@@ -1,0 +1,3 @@
+[submodule "ext/ghoul"]
+	path = ext/ghoul
+	url = git@openspace.itn.liu.se:ghoul
