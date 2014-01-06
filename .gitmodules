@@ -1,3 +1,9 @@
 [submodule "ext/ghoul"]
 	path = ext/ghoul
 	url = git@openspace.itn.liu.se:ghoul
+[submodule "ext/spice"]
+	path = ext/spice
+	url = git@openspace.itn.liu.se:/spice
+[submodule "ext/lua"]
+	path = ext/lua
+	url = git@openspace.itn.liu.se:/lua
