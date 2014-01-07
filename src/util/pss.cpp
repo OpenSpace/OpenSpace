@@ -9,6 +9,11 @@
 
 namespace openspace {
 
+    namespace {
+        const double k = 10.0;
+    }
+
+
 pss::pss() {
 
 }

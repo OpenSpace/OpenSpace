@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<Cluster masterAddress="127.0.0.1">
-	<Node address="127.0.0.1" port="20401">
+<Cluster masterAddress="localhost">
+	<Node address="localhost" port="20401">
 		<Window fullScreen="false">
 			<!-- 16:9 aspect ratio -->
 			<Size x="640" y="360" />

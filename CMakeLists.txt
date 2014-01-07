@@ -53,14 +53,20 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
 # SGCT (TODO: write cmake script)
 #set(SGCT_ROOT_DIR "$ENV{SGCT_ROOT_DIR}")
 #set(SGCT_ROOT_DIR "C:/Program Files/SGCT/SGCT_2.0.7")
-set(SGCT_ROOT_DIR "C:/Program Files (x86)/SGCT/SGCT_2.0.5_x86")
+#set(SGCT_ROOT_DIR "C:/Program Files (x86)/SGCT/SGCT_2.0.5_x86")
+set(SGCT_ROOT_DIR "C:/Program Files/SGCT/SGCT_2.0.7")
 add_definitions(-D__WIN32__)
 include_directories("${SGCT_ROOT_DIR}/include")
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${SGCT_ROOT_DOR}/bin/lib/msvc11)
 set(DEPENDENT_LIBS
     ${DEPENDENT_LIBS}
-    optimized "${SGCT_ROOT_DIR}/lib/msvc11/sgct.lib"
-    debug "${SGCT_ROOT_DIR}/lib/msvc11/sgctd.lib"
+    "Ws2_32.lib"
+    optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
+    debug "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgctd.lib"
    )
+
+#add_subdirectory(${SGCT_ROOT_DIR})
+#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} SGCT)
 
 # GLM
 set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
@@ -78,10 +84,10 @@ include_directories(${GLM_INCLUDE_DIRS})
 #set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
 
 # Lua
-set(LUA_ROOT_DIR "${OPENSPACE_EXT_DIR}/lua")
+set(LUA_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/lua")
 include_directories("${LUA_ROOT_DIR}/include")
-add_subdirectory(${LUA_ROOT_DIR})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Lua)
+#add_subdirectory(${LUA_ROOT_DIR})
+#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Lua)
 
 # Spice
 set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")

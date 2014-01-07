@@ -12,8 +12,6 @@
 namespace openspace
 {
 
-#define k 10.0
-
 // forward declare the power scaled coordinates
 class psc;
 

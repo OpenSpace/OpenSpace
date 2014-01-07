@@ -4,6 +4,3 @@
 [submodule "ext/spice"]
 	path = ext/spice
 	url = git@openspace.itn.liu.se:/spice
-[submodule "ext/lua"]
-	path = ext/lua
-	url = git@openspace.itn.liu.se:/lua
