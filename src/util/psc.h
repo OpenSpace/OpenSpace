@@ -2,8 +2,6 @@
 #define PSC_H
 
 // open space includes
-#include "Object.h"
-
 // glm includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,7 +13,7 @@ namespace openspace
 // forward declare the power scaled scalars
 class pss;
 
-class psc: public Object {
+class psc {
 public:
 
 	// constructors

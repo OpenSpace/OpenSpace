@@ -2,7 +2,6 @@
 #define SCENEGRAPHLOADER_H
 
 // open space includes
-#include "object.h"
 #include "scenegraph/scenegraphnode.h"
 
 // std includes
@@ -19,7 +18,7 @@
 
 namespace openspace {
 
-class SceneGraphLoader: public Object {
+class SceneGraphLoader {
 public:
 
 	// constructors & destructor

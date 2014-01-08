@@ -2,8 +2,7 @@
 #define SCENEGRAPHNODE_H
 
 // open space includes
-#include "object.h"
-#include "renderable.h"
+#include "rendering/renderable.h"
 
 // std includes
 #include <iostream>
@@ -12,7 +11,7 @@
 
 namespace openspace {
 
-class SceneGraphNode: public Object {
+class SceneGraphNode {
 public:
 
 	// constructors & destructor

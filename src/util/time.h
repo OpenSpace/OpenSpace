@@ -1,14 +1,10 @@
 #ifndef ENGINETIME_H
 #define ENGINETIME_H
 
-// open space includes
-#include "Object.h"
-
-
 namespace openspace
 {
 
-class Time: public Object {
+class Time {
 public:
 	virtual ~Time();
 

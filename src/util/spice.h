@@ -1,16 +1,13 @@
 #ifndef SPICE_H
 #define SPICE_H
 
-// open space includes
-#include "Object.h"
-
 // std includes
 #include <string>
 
 namespace openspace
 {
 
-class Spice: public Object {
+class Spice {
 public:
 	virtual ~Spice();
 

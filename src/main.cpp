@@ -1,6 +1,6 @@
 
 // open space includes
-#include "renderengine.h"
+#include "engine/openspaceengine.h"
 
 // sgct includes
 #include "sgct.h"
@@ -17,7 +17,7 @@
 
 // graphics and openspace engines
 sgct::Engine * gEngine;
-openspace::RenderEngine *rEngine;
+openspace::OpenSpaceEngine* rEngine;
 
 // function pointer declarations
 void mainInitFunc(void);
@@ -148,9 +148,11 @@ int main(int argc, char **argv) {
     newArgv[1] = cmd;
     newArgv[2] = path;
 
+    openspace::OpenSpaceEngine::create(argc, argv);
+
+
 	// allocate sgct- and openspace engine objects
 	gEngine = new sgct::Engine( newArgc, newArgv );
-	rEngine = new openspace::RenderEngine(argc, argv);
 	
     free(path);
     delete[] newArgv;
@@ -173,19 +175,17 @@ int main(int argc, char **argv) {
 
 	// try to open a window
 	if( ! gEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile)) {
-
 		// could not open a window, deallocates and exits
 		delete gEngine;
-		delete rEngine;
+        openspace::OpenSpaceEngine::destroy();
 		return EXIT_FAILURE;
 	}
- 
+
 	// Main loop
 	gEngine->render();
  
 	// Clean up (de-allocate)
 	delete gEngine;
-	delete rEngine;
 	
 	// Exit program
 	exit( EXIT_SUCCESS );
@@ -193,59 +193,54 @@ int main(int argc, char **argv) {
 
 
 void mainInitFunc(void) {
-    rEngine->init();
+    OsEng.initialize();
+    OsEng.initializeGL();
 }
 
 void mainPreSyncFunc(void) {
-	rEngine->preSync();
+    OsEng.preSynchronization();
 }
 
 void mainPostSyncPreDrawFunc(void) {
-	rEngine->postSyncPreDraw();
+    OsEng.postSynchronizationPreDraw();
 }
 
 void mainRenderFunc(void) {
-	rEngine->render();
+    OsEng.render();
 }
 
 void mainPostDrawFunc(void) {
-	rEngine->postDraw();
+    OsEng.postDraw();
 }
 
 void mainKeyboardCallback(int key, int action) {
 	if (gEngine->isMaster())
-	{
-		rEngine->keyboardCallback(key, action);
-	}
+        OsEng.keyboardCallback(key, action);
 }
 
 void mainMouseButtonCallback(int key, int action) {
 	if (gEngine->isMaster())
-	{
-		rEngine->mouseButtonCallback(key, action);
-	}
+        OsEng.mouseButtonCallback(key, action);
 }
 
 void mainMousePosCallback(double x, double y) {
+    // TODO use float instead
 	if (gEngine->isMaster())
-	{
-		rEngine->mousePosCallback(static_cast<int>(x), static_cast<int>(y));
-	}
+        OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
 }
 
 void mainMouseScrollCallback(double pos, double /*pos2*/) {
+    // TODO use float instead
 	if (gEngine->isMaster())
-	{
-		rEngine->mouseScrollCallback(static_cast<int>(pos));
-	}
+        OsEng.mouseScrollWheelCallback(static_cast<int>(pos));
 }
 
 void mainEncodeFun() {
-	rEngine->encode();
+    // TODO use encoding
 }
 
 void mainDecodeFun() {
-	rEngine->decode();
+    // TODO use decoding
 }
 
 

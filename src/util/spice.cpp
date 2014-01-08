@@ -3,7 +3,7 @@
 #include "util/Spice.h"
 #include "util/Time.h"
 #include "util/Psc.h"
-#include "InteractionHandler.h"
+#include "interaction/interactionHandler.h"
 
 // spice
 #include "SpiceUsr.h"

@@ -1,9 +1,6 @@
 #ifndef PSS_H
 #define PSS_H
 
-// open space includes
-#include "Object.h"
-
 // glm includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,7 +12,7 @@ namespace openspace
 // forward declare the power scaled coordinates
 class psc;
 
-class pss: public Object {
+class pss {
 public:
 
 	// constructors

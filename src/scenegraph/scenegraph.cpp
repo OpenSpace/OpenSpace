@@ -2,8 +2,8 @@
 // open space includes
 #include "scenegraph/scenegraph.h"
 #include "scenegraph/scenegraphloader.h"
-#include "renderablebody.h"
-#include "interactionhandler.h"
+#include "rendering/renderablebody.h"
+#include "interaction/interactionhandler.h"
 #include "util/spice.h"
 
 // ghoul includes

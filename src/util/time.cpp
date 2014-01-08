@@ -1,7 +1,7 @@
 
 // open space includes
 #include "util/Time.h"
-#include "InteractionHandler.h"
+#include "interaction/interactionHandler.h"
 
 // std includes
 #include <cassert>

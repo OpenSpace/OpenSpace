@@ -1,9 +1,10 @@
 
+#include "engine/openspaceengine.h"
 // open space includes
 #include "scenegraph/scenegraphloader.h"
-#include "renderablebody.h"
-#include "renderableplanet.h"
-#include "interactionhandler.h"
+#include "rendering/renderablebody.h"
+#include "rendering/renderableplanet.h"
+#include "interaction/interactionhandler.h"
 #include "util/spice.h"
 
 // ghoul includes
@@ -70,10 +71,6 @@ SceneGraphNode* SceneGraphLoader::loadSceneGraph(const std::string &path) {
 
 // ugly
 void SceneGraphLoader::loadSceneGraphTree(tinyxml2::XMLElement* node, SceneGraphNode *current, const std::string &path) {
-
-	// check that everything works
-	assert(InteractionHandler::isInitialized());
-
 	// ghoul logger
 	std::string _loggerCat = "SceneGraphLoader::loadSceneGraphTree";
 
@@ -100,10 +97,10 @@ void SceneGraphLoader::loadSceneGraphTree(tinyxml2::XMLElement* node, SceneGraph
 				std::string setting = camera->Attribute("setting");
 				if(setting == "focus") {
                     // HACK
-					InteractionHandler::ref().setFocusNode(thisNode->parent());
+                    OsEng.interactionHandler().setFocusNode(thisNode->parent());
 					LINFO_SAFE("Setting camera focus: " << name);
 				} else if(setting == "position") {
-					InteractionHandler::ref().getCamera()->setPosition(thisNode->getWorldPosition());
+					OsEng.interactionHandler().getCamera()->setPosition(thisNode->getWorldPosition());
 					LINFO_SAFE("Setting camera position: " << name);
 				}
 			}
