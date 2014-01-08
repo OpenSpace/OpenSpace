@@ -300,6 +300,31 @@ void RenderEngine::keyboardCallback(int key, int action) {
         pss dist(3 * speed * dt, 8.0);
         InteractionHandler::ref().distance(dist);
     }
+    if (key == '1') {
+        SceneGraphNode* earth = sceneGraph_->root()->get("sun");
+
+        InteractionHandler::ref().setFocusNode(earth);
+        InteractionHandler::ref().getCamera()->setPosition(earth->getWorldPosition() + psc(0.0, 0.0, 0.5, 10.0));
+        InteractionHandler::ref().getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
+    }
+
+    if (key == '2') {
+        SceneGraphNode* earth = sceneGraph_->root()->get("earth");
+
+        InteractionHandler::ref().setFocusNode(earth);
+        InteractionHandler::ref().getCamera()->setPosition(earth->getWorldPosition() + psc(0.0, 0.0, 1.0, 8.0));
+        InteractionHandler::ref().getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
+    }
+
+
+    if (key == '3') {
+        SceneGraphNode* earth = sceneGraph_->root()->get("moon");
+
+        InteractionHandler::ref().setFocusNode(earth);
+        InteractionHandler::ref().getCamera()->setPosition(earth->getWorldPosition() + psc(0.0, 0.0, 0.5, 8.0));
+        InteractionHandler::ref().getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
+    }
+
 }
 
 void RenderEngine::mouseButtonCallback(int key, int action) {

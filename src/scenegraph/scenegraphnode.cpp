@@ -231,8 +231,8 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, con
     if (nodeName_ == "earth") {
         psc tmp = s_pos - camera->getPosition();
         
-        LINFOC("", "Angle: " << psc_camdir.angle(D));
-        LINFOC("", "Pos: " << tmp.getVec4f()[0] << " " << tmp.getVec4f()[1] << " " << tmp.getVec4f()[2] << " " << tmp.getVec4f()[3]);
+        //LINFOC("", "Angle: " << psc_camdir.angle(D));
+        //LINFOC("", "Pos: " << tmp.getVec4f()[0] << " " << tmp.getVec4f()[1] << " " << tmp.getVec4f()[2] << " " << tmp.getVec4f()[3]);
     }
     const double a = psc_camdir.angle(D);
 	if ( a < camera->getMaxFov())

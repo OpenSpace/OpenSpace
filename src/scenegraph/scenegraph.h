@@ -27,6 +27,12 @@ public:
 	void evaluate(Camera *camera);
 	void render(Camera *camera);
 
+    void printChildren() const {
+        root_->print();
+    }
+
+    SceneGraphNode* root() const { return root_; }
+
 private:
 
 	SceneGraphNode *root_;

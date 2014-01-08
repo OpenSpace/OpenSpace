@@ -87,57 +87,57 @@ int main(int argc, char **argv) {
     FileSys.registerPathToken("${BASE_PATH}", "../..");
     FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 
-    LARGE_INTEGER t1;
-    QueryPerformanceCounter(&t1);
-    lua_State* l = luaL_newstate();
-    LARGE_INTEGER t2;
-    QueryPerformanceCounter(&t2);
+    //LARGE_INTEGER t1;
+    //QueryPerformanceCounter(&t1);
+    //lua_State* l = luaL_newstate();
+    //LARGE_INTEGER t2;
+    //QueryPerformanceCounter(&t2);
 
-    luaL_openlibs(l);
-    LARGE_INTEGER t3;
-    QueryPerformanceCounter(&t3);
-    if (luaL_loadfile(l, p("${SCRIPTS}/script.lua").c_str())) {
-        std::cerr << lua_tostring(l, -1) << std::endl;
-        return EXIT_SUCCESS;
-    }
-    LARGE_INTEGER t4;
-    QueryPerformanceCounter(&t4);
+    //luaL_openlibs(l);
+    //LARGE_INTEGER t3;
+    //QueryPerformanceCounter(&t3);
+    //if (luaL_loadfile(l, p("${SCRIPTS}/script.lua").c_str())) {
+    //    std::cerr << lua_tostring(l, -1) << std::endl;
+    //    return EXIT_SUCCESS;
+    //}
+    //LARGE_INTEGER t4;
+    //QueryPerformanceCounter(&t4);
 
-    if (lua_pcall(l,0, LUA_MULTRET, 0)) {
-        std::cerr << lua_tostring(l, -1) << std::endl;
-        return EXIT_SUCCESS;
-    }
-    LARGE_INTEGER t5;
-    QueryPerformanceCounter(&t5);
+    //if (lua_pcall(l,0, LUA_MULTRET, 0)) {
+    //    std::cerr << lua_tostring(l, -1) << std::endl;
+    //    return EXIT_SUCCESS;
+    //}
+    //LARGE_INTEGER t5;
+    //QueryPerformanceCounter(&t5);
 
-    stackDump(l);
+    //stackDump(l);
 
-    lua_getglobal(l, "t");
-    std::cout << lua_istable(l, -1) << std::endl;
+    //lua_getglobal(l, "t");
+    //std::cout << lua_istable(l, -1) << std::endl;
 
-    stackDump(l);
-    
-    
-    
-    lua_close(l);
-    LARGE_INTEGER t6;
-    QueryPerformanceCounter(&t6);
-
-
+    //stackDump(l);
+    //
+    //
+    //
+    //lua_close(l);
+    //LARGE_INTEGER t6;
+    //QueryPerformanceCounter(&t6);
 
 
-    // --------
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
 
-    std::cout << "State: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000  << std::endl;
-    std::cout << "Libs : " << ((t3.QuadPart - t2.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    std::cout << "Load : " << ((t4.QuadPart - t3.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    std::cout << "Exec : " << ((t5.QuadPart - t4.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    std::cout << "Close: " << ((t6.QuadPart - t5.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
 
-    
-    exit(EXIT_SUCCESS);
+    //// --------
+    //LARGE_INTEGER freq;
+    //QueryPerformanceFrequency(&freq);
+
+    //std::cout << "State: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000  << std::endl;
+    //std::cout << "Libs : " << ((t3.QuadPart - t2.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    //std::cout << "Load : " << ((t4.QuadPart - t3.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    //std::cout << "Exec : " << ((t5.QuadPart - t4.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    //std::cout << "Close: " << ((t6.QuadPart - t5.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+
+    //
+    //exit(EXIT_SUCCESS);
 
     char* cmd = "-config";
     const std::string pathStr = p("${BASE_PATH}/config/single.xml");

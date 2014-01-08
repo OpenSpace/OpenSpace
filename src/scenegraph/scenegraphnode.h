@@ -6,6 +6,7 @@
 #include "renderable.h"
 
 // std includes
+#include <iostream>
 #include <vector>
 #include <string>
 
@@ -34,12 +35,29 @@ public:
 	const std::string & getSpiceName();
 	const psc& getPosition() const;
 	psc getWorldPosition() const;
+    std::string nodeName() const { return nodeName_; }
 
     SceneGraphNode* parent() const { return parent_; }
+    const std::vector<SceneGraphNode*>& children() const { return children_; }
 
 	// bounding sphere
 	pss calculateBoundingSphere();
 	
+    SceneGraphNode* get(const std::string& name) {
+        if (nodeName_ == name)
+            return this;
+        else
+            for (auto it : children_)
+                return it->get(name);
+    }
+
+    void print() const {
+        std::cout << nodeName_ << std::endl;
+        for (auto it : children_) {
+            it->print();
+        }
+    }
+
 	// renderable
 	void setRenderable(Renderable *renderable);
 	const Renderable * getRenderable() const;
