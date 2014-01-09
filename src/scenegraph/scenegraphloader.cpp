@@ -1,5 +1,5 @@
 
-#include "engine/openspaceengine.h"
+#include "openspaceengine.h"
 // open space includes
 #include "scenegraph/scenegraphloader.h"
 #include "rendering/renderablebody.h"
@@ -17,6 +17,16 @@
 #include <utility> 
 
 namespace openspace {
+
+
+SceneGraph* loadSceneGraph(const std::string& sceneGraphPath) {
+    SceneGraph* result = new SceneGraph;
+    //result->setRo
+
+    return result;
+}
+
+
 	
 SceneGraphLoader::SceneGraphLoader(std::vector<SceneGraphNode*> *nodes, std::map<std::string, ghoul::opengl::ProgramObject*> *commonShaders) {
 	root_ = nullptr;
@@ -424,5 +434,5 @@ bool SceneGraphLoader::getShader(ghoul::opengl::ProgramObject **program, const s
 	LERROR_SAFE("Could not load shader");
 	return false;
 }
-	
+
 } // namespace openspace

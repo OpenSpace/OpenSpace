@@ -56,6 +56,7 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
 #set(SGCT_ROOT_DIR "C:/Program Files (x86)/SGCT/SGCT_2.0.5_x86")
 set(SGCT_ROOT_DIR "C:/Program Files/SGCT/SGCT_2.0.7")
 add_definitions(-D__WIN32__)
+add_definitions(-DGLEW_STATIC)
 include_directories("${SGCT_ROOT_DIR}/include")
 #set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${SGCT_ROOT_DOR}/bin/lib/msvc11)
 set(DEPENDENT_LIBS

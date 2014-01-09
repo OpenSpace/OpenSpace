@@ -31,6 +31,7 @@ public:
     }
 
     SceneGraphNode* root() const { return root_; }
+    void setRoot(SceneGraphNode* root) { root_ = root; }
 
 private:
 

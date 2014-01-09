@@ -7,7 +7,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#version 150
+#version 400 core
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
@@ -93,7 +93,7 @@ void main()
 	} else {
 		// where am I?
 		// do I need to be discarded?
-		//discard;
+		// discard;
 	}
 	
 	
@@ -101,6 +101,8 @@ void main()
 	gl_FragDepth = depth;
 
 	// color 
-	diffuse = texture2D(texture1, vs_st);
+	   diffuse = texture2D(texture1, vs_st);
+    // diffuse = vec4(vs_position.xyz * pow(10, vs_position.w), 1.0);
+    // diffuse = vec4(vs_st, 0.0, 1.0);
 	//diffuse = vec4(1.0,0.0,0.0,1.0);
 }

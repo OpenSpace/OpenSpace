@@ -1,6 +1,6 @@
 
 // open space includes
-#include "engine/openspaceengine.h"
+#include "openspaceengine.h"
 
 // sgct includes
 #include "sgct.h"
@@ -14,6 +14,7 @@
 #include <lua.hpp>
 #include <lstate.h>
 #include <chrono>
+#include <fstream>
 
 // graphics and openspace engines
 sgct::Engine * gEngine;
@@ -82,73 +83,90 @@ static void stackDump (lua_State *L) {
 }
 
 int main(int argc, char **argv) {
-    ghoul::filesystem::FileSystem::initialize();
-    //FileSys.registerPathToken("${BASE_PATH}", "../../..");
-    FileSys.registerPathToken("${BASE_PATH}", "../..");
-    FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+#if 0
+    LARGE_INTEGER t1;
+    QueryPerformanceCounter(&t1);
+    lua_State* l = luaL_newstate();
+    LARGE_INTEGER t2;
+    QueryPerformanceCounter(&t2);
 
-    //LARGE_INTEGER t1;
-    //QueryPerformanceCounter(&t1);
-    //lua_State* l = luaL_newstate();
-    //LARGE_INTEGER t2;
-    //QueryPerformanceCounter(&t2);
+    luaL_openlibs(l);
+    LARGE_INTEGER t3;
+    QueryPerformanceCounter(&t3);
 
-    //luaL_openlibs(l);
-    //LARGE_INTEGER t3;
-    //QueryPerformanceCounter(&t3);
-    //if (luaL_loadfile(l, p("${SCRIPTS}/script.lua").c_str())) {
-    //    std::cerr << lua_tostring(l, -1) << std::endl;
-    //    return EXIT_SUCCESS;
-    //}
-    //LARGE_INTEGER t4;
-    //QueryPerformanceCounter(&t4);
+    //std::ifstream file("../../scripts/script.lua");
+    //int length;
+    //file.seekg(0, std::ios::end);    // go to the end
+    //length = file.tellg();           // report location (this is the length)
+    //file.seekg(0, std::ios::beg);    // go back to the beginning
+    //char* buffer = new char[length];    // allocate memory for a buffer of appropriate dimension
+    //file.read(buffer, length);       // read the whole file into the buffer
+    //file.close();  
 
-    //if (lua_pcall(l,0, LUA_MULTRET, 0)) {
-    //    std::cerr << lua_tostring(l, -1) << std::endl;
-    //    return EXIT_SUCCESS;
-    //}
-    //LARGE_INTEGER t5;
-    //QueryPerformanceCounter(&t5);
+    //if (luaL_loadstring(l, buffer)) {
+    if (luaL_loadfile(l, "../../scripts/script.lua")) {
+        std::cerr << lua_tostring(l, -1) << std::endl;
+        return EXIT_SUCCESS;
+    }
+    LARGE_INTEGER t4;
+    QueryPerformanceCounter(&t4);
+
+    if (lua_pcall(l,0, LUA_MULTRET, 0)) {
+        std::cerr << lua_tostring(l, -1) << std::endl;
+        return EXIT_SUCCESS;
+    }
+    LARGE_INTEGER t5;
+    QueryPerformanceCounter(&t5);
 
     //stackDump(l);
 
-    //lua_getglobal(l, "t");
-    //std::cout << lua_istable(l, -1) << std::endl;
+    lua_getglobal(l, "config");
+    std::cout << "Table|Function|NIL|bool|thread|none|noneornil" << std::endl;
+    std::cout << lua_istable(l, -1) << "|" << 
+        lua_isfunction(l, -1) << "|" <<
+        lua_isnil(l, -1) << "|" <<
+        lua_isboolean(l, -1) << "|" <<
+        lua_isthread(l, -1) << "|" <<
+        lua_isnone(l, -1) << "|" <<
+        lua_isnoneornil(l, -1) << "|" <<
+        std::endl;
 
-    //stackDump(l);
-    //
-    //
-    //
-    //lua_close(l);
-    //LARGE_INTEGER t6;
-    //QueryPerformanceCounter(&t6);
+    stackDump(l);
+    
+    
+    
+    lua_close(l);
+    LARGE_INTEGER t6;
+    QueryPerformanceCounter(&t6);
 
 
 
 
-    //// --------
-    //LARGE_INTEGER freq;
-    //QueryPerformanceFrequency(&freq);
+    // --------
+    LARGE_INTEGER freq;
+    QueryPerformanceFrequency(&freq);
 
-    //std::cout << "State: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000  << std::endl;
-    //std::cout << "Libs : " << ((t3.QuadPart - t2.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    //std::cout << "Load : " << ((t4.QuadPart - t3.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    //std::cout << "Exec : " << ((t5.QuadPart - t4.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
-    //std::cout << "Close: " << ((t6.QuadPart - t5.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    std::cout << "State: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000  << std::endl;
+    std::cout << "Libs : " << ((t3.QuadPart - t2.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    std::cout << "Load : " << ((t4.QuadPart - t3.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    std::cout << "Exec : " << ((t5.QuadPart - t4.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
+    std::cout << "Close: " << ((t6.QuadPart - t5.QuadPart) / double(freq.QuadPart)) * 1000 << std::endl;
 
-    //
-    //exit(EXIT_SUCCESS);
+    
+    exit(EXIT_SUCCESS);
+
+#endif
+
+    openspace::OpenSpaceEngine::create(argc, argv);
 
     char* cmd = "-config";
-    const std::string pathStr = p("${BASE_PATH}/config/single.xml");
+    const std::string pathStr = p("${BASE_PATH}/config/single_sbs_stereo.xml");
     char* path = _strdup(pathStr.c_str());
     char** newArgv = new char*[3];
     int newArgc = 3;
     newArgv[0] = argv[0];
     newArgv[1] = cmd;
     newArgv[2] = path;
-
-    openspace::OpenSpaceEngine::create(argc, argv);
 
 
 	// allocate sgct- and openspace engine objects

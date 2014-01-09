@@ -18,6 +18,10 @@
 
 namespace openspace {
 
+class SceneGraph;
+
+SceneGraph* loadSceneGraph(const std::string& sceneGraphPath);
+
 class SceneGraphLoader {
 public:
 
