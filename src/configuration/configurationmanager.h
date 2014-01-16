@@ -37,7 +37,7 @@ public:
     ConfigurationManager();
     ~ConfigurationManager();
 
-    bool initialize();
+    bool initialize(const std::string& configurationScript = "");
     void deinitialize();
 
     void loadConfiguration(const std::string& filename, const std::string& position = "");

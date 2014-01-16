@@ -37,6 +37,7 @@ void ConfigurationManager::setValue(const std::string& key, const T& value) {
     LERROR("Unsupported type for key '" << key << "'");
 }
 
+extern template void ConfigurationManager::setValue<>(const std::string& key, const bool& value);
 extern template void ConfigurationManager::setValue<>(const std::string& key, const char& value);
 extern template void ConfigurationManager::setValue<>(const std::string& key, const signed char& value);
 extern template void ConfigurationManager::setValue<>(const std::string& key, const unsigned char& value);
@@ -54,6 +55,7 @@ extern template void ConfigurationManager::setValue<>(const std::string& key, co
 extern template void ConfigurationManager::setValue<>(const std::string& key, const long double& value);
 extern template void ConfigurationManager::setValue<>(const std::string& key, const std::string& value);
 
+extern template bool ConfigurationManager::getValue<>(const std::string& key, bool& value);
 extern template bool ConfigurationManager::getValue<>(const std::string& key, char& value);
 extern template bool ConfigurationManager::getValue<>(const std::string& key, signed char& value);
 extern template bool ConfigurationManager::getValue<>(const std::string& key, unsigned char& value);

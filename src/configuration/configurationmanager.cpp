@@ -24,7 +24,7 @@
 
 #include "configuration/configurationmanager.h"
 
-#include <ghoul/lua//ghoul_lua.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
 
@@ -36,8 +36,6 @@ namespace {
     const char* _configurationScript = "${SCRIPTS}/configurationmanager.lua";
     const char* _configurationTable = "config";
 }
-
-using namespace ghoul::lua;
 
 namespace openspace {
 
@@ -61,9 +59,15 @@ ConfigurationManager::~ConfigurationManager() {
     }
 }
 
-bool ConfigurationManager::initialize() {
+bool ConfigurationManager::initialize(const std::string& configurationScript) {
     // TODO custom assert (ticket #5)
     assert(_state == nullptr);
+
+    std::string script;
+    if (configurationScript == "")
+        script = _configurationScript;
+    else
+        script = configurationScript;
 
     LDEBUG("Create Lua state");
     _state = luaL_newstate();
@@ -74,8 +78,8 @@ bool ConfigurationManager::initialize() {
     LDEBUG("Open libraries");
     luaL_openlibs(_state);
 
-    LDEBUG("Loading configuration script '" << _configurationScript << "'");
-    const int status = luaL_loadfile(_state, absPath(_configurationScript).c_str());
+    LDEBUG("Loading configuration script '" << script << "'");
+    const int status = luaL_loadfile(_state, absPath(script).c_str());
     if (status != LUA_OK) {
         LFATAL("Error loading configuration script: " << lua_tostring(_state, -1));
         deinitialize();
@@ -93,7 +97,7 @@ bool ConfigurationManager::initialize() {
     LDEBUG("Sanity check for 'loadConfiguration'");
     lua_getglobal(_state, "loadConfiguration");
     if (!lua_isfunction(_state, -1)) {
-        LFATAL("Could not find function 'loadConfiguration' in script");
+        LFATAL("Could not find function 'loadConfiguration' in configuration script");
         deinitialize();
         return false;
     }
@@ -102,7 +106,7 @@ bool ConfigurationManager::initialize() {
     LDEBUG("Sanity check for the configuration table");
     lua_getglobal(_state, _configurationTable);
     if (!lua_istable(_state, -1)) {
-        LERROR("Table '" << _configurationTable << "' not found in script");
+        LERROR("Table '" << _configurationTable << "' not found in configuration script");
         deinitialize();
         return false;
     }
@@ -111,7 +115,7 @@ bool ConfigurationManager::initialize() {
     LDEBUG("Sanity check for 'getValue'");
     lua_getglobal(_state, "getValue");
     if (!lua_isfunction(_state, -1)) {
-        LFATAL("Could not find function 'getValue' in script");
+        LFATAL("Could not find function 'getValue' in configuration script");
         deinitialize();
         return false;
     }
@@ -120,7 +124,7 @@ bool ConfigurationManager::initialize() {
     LDEBUG("Sanity check for 'setValue'");
     lua_getglobal(_state, "setValue");
     if (!lua_isfunction(_state, -1)) {
-        LFATAL("Could not find function 'setValue' in script");
+        LFATAL("Could not find function 'setValue' in configuration script");
         deinitialize();
         return false;
     }
@@ -155,6 +159,18 @@ void ConfigurationManager::loadConfiguration(const std::string& filename,
 }
 
 // TODO: We can replace this by using type_traits in a smart way
+
+template<>
+void ConfigurationManager::setValue(const std::string& key, const bool& value) {
+    assert(_state != nullptr);
+
+    lua_getglobal(_state, "setValue");
+    lua_pushstring(_state, key.c_str());
+    lua_pushboolean(_state, static_cast<int>(value));
+    const int status = lua_pcall(_state, 2, 0, NULL);
+    if (status != LUA_OK)
+        LERROR("Error setting value '" << key << "'. Error: " << lua_tostring(_state, -1));
+}
 
 // character types
 template <>
@@ -264,6 +280,28 @@ void ConfigurationManager::setValue(const std::string& key, const std::string& v
 //
 // Get
 //
+template <>
+bool ConfigurationManager::getValue(const std::string& key, bool& value) {
+    assert(_state != nullptr);
+
+    lua_getglobal(_state, "getValue");
+    lua_pushstring(_state, key.c_str());
+    const int status = lua_pcall(_state, 1, 1, NULL);
+    if (status != LUA_OK) {
+        LERROR("Error getting value '" << key << "'. Error: " << lua_tostring(_state, -1));
+        return false;
+    }
+    if (lua_isnil(_state, -1)) {
+        lua_pop(_state, 1);
+        return false;
+    } else {
+        const int v = lua_toboolean(_state, -1);
+        value = (v != 0);
+        lua_pop(_state, 1);
+        return true;
+    }
+}
+
 template <>
 bool ConfigurationManager::getValue(const std::string& key, char& value) {
     lua_Integer val;
