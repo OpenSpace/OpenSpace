@@ -24,6 +24,7 @@
 
 #include "configuration/configurationmanager.h"
 
+#include <ghoul/lua//ghoul_lua.h>
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
 
@@ -40,6 +41,14 @@ using namespace ghoul::lua;
 
 namespace openspace {
 
+namespace helper {
+    bool getValue(lua_State* state, const std::string& key, lua_Integer& value);
+    bool getValue(lua_State* state, const std::string& key, lua_Unsigned& value);
+    bool getValue(lua_State* state, const std::string& key, lua_Number& value);
+    void setValue(lua_State* state, const std::string& key, const lua_Integer& value);
+    void setValue(lua_State* state, const std::string& key, const lua_Unsigned& value);
+    void setValue(lua_State* state, const std::string& key, const lua_Number& value);
+}
 
 ConfigurationManager::ConfigurationManager()
     : _state(nullptr)
@@ -81,6 +90,7 @@ bool ConfigurationManager::initialize() {
     }
 
     // Sanity checks
+    LDEBUG("Sanity check for 'loadConfiguration'");
     lua_getglobal(_state, "loadConfiguration");
     if (!lua_isfunction(_state, -1)) {
         LFATAL("Could not find function 'loadConfiguration' in script");
@@ -88,9 +98,29 @@ bool ConfigurationManager::initialize() {
         return false;
     }
     lua_pop(_state, 1);
+    
+    LDEBUG("Sanity check for the configuration table");
     lua_getglobal(_state, _configurationTable);
     if (!lua_istable(_state, -1)) {
         LERROR("Table '" << _configurationTable << "' not found in script");
+        deinitialize();
+        return false;
+    }
+    lua_pop(_state, 1);
+
+    LDEBUG("Sanity check for 'getValue'");
+    lua_getglobal(_state, "getValue");
+    if (!lua_isfunction(_state, -1)) {
+        LFATAL("Could not find function 'getValue' in script");
+        deinitialize();
+        return false;
+    }
+    lua_pop(_state, 1);
+
+    LDEBUG("Sanity check for 'setValue'");
+    lua_getglobal(_state, "setValue");
+    if (!lua_isfunction(_state, -1)) {
+        LFATAL("Could not find function 'setValue' in script");
         deinitialize();
         return false;
     }
@@ -101,6 +131,7 @@ bool ConfigurationManager::initialize() {
 void ConfigurationManager::deinitialize() {
     // TODO custom assert (ticket #5)
     assert(_state != nullptr);
+    LDEBUG("Close Lua state");
     lua_close(_state);
     _state = nullptr;
 }
@@ -123,78 +154,373 @@ void ConfigurationManager::loadConfiguration(const std::string& filename,
     }
 }
 
-template <class T>
-bool ConfigurationManager::getValue(const std::string& key, T& value) {
-    // If none of the specializations fit, we don't know what to do
-    LERROR("Unsupported type for key '" << key << "'");
-    return false;
-}
+// TODO: We can replace this by using type_traits in a smart way
 
-template <class T>
-bool ConfigurationManager::setValue(const std::string& key, const T& value) {
-    // If none of the specializations fit, we don't know what to do
-    LERROR("Unsupported type for key '" << key << "'");
-    return false;
-}
-
-bool getFullValue(lua_State* state, const std::string& key, LUA_INTEGER& value) {
-    assert(state != nullptr);
-
-    lua_getglobal(state, "getValue");
-    lua_pushstring(state, key.c_str());
-    lua_pcall(state, 1, 1, NULL);
-
-    //lua_getglobal(state, _configurationTable);
-    //lua_getfield(state, -1, key.c_str());
-    //if (lua_isnil(state, -1)) {
-    //    LWARNING("Key '" << key << "' not found");
-    //    return false;
-    //}
-    //if (!lua_isnumber(state, -1)) {
-    //    LWARNING("Value of key '" << key <<"' is not a number");
-    //    return false;
-    //}
-    //value = lua_tointeger(state, -1);
-    //lua_pop(state, lua_gettop(state));
-    return true;
-}
-
-bool setFullValue(lua_State* state, const std::string& key, const LUA_INTEGER& value) {
-    assert(state != nullptr);
-    lua_getglobal(state, _configurationTable);
-    lua_pushinteger(state, value);
-    lua_setfield(state, -2, key.c_str());
-    lua_pop(state, 1);
-    return true;
-}
-
-// int
+// character types
 template <>
-bool ConfigurationManager::setValue(const std::string& key, const int& value) {
-    return setFullValue(_state, key, value);
+void ConfigurationManager::setValue(const std::string& key, const char& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const signed char& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const unsigned char& value) {
+    lua_Unsigned val = static_cast<lua_Unsigned>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const wchar_t& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+// integer types
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const short& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const unsigned short& value) {
+    lua_Unsigned val = static_cast<lua_Unsigned>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const int& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const unsigned int& value) {
+    lua_Unsigned val = static_cast<lua_Unsigned>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const long& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const unsigned long& value) {
+    lua_Unsigned val = static_cast<lua_Unsigned>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const long long& value) {
+    lua_Integer val = static_cast<lua_Integer>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const unsigned long long& value) {
+    lua_Unsigned val = static_cast<lua_Unsigned>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const float& value) {
+    lua_Number val = static_cast<lua_Number>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const double& value) {
+    lua_Number val = static_cast<lua_Number>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const long double& value) {
+    lua_Number val = static_cast<lua_Number>(value);
+    helper::setValue(_state, key, val);
+}
+
+template <>
+void ConfigurationManager::setValue(const std::string& key, const std::string& value) {
+    assert(_state != nullptr);
+
+    lua_getglobal(_state, "setValue");
+    lua_pushstring(_state, key.c_str());
+    lua_pushstring(_state, value.c_str());
+    const int status = lua_pcall(_state, 2, 0, NULL);
+    if (status != LUA_OK)
+        LERROR("Error setting value '" << key << "'. Error: " << lua_tostring(_state, -1));
+}
+
+//
+// Get
+//
+template <>
+bool ConfigurationManager::getValue(const std::string& key, char& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<char>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, signed char& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<signed char>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, unsigned char& value) {
+    lua_Unsigned val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<unsigned char>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, wchar_t& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<wchar_t>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, short& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<short>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, unsigned short& value) {
+    lua_Unsigned val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<unsigned short>(val);
+    return result;
 }
 
 template <>
 bool ConfigurationManager::getValue(const std::string& key, int& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<int>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, unsigned int& value) {
+    lua_Unsigned val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<unsigned int>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, long& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<long>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, unsigned long& value) {
+    lua_Unsigned val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<unsigned long>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, long long& value) {
+    lua_Integer val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<long long>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, unsigned long long& value) {
+    lua_Unsigned val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<unsigned long>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, float& value) {
+    lua_Number val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<float>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, double& value) {
+    lua_Number val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<double>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, long double& value) {
+    lua_Number val;
+    const bool result = helper::getValue(_state, key, val);
+    if (result)
+        value = static_cast<long double>(val);
+    return result;
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, std::string& value) {
+    assert(_state != nullptr);
+
     lua_getglobal(_state, "getValue");
     lua_pushstring(_state, key.c_str());
-    lua_pcall(_state, 1, 1, NULL);
+    const int status = lua_pcall(_state, 1, 1, NULL);
+    if (status != LUA_OK) {
+        LERROR("Error getting value '" << key << "'. Error: " << lua_tostring(_state, -1));
+        return false;
+    }
     if (lua_isnil(_state, -1)) {
         lua_pop(_state, 1);
         return false;
     } else {
-        value = lua_tointeger(_state, -1);
+        const char* v = lua_tostring(_state, -1);
+        value = std::string(v);
         lua_pop(_state, 1);
         return true;
     }
-
-
-    //lua_getglobal(_state, _configurationTable);
-    //LUA_INTEGER val;
-    //const bool result = getFullValue(_state, key, val);
-    //if (result)
-    //    value = static_cast<int>(val);
-    //return result;
 }
 
+//
+// Helper
+//
+
+namespace helper {
+
+bool getValue(lua_State* state, const std::string& key, lua_Integer& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "getValue");
+    lua_pushstring(state, key.c_str());
+    const int status = lua_pcall(state, 1, 1, NULL);
+    if (status != LUA_OK) {
+        LERROR("Error getting value '" << key << "'. Error: " << lua_tostring(state, -1));
+        return false;
+    }
+    if (lua_isnil(state, -1)) {
+        lua_pop(state, 1);
+        return false;
+    } else {
+        value = lua_tointeger(state, -1);
+        lua_pop(state, 1);
+        return true;
+    }
+}
+
+bool getValue(lua_State* state, const std::string& key, lua_Unsigned& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "getValue");
+    lua_pushstring(state, key.c_str());
+    const int status = lua_pcall(state, 1, 1, NULL);
+    if (status != LUA_OK) {
+        LERROR("Error getting value '" << key << "'. Error: " << lua_tostring(state, -1));
+        return false;
+    }
+    if (lua_isnil(state, -1)) {
+        lua_pop(state, 1);
+        return false;
+    } else {
+        value = lua_tounsigned(state, -1);
+        lua_pop(state, 1);
+        return true;
+    }
+}
+
+bool getValue(lua_State* state, const std::string& key, lua_Number& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "getValue");
+    lua_pushstring(state, key.c_str());
+    const int status = lua_pcall(state, 1, 1, NULL);
+    if (status != LUA_OK) {
+        LERROR("Error getting value '" << key << "'. Error: " << lua_tostring(state, -1));
+        return false;
+    }
+    if (lua_isnil(state, -1)) {
+        lua_pop(state, 1);
+        return false;
+    } else {
+        value = lua_tonumber(state, -1);
+        lua_pop(state, 1);
+        return true;
+    }
+}
+
+void setValue(lua_State* state, const std::string& key, const lua_Integer& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "setValue");
+    lua_pushstring(state, key.c_str());
+    lua_pushinteger(state, value);
+    const int status = lua_pcall(state, 2, 0, NULL);
+    if (status != LUA_OK)
+        LERROR("Error setting value '" << key << "'. Error: " << lua_tostring(state, -1));
+}
+
+void setValue(lua_State* state, const std::string& key, const lua_Unsigned& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "setValue");
+    lua_pushstring(state, key.c_str());
+    lua_pushunsigned(state, value);
+    const int status = lua_pcall(state, 2, 0, NULL);
+    if (status != LUA_OK)
+        LERROR("Error setting value '" << key << "'. Error: " << lua_tostring(state, -1));
+}
+
+void setValue(lua_State* state, const std::string& key, const lua_Number& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "setValue");
+    lua_pushstring(state, key.c_str());
+    lua_pushnumber(state, value);
+    const int status = lua_pcall(state, 2, 0, NULL);
+    if (status != LUA_OK)
+        LERROR("Error setting value '" << key << "'. Error: " << lua_tostring(state, -1));
+}
+
+};
+
 } // namespace openspace
+

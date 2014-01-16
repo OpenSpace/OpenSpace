@@ -25,7 +25,7 @@
 #ifndef __CONFIGURATIONMANAGER_H__
 #define __CONFIGURATIONMANAGER_H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/logging/logmanager.h>
 #include <string>
 
 struct lua_State;
@@ -42,13 +42,13 @@ public:
 
     void loadConfiguration(const std::string& filename, const std::string& position = "");
 
-    template <class T>
-    bool setValue(const std::string& key, const T& value);
+    template <typename T>
+    void setValue(const std::string& key, const T& value);
 
-    template <class T>
+    template <typename T>
     bool getValue(const std::string& key, T& value);
 
-//private:
+private:
     lua_State* _state;
 };
 

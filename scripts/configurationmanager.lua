@@ -11,7 +11,7 @@ function merge(t1, t2)
     return t1
 end
 
---[[
+
 function printTable(t, i)
     i = i or ""
     for k,v in pairs(t) do
@@ -23,7 +23,7 @@ function printTable(t, i)
         end
     end
 end
-]]--
+
 
 function loadConfiguration(file)
     io.input(file)
@@ -40,11 +40,11 @@ function getValue(key, t)
     if (not pos) then
         return t[key]
     else
-        newKey = t[key:sub(0, pos - 1)]
-        if (not newKey) then
+        newTable = t[key:sub(0, pos - 1)]
+        if (not newTable) then
             return nil
         else
-            return getValue(key:sub(pos + 1), newKey)
+            return getValue(key:sub(pos + 1), newTable)
         end
     end
 end
@@ -54,13 +54,13 @@ function setValue(key, v, t)
     pos = key:find('[.]')
     if (not pos) then
         t[key] = v
-        return true
     else
-        newKey = t[key:sub(0, pos - 1)]
-        if (not newKey) then
-            return false
-        else
-            return setValue(key:sub(pos + 1), v, newKey)
+        newKey = key:sub(0, pos - 1)
+        newTable = t[newKey]
+        if (not newTable) then
+            newTable = {}
+            t[newKey] = newTable
         end
+        setValue(key:sub(pos + 1), v, newTable)
     end
 end
