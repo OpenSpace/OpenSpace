@@ -1,6 +1,5 @@
--- fofo
 {
-    a = 0,
-    b = 1,
-    c = 2
+    setting1 = 1,
+    setting2 = 2,
+    t = {s = 1, t = 2, u = 3}
 }

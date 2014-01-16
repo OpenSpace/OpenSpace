@@ -18,7 +18,7 @@ Time::Time() {
 	time_ = 0.0;
 
 	// load spice time kernel
-	furnsh_c (p("${BASE_PATH}/data/spice/naif0010.tls").c_str());
+	furnsh_c (absPath("${BASE_PATH}/data/spice/naif0010.tls").c_str());
 
 	// convert UTC to ET 
 	str2et_c ( "2006 JAN 31 01:00", &time_ );

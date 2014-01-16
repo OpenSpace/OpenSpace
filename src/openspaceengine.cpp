@@ -75,13 +75,12 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 
 void OpenSpaceEngine::create(int& argc, char**& argv) {
     // TODO add parsing of configuration file, configuration file loading
-    LogManager::initialize(LogManager::LogLevel::Info);
+    LogManager::initialize(LogManager::LogLevel::Debug);
     LogMgr.addLog(new ConsoleLog);
 
     ghoul::filesystem::FileSystem::initialize();
-    FileSys.registerPathToken("${BASE_PATH}", "../..");
+    FileSys.registerPathToken("${BASE_PATH}", "../../..");
     FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-
 
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
@@ -99,7 +98,47 @@ void OpenSpaceEngine::destroy() {
 
 bool OpenSpaceEngine::initialize() {
     _configurationManager->initialize();
-    _configurationManager->loadConfiguration(p("${SCRIPTS}/config.lua"));
+    _configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
+    _configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
+
+    LARGE_INTEGER freq;
+    QueryPerformanceFrequency(&freq);
+
+    ghoul::lua::lua_logStack(_configurationManager->_state);
+    
+
+    int v;
+    LINFO("setting2");
+    LARGE_INTEGER t1, t2;
+    QueryPerformanceCounter(&t1);
+    bool success = _configurationManager->getValue("setting2", v);
+    QueryPerformanceCounter(&t2);
+    LINFO("Get: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000* 1000);
+    LINFO("Value:" << v);
+    QueryPerformanceCounter(&t1);
+    _configurationManager->setValue("setting2", 5);
+    QueryPerformanceCounter(&t2);
+    LINFO("Set: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000* 1000);
+    success = _configurationManager->getValue("setting2", v);
+    LINFO("Value:" << v);
+
+    //_configurationManager->setValue("setting2", 5);
+    ghoul::lua::lua_logStack(_configurationManager->_state);
+    //success = _configurationManager->getValue("setting2", v);
+
+    LINFO("t.s");
+    QueryPerformanceCounter(&t1);
+    success = _configurationManager->getValue("t.s", v);
+    QueryPerformanceCounter(&t2);
+    LINFO(((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000 * 1000);
+    ghoul::lua::lua_logStack(_configurationManager->_state);
+
+    LINFO("table.te.s.foo");
+    QueryPerformanceCounter(&t1);
+    success = _configurationManager->getValue("table.te.s.foo", v);
+    QueryPerformanceCounter(&t2);
+    LINFO(((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000 * 1000);
+    ghoul::lua::lua_logStack(_configurationManager->_state);
 
     Time::init();
     Spice::init();
@@ -175,6 +214,7 @@ void OpenSpaceEngine::mousePositionCallback(int x, int y) {
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler->mouseScrollWheelCallback(pos);
 }
+
 
 } // namespace openspace
 

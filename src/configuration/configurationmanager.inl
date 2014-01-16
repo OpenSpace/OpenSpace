@@ -22,38 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONFIGURATIONMANAGER_H__
-#define __CONFIGURATIONMANAGER_H__
-
-#include <ghoul/lua/ghoul_lua.h>
-#include <string>
-
-struct lua_State;
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
-class ConfigurationManager {
-public:
-    ConfigurationManager();
-    ~ConfigurationManager();
-
-    bool initialize();
-    void deinitialize();
-
-    void loadConfiguration(const std::string& filename, const std::string& position = "");
-
-    template <class T>
-    bool setValue(const std::string& key, const T& value);
-
-    template <class T>
-    bool getValue(const std::string& key, T& value);
-
-//private:
-    lua_State* _state;
-};
-
 } // namespace openspace
-
-#include "configurationmanager.inl"
-
-#endif // __CONFIGURATIONMANAGER_H__

@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
     openspace::OpenSpaceEngine::create(argc, argv);
 
     char* cmd = "-config";
-    const std::string pathStr = p("${BASE_PATH}/config/single_sbs_stereo.xml");
+    const std::string pathStr = absPath("${BASE_PATH}/config/single.xml");
     char* path = _strdup(pathStr.c_str());
     char** newArgv = new char*[3];
     int newArgc = 3;

@@ -26,15 +26,14 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
-#include <ghoul/lua/ghoul_lua.h>
 
 #include <assert.h>
 #include <fstream>
 
 namespace {
     const std::string _loggerCat = "ConfigurationManager";
-
-    lua_State* _state = nullptr;
+    const char* _configurationScript = "${SCRIPTS}/configurationmanager.lua";
+    const char* _configurationTable = "config";
 }
 
 using namespace ghoul::lua;
@@ -42,28 +41,69 @@ using namespace ghoul::lua;
 namespace openspace {
 
 
-
-ConfigurationManager::ConfigurationManager() {}
-
+ConfigurationManager::ConfigurationManager()
+    : _state(nullptr)
+{}
 
 ConfigurationManager::~ConfigurationManager() {
-
+    if (_state != nullptr) {
+        LWARNING("ConfigurationManager was not deinitialized");
+        deinitialize();
+    }
 }
 
-void ConfigurationManager::initialize() {
+bool ConfigurationManager::initialize() {
     // TODO custom assert (ticket #5)
     assert(_state == nullptr);
 
+    LDEBUG("Create Lua state");
     _state = luaL_newstate();
+    if (_state == nullptr) {
+        LFATAL("Error creating new Lua state: Memory allocation error");
+        return false;
+    }
+    LDEBUG("Open libraries");
     luaL_openlibs(_state);
+
+    LDEBUG("Loading configuration script '" << _configurationScript << "'");
+    const int status = luaL_loadfile(_state, absPath(_configurationScript).c_str());
+    if (status != LUA_OK) {
+        LFATAL("Error loading configuration script: " << lua_tostring(_state, -1));
+        deinitialize();
+        return false;
+    }
+
+    LDEBUG("Executing configuration script");
+    if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
+        LFATAL("Error executing configuration script: " << lua_tostring(_state, -1));
+        deinitialize();
+        return false;
+    }
+
+    // Sanity checks
+    lua_getglobal(_state, "loadConfiguration");
+    if (!lua_isfunction(_state, -1)) {
+        LFATAL("Could not find function 'loadConfiguration' in script");
+        deinitialize();
+        return false;
+    }
+    lua_pop(_state, 1);
+    lua_getglobal(_state, _configurationTable);
+    if (!lua_istable(_state, -1)) {
+        LERROR("Table '" << _configurationTable << "' not found in script");
+        deinitialize();
+        return false;
+    }
+    lua_pop(_state, 1);
+    return true;
 }
 
 void ConfigurationManager::deinitialize() {
     // TODO custom assert (ticket #5)
     assert(_state != nullptr);
     lua_close(_state);
+    _state = nullptr;
 }
-
 
 void ConfigurationManager::loadConfiguration(const std::string& filename,
                                              const std::string& position)
@@ -71,52 +111,16 @@ void ConfigurationManager::loadConfiguration(const std::string& filename,
     // TODO custom assert (ticket #5)
     assert(_state != nullptr);
 
-    // load 'filename', prepent 'return', execute string, modify stack and execute
-    // separate script to apply the table of changes
-    std::ifstream file(filename);
-    if (!file.good()) {
-        LERROR("Error opening file '" << filename << "': Error code:" << 
-            std::endl << file.rdstate());
+    const std::string& absFilename = absPath(filename);
+
+    lua_getglobal(_state, "loadConfiguration");
+    lua_pushstring(_state, absFilename.c_str());
+
+    const int status = lua_pcall(_state, 1, 0, 0);
+    if (status != LUA_OK) {
+        LERROR("Error loading configuration: " << lua_tostring(_state, -1));
         return;
     }
-
-    // load script code from 'filename' and prepend "return"
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string scriptText = "return " + buffer.str();
-
-    const int loadResult = luaL_loadstring(_state, scriptText.c_str());
-    if (loadResult != 0) {
-        LERROR("Error loading script in file '" << filename << "'. Error:" <<
-            std::endl << lua_tostring(_state, -1));
-        return;
-    }
-
-    LINFO("before");
-    lua_logStack(_state);
-
-    const int execResult = lua_pcall(_state, 0, LUA_MULTRET, 0);
-    if (execResult != 0) {
-        LERROR("Error executing script in file '" << filename << "'. Error:" << 
-            std::endl << lua_tostring(_state, -1));
-        return;
-    }
-    LINFO("after");
-    lua_logStack(_state);
-    lua_logTable(_state);
-
-    //lua_p
-
-    const int load2Result = luaL_loadfile(_state, p("${SCRIPTS}/script.lua").c_str());
-    if (load2Result != 0) {
-        LERROR("Error loading script in file '" << filename << "'. Error:" <<
-            std::endl << lua_tostring(_state, -1));
-        return;
-    }
-    LINFO("afterloading");
-    lua_logStack(_state);
-
-
 }
 
 template <class T>
@@ -133,5 +137,64 @@ bool ConfigurationManager::setValue(const std::string& key, const T& value) {
     return false;
 }
 
+bool getFullValue(lua_State* state, const std::string& key, LUA_INTEGER& value) {
+    assert(state != nullptr);
+
+    lua_getglobal(state, "getValue");
+    lua_pushstring(state, key.c_str());
+    lua_pcall(state, 1, 1, NULL);
+
+    //lua_getglobal(state, _configurationTable);
+    //lua_getfield(state, -1, key.c_str());
+    //if (lua_isnil(state, -1)) {
+    //    LWARNING("Key '" << key << "' not found");
+    //    return false;
+    //}
+    //if (!lua_isnumber(state, -1)) {
+    //    LWARNING("Value of key '" << key <<"' is not a number");
+    //    return false;
+    //}
+    //value = lua_tointeger(state, -1);
+    //lua_pop(state, lua_gettop(state));
+    return true;
+}
+
+bool setFullValue(lua_State* state, const std::string& key, const LUA_INTEGER& value) {
+    assert(state != nullptr);
+    lua_getglobal(state, _configurationTable);
+    lua_pushinteger(state, value);
+    lua_setfield(state, -2, key.c_str());
+    lua_pop(state, 1);
+    return true;
+}
+
+// int
+template <>
+bool ConfigurationManager::setValue(const std::string& key, const int& value) {
+    return setFullValue(_state, key, value);
+}
+
+template <>
+bool ConfigurationManager::getValue(const std::string& key, int& value) {
+    lua_getglobal(_state, "getValue");
+    lua_pushstring(_state, key.c_str());
+    lua_pcall(_state, 1, 1, NULL);
+    if (lua_isnil(_state, -1)) {
+        lua_pop(_state, 1);
+        return false;
+    } else {
+        value = lua_tointeger(_state, -1);
+        lua_pop(_state, 1);
+        return true;
+    }
+
+
+    //lua_getglobal(_state, _configurationTable);
+    //LUA_INTEGER val;
+    //const bool result = getFullValue(_state, key, val);
+    //if (result)
+    //    value = static_cast<int>(val);
+    //return result;
+}
 
 } // namespace openspace
