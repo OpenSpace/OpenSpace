@@ -90,7 +90,7 @@ void OpenSpaceEngine::create(int& argc, char**& argv) {
 
     _engine->_interactionHandler = new InteractionHandler;
 
-    _engine->_configurationManager = new ConfigurationManager;
+    _engine->_configurationManager = new ghoul::ConfigurationManager;
 }
 
 void OpenSpaceEngine::destroy() {
@@ -119,6 +119,19 @@ bool OpenSpaceEngine::initialize() {
     _configurationManager->setValue("key", t);
     _configurationManager->setValue("key", u);
     _configurationManager->setValue("key", d);
+
+    //LINFO("All Keys:");
+    //std::vector<std::string> keys = _configurationManager->keys();
+    //for (const std::string& k : keys) {
+    //    LINFO(k);
+    //}
+
+
+    LINFO("Keys (t):");
+    std::vector<std::string> keys = _configurationManager->keys("tt.t");
+    for (const std::string& k : keys) {
+        LINFO(k);
+    }
 
 
     //LINFO("setting2");
@@ -191,7 +204,7 @@ bool OpenSpaceEngine::initialize() {
     return true;
 }
 
-ConfigurationManager& OpenSpaceEngine::configurationManager() {
+ghoul::ConfigurationManager& OpenSpaceEngine::configurationManager() {
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_configurationManager;

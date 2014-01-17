@@ -25,9 +25,9 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include "configuration/configurationmanager.h"
 #include "interaction/interactionhandler.h"
 #include "rendering/renderengine.h"
+#include <ghoul/misc/configurationmanager.h>
 
 namespace openspace {
 
@@ -41,7 +41,7 @@ public:
 
     bool initialize();
 
-    ConfigurationManager& configurationManager();
+    ghoul::ConfigurationManager& configurationManager();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 
@@ -62,7 +62,7 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    ConfigurationManager* _configurationManager;
+    ghoul::ConfigurationManager* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
     ScriptEngine* _scriptEngine;
