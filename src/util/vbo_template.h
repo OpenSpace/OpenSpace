@@ -67,10 +67,10 @@ public:
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, isize_*sizeof(int), iarray_, GL_STATIC_DRAW);
 
 		if(vBufferID_ == 0) {
-			LERROR_SAFE("Vertex buffer not initialized");
+			LERROR("Vertex buffer not initialized");
 		}
 		if(iBufferID_ == 0) {
-			LERROR_SAFE("Index buffer not initialized");
+			LERROR("Index buffer not initialized");
 		}
 
 		glBindVertexArray(0);
@@ -78,8 +78,8 @@ public:
 		errorID = glGetError();
 		if(errorID != GL_NO_ERROR)
 		{
-			LERROR_SAFE("OpenGL error: " << glewGetErrorString(errorID));
-			LERROR_SAFE("Attempting to proceed anyway. Expect rendering errors or a crash.");
+			LERROR("OpenGL error: " << glewGetErrorString(errorID));
+			LERROR("Attempting to proceed anyway. Expect rendering errors or a crash.");
 		}
 
 	};

@@ -152,11 +152,11 @@ void gl4::VBO::init()
 
 	if(_vBufferID == 0)
 	{
-		LERROR_SAFE("Vertex buffer not initialized");
+		LERROR("Vertex buffer not initialized");
 	}
 	if(_iBufferID == 0) 
 	{
-		LERROR_SAFE("Index buffer not initialized");
+		LERROR("Index buffer not initialized");
 	}
 
 	glBindVertexArray(0);
@@ -164,8 +164,8 @@ void gl4::VBO::init()
 	errorID = glGetError();
 	if(errorID != GL_NO_ERROR)
 	{
-		LERROR_SAFE("OpenGL error: " << glewGetErrorString(errorID));
-		LERROR_SAFE("Attempting to proceed anyway. Expect rendering errors or a crash.");
+		LERROR("OpenGL error: " << glewGetErrorString(errorID));
+		LERROR("Attempting to proceed anyway. Expect rendering errors or a crash.");
 	}
 
 }

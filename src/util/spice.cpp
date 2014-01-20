@@ -30,7 +30,7 @@ Spice::Spice() {
 	// print spice toolkit version
 	ConstSpiceChar  * versn;
 	versn = tkvrsn_c( "TOOLKIT" );
-	LINFO_SAFE("Spice Toolkit version: " << versn);	
+	LINFO("Spice Toolkit version: " << versn);	
 
 	// make the spice framework not exit on error
 	erract_c (const_cast<char*>("SET"), lenout, const_cast<char*>("RETURN"));
@@ -93,8 +93,8 @@ bool Spice::loadKernel(const std::string &path) {
 	if(failed) {
 		char shrtms[shrtms_len];
 		getmsg_c ( "SHORT", shrtms_len, shrtms );
-		LERROR_SAFE("Error when loading kernel with path: " << path);
-		LERROR_SAFE("Spice reported: " << shrtms);
+		LERROR("Error when loading kernel with path: " << path);
+		LERROR("Spice reported: " << shrtms);
 		reset_c();
 	}
 	return ( ! failed);
@@ -116,8 +116,8 @@ bool Spice::getRadii(const std::string & name, double radii[3], int *n) {
 	if(failed) {
 		char shrtms[shrtms_len];
 		getmsg_c ( "SHORT", shrtms_len, shrtms );
-		LERROR_SAFE("Error when fetching radii");
-		LERROR_SAFE("Spice reported: " << shrtms);
+		LERROR("Error when fetching radii");
+		LERROR("Spice reported: " << shrtms);
 		reset_c();
 	}
 	return ( ! failed);
@@ -164,8 +164,8 @@ bool Spice::spk_getOrientation(const std::string &target, double state[3][3]) {
 	if(failed) {
 		char shrtms[shrtms_len];
 		getmsg_c ( "SHORT", shrtms_len, shrtms );
-		LERROR_SAFE("Error when fetching orientation");
-		LERROR_SAFE("Spice reported: " << shrtms);
+		LERROR("Error when fetching orientation");
+		LERROR("Spice reported: " << shrtms);
 		reset_c();
 	}
 	return ( ! failed);

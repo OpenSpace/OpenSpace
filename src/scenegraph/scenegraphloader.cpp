@@ -108,16 +108,16 @@ void SceneGraphLoader::loadSceneGraphTree(tinyxml2::XMLElement* node, SceneGraph
 				if(setting == "focus") {
                     // HACK
                     OsEng.interactionHandler().setFocusNode(thisNode->parent());
-					LINFO_SAFE("Setting camera focus: " << name);
+					LINFO("Setting camera focus: " << name);
 				} else if(setting == "position") {
 					OsEng.interactionHandler().getCamera()->setPosition(thisNode->getWorldPosition());
-					LINFO_SAFE("Setting camera position: " << name);
+					LINFO("Setting camera position: " << name);
 				}
 			}
 
 					
 		} else {
-			LERROR_SAFE("Could not load SceneGraphNode [ " << name << " ], ignoring all children!");
+			LERROR("Could not load SceneGraphNode [ " << name << " ], ignoring all children!");
 		}
 		
 	}
@@ -171,18 +171,18 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 						// multiply with factor 1000, spice uses km as standard and Open Space uses m
 						radius = pss::CreatePSS(radii[0]*1000.0);
 					} else {
-						LERROR_SAFE("Tried to use spice raddi but failed for: " << name);
+						LERROR("Tried to use spice raddi but failed for: " << name);
 						delete thisNode;
 						return nullptr;
 					}
 				} else {
-					LERROR_SAFE("Could not find radiiElement or spice id for: " << name << " " << thisNode->getSpiceID() );
+					LERROR("Could not find radiiElement or spice id for: " << name << " " << thisNode->getSpiceID() );
 					delete thisNode;
 					return nullptr;
 				}
 				
 
-				LINFO_SAFE("Adding renderable: "<< name);
+				LINFO("Adding renderable: "<< name);
 				// load texture and shader
 				ghoul::opengl::Texture *texture = nullptr;
 				ghoul::opengl::ProgramObject *program = nullptr;
@@ -190,15 +190,15 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 				tinyxml2::XMLElement* textureElement = renderableElement->FirstChildElement( "texture" );
 				if(textureElement) {
 					if( ! getTexture(&texture, path, textureElement->FirstChildElement( "file" ))) {
-						LERROR_SAFE("Could not load texture " << name);
+						LERROR("Could not load texture " << name);
 					}
 				} else {
-					LERROR_SAFE("Could not find texture for: " << name);
+					LERROR("Could not find texture for: " << name);
 				}
 
 				// load shader
 				if( ! getShader(&program, path, renderableElement->FirstChildElement( "shader" ))) {
-					LERROR_SAFE("Could not find shader for: " << name);
+					LERROR("Could not find shader for: " << name);
 				}
 
 				if( ! texture || ! program) {
@@ -228,18 +228,18 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 						// multiply with factor 1000, spice uses km as standard and Open Space uses m
 						radius = pss::CreatePSS(radii[0]*1000.0);
 					} else {
-						LERROR_SAFE("Tried to use spice raddi but failed for: " << name);
+						LERROR("Tried to use spice raddi but failed for: " << name);
 						delete thisNode;
 						return nullptr;
 					}
 				} else {
-					LERROR_SAFE("Could not find radiiElement or spice id for: " << name << " " << thisNode->getSpiceID() );
+					LERROR("Could not find radiiElement or spice id for: " << name << " " << thisNode->getSpiceID() );
 					delete thisNode;
 					return nullptr;
 				}
 				
 
-				LINFO_SAFE("Adding renderable: "<< name);
+				LINFO("Adding renderable: "<< name);
 				// load texture and shader
 				ghoul::opengl::Texture *texture = nullptr;
 				ghoul::opengl::ProgramObject *program = nullptr;
@@ -247,15 +247,15 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 				tinyxml2::XMLElement* textureElement = renderableElement->FirstChildElement( "texture" );
 				if(textureElement) {
 					if( ! getTexture(&texture, path, textureElement->FirstChildElement( "file" ))) {
-						LERROR_SAFE("Could not load texture " << name);
+						LERROR("Could not load texture " << name);
 					}
 				} else {
-					LERROR_SAFE("Could not find texture for: " << name);
+					LERROR("Could not find texture for: " << name);
 				}
 
 				// load shader
 				if( ! getShader(&program, path, renderableElement->FirstChildElement( "shader" ))) {
-					LERROR_SAFE("Could not find shader for: " << name);
+					LERROR("Could not find shader for: " << name);
 				}
 
 				if( ! texture || ! program) {
@@ -268,7 +268,7 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 				renderable->setTexture(texture);
 				renderable->setProgramObject(program);
 				thisNode->setRenderable(renderable);
-				LINFO_SAFE("Adding renderablePlanet");
+				LINFO("Adding renderablePlanet");
 			}
 		}
 
@@ -278,7 +278,7 @@ SceneGraphNode * SceneGraphLoader::loadSceneGraphNode(tinyxml2::XMLElement *xmln
 		return thisNode;
 
 	} else {
-		LERROR_SAFE("Unable to open properties element");
+		LERROR("Unable to open properties element");
 		return nullptr;
 	}
 }
@@ -307,10 +307,10 @@ bool SceneGraphLoader::getSpice(SceneGraphNode *node, SceneGraphNode *parent, ti
 				node->setSpiceID(spiceID,parentSpice);
 				return true;
 			} else {
-				LERROR_SAFE("Could not find spice ID ");
+				LERROR("Could not find spice ID ");
 			}
 		} else {
-			LERROR_SAFE("Could not find spice identifier element in xml ");
+			LERROR("Could not find spice identifier element in xml ");
 		}
 	}
 	return false;
@@ -340,16 +340,16 @@ bool SceneGraphLoader::getTexture(ghoul::opengl::Texture **texture, const std::s
 
 		// if textures where accessed, upload them to the graphics card. This check needs to be done to avoid crash.
 		if(texture) {
-			LINFO_SAFE("Uploading tetxure: "<< texturePath);
+			LINFO("Uploading tetxure: "<< texturePath);
 			(*texture)->uploadTexture();
 			//ghoul::opengl::Texture *tmp = new ghoul::opengl::Texture(*texture);
 			//texture = tmp;
 			return true;
 		} else {
-			LERROR_SAFE("Could not load texture: "<< texturePath);
+			LERROR("Could not load texture: "<< texturePath);
 		}
 	} else {
-		LERROR_SAFE("Could not find file element");
+		LERROR("Could not find file element");
 	}
 	return false;
 }
@@ -369,7 +369,7 @@ bool SceneGraphLoader::getShader(ghoul::opengl::ProgramObject **program, const s
 			return true;
 		} 
 
-		LERROR_SAFE("Could not find common shader: " << identifier);
+		LERROR("Could not find common shader: " << identifier);
 		return false;
 
 	// load and return the shader
@@ -414,13 +414,13 @@ bool SceneGraphLoader::getShader(ghoul::opengl::ProgramObject **program, const s
 				if(programObject->compileShaderObjects()) {
 					if(programObject->linkProgramObject()) {
 						*program = programObject;
-						LINFO_SAFE("Common shader successfully loaded!");
+						LINFO("Common shader successfully loaded!");
 						return true;
 					} else {
-						LERROR_SAFE("Common shader could not be linked!");
+						LERROR("Common shader could not be linked!");
 					}
 				} else {
-					LERROR_SAFE("Common shader  could not be compiled!");
+					LERROR("Common shader  could not be compiled!");
 				}
 
 				if(programObject)
@@ -431,7 +431,7 @@ bool SceneGraphLoader::getShader(ghoul::opengl::ProgramObject **program, const s
 		}
 	}
 	
-	LERROR_SAFE("Could not load shader");
+	LERROR("Could not load shader");
 	return false;
 }
 

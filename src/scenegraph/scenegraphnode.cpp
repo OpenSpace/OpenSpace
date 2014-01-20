@@ -27,7 +27,7 @@ SceneGraphNode::SceneGraphNode() {
 SceneGraphNode::~SceneGraphNode() {
 	// logger string
 	std::string _loggerCat = "SceneGraphNode::~SceneGraphNode()";
-	LDEBUG_SAFE("Deallocating: " << nodeName_);
+	LDEBUG("Deallocating: " << nodeName_);
 
 	// deallocate the renderable
 	if(renderable_)
