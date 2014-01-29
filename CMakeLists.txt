@@ -46,6 +46,7 @@ endif ()
 # Ghoul
 add_definitions(-DGHL_DEBUG)
 set(GHOUL_ROOT_DIR "${OPENSPACE_EXT_DIR}/ghoul")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
 include_directories("${GHOUL_ROOT_DIR}/include")
 add_subdirectory(${GHOUL_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
