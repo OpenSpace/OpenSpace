@@ -39,10 +39,10 @@ void SceneGraph::init() {
 	// logger string
 	std::string _loggerCat = "SceneGraph::init";
 	
-	SceneGraphLoader *loader = new SceneGraphLoader(&nodes_, &shaders_);
-    root_ = loader->loadSceneGraph(absPath("${BASE_PATH}/modules"));
+    //	SceneGraphLoader *loader = new SceneGraphLoader(&nodes_, &shaders_);
+    //    root_ = loader->loadSceneGraph(absPath("${BASE_PATH}/modules"));
 	update();
-	pss bs = root_->calculateBoundingSphere();
+	//pss bs = root_->calculateBoundingSphere();
 }
 
 void SceneGraph::update() {

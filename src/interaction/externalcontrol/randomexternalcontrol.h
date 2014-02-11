@@ -18,7 +18,7 @@ public:
 private:
 	std::mutex inputGuard;
 	bool *keepGoing_;
-	std::thread *backgroundThread;
+    //	std::thread *backgroundThread;
 };
 
 } // namespace openspace

@@ -27,7 +27,7 @@ public:
 private:
 	ghoul::opengl::ProgramObject *programObject_;
 	ghoul::opengl::Texture *texture_;
-	double rad_;
+    //	double rad_;
 
 	Planet *planet_;
 };

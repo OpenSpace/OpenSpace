@@ -14,9 +14,10 @@
 #include "ghoul/opengl/texture.h"
 
 // sgct includes
-#include "external/tinyxml2.h"
+//#include "ext/tinyxml2.h"
 
 namespace openspace {
+    /*
 
 class SceneGraph;
 
@@ -48,6 +49,7 @@ private:
 	bool getShader(ghoul::opengl::ProgramObject **program, const std::string &path, tinyxml2::XMLElement *xmlnode);
 
 };
+ */
 
 } // namespace openspace
 

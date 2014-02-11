@@ -48,6 +48,7 @@ public:
         else
             for (auto it : children_)
                 return it->get(name);
+        return nullptr;
     }
 
     void print() const {

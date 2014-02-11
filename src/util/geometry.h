@@ -20,7 +20,7 @@ namespace gl4
 	public:
 		//initializers
 		Geometry();
-		~Geometry();
+		virtual ~Geometry();
 
 		virtual void init();
 		glm::mat4 getTransform();

@@ -3,7 +3,9 @@
 #include "deviceIdentifier.h"
 
 // sgct includes
-#include "sgct.h"
+//#include "sgct.h"
+
+#include <assert.h>
 
 namespace openspace {
 
@@ -57,16 +59,17 @@ void DeviceIdentifier::scanDevices() {
 	for (int i = 0; i < MAXDEVICES; ++i)
 	{
 		// check for device on position i
-        const char* joystickName = sgct::Engine::getJoystickName(SGCT_JOYSTICK_1 + i);
+        //        const char* joystickName = sgct::Engine::getJoystickName(SGCT_JOYSTICK_1 + i);
 
   //      int joystickPresent = sgct::Engine::getJoystickParam( GLFW_JOYSTICK_1 + i, GLFW_PRESENT );
 		//numberOfAxes_[i] = sgct::Engine::getJoystickParam( GLFW_JOYSTICK_1 + i, GLFW_AXES );
 		//numberOfButtons_[i] = sgct::Engine::getJoystickParam( GLFW_JOYSTICK_1 + i, GLFW_BUTTONS );
 		
 		// joystick found
+        void* joystickName;
 		if( joystickName != NULL ) {
-            sgct::Engine::getJoystickAxes(SGCT_JOYSTICK_1 + i, &numberOfAxes_[i]);
-            sgct::Engine::getJoystickButtons(SGCT_JOYSTICK_1 + i, &numberOfButtons_[i]);
+//            sgct::Engine::getJoystickAxes(SGCT_JOYSTICK_1 + i, &numberOfAxes_[i]);
+//            sgct::Engine::getJoystickButtons(SGCT_JOYSTICK_1 + i, &numberOfButtons_[i]);
 
 
 
@@ -118,10 +121,10 @@ void DeviceIdentifier::update() {
 void DeviceIdentifier::update(const int device) {
 	assert(this_);
 	if(inputDevice_[device] != InputDevice::NONE) {
-		const float* axesPos = sgct::Engine::getJoystickAxes(GLFW_JOYSTICK_1+device, &(numberOfAxes_[device]) );
+        //		const float* axesPos = sgct::Engine::getJoystickAxes(GLFW_JOYSTICK_1+device, &(numberOfAxes_[device]) );
 
         //axesPos_[device]
-		const unsigned char* buttons = sgct::Engine::getJoystickButtons( GLFW_JOYSTICK_1+device, &(numberOfButtons_[device]) );
+		//const unsigned char* buttons = sgct::Engine::getJoystickButtons( GLFW_JOYSTICK_1+device, &(numberOfButtons_[device]) );
         //buttons_[device]
 	}
 }

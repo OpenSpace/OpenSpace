@@ -12,7 +12,7 @@ public:
 
 	// constructors & destructor
 	ExternalControl();
-	~ExternalControl();
+	virtual ~ExternalControl();
 	
 	virtual void update();
 	

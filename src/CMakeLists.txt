@@ -85,5 +85,8 @@ source_group(Util FILES ${UTIL_SOURCE} ${UTIL_HEADER})
 
 include_directories(${HEADER_ROOT_DIR})
 
+# hack:
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
+
 add_executable(OpenSpace ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})

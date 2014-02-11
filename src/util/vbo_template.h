@@ -19,7 +19,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "ghoul/logging/consolelog.h"
 
 // sgct includes
-#include "sgct.h"
+//#include "sgct.h"
+#include <ghoul/opengl/opengl>
 
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))

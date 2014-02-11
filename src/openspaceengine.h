@@ -35,7 +35,7 @@ class ScriptEngine;
 
 class OpenSpaceEngine {
 public:
-    static void create(int& argc, char**& argv);
+    static void create(int argc, char** argv, int& newArgc, char**& newArgv);
     static void destroy();
     static OpenSpaceEngine& ref();
 

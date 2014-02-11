@@ -11,7 +11,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define VBO_H
 
 // sgct includes
-#include "sgct.h"
+//#include "sgct.h"
+#include <ghoul/opengl/opengl>
 
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))

@@ -73,24 +73,34 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-void OpenSpaceEngine::create(int& argc, char**& argv) {
-    // TODO add parsing of configuration file, configuration file loading
-    LogManager::initialize(LogManager::LogLevel::Debug);
-    LogMgr.addLog(new ConsoleLog);
-
-    ghoul::filesystem::FileSystem::initialize();
-    //FileSys.registerPathToken("${BASE_PATH}", "../../..");
-    FileSys.registerPathToken("${BASE_PATH}", "../..");
-    FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-
+void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArgv) {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
     _engine = new OpenSpaceEngine;
+
+    LogManager::initialize(LogManager::LogLevel::Debug);
+    LogMgr.addLog(new ConsoleLog);
+    
+    _engine->_configurationManager = new ghoul::ConfigurationManager;
+    _engine->_configurationManager->initialize();
+    
+    newArgc = 3;
+    newArgv = new char*[3];
+    newArgv[0] = "prog";
+    newArgv[1] = "-config";
+    newArgv[2] = "../../../config/single.xml";
+    
+    
+
+    ghoul::filesystem::FileSystem::initialize();
+    FileSys.registerPathToken("${BASE_PATH}", "../../..");
+    //FileSys.registerPathToken("${BASE_PATH}", "../..");
+    FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+
     _engine->_renderEngine = new RenderEngine;
 
     _engine->_interactionHandler = new InteractionHandler;
 
-    _engine->_configurationManager = new ghoul::ConfigurationManager;
 }
 
 void OpenSpaceEngine::destroy() {
@@ -101,93 +111,6 @@ bool OpenSpaceEngine::initialize() {
     _configurationManager->initialize();
     _configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
     _configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
-
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
-
-    //ghoul::lua::lua_logStack(_configurationManager->_state);
-    //
-    //lua_getglobal(_configurationManager->_state, "printTable");
-    //lua_getglobal(_configurationManager->_state, "config");
-    //lua_pcall(_configurationManager->_state, 1, 0, NULL);
-
-    int s = 0;
-    char t = 0;
-    long long u = 0;
-    unsigned long d = 0;
-    _configurationManager->setValue("key", s);
-    _configurationManager->setValue("key", t);
-    _configurationManager->setValue("key", u);
-    _configurationManager->setValue("key", d);
-
-    //LINFO("All Keys:");
-    //std::vector<std::string> keys = _configurationManager->keys();
-    //for (const std::string& k : keys) {
-    //    LINFO(k);
-    //}
-
-
-    LINFO("Keys (t):");
-    std::vector<std::string> keys = _configurationManager->keys("tt.t");
-    for (const std::string& k : keys) {
-        LINFO(k);
-    }
-
-
-    //LINFO("setting2");
-    //_configurationManager->setValue("setting2", 5);
-
-    //lua_getglobal(_configurationManager->_state, "printTable");
-    //lua_getglobal(_configurationManager->_state, "config");
-    //lua_pcall(_configurationManager->_state, 1, 0, NULL);
-
-    //LINFO("t.s");
-    //_configurationManager->setValue("t.s", 10);
-
-    //lua_getglobal(_configurationManager->_state, "printTable");
-    //lua_getglobal(_configurationManager->_state, "config");
-    //lua_pcall(_configurationManager->_state, 1, 0, NULL);
-
-    //LINFO("table.te.s.foo");
-    //_configurationManager->setValue("table.te.s.foo", 12);
-
-    //lua_getglobal(_configurationManager->_state, "printTable");
-    //lua_getglobal(_configurationManager->_state, "config");
-    //lua_pcall(_configurationManager->_state, 1, 0, NULL);
-
-
-    //int v;
-    //LINFO("setting2");
-    //LARGE_INTEGER t1, t2;
-    //QueryPerformanceCounter(&t1);
-    //bool success = _configurationManager->getValue("setting2", v);
-    //QueryPerformanceCounter(&t2);
-    //LINFO("Get: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000* 1000);
-    //LINFO("Value:" << v);
-    //QueryPerformanceCounter(&t1);
-    //_configurationManager->setValue("setting2", 5);
-    //QueryPerformanceCounter(&t2);
-    //LINFO("Set: " << ((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000* 1000);
-    //success = _configurationManager->getValue("setting2", v);
-    //LINFO("Value:" << v);
-
-    ////_configurationManager->setValue("setting2", 5);
-    //ghoul::lua::lua_logStack(_configurationManager->_state);
-    ////success = _configurationManager->getValue("setting2", v);
-
-    //LINFO("t.s");
-    //QueryPerformanceCounter(&t1);
-    //success = _configurationManager->getValue("t.s", v);
-    //QueryPerformanceCounter(&t2);
-    //LINFO(((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000 * 1000);
-    //ghoul::lua::lua_logStack(_configurationManager->_state);
-
-    //LINFO("table.te.s.foo");
-    //QueryPerformanceCounter(&t1);
-    //success = _configurationManager->getValue("table.te.s.foo", v);
-    //QueryPerformanceCounter(&t2);
-    //LINFO(((t2.QuadPart - t1.QuadPart) / double(freq.QuadPart)) * 1000 * 1000);
-    //ghoul::lua::lua_logStack(_configurationManager->_state);
 
     Time::init();
     Spice::init();
