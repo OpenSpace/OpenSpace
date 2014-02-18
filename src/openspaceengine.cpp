@@ -81,6 +81,12 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     LogManager::initialize(LogManager::LogLevel::Debug);
     LogMgr.addLog(new ConsoleLog);
     
+	ghoul::filesystem::FileSystem::initialize();
+	//FileSys.registerPathToken("${BASE_PATH}", "../../..");
+	FileSys.registerPathToken("${BASE_PATH}", "../..");
+	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path
+
     _engine->_configurationManager = new ghoul::ConfigurationManager;
     _engine->_configurationManager->initialize();
     
@@ -88,14 +94,12 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv = new char*[3];
     newArgv[0] = "prog";
     newArgv[1] = "-config";
-    newArgv[2] = "../../../config/single.xml";
+    //newArgv[2] = "../../../config/single.xml";
+	newArgv[2] = "C:/openspace/config/single.xml"; // FIX ME: tempoary path
     
     
 
-    ghoul::filesystem::FileSystem::initialize();
-    FileSys.registerPathToken("${BASE_PATH}", "../../..");
-    //FileSys.registerPathToken("${BASE_PATH}", "../..");
-    FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+    
 
     _engine->_renderEngine = new RenderEngine;
 
@@ -108,9 +112,9 @@ void OpenSpaceEngine::destroy() {
 }
 
 bool OpenSpaceEngine::initialize() {
-    _configurationManager->initialize();
-    _configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
-    _configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
+    //_configurationManager->initialize();
+    //_configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
+    //_configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
 
     Time::init();
     Spice::init();
@@ -229,7 +233,7 @@ void RenderEngine::decode() {
 	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
 	
 	// sync the time
-	sharedDataInstance_->readDouble(shDouble);
+	sharedDataInstance_->Double(shDouble);
 	masterTime_ = shDouble->getVal();
 	
 	// check that the camera has been allocated

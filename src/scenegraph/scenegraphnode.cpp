@@ -70,7 +70,8 @@ void SceneGraphNode::update() {
 void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) {
 
 	const psc thisPosition = parentPosition + position_;
-	const psc toCamera = thisPosition - camera->getPosition();
+	const psc camPos = camera->getPosition();
+	const psc toCamera = thisPosition - camPos;
 	
 	// init as not visible
 	boundingSphereVisible_ = true;
