@@ -53,24 +53,10 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
 # Add ghoul ext
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
 
-# SGCT (TODO: write cmake script)
-#set(SGCT_ROOT_DIR "$ENV{SGCT_ROOT_DIR}")
-#set(SGCT_ROOT_DIR "C:/Program Files/SGCT/SGCT_2.0.7")
-#set(SGCT_ROOT_DIR "C:/Program Files (x86)/SGCT/SGCT_2.0.5_x86")
-set(SGCT_ROOT_DIR "C:/Program Files/SGCT/SGCT_2.0.7")
-add_definitions(-D__WIN32__)
-add_definitions(-DGLEW_STATIC)
-include_directories("${SGCT_ROOT_DIR}/include")
-#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${SGCT_ROOT_DOR}/bin/lib/msvc11)
-set(DEPENDENT_LIBS
-    ${DEPENDENT_LIBS}
-    "Ws2_32.lib"
-    optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
-    debug "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgctd.lib"
-   )
-
-#add_subdirectory(${SGCT_ROOT_DIR})
-#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} SGCT)
+# SGCT
+find_package(SGCT REQUIRED)
+include_directories(${SGCT_INCLUDE_DIRECTORIES})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SGCT_LIBRARIES})
 
 # GLM
 set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
@@ -83,9 +69,9 @@ include_directories(${GLM_INCLUDE_DIRS})
 #set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${OPENGL_LIBRARIES})
 
 # GLEW
-#find_package(GLEW REQUIRED)
-#include_directories(${GLEW_INCLUDE_DIRECTORIES})
-#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
+find_package(GLEW REQUIRED)
+include_directories(${GLEW_INCLUDE_DIRECTORIES})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
 
 # Lua
 set(LUA_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/lua")
@@ -102,10 +88,10 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Spice)
 if (APPLE)
     include_directories(/Developer/Headers/FlatCarbon)
     find_library(CARBON_LIBRARY Carbon)
-    find_library(COCOA_LIBRARY Carbon)
+    find_library(COCOA_LIBRARY Cocoa)
     find_library(APP_SERVICES_LIBRARY ApplicationServices)
     mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-    set(DEPENDENT_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
+    set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${CARBON_LIBRARY} ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
 endif ()
 
 #########################################################################################
