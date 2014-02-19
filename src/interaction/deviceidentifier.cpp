@@ -66,7 +66,7 @@ void DeviceIdentifier::scanDevices() {
 		//numberOfButtons_[i] = sgct::Engine::getJoystickParam( GLFW_JOYSTICK_1 + i, GLFW_BUTTONS );
 		
 		// joystick found
-        void* joystickName;
+        void* joystickName = NULL;
 		if( joystickName != NULL ) {
 //            sgct::Engine::getJoystickAxes(SGCT_JOYSTICK_1 + i, &numberOfAxes_[i]);
 //            sgct::Engine::getJoystickButtons(SGCT_JOYSTICK_1 + i, &numberOfButtons_[i]);

@@ -88,5 +88,28 @@ include_directories(${HEADER_ROOT_DIR})
 # hack:
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
 
+if (APPLE)
+    find_library(FRAMEWORK_IOKit
+        NAMES IOKit
+        PATHS ${CMAKE_OSX_SYSROOT}/System/Library
+        PATH_SUFFIXES Frameworks
+        NO_DEFAULT_PATH
+    )
+    find_library(FRAMEWORK_CoreVideo
+        NAMES CoreVideo
+        PATHS ${CMAKE_OSX_SYSROOT}/System/Library
+        PATH_SUFFIXES Frameworks
+        NO_DEFAULT_PATH
+    )
+    find_library(FRAMEWORK_Cocoa
+        NAMES Cocoa
+        PATHS ${CMAKE_OSX_SYSROOT}/System/Library
+        PATH_SUFFIXES Frameworks
+        NO_DEFAULT_PATH
+    )
+    set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${FRAMEWORK_IOKit} ${FRAMEWORK_CoreVideo} ${FRAMEWORK_Cocoa})
+endif (APPLE)
+#add_definitions(-framework IOKit -framework CoreVideo)
+
 add_executable(OpenSpace ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})

@@ -144,8 +144,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 	_mainCamera->compileViewRotationMatrix();
 
 	// update and evaluate the scene starting from the root node
-	_sceneGraph->update();
-	_sceneGraph->evaluate(_mainCamera);
+	//_sceneGraph->update();
+	//_sceneGraph->evaluate(_mainCamera);
 }
 
 void RenderEngine::render() {
@@ -158,11 +158,11 @@ void RenderEngine::render() {
 	view = glm::translate(view, eyePosition); // make sure the eye is in the center
 
 	// setup the camera for the current frame
-	_mainCamera->setViewProjectionMatrix(projection*view);
+	//_mainCamera->setViewProjectionMatrix(projection*view);
 
 	// render the scene starting from the root node
-	_sceneGraph->render(_mainCamera);
-	
+	//_sceneGraph->render(_mainCamera);
+	/*
 	if (sgct::Engine::instance()->isMaster()) {
 		const glm::vec2 scaling = _mainCamera->getScaling();
 		const glm::vec3 viewdirection = _mainCamera->getViewDirection();
@@ -189,6 +189,7 @@ void RenderEngine::render() {
 			"Distance to origin: (%.15f, %.2f)", pssl[0], pssl[1]
 		);
 	}
+     */
 }
 
 SceneGraph* RenderEngine::sceneGraph() {

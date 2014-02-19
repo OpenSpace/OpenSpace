@@ -60,6 +60,8 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
+    
+    // TODO deallocate scriptengine when starting to use it
     //delete _scriptEngine;
 
     Spice::deinit();
@@ -81,6 +83,20 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     LogManager::initialize(LogManager::LogLevel::Debug);
     LogMgr.addLog(new ConsoleLog);
     
+	ghoul::filesystem::FileSystem::initialize();
+    
+#ifdef __WIN32__
+    // Windows: Binary two folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../..");
+#else
+    // OS X and linux: Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../../..");
+#endif
+	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+    
+    // OLD
+	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path
+
     _engine->_configurationManager = new ghoul::ConfigurationManager;
     _engine->_configurationManager->initialize();
     
@@ -88,14 +104,18 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv = new char*[3];
     newArgv[0] = "prog";
     newArgv[1] = "-config";
+#ifdef __WIN32__
+    // Windows uses fixed path to OpenSpace data
+    #warning "Fixed path"
+	newArgv[2] = "C:/openspace/config/single.xml"; // FIX ME: tempoary path
+#else
+    // OS X and Linux uses local path to OpenSpace data
     newArgv[2] = "../../../config/single.xml";
+#endif
     
     
 
-    ghoul::filesystem::FileSystem::initialize();
-    FileSys.registerPathToken("${BASE_PATH}", "../../..");
-    //FileSys.registerPathToken("${BASE_PATH}", "../..");
-    FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+    
 
     _engine->_renderEngine = new RenderEngine;
 
@@ -108,9 +128,9 @@ void OpenSpaceEngine::destroy() {
 }
 
 bool OpenSpaceEngine::initialize() {
-    _configurationManager->initialize();
-    _configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
-    _configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
+    //_configurationManager->initialize();
+    //_configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
+    //_configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
 
     Time::init();
     Spice::init();
@@ -229,7 +249,7 @@ void RenderEngine::decode() {
 	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
 	
 	// sync the time
-	sharedDataInstance_->readDouble(shDouble);
+	sharedDataInstance_->Double(shDouble);
 	masterTime_ = shDouble->getVal();
 	
 	// check that the camera has been allocated
