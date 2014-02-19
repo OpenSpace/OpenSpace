@@ -1,17 +1,42 @@
 
 
-
-
 # Find the library
 if(WIN32)
+
+    # Check for visual studio
+    if(NOT MSVC)
+        message(FATAL_ERROR "Only visual studio supported!")
+    endif(NOT MSVC)
+
+    # make sure sgct knows about windows
     add_definitions(-D__WIN32__)
-    file(GLOB SGCT_WINDOWS_PATHS "C:/Program Files/SGCT/SGCT_*")
+
+    # search for SGCT, 64-bit and 32-bit
+    if(CMAKE_CL_64)
+        set(SGCT_PATH "C:/Program Files/SGCT")
+    else(CMAKE_CL_64)
+        set(SGCT_PATH "C:/Program Files (x86)/SGCT")
+    endif(CMAKE_CL_64)
+    file(GLOB SGCT_WINDOWS_PATHS "${SGCT_PATH}/SGCT_*")
+    
+    FOREACH(path ${SGCT_WINDOWS_PATHS})
+        find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
+            "${path}"
+        )
+    ENDFOREACH(path)
+
+    # Check if found the SGCT root directory
+    if(NOT SGCT_ROOT_DIR)
+        message(FATAL_ERROR "Could not locate SGCT in ${SGCT_PATH}!")
+    endif(NOT SGCT_ROOT_DIR)
+
+
     find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
     	"${SGCT_WINDOWS_PATHS}"
 	)
-	set(DEPENDENT_LIBS
-	    ${DEPENDENT_LIBS}
-        "Ws2_32.lib"
+
+    set(SGCT_LIBRARY
+        "ws2_32.lib"
         optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
         debug "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgctd.lib"
     )
@@ -60,7 +85,6 @@ include_directories(${SGCT_INCLUDE_DIRS})
 # libraries
 set(SGCT_INCLUDE_DIRECTORIES ${SGCT_INCLUDES})
 set(SGCT_LIBRARIES ${SGCT_DEPENDENCIES} ${SGCT_LIBRARY})
-#set(SGCT_LIBRARIES "${SGCT_LIBRARY}")
 
 # handle the QUIETLY and REQUIRED arguments and set SGCT_FOUND to TRUE
 # if all listed variables are TRUE
@@ -71,7 +95,6 @@ mark_as_advanced(SGCT_INCLUDE_DIR SGCT_LIBRARY )
 
 if(SGCT_FOUND) 
     MESSAGE(STATUS "SGCT found: ${SGCT_INCLUDES}/sgct.h")
-    MESSAGE(STATUS "SGCT SGCT_LIBRARY: ${SGCT_LIBRARY}")
 else()
 	MESSAGE(FATAL_ERROR "SGCT not found!")
 endif(SGCT_FOUND)
