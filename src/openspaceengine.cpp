@@ -60,6 +60,8 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
+    
+    // TODO deallocate scriptengine when starting to use it
     //delete _scriptEngine;
 
     Spice::deinit();
@@ -82,9 +84,17 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     LogMgr.addLog(new ConsoleLog);
     
 	ghoul::filesystem::FileSystem::initialize();
-	//FileSys.registerPathToken("${BASE_PATH}", "../../..");
+    
+#ifdef __WIN32__
+    // Windows: Binary two folders down
 	FileSys.registerPathToken("${BASE_PATH}", "../..");
+#else
+    // OS X and linux: Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../../..");
+#endif
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+    
+    // OLD
 	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path
 
     _engine->_configurationManager = new ghoul::ConfigurationManager;
@@ -94,8 +104,14 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv = new char*[3];
     newArgv[0] = "prog";
     newArgv[1] = "-config";
-    //newArgv[2] = "../../../config/single.xml";
+#ifdef __WIN32__
+    // Windows uses fixed path to OpenSpace data
+    #warning "Fixed path"
 	newArgv[2] = "C:/openspace/config/single.xml"; // FIX ME: tempoary path
+#else
+    // OS X and Linux uses local path to OpenSpace data
+    newArgv[2] = "../../../config/single.xml";
+#endif
     
     
 
