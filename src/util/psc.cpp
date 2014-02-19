@@ -1,7 +1,7 @@
 
 // open space includes
-#include "util/Psc.h"
-#include "util/Pss.h"
+#include "util/psc.h"
+#include "util/pss.h"
 
 // std includes
 #include <cstdio>

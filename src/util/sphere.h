@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define SPHERE_H
 
 // open space includes
-#include "util/Geometry.h"
+#include "util/geometry.h"
 
 namespace gl4
 {

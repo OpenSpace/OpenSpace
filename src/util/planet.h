@@ -11,8 +11,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define PLANET_H
 
 // open space includes
-#include "util/Pss.h"
-#include "util/VBO_template.h"
+#include "util/pss.h"
+#include "util/vbo_template.h"
 
 // std includes
 #include <string>

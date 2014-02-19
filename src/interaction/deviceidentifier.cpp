@@ -1,6 +1,6 @@
 
 // open space includes
-#include "deviceIdentifier.h"
+#include "deviceidentifier.h"
 
 // sgct includes
 //#include "sgct.h"

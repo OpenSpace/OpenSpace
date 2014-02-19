@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include "util/Planet.h"
+#include "util/planet.h"
 
 // sgct includes
 #include "sgct.h"
