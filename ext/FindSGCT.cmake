@@ -1,5 +1,4 @@
 
-
 # Find the library
 if(WIN32)
 
@@ -35,6 +34,7 @@ if(WIN32)
     	"${SGCT_WINDOWS_PATHS}"
 	)
 
+	# Find the sgct library
     set(SGCT_LIBRARY
         "ws2_32.lib"
         optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
@@ -53,12 +53,19 @@ else()
         message(FATAL_ERROR "Could not locate SGCT!")
     endif(NOT SGCT_ROOT_DIR)
 	
+	# OS X has cpp11 support
 	if (APPLE)
 		set(SGCT_NAME "sgct_cpp11")
 	else(APPLE)
 		set(SGCT_NAME "sgct")
 	endif(APPLE)
+
+	# check if debug or release version of sgct should be used
+	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+		set(SGCT_NAME "${SGCT_NAME}d")
+	endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
 	
+	# Find the sgct library
 	find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}${SGCT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
                  HINTS "${SGCT_ROOT_DIR}/lib")
 
@@ -108,6 +115,7 @@ include_directories(${SGCT_INCLUDE_DIRS})
 # libraries
 set(SGCT_INCLUDE_DIRECTORIES ${SGCT_INCLUDES})
 set(SGCT_LIBRARIES ${SGCT_LIBRARY} ${SGCT_DEPENDENCIES})
+
 
 # handle the QUIETLY and REQUIRED arguments and set SGCT_FOUND to TRUE
 # if all listed variables are TRUE

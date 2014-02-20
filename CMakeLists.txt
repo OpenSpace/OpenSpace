@@ -35,6 +35,13 @@ set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
 
+# Make sure abuild type is set. Default is Debug.
+if(NOT CMAKE_BUILD_TYPE)
+	set( CMAKE_BUILD_TYPE Debug CACHE STRING
+       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." 
+	   FORCE )
+endif(NOT CMAKE_BUILD_TYPE)
+
 if (APPLE )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 endif ()
