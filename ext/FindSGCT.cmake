@@ -47,8 +47,19 @@ else()
     	"/usr/include/sgct"
     	"/opt/local"
     	"/usr/local"
+		"/usr"
 	)
-	find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}sgct_cpp11${CMAKE_STATIC_LIBRARY_SUFFIX}
+    if(NOT SGCT_ROOT_DIR)
+        message(FATAL_ERROR "Could not locate SGCT!")
+    endif(NOT SGCT_ROOT_DIR)
+	
+	if (APPLE)
+		set(SGCT_NAME "sgct_cpp11")
+	else(APPLE)
+		set(SGCT_NAME "sgct")
+	endif(APPLE)
+	
+	find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}${SGCT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
                  HINTS "${SGCT_ROOT_DIR}/lib")
 
 endif()
