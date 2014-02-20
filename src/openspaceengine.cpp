@@ -96,6 +96,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 	FileSys.registerPathToken("${BASE_PATH}", "..");
 #endif
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
     
     // OLD
 	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path

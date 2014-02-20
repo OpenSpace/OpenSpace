@@ -4,3 +4,6 @@
 [submodule "ext/spice"]
 	path = ext/spice
 	url = git@openspace.itn.liu.se:/spice
+[submodule "openspace-data"]
+	path = openspace-data
+	url = git@openspace.itn.liu.se:/openspace-data
