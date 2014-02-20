@@ -88,7 +88,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 #ifdef __WIN32__
     // Windows: Binary two folders down
 	FileSys.registerPathToken("${BASE_PATH}", "../..");
-#elif __APPLE_
+#elif __APPLE__
     // OS X : Binary three folders down
 	FileSys.registerPathToken("${BASE_PATH}", "../../..");
 #else
