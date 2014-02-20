@@ -96,7 +96,7 @@ if (APPLE)
     set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${FRAMEWORK_IOKit} ${FRAMEWORK_CoreVideo} ${FRAMEWORK_Cocoa})
 endif (APPLE)
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
 	find_package(XRandR)
 	find_package(Xi)
 	if(NOT XRANDR_FOUND)
@@ -106,7 +106,7 @@ if(UNIX)
 		message(FATAL_ERROR "Xi not found!")
 	endif(NOT XI_FOUND)
 	set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES})
-endif(UNIX)
+endif(UNIX AND NOT APPLE)
 
 # includes
 set(SGCT_INCLUDES "${SGCT_ROOT_DIR}/include")
