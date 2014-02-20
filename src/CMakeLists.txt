@@ -111,5 +111,15 @@ if (APPLE)
 endif (APPLE)
 #add_definitions(-framework IOKit -framework CoreVideo)
 
+if (APPLE)
+	add_definitions(-D__APPLE__)
+	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+endif (APPLE)
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
+endif (UNIX)
+
+
 add_executable(OpenSpace ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})

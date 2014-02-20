@@ -89,13 +89,25 @@ if (APPLE)
     set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${FRAMEWORK_IOKit} ${FRAMEWORK_CoreVideo} ${FRAMEWORK_Cocoa})
 endif (APPLE)
 
+if(UNIX)
+	find_package(XRandR)
+	find_package(Xi)
+	if(NOT XRANDR_FOUND)
+		message(FATAL_ERROR "XRandR not found!")
+	endif(NOT XRANDR_FOUND)
+	if(NOT XI_FOUND)
+		message(FATAL_ERROR "Xi not found!")
+	endif(NOT XI_FOUND)
+	set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES})
+endif(UNIX)
+
 # includes
 set(SGCT_INCLUDES "${SGCT_ROOT_DIR}/include")
 include_directories(${SGCT_INCLUDE_DIRS})
 
 # libraries
 set(SGCT_INCLUDE_DIRECTORIES ${SGCT_INCLUDES})
-set(SGCT_LIBRARIES ${SGCT_DEPENDENCIES} ${SGCT_LIBRARY})
+set(SGCT_LIBRARIES ${SGCT_LIBRARY} ${SGCT_DEPENDENCIES})
 
 # handle the QUIETLY and REQUIRED arguments and set SGCT_FOUND to TRUE
 # if all listed variables are TRUE

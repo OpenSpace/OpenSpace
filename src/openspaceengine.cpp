@@ -88,9 +88,12 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 #ifdef __WIN32__
     // Windows: Binary two folders down
 	FileSys.registerPathToken("${BASE_PATH}", "../..");
-#else
-    // OS X and linux: Binary three folders down
+#elif __APPLE_
+    // OS X : Binary three folders down
 	FileSys.registerPathToken("${BASE_PATH}", "../../..");
+#else
+    // Linux : Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "..");
 #endif
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
     
@@ -107,9 +110,12 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 #ifdef __WIN32__
     // Windows uses fixed path to OpenSpace data
 	newArgv[2] = "C:/openspace/config/single.xml"; // FIX ME: tempoary path
-#else
-    // OS X and Linux uses local path to OpenSpace data
+#elif __APPLE__
+    // OS X uses local path to OpenSpace data
     newArgv[2] = "../../../config/single.xml";
+#else
+	// Linux is is a bin folder
+    newArgv[2] = "../config/single.xml";
 #endif
     
     
