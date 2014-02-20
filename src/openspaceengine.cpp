@@ -110,7 +110,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv[1] = "-config";
 #ifdef __WIN32__
     // Windows uses fixed path to OpenSpace data
-	newArgv[2] = "C:/openspace/config/single.xml"; // FIX ME: tempoary path
+	newArgv[2] = "../../config/single.xml";
 #elif __APPLE__
     // OS X uses local path to OpenSpace data
     newArgv[2] = "../../../config/single.xml";
