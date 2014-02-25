@@ -60,6 +60,9 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
 # Add ghoul ext
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
 
+# Boost
+include_directories(${GHOUL_ROOT_DIR}/ext/boost)
+
 # SGCT
 find_package(SGCT REQUIRED)
 include_directories(${SGCT_INCLUDE_DIRECTORIES})
