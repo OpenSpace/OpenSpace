@@ -1,7 +1,5 @@
-
 # Find the library
 if(WIN32)
-
     # Check for visual studio
     if(NOT MSVC)
         message(FATAL_ERROR "Only visual studio supported!")
@@ -11,19 +9,26 @@ if(WIN32)
     add_definitions(-D__WIN32__)
 
     # search for SGCT, 64-bit and 32-bit
-    if(CMAKE_CL_64)
+    if (CMAKE_CL_64)
         set(SGCT_PATH "C:/Program Files/SGCT")
-    else(CMAKE_CL_64)
+    else (CMAKE_CL_64)
         set(SGCT_PATH "C:/Program Files (x86)/SGCT")
-    endif(CMAKE_CL_64)
+    endif (CMAKE_CL_64)
     file(GLOB SGCT_WINDOWS_PATHS "${SGCT_PATH}/SGCT_*")
     
-    FOREACH(path ${SGCT_WINDOWS_PATHS})
+    # sort and reverse the list to find the most recent (a.k.a. highest number) version
+    list(SORT SGCT_WINDOWS_PATHS)
+    list(REVERSE SGCT_WINDOWS_PATHS)
+    
+    foreach(path ${SGCT_WINDOWS_PATHS})
         find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
             "${path}"
         )
-    ENDFOREACH(path)
-
+        if (SGCT_ROOT_DIR)
+            break()
+        endif ()
+    endforeach(path)
+    
     # Check if found the SGCT root directory
     if(NOT SGCT_ROOT_DIR)
         message(FATAL_ERROR "Could not locate SGCT in ${SGCT_PATH}!")
@@ -31,42 +36,55 @@ if(WIN32)
 
 
     find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
-    	"${SGCT_WINDOWS_PATHS}"
-	)
-
-	# Find the sgct library
+        "${SGCT_WINDOWS_PATHS}"
+    )
+    
+    # construct the correct library path
+    if (MSVC10)
+        set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc10")
+    elseif (MSVC11)
+        set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc11")
+    elseif (MSVC12)
+        set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc12")
+    endif (MSVC10)
+    
+    if (CMAKE_CL_64)
+        set(SGCT_LIBRARY_FOLDER "${SGCT_LIBRARY_FOLDER}_x64")
+    endif (CMAKE_CL_64)
+    
+    # Find the sgct library
     set(SGCT_LIBRARY
         "ws2_32.lib"
-        optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
-        debug "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgctd.lib"
+        optimized "${SGCT_LIBRARY_FOLDER}/sgct.lib"
+        debug "${SGCT_LIBRARY_FOLDER}/sgctd.lib"
     )
 else()
-	find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
-    	"/opt/local/include/sgct"
-    	"/usr/local/include/sgct"
-    	"/usr/include/sgct"
-    	"/opt/local"
-    	"/usr/local"
-		"/usr"
-	)
+    find_path(SGCT_ROOT_DIR include/sgct.h HINTS 
+        "/opt/local/include/sgct"
+        "/usr/local/include/sgct"
+        "/usr/include/sgct"
+        "/opt/local"
+        "/usr/local"
+        "/usr"
+    )
     if(NOT SGCT_ROOT_DIR)
         message(FATAL_ERROR "Could not locate SGCT!")
     endif(NOT SGCT_ROOT_DIR)
-	
-	# OS X has cpp11 support
-	if (APPLE)
-		set(SGCT_NAME "sgct_cpp11")
-	else(APPLE)
-		set(SGCT_NAME "sgct")
-	endif(APPLE)
 
-	# check if debug or release version of sgct should be used
-	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-		set(SGCT_NAME "${SGCT_NAME}d")
-	endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
-	
-	# Find the sgct library
-	find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}${SGCT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
+    # OS X has cpp11 support
+    if (APPLE)
+        set(SGCT_NAME "sgct_cpp11")
+    else(APPLE)
+        set(SGCT_NAME "sgct")
+    endif(APPLE)
+
+    # check if debug or release version of sgct should be used
+    if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+        set(SGCT_NAME "${SGCT_NAME}d")
+    endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    
+    # Find the sgct library
+    find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}${SGCT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
                  HINTS "${SGCT_ROOT_DIR}/lib")
 
 endif()
@@ -97,15 +115,15 @@ if (APPLE)
 endif (APPLE)
 
 if(UNIX AND NOT APPLE)
-	find_package(XRandR)
-	find_package(Xi)
-	if(NOT XRANDR_FOUND)
-		message(FATAL_ERROR "XRandR not found!")
-	endif(NOT XRANDR_FOUND)
-	if(NOT XI_FOUND)
-		message(FATAL_ERROR "Xi not found!")
-	endif(NOT XI_FOUND)
-	set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES})
+    find_package(XRandR)
+    find_package(Xi)
+    if(NOT XRANDR_FOUND)
+        message(FATAL_ERROR "XRandR not found!")
+    endif(NOT XRANDR_FOUND)
+    if(NOT XI_FOUND)
+        message(FATAL_ERROR "Xi not found!")
+    endif(NOT XI_FOUND)
+    set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES})
 endif(UNIX AND NOT APPLE)
 
 # includes
@@ -127,6 +145,6 @@ mark_as_advanced(SGCT_INCLUDE_DIR SGCT_LIBRARY )
 if(SGCT_FOUND) 
     MESSAGE(STATUS "SGCT found: ${SGCT_INCLUDES}/sgct.h")
 else()
-	MESSAGE(FATAL_ERROR "SGCT not found!")
+    MESSAGE(FATAL_ERROR "SGCT not found!")
 endif(SGCT_FOUND)
 
