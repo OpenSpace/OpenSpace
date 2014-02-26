@@ -33,6 +33,8 @@
 #include "util/time.h"
 #include "util//spice.h"
 
+
+
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
 
@@ -150,6 +152,7 @@ bool OpenSpaceEngine::initialize() {
 
     _engine->_interactionHandler->connectDevices();
 
+    _volumeRaycaster = new VolumeRaycaster();
     return true;
 }
 
@@ -189,6 +192,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
+	_volumeRaycaster->render();
     _renderEngine->render();
 }
 

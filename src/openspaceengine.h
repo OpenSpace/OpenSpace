@@ -29,6 +29,8 @@
 #include "rendering/renderengine.h"
 #include <ghoul/misc/configurationmanager.h>
 
+#include <rendering/volumeraycaster.h>
+
 namespace openspace {
 
 class ScriptEngine;
@@ -62,6 +64,7 @@ private:
 
     static OpenSpaceEngine* _engine;
 
+    VolumeRaycaster* _volumeRaycaster;
     ghoul::ConfigurationManager* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
