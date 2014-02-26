@@ -1,5 +1,3 @@
-
-config =
 {
 	level1_string = "music1",
 	level1_integer = 2332,

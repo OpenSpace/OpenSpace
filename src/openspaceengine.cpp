@@ -123,7 +123,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     // Load the configurationmanager with the default configuration
     ghoul::ConfigurationManager configuration;
     configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
-    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfig.lua"));
+    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfigScript.lua"), false);
     
     // Create the renderenginge object
     _engine->_renderEngine = new RenderEngine;
