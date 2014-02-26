@@ -130,19 +130,3 @@ else()
 	MESSAGE(FATAL_ERROR "SGCT not found!")
 endif(SGCT_FOUND)
 
-
-
-
-
-
-# OLD STUFF. REMOVE WHEN ABOVE WORKS
-#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${SGCT_ROOT_DOR}/bin/lib/msvc11)
-#set(DEPENDENT_LIBS
-#    ${DEPENDENT_LIBS}
-#    "Ws2_32.lib"
-#    optimized "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgct.lib"
-#    debug "${SGCT_ROOT_DIR}/lib/msvc11_x64/sgctd.lib"
-#   )
-
-#add_subdirectory(${SGCT_ROOT_DIR})
-#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} SGCT)

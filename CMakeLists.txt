@@ -35,7 +35,7 @@ set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
 
-# Make sure abuild type is set. Default is Debug.
+# Make sure a build type is set. Default is Debug.
 if(NOT CMAKE_BUILD_TYPE)
 	set( CMAKE_BUILD_TYPE Debug CACHE STRING
        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." 
@@ -51,7 +51,6 @@ endif ()
 #########################################################################################
 
 # Ghoul
-add_definitions(-DGHL_DEBUG)
 set(GHOUL_ROOT_DIR "${OPENSPACE_EXT_DIR}/ghoul")
 include_directories("${GHOUL_ROOT_DIR}/include")
 add_subdirectory(${GHOUL_ROOT_DIR})
@@ -70,11 +69,6 @@ set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
 find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIRS})
 
-# OpenGL
-#find_package(OpenGL REQUIRED)
-#include_directories(${OPENGL_INCLUDE_DIRS})
-#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${OPENGL_LIBRARIES})
-
 # GLEW
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIRECTORIES})
@@ -83,8 +77,6 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
 # Lua
 set(LUA_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/lua")
 include_directories("${LUA_ROOT_DIR}/include")
-#add_subdirectory(${LUA_ROOT_DIR})
-#set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Lua)
 
 # Spice
 set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")

@@ -35,6 +35,7 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
+#include <ghoul/misc/configurationmanager.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -80,7 +81,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     assert(_engine == nullptr);
     _engine = new OpenSpaceEngine;
 
-    LogManager::initialize(LogManager::LogLevel::Debug);
+    LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
     
 	ghoul::filesystem::FileSystem::initialize();
@@ -119,12 +120,13 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv[2] = "../config/single.xml";
 #endif
     
+    // Load the configurationmanager with the default configuration
+    ghoul::ConfigurationManager configuration;
+    configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfig.lua"));
     
-
-    
-
+    // Create the renderenginge object
     _engine->_renderEngine = new RenderEngine;
-
     _engine->_interactionHandler = new InteractionHandler;
 
 }
