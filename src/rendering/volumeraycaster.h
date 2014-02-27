@@ -5,8 +5,8 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
 
-#include <util/camera.h>
 #include <sgct.h>
+#include <cstdio>
 
 namespace openspace {
 using namespace ghoul::opengl;
@@ -14,20 +14,23 @@ using namespace ghoul::opengl;
 class VolumeRaycaster {
 public:
 	VolumeRaycaster();
-	VolumeRaycaster(Camera* camera);
 	~VolumeRaycaster();
 	void initialize();
 	void render();
 
 private:
-	void loadUniforms();
+	void createVolumetexture(const char *filename, int dimensions[3]);
 
 	FramebufferObject* _fbo;
-	Texture* _texture;
-	Texture* _test;
+	Texture* _backTexture;
+	Texture* _frontTexture;
+	Texture* _volume;
 
-	Camera* _camera;
-	ProgramObject* _program;
+	GLuint _volumeTexture;
+	GLuint _sgctFBO;
+
+	ProgramObject* _FBOProgram;
+	ProgramObject* _screenProgram;
 	sgct_utils::SGCTBox* myBox;
 };
 

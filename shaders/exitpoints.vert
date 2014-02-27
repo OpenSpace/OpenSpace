@@ -9,7 +9,6 @@ out vec2 texCoords;
 
 void main() {
 	gl_Position = modelViewProjection * vec4(vertPosition, 1.0);
-	// vPosition = gl_Position.xyz;
 	vPosition = vertPosition;
 	texCoords = texCoordinate;
 }
