@@ -42,8 +42,7 @@ bool IntersectBox(Ray r, AABB aabb, out float t0, out float t1)
     return t0 <= t1;
 }
 
-void main()
-{
+void main() {
     vec3 rayDirection;
     rayDirection.xy = 2.0 * gl_FragCoord.xy / WindowSize - 1.0;
     rayDirection.z = -FocalLength;

@@ -87,6 +87,7 @@ include_directories(${HEADER_ROOT_DIR})
 
 # hack:
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
+include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
 if (APPLE)
     find_library(FRAMEWORK_IOKit

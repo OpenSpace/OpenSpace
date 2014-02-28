@@ -61,7 +61,7 @@ void VolumeRaycaster::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
 
-//	myBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
+	myBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
 
 //	------ VOLUME READING ----------------
 	const char* filename = absPath("${BASE_PATH}/openspace-data/skull_256x256x256_8.raw").c_str();
@@ -119,6 +119,7 @@ void VolumeRaycaster::initialize() {
 	_singlepassProgram->setUniform("WindowSize", glm::vec2(x,y));
 	_singlepassProgram->setUniform("Density", 2);
 
+
 	sgct::Engine::instance()->setKeyboardCallbackFunction(keyCallback);
 //	------ SETUP FBO ---------------------
 	_fbo = new FramebufferObject();
@@ -158,81 +159,80 @@ void VolumeRaycaster::render() {
 	glm::mat4 scene_mat = glm::rotate( glm::mat4(1.0f), static_cast<float>( curr_time.getVal() ) * speed, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 modelViewProjectionMatrix = sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * scene_mat;
 
-////	------ TWO PASS ----------------------
-////	------ DRAW TO FBO -------------------
-//	_sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
-//	_fbo->activate();
-//	_fboProgram->activate();
-//	_fboProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
-//
-////	Draw backface
-//	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-//	glClearColor(0.2f, 0.2f, 0.2f, 0);
-//	glClear(GL_COLOR_BUFFER_BIT);
-//	glEnable(GL_CULL_FACE);
-//		glCullFace(GL_FRONT);
-//		myBox->draw();
-//	glDisable(GL_CULL_FACE);
-//
-////	Draw frontface
-//	glDrawBuffer(GL_COLOR_ATTACHMENT1);
-//	glClear(GL_COLOR_BUFFER_BIT);
-//	glClearColor(0.2f, 0.2f, 0.2f, 0);
-//	glEnable(GL_CULL_FACE);
-//		glCullFace(GL_BACK);
-//		myBox->draw();
-//	glDisable(GL_CULL_FACE);
-//
-//	_fboProgram->deactivate();
-//	_fbo->deactivate();
-//
-////	------ DRAW TO SCREEN ----------------
-//	glBindFramebuffer(GL_FRAMEBUFFER, _sgctFBO); // Re-bind SGCTs main FBO
-//	_twopassProgram->activate();
-//	_twopassProgram->setUniform("stepSize", _stepSize);
-//
-////	 Set textures
-//	glActiveTexture(GL_TEXTURE0);
-//	_backTexture->bind();
-//	glActiveTexture(GL_TEXTURE1);
-//	_frontTexture->bind();
-//	glActiveTexture(GL_TEXTURE2);
-//	_volume->bind();
-//
-////	Draw screenquad
-//	glClearColor(0.2f, 0.2f, 0.2f, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	glBindVertexArray(vertexArray);
-//		glDrawArrays(GL_TRIANGLES, 0, 6);
-//	glBindVertexArray(0);
-//
-//	_twopassProgram->deactivate();
+//	------ TWO PASS ----------------------
+//	------ DRAW TO FBO -------------------
+	_sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
+	_fbo->activate();
+	_fboProgram->activate();
+	_fboProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
 
-//	------ SINGLE PASS -------------------
-	glm::mat4 modelView = sgct::Engine::instance()->getActiveModelViewMatrix();
-	glm::vec3 eyePos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
-	_singlepassProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
-	_singlepassProgram->setUniform("Modelview", modelView);
-	_singlepassProgram->setUniform("RayOrigin", glm::transpose(modelView)*glm::vec4(eyePos, 1.0));
-	_singlepassProgram->setUniform("ProjectionMatrix", sgct::Engine::instance()->getActiveProjectionMatrix());
-	_singlepassProgram->setUniform("ViewMatrix", sgct::Engine::instance()->getActiveViewMatrix());
-
-	CubeCenterVbo = CreatePointVbo(0, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, CubeCenterVbo);
-	GLuint SlotPosition = 5;
-	glEnableVertexAttribArray(SlotPosition);
-	glVertexAttribPointer(SlotPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-	glEnableVertexAttribArray(SlotPosition);
+//	Draw backface
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glClearColor(0.2f, 0.2f, 0.2f, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	_singlepassProgram->activate();
+	glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		myBox->draw();
+	glDisable(GL_CULL_FACE);
 
+//	Draw frontface
+	glDrawBuffer(GL_COLOR_ATTACHMENT1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.2f, 0.2f, 0.2f, 0);
+	glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		myBox->draw();
+	glDisable(GL_CULL_FACE);
+
+	_fboProgram->deactivate();
+	_fbo->deactivate();
+
+//	------ DRAW TO SCREEN ----------------
+	glBindFramebuffer(GL_FRAMEBUFFER, _sgctFBO); // Re-bind SGCTs main FBO
+	_twopassProgram->activate();
+	_twopassProgram->setUniform("stepSize", _stepSize);
+
+//	 Set textures
+	glActiveTexture(GL_TEXTURE0);
+	_backTexture->bind();
+	glActiveTexture(GL_TEXTURE1);
+	_frontTexture->bind();
 	glActiveTexture(GL_TEXTURE2);
 	_volume->bind();
 
-	glDrawArrays(GL_POINTS, 0, 1);
+//	Draw screenquad
+	glClearColor(0.2f, 0.2f, 0.2f, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindVertexArray(vertexArray);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
 
-	_singlepassProgram->deactivate();
+	_twopassProgram->deactivate();
+
+////	------ SINGLE PASS -------------------
+//	glm::mat4 modelView = sgct::Engine::instance()->getActiveModelViewMatrix();
+//	glm::vec3 eyePos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
+//	_singlepassProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
+//	_singlepassProgram->setUniform("Modelview", modelView);
+//	_singlepassProgram->setUniform("RayOrigin", glm::transpose(modelView)*glm::vec4(eyePos, 1.0));
+//	_singlepassProgram->setUniform("ProjectionMatrix", sgct::Engine::instance()->getActiveProjectionMatrix());
+//	_singlepassProgram->setUniform("ViewMatrix", sgct::Engine::instance()->getActiveViewMatrix());
+//	_singlepassProgram->activate();
+//
+//	glBindBuffer(GL_ARRAY_BUFFER, CubeCenterVbo);
+//	GLuint SlotPosition = 5;
+//	glEnableVertexAttribArray(SlotPosition);
+//	glVertexAttribPointer(SlotPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+//	glEnableVertexAttribArray(SlotPosition);
+//	glClearColor(0.2f, 0.2f, 0.2f, 0);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//
+//	glActiveTexture(GL_TEXTURE2);
+//	_volume->bind();
+//
+//	glDrawArrays(GL_POINTS, 0, 1);
+//
+//	_singlepassProgram->deactivate();
 }
 
 Texture* VolumeRaycaster::createVolumetexture(const char *filename, glm::ivec3 dimensions) {
