@@ -94,4 +94,6 @@ void main()
 
     FragColor.rgb = Lo;
     FragColor.a = 1-T;
+
+    FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 }

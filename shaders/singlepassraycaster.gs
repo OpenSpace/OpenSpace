@@ -6,9 +6,9 @@ layout(triangle_strip, max_vertices = 24) out;
 in vec4 vPosition[1];
 
 uniform mat4 modelViewProjection;
-// uniform mat4 ProjectionMatrix;
-// uniform mat4 ViewMatrix;
-// uniform mat4 Modelview;
+uniform mat4 ProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 Modelview;
 
 vec4 objCube[8]; // Object space coordinate of cube corner
 vec4 ndcCube[8]; // Normalized device coordinate of cube corner

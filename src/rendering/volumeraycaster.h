@@ -19,19 +19,19 @@ public:
 	void render();
 
 private:
-	void createVolumetexture(const char *filename, int dimensions[3]);
+	Texture* createVolumetexture(const char *filename, glm::ivec3 dimensions);
 
 	FramebufferObject* _fbo;
 	Texture* _backTexture;
 	Texture* _frontTexture;
 	Texture* _volume;
 
-	GLuint _volumeTexture;
 	GLuint _sgctFBO;
 
-	ProgramObject* _FBOProgram;
-	ProgramObject* _screenProgram;
+	ProgramObject *_fboProgram, *_twopassProgram, *_singlepassProgram;
 	sgct_utils::SGCTBox* myBox;
+
+
 };
 
 } // namespace openspace

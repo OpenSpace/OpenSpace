@@ -3,6 +3,7 @@
 uniform sampler2D texBack, texFront;
 uniform sampler3D texVolume;
 uniform int screenWidth, screenHeight;
+uniform float stepSize;
 
 in vec3 vPosition;
 in vec2 texCoords;
@@ -14,18 +15,14 @@ void main() {;
 	vec3 front  = texture(texFront, texCoords).xyz;
 	vec3 back 	= texture(texBack, texCoords).xyz;
 	vec3 direction = back-front;
+	float directionLength = length(direction);
 	direction = normalize(direction);
 	vec3 position = front;
-	float stepSize = 0.05;
-	vec4 color = vec4(0);
-	vec4 tmp;
-	
+	vec4 tmp, color = vec4(0);
 
-	for (int i = 0; i < 100; ++i) {
+	while (length(position-front) < directionLength && color.r != 1.0) {
 		tmp = texture(texVolume, position);
-		if (tmp.r > color.r)
-			color = tmp;
-
+		color = max(color, tmp); // MIP
 		position = position + direction * stepSize;
 	}
 

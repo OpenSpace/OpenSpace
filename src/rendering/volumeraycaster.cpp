@@ -3,11 +3,26 @@
 #include <glm/glm.hpp>
 #include <ghoul/filesystem/filesystem.h>
 #include <iostream>
+#include <cmath>
 
 namespace openspace {
 
 GLuint vertexArray = GL_FALSE;
 GLuint vertexPositionBuffer = GL_FALSE;
+GLuint CubeCenterVbo, SlotPosition;
+float _stepSize = 0.05f;
+sgct::SharedDouble curr_time(0.0);
+
+void keyCallback(int key, int action);
+
+GLuint CreatePointVbo(float x, float y, float z) {
+    float p[] = {x, y, z};
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(p), &p[0], GL_STATIC_DRAW);
+    return vbo;
+}
 
 VolumeRaycaster::VolumeRaycaster() {
 	initialize();
@@ -46,42 +61,69 @@ void VolumeRaycaster::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
 
-	myBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
+//	myBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
 
 //	------ VOLUME READING ----------------
-	const char* filename = "../openspace-data/skull_256x256x256_8.raw";
-	int dimensions[3];
-	dimensions[0] = 256;dimensions[1] = 256;dimensions[2] = 256;
-	createVolumetexture(filename, dimensions);
+	const char* filename = absPath("${BASE_PATH}/openspace-data/skull_256x256x256_8.raw").c_str();
+	glm::ivec3 dimensions = glm::ivec3(256);
+	_volume = createVolumetexture(filename, dimensions);
 
 //	------ SETUP SHADERS -----------------
-	_FBOProgram = new ProgramObject("RaycastProgram");
-	ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex, absPath("${BASE_PATH}/shaders/exitpoints.vert"));
-	ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment, absPath("${BASE_PATH}/shaders/exitpoints.frag"));
-	_FBOProgram->attachObject(vertexShader);
-	_FBOProgram->attachObject(fragmentShader);
-	_FBOProgram->compileShaderObjects();
-	_FBOProgram->linkProgramObject();
+	_fboProgram = new ProgramObject("RaycastProgram");
+	ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+			absPath("${BASE_PATH}/shaders/exitpoints.vert"));
+	ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+			absPath("${BASE_PATH}/shaders/exitpoints.frag"));
+	_fboProgram->attachObject(vertexShader);
+	_fboProgram->attachObject(fragmentShader);
+	_fboProgram->compileShaderObjects();
+	_fboProgram->linkProgramObject();
 
-	_screenProgram = new ProgramObject("RaycastProgram");
-	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex, absPath("${BASE_PATH}/shaders/rendertoscreen.vert"));
-	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment, absPath("${BASE_PATH}/shaders/rendertoscreen.frag"));
-	_screenProgram->attachObject(vertexShader);
-	_screenProgram->attachObject(fragmentShader);
-	_screenProgram->compileShaderObjects();
-	_screenProgram->linkProgramObject();
-	_screenProgram->setUniform("texBack", 0);
-	_screenProgram->setUniform("texFront", 1);
-	_screenProgram->setUniform("texVolume", 2);
-	_screenProgram->setUniform("screenWidth", sgct::Engine::instance()->getActiveXResolution());
-	_screenProgram->setUniform("screenHeight", sgct::Engine::instance()->getActiveYResolution());
+	_twopassProgram = new ProgramObject("RaycastProgram");
+	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+			absPath("${BASE_PATH}/shaders/twopassraycaster.vert"));
+	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+			absPath("${BASE_PATH}/shaders/twopassraycaster.frag"));
+	_twopassProgram->attachObject(vertexShader);
+	_twopassProgram->attachObject(fragmentShader);
+	_twopassProgram->compileShaderObjects();
+	_twopassProgram->linkProgramObject();
+	_twopassProgram->setUniform("texBack", 0);
+	_twopassProgram->setUniform("texFront", 1);
+	_twopassProgram->setUniform("texVolume", 2);
+	_twopassProgram->setUniform("screenWidth", sgct::Engine::instance()->getActiveXResolution());
+	_twopassProgram->setUniform("screenHeight", sgct::Engine::instance()->getActiveYResolution());
+	_twopassProgram->setUniform("stepSize", _stepSize);
 
+	float top = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getTop();
+	float near = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getNear();
+	float FOV = float(atan(top / near)) * (180.0 / 3.141592653589793) * 2.0f;
+	float focalLength = 1.0f / tan(FOV / 2);
+	int x = sgct::Engine::instance()->getActiveXResolution();
+	int y = sgct::Engine::instance()->getActiveYResolution();
+	CubeCenterVbo = CreatePointVbo(0, 0, 0);
+
+	_singlepassProgram = new ProgramObject("RaycastProgram");
+	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+			absPath("${BASE_PATH}/shaders/singlepassraycaster.vert"));
+	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+			absPath("${BASE_PATH}/shaders/singlepassraycaster.frag"));
+	ShaderObject* geometryShader = new ShaderObject(ShaderObject::ShaderTypeGeometry,
+			absPath("${BASE_PATH}/shaders/singlepassraycaster.gs"));
+	_singlepassProgram->attachObject(vertexShader);
+	_singlepassProgram->attachObject(fragmentShader);
+	_singlepassProgram->attachObject(geometryShader);
+	_singlepassProgram->compileShaderObjects();
+	_singlepassProgram->linkProgramObject();
+	_singlepassProgram->setUniform("FocalLength", focalLength);
+	_singlepassProgram->setUniform("WindowSize", glm::vec2(x,y));
+	_singlepassProgram->setUniform("Density", 2);
+
+	sgct::Engine::instance()->setKeyboardCallbackFunction(keyCallback);
 //	------ SETUP FBO ---------------------
 	_fbo = new FramebufferObject();
 	_fbo->activate();
 
-	int x = sgct::Engine::instance()->getActiveXResolution();
-	int y = sgct::Engine::instance()->getActiveYResolution();
 	_backTexture = new Texture(glm::size3_t(x,y,1));
 	_frontTexture = new Texture(glm::size3_t(x,y,1));
 	_backTexture->uploadTexture();
@@ -92,85 +134,125 @@ void VolumeRaycaster::initialize() {
 	_fbo->deactivate();
 }
 
-void VolumeRaycaster::render() {
-	glm::mat4 modelViewProjectionMatrix = sgct::Engine::instance()->getActiveModelViewProjectionMatrix();
-	_FBOProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
+void keyCallback(int key, int action) {
+	switch( key ) {
+		case GLFW_KEY_UP:
+		case 'W':
+			_stepSize += 0.01;
+			std::cout << "Stepsize: " << _stepSize << std::endl;
+			break;
 
-//	------ DRAW TO FBO -------------------
-	_sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
-	_fbo->activate();
-	_FBOProgram->activate();
+		case GLFW_KEY_DOWN:
+		case 'S':
+			if (_stepSize > 0.015)
+				_stepSize -= 0.01;
 
-//	Draw backface
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-		myBox->draw();
-	glDisable(GL_CULL_FACE);
-
-//	Draw frontface
-	glDrawBuffer(GL_COLOR_ATTACHMENT1);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		myBox->draw();
-	glDisable(GL_CULL_FACE);
-
-	_FBOProgram->deactivate();
-	_fbo->deactivate();
-
-//	------ DRAW TO SCREEN ----------------
-	glBindFramebuffer(GL_FRAMEBUFFER, _sgctFBO); // Re-bind SGCTs main FBO
-	_screenProgram->activate();
-
-//	 Set textures
-	glActiveTexture(GL_TEXTURE0);
-	_backTexture->bind();
-	glActiveTexture(GL_TEXTURE1);
-	_frontTexture->bind();
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_3D, _volumeTexture);
-
-//	Draw screenquad
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glBindVertexArray(vertexArray);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
-
-	_screenProgram->deactivate();
+			std::cout << "Stepsize: " << _stepSize << std::endl;
+			break;
+	}
 }
 
-void VolumeRaycaster::createVolumetexture(const char *filename, int dimensions[3]) {
-	// Make sure that the texture is not used
-	if(glIsTexture(_volumeTexture))
-		glDeleteTextures(1, &_volumeTexture);
+void VolumeRaycaster::render() {
+	float speed = 50.0f;
+	curr_time.setVal(sgct::Engine::getTime());
+	glm::mat4 scene_mat = glm::rotate( glm::mat4(1.0f), static_cast<float>( curr_time.getVal() ) * speed, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 modelViewProjectionMatrix = sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * scene_mat;
 
-	int size = dimensions[0]*dimensions[1]*dimensions[2];
+////	------ TWO PASS ----------------------
+////	------ DRAW TO FBO -------------------
+//	_sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
+//	_fbo->activate();
+//	_fboProgram->activate();
+//	_fboProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
+//
+////	Draw backface
+//	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+//	glClearColor(0.2f, 0.2f, 0.2f, 0);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//	glEnable(GL_CULL_FACE);
+//		glCullFace(GL_FRONT);
+//		myBox->draw();
+//	glDisable(GL_CULL_FACE);
+//
+////	Draw frontface
+//	glDrawBuffer(GL_COLOR_ATTACHMENT1);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//	glClearColor(0.2f, 0.2f, 0.2f, 0);
+//	glEnable(GL_CULL_FACE);
+//		glCullFace(GL_BACK);
+//		myBox->draw();
+//	glDisable(GL_CULL_FACE);
+//
+//	_fboProgram->deactivate();
+//	_fbo->deactivate();
+//
+////	------ DRAW TO SCREEN ----------------
+//	glBindFramebuffer(GL_FRAMEBUFFER, _sgctFBO); // Re-bind SGCTs main FBO
+//	_twopassProgram->activate();
+//	_twopassProgram->setUniform("stepSize", _stepSize);
+//
+////	 Set textures
+//	glActiveTexture(GL_TEXTURE0);
+//	_backTexture->bind();
+//	glActiveTexture(GL_TEXTURE1);
+//	_frontTexture->bind();
+//	glActiveTexture(GL_TEXTURE2);
+//	_volume->bind();
+//
+////	Draw screenquad
+//	glClearColor(0.2f, 0.2f, 0.2f, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glBindVertexArray(vertexArray);
+//		glDrawArrays(GL_TRIANGLES, 0, 6);
+//	glBindVertexArray(0);
+//
+//	_twopassProgram->deactivate();
+
+//	------ SINGLE PASS -------------------
+	glm::mat4 modelView = sgct::Engine::instance()->getActiveModelViewMatrix();
+	glm::vec3 eyePos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
+	_singlepassProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
+	_singlepassProgram->setUniform("Modelview", modelView);
+	_singlepassProgram->setUniform("RayOrigin", glm::transpose(modelView)*glm::vec4(eyePos, 1.0));
+	_singlepassProgram->setUniform("ProjectionMatrix", sgct::Engine::instance()->getActiveProjectionMatrix());
+	_singlepassProgram->setUniform("ViewMatrix", sgct::Engine::instance()->getActiveViewMatrix());
+
+	CubeCenterVbo = CreatePointVbo(0, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, CubeCenterVbo);
+	GLuint SlotPosition = 5;
+	glEnableVertexAttribArray(SlotPosition);
+	glVertexAttribPointer(SlotPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(SlotPosition);
+	glClearColor(0.2f, 0.2f, 0.2f, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	_singlepassProgram->activate();
+
+	glActiveTexture(GL_TEXTURE2);
+	_volume->bind();
+
+	glDrawArrays(GL_POINTS, 0, 1);
+
+	_singlepassProgram->deactivate();
+}
+
+Texture* VolumeRaycaster::createVolumetexture(const char *filename, glm::ivec3 dimensions) {
+	int size = dimensions.x*dimensions.y*dimensions.z;
 	GLubyte *data = new GLubyte[size];
 
     if( FILE *fin = fopen(filename, "rb") ){
-	fread(data, sizeof(unsigned char), size, fin);
-      fclose(fin);
+    	fread(data, sizeof(unsigned char), size, fin);
+    	fclose(fin);
+    } else {
+    	fprintf( stderr, "Could not open file '%s'\n", filename );
     }
-    else
-      fprintf( stderr, "Could not open file '%s'\n", filename );
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glGenTextures(1, &_volumeTexture);
-	glBindTexture(GL_TEXTURE_3D, _volumeTexture);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, dimensions[0], dimensions[1],dimensions[2],0, GL_RED, GL_UNSIGNED_BYTE,data);
-	glBindTexture(GL_TEXTURE_3D, 0);
+    Texture* texture = new Texture(data, glm::size3_t(dimensions),
+				Texture::Format::Red, GL_R8, GL_UNSIGNED_BYTE,
+				Texture::FilterMode::Linear, Texture::WrappingMode::ClampToBorder);
+    texture->uploadTexture();
+
 	delete []data;
-	std::cout << "Volume texture created" << std::endl;
+	return texture;
 }
 
 }// namespace openspace
