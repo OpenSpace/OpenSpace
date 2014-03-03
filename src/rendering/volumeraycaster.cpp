@@ -4,6 +4,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <iostream>
 #include <cmath>
+#include <string>
 
 namespace openspace {
 
@@ -64,7 +65,8 @@ void VolumeRaycaster::initialize() {
 	myBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
 
 //	------ VOLUME READING ----------------
-	const char* filename = absPath("${BASE_PATH}/openspace-data/skull_256x256x256_8.raw").c_str();
+	std::string tmp = absPath("${BASE_PATH}/openspace-data/skull_256x256x256_8.raw");
+	const char* filename = tmp.c_str();
 	glm::ivec3 dimensions = glm::ivec3(256);
 	_volume = createVolumetexture(filename, dimensions);
 
@@ -95,9 +97,10 @@ void VolumeRaycaster::initialize() {
 	_twopassProgram->setUniform("screenHeight", sgct::Engine::instance()->getActiveYResolution());
 	_twopassProgram->setUniform("stepSize", _stepSize);
 
-	float top = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getTop();
-	float near = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getNear();
-	float FOV = float(atan(top / near)) * (180.0 / 3.141592653589793) * 2.0f;
+	float topPlane, nearPlane;
+	topPlane = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getTop();
+	nearPlane = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getNear();
+	float FOV = float(atan(topPlane / nearPlane)) * (180.0 / 3.141592653589793) * 2.0f;
 	float focalLength = 1.0f / tan(FOV / 2);
 	int x = sgct::Engine::instance()->getActiveXResolution();
 	int y = sgct::Engine::instance()->getActiveYResolution();
