@@ -36,6 +36,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
 #include <ghoul/misc/configurationmanager.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -98,9 +99,6 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 #endif
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
-    
-    // OLD
-	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path
 
     _engine->_configurationManager = new ghoul::ConfigurationManager;
     _engine->_configurationManager->initialize();
@@ -120,15 +118,9 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv[2] = "../config/single.xml";
 #endif
     
-    // Load the configurationmanager with the default configuration
-    ghoul::ConfigurationManager configuration;
-    configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
-    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfigScript.lua"), false);
-    
     // Create the renderenginge object
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
-
 }
 
 void OpenSpaceEngine::destroy() {
@@ -136,9 +128,10 @@ void OpenSpaceEngine::destroy() {
 }
 
 bool OpenSpaceEngine::initialize() {
-    //_configurationManager->initialize();
-    //_configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
-    //_configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
+    // Load the configurationmanager with the default configuration
+    ghoul::ConfigurationManager configuration;
+    configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfigScript.lua"), false);
 
     Time::init();
     Spice::init();
