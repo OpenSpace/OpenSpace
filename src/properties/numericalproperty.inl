@@ -25,6 +25,47 @@
 namespace openspace {
 namespace properties {
 
+// Delegating constructors seem to be necessary; Visual Studio 2013 compiler could not
+// deduce template argument for 'U' if 'default' methods are used as default values in
+// a single constructor    
+        
+template <typename T>
+NumericalProperty<T>::NumericalProperty(const std::string& identifier,
+    const std::string& guiName)
+    : NumericalProperty<T>(identifier, guiName,
+    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::defaultMinimumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::defaultStepping<T>())
+{}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(const std::string& identifier,
+                                        const std::string& guiName, const T& value)
+    : NumericalProperty<T>(identifier, guiName, value,
+    PropertyDelegate<NumericalProperty<T>>::defaultMinimumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+{}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(const std::string& identifier,
+                                        const std::string& guiName, const T& value,
+                                        const T& minimumValue)
+     : NumericalProperty<T>(identifier, guiName, value, minimumValue,
+     PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
+     PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+ {}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(const std::string& identifier,
+                                        const std::string& guiName, const T& value,
+                                        const T& minimumValue, const T& maximumValue)
+    : NumericalProperty<T>(identifier, guiName, value, minimumValue, maximumValue,
+    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+{}
+
+
 template <typename T>
 NumericalProperty<T>::NumericalProperty(const std::string& identifier,
                                         const std::string& guiName, const T& value,
@@ -37,12 +78,6 @@ template <typename T>
 std::string NumericalProperty<T>::className() const {
     return PropertyDelegate<NumericalProperty<T>>::className();
 }
-
-//template <typename T>
-//NumericalProperty<T>& NumericalProperty<T>::operator=(T&& val) {
-//    _value = val; return *this; 
-//}
-
 
 } // namespace properties
 } // namespace openspace

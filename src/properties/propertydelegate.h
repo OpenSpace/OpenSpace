@@ -34,6 +34,18 @@ template <typename T>
 class PropertyDelegate {
 public:
     static std::string className();
+
+    template <typename U>
+    static U defaultValue();
+
+    template <typename U>
+    static U defaultMinimumValue();
+
+    template <typename U>
+    static U defaultMaximumValue();
+
+    template <typename U>
+    static U defaultStepping();
 };
 
 } // namespace properties

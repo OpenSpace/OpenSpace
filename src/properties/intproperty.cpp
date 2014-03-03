@@ -37,6 +37,12 @@ std::string PropertyDelegate<TemplateProperty<int>>::className() {
     return "IntProperty";
 }
 
+template <>
+template <>
+int PropertyDelegate<IntProperty>::defaultValue<int>() {
+    return 0;
+}
+
 //template <>
 //std::string classNameDelegate<IntProperty>() { return "IntProperty"; }
 

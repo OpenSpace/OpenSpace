@@ -33,17 +33,38 @@ namespace properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
+    NumericalProperty(const std::string& identifier, const std::string& guiName);
+
     NumericalProperty(const std::string& identifier, const std::string& guiName,
-        const T& value, const T& minimumValue, const T& maximumValue, const T& stepping);
+        const T& value);
+
+    NumericalProperty(const std::string& identifier, const std::string& guiName,
+        const T& value, const T& minimumValue);
+
+    NumericalProperty(const std::string& identifier, const std::string& guiName,
+        const T& value, const T& minimumValue, const T& maximumValue);
+
+    NumericalProperty(const std::string& identifier, const std::string& guiName,
+        const T& value, const T& minimumValue, const T& maximumValue,
+        const T& stepping);
 
     virtual std::string className() const;
 
     using TemplateProperty<T>::operator=;
-    //NumericalProperty<T>& operator=(T&& val);
 };
 
 } // namespace properties
 } // namespace openspace
+
+// use inside namespace
+#define REGISTER_NUMERICALPROPERTY_HEADER(CLASSNAME, TYPE, \
+    DEFAULTVALUE, DEFAULTMINIMUM, DEFAULTMAXIMUM, DEFAULTSTEPPING) \
+    typedef NumericalProperty<TYPE> CLASSNAME; \
+    template <> std::string PropertyDelegate<NumericalProperty<TYPE>>::className(); \
+    template <> std::string PropertyDelegate<TemplateProperty<TYPE>>::className(); \
+    template <> template <> TYPE PropertyDelegate<CLASSNAME>::defaultValue<TYPE>();
+
+
 
 #include "properties/numericalproperty.inl"
 
