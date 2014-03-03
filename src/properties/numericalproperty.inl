@@ -72,6 +72,9 @@ NumericalProperty<T>::NumericalProperty(const std::string& identifier,
                                         const T& minimumValue, const T& maximumValue,
                                         const T& stepping)
     : TemplateProperty<T>(identifier, guiName, value)
+    , _minimumValue(minimumValue)
+    , _maximumValue(maximumValue)
+    , _stepping(stepping)
 {}
 
 template <typename T>

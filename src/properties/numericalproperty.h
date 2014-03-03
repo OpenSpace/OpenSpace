@@ -51,19 +51,57 @@ public:
     virtual std::string className() const;
 
     using TemplateProperty<T>::operator=;
+
+protected:
+    T _minimumValue;
+    T _maximumValue;
+    T _stepping;
 };
 
 } // namespace properties
 } // namespace openspace
 
 // use inside namespace
-#define REGISTER_NUMERICALPROPERTY_HEADER(CLASSNAME, TYPE, \
-    DEFAULTVALUE, DEFAULTMINIMUM, DEFAULTMAXIMUM, DEFAULTSTEPPING) \
-    typedef NumericalProperty<TYPE> CLASSNAME; \
+#define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE) \
+    typedef NumericalProperty<TYPE> CLASS_NAME; \
     template <> std::string PropertyDelegate<NumericalProperty<TYPE>>::className(); \
     template <> std::string PropertyDelegate<TemplateProperty<TYPE>>::className(); \
-    template <> template <> TYPE PropertyDelegate<CLASSNAME>::defaultValue<TYPE>();
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultStepping<TYPE>();
 
+
+#define REGISTER_NUMERICALPROPERTY_SOURCE(CLASS_NAME, TYPE, \
+    DEFAULT_VALUE, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_STEPPING) \
+    template <> \
+    std::string PropertyDelegate<NumericalProperty<TYPE>>::className() { \
+        return #CLASS_NAME; \
+    } \
+    template <> \
+    std::string PropertyDelegate<TemplateProperty<TYPE>>::className() { \
+        return #CLASS_NAME; \
+    } \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>() { \
+        return DEFAULT_VALUE; \
+    } \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>() { \
+        return DEFAULT_MIN_VALUE; \
+    } \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>() { \
+        return DEFAULT_MAX_VALUE; \
+    } \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultStepping<TYPE>() { \
+        return DEFAULT_STEPPING; \
+    }
 
 
 #include "properties/numericalproperty.inl"

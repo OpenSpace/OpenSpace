@@ -30,19 +30,24 @@
 namespace openspace {
 namespace properties {
 
-//REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int, 0, )
+REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
+//REGISTER_NUMERICALPROPERTY_HEADER(Char16Property, char16_t);
+//REGISTER_NUMERICALPROPERTY_HEADER(Char32Property, char32_t);
+REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
+REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
+REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char);
+REGISTER_NUMERICALPROPERTY_HEADER(ShortProperty, short);
+REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
+REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
+REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
+REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long);
+REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long);
+REGISTER_NUMERICALPROPERTY_HEADER(LongLongProperty, long long);
+REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long);
+REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
+REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
+REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
 
-//typedef NumericalProperty<int> IntProperty;
-//
-//template <>
-//std::string PropertyDelegate<IntProperty>::className();
-//
-//template <>
-//std::string PropertyDelegate<TemplateProperty<int>>::className();
-//
-//template <>
-//template <>
-//int PropertyDelegate<IntProperty>::defaultValue<int>();
 
 } // namespace properties
 } // namespace openspace

@@ -41,7 +41,6 @@ public:
     operator T();
     TemplateProperty<T>& operator=(T val);
 
-
 protected:
     T _value;
 };
