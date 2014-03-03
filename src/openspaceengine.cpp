@@ -36,6 +36,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
 #include <ghoul/misc/configurationmanager.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -79,32 +80,8 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArgv) {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
-    _engine = new OpenSpaceEngine;
-
-    LogManager::initialize(LogManager::LogLevel::Debug, true);
-    LogMgr.addLog(new ConsoleLog);
     
-	ghoul::filesystem::FileSystem::initialize();
-    
-#ifdef __WIN32__
-    // Windows: Binary two folders down
-	FileSys.registerPathToken("${BASE_PATH}", "../..");
-#elif __APPLE__
-    // OS X : Binary three folders down
-	FileSys.registerPathToken("${BASE_PATH}", "../../..");
-#else
-    // Linux : Binary three folders down
-	FileSys.registerPathToken("${BASE_PATH}", "..");
-#endif
-	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
-    
-    // OLD
-	//FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/openspace/scripts"); // FIX ME: tempoary path
-
-    _engine->_configurationManager = new ghoul::ConfigurationManager;
-    _engine->_configurationManager->initialize();
-    
+    // set the arguments for SGCT
     newArgc = 3;
     newArgv = new char*[3];
     newArgv[0] = "prog";
@@ -119,16 +96,13 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
 	// Linux is is a bin folder
     newArgv[2] = "../config/single.xml";
 #endif
-    
-    // Load the configurationmanager with the default configuration
-    ghoul::ConfigurationManager configuration;
-    configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
-    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfigScript.lua"), false);
-    
-    // Create the renderenginge object
+
+    // Create the engine objects
+    _engine = new OpenSpaceEngine;
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
-
+    _engine->_configurationManager = new ghoul::ConfigurationManager;
+    
 }
 
 void OpenSpaceEngine::destroy() {
@@ -136,17 +110,49 @@ void OpenSpaceEngine::destroy() {
 }
 
 bool OpenSpaceEngine::initialize() {
-    //_configurationManager->initialize();
-    //_configurationManager->loadConfiguration("${SCRIPTS}/config.lua");
-    //_configurationManager->loadConfiguration("${SCRIPTS}/config2.lua");
 
+    // Initialize the logmanager
+    LogManager::initialize(LogManager::LogLevel::Debug, true);
+    LogMgr.addLog(new ConsoleLog);
+    
+    // Initialize the filesystem module and register filesystem paths
+	ghoul::filesystem::FileSystem::initialize();
+#ifdef __WIN32__
+    // Windows: Binary two folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../..");
+#elif __APPLE__
+    // OS X : Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../../..");
+#else
+    // Linux : Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "..");
+#endif
+	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
+
+    // Initialize configuration
+    _configurationManager->initialize();
+    _configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    
+    // Detect and logOpenCL and OpenGL versions and available devices
+    ghoul::systemcapabilities::SystemCapabilities::initialize();
+    ghoul::systemcapabilities::SystemCapabilities::ref().addComponent(
+        new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
+    ghoul::systemcapabilities::SystemCapabilities::ref().addComponent(
+        new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
+    ghoul::systemcapabilities::SystemCapabilities::ref().detectCapabilities();
+    ghoul::systemcapabilities::SystemCapabilities::ref().logCapabilities();
+
+    // initialize OpenSpace helpers
     Time::init();
     Spice::init();
     Spice::ref().loadDefaultKernels();
 
     // TODO add scenegraph file name
+    // Initilize scene graph and RenderEngine
     _renderEngine->initialize("");
 
+    // Initialize OpenSPace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
 
