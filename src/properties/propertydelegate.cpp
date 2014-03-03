@@ -22,31 +22,5 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-namespace openspace {
-namespace properties {
+#include "properties/propertydelegate.h"
 
-template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName, const T& value)
-    : Property(identifier, guiName)
-    , _value(value)
-{}
-
-template <typename T>
-std::string TemplateProperty<T>::className() const {
-    return PropertyDelegate<TemplateProperty<T>>::className();
-}
-
-template <typename T>
-TemplateProperty<T>::operator T() {
-    return _value;
-}
-
-template <typename T>
-TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    _value = val;
-    return *this;
-}
-
-} // namespace properties
-} // namespace openspace

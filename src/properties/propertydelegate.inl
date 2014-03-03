@@ -22,31 +22,21 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <typeinfo>
+
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace {
 namespace properties {
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName, const T& value)
-    : Property(identifier, guiName)
-    , _value(value)
-{}
-
-template <typename T>
-std::string TemplateProperty<T>::className() const {
-    return PropertyDelegate<TemplateProperty<T>>::className();
+std::string PropertyDelegate<T>::className() {
+    static_assert(false, "foo");
+    LERRORC("PropertyDelegate",
+        "Unimplemented PropertyDelegate::className for type '" << typeid(T).name() << "'");
+    return "";
 }
 
-template <typename T>
-TemplateProperty<T>::operator T() {
-    return _value;
-}
-
-template <typename T>
-TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    _value = val;
-    return *this;
-}
 
 } // namespace properties
 } // namespace openspace

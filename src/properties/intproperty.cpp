@@ -24,16 +24,32 @@
 
 #include "properties/intproperty.h"
 
-//template <>
-//Property* createPropertyDelegate<TemplateProperty<float>>() { return new TemplateProperty<float>(); }
+namespace openspace {
+namespace properties {
 
-IntProperty::IntProperty(const std::string& identifier, const std::string& guiName,
-    int value, int minimumValue, int maximumValue, int stepping)
-    : NumericalProperty<int>(identifier, guiName, value, minimumValue, maximumValue, stepping)
-{
-
-}
-
-std::string IntProperty::className() const {
+template <>
+std::string PropertyDelegate<IntProperty>::className() {
     return "IntProperty";
 }
+
+template <>
+std::string PropertyDelegate<TemplateProperty<int>>::className() {
+    return "IntProperty";
+}
+
+//template <>
+//std::string classNameDelegate<IntProperty>() { return "IntProperty"; }
+
+} // namespace properties
+} // namespace openspace
+
+//IntProperty::IntProperty(const std::string& identifier, const std::string& guiName,
+//    int value, int minimumValue, int maximumValue, int stepping)
+//    : NumericalProperty<int>(identifier, guiName, value, minimumValue, maximumValue, stepping)
+//{
+//
+//}
+
+//std::string IntProperty::className() const {
+//    return "IntProperty";
+//}

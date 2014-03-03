@@ -27,11 +27,16 @@
 
 #include "properties/property.h"
 
+namespace openspace {
+namespace properties {
+
 template <typename T>
 class TemplateProperty : public Property {
 public:
     TemplateProperty(const std::string& identifier, const std::string& guiName,
         const T& value);
+
+    virtual std::string className() const;
 
     operator T();
 
@@ -41,6 +46,9 @@ public:
 protected:
     T _value;
 };
+
+} // namespace properties
+} // namespace openspace
 
 #include "properties/templateproperty.inl"
 

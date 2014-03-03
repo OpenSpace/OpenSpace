@@ -25,8 +25,13 @@
 #ifndef __PROPERTY_H__
 #define __PROPERTY_H__
 
+#include "properties/propertydelegate.h"
+
 #include <boost/any.hpp>
 #include <string>
+
+namespace openspace {
+namespace properties {
 
 class Property {
 public:
@@ -52,7 +57,6 @@ public:
     void setReadOnly(bool state);
     bool isReadOnly() const;
 
-
 protected:
     std::string _identifier;
     std::string _guiName;
@@ -61,5 +65,8 @@ protected:
     bool _isVisible;
     bool _isReadOnly;
 };
+
+} // namespace properties
+} // namespace openspace
 
 #endif // __PROPERTY_H__

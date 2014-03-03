@@ -27,23 +27,24 @@
 
 #include "properties/templateproperty.h"
 
+namespace openspace {
+namespace properties {
+
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
     NumericalProperty(const std::string& identifier, const std::string& guiName,
         const T& value, const T& minimumValue, const T& maximumValue, const T& stepping);
 
-    NumericalProperty<T>& operator=(T val) { _value = val; return *this; }
+    virtual std::string className() const;
+
+    using TemplateProperty<T>::operator=;
+    //NumericalProperty<T>& operator=(T&& val);
 };
 
-template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-                                        const std::string& guiName, const T& value,
-                                        const T& minimumValue, const T& maximumValue,
-                                        const T& stepping)
-    : TemplateProperty<T>(identifier, guiName, value)
-{
+} // namespace properties
+} // namespace openspace
 
-}
+#include "properties/numericalproperty.inl"
 
 #endif // __NUMERICALPROPERTY_H__

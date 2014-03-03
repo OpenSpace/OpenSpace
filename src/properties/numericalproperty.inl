@@ -26,27 +26,23 @@ namespace openspace {
 namespace properties {
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName, const T& value)
-    : Property(identifier, guiName)
-    , _value(value)
+NumericalProperty<T>::NumericalProperty(const std::string& identifier,
+                                        const std::string& guiName, const T& value,
+                                        const T& minimumValue, const T& maximumValue,
+                                        const T& stepping)
+    : TemplateProperty<T>(identifier, guiName, value)
 {}
 
 template <typename T>
-std::string TemplateProperty<T>::className() const {
-    return PropertyDelegate<TemplateProperty<T>>::className();
+std::string NumericalProperty<T>::className() const {
+    return PropertyDelegate<NumericalProperty<T>>::className();
 }
 
-template <typename T>
-TemplateProperty<T>::operator T() {
-    return _value;
-}
+//template <typename T>
+//NumericalProperty<T>& NumericalProperty<T>::operator=(T&& val) {
+//    _value = val; return *this; 
+//}
 
-template <typename T>
-TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    _value = val;
-    return *this;
-}
 
 } // namespace properties
 } // namespace openspace

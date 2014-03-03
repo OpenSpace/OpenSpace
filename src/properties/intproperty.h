@@ -26,21 +26,35 @@
 #define __INTPROPERTY_H__
 
 #include "properties/numericalproperty.h"
-
+//
 //template <>
 //Property* createPropertyDelegate<TemplateProperty<float>>();
 
+namespace openspace {
+namespace properties {
+
+typedef NumericalProperty<int> IntProperty;
+
+template <>
+std::string PropertyDelegate<IntProperty>::className();
+
+template <>
+std::string PropertyDelegate<TemplateProperty<int>>::className();
+
 //template <>
-//std::string classNamePropertyDelegate<NumericalProperty<float>>();
+//std::string classNameDelegate<IntProperty>();
 
-class IntProperty : public NumericalProperty<int> {
-public:
-    IntProperty(const std::string& identifier, const std::string& guiName, int value = 0,
-        int minimumValue = 0, int maximumValue = 100, int stepping = 1);
+} // namespace properties
+} // namespace openspace
 
-    using NumericalProperty<int>::operator=;
-
-    std::string className() const;
-};
+//class IntProperty : public NumericalProperty<int> {
+//public:
+//    IntProperty(const std::string& identifier, const std::string& guiName, int value = 0,
+//        int minimumValue = 0, int maximumValue = 100, int stepping = 1);
+//
+//    using NumericalProperty<int>::operator=;
+//
+//    std::string className() const;
+//};
 
 #endif // __INTPROPERTY_H__

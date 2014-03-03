@@ -24,6 +24,9 @@
 
 #include "properties/property.h"
 
+namespace openspace {
+namespace properties {
+
 Property::Property(const std::string& identifier, const std::string& guiName)
     : _identifier(identifier)
     , _guiName(guiName)
@@ -33,6 +36,11 @@ Property::Property(const std::string& identifier, const std::string& guiName)
 {}
 
 Property::~Property() {}
+
+//std::string Property::className() const {
+//    return classNameHelper(this);
+//    //return PropertyDelegate<Property>::className();
+//}
 
 const std::string& Property::identifier() const {
     return _identifier;
@@ -75,3 +83,6 @@ void Property::setReadOnly(bool state) {
 bool Property::isReadOnly() const {
     return _isReadOnly;
 }
+
+} // namespace properties
+} // namespace openspace
