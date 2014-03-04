@@ -22,35 +22,36 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __SCALARPROPERTY_H__
-#define __SCALARPROPERTY_H__
+#ifndef __MATRIXPROPERTY_H__
+#define __MATRIXPROPERTY_H__
 
 #include "properties/numericalproperty.h"
+
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
-
-REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
-//REGISTER_NUMERICALPROPERTY_HEADER(Char16Property, char16_t);
-//REGISTER_NUMERICALPROPERTY_HEADER(Char32Property, char32_t);
-REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
-REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
-REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char);
-REGISTER_NUMERICALPROPERTY_HEADER(ShortProperty, short);
-REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
-REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
-REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
-REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long);
-REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long);
-REGISTER_NUMERICALPROPERTY_HEADER(LongLongProperty, long long);
-REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long);
-REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
-REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2Property, glm::mat2x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2x3Property, glm::mat2x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2x4Property, glm::mat2x4);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3x2Property, glm::mat3x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3Property, glm::mat3x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3x4Property, glm::mat3x4);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4x2Property, glm::mat4x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4x3Property, glm::mat4x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4Property, glm::mat4x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2Property, glm::dmat2x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2x3Property, glm::dmat2x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2x4Property, glm::dmat2x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3x2Property, glm::dmat3x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3Property, glm::dmat3x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3x4Property, glm::dmat3x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4x2Property, glm::dmat4x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4x3Property, glm::dmat4x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4Property, glm::dmat4x4);
 
 } // namespace properties
 } // namespace openspace
 
-#endif // __SCALARPROPERTY_H__
+#endif // __MATRIXPROPERTY_H__

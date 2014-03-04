@@ -27,6 +27,14 @@ namespace properties {
 
 template <typename T>
 TemplateProperty<T>::TemplateProperty(const std::string& identifier,
+                                      const std::string& guiName)
+    : TemplateProperty<T>(identifier, guiName,
+    PropertyDelegate<TemplateProperty<T>>::defaultValue<T>())
+{}
+
+
+template <typename T>
+TemplateProperty<T>::TemplateProperty(const std::string& identifier,
                                       const std::string& guiName, const T& value)
     : Property(identifier, guiName)
     , _value(value)

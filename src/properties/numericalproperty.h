@@ -61,7 +61,7 @@ protected:
 } // namespace properties
 } // namespace openspace
 
-// use inside namespace
+// use inside namespace (?)
 #define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE) \
     typedef NumericalProperty<TYPE> CLASS_NAME; \
     template <> std::string PropertyDelegate<NumericalProperty<TYPE>>::className(); \
@@ -102,7 +102,6 @@ protected:
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultStepping<TYPE>() { \
         return DEFAULT_STEPPING; \
     }
-
 
 #include "properties/numericalproperty.inl"
 

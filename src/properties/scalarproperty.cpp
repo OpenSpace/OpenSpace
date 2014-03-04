@@ -34,48 +34,49 @@ namespace properties {
 // char16_t and char32_t are not supported on Visual Studio 2013 and are defined to
 // be equal to unsigned short and unsigned int
 
+REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false);
+
 REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
-    numeric_limits<char>::min(), numeric_limits<char>::max(), char(1));
+    numeric_limits<char>::lowest(), numeric_limits<char>::max(), char(1));
 //REGISTER_NUMERICALPROPERTY_SOURCE(Char16Property, char16_t, char16_t(0),
-//    numeric_limits<char16_t>::min(), numeric_limits<char16_t>::max(), char16_t(1));
+//    numeric_limits<char16_t>::lowest(), numeric_limits<char16_t>::max(), char16_t(1));
 //REGISTER_NUMERICALPROPERTY_SOURCE(Char32Property, char32_t, char32_t(0),
-//    numeric_limits<char32_t>::min(), numeric_limits<char32_t>::max(), char32_t(1));
+//    numeric_limits<char32_t>::lowest(), numeric_limits<char32_t>::max(), char32_t(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-    numeric_limits<wchar_t>::min(), numeric_limits<wchar_t>::max(), wchar_t(1));
+    numeric_limits<wchar_t>::lowest(), numeric_limits<wchar_t>::max(), wchar_t(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(SignedCharProperty, signed char, signed char(0),
-    numeric_limits<signed char>::min(), numeric_limits<signed char>::max(),
+    numeric_limits<signed char>::lowest(), numeric_limits<signed char>::max(),
     signed char(0));
 REGISTER_NUMERICALPROPERTY_SOURCE(UCharProperty, unsigned char, unsigned char(0),
-    numeric_limits<unsigned char>::min(), numeric_limits<unsigned char>::max(),
+    numeric_limits<unsigned char>::lowest(), numeric_limits<unsigned char>::max(),
     unsigned char(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(ShortProperty, short, short(0),
-    numeric_limits<short>::min(), numeric_limits<short>::max(), short(1));
+    numeric_limits<short>::lowest(), numeric_limits<short>::max(), short(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(UShortProperty, unsigned short, unsigned short(0),
-    numeric_limits<unsigned short>::min(), numeric_limits<unsigned short>::max(),
+    numeric_limits<unsigned short>::lowest(), numeric_limits<unsigned short>::max(),
     unsigned short(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(IntProperty, int, int(0),
-    numeric_limits<int>::min(), numeric_limits<int>::max(), int(1));
+    numeric_limits<int>::lowest(), numeric_limits<int>::max(), int(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(UIntProperty, unsigned int, unsigned int(0),
-    numeric_limits<unsigned int>::min(), numeric_limits<unsigned int>::max(),
+    numeric_limits<unsigned int>::lowest(), numeric_limits<unsigned int>::max(),
     unsigned int(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(LongProperty, long, long(0),
-    numeric_limits<long>::min(), numeric_limits<long>::max(), long(1));
+    numeric_limits<long>::lowest(), numeric_limits<long>::max(), long(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(ULongProperty, unsigned long, unsigned long(0),
-    numeric_limits<unsigned long>::min(), numeric_limits<unsigned long>::max(),
+    numeric_limits<unsigned long>::lowest(), numeric_limits<unsigned long>::max(),
     unsigned long(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(LongLongProperty, long long, long long(0),
-    numeric_limits<long long>::min(), numeric_limits<long long>::max(), long long(1));
+    numeric_limits<long long>::lowest(), numeric_limits<long long>::max(), long long(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(ULongLongProperty, unsigned long long,
-    unsigned long long(1), numeric_limits<unsigned long long>::min(),
+    unsigned long long(1), numeric_limits<unsigned long long>::lowest(),
     numeric_limits<unsigned long long>::max(), unsigned long long(1));
 REGISTER_NUMERICALPROPERTY_SOURCE(FloatProperty, float, 0.f,
-    numeric_limits<float>::min(), numeric_limits<float>::max(), 0.01f);
+    numeric_limits<float>::lowest(), numeric_limits<float>::max(), 0.01f);
 REGISTER_NUMERICALPROPERTY_SOURCE(DoubleProperty, double, 0.0,
-    numeric_limits<double>::min(), numeric_limits<double>::max(), 0.01);
+    numeric_limits<double>::lowest(), numeric_limits<double>::max(), 0.01);
 REGISTER_NUMERICALPROPERTY_SOURCE(LongDoubleProperty, long double, long double(0),
-    numeric_limits<long double>::min(), numeric_limits<long double>::max(),
+    numeric_limits<long double>::lowest(), numeric_limits<long double>::max(),
     long double(0.01f));
-
 
 } // namespace properties
 } // namespace openspace
