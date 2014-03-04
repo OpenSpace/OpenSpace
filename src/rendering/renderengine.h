@@ -38,7 +38,7 @@ public:
 	RenderEngine();
 	~RenderEngine();
 	
-    bool initialize(const std::string& sceneGraph);
+    bool initialize();
 
     SceneGraph* sceneGraph();
 

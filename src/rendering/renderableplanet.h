@@ -15,8 +15,10 @@ class RenderablePlanet: public Renderable {
 public:
 
 	// constructors & destructor
-	RenderablePlanet(const pss &radius);
+	RenderablePlanet();
 	~RenderablePlanet();
+    
+    virtual void initialize(ghoul::Dictionary* dictionary);
 
 	void setProgramObject(ghoul::opengl::ProgramObject *programObject);
 	void setTexture(ghoul::opengl::Texture *texture);

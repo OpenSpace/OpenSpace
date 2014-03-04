@@ -4,16 +4,15 @@
 
 namespace openspace {
 
-RenderablePlanet::RenderablePlanet(const pss &radius):Renderable(radius) {
-	programObject_ = nullptr;
-	texture_ = nullptr;
-
-	// setup a unit sphere
-	planet_ = new Planet(radius,30);
-}
+RenderablePlanet::RenderablePlanet(): programObject_(nullptr), texture_(nullptr) {}
 
 RenderablePlanet::~RenderablePlanet() {
 	delete planet_;
+}
+
+    
+void RenderablePlanet::initialize(ghoul::Dictionary* dictionary) {
+    
 }
 
 void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject = nullptr) {

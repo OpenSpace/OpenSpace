@@ -80,29 +80,8 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArgv) {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
-    _engine = new OpenSpaceEngine;
-
-    LogManager::initialize(LogManager::LogLevel::Debug, true);
-    LogMgr.addLog(new ConsoleLog);
     
-	ghoul::filesystem::FileSystem::initialize();
-    
-#ifdef __WIN32__
-    // Windows: Binary two folders down
-	FileSys.registerPathToken("${BASE_PATH}", "../..");
-#elif __APPLE__
-    // OS X : Binary three folders down
-	FileSys.registerPathToken("${BASE_PATH}", "../../..");
-#else
-    // Linux : Binary three folders down
-	FileSys.registerPathToken("${BASE_PATH}", "..");
-#endif
-	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
-
-    _engine->_configurationManager = new ghoul::ConfigurationManager;
-    _engine->_configurationManager->initialize();
-    
+    // set SGCT arguments
     newArgc = 3;
     newArgv = new char*[3];
     newArgv[0] = "prog";
@@ -118,7 +97,9 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv[2] = "../config/single.xml";
 #endif
     
-    // Create the renderenginge object
+    // create objects
+    _engine = new OpenSpaceEngine;
+    _engine->_configurationManager = new ghoul::ConfigurationManager;
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
 }
@@ -128,17 +109,38 @@ void OpenSpaceEngine::destroy() {
 }
 
 bool OpenSpaceEngine::initialize() {
+
+    // initialize ghou logging
+    LogManager::initialize(LogManager::LogLevel::Debug, true);
+    LogMgr.addLog(new ConsoleLog);
+
+    // Initialize ghoul filesystem and set path variables
+    ghoul::filesystem::FileSystem::initialize();
+#ifdef __WIN32__
+    // Windows: Binary two folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../..");
+#elif __APPLE__
+    // OS X : Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "../../..");
+#else
+    // Linux : Binary three folders down
+	FileSys.registerPathToken("${BASE_PATH}", "..");
+#endif
+	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
+	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
+	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");
+
     // Load the configurationmanager with the default configuration
-    ghoul::ConfigurationManager configuration;
-    configuration.initialize(absPath("${SCRIPTS}/DefaultConfig.lua"));
-    configuration.loadConfiguration(absPath("${SCRIPTS}/ExtraConfigScript.lua"), false);
+    _engine->_configurationManager->initialize();
+    _engine->_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
 
     Time::init();
     Spice::init();
     Spice::ref().loadDefaultKernels();
 
     // TODO add scenegraph file name
-    _renderEngine->initialize("");
+    // initialize the RenderEngine, needs ${SCENEPATH} to be set
+    _renderEngine->initialize();
 
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();

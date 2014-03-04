@@ -10,7 +10,7 @@
 #include "ghoul/opengl/texture.h"
 
 namespace openspace {
-
+/*
 class RenderableBody: public Renderable {
 public:
 
@@ -31,7 +31,7 @@ private:
 
 	gl4::Sphere *planet_;
 };
-
+*/
 } // namespace openspace
 
 #endif

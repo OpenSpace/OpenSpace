@@ -36,18 +36,14 @@ namespace {
 }
 namespace openspace {
 	
-RenderEngine::RenderEngine()
-    : _mainCamera(nullptr)
-    , _sceneGraph(nullptr)
-{
-}
+RenderEngine::RenderEngine() : _mainCamera(nullptr) , _sceneGraph(nullptr) {}
 
 RenderEngine::~RenderEngine() {
 	delete _mainCamera;
 	delete _sceneGraph;
 }
 
-bool RenderEngine::initialize(const std::string& sceneGraph) {
+bool RenderEngine::initialize() {
     // init camera and set position
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
@@ -67,7 +63,7 @@ bool RenderEngine::initialize(const std::string& sceneGraph) {
 
     // init scenegraph
     _sceneGraph = new SceneGraph;
-    _sceneGraph->init();
+    _sceneGraph->initialize();
     //_sceneGraph = loadSceneGraph(sceneGraph);
 
     return true;

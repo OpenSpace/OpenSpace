@@ -1,57 +1,100 @@
-
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+ 
 // open space includes
 #include "scenegraph/scenegraphnode.h"
 #include "util/spice.h"
 
 // ghoul includes
-#include "ghoul/logging/logmanager.h"
-#include "ghoul/logging/consolelog.h"
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
+
+namespace {
+	std::string _loggerCat = "SceneGraphNode";
+}
 
 namespace openspace {
 	
-SceneGraphNode::SceneGraphNode() {
-
-	nodeName_ = "";
-
-	// init pointers with nullptr
-	renderable_ = nullptr;
-	parent_ = nullptr;
-	boundingSphereVisible_ = false;
-	renderableVisible_ = false;
-
-	// spice not used when spiceID_ is 0, 0 is the sun barycenter
-	spiceID_ = 0;
-	parentSpiceID_ = 0;
-}
+SceneGraphNode::SceneGraphNode(): _parent(nullptr), _nodeName("Unnamed OpenSpace SceneGraphNode"),
+                                  _renderable(nullptr), _renderableVisible(false),
+                                  _boundingSphereVisible(false), _spiceName("") {}
 
 SceneGraphNode::~SceneGraphNode() {
-	// logger string
-	std::string _loggerCat = "SceneGraphNode::~SceneGraphNode()";
-	LDEBUG("Deallocating: " << nodeName_);
+	LDEBUG("Deallocating: " << _nodeName);
 
 	// deallocate the renderable
-	if(renderable_)
-		delete renderable_;
+	if(_renderable != nullptr)
+		delete _renderable;
 
 	// deallocate the child nodes and delete them, iterate c++11 style
-	for( auto &child: children_) {
+	for( auto child: _children)
 		delete child;
-	}
+}
 
-	// empty the vector
-	children_.erase (children_.begin(),children_.end());
+
+bool SceneGraphNode::initialize() {
+    return true;
+}
+
+bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
+    
+    if( ! initialize()) {
+        return false;
+    }
+    
+    // set the _nodeName if available
+    dictionary->getValue("Name", _nodeName);
+    
+    // get the renderable
+    if(dictionary->hasKey("Renderable")) {
+        ghoul::Dictionary* renderableDictionary;
+        if(dictionary->getValue("Renderable", renderableDictionary)) {
+            
+        }
+    }
+    
+    // get the position
+    if(dictionary->hasKey("Position")) {
+        ghoul::Dictionary* positionDictionary;
+        if(dictionary->getValue("Position", positionDictionary)) {
+            
+        }
+    }
+
+    return true;
 }
 
 // essential
 void SceneGraphNode::update() {
-
-	if(spiceID_ > 0) {
+    /*
+	if(_spiceID > 0) {
 		double state[3];
 		//double orientation[3][3];
-		Spice::ref().spk_getPosition(spiceID_, parentSpiceID_, state);
+		Spice::ref().spk_getPosition(_spiceID, _parentSpiceID, state);
 
 		// multiply with factor 1000, spice uses km as standard and Open Space uses m
-		position_ = psc::CreatePSC(state[0]*1000.0,state[1]*1000.0,state[2]*1000.0);
+		_position = psc::CreatePSC(state[0]*1000.0,state[1]*1000.0,state[2]*1000.0);
 		
 		// update rotation
 		//if(Spice::ref().spk_getOrientation(spiceName_,orientation)) {
@@ -62,43 +105,44 @@ void SceneGraphNode::update() {
 		//}
 	}
 
-	if(renderable_) {
-		renderable_->update();
+	if(_renderable) {
+		_renderable->update();
 	}
+    */
 }
 
 void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) {
 
-	const psc thisPosition = parentPosition + position_;
+	const psc thisPosition = parentPosition + _position;
 	const psc camPos = camera->getPosition();
 	const psc toCamera = thisPosition - camPos;
 	
 	// init as not visible
-	boundingSphereVisible_ = true;
-	renderableVisible_ = false;
+	_boundingSphereVisible = true;
+	_renderableVisible = false;
 
 	// check if camera is outside the node boundingsphere
-	if(toCamera.length() > boundingSphere_) {
+	if(toCamera.length() > _boundingSphereVisible) {
 		
 		// check if the boudningsphere is visible before avaluating children
-		if( ! sphereInsideFrustum(thisPosition, boundingSphere_, camera)) {
+		if( ! sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
 			// the node is completely outside of the camera view, stop evaluating this node
 			return;
 		}
 		
 	} 
-	boundingSphereVisible_ = true;
+	_boundingSphereVisible = true;
 	// inside boudningsphere or parts of the sphere is visible, individual children needs to be evaluated
 	
 	// this node has an renderable
-	if(renderable_) {
+	if(_renderable) {
 
 		//  check if the renderable boundingsphere is visible
-		renderableVisible_ = sphereInsideFrustum(thisPosition, renderable_->getBoundingSphere(), camera);
+		_renderableVisible = sphereInsideFrustum(thisPosition, _renderable->getBoundingSphere(), camera);
 	}
 
 	// evaluate all the children, tail-recursive function(?)
-	for(auto &child: children_) {
+	for(auto &child: _children) {
 		child->evaluate(camera,thisPosition);
 	}
 
@@ -106,20 +150,20 @@ void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) 
 
 void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
 
-	const psc thisPosition = parentPosition + position_;
+	const psc thisPosition = parentPosition + _position;
 	
 	// check if camera is outside the node boundingsphere
-	if( ! boundingSphereVisible_) {
+	if( ! _boundingSphereVisible) {
 		return;
 	} 
-	if(renderableVisible_) {
-        if (nodeName_ == "earth")
-            nodeName_ = nodeName_;
-		renderable_->render(camera,thisPosition);
+	if(_renderableVisible) {
+        if (_nodeName == "earth")
+            _nodeName = _nodeName;
+		_renderable->render(camera,thisPosition);
 	}
 
 	// evaluate all the children, tail-recursive function(?)
-	for(auto &child: children_) {
+	for(auto &child: _children) {
 		child->render(camera,thisPosition);
 	}
 
@@ -127,53 +171,56 @@ void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
 
 // set & get
 void SceneGraphNode::addNode(SceneGraphNode *child) {
-
 	// add a child node and set this node to be the parent
-	child->setParent(this);
-	children_.push_back(child);
+
+    child->setParent(this);
+    _children.push_back(child);
 }
 
 void SceneGraphNode::setName(const std::string &name) {
-	nodeName_ = name;
+	_nodeName = name;
 }
 
 void SceneGraphNode::setParent(SceneGraphNode *parent) {
-	parent_ = parent;
+	_parent = parent;
 }
 
+
 void SceneGraphNode::setPosition(const psc &position) {
-	position_ = position;
+	_position = position;
 }
 
 void SceneGraphNode::setSpiceID(const int spiceID, const int parentSpiceID) {
-	spiceID_ = spiceID;
-	parentSpiceID_ = parentSpiceID;
+	
+    _spiceID = spiceID;
+	_parentSpiceID = parentSpiceID;
 	update();
+ 
 }
 
 void SceneGraphNode::setSpiceName(const std::string &name) {
-	spiceName_ = name;
+	_spiceName = name;
 }
 
 const int SceneGraphNode::getSpiceID() const {
-	return spiceID_;
+	return 0;//spiceID_;
 }
 
 const std::string & SceneGraphNode::getSpiceName() {
-	return spiceName_;
+	return _spiceName;
 }
 
 const psc &SceneGraphNode::getPosition() const {
-	return position_;
+	return _position;
 }
 
 psc SceneGraphNode::getWorldPosition() const {
 
 	// recursive up the hierarchy if there are parents available
-	if(parent_) {
-		return position_ + parent_->getWorldPosition();
+	if(_parent) {
+		return _position + _parent->getWorldPosition();
 	} else {
-		return position_;
+		return _position;
 	}
 }
 
@@ -181,39 +228,39 @@ psc SceneGraphNode::getWorldPosition() const {
 pss SceneGraphNode::calculateBoundingSphere() {
 	
 	// set the vounding sphere to 0.0
-	boundingSphere_ = 0.0;
+	_boundingSphere = 0.0;
 
-	if(children_.size() > 0) { // node
+	if(_children.size() > 0) { // node
 		pss maxChild;
 
 		// loop though all children and find the one furthest away/with the largest bounding sphere
-		for(size_t i = 0; i < children_.size(); ++i) {
+		for(size_t i = 0; i < _children.size(); ++i) {
 
 			// when positions is dynamix, change this part to fins the most distant position
-			pss child = children_.at(i)->getPosition().length() + children_.at(i)->calculateBoundingSphere();
+			pss child = _children.at(i)->getPosition().length() + _children.at(i)->calculateBoundingSphere();
 			if(child > maxChild) {
 				maxChild = child;
 			}
 		}
-		boundingSphere_ += maxChild;
+		_boundingSphere += maxChild;
 	} else { // leaf
 
 		// if has a renderable, use that boundingsphere
-		if(renderable_)
-			boundingSphere_ += renderable_->getBoundingSphere();
+		if(_renderable)
+			_boundingSphere += _renderable->getBoundingSphere();
 	}
 
-	return boundingSphere_;
+	return _boundingSphere;
 }
 
 // renderable
 void SceneGraphNode::setRenderable(Renderable *renderable) {
-	renderable_ = renderable;
+	_renderable = renderable;
 	update();
 }
 
 const Renderable *  SceneGraphNode::getRenderable() const{
-	return renderable_;
+	return _renderable;
 }
 
 // private helper methods
@@ -229,7 +276,7 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, con
 	psc D = s_pos - U;
 	
 	// check if outside the maximum angle
-    if (nodeName_ == "earth") {
+    if (_nodeName == "earth") {
         //psc tmp = s_pos - camera->getPosition();
         
         //LINFOC("", "Angle: " << psc_camdir.angle(D));
@@ -253,6 +300,5 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, con
 	}
 	
 }
-
 	
 } // namespace openspace

@@ -8,10 +8,6 @@ Renderable::Renderable() {
 
 }
 
-Renderable::Renderable(const pss &boundingSphere) {
-	boundingSphere_ = boundingSphere;
-}
-
 Renderable::~Renderable() {
 
 }

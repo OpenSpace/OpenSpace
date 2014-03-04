@@ -5,6 +5,7 @@
 #include "util/psc.h"
 #include "util/pss.h"
 #include "util/camera.h"
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
@@ -13,9 +14,10 @@ public:
 
 	// constructors & destructor
 	Renderable();
-	Renderable(const pss &boundingSphere);
-	virtual ~Renderable();
+    virtual ~Renderable();
 	
+    virtual void initialize(ghoul::Dictionary* dictionary) = 0;
+    
 	void setBoundingSphere(const pss &boundingSphere);
 	const pss &getBoundingSphere();
 

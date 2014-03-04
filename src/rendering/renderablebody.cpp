@@ -3,7 +3,7 @@
 #include "renderablebody.h"
 
 namespace openspace {
-
+/*
 RenderableBody::RenderableBody(const pss &radius):Renderable(radius) {
 	programObject_ = nullptr;
 	texture_ = nullptr;
@@ -70,5 +70,6 @@ void RenderableBody::render(const Camera *camera, const psc &thisPosition) {
 void RenderableBody::update() {
 
 }
+*/
 	
 } // namespace openspace
