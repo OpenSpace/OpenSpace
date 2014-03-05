@@ -2,7 +2,6 @@
 
 uniform sampler2D texBack, texFront;
 uniform sampler3D texVolume;
-uniform int screenWidth, screenHeight;
 uniform float stepSize;
 
 in vec3 vPosition;
