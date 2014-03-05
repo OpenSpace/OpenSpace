@@ -11,8 +11,12 @@ RenderablePlanet::~RenderablePlanet() {
 }
 
     
-void RenderablePlanet::initialize(ghoul::Dictionary* dictionary) {
-    
+bool RenderablePlanet::initialize() {
+    return true;
+}
+
+bool RenderablePlanet::initializeWithDictionary(ghoul::Dictionary* dictionary) {
+    return true;
 }
 
 void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject = nullptr) {

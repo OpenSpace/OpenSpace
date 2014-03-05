@@ -32,6 +32,7 @@
 #include "rendering/renderengine.h"
 #include "util/time.h"
 #include "util//spice.h"
+#include <util/factorymanager.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
@@ -137,6 +138,7 @@ bool OpenSpaceEngine::initialize() {
     Time::init();
     Spice::init();
     Spice::ref().loadDefaultKernels();
+    FactoryManager::initialize();
 
     // TODO add scenegraph file name
     // initialize the RenderEngine, needs ${SCENEPATH} to be set

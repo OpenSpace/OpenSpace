@@ -40,7 +40,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/templatefactory.h>
 
 #include <iostream>
 #include <string>
@@ -99,9 +98,6 @@ void SceneGraph::render(Camera *camera) {
 
 void SceneGraph::loadFromModulePath() {
     assert(_root == nullptr);
-
-    ghoul::TemplateFactory<Renderable> renderablefactory;
-    renderablefactory.registerClass<RenderablePlanet>("RenderablePlanet");
     
     ghoul::Dictionary dictionary;
     lua_State* state = luaL_newstate();
@@ -168,7 +164,7 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
                 
                 auto parentIterator = _allNodes.find(parentName);
                 if (parentIterator == _allNodes.end()) {
-                    LDEBUG("Could not find parent named '"<< parentName <<
+                    LFATAL("Could not find parent named '"<< parentName <<
                            "' for '" << moduleName << "'." <<
                            " Check module definition order. Skipping module.");
                     continue;
@@ -176,6 +172,7 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
                 
                 // allocate SceneGraphNode and initialize with Dictionary
                 SceneGraphNode* node = new SceneGraphNode;
+                singleModuleDictionary->setValue("Path", modulePath);
                 if(node->initializeWithDictionary(singleModuleDictionary)) {
                     // add to internal data structures
                     _allNodes.insert(std::make_pair(moduleName, node));

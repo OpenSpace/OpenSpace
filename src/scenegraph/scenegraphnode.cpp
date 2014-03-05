@@ -30,6 +30,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 
+#include <util/factorymanager.h>
+
 namespace {
 	std::string _loggerCat = "SceneGraphNode";
 }
@@ -37,8 +39,8 @@ namespace {
 namespace openspace {
 	
 SceneGraphNode::SceneGraphNode(): _parent(nullptr), _nodeName("Unnamed OpenSpace SceneGraphNode"),
-                                  _renderable(nullptr), _renderableVisible(false),
-                                  _boundingSphereVisible(false), _spiceName("") {}
+                                  _position(nullptr), _renderable(nullptr),
+                                  _renderableVisible(false), _boundingSphereVisible(false) {}
 
 SceneGraphNode::~SceneGraphNode() {
 	LDEBUG("Deallocating: " << _nodeName);
@@ -57,6 +59,32 @@ bool SceneGraphNode::initialize() {
     return true;
 }
 
+template<class T>
+bool safeInitializeWithDictionary(T** object, const std::string& key, ghoul::Dictionary* dictionary, const std::string& path = "") {
+    if(dictionary->hasKey(key)) {
+        ghoul::Dictionary* tmpDictionary;
+        if(dictionary->getValue(key, tmpDictionary)) {
+            std::string renderableType;
+            if(tmpDictionary->getValue("Type", renderableType)) {
+                ghoul::TemplateFactory<T>* factory = FactoryManager::ref().factoryByType<T>();
+                T* tmp = factory->create(renderableType);
+                if(tmp != nullptr) {
+                    if ( ! tmpDictionary->hasKey("Path")) {
+                        tmpDictionary->setValue("Path", path);
+                    }
+                    if(tmp->initializeWithDictionary(tmpDictionary)) {
+                        *object = tmp;
+                        return true;
+                    } else {
+                        delete tmp;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
     
     if( ! initialize()) {
@@ -66,19 +94,21 @@ bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
     // set the _nodeName if available
     dictionary->getValue("Name", _nodeName);
     
-    // get the renderable
+    std::string path;
+    dictionary->getValue("Path", path);
+    
     if(dictionary->hasKey("Renderable")) {
-        ghoul::Dictionary* renderableDictionary;
-        if(dictionary->getValue("Renderable", renderableDictionary)) {
-            
+        if(safeInitializeWithDictionary<Renderable>(&_renderable, "Renderable", dictionary, path)) {
+            LDEBUG("Successful initialization of renderable!");
+        } else {
+            LDEBUG("Failed to initialize renderable!");
         }
     }
-    
-    // get the position
     if(dictionary->hasKey("Position")) {
-        ghoul::Dictionary* positionDictionary;
-        if(dictionary->getValue("Position", positionDictionary)) {
-            
+        if(safeInitializeWithDictionary<PositionInformation>(&_position, "Position", dictionary, path)) {
+            LDEBUG("Successful initialization of position!");
+        } else {
+            LDEBUG("Failed to initialize position!");
         }
     }
 
@@ -113,7 +143,7 @@ void SceneGraphNode::update() {
 
 void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) {
 
-	const psc thisPosition = parentPosition + _position;
+	const psc thisPosition = parentPosition + _position->position();
 	const psc camPos = camera->getPosition();
 	const psc toCamera = thisPosition - camPos;
 	
@@ -150,7 +180,7 @@ void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) 
 
 void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
 
-	const psc thisPosition = parentPosition + _position;
+	const psc thisPosition = parentPosition + _position->position();
 	
 	// check if camera is outside the node boundingsphere
 	if( ! _boundingSphereVisible) {
@@ -185,42 +215,17 @@ void SceneGraphNode::setParent(SceneGraphNode *parent) {
 	_parent = parent;
 }
 
-
-void SceneGraphNode::setPosition(const psc &position) {
-	_position = position;
-}
-
-void SceneGraphNode::setSpiceID(const int spiceID, const int parentSpiceID) {
-	
-    _spiceID = spiceID;
-	_parentSpiceID = parentSpiceID;
-	update();
- 
-}
-
-void SceneGraphNode::setSpiceName(const std::string &name) {
-	_spiceName = name;
-}
-
-const int SceneGraphNode::getSpiceID() const {
-	return 0;//spiceID_;
-}
-
-const std::string & SceneGraphNode::getSpiceName() {
-	return _spiceName;
-}
-
 const psc &SceneGraphNode::getPosition() const {
-	return _position;
+	return _position->position();
 }
 
 psc SceneGraphNode::getWorldPosition() const {
 
 	// recursive up the hierarchy if there are parents available
 	if(_parent) {
-		return _position + _parent->getWorldPosition();
+		return _position->position() + _parent->getWorldPosition();
 	} else {
-		return _position;
+		return _position->position();
 	}
 }
 

@@ -16,7 +16,8 @@ public:
 	Renderable();
     virtual ~Renderable();
 	
-    virtual void initialize(ghoul::Dictionary* dictionary) = 0;
+    virtual bool initialize() = 0;
+    virtual bool initializeWithDictionary(ghoul::Dictionary* dictionary) = 0;
     
 	void setBoundingSphere(const pss &boundingSphere);
 	const pss &getBoundingSphere();

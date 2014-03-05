@@ -18,7 +18,8 @@ public:
 	RenderablePlanet();
 	~RenderablePlanet();
     
-    virtual void initialize(ghoul::Dictionary* dictionary);
+    bool initialize();
+    bool initializeWithDictionary(ghoul::Dictionary* dictionary);
 
 	void setProgramObject(ghoul::opengl::ProgramObject *programObject);
 	void setTexture(ghoul::opengl::Texture *texture);
