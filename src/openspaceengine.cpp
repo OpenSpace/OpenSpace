@@ -135,12 +135,11 @@ bool OpenSpaceEngine::initialize() {
     
     // Detect and logOpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
-    ghoul::systemcapabilities::SystemCapabilities::ref().addComponent(
-        new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
-    ghoul::systemcapabilities::SystemCapabilities::ref().addComponent(
-        new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
-    ghoul::systemcapabilities::SystemCapabilities::ref().detectCapabilities();
-    ghoul::systemcapabilities::SystemCapabilities::ref().logCapabilities();
+    SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
+    SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
+    SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
+    SysCap.detectCapabilities();
+    SysCap.logCapabilities();
 
     // initialize OpenSpace helpers
     Time::init();
