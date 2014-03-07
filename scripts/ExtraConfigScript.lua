@@ -1,7 +1,7 @@
 musicname = "music2"
 lyrics = "This is not, the greatest lyrics in the world. This is just a tribute"
 
-configuration =
+config =
 {
 	level1_string = musicname,
 	level1_lyrics = lyrics,
