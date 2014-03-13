@@ -29,8 +29,13 @@
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/shadermanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/shaderobject.h>
 
-#include <util/factorymanager.h>
+#include <scenegraph/constantpositioninformation.h>
+#include <openspaceengine.h>
 
 namespace {
 	std::string _loggerCat = "SceneGraphNode";
@@ -54,40 +59,49 @@ SceneGraphNode::~SceneGraphNode() {
 		delete child;
 }
 
-
-bool SceneGraphNode::initialize() {
+bool SceneGraphNode::_initialize() {
+    using ghoul::opengl::ShaderObject;
+    using ghoul::opengl::ProgramObject;
+    using ghoul::opengl::ShaderManager;
+    ShaderObject* powerscale_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                   absPath("${SHADERS}/pscstandard_vs.glsl"),
+                                                   "PS Vertex"
+                                                   );
+    ShaderObject* powerscale_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                   absPath("${SHADERS}/pscstandard_fs.glsl"),
+                                                   "PS Fragment"
+                                                   );
+    
+    ProgramObject* po = new ProgramObject;
+    po->attachObject(powerscale_vs);
+    po->attachObject(powerscale_fs);
+    
+    if( ! po->compileShaderObjects())
+        return false;
+    if( ! po->linkProgramObject())
+        return false;
+    
+    OsEng.ref().configurationManager().setValue("pscShader", po);
+    
     return true;
+
 }
 
-template<class T>
-bool safeInitializeWithDictionary(T** object, const std::string& key, ghoul::Dictionary* dictionary, const std::string& path = "") {
-    if(dictionary->hasKey(key)) {
-        ghoul::Dictionary* tmpDictionary;
-        if(dictionary->getValue(key, tmpDictionary)) {
-            std::string renderableType;
-            if(tmpDictionary->getValue("Type", renderableType)) {
-                ghoul::TemplateFactory<T>* factory = FactoryManager::ref().factoryByType<T>();
-                T* tmp = factory->create(renderableType);
-                if(tmp != nullptr) {
-                    if ( ! tmpDictionary->hasKey("Path")) {
-                        tmpDictionary->setValue("Path", path);
-                    }
-                    if(tmp->initializeWithDictionary(tmpDictionary)) {
-                        *object = tmp;
-                        return true;
-                    } else {
-                        delete tmp;
-                    }
-                }
-            }
-        }
+bool SceneGraphNode::initialize() {
+    
+    if( ! _initialize()) {
+        return false;
     }
-    return false;
+    
+    _position = new ConstantPositionInformation;
+    _position->initializeWithDictionary(nullptr);
+    
+    return true;
 }
 
 bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
     
-    if( ! initialize()) {
+    if( ! _initialize()) {
         return false;
     }
     
@@ -100,6 +114,9 @@ bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
     if(dictionary->hasKey("Renderable")) {
         if(safeInitializeWithDictionary<Renderable>(&_renderable, "Renderable", dictionary, path)) {
             LDEBUG("Successful initialization of renderable!");
+            if ( ! _renderable) {
+                LFATAL("But the renderable is not initialized for " << _nodeName);
+            }
         } else {
             LDEBUG("Failed to initialize renderable!");
         }
@@ -107,9 +124,17 @@ bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
     if(dictionary->hasKey("Position")) {
         if(safeInitializeWithDictionary<PositionInformation>(&_position, "Position", dictionary, path)) {
             LDEBUG("Successful initialization of position!");
+            if ( ! _position) {
+                LFATAL("But the position is not initialized for " << _nodeName);
+            }
         } else {
             LDEBUG("Failed to initialize position!");
         }
+    }
+    
+    if (_position == nullptr) {
+        _position = new ConstantPositionInformation;
+        _position->initializeWithDictionary(nullptr);
     }
 
     return true;
@@ -117,42 +142,21 @@ bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
 
 // essential
 void SceneGraphNode::update() {
-    /*
-	if(_spiceID > 0) {
-		double state[3];
-		//double orientation[3][3];
-		Spice::ref().spk_getPosition(_spiceID, _parentSpiceID, state);
-
-		// multiply with factor 1000, spice uses km as standard and Open Space uses m
-		_position = psc::CreatePSC(state[0]*1000.0,state[1]*1000.0,state[2]*1000.0);
-		
-		// update rotation
-		//if(Spice::ref().spk_getOrientation(spiceName_,orientation)) {
-		//	printf("%s\n",spiceName_);
-		//	printf("%.5f %.5f %.5f \n", orientation[0][0], orientation[0][1], orientation[0][2]);
-		//	printf("%.5f %.5f %.5f \n", orientation[1][0], orientation[1][1], orientation[1][2]);
-		//	printf("%.5f %.5f %.5f \n", orientation[2][0], orientation[2][1], orientation[2][2]);
-		//}
-	}
-
-	if(_renderable) {
-		_renderable->update();
-	}
-    */
+    _position->update();
 }
 
-void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) {
+void SceneGraphNode::evaluate(const Camera *camera, const psc& parentPosition) {
 
 	const psc thisPosition = parentPosition + _position->position();
 	const psc camPos = camera->getPosition();
 	const psc toCamera = thisPosition - camPos;
-	
+    
 	// init as not visible
-	_boundingSphereVisible = true;
+	_boundingSphereVisible = false;
 	_renderableVisible = false;
-
+    
 	// check if camera is outside the node boundingsphere
-	if(toCamera.length() > _boundingSphereVisible) {
+	if(toCamera.length() > _boundingSphere) {
 		
 		// check if the boudningsphere is visible before avaluating children
 		if( ! sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
@@ -160,9 +164,11 @@ void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) 
 			return;
 		}
 		
-	} 
+	}
+    
+	// inside boudningsphere or parts of the sphere is visible, individual
+    // children needs to be evaluated
 	_boundingSphereVisible = true;
-	// inside boudningsphere or parts of the sphere is visible, individual children needs to be evaluated
 	
 	// this node has an renderable
 	if(_renderable) {
@@ -173,9 +179,9 @@ void SceneGraphNode::evaluate(const Camera *camera, const psc & parentPosition) 
 
 	// evaluate all the children, tail-recursive function(?)
 	for(auto &child: _children) {
-		child->evaluate(camera,thisPosition);
+		child->evaluate(camera,psc());
 	}
-
+    
 }
 
 void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
@@ -185,15 +191,14 @@ void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
 	// check if camera is outside the node boundingsphere
 	if( ! _boundingSphereVisible) {
 		return;
-	} 
+	}
 	if(_renderableVisible) {
-        if (_nodeName == "earth")
-            _nodeName = _nodeName;
 		_renderable->render(camera,thisPosition);
 	}
 
 	// evaluate all the children, tail-recursive function(?)
-	for(auto &child: _children) {
+	
+    for(auto &child: _children) {
 		child->render(camera,thisPosition);
 	}
 
@@ -242,7 +247,8 @@ pss SceneGraphNode::calculateBoundingSphere() {
 		for(size_t i = 0; i < _children.size(); ++i) {
 
 			// when positions is dynamix, change this part to fins the most distant position
-			pss child = _children.at(i)->getPosition().length() + _children.at(i)->calculateBoundingSphere();
+			pss child = _children.at(i)->getPosition().length() +
+                        _children.at(i)->calculateBoundingSphere();
 			if(child > maxChild) {
 				maxChild = child;
 			}
@@ -280,13 +286,6 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, con
 	// the vector to the object from the new position
 	psc D = s_pos - U;
 	
-	// check if outside the maximum angle
-    if (_nodeName == "earth") {
-        //psc tmp = s_pos - camera->getPosition();
-        
-        //LINFOC("", "Angle: " << psc_camdir.angle(D));
-        //LINFOC("", "Pos: " << tmp.getVec4f()[0] << " " << tmp.getVec4f()[1] << " " << tmp.getVec4f()[2] << " " << tmp.getVec4f()[3]);
-    }
     const double a = psc_camdir.angle(D);
 	if ( a < camera->getMaxFov())
 	{

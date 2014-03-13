@@ -92,6 +92,9 @@ public:
 	
 private:
 
+    // private initialize helper
+    bool _initialize();
+
 	// essential
 	std::vector<SceneGraphNode*> _children;
 	SceneGraphNode* _parent;
@@ -111,5 +114,7 @@ private:
 };
 
 } // namespace openspace
+
+#include <scenegraph/scenegraphnode.inl>
 
 #endif

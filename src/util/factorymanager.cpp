@@ -50,9 +50,15 @@ void FactoryManager::initialize() {
         _manager = new FactoryManager;
     assert(_manager != nullptr);
     
-    _manager->factoryByType<Renderable>()->registerClass<RenderablePlanet>("RenderablePlanet");
-    _manager->factoryByType<PositionInformation>()->registerClass<ConstantPositionInformation>("Constant");
-    _manager->factoryByType<PositionInformation>()->registerClass<SpicePositionInformation>("Spice");
+    // Add Renderables
+    _manager->factoryByType<Renderable>()->
+        registerClass<RenderablePlanet>("RenderablePlanet");
+    
+    // Add PositionInformations
+    _manager->factoryByType<PositionInformation>()->
+        registerClass<ConstantPositionInformation>("Static");
+    _manager->factoryByType<PositionInformation>()->
+        registerClass<SpicePositionInformation>("Spice");
 }
 
 void FactoryManager::deinitialize() {

@@ -38,6 +38,7 @@ public:
     virtual void update();
 protected:
 private:
+    psc _position;
     
 };
     

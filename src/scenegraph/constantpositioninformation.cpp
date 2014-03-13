@@ -31,16 +31,29 @@ ConstantPositionInformation::ConstantPositionInformation() {}
 ConstantPositionInformation::~ConstantPositionInformation() {}
 
 bool ConstantPositionInformation::initializeWithDictionary(ghoul::Dictionary* dictionary) {
-    
-    return true;
+    if ( dictionary == nullptr) {
+        _position = psc(0.0,0.0,0.0,0.0);
+        return true;
+    }
+
+    if (dictionary->hasKey("Position.1")) {
+        double x, y, z, e;
+        
+        if (dictionary->getValue("Position.1", x) && dictionary->getValue("Position.2", y) &&
+            dictionary->getValue("Position.3", z) && dictionary->getValue("Position.4", e)) {
+            _position = psc(x, y, z, e);
+            return true;
+        }
+    }
+    return false;
 }
 
-const psc& ConstantPositionInformation::position() const {
-    
-    return psc();
+const psc& ConstantPositionInformation::position() const {    
+    return _position;
 }
 
 void ConstantPositionInformation::update() {
-    
+
 }
-}
+
+} // namespace openspace

@@ -3,11 +3,11 @@
 
 // open space includes
 #include "renderable.h"
-#include "util/planet.h"
+#include <util/powerscaledsphere.h>
 
 // ghoul includes
-#include "ghoul/opengl/programobject.h"
-#include "ghoul/opengl/texture.h"
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
@@ -30,9 +30,7 @@ public:
 private:
 	ghoul::opengl::ProgramObject *programObject_;
 	ghoul::opengl::Texture *texture_;
-    //	double rad_;
-
-	Planet *planet_;
+	PowerScaledSphere *planet_;
 };
 
 } // namespace openspace

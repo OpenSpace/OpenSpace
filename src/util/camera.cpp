@@ -8,11 +8,9 @@
 namespace openspace {
 	
 Camera::Camera() {
-	//glm::vec3 EulerAngles(90, 45, 0);
 	scaling_ = glm::vec2(1.0,0.0);
 	glm::vec3 EulerAngles(0, 0, 0);
 	viewRotation_ = glm::quat(EulerAngles);
-	//printf("Camera: [%f, %f, %f, %f]\n", viewRotation_[0], viewRotation_[1], viewRotation_[2], viewRotation_[3]);
 }
 
 Camera::~Camera() {
@@ -20,7 +18,7 @@ Camera::~Camera() {
 }
 
 void Camera::setPosition(psc pos) {
-	position_ = pos;
+    position_ = pos;
 }
 
 const psc& Camera::getPosition() const {
@@ -71,7 +69,6 @@ const glm::quat & Camera::getRotation() const {
 const glm::vec3 & Camera::getViewDirection() const {
 	return viewDirection_;
 }
-
 
 const float & Camera::getMaxFov() const {
 	return maxFov_;

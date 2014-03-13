@@ -130,6 +130,7 @@ bool OpenSpaceEngine::initialize() {
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
 	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");
+	FileSys.registerPathToken("${SHADERS}", "${BASE_PATH}/shaders");
 
     // Load the configurationmanager with the default configuration
     _engine->_configurationManager->initialize();
@@ -146,9 +147,8 @@ bool OpenSpaceEngine::initialize() {
 
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-
     _engine->_interactionHandler->connectDevices();
-
+    
     return true;
 }
 

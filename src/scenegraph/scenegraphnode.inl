@@ -22,63 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FACTORYMANAGER_H__
-#define __FACTORYMANAGER_H__
+#ifndef SCENEGRAPHNODE_INL
+#define SCENEGRAPHNODE_INL
 
-// ghoul includes
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
-
-#include "scenegraph/positioninformation.h"
-#include "rendering/renderable.h"
-
+#include <util/factorymanager.h>
 
 namespace openspace {
-    
-class FactoryManager {
-public:
-    
-    /**
-     * Static initializer that initializes the static member. This needs to be done before
-     * the FactoryManager can be used. If the manager has been already initialized, an
-     * assertion will be triggered.
-     */
-    static void initialize();
-    static void deinitialize();
-    
-    /**
-     * This method returns a reference to the initialized FactoryManager. If the manager
-     * has not been initialized, an assertion will be triggered.
-     * \return An initialized reference to the singleton manager
-     */
-    static FactoryManager& ref();
-    
-    template<class T>
-    ghoul::TemplateFactory<T>* factoryByType();
-    
-private:
-    FactoryManager();
-    
-    /// Not implemented on purpose, using this should result in an error
-    FactoryManager(const FactoryManager& c);
-    
-    /// Not implemented on purpose, using this should result in an error
-    ~FactoryManager();
-    
-    static FactoryManager* _manager; ///<Singleton member
-    
-    ghoul::TemplateFactory<Renderable> _renderableFactory;
-    ghoul::TemplateFactory<PositionInformation> _positionInformationFactory;
 
-};
-    
-// Forward declare template specializations
-template<>
-ghoul::TemplateFactory<Renderable()>* FactoryManager::factoryByType();
-template<>
-ghoul::TemplateFactory<PositionInformation()>* FactoryManager::factoryByType();
+template<class T>
+bool safeInitializeWithDictionary(T** object, const std::string& key,
+ghoul::Dictionary* dictionary, const std::string& path = "") {
+    if(dictionary->hasKey(key)) {
+        ghoul::Dictionary tmpDictionary;
+        if(dictionary->getValue(key, tmpDictionary)) {
+            std::string renderableType;
+            if(tmpDictionary.getValue("Type", renderableType)) {
+                ghoul::TemplateFactory<T>* factory = FactoryManager::ref().factoryByType<T>();
+                T* tmp = factory->create(renderableType);
+                if(tmp != nullptr) {
+                    if ( ! tmpDictionary.hasKey("Path") && path != "") {
+                        tmpDictionary.setValue("Path", path);
+                    }
+                    if(tmp->initializeWithDictionary(&tmpDictionary)) {
+                        *object = tmp;
+                        return true;
+                    } else {
+                        delete tmp;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
 
-    
 } // namespace openspace
 
 #endif

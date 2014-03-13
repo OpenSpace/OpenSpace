@@ -12,17 +12,6 @@
 #include <mutex>
 #include <memory>
 
-// hack until we have a file/path manager
-//#ifdef __WIN32__
-//#ifdef NDEBUG 
-//#define RELATIVE_PATH ""
-//#else
-//#define RELATIVE_PATH "../../../"
-//#endif
-//#else
-//#define RELATIVE_PATH "../"
-//#endif
-
 namespace openspace {
 
 class InteractionHandler {

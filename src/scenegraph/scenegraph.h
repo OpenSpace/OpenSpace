@@ -45,18 +45,35 @@ public:
 	SceneGraph();
 	~SceneGraph();
 
+    /*
+     * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
+     */
 	void initialize();
 
+    /*
+     * Updates all SceneGraphNodes relative positions
+     */
 	void update();
+    
+    /*
+     * Evaluates if the SceneGraphNodes are visible to the provided camera
+     */
 	void evaluate(Camera *camera);
+    
+    /*
+     * Render visible SceneGraphNodes using the provided camera
+     */
 	void render(Camera *camera);
 
-    void printChildren() const {
-        _root->print();
-    }
+    /*
+     * Prints the SceneGraph tree. For debugging purposes
+     */
+    void printChildren() const;
 
-    SceneGraphNode* root() const { return _root; }
-    void setRoot(SceneGraphNode* root) { _root = root; }
+    /*
+     * Returns the root SceneGraphNode
+     */
+    SceneGraphNode* root() const;
 
 private:
 
@@ -67,7 +84,6 @@ private:
 	SceneGraphNode *_root;
 	std::vector<SceneGraphNode*> _nodes;
 	std::map<std::string, SceneGraphNode*> _allNodes;
-	std::map<std::string, ghoul::opengl::ProgramObject*> _shaders;
 
 };
 

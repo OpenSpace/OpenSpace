@@ -52,7 +52,7 @@ void gl4::VBO::init()
 	// if arrays not set from sub-class initialize with a colored quad
 	if(_vsize == 0 || _isize == 0 || _varray == NULL || _iarray == NULL) {
 
-		//LOG("VBO: Init color quad\n");
+		LDEBUG("VBO: Init color quad");
 		_mode = GL_TRIANGLES;
 
 		_vsize = 4;

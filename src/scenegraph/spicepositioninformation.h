@@ -27,6 +27,8 @@
 
 #include "positioninformation.h"
 
+#include <util/psc.h>
+
 namespace openspace {
     
 class SpicePositionInformation: public PositionInformation {
@@ -38,6 +40,9 @@ public:
     virtual void update();
 protected:
 private:
+
+    int _target, _origin;
+    psc _position;
     
 };
     
