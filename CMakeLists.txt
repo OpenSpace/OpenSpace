@@ -84,6 +84,14 @@ include_directories("${SPICE_ROOT_DIR}/include")
 add_subdirectory(${SPICE_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Spice)
 
+# OpenCL
+find_package(OpenCL)
+if(OPENCL_FOUND)
+    add_definitions(-DGHL_OPENCL)
+    include_directories(${OPENCL_INCLUDE_DIRS})
+    set(GHOUL_DEPENDENCIES ${GHOUL_DEPENDENCIES} ${OPENCL_LIBRARIES})
+endif(OPENCL_FOUND)
+
 if (APPLE)
     include_directories(/Developer/Headers/FlatCarbon)
     find_library(CARBON_LIBRARY Carbon)

@@ -82,7 +82,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
     
-    // set SGCT arguments
+    // set the arguments for SGCT
     newArgc = 3;
     newArgv = new char*[3];
     newArgv[0] = "prog";
@@ -100,9 +100,9 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     
     // create objects
     _engine = new OpenSpaceEngine;
-    _engine->_configurationManager = new ghoul::ConfigurationManager;
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
+    _engine->_configurationManager = new ghoul::ConfigurationManager;
 }
 
 void OpenSpaceEngine::destroy() {
@@ -132,10 +132,19 @@ bool OpenSpaceEngine::initialize() {
 	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");
 	FileSys.registerPathToken("${SHADERS}", "${BASE_PATH}/shaders");
 
-    // Load the configurationmanager with the default configuration
-    _engine->_configurationManager->initialize();
-    _engine->_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    // initialize the configurationmanager with the default configuration
+    _configurationManager->initialize();
+    _configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    
+    // Detect and logOpenCL and OpenGL versions and available devices
+    ghoul::systemcapabilities::SystemCapabilities::initialize();
+    SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
+    SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
+    SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
+    SysCap.detectCapabilities();
+    SysCap.logCapabilities();
 
+    // initialize OpenSpace helpers
     Time::init();
     Spice::init();
     Spice::ref().loadDefaultKernels();
@@ -145,6 +154,7 @@ bool OpenSpaceEngine::initialize() {
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
 
+    // Initialize OpenSPace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
