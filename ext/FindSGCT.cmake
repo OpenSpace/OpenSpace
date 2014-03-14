@@ -79,9 +79,9 @@ else()
     endif(APPLE)
 
     # check if debug or release version of sgct should be used
-    if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
         set(SGCT_NAME "${SGCT_NAME}d")
-    endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    endif(CMAKE_BUILD_TYPE MATCHES Debug)
     
     # Find the sgct library
     find_library(SGCT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}${SGCT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -117,13 +117,17 @@ endif (APPLE)
 if(UNIX AND NOT APPLE)
     find_package(XRandR)
     find_package(Xi)
+    find_package(Threads)
     if(NOT XRANDR_FOUND)
         message(FATAL_ERROR "XRandR not found!")
     endif(NOT XRANDR_FOUND)
     if(NOT XI_FOUND)
         message(FATAL_ERROR "Xi not found!")
     endif(NOT XI_FOUND)
-    set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES})
+    if(NOT THREADS_FOUND)
+        message(FATAL_ERROR "Threads not found!")
+    endif(NOT THREADS_FOUND)
+    set(SGCT_DEPENDENCIES ${SGCT_DEPENDENCIES} ${XRANDR_LIBRARIES} ${XI_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} Xxf86vm )
 endif(UNIX AND NOT APPLE)
 
 # includes
