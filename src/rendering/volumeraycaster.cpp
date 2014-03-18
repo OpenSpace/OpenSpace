@@ -47,7 +47,7 @@ VolumeRaycaster::~VolumeRaycaster() {}
 
 void VolumeRaycaster::initialize() {
 //	------ VOLUME READING ----------------
-	std::string filename = absPath("${BASE_PATH}/openspace-data/skull_256x256x256_8.raw");
+	std::string filename = absPath("${BASE_PATH}/openspace-data/skull.raw");
 
 	ghoul::RawVolumeReader::ReadHints hints; // TODO: Read hints from .dat file
 	hints._dimensions = glm::ivec3(256, 256, 256);
