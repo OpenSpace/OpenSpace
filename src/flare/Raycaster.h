@@ -21,7 +21,6 @@ TODO: Iteratively break away parts from it into other classes.
 #include <flare/KernelConstants.h>
 #include <boost/timer/timer.hpp>
 #include <flare/TSP.h>
-#include <flare/SGCTWinManager.h>
 
 namespace osp {
 

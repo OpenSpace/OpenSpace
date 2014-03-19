@@ -24,7 +24,6 @@
 #include <flare/Config.h>
 #include <stdint.h>
 #include <unistd.h> // sync()
-#include <flare/SGCTWinManager.h>
 
 using namespace osp;
 
@@ -95,7 +94,7 @@ Raycaster * Raycaster::New(Config *_config) {
 }
 
 bool Raycaster::Render(float _timestep) {
-  proj_ = SGCTWinManager::Instance()->ProjMatrix();
+  proj_ = sgct::Engine::instance()->getActiveProjectionMatrix();
 
   // Clear cache for benchmarking
   if (config_->ClearCache()) {
@@ -271,7 +270,7 @@ bool Raycaster::Render(float _timestep) {
 
 
   // Render to framebuffer using quad
-  glBindFramebuffer(GL_FRAMEBUFFER, SGCTWinManager::Instance()->FBOHandle());
+  glBindFramebuffer(GL_FRAMEBUFFER, sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
 
   if (!quadTex_->Bind(quadShaderProgram_, "quadTex", 0)) return false;
   
@@ -582,7 +581,7 @@ bool Raycaster::UpdateMatrices() {
   view_ = glm::rotate(glm::mat4(1.f), 180.f, glm::vec3(1.f, 0.f, 0.f));
   view_ = glm::translate(view_, glm::vec3(-0.5f, -0.5f, zoom_));
   */
-  glm::mat4 sgctView = SGCTWinManager::Instance()->ViewMatrix();
+  glm::mat4 sgctView = sgct::Engine::instance()->getActiveViewMatrix();
   view_ = glm::translate(sgctView, glm::vec3(translateX_, 
                                              translateY_,
                                              translateZ_));

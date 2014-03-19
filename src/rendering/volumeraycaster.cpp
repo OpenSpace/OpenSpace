@@ -34,10 +34,8 @@
 
 namespace openspace {
 
-float _stepSize = 0.05f;
+float _stepSize = 0.01f;
 float time = 0.0f;
-
-void keyCallback(int key, int action); // For testing. TODO: Remove
 
 VolumeRaycaster::VolumeRaycaster() {
 	initialize();
@@ -59,8 +57,6 @@ void VolumeRaycaster::initialize() {
 //	------ SETUP RAYCASTER ---------------
 	setupTwopassRaycaster();
 //	setupSinglepassRaycaster();
-
-	sgct::Engine::instance()->setKeyboardCallbackFunction(keyCallback); // For testing. TODO: Remove
 }
 
 void VolumeRaycaster::render() {
@@ -260,29 +256,6 @@ void VolumeRaycaster::renderWithSinglepassRaycaster(glm::mat4 modelViewProjectio
 	glDrawArrays(GL_POINTS, 0, 1);
 
 	_singlepassProgram->deactivate();
-}
-
-// For testing. TODO: Remove
-void keyCallback(int key, int action) {
-	switch( key ) {
-		case GLFW_KEY_UP:
-		case 'W':
-			if (action != GLFW_RELEASE) {
-				_stepSize += 0.005;
-				std::cout << "Stepsize: " << _stepSize << std::endl;
-			}
-			break;
-
-		case GLFW_KEY_DOWN:
-		case 'S':
-			if (action != GLFW_RELEASE) {
-				if (_stepSize > 0.007)
-					_stepSize -= 0.005;
-
-				std::cout << "Stepsize: " << _stepSize << std::endl;
-			}
-			break;
-	}
 }
 
 }// namespace openspace

@@ -2,6 +2,7 @@ bin/
 build/
 ext/SGCT
 .DS_Store
+*.swp
 
 # CMake stuff
 CMakeCache.txt

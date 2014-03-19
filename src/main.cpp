@@ -133,11 +133,11 @@ void mainMouseScrollCallback(double pos, double /*pos2*/) {
 }
 
 void mainEncodeFun() {
-    // TODO use encoding
+	OsEng.encode();
 }
 
 void mainDecodeFun() {
-    // TODO use decoding
+	OsEng.decode();
 }
 
 

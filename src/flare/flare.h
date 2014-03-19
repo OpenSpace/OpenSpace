@@ -22,96 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef __FLARE_H__
+#define __FLARE_H__
 
-#include "interaction/interactionhandler.h"
-#include "rendering/renderengine.h"
-#include <ghoul/misc/configurationmanager.h>
-
-#include <rendering/volumeraycaster.h>
-#include <flare/flare.h>
+#include <GL/glew.h>
+#include <sgct.h>
+#include <flare/Animator.h>
+#include <flare/Raycaster.h>
+#include <flare/Config.h>
 
 namespace openspace {
 
-class ScriptEngine;
-
-class OpenSpaceEngine {
+class Flare {
 public:
-    static void create(int argc, char** argv, int& newArgc, char**& newArgv);
-    static void destroy();
-    static OpenSpaceEngine& ref();
+	Flare();
+	~Flare();
 
-    bool initialize();
-
-    ghoul::ConfigurationManager& configurationManager();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
-
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
-
-    void encode();
-    void decode();
-
-private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
-
-    static OpenSpaceEngine* _engine;
-
-    VolumeRaycaster* _volumeRaycaster;
-    Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    ScriptEngine* _scriptEngine;
-};
-
-#define OsEng (openspace::OpenSpaceEngine::ref())
-
-    /*
-class RenderEngine: public Object {
-public:
-
-	// constructors & destructor
-	RenderEngine(int argc, char **argv);
-	~RenderEngine();
-	
-	// sgct wrapped functions
-	bool init();
-	void preSync();
-	void postSyncPreDraw();
 	void render();
+	void initNavigation();
+
+	void keyboard(int key, int action);
+	void mouse(int button, int action);
+	void preSync();
 	void postDraw();
-	void keyboardCallback(int key, int action);
-	void mouseButtonCallback(int key, int action);
-	void mousePosCallback(int x, int y);
-	void mouseScrollCallback(int pos);
+	void encode();
+	void decode();
 
-	// object extensions
-	virtual void encode();
-	virtual void decode();
-	
 private:
-	double masterTime_;
-	Camera *mainCamera_;
-	//MouseExternalControl *mouseControl_;
-	//KeyboardExternalControl *keyboardControl_;
+	void init();
 
-	SceneGraph *sceneGraph_;
-	glm::vec3 eyePosition_;
+	osp::Config* _config;
+	osp::Raycaster* _raycaster;
+	osp::Animator* _animator;
+
+	sgct::SharedBool _animationPaused;
+	sgct::SharedBool _fpsMode;
+	sgct::SharedFloat _elapsedTime;
+	sgct::SharedInt _manualTimestep;
+	sgct::SharedFloat _pitch;
+	sgct::SharedFloat _yaw;
+	sgct::SharedFloat _roll;
+	sgct::SharedFloat _translateX;
+	sgct::SharedFloat _translateY;
+	sgct::SharedFloat _translateZ;
+	sgct::SharedBool _reloadFlag;
+
+	float _oldTime;
+	float _currentTime;
+	bool _leftMouseButton;
+	double _currentMouseX;
+	double _currentMouseY;
+	double _lastMouseX;
+	double _lastMouseY;
 };
-*/
 
 } // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__
+#endif // __FLARE_H__
