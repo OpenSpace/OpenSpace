@@ -1,7 +1,7 @@
 
 // open space includes
-#include "util/time.h"
-#include "interaction/interactionhandler.h"
+#include <openspace/util/time.h>
+#include <openspace/interaction/interactionhandler.h>
 
 // std includes
 #include <cassert>
@@ -29,7 +29,7 @@ Time::~Time() {
 }
 
 void Time::init() {
-	assert( ! this_);
+	assert( this_ == nullptr);
 	 this_ = new Time();
 }
 

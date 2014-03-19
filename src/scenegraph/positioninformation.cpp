@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "positioninformation.h"
+#include <openspace/scenegraph/positioninformation.h>
 
 namespace openspace {
-
+    
 PositionInformation::PositionInformation() {}
+PositionInformation::PositionInformation(const ghoul::Dictionary& dictionary) {}
 PositionInformation::~PositionInformation() {}
      
 } // namespace openspace

@@ -1,0 +1,105 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * GHOUL                                                                                 *
+ * General Helpful Open Utility Library                                                  *
+ *                                                                                       *
+ * Copyright (c) 2012-2014                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include "gtest/gtest.h"
+
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/time.h>
+#include <openspace/util/spice.h>
+#include <openspace/util/factorymanager.h>
+
+class SceneGraphTest : public testing::Test {
+protected:
+    SceneGraphTest() {
+        _scenegraph = new openspace::SceneGraph;
+    }
+
+    ~SceneGraphTest() {
+        _scenegraph = new openspace::SceneGraph;
+    }
+
+    void reset() {
+        delete _scenegraph;
+        _scenegraph = new openspace::SceneGraph;
+    }
+
+    openspace::SceneGraph* _scenegraph;
+};
+
+TEST_F(SceneGraphTest, SceneGraphNode) {
+    
+    
+    openspace::SceneGraphNode* node = new openspace::SceneGraphNode(ghoul::Dictionary());
+    EXPECT_EQ(nullptr, node->getRenderable());
+    EXPECT_EQ(openspace::psc(), node->getPosition());
+    
+    delete node;
+    ghoul::Dictionary nodeDictionary;
+    ghoul::Dictionary positionDictionary;
+    //nodeDictionary.setValue("Renderable.Type", "RenderablePlanet");
+    positionDictionary.setValue("Type", "Static");
+    positionDictionary.setValue("Position.1", 1.0);
+    positionDictionary.setValue("Position.2", 1.0);
+    positionDictionary.setValue("Position.3", 1.0);
+    positionDictionary.setValue("Position.4", 1.0);
+    
+    nodeDictionary.setValue("Position", positionDictionary);
+    
+    node = new openspace::SceneGraphNode(nodeDictionary);
+    //EXPECT_TRUE(node->getRenderable());
+    EXPECT_EQ(openspace::psc(1.0,1.0,1.0,1.0), node->getPosition());
+    
+    delete node;
+}
+
+TEST_F(SceneGraphTest, Loading) {
+    
+    
+    // Should not successfully load a non existing scenegraph
+    EXPECT_FALSE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTestNonExisting")));
+    
+    // Existing scenegraph should load
+    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    
+    // This loading should fail regardless of existing or not since the
+    // scenegraph is already loaded
+    EXPECT_FALSE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+}
+
+TEST_F(SceneGraphTest, Reinitializing) {
+    
+    // Existing scenegraph should load
+    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    
+    _scenegraph->deinitialize();
+    
+    // Existing scenegraph should load
+    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+}
+
+
+
+

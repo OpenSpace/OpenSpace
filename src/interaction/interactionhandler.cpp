@@ -1,11 +1,11 @@
 
 // open space includes
-#include "interactionhandler.h"
-#include "deviceidentifier.h"
-#include "externalcontrol/randomexternalcontrol.h"
-#include "externalcontrol/joystickexternalcontrol.h"
-#include "query/query.h"
-#include "openspaceengine.h"
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/deviceidentifier.h>
+#include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
+#include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
+#include <openspace/query/query.h>
+#include <openspace/engine/openspaceengine.h>
 
 // std includes
 #include <cassert>

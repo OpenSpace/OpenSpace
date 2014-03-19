@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 // open space includes
-#include "scenegraph/scenegraph.h"
-#include "rendering/renderableplanet.h"
-#include "interaction/interactionhandler.h"
-#include "util/spice.h"
-#include <openspaceengine.h>
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/rendering/renderableplanet.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/util/spice.h>
+#include <openspace/engine/openspaceengine.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -50,32 +50,115 @@ namespace {
 }
 
 namespace openspace {
-	
-SceneGraph::SceneGraph() {
-	_root = nullptr;
+
+void printTree(SceneGraphNode* node, std::string pre = "") {
+    LDEBUGC("Tree", pre << node->nodeName());
+    auto children = node->children();
+    for(auto child: children) {
+        printTree(child, pre + "    ");
+    }
 }
+	
+SceneGraph::SceneGraph(): _focus("Root"), _position("Root"), _root(nullptr) {}
 
 SceneGraph::~SceneGraph() {
 
-	// deallocate the scene graph. Recursive deallocation will occur
-    // no need to remove from _nodes and _allNodes.
-	if(_root)
-		delete _root;
+	deinitialize();
 }
 
-void SceneGraph::initialize() {
-	// logger string
-	std::string _loggerCat = "SceneGraph::init";
+bool SceneGraph::initialize() {
+    LDEBUG("Initializing SceneGraph");
     
-    // The ${SCENEPATH} variable needs to be set and the scene definition needs to exist
-    assert(FileSys.fileExists("${SCENEPATH}/default.scene"));
+    using ghoul::opengl::ShaderObject;
+    using ghoul::opengl::ProgramObject;
+    using ghoul::opengl::ShaderManager;
     
-    // load the scene
-    loadFromModulePath();
+    ProgramObject* po = nullptr;
+    if (    OsEng.ref().configurationManager().hasKey("pscShader") &&
+            OsEng.ref().configurationManager().getValue("pscShader", po)) {
+        LWARNING("pscShader already in ConfigurationManager, deleting.");
+        delete po;
+        po = nullptr;
+    }
+    
+    ShaderObject* powerscale_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                   absPath("${SHADERS}/pscstandard_vs.glsl"),
+                                                   "PS Vertex"
+                                                   );
+    ShaderObject* powerscale_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                   absPath("${SHADERS}/pscstandard_fs.glsl"),
+                                                   "PS Fragment"
+                                                   );
+    
+    po = new ProgramObject;
+    po->attachObject(powerscale_vs);
+    po->attachObject(powerscale_fs);
+    
+    if( ! po->compileShaderObjects())
+        return false;
+    if( ! po->linkProgramObject())
+        return false;
+    
+    OsEng.ref().configurationManager().setValue("pscShader", po);
+    
+    // Initialize all nodes
+    for(auto node: _nodes) {
+        bool success = node->initialize();
+        if (success) {
+            LDEBUG(node->nodeName() << " initialized successfully!");
+        } else {
+            LWARNING(node->nodeName() << " not initialized.");
+        }
+    }
+    
+    // update the position of all nodes
+    update();
     
     // Calculate the bounding sphere for the scenegraph
 	_root->calculateBoundingSphere();
     
+    // set the camera position
+    auto focusIterator = _allNodes.find(_focus);
+    auto positionIterator = _allNodes.find(_position);
+    
+    if(focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
+        LDEBUG("Camera position is '"<< _position <<"', camera focus is '" << _focus << "'");
+        SceneGraphNode* focusNode = focusIterator->second;
+        SceneGraphNode* positionNode = positionIterator->second;
+        Camera* c = OsEng.interactionHandler().getCamera();
+        
+        // TODO: Make distance depend on radius
+        // TODO: Set distance and camera direction in some more smart way
+        // TODO: Set scaling dependent on the position and distance
+        // set position for camera
+        psc cameraPosition = positionNode->getPosition();
+        cameraPosition += psc(0.0,0.0,1.0,2.0);
+        c->setPosition(cameraPosition);
+        c->setCameraDirection(glm::vec3(0,0,-1));
+        c->setScaling(glm::vec2(1.0,0.0));
+        
+        // Set the focus node for the interactionhandler
+        OsEng.interactionHandler().setFocusNode(focusNode);
+    }
+
+    
+    return true;
+}
+
+bool SceneGraph::deinitialize() {
+
+    // deallocate the scene graph. Recursive deallocation will occur
+    if(_root)
+        delete _root;
+    _root = nullptr;
+    
+    _nodes.erase(_nodes.begin(), _nodes.end());
+    _allNodes.erase(_allNodes.begin(), _allNodes.end());
+    
+    _focus = "";
+    _position = "";
+    
+    return true;
 }
 
 void SceneGraph::update() {
@@ -92,26 +175,35 @@ void SceneGraph::render(Camera *camera) {
 	_root->render(camera);
 }
 
-void SceneGraph::loadFromModulePath() {
-    assert(_root == nullptr);
+bool SceneGraph::loadFromModulePath(const std::string& path) {
+   
+    LDEBUG("Loading scenegraph nodes");
+    if(_root != nullptr) {
+        LFATAL("Scenegraph already loaded");
+        return false;
+    }
+    
+    std::string defaultScene = path + "/default.scene";
+    if( ! FileSys.fileExists(defaultScene)) {
+        LFATAL("Could not find 'default.scene' in '" << path << "'");
+        return false;
+    }
     
     ghoul::Dictionary dictionary;
     lua_State* state = luaL_newstate();
     if (state == nullptr) {
         LFATAL("Error creating new Lua state: Memory allocation error");
-        return;
+        return false;
     }
     luaL_openlibs(state);
     
     // initialize the root node
-    _root = new SceneGraphNode;
-    _root->initialize();
+    _root = new SceneGraphNode(ghoul::Dictionary());
     _root->setName("Root");
     _nodes.push_back(_root);
     _allNodes.insert ( std::make_pair("Root", _root));
 
-
-    ghoul::lua::lua_loadIntoDictionary(state, &dictionary, absPath("${SCENEPATH}/default.scene"));
+    ghoul::lua::lua_loadIntoDictionary(state, &dictionary, defaultScene);
     
     ghoul::Dictionary moduleDictionary;
     if(dictionary.getValue("Modules", moduleDictionary)) {
@@ -120,13 +212,10 @@ void SceneGraph::loadFromModulePath() {
         for (auto key: keys) {
             std::string moduleFolder;
             if(moduleDictionary.getValue(key, moduleFolder)) {
-                loadModulesFromModulePath(absPath("${SCENEPATH}/"+moduleFolder));
+                loadModulesFromModulePath(path +"/"+moduleFolder);
             }
         }
     }
-    
-    // update relative positions for all loaded objects. Necessary for Spice position modules
-    update();
     
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     ghoul::Dictionary cameraDictionary;
@@ -135,37 +224,26 @@ void SceneGraph::loadFromModulePath() {
         std::string focus;
         std::string position;
         
-        if (cameraDictionary.getValue("Focus", focus) &&
-            cameraDictionary.getValue("Position", position)) {
-            LDEBUG("focus & position found " << focus << " " << position);
-            
+        if(cameraDictionary.hasKey("Focus") && cameraDictionary.getValue("Focus", focus)) {
             auto focusIterator = _allNodes.find(focus);
+            if (focusIterator != _allNodes.end()) {
+                _focus = focus;
+                LDEBUG("Setting camera focus to '"<< _focus << "'");
+            }
+        }
+        if(cameraDictionary.hasKey("Position") && cameraDictionary.getValue("Position", position)) {
             auto positionIterator = _allNodes.find(position);
-            
-            if(focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
-                LDEBUG("Setting position and focus from config");
-                SceneGraphNode* focusNode = focusIterator->second;
-                SceneGraphNode* positionNode = positionIterator->second;
-                Camera* c = OsEng.interactionHandler().getCamera();
-                
-                // TODO: Make distance depend on radius
-                // TODO: Set distance and camera direction in some more smart way
-                // TODO: Set scaling dependent on the position and distance
-                // set position for camera
-                psc cameraPosition = positionNode->getPosition();
-                cameraPosition += psc(0.0,0.0,1.0,2.0);
-                c->setPosition(cameraPosition);
-                c->setCameraDirection(glm::vec3(0,0,-1));
-                c->setScaling(glm::vec2(1.0,0.0));
-                
-                // Set the focus node for the interactionhandler
-                OsEng.interactionHandler().setFocusNode(focusNode);
+            if (positionIterator != _allNodes.end()) {
+                _position = position;
+                LDEBUG("Setting camera position to '"<< _position << "'");
             }
         }
     }
     
     // Close the Lua state
     lua_close(state);
+    
+    return true;
 }
 
 void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
@@ -208,9 +286,10 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
                 }
                 
                 // allocate SceneGraphNode and initialize with Dictionary
-                SceneGraphNode* node = new SceneGraphNode;
                 singleModuleDictionary.setValue("Path", modulePath);
-                if(node->initializeWithDictionary(&singleModuleDictionary)) {
+                SceneGraphNode* node = nullptr;
+                node = new SceneGraphNode(singleModuleDictionary);
+                if(node != nullptr) {
                     // add to internal data structures
                     _allNodes.insert(std::make_pair(moduleName, node));
                     _nodes.push_back(node);
@@ -218,9 +297,6 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
                     // set child and parent
                     SceneGraphNode* parentNode = parentIterator->second;
                     parentNode->addNode(node);
-                } else {
-                    LFATAL("Unable to initialize module '"<< moduleName <<"' using dictionary.");
-                    delete node;
                 }
             }
         }
@@ -228,6 +304,9 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
     
     // Close the Lua state
     lua_close(state);
+    
+    // Print the tree
+    printTree(_root);
 }
 
 void SceneGraph::printChildren() const {

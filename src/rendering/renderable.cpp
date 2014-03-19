@@ -1,12 +1,12 @@
 
 // open space includes
-#include "renderable.h"
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
+    
+Renderable::Renderable() {}
 	
-Renderable::Renderable() {
-
-}
+Renderable::Renderable(const ghoul::Dictionary& dictionary) {}
 
 Renderable::~Renderable() {
 

@@ -22,13 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "rendering/renderengine.h"
+#include <openspace/rendering/renderengine.h>
 
-#include "openspaceengine.h"
-#include "scenegraph/scenegraph.h"
-#include "util/camera.h"
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/util/camera.h>
 
 #include "sgct.h"
+
+#include <ghoul/filesystem/filesystem.h>
 
 namespace {
     const std::string _loggerCat = "RenderEngine";
@@ -56,6 +58,7 @@ bool RenderEngine::initialize() {
 
     // initialize scenegraph
     _sceneGraph = new SceneGraph;
+    _sceneGraph->loadFromModulePath(absPath("${SCENEPATH}"));
     _sceneGraph->initialize();
 
     return true;

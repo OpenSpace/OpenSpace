@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include <util/powerscaledsphere.h>
+#include <openspace/util/powerscaledsphere.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -108,8 +108,32 @@ PowerScaledSphere::PowerScaledSphere(const pss radius, int segments)
 		}
 	}
     
+    
+}
+
+PowerScaledSphere::~PowerScaledSphere() {
+    if(_varray)
+        delete[] _varray;
+    
+    if(_iarray)
+        delete[] _iarray;
+    
+    if(_vBufferID != 0)
+        glDeleteBuffers(1, &_vBufferID);
+    
+    if(_iBufferID != 0)
+        glDeleteBuffers(1, &_iBufferID);
+    
+    if(_vaoID != 0)
+        glDeleteVertexArrays(1, &_vaoID);
+}
+
+bool PowerScaledSphere::initialize() {
+
+    bool completeSuccess = true;
+
     // Initialize and upload to graphics card
-    GLuint errorID = glGetError();
+    GLuint errorID;
 	glGenVertexArrays(1, &_vaoID);
     
 	// First VAO setup
@@ -134,10 +158,12 @@ PowerScaledSphere::PowerScaledSphere(const pss radius, int segments)
 	if(_vBufferID == 0)
 	{
 		LERROR("Vertex buffer not initialized");
+        completeSuccess = false;
 	}
 	if(_iBufferID == 0)
 	{
 		LERROR("Index buffer not initialized");
+        completeSuccess = false;
 	}
     
 	glBindVertexArray(0);
@@ -147,21 +173,12 @@ PowerScaledSphere::PowerScaledSphere(const pss radius, int segments)
 	{
 		LERROR("OpenGL error: " << glewGetErrorString(errorID));
 		LERROR("Attempting to proceed anyway. Expect rendering errors or a crash.");
+        completeSuccess = false;
 	}
-}
-
-PowerScaledSphere::~PowerScaledSphere() {
-    if(_varray)
-        delete[] _varray;
-    
-    if(_iarray)
-        delete[] _iarray;
+    return completeSuccess;
 }
 
 void PowerScaledSphere::render() {
-    
-    
-    //LDEBUGC("gogo","power renders");
 	glBindVertexArray(_vaoID);		// select first VAO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
 	glDrawElements(_mode, _isize, GL_UNSIGNED_INT, BUFFER_OFFSET(0));

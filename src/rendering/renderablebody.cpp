@@ -1,6 +1,6 @@
 
 // open space includes
-#include "renderablebody.h"
+#include <openspace/rendering/renderablebody.h>
 
 namespace openspace {
 /*

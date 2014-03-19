@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "factorymanager.h"
+#include <openspace/util/factorymanager.h>
 
 #include <cassert>
 
-#include "rendering/renderableplanet.h"
-#include "scenegraph/constantpositioninformation.h"
-#include "scenegraph/spicepositioninformation.h"
+#include <openspace/rendering/renderableplanet.h>
+#include <openspace/scenegraph/constantpositioninformation.h>
+#include <openspace/scenegraph/spicepositioninformation.h>
 
 namespace openspace {
 
@@ -59,6 +59,7 @@ void FactoryManager::initialize() {
         registerClass<ConstantPositionInformation>("Static");
     _manager->factoryByType<PositionInformation>()->
         registerClass<SpicePositionInformation>("Spice");
+
 }
 
 void FactoryManager::deinitialize() {

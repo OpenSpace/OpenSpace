@@ -1,4 +1,4 @@
-#include "interaction/externalcontrol/randomexternalcontrol.h"
+#include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 
 #include <cstdio>
 #ifndef __WIN32__

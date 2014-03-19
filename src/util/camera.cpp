@@ -1,6 +1,6 @@
 
 // open space includes
-#include "camera.h"
+#include <openspace/util/camera.h>
 
 // sgct includes
 #include "sgct.h"

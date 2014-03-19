@@ -1,9 +1,9 @@
 
 // openspace stuff
-#include "util/spice.h"
-#include "util/time.h"
-#include "util/psc.h"
-#include "interaction/interactionhandler.h"
+#include <openspace/util/spice.h>
+#include <openspace/util/time.h>
+#include <openspace/util/psc.h>
+#include <openspace/interaction/interactionhandler.h>
 
 // spice
 #include "SpiceUsr.h"

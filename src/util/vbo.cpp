@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include "util/vbo.h"
+#include <openspace/util/vbo.h>
 
 // ghoul includes
 #include "ghoul/logging/logmanager.h"
@@ -122,7 +122,7 @@ void gl4::VBO::init()
 
 	}
 
-	GLuint errorID = glGetError();
+	GLuint errorID;
 	glGenVertexArrays(1, &_vaoID);
 
 	// First VAO setup

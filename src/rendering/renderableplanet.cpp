@@ -1,11 +1,11 @@
 
 // open space includes
-#include "renderableplanet.h"
+#include <openspace/rendering/renderableplanet.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <openspaceengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 
 namespace {
@@ -14,68 +14,81 @@ namespace {
 
 namespace openspace {
 
-RenderablePlanet::RenderablePlanet(): programObject_(nullptr), texture_(nullptr),
-                                      planet_(nullptr) {}
-
-RenderablePlanet::~RenderablePlanet() {
-	delete planet_;
-}
-
-bool RenderablePlanet::initialize() {
-    
-    if (programObject_ == nullptr) {
-        OsEng.ref().configurationManager().getValue("pscShader", programObject_);
-    }
-    if (programObject_ == nullptr) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool RenderablePlanet::initializeWithDictionary(ghoul::Dictionary* dictionary) {
-
-    if ( ! initialize()) {
-        return false;
-    }
-
+RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary): programObject_(nullptr),
+                                                                   _texturePath(""),
+                                                                   texture_(nullptr),
+                                                                   planet_(nullptr)
+{
     double value = 1.0f, exponent= 0.0f;
     double segments = 20.0;
     
-    if(dictionary->hasKey("Geometry.Radius.1"))
-        dictionary->getValue("Geometry.Radius.1", value);
+    if(dictionary.hasKey("Geometry.Radius.1"))
+        dictionary.getValue("Geometry.Radius.1", value);
     
-    if(dictionary->hasKey("Geometry.Radius.2"))
-        dictionary->getValue("Geometry.Radius.2", exponent);
+    if(dictionary.hasKey("Geometry.Radius.2"))
+        dictionary.getValue("Geometry.Radius.2", exponent);
     
-    if(dictionary->hasKey("Geometry.Segments"))
-        dictionary->getValue("Geometry.Segments", segments);
+    if(dictionary.hasKey("Geometry.Segments"))
+        dictionary.getValue("Geometry.Segments", segments);
     
     // create the power scaled scalar
     pss planetSize(value, exponent);
     setBoundingSphere(planetSize);
     
     // get path if available
-    std::string path;
-    dictionary->getValue("Path", path);
+    std::string path = "";
+    if(dictionary.hasKey("Path")) {
+       dictionary.getValue("Path", path);
+       path += "/";
+    }
     
-    if(dictionary->hasKey("Textures.Color")) {
+    if(dictionary.hasKey("Textures.Color")) {
         std::string texturePath;
-        dictionary->getValue("Textures.Color", texturePath);
-        std::string fullpath = path + "/" + texturePath;
-        texture_ = ghoul::opengl::loadTexture(fullpath);
-        if (texture_) {
-            LDEBUG("Loaded texture from '" << fullpath <<"'");
-            texture_->uploadTexture();
-        }
+        dictionary.getValue("Textures.Color", texturePath);
+        _texturePath = path + texturePath;
     }
     
     planet_ = new PowerScaledSphere(pss(value, exponent), static_cast<int>(segments));
+}
+
+RenderablePlanet::~RenderablePlanet() {
+    deinitialize();
+}
+
+bool RenderablePlanet::initialize() {
+    
+    bool completeSuccess = true;
+    if (programObject_ == nullptr) {
+        completeSuccess = OsEng.ref().configurationManager().getValue("pscShader", programObject_);
+    }
+    
+    if(_texturePath != "") {
+        texture_ = ghoul::opengl::loadTexture(_texturePath);
+        if (texture_) {
+            LDEBUG("Loaded texture from '" << _texturePath <<"'");
+            texture_->uploadTexture();
+        } else {
+            completeSuccess = false;
+        }
+    }
+    planet_->initialize();
+    
+    return completeSuccess;
+}
+
+
+
+bool RenderablePlanet::deinitialize() {
+    if(planet_)
+        delete planet_;
+    
+    if(texture_)
+        delete texture_;
     
     return true;
 }
 
-void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject = nullptr) {
+void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject) {
 	assert(programObject);
 	programObject_ = programObject;
 }

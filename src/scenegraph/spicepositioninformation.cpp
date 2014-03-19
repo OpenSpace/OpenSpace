@@ -22,30 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "spicepositioninformation.h"
+#include <openspace/scenegraph/spicepositioninformation.h>
 
-#include <util/spice.h>
+#include <openspace/util/spice.h>
 
 namespace openspace {
     
-SpicePositionInformation::SpicePositionInformation(): _target(0), _origin(0), _position() {}
+SpicePositionInformation::SpicePositionInformation(const ghoul::Dictionary& dictionary): _targetName(""),
+                                                                                   _originName(""),
+                                                                                   _target(0),
+                                                                                   _origin(0),
+                                                                                   _position()
+{
+    dictionary.getValue("Body", _targetName);
+    dictionary.getValue("Observer", _originName);
+}
 SpicePositionInformation::~SpicePositionInformation() {}
 
-bool SpicePositionInformation::initializeWithDictionary(ghoul::Dictionary* dictionary) {
+bool SpicePositionInformation::initialize() {
     
-    std::string body, observer;
-    if (dictionary->getValue("Body", body) && dictionary->getValue("Observer", observer)) {
+    if (_targetName != "" && _originName != "") {
         int bsuccess = 0;
         int osuccess = 0;
-        Spice::ref().bod_NameToInt(body, &_target, &bsuccess);
-        Spice::ref().bod_NameToInt(observer, &_origin, &osuccess);
+        Spice::ref().bod_NameToInt(_targetName, &_target, &bsuccess);
+        Spice::ref().bod_NameToInt(_originName, &_origin, &osuccess);
         
         if (bsuccess && osuccess) {
             return true;
         }
     }
     
-    return true;
+    return false;
 }
 
 const psc& SpicePositionInformation::position() const {

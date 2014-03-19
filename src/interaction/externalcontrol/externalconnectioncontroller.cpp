@@ -1,4 +1,4 @@
-#include "interaction/externalcontrol/externalconnectioncontroller.h"
+#include <openspace/interaction/externalcontrol/externalconnectioncontroller.h>
 
 namespace openspace {
 	

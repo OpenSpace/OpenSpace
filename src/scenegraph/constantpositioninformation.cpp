@@ -22,30 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "constantpositioninformation.h"
+#include <openspace/scenegraph/constantpositioninformation.h>
 
 namespace openspace {
 
-ConstantPositionInformation::ConstantPositionInformation() {}
+ConstantPositionInformation::ConstantPositionInformation(const ghoul::Dictionary& dictionary) {
+    double x = 0.0, y = 0.0, z = 0.0, e = 0.0;
+    if (dictionary.hasKey("Position.1")) {
+        dictionary.getValue("Position.1", x);
+        dictionary.getValue("Position.2", y);
+        dictionary.getValue("Position.3", z);
+        dictionary.getValue("Position.4", e);
+    }
+    _position = psc(x, y, z, e);
+}
 
 ConstantPositionInformation::~ConstantPositionInformation() {}
 
-bool ConstantPositionInformation::initializeWithDictionary(ghoul::Dictionary* dictionary) {
-    if ( dictionary == nullptr) {
-        _position = psc(0.0,0.0,0.0,0.0);
-        return true;
-    }
-
-    if (dictionary->hasKey("Position.1")) {
-        double x, y, z, e;
-        
-        if (dictionary->getValue("Position.1", x) && dictionary->getValue("Position.2", y) &&
-            dictionary->getValue("Position.3", z) && dictionary->getValue("Position.4", e)) {
-            _position = psc(x, y, z, e);
-            return true;
-        }
-    }
-    return false;
+bool ConstantPositionInformation::initialize() {
+    return true;
 }
 
 const psc& ConstantPositionInformation::position() const {    

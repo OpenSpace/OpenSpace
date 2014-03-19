@@ -23,8 +23,8 @@
  ****************************************************************************************/
  
 // open space includes
-#include "scenegraph/scenegraphnode.h"
-#include "util/spice.h"
+#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/util/spice.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
@@ -34,8 +34,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <scenegraph/constantpositioninformation.h>
-#include <openspaceengine.h>
+#include <openspace/scenegraph/constantpositioninformation.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
 	std::string _loggerCat = "SceneGraphNode";
@@ -43,100 +43,81 @@ namespace {
 
 namespace openspace {
 	
-SceneGraphNode::SceneGraphNode(): _parent(nullptr), _nodeName("Unnamed OpenSpace SceneGraphNode"),
-                                  _position(nullptr), _renderable(nullptr),
-                                  _renderableVisible(false), _boundingSphereVisible(false) {}
-
-SceneGraphNode::~SceneGraphNode() {
-	LDEBUG("Deallocating: " << _nodeName);
-
-	// deallocate the renderable
-	if(_renderable != nullptr)
-		delete _renderable;
-
-	// deallocate the child nodes and delete them, iterate c++11 style
-	for( auto child: _children)
-		delete child;
-}
-
-bool SceneGraphNode::_initialize() {
-    using ghoul::opengl::ShaderObject;
-    using ghoul::opengl::ProgramObject;
-    using ghoul::opengl::ShaderManager;
-    ShaderObject* powerscale_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                                                   absPath("${SHADERS}/pscstandard_vs.glsl"),
-                                                   "PS Vertex"
-                                                   );
-    ShaderObject* powerscale_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                                                   absPath("${SHADERS}/pscstandard_fs.glsl"),
-                                                   "PS Fragment"
-                                                   );
-    
-    ProgramObject* po = new ProgramObject;
-    po->attachObject(powerscale_vs);
-    po->attachObject(powerscale_fs);
-    
-    if( ! po->compileShaderObjects())
-        return false;
-    if( ! po->linkProgramObject())
-        return false;
-    
-    OsEng.ref().configurationManager().setValue("pscShader", po);
-    
-    return true;
-
-}
-
-bool SceneGraphNode::initialize() {
-    
-    if( ! _initialize()) {
-        return false;
-    }
-    
-    _position = new ConstantPositionInformation;
-    _position->initializeWithDictionary(nullptr);
-    
-    return true;
-}
-
-bool SceneGraphNode::initializeWithDictionary(ghoul::Dictionary* dictionary) {
-    
-    if( ! _initialize()) {
-        return false;
-    }
+SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary):
+    _parent(nullptr), _nodeName("Unnamed OpenSpace SceneGraphNode"), _position(nullptr),
+    _renderable(nullptr), _renderableVisible(false), _boundingSphereVisible(false)
+{
+    ghoul::Dictionary localDictionary = dictionary;
     
     // set the _nodeName if available
-    dictionary->getValue("Name", _nodeName);
+    localDictionary.getValue("Name", _nodeName);
     
-    std::string path;
-    dictionary->getValue("Path", path);
+    std::string path = "";
+    localDictionary.getValue("Path", path);
     
-    if(dictionary->hasKey("Renderable")) {
-        if(safeInitializeWithDictionary<Renderable>(&_renderable, "Renderable", dictionary, path)) {
-            LDEBUG("Successful initialization of renderable!");
-            if ( ! _renderable) {
-                LFATAL("But the renderable is not initialized for " << _nodeName);
-            }
+    if(localDictionary.hasKey("Renderable")) {
+        if(safeCreationWithDictionary<Renderable>(&_renderable, "Renderable", &localDictionary, path)) {
+            LDEBUG(_nodeName << ": Successful creation of renderable!");
         } else {
-            LDEBUG("Failed to initialize renderable!");
+            LDEBUG(_nodeName << ": Failed to create renderable!");
         }
     }
-    if(dictionary->hasKey("Position")) {
-        if(safeInitializeWithDictionary<PositionInformation>(&_position, "Position", dictionary, path)) {
-            LDEBUG("Successful initialization of position!");
-            if ( ! _position) {
-                LFATAL("But the position is not initialized for " << _nodeName);
-            }
+    if(localDictionary.hasKey("Position")) {
+        if(safeCreationWithDictionary<PositionInformation>(&_position, "Position", &localDictionary, path)) {
+            LDEBUG(_nodeName << ": Successful creation of position!");
         } else {
-            LDEBUG("Failed to initialize position!");
+            LDEBUG(_nodeName << ": Failed to create position!");
         }
     }
     
     if (_position == nullptr) {
-        _position = new ConstantPositionInformation;
-        _position->initializeWithDictionary(nullptr);
+        _position = new ConstantPositionInformation(ghoul::Dictionary());
+        _position->initialize();
     }
+}
 
+SceneGraphNode::~SceneGraphNode() {
+	deinitialize();
+}
+
+bool SceneGraphNode::initialize() {
+    if(_renderable != nullptr)
+		_renderable->initialize();
+    
+    // deallocate position
+    if(_position != nullptr)
+        _position->initialize();
+    return true;
+}
+
+
+bool SceneGraphNode::deinitialize() {
+    LDEBUG("Deinitialize: " << _nodeName);
+    
+	// deallocate the renderable
+	if(_renderable != nullptr)
+		delete _renderable;
+    
+    // deallocate position
+    if(_position != nullptr)
+        delete _position;
+    
+	// deallocate the child nodes and delete them, iterate c++11 style
+	for( auto child: _children)
+		delete child;
+    
+    // empty the children vector
+    _children.erase(_children.begin(), _children.end());
+    
+    // reset variables
+    _parent = nullptr;
+    _renderable = nullptr;
+    _position = nullptr;
+    _nodeName = "Unnamed OpenSpace SceneGraphNode";
+    _renderableVisible = false;
+    _boundingSphereVisible = false;
+    _boundingSphere = pss(0.0,0.0);
+    
     return true;
 }
 
@@ -193,6 +174,7 @@ void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
 		return;
 	}
 	if(_renderableVisible) {
+        //LDEBUG("Render");
 		_renderable->render(camera,thisPosition);
 	}
 
@@ -232,6 +214,18 @@ psc SceneGraphNode::getWorldPosition() const {
 	} else {
 		return _position->position();
 	}
+}
+
+    
+std::string SceneGraphNode::nodeName() const {
+    return _nodeName;
+}
+
+SceneGraphNode* SceneGraphNode::parent() const {
+    return _parent;
+}
+const std::vector<SceneGraphNode*>& SceneGraphNode::children() const {
+    return _children;
 }
 
 // bounding sphere
@@ -303,6 +297,26 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, con
 		return false;
 	}
 	
+}
+
+SceneGraphNode* SceneGraphNode::get(const std::string& name) {
+    if (_nodeName == name)
+        return this;
+    else
+        for (auto it : _children) {
+            SceneGraphNode* tmp = it->get(name);
+            if (tmp != nullptr) {
+                return tmp;
+            }
+        }
+    return nullptr;
+}
+
+void SceneGraphNode::print() const {
+    std::cout << _nodeName << std::endl;
+    for (auto it : _children) {
+        it->print();
+    }
 }
 	
 } // namespace openspace

@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include "util/sphere.h"
+#include <openspace/util/sphere.h>
 
 gl4::Sphere::Sphere(float radius, int segments, bool tessellation)
 {

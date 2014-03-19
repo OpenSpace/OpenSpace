@@ -24,7 +24,7 @@
 
 
 // open space includes
-#include "openspaceengine.h"
+#include <openspace/engine/openspaceengine.h>
 
 // sgct includes
 #include "sgct.h"
