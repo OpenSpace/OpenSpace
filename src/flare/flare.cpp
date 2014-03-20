@@ -44,15 +44,14 @@
 namespace openspace {
 using namespace osp;
 
-Flare::Flare() {
-	_leftMouseButton = false;
-	_currentMouseX = 0;
-	_currentMouseY = 0;
-	_lastMouseX = 0;
-	_lastMouseY = 0;
-	_oldTime = 0.f;
-	_currentTime = 0.f;
-
+Flare::Flare() : Renderable()
+	,	_leftMouseButton(false)
+	,	_currentMouseX(0)
+	,	_currentMouseY(0)
+	,	_lastMouseX(0)
+	,	_lastMouseY(0)
+	,	_oldTime(0.0f)
+	,	_currentTime(0.0f) {
 	initialize();
 }
 
@@ -63,7 +62,7 @@ Flare::~Flare() {
 	delete _animator;
 }
 
-void Flare::render() {
+void Flare::render(const Camera *camera, const psc &thisPosition) {
 	// Sync timestep
 	_animator->SetCurrentTimestep(static_cast<unsigned int>(_timeStep.getVal()));
 

@@ -27,19 +27,22 @@
 
 #include <GL/glew.h>
 #include <sgct.h>
+
+#include <rendering/renderable.h>
+
 #include <flare/Animator.h>
 #include <flare/Raycaster.h>
 #include <flare/Config.h>
 
 namespace openspace {
 
-class Flare {
+class Flare : public Renderable {
 public:
 	Flare();
 	~Flare();
 
 //	This is where the magic happens
-	void render();
+	void render(const Camera *camera = nullptr, const psc &thisPosition = psc(glm::vec3(0)));
 
 //	SGCT functions for cluster rendering and interaction.
 //	Called from OpenspaceEngine.
