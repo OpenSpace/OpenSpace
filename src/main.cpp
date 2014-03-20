@@ -48,10 +48,7 @@ int main(int argc, char **argv) {
     int newArgc;
     char** newArgv;
     openspace::OpenSpaceEngine::create(argc, argv, newArgc, newArgv);
-
-    
-	_sgctEngine = new sgct::Engine(newArgc, newArgv);
-	
+    _sgctEngine = new sgct::Engine(newArgc, newArgv);
     delete[] newArgv;
  	
     // Bind functions

@@ -58,6 +58,7 @@ private:
 	osp::Raycaster* _raycaster;
 	osp::Animator* _animator;
 
+	sgct::SharedInt _timeStep;
 	sgct::SharedBool _animationPaused;
 	sgct::SharedBool _fpsMode;
 	sgct::SharedFloat _elapsedTime;
