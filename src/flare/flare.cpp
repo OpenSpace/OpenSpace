@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <flare/flare.h>
 
 #include <flare/Renderer.h>
@@ -29,7 +53,7 @@ Flare::Flare() {
 	_oldTime = 0.f;
 	_currentTime = 0.f;
 
-	init();
+	initialize();
 }
 
 Flare::~Flare() {
@@ -40,11 +64,8 @@ Flare::~Flare() {
 }
 
 void Flare::render() {
-	// Go!
 	// Reload config if flag is set
-	if (_reloadFlag.getVal()) {
-		_raycaster->Reload();
-	}
+	if (_reloadFlag.getVal()) _raycaster->Reload();
 
 	// Set model and view params
 	_raycaster->SetModelParams(_pitch.getVal(),
@@ -53,15 +74,12 @@ void Flare::render() {
 	_raycaster->SetViewParams(_translateX.getVal(),
 			_translateY.getVal(),
 			_translateZ.getVal());
+
 	// Render
-	if (!_raycaster->Render(_elapsedTime.getVal())) {
-		exit(1);
-	}
+	if (!_raycaster->Render(_elapsedTime.getVal()))	exit(1);
 
 	// Save screenshot
-	if (_config->TakeScreenshot()) {
-		sgct::Engine::instance()->takeScreenshot();
-	}
+	if (_config->TakeScreenshot()) sgct::Engine::instance()->takeScreenshot();
 
 	// Update animator with synchronized time
 	_animator->SetPaused(_animationPaused.getVal());
@@ -70,8 +88,9 @@ void Flare::render() {
 	_animator->ManualTimestep(_manualTimestep.getVal());
 }
 
-void Flare::initNavigation() {
+void Flare::setupNavigationParameters() {
 	_animationPaused.setVal(false);
+	_reloadFlag.setVal(false);
 
 	// FPS mode should be OFF for cluster syncing
 	_fpsMode.setVal(true);
@@ -87,13 +106,12 @@ void Flare::initNavigation() {
 	_translateZ.setVal(_config->TranslateZ());
 }
 
-void Flare::init() {
+void Flare::initialize() {
 	// Start with reading a config file
 	_config = Config::New(absPath("${BASE_PATH}/config/flareConfig.txt"));
 	if (!_config) exit(1);
 
-	initNavigation();
-	_reloadFlag.setVal(false);
+	setupNavigationParameters();
 
 	// Get the viewport coordinates from OpenGL
 	GLint currentViewPort[4];

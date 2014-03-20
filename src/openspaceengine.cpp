@@ -56,6 +56,8 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _interactionHandler(nullptr)
     , _renderEngine(nullptr)
     , _scriptEngine(nullptr)
+	, _flare(nullptr)
+	, _volumeRaycaster(nullptr)
 {
 
 }
@@ -158,8 +160,10 @@ bool OpenSpaceEngine::initialize() {
 
     _engine->_interactionHandler->connectDevices();
 
+//    Choose rendering
 //    _volumeRaycaster = new VolumeRaycaster();
     _flare = new Flare();
+
     return true;
 }
 
@@ -189,10 +193,10 @@ void OpenSpaceEngine::preSynchronization() {
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
         
+        if (_flare) _flare->preSync();
+
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
-
-        _flare->preSync();
     }
 }
 
@@ -201,29 +205,30 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
-//	_volumeRaycaster->render();
-	_flare->render();
+	if (_volumeRaycaster) _volumeRaycaster->render();
+	if (_flare) _flare->render();
+
     _renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        _flare->postDraw();
+        if (_flare) _flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		_flare->keyboard(key, action);
+		if (_flare) _flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		_flare->mouse(key, action);
+		if (_flare) _flare->mouse(key, action);
 	}
 }
 
@@ -236,11 +241,11 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 }
 
 void OpenSpaceEngine::encode() {
-	_flare->encode();
+	if (_flare) _flare->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	_flare->decode();
+	if (_flare) _flare->decode();
 }
 
 } // namespace openspace

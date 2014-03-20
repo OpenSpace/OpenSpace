@@ -38,9 +38,11 @@ public:
 	Flare();
 	~Flare();
 
+//	This is where the magic happens
 	void render();
-	void initNavigation();
 
+//	SGCT functions for cluster rendering and interaction.
+//	Called from OpenspaceEngine.
 	void keyboard(int key, int action);
 	void mouse(int button, int action);
 	void preSync();
@@ -49,7 +51,8 @@ public:
 	void decode();
 
 private:
-	void init();
+	void initialize();
+	void setupNavigationParameters();
 
 	osp::Config* _config;
 	osp::Raycaster* _raycaster;

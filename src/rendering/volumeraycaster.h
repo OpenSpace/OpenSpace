@@ -36,6 +36,11 @@ using namespace ghoul::opengl;
 
 class VolumeRaycaster {
 public:
+	enum RaycasterType {
+		SINGLEPASS,
+		TWOPASS
+	};
+
 	VolumeRaycaster();
 	~VolumeRaycaster();
 	void initialize();
@@ -55,6 +60,9 @@ private:
 	ProgramObject *_fboProgram, *_twopassProgram, *_singlepassProgram;
 	sgct_utils::SGCTBox* _boundingBox;
 	GLuint _screenQuad, _cubeCenterVBO;
+
+	float _stepSize;
+	RaycasterType _type;
 };
 
 } // namespace openspace

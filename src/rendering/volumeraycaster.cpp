@@ -34,15 +34,13 @@
 
 namespace openspace {
 
-float _stepSize = 0.01f;
-float time = 0.0f;
-
-VolumeRaycaster::VolumeRaycaster() {
+VolumeRaycaster::VolumeRaycaster() : _stepSize(0.01f) , _type(TWOPASS) {
 	initialize();
 }
 
 VolumeRaycaster::~VolumeRaycaster() {}
 
+// Initializes the data and setups the correct type of ray caster
 void VolumeRaycaster::initialize() {
 //	------ VOLUME READING ----------------
 	std::string filename = absPath("${BASE_PATH}/openspace-data/skull.raw");
@@ -55,20 +53,23 @@ void VolumeRaycaster::initialize() {
 	_volume = rawReader.read(filename);
 
 //	------ SETUP RAYCASTER ---------------
-	setupTwopassRaycaster();
-//	setupSinglepassRaycaster();
+	if (_type == SINGLEPASS) 	setupSinglepassRaycaster();
+	if (_type == TWOPASS) 		setupTwopassRaycaster();
 }
 
+// Calculate MVP and use it to render with the chosen raycaster
 void VolumeRaycaster::render() {
 	float speed = 50.0f;
-	time = sgct::Engine::getTime();
+	float time = sgct::Engine::getTime();
 	glm::mat4 yRotation = glm::rotate(glm::mat4(1.0f), time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 MVP = sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*yRotation;
 
-	renderWithTwopassRaycaster(MVP);
-//	renderWithSinglepassRaycaster(MVP);
+	if (_type == SINGLEPASS) 	renderWithSinglepassRaycaster(MVP);
+	if (_type == TWOPASS) 		renderWithTwopassRaycaster(MVP);
 }
 
+// Initialize the two pass raycaster by specifying the bounding box,
+// full screen quad, FBO and the constant uniforms needed.
 void VolumeRaycaster::setupTwopassRaycaster() {
 //	------ SETUP GEOMETRY ----------------
 	const GLfloat size = 1.0f;
@@ -145,6 +146,9 @@ void VolumeRaycaster::setupTwopassRaycaster() {
 	_fbo->deactivate();
 }
 
+
+// Initialize the single pass raycaster by specifying the VBO for the
+// bounding box center, calculating the focallength and setting it as a uniform
 void VolumeRaycaster::setupSinglepassRaycaster() {
 	float p[] = {0, 0, 0};
 	glGenBuffers(1, &_cubeCenterVBO);
@@ -181,9 +185,10 @@ void VolumeRaycaster::setupSinglepassRaycaster() {
 	_singlepassProgram->setUniform("Density", 2);
 }
 
+// First renders a SGCT box to a FBO and then uses it as entry and exit points
+// for the second pass which does the actual ray casting.
 void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMatrix) {
 //	------ DRAW TO FBO -------------------
-	GLuint _sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
 	_fbo->activate();
 	_fboProgram->activate();
 	_fboProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
@@ -210,7 +215,8 @@ void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMa
 	_fbo->deactivate();
 
 //	------ DRAW TO SCREEN ----------------
-	glBindFramebuffer(GL_FRAMEBUFFER, _sgctFBO); // Re-bind SGCTs main FBO
+	glBindFramebuffer(GL_FRAMEBUFFER,
+			sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
 	_twopassProgram->activate();
 	_twopassProgram->setUniform("stepSize", _stepSize);
 
@@ -232,6 +238,9 @@ void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMa
 	_twopassProgram->deactivate();
 }
 
+// FIXME Get it working
+// Uses the cube center VBO with a geometry shader to create a bounding box
+// and then does the ray casting in the same pass in the fragment shader.
 void VolumeRaycaster::renderWithSinglepassRaycaster(glm::mat4 modelViewProjectionMatrix) {
 	glm::mat4 modelViewMatrix = sgct::Engine::instance()->getActiveModelViewMatrix();
 	glm::vec3 eyePos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
