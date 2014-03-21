@@ -161,8 +161,8 @@ bool OpenSpaceEngine::initialize() {
     _engine->_interactionHandler->connectDevices();
 
 //    Choose rendering
-//    _volumeRaycaster = new VolumeRaycaster();
-    _flare = new Flare();
+    _volumeRaycaster = new VolumeRaycaster();
+//    _flare = new Flare();
 
     return true;
 }
@@ -194,6 +194,7 @@ void OpenSpaceEngine::preSynchronization() {
         const double dt = sgct::Engine::instance()->getDt();
         
         if (_flare) _flare->preSync();
+        if (_volumeRaycaster) _volumeRaycaster->preSync();
 
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
@@ -229,6 +230,7 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
 		if (_flare) _flare->mouse(key, action);
+		if (_volumeRaycaster) _volumeRaycaster->mouse(key, action);
 	}
 }
 
@@ -242,10 +244,12 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 
 void OpenSpaceEngine::encode() {
 	if (_flare) _flare->encode();
+	if (_volumeRaycaster) _volumeRaycaster->encode();
 }
 
 void OpenSpaceEngine::decode() {
 	if (_flare) _flare->decode();
+	if (_volumeRaycaster) _volumeRaycaster->decode();
 }
 
 } // namespace openspace

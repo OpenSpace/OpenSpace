@@ -34,7 +34,18 @@
 
 namespace openspace {
 
-VolumeRaycaster::VolumeRaycaster() : _stepSize(0.01f) , _type(TWOPASS) {
+const float MOUSE_FACTOR = 0.05;
+
+VolumeRaycaster::VolumeRaycaster() : Renderable()
+	, _stepSize(0.01f)
+	, _type(SINGLEPASS)
+	, _leftMouseButton(false)
+	, _currentMouseX(0.0)
+	, _currentMouseY(0.0)
+	, _lastMouseX(0.0)
+	, _lastMouseY(0.0) {
+	_rotateX.setVal(0.0);
+	_rotateY.setVal(0.0);
 	initialize();
 }
 
@@ -58,11 +69,10 @@ void VolumeRaycaster::initialize() {
 }
 
 // Calculate MVP and use it to render with the chosen raycaster
-void VolumeRaycaster::render() {
-	float speed = 50.0f;
-	float time = sgct::Engine::getTime();
-	glm::mat4 yRotation = glm::rotate(glm::mat4(1.0f), time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 MVP = sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*yRotation;
+void VolumeRaycaster::render(const Camera *camera, const psc &thisPosition) {
+	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)_rotateX.getVal(), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotation = glm::rotate(rotation, (float)_rotateY.getVal(), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 MVP = sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*rotation;
 
 	if (_type == SINGLEPASS) 	renderWithSinglepassRaycaster(MVP);
 	if (_type == TWOPASS) 		renderWithTwopassRaycaster(MVP);
@@ -150,7 +160,7 @@ void VolumeRaycaster::setupTwopassRaycaster() {
 // Initialize the single pass raycaster by specifying the VBO for the
 // bounding box center, calculating the focallength and setting it as a uniform
 void VolumeRaycaster::setupSinglepassRaycaster() {
-	float p[] = {0, 0, 0};
+	float p[] = {0.0, 0.0, 0.0};
 	glGenBuffers(1, &_cubeCenterVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, _cubeCenterVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(p), &p[0], GL_STATIC_DRAW);
@@ -267,4 +277,32 @@ void VolumeRaycaster::renderWithSinglepassRaycaster(glm::mat4 modelViewProjectio
 	_singlepassProgram->deactivate();
 }
 
+void VolumeRaycaster::mouse(int button, int action) {
+	switch (button) {
+	case GLFW_MOUSE_BUTTON_LEFT:
+		_leftMouseButton = (action == GLFW_PRESS) ? true : false;
+		std::size_t winId = sgct::Engine::instance()->getActiveWindowPtr()->getId();
+		sgct::Engine::getMousePos(winId, &_lastMouseX, &_lastMouseY);
+	}
+}
+
+void VolumeRaycaster::preSync() {
+	// Update mouse
+	if (_leftMouseButton) {
+		std::size_t winId = sgct::Engine::instance()->getActiveWindowPtr()->getId();
+		sgct::Engine::getMousePos(winId ,&_currentMouseX, &_currentMouseY);
+		_rotateX.setVal(_rotateX.getVal() + MOUSE_FACTOR*(_currentMouseX-_lastMouseX));
+		_rotateY.setVal(_rotateY.getVal() + MOUSE_FACTOR*(_currentMouseY-_lastMouseY));
+	}
+}
+
+void VolumeRaycaster::encode() {
+	sgct::SharedData::instance()->writeDouble(&_rotateX);
+	sgct::SharedData::instance()->writeDouble(&_rotateY);
+}
+
+void VolumeRaycaster::decode() {
+	sgct::SharedData::instance()->readDouble(&_rotateX);
+	sgct::SharedData::instance()->readDouble(&_rotateY);
+}
 }// namespace openspace

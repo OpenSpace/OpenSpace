@@ -45,13 +45,13 @@ namespace openspace {
 using namespace osp;
 
 Flare::Flare() : Renderable()
-	,	_leftMouseButton(false)
-	,	_currentMouseX(0)
-	,	_currentMouseY(0)
-	,	_lastMouseX(0)
-	,	_lastMouseY(0)
-	,	_oldTime(0.0f)
-	,	_currentTime(0.0f) {
+	, _leftMouseButton(false)
+	, _currentMouseX(0)
+	, _currentMouseY(0)
+	, _lastMouseX(0)
+	, _lastMouseY(0)
+	, _oldTime(0.0f)
+	, _currentTime(0.0f) {
 	initialize();
 }
 

@@ -41,11 +41,11 @@ public:
 	Flare();
 	~Flare();
 
-//	This is where the magic happens
+	//	This is where the magic happens
 	void render(const Camera *camera = nullptr, const psc &thisPosition = psc(glm::vec3(0)));
 
-//	SGCT functions for cluster rendering and interaction.
-//	Called from OpenspaceEngine.
+	//	SGCT functions for cluster rendering and interaction.
+	//	Called from OpenspaceEngine.
 	void keyboard(int key, int action);
 	void mouse(int button, int action);
 	void preSync();

@@ -29,12 +29,14 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <rendering/renderable.h>
+
 #include <sgct.h>
 
 namespace openspace {
 using namespace ghoul::opengl;
 
-class VolumeRaycaster {
+class VolumeRaycaster : public Renderable{
 public:
 	enum RaycasterType {
 		SINGLEPASS,
@@ -44,7 +46,14 @@ public:
 	VolumeRaycaster();
 	~VolumeRaycaster();
 	void initialize();
-	void render();
+	void render(const Camera *camera = nullptr, const psc &thisPosition = psc(glm::vec3(0)));
+
+	//	SGCT functions for cluster rendering and interaction.
+	//	Called from OpenspaceEngine.
+	void mouse(int button, int action);
+	void preSync();
+	void encode();
+	void decode();
 
 private:
 	void setupTwopassRaycaster();
@@ -63,6 +72,15 @@ private:
 
 	float _stepSize;
 	RaycasterType _type;
+
+	// Interaction variables
+	sgct::SharedDouble _rotateX;
+	sgct::SharedDouble _rotateY;
+	bool _leftMouseButton;
+	double _currentMouseX;
+	double _currentMouseY;
+	double _lastMouseX;
+	double _lastMouseY;
 };
 
 } // namespace openspace
