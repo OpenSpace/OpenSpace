@@ -40,6 +40,12 @@
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
+#include <ghoul/opencl/clworksize.h>
+#include <ghoul/opencl/clcommandqueue.h>
+
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
@@ -130,12 +136,13 @@ bool OpenSpaceEngine::initialize() {
 #endif
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
+	FileSys.registerPathToken("${KERNELS}", "${BASE_PATH}/kernels");
 
     // Initialize configuration
     _configurationManager->initialize();
     _configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
     
-    // Detect and logOpenCL and OpenGL versions and available devices
+    // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
     SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
@@ -158,8 +165,44 @@ bool OpenSpaceEngine::initialize() {
 
     _engine->_interactionHandler->connectDevices();
 
-//    _volumeRaycaster = new VolumeRaycaster();
-    _flare = new Flare();
+     //_volumeRaycaster = new VolumeRaycaster();
+     //_flare = new Flare();
+    
+    ghoul::opencl::CLContext context;
+    if(context.createContextGLContext()) {
+        LDEBUG("Successfull CL/GL context creation");
+        
+        ghoul::opencl::CLProgram prog(&context, "${KERNELS}/test.cl");
+        prog.addDefinition("OFFSET", 3);
+        prog.build();
+        ghoul::opencl::CLKernel kernel = prog.createKernel("hello");
+
+        
+        #define DATA_SIZE 8
+        ghoul::opencl::CLWorkSize ws({DATA_SIZE}, {1});
+        ghoul::opencl::CLCommandQueue commands = context.createCommandQueue();
+        
+        cl_mem output = context.createBuffer(CL_MEM_WRITE_ONLY, sizeof(int) * DATA_SIZE);
+        
+        
+        kernel.setArgument(0, &output);
+        commands.enqueueKernelBlocking(kernel, ws);
+        commands.finish();
+        
+        
+        
+        int* out = new int[DATA_SIZE];
+        commands.enqueueReadBufferBlocking(output, sizeof(int) * DATA_SIZE, out);
+        commands.finish();
+        
+        for (int i = 0; i < DATA_SIZE; ++i) {
+            LDEBUG(out[i]);
+        }
+        
+        delete out;
+        
+    }
+    
     return true;
 }
 
@@ -192,7 +235,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
 
-        _flare->preSync();
+        //_flare->preSync();
     }
 }
 
@@ -202,28 +245,28 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
 void OpenSpaceEngine::render() {
 //	_volumeRaycaster->render();
-	_flare->render();
-    _renderEngine->render();
+    //_flare->render();
+    //_renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        _flare->postDraw();
+        //_flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		_flare->keyboard(key, action);
+		//_flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		_flare->mouse(key, action);
+		//_flare->mouse(key, action);
 	}
 }
 
@@ -236,11 +279,11 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 }
 
 void OpenSpaceEngine::encode() {
-	_flare->encode();
+	//_flare->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	_flare->decode();
+	//_flare->decode();
 }
 
 } // namespace openspace

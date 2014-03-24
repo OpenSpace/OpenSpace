@@ -30,7 +30,7 @@
 #include <ghoul/misc/configurationmanager.h>
 
 #include <rendering/volumeraycaster.h>
-#include <flare/flare.h>
+//#include <flare/flare.h>
 
 namespace openspace {
 
@@ -69,7 +69,7 @@ private:
     static OpenSpaceEngine* _engine;
 
     VolumeRaycaster* _volumeRaycaster;
-    Flare* _flare;
+    //Flare* _flare;
     ghoul::ConfigurationManager* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
