@@ -166,13 +166,13 @@ bool OpenSpaceEngine::initialize() {
     _engine->_interactionHandler->connectDevices();
 
      //_volumeRaycaster = new VolumeRaycaster();
-     //_flare = new Flare();
+     _flare = new Flare();
     
     ghoul::opencl::CLContext context;
-    if(context.createContextGLContext()) {
+    if(context.createContextFromGLContext()) {
         LDEBUG("Successfull CL/GL context creation");
         
-        ghoul::opencl::CLProgram prog(&context, "${KERNELS}/test.cl");
+        ghoul::opencl::CLProgram prog = context.createProgram("${KERNELS}/test.cl");
         prog.addDefinition("OFFSET", 3);
         prog.build();
         ghoul::opencl::CLKernel kernel = prog.createKernel("hello");
@@ -200,6 +200,8 @@ bool OpenSpaceEngine::initialize() {
         }
         
         delete out;
+        
+        //ghoul::opengl::Texture t(glm::size3_t(256,256,256));
         
     }
     
@@ -235,7 +237,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
 
-        //_flare->preSync();
+        _flare->preSync();
     }
 }
 
@@ -245,28 +247,28 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
 void OpenSpaceEngine::render() {
 //	_volumeRaycaster->render();
-    //_flare->render();
+    _flare->render();
     //_renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        //_flare->postDraw();
+        _flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		//_flare->keyboard(key, action);
+		_flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		//_flare->mouse(key, action);
+		_flare->mouse(key, action);
 	}
 }
 
@@ -279,11 +281,11 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 }
 
 void OpenSpaceEngine::encode() {
-	//_flare->encode();
+	_flare->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	//_flare->decode();
+	_flare->decode();
 }
 
 } // namespace openspace
