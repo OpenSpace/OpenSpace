@@ -68,14 +68,13 @@ void VolumeRaycaster::initialize() {
 	if (_type == TWOPASS) 		setupTwopassRaycaster();
 }
 
-// Calculate MVP and use it to render with the chosen raycaster
+// Calculate rotation and use it with the chosen raycaster
 void VolumeRaycaster::render(const Camera *camera, const psc &thisPosition) {
 	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)_rotateX.getVal(), glm::vec3(0.0f, 1.0f, 0.0f));
 	rotation = glm::rotate(rotation, (float)_rotateY.getVal(), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 MVP = sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*rotation;
 
-	if (_type == SINGLEPASS) 	renderWithSinglepassRaycaster(MVP);
-	if (_type == TWOPASS) 		renderWithTwopassRaycaster(MVP);
+	if (_type == SINGLEPASS) 	renderWithSinglepassRaycaster(rotation);
+	if (_type == TWOPASS) 		renderWithTwopassRaycaster(rotation);
 }
 
 // Initialize the two pass raycaster by specifying the bounding box,
@@ -125,6 +124,7 @@ void VolumeRaycaster::setupTwopassRaycaster() {
 	_fboProgram->attachObject(fragmentShader);
 	_fboProgram->compileShaderObjects();
 	_fboProgram->linkProgramObject();
+	_MVPLocation = _fboProgram->uniformLocation("modelViewProjection");
 
 	_twopassProgram = new ProgramObject("TwoPassProgram");
 	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
@@ -156,25 +156,35 @@ void VolumeRaycaster::setupTwopassRaycaster() {
 	_fbo->deactivate();
 }
 
-
+// TODO Fix bugs
 // Initialize the single pass raycaster by specifying the VBO for the
 // bounding box center, calculating the focallength and setting it as a uniform
 void VolumeRaycaster::setupSinglepassRaycaster() {
-	float p[] = {0.0, 0.0, 0.0};
+	const GLfloat cubeCenter[] = {0.0, 0.0, 0.0};
+	GLuint vertexPosition = 0;
+
+	glGenVertexArrays(1, &_VAO);
+	glBindVertexArray(_VAO);
+
 	glGenBuffers(1, &_cubeCenterVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, _cubeCenterVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(p), &p[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeCenter), cubeCenter, GL_STATIC_DRAW);
+	glVertexAttribPointer(vertexPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(vertexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	float topPlane, nearPlane;
+	float topPlane, bottomPlane;
 	topPlane = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getTop();
-	nearPlane = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getNear();
-	float FOV = float(atan(topPlane / nearPlane)) * (180.0 / 3.141592653589793) * 2.0f;
-	float focalLength = 1.0f / tan(FOV / 2);
+	bottomPlane = sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewport()->getFrustum()->getBottom();
+	float FOV = fabs(float(atan(topPlane / bottomPlane)) * 2.0f);
+	float focalLength = 1.0f / tan(FOV / 2.0f);
 	int x = sgct::Engine::instance()->getActiveXResolution();
 	int y = sgct::Engine::instance()->getActiveYResolution();
 
@@ -190,18 +200,24 @@ void VolumeRaycaster::setupSinglepassRaycaster() {
 	_singlepassProgram->attachObject(geometryShader);
 	_singlepassProgram->compileShaderObjects();
 	_singlepassProgram->linkProgramObject();
-	_singlepassProgram->setUniform("FocalLength", focalLength);
-	_singlepassProgram->setUniform("WindowSize", glm::vec2(x,y));
-	_singlepassProgram->setUniform("Density", 2);
+	_singlepassProgram->setUniform("focalLength", focalLength);
+	_singlepassProgram->setUniform("windowSize", glm::vec2(x,y));
+	_singlepassProgram->setUniform("texVolume", 2);
+	_singlepassProgram->setUniform("stepSize", _stepSize);
+	_MVPLocation = _singlepassProgram->uniformLocation("modelViewProjection");
+	_modelViewLocation = _singlepassProgram->uniformLocation("modelView");
+	_rayOriginLocation = _singlepassProgram->uniformLocation("rayOrigin");
 }
 
 // First renders a SGCT box to a FBO and then uses it as entry and exit points
 // for the second pass which does the actual ray casting.
-void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMatrix) {
+void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 rotation) {
 //	------ DRAW TO FBO -------------------
 	_fbo->activate();
 	_fboProgram->activate();
-	_fboProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
+	glm::mat4 modelViewProjectionMatrix =
+			sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*rotation;
+	_fboProgram->setUniform(_MVPLocation, modelViewProjectionMatrix);
 
 	//	Draw backface
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -228,7 +244,6 @@ void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMa
 	glBindFramebuffer(GL_FRAMEBUFFER,
 			sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
 	_twopassProgram->activate();
-	_twopassProgram->setUniform("stepSize", _stepSize);
 
 	//	 Set textures
 	glActiveTexture(GL_TEXTURE0);
@@ -248,31 +263,33 @@ void VolumeRaycaster::renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMa
 	_twopassProgram->deactivate();
 }
 
-// FIXME Get it working
+// TODO Fix bugs
 // Uses the cube center VBO with a geometry shader to create a bounding box
 // and then does the ray casting in the same pass in the fragment shader.
-void VolumeRaycaster::renderWithSinglepassRaycaster(glm::mat4 modelViewProjectionMatrix) {
-	glm::mat4 modelViewMatrix = sgct::Engine::instance()->getActiveModelViewMatrix();
+void VolumeRaycaster::renderWithSinglepassRaycaster(glm::mat4 rotation) {
+//	------ UNIFORMS ----------------------
+	glm::mat4 modelViewProjectionMatrix = sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*rotation;
+	_singlepassProgram->setUniform(_MVPLocation, modelViewProjectionMatrix);
+
+	glm::mat4 projection = sgct::Engine::instance()->getActiveProjectionMatrix();
+	glm::mat4 modelViewMatrix = glm::inverse(projection)*modelViewProjectionMatrix;
+	_singlepassProgram->setUniform(_modelViewLocation, modelViewMatrix);
+
 	glm::vec3 eyePos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
-	_singlepassProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
-	_singlepassProgram->setUniform("Modelview", modelViewMatrix);
 	glm::vec4 rayOrigin = glm::transpose(modelViewMatrix)*glm::vec4(eyePos, 1.0);
-	_singlepassProgram->setUniform("RayOrigin", glm::vec3(rayOrigin.x, rayOrigin.y, rayOrigin.z));
+	_singlepassProgram->setUniform(_rayOriginLocation, glm::vec3(rayOrigin.x, rayOrigin.y, rayOrigin.z));
 
+//	------ DRAW TO SCREEN ----------------
 	_singlepassProgram->activate();
-
-	glBindBuffer(GL_ARRAY_BUFFER, _cubeCenterVBO);
-	GLuint SlotPosition = 0;
-	glEnableVertexAttribArray(SlotPosition);
-	glVertexAttribPointer(SlotPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-	glEnableVertexAttribArray(SlotPosition);
 	glClearColor(0.2f, 0.2f, 0.2f, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glActiveTexture(GL_TEXTURE2);
 	_volume->bind();
 
+	glBindVertexArray(_VAO);
 	glDrawArrays(GL_POINTS, 0, 1);
+	glBindVertexArray(0);
 
 	_singlepassProgram->deactivate();
 }
@@ -286,6 +303,7 @@ void VolumeRaycaster::mouse(int button, int action) {
 	}
 }
 
+// TODO Fix proper trackball interaction
 void VolumeRaycaster::preSync() {
 	// Update mouse
 	if (_leftMouseButton) {

@@ -59,8 +59,8 @@ private:
 	void setupTwopassRaycaster();
 	void setupSinglepassRaycaster();
 
-	void renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMatrix);
-	void renderWithSinglepassRaycaster(glm::mat4 modelViewProjectionMatrix);
+	void renderWithTwopassRaycaster(glm::mat4 rotation);
+	void renderWithSinglepassRaycaster(glm::mat4 rotation);
 
 	FramebufferObject* _fbo;
 	Texture* _backTexture;
@@ -68,7 +68,8 @@ private:
 	Texture* _volume;
 	ProgramObject *_fboProgram, *_twopassProgram, *_singlepassProgram;
 	sgct_utils::SGCTBox* _boundingBox;
-	GLuint _screenQuad, _cubeCenterVBO;
+	GLuint _screenQuad, _cubeCenterVBO, _VAO;
+	GLint _MVPLocation, _modelViewLocation, _rayOriginLocation;
 
 	float _stepSize;
 	RaycasterType _type;
