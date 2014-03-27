@@ -3,10 +3,9 @@
  * 
  */
 
+#include <ghoul/logging/logmanager.h>
 #include <sgct.h>
-#ifndef _WIN32
-  #include <GL/glx.h>
-#endif
+#include <ghoul/opengl/ghoul_gl.h>
 #include <fstream>
 #include <flare/Raycaster.h>
 #include <flare/Texture2D.h>
@@ -24,6 +23,8 @@
 #include <flare/Config.h>
 #include <stdint.h>
 #include <unistd.h> // sync()
+
+
 
 using namespace osp;
 
@@ -348,7 +349,8 @@ bool Raycaster::InitPipeline() {
   // Allocate space for the brick request list
   // Use 0 as default value
   brickRequest_.resize(tsp_->NumTotalNodes(), 0);
-
+    
+    glFinish();
   // Run TSP traversal for timestep 0
   if (!LaunchTSPTraversal(0)) {
     ERROR("InitPipeline() - failed to launch TSP traversal");
@@ -357,7 +359,7 @@ bool Raycaster::InitPipeline() {
 
   // Finish TSP traversal and read results into brick request
   if (!clManager_->FinishProgram("TSPTraversal")) return false;
-
+    
   if (!clManager_->ReadBuffer("TSPTraversal", tspBrickListArg_,
                               reinterpret_cast<void*>(&brickRequest_[0]),
                               brickRequest_.size()*sizeof(int),
@@ -670,14 +672,14 @@ bool Raycaster::InitCL() {
   }
   if (!clManager_->BuildProgram("TSPTraversal")) return false;
   if (!clManager_->CreateKernel("TSPTraversal")) return false;
-  cl_mem cubeFrontCLmem;
+  //cl_mem cubeFrontCLmem;
   if (!clManager_->AddTexture("TSPTraversal", tspCubeFrontArg_, 
                               cubeFrontTex_, CLManager::TEXTURE_2D,
                               CLManager::READ_ONLY, cubeFrontCLmem)) {
     return false;
   }
 
-  cl_mem cubeBackCLmem;
+  //cl_mem cubeBackCLmem;
   if (!clManager_->AddTexture("TSPTraversal", tspCubeBackArg_,
                               cubeBackTex_, CLManager::TEXTURE_2D,
                               CLManager::READ_ONLY, cubeBackCLmem)) {
@@ -690,6 +692,7 @@ bool Raycaster::InitCL() {
                              CLManager::READ_ONLY)) return false;
 
 
+    LDEBUGC("RAYCASTER", config_->RaycasterKernelFilename());
   // Raycaster part
   if (!clManager_->CreateProgram("RaycasterTSP",
                                 config_->RaycasterKernelFilename())) {
@@ -769,7 +772,18 @@ bool Raycaster::UpdateKernelConstants() {
     static_cast<int>(tsp_->NumValuesPerNode());
   traversalConstants_.numOTNodes_ = static_cast<int>(tsp_->NumOTNodes());
   traversalConstants_.temporalTolerance_ = config_->TemporalErrorTolerance();
-  traversalConstants_.spatialTolerance_ = config_->SpatialErrorTolerance(); 
+  traversalConstants_.spatialTolerance_ = config_->SpatialErrorTolerance();
+  
+  
+    std::string _loggerCat = "KOLLA KONSTANTER";
+    LDEBUG("traversalConstants_.gridType_: " << traversalConstants_.gridType_);
+    LDEBUG("traversalConstants_.numOTNodes_: " << traversalConstants_.numOTNodes_);
+    LDEBUG("traversalConstants_.numTimesteps_: " << traversalConstants_.numTimesteps_);
+    LDEBUG("traversalConstants_.numValuesPerNode_: " << traversalConstants_.numValuesPerNode_);
+    LDEBUG("traversalConstants_.spatialTolerance_: " << traversalConstants_.spatialTolerance_);
+    LDEBUG("traversalConstants_.stepsize_: " << traversalConstants_.stepsize_);
+    LDEBUG("traversalConstants_.temporalTolerance_: " << traversalConstants_.temporalTolerance_);
+  
 
   if (!clManager_->AddBuffer("RaycasterTSP", constantsArg_,
                              reinterpret_cast<void*>(&kernelConstants_),

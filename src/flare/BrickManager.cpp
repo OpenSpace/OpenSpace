@@ -2,7 +2,8 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
 #include <flare/BrickManager.h>
 #include <flare/Texture3D.h>
 #include <flare/Config.h>
@@ -108,9 +109,9 @@ bool BrickManager::ReadHeader() {
   numValsTot_ = numBrickVals_*numBricksFrame_;
 
   fseeko(file_, 0, SEEK_END);
-  off fileSize = ftello(file_);
-  off calcFileSize = static_cast<off>(numBricksTree_) * 
-                     static_cast<off>(brickSize_) + dataPos_;
+  off_t fileSize = ftello(file_);
+  off_t calcFileSize = static_cast<off_t>(numBricksTree_) *
+                     static_cast<off_t>(brickSize_) + dataPos_;
 
   if (fileSize != calcFileSize) {
     ERROR("Sizes don't match");
@@ -366,9 +367,9 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
                                 static_cast<std::ios::pos_type>(brickSize_);
     */
 
-    off offset = dataPos_ + 
-                  static_cast<off>(brickIndex) * 
-                  static_cast<off>(brickSize_);
+    off_t offset = dataPos_ +
+                  static_cast<off_t>(brickIndex) *
+                  static_cast<off_t>(brickSize_);
 
     // Skip reading if all bricks in sequence is already in PBO
     if (inPBO != sequence) {

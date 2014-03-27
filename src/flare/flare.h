@@ -26,6 +26,7 @@
 #define __FLARE_H__
 
 #include <GL/glew.h>
+#include <ghoul/logging/logmanager.h>
 #include <sgct.h>
 #include <flare/Animator.h>
 #include <flare/Raycaster.h>

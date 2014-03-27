@@ -165,7 +165,7 @@ bool TSP::CalculateSpatialError() {
   for (unsigned int brick=0; brick<numTotalNodes_; ++brick) {
 
     // Offset in file
-    off offset = dataPos_ + static_cast<off>(brick*numBrickVals*sizeof(float));
+    off_t offset = dataPos_ + static_cast<off_t>(brick*numBrickVals*sizeof(float));
     fseeko(in, offset, SEEK_SET);
 
     fread(reinterpret_cast<void*>(&buffer[0]), 
@@ -212,7 +212,7 @@ bool TSP::CalculateSpatialError() {
            lb!=coveredLeafBricks.end(); ++lb) {
 
         // Read brick
-        off offset = dataPos_+static_cast<off>((*lb)*numBrickVals*sizeof(float));
+        off_t offset = dataPos_+static_cast<off_t>((*lb)*numBrickVals*sizeof(float));
         fseeko(in, offset, SEEK_SET);
         fread(reinterpret_cast<void*>(&buffer[0]),
               static_cast<size_t>(numBrickVals)*sizeof(float), 1, in);
@@ -323,7 +323,7 @@ bool TSP::CalculateTemporalError() {
     std::vector<float> voxelStdDevs(numBrickVals);
 
     // Read the whole brick to fill the averages
-    off offset = dataPos_+static_cast<off>(brick*numBrickVals*sizeof(float));
+    off_t offset = dataPos_+static_cast<off_t>(brick*numBrickVals*sizeof(float));
     fseeko(in, offset, SEEK_SET);
     fread(reinterpret_cast<void*>(&voxelAverages[0]), 
           static_cast<size_t>(numBrickVals)*sizeof(float), 1, in);
@@ -349,8 +349,8 @@ bool TSP::CalculateTemporalError() {
              leaf != coveredBricks.end(); ++leaf) {
 
           // Sample the leaves at the corresponding voxel position
-          off sampleOffset = dataPos_ +
-            static_cast<off>((*leaf*numBrickVals+voxel)*sizeof(float));
+          off_t sampleOffset = dataPos_ +
+            static_cast<off_t>((*leaf*numBrickVals+voxel)*sizeof(float));
           fseeko(in, sampleOffset, SEEK_SET);
           float sample;
           fread(reinterpret_cast<void*>(&sample), sizeof(float), 1, in);

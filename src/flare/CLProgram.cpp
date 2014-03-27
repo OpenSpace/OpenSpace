@@ -2,16 +2,18 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
+//#include <ghoul/opengl/ghoul_gl.h>
 #include <flare/CLProgram.h>
 #include <flare/CLManager.h>
 #include <flare/TransferFunction.h>
 #include <flare/Texture.h>
 #include <flare/Utils.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opencl/ghoul_cl.hpp>
 
-#ifdef _WIN32
-#include <CL/cl_gl.h>
-#endif
+namespace {
+    std::string _loggerCat = "CLProgram";
+}
 
 using namespace osp;
 
@@ -32,7 +34,7 @@ CLProgram::~CLProgram() {
 bool CLProgram::CreateProgram(std::string _fileName) {
   int numChars;
   char *source = ReadSource(_fileName, numChars);
-  program_ = clCreateProgramWithSource(clManager_->context_, 1, 
+  program_ = clCreateProgramWithSource(clManager_->_context, 1,
                                        (const char**)&source,
                                        NULL, &error_);
   free(source);
@@ -41,9 +43,11 @@ bool CLProgram::CreateProgram(std::string _fileName) {
 
 
 bool CLProgram::BuildProgram() {
+std::string options = "-cl-opt-disable";
   error_ = clBuildProgram(program_, (cl_uint)0,
-                          NULL, NULL, NULL, NULL);
+                          NULL, options.c_str(), NULL, NULL);
   if (error_ != CL_SUCCESS) {
+      LDEBUG("Could not build program " << getErrorString(error_));
     // Print build log
     char * log;
     size_t logSize = 0;
@@ -86,14 +90,26 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
       return false;
       break;
     case GL_TEXTURE_2D:
-      texture = clCreateFromGLTexture2D(clManager_->context_, _permissions, 
-                                        GL_TEXTURE_2D, 0, 
-                                        _texture->Handle(), &error_);
-      break;
-    case GL_TEXTURE_3D:
-      texture = clCreateFromGLTexture3D(clManager_->context_, _permissions, 
-                                        GL_TEXTURE_3D, 0, 
-                                        _texture->Handle(), &error_);
+#ifdef CL_VERSION_1_2
+          texture = clCreateFromGLTexture(clManager_->_context, _permissions,
+                                                GL_TEXTURE_2D, 0,
+                                                _texture->Handle(), &error_);
+#else
+          texture = clCreateFromGLTexture2D(clManager_->_context, _permissions,
+                                                  GL_TEXTURE_2D, 0,
+                                                  _texture->Handle(), &error_);
+#endif
+          break;
+      case GL_TEXTURE_3D:
+#ifdef CL_VERSION_1_2
+          texture = clCreateFromGLTexture(clManager_->_context, _permissions,
+                                                GL_TEXTURE_3D, 0,
+                                                _texture->Handle(), &error_);
+#else
+          texture = clCreateFromGLTexture2D(clManager_->_context, _permissions,
+                                                  GL_TEXTURE_3D, 0,
+                                                  _texture->Handle(), &error_);
+#endif
       break;
     default:
       ERROR("Unknown GL texture type");
@@ -125,14 +141,26 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
         return false;
         break;
     case GL_TEXTURE_2D:
-        _clTextureMem = clCreateFromGLTexture2D(clManager_->context_, _permissions,
+#ifdef CL_VERSION_1_2
+            _clTextureMem = clCreateFromGLTexture(clManager_->_context, _permissions,
             GL_TEXTURE_2D, 0,
             _texture->Handle(), &error_);
+#else
+        _clTextureMem = clCreateFromGLTexture2D(clManager_->_context, _permissions,
+            GL_TEXTURE_2D, 0,
+            _texture->Handle(), &error_);
+#endif
         break;
     case GL_TEXTURE_3D:
-        _clTextureMem = clCreateFromGLTexture3D(clManager_->context_, _permissions, 
-            GL_TEXTURE_3D, 0, 
-            _texture->Handle(), &error_);
+#ifdef CL_VERSION_1_2
+            _clTextureMem = clCreateFromGLTexture(clManager_->_context, _permissions,
+                                                  GL_TEXTURE_3D, 0,
+                                                  _texture->Handle(), &error_);
+#else
+            _clTextureMem = clCreateFromGLTexture2D(clManager_->_context, _permissions,
+                                                    GL_TEXTURE_3D, 0,
+                                                    _texture->Handle(), &error_);
+#endif
         break;
     default:
         ERROR("Unknown GL texture type");
@@ -176,7 +204,7 @@ bool CLProgram::AddBuffer(unsigned int _argNr,
   }
   MemArg ma;
   ma.size_ = sizeof(cl_mem);
-  ma.mem_ = clCreateBuffer(clManager_->context_,
+  ma.mem_ = clCreateBuffer(clManager_->_context,
                            _allocMode | _permissions,
                            (size_t)_sizeInBytes,
                            _hostPtr,
@@ -196,10 +224,15 @@ bool CLProgram::ReadBuffer(unsigned int _argNr,
     ERROR("ReadBuffer(): Could not find mem arg " << _argNr);
     return false;
   }
-  error_ = clEnqueueReadBuffer(
-    clManager_->commandQueues_[CLManager::EXECUTE],
-    memArgs_[(cl_uint)_argNr].mem_, _blocking, 0, _sizeInBytes,
-    _hostPtr, 0, NULL, NULL);
+  error_ = clEnqueueReadBuffer(clManager_->commandQueues_[CLManager::EXECUTE],
+                               memArgs_[(cl_uint)_argNr].mem_,
+                               _blocking,
+                               0,
+                               _sizeInBytes,
+                               _hostPtr,
+                               0,
+                               NULL,
+                               NULL);
   return clManager_->CheckSuccess(error_, "ReadBuffer");
 }
 
@@ -208,25 +241,36 @@ bool CLProgram::ReleaseBuffer(unsigned int _argNr) {
     ERROR("ReleaseBuffer(): Could not find mem arg " << _argNr);
     return false;
   }
+  //LDEBUG("Releasing memory");
   error_ = clReleaseMemObject(memArgs_[(cl_uint)_argNr].mem_);
   return clManager_->CheckSuccess(error_, "ReleaseBuffer");
 }
 
 
 bool CLProgram::PrepareProgram() {
-
+//ghoulFinishGL();
+/*
+#ifdef __APPLE__
+    
+    //glFlushRenderAPPLE();
+    glFinish();
+    //glFlush();
+#else
+*/
   // Let OpenCL take control of the shared GL textures
   for (auto it = OGLTextures_.begin(); it != OGLTextures_.end(); ++it) {
-    error_ = clEnqueueAcquireGLObjects(
-      clManager_->commandQueues_[CLManager::EXECUTE], 1, 
-      &(it->second), 0, NULL, NULL);
-
+    ghoul::opencl::CLCommandQueue q = clManager_->commandQueues_[CLManager::EXECUTE];
+    cl_command_queue clq = q;
+    error_ = clEnqueueAcquireGLObjects(clq, 1, &(it->second), 0, NULL, NULL);
+      
     if (!clManager_->CheckSuccess(error_, "PrepareProgram")) {
+        LDEBUG("error: " << getErrorString(error_));
       ERROR("Failed to enqueue GL object aqcuisition");
       ERROR("Failing object: " << it->first);
       return false;
     }
   }
+//#endif
 
   // Set up kernel arguments of non-shared items
   for (auto it=memArgs_.begin(); it!=memArgs_.end(); ++it) {
@@ -276,14 +320,14 @@ bool CLProgram::LaunchProgram(unsigned int _gx, unsigned int _gy,
 }
 
 bool CLProgram::FinishProgram() {
-
+    
+//#ifndef __APPLE__
   // Make sure kernel is done
   error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
   if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
     ERROR("Failed to finish program");
     return false;
   }
-
   // Release shared OGL objects
   for (auto it=OGLTextures_.begin(); it!=OGLTextures_.end(); ++it) {
     error_ = clEnqueueReleaseGLObjects(
@@ -295,7 +339,15 @@ bool CLProgram::FinishProgram() {
       return false;
     }
   }
-
+  /*
+#else
+    error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
+    if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
+        ERROR("Failed to finish program");
+        return false;
+    }
+#endif
+*/
   return true;
 }
 

@@ -2,14 +2,7 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
-#ifndef _WIN32
-	#include <GL/glx.h>
-#else
-	#include <Windows.h>
-	#include <WinUser.h>
-	#include <CL/cl_gl.h>
-#endif
+//#include <ghoul/opencl/ghoul_cl.hpp>
 #include <flare/CLManager.h>
 #include <flare/CLProgram.h>
 #include <flare/TransferFunction.h>
@@ -17,6 +10,11 @@
 #include <flare/Texture.h>
 #include <flare/Utils.h>
 #include <sstream>
+
+#include <ghoul/logging/logmanager.h>
+namespace {
+    std::string _loggerCat = "CLManager";
+}
 
 using namespace osp;
 
@@ -34,7 +32,7 @@ CLManager::~CLManager() {
   for (unsigned int i=0; i<NUM_QUEUE_INDICES; ++i) {
     clReleaseCommandQueue(commandQueues_[i]);
   }
-  clReleaseContext(context_);
+  //clReleaseContext(context_);
 }
 
 bool CLManager::InitPlatform() {
@@ -110,6 +108,7 @@ bool CLManager::InitDevices() {
 }
 
 bool CLManager::CreateContext() {
+
   if (numPlatforms_ < 1) {
     ERROR("Number of platforms < 1, can't create context");
     return false;
@@ -119,7 +118,7 @@ bool CLManager::CreateContext() {
     ERROR("Number of devices < 1, can't create context");
     return false;
   }
-
+/*
   // Create an OpenCL context with a reference to an OpenGL context
   cl_context_properties contextProperties[] = {
 #ifndef _WIN32
@@ -139,14 +138,21 @@ bool CLManager::CreateContext() {
   // TODO Support more than one device?
   context_ = clCreateContext(contextProperties, 1, &devices_[0], NULL,
                              NULL, &error_);
+ */
+    bool success = _context.createContextFromGLContext();
+    if(!success)
+        LDEBUG("Could not create GL context");
 
-  return CheckSuccess(error_, "CreateContext()");
+    devices_[0] = _context.device();
+    return success;
+  //return CheckSuccess(error_, "CreateContext()");
 }
 
 
 bool CLManager::CreateCommandQueue() {
   for (unsigned int i=0; i<NUM_QUEUE_INDICES; ++i) {
-    commandQueues_[i]=clCreateCommandQueue(context_, devices_[0], 0, &error_);
+      commandQueues_[i] = std::move(_context.createCommandQueue());
+    //commandQueues_[i]=clCreateCommandQueue(context_, devices_[0], 0, &error_);
     if (!CheckSuccess(error_, "CreateCommandQueue()")) {
       return false;
     }

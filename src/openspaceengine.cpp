@@ -171,6 +171,9 @@ bool OpenSpaceEngine::initialize() {
     ghoul::opencl::CLContext context;
     if(context.createContextFromGLContext()) {
         LDEBUG("Successfull CL/GL context creation");
+        {
+            ghoul::opencl::CLContext tmp = context;
+        }
         
         ghoul::opencl::CLProgram prog = context.createProgram("${KERNELS}/test.cl");
         prog.addDefinition("OFFSET", 3);

@@ -2,7 +2,9 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
+
+
+#include <ghoul/opengl/ghoul_gl.h>
 #include <flare/Texture.h>
 #include <flare/Utils.h>
 

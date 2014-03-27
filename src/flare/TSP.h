@@ -139,7 +139,7 @@ private:
 
   //std::ios::pos_type dataPos_;
   // Position of first data entry (after header)
-  off dataPos_;
+  off_t dataPos_;
 
   // Calculate weighted square distance between two RGBA colors
   // c2 should be an averaged or zero color

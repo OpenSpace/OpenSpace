@@ -6,11 +6,7 @@
 #ifndef CL_PROGRAM_H_
 #define CL_PROGRAM_H_
 
-#ifndef _WIN32
-#include <CL/cl.hpp>
-#else
-#include <CL/cl.h>
-#endif
+#include <ghoul/opencl/ghoul_cl.h>
 #include <map>
 #include <string>
 #include <flare/KernelConstants.h>

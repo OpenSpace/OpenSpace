@@ -2,7 +2,7 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <flare/Utils.h>
 
 unsigned int osp::CheckGLError(std::string _location) {

@@ -13,11 +13,7 @@ TODO: Iteratively break away parts from it into other classes.
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
-#ifndef _WIN32
-#include <CL/cl.hpp>
-#else
-#include <CL/cl.h>
-#endif
+#include <ghoul/opencl/ghoul_cl.h>
 #include <flare/KernelConstants.h>
 #include <boost/timer/timer.hpp>
 #include <flare/TSP.h>
@@ -189,6 +185,10 @@ private:
   
   // Timer and timer constants 
   boost::timer::cpu_timer timer_;
+  
+  
+  cl_mem cubeFrontCLmem;
+  cl_mem cubeBackCLmem;
 };
 
 }

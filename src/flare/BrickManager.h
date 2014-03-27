@@ -112,7 +112,7 @@ private:
 
   // C-style I/O
   std::FILE *file_;
-  off dataPos_;
+  off_t dataPos_;
 
   bool hasReadHeader_;
   bool atlasInitialized_;

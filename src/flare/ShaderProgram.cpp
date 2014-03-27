@@ -6,12 +6,7 @@
 // TODO abstraction of shader binder, maybe a templated ShaderBinder class?
 // or string values service
 // possibly make a common UniformType class to handle matrices, ints, floats
-#include <GL/glew.h>
-#ifndef _WIN32
-  #include <GL/glfw3.h>
-#else
-  #include <GL/glfw3.h>
-#endif
+#include <ghoul/opengl/ghoul_gl.h>
 #include <flare/Utils.h>
 #include <flare/ShaderProgram.h>
 #include <flare/Texture2D.h>

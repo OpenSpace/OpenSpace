@@ -17,6 +17,10 @@
 #include <vector>
 #include <iostream>
 
+namespace {
+    std::string _loggerCat = "Flare";
+}
+
 namespace openspace {
 using namespace osp;
 
@@ -39,6 +43,11 @@ Flare::~Flare() {
 	delete _animator;
 }
 
+void exit_msg(std::string m) {
+    LDEBUG(m);
+    exit(1);
+}
+
 void Flare::render() {
 	// Go!
 	// Reload config if flag is set
@@ -55,6 +64,7 @@ void Flare::render() {
 			_translateZ.getVal());
 	// Render
 	if (!_raycaster->Render(_elapsedTime.getVal())) {
+        LDEBUG("!_raycaster->Render(_elapsedTime.getVal())");
 		exit(1);
 	}
 
@@ -90,7 +100,10 @@ void Flare::initNavigation() {
 void Flare::init() {
 	// Start with reading a config file
 	_config = Config::New(absPath("${BASE_PATH}/config/flareConfig.txt"));
-	if (!_config) exit(1);
+	if (!_config) {
+        LDEBUG("!_Config");
+        exit(1);
+    }
 
 	initNavigation();
 	_reloadFlag.setVal(false);
@@ -115,26 +128,47 @@ void Flare::init() {
 
 	// Create TSP structure from file
 	TSP *tsp = TSP::New(_config);
-	if (!tsp->ReadHeader()) exit(1);
+	if (!tsp->ReadHeader()) {
+        LDEBUG("!tsp->ReadHeader()");
+        exit(1);
+    }
 	// Read cache if it exists, calculate otherwise
 	if (tsp->ReadCache()) {
 		INFO("\nUsing cached TSP file");
 	} else {
 		INFO("\nNo cached TSP file found");
-		if (!tsp->Construct()) exit(1);
+		if (!tsp->Construct()) {
+            LDEBUG("!tsp->Construct()");
+            exit(1);
+        }
 		if (_config->CalculateError() == 0) {
 			INFO("Not calculating errors");
 		} else {
-			if (!tsp->CalculateSpatialError()) exit(1);
-			if (!tsp->CalculateTemporalError()) exit(1);
-			if (!tsp->WriteCache()) exit(1);
+			if (!tsp->CalculateSpatialError()) {
+                LDEBUG("!tsp->CalculateSpatialError()");
+                    exit(1);
+            }
+			if (!tsp->CalculateTemporalError()) {
+                LDEBUG("!tsp->CalculateTemporalError()");
+                exit(1);
+            }
+			if (!tsp->WriteCache()) {
+                LDEBUG("!tsp->WriteCache()");
+                exit(1);
+            }
 		}
 	}
 
 	// Create brick manager and init (has to be done after init OpenGL!)
 	BrickManager *brickManager= BrickManager::New(_config);
-	if (!brickManager->ReadHeader()) exit(1);
-	if (!brickManager->InitAtlas()) exit(1);
+	if (!brickManager->ReadHeader()) {
+        LDEBUG("!brickManager->ReadHeader()");
+        exit(1);
+    }
+	if (!brickManager->InitAtlas()) {
+        LDEBUG("!brickManager->InitAtlas()");
+        exit(1);
+    }
 
 	// Create shaders for color cube and output textured quad
 	ShaderProgram *cubeShaderProgram = ShaderProgram::New();
@@ -167,8 +201,8 @@ void Flare::init() {
 	// Create transfer functions
 	TransferFunction *transferFunction = TransferFunction::New();
 	transferFunction->SetInFilename(_config->TFFilename());
-	if (!transferFunction->ReadFile()) exit(1);
-	if (!transferFunction->ConstructTexture()) exit(1);
+	if (!transferFunction->ReadFile()) exit_msg("!transferFunction->ReadFile()");
+	if (!transferFunction->ConstructTexture()) exit_msg("!transferFunction->ConstructTexture()");
 
 
 	// Create animator
@@ -183,15 +217,15 @@ void Flare::init() {
 	_raycaster = Raycaster::New(_config);
 	_raycaster->SetWinWidth(width);
 	_raycaster->SetWinHeight(height);
-	if (!_raycaster->InitCube()) exit(1);
-	if (!_raycaster->InitQuad()) exit(1);
+	if (!_raycaster->InitCube()) exit_msg("!_raycaster->InitCube()");
+	if (!_raycaster->InitQuad()) exit_msg("!_raycaster->InitQuad()");
 	_raycaster->SetBrickManager(brickManager);
 	_raycaster->SetCubeFrontTexture(cubeFrontTex);
 	_raycaster->SetCubeBackTexture(cubeBackTex);
 	_raycaster->SetQuadTexture(quadTex);
 	_raycaster->SetCubeShaderProgram(cubeShaderProgram);
 	_raycaster->SetQuadShaderProgram(quadShaderProgram);
-	if (!_raycaster->InitFramebuffers()) exit(1);
+	if (!_raycaster->InitFramebuffers()) exit_msg("!_raycaster->InitFramebuffers()");
 	_raycaster->SetAnimator(_animator);
 	_raycaster->AddTransferFunction(transferFunction);
 
@@ -199,8 +233,8 @@ void Flare::init() {
 	_raycaster->SetCLManager(clManager);
 	_raycaster->SetTSP(tsp);
 
-	if (!_raycaster->InitCL()) exit(1);
-	if (!_raycaster->InitPipeline()) exit(1);
+	if (!_raycaster->InitCL()) exit_msg("!_raycaster->InitCL()");
+	if (!_raycaster->InitPipeline()) exit_msg("!_raycaster->InitCL()");
 }
 
 void Flare::keyboard(int key, int action) {

@@ -6,11 +6,13 @@
 #ifndef CL_MANAGER_H_
 #define CL_MANAGER_H_
 
-#ifndef _WIN32
-#include <CL/cl.hpp>
-#else
-#include <CL/cl.h>
-#endif
+#include <ghoul/opencl/ghoul_cl.h>
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clcommandqueue.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
+#include <ghoul/opencl/clutil.h>
+#include <ghoul/opencl/clworksize.h>
 #include <map>
 #include <string>
 #include <flare/KernelConstants.h>
@@ -120,11 +122,13 @@ private:
   char deviceName_[MAX_NAME_LENGTH];
   char driverVersion_[MAX_NAME_LENGTH];
   char platformVersion_[MAX_NAME_LENGTH];
-  cl_context context_;
-  cl_command_queue commandQueues_[NUM_QUEUE_INDICES];
+  //cl_context context_;
+  ghoul::opencl::CLCommandQueue commandQueues_[NUM_QUEUE_INDICES];
 
   // Programs are mapped using strings
   std::map<std::string, CLProgram*> clPrograms_;
+  
+  ghoul::opencl::CLContext _context;
 
 };
 
