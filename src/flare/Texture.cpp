@@ -12,8 +12,7 @@ using namespace osp;
 
 Texture::Texture(std::vector<unsigned int> _dim) 
   : dim_(_dim),
-    handle_(0),
-    initialized_(false) {
+    initialized_(false), _texture(nullptr) {
 }
 
 unsigned int Texture::Dim(unsigned int _axis) const {
@@ -31,14 +30,16 @@ bool Texture::Bind(ShaderProgram *_shaderProgram, std::string _uniformName,
 }
 
 unsigned int Texture::Handle() const {
-  if (handle_ == 0) {
-    WARNING("Texture handle is zero");
+  if(_texture) {
+	 return *_texture;
   }
-  return handle_;
+  return 0;
 }
 
 Texture::~Texture() { 
-  glDeleteTextures(1, &handle_);
+	if(_texture) {
+	  delete _texture;
+	}
 }
 
 

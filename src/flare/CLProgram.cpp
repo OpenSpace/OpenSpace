@@ -106,7 +106,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
                                                 GL_TEXTURE_3D, 0,
                                                 _texture->Handle(), &error_);
 #else
-          texture = clCreateFromGLTexture2D(clManager_->_context, _permissions,
+          texture = clCreateFromGLTexture3D(clManager_->_context, _permissions,
                                                   GL_TEXTURE_3D, 0,
                                                   _texture->Handle(), &error_);
 #endif

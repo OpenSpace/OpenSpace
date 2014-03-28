@@ -8,7 +8,10 @@
 
 using namespace osp;
 
-Texture3D::Texture3D(std::vector<unsigned int> _dim) : Texture(_dim) {}
+Texture3D::Texture3D(std::vector<unsigned int> _dim) : Texture(_dim) {
+	_texture = new ghoul::opengl::Texture(glm::size3_t(_dim[0], _dim[1], _dim[2]),
+			ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+}
 
 Texture3D * Texture3D::New(std::vector<unsigned int> _dim) {
   if (_dim.size() != 3) {
@@ -36,25 +39,12 @@ bool Texture3D::Init(float *_data) {
     ERROR("Dims: " << dim_[0] << " " << dim_[1] << " " << dim_[2]);
     return false;
   }
- 
-  //glEnable(GL_TEXTURE_3D);
-  if (CheckGLError("Texture3D::Init(): enabling 3D texture") != GL_NO_ERROR) {
-    return false;
-  }
-  glGenTextures(1, &handle_);
-  glBindTexture(GL_TEXTURE_3D, handle_);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-               dim_[0], dim_[1], dim_[2],
-               0, GL_RED, GL_FLOAT, static_cast<GLvoid*>(_data));
-  glBindTexture(GL_TEXTURE_3D, 0);
-  
-  initialized_ = true;
 
+  if(_data != 0)
+  _texture->setPixelData(_data);
+	_texture->uploadTexture();
+
+  initialized_ = true;
   return (CheckGLError("Texture3D::Init()") == GL_NO_ERROR);
 }
 
@@ -68,7 +58,7 @@ bool Texture3D::UpdateSubRegion(unsigned int _xOffset,
                                 float *_data) {
 
   glGetError();
-  glBindTexture(GL_TEXTURE_3D, handle_);
+  glBindTexture(GL_TEXTURE_3D, *_texture);
   glTexSubImage3D(GL_TEXTURE_3D,
                   0,
                   _xOffset,

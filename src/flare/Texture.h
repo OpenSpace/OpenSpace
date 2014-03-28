@@ -8,6 +8,8 @@ Wrapper for OpenGL 1D, 2D and 3D textures
 
 #include <vector>
 #include <string>
+#include <ghoul/opengl/texture.h>
+
 
 namespace osp {
 
@@ -30,8 +32,8 @@ public:
 protected:
   Texture(std::vector<unsigned int> _dim);
   std::vector<unsigned int> dim_;
-  unsigned int handle_;
   bool initialized_;
+  ghoul::opengl::Texture* _texture;
 };
 
 }

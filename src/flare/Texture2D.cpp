@@ -10,6 +10,8 @@
 using namespace osp;
 
 Texture2D::Texture2D(std::vector<unsigned int> _dim) : Texture(_dim) {
+	_texture = new ghoul::opengl::Texture(glm::size3_t(_dim[0], _dim[1], 1),
+			ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
 }
 
 Texture2D * Texture2D::New(std::vector<unsigned int> _dim) {
@@ -28,27 +30,11 @@ bool Texture2D::Init(float *_data) {
     WARNING("Texture2D already initialized, doing nothing");
     return true;
   }
+  if(_data != 0)
+  _texture->setPixelData(_data);
+	_texture->uploadTexture();
 
-//  glEnable(GL_TEXTURE_2D);
-  glGenTextures(1, &handle_);
-  glBindTexture(GL_TEXTURE_2D, handle_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-  glTexImage2D(GL_TEXTURE_2D,           // target
-               0,                       // level
-               GL_RGBA,                 // internal format
-               dim_[0],                 // width
-               dim_[1],                 // height
-               0,                       // border
-               GL_RGBA,                 // format
-               GL_FLOAT,                // type
-               _data);                  // data
 
-  glBindTexture(GL_TEXTURE_2D, 0);
   initialized_ = true;
   return CheckGLError("Texture2D::Init()") == GL_NO_ERROR;
 }
@@ -76,7 +62,7 @@ bool Texture2D::Bind(ShaderProgram * _shaderProgram,
   }
 
   glUniform1i(location, _texUnit);
-  glBindTexture(GL_TEXTURE_2D, handle_);
+  glBindTexture(GL_TEXTURE_2D, *_texture);
   glUseProgram(0);
   return (CheckGLError("Texture2D::Bind() " + _uniformName) == GL_NO_ERROR);
 

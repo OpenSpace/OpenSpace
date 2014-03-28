@@ -8,6 +8,7 @@ Wrapper for OpenGL 2D Texture
 
 #include <flare/Texture.h>
 #include <vector>
+#include <ghoul/opengl/texture.h>
 
 namespace osp {
 
