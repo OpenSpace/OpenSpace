@@ -12,7 +12,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <math.h>
-#include <flare/Texture2D.h>
 
 using namespace osp;
 

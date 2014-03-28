@@ -7,7 +7,6 @@
 #include <flare/CLProgram.h>
 #include <flare/TransferFunction.h>
 #include <flare/TSP.h>
-#include <flare/Texture.h>
 #include <flare/Utils.h>
 #include <sstream>
 

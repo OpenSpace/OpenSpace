@@ -6,7 +6,6 @@
 #include <flare/CLProgram.h>
 #include <flare/CLManager.h>
 #include <flare/TransferFunction.h>
-#include <flare/Texture.h>
 #include <flare/Utils.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opencl/ghoul_cl.hpp>

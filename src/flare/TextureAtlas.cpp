@@ -4,8 +4,8 @@
  */
 
 #include <flare/TextureAtlas.h>
-#include <flare/Texture3D.h>
 #include <flare/Utils.h>
+#include <vector>
 
 using namespace osp;
 
@@ -62,8 +62,10 @@ bool TextureAtlas::Init() {
   dims.push_back(yBrickDim_);
   dims.push_back(zBrickDim_);
   
-  texture_ = Texture3D::New(dims);
-  if (!texture_->Init()) return false;
+  texture_ = new ghoul::opengl::Texture(glm::size3_t(xBrickDim_ * numBricksTotal,yBrickDim_,zBrickDim_), ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+  texture_->uploadTexture();
+  //texture_ = Texture3D::New(dims);
+  //if (!texture_->Init()) return false;
 
   return true;
 
@@ -78,12 +80,31 @@ bool TextureAtlas::UpdateBrick(unsigned int _brickIndex, real *_brickData) {
   unsigned int xSize = xBrickDim_;
   unsigned int ySize = yBrickDim_;
   unsigned int zSize = zBrickDim_;
+  glm::size3_t dim = texture_->dimensions();
+    glGetError();
+    glBindTexture(GL_TEXTURE_3D, *texture_);
+    glTexSubImage3D(GL_TEXTURE_3D,
+                    0,
+                    xOffset,
+                    yOffset,
+                    zOffset,
+                    xSize,
+                    ySize,
+                    zSize,
+                    GL_RED,
+                    GL_FLOAT,
+                    NULL);
+    glBindTexture(GL_TEXTURE_3D, 0);
+    
+    return (CheckGLError("Texture3D::UpdateSubRegion") == GL_NO_ERROR);
+/*
   if (!texture_->UpdateSubRegion(xOffset, yOffset, zOffset,
                                  xSize, ySize, zSize, _brickData)) {
     return false;
   }
 
   return true;
+  */
 }
 
 

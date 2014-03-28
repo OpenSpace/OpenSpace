@@ -3,9 +3,6 @@
 #include <ghoul/opengl/texture.h>
 
 #include <flare/Renderer.h>
-#include <flare/Texture.h>
-#include <flare/Texture2D.h>
-#include <flare/ShaderProgram.h>
 #include <flare/TransferFunction.h>
 #include <flare/BrickManager.h>
 #include <flare/TSP.h>

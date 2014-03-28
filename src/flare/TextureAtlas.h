@@ -6,11 +6,12 @@
 #ifndef TEXTUREATLAS_H_
 #define TEXTUREATLAS_H_
 
+#include <ghoul/opengl/texture.h>
+
 #define real float
 
 namespace osp {
 
-class Texture3D;
 
 class TextureAtlas {
 public:
@@ -29,7 +30,7 @@ public:
   // Assuming the brick data is ordered inorder for an individual brick
   bool UpdateBrick(unsigned int _brickIndex, real *_brickData);
 
-  Texture3D * TexturePtr() { return texture_; }
+  ghoul::opengl::Texture * TexturePtr() { return texture_; }
   
 private:
   TextureAtlas();
@@ -40,7 +41,7 @@ private:
   unsigned int xNumBricks_;
   unsigned int yNumBricks_;
   unsigned int zNumBricks_;
-  Texture3D * texture_;
+  ghoul::opengl::Texture * texture_;
 };
 
 }

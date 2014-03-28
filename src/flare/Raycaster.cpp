@@ -8,12 +8,9 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <fstream>
 #include <flare/Raycaster.h>
-#include <flare/Texture2D.h>
-#include <flare/Texture3D.h>
 #include <flare/TextureAtlas.h>
 #include <flare/BrickManager.h>
 #include <flare/Utils.h>
-#include <flare/ShaderProgram.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <flare/TransferFunction.h>
 #include <flare/Animator.h>

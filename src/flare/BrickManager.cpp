@@ -5,7 +5,6 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <flare/BrickManager.h>
-#include <flare/Texture3D.h>
 #include <flare/Config.h>
 #include <flare/Utils.h>
 #include <cmath>
