@@ -158,9 +158,11 @@ bool BrickManager::InitAtlas() {
   dims.push_back(atlasDim_);
   dims.push_back(atlasDim_);
   dims.push_back(atlasDim_);
-  textureAtlas_ = Texture3D::New(dims);
+  textureAtlas_ = new ghoul::opengl::Texture(glm::size3_t(atlasDim_, atlasDim_, atlasDim_), ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+  textureAtlas_->uploadTexture();
+  //textureAtlas_ = Texture3D::New(dims);
 
-  if (!textureAtlas_->Init()) return false;
+  //if (!textureAtlas_->Init()) return false;
   
   atlasInitialized_ = true;
 
@@ -449,11 +451,30 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
 
 bool BrickManager::PBOToAtlas(BUFFER_INDEX _pboIndex) {
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle_[_pboIndex]);
+  glm::size3_t dim = textureAtlas_->dimensions();
+    glGetError();
+    glBindTexture(GL_TEXTURE_3D, *textureAtlas_);
+    glTexSubImage3D(GL_TEXTURE_3D,
+                    0,
+                    0,
+                    0,
+                    0,
+                    dim[0],
+                    dim[1],
+                    dim[2],
+                    GL_RED,
+                    GL_FLOAT,
+                    NULL);
+    glBindTexture(GL_TEXTURE_3D, 0);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    
+    return (CheckGLError("Texture3D::UpdateSubRegion") == GL_NO_ERROR);
+  /*
   if (!textureAtlas_->UpdateSubRegion(0, 0, 0,
                                       textureAtlas_->Dim(0),
                                       textureAtlas_->Dim(1),
                                       textureAtlas_->Dim(2),
                                       0)) return false;
-   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-   return true;
+                                      */
+   //return true;
 }

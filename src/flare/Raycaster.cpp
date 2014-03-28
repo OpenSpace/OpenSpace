@@ -148,8 +148,9 @@ bool Raycaster::Render(float _timestep) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Render cube
-  glUseProgram(cubeShaderProgram_->Handle());
-  cubePositionAttrib_ = cubeShaderProgram_->GetAttribLocation("position");
+  cubeShaderProgram_->activate();
+  //glUseProgram(cubeShaderProgram_->Handle());
+  cubePositionAttrib_ = cubeShaderProgram_->attributeLocation("position");
   if (cubePositionAttrib_ == -1) {
     ERROR("Cube position attribute lookup failed");
     return false;
@@ -273,12 +274,30 @@ bool Raycaster::Render(float _timestep) {
   // Render to framebuffer using quad
   glBindFramebuffer(GL_FRAMEBUFFER, sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
 
-  if (!quadTex_->Bind(quadShaderProgram_, "quadTex", 0)) return false;
+    glGetError();
+    quadShaderProgram_->activate();
+    glActiveTexture(GL_TEXTURE0);
+    int location = quadShaderProgram_->uniformLocation("quadTex");
+    //int location = glGetUniformLocation(_shaderProgram->Handle(),_uniformName.c_str());
+    if (location == -1) {
+        ERROR("Uniform " << "quadTex" << " could not be found");
+        glUseProgram(0);
+        return false;
+    }
+    
+    glUniform1i(location, 0);
+    glBindTexture(GL_TEXTURE_2D, *quadTex_);
+    glUseProgram(0);
+
+
+  //if (!quadTex_->Bind(quadShaderProgram_, "quadTex", 0)) return false;
   
   glDisable(GL_CULL_FACE);
 
-  glUseProgram(quadShaderProgram_->Handle());
-  quadPositionAttrib_ = quadShaderProgram_->GetAttribLocation("position");
+    quadShaderProgram_->activate();
+    //glUseProgram(quadShaderProgram_->Handle());
+    //quadPositionAttrib_ = quadShaderProgram_->GetAttribLocation("position");
+    quadPositionAttrib_ = quadShaderProgram_->attributeLocation("position");
   if (quadPositionAttrib_ == -1) {
     ERROR("Quad position attribute lookup failed");
     return false;
@@ -512,7 +531,7 @@ bool Raycaster::InitFramebuffers() {
   glFramebufferTexture2D(GL_FRAMEBUFFER,
                          GL_COLOR_ATTACHMENT0,
                          GL_TEXTURE_2D,
-                         cubeFrontTex_->Handle(),
+                         *cubeFrontTex_,
                          0);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER,
                             GL_DEPTH_ATTACHMENT,
@@ -534,7 +553,7 @@ bool Raycaster::InitFramebuffers() {
   glFramebufferTexture2D(GL_FRAMEBUFFER,
                          GL_COLOR_ATTACHMENT0,
                          GL_TEXTURE_2D,
-                         cubeBackTex_->Handle(),
+                         *cubeBackTex_,
                          0);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER,
                             GL_DEPTH_ATTACHMENT,
@@ -590,23 +609,29 @@ bool Raycaster::UpdateMatrices() {
   return true;
 }
 
-bool Raycaster::BindTransformationMatrices(ShaderProgram * _program)
+bool Raycaster::BindTransformationMatrices(ghoul::opengl::ProgramObject * _program)
 {
+    if (!_program->setUniform("modelMatrix", model_)) return false;
+    if (!_program->setUniform("viewMatrix", view_)) return false;
+    if (!_program->setUniform("projectionMatrix", proj_)) return false;
+    
+/*
   if (!_program->BindMatrix4f("modelMatrix", &model_[0][0])) return false;
   if (!_program->BindMatrix4f("viewMatrix", &view_[0][0])) return false;
   if (!_program->BindMatrix4f("projectionMatrix", &proj_[0][0])) return false;
+  */
   return true;
 }
 
-void Raycaster::SetCubeFrontTexture(Texture2D *_cubeFrontTexture) {
+void Raycaster::SetCubeFrontTexture(ghoul::opengl::Texture  *_cubeFrontTexture) {
   cubeFrontTex_ = _cubeFrontTexture;
 }
 
-void Raycaster::SetCubeBackTexture(Texture2D *_cubeBackTexture) {
+void Raycaster::SetCubeBackTexture(ghoul::opengl::Texture  *_cubeBackTexture) {
   cubeBackTex_ = _cubeBackTexture;
 }
 
-void Raycaster::SetQuadTexture(Texture2D *_quadTexture) {
+void Raycaster::SetQuadTexture(ghoul::opengl::Texture *_quadTexture) {
   quadTex_ = _quadTexture;
 }
 
@@ -618,21 +643,19 @@ void Raycaster::SetTSP(TSP *_tsp) {
   tsp_ = _tsp;
 }
 
-void Raycaster::SetCubeShaderProgram(ShaderProgram *_cubeShaderProgram) {
+void Raycaster::SetCubeShaderProgram(ghoul::opengl::ProgramObject *_cubeShaderProgram) {
   cubeShaderProgram_ = _cubeShaderProgram;
 }
 
-void Raycaster::SetQuadShaderProgram(ShaderProgram *_quadShaderProgram) {
+void Raycaster::SetQuadShaderProgram(ghoul::opengl::ProgramObject *_quadShaderProgram) {
   quadShaderProgram_ = _quadShaderProgram;
 }
 
 bool Raycaster::ReloadShaders() {
   glGetError();
-  INFO("Reloading shaders");
-  if (!cubeShaderProgram_->DeleteShaders()) return false;
-  if (!quadShaderProgram_->DeleteShaders()) return false;
-  if (!cubeShaderProgram_->Reload()) return false;
-  if (!quadShaderProgram_->Reload()) return false;
+    INFO("Reloading shaders");
+    if (!cubeShaderProgram_->rebuildFromFile()) return false;
+    if (!quadShaderProgram_->rebuildFromFile()) return false;
   CheckGLError("ReloadShaders()");
   return true;
 }

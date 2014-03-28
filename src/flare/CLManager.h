@@ -19,7 +19,6 @@
 
 namespace osp {
 
-class Texture;
 class TransferFunction;
 class CLProgram;
 class TSP;
@@ -50,11 +49,11 @@ public:
   
   // Add an OpenGL texture to a program
   bool AddTexture(std::string _programName, unsigned int _argNr,
-                  Texture *_texture, TextureType _textureType,
+                  ghoul::opengl::Texture *_texture, TextureType _textureType,
                   Permissions _permissions);
 
   bool AddTexture(std::string _programName, unsigned int _argNr,
-      Texture *_texture, TextureType _textureType,
+      ghoul::opengl::Texture *_texture, TextureType _textureType,
       Permissions _permissions, cl_mem& _clTextureMem);
 
   bool AddTexture(std::string _programName, unsigned int _argNr,

@@ -1,5 +1,7 @@
 #include <flare/flare.h>
 
+#include <ghoul/opengl/texture.h>
+
 #include <flare/Renderer.h>
 #include <flare/Texture.h>
 #include <flare/Texture2D.h>
@@ -170,7 +172,49 @@ void Flare::init() {
         exit(1);
     }
 
+    using ghoul::opengl::ShaderObject;
+    using ghoul::opengl::ProgramObject;
+    
+    ProgramObject* cubeShaderProgram = nullptr;
+    ShaderObject* cubeShaderProgram_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                          _config->CubeShaderVertFilename(),
+                                                          "cubeShaderProgram_vs"
+                                                          );
+    ShaderObject* cubeShaderProgram_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                          _config->CubeShaderFragFilename(),
+                                                          "cubeShaderProgram_fs"
+                                                          );
+    
+    cubeShaderProgram = new ProgramObject;
+    cubeShaderProgram->attachObject(cubeShaderProgram_vs);
+    cubeShaderProgram->attachObject(cubeShaderProgram_fs);
+    
+    if( ! cubeShaderProgram->compileShaderObjects())
+        LDEBUG("Could not compile cubeShaderProgram");
+    if( ! cubeShaderProgram->linkProgramObject())
+        LDEBUG("Could not link cubeShaderProgram");
+    
+    ProgramObject* quadShaderProgram = nullptr;
+    ShaderObject* quadShaderProgram_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                          _config->QuadShaderVertFilename(),
+                                                          "quadShaderProgram_vs"
+                                                          );
+    ShaderObject* quadShaderProgram_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                          _config->QuadShaderFragFilename(),
+                                                          "quadShaderProgram_fs"
+                                                          );
+    
+    quadShaderProgram = new ProgramObject;
+    quadShaderProgram->attachObject(quadShaderProgram_vs);
+    quadShaderProgram->attachObject(quadShaderProgram_fs);
+    
+    if( ! quadShaderProgram->compileShaderObjects())
+        LDEBUG("Could not compile quadShaderProgram");
+    if( ! quadShaderProgram->linkProgramObject())
+        LDEBUG("Could not link quadShaderProgram");
+
 	// Create shaders for color cube and output textured quad
+    /*
 	ShaderProgram *cubeShaderProgram = ShaderProgram::New();
 	cubeShaderProgram->CreateShader(ShaderProgram::VERTEX,
 			_config->CubeShaderVertFilename());
@@ -184,19 +228,31 @@ void Flare::init() {
 	quadShaderProgram->CreateShader(ShaderProgram::FRAGMENT,
 			_config->QuadShaderFragFilename());
 	quadShaderProgram->CreateProgram();
+    */
 
 	// Create two textures to hold the color cube
 	std::vector<unsigned int> dimensions(2);
 	dimensions[0] = width;
 	dimensions[1] = height;
+    ghoul::opengl::Texture* cubeFrontTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    cubeFrontTex->uploadTexture();
+    ghoul::opengl::Texture* cubeBackTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                                       ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    cubeBackTex->uploadTexture();
+    /*
 	Texture2D *cubeFrontTex = Texture2D::New(dimensions);
 	Texture2D *cubeBackTex = Texture2D::New(dimensions);
 	cubeFrontTex->Init();
 	cubeBackTex->Init();
-
+*/
 	// Create an output texture to write to
-	Texture2D *quadTex = Texture2D::New(dimensions);
-	quadTex->Init();
+    ghoul::opengl::Texture* quadTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                                      ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    quadTex->uploadTexture();
+
+	//Texture2D *quadTex = Texture2D::New(dimensions);
+	//quadTex->Init();
 
 	// Create transfer functions
 	TransferFunction *transferFunction = TransferFunction::New();

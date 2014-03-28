@@ -13,10 +13,10 @@ TODO Use Texture1D for implementation when OpenCL 1.2 is supported
 #include <set>
 #include <string>
 #include <iostream>
+#include <ghoul/opengl/texture.h>
 
 namespace osp {
 
-class Texture2D;
   
 class TransferFunction {
 public:
@@ -48,7 +48,7 @@ public:
 
   // Accessors
   unsigned int Width() const { return width_; }
-  Texture2D * Texture() { return texture_; }
+  ghoul::opengl::Texture * Texture() { return texture_; }
   
   // TODO temp
   float * FloatData() { return floatData_; }
@@ -61,7 +61,7 @@ private:
   TransferFunction(const TransferFunction &_tf);
   float *floatData_;
   
-  Texture2D *texture_;
+  ghoul::opengl::Texture *texture_;
   unsigned int width_;
   float lower_;
   float upper_;

@@ -18,11 +18,11 @@ TODO: Iteratively break away parts from it into other classes.
 #include <boost/timer/timer.hpp>
 #include <flare/TSP.h>
 
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+
 namespace osp {
 
-class ShaderProgram;
-class Texture2D;
-class Texture3D;
 class TransferFunction;
 class Animator;
 class BrickManager;
@@ -60,7 +60,7 @@ public:
   // Update matrices with current view parameters
   bool UpdateMatrices();
   // Bind transformation matrices to a ShaderProgram
-  bool BindTransformationMatrices(ShaderProgram *_program);
+  bool BindTransformationMatrices(ghoul::opengl::ProgramObject *_program);
   // Read kernel config from file and voxel data,
   // update the constants that get sent to the kernel every frame
   bool UpdateKernelConfig();
@@ -70,16 +70,16 @@ public:
   // TODO Actually support and make use of multiple TFs
   void AddTransferFunction(TransferFunction *_transferFunction);
 
-  Texture2D * CubeFrontTexture() const { return cubeFrontTex_; }
-  Texture2D * CubeBackTexture() const { return cubeBackTex_; }
-  Texture2D * QuadTexture() const { return quadTex_; }
+  ghoul::opengl::Texture * CubeFrontTexture() const { return cubeFrontTex_; }
+  ghoul::opengl::Texture  * CubeBackTexture() const { return cubeBackTex_; }
+  ghoul::opengl::Texture * QuadTexture() const { return quadTex_; }
 
   void SetKernelConfigFilename(const std::string &_filename);
-  void SetCubeFrontTexture(Texture2D *_cubeFrontTexture);
-  void SetCubeBackTexture(Texture2D *_cubeBackTexture);
-  void SetQuadTexture(Texture2D *_quadTexture);
-  void SetCubeShaderProgram(ShaderProgram *_cubeShaderProgram);
-  void SetQuadShaderProgram(ShaderProgram *_quadShaderProgram);
+  void SetCubeFrontTexture(ghoul::opengl::Texture  *_cubeFrontTexture);
+  void SetCubeBackTexture(ghoul::opengl::Texture  *_cubeBackTexture);
+  void SetQuadTexture(ghoul::opengl::Texture *_quadTexture);
+  void SetCubeShaderProgram(ghoul::opengl::ProgramObject *_cubeShaderProgram);
+  void SetQuadShaderProgram(ghoul::opengl::ProgramObject *_quadShaderProgram);
   void SetAnimator(Animator *_animator);
   void SetCLManager(CLManager *_clManager);
   void SetBrickManager(BrickManager *_brickManager);
@@ -108,13 +108,13 @@ private:
   unsigned int cubePositionAttrib_;
   unsigned int quadPositionAttrib_;
   // Shaders
-  ShaderProgram *cubeShaderProgram_;
-  ShaderProgram *quadShaderProgram_;
+  ghoul::opengl::ProgramObject *cubeShaderProgram_;
+  ghoul::opengl::ProgramObject *quadShaderProgram_;
   // Textures
-  Texture2D *cubeFrontTex_;
-  Texture2D *cubeBackTex_;
-  Texture2D *quadTex_;
-  Texture3D *volumeTex_;
+  ghoul::opengl::Texture  *cubeFrontTex_;
+  ghoul::opengl::Texture  *cubeBackTex_;
+  ghoul::opengl::Texture *quadTex_;
+  ghoul::opengl::Texture *volumeTex_;
   // Model params
   float pitch_;
   float yaw_;

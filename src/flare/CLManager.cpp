@@ -196,7 +196,7 @@ bool CLManager::CreateKernel(std::string _programName) {
 
 
 bool CLManager::AddTexture(std::string _programName, unsigned int _argNr,
-                           Texture *_texture, TextureType _textureType,
+                           ghoul::opengl::Texture *_texture, TextureType _textureType,
                            Permissions _permissions) {
     cl_mem_flags flag = ConvertPermissions(_permissions);
 
@@ -226,7 +226,7 @@ bool CLManager::AddTexture(std::string _programName, unsigned int _argNr,
 }
 
 bool CLManager::AddTexture(std::string _programName, unsigned int _argNr,
-                           Texture *_texture, TextureType _textureType,
+                           ghoul::opengl::Texture *_texture, TextureType _textureType,
                            Permissions _permissions, cl_mem& _clTextureMem) {
 
 	cl_mem_flags flag = ConvertPermissions(_permissions);

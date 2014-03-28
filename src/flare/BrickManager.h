@@ -13,6 +13,7 @@
 #include <fstream>
 #include <boost/timer/timer.hpp>
 #include <stdio.h>
+#include <ghoul/opengl/texture.h>
 
 // Make sure we get 64 bits for offset
 #define _FILE_OFFSET_BITS 64
@@ -21,7 +22,6 @@
 
 namespace osp {
 
-class Texture3D;
 class Config;
 
 class BrickManager {
@@ -53,7 +53,7 @@ public:
     return brickLists_[_bufIdx]; 
   }
 
-  Texture3D * TextureAtlas() { return textureAtlas_; }
+  ghoul::opengl::Texture * TextureAtlas() { return textureAtlas_; }
 
   // Header accessors
   unsigned int GridType() const { return gridType_; }
@@ -106,7 +106,7 @@ private:
   int zCoord_;
 
   // Texture where the actual atlas is kept
-  Texture3D *textureAtlas_;
+  ghoul::opengl::Texture *textureAtlas_;
 
   std::vector<std::vector<int> > brickLists_;
 

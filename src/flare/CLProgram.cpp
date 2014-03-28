@@ -74,7 +74,7 @@ bool CLProgram::CreateKernel() {
 }
 
 
-bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
+bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture,
                            GLuint _textureType,
                            cl_mem_flags _permissions) {
 
@@ -93,22 +93,22 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
 #ifdef CL_VERSION_1_2
           texture = clCreateFromGLTexture(clManager_->_context, _permissions,
                                                 GL_TEXTURE_2D, 0,
-                                                _texture->Handle(), &error_);
+                                                *_texture, &error_);
 #else
           texture = clCreateFromGLTexture2D(clManager_->_context, _permissions,
                                                   GL_TEXTURE_2D, 0,
-                                                  _texture->Handle(), &error_);
+                                                  *_texture, &error_);
 #endif
           break;
       case GL_TEXTURE_3D:
 #ifdef CL_VERSION_1_2
           texture = clCreateFromGLTexture(clManager_->_context, _permissions,
                                                 GL_TEXTURE_3D, 0,
-                                                _texture->Handle(), &error_);
+                                                *_texture, &error_);
 #else
           texture = clCreateFromGLTexture3D(clManager_->_context, _permissions,
                                                   GL_TEXTURE_3D, 0,
-                                                  _texture->Handle(), &error_);
+                                                  *_texture, &error_);
 #endif
       break;
     default:
@@ -125,7 +125,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
 }
 
 
-bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
+bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture,
                            GLuint _textureType,
                            cl_mem_flags _permissions,
                            cl_mem& _clTextureMem) {
@@ -144,22 +144,22 @@ bool CLProgram::AddTexture(unsigned int _argNr, Texture *_texture,
 #ifdef CL_VERSION_1_2
             _clTextureMem = clCreateFromGLTexture(clManager_->_context, _permissions,
             GL_TEXTURE_2D, 0,
-            _texture->Handle(), &error_);
+            *_texture, &error_);
 #else
         _clTextureMem = clCreateFromGLTexture2D(clManager_->_context, _permissions,
             GL_TEXTURE_2D, 0,
-            _texture->Handle(), &error_);
+            *_texture, &error_);
 #endif
         break;
     case GL_TEXTURE_3D:
 #ifdef CL_VERSION_1_2
             _clTextureMem = clCreateFromGLTexture(clManager_->_context, _permissions,
                                                   GL_TEXTURE_3D, 0,
-                                                  _texture->Handle(), &error_);
+                                                  *_texture, &error_);
 #else
             _clTextureMem = clCreateFromGLTexture2D(clManager_->_context, _permissions,
                                                     GL_TEXTURE_3D, 0,
-                                                    _texture->Handle(), &error_);
+                                                    *_texture, &error_);
 #endif
         break;
     default:

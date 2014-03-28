@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <flare/KernelConstants.h>
+#include <ghoul/opengl/texture.h>
 
 namespace osp {
 
@@ -36,11 +37,11 @@ public:
   bool BuildProgram();
   bool CreateKernel();
  
-  bool AddTexture(unsigned int _argNr, Texture *_texture,
+  bool AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture,
                   GLuint _textureType,
                   cl_mem_flags _permissions);
 
-  bool AddTexture(unsigned int _argNr, Texture *_texture,
+  bool AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture,
       GLuint _textureType,
       cl_mem_flags _permissions, cl_mem& _clTextureMem);
 

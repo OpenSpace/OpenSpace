@@ -21,7 +21,7 @@ TransferFunction * TransferFunction::New() {
 }
 
 TransferFunction::TransferFunction() : 
-  texture_(NULL),
+  texture_(nullptr),
   floatData_(NULL),
   width_(0),
   lower_(0.f),
@@ -203,8 +203,10 @@ bool TransferFunction::ConstructTexture() {
     std::vector<unsigned int> dim(2);
     dim[0] = width_;
     dim[1] = 1;
-    texture_ = Texture2D::New(dim);
-    texture_->Init(&floatData_[0]);
+    texture_ = new ghoul::opengl::Texture(floatData_, glm::size3_t(width_,1,1),ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    texture_->uploadTexture();
+    //texture_ = Texture2D::New(dim);
+    //texture_->Init(&floatData_[0]);
     generatedTexture_ = true; 
     
     //delete[] values;
