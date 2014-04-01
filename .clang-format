@@ -1,6 +1,6 @@
 ---
 Language: Cpp
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
@@ -23,7 +23,7 @@ DerivePointerBinding: false
 IndentCaseLabels: true
 #Check next
 IndentFunctionDeclarationAfterType: true
-IndentWidth: 2
+IndentWidth: 4
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 PenaltyBreakBeforeFirstCallParameter: 19
