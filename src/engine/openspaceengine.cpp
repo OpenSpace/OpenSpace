@@ -39,6 +39,22 @@
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 
+#ifdef __WIN32__
+    // Windows: Binary two folders down
+    #define FIXED_BASE_PATH "../.."
+#elif __APPLE__
+    // OS X : Binary three folders down
+    #define FIXED_BASE_PATH "../../.."
+#else
+    // Linux : Binary three folders down
+    #define FIXED_BASE_PATH ".."
+#endif
+
+// Check if CMake have provided a base path.
+#ifndef BASE_PATH
+#define BASE_PATH FIXED_BASE_PATH
+#endif
+
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
@@ -85,17 +101,7 @@ void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArg
     newArgv = new char*[3];
     newArgv[0] = "prog";
     newArgv[1] = "-config";
-    newArgv[2] = "../../config/single.xml";
-#ifdef __WIN32__
-    // Windows uses fixed path to OpenSpace data
-	newArgv[2] = "../../config/single.xml";
-#elif __APPLE__
-    // OS X uses local path to OpenSpace data
-    newArgv[2] = "../../../config/single.xml";
-#else
-	// Linux is is a bin folder
-    newArgv[2] = "../config/single.xml";
-#endif
+    newArgv[2] = FIXED_BASE_PATH"/config/single.xml";
     
     // create objects
     _engine = new OpenSpaceEngine;
@@ -154,21 +160,7 @@ bool OpenSpaceEngine::initialize() {
 
 bool OpenSpaceEngine::registerFilePaths() {
 
-// Check if CMake have provided an base path.
-#ifndef BASE_PATH
-#ifdef __WIN32__
-    // Windows: Binary two folders down
-	#define BASE_PATH "../.."
-#elif __APPLE__
-    // OS X : Binary three folders down
-    #define BASE_PATH "../../.."
-#else
-    // Linux : Binary three folders down
-    #define BASE_PATH ".."
-#endif
-#endif
-
-    FileSys.registerPathToken("${BASE_PATH}", BASE_PATH);
+    FileSys.registerPathToken("${BASE_PATH}", FileSys.relativePath(BASE_PATH));
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
 	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");

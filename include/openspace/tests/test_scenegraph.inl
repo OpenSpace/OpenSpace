@@ -51,25 +51,39 @@ protected:
 
 TEST_F(SceneGraphTest, SceneGraphNode) {
     
-    
     openspace::SceneGraphNode* node = new openspace::SceneGraphNode(ghoul::Dictionary());
+    
+    // Should not have a renderable and position should be 0,0,0,0 (undefined).
     EXPECT_EQ(nullptr, node->getRenderable());
     EXPECT_EQ(openspace::psc(), node->getPosition());
     
     delete node;
     ghoul::Dictionary nodeDictionary;
+    
     ghoul::Dictionary positionDictionary;
-    //nodeDictionary.setValue("Renderable.Type", "RenderablePlanet");
-    positionDictionary.setValue("Type", "Static");
-    positionDictionary.setValue("Position.1", 1.0);
-    positionDictionary.setValue("Position.2", 1.0);
-    positionDictionary.setValue("Position.3", 1.0);
-    positionDictionary.setValue("Position.4", 1.0);
+    ghoul::Dictionary positionPositionArrayDictionary;
+    
+    ghoul::Dictionary renderableDictionary;
+    
+    renderableDictionary.setValue("Type", std::string("RenderablePlanet"));
+    
+    positionPositionArrayDictionary.setValue("1", 1.0);
+    positionPositionArrayDictionary.setValue("2", 1.0);
+    positionPositionArrayDictionary.setValue("3", 1.0);
+    positionPositionArrayDictionary.setValue("4", 1.0);
+    
+    positionDictionary.setValue("Type", std::string("Static"));
+    positionDictionary.setValue("Position", positionPositionArrayDictionary);
     
     nodeDictionary.setValue("Position", positionDictionary);
+    nodeDictionary.setValue("Renderable", renderableDictionary);
     
     node = new openspace::SceneGraphNode(nodeDictionary);
-    //EXPECT_TRUE(node->getRenderable());
+    
+    // This node should have a renderable (probably no good values but an existing one)
+    EXPECT_TRUE(node->getRenderable());
+    
+    // position should be initialized
     EXPECT_EQ(openspace::psc(1.0,1.0,1.0,1.0), node->getPosition());
     
     delete node;

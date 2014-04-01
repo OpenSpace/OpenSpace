@@ -45,15 +45,6 @@ int main(int argc, char** argv) {
     LogMgr.addLog(new ConsoleLog);
 
     FileSystem::initialize();
-
-    const bool extDir = FileSys.directoryExists("../../../ext/ghoul/tests");
-    if (extDir) {
-        FileSys.registerPathToken("${SCRIPTS_DIR}", "../../../ext/ghoul/scripts");
-        FileSys.registerPathToken("${TEST_DIR}", "../../../ext/ghoul/tests");
-    }
-    else {
-        LFATALC("main", "Fix me");
-    }
     
     openspace::OpenSpaceEngine::registerFilePaths();
     FileSys.registerPathToken("${TESTDIR}", "${BASE_PATH}/src/tests");
