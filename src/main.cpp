@@ -43,6 +43,7 @@ void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
 void mainEncodeFun();
 void mainDecodeFun();
+void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
 
 int main(int argc, char **argv) {
     int newArgc;
@@ -61,11 +62,14 @@ int main(int argc, char **argv) {
 	_sgctEngine->setMouseButtonCallbackFunction( mainMouseButtonCallback );
 	_sgctEngine->setMousePosCallbackFunction( mainMousePosCallback );
 	_sgctEngine->setMouseScrollCallbackFunction( mainMouseScrollCallback );
+	_sgctEngine->setExternalControlCallback( mainExternalControlCallback );
 
 	// set encode and decode functions
 	// NOTE: starts synchronizing before init functions
 	sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
 	sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
+
+
 
 	// try to open a window
 	if( ! _sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile)) {
@@ -85,6 +89,10 @@ int main(int argc, char **argv) {
 	exit( EXIT_SUCCESS );
 }
 
+void mainExternalControlCallback(const char * receivedChars, int size, int clientId) {
+	if (_sgctEngine->isMaster())
+		OsEng.externalControlCallback(receivedChars, size, clientId);
+}
 
 void mainInitFunc(void) {
     OsEng.initialize();

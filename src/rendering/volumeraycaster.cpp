@@ -38,7 +38,7 @@ const float MOUSE_FACTOR = 0.05;
 
 VolumeRaycaster::VolumeRaycaster() : Renderable()
 	, _stepSize(0.01f)
-	, _type(SINGLEPASS)
+	, _type(TWOPASS)
 	, _leftMouseButton(false)
 	, _currentMouseX(0.0)
 	, _currentMouseY(0.0)

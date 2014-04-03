@@ -31,6 +31,7 @@
 
 #include <rendering/volumeraycaster.h>
 #include <flare/flare.h>
+#include <interface/interface.h>
 
 namespace openspace {
 
@@ -58,6 +59,7 @@ public:
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
+    void externalControlCallback(const char* receivedChars, int size, int clientId);
 
     void encode();
     void decode();
@@ -74,6 +76,8 @@ private:
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
     ScriptEngine* _scriptEngine;
+    Interface* _interface;
+    bool _useVolumeRaycaster, _useFlare;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

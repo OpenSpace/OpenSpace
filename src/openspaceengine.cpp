@@ -40,6 +40,10 @@
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
@@ -58,6 +62,8 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _scriptEngine(nullptr)
 	, _flare(nullptr)
 	, _volumeRaycaster(nullptr)
+	, _useVolumeRaycaster(true)
+	, _useFlare(false)
 {
 
 }
@@ -162,7 +168,7 @@ bool OpenSpaceEngine::initialize() {
 
 //    Choose rendering
     _volumeRaycaster = new VolumeRaycaster();
-//    _flare = new Flare();
+    _flare = new Flare();
 
     return true;
 }
@@ -193,8 +199,8 @@ void OpenSpaceEngine::preSynchronization() {
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
         
-        if (_flare) _flare->preSync();
-        if (_volumeRaycaster) _volumeRaycaster->preSync();
+        if (_useFlare) _flare->preSync();
+        if (_useVolumeRaycaster) _volumeRaycaster->preSync();
 
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
@@ -206,8 +212,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
-	if (_volumeRaycaster) _volumeRaycaster->render();
-	if (_flare) _flare->render();
+	if (_useVolumeRaycaster) _volumeRaycaster->render();
+	if (_useFlare) _flare->render();
 
     _renderEngine->render();
 }
@@ -215,22 +221,22 @@ void OpenSpaceEngine::render() {
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        if (_flare) _flare->postDraw();
+        if (_useFlare) _flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		if (_flare) _flare->keyboard(key, action);
+		if (_useFlare) _flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		if (_flare) _flare->mouse(key, action);
-		if (_volumeRaycaster) _volumeRaycaster->mouse(key, action);
+		if (_useFlare) _flare->mouse(key, action);
+		if (_useVolumeRaycaster) _volumeRaycaster->mouse(key, action);
 	}
 }
 
@@ -242,14 +248,19 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler->mouseScrollWheelCallback(pos);
 }
 
+void OpenSpaceEngine::externalControlCallback(const char * receivedChars, int size, int clientId) {
+	std::cout << receivedChars << std::endl;
+	_interface->callback(receivedChars);
+}
+
 void OpenSpaceEngine::encode() {
-	if (_flare) _flare->encode();
-	if (_volumeRaycaster) _volumeRaycaster->encode();
+	if (_useFlare) _flare->encode();
+	if (_useVolumeRaycaster) _volumeRaycaster->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	if (_flare) _flare->decode();
-	if (_volumeRaycaster) _volumeRaycaster->decode();
+	if (_useFlare) _flare->decode();
+	if (_useVolumeRaycaster) _volumeRaycaster->decode();
 }
 
 } // namespace openspace
