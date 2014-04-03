@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/vectorproperty.h"
+#include "openspace/properties/vectorproperty.h"
 
 #include <limits>
 

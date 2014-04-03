@@ -25,7 +25,7 @@
 #ifndef __NUMERICALPROPERTY_H__
 #define __NUMERICALPROPERTY_H__
 
-#include "properties/templateproperty.h"
+#include "openspace/properties/templateproperty.h"
 
 namespace openspace {
 namespace properties {
@@ -103,6 +103,6 @@ protected:
         return DEFAULT_STEPPING; \
     }
 
-#include "properties/numericalproperty.inl"
+#include "openspace/properties/numericalproperty.inl"
 
 #endif // __NUMERICALPROPERTY_H__

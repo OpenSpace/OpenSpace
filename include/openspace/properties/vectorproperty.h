@@ -22,35 +22,53 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PROPERTYDELEGATE_H__
-#define __PROPERTYDELEGATE_H__
+#ifndef __VECTORPROPERTY_H__
+#define __VECTORPROPERTY_H__
 
-#include <string>
+#include "openspace/properties/numericalproperty.h"
+
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace properties {
 
-template <typename T>
-class PropertyDelegate {
-public:
-    static std::string className();
+REGISTER_TEMPLATEPROPERTY_HEADER(BVec2Property, glm::bvec2);
+REGISTER_TEMPLATEPROPERTY_HEADER(BVec3Property, glm::bvec3);
+REGISTER_TEMPLATEPROPERTY_HEADER(BVec4Property, glm::bvec4);
 
-    template <typename U>
-    static U defaultValue();
+REGISTER_NUMERICALPROPERTY_HEADER(Vec2Property, glm::vec2);
+REGISTER_NUMERICALPROPERTY_HEADER(Vec3Property, glm::vec3);
+REGISTER_NUMERICALPROPERTY_HEADER(Vec4Property, glm::vec4);
+REGISTER_NUMERICALPROPERTY_HEADER(DVec2Property, glm::dvec2);
+REGISTER_NUMERICALPROPERTY_HEADER(DVec3Property, glm::dvec3);
+REGISTER_NUMERICALPROPERTY_HEADER(DVec4Property, glm::dvec4);
+REGISTER_NUMERICALPROPERTY_HEADER(IVec2Property, glm::ivec2);
+REGISTER_NUMERICALPROPERTY_HEADER(IVec3Property, glm::ivec3);
+REGISTER_NUMERICALPROPERTY_HEADER(IVec4Property, glm::ivec4);
+REGISTER_NUMERICALPROPERTY_HEADER(UVec2Property, glm::uvec2);
+REGISTER_NUMERICALPROPERTY_HEADER(UVec3Property, glm::uvec3);
+REGISTER_NUMERICALPROPERTY_HEADER(UVec4Property, glm::uvec4);
 
-    template <typename U>
-    static U defaultMinimumValue();
+//REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
+////REGISTER_NUMERICALPROPERTY_HEADER(Char16Property, char16_t);
+////REGISTER_NUMERICALPROPERTY_HEADER(Char32Property, char32_t);
+//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
+//REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
+//REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char);
+//REGISTER_NUMERICALPROPERTY_HEADER(ShortProperty, short);
+//REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
+//REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
+//REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
+//REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long);
+//REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long);
+//REGISTER_NUMERICALPROPERTY_HEADER(LongLongProperty, long long);
+//REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long);
+//REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
+//REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
+//REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
 
-    template <typename U>
-    static U defaultMaximumValue();
-
-    template <typename U>
-    static U defaultStepping();
-};
 
 } // namespace properties
 } // namespace openspace
 
-#include "properties/propertydelegate.inl"
-
-#endif // __PROPERTYDELEGATE_H__
+#endif // __INTPROPERTY_H__

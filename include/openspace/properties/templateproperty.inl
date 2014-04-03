@@ -22,51 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEMPLATEPROPERTY_H__
-#define __TEMPLATEPROPERTY_H__
-
-#include "properties/property.h"
-
 namespace openspace {
 namespace properties {
 
+    // check!
 template <typename T>
-class TemplateProperty : public Property {
-public:
-    TemplateProperty(const std::string& identifier, const std::string& guiName);
+TemplateProperty<T>::TemplateProperty(const std::string& identifier,
+                                      const std::string& guiName)
+    : TemplateProperty<T>(identifier, guiName,
+    PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>())
+{}
 
-    TemplateProperty(const std::string& identifier, const std::string& guiName,
-        const T& value);
 
-    virtual std::string className() const;
+template <typename T>
+TemplateProperty<T>::TemplateProperty(const std::string& identifier,
+                                      const std::string& guiName, const T& value)
+    : Property(identifier, guiName)
+    , _value(value)
+{}
 
-    operator T();
-    TemplateProperty<T>& operator=(T val);
+template <typename T>
+std::string TemplateProperty<T>::className() const {
+    return PropertyDelegate<TemplateProperty<T>>::className();
+}
 
-protected:
-    T _value;
-};
+template <typename T>
+TemplateProperty<T>::operator T() {
+    return _value;
+}
+
+template <typename T>
+TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
+    _value = val;
+    return *this;
+}
 
 } // namespace properties
 } // namespace openspace
-
-// use inside namespace (?)
-#define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE) \
-    typedef TemplateProperty<TYPE> CLASS_NAME; \
-    template <> std::string PropertyDelegate<TemplateProperty<TYPE>>::className(); \
-    template <> template <> \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>(); 
-
-#define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE) \
-    template <> \
-    std::string PropertyDelegate<TemplateProperty<TYPE>>::className() { \
-        return #CLASS_NAME; \
-    } \
-    template <> template <> \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>() { \
-        return DEFAULT_VALUE; \
-    }
-
-#include "properties/templateproperty.inl"
-
-#endif // __TEMPLATEPROPERTY_H__

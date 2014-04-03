@@ -22,39 +22,48 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <typeinfo>
+
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace {
 namespace properties {
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName)
-    : TemplateProperty<T>(identifier, guiName,
-    PropertyDelegate<TemplateProperty<T>>::defaultValue<T>())
-{}
-
-
-template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName, const T& value)
-    : Property(identifier, guiName)
-    , _value(value)
-{}
-
-template <typename T>
-std::string TemplateProperty<T>::className() const {
-    return PropertyDelegate<TemplateProperty<T>>::className();
+std::string PropertyDelegate<T>::className() {
+//    static_assert(false, "Unimplemented PropertyDelegate::className specialization");
 }
 
 template <typename T>
-TemplateProperty<T>::operator T() {
-    return _value;
+template <typename U>
+U PropertyDelegate<T>::defaultValue() {
+//    static_assert(false, "Unimplemented PropertyDelegate::defaultValue specialization");
 }
 
 template <typename T>
-TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    _value = val;
-    return *this;
+template <typename U>
+U PropertyDelegate<T>::defaultMinimumValue() {
+//    static_assert(false,
+//        "Unimplemented PropertyDelegate::defaultMinimumValue specialization");
 }
+
+
+template <typename T>
+template <typename U>
+U PropertyDelegate<T>::defaultMaximumValue() {
+//    static_assert(false,
+//        "Unimplemented PropertyDelegate::defaultMaximumValue specialization");
+}
+
+
+template <typename T>
+template <typename U>
+U PropertyDelegate<T>::defaultStepping() {
+//    static_assert(false,
+//        "Unimplemented PropertyDelegate::defaultStepping specialization");
+}
+
+
 
 } // namespace properties
 } // namespace openspace

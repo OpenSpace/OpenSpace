@@ -22,5 +22,5 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/templateproperty.h"
+#include "openspace/properties/templateproperty.h"
 

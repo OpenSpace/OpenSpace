@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/property.h"
+#include "openspace/properties/property.h"
 
 namespace openspace {
 namespace properties {

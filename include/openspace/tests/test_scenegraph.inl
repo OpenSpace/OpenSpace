@@ -97,6 +97,7 @@ TEST_F(SceneGraphTest, Loading) {
     
     // Existing scenegraph should load
     EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    // TODO need to check for correctness
     
     // This loading should fail regardless of existing or not since the
     // scenegraph is already loaded
@@ -112,6 +113,7 @@ TEST_F(SceneGraphTest, Reinitializing) {
     
     // Existing scenegraph should load
     EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    // TODO need to check for correctness
 }
 
 

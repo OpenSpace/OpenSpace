@@ -22,51 +22,35 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PROPERTY_H__
-#define __PROPERTY_H__
+#ifndef __PROPERTYDELEGATE_H__
+#define __PROPERTYDELEGATE_H__
 
-#include "properties/propertydelegate.h"
-
-#include <boost/any.hpp>
 #include <string>
 
 namespace openspace {
 namespace properties {
 
-class Property {
+template <typename T>
+class PropertyDelegate {
 public:
-    Property(const std::string& identifier, const std::string& guiName);
-    virtual ~Property();
+    static std::string className();
 
-    //virtual Property* create() const = 0;
-    virtual std::string className() const = 0;
+    template <typename U>
+    static U defaultValue();
 
-    virtual boost::any get() const;
-    virtual void set(const boost::any& value);
-    virtual const std::type_info& type() const;
+    template <typename U>
+    static U defaultMinimumValue();
 
-    const std::string& identifier() const;
-    const std::string& guiName() const;
+    template <typename U>
+    static U defaultMaximumValue();
 
-    void setGroupIdentifier(const std::string& groupId);
-    const std::string& groupIdentifier() const;
-
-    void setVisible(bool state);
-    bool isVisible() const;
-
-    void setReadOnly(bool state);
-    bool isReadOnly() const;
-
-protected:
-    std::string _identifier;
-    std::string _guiName;
-    std::string _groupId;
-
-    bool _isVisible;
-    bool _isReadOnly;
+    template <typename U>
+    static U defaultStepping();
 };
 
 } // namespace properties
 } // namespace openspace
 
-#endif // __PROPERTY_H__
+#include "openspace/properties/propertydelegate.inl"
+
+#endif // __PROPERTYDELEGATE_H__

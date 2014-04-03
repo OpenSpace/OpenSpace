@@ -22,5 +22,5 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/propertydelegate.h"
+#include "openspace/properties/propertydelegate.h"
 

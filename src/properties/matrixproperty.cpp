@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/matrixproperty.h"
+#include "openspace/properties/matrixproperty.h"
 
 #include <limits>
 

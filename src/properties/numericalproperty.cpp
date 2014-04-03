@@ -22,5 +22,5 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "properties/numericalproperty.h"
+#include "openspace/properties/numericalproperty.h"
 

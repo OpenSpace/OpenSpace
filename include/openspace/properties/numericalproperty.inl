@@ -33,19 +33,19 @@ template <typename T>
 NumericalProperty<T>::NumericalProperty(const std::string& identifier,
     const std::string& guiName)
     : NumericalProperty<T>(identifier, guiName,
-    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::defaultStepping<T>())
+    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::template defaultStepping<T>())
 {}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(const std::string& identifier,
                                         const std::string& guiName, const T& value)
     : NumericalProperty<T>(identifier, guiName, value,
-    PropertyDelegate<NumericalProperty<T>>::defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+    PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
+    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
 {}
 
 template <typename T>
@@ -53,8 +53,8 @@ NumericalProperty<T>::NumericalProperty(const std::string& identifier,
                                         const std::string& guiName, const T& value,
                                         const T& minimumValue)
      : NumericalProperty<T>(identifier, guiName, value, minimumValue,
-     PropertyDelegate<NumericalProperty<T>>::defaultMaximumValue<T>(),
-     PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+     PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
+     PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
  {}
 
 template <typename T>
@@ -62,7 +62,7 @@ NumericalProperty<T>::NumericalProperty(const std::string& identifier,
                                         const std::string& guiName, const T& value,
                                         const T& minimumValue, const T& maximumValue)
     : NumericalProperty<T>(identifier, guiName, value, minimumValue, maximumValue,
-    PropertyDelegate<NumericalProperty<T>>::defaultValue<T>())
+    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
 {}
 
 

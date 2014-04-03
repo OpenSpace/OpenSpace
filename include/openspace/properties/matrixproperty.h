@@ -22,48 +22,36 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <typeinfo>
+#ifndef __MATRIXPROPERTY_H__
+#define __MATRIXPROPERTY_H__
 
-#include <ghoul/logging/logmanager.h>
+#include "openspace/properties/numericalproperty.h"
+
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace properties {
 
-template <typename T>
-std::string PropertyDelegate<T>::className() {
-    static_assert(false, "Unimplemented PropertyDelegate::className specialization");
-}
-
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::defaultValue() {
-    static_assert(false, "Unimplemented PropertyDelegate::defaultValue specialization");
-}
-
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::defaultMinimumValue() {
-    static_assert(false,
-        "Unimplemented PropertyDelegate::defaultMinimumValue specialization");
-}
-
-
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::defaultMaximumValue() {
-    static_assert(false,
-        "Unimplemented PropertyDelegate::defaultMaximumValue specialization");
-}
-
-
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::defaultStepping() {
-    static_assert(false,
-        "Unimplemented PropertyDelegate::defaultStepping specialization");
-}
-
-
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2Property, glm::mat2x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2x3Property, glm::mat2x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2x4Property, glm::mat2x4);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3x2Property, glm::mat3x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3Property, glm::mat3x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat3x4Property, glm::mat3x4);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4x2Property, glm::mat4x2);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4x3Property, glm::mat4x3);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat4Property, glm::mat4x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2Property, glm::dmat2x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2x3Property, glm::dmat2x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat2x4Property, glm::dmat2x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3x2Property, glm::dmat3x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3Property, glm::dmat3x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3x4Property, glm::dmat3x4);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4x2Property, glm::dmat4x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4x3Property, glm::dmat4x3);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat4Property, glm::dmat4x4);
 
 } // namespace properties
 } // namespace openspace
+
+#endif // __MATRIXPROPERTY_H__

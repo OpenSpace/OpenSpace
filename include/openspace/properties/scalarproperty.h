@@ -25,7 +25,7 @@
 #ifndef __SCALARPROPERTY_H__
 #define __SCALARPROPERTY_H__
 
-#include "properties/numericalproperty.h"
+#include "openspace/properties/numericalproperty.h"
 
 namespace openspace {
 namespace properties {
