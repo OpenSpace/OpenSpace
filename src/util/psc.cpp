@@ -1,7 +1,7 @@
 
 // open space includes
-#include "util/psc.h"
-#include "util/pss.h"
+#include <openspace/util/psc.h>
+#include <openspace/util/pss.h>
 
 // std includes
 #include <cstdio>
@@ -240,6 +240,10 @@ const double psc::angle(const psc &rhs) const {
 bool psc::operator==(const psc &other) const {
 	return vec_ == other.vec_;
 }
+    
+bool psc::operator!=(const psc &other) const {
+    return vec_ != other.vec_;
+}
 
 bool psc::operator<(const psc &other) const {
 	double ds = this->vec_[3] - other.vec_[3];
@@ -277,6 +281,12 @@ bool psc::operator<=(const psc &other) const {
 
 bool psc::operator>=(const psc &other) const {
 	return *this > other || *this == other;
+}
+
+    
+std::ostream& operator<<(::std::ostream& os, const psc& rhs) {
+    os << "(" << rhs[0] << ", " << rhs[1] << ", " << rhs[2] << ", " << rhs[3] << ")";
+    return os;
 }
 
 

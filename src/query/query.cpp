@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "query/query.h"
+#include <openspace/query/query.h>
 
-#include "openspaceengine.h"
+#include <openspace/engine/openspaceengine.h>
 
 namespace openspace {
 
