@@ -35,19 +35,50 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <iostream>
+#include <openspace/engine/openspaceengine.h>
+#include <ghoul/lua/ghoul_lua.h>
 
 using namespace ghoul::cmdparser;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
+
+namespace {
+    std::string _loggerCat = "OpenSpaceTest";
+}
 
 int main(int argc, char** argv) {
     LogManager::initialize(LogManager::LogLevel::None);
     LogMgr.addLog(new ConsoleLog);
 
     FileSystem::initialize();
+    std::string configurationFilePath = "";
+    LDEBUG("Finding configuration");
+    if( ! openspace::OpenSpaceEngine::findConfiguration(configurationFilePath)) {
+        LFATAL("Could not find OpenSpace configuration file!");
+        assert(false);
+    }
     
-    openspace::OpenSpaceEngine::registerFilePaths();
-    FileSys.registerPathToken("${TESTDIR}", "${BASE_PATH}/src/tests");
+    LDEBUG("registering base path");
+    if( ! openspace::OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
+        LFATAL("Could not register base path");
+        assert(false);
+    }
+    
+    lua_State* state = luaL_newstate();
+    if (state == nullptr) {
+        LFATAL("Error creating new Lua state: Memory allocation error");
+        assert(false);
+    }
+    luaL_openlibs(state);
+    ghoul::Dictionary configuration;
+    ghoul::lua::lua_loadIntoDictionary(state, &configuration, configurationFilePath, true);
+    if(configuration.hasKey("paths")) {
+        ghoul::Dictionary pathsDictionary;
+        if(configuration.getValue("paths", pathsDictionary)) {
+            openspace::OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
+        }
+    }
+    lua_close(state);
     
     openspace::Time::init();
     openspace::Spice::init();

@@ -38,22 +38,10 @@
 #include <ghoul/logging/logging>
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
-
-#ifdef __WIN32__
-    // Windows: Binary two folders down
-    #define FIXED_BASE_PATH "../.."
-#elif __APPLE__
-    // OS X : Binary three folders down
-    #define FIXED_BASE_PATH "../../.."
-#else
-    // Linux : Binary three folders down
-    #define FIXED_BASE_PATH ".."
-#endif
-
-// Check if CMake have provided a base path.
-#ifndef BASE_PATH
-#define BASE_PATH FIXED_BASE_PATH
-#endif
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/commandlinecommand.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -92,17 +80,115 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArgv) {
+bool OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary) {
+    auto path_keys = dictionary.keys();
+    for(auto key: path_keys) {
+        std::string p;
+        if(dictionary.getValue(key, p)) {
+            std::stringstream ss;
+            ss << "${" << key << "}";
+            LDEBUG(ss.str() << ": " << p);
+            FileSys.registerPathToken(ss.str(), p);
+        }
+    }
+
+    return true;
+}
+bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& filename) {
+    if( ! FileSys.fileExists(filename))
+        return false;
+    
+    const std::string absolutePath = FileSys.absolutePath(filename);
+    
+    auto last = absolutePath.find_last_of("/");
+    if(last == absolutePath.npos)
+        return false;
+    
+    std::string basePath = absolutePath.substr(0, last);
+    
+    FileSys.registerPathToken("${BASE_PATH}", basePath);
+    
+    return true;
+}
+
+bool OpenSpaceEngine::findConfiguration(std::string& filename) {
+    if (filename != "") {
+        return FileSys.fileExists(filename);
+    }
+    std::string currentDirectory = FileSys.currentDirectory();
+    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '/');
+    
+    std::string cfgname = "openspace.cfg";
+    
+    for (int i = 0; i < occurrences; ++i) {
+        if(i > 0) {
+            cfgname = "../" + cfgname;
+        }
+        
+        if(FileSys.fileExists(cfgname))
+            break;
+    }
+    if ( ! FileSys.fileExists(cfgname)) {
+        return false;
+    }
+    
+    filename = cfgname;
+    
+    return true;
+}
+
+void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sgctArguments) {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
     
-    // set the arguments for SGCT
-    newArgc = 3;
-    newArgv = new char*[3];
-    newArgv[0] = "prog";
-    newArgv[1] = "-config";
-    newArgv[2] = FIXED_BASE_PATH"/config/single.xml";
+    // initialize ghoul logging
+    LogManager::initialize(LogManager::LogLevel::Debug, true);
+    LogMgr.addLog(new ConsoleLog);
     
+    // TODO change so initialize is not called in the create function
+    ghoul::filesystem::FileSystem::initialize();
+    
+    // TODO parse arguments if filename is specified, if not use default
+    std::string configurationFilePath = "";
+    
+    LDEBUG("Finding configuration");
+    if( ! OpenSpaceEngine::findConfiguration(configurationFilePath)) {
+        LFATAL("Could not find OpenSpace configuration file!");
+        assert(false);
+    }
+    
+    LDEBUG("registering base path");
+    if( ! OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
+        LFATAL("Could not register base path");
+        assert(false);
+    }
+    
+    // TODO make cleaner interface for configuration loading
+    lua_State* state = luaL_newstate();
+    if (state == nullptr) {
+        LFATAL("Error creating new Lua state: Memory allocation error");
+        assert(false);
+    }
+    luaL_openlibs(state);
+    ghoul::Dictionary configuration;
+    ghoul::lua::lua_loadIntoDictionary(state, &configuration, configurationFilePath, true);
+    if(configuration.hasKey("paths")) {
+        ghoul::Dictionary pathsDictionary;
+        if(configuration.getValue("paths", pathsDictionary)) {
+            OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
+        }
+    }
+    lua_close(state);
+    
+    std::string sgctConfigurationPath = "${SGCT}/single.xml";
+    if(configuration.hasKey("sgctConfig")) {
+        configuration.getValue("sgctConfig", sgctConfigurationPath);
+    }
+    
+    sgctArguments.push_back("OpenSpace");
+    sgctArguments.push_back("-config");
+    sgctArguments.push_back(absPath(sgctConfigurationPath));
+
     // create objects
     _engine = new OpenSpaceEngine;
     _engine->_renderEngine = new RenderEngine;
@@ -120,13 +206,8 @@ bool OpenSpaceEngine::isInitialized() {
 
 bool OpenSpaceEngine::initialize() {
 
-    // initialize ghou logging
-    LogManager::initialize(LogManager::LogLevel::Debug, true);
-    LogMgr.addLog(new ConsoleLog);
-
     // Register the filepaths from static function enables easy testing
-    ghoul::filesystem::FileSystem::initialize();
-    registerFilePaths();
+    //registerFilePaths();
     
     // initialize the configurationmanager with the default configuration
     _configurationManager->initialize();
@@ -155,17 +236,6 @@ bool OpenSpaceEngine::initialize() {
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
     
-    return true;
-}
-
-bool OpenSpaceEngine::registerFilePaths() {
-
-    FileSys.registerPathToken("${BASE_PATH}", FileSys.relativePath(BASE_PATH));
-	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
-	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");
-	FileSys.registerPathToken("${SHADERS}", "${BASE_PATH}/shaders");
-
     return true;
 }
 

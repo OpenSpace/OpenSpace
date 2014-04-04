@@ -28,6 +28,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/misc/configurationmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
@@ -35,14 +36,17 @@ class ScriptEngine;
 
 class OpenSpaceEngine {
 public:
-    static void create(int argc, char** argv, int& newArgc, char**& newArgv);
+    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
     static bool isInitialized();
     bool initialize();
-    static bool registerFilePaths();
-
+    
+    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
+    static bool registerBasePathFromConfigurationFile(const std::string& filename);
+    static bool findConfiguration(std::string& filename) ;
+    
     ghoul::ConfigurationManager& configurationManager();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();

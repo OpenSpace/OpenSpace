@@ -83,8 +83,6 @@ include_directories(${HEADER_ROOT_DIR})
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
-add_definitions(-DBASE_PATH="${CMAKE_SOURCE_DIR}")
-
 if (APPLE)
 	add_definitions(-D__APPLE__)
 	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")

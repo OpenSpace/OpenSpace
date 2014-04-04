@@ -45,13 +45,26 @@ void mainEncodeFun();
 void mainDecodeFun();
 
 int main(int argc, char **argv) {
-    int newArgc;
-    char** newArgv;
-    openspace::OpenSpaceEngine::create(argc, argv, newArgc, newArgv);
 
+    // create the OpenSpace engine and get arguments for the sgct engine
+    std::vector<std::string> sgctArguments;
+    openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+
+    // create sgct engine c arguments
+    int newArgc = sgctArguments.size();
+    char** newArgv = new char*[newArgc];
+    for (int i = 0; i < newArgc; ++i) {
+        //newArgv[i] = new char[sgctArguments.at(i).length()];
+        //std::strcpy(newArgv[i], sgctArguments.at(i).c_str());
+        newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
+    }
     
 	_sgctEngine = new sgct::Engine(newArgc, newArgv);
 	
+    // deallocate sgct c arguments
+    for (int i = 0; i < newArgc; ++i) {
+        //delete newArgv[i];
+    }
     delete[] newArgv;
  	
     // Bind functions
