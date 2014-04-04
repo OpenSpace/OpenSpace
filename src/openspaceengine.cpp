@@ -166,11 +166,24 @@ bool OpenSpaceEngine::initialize() {
 
     _engine->_interactionHandler->connectDevices();
 
+    // Init interface
+//    _interface = new Interface(this);
+
 //    Choose rendering
     _volumeRaycaster = new VolumeRaycaster();
     _flare = new Flare();
 
     return true;
+}
+
+void OpenSpaceEngine::setRenderer(OpenSpaceEngine::Renderers renderer) {
+	if (renderer == Renderers::VolumeRaycaster) {
+		_useVolumeRaycaster = true;
+		_useFlare = false;
+	} else if (renderer == Renderers::Flare) {
+		_useVolumeRaycaster = false;
+		_useFlare = true;
+	}
 }
 
 ghoul::ConfigurationManager& OpenSpaceEngine::configurationManager() {
@@ -246,11 +259,6 @@ void OpenSpaceEngine::mousePositionCallback(int x, int y) {
 
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler->mouseScrollWheelCallback(pos);
-}
-
-void OpenSpaceEngine::externalControlCallback(const char * receivedChars, int size, int clientId) {
-	std::cout << receivedChars << std::endl;
-	_interface->callback(receivedChars);
 }
 
 void OpenSpaceEngine::encode() {

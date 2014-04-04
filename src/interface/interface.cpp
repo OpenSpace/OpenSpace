@@ -30,75 +30,74 @@
 #include <boost/foreach.hpp>
 
 #include <iterator>
+#include <algorithm>
 
 namespace openspace {
 
-Interface::Interface() {}
+Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
 Interface::~Interface() {}
 
 void Interface::callback(const char* receivedChars) {
+	std::cout << receivedChars;
+
 	boost::property_tree::ptree pt;
 	std::stringstream input(receivedChars);
 	boost::property_tree::json_parser::read_json(input, pt);
+	_nodes = std::vector<Node>();
 
-//	handleNodes(pt);
+	loadIntoNodes(pt);
+	handleNodes();
 
-	auto it = pt.begin();
-	while (it != pt.end()) {
-
-		std::string key = (*it).first;
-		auto data = (*it).second;
-
-		if (data.size() == 0) { // JSON Single value
-			if (strcmp(key.c_str(), "stats") == 0)
-				sgct::Engine::instance()->setDisplayInfoVisibility(atoi(pt.get<std::string>(key).c_str()));
-			else if (strcmp(key.c_str(), "graph") == 0)
-				sgct::Engine::instance()->setStatsGraphVisibility(atoi(pt.get<std::string>(key).c_str()));
-			else if (strcmp(key.c_str(), "renderer") == 0){
-				if (strcmp(pt.get<std::string>(key).c_str(), "volumeraycaster") == 0) {
-//					_useVolumeRaycaster = true;
-//					_useFlare = false;
-				} else if (strcmp(pt.get<std::string>(key).c_str(), "flare") == 0) {
-//					_useVolumeRaycaster = false;
-//					_useFlare = true;
-				}
-			}
-
-
-		} else { // JSON Array
-			std::cout << key << " = { " << std::flush;
-			BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child(key)) {
-				assert(v.first.empty()); // array elements have no names
-				std::cout << v.second.data() << " " << std::flush;
-			}
-			std::cout << "}" << std::endl;
-		}
-
-		it++;
-	}
-
+//	for (int i = 0; i < _nodes.size(); ++i) {
+//		std::cout << _nodes.at(i)._key << " " << _nodes.at(i)._value;
+//		for (int j = 0; j < _nodes.at(i)._children.size(); ++j) {
+//			std::cout << _nodes.at(i)._children.at(j)._value << " ";
+//		}
+//		std::cout << std::endl;
+//	}
+	_nodes.clear();
 }
 
-// Workd in progress on recursive node handler
-void Interface::handleNodes(boost::property_tree::ptree pt, std::string key) {
-	auto it = pt.begin();
-	while (it != pt.end()) {
-		std::string name = (*it).first;
-		auto data = (*it).second;
-		if (!name.empty())
-			key = name;
-
-		std::cout << key << " " << data.size() << " " << std::flush;
-
-		if (data.size() == 0) { // leaf node
-			std::cout << key << " : "<< data.data() << std::endl;
-		} else {
-			handleNodes(pt.get_child(key), key);
+void Interface::handleNodes() {
+	for (int i = 0; i < _nodes.size(); ++i) {
+		Node node = _nodes.at(i);
+		if (node == "stats") {
+			sgct::Engine::instance()->setDisplayInfoVisibility(atoi(node._value.c_str()));
+		} else if (node == "graph") {
+			sgct::Engine::instance()->setStatsGraphVisibility(atoi(node._value.c_str()));
+		} else if (node == "renderer") {
+			if (strcmp(node._value.c_str(), "volumeraycaster") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::VolumeRaycaster);
+			else if (strcmp(node._value.c_str(), "flare") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::Flare);
 		}
-		++it;
 	}
 }
 
+// http://duck-wrath.blogspot.com/2012/02/how-to-recursive-parse.html
+void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent, const int depth) {
+	BOOST_FOREACH( boost::property_tree::ptree::value_type const&v, tree.get_child("") ) {
+		boost::property_tree::ptree subtree = v.second;
+		std::string value = v.second.data();
+		std::string key = v.first;
+
+		// classify and store nodes
+		if ( key.length() > 0 ) { // value
+			_nodes.push_back(Node(key, value));
+		} else { // array
+			// Find parent and add to its children vector
+			std::vector<Node>::iterator it = std::find(_nodes.begin(), _nodes.end(), Node(parent));
+			if (it != _nodes.end()) {
+				(*it)._children.push_back(Node(parent, value));
+			} else {
+				std::cout << "Parent not found" << std::endl;
+			}
+		}
+
+		// recursive go down the hierarchy
+		loadIntoNodes(subtree,key,depth+1);
+	}
+}
 
 } // namespace openspace
 

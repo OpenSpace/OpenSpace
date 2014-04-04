@@ -25,11 +25,13 @@
 
 // open space includes
 #include "openspaceengine.h"
+#include <interface/interface.h>
 
 // sgct includes
 #include "sgct.h"
 
 sgct::Engine* _sgctEngine;
+openspace::Interface* _interface;
 
 // function pointer declarations
 void mainInitFunc(void);
@@ -69,7 +71,8 @@ int main(int argc, char **argv) {
 	sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
 	sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
 
-
+	// init the interface which will handle callbacks from an external gui
+	_interface = new openspace::Interface(&OsEng);
 
 	// try to open a window
 	if( ! _sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile)) {
@@ -91,7 +94,7 @@ int main(int argc, char **argv) {
 
 void mainExternalControlCallback(const char * receivedChars, int size, int clientId) {
 	if (_sgctEngine->isMaster())
-		OsEng.externalControlCallback(receivedChars, size, clientId);
+		_interface->callback(receivedChars);
 }
 
 void mainInitFunc(void) {

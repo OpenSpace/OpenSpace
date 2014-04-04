@@ -26,19 +26,47 @@
 #define INTERFACE_H_
 
 #include <boost/property_tree/ptree.hpp>
+#include <openspaceengine.h>
+#include <vector>
 
 namespace openspace {
-
 class Interface {
+
+	struct Node {
+		std::string _key;
+		std::string _value;
+		std::vector<Node> _children;
+		Node(std::string key, std::string value) {
+			_key = key;
+			_value = value;
+			_children = std::vector<Node>();
+		}
+		Node(std::string key) {
+			_key = key;
+			_value = "";
+			_children = std::vector<Node>();
+		}
+
+		inline bool operator==(const Node& rhs){
+			return (strcmp(_key.c_str(), rhs._key.c_str()) == 0);
+		}
+		inline bool operator==(const std::string& rhs){
+			return (strcmp(_key.c_str(), rhs.c_str()) == 0);
+		}
+	};
+
 public:
-	Interface();
+	Interface(OpenSpaceEngine* engine);
 	~Interface();
 
 	void callback(const char * receivedChars);
 
 private:
-	void handleNodes(boost::property_tree::ptree pt, std::string key = "root");
+	void handleNodes();
+	void loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent = "", const int depth = 0);
 
+	OpenSpaceEngine* _engine;
+	std::vector<Node> _nodes;
 };
 
 } // namespace openspace

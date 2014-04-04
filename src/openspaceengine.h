@@ -31,7 +31,7 @@
 
 #include <rendering/volumeraycaster.h>
 #include <flare/flare.h>
-#include <interface/interface.h>
+//#include <interface/interface.h>
 
 namespace openspace {
 
@@ -39,11 +39,17 @@ class ScriptEngine;
 
 class OpenSpaceEngine {
 public:
+	enum class Renderers {
+		VolumeRaycaster,
+		Flare
+	};
+
     static void create(int argc, char** argv, int& newArgc, char**& newArgv);
     static void destroy();
     static OpenSpaceEngine& ref();
 
     bool initialize();
+    void setRenderer(OpenSpaceEngine::Renderers renderer);
 
     ghoul::ConfigurationManager& configurationManager();
     InteractionHandler& interactionHandler();
@@ -59,8 +65,6 @@ public:
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
-    void externalControlCallback(const char* receivedChars, int size, int clientId);
-
     void encode();
     void decode();
 
@@ -76,7 +80,7 @@ private:
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
     ScriptEngine* _scriptEngine;
-    Interface* _interface;
+//    Interface* _interface;
     bool _useVolumeRaycaster, _useFlare;
 };
 
