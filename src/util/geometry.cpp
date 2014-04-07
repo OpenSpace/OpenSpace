@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include "util/geometry.h"
+#include <openspace/util/geometry.h>
 
 gl4::Geometry::Geometry() 
 {

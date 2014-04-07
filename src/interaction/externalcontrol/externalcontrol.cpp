@@ -1,6 +1,6 @@
-#include "interaction/externalcontrol/externalcontrol.h"
-#include "interaction/interactionhandler.h"
-#include "openspaceengine.h"
+#include <openspace/interaction/externalcontrol/externalcontrol.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/engine/openspaceengine.h>
 #include <cstdio>
 
 namespace openspace {

@@ -3,14 +3,14 @@
  *
  */
 
-#include <flare/TSP.h>
-#include <flare/Config.h>
+#include <openspace/flare/TSP.h>
+#include <openspace/flare/Config.h>
 #include <stdio.h>
-#include <flare/Utils.h>
+#include <openspace/flare/Utils.h>
 #include <cmath>
 #include <list>
 #include <queue>
-#include <flare/TransferFunction.h>
+#include <openspace/flare/TransferFunction.h>
 #include <algorithm>
 
 using namespace osp;

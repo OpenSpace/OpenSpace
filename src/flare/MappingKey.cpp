@@ -1,4 +1,4 @@
-#include <flare/MappingKey.h>
+#include <openspace/flare/MappingKey.h>
 #include <iostream>
 #include <iomanip>
 

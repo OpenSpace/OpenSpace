@@ -3,7 +3,7 @@
  *
  */
 #include <ghoul/opengl/ghoul_gl.h>
-#include <flare/Utils.h>
+#include <openspace/flare/Utils.h>
 
 unsigned int osp::CheckGLError(std::string _location) {
   unsigned int error = glGetError();

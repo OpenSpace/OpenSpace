@@ -1,13 +1,13 @@
-#include <flare/flare.h>
+#include <openspace/flare/flare.h>
 
 #include <ghoul/opengl/texture.h>
 
-#include <flare/Renderer.h>
-#include <flare/TransferFunction.h>
-#include <flare/BrickManager.h>
-#include <flare/TSP.h>
-#include <flare/CLManager.h>
-#include <flare/Utils.h>
+#include <openspace/flare/Renderer.h>
+#include <openspace/flare/TransferFunction.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/TSP.h>
+#include <openspace/flare/CLManager.h>
+#include <openspace/flare/Utils.h>
 
 #include <ghoul/filesystem/filesystem.h>
 

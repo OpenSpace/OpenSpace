@@ -1,7 +1,7 @@
 # Filenames
 # Don't change during runtime
 # (Transfer function values can be changed during runtime though)
-tsp_filename                    ${OPENSPACE-DATA}/enlil_64_32_8.tsp
+tsp_filename                    ${OPENSPACE_DATA}/enlil_64_32_8.tsp
 transferfunction_filename       ${CONFIG}/transferfunctions/fire.txt
 
 # Window dimensions

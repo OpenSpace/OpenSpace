@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // open space includes
-#include "util/vbo.h"
+#include <openspace/util/vbo.h>
 
 // ghoul includes
 #include "ghoul/logging/logmanager.h"
@@ -52,7 +52,7 @@ void gl4::VBO::init()
 	// if arrays not set from sub-class initialize with a colored quad
 	if(_vsize == 0 || _isize == 0 || _varray == NULL || _iarray == NULL) {
 
-		//LOG("VBO: Init color quad\n");
+		LDEBUG("VBO: Init color quad");
 		_mode = GL_TRIANGLES;
 
 		_vsize = 4;
@@ -122,7 +122,7 @@ void gl4::VBO::init()
 
 	}
 
-	GLuint errorID = glGetError();
+	GLuint errorID;
 	glGenVertexArrays(1, &_vaoID);
 
 	// First VAO setup

@@ -1,6 +1,6 @@
-#include <flare/Animator.h>
-#include <flare/Utils.h>
-#include <flare/Config.h>
+#include <openspace/flare/Animator.h>
+#include <openspace/flare/Utils.h>
+#include <openspace/flare/Config.h>
 
 using namespace osp;
 

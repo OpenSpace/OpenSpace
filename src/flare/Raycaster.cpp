@@ -7,16 +7,16 @@
 #include <sgct.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <fstream>
-#include <flare/Raycaster.h>
-#include <flare/BrickManager.h>
-#include <flare/Utils.h>
+#include <openspace/flare/Raycaster.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/Utils.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <flare/TransferFunction.h>
-#include <flare/Animator.h>
+#include <openspace/flare/TransferFunction.h>
+#include <openspace/flare/Animator.h>
 #include <vector>
-#include <flare/CLManager.h>
-#include <flare/KernelConstants.h>
-#include <flare/Config.h>
+#include <openspace/flare/CLManager.h>
+#include <openspace/flare/KernelConstants.h>
+#include <openspace/flare/Config.h>
 #include <stdint.h>
 #include <unistd.h> // sync()
 

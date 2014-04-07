@@ -3,11 +3,11 @@
  *
  */
 
-#include <flare/Config.h>
+#include <openspace/flare/Config.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <flare/Utils.h>
+#include <openspace/flare/Utils.h>
 #include <ghoul/filesystem/filesystem.h>
 
 using namespace osp;

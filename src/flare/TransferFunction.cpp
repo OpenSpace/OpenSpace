@@ -3,12 +3,12 @@
  *
  */
 
-#include <flare/TransferFunction.h>
+#include <openspace/flare/TransferFunction.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <sstream>
-#include <flare/Utils.h>
+#include <openspace/flare/Utils.h>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <math.h>

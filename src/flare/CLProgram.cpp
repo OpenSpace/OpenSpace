@@ -3,10 +3,10 @@
  *
  */
 //#include <ghoul/opengl/ghoul_gl.h>
-#include <flare/CLProgram.h>
-#include <flare/CLManager.h>
-#include <flare/TransferFunction.h>
-#include <flare/Utils.h>
+#include <openspace/flare/CLProgram.h>
+#include <openspace/flare/CLManager.h>
+#include <openspace/flare/TransferFunction.h>
+#include <openspace/flare/Utils.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opencl/ghoul_cl.hpp>
 

@@ -4,9 +4,9 @@
  */
 
 #include <ghoul/opengl/ghoul_gl.h>
-#include <flare/BrickManager.h>
-#include <flare/Config.h>
-#include <flare/Utils.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/Config.h>
+#include <openspace/flare/Utils.h>
 #include <cmath>
 #include <limits>
 //#include <boost/timer/timer.hpp>
