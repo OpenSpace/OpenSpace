@@ -335,7 +335,8 @@ void TraverseOctree(float3 _rayO,
   int max_iterations = 50;
   int iterations = 0;
   bool ok = stepsize > 0.0f && stepsize < fabs(_maxDist);
-  while (traversed < _maxDist && iterations < max_iterations) {
+  //while (traversed < _maxDist && iterations < max_iterations) {
+  while (traversed < _maxDist) {
     
     // Reset traversal variables
     float3 offset = (float3)(0.0f);
@@ -404,7 +405,6 @@ void TraverseOctree(float3 _rayO,
     } // while traversing
 
     // Update 
-    iterations = iterations + 1;
     traversed = traversed + stepsize;
     P = P + stepsize * _rayD;
 

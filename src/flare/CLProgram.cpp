@@ -256,6 +256,8 @@ bool CLProgram::PrepareProgram() {
     //glFlush();
 #else
 */
+    
+    glFinish();
   // Let OpenCL take control of the shared GL textures
   for (auto it = OGLTextures_.begin(); it != OGLTextures_.end(); ++it) {
     ghoul::opencl::CLCommandQueue q = clManager_->commandQueues_[CLManager::EXECUTE];
@@ -322,11 +324,7 @@ bool CLProgram::FinishProgram() {
     
 //#ifndef __APPLE__
   // Make sure kernel is done
-  error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
-  if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
-    ERROR("Failed to finish program");
-    return false;
-  }
+  
   // Release shared OGL objects
   for (auto it=OGLTextures_.begin(); it!=OGLTextures_.end(); ++it) {
     error_ = clEnqueueReleaseGLObjects(
@@ -338,6 +336,11 @@ bool CLProgram::FinishProgram() {
       return false;
     }
   }
+    error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
+    if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
+        ERROR("Failed to finish program");
+        return false;
+    }
   /*
 #else
     error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);

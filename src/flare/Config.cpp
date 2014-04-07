@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <flare/Utils.h>
+#include <ghoul/filesystem/filesystem.h>
 
 using namespace osp;
 
@@ -85,9 +86,11 @@ bool Config::Read() {
       // Save value
       if (variable == "tsp_filename") {
         ss >> TSPFilename_;
+        TSPFilename_ = absPath(TSPFilename_);
         INFO("TSP file name: " << TSPFilename_);
       } else if (variable == "transferfunction_filename") {
-        ss >> TFFilename_; 
+        ss >> TFFilename_;
+        TFFilename_ = absPath(TFFilename_);
         INFO("Transfer function file name " << TFFilename_);
       } else if (variable == "spatial_error_tolerance") {
         ss >> spatialErrorTolerance_;
@@ -115,21 +118,27 @@ bool Config::Read() {
         INFO("Win height: " << winHeight_);
       } else if (variable == "raycaster_kernel_filename") {
         ss >> raycasterKernelFilename_;
+        raycasterKernelFilename_ = absPath(raycasterKernelFilename_);
         INFO("Raycaster kernel file name: " << raycasterKernelFilename_);
       } else if (variable == "tsp_traversal_kernel_filename" ) {
         ss >> TSPTraversalKernelFilename_;
+        TSPTraversalKernelFilename_ = absPath(TSPTraversalKernelFilename_);
         INFO("TSP traversal kernel file name: " <<TSPTraversalKernelFilename_);
       } else if (variable == "cube_shader_vert_filename") {
         ss >> cubeShaderVertFilename_;
+        cubeShaderVertFilename_ = absPath(cubeShaderVertFilename_);
         INFO("Cube vertex shader file name: " << cubeShaderVertFilename_);
       } else if (variable == "cube_shader_frag_filename") {
         ss >> cubeShaderFragFilename_;
+        cubeShaderFragFilename_ = absPath(cubeShaderFragFilename_);
         INFO("Cube fragment shader file name: " << cubeShaderFragFilename_);
       } else if (variable == "quad_shader_vert_filename") {
         ss >> quadShaderVertFilename_;
+        quadShaderVertFilename_ = absPath(quadShaderVertFilename_);
         INFO("Quad vertex shader file name: " << quadShaderVertFilename_);
        } else if (variable == "quad_shader_frag_filename") {
         ss >> quadShaderFragFilename_;
+        quadShaderFragFilename_ = absPath(quadShaderFragFilename_);
         INFO("Cube vertex shader file name: " << quadShaderFragFilename_);
       } else if (variable == "mouse_pitch_factor") {
         ss >> mousePitchFactor_;

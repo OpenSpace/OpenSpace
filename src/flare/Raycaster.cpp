@@ -8,7 +8,6 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <fstream>
 #include <flare/Raycaster.h>
-#include <flare/TextureAtlas.h>
 #include <flare/BrickManager.h>
 #include <flare/Utils.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -74,12 +73,14 @@ Raycaster::Raycaster(Config *_config)
     cubeInitialized_(false),
     quadInitialized_(false),
     framebuffersInitialized_(false),
-    pingPongIndex_(true),
-    animator_(NULL),
     pingPong_(0),
+    animator_(NULL),
     lastTimestep_(1),
+    pingPongIndex_(true),
     brickManager_(NULL),
-    clManager_(NULL) {
+    clManager_(NULL),
+    cubeFrontCLmem(0),
+    cubeBackCLmem(0) {
 }
 
 Raycaster::~Raycaster() {
@@ -705,6 +706,11 @@ bool Raycaster::InitCL() {
                               CLManager::READ_ONLY, cubeBackCLmem)) {
     return false;
   }
+  /*
+    if (!clManager_->AddTexture("TSPTraversal", quadArg_, quadTex_,
+                                CLManager::TEXTURE_2D,
+                                CLManager::WRITE_ONLY)) return false;
+  */
   if (!clManager_->AddBuffer("TSPTraversal", tspTSPArg_,
                              reinterpret_cast<void*>(tsp_->Data()),
                              tsp_->Size()*sizeof(int),

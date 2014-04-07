@@ -11,6 +11,8 @@
 #include <sstream>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
+
 namespace {
     std::string _loggerCat = "CLManager";
 }
@@ -117,41 +119,18 @@ bool CLManager::CreateContext() {
     ERROR("Number of devices < 1, can't create context");
     return false;
   }
-/*
-  // Create an OpenCL context with a reference to an OpenGL context
-  cl_context_properties contextProperties[] = {
-#ifndef _WIN32
-    CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
-    CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
-#else
-    CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-    CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-#endif
-    CL_CONTEXT_PLATFORM, (cl_context_properties)platforms_[0],
-    0};
-  
-//  FIXME I am a ugly hack
-  if (numDevices_> 1)
-	  devices_[0] = devices_[1];
-
-  // TODO Support more than one device?
-  context_ = clCreateContext(contextProperties, 1, &devices_[0], NULL,
-                             NULL, &error_);
- */
     bool success = _context.createContextFromGLContext();
     if(!success)
         LDEBUG("Could not create GL context");
 
     devices_[0] = _context.device();
     return success;
-  //return CheckSuccess(error_, "CreateContext()");
 }
 
 
 bool CLManager::CreateCommandQueue() {
   for (unsigned int i=0; i<NUM_QUEUE_INDICES; ++i) {
-      commandQueues_[i] = std::move(_context.createCommandQueue());
-    //commandQueues_[i]=clCreateCommandQueue(context_, devices_[0], 0, &error_);
+      commandQueues_[i] = _context.createCommandQueue();
     if (!CheckSuccess(error_, "CreateCommandQueue()")) {
       return false;
     }

@@ -137,6 +137,10 @@ bool OpenSpaceEngine::initialize() {
 	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
 	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
 	FileSys.registerPathToken("${KERNELS}", "${BASE_PATH}/kernels");
+	FileSys.registerPathToken("${SHADERS}", "${BASE_PATH}/shaders");
+	FileSys.registerPathToken("${CONFIG}", "${BASE_PATH}/config");
+    
+    LDEBUGC("HOMEDIR", FileSys.homeDirectory());
 
     // Initialize configuration
     _configurationManager->initialize();
@@ -292,71 +296,3 @@ void OpenSpaceEngine::decode() {
 }
 
 } // namespace openspace
-
-/*
-void RenderEngine::encode() {
-	
-	// allocate a sgct shared double for syncing
-	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
-
-	// sync the time
-	shDouble->setVal(masterTime_);
-	sharedDataInstance_->writeDouble(shDouble);
-	
-	// check that the camera has been allocated
-	if(mainCamera_ != nullptr) {
-
-		// sync position
-		psc campos = mainCamera_->getPosition();
-		for(int i = 0; i < 4; i++) {
-			shDouble->setVal(campos[i]);
-			sharedDataInstance_->writeDouble(shDouble);
-		}
-
-		// sync view direction
-		glm::quat camrot = mainCamera_->getRotation();
-		for(int i = 0; i < 4; i++) {
-			shDouble->setVal(camrot[i]);
-			sharedDataInstance_->writeDouble(shDouble);
-		}
-	}
-	
-	// deallocate
-	delete shDouble;
-	
-}
-
-void RenderEngine::decode() {
-	
-	// allocate a sgct shared double for syncing
-	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
-	
-	// sync the time
-	sharedDataInstance_->Double(shDouble);
-	masterTime_ = shDouble->getVal();
-	
-	// check that the camera has been allocated
-	if(mainCamera_ != nullptr) {
-
-		// sync position
-		psc campos;
-		for(int i = 0; i < 4; i++) {
-			sharedDataInstance_->readDouble(shDouble);
-			campos[i] = shDouble->getVal();
-		}
-		mainCamera_->setPosition(campos);
-
-		// sync view direction
-		glm::quat camrot;
-		for(int i = 0; i < 4; i++) {
-			sharedDataInstance_->readDouble(shDouble);
-			camrot[i] = static_cast<float>(shDouble->getVal());
-		}
-		mainCamera_->setRotation(camrot);
-	}
-	
-	// deallocate
-	delete shDouble;
-	
-}
-*/

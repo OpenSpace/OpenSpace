@@ -98,7 +98,7 @@ void Flare::initNavigation() {
 
 void Flare::init() {
 	// Start with reading a config file
-	_config = Config::New(absPath("${BASE_PATH}/config/flareConfig.txt"));
+	_config = Config::New(absPath("${CONFIG}/flareConfig.txt"));
 	if (!_config) {
         LDEBUG("!_Config");
         exit(1);
