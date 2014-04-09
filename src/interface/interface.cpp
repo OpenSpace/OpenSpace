@@ -29,7 +29,6 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
-#include <iterator>
 #include <algorithm>
 
 namespace openspace {
@@ -46,16 +45,8 @@ void Interface::callback(const char* receivedChars) {
 	_nodes = std::vector<Node>();
 
 	loadIntoNodes(pt);
-	handleNodes();
-
-//	for (int i = 0; i < _nodes.size(); ++i) {
-//		std::cout << _nodes.at(i)._key << " " << _nodes.at(i)._value;
-//		for (int j = 0; j < _nodes.at(i)._children.size(); ++j) {
-//			std::cout << _nodes.at(i)._children.at(j)._value << " ";
-//		}
-//		std::cout << std::endl;
-//	}
-	_nodes.clear();
+	handleNodes(); // Issue commands
+	_nodes.clear(); // Clean up after commands are issued
 }
 
 void Interface::handleNodes() {
