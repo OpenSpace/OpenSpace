@@ -12,12 +12,76 @@ struct KernelConstants {
   int paddedBrickDim_;
 };
 
-        
+float3 CartesianToSpherical(float3 _cartesian);
+float Lerp(float _v0, float _v1, float _d);
+int LeftBST(int _bstNodeIndex, int _numValuesPerNode, int _numOTNodes,
+            bool _bstRoot, __global __read_only int *_tsp);
+int RightBST(int _bstNodeIndex, int _numValuesPerNode, int _numOTNodes,
+             bool _bstRoot, __global __read_only int *_tsp);
+int ChildNodeIndex(int _bstNodeIndex, 
+                   int *_timespanStart,
+                   int *_timespanEnd,
+                   int _timestep,
+                   int _numValuesPerNode,
+                   int _numOTNodes,
+                   bool _bstRoot,
+                   __global __read_only int *_tsp);
+int BrickIndex(int _bstNodeIndex, int _numValuesPerNode, 
+               __global __read_only int *_tsp);
+bool IsBSTLeaf(int _bstNodeIndex, int _numValuesPerNode, 
+               bool _bstRoot, __global __read_only int *_tsp);
+bool IsOctreeLeaf(int _otNodeIndex, int _numValuesPerNode, 
+                  __global __read_only int *_tsp);
+int OTChildIndex(int _otNodeIndex, int _numValuesPerNode,
+                 int _child, 
+                 __global __read_only int *_tsp) ;
+float TemporalError(int _bstNodeIndex, int _numValuesPerNode, 
+                    __global __read_only int *_tsp) ; 
+float SpatialError(int _bstNodeIndex, int _numValuesPerNode, 
+                  __global __read_only int *_tsp);
+int3 BoxCoords(float3 _globalCoords, int _boxesPerAxis) ;
+int3 AtlasBoxCoords(int _brickIndex, 
+                    __global __read_only int *_brickList);
+float3 AtlasCoords(float3 _globalCoords, int _brickIndex, int _boxesPerAxis,
+                   int _paddedBrickDim, int _level, 
+                   __global __read_only int *_brickList) ;
+void SampleAtlas(float4 *_color, float3 _coords, int _brickIndex,
+                 int _boxesPerAxis, int _paddedBrickDim, int _level,
+                 const sampler_t _atlasSampler,
+                 __read_only image3d_t _textureAtlas,
+                 __read_only image2d_t _transferFunction,
+                 const sampler_t _tfSampler,
+                 __global __read_only int *_brickList);
+bool TraverseBST(int _otNodeIndex, int *_brickIndex,
+                 __constant __read_only struct KernelConstants *_constants,
+                 __global __read_only int *_tsp, const int _timestep);
+int EnclosingChild(float3 _P, float _boxMid, float3 _offset) ;
+void UpdateOffset(float3 *_offset, float _boxDim, int _child) ;
+float4 TraverseOctree(float3 _rayO, float3 _rayD, float _maxDist,
+                      __read_only image3d_t _textureAtlas,
+                      __constant struct KernelConstants *_constants,
+                      __read_only image2d_t _transferFunction,
+                      __global __read_only int *_tsp,
+                      __global __read_only int *_brickList,
+                      const int _timestep);
+__kernel void RaycasterTSP(__read_only image2d_t _cubeFront,
+                           __read_only image2d_t _cubeBack,
+                           __write_only image2d_t _output,
+                           __read_only image3d_t _textureAtlas,
+                           __constant struct KernelConstants *_constants,
+                           __read_only image2d_t _transferFunction,
+                           //__global __read_only float *_transferFunction,
+                           __global __read_only int *_tsp,
+                           __global __read_only int *_brickList,
+                           const int _timestep);
+
+
+
 // Turn normalized [0..1] cartesian coordinates 
 // to normalized spherical [0..1] coordinates
 float3 CartesianToSpherical(float3 _cartesian) {
   // Put cartesian in [-1..1] range first
-  _cartesian = (float3)(-1.0) + 2.0* _cartesian;
+  _cartesian = (float3)(-1.0) + 2.0f* _cartesian;
   float r = length(_cartesian);
   float theta, phi;
   if (r == 0.0) {
@@ -26,7 +90,7 @@ float3 CartesianToSpherical(float3 _cartesian) {
     theta = acospi(_cartesian.z/r);
     phi = (M_PI + atan2(_cartesian.y, _cartesian.x)) / (2.0*M_PI);
   }
-  r = r / native_sqrt(3.0);
+  r = r / native_sqrt(3.0f);
   // Sampler ignores w component
   return (float3)(r, theta, phi);
 }
@@ -218,8 +282,8 @@ float3 AtlasCoords(float3 _globalCoords, int _brickIndex, int _boxesPerAxis,
 void SampleAtlas(float4 *_color, float3 _coords, int _brickIndex,
                  int _boxesPerAxis, int _paddedBrickDim, int _level,
                  const sampler_t _atlasSampler,
-                 __global __read_only image3d_t _textureAtlas,
-                 __global __read_only image2d_t _transferFunction,
+                 __read_only image3d_t _textureAtlas,
+                 __read_only image2d_t _transferFunction,
                  const sampler_t _tfSampler,
                  __global __read_only int *_brickList) {
 
@@ -235,7 +299,7 @@ void SampleAtlas(float4 *_color, float3 _coords, int _brickIndex,
   float sample = read_imagef(_textureAtlas, _atlasSampler, a4).x;
   // Composition
   float4 tf = read_imagef(_transferFunction, _tfSampler, (float2)(sample, 0.0));
-  *_color += (1.0 - _color->w)*tf;
+  *_color += (1.0f - _color->w)*tf;
 
 }
 
@@ -358,9 +422,9 @@ void UpdateOffset(float3 *_offset, float _boxDim, int _child) {
 }
 
 float4 TraverseOctree(float3 _rayO, float3 _rayD, float _maxDist,
-                      __global __read_only image3d_t _textureAtlas,
+                      __read_only image3d_t _textureAtlas,
                       __constant struct KernelConstants *_constants,
-                      __global __read_only image2d_t _transferFunction,
+                      __read_only image2d_t _transferFunction,
                       __global __read_only int *_tsp,
                       __global __read_only int *_brickList,
                       const int _timestep) {
@@ -438,7 +502,7 @@ float4 TraverseOctree(float3 _rayO, float3 _rayD, float _maxDist,
         // Keep traversing the octree
         
         // Next box dimension
-        boxDim /= 2.0;
+        boxDim /= 2.0f;
         
         // Current mid point
         float boxMid = boxDim;
@@ -469,12 +533,12 @@ float4 TraverseOctree(float3 _rayO, float3 _rayD, float _maxDist,
 }
 
 
-__kernel void RaycasterTSP(__global __read_only image2d_t _cubeFront,
-                           __global __read_only image2d_t _cubeBack,
-                           __global __write_only image2d_t _output,
-                           __global __read_only image3d_t _textureAtlas,
+__kernel void RaycasterTSP(__read_only image2d_t _cubeFront,
+                           __read_only image2d_t _cubeBack,
+                           __write_only image2d_t _output,
+                           __read_only image3d_t _textureAtlas,
                            __constant struct KernelConstants *_constants,
-                           __global __read_only image2d_t _transferFunction,
+                           __read_only image2d_t _transferFunction,
                            //__global __read_only float *_transferFunction,
                            __global __read_only int *_tsp,
                            __global __read_only int *_brickList,

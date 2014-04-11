@@ -22,17 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <flare/flare.h>
+#include <openspace/flare/flare.h>
 
-#include <flare/Renderer.h>
-#include <flare/Texture.h>
-#include <flare/Texture2D.h>
-#include <flare/ShaderProgram.h>
-#include <flare/TransferFunction.h>
-#include <flare/BrickManager.h>
-#include <flare/TSP.h>
-#include <flare/CLManager.h>
-#include <flare/Utils.h>
+#include <ghoul/opengl/texture.h>
+
+#include <openspace/flare/Renderer.h>
+#include <openspace/flare/TransferFunction.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/TSP.h>
+#include <openspace/flare/CLManager.h>
+#include <openspace/flare/Utils.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
@@ -40,6 +39,10 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
+
+namespace {
+    std::string _loggerCat = "Flare";
+}
 
 namespace openspace {
 using namespace osp;
@@ -62,6 +65,11 @@ Flare::~Flare() {
 	delete _animator;
 }
 
+void exit_msg(std::string m) {
+    LDEBUG(m);
+    exit(1);
+}
+
 void Flare::render(const Camera *camera, const psc &thisPosition) {
 	// Sync timestep
 	_animator->SetCurrentTimestep(static_cast<unsigned int>(_timeStep.getVal()));
@@ -76,7 +84,6 @@ void Flare::render(const Camera *camera, const psc &thisPosition) {
 	_raycaster->SetViewParams(_translateX.getVal(),
 			_translateY.getVal(),
 			_translateZ.getVal());
-
 	// Render
 	if (!_raycaster->Render(_elapsedTime.getVal()))	exit(1);
 
@@ -110,8 +117,11 @@ void Flare::setupNavigationParameters() {
 
 void Flare::initialize() {
 	// Start with reading a config file
-	_config = Config::New(absPath("${BASE_PATH}/config/flareConfig.txt"));
-	if (!_config) exit(1);
+	_config = Config::New(absPath("${CONFIG}/flareConfig.txt"));
+	if (!_config) {
+        LDEBUG("!_Config");
+        exit(1);
+    }
 
 	setupNavigationParameters();
 
@@ -135,28 +145,91 @@ void Flare::initialize() {
 
 	// Create TSP structure from file
 	TSP *tsp = TSP::New(_config);
-	if (!tsp->ReadHeader()) exit(1);
+	if (!tsp->ReadHeader()) {
+        LDEBUG("!tsp->ReadHeader()");
+        exit(1);
+    }
 	// Read cache if it exists, calculate otherwise
 	if (tsp->ReadCache()) {
 		INFO("\nUsing cached TSP file");
 	} else {
 		INFO("\nNo cached TSP file found");
-		if (!tsp->Construct()) exit(1);
+		if (!tsp->Construct()) {
+            LDEBUG("!tsp->Construct()");
+            exit(1);
+        }
 		if (_config->CalculateError() == 0) {
 			INFO("Not calculating errors");
 		} else {
-			if (!tsp->CalculateSpatialError()) exit(1);
-			if (!tsp->CalculateTemporalError()) exit(1);
-			if (!tsp->WriteCache()) exit(1);
+			if (!tsp->CalculateSpatialError()) {
+                LDEBUG("!tsp->CalculateSpatialError()");
+                    exit(1);
+            }
+			if (!tsp->CalculateTemporalError()) {
+                LDEBUG("!tsp->CalculateTemporalError()");
+                exit(1);
+            }
+			if (!tsp->WriteCache()) {
+                LDEBUG("!tsp->WriteCache()");
+                exit(1);
+            }
 		}
 	}
 
 	// Create brick manager and init (has to be done after init OpenGL!)
 	BrickManager *brickManager= BrickManager::New(_config);
-	if (!brickManager->ReadHeader()) exit(1);
-	if (!brickManager->InitAtlas()) exit(1);
+	if (!brickManager->ReadHeader()) {
+        LDEBUG("!brickManager->ReadHeader()");
+        exit(1);
+    }
+	if (!brickManager->InitAtlas()) {
+        LDEBUG("!brickManager->InitAtlas()");
+        exit(1);
+    }
+
+    using ghoul::opengl::ShaderObject;
+    using ghoul::opengl::ProgramObject;
+    
+    ProgramObject* cubeShaderProgram = nullptr;
+    ShaderObject* cubeShaderProgram_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                          _config->CubeShaderVertFilename(),
+                                                          "cubeShaderProgram_vs"
+                                                          );
+    ShaderObject* cubeShaderProgram_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                          _config->CubeShaderFragFilename(),
+                                                          "cubeShaderProgram_fs"
+                                                          );
+    
+    cubeShaderProgram = new ProgramObject;
+    cubeShaderProgram->attachObject(cubeShaderProgram_vs);
+    cubeShaderProgram->attachObject(cubeShaderProgram_fs);
+    
+    if( ! cubeShaderProgram->compileShaderObjects())
+        LDEBUG("Could not compile cubeShaderProgram");
+    if( ! cubeShaderProgram->linkProgramObject())
+        LDEBUG("Could not link cubeShaderProgram");
+    
+    ProgramObject* quadShaderProgram = nullptr;
+    ShaderObject* quadShaderProgram_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                                                          _config->QuadShaderVertFilename(),
+                                                          "quadShaderProgram_vs"
+                                                          );
+    ShaderObject* quadShaderProgram_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                                                          _config->QuadShaderFragFilename(),
+                                                          "quadShaderProgram_fs"
+                                                          );
+    
+    quadShaderProgram = new ProgramObject;
+    quadShaderProgram->attachObject(quadShaderProgram_vs);
+    quadShaderProgram->attachObject(quadShaderProgram_fs);
+    
+    if( ! quadShaderProgram->compileShaderObjects())
+        LDEBUG("Could not compile quadShaderProgram");
+    if( ! quadShaderProgram->linkProgramObject())
+        LDEBUG("Could not link quadShaderProgram");
 
 	// Create shaders for color cube and output textured quad
+    /*
 	ShaderProgram *cubeShaderProgram = ShaderProgram::New();
 	cubeShaderProgram->CreateShader(ShaderProgram::VERTEX,
 			_config->CubeShaderVertFilename());
@@ -170,25 +243,37 @@ void Flare::initialize() {
 	quadShaderProgram->CreateShader(ShaderProgram::FRAGMENT,
 			_config->QuadShaderFragFilename());
 	quadShaderProgram->CreateProgram();
+    */
 
 	// Create two textures to hold the color cube
 	std::vector<unsigned int> dimensions(2);
 	dimensions[0] = width;
 	dimensions[1] = height;
+    ghoul::opengl::Texture* cubeFrontTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    cubeFrontTex->uploadTexture();
+    ghoul::opengl::Texture* cubeBackTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                                       ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    cubeBackTex->uploadTexture();
+    /*
 	Texture2D *cubeFrontTex = Texture2D::New(dimensions);
 	Texture2D *cubeBackTex = Texture2D::New(dimensions);
 	cubeFrontTex->Init();
 	cubeBackTex->Init();
-
+*/
 	// Create an output texture to write to
-	Texture2D *quadTex = Texture2D::New(dimensions);
-	quadTex->Init();
+    ghoul::opengl::Texture* quadTex = new ghoul::opengl::Texture(glm::size3_t(width, height, 1),
+                                                                      ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+    quadTex->uploadTexture();
+
+	//Texture2D *quadTex = Texture2D::New(dimensions);
+	//quadTex->Init();
 
 	// Create transfer functions
 	TransferFunction *transferFunction = TransferFunction::New();
 	transferFunction->SetInFilename(_config->TFFilename());
-	if (!transferFunction->ReadFile()) exit(1);
-	if (!transferFunction->ConstructTexture()) exit(1);
+	if (!transferFunction->ReadFile()) exit_msg("!transferFunction->ReadFile()");
+	if (!transferFunction->ConstructTexture()) exit_msg("!transferFunction->ConstructTexture()");
 
 
 	// Create animator
@@ -203,15 +288,15 @@ void Flare::initialize() {
 	_raycaster = Raycaster::New(_config);
 	_raycaster->SetWinWidth(width);
 	_raycaster->SetWinHeight(height);
-	if (!_raycaster->InitCube()) exit(1);
-	if (!_raycaster->InitQuad()) exit(1);
+	if (!_raycaster->InitCube()) exit_msg("!_raycaster->InitCube()");
+	if (!_raycaster->InitQuad()) exit_msg("!_raycaster->InitQuad()");
 	_raycaster->SetBrickManager(brickManager);
 	_raycaster->SetCubeFrontTexture(cubeFrontTex);
 	_raycaster->SetCubeBackTexture(cubeBackTex);
 	_raycaster->SetQuadTexture(quadTex);
 	_raycaster->SetCubeShaderProgram(cubeShaderProgram);
 	_raycaster->SetQuadShaderProgram(quadShaderProgram);
-	if (!_raycaster->InitFramebuffers()) exit(1);
+	if (!_raycaster->InitFramebuffers()) exit_msg("!_raycaster->InitFramebuffers()");
 	_raycaster->SetAnimator(_animator);
 	_raycaster->AddTransferFunction(transferFunction);
 
@@ -219,8 +304,8 @@ void Flare::initialize() {
 	_raycaster->SetCLManager(clManager);
 	_raycaster->SetTSP(tsp);
 
-	if (!_raycaster->InitCL()) exit(1);
-	if (!_raycaster->InitPipeline()) exit(1);
+	if (!_raycaster->InitCL()) exit_msg("!_raycaster->InitCL()");
+	if (!_raycaster->InitPipeline()) exit_msg("!_raycaster->InitCL()");
 }
 
 void Flare::keyboard(int key, int action) {
@@ -297,8 +382,6 @@ void Flare::preSync() {
 	_oldTime = _currentTime;
 	_currentTime = static_cast<float>(sgct::Engine::getTime());
 	_elapsedTime.setVal(_currentTime - _oldTime);
-
-	_timeStep.setVal(static_cast<int>(_animator->CurrentTimestep()));
 
 	// Update automatic model transform
 	if (!_animationPaused.getVal()) {

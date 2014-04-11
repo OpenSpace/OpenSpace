@@ -9,11 +9,66 @@ struct TraversalConstants {
   float spatialTolerance_;
 };
 
+float3 CartesianToSpherical(float3 _cartesian);
+int OctreeRootNodeIndex();
+int LeftBST(int _bstNodeIndex, int _numValuesPerNode, int _numOTNodes,
+            bool _bstRoot, __global __read_only int *_tsp);
+int RightBST(int _bstNodeIndex, int _numValuesPerNode, int _numOTNodes,
+             bool _bstRoot, __global __read_only int *_tsp);
+int ChildNodeIndex(int _bstNodeIndex, 
+                   int *_timespanStart,
+                   int *_timespanEnd,
+                   int _timestep,
+                   int _numValuesPerNode,
+                   int _numOTNodes,
+                   bool _bstRoot,
+                   __global __read_only int *_tsp);
+int BrickIndex(int _bstNodeIndex, int _numValuesPerNode, 
+               __global __read_only int *_tsp) ;
+bool IsBSTLeaf(int _bstNodeIndex, int _numValuesPerNode, 
+               bool _bstRoot, __global __read_only int *_tsp) ;
+bool IsOctreeLeaf(int _otNodeIndex, int _numValuesPerNode, 
+                  __global __read_only int *_tsp) ;
+int OTChildIndex(int _otNodeIndex, int _numValuesPerNode,
+                 int _child, 
+                 __global __read_only int *_tsp);
+void AddToList(int _brickIndex, 
+               __global volatile int *_reqList);
+float TemporalError(int _bstNodeIndex, int _numValuesPerNode, 
+                    __global __read_only int *_tsp) ;
+float SpatialError(int _bstNodeIndex, int _numValuesPerNode, 
+                   __global __read_only int *_tsp);
+bool TraverseBST(int _otNodeIndex,
+                 int *_brickIndex, 
+                 int _timestep,
+                 __constant struct TraversalConstants *_constants,
+                 __global volatile int *_reqList,
+                 __global __read_only int *_tsp);
+int EnclosingChild(float3 _P, float _boxMid, float3 _offset);
+void UpdateOffset(float3 *_offset, float _boxDim, int _child) ;
+void TraverseOctree(float3 _rayO, 
+                    float3 _rayD,
+                    float _maxDist,
+                    __constant struct TraversalConstants *_constants,
+                    __global volatile int *_reqList,
+                    __global __read_only int *_tsp,
+                    const int _timestep);
+__kernel void TSPTraversal(__read_only image2d_t _cubeFront,
+                           __read_only image2d_t _cubeBack,
+                           __constant struct TraversalConstants *_constants,
+                           __global __read_only int *_tsp,
+                           __global int *_reqList,
+                           const int _timestep) ;
+
+
+
+
+
 // Turn normalized [0..1] cartesian coordinates 
 // to normalized spherical [0..1] coordinates
 float3 CartesianToSpherical(float3 _cartesian) {
   // Put cartesian in [-1..1] range first
-  _cartesian = (float3)(-1.0) + 2.0* _cartesian;
+  _cartesian = (float3)(-1.0) + 2.0f* _cartesian;
   float r = length(_cartesian);
   float theta, phi;
   if (r == 0.0) {
@@ -22,7 +77,7 @@ float3 CartesianToSpherical(float3 _cartesian) {
     theta = acospi(_cartesian.z/r);
     phi = (M_PI + atan2(_cartesian.y, _cartesian.x)) / (2.0*M_PI);
   }
-  r = r / native_sqrt(3.0);
+  r = r / native_sqrt(3.0f);
   // Sampler ignores w component
   return (float3)(r, theta, phi);
 }
@@ -105,7 +160,7 @@ bool IsOctreeLeaf(int _otNodeIndex, int _numValuesPerNode,
 int OTChildIndex(int _otNodeIndex, int _numValuesPerNode,
                  int _child, 
                  __global __read_only int *_tsp) {
-  int firstChild = _tsp[_otNodeIndex*_numValuesPerNode + 1];
+  int firstChild = _tsp[_otNodeIndex*_numValuesPerNode+1];
   return firstChild + _child;
 }
 
@@ -275,21 +330,26 @@ void TraverseOctree(float3 _rayO,
   float stepsize = _constants->stepsize_;
   float3 P = _rayO;
   // Keep traversing until the sample point goes outside the unit cube
-  float traversed = 0.0;
+  float traversed = 0.0f;
+  
+  int max_iterations = 50;
+  int iterations = 0;
+  bool ok = stepsize > 0.0f && stepsize < fabs(_maxDist);
+  //while (traversed < _maxDist && iterations < max_iterations) {
   while (traversed < _maxDist) {
     
     // Reset traversal variables
-    float3 offset = (float3)(0.0);
-    float boxDim = 1.0;
+    float3 offset = (float3)(0.0f);
+    float boxDim = 1.0f;
     int child;
 
     // Init the octree node index to the root
     int otNodeIndex = OctreeRootNodeIndex();
-
+    
     // Start traversing octree
     // Rely on finding a leaf for loop termination 
+    
     while (true) {
-
       // See if the BST tree is good enough
       int brickIndex = 0;
       bool bstSuccess = TraverseBST(otNodeIndex, 
@@ -307,7 +367,7 @@ void TraverseOctree(float3 _rayO,
         AddToList(brickIndex, _reqList);
         // We are now done with this node, so go to next
         break;
-        
+
       // If the BST lookup failed but the octree node is a leaf, 
       // add the brick anyway (it is the BST leaf)
       } else if (IsOctreeLeaf(otNodeIndex, 
@@ -319,9 +379,9 @@ void TraverseOctree(float3 _rayO,
       // If the BST lookup failed and we can traverse the octree,
       // visit the child that encloses the point
       } else {
-
+        
         // Next box dimension
-        boxDim = boxDim/2.0;
+        boxDim = boxDim/2.0f;
 
         // Current mid point
         float boxMid = boxDim;
@@ -338,23 +398,23 @@ void TraverseOctree(float3 _rayO,
         UpdateOffset(&offset, boxDim, child);
 
         // Update node index to new node
-        int oldIndex = otNodeIndex;
+        //int oldIndex = otNodeIndex;
         otNodeIndex = OTChildIndex(otNodeIndex, _constants->numValuesPerNode_,
                                   child, _tsp);
-
-      } 
-
+      }
     } // while traversing
 
     // Update 
-    traversed += stepsize;
-    P += stepsize * _rayD;
+    traversed = traversed + stepsize;
+    P = P + stepsize * _rayD;
 
   } // while (traversed < maxDist)
+  
+  
 }
 
-__kernel void TSPTraversal(__global __read_only image2d_t _cubeFront,
-                           __global __read_only image2d_t _cubeBack,
+__kernel void TSPTraversal(__read_only image2d_t _cubeFront,
+                           __read_only image2d_t _cubeBack,
                            __constant struct TraversalConstants *_constants,
                            __global __read_only int *_tsp,
                            __global int *_reqList,
@@ -368,6 +428,7 @@ __kernel void TSPTraversal(__global __read_only image2d_t _cubeFront,
 
     // Read from color cube textures
     float4 cubeFrontColor = read_imagef(_cubeFront, sampler, intCoords);
+    
     if (length(cubeFrontColor.xyz) == 0.0) return;
     float4 cubeBackColor = read_imagef(_cubeBack, sampler, intCoords);
 

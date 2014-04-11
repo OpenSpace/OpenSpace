@@ -1,0 +1,12 @@
+
+
+{
+    Camera = {
+        Focus = "Earth",
+        Position = "Earth"
+    },
+    Modules = {
+        "common",
+        "earth"
+    }
+}

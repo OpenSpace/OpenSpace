@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <rendering/volumeraycaster.h>
+#include <openspace/rendering/volumeraycaster.h>
 
 #include <glm/glm.hpp>
 #include <ghoul/filesystem/filesystem.h>
@@ -54,7 +54,7 @@ VolumeRaycaster::~VolumeRaycaster() {}
 // Initializes the data and setups the correct type of ray caster
 void VolumeRaycaster::initialize() {
 //	------ VOLUME READING ----------------
-	std::string filename = absPath("${BASE_PATH}/openspace-data/skull.raw");
+	std::string filename = absPath("${OPENSPACE_DATA}/skull.raw");
 
 	ghoul::RawVolumeReader::ReadHints hints; // TODO: Read hints from .dat file
 	hints._dimensions = glm::ivec3(256, 256, 256);

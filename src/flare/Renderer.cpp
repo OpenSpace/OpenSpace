@@ -3,7 +3,7 @@
  *
  */
 
-#include <flare/Renderer.h>
+#include <openspace/flare/Renderer.h>
 #include <utility>
 
 using namespace osp;

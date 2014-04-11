@@ -1,7 +1,7 @@
 
 // open space includes
-#include "util/time.h"
-#include "interaction/interactionhandler.h"
+#include <openspace/util/time.h>
+#include <openspace/interaction/interactionhandler.h>
 
 // std includes
 #include <cassert>
@@ -18,7 +18,7 @@ Time::Time() {
 	time_ = 0.0;
 
 	// load spice time kernel
-	furnsh_c (absPath("${OPENSPACE-DATA}/spice/naif0010.tls").c_str());
+	furnsh_c (absPath("${OPENSPACE_DATA}/spice/naif0010.tls").c_str());
 
 	// convert UTC to ET 
 	str2et_c ( "2006 JAN 31 01:00", &time_ );
@@ -29,7 +29,7 @@ Time::~Time() {
 }
 
 void Time::init() {
-	assert( ! this_);
+	assert( this_ == nullptr);
 	 this_ = new Time();
 }
 

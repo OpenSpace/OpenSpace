@@ -1,6 +1,6 @@
 
 // open space includes
-#include "util/pss.h"
+#include <openspace/util/pss.h>
 
 // std includes
 #include <cstdio>
@@ -204,7 +204,12 @@ bool pss::operator<(const pss &other) const {
 	double ds = this->vec_[1] - other.vec_[1];
 	if(ds >= 0) {
 		double upscaled = other.vec_[0]*pow(k,-ds);
-		return vec_[0] < upscaled;
+        return vec_[0] < upscaled;
+        /*
+        bool retur =(vec_[0] < upscaled);
+        std::printf("this: %f, upscaled: %f, this<upscaled: %i\n", vec_[0], upscaled, retur);
+		return retur;
+        */
 	} else {
 		double upscaled = vec_[0]*pow(k,-ds);
 		return other.vec_[0] > upscaled;
@@ -271,5 +276,9 @@ bool pss::operator>=(const double &other) const {
 	return *this > other || *this == other;
 }
 
+std::ostream& operator<<(::std::ostream& os, const pss& rhs) {
+    os << "(" << rhs[0] << ", " << rhs[1] << ")";
+    return os;
+}
 
 } // namespace openspace

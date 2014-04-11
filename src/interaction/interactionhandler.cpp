@@ -1,11 +1,11 @@
 
 // open space includes
-#include "interactionhandler.h"
-#include "deviceidentifier.h"
-#include "externalcontrol/randomexternalcontrol.h"
-#include "externalcontrol/joystickexternalcontrol.h"
-#include "query/query.h"
-#include "openspaceengine.h"
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/deviceidentifier.h>
+#include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
+#include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
+#include <openspace/query/query.h>
+#include <openspace/engine/openspaceengine.h>
 
 // std includes
 #include <cassert>
@@ -227,7 +227,7 @@ double InteractionHandler::getDt() {
 
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
-    const double speed = 0.75;
+    const double speed = 2.75;
     const double dt = getDt();
     if (key == 'S') {
         glm::vec3 euler(speed * dt, 0.0, 0.0);
@@ -277,6 +277,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         pss dist(speed * dt, 8.0);
         distance(dist);
     }
+    /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");
 
@@ -301,7 +302,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         getCamera()->setPosition(node->getWorldPosition() + psc(0.0, 0.0, 0.5, 8.0));
         getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
     }
-
+*/
 }
 
 void InteractionHandler::mouseButtonCallback(int key, int action) {

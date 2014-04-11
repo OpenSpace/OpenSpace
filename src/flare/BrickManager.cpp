@@ -2,11 +2,11 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
-#include <GL/glew.h>
-#include <flare/BrickManager.h>
-#include <flare/Texture3D.h>
-#include <flare/Config.h>
-#include <flare/Utils.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/Config.h>
+#include <openspace/flare/Utils.h>
 #include <cmath>
 #include <limits>
 //#include <boost/timer/timer.hpp>
@@ -108,9 +108,9 @@ bool BrickManager::ReadHeader() {
   numValsTot_ = numBrickVals_*numBricksFrame_;
 
   fseeko(file_, 0, SEEK_END);
-  off fileSize = ftello(file_);
-  off calcFileSize = static_cast<off>(numBricksTree_) * 
-                     static_cast<off>(brickSize_) + dataPos_;
+  off_t fileSize = ftello(file_);
+  off_t calcFileSize = static_cast<off_t>(numBricksTree_) *
+                     static_cast<off_t>(brickSize_) + dataPos_;
 
   if (fileSize != calcFileSize) {
     ERROR("Sizes don't match");
@@ -157,9 +157,11 @@ bool BrickManager::InitAtlas() {
   dims.push_back(atlasDim_);
   dims.push_back(atlasDim_);
   dims.push_back(atlasDim_);
-  textureAtlas_ = Texture3D::New(dims);
+  textureAtlas_ = new ghoul::opengl::Texture(glm::size3_t(atlasDim_, atlasDim_, atlasDim_), ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+  textureAtlas_->uploadTexture();
+  //textureAtlas_ = Texture3D::New(dims);
 
-  if (!textureAtlas_->Init()) return false;
+  //if (!textureAtlas_->Init()) return false;
   
   atlasInitialized_ = true;
 
@@ -366,9 +368,9 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
                                 static_cast<std::ios::pos_type>(brickSize_);
     */
 
-    off offset = dataPos_ + 
-                  static_cast<off>(brickIndex) * 
-                  static_cast<off>(brickSize_);
+    off_t offset = dataPos_ +
+                  static_cast<off_t>(brickIndex) *
+                  static_cast<off_t>(brickSize_);
 
     // Skip reading if all bricks in sequence is already in PBO
     if (inPBO != sequence) {
@@ -448,11 +450,30 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
 
 bool BrickManager::PBOToAtlas(BUFFER_INDEX _pboIndex) {
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle_[_pboIndex]);
+  glm::size3_t dim = textureAtlas_->dimensions();
+    glGetError();
+    glBindTexture(GL_TEXTURE_3D, *textureAtlas_);
+    glTexSubImage3D(GL_TEXTURE_3D,
+                    0,
+                    0,
+                    0,
+                    0,
+                    dim[0],
+                    dim[1],
+                    dim[2],
+                    GL_RED,
+                    GL_FLOAT,
+                    NULL);
+    glBindTexture(GL_TEXTURE_3D, 0);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    
+    return (CheckGLError("Texture3D::UpdateSubRegion") == GL_NO_ERROR);
+  /*
   if (!textureAtlas_->UpdateSubRegion(0, 0, 0,
                                       textureAtlas_->Dim(0),
                                       textureAtlas_->Dim(1),
                                       textureAtlas_->Dim(2),
                                       0)) return false;
-   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-   return true;
+                                      */
+   //return true;
 }

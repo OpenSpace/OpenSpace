@@ -3,27 +3,24 @@
  * 
  */
 
+#include <ghoul/logging/logmanager.h>
 #include <sgct.h>
-#ifndef _WIN32
-  #include <GL/glx.h>
-#endif
+#include <ghoul/opengl/ghoul_gl.h>
 #include <fstream>
-#include <flare/Raycaster.h>
-#include <flare/Texture2D.h>
-#include <flare/Texture3D.h>
-#include <flare/TextureAtlas.h>
-#include <flare/BrickManager.h>
-#include <flare/Utils.h>
-#include <flare/ShaderProgram.h>
+#include <openspace/flare/Raycaster.h>
+#include <openspace/flare/BrickManager.h>
+#include <openspace/flare/Utils.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <flare/TransferFunction.h>
-#include <flare/Animator.h>
+#include <openspace/flare/TransferFunction.h>
+#include <openspace/flare/Animator.h>
 #include <vector>
-#include <flare/CLManager.h>
-#include <flare/KernelConstants.h>
-#include <flare/Config.h>
+#include <openspace/flare/CLManager.h>
+#include <openspace/flare/KernelConstants.h>
+#include <openspace/flare/Config.h>
 #include <stdint.h>
 #include <unistd.h> // sync()
+
+
 
 using namespace osp;
 
@@ -76,12 +73,14 @@ Raycaster::Raycaster(Config *_config)
     cubeInitialized_(false),
     quadInitialized_(false),
     framebuffersInitialized_(false),
-    pingPongIndex_(true),
-    animator_(NULL),
     pingPong_(0),
+    animator_(NULL),
     lastTimestep_(1),
+    pingPongIndex_(true),
     brickManager_(NULL),
-    clManager_(NULL) {
+    clManager_(NULL),
+    cubeFrontCLmem(0),
+    cubeBackCLmem(0) {
 }
 
 Raycaster::~Raycaster() {
@@ -147,8 +146,9 @@ bool Raycaster::Render(float _timestep) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Render cube
-  glUseProgram(cubeShaderProgram_->Handle());
-  cubePositionAttrib_ = cubeShaderProgram_->GetAttribLocation("position");
+  cubeShaderProgram_->activate();
+  //glUseProgram(cubeShaderProgram_->Handle());
+  cubePositionAttrib_ = cubeShaderProgram_->attributeLocation("position");
   if (cubePositionAttrib_ == -1) {
     ERROR("Cube position attribute lookup failed");
     return false;
@@ -272,12 +272,30 @@ bool Raycaster::Render(float _timestep) {
   // Render to framebuffer using quad
   glBindFramebuffer(GL_FRAMEBUFFER, sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
 
-  if (!quadTex_->Bind(quadShaderProgram_, "quadTex", 0)) return false;
+    glGetError();
+    quadShaderProgram_->activate();
+    glActiveTexture(GL_TEXTURE0);
+    int location = quadShaderProgram_->uniformLocation("quadTex");
+    //int location = glGetUniformLocation(_shaderProgram->Handle(),_uniformName.c_str());
+    if (location == -1) {
+        ERROR("Uniform " << "quadTex" << " could not be found");
+        glUseProgram(0);
+        return false;
+    }
+    
+    glUniform1i(location, 0);
+    glBindTexture(GL_TEXTURE_2D, *quadTex_);
+    glUseProgram(0);
+
+
+  //if (!quadTex_->Bind(quadShaderProgram_, "quadTex", 0)) return false;
   
   glDisable(GL_CULL_FACE);
 
-  glUseProgram(quadShaderProgram_->Handle());
-  quadPositionAttrib_ = quadShaderProgram_->GetAttribLocation("position");
+    quadShaderProgram_->activate();
+    //glUseProgram(quadShaderProgram_->Handle());
+    //quadPositionAttrib_ = quadShaderProgram_->GetAttribLocation("position");
+    quadPositionAttrib_ = quadShaderProgram_->attributeLocation("position");
   if (quadPositionAttrib_ == -1) {
     ERROR("Quad position attribute lookup failed");
     return false;
@@ -348,7 +366,8 @@ bool Raycaster::InitPipeline() {
   // Allocate space for the brick request list
   // Use 0 as default value
   brickRequest_.resize(tsp_->NumTotalNodes(), 0);
-
+    
+    glFinish();
   // Run TSP traversal for timestep 0
   if (!LaunchTSPTraversal(0)) {
     ERROR("InitPipeline() - failed to launch TSP traversal");
@@ -357,7 +376,7 @@ bool Raycaster::InitPipeline() {
 
   // Finish TSP traversal and read results into brick request
   if (!clManager_->FinishProgram("TSPTraversal")) return false;
-
+    
   if (!clManager_->ReadBuffer("TSPTraversal", tspBrickListArg_,
                               reinterpret_cast<void*>(&brickRequest_[0]),
                               brickRequest_.size()*sizeof(int),
@@ -510,7 +529,7 @@ bool Raycaster::InitFramebuffers() {
   glFramebufferTexture2D(GL_FRAMEBUFFER,
                          GL_COLOR_ATTACHMENT0,
                          GL_TEXTURE_2D,
-                         cubeFrontTex_->Handle(),
+                         *cubeFrontTex_,
                          0);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER,
                             GL_DEPTH_ATTACHMENT,
@@ -532,7 +551,7 @@ bool Raycaster::InitFramebuffers() {
   glFramebufferTexture2D(GL_FRAMEBUFFER,
                          GL_COLOR_ATTACHMENT0,
                          GL_TEXTURE_2D,
-                         cubeBackTex_->Handle(),
+                         *cubeBackTex_,
                          0);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER,
                             GL_DEPTH_ATTACHMENT,
@@ -588,23 +607,29 @@ bool Raycaster::UpdateMatrices() {
   return true;
 }
 
-bool Raycaster::BindTransformationMatrices(ShaderProgram * _program)
+bool Raycaster::BindTransformationMatrices(ghoul::opengl::ProgramObject * _program)
 {
+    if (!_program->setUniform("modelMatrix", model_)) return false;
+    if (!_program->setUniform("viewMatrix", view_)) return false;
+    if (!_program->setUniform("projectionMatrix", proj_)) return false;
+    
+/*
   if (!_program->BindMatrix4f("modelMatrix", &model_[0][0])) return false;
   if (!_program->BindMatrix4f("viewMatrix", &view_[0][0])) return false;
   if (!_program->BindMatrix4f("projectionMatrix", &proj_[0][0])) return false;
+  */
   return true;
 }
 
-void Raycaster::SetCubeFrontTexture(Texture2D *_cubeFrontTexture) {
+void Raycaster::SetCubeFrontTexture(ghoul::opengl::Texture  *_cubeFrontTexture) {
   cubeFrontTex_ = _cubeFrontTexture;
 }
 
-void Raycaster::SetCubeBackTexture(Texture2D *_cubeBackTexture) {
+void Raycaster::SetCubeBackTexture(ghoul::opengl::Texture  *_cubeBackTexture) {
   cubeBackTex_ = _cubeBackTexture;
 }
 
-void Raycaster::SetQuadTexture(Texture2D *_quadTexture) {
+void Raycaster::SetQuadTexture(ghoul::opengl::Texture *_quadTexture) {
   quadTex_ = _quadTexture;
 }
 
@@ -616,21 +641,19 @@ void Raycaster::SetTSP(TSP *_tsp) {
   tsp_ = _tsp;
 }
 
-void Raycaster::SetCubeShaderProgram(ShaderProgram *_cubeShaderProgram) {
+void Raycaster::SetCubeShaderProgram(ghoul::opengl::ProgramObject *_cubeShaderProgram) {
   cubeShaderProgram_ = _cubeShaderProgram;
 }
 
-void Raycaster::SetQuadShaderProgram(ShaderProgram *_quadShaderProgram) {
+void Raycaster::SetQuadShaderProgram(ghoul::opengl::ProgramObject *_quadShaderProgram) {
   quadShaderProgram_ = _quadShaderProgram;
 }
 
 bool Raycaster::ReloadShaders() {
   glGetError();
-  INFO("Reloading shaders");
-  if (!cubeShaderProgram_->DeleteShaders()) return false;
-  if (!quadShaderProgram_->DeleteShaders()) return false;
-  if (!cubeShaderProgram_->Reload()) return false;
-  if (!quadShaderProgram_->Reload()) return false;
+    INFO("Reloading shaders");
+    if (!cubeShaderProgram_->rebuildFromFile()) return false;
+    if (!quadShaderProgram_->rebuildFromFile()) return false;
   CheckGLError("ReloadShaders()");
   return true;
 }
@@ -670,19 +693,24 @@ bool Raycaster::InitCL() {
   }
   if (!clManager_->BuildProgram("TSPTraversal")) return false;
   if (!clManager_->CreateKernel("TSPTraversal")) return false;
-  cl_mem cubeFrontCLmem;
+  //cl_mem cubeFrontCLmem;
   if (!clManager_->AddTexture("TSPTraversal", tspCubeFrontArg_, 
                               cubeFrontTex_, CLManager::TEXTURE_2D,
                               CLManager::READ_ONLY, cubeFrontCLmem)) {
     return false;
   }
 
-  cl_mem cubeBackCLmem;
+  //cl_mem cubeBackCLmem;
   if (!clManager_->AddTexture("TSPTraversal", tspCubeBackArg_,
                               cubeBackTex_, CLManager::TEXTURE_2D,
                               CLManager::READ_ONLY, cubeBackCLmem)) {
     return false;
   }
+  /*
+    if (!clManager_->AddTexture("TSPTraversal", quadArg_, quadTex_,
+                                CLManager::TEXTURE_2D,
+                                CLManager::WRITE_ONLY)) return false;
+  */
   if (!clManager_->AddBuffer("TSPTraversal", tspTSPArg_,
                              reinterpret_cast<void*>(tsp_->Data()),
                              tsp_->Size()*sizeof(int),
@@ -690,6 +718,7 @@ bool Raycaster::InitCL() {
                              CLManager::READ_ONLY)) return false;
 
 
+    LDEBUGC("RAYCASTER", config_->RaycasterKernelFilename());
   // Raycaster part
   if (!clManager_->CreateProgram("RaycasterTSP",
                                 config_->RaycasterKernelFilename())) {
@@ -769,7 +798,18 @@ bool Raycaster::UpdateKernelConstants() {
     static_cast<int>(tsp_->NumValuesPerNode());
   traversalConstants_.numOTNodes_ = static_cast<int>(tsp_->NumOTNodes());
   traversalConstants_.temporalTolerance_ = config_->TemporalErrorTolerance();
-  traversalConstants_.spatialTolerance_ = config_->SpatialErrorTolerance(); 
+  traversalConstants_.spatialTolerance_ = config_->SpatialErrorTolerance();
+  
+  
+    std::string _loggerCat = "KOLLA KONSTANTER";
+    LDEBUG("traversalConstants_.gridType_: " << traversalConstants_.gridType_);
+    LDEBUG("traversalConstants_.numOTNodes_: " << traversalConstants_.numOTNodes_);
+    LDEBUG("traversalConstants_.numTimesteps_: " << traversalConstants_.numTimesteps_);
+    LDEBUG("traversalConstants_.numValuesPerNode_: " << traversalConstants_.numValuesPerNode_);
+    LDEBUG("traversalConstants_.spatialTolerance_: " << traversalConstants_.spatialTolerance_);
+    LDEBUG("traversalConstants_.stepsize_: " << traversalConstants_.stepsize_);
+    LDEBUG("traversalConstants_.temporalTolerance_: " << traversalConstants_.temporalTolerance_);
+  
 
   if (!clManager_->AddBuffer("RaycasterTSP", constantsArg_,
                              reinterpret_cast<void*>(&kernelConstants_),
