@@ -30,6 +30,11 @@
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clcommandqueue.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
+
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/flare/flare.h>
 
@@ -51,6 +56,7 @@ public:
     static bool findConfiguration(std::string& filename) ;
     
     ghoul::ConfigurationManager& configurationManager();
+    ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 
@@ -74,12 +80,12 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    VolumeRaycaster* _volumeRaycaster;
-    Flare* _flare;
+    //Flare* _flare;
     ghoul::ConfigurationManager* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
-    ScriptEngine* _scriptEngine;
+    //ScriptEngine* _scriptEngine;
+    ghoul::opencl::CLContext _context;
 };
     
 #define OsEng (openspace::OpenSpaceEngine::ref())

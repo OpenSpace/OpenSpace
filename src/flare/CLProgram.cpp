@@ -59,7 +59,7 @@ std::string options = "-cl-opt-disable";
                             CL_PROGRAM_BUILD_LOG, logSize, log, NULL);
       log[logSize] = '\0';
       INFO(log);
-      free(log);                       
+      delete[] log;
     }
     return false;
   }

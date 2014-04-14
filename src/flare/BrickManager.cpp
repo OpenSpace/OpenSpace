@@ -19,8 +19,8 @@ BrickManager * BrickManager::New(Config *_config) {
 
 
 BrickManager::BrickManager(Config *_config)
-  : textureAtlas_(NULL), config_(_config), atlasInitialized_(false), 
-   hasReadHeader_(false), xCoord_(0), yCoord_(0), zCoord_(0), file_(NULL) {
+  : config_(_config), xCoord_(0), yCoord_(0), zCoord_(0), textureAtlas_(NULL), file_(NULL),
+    hasReadHeader_(false), atlasInitialized_(false) {
 
   // TODO move
   glGenBuffers(1, &pboHandle_[EVEN]);

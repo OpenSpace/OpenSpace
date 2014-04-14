@@ -32,7 +32,7 @@ template<typename T>
 class VBO {
 public:
 	//initializers
-	VBO(const std::vector<std::tuple<int, GLenum, int> > descriptor, T *varray, int vsize, int *iarray, int isize): descriptor_(descriptor), isize_(isize), vsize_(vsize), varray_(varray), iarray_(iarray) {
+	VBO(const std::vector<std::tuple<int, GLenum, int> > descriptor, T *varray, int vsize, int *iarray, int isize): isize_(isize), vsize_(vsize), descriptor_(descriptor), varray_(varray), iarray_(iarray) {
 		static_assert(std::is_pod<T>::value, "Template typename should be a POD");
 		vBufferID_ = 0;
 		iBufferID_ = 0;

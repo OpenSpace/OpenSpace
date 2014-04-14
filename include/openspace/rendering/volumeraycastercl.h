@@ -22,68 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __VOLUMERAYCASTERCL_H__
+#define __VOLUMERAYCASTERCL_H__
 
-#include <cassert>
+#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/engine/openspaceengine.h>
 
-#include <openspace/rendering/renderableplanet.h>
-#include <openspace/rendering/renderablevolume.h>
-#include <openspace/flare/flare.h>
-#include <openspace/scenegraph/constantpositioninformation.h>
-#include <openspace/scenegraph/spicepositioninformation.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/io/rawvolumereader.h>
+#include <ghoul/filesystem/file.h>
+
+#include <sgct.h>
+
+#include <memory>
+#include <mutex>
 
 namespace openspace {
 
-// Template specializations for the different factories
-template<>
-ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType() {
-    return &_renderableFactory;
-}
-template<>
-ghoul::TemplateFactory<PositionInformation>* FactoryManager::factoryByType() {
-    return &_positionInformationFactory;
-}
-    
-FactoryManager* FactoryManager::_manager = nullptr;
+class VolumeRaycasterCL: public VolumeRaycaster {
+public:
+    VolumeRaycasterCL(const ghoul::Dictionary& dictionary);
+	~VolumeRaycasterCL();
+	
+    bool initialize();
+	void render(const glm::mat4& modelViewProjection);
 
-void FactoryManager::initialize() {
-    assert(_manager == nullptr);
-    if (_manager == nullptr)
-        _manager = new FactoryManager;
-    assert(_manager != nullptr);
+private:
+    std::string _filename;
+    ghoul::RawVolumeReader::ReadHints _hints;
+    float _stepSize;
+	ghoul::opengl::FramebufferObject* _fbo;
+	ghoul::opengl::Texture* _backTexture;
+	ghoul::opengl::Texture* _frontTexture;
+	ghoul::opengl::Texture* _volume;
+	ghoul::opengl::Texture* _output;
+	ghoul::opengl::ProgramObject *_fboProgram;
+	ghoul::opengl::ProgramObject *_quadProgram;
+	sgct_utils::SGCTBox* _boundingBox;
+	GLuint _screenQuad;
     
-    // Add Renderables
-    _manager->factoryByType<Renderable>()->
-    registerClass<RenderablePlanet>("RenderablePlanet");
-    _manager->factoryByType<Renderable>()->
-    registerClass<RenderableVolume>("RenderableVolume");
-    _manager->factoryByType<Renderable>()->
-    registerClass<Flare>("RenderableFlare");
+    ghoul::opencl::CLContext _context;
+    ghoul::opencl::CLCommandQueue _commands;
+    ghoul::opencl::CLProgram _program;
+    ghoul::opencl::CLKernel _kernel;
+    cl_mem _clBackTexture, _clFrontTexture, _clVolume, _clOutput;
     
-    // Add PositionInformations
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<ConstantPositionInformation>("Static");
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<SpicePositionInformation>("Spice");
-
-}
-
-void FactoryManager::deinitialize() {
-    assert(_manager != nullptr);
-    delete _manager;
-    _manager = nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    assert(_manager != nullptr);
-    return *_manager;
-}
-     
-FactoryManager::FactoryManager() {
     
-}
-FactoryManager::~FactoryManager() {
-    
-}
+    std::string _kernelPath;
+    ghoul::filesystem::File* _kernelSourceFile;
+    bool _kernelUpdateOnSave;
+    std::mutex _kernelMutex;
+    void _safeKernelCompilation();
+};
 
 } // namespace openspace
+
+#endif // VOLUMERAYCASTER_H

@@ -32,7 +32,6 @@ Flare::Flare() {
 	_oldTime = 0.f;
 	_currentTime = 0.f;
 
-	init();
 }
 
 Flare::~Flare() {
@@ -45,6 +44,22 @@ Flare::~Flare() {
 void exit_msg(std::string m) {
     LDEBUG(m);
     exit(1);
+}
+
+    
+bool Flare::initialize() {
+    init();
+    return true;
+}
+bool Flare::deinitialize() {
+    return true;
+}
+
+void Flare::render(const Camera *camera, const psc& thisPosition) {
+    render();
+}
+void Flare::update() {
+    
 }
 
 void Flare::render() {

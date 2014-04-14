@@ -31,16 +31,25 @@
 #include <openspace/flare/Animator.h>
 #include <openspace/flare/Raycaster.h>
 #include <openspace/flare/Config.h>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
 
-class Flare {
+class Flare: public Renderable {
 public:
 	Flare();
 	~Flare();
-
+    
+    bool initialize();
+    bool deinitialize();
+    
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
+    
 	void render();
 	void initNavigation();
+    
+    
 
 	void keyboard(int key, int action);
 	void mouse(int button, int action);

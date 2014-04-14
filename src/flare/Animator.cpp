@@ -11,13 +11,13 @@ Animator * Animator::New(Config *_config) {
 }
 
 Animator::Animator(Config *_config) 
-  : numTimesteps_(0),
+  : config_(_config),
+    numTimesteps_(0),
     currentTimestep_(0),
     fpsMode_(true),
     paused_(false),
     elapsedTime_(0.f),
-    refreshInterval_(0.f),
-    config_(_config) {
+    refreshInterval_(0.f) {
 }
 
 void Animator::SetCurrentTimestep(unsigned int _timestep) {

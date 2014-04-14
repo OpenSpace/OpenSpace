@@ -71,7 +71,6 @@ bool SceneGraph::initialize() {
     
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-    using ghoul::opengl::ShaderManager;
     
     ProgramObject* po = nullptr;
     if (    OsEng.ref().configurationManager().hasKey("pscShader") &&
@@ -100,6 +99,46 @@ bool SceneGraph::initialize() {
         return false;
     
     OsEng.ref().configurationManager().setValue("pscShader", po);
+    
+    ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
+	ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                                  absPath("${SHADERS}/exitpoints.vert"));
+	ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                                    absPath("${SHADERS}/exitpoints.frag"));
+	_fboProgram->attachObject(vertexShader);
+	_fboProgram->attachObject(fragmentShader);
+	_fboProgram->compileShaderObjects();
+	_fboProgram->linkProgramObject();
+    
+	ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
+	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                    absPath("${SHADERS}/twopassraycaster.vert"));
+	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                      absPath("${SHADERS}/twopassraycaster.frag"));
+	_twopassProgram->attachObject(vertexShader);
+	_twopassProgram->attachObject(fragmentShader);
+	_twopassProgram->compileShaderObjects();
+	_twopassProgram->linkProgramObject();
+	_twopassProgram->setUniform("texBack", 0);
+	_twopassProgram->setUniform("texFront", 1);
+	_twopassProgram->setUniform("texVolume", 2);
+    
+    ProgramObject* quad = new ProgramObject("Quad");
+	ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                    absPath("${SHADERS}/quadVert.glsl"));
+	ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                      absPath("${SHADERS}/quadFrag.glsl"));
+	quad->attachObject(quadv);
+	quad->attachObject(quadf);
+	quad->compileShaderObjects();
+	quad->linkProgramObject();
+	quad->setUniform("quadTex", 0);
+    
+    
+    OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
+    OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
+    OsEng.ref().configurationManager().setValue("Quad", quad);
+    
     
     // Initialize all nodes
     for(auto node: _nodes) {

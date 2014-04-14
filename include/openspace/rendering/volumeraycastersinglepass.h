@@ -22,68 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __VOLUMERAYCASTERSINGLEPASS_H__
+#define __VOLUMERAYCASTERSINGLEPASS_H__
 
-#include <cassert>
+#include <openspace/rendering/volumeraycaster.h>
 
-#include <openspace/rendering/renderableplanet.h>
-#include <openspace/rendering/renderablevolume.h>
-#include <openspace/flare/flare.h>
-#include <openspace/scenegraph/constantpositioninformation.h>
-#include <openspace/scenegraph/spicepositioninformation.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/io/rawvolumereader.h>
+
+#include <sgct.h>
 
 namespace openspace {
+using namespace ghoul::opengl;
 
-// Template specializations for the different factories
-template<>
-ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType() {
-    return &_renderableFactory;
-}
-template<>
-ghoul::TemplateFactory<PositionInformation>* FactoryManager::factoryByType() {
-    return &_positionInformationFactory;
-}
-    
-FactoryManager* FactoryManager::_manager = nullptr;
+class VolumeRaycasterSinglePass: public VolumeRaycaster {
+public:
+    VolumeRaycasterSinglePass(const ghoul::Dictionary& dictionary);
+	~VolumeRaycasterSinglePass();
+	
+    bool initialize();
+	void render(const glm::mat4& modelViewProjection);
 
-void FactoryManager::initialize() {
-    assert(_manager == nullptr);
-    if (_manager == nullptr)
-        _manager = new FactoryManager;
-    assert(_manager != nullptr);
-    
-    // Add Renderables
-    _manager->factoryByType<Renderable>()->
-    registerClass<RenderablePlanet>("RenderablePlanet");
-    _manager->factoryByType<Renderable>()->
-    registerClass<RenderableVolume>("RenderableVolume");
-    _manager->factoryByType<Renderable>()->
-    registerClass<Flare>("RenderableFlare");
-    
-    // Add PositionInformations
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<ConstantPositionInformation>("Static");
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<SpicePositionInformation>("Spice");
+private:
 
-}
-
-void FactoryManager::deinitialize() {
-    assert(_manager != nullptr);
-    delete _manager;
-    _manager = nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    assert(_manager != nullptr);
-    return *_manager;
-}
-     
-FactoryManager::FactoryManager() {
-    
-}
-FactoryManager::~FactoryManager() {
-    
-}
+    std::string _filename;
+    ghoul::RawVolumeReader::ReadHints _hints;
+    //float _stepSize;
+	Texture* _volume;
+	ProgramObject *_singlepassProgram;
+	sgct_utils::SGCTBox* _boundingBox;
+	GLuint _cubeCenterVBO;
+};
 
 } // namespace openspace
+
+#endif // VOLUMERAYCASTER_H

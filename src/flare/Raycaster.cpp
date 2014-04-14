@@ -44,7 +44,7 @@ uint32_t ZOrder(uint16_t xPos, uint16_t yPos, uint16_t zPos) {
   return result;
 }
 
-const double BYTES_PER_GB = 1073741824.0;
+//const double BYTES_PER_GB = 1073741824.0;
 
 Raycaster::Raycaster(Config *_config) 
   : Renderer(),

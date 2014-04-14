@@ -52,7 +52,7 @@ raycaster_kernel_filename       ${KERNELS}/RaycasterTSP.cl
 tsp_traversal_kernel_filename   ${KERNELS}/TSPTraversal.cl
 cube_shader_vert_filename       ${SHADERS}/cubeVert.glsl	
 cube_shader_frag_filename       ${SHADERS}/cubeFrag.glsl
-quad_shader_vert_filename       ${SHADERS}/quadVert.glsl
+quad_shader_vert_filename       ${SHADERS}/quadVertFlare.glsl
 quad_shader_frag_filename       ${SHADERS}/quadFrag.glsl
 
 # Model

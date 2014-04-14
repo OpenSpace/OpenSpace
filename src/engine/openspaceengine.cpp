@@ -67,7 +67,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _configurationManager(nullptr)
     , _interactionHandler(nullptr)
     , _renderEngine(nullptr)
-    , _scriptEngine(nullptr)
+    //, _scriptEngine(nullptr)
 {}
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -195,6 +195,7 @@ void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sg
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
     _engine->_configurationManager = new ghoul::ConfigurationManager;
+
 }
 
 void OpenSpaceEngine::destroy() {
@@ -209,6 +210,7 @@ bool OpenSpaceEngine::initialize() {
 
     // Register the filepaths from static function enables easy testing
     //registerFilePaths();
+    _context.createContextFromGLContext();
 
     // initialize the configurationmanager with the default configuration
     //_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
@@ -236,8 +238,7 @@ bool OpenSpaceEngine::initialize() {
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
 
-     //_volumeRaycaster = new VolumeRaycaster();
-     _flare = new Flare();
+     //_flare = new Flare();
     
     return true;
 }
@@ -246,6 +247,10 @@ ghoul::ConfigurationManager& OpenSpaceEngine::configurationManager() {
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_configurationManager;
+}
+    
+ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
+    return _context;
 }
 
 InteractionHandler& OpenSpaceEngine::interactionHandler() {
@@ -271,7 +276,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
 
-        _flare->preSync();
+        //_flare->preSync();
     }
 }
 
@@ -280,29 +285,28 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
-//	_volumeRaycaster->render();
-    _flare->render();
-    //_renderEngine->render();
+    //_flare->render();
+    _renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        _flare->postDraw();
+        //_flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		_flare->keyboard(key, action);
+		//_flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		_flare->mouse(key, action);
+		//_flare->mouse(key, action);
 	}
 }
 
@@ -315,11 +319,11 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 }
 
 void OpenSpaceEngine::encode() {
-	_flare->encode();
+	//_flare->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	_flare->decode();
+	//_flare->decode();
 }
 
 } // namespace openspace

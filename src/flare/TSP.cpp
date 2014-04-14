@@ -102,7 +102,7 @@ bool TSP::Construct() {
         data_[OTNode*NUM_DATA + BRICK_INDEX] = (int)OTNode;
 
         // Error metrics
-        int localOTNode = (OTNode - OT*numOTNodes_);
+        //int localOTNode = (OTNode - OT*numOTNodes_);
         data_[OTNode*NUM_DATA + TEMPORAL_ERR] = (int)(numBSTLevels_-1-BSTLevel);
         data_[OTNode*NUM_DATA + SPATIAL_ERR] = (int)(numOTLevels_-1-OTLevel);
     
@@ -250,7 +250,7 @@ bool TSP::CalculateSpatialError() {
   fclose(in);
 
   std::sort(medianArray.begin(), medianArray.end());
-  float medError = medianArray[medianArray.size()/2];
+  //float medError = medianArray[medianArray.size()/2];
 
   /*
   INFO("\nMin spatial std dev: " << minError);
@@ -382,7 +382,7 @@ bool TSP::CalculateTemporalError() {
   fclose(in);
 
   std::sort(meanArray.begin(), meanArray.end());
-  float medErr = meanArray[meanArray.size()/2];
+  //float medErr = meanArray[meanArray.size()/2];
 
   /*
   INFO("\nMin temporal error: " << minErr);

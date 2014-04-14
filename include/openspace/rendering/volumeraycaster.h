@@ -22,39 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef VOLUMERAYCASTER_H
-#define VOLUMERAYCASTER_H
+#ifndef __VOLUMERAYCASTER_H__
+#define __VOLUMERAYCASTER_H__
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
-
-#include <sgct.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
-using namespace ghoul::opengl;
 
 class VolumeRaycaster {
 public:
-	VolumeRaycaster();
-	~VolumeRaycaster();
-	void initialize();
-	void render();
-
-private:
-	void setupTwopassRaycaster();
-	void setupSinglepassRaycaster();
-
-	void renderWithTwopassRaycaster(glm::mat4 modelViewProjectionMatrix);
-	void renderWithSinglepassRaycaster(glm::mat4 modelViewProjectionMatrix);
-
-	FramebufferObject* _fbo;
-	Texture* _backTexture;
-	Texture* _frontTexture;
-	Texture* _volume;
-	ProgramObject *_fboProgram, *_twopassProgram, *_singlepassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
-	GLuint _screenQuad, _cubeCenterVBO;
+    VolumeRaycaster() = default;
+    VolumeRaycaster(const ghoul::Dictionary& dictionary);
+	virtual ~VolumeRaycaster();
+	
+    virtual bool initialize() = 0;
+	virtual void render(const glm::mat4& modelViewProjection) = 0;
 };
 
 } // namespace openspace

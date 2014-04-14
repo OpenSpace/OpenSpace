@@ -3,6 +3,7 @@
  *
  */
 //#include <ghoul/opencl/ghoul_cl.hpp>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/flare/CLManager.h>
 #include <openspace/flare/CLProgram.h>
 #include <openspace/flare/TransferFunction.h>
@@ -119,12 +120,14 @@ bool CLManager::CreateContext() {
     ERROR("Number of devices < 1, can't create context");
     return false;
   }
+  _context = OsEng.clContext();
+    /*
     bool success = _context.createContextFromGLContext();
     if(!success)
         LDEBUG("Could not create GL context");
-
+*/
     devices_[0] = _context.device();
-    return success;
+    return _context.isValidContext();
 }
 
 

@@ -11,12 +11,12 @@ using namespace osp;
 Renderer::Renderer() 
   : winWidth_(0), 
     winHeight_(0),
+    leftMouseDown_(false),
+    rightMouseDown_(false),
     currentMouseX_(0),
     currentMouseY_(0),
     lastMouseX_(0),
-    lastMouseY_(0),
-    leftMouseDown_(false),
-    rightMouseDown_(false) {
+    lastMouseY_(0) {
 }
 
 Renderer::~Renderer() {

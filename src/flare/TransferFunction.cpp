@@ -20,8 +20,8 @@ TransferFunction * TransferFunction::New() {
 }
 
 TransferFunction::TransferFunction() : 
-  texture_(nullptr),
   floatData_(NULL),
+  texture_(nullptr),
   width_(0),
   lower_(0.f),
   upper_(1.f),
