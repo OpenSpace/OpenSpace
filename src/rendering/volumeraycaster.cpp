@@ -52,7 +52,7 @@ VolumeRaycaster::VolumeRaycaster() : Renderable()
 VolumeRaycaster::~VolumeRaycaster() {}
 
 // Initializes the data and setups the correct type of ray caster
-void VolumeRaycaster::initialize() {
+bool VolumeRaycaster::initialize() {
 //	------ VOLUME READING ----------------
 	std::string filename = absPath("${OPENSPACE_DATA}/skull.raw");
 
@@ -66,6 +66,13 @@ void VolumeRaycaster::initialize() {
 //	------ SETUP RAYCASTER ---------------
 	if (_type == SINGLEPASS) 	setupSinglepassRaycaster();
 	if (_type == TWOPASS) 		setupTwopassRaycaster();
+
+	return true;
+}
+
+bool VolumeRaycaster::deinitialize() {
+	// TODO
+	return true;
 }
 
 // Calculate rotation and use it with the chosen raycaster

@@ -26,7 +26,7 @@
 #define INTERFACE_H_
 
 #include <boost/property_tree/ptree.hpp>
-#include <openspaceengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <vector>
 
 namespace openspace {

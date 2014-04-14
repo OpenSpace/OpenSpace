@@ -115,7 +115,7 @@ void Flare::setupNavigationParameters() {
 	_translateZ.setVal(_config->TranslateZ());
 }
 
-void Flare::initialize() {
+bool Flare::initialize() {
 	// Start with reading a config file
 	_config = Config::New(absPath("${CONFIG}/flareConfig.txt"));
 	if (!_config) {
@@ -306,6 +306,13 @@ void Flare::initialize() {
 
 	if (!_raycaster->InitCL()) exit_msg("!_raycaster->InitCL()");
 	if (!_raycaster->InitPipeline()) exit_msg("!_raycaster->InitCL()");
+
+	return true;
+}
+
+bool Flare::deinitialize() {
+	// TODO
+	return true;
 }
 
 void Flare::keyboard(int key, int action) {

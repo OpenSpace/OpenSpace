@@ -24,11 +24,11 @@
 
 
 // open space includes
-#include "openspaceengine.h"
-#include <interface/interface.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interface/interface.h>
 
 // sgct includes
-#include "sgct.h"
+#include <sgct.h>
 
 sgct::Engine* _sgctEngine;
 openspace::Interface* _interface;

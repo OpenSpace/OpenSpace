@@ -28,20 +28,23 @@
 #include <GL/glew.h>
 #include <ghoul/logging/logmanager.h>
 #include <sgct.h>
-#include <rendering/renderable.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/flare/Animator.h>
 #include <openspace/flare/Raycaster.h>
 #include <openspace/flare/Config.h>
 
 namespace openspace {
 
-class Flare {
+class Flare : Renderable {
 public:
 	Flare();
 	~Flare();
 
 	//	This is where the magic happens
 	void render(const Camera *camera = nullptr, const psc &thisPosition = psc(glm::vec3(0)));
+
+	bool initialize();
+	bool deinitialize();
 
 	void keyboard(int key, int action);
 	void mouse(int button, int action);
@@ -51,7 +54,6 @@ public:
 	void decode();
 
 private:
-	void initialize();
 	void setupNavigationParameters();
 
 	osp::Config* _config;

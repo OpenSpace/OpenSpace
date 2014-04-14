@@ -25,13 +25,13 @@
 #include <openspace/engine/openspaceengine.h>
 
 // sgct header has to be included before all others due to Windows header
-#include "sgct.h"
+#include <sgct.h>
 
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
-#include <openspace/util//spice.h>
+#include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
 
 

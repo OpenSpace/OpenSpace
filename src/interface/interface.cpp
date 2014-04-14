@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <interface/interface.h>
+#include <openspace/interface/interface.h>
 
 #include <sgct.h>
 

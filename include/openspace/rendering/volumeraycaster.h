@@ -29,7 +29,7 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
 
-#include <rendering/renderable.h>
+#include <openspace/rendering/renderable.h>
 
 #include <sgct.h>
 
@@ -45,7 +45,8 @@ public:
 
 	VolumeRaycaster();
 	~VolumeRaycaster();
-	void initialize();
+	bool initialize();
+	bool deinitialize();
 	void render(const Camera *camera = nullptr, const psc &thisPosition = psc(glm::vec3(0)));
 
 	//	SGCT functions for cluster rendering and interaction.
