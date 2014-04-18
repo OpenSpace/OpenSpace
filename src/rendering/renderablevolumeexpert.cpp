@@ -61,9 +61,9 @@ namespace openspace {
 
 RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictionary):
     RenderableVolume(dictionary),
-    _backTexture(nullptr), _frontTexture(nullptr), _output(nullptr),
+    _output(nullptr),
     _clBackTexture(0), _clFrontTexture(0), _clOutput(0),
-    _kernelSourceFile(nullptr), _programUpdateOnSave(false) {
+    _kernelSourceFile(nullptr), _programUpdateOnSave(false), _colorBoxRenderer(nullptr) {
         
     _kernelLock = new std::mutex;
     _textureLock = new std::mutex;
@@ -166,7 +166,8 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
     if (kernelPath != "") {
         _kernelSourceFile = new ghoul::filesystem::File(kernelPath, false);
     }
-    
+        
+    _colorBoxRenderer = new VolumeRaycasterBox();
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
@@ -244,49 +245,43 @@ bool RenderableVolumeExpert::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
     
-	_boundingBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
-    
-    //	------ SETUP SHADERS -----------------
-    // TODO error control or better design pattern
-	
-    if( ! OsEng.ref().configurationManager().getValue("RaycastProgram", _fboProgram)) {
-        LERROR("Could not find 'RaycastProgram'");
-        return false;
-    }
-    
 	if( ! OsEng.ref().configurationManager().getValue("Quad", _quadProgram)) {
         LERROR("Could not find 'Quad'");
         return false;
     }
     
-    //	------ SETUP FBO ---------------------
-	_fbo = new ghoul::opengl::FramebufferObject();
-	_fbo->activate();
-    
-	int x = sgct::Engine::instance()->getActiveXResolution();
-	int y = sgct::Engine::instance()->getActiveYResolution();
-	_backTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
-	_frontTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
-	_output = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
-	_backTexture->uploadTexture();
-	_frontTexture->uploadTexture();
+    _colorBoxRenderer->initialize();
+    glm::size2_t dimensions = _colorBoxRenderer->dimensions();
+	ghoul::opengl::Texture* backTexture = _colorBoxRenderer->backFace();
+	ghoul::opengl::Texture* frontTexture = _colorBoxRenderer->frontFace();
+	_output = new ghoul::opengl::Texture(glm::size3_t(dimensions[0],dimensions[1],1));
 	_output->uploadTexture();
-	_fbo->attachTexture(_backTexture, GL_COLOR_ATTACHMENT0);
-	_fbo->attachTexture(_frontTexture, GL_COLOR_ATTACHMENT1);
-    
-	_fbo->deactivate();
     
     _context = OsEng.clContext();
     _commands = _context.createCommandQueue();
     
-    
-    
-    _clBackTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *_backTexture);
-    _clFrontTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *_frontTexture);
+    _clBackTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *backTexture);
+    _clFrontTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *frontTexture);
     _clOutput = _context.createTextureFromGLTexture(CL_MEM_WRITE_ONLY, *_output);
     
     // Compile kernels
     safeKernelCompilation();
+    
+    
+    size_t local_x = 32;
+    size_t local_y = 32;
+    while (local_x > 1) {
+        if(dimensions[0] % local_x == 0)
+            break;
+        local_x /= 2;
+    }
+    while (local_y > 1) {
+        if(dimensions[1] % local_y == 0)
+            break;
+        local_y /= 2;
+    }
+    _ws = new ghoul::opencl::CLWorkSize({dimensions[0],dimensions[1]}, {local_x,local_y});
+
     
     return true;
 }
@@ -299,9 +294,6 @@ bool RenderableVolumeExpert::deinitialize() {
 
 void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPosition) {
 
-	// check so that the raycaster is set
-	//assert(_rayCaster);
-    
     if( ! _kernel.isValidKernel())
         return;
     
@@ -313,58 +305,13 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
 	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
 	
-        
-    //	------ DRAW TO FBO -------------------
-    GLuint sgctFBO = ghoul::opengl::FramebufferObject::getActiveObject(); // Save SGCTs main FBO
-    _fbo->activate();
-    _fboProgram->activate();
-    _fboProgram->setUniform("modelViewProjection", transform);
-    
-    //	Draw backface
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glClearColor(0.2f, 0.2f, 0.2f, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    _boundingBox->draw();
-    glDisable(GL_CULL_FACE);
-    
-    //	Draw frontface
-    glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.2f, 0.2f, 0.2f, 0);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    _boundingBox->draw();
-    glDisable(GL_CULL_FACE);
-    
-    _fboProgram->deactivate();
-    _fbo->deactivate();
-    
-    //	------ DRAW TO SCREEN ----------------
-    glBindFramebuffer(GL_FRAMEBUFFER, sgctFBO); // Re-bind SGCTs main FBO
-    
-    size_t x = sgct::Engine::instance()->getActiveXResolution();
-    size_t y = sgct::Engine::instance()->getActiveYResolution();
-    size_t local_x = 32;
-    size_t local_y = 32;
-    while (local_x > 1) {
-        if(x % local_x == 0)
-            break;
-        local_x /= 2;
-    }
-    while (local_y > 1) {
-        if(y % local_y == 0)
-            break;
-        local_y /= 2;
-    }
-    ghoul::opencl::CLWorkSize ws({x,y}, {local_x,local_y});
+    _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
     _kernelLock->lock();
     glFinish();
     
-    _commands.enqueueKernelBlocking(_kernel, ws);
+    _commands.enqueueKernelBlocking(_kernel, *_ws);
     _commands.finish();
     
     _quadProgram->activate();
@@ -465,9 +412,9 @@ void RenderableVolumeExpert::safeUpdateTexture(const ghoul::filesystem::File& fi
         return;
 
     LDEBUG("Updating transferfunction");
+    
     // create the new texture
     ghoul::opengl::Texture* newTexture = loadTransferFunction(file.path());
-    //ghoul::opengl::Texture* newTexture = ghoul::opengl::loadTexture(file.path());
     
     if(newTexture) {
         
@@ -494,6 +441,8 @@ void RenderableVolumeExpert::safeUpdateTexture(const ghoul::filesystem::File& fi
         // update kernel
         // __kernel arguments(front, back, output, [_volumes], .. fileID))
         _kernel.setArgument(3 + _volumes.size() + fileID, &clNewTexture);
+        
+        LDEBUG("Transferfunction successfully updated");
         
         // end of critical section
         _textureLock->unlock();

@@ -27,6 +27,7 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
+#include <openspace/rendering/volumeraycasterbox.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -39,13 +40,17 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
-#include <sgct.h>
-
 #ifdef __APPLE__
     #include <memory>
 #else
     #include <mutex>
 #endif
+
+namespace ghoul {
+    namespace opencl {
+        class CLWorkSize;
+    }
+}
 
 namespace openspace {
 
@@ -73,8 +78,6 @@ private:
     std::vector<ghoul::RawVolumeReader::ReadHints> _volumeHints;
     
     // Textures
-	ghoul::opengl::Texture* _backTexture;
-	ghoul::opengl::Texture* _frontTexture;
 	ghoul::opengl::Texture* _output;
 	std::vector<ghoul::opengl::Texture*> _volumes;
 	std::vector<ghoul::opengl::Texture*> _transferFunctions;
@@ -92,6 +95,7 @@ private:
     ghoul::opencl::CLCommandQueue _commands;
     ghoul::opencl::CLProgram _program;
     ghoul::opencl::CLKernel _kernel;
+    ghoul::opencl::CLWorkSize* _ws;
     ghoul::filesystem::File* _kernelSourceFile;
     std::vector<std::pair<ghoul::opencl::CLProgram::Option, bool> > _kernelOptions;
     bool _programUpdateOnSave;
@@ -100,11 +104,11 @@ private:
     std::mutex* _kernelLock;
     std::mutex* _textureLock;
     
-	ghoul::opengl::FramebufferObject* _fbo;
-	ghoul::opengl::ProgramObject *_fboProgram;
 	ghoul::opengl::ProgramObject *_quadProgram;
     sgct_utils::SGCTBox* _boundingBox;
 	GLuint _screenQuad;
+    
+    VolumeRaycasterBox* _colorBoxRenderer;
     
 };
 
