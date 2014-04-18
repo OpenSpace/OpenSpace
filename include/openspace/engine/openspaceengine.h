@@ -35,7 +35,6 @@
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
-#include <openspace/rendering/volumeraycaster.h>
 #include <openspace/flare/flare.h>
 
 namespace openspace {

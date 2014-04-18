@@ -22,59 +22,81 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/volumeraycastergl.h>
+// open space includes
+#include <openspace/rendering/renderablevolumegl.h>
+
 #include <openspace/engine/openspaceengine.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/opengl/texturereader.h>
+#include <ghoul/opencl/clworksize.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/rawvolumereader.h>
 
-#include <iostream>
-#include <cmath>
-#include <cstdio>
+#include <algorithm>
 
 namespace {
-    std::string _loggerCat = "VolumeRaycasterGL";
+    std::string _loggerCat = "RenderableVolumeGL";
 }
 
 namespace openspace {
 
-VolumeRaycasterGL::VolumeRaycasterGL(const ghoul::Dictionary& dictionary):
-    _fbo(nullptr), _backTexture(nullptr), _frontTexture(nullptr), _volume(nullptr),
-    _fboProgram(nullptr), _twopassProgram(nullptr), _boundingBox(nullptr), _screenQuad(0) {
+RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
+    RenderableVolume(dictionary),
+    _backTexture(nullptr), _frontTexture(nullptr), _screenQuad(0),
+    _programUpdateOnSave(false) {
+        
+    _shaderMutex = new std::mutex;
     
-    if (dictionary.hasKey("Filepath")) {
-        std::string filename;
-        if(dictionary.getValue("Filepath", filename)) {
-            if (FileSys.ref().fileExists(absPath(filename))) {
-                _filename = absPath(filename);
+    _filename = "";
+    if(dictionary.hasKey("Volume")) {
+        if(dictionary.getValue("Volume", _filename)) {
+            _filename = findPath(_filename);
+        }
+    }
+    
+    LDEBUG("filename: " << _filename);
+    
+    ghoul::Dictionary hintsDictionary;
+    if(dictionary.hasKey("Hints"))
+        dictionary.getValue("Hints", hintsDictionary);
+    _hints = readHints(hintsDictionary);
+
+    std::string vshaderpath = "";
+    std::string fshaderpath = "";
+        
+    if (dictionary.hasKey("Shaders")) {
+        ghoul::Dictionary shaderDictionary;
+        if(dictionary.getValue("Shaders", shaderDictionary)) {
+            if (shaderDictionary.hasKey("VertexShader")) {
+                shaderDictionary.getValue("VertexShader", vshaderpath);
             }
+            if (shaderDictionary.hasKey("FragmentShader")) {
+                shaderDictionary.getValue("FragmentShader", fshaderpath);
+            }
+            
+            vshaderpath = findPath(vshaderpath);
+            fshaderpath = findPath(fshaderpath);
+            
+            _vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
+            _fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
+            
+            _twopassProgram = new ghoul::opengl::ProgramObject("TwoPassProgram");
+            ghoul::opengl::ShaderObject* vertexShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeVertex,vshaderpath);
+            ghoul::opengl::ShaderObject* fragmentShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeFragment,fshaderpath);
+            _twopassProgram->attachObject(vertexShader);
+            _twopassProgram->attachObject(fragmentShader);
         }
-    }
         
-    if (dictionary.hasKey("Hints")) {
-        if(dictionary.getValue("Hints", _hints)) {
-        }
+        
     }
-    _vshaderpath = "";
-    _fshaderpath = "";
     
-    if (dictionary.hasKey("VertexShader")) {
-        dictionary.getValue("VertexShader", _vshaderpath);
+    if(dictionary.hasKey("UpdateOnSave")) {
+        dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
     }
-    if (dictionary.hasKey("FragmentShader")) {
-        dictionary.getValue("FragmentShader", _fshaderpath);
-    }
-        
-    _twopassProgram = new ProgramObject("TwoPassProgram");
-    ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,_vshaderpath);
-    ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,_fshaderpath);
-    _twopassProgram->attachObject(vertexShader);
-    _twopassProgram->attachObject(fragmentShader);
 
 }
 
-VolumeRaycasterGL::~VolumeRaycasterGL() {
+RenderableVolumeGL::~RenderableVolumeGL() {
+    deinitialize();
     if(_fbo)
         delete _fbo;
     if(_backTexture)
@@ -87,12 +109,12 @@ VolumeRaycasterGL::~VolumeRaycasterGL() {
         delete _boundingBox;
 }
 
-bool VolumeRaycasterGL::initialize() {
+bool RenderableVolumeGL::initialize() {
     assert(_filename != "");
-//	------ VOLUME READING ----------------
+    //	------ VOLUME READING ----------------
 	ghoul::RawVolumeReader rawReader(_hints);
 	_volume = rawReader.read(_filename);
-
+    
     //	------ SETUP GEOMETRY ----------------
 	const GLfloat size = 1.0f;
 	const GLfloat vertex_texcoord_data[] = { // square of two triangles (sigh)
@@ -132,13 +154,13 @@ bool VolumeRaycasterGL::initialize() {
 	OsEng.ref().configurationManager().getValue("RaycastProgram", _fboProgram);
     
     auto privateCallback = [this](const ghoul::filesystem::File& file) {
-        _safeShaderCompilation();
+        safeShaderCompilation();
     };
-    _vertexSourceFile = new ghoul::filesystem::File(_vshaderpath, false);
-    _fragmentSourceFile = new ghoul::filesystem::File(_fshaderpath, false);
-    _vertexSourceFile->setCallback(privateCallback);
-    _fragmentSourceFile->setCallback(privateCallback);
-
+    if(_programUpdateOnSave) {
+        _vertexSourceFile->setCallback(privateCallback);
+        _fragmentSourceFile->setCallback(privateCallback);
+    }
+    
     _twopassProgram->compileShaderObjects();
     _twopassProgram->linkProgramObject();
     _twopassProgram->setUniform("texBack", 0);
@@ -147,13 +169,13 @@ bool VolumeRaycasterGL::initialize() {
 	//OsEng.ref().configurationManager().getValue("TwoPassProgram", _twopassProgram);
     
     //	------ SETUP FBO ---------------------
-	_fbo = new FramebufferObject();
+	_fbo = new ghoul::opengl::FramebufferObject();
 	_fbo->activate();
     
 	int x = sgct::Engine::instance()->getActiveXResolution();
 	int y = sgct::Engine::instance()->getActiveYResolution();
-	_backTexture = new Texture(glm::size3_t(x,y,1));
-	_frontTexture = new Texture(glm::size3_t(x,y,1));
+	_backTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
+	_frontTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
 	_backTexture->uploadTexture();
 	_frontTexture->uploadTexture();
 	_fbo->attachTexture(_backTexture, GL_COLOR_ATTACHMENT0);
@@ -161,17 +183,34 @@ bool VolumeRaycasterGL::initialize() {
     
 	_fbo->deactivate();
 
+    
     return true;
 }
 
-void VolumeRaycasterGL::render(const glm::mat4& modelViewProjection) {
+bool RenderableVolumeGL::deinitialize() {
+
+    
+    return true;
+}
+
+void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
+    
+	float speed = 50.0f;
+	float time = sgct::Engine::getTime();
+    glm::mat4 transform = camera->getViewProjectionMatrix();
+    
+    double factor = pow(10.0,thisPosition[3]);
+    transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
+	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
+	
+        
     _stepSize = 0.01f;
 	
     //	------ DRAW TO FBO -------------------
-	GLuint sgctFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
+	GLuint sgctFBO = ghoul::opengl::FramebufferObject::getActiveObject(); // Save SGCTs main FBO
 	_fbo->activate();
 	_fboProgram->activate();
-	_fboProgram->setUniform("modelViewProjection", modelViewProjection);
+	_fboProgram->setUniform("modelViewProjection", transform);
     
 	//	Draw backface
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -196,6 +235,12 @@ void VolumeRaycasterGL::render(const glm::mat4& modelViewProjection) {
     
     //	------ DRAW TO SCREEN ----------------
 	glBindFramebuffer(GL_FRAMEBUFFER, sgctFBO); // Re-bind SGCTs main FBO
+    
+	//	Draw screenquad
+	glClearColor(0.2f, 0.2f, 0.2f, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    _shaderMutex->lock();
 	_twopassProgram->activate();
 	_twopassProgram->setUniform("stepSize", _stepSize);
     
@@ -207,25 +252,30 @@ void VolumeRaycasterGL::render(const glm::mat4& modelViewProjection) {
 	glActiveTexture(GL_TEXTURE2);
 	_volume->bind();
     
-	//	Draw screenquad
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindVertexArray(_screenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
     
 	_twopassProgram->deactivate();
+    _shaderMutex->unlock();
+
 }
 
-void VolumeRaycasterGL::_safeShaderCompilation() {
-    _shaderMutex.lock();
+void RenderableVolumeGL::update() {
+    
+}
+
+void RenderableVolumeGL::safeShaderCompilation() {
+    _shaderMutex->lock();
     _twopassProgram->rebuildFromFile();
     _twopassProgram->compileShaderObjects();
     _twopassProgram->linkProgramObject();
     _twopassProgram->setUniform("texBack", 0);
     _twopassProgram->setUniform("texFront", 1);
     _twopassProgram->setUniform("texVolume", 2);
-    _shaderMutex.unlock();
+    _shaderMutex->unlock();
 }
+    
 
-}// namespace openspace
+	
+} // namespace openspace

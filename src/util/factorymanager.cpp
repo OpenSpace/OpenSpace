@@ -26,9 +26,14 @@
 
 #include <cassert>
 
+// renderables
 #include <openspace/rendering/renderableplanet.h>
-#include <openspace/rendering/renderablevolume.h>
+#include <openspace/rendering/renderablevolumeexpert.h>
+#include <openspace/rendering/renderablevolumecl.h>
+#include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/flare/flare.h>
+
+// positioninformation
 #include <openspace/scenegraph/constantpositioninformation.h>
 #include <openspace/scenegraph/spicepositioninformation.h>
 
@@ -54,11 +59,15 @@ void FactoryManager::initialize() {
     
     // Add Renderables
     _manager->factoryByType<Renderable>()->
-    registerClass<RenderablePlanet>("RenderablePlanet");
+        registerClass<RenderablePlanet>("RenderablePlanet");
     _manager->factoryByType<Renderable>()->
-    registerClass<RenderableVolume>("RenderableVolume");
+        registerClass<RenderableVolumeCL>("RenderableVolumeCL");
     _manager->factoryByType<Renderable>()->
-    registerClass<Flare>("RenderableFlare");
+        registerClass<RenderableVolumeGL>("RenderableVolumeGL");
+    _manager->factoryByType<Renderable>()->
+        registerClass<RenderableVolumeExpert>("RenderableVolumeExpert");
+    _manager->factoryByType<Renderable>()->
+        registerClass<Flare>("RenderableFlare");
     
     // Add PositionInformations
     _manager->factoryByType<PositionInformation>()->

@@ -1,3 +1,26 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
@@ -6,8 +29,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/volumeraycastergl.h>
-#include <openspace/rendering/volumeraycastercl.h>
 #include <sgct.h>
 
 namespace {
@@ -16,109 +37,25 @@ namespace {
 
 namespace openspace {
 
-RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary): _volumePath("") {
+RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary) {
     
     // get path if available
-    std::string path = "";
+    _relativePath = "";
     if(dictionary.hasKey("Path")) {
-       dictionary.getValue("Path", path);
-       path += "/";
+       dictionary.getValue("Path", _relativePath);
+       _relativePath += "/";
     }
-    
-    if(dictionary.hasKey("Volume")) {
-        dictionary.getValue("Volume", _volumePath);
-        _volumePath = findPath(_volumePath, path);
-    }
-    
-    // parse hints
-    ghoul::Dictionary hintsDictionary;
-    if(dictionary.hasKey("Hints"))
-        dictionary.getValue("Hints", hintsDictionary);
-    _hints = readHints(hintsDictionary);
-    
-    _programUpdateOnSave = false;
-    if(dictionary.hasKey("UpdateOnSave")) {
-        if(dictionary.getValue("UpdateOnSave", _programUpdateOnSave)) {
-        }
-    }
-    
-    ghoul::Dictionary raycasterDictionary;
-    raycasterDictionary.setValue("Filepath", _volumePath);
-    raycasterDictionary.setValue("Hints", _hints);
-    raycasterDictionary.setValue("ProgramUpdateOnSave", _programUpdateOnSave);
-    
-    if (dictionary.hasKey("Kernel")) {
-        std::string kernelPath = "";
-        if(dictionary.getValue("Kernel", kernelPath)) {
-            kernelPath = findPath(kernelPath, path);
-        }
-        // opencl
-        raycasterDictionary.setValue("Kernel", kernelPath);
-        _rayCaster = new VolumeRaycasterCL(raycasterDictionary);
-    } else if(dictionary.hasKey("Shaders")){
-        
-        ghoul::Dictionary shadersDictionary;
-        if(dictionary.getValue("Shaders", shadersDictionary)) {
-            std::string vertexShaderPath = "";
-            std::string fragShaderPath = "";
-            shadersDictionary.getValue("VertexShader",  vertexShaderPath);
-            shadersDictionary.getValue("FragmentShader",    fragShaderPath);
-            
-            LDEBUG("vertexShaderPath: " << vertexShaderPath);
-            LDEBUG("fragShaderPath: " << fragShaderPath);
-            vertexShaderPath = findPath(vertexShaderPath, path);
-            fragShaderPath = findPath(fragShaderPath, path);
-            
-            raycasterDictionary.setValue("VertexShader", vertexShaderPath);
-            raycasterDictionary.setValue("FragmentShader", fragShaderPath);
-        }
-        
-        // glsl
-        _rayCaster = new VolumeRaycasterGL(raycasterDictionary);
-    }
-    
 }
 
 RenderableVolume::~RenderableVolume() {
-    deinitialize();
 }
 
-bool RenderableVolume::initialize() {
-    return _rayCaster->initialize();
-}
-
-bool RenderableVolume::deinitialize() {
-    if(_rayCaster)
-        delete _rayCaster;
-    
-    return true;
-}
-
-void RenderableVolume::render(const Camera *camera, const psc &thisPosition) {
-
-	// check so that the raycaster is set
-	assert(_rayCaster);
-    
-	float speed = 50.0f;
-	float time = sgct::Engine::getTime();
-    glm::mat4 transform = camera->getViewProjectionMatrix();
-    
-    double factor = pow(10.0,thisPosition[3]);
-    transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-	_rayCaster->render(transform);
-}
-
-void RenderableVolume::update() {
-
-}
-
-std::string RenderableVolume::findPath(const std::string& path, const std::string& relativePath) {
+std::string RenderableVolume::findPath(const std::string& path) {
     std::string tmp = absPath(path);
     if(FileSys.fileExists(tmp))
         return tmp;
     
-    tmp = absPath(relativePath + path);
+    tmp = absPath(_relativePath + path);
     if(FileSys.fileExists(tmp))
         return tmp;
     
@@ -130,8 +67,8 @@ std::string RenderableVolume::findPath(const std::string& path, const std::strin
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {
     ghoul::RawVolumeReader::ReadHints hints;
     hints._dimensions = glm::ivec3(1, 1, 1);
-	hints._format = ghoul::opengl::Texture::Format::Red;
-	hints._internalFormat = GL_R8;
+    hints._format = ghoul::opengl::Texture::Format::Red;
+    hints._internalFormat = GL_R8;
     
     // parse hints
     double tempValue;
@@ -186,5 +123,13 @@ ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dicti
     }
     return hints;
 }
-	
+    
+ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string& filepath) {
+    if ( ! FileSys.fileExists(filepath)) {
+        return nullptr;
+    }
+    
+    return ghoul::opengl::loadTexture(filepath);
+}
+
 } // namespace openspace

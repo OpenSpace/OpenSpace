@@ -22,55 +22,92 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VOLUMERAYCASTERGL_H__
-#define __VOLUMERAYCASTERGL_H__
+#ifndef __RENDERABLEVOLUMEEXPERT_H__
+#define __RENDERABLEVOLUMEEXPERT_H__
 
-#include <openspace/rendering/volumeraycaster.h>
+// open space includes
+#include <openspace/rendering/renderablevolume.h>
 
+// ghoul includes
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/filesystem/file.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clcommandqueue.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
 #include <ghoul/io/rawvolumereader.h>
+#include <ghoul/filesystem/file.h>
 
 #include <sgct.h>
 
-#include <memory>
+#ifdef __APPLE__
+    #include <memory>
+#else
+    #include <mutex>
+#endif
 
 namespace openspace {
-using namespace ghoul::opengl;
 
-class VolumeRaycasterGL: public VolumeRaycaster {
+class RenderableVolumeExpert: public RenderableVolume {
 public:
-    VolumeRaycasterGL(const ghoul::Dictionary& dictionary);
-	~VolumeRaycasterGL();
-	
+
+	// constructors & destructor
+	RenderableVolumeExpert(const ghoul::Dictionary& dictionary);
+	~RenderableVolumeExpert();
+    
     bool initialize();
-	void render(const glm::mat4& modelViewProjection);
+    bool deinitialize();
+
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
 
 private:
 
-    std::string _filename;
-    ghoul::RawVolumeReader::ReadHints _hints;
-    float _stepSize;
-	FramebufferObject* _fbo;
-	Texture* _backTexture;
-	Texture* _frontTexture;
-	Texture* _volume;
-	ProgramObject *_fboProgram, *_twopassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
+    // private methods
+    void safeKernelCompilation();
+    void safeUpdateTexture(const ghoul::filesystem::File& file);
+
+    // Volumes
+    std::vector<std::string> _volumePaths;
+    std::vector<ghoul::RawVolumeReader::ReadHints> _volumeHints;
+    
+    // Textures
+	ghoul::opengl::Texture* _backTexture;
+	ghoul::opengl::Texture* _frontTexture;
+	ghoul::opengl::Texture* _output;
+	std::vector<ghoul::opengl::Texture*> _volumes;
+	std::vector<ghoul::opengl::Texture*> _transferFunctions;
+	std::vector<ghoul::filesystem::File*> _transferFunctionsFiles;
+    
+    // opencl texture memory pointers
+    cl_mem _clBackTexture;
+    cl_mem _clFrontTexture;
+    cl_mem _clOutput;
+    std::vector<cl_mem> _clVolumes;
+    std::vector<cl_mem> _clTransferFunctions;
+    
+    // opencl program
+    ghoul::opencl::CLContext _context;
+    ghoul::opencl::CLCommandQueue _commands;
+    ghoul::opencl::CLProgram _program;
+    ghoul::opencl::CLKernel _kernel;
+    ghoul::filesystem::File* _kernelSourceFile;
+    std::vector<std::pair<ghoul::opencl::CLProgram::Option, bool> > _kernelOptions;
+    bool _programUpdateOnSave;
+    
+    // mutexes to prevent inconsistencies
+    std::mutex* _kernelLock;
+    std::mutex* _textureLock;
+    
+	ghoul::opengl::FramebufferObject* _fbo;
+	ghoul::opengl::ProgramObject *_fboProgram;
+	ghoul::opengl::ProgramObject *_quadProgram;
+    sgct_utils::SGCTBox* _boundingBox;
 	GLuint _screenQuad;
     
-    std::mutex _shaderMutex;
-    
-    std::string _vshaderpath;
-    std::string _fshaderpath;
-    ghoul::filesystem::File* _vertexSourceFile;
-    ghoul::filesystem::File* _fragmentSourceFile;
-    
-    void _safeShaderCompilation();
 };
 
 } // namespace openspace
 
-#endif // VOLUMERAYCASTER_H
+#endif

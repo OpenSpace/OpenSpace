@@ -22,21 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/volumeraycaster.h>
-#include <openspace/engine/openspaceengine.h>
+#ifndef __RENDERABLEVOLUMEGL_H__
+#define __RENDERABLEVOLUMEGL_H__
 
-#include <glm/glm.hpp>
-#include <ghoul/filesystem/filesystem.h>
+// open space includes
+#include <openspace/rendering/renderablevolume.h>
 
-#include <iostream>
-#include <cmath>
-#include <cstdio>
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/io/rawvolumereader.h>
+#include <ghoul/filesystem/file.h>
+
+#include <sgct.h>
+
+#ifdef __APPLE__
+    #include <memory>
+#else
+    #include <mutex>
+#endif
 
 namespace openspace {
 
+class RenderableVolumeGL: public RenderableVolume {
+public:
 
-VolumeRaycaster::VolumeRaycaster(const ghoul::Dictionary& dictionary) {}
+	// constructors & destructor
+	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
+	~RenderableVolumeGL();
+    
+    bool initialize();
+    bool deinitialize();
 
-VolumeRaycaster::~VolumeRaycaster() {}
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
 
-}// namespace openspace
+private:
+    
+    
+    std::string _filename;
+    ghoul::RawVolumeReader::ReadHints _hints;
+    float _stepSize;
+	ghoul::opengl::FramebufferObject* _fbo;
+	ghoul::opengl::Texture* _backTexture;
+	ghoul::opengl::Texture* _frontTexture;
+	ghoul::opengl::Texture* _volume;
+	ghoul::opengl::ProgramObject *_fboProgram, *_twopassProgram;
+	sgct_utils::SGCTBox* _boundingBox;
+	GLuint _screenQuad;
+    
+    std::mutex* _shaderMutex;
+    
+    ghoul::filesystem::File* _vertexSourceFile;
+    ghoul::filesystem::File* _fragmentSourceFile;
+    bool _programUpdateOnSave;
+    
+    void safeShaderCompilation();
+    
+};
+
+} // namespace openspace
+
+#endif

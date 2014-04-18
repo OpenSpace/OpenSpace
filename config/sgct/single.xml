@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
+	<Settings>
+		<Display swapInterval="0" />
+	</Settings>
 	<Node address="localhost" port="20401">
 		<Window fullScreen="false">
 			<!-- 16:9 aspect ratio -->

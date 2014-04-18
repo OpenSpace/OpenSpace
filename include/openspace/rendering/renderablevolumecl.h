@@ -22,34 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VOLUMERAYCASTERCL_H__
-#define __VOLUMERAYCASTERCL_H__
+#ifndef __RENDERABLEVOLUMECL_H__
+#define __RENDERABLEVOLUMECL_H__
 
-#include <openspace/rendering/volumeraycaster.h>
-#include <openspace/engine/openspaceengine.h>
+// open space includes
+#include <openspace/rendering/renderablevolume.h>
 
+// ghoul includes
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clcommandqueue.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
+#include <ghoul/opencl/clworksize.h>
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
 #include <sgct.h>
 
-#include <memory>
-#include <mutex>
+//#include <vector>
+//#include <string>
+#ifdef __APPLE__
+    #include <memory>
+#else
+    #include <mutex>
+#endif
 
 namespace openspace {
 
-class VolumeRaycasterCL: public VolumeRaycaster {
+class RenderableVolumeCL: public RenderableVolume {
 public:
-    VolumeRaycasterCL(const ghoul::Dictionary& dictionary);
-	~VolumeRaycasterCL();
-	
+
+	// constructors & destructor
+	RenderableVolumeCL(const ghoul::Dictionary& dictionary);
+	~RenderableVolumeCL();
+    
     bool initialize();
-	void render(const glm::mat4& modelViewProjection);
+    bool deinitialize();
+
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
 
 private:
+
+    void safeKernelCompilation();
+
     std::string _filename;
     ghoul::RawVolumeReader::ReadHints _hints;
     float _stepSize;
@@ -67,16 +86,15 @@ private:
     ghoul::opencl::CLCommandQueue _commands;
     ghoul::opencl::CLProgram _program;
     ghoul::opencl::CLKernel _kernel;
+    ghoul::opencl::CLWorkSize* _ws;
     cl_mem _clBackTexture, _clFrontTexture, _clVolume, _clOutput;
     
-    
-    std::string _kernelPath;
     ghoul::filesystem::File* _kernelSourceFile;
     bool _kernelUpdateOnSave;
-    std::mutex _kernelMutex;
-    void _safeKernelCompilation();
+    std::mutex* _kernelMutex;
+    
 };
 
 } // namespace openspace
 
-#endif // VOLUMERAYCASTER_H
+#endif

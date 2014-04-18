@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+/*
 #include <openspace/rendering/volumeraycastersinglepass.h>
 #include <openspace/engine/openspaceengine.h>
 
@@ -135,3 +136,4 @@ void VolumeRaycasterSinglePass::render(const glm::mat4& modelViewProjection) {
 }
 
 }// namespace openspace
+*/
