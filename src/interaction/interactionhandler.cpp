@@ -1,5 +1,6 @@
 
 // open space includes
+#include <ghoul/logging/logmanager.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
@@ -9,6 +10,8 @@
 
 // std includes
 #include <cassert>
+
+std::string _loggerCat = "InteractionHandler";
 
 namespace openspace {
 
@@ -225,6 +228,18 @@ double InteractionHandler::getDt() {
 	return dt_;
 }
 
+// Implementation of Holroyd's Trackball
+glm::vec3 InteractionHandler::mapToTrackball(glm::vec2 mousePos) {
+	glm::vec3 out = glm::vec3(mousePos.x, mousePos.y, 0);
+	const float RADIUS = 0.5; // Sphere radius
+	if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS/2.0)
+		out.z = sqrt(RADIUS*RADIUS - (out.x*out.x + out.y*out.y));
+	else
+		out.z = (RADIUS*RADIUS/2.0)/sqrt(out.x*out.x + out.y*out.y);
+
+	return out;
+}
+
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const double speed = 2.75;
@@ -312,6 +327,11 @@ void InteractionHandler::mouseButtonCallback(int key, int action) {
 }
 
 void InteractionHandler::mousePositionCallback(int x, int y) {
+	float width = sgct::Engine::instance()->getActiveXResolution();
+	float height = sgct::Engine::instance()->getActiveYResolution();
+	glm::vec2 mousePos = glm::vec2(((float)x/width)-0.5, ((float)y/height)-0.5);
+	glm::vec3 trackballPos = mapToTrackball(mousePos);
+	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << trackballPos.x << ", " << trackballPos.y << ", " << trackballPos.z);
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mousePosCallback(x,y);
     //}

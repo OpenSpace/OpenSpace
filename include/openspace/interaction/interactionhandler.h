@@ -58,6 +58,7 @@ public:
     void mouseScrollWheelCallback(int pos);
 	
 private:
+    glm::vec3 mapToTrackball(glm::vec2 mousePos);
 
 	Camera *camera_;
 	bool enabled_;
