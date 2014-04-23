@@ -195,7 +195,6 @@ void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sg
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
     _engine->_configurationManager = new ghoul::ConfigurationManager;
-
 }
 
 void OpenSpaceEngine::destroy() {

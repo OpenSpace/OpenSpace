@@ -22,69 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FLARE_H__
-#define __FLARE_H__
+#ifndef INTERFACE_H_
+#define INTERFACE_H_
 
-#include <GL/glew.h>
-#include <ghoul/logging/logmanager.h>
-#include <sgct.h>
-#include <openspace/flare/Animator.h>
-#include <openspace/flare/Raycaster.h>
-#include <openspace/flare/Config.h>
-#include <openspace/rendering/renderable.h>
+#include <boost/property_tree/ptree.hpp>
+#include <openspace/engine/openspaceengine.h>
+#include <vector>
 
 namespace openspace {
+class Interface {
 
-class Flare: public Renderable {
+	struct Node {
+		std::string _key;
+		std::string _value;
+		std::vector<Node> _children;
+		Node(std::string key, std::string value) {
+			_key = key;
+			_value = value;
+			_children = std::vector<Node>();
+		}
+		Node(std::string key) {
+			_key = key;
+			_value = "";
+			_children = std::vector<Node>();
+		}
+
+		inline bool operator==(const Node& rhs){
+			return (strcmp(_key.c_str(), rhs._key.c_str()) == 0);
+		}
+		inline bool operator==(const std::string& rhs){
+			return (strcmp(_key.c_str(), rhs.c_str()) == 0);
+		}
+	};
+
 public:
-	Flare();
-	~Flare();
-    
-    bool initialize();
-    bool deinitialize();
-    
-	virtual void render(const Camera *camera, const psc& thisPosition);
-	virtual void update();
-    
-	void render();
-	void initNavigation();
+	Interface(OpenSpaceEngine* engine);
+	~Interface();
 
-	void keyboard(int key, int action);
-	void mouse(int button, int action);
-	void preSync();
-	void postDraw();
-	void encode();
-	void decode();
+	void callback(const char * receivedChars);
 
 private:
-	void init();
+	void handleNodes();
+	void loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent = "", const int depth = 0);
 
-	osp::Config* _config;
-	osp::Raycaster* _raycaster;
-	osp::Animator* _animator;
-
-	sgct::SharedInt _timeStep;
-	sgct::SharedBool _animationPaused;
-	sgct::SharedBool _fpsMode;
-	sgct::SharedFloat _elapsedTime;
-	sgct::SharedInt _manualTimestep;
-	sgct::SharedFloat _pitch;
-	sgct::SharedFloat _yaw;
-	sgct::SharedFloat _roll;
-	sgct::SharedFloat _translateX;
-	sgct::SharedFloat _translateY;
-	sgct::SharedFloat _translateZ;
-	sgct::SharedBool _reloadFlag;
-
-	float _oldTime;
-	float _currentTime;
-	bool _leftMouseButton;
-	double _currentMouseX;
-	double _currentMouseY;
-	double _lastMouseX;
-	double _lastMouseY;
+	OpenSpaceEngine* _engine;
+	std::vector<Node> _nodes;
 };
 
 } // namespace openspace
 
-#endif // __FLARE_H__
+#endif /* INTERFACE_H_ */

@@ -22,69 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FLARE_H__
-#define __FLARE_H__
+#include <openspace/interface/interface.h>
 
-#include <GL/glew.h>
-#include <ghoul/logging/logmanager.h>
 #include <sgct.h>
-#include <openspace/flare/Animator.h>
-#include <openspace/flare/Raycaster.h>
-#include <openspace/flare/Config.h>
-#include <openspace/rendering/renderable.h>
+
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+
+#include <algorithm>
 
 namespace openspace {
 
-class Flare: public Renderable {
-public:
-	Flare();
-	~Flare();
-    
-    bool initialize();
-    bool deinitialize();
-    
-	virtual void render(const Camera *camera, const psc& thisPosition);
-	virtual void update();
-    
-	void render();
-	void initNavigation();
+Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
+Interface::~Interface() {}
 
-	void keyboard(int key, int action);
-	void mouse(int button, int action);
-	void preSync();
-	void postDraw();
-	void encode();
-	void decode();
+void Interface::callback(const char* receivedChars) {
+	std::cout << receivedChars;
 
-private:
-	void init();
+	boost::property_tree::ptree pt;
+	std::stringstream input(receivedChars);
+	boost::property_tree::json_parser::read_json(input, pt);
+	_nodes = std::vector<Node>();
 
-	osp::Config* _config;
-	osp::Raycaster* _raycaster;
-	osp::Animator* _animator;
+	loadIntoNodes(pt);
+	handleNodes(); // Issue commands
+	_nodes.clear(); // Clean up after commands are issued
+}
 
-	sgct::SharedInt _timeStep;
-	sgct::SharedBool _animationPaused;
-	sgct::SharedBool _fpsMode;
-	sgct::SharedFloat _elapsedTime;
-	sgct::SharedInt _manualTimestep;
-	sgct::SharedFloat _pitch;
-	sgct::SharedFloat _yaw;
-	sgct::SharedFloat _roll;
-	sgct::SharedFloat _translateX;
-	sgct::SharedFloat _translateY;
-	sgct::SharedFloat _translateZ;
-	sgct::SharedBool _reloadFlag;
+void Interface::handleNodes() {
+	for (int i = 0; i < _nodes.size(); ++i) {
+		Node node = _nodes.at(i);
+		if (node == "stats") {
+			sgct::Engine::instance()->setDisplayInfoVisibility(atoi(node._value.c_str()));
+		} else if (node == "graph") {
+			sgct::Engine::instance()->setStatsGraphVisibility(atoi(node._value.c_str()));
+		} /*else if (node == "renderer") {
+			if (strcmp(node._value.c_str(), "volumeraycaster") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::VolumeRaycaster);
+			else if (strcmp(node._value.c_str(), "flare") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::Flare);
+		}*/
+	}
+}
 
-	float _oldTime;
-	float _currentTime;
-	bool _leftMouseButton;
-	double _currentMouseX;
-	double _currentMouseY;
-	double _lastMouseX;
-	double _lastMouseY;
-};
+// http://duck-wrath.blogspot.com/2012/02/how-to-recursive-parse.html
+void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent, const int depth) {
+	BOOST_FOREACH( boost::property_tree::ptree::value_type const&v, tree.get_child("") ) {
+		boost::property_tree::ptree subtree = v.second;
+		std::string value = v.second.data();
+		std::string key = v.first;
+
+		// classify and store nodes
+		if ( key.length() > 0 ) { // value
+			_nodes.push_back(Node(key, value));
+		} else { // array
+			// Find parent and add to its children vector
+			std::vector<Node>::iterator it = std::find(_nodes.begin(), _nodes.end(), Node(parent));
+			if (it != _nodes.end()) {
+				(*it)._children.push_back(Node(parent, value));
+			} else {
+				std::cout << "Parent not found" << std::endl;
+			}
+		}
+
+		// recursive go down the hierarchy
+		loadIntoNodes(subtree,key,depth+1);
+	}
+}
 
 } // namespace openspace
 
-#endif // __FLARE_H__
