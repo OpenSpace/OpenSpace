@@ -299,7 +299,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     for(auto key: mappingKeys) {
         glm::vec4 rgba = key.color;
-        LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+//        LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
     }
     
     // allocate new float array with zeros
@@ -359,15 +359,16 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             //LDEBUG("["<< position <<"] " << value);
             
         }
-        LDEBUG(weight << ", (" <<
-               transferFunction[4*i+0] << ", " <<
-               transferFunction[4*i+1] << ", " <<
-               transferFunction[4*i+2] << ", " <<
-               transferFunction[4*i+3] << ")");
+//        LDEBUG(weight << ", (" <<
+//               transferFunction[4*i+0] << ", " <<
+//               transferFunction[4*i+1] << ", " <<
+//               transferFunction[4*i+2] << ", " <<
+//               transferFunction[4*i+3] << ")");
     }
-    
-    
-     return new ghoul::opengl::Texture(transferFunction, glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+
+    return new ghoul::opengl::Texture(transferFunction,
+    		glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
+    		GL_RGBA, GL_FLOAT);;
 }
 
 } // namespace openspace

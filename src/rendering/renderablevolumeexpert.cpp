@@ -204,7 +204,6 @@ bool RenderableVolumeExpert::initialize() {
     }
     
     for (int i = 0; i < _volumePaths.size(); ++i) {
-    
         ghoul::opengl::Texture* volume = loadVolume(_volumePaths.at(i), _volumeHints.at(i));
         if(volume) {
             volume->uploadTexture();
@@ -295,7 +294,6 @@ bool RenderableVolumeExpert::deinitialize() {
 }
 
 void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPosition) {
-
     if( ! _kernel.isValidKernel())
         return;
     
@@ -306,16 +304,30 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     double factor = pow(10.0,thisPosition[3]);
     transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
 	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-	
+
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
     _kernelLock->lock();
     glFinish();
     
+    // Aquire GL objects
+    _commands.enqueueAcquireGLObjects(_clBackTexture);
+    _commands.enqueueAcquireGLObjects(_clFrontTexture);
+    _commands.enqueueAcquireGLObjects(_clOutput);
+    _commands.enqueueAcquireGLObjects(_clVolumes);
+    _commands.enqueueAcquireGLObjects(_clTransferFunctions);
+
     _commands.enqueueKernelBlocking(_kernel, *_ws);
     _commands.finish();
-    
+
+    // Release GL objects
+    _commands.enqueueReleaseGLObjects(_clBackTexture);
+    _commands.enqueueReleaseGLObjects(_clFrontTexture);
+    _commands.enqueueReleaseGLObjects(_clOutput);
+    _commands.enqueueReleaseGLObjects(_clVolumes);
+	_commands.enqueueReleaseGLObjects(_clTransferFunctions);
+
     _quadProgram->activate();
     glActiveTexture(GL_TEXTURE0);
     _output->bind();
@@ -324,6 +336,7 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
     _kernelLock->unlock();
     _textureLock->unlock();
     

@@ -30,6 +30,8 @@
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <sgct.h>
+
 #include <algorithm>
 
 namespace {

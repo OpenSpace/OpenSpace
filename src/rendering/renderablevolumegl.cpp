@@ -31,6 +31,8 @@
 #include <ghoul/opencl/clworksize.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <sgct.h>
+
 #include <algorithm>
 
 namespace {

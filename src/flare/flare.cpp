@@ -11,6 +11,8 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
+#include <sgct.h>
+
 #include <string>
 #include <cstdlib>
 #include <vector>
@@ -63,11 +65,10 @@ void Flare::update() {
 }
 
 void Flare::render() {
-	// Go!
+	// Sync timestep
+	_animator->SetCurrentTimestep(static_cast<unsigned int>(_timeStep.getVal()));
 	// Reload config if flag is set
-	if (_reloadFlag.getVal()) {
-		_raycaster->Reload();
-	}
+	if (_reloadFlag.getVal()) _raycaster->Reload();
 
 	// Set model and view params
 	_raycaster->SetModelParams(_pitch.getVal(),
@@ -83,9 +84,7 @@ void Flare::render() {
 	}
 
 	// Save screenshot
-	if (_config->TakeScreenshot()) {
-		sgct::Engine::instance()->takeScreenshot();
-	}
+	if (_config->TakeScreenshot()) sgct::Engine::instance()->takeScreenshot();
 
 	// Update animator with synchronized time
 	_animator->SetPaused(_animationPaused.getVal());
@@ -96,6 +95,7 @@ void Flare::render() {
 
 void Flare::initNavigation() {
 	_animationPaused.setVal(false);
+	_reloadFlag.setVal(false);
 
 	// FPS mode should be OFF for cluster syncing
 	_fpsMode.setVal(true);
@@ -407,31 +407,33 @@ void Flare::postDraw() {
 }
 
 void Flare::encode() {
-  sgct::SharedData::instance()->writeBool(&_animationPaused);
-  sgct::SharedData::instance()->writeBool(&_fpsMode);
-  sgct::SharedData::instance()->writeFloat(&_elapsedTime);
-  sgct::SharedData::instance()->writeInt(&_manualTimestep);
-  sgct::SharedData::instance()->writeFloat(&_pitch);
-  sgct::SharedData::instance()->writeFloat(&_yaw);
-  sgct::SharedData::instance()->writeFloat(&_roll);
-  sgct::SharedData::instance()->writeFloat(&_translateX);
-  sgct::SharedData::instance()->writeFloat(&_translateY);
-  sgct::SharedData::instance()->writeFloat(&_translateZ);
-  sgct::SharedData::instance()->writeBool(&_reloadFlag);
+	sgct::SharedData::instance()->writeInt(&_timeStep);
+	sgct::SharedData::instance()->writeBool(&_animationPaused);
+	sgct::SharedData::instance()->writeBool(&_fpsMode);
+	sgct::SharedData::instance()->writeFloat(&_elapsedTime);
+	sgct::SharedData::instance()->writeInt(&_manualTimestep);
+	sgct::SharedData::instance()->writeFloat(&_pitch);
+	sgct::SharedData::instance()->writeFloat(&_yaw);
+	sgct::SharedData::instance()->writeFloat(&_roll);
+	sgct::SharedData::instance()->writeFloat(&_translateX);
+	sgct::SharedData::instance()->writeFloat(&_translateY);
+	sgct::SharedData::instance()->writeFloat(&_translateZ);
+	sgct::SharedData::instance()->writeBool(&_reloadFlag);
 }
 
 void Flare::decode() {
-  sgct::SharedData::instance()->readBool(&_animationPaused);
-  sgct::SharedData::instance()->readBool(&_fpsMode);
-  sgct::SharedData::instance()->readFloat(&_elapsedTime);
-  sgct::SharedData::instance()->readInt(&_manualTimestep);
-  sgct::SharedData::instance()->readFloat(&_pitch);
-  sgct::SharedData::instance()->readFloat(&_yaw);
-  sgct::SharedData::instance()->readFloat(&_roll);
-  sgct::SharedData::instance()->readFloat(&_translateX);
-  sgct::SharedData::instance()->readFloat(&_translateY);
-  sgct::SharedData::instance()->readFloat(&_translateZ);
-  sgct::SharedData::instance()->readBool(&_reloadFlag);
+	sgct::SharedData::instance()->readInt(&_timeStep);
+	sgct::SharedData::instance()->readBool(&_animationPaused);
+	sgct::SharedData::instance()->readBool(&_fpsMode);
+	sgct::SharedData::instance()->readFloat(&_elapsedTime);
+	sgct::SharedData::instance()->readInt(&_manualTimestep);
+	sgct::SharedData::instance()->readFloat(&_pitch);
+	sgct::SharedData::instance()->readFloat(&_yaw);
+	sgct::SharedData::instance()->readFloat(&_roll);
+	sgct::SharedData::instance()->readFloat(&_translateX);
+	sgct::SharedData::instance()->readFloat(&_translateY);
+	sgct::SharedData::instance()->readFloat(&_translateZ);
+	sgct::SharedData::instance()->readBool(&_reloadFlag);
 }
 
 } // namespace openspace

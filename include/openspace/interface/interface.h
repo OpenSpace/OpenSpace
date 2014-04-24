@@ -22,68 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEVOLUMEGL_H__
-#define __RENDERABLEVOLUMEGL_H__
+#ifndef INTERFACE_H_
+#define INTERFACE_H_
+#include <openspace/engine/openspaceengine.h>
 
-// open space includes
-#include <openspace/rendering/renderablevolume.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/io/rawvolumereader.h>
-#include <ghoul/filesystem/file.h>
-
-#ifdef __APPLE__
-    #include <memory>
-#else
-    #include <mutex>
-#endif
-
-namespace sgct_utils {
-    class SGCTBox;
-}
+#include <boost/property_tree/ptree.hpp>
+#include <openspace/engine/openspaceengine.h>
+#include <vector>
 
 namespace openspace {
+class Interface {
+	struct Node {
+		std::string _key;
+		std::string _value;
+		std::vector<Node> _children;
+		Node(std::string key, std::string value) {
+			_key = key;
+			_value = value;
+			_children = std::vector<Node>();
+		}
+		Node(std::string key) {
+			_key = key;
+			_value = "";
+			_children = std::vector<Node>();
+		}
 
-class RenderableVolumeGL: public RenderableVolume {
+		inline bool operator==(const Node& rhs){
+			return (strcmp(_key.c_str(), rhs._key.c_str()) == 0);
+		}
+		inline bool operator==(const std::string& rhs){
+			return (strcmp(_key.c_str(), rhs.c_str()) == 0);
+		}
+	};
+
 public:
+	Interface(OpenSpaceEngine* engine);
+	~Interface();
 
-	// constructors & destructor
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
-    
-    bool initialize();
-    bool deinitialize();
-
-	virtual void render(const Camera *camera, const psc& thisPosition);
-	virtual void update();
+	void callback(const char * receivedChars);
 
 private:
-    
-    
-    std::string _filename;
-    ghoul::RawVolumeReader::ReadHints _hints;
-    float _stepSize;
-	ghoul::opengl::FramebufferObject* _fbo;
-	ghoul::opengl::Texture* _backTexture;
-	ghoul::opengl::Texture* _frontTexture;
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::ProgramObject *_fboProgram, *_twopassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
-	GLuint _screenQuad;
-    
-    std::mutex* _shaderMutex;
-    
-    ghoul::filesystem::File* _vertexSourceFile;
-    ghoul::filesystem::File* _fragmentSourceFile;
-    bool _programUpdateOnSave;
-    
-    void safeShaderCompilation();
-    
+
+	void handleNodes();
+	void loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent = "", const int depth = 0);
+
+	OpenSpaceEngine* _engine;
+	std::vector<Node> _nodes;
 };
 
 } // namespace openspace
 
-#endif
+#endif /* INTERFACE_H_ */

@@ -1,13 +1,12 @@
 #version 400 core
 
-// layout(location = 0) in vec3 vertPosition;
-in vec4 Position;
+// Based on http://prideout.net/blog/?p=64
 
-uniform mat4 modelViewProjection;
+layout(location = 0) in vec4 Position;
 out vec4 vPosition;
+uniform mat4 modelViewProjection;
 
 void main() {
-	// vec4 Position = vec4(vertPosition, 1.0);
     gl_Position = modelViewProjection * Position;
     vPosition = Position;
 }

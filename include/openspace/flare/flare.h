@@ -48,8 +48,6 @@ public:
     
 	void render();
 	void initNavigation();
-    
-    
 
 	void keyboard(int key, int action);
 	void mouse(int button, int action);
@@ -65,6 +63,7 @@ private:
 	osp::Raycaster* _raycaster;
 	osp::Animator* _animator;
 
+	sgct::SharedInt _timeStep;
 	sgct::SharedBool _animationPaused;
 	sgct::SharedBool _fpsMode;
 	sgct::SharedFloat _elapsedTime;

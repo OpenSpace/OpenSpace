@@ -40,7 +40,9 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
-#include <sgct.h>
+namespace sgct_utils {
+    class SGCTBox;
+}
 
 //#include <vector>
 //#include <string>

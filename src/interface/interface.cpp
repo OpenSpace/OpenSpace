@@ -22,68 +22,74 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEVOLUMEGL_H__
-#define __RENDERABLEVOLUMEGL_H__
+#include <openspace/interface/interface.h>
+/*
+#include <sgct.h>
 
-// open space includes
-#include <openspace/rendering/renderablevolume.h>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/io/rawvolumereader.h>
-#include <ghoul/filesystem/file.h>
-
-#ifdef __APPLE__
-    #include <memory>
-#else
-    #include <mutex>
-#endif
-
-namespace sgct_utils {
-    class SGCTBox;
-}
-
+#include <algorithm>
+*/
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
-public:
+Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
+Interface::~Interface() {}
 
-	// constructors & destructor
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
-    
-    bool initialize();
-    bool deinitialize();
+void Interface::callback(const char* receivedChars) {
+/*
+	std::cout << receivedChars;
 
-	virtual void render(const Camera *camera, const psc& thisPosition);
-	virtual void update();
+	boost::property_tree::ptree pt;
+	std::stringstream input(receivedChars);
+	boost::property_tree::json_parser::read_json(input, pt);
+	_nodes = std::vector<Node>();
 
-private:
-    
-    
-    std::string _filename;
-    ghoul::RawVolumeReader::ReadHints _hints;
-    float _stepSize;
-	ghoul::opengl::FramebufferObject* _fbo;
-	ghoul::opengl::Texture* _backTexture;
-	ghoul::opengl::Texture* _frontTexture;
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::ProgramObject *_fboProgram, *_twopassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
-	GLuint _screenQuad;
-    
-    std::mutex* _shaderMutex;
-    
-    ghoul::filesystem::File* _vertexSourceFile;
-    ghoul::filesystem::File* _fragmentSourceFile;
-    bool _programUpdateOnSave;
-    
-    void safeShaderCompilation();
-    
-};
+	loadIntoNodes(pt);
+	handleNodes(); // Issue commands
+	_nodes.clear(); // Clean up after commands are issued
+  */
+}
+
+void Interface::handleNodes() {
+/*
+	for (int i = 0; i < _nodes.size(); ++i) {
+		Node node = _nodes.at(i);
+		if (node == "stats") {
+			sgct::Engine::instance()->setDisplayInfoVisibility(atoi(node._value.c_str()));
+		} else if (node == "graph") {
+			sgct::Engine::instance()->setStatsGraphVisibility(atoi(node._value.c_str()));
+		}
+	}
+    */
+}
+
+// http://duck-wrath.blogspot.com/2012/02/how-to-recursive-parse.html
+void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent, const int depth) {
+/*
+	BOOST_FOREACH( boost::property_tree::ptree::value_type const&v, tree.get_child("") ) {
+		boost::property_tree::ptree subtree = v.second;
+		std::string value = v.second.data();
+		std::string key = v.first;
+
+		// classify and store nodes
+		if ( key.length() > 0 ) { // value
+			_nodes.push_back(Node(key, value));
+		} else { // array
+			// Find parent and add to its children vector
+			std::vector<Node>::iterator it = std::find(_nodes.begin(), _nodes.end(), Node(parent));
+			if (it != _nodes.end()) {
+				(*it)._children.push_back(Node(parent, value));
+			} else {
+				std::cout << "Parent not found" << std::endl;
+			}
+		}
+
+		// recursive go down the hierarchy
+		loadIntoNodes(subtree,key,depth+1);
+	}
+*/
+}
 
 } // namespace openspace
 
-#endif
