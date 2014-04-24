@@ -30,6 +30,7 @@
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opencl/clworksize.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/rawvolumereader.h>
 
 #include <algorithm>
 
@@ -85,10 +86,9 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
                                 ghoul::Dictionary hintsDictionary;
                                 if(volume.hasKey("Hints"))
                                     volume.getValue("Hints", hintsDictionary);
-                                ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
                                 
                                 _volumePaths.push_back(file);
-                                _volumeHints.push_back(hints);
+                                _volumeHints.push_back(hintsDictionary);
                             }
                         }
                     }
@@ -204,13 +204,15 @@ bool RenderableVolumeExpert::initialize() {
     }
     
     for (int i = 0; i < _volumePaths.size(); ++i) {
-        ghoul::RawVolumeReader rawReader(_volumeHints.at(i));
-        ghoul::opengl::Texture* volume = rawReader.read(_volumePaths.at(i));
-        volume->uploadTexture();
-        cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
-
-        _volumes.push_back(volume);
-        _clVolumes.push_back(volumeTexture);
+    
+        ghoul::opengl::Texture* volume = loadVolume(_volumePaths.at(i), _volumeHints.at(i));
+        if(volume) {
+            volume->uploadTexture();
+            cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
+            
+            _volumes.push_back(volume);
+            _clVolumes.push_back(volumeTexture);
+        }
     }
     
     //	------ SETUP GEOMETRY ----------------

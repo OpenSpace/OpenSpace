@@ -92,6 +92,15 @@ if(OPENCL_FOUND)
     set(GHOUL_DEPENDENCIES ${GHOUL_DEPENDENCIES} ${OPENCL_LIBRARIES})
 endif(OPENCL_FOUND)
 
+# Kameleon
+option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
+option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+set(KAMELEON_ROOT_DIR ${OPENSPACE_EXT_DIR}/kameleon)
+set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
+add_subdirectory(${KAMELEON_ROOT_DIR})
+include_directories(${KAMELEON_INCLUDES})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ccmc)
+
 if (APPLE)
     include_directories(/Developer/Headers/FlatCarbon)
     find_library(CARBON_LIBRARY Carbon)
