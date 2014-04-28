@@ -97,6 +97,8 @@ private:
     ghoul::opencl::CLWorkSize* _ws;
     ghoul::filesystem::File* _kernelSourceFile;
     std::vector<std::pair<ghoul::opencl::CLProgram::Option, bool> > _kernelOptions;
+    std::vector<std::string> _kernelIncludes;
+    std::vector<std::pair<std::string,std::string> > _kernelDefinitions;
     bool _programUpdateOnSave;
     
     // mutexes to prevent inconsistencies
@@ -107,6 +109,7 @@ private:
 	GLuint _screenQuad;
     
     VolumeRaycasterBox* _colorBoxRenderer;
+    glm::vec3 _boxScaling;
     
 };
 

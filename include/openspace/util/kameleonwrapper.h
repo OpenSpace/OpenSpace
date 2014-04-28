@@ -49,6 +49,7 @@ public:
 
 private:
 	ccmc::Model* _model;
+    Model _type;
 	ccmc::Interpolator* _interpolator;
 };
 

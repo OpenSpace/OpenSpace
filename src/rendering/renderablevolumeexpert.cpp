@@ -64,7 +64,8 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
     RenderableVolume(dictionary),
     _output(nullptr),
     _clBackTexture(0), _clFrontTexture(0), _clOutput(0),
-    _kernelSourceFile(nullptr), _programUpdateOnSave(false), _colorBoxRenderer(nullptr) {
+    _kernelSourceFile(nullptr), _programUpdateOnSave(false), _colorBoxRenderer(nullptr),
+    _boxScaling(1.0,1.0,1.0) {
         
     _kernelLock = new std::mutex;
     _textureLock = new std::mutex;
@@ -161,6 +162,30 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
                     }
                 }
             }
+            
+            ghoul::Dictionary includeDictionary;
+            if (kernelDictionary.hasKey("Includes") && kernelDictionary.getValue("Includes", includeDictionary)) {
+                auto keys = includeDictionary.keys();
+                for(auto key: keys) {
+                    std::string includePath;
+                    if(includeDictionary.getValue(key, includePath)) {
+                        if(FileSys.directoryExists(includePath)) {
+                            _kernelIncludes.push_back(absPath(includePath));
+                        }
+                    }
+                }
+            }
+            
+            ghoul::Dictionary defineDictionary;
+            if (kernelDictionary.hasKey("Definitions") && kernelDictionary.getValue("Definitions", defineDictionary)) {
+                auto keys = defineDictionary.keys();
+                for(auto key: keys) {
+                    std::string defintion;
+                    if(defineDictionary.getValue(key, defintion)) {
+                        _kernelDefinitions.push_back(std::make_pair(key, defintion));
+                    }
+                }
+            }
         }
     }
     if (kernelPath != "") {
@@ -168,6 +193,22 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
     }
         
     _colorBoxRenderer = new VolumeRaycasterBox();
+    double tempValue;
+    if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[0] = tempValue;
+        }
+    }
+    if(dictionary.hasKey("BoxScaling.2") && dictionary.getValue("BoxScaling.2", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[1] = tempValue;
+        }
+    }
+    if(dictionary.hasKey("BoxScaling.3") && dictionary.getValue("BoxScaling.3", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[2] = tempValue;
+        }
+    }
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
@@ -207,6 +248,8 @@ bool RenderableVolumeExpert::initialize() {
         ghoul::opengl::Texture* volume = loadVolume(_volumePaths.at(i), _volumeHints.at(i));
         if(volume) {
             volume->uploadTexture();
+            
+            LDEBUG("Creating CL texture from GL texture with path '" << _volumePaths.at(i) << "'");
             cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
             
             _volumes.push_back(volume);
@@ -304,7 +347,7 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     double factor = pow(10.0,thisPosition[3]);
     transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
 	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-
+    transform = glm::scale(transform, _boxScaling);
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
@@ -354,6 +397,14 @@ void RenderableVolumeExpert::safeKernelCompilation() {
         for(auto option: _kernelOptions) {
             tmpProgram.setOption(option.first, option.second);
         }
+        
+        for(auto defintion: _kernelDefinitions) {
+            tmpProgram.addDefinition(defintion.first, defintion.second);
+        }
+        
+        // add the include directories
+        tmpProgram.addIncludeDirectory(_kernelIncludes);
+        
         if(tmpProgram.build()) {
             ghoul::opencl::CLKernel tmpKernel = tmpProgram.createKernel("volumeraycaster");
             if(tmpKernel.isValidKernel()) {
