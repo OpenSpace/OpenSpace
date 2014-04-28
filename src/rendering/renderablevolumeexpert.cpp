@@ -281,7 +281,6 @@ bool RenderableVolumeExpert::initialize() {
         local_y /= 2;
     }
     _ws = new ghoul::opencl::CLWorkSize({dimensions[0],dimensions[1]}, {local_x,local_y});
-
     
     return true;
 }
@@ -299,10 +298,15 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
 	float speed = 50.0f;
 	float time = sgct::Engine::getTime();
     glm::mat4 transform = camera->getViewProjectionMatrix();
+    glm::mat4 camTransform = camera->getViewRotationMatrix();
+    psc camPos = camera->getPosition();
     
     double factor = pow(10.0,thisPosition[3]);
+
     transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
+    transform = transform*camTransform;
+//    transform = glm::rotate(transform, speed*camera->getRotationAngle(), camera->getRotationAxis());
+//	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
 
     _colorBoxRenderer->render(transform);
     
@@ -330,7 +334,7 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     _quadProgram->activate();
     glActiveTexture(GL_TEXTURE0);
     _output->bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
