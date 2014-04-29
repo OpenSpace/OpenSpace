@@ -209,6 +209,8 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
             _boxScaling[2] = tempValue;
         }
     }
+    
+    setBoundingSphere(pss::CreatePSS(_boxScaling.length()));
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
@@ -325,7 +327,6 @@ bool RenderableVolumeExpert::initialize() {
         local_y /= 2;
     }
     _ws = new ghoul::opencl::CLWorkSize({dimensions[0],dimensions[1]}, {local_x,local_y});
-
     
     return true;
 }
@@ -340,14 +341,28 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     if( ! _kernel.isValidKernel())
         return;
     
-	float speed = 50.0f;
-	float time = sgct::Engine::getTime();
     glm::mat4 transform = camera->getViewProjectionMatrix();
+    glm::mat4 camTransform = camera->getViewRotationMatrix();
+    psc camPos = camera->getPosition();
     
-    double factor = pow(10.0,thisPosition[3]);
-    transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
+//    psc relative = camPos - thisPosition;
+    psc relative = thisPosition-camPos;
+    double factor = pow(10.0,relative[3]);
+    
+    transform = transform*camTransform;
+    transform = glm::translate(transform, glm::vec3(relative[0]*factor, relative[1]*factor, relative[2]*factor));
+    transform = glm::scale(transform, _boxScaling);
+    /*
+<<<<<<< HEAD
 	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
     transform = glm::scale(transform, _boxScaling);
+=======
+    transform = transform*camTransform;
+//    transform = glm::rotate(transform, speed*camera->getRotationAngle(), camera->getRotationAxis());
+//	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
+
+>>>>>>> trackball
+*/
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
@@ -374,7 +389,7 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     _quadProgram->activate();
     glActiveTexture(GL_TEXTURE0);
     _output->bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -44,6 +44,7 @@ const glm::mat4 & Camera::getViewRotationMatrix() const {
 
 void Camera::compileViewRotationMatrix() {
 	// convert from quaternion to rotationmatrix using glm
+
 	viewRotationMatrix_ = glm::mat4_cast(viewRotation_);
 
 	// the camera matrix needs to be rotated inverse to the world

@@ -1,14 +1,19 @@
 
 // open space includes
+#include <ghoul/logging/logmanager.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 #include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/psc.h>
+#include <glm/gtx/vector_angle.hpp>
 
 // std includes
 #include <cassert>
+
+std::string _loggerCat = "InteractionHandler";
 
 namespace openspace {
 
@@ -19,11 +24,13 @@ InteractionHandler::InteractionHandler() {
 	enabled_ = true;
 	node_ = nullptr;
 	dt_ = 0.0;
+	_lastTrackballPos = glm::vec3(0.5);
+	_leftMouseButtonDown = false;
+	_isMouseBeingPressedAndHeld = false;
 }
 
 InteractionHandler::~InteractionHandler() {
-	for (size_t i = 0; i < controllers_.size(); ++i)
-	{
+	for (size_t i = 0; i < controllers_.size(); ++i) {
 		delete controllers_[i];
 	}
 }
@@ -225,6 +232,75 @@ double InteractionHandler::getDt() {
 	return dt_;
 }
 
+glm::vec3 InteractionHandler::mapToTrackball(glm::vec2 mousePos) {
+	const float RADIUS = 0.5; // Sphere radius
+	glm::vec3 out = glm::vec3(mousePos.x-0.5, -1.0*(mousePos.y-0.5), 0);
+
+	// Mapping according to Holroyds trackball
+	// Piece-wise sphere + hyperbolic sheet
+	if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS/2.0) {
+		//Spherical Region
+		out.z = RADIUS*RADIUS - (out.x*out.x + out.y*out.y);
+		out.z = out.z > 0.0 ? sqrtf(out.z) : 0.0;
+	} else { //Hyperbolic Region - for smooth z values
+		out.z = (RADIUS*RADIUS)/(2.0*sqrt(out.x*out.x + out.y*out.y));
+	}
+
+	return glm::normalize(out);
+}
+
+void InteractionHandler::trackballRotate(int x, int y) {
+	// Normalize mouse coordinates to [0,1]
+	float width = sgct::Engine::instance()->getActiveXResolution();
+	float height = sgct::Engine::instance()->getActiveYResolution();
+	glm::vec2 mousePos = glm::vec2((float)x/width, (float)y/height);
+    mousePos[1] = 0.5;
+
+	glm::vec3 curTrackballPos = mapToTrackball(mousePos);
+//	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
+
+	// Disable movement on the first click for extra smoothness
+	if (!_isMouseBeingPressedAndHeld) {
+		_lastTrackballPos = curTrackballPos;
+		_isMouseBeingPressedAndHeld = true;
+	}
+
+	if (curTrackballPos != _lastTrackballPos) {
+		// calculate rotation angle (in radians), rotation axis and quaternion
+		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
+        rotationAngle *= getDt()*100.0f;
+		glm::vec3 rotationAxis = glm::cross(_lastTrackballPos, curTrackballPos);
+		rotationAxis = glm::normalize(rotationAxis);
+		glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
+
+		// -----------------------------------------------------------------
+
+		orbit(glm::inverse(quaternion));
+		camera_->rotate(quaternion);
+//		camera_->compileViewRotationMatrix();
+/*
+		psc nodePos = node_->getWorldPosition();
+		psc camPos = camera_->getPosition();
+		glm::mat4 transMatrix = glm::translate(glm::mat4(1.0), nodePos.getVec3f()-camPos.getVec3f());
+		glm::mat4 transBackMatrix = glm::translate(glm::mat4(1.0), camPos.getVec3f()-nodePos.getVec3f());
+		glm::vec4 translated = transMatrix*glm::vec4(camPos.getVec3f(), 1.0);
+		glm::vec4 postRot = glm::rotate(quaternion, translated);
+		glm::vec4 newCamPos = transBackMatrix*glm::vec4(postRot.x, postRot.y, postRot.z, 1.0);
+		camera_->setPosition(psc::CreatePSC(newCamPos.x, newCamPos.y, newCamPos.z));
+		camera_->rotate(glm::inverse(quaternion));
+		camera_->compileViewRotationMatrix();
+        */
+//		node_->calculateBoundingSphere();
+
+//		glm::vec3 camPos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
+//		sgct::Engine::instance()->getUserPtr()->setOrientation(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
+//		sgct::Engine::instance()->getUserPtr()->setPos(glm::rotate(quaternion, camPos));
+
+
+		_lastTrackballPos = curTrackballPos;
+	}
+}
+
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const double speed = 2.75;
@@ -270,11 +346,11 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         rotate(rot);
     }
     if (key == 'R') {
-        pss dist(-speed * dt, 8.0);
+        pss dist(-speed * dt, 0.0);
         distance(dist);
     }
     if (key == 'F') {
-        pss dist(speed * dt, 8.0);
+        pss dist(speed * dt, 0.0);
         distance(dist);
     }
     /*
@@ -309,9 +385,18 @@ void InteractionHandler::mouseButtonCallback(int key, int action) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseButtonCallback(key,action);
     //}
+	if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+		_leftMouseButtonDown = true;
+	else if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		_leftMouseButtonDown = false;
+		_isMouseBeingPressedAndHeld = false;
+	}
 }
 
 void InteractionHandler::mousePositionCallback(int x, int y) {
+	if (_leftMouseButtonDown)
+		trackballRotate(x,y);
+
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mousePosCallback(x,y);
     //}

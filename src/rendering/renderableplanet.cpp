@@ -115,8 +115,8 @@ void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
 
 	// scale the planet to appropriate size since the planet is a unit sphere
 	glm::mat4 transform = glm::mat4(1);
-    transform = glm::rotate(transform, 4.1f*static_cast<float>(sgct::Engine::instance()->getTime()), glm::vec3(0.0f, 1.0f, 0.0f));
-		
+//    transform = glm::rotate(transform, 4.1f*static_cast<float>(sgct::Engine::instance()->getTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+
 	// setup the data to the shader
 	programObject_->setUniform("ViewProjection", camera->getViewProjectionMatrix());
 	programObject_->setUniform("ModelTransform", transform);
