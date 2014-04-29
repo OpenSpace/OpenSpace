@@ -22,73 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef VOLUMERAYCASTERBOX_H_
+#define VOLUMERAYCASTERBOX_H_
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
 
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-
-#include <openspace/flare/flare.h>
+namespace sgct_utils {
+    class SGCTBox;
+}
 
 namespace openspace {
 
-class ScriptEngine;
-
-class OpenSpaceEngine {
+class VolumeRaycasterBox {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
-    static void destroy();
-    static OpenSpaceEngine& ref();
-
-    static bool isInitialized();
+	VolumeRaycasterBox();
+	~VolumeRaycasterBox();
     bool initialize();
+	void render(glm::mat4 MVP);
     
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
-    
-    ghoul::ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
-
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
-
-    void encode();
-    void decode();
+	ghoul::opengl::Texture* backFace();
+	ghoul::opengl::Texture* frontFace();
+    glm::size2_t dimensions();
 
 private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
-
-    static OpenSpaceEngine* _engine;
-
-    //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
-};
+	ghoul::opengl::FramebufferObject* _fbo;
+	ghoul::opengl::Texture *_backTexture, *_frontTexture;
+	ghoul::opengl::ProgramObject *_boxProgram;
+	sgct_utils::SGCTBox* _boundingBox;
+	GLint _MVPLocation;
     
-#define OsEng (openspace::OpenSpaceEngine::ref())
+    glm::size2_t _dimensions;
+};
 
-} // namespace openspace
-
-#endif // __OPENSPACEENGINE_H__
+} /* namespace openspace */
+#endif /* VOLUMERAYCASTERBOX_H_ */

@@ -68,7 +68,7 @@ void Spice::loadDefaultKernels() {
 	assert(this_);
 
 	// load
-	loadKernel(absPath("${OPENSPACE-DATA}/spice/de430_1850-2150.bsp"));
+	loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"));
 	//Summary for: de430_1850-2150.bsp
 	//Bodies: MERCURY BARYCENTER (1)  SATURN BARYCENTER (6)   MERCURY (199)
 	//        VENUS BARYCENTER (2)    URANUS BARYCENTER (7)   VENUS (299)
@@ -79,7 +79,7 @@ void Spice::loadDefaultKernels() {
 	//        -----------------------------       -----------------------------
 	//        1849 DEC 26 00:00:00.000            2150 JAN 22 00:00:00.000
 	
-	loadKernel(absPath("${OPENSPACE-DATA}/spice/pck00010.tpc"));
+	loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc"));
 }
 
 bool Spice::loadKernel(const std::string &path) {

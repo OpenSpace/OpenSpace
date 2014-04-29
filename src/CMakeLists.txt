@@ -84,13 +84,27 @@ file(GLOB UTIL_HEADER ${HEADER_ROOT_DIR}/openspace/util/*.h)
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${UTIL_HEADER})
 source_group(Util FILES ${UTIL_SOURCE} ${UTIL_HEADER})
 
+file(GLOB FLARE_SOURCE ${SOURCE_ROOT_DIR}/flare/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${FLARE_SOURCE})
+file(GLOB FLARE_HEADER ${HEADER_ROOT_DIR}/openspace/flare/*.h)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${FLARE_HEADER})
+source_group(Flare FILES ${FLARE_SOURCE} ${FLARE_HEADER})
+
+file(GLOB INTERFACE_SOURCE ${SOURCE_ROOT_DIR}/interface/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${INTERFACE_SOURCE})
+file(GLOB INTERFACE_HEADER ${HEADER_ROOT_DIR}/openspace/interface/*.h)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${INTERFACE_HEADER})
+source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
+
 include_directories(${HEADER_ROOT_DIR})
 
 # hack:
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
-add_definitions(-DBASE_PATH="${CMAKE_SOURCE_DIR}")
+find_package(OpenCL REQUIRED)
+include_directories(${OPENCL_INCLUDE_DIRS})
+
 
 if (APPLE)
 	add_definitions(-D__APPLE__)

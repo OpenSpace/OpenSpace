@@ -71,7 +71,6 @@ bool SceneGraph::initialize() {
     
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-    using ghoul::opengl::ShaderManager;
     
     ProgramObject* po = nullptr;
     if (    OsEng.ref().configurationManager().hasKey("pscShader") &&
@@ -100,6 +99,46 @@ bool SceneGraph::initialize() {
         return false;
     
     OsEng.ref().configurationManager().setValue("pscShader", po);
+    
+    ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
+	ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                                  absPath("${SHADERS}/exitpoints.vert"));
+	ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                                    absPath("${SHADERS}/exitpoints.frag"));
+	_fboProgram->attachObject(vertexShader);
+	_fboProgram->attachObject(fragmentShader);
+	_fboProgram->compileShaderObjects();
+	_fboProgram->linkProgramObject();
+    
+	ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
+	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                    absPath("${SHADERS}/twopassraycaster.vert"));
+	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                      absPath("${SHADERS}/twopassraycaster.frag"));
+	_twopassProgram->attachObject(vertexShader);
+	_twopassProgram->attachObject(fragmentShader);
+	_twopassProgram->compileShaderObjects();
+	_twopassProgram->linkProgramObject();
+	_twopassProgram->setUniform("texBack", 0);
+	_twopassProgram->setUniform("texFront", 1);
+	_twopassProgram->setUniform("texVolume", 2);
+    
+    ProgramObject* quad = new ProgramObject("Quad");
+	ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                    absPath("${SHADERS}/quadVert.glsl"));
+	ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                      absPath("${SHADERS}/quadFrag.glsl"));
+	quad->attachObject(quadv);
+	quad->attachObject(quadf);
+	quad->compileShaderObjects();
+	quad->linkProgramObject();
+	quad->setUniform("quadTex", 0);
+    
+    
+    OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
+    OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
+    OsEng.ref().configurationManager().setValue("Quad", quad);
+    
     
     // Initialize all nodes
     for(auto node: _nodes) {
@@ -190,12 +229,6 @@ bool SceneGraph::loadFromModulePath(const std::string& path) {
     }
     
     ghoul::Dictionary dictionary;
-    lua_State* state = luaL_newstate();
-    if (state == nullptr) {
-        LFATAL("Error creating new Lua state: Memory allocation error");
-        return false;
-    }
-    luaL_openlibs(state);
     
     // initialize the root node
     _root = new SceneGraphNode(ghoul::Dictionary());
@@ -203,8 +236,7 @@ bool SceneGraph::loadFromModulePath(const std::string& path) {
     _nodes.push_back(_root);
     _allNodes.insert ( std::make_pair("Root", _root));
 
-    ghoul::lua::lua_loadIntoDictionary(state, &dictionary, defaultScene);
-    
+    ghoul::lua::loadDictionary(defaultScene, dictionary);
     ghoul::Dictionary moduleDictionary;
     if(dictionary.getValue("Modules", moduleDictionary)) {
         auto keys = moduleDictionary.keys();
@@ -240,20 +272,10 @@ bool SceneGraph::loadFromModulePath(const std::string& path) {
         }
     }
     
-    // Close the Lua state
-    lua_close(state);
-    
     return true;
 }
 
 void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
-    lua_State* state = luaL_newstate();
-    if (state == nullptr) {
-        LFATAL("Error creating new Lua state: Memory allocation error");
-        return;
-    }
-    luaL_openlibs(state);
-    
     auto pos = modulePath.find_last_of("/");
     if (pos == modulePath.npos) {
         LFATAL("Bad format for module path: " << modulePath);
@@ -264,7 +286,7 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
     LDEBUG("Loading modules from: " << fullModule);
     
     ghoul::Dictionary moduleDictionary;
-    ghoul::lua::lua_loadIntoDictionary(state, &moduleDictionary, fullModule);
+    ghoul::lua::loadDictionary(fullModule, moduleDictionary);
     auto keys = moduleDictionary.keys();
     for (auto key: keys) {
         ghoul::Dictionary singleModuleDictionary;
@@ -301,9 +323,6 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
             }
         }
     }
-    
-    // Close the Lua state
-    lua_close(state);
     
     // Print the tree
     printTree(_root);

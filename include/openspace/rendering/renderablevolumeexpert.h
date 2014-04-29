@@ -22,73 +22,96 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef __RENDERABLEVOLUMEEXPERT_H__
+#define __RENDERABLEVOLUMEEXPERT_H__
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
-#include <ghoul/misc/dictionary.h>
+// open space includes
+#include <openspace/rendering/renderablevolume.h>
+#include <openspace/rendering/volumeraycasterbox.h>
 
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
+#include <ghoul/io/rawvolumereader.h>
+#include <ghoul/filesystem/file.h>
 
-#include <openspace/flare/flare.h>
+#ifdef __APPLE__
+    #include <memory>
+#else
+    #include <mutex>
+#endif
+
+namespace ghoul {
+    namespace opencl {
+        class CLWorkSize;
+    }
+}
 
 namespace openspace {
 
-class ScriptEngine;
-
-class OpenSpaceEngine {
+class RenderableVolumeExpert: public RenderableVolume {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
-    static void destroy();
-    static OpenSpaceEngine& ref();
 
-    static bool isInitialized();
+	// constructors & destructor
+	RenderableVolumeExpert(const ghoul::Dictionary& dictionary);
+	~RenderableVolumeExpert();
+    
     bool initialize();
-    
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
-    
-    ghoul::ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
+    bool deinitialize();
 
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
-
-    void encode();
-    void decode();
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
 
 private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
 
-    static OpenSpaceEngine* _engine;
+    // private methods
+    void safeKernelCompilation();
+    void safeUpdateTexture(const ghoul::filesystem::File& file);
 
-    //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
-};
+    // Volumes
+    std::vector<std::string> _volumePaths;
+    std::vector<ghoul::RawVolumeReader::ReadHints> _volumeHints;
     
-#define OsEng (openspace::OpenSpaceEngine::ref())
+    // Textures
+	ghoul::opengl::Texture* _output;
+	std::vector<ghoul::opengl::Texture*> _volumes;
+	std::vector<ghoul::opengl::Texture*> _transferFunctions;
+	std::vector<ghoul::filesystem::File*> _transferFunctionsFiles;
+    
+    // opencl texture memory pointers
+    cl_mem _clBackTexture;
+    cl_mem _clFrontTexture;
+    cl_mem _clOutput;
+    std::vector<cl_mem> _clVolumes;
+    std::vector<cl_mem> _clTransferFunctions;
+    
+    // opencl program
+    ghoul::opencl::CLContext _context;
+    ghoul::opencl::CLCommandQueue _commands;
+    ghoul::opencl::CLProgram _program;
+    ghoul::opencl::CLKernel _kernel;
+    ghoul::opencl::CLWorkSize* _ws;
+    ghoul::filesystem::File* _kernelSourceFile;
+    std::vector<std::pair<ghoul::opencl::CLProgram::Option, bool> > _kernelOptions;
+    bool _programUpdateOnSave;
+    
+    // mutexes to prevent inconsistencies
+    std::mutex* _kernelLock;
+    std::mutex* _textureLock;
+    
+	ghoul::opengl::ProgramObject *_quadProgram;
+    sgct_utils::SGCTBox* _boundingBox;
+	GLuint _screenQuad;
+    
+    VolumeRaycasterBox* _colorBoxRenderer;
+    
+};
 
 } // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__
+#endif

@@ -3,3 +3,19 @@ build/
 ext/SGCT
 .DS_Store
 *.swp
+
+# CMake stuff
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Eclipse stuff
+.cproject
+.project
+
+# Doxygen stuff
+html/
+latex/
+Doxyfile

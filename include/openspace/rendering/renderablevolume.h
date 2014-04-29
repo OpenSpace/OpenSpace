@@ -22,73 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef RENDERABLEVOLUME_H
+#define RENDERABLEVOLUME_H
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
-#include <ghoul/misc/dictionary.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
 
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-
-#include <openspace/flare/flare.h>
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/io/rawvolumereader.h>
 
 namespace openspace {
 
-class ScriptEngine;
-
-class OpenSpaceEngine {
+class RenderableVolume: public Renderable {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
-    static void destroy();
-    static OpenSpaceEngine& ref();
 
-    static bool isInitialized();
-    bool initialize();
+	// constructors & destructor
+	RenderableVolume(const ghoul::Dictionary& dictionary);
+	~RenderableVolume();
     
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
-    
-    ghoul::ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
-
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
-
-    void encode();
-    void decode();
+protected:
+    std::string findPath(const std::string& path);
+    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
+    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
 
 private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
 
-    static OpenSpaceEngine* _engine;
-
-    //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
+    // relative path
+    std::string _relativePath;
 };
-    
-#define OsEng (openspace::OpenSpaceEngine::ref())
 
 } // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__
+#endif

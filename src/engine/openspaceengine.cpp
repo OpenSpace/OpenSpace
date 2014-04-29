@@ -34,26 +34,23 @@
 #include <openspace/util//spice.h>
 #include <openspace/util/factorymanager.h>
 
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
+
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/misc/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/commandlinecommand.h>
 
-#ifdef __WIN32__
-    // Windows: Binary two folders down
-    #define FIXED_BASE_PATH "../.."
-#elif __APPLE__
-    // OS X : Binary three folders down
-    #define FIXED_BASE_PATH "../../.."
-#else
-    // Linux : Binary three folders down
-    #define FIXED_BASE_PATH ".."
-#endif
-
-// Check if CMake have provided a base path.
-#ifndef BASE_PATH
-#define BASE_PATH FIXED_BASE_PATH
-#endif
+#include <ghoul/opencl/clcontext.h>
+#include <ghoul/opencl/clprogram.h>
+#include <ghoul/opencl/clkernel.h>
+#include <ghoul/opencl/clworksize.h>
+#include <ghoul/opencl/clcommandqueue.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -70,7 +67,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _configurationManager(nullptr)
     , _interactionHandler(nullptr)
     , _renderEngine(nullptr)
-    , _scriptEngine(nullptr)
+    //, _scriptEngine(nullptr)
 {}
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -92,17 +89,107 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-void OpenSpaceEngine::create(int argc, char** argv, int& newArgc, char**& newArgv) {
+bool OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary) {
+    auto path_keys = dictionary.keys();
+    for(auto key: path_keys) {
+        std::string p;
+        if(dictionary.getValue(key, p)) {
+            std::stringstream ss;
+            ss << "${" << key << "}";
+            LDEBUG(ss.str() << ": " << p);
+            FileSys.registerPathToken(ss.str(), p);
+        }
+    }
+
+    return true;
+}
+bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& filename) {
+    if( ! FileSys.fileExists(filename))
+        return false;
+    
+    const std::string absolutePath = FileSys.absolutePath(filename);
+    
+    auto last = absolutePath.find_last_of("/");
+    if(last == absolutePath.npos)
+        return false;
+    
+    std::string basePath = absolutePath.substr(0, last);
+    
+    FileSys.registerPathToken("${BASE_PATH}", basePath);
+    
+    return true;
+}
+
+bool OpenSpaceEngine::findConfiguration(std::string& filename) {
+    if (filename != "") {
+        return FileSys.fileExists(filename);
+    }
+    std::string currentDirectory = FileSys.currentDirectory();
+    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '/');
+    
+    std::string cfgname = "openspace.cfg";
+    
+    for (int i = 0; i < occurrences; ++i) {
+        if(i > 0) {
+            cfgname = "../" + cfgname;
+        }
+        
+        if(FileSys.fileExists(cfgname))
+            break;
+    }
+    if ( ! FileSys.fileExists(cfgname)) {
+        return false;
+    }
+    
+    filename = cfgname;
+    
+    return true;
+}
+
+void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sgctArguments) {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
     
-    // set the arguments for SGCT
-    newArgc = 3;
-    newArgv = new char*[3];
-    newArgv[0] = "prog";
-    newArgv[1] = "-config";
-    newArgv[2] = FIXED_BASE_PATH"/config/single.xml";
+    // initialize ghoul logging
+    LogManager::initialize(LogManager::LogLevel::Debug, true);
+    LogMgr.addLog(new ConsoleLog);
     
+    // TODO change so initialize is not called in the create function
+    ghoul::filesystem::FileSystem::initialize();
+    
+    // TODO parse arguments if filename is specified, if not use default
+    std::string configurationFilePath = "";
+    
+    LDEBUG("Finding configuration");
+    if( ! OpenSpaceEngine::findConfiguration(configurationFilePath)) {
+        LFATAL("Could not find OpenSpace configuration file!");
+        assert(false);
+    }
+    
+    LDEBUG("registering base path");
+    if( ! OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
+        LFATAL("Could not register base path");
+        assert(false);
+    }
+    
+    ghoul::Dictionary configuration;
+    ghoul::lua::loadDictionary(configurationFilePath, configuration);
+    if(configuration.hasKey("paths")) {
+        ghoul::Dictionary pathsDictionary;
+        if(configuration.getValue("paths", pathsDictionary)) {
+            OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
+        }
+    }
+    
+    std::string sgctConfigurationPath = "${SGCT}/single.xml";
+    if(configuration.hasKey("sgctConfig")) {
+        configuration.getValue("sgctConfig", sgctConfigurationPath);
+    }
+    
+    sgctArguments.push_back("OpenSpace");
+    sgctArguments.push_back("-config");
+    sgctArguments.push_back(absPath(sgctConfigurationPath));
+
     // create objects
     _engine = new OpenSpaceEngine;
     _engine->_renderEngine = new RenderEngine;
@@ -120,19 +207,14 @@ bool OpenSpaceEngine::isInitialized() {
 
 bool OpenSpaceEngine::initialize() {
 
-    // initialize ghou logging
-    LogManager::initialize(LogManager::LogLevel::Debug, true);
-    LogMgr.addLog(new ConsoleLog);
-
     // Register the filepaths from static function enables easy testing
-    ghoul::filesystem::FileSystem::initialize();
-    registerFilePaths();
-    
+    //registerFilePaths();
+    _context.createContextFromGLContext();
+
     // initialize the configurationmanager with the default configuration
-    _configurationManager->initialize();
-    _configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
+    //_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
     
-    // Detect and logOpenCL and OpenGL versions and available devices
+    // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
     SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
@@ -154,18 +236,9 @@ bool OpenSpaceEngine::initialize() {
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
+
+     //_flare = new Flare();
     
-    return true;
-}
-
-bool OpenSpaceEngine::registerFilePaths() {
-
-    FileSys.registerPathToken("${BASE_PATH}", FileSys.relativePath(BASE_PATH));
-	FileSys.registerPathToken("${SCRIPTS}", "${BASE_PATH}/scripts");
-	FileSys.registerPathToken("${OPENSPACE-DATA}", "${BASE_PATH}/openspace-data");
-	FileSys.registerPathToken("${SCENEPATH}", "${OPENSPACE-DATA}/scene");
-	FileSys.registerPathToken("${SHADERS}", "${BASE_PATH}/shaders");
-
     return true;
 }
 
@@ -173,6 +246,10 @@ ghoul::ConfigurationManager& OpenSpaceEngine::configurationManager() {
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_configurationManager;
+}
+    
+ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
+    return _context;
 }
 
 InteractionHandler& OpenSpaceEngine::interactionHandler() {
@@ -197,6 +274,8 @@ void OpenSpaceEngine::preSynchronization() {
         
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
+
+        //_flare->preSync();
     }
 }
 
@@ -205,20 +284,29 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
+    //_flare->render();
     _renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
-    if (sgct::Engine::instance()->isMaster())
+    if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
+        //_flare->postDraw();
+    }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
-    _interactionHandler->keyboardCallback(key, action);
+	if (sgct::Engine::instance()->isMaster()) {
+		_interactionHandler->keyboardCallback(key, action);
+		//_flare->keyboard(key, action);
+	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
-    _interactionHandler->mouseButtonCallback(key, action);
+	if (sgct::Engine::instance()->isMaster()) {
+		_interactionHandler->mouseButtonCallback(key, action);
+		//_flare->mouse(key, action);
+	}
 }
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y) {
@@ -229,73 +317,12 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler->mouseScrollWheelCallback(pos);
 }
 
+void OpenSpaceEngine::encode() {
+	//_flare->encode();
+}
+
+void OpenSpaceEngine::decode() {
+	//_flare->decode();
+}
 
 } // namespace openspace
-
-/*
-void RenderEngine::encode() {
-	
-	// allocate a sgct shared double for syncing
-	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
-
-	// sync the time
-	shDouble->setVal(masterTime_);
-	sharedDataInstance_->writeDouble(shDouble);
-	
-	// check that the camera has been allocated
-	if(mainCamera_ != nullptr) {
-
-		// sync position
-		psc campos = mainCamera_->getPosition();
-		for(int i = 0; i < 4; i++) {
-			shDouble->setVal(campos[i]);
-			sharedDataInstance_->writeDouble(shDouble);
-		}
-
-		// sync view direction
-		glm::quat camrot = mainCamera_->getRotation();
-		for(int i = 0; i < 4; i++) {
-			shDouble->setVal(camrot[i]);
-			sharedDataInstance_->writeDouble(shDouble);
-		}
-	}
-	
-	// deallocate
-	delete shDouble;
-	
-}
-
-void RenderEngine::decode() {
-	
-	// allocate a sgct shared double for syncing
-	sgct::SharedDouble *shDouble = new sgct::SharedDouble();
-	
-	// sync the time
-	sharedDataInstance_->Double(shDouble);
-	masterTime_ = shDouble->getVal();
-	
-	// check that the camera has been allocated
-	if(mainCamera_ != nullptr) {
-
-		// sync position
-		psc campos;
-		for(int i = 0; i < 4; i++) {
-			sharedDataInstance_->readDouble(shDouble);
-			campos[i] = shDouble->getVal();
-		}
-		mainCamera_->setPosition(campos);
-
-		// sync view direction
-		glm::quat camrot;
-		for(int i = 0; i < 4; i++) {
-			sharedDataInstance_->readDouble(shDouble);
-			camrot[i] = static_cast<float>(shDouble->getVal());
-		}
-		mainCamera_->setRotation(camrot);
-	}
-	
-	// deallocate
-	delete shDouble;
-	
-}
-*/

@@ -22,73 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#include <openspace/interface/interface.h>
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <sgct.h>
 
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
-#include <openspace/flare/flare.h>
+#include <algorithm>
 
 namespace openspace {
 
-class ScriptEngine;
+Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
+Interface::~Interface() {}
 
-class OpenSpaceEngine {
-public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
-    static void destroy();
-    static OpenSpaceEngine& ref();
+void Interface::callback(const char* receivedChars) {
+	std::cout << receivedChars;
 
-    static bool isInitialized();
-    bool initialize();
-    
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
-    
-    ghoul::ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
+	boost::property_tree::ptree pt;
+	std::stringstream input(receivedChars);
+	boost::property_tree::json_parser::read_json(input, pt);
+	_nodes = std::vector<Node>();
 
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
+	loadIntoNodes(pt);
+	handleNodes(); // Issue commands
+	_nodes.clear(); // Clean up after commands are issued
+}
 
-    void encode();
-    void decode();
+void Interface::handleNodes() {
+	for (int i = 0; i < _nodes.size(); ++i) {
+		Node node = _nodes.at(i);
+		if (node == "stats") {
+			sgct::Engine::instance()->setDisplayInfoVisibility(atoi(node._value.c_str()));
+		} else if (node == "graph") {
+			sgct::Engine::instance()->setStatsGraphVisibility(atoi(node._value.c_str()));
+		} /*else if (node == "renderer") {
+			if (strcmp(node._value.c_str(), "volumeraycaster") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::VolumeRaycaster);
+			else if (strcmp(node._value.c_str(), "flare") == 0)
+				_engine->setRenderer(OpenSpaceEngine::Renderers::Flare);
+		}*/
+	}
+}
 
-private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
+// http://duck-wrath.blogspot.com/2012/02/how-to-recursive-parse.html
+void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent, const int depth) {
+	BOOST_FOREACH( boost::property_tree::ptree::value_type const&v, tree.get_child("") ) {
+		boost::property_tree::ptree subtree = v.second;
+		std::string value = v.second.data();
+		std::string key = v.first;
 
-    static OpenSpaceEngine* _engine;
+		// classify and store nodes
+		if ( key.length() > 0 ) { // value
+			_nodes.push_back(Node(key, value));
+		} else { // array
+			// Find parent and add to its children vector
+			std::vector<Node>::iterator it = std::find(_nodes.begin(), _nodes.end(), Node(parent));
+			if (it != _nodes.end()) {
+				(*it)._children.push_back(Node(parent, value));
+			} else {
+				std::cout << "Parent not found" << std::endl;
+			}
+		}
 
-    //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
-};
-    
-#define OsEng (openspace::OpenSpaceEngine::ref())
+		// recursive go down the hierarchy
+		loadIntoNodes(subtree,key,depth+1);
+	}
+}
 
 } // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__

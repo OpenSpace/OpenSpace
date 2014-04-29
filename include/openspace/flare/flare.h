@@ -22,73 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef __FLARE_H__
+#define __FLARE_H__
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-
-#include <openspace/flare/flare.h>
+#include <GL/glew.h>
+#include <ghoul/logging/logmanager.h>
+#include <sgct.h>
+#include <openspace/flare/Animator.h>
+#include <openspace/flare/Raycaster.h>
+#include <openspace/flare/Config.h>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
 
-class ScriptEngine;
-
-class OpenSpaceEngine {
+class Flare: public Renderable {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
-    static void destroy();
-    static OpenSpaceEngine& ref();
-
-    static bool isInitialized();
+	Flare();
+	~Flare();
+    
     bool initialize();
+    bool deinitialize();
     
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
     
-    ghoul::ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
+	void render();
+	void initNavigation();
 
-    // SGCT callbacks
-    bool initializeGL();
-    void preSynchronization();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
-
-    void encode();
-    void decode();
+	void keyboard(int key, int action);
+	void mouse(int button, int action);
+	void preSync();
+	void postDraw();
+	void encode();
+	void decode();
 
 private:
-    OpenSpaceEngine();
-    ~OpenSpaceEngine();
+	void init();
 
-    static OpenSpaceEngine* _engine;
+	osp::Config* _config;
+	osp::Raycaster* _raycaster;
+	osp::Animator* _animator;
 
-    //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
+	sgct::SharedInt _timeStep;
+	sgct::SharedBool _animationPaused;
+	sgct::SharedBool _fpsMode;
+	sgct::SharedFloat _elapsedTime;
+	sgct::SharedInt _manualTimestep;
+	sgct::SharedFloat _pitch;
+	sgct::SharedFloat _yaw;
+	sgct::SharedFloat _roll;
+	sgct::SharedFloat _translateX;
+	sgct::SharedFloat _translateY;
+	sgct::SharedFloat _translateZ;
+	sgct::SharedBool _reloadFlag;
+
+	float _oldTime;
+	float _currentTime;
+	bool _leftMouseButton;
+	double _currentMouseX;
+	double _currentMouseY;
+	double _lastMouseX;
+	double _lastMouseY;
 };
-    
-#define OsEng (openspace::OpenSpaceEngine::ref())
 
 } // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__
+#endif // __FLARE_H__

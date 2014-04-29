@@ -25,11 +25,13 @@
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interface/interface.h>
 
 // sgct includes
-#include "sgct.h"
+#include <sgct.h>
 
 sgct::Engine* _sgctEngine;
+openspace::Interface* _interface;
 
 // function pointer declarations
 void mainInitFunc(void);
@@ -43,15 +45,29 @@ void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
 void mainEncodeFun();
 void mainDecodeFun();
+void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
 
 int main(int argc, char **argv) {
-    int newArgc;
-    char** newArgv;
-    openspace::OpenSpaceEngine::create(argc, argv, newArgc, newArgv);
 
+    // create the OpenSpace engine and get arguments for the sgct engine
+    std::vector<std::string> sgctArguments;
+    openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+
+    // create sgct engine c arguments
+    int newArgc = sgctArguments.size();
+    char** newArgv = new char*[newArgc];
+    for (int i = 0; i < newArgc; ++i) {
+        //newArgv[i] = new char[sgctArguments.at(i).length()];
+        //std::strcpy(newArgv[i], sgctArguments.at(i).c_str());
+        newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
+    }
     
 	_sgctEngine = new sgct::Engine(newArgc, newArgv);
 	
+    // deallocate sgct c arguments
+    for (int i = 0; i < newArgc; ++i) {
+        //delete newArgv[i];
+    }
     delete[] newArgv;
  	
     // Bind functions
@@ -64,11 +80,15 @@ int main(int argc, char **argv) {
 	_sgctEngine->setMouseButtonCallbackFunction( mainMouseButtonCallback );
 	_sgctEngine->setMousePosCallbackFunction( mainMousePosCallback );
 	_sgctEngine->setMouseScrollCallbackFunction( mainMouseScrollCallback );
+	_sgctEngine->setExternalControlCallback( mainExternalControlCallback );
 
 	// set encode and decode functions
 	// NOTE: starts synchronizing before init functions
 	sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
 	sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
+
+	// init the interface which will handle callbacks from an external gui
+	_interface = new openspace::Interface(&OsEng);
 
 	// try to open a window
 	if( ! _sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile)) {
@@ -88,6 +108,10 @@ int main(int argc, char **argv) {
 	exit( EXIT_SUCCESS );
 }
 
+void mainExternalControlCallback(const char * receivedChars, int size, int clientId) {
+	if (_sgctEngine->isMaster())
+		_interface->callback(receivedChars);
+}
 
 void mainInitFunc(void) {
     OsEng.initialize();
@@ -133,11 +157,11 @@ void mainMouseScrollCallback(double pos, double /*pos2*/) {
 }
 
 void mainEncodeFun() {
-    // TODO use encoding
+	OsEng.encode();
 }
 
 void mainDecodeFun() {
-    // TODO use decoding
+	OsEng.decode();
 }
 
 
