@@ -1,6 +1,5 @@
 
 float3 CartesianToSpherical(float3 _cartesian);
-
 float intensityNormalizer(float intensity, float iMin, float iMax);
 
 float3 CartesianToSpherical(float3 _cartesian) {
@@ -24,3 +23,6 @@ float intensityNormalizer(float intensity, float iMin, float iMax) {
   i = (i - iMin) / (iMax - iMin);
   return clamp(i, 0.0f, 1.0f);
 }
+
+
+

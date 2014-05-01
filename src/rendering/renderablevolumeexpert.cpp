@@ -298,6 +298,7 @@ bool RenderableVolumeExpert::initialize() {
     
     _colorBoxRenderer->initialize();
     glm::size2_t dimensions = _colorBoxRenderer->dimensions();
+    
 	ghoul::opengl::Texture* backTexture = _colorBoxRenderer->backFace();
 	ghoul::opengl::Texture* frontTexture = _colorBoxRenderer->frontFace();
 	_output = new ghoul::opengl::Texture(glm::size3_t(dimensions[0],dimensions[1],1));
@@ -313,7 +314,7 @@ bool RenderableVolumeExpert::initialize() {
     // Compile kernels
     safeKernelCompilation();
     
-    
+    // create work group
     size_t local_x = 32;
     size_t local_y = 32;
     while (local_x > 1) {
@@ -341,32 +342,21 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     if( ! _kernel.isValidKernel())
         return;
     
-    glm::mat4 transform = camera->getViewProjectionMatrix();
-    glm::mat4 camTransform = camera->getViewRotationMatrix();
     psc camPos = camera->getPosition();
-    
-//    psc relative = camPos - thisPosition;
     psc relative = thisPosition-camPos;
     double factor = pow(10.0,relative[3]);
+    glm::mat4 camTransform = camera->getViewRotationMatrix();
     
+    glm::mat4 transform = camera->getViewProjectionMatrix();
     transform = transform*camTransform;
     transform = glm::translate(transform, glm::vec3(relative[0]*factor, relative[1]*factor, relative[2]*factor));
     transform = glm::scale(transform, _boxScaling);
-    /*
-<<<<<<< HEAD
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-    transform = glm::scale(transform, _boxScaling);
-=======
-    transform = transform*camTransform;
-//    transform = glm::rotate(transform, speed*camera->getRotationAngle(), camera->getRotationAxis());
-//	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-
->>>>>>> trackball
-*/
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
     _kernelLock->lock();
+    
+    // tell opengl to finish everything before opencl takes ownerhip (uses) the textures
     glFinish();
     
     // Aquire GL objects
@@ -389,14 +379,23 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     _quadProgram->activate();
     glActiveTexture(GL_TEXTURE0);
     _output->bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // enable blending
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     _kernelLock->unlock();
     _textureLock->unlock();
+    
+    // disable blending
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_ONE, GL_ZERO);
     
     _quadProgram->deactivate();
 }
@@ -451,7 +450,6 @@ void RenderableVolumeExpert::safeKernelCompilation() {
                 if(argumentError)
                     return;
                 
-            
                 tmpKernel.setArgument(0, &_clFrontTexture);
                 tmpKernel.setArgument(1, &_clBackTexture);
                 tmpKernel.setArgument(2, &_clOutput);
@@ -496,24 +494,24 @@ void RenderableVolumeExpert::safeUpdateTexture(const ghoul::filesystem::File& fi
     
     // create the new texture
     ghoul::opengl::Texture* newTexture = loadTransferFunction(file.path());
-    
     if(newTexture) {
         
         // upload the new texture and create a cl memory
         newTexture->uploadTexture();
         cl_mem clNewTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *newTexture);
         
+        // check if opencl memory is unsuccessfull
         if(clNewTexture == 0) {
             delete newTexture;
             return;
         }
         
-        // everything is ok, critical point to replace current texture pointers
+        // everything seems ok, critical point to replace current texture pointers
         _textureLock->lock();
         
         // deallocate current texture
-        delete _transferFunctions.at(fileID);
         clReleaseMemObject(_clTransferFunctions.at(fileID));
+        delete _transferFunctions.at(fileID);
         
         // set the new texture
         _transferFunctions.at(fileID) = newTexture;
