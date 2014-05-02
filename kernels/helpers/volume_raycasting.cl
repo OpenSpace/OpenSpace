@@ -37,8 +37,8 @@ void raySetup(float3 first, float3 last, float3 dimension, float3* rayDirection,
  * 1.0 and true is returned, otherwise false is returned.
  ***/
 bool earlyRayTermination(float4* color, float maxOpacity) {
-    if ((*color).a >= maxOpacity) {
-        (*color).a = 1.0f;
+    if ((*color).w >= maxOpacity) {
+        (*color).w = 1.0f;
         return true;
     } else {
         return false;
