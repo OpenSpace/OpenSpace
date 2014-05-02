@@ -236,7 +236,7 @@ bool SceneGraph::loadFromModulePath(const std::string& path) {
     _nodes.push_back(_root);
     _allNodes.insert ( std::make_pair("Root", _root));
 
-    ghoul::lua::loadDictionary(defaultScene, dictionary);
+    ghoul::lua::loadDictionaryFromFile(defaultScene, dictionary);
     ghoul::Dictionary moduleDictionary;
     if(dictionary.getValue("Modules", moduleDictionary)) {
         auto keys = moduleDictionary.keys();
@@ -286,7 +286,7 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
     LDEBUG("Loading modules from: " << fullModule);
     
     ghoul::Dictionary moduleDictionary;
-    ghoul::lua::loadDictionary(fullModule, moduleDictionary);
+    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
     auto keys = moduleDictionary.keys();
     for (auto key: keys) {
         ghoul::Dictionary singleModuleDictionary;

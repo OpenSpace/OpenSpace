@@ -54,7 +54,7 @@ public:
     static bool registerBasePathFromConfigurationFile(const std::string& filename);
     static bool findConfiguration(std::string& filename) ;
     
-    ghoul::ConfigurationManager& configurationManager();
+    ghoul::Dictionary& configurationManager();
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
@@ -80,7 +80,7 @@ private:
     static OpenSpaceEngine* _engine;
 
     //Flare* _flare;
-    ghoul::ConfigurationManager* _configurationManager;
+    ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
     //ScriptEngine* _scriptEngine;

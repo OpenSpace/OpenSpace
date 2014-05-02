@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     }
     
     ghoul::Dictionary configuration;
-    ghoul::lua::loadDictionary(configurationFilePath, configuration);
+    ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
     if(configuration.hasKey("paths")) {
         ghoul::Dictionary pathsDictionary;
         if(configuration.getValue("paths", pathsDictionary)) {

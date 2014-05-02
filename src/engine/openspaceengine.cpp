@@ -182,7 +182,7 @@ void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sg
     }
     
     ghoul::Dictionary configuration;
-    ghoul::lua::loadDictionary(configurationFilePath, configuration);
+    ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
     if(configuration.hasKey("paths")) {
         ghoul::Dictionary pathsDictionary;
         if(configuration.getValue("paths", pathsDictionary)) {
@@ -203,7 +203,7 @@ void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sg
     _engine = new OpenSpaceEngine;
     _engine->_renderEngine = new RenderEngine;
     _engine->_interactionHandler = new InteractionHandler;
-    _engine->_configurationManager = new ghoul::ConfigurationManager;
+    _engine->_configurationManager = new ghoul::Dictionary;
 }
 
 void OpenSpaceEngine::destroy() {
@@ -251,7 +251,7 @@ bool OpenSpaceEngine::initialize() {
     return true;
 }
 
-ghoul::ConfigurationManager& OpenSpaceEngine::configurationManager() {
+ghoul::Dictionary& OpenSpaceEngine::configurationManager() {
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_configurationManager;
