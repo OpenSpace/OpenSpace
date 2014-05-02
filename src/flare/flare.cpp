@@ -11,6 +11,8 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
+#include <sgct.h>
+
 #include <string>
 #include <cstdlib>
 #include <vector>

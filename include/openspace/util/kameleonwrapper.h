@@ -22,38 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEVOLUME_H
-#define RENDERABLEVOLUME_H
+#ifndef KAMELEONWRAPPER_H_
+#define KAMELEONWRAPPER_H_
 
-// open space includes
-#include <openspace/rendering/renderable.h>
+#include <glm/glm.hpp>
+#include <glm/gtx/std_based_type.hpp>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/io/rawvolumereader.h>
+namespace ccmc {
+    class Model;
+    class Interpolator;
+}
 
 namespace openspace {
 
-class RenderableVolume: public Renderable {
+class KameleonWrapper {
 public:
 
-	// constructors & destructor
-	RenderableVolume(const ghoul::Dictionary& dictionary);
-	~RenderableVolume();
-    
-protected:
-    std::string findPath(const std::string& path);
-    ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
-    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
+	enum class Model {
+		ENLIL,		// Heliosphere
+		BATSRUS		// Magnetosphere
+	};
+
+	KameleonWrapper(const std::string& filename, Model model);
+	~KameleonWrapper();
+	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
 
 private:
-
-    // relative path
-    std::string _relativePath;
+	ccmc::Model* _model;
+    Model _type;
+	ccmc::Interpolator* _interpolator;
 };
 
 } // namespace openspace
 
-#endif
+#endif // KAMELEONWRAPPER_H_

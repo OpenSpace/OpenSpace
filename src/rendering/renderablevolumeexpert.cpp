@@ -30,6 +30,7 @@
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opencl/clworksize.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/rawvolumereader.h>
 
 #include <algorithm>
 
@@ -63,7 +64,8 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
     RenderableVolume(dictionary),
     _output(nullptr),
     _clBackTexture(0), _clFrontTexture(0), _clOutput(0),
-    _kernelSourceFile(nullptr), _programUpdateOnSave(false), _colorBoxRenderer(nullptr) {
+    _kernelSourceFile(nullptr), _programUpdateOnSave(false), _colorBoxRenderer(nullptr),
+    _boxScaling(1.0,1.0,1.0) {
         
     _kernelLock = new std::mutex;
     _textureLock = new std::mutex;
@@ -85,10 +87,9 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
                                 ghoul::Dictionary hintsDictionary;
                                 if(volume.hasKey("Hints"))
                                     volume.getValue("Hints", hintsDictionary);
-                                ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
                                 
                                 _volumePaths.push_back(file);
-                                _volumeHints.push_back(hints);
+                                _volumeHints.push_back(hintsDictionary);
                             }
                         }
                     }
@@ -161,6 +162,30 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
                     }
                 }
             }
+            
+            ghoul::Dictionary includeDictionary;
+            if (kernelDictionary.hasKey("Includes") && kernelDictionary.getValue("Includes", includeDictionary)) {
+                auto keys = includeDictionary.keys();
+                for(auto key: keys) {
+                    std::string includePath;
+                    if(includeDictionary.getValue(key, includePath)) {
+                        if(FileSys.directoryExists(includePath)) {
+                            _kernelIncludes.push_back(absPath(includePath));
+                        }
+                    }
+                }
+            }
+            
+            ghoul::Dictionary defineDictionary;
+            if (kernelDictionary.hasKey("Definitions") && kernelDictionary.getValue("Definitions", defineDictionary)) {
+                auto keys = defineDictionary.keys();
+                for(auto key: keys) {
+                    std::string defintion;
+                    if(defineDictionary.getValue(key, defintion)) {
+                        _kernelDefinitions.push_back(std::make_pair(key, defintion));
+                    }
+                }
+            }
         }
     }
     if (kernelPath != "") {
@@ -168,6 +193,24 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
     }
         
     _colorBoxRenderer = new VolumeRaycasterBox();
+    double tempValue;
+    if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[0] = tempValue;
+        }
+    }
+    if(dictionary.hasKey("BoxScaling.2") && dictionary.getValue("BoxScaling.2", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[1] = tempValue;
+        }
+    }
+    if(dictionary.hasKey("BoxScaling.3") && dictionary.getValue("BoxScaling.3", tempValue)) {
+        if(tempValue > 0.0) {
+            _boxScaling[2] = tempValue;
+        }
+    }
+    
+    setBoundingSphere(pss::CreatePSS(_boxScaling.length()));
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
@@ -204,13 +247,16 @@ bool RenderableVolumeExpert::initialize() {
     }
     
     for (int i = 0; i < _volumePaths.size(); ++i) {
-        ghoul::RawVolumeReader rawReader(_volumeHints.at(i));
-        ghoul::opengl::Texture* volume = rawReader.read(_volumePaths.at(i));
-//        volume->uploadTexture();
-        cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
-
-        _volumes.push_back(volume);
-        _clVolumes.push_back(volumeTexture);
+        ghoul::opengl::Texture* volume = loadVolume(_volumePaths.at(i), _volumeHints.at(i));
+        if(volume) {
+            volume->uploadTexture();
+            
+            LDEBUG("Creating CL texture from GL texture with path '" << _volumePaths.at(i) << "'");
+            cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
+            
+            _volumes.push_back(volume);
+            _clVolumes.push_back(volumeTexture);
+        }
     }
     
     //	------ SETUP GEOMETRY ----------------
@@ -252,6 +298,7 @@ bool RenderableVolumeExpert::initialize() {
     
     _colorBoxRenderer->initialize();
     glm::size2_t dimensions = _colorBoxRenderer->dimensions();
+    
 	ghoul::opengl::Texture* backTexture = _colorBoxRenderer->backFace();
 	ghoul::opengl::Texture* frontTexture = _colorBoxRenderer->frontFace();
 	_output = new ghoul::opengl::Texture(glm::size3_t(dimensions[0],dimensions[1],1));
@@ -267,7 +314,7 @@ bool RenderableVolumeExpert::initialize() {
     // Compile kernels
     safeKernelCompilation();
     
-    
+    // create work group
     size_t local_x = 32;
     size_t local_y = 32;
     while (local_x > 1) {
@@ -281,7 +328,6 @@ bool RenderableVolumeExpert::initialize() {
         local_y /= 2;
     }
     _ws = new ghoul::opencl::CLWorkSize({dimensions[0],dimensions[1]}, {local_x,local_y});
-
     
     return true;
 }
@@ -296,18 +342,21 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     if( ! _kernel.isValidKernel())
         return;
     
-	float speed = 50.0f;
-	float time = sgct::Engine::getTime();
-    glm::mat4 transform = camera->getViewProjectionMatrix();
+    psc camPos = camera->getPosition();
+    psc relative = thisPosition-camPos;
+    double factor = pow(10.0,relative[3]);
+    glm::mat4 camTransform = camera->getViewRotationMatrix();
     
-    double factor = pow(10.0,thisPosition[3]);
-    transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-
+    glm::mat4 transform = camera->getViewProjectionMatrix();
+    transform = transform*camTransform;
+    transform = glm::translate(transform, glm::vec3(relative[0]*factor, relative[1]*factor, relative[2]*factor));
+    transform = glm::scale(transform, _boxScaling);
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
     _kernelLock->lock();
+    
+    // tell opengl to finish everything before opencl takes ownerhip (uses) the textures
     glFinish();
     
     // Aquire GL objects
@@ -330,14 +379,23 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     _quadProgram->activate();
     glActiveTexture(GL_TEXTURE0);
     _output->bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // enable blending
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     _kernelLock->unlock();
     _textureLock->unlock();
+    
+    // disable blending
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_ONE, GL_ZERO);
     
     _quadProgram->deactivate();
 }
@@ -353,6 +411,14 @@ void RenderableVolumeExpert::safeKernelCompilation() {
         for(auto option: _kernelOptions) {
             tmpProgram.setOption(option.first, option.second);
         }
+        
+        for(auto defintion: _kernelDefinitions) {
+            tmpProgram.addDefinition(defintion.first, defintion.second);
+        }
+        
+        // add the include directories
+        tmpProgram.addIncludeDirectory(_kernelIncludes);
+        
         if(tmpProgram.build()) {
             ghoul::opencl::CLKernel tmpKernel = tmpProgram.createKernel("volumeraycaster");
             if(tmpKernel.isValidKernel()) {
@@ -384,7 +450,6 @@ void RenderableVolumeExpert::safeKernelCompilation() {
                 if(argumentError)
                     return;
                 
-            
                 tmpKernel.setArgument(0, &_clFrontTexture);
                 tmpKernel.setArgument(1, &_clBackTexture);
                 tmpKernel.setArgument(2, &_clOutput);
@@ -429,24 +494,24 @@ void RenderableVolumeExpert::safeUpdateTexture(const ghoul::filesystem::File& fi
     
     // create the new texture
     ghoul::opengl::Texture* newTexture = loadTransferFunction(file.path());
-    
     if(newTexture) {
         
         // upload the new texture and create a cl memory
         newTexture->uploadTexture();
         cl_mem clNewTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *newTexture);
         
+        // check if opencl memory is unsuccessfull
         if(clNewTexture == 0) {
             delete newTexture;
             return;
         }
         
-        // everything is ok, critical point to replace current texture pointers
+        // everything seems ok, critical point to replace current texture pointers
         _textureLock->lock();
         
         // deallocate current texture
-        delete _transferFunctions.at(fileID);
         clReleaseMemObject(_clTransferFunctions.at(fileID));
+        delete _transferFunctions.at(fileID);
         
         // set the new texture
         _transferFunctions.at(fileID) = newTexture;

@@ -44,6 +44,10 @@
     #include <mutex>
 #endif
 
+namespace sgct_utils {
+    class SGCTBox;
+}
+
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {

@@ -23,20 +23,21 @@
  ****************************************************************************************/
 
 #include <openspace/interface/interface.h>
-
+/*
 #include <sgct.h>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
 #include <algorithm>
-
+*/
 namespace openspace {
 
 Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
 Interface::~Interface() {}
 
 void Interface::callback(const char* receivedChars) {
+/*
 	std::cout << receivedChars;
 
 	boost::property_tree::ptree pt;
@@ -47,26 +48,25 @@ void Interface::callback(const char* receivedChars) {
 	loadIntoNodes(pt);
 	handleNodes(); // Issue commands
 	_nodes.clear(); // Clean up after commands are issued
+  */
 }
 
 void Interface::handleNodes() {
+/*
 	for (int i = 0; i < _nodes.size(); ++i) {
 		Node node = _nodes.at(i);
 		if (node == "stats") {
 			sgct::Engine::instance()->setDisplayInfoVisibility(atoi(node._value.c_str()));
 		} else if (node == "graph") {
 			sgct::Engine::instance()->setStatsGraphVisibility(atoi(node._value.c_str()));
-		} /*else if (node == "renderer") {
-			if (strcmp(node._value.c_str(), "volumeraycaster") == 0)
-				_engine->setRenderer(OpenSpaceEngine::Renderers::VolumeRaycaster);
-			else if (strcmp(node._value.c_str(), "flare") == 0)
-				_engine->setRenderer(OpenSpaceEngine::Renderers::Flare);
-		}*/
+		}
 	}
+    */
 }
 
 // http://duck-wrath.blogspot.com/2012/02/how-to-recursive-parse.html
 void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent, const int depth) {
+/*
 	BOOST_FOREACH( boost::property_tree::ptree::value_type const&v, tree.get_child("") ) {
 		boost::property_tree::ptree subtree = v.second;
 		std::string value = v.second.data();
@@ -88,6 +88,7 @@ void Interface::loadIntoNodes(const boost::property_tree::ptree& tree, std::stri
 		// recursive go down the hierarchy
 		loadIntoNodes(subtree,key,depth+1);
 	}
+*/
 }
 
 } // namespace openspace

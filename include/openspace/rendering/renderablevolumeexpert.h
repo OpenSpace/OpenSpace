@@ -37,7 +37,6 @@
 #include <ghoul/opencl/clcommandqueue.h>
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
-#include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
 #ifdef __APPLE__
@@ -75,7 +74,7 @@ private:
 
     // Volumes
     std::vector<std::string> _volumePaths;
-    std::vector<ghoul::RawVolumeReader::ReadHints> _volumeHints;
+    std::vector<ghoul::Dictionary> _volumeHints;
     
     // Textures
 	ghoul::opengl::Texture* _output;
@@ -98,6 +97,8 @@ private:
     ghoul::opencl::CLWorkSize* _ws;
     ghoul::filesystem::File* _kernelSourceFile;
     std::vector<std::pair<ghoul::opencl::CLProgram::Option, bool> > _kernelOptions;
+    std::vector<std::string> _kernelIncludes;
+    std::vector<std::pair<std::string,std::string> > _kernelDefinitions;
     bool _programUpdateOnSave;
     
     // mutexes to prevent inconsistencies
@@ -105,10 +106,10 @@ private:
     std::mutex* _textureLock;
     
 	ghoul::opengl::ProgramObject *_quadProgram;
-    sgct_utils::SGCTBox* _boundingBox;
 	GLuint _screenQuad;
     
     VolumeRaycasterBox* _colorBoxRenderer;
+    glm::vec3 _boxScaling;
     
 };
 

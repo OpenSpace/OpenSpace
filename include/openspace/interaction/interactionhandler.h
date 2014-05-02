@@ -58,12 +58,18 @@ public:
     void mouseScrollWheelCallback(int pos);
 	
 private:
+    glm::vec3 mapToTrackball(glm::vec2 mousePos);
+    void trackballRotate(int x, int y);
 
-	Camera *camera_;
+	Camera* camera_;
 	bool enabled_;
 	SceneGraphNode *node_;
 	
 	double dt_;
+
+
+	glm::vec3 _lastTrackballPos;
+	bool _leftMouseButtonDown, _isMouseBeingPressedAndHeld;
 
 	// used for calling when updating and deallocation
 	std::vector<ExternalControl*> controllers_;

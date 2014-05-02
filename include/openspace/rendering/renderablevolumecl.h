@@ -43,6 +43,10 @@
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 
+namespace sgct_utils {
+    class SGCTBox;
+}
+
 //#include <vector>
 //#include <string>
 #ifdef __APPLE__

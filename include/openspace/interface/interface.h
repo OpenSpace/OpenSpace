@@ -24,6 +24,7 @@
 
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
+#include <openspace/engine/openspaceengine.h>
 
 #include <boost/property_tree/ptree.hpp>
 #include <openspace/engine/openspaceengine.h>
@@ -31,7 +32,6 @@
 
 namespace openspace {
 class Interface {
-
 	struct Node {
 		std::string _key;
 		std::string _value;
@@ -62,6 +62,7 @@ public:
 	void callback(const char * receivedChars);
 
 private:
+
 	void handleNodes();
 	void loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent = "", const int depth = 0);
 

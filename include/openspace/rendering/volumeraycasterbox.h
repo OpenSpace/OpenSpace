@@ -25,12 +25,17 @@
 #ifndef VOLUMERAYCASTERBOX_H_
 #define VOLUMERAYCASTERBOX_H_
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/texture.h>
 
+// forward declare private objects
 namespace sgct_utils {
     class SGCTBox;
+}
+namespace ghoul {
+    namespace opengl {
+        class FramebufferObject;
+        class ProgramObject;
+    }
 }
 
 namespace openspace {
@@ -40,7 +45,7 @@ public:
 	VolumeRaycasterBox();
 	~VolumeRaycasterBox();
     bool initialize();
-	void render(glm::mat4 MVP);
+	void render(const glm::mat4& MVP);
     
 	ghoul::opengl::Texture* backFace();
 	ghoul::opengl::Texture* frontFace();
@@ -56,5 +61,5 @@ private:
     glm::size2_t _dimensions;
 };
 
-} /* namespace openspace */
-#endif /* VOLUMERAYCASTERBOX_H_ */
+} // namespace openspace
+#endif // VOLUMERAYCASTERBOX_H_

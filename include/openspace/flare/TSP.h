@@ -71,7 +71,7 @@ public:
   bool CalculateTemporalError();
 
   int * Data() { return &data_[0]; }
-  unsigned int Size() { return data_.size(); }
+  size_t Size() { return data_.size(); }
 
   // TODO support dimensions of differens sizes
   unsigned int BrickDim() const { return xBrickDim_; }

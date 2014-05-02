@@ -29,6 +29,8 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/kameleonwrapper.h>
+
 #include <sgct.h>
 
 #include <iostream>
@@ -41,10 +43,11 @@
 namespace {
     std::string _loggerCat = "RenderableVolume";
     
-    bool hasEnding (std::string const &fullString, std::string const &ending)
+    bool hasExtension (std::string const &filepath, std::string const &extension)
     {
-        if (fullString.length() >= ending.length()) {
-            return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+        std::string ending = "." + extension;
+        if (filepath.length() > ending.length()) {
+            return (0 == filepath.compare (filepath.length() - ending.length(), ending.length(), ending));
         } else {
             return false;
         }
@@ -94,6 +97,66 @@ std::string RenderableVolume::findPath(const std::string& path) {
     LERROR("Could not find file '" << path << "'");
     
     return "";
+}
+
+ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary) {
+    if( ! FileSys.fileExists(filepath)) {
+        LWARNING("Could not load volume, could not find '" << filepath << "'");
+        return nullptr;
+    }
+    
+    if(hasExtension(filepath, "raw")) {
+        ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
+        ghoul::RawVolumeReader rawReader(hints);
+        return rawReader.read(filepath);
+    } else if(hasExtension(filepath, "cdf")) {
+        
+        std::string modelString;
+        if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
+            KameleonWrapper::Model model;
+            if (modelString == "BATSRUS") {
+                model = KameleonWrapper::Model::BATSRUS;
+            } else if (modelString == "ENLIL") {
+                model = KameleonWrapper::Model::ENLIL;
+            } else {
+                LWARNING("Hints does not specify a valid 'Model'");
+                return nullptr;
+            }
+            
+            std::string variableString;
+            if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
+                glm::size3_t dimensions(1,1,1);
+                double tempValue;
+                if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
+                    int intVal = static_cast<int>(tempValue);
+                    if(intVal > 0)
+                        dimensions[0] = intVal;
+                }
+                if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
+                    int intVal = static_cast<int>(tempValue);
+                    if(intVal > 0)
+                        dimensions[1] = intVal;
+                }
+                if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
+                    int intVal = static_cast<int>(tempValue);
+                    if(intVal > 0)
+                        dimensions[2] = intVal;
+                }
+                
+                KameleonWrapper kw(filepath, model);
+                float* data = kw.getUniformSampledValues(variableString, dimensions);
+                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+            } else {
+                LWARNING("Hints does not specify a 'Variable'");
+            }
+            
+            
+        }
+        LWARNING("Hints does not specify a 'Model'");
+    } else {
+        LWARNING("No valid file extension.");
+    }
+    return nullptr;
 }
 
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {
@@ -165,8 +228,8 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     }
     
     // check if not a txt based texture
-    if ( ! hasEnding(filepath, ".txt")) {
-        return ghoul::opengl::loadTexture(f);;
+    if ( ! hasExtension(filepath, "txt")) {
+        return ghoul::opengl::loadTexture(f);
     }
     
     // it is a txt based texture

@@ -35,8 +35,6 @@
 #include <openspace/util//spice.h>
 #include <openspace/util/factorymanager.h>
 
-
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -45,7 +43,6 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/commandlinecommand.h>
-
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
@@ -215,6 +212,12 @@ bool OpenSpaceEngine::isInitialized() {
 
 bool OpenSpaceEngine::initialize() {
 
+    // clear the screen so the user don't have to see old buffer contents from the graphics card
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
+    glfwSwapBuffers(win);
+
     // Register the filepaths from static function enables easy testing
     //registerFilePaths();
     _context.createContextFromGLContext();
@@ -244,8 +247,6 @@ bool OpenSpaceEngine::initialize() {
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
-
-     //_flare = new Flare();
     
     return true;
 }
@@ -282,8 +283,6 @@ void OpenSpaceEngine::preSynchronization() {
         
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
-
-        //_flare->preSync();
     }
 }
 
@@ -292,28 +291,24 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render() {
-    //_flare->render();
     _renderEngine->render();
 }
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
-        //_flare->postDraw();
     }
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->keyboardCallback(key, action);
-		//_flare->keyboard(key, action);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 		_interactionHandler->mouseButtonCallback(key, action);
-		//_flare->mouse(key, action);
 	}
 }
 
@@ -326,11 +321,9 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 }
 
 void OpenSpaceEngine::encode() {
-	//_flare->encode();
 }
 
 void OpenSpaceEngine::decode() {
-	//_flare->decode();
 }
 
 } // namespace openspace
