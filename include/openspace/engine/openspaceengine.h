@@ -27,7 +27,6 @@
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/configurationmanager.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
