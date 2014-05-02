@@ -40,6 +40,9 @@ public:
 	void setScaling(const glm::vec2 &scaling);
 	const glm::vec2 & getScaling() const;
 	
+	void setLookUp(glm::vec3 lookUp);
+	const glm::vec3 getLookUp() const;
+
 private:
 	float maxFov_;
 	float sinMaxFov_;
@@ -51,6 +54,8 @@ private:
 
 	glm::quat viewRotation_;
 	glm::mat4 viewRotationMatrix_; // compiled from the quaternion
+
+	glm::vec3 lookUp_;
 };
 
 } // namespace openspace

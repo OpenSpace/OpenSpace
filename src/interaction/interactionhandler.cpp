@@ -18,13 +18,12 @@ std::string _loggerCat = "InteractionHandler";
 namespace openspace {
 
 InteractionHandler::InteractionHandler() {
-
 	// initiate pointers
 	camera_ = nullptr;
 	enabled_ = true;
 	node_ = nullptr;
 	dt_ = 0.0;
-	_lastTrackballPos = glm::vec3(0.5);
+	_lastTrackballPos = glm::vec3(0.0, 0.0, 0.5);
 	_leftMouseButtonDown = false;
 	_isMouseBeingPressedAndHeld = false;
 }
@@ -100,8 +99,7 @@ void InteractionHandler::connectDevices() {
 
 void InteractionHandler::addExternalControl(ExternalControl* controller) {
 	//assert(this_);
-	if (controller != nullptr)
-	{
+	if (controller != nullptr) {
 		controllers_.push_back(controller);
 	}
 }
@@ -113,8 +111,7 @@ void InteractionHandler::setCamera(Camera *camera) {
 
 Camera * InteractionHandler::getCamera() const {
 	//assert(this_);
-	if (enabled_)
-	{
+	if (enabled_) {
 		return camera_;
 	}
 	return nullptr;
@@ -174,7 +171,6 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 void InteractionHandler::distance(const pss &distance) {
 	//assert(this_);
 	lockControls();
-
 	
 	psc relative = camera_->getPosition();
 	psc origin;
@@ -210,12 +206,9 @@ void InteractionHandler::setRotation(const glm::quat &rotation) {
 
 void InteractionHandler::update(const double dt) {
 	//assert(this_);
-
 	// setting dt_ for use in callbacks
 	dt_ = dt;
-
 	if (enabled_ && camera_) {
-
 		// fetch data from joysticks
 		DeviceIdentifier::ref().update();
 
@@ -223,7 +216,6 @@ void InteractionHandler::update(const double dt) {
 		for (size_t i = 0; i < controllers_.size(); ++i) {
 			controllers_[i]->update();
 		}
-		
 	}
 }
 
@@ -249,12 +241,30 @@ glm::vec3 InteractionHandler::mapToTrackball(glm::vec2 mousePos) {
 	return glm::normalize(out);
 }
 
+glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
+//	return glm::vec3((sgct::Engine::instance()->getActiveViewMatrix() * glm::vec4(trackballPos,0)));
+
+    //Get x,y,z axis vectors of current camera view
+	glm::vec3 currentViewYaxis = glm::normalize(camera_->getLookUp());
+	psc viewDir = camera_->getPosition() - node_->getWorldPosition();
+	glm::vec3 currentViewZaxis = glm::normalize(viewDir.getVec3f());
+	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
+
+    //mapping to camera co-ordinate
+    currentViewXaxis*=trackballPos.x;
+    currentViewYaxis*=trackballPos.y;
+    currentViewZaxis*=trackballPos.z;
+    return (currentViewXaxis + currentViewYaxis + currentViewZaxis);
+}
+
 void InteractionHandler::trackballRotate(int x, int y) {
 	// Normalize mouse coordinates to [0,1]
 	float width = sgct::Engine::instance()->getActiveXResolution();
 	float height = sgct::Engine::instance()->getActiveYResolution();
 	glm::vec2 mousePos = glm::vec2((float)x/width, (float)y/height);
-    mousePos[1] = 0.5;
+
+	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
+    mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
 
 	glm::vec3 curTrackballPos = mapToTrackball(mousePos);
 //	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
@@ -266,36 +276,24 @@ void InteractionHandler::trackballRotate(int x, int y) {
 	}
 
 	if (curTrackballPos != _lastTrackballPos) {
-		// calculate rotation angle (in radians), rotation axis and quaternion
+		// calculate rotation angle (in radians)
 		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-        rotationAngle *= getDt()*100.0f;
+		rotationAngle *= getDt()*100.0f;
+
+        // Map trackballpos to camera
+//		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
+//		psc currentCamPos = camera_->getPosition();
+//		glm::vec3 nextCamPos = currentCamPos.getVec3f() + trackballMappedToCamera;
+//		glm::vec3 rotationAxis = glm::cross(currentCamPos.getVec3f(), nextCamPos);
+
 		glm::vec3 rotationAxis = glm::cross(_lastTrackballPos, curTrackballPos);
 		rotationAxis = glm::normalize(rotationAxis);
 		glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
 
-		// -----------------------------------------------------------------
-
+		// Apply quaternion to camera
 		orbit(glm::inverse(quaternion));
 		camera_->rotate(quaternion);
-//		camera_->compileViewRotationMatrix();
-/*
-		psc nodePos = node_->getWorldPosition();
-		psc camPos = camera_->getPosition();
-		glm::mat4 transMatrix = glm::translate(glm::mat4(1.0), nodePos.getVec3f()-camPos.getVec3f());
-		glm::mat4 transBackMatrix = glm::translate(glm::mat4(1.0), camPos.getVec3f()-nodePos.getVec3f());
-		glm::vec4 translated = transMatrix*glm::vec4(camPos.getVec3f(), 1.0);
-		glm::vec4 postRot = glm::rotate(quaternion, translated);
-		glm::vec4 newCamPos = transBackMatrix*glm::vec4(postRot.x, postRot.y, postRot.z, 1.0);
-		camera_->setPosition(psc::CreatePSC(newCamPos.x, newCamPos.y, newCamPos.z));
-		camera_->rotate(glm::inverse(quaternion));
-		camera_->compileViewRotationMatrix();
-        */
-//		node_->calculateBoundingSphere();
-
-//		glm::vec3 camPos = *sgct::Engine::instance()->getUserPtr()->getPosPtr();
-//		sgct::Engine::instance()->getUserPtr()->setOrientation(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
-//		sgct::Engine::instance()->getUserPtr()->setPos(glm::rotate(quaternion, camPos));
-
+		camera_->setLookUp(glm::rotate(quaternion, camera_->getLookUp()));
 
 		_lastTrackballPos = curTrackballPos;
 	}

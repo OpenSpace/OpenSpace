@@ -343,26 +343,12 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     
     glm::mat4 transform = camera->getViewProjectionMatrix();
     glm::mat4 camTransform = camera->getViewRotationMatrix();
-    psc camPos = camera->getPosition();
-    
-//    psc relative = camPos - thisPosition;
-    psc relative = thisPosition-camPos;
-    double factor = pow(10.0,relative[3]);
-    
-    transform = transform*camTransform;
-    transform = glm::translate(transform, glm::vec3(relative[0]*factor, relative[1]*factor, relative[2]*factor));
-    transform = glm::scale(transform, _boxScaling);
-    /*
-<<<<<<< HEAD
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-    transform = glm::scale(transform, _boxScaling);
-=======
-    transform = transform*camTransform;
-//    transform = glm::rotate(transform, speed*camera->getRotationAngle(), camera->getRotationAxis());
-//	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
+    psc relative = thisPosition-camera->getPosition();
 
->>>>>>> trackball
-*/
+    transform = transform*camTransform;
+    transform = glm::translate(transform, relative.getVec3f());
+    transform = glm::scale(transform, _boxScaling);
+
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();

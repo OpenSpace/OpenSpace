@@ -59,6 +59,7 @@ public:
 	
 private:
     glm::vec3 mapToTrackball(glm::vec2 mousePos);
+    glm::vec3 mapToCamera(glm::vec3 trackballPos);
     void trackballRotate(int x, int y);
 
 	Camera* camera_;
