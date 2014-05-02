@@ -49,9 +49,9 @@ namespace {
             acq = kernel.argumentAccessQualifier(arguments);
             atq = kernel.argumentTypeQualifier(arguments);
             ++arguments;
-        } while (adq != CLKernel::AddressQualifier::ERROR &&
-                 acq != CLKernel::AccessQualifier::ERROR &&
-                 atq != CLKernel::TypeQualifier::ERROR);
+        } while (adq != CLKernel::AddressQualifier::Error &&
+                 acq != CLKernel::AccessQualifier::Error &&
+                 atq != CLKernel::TypeQualifier::Error);
         
         return arguments - 1;
     }
@@ -371,7 +371,7 @@ void RenderableVolumeExpert::safeKernelCompilation() {
                     
                     for (int i = 3; i<maxarguments; ++i) {
                         CLKernel::AccessQualifier acq = tmpKernel.argumentAccessQualifier(i);
-                        CLKernel::AccessQualifier expected = CLKernel::AccessQualifier::READ_ONLY;
+                        CLKernel::AccessQualifier expected = CLKernel::AccessQualifier::ReadOnly;
                         if (acq != expected) {
                             LWARNING("Argument " << i << " is '" <<
                                      CLKernel::AccessQualifierName(acq) <<"', expected '" <<

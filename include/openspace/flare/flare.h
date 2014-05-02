@@ -27,6 +27,7 @@
 
 #include <GL/glew.h>
 #include <ghoul/logging/logmanager.h>
+#define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 #include <openspace/flare/Animator.h>
 #include <openspace/flare/Raycaster.h>

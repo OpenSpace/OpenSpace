@@ -74,9 +74,9 @@ private:
     
 // Forward declare template specializations
 template<>
-ghoul::TemplateFactory<Renderable()>* FactoryManager::factoryByType();
+ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType();
 template<>
-ghoul::TemplateFactory<PositionInformation()>* FactoryManager::factoryByType();
+ghoul::TemplateFactory<PositionInformation>* FactoryManager::factoryByType();
 
     
 } // namespace openspace

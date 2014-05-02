@@ -85,7 +85,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture
   cl_mem texture;
   switch (_textureType) {
     case GL_TEXTURE_1D:
-      ERROR("Texture 1D unimplemented");
+      LERROR("Texture 1D unimplemented");
       return false;
       break;
     case GL_TEXTURE_2D:
@@ -111,7 +111,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture
 #endif
       break;
     default:
-      ERROR("Unknown GL texture type");
+      LERROR("Unknown GL texture type");
       return false;
   }
 
@@ -136,7 +136,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture
 
     switch (_textureType) {
     case GL_TEXTURE_1D:
-        ERROR("Texture 1D unimplemented");
+        LERROR("Texture 1D unimplemented");
         return false;
         break;
     case GL_TEXTURE_2D:
@@ -162,7 +162,7 @@ bool CLProgram::AddTexture(unsigned int _argNr, ghoul::opengl::Texture *_texture
 #endif
         break;
     default:
-        ERROR("Unknown GL texture type");
+        LERROR("Unknown GL texture type");
         return false;
     }
 
@@ -194,7 +194,7 @@ bool CLProgram::AddBuffer(unsigned int _argNr,
                           cl_mem_flags _permissions) {
 
   if (!_hostPtr) {
-    ERROR("AddBuffer(): Host pointer is NULL");
+    LERROR("AddBuffer(): Host pointer is NULL");
     return false;
   }
 
@@ -220,7 +220,7 @@ bool CLProgram::ReadBuffer(unsigned int _argNr,
                            unsigned int _sizeInBytes,
                            cl_bool _blocking) {
   if (memArgs_.find((cl_uint)_argNr) == memArgs_.end()) {
-    ERROR("ReadBuffer(): Could not find mem arg " << _argNr);
+    LERROR("ReadBuffer(): Could not find mem arg " << _argNr);
     return false;
   }
   error_ = clEnqueueReadBuffer(clManager_->commandQueues_[CLManager::EXECUTE],
@@ -237,7 +237,7 @@ bool CLProgram::ReadBuffer(unsigned int _argNr,
 
 bool CLProgram::ReleaseBuffer(unsigned int _argNr) {
   if (memArgs_.find((cl_uint)_argNr) == memArgs_.end()) {
-    ERROR("ReleaseBuffer(): Could not find mem arg " << _argNr);
+    LERROR("ReleaseBuffer(): Could not find mem arg " << _argNr);
     return false;
   }
   //LDEBUG("Releasing memory");
@@ -266,8 +266,8 @@ bool CLProgram::PrepareProgram() {
       
     if (!clManager_->CheckSuccess(error_, "PrepareProgram")) {
         LDEBUG("error: " << getErrorString(error_));
-      ERROR("Failed to enqueue GL object aqcuisition");
-      ERROR("Failing object: " << it->first);
+      LERROR("Failed to enqueue GL object aqcuisition");
+      LERROR("Failing object: " << it->first);
       return false;
     }
   }
@@ -280,7 +280,7 @@ bool CLProgram::PrepareProgram() {
                             (it->second).size_,
                             &((it->second).mem_));
     if (!clManager_->CheckSuccess(error_, "PrepareProgram")) {
-      ERROR("Failed to set kernel argument " << it->first);
+      LERROR("Failed to set kernel argument " << it->first);
       return false;
     }
   }
@@ -292,7 +292,7 @@ bool CLProgram::PrepareProgram() {
                             sizeof(cl_mem),
                             &(it->second));
     if (!clManager_->CheckSuccess(error_, "PrepareProgram")) {
-      ERROR("Failed to set texture kernel arg " << it->first);
+      LERROR("Failed to set texture kernel arg " << it->first);
       return false;
     }
   }
@@ -303,7 +303,7 @@ bool CLProgram::PrepareProgram() {
 bool CLProgram::SetInt(unsigned int _argNr, int _val) {
   error_ = clSetKernelArg(kernel_, _argNr, sizeof(int), &_val);
   if (!clManager_->CheckSuccess(error_, "SetInt")) {
-    ERROR("Failed to set integer value");
+    LERROR("Failed to set integer value");
     return false;
   }
   return true;
@@ -331,14 +331,14 @@ bool CLProgram::FinishProgram() {
       clManager_->commandQueues_[CLManager::EXECUTE], 1, 
                                  &(it->second), 0, NULL, NULL);
     if (!clManager_->CheckSuccess(error_, "FinishProgram, release GL objs")) {
-      ERROR("Failed to release GL object");
-      ERROR("Failed object: " << it->first);
+      LERROR("Failed to release GL object");
+      LERROR("Failed object: " << it->first);
       return false;
     }
   }
     error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
     if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
-        ERROR("Failed to finish program");
+        LERROR("Failed to finish program");
         return false;
     }
   /*
@@ -369,7 +369,7 @@ char * CLProgram::ReadSource(const std::string &_filename,
     content[count] = '\0';
     fclose(in);
   } else {
-    ERROR("Could not read source from file " << _filename);
+    LERROR("Could not read source from file " << _filename);
   }
   _numChars = count;
   return content;

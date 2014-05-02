@@ -78,7 +78,11 @@ bool BrickManager::ReadHeader() {
   INFO("");
 
   // Keep track of position for data in file
+#ifdef WIN32
+  dataPos_ = _ftelli64(file_);
+#else
   dataPos_ = ftello(file_);
+#endif
 
   brickDim_ = xBrickDim_;
   numBricks_ = xNumBricks_;
@@ -107,10 +111,17 @@ bool BrickManager::ReadHeader() {
   volumeSize_ = brickSize_*numBricksFrame_;
   numValsTot_ = numBrickVals_*numBricksFrame_;
 
+#ifdef WIN32
+    _fseeki64(file_, 0, SEEK_END);
+    long long fileSize = _ftelli64(file_);
+    long long calcFileSize = static_cast<long long>(numBricksTree_)*
+        static_cast<long long>(brickSize_)+dataPos_;
+#else
   fseeko(file_, 0, SEEK_END);
   off_t fileSize = ftello(file_);
   off_t calcFileSize = static_cast<off_t>(numBricksTree_) *
                      static_cast<off_t>(brickSize_) + dataPos_;
+#endif
 
   if (fileSize != calcFileSize) {
     ERROR("Sizes don't match");
@@ -391,7 +402,11 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
       in_.read(reinterpret_cast<char*>(seqBuffer), brickSize_*sequence);
       */
 
-      fseeko(file_, offset, SEEK_SET);
+#ifdef WIN32
+        _fseeki64(file_, offset, SEEK_SET);
+#else
+        fseeko(file_, offset, SEEK_SET);
+#endif
       fread(reinterpret_cast<void*>(seqBuffer), bufSize, 1, file_);
       if (ferror(file_) != 0) {
         ERROR("File reading error");

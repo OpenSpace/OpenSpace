@@ -40,6 +40,7 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
+#define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 
 //#include <vector>

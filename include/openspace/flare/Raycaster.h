@@ -15,7 +15,7 @@ TODO: Iteratively break away parts from it into other classes.
 #include <glm/glm.hpp>
 #include <ghoul/opencl/ghoul_cl.h>
 #include <openspace/flare/KernelConstants.h>
-#include <boost/timer/timer.hpp>
+//#include <boost/timer/timer.hpp>
 #include <openspace/flare/TSP.h>
 
 #include <ghoul/opengl/programobject.h>
@@ -184,7 +184,7 @@ private:
 
   
   // Timer and timer constants 
-  boost::timer::cpu_timer timer_;
+  //boost::timer::cpu_timer timer_;
   
   
   cl_mem cubeFrontCLmem;

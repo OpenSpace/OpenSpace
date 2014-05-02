@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 // sgct header has to be included before all others due to Windows header
+#define SGCT_WINDOWS_INCLUDE
 #include "sgct.h"
 
 #include <openspace/interaction/deviceidentifier.h>
@@ -109,7 +110,11 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
     
     const std::string absolutePath = FileSys.absolutePath(filename);
     
+#ifdef WIN32
+    auto last = absolutePath.find_last_of("\\");
+#else
     auto last = absolutePath.find_last_of("/");
+#endif
     if(last == absolutePath.npos)
         return false;
     
@@ -124,8 +129,12 @@ bool OpenSpaceEngine::findConfiguration(std::string& filename) {
     if (filename != "") {
         return FileSys.fileExists(filename);
     }
-    std::string currentDirectory = FileSys.currentDirectory();
+    std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
+#ifdef WIN32
+    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '\\');
+#else
     size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '/');
+#endif
     
     std::string cfgname = "openspace.cfg";
     

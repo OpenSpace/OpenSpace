@@ -18,7 +18,7 @@
 #include <openspace/flare/KernelConstants.h>
 #include <openspace/flare/Config.h>
 #include <stdint.h>
-#include <unistd.h> // sync()
+//#include <unistd.h> // sync()
 
 
 
@@ -97,7 +97,7 @@ bool Raycaster::Render(float _timestep) {
 
   // Clear cache for benchmarking
   if (config_->ClearCache()) {
-    sync();
+    //sync();
     std::ofstream ofs("/proc/sys/vm/drop_caches");
     ofs << "3" << std::endl;
     ofs.close();

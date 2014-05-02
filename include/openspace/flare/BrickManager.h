@@ -11,7 +11,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include <boost/timer/timer.hpp>
+//#include <boost/timer/timer.hpp>
 #include <stdio.h>
 #include <ghoul/opengl/texture.h>
 
@@ -112,7 +112,12 @@ private:
 
   // C-style I/O
   std::FILE *file_;
+#ifdef WIN32
+  long long dataPos_;
+#else
   off_t dataPos_;
+
+#endif
 
   bool hasReadHeader_;
   bool atlasInitialized_;
@@ -139,7 +144,7 @@ private:
                   unsigned int _z);
 
   // Timer and timer constants
-  boost::timer::cpu_timer timer_;
+  //boost::timer::cpu_timer timer_;
   const double BYTES_PER_GB = 1073741824.0;
 
 };

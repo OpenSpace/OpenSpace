@@ -51,7 +51,11 @@ bool TSP::ReadHeader() {
   INFO("Brick dimensions: "<<xBrickDim_<<" "<<yBrickDim_<<" "<< zBrickDim_);
   INFO("Num bricks: "<<xNumBricks_<<" "<<yNumBricks_ <<" "<< zNumBricks_);
 
+#ifdef WIN32
+  dataPos_ = _ftelli64(in);
+#else
   dataPos_ = ftello(in);
+#endif
 
   paddedBrickDim_ = xBrickDim_ + 2*paddingWidth_;
   // TODO support dimensions of different size
@@ -165,8 +169,13 @@ bool TSP::CalculateSpatialError() {
   for (unsigned int brick=0; brick<numTotalNodes_; ++brick) {
 
     // Offset in file
+#ifdef WIN32
+      long long offset = dataPos_ + static_cast<long long>(brick*numBrickVals*sizeof(float));
+      _fseeki64(in, offset, SEEK_SET);
+#else
     off_t offset = dataPos_ + static_cast<off_t>(brick*numBrickVals*sizeof(float));
     fseeko(in, offset, SEEK_SET);
+#endif
 
     fread(reinterpret_cast<void*>(&buffer[0]), 
       static_cast<size_t>(numBrickVals)*sizeof(float), 1, in);
@@ -212,8 +221,13 @@ bool TSP::CalculateSpatialError() {
            lb!=coveredLeafBricks.end(); ++lb) {
 
         // Read brick
+#ifdef WIN32
+          long long offset = dataPos_ + static_cast<long long>((*lb)*numBrickVals*sizeof(float));
+          _fseeki64(in, offset, SEEK_SET);
+#else
         off_t offset = dataPos_+static_cast<off_t>((*lb)*numBrickVals*sizeof(float));
         fseeko(in, offset, SEEK_SET);
+#endif
         fread(reinterpret_cast<void*>(&buffer[0]),
               static_cast<size_t>(numBrickVals)*sizeof(float), 1, in);
 
@@ -323,8 +337,13 @@ bool TSP::CalculateTemporalError() {
     std::vector<float> voxelStdDevs(numBrickVals);
 
     // Read the whole brick to fill the averages
+#ifdef WIN32
+    long long offset = dataPos_ + static_cast<long long>(brick*numBrickVals*sizeof(float));
+    _fseeki64(in, offset, SEEK_SET);
+#else
     off_t offset = dataPos_+static_cast<off_t>(brick*numBrickVals*sizeof(float));
     fseeko(in, offset, SEEK_SET);
+#endif
     fread(reinterpret_cast<void*>(&voxelAverages[0]), 
           static_cast<size_t>(numBrickVals)*sizeof(float), 1, in);
 
@@ -349,9 +368,15 @@ bool TSP::CalculateTemporalError() {
              leaf != coveredBricks.end(); ++leaf) {
 
           // Sample the leaves at the corresponding voxel position
-          off_t sampleOffset = dataPos_ +
-            static_cast<off_t>((*leaf*numBrickVals+voxel)*sizeof(float));
-          fseeko(in, sampleOffset, SEEK_SET);
+#ifdef WIN32
+          long long sampleOffset = dataPos_ +
+              static_cast<long long>((*leaf*numBrickVals + voxel)*sizeof(float));
+          _fseeki64(in, sampleOffset, SEEK_SET);
+#else
+            off_t sampleOffset = dataPos_ +
+                static_cast<off_t>((*leaf*numBrickVals + voxel)*sizeof(float));
+            fseeko(in, sampleOffset, SEEK_SET);
+#endif
           float sample;
           fread(reinterpret_cast<void*>(&sample), sizeof(float), 1, in);
 
