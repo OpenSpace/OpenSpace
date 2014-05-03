@@ -25,35 +25,4 @@
 #ifndef SCENEGRAPHNODE_INL
 #define SCENEGRAPHNODE_INL
 
-#include <openspace/util/factorymanager.h>
-
-namespace openspace {
-
-template <class T>
-bool safeCreationWithDictionary(T** object, const std::string& key,
-                                ghoul::Dictionary* dictionary,
-                                const std::string& path = "") {
-    if (dictionary->hasKey(key)) {
-        ghoul::Dictionary tmpDictionary;
-        if (dictionary->getValue(key, tmpDictionary)) {
-            if (!tmpDictionary.hasKey("Path") && path != "") {
-                tmpDictionary.setValue("Path", path);
-            }
-            std::string renderableType;
-            if (tmpDictionary.getValue("Type", renderableType)) {
-                ghoul::TemplateFactory<T>* factory
-                      = FactoryManager::ref().factoryByType<T>();
-                T* tmp = factory->create(renderableType, tmpDictionary);
-                if (tmp != nullptr) {
-                    *object = tmp;
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-} // namespace openspace
-
 #endif

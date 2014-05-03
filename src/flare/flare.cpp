@@ -25,16 +25,16 @@ namespace {
 namespace openspace {
 using namespace osp;
 
-Flare::Flare() {
-	_leftMouseButton = false;
-	_currentMouseX = 0;
-	_currentMouseY = 0;
-	_lastMouseX = 0;
-	_lastMouseY = 0;
-	_oldTime = 0.f;
-	_currentTime = 0.f;
-
-}
+Flare::Flare()
+    : Renderable(ghoul::Dictionary())
+    , _leftMouseButton(false)
+    , _currentMouseX(0)
+    , _currentMouseY(0)
+    , _lastMouseX(0)
+    , _lastMouseY(0)
+    , _oldTime(0.f)
+    , _currentTime(0.f)
+{}
 
 Flare::~Flare() {
 	// Clean up like a good citizen

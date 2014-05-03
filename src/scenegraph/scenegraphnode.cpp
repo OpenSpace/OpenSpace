@@ -36,16 +36,45 @@
 
 #include <openspace/scenegraph/constantpositioninformation.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-	std::string _loggerCat = "SceneGraphNode";
+	const std::string _loggerCat = "SceneGraphNode";
+
+    const std::string _unnamedSceneGraphNodeName = "Unnamed";
 }
 
 namespace openspace {
 
+template <class T>
+bool safeCreationWithDictionary(T** object, const std::string& key,
+    ghoul::Dictionary* dictionary,
+    const std::string& path = "") {
+    if (dictionary->hasKey(key)) {
+        ghoul::Dictionary tmpDictionary;
+        if (dictionary->getValue(key, tmpDictionary)) {
+            if (!tmpDictionary.hasKey("Path") && path != "") {
+                tmpDictionary.setValue("Path", path);
+            }
+            std::string renderableType;
+            if (tmpDictionary.getValue("Type", renderableType)) {
+                ghoul::TemplateFactory<T>* factory
+                    = FactoryManager::ref().factoryByType<T>();
+                T* tmp = factory->create(renderableType, tmpDictionary);
+                if (tmp != nullptr) {
+                    *object = tmp;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
 SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
-    , _nodeName("Unnamed OpenSpace SceneGraphNode")
+    , _nodeName(_unnamedSceneGraphNodeName)
     , _position(nullptr)
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -63,6 +92,7 @@ SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary)
         if (safeCreationWithDictionary<Renderable>(&_renderable, "Renderable",
                                                    &localDictionary, path)) {
             LDEBUG(_nodeName << ": Successful creation of renderable!");
+            _renderable->setName(_nodeName);
         } else {
             LDEBUG(_nodeName << ": Failed to create renderable!");
         }

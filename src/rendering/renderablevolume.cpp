@@ -72,8 +72,9 @@ namespace {
 
 namespace openspace {
 
-RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary) {
-    
+RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+{
     // get path if available
     _relativePath = "";
     if(dictionary.hasKey("Path")) {
