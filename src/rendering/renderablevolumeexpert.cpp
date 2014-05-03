@@ -298,7 +298,6 @@ bool RenderableVolumeExpert::initialize() {
     
     _colorBoxRenderer->initialize();
     glm::size2_t dimensions = _colorBoxRenderer->dimensions();
-    
 	ghoul::opengl::Texture* backTexture = _colorBoxRenderer->backFace();
 	ghoul::opengl::Texture* frontTexture = _colorBoxRenderer->frontFace();
 	_output = new ghoul::opengl::Texture(glm::size3_t(dimensions[0],dimensions[1],1));
@@ -342,15 +341,14 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     if( ! _kernel.isValidKernel())
         return;
     
-    psc camPos = camera->getPosition();
-    psc relative = thisPosition-camPos;
-    double factor = pow(10.0,relative[3]);
-    glm::mat4 camTransform = camera->getViewRotationMatrix();
-    
     glm::mat4 transform = camera->getViewProjectionMatrix();
+    glm::mat4 camTransform = camera->getViewRotationMatrix();
+    psc relative = thisPosition-camera->getPosition();
+
     transform = transform*camTransform;
-    transform = glm::translate(transform, glm::vec3(relative[0]*factor, relative[1]*factor, relative[2]*factor));
+    transform = glm::translate(transform, relative.getVec3f());
     transform = glm::scale(transform, _boxScaling);
+
     _colorBoxRenderer->render(transform);
     
     _textureLock->lock();
@@ -450,6 +448,7 @@ void RenderableVolumeExpert::safeKernelCompilation() {
                 if(argumentError)
                     return;
                 
+            
                 tmpKernel.setArgument(0, &_clFrontTexture);
                 tmpKernel.setArgument(1, &_clBackTexture);
                 tmpKernel.setArgument(2, &_clOutput);
@@ -494,6 +493,7 @@ void RenderableVolumeExpert::safeUpdateTexture(const ghoul::filesystem::File& fi
     
     // create the new texture
     ghoul::opengl::Texture* newTexture = loadTransferFunction(file.path());
+    
     if(newTexture) {
         
         // upload the new texture and create a cl memory

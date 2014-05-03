@@ -5,6 +5,8 @@
 // sgct includes
 #include "sgct.h"
 
+#include <glm/gtx/vector_angle.hpp>
+
 namespace openspace {
 	
 Camera::Camera() {
@@ -44,14 +46,11 @@ const glm::mat4 & Camera::getViewRotationMatrix() const {
 
 void Camera::compileViewRotationMatrix() {
 	// convert from quaternion to rotationmatrix using glm
-
 	viewRotationMatrix_ = glm::mat4_cast(viewRotation_);
 
 	// the camera matrix needs to be rotated inverse to the world
-	glm::mat4 camrotmatrix = glm::mat4_cast(glm::inverse(viewRotation_));
-	glm::vec4 camdir(cameraDirection_[0],cameraDirection_[1],cameraDirection_[2],0);
-	camdir = camrotmatrix* camdir;
-	viewDirection_ = glm::normalize(glm::vec3(camdir[0],camdir[1],camdir[2]));
+	viewDirection_ = glm::rotate(glm::inverse(viewRotation_), cameraDirection_);
+	viewDirection_ = glm::normalize(viewDirection_);
 }
 
 void Camera::rotate(glm::quat rotation) {
@@ -90,6 +89,14 @@ void Camera::setScaling(const glm::vec2 &scaling) {
 
 const glm::vec2 & Camera::getScaling() const {
 	return scaling_;
+}
+
+void Camera::setLookUp(glm::vec3 lookUp) {
+	lookUp_ = lookUp;
+}
+
+const glm::vec3 Camera::getLookUp() const {
+	return lookUp_;
 }
 	
 } // namespace openspace

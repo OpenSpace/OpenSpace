@@ -1,4 +1,13 @@
 
+#ifdef CL_VERSION_1_2
+    #define RC_TF_TYPE image1d_t
+    #define RC_TF_MAP(intensity) intensity
+#else
+    #define RC_TF_TYPE image1d_t
+    #define RC_TF_MAP(intensity) (float2)(intensity,0.0f)
+#endif
+
+
 #define EARLY_RAY_TERMINATION_OPACITY 0.95
 
 void raySetup(float3 first, float3 last, float3 dimension, float3* rayDirection, float* tIncr, float* tEnd);
@@ -37,8 +46,8 @@ void raySetup(float3 first, float3 last, float3 dimension, float3* rayDirection,
  * 1.0 and true is returned, otherwise false is returned.
  ***/
 bool earlyRayTermination(float4* color, float maxOpacity) {
-    if ((*color).a >= maxOpacity) {
-        (*color).a = 1.0f;
+    if ((*color).w >= maxOpacity) {
+        (*color).w = 1.0f;
         return true;
     } else {
         return false;

@@ -66,7 +66,7 @@ bool RenderEngine::initialize() {
 
 bool RenderEngine::initializeGL() {
 
-#define SGCT_WPTR sgct::Engine::instance()->getWindowPtr(0)
+#define SGCT_WPTR sgct::Engine::instance()->getActiveWindowPtr()
 using sgct_core::Viewport;
 
     // TODO:    Fix the power scaled coordinates in such a way that these values can be set
@@ -107,6 +107,7 @@ using sgct_core::Viewport;
 		// get viewdirection, stores the direction in the camera, used for culling
 		glm::vec3 viewdir = glm::normalize(eyePosition- center);
 		_mainCamera->setCameraDirection(-viewdir);
+		_mainCamera->setLookUp(glm::vec3(0.0, 1.0, 0.0));
 
 		// set the initial fov to be 0.0 which means everything will be culled
 		float maxFov = 0.0f;
@@ -142,14 +143,13 @@ void RenderEngine::postSynchronizationPreDraw() {
 }
 
 void RenderEngine::render() {
-	
     // SGCT resets certian settings
 	glEnable (GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
     
 	// setup the camera for the current frame
-    const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
-    glm::mat4 view = glm::translate(glm::mat4(1.0), eyePosition); // make sure the eye is in the center
+	const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+	glm::mat4 view = glm::translate(glm::mat4(1.0), eyePosition); // make sure the eye is in the center
 	_mainCamera->setViewProjectionMatrix(sgct::Engine::instance()->getActiveModelViewProjectionMatrix()*view);
 
 	// render the scene starting from the root node
