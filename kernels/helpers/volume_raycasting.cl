@@ -1,4 +1,13 @@
 
+#ifdef CL_VERSION_1_2
+    #define RC_TF_TYPE image1d_t
+    #define RC_TF_MAP(intensity) intensity
+#else
+    #define RC_TF_TYPE image1d_t
+    #define RC_TF_MAP(intensity) (float2)(intensity,0.0f)
+#endif
+
+
 #define EARLY_RAY_TERMINATION_OPACITY 0.95
 
 void raySetup(float3 first, float3 last, float3 dimension, float3* rayDirection, float* tIncr, float* tEnd);
