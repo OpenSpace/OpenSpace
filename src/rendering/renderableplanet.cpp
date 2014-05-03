@@ -39,13 +39,16 @@ namespace openspace {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
+              glm::vec2(10.f, 20.f))
+    , _segments("segments", "Segments", 20, 1, 1000)
+    , _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
-    , _texturePath("")
     , _texture(nullptr)
     , _planet(nullptr)
 {
     double value = 1.0f, exponent = 0.0f;
-    double segments = 20.0;
+    int segments = 20;
 
     if (dictionary.hasKey("Geometry.Radius.1"))
         dictionary.getValue("Geometry.Radius.1", value);
@@ -53,12 +56,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey("Geometry.Radius.2"))
         dictionary.getValue("Geometry.Radius.2", exponent);
 
+    _radius = glm::vec2(value, exponent);
+
     if (dictionary.hasKey("Geometry.Segments"))
         dictionary.getValue("Geometry.Segments", segments);
 
-    // create the power scaled scalar
-    pss planetSize(value, exponent);
-    setBoundingSphere(planetSize);
+    _segments = segments;
 
     // get path if available
     std::string path = "";
@@ -67,13 +70,22 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         path += "/";
     }
 
-    if (dictionary.hasKey("Textures.Color")) {
-        std::string texturePath;
+    std::string texturePath = "";
+    if (dictionary.hasKey("Textures.Color"))
         dictionary.getValue("Textures.Color", texturePath);
-        _texturePath = path + texturePath;
-    }
 
-    _planet = new PowerScaledSphere(pss(value, exponent), static_cast<int>(segments));
+    _colorTexturePath = path + texturePath;
+
+
+    addProperty(_radius);
+    _radius.onChange(std::bind(&RenderablePlanet::createSphere, this));
+    addProperty(_segments);
+    _segments.onChange(std::bind(&RenderablePlanet::createSphere, this));
+
+    addProperty(_colorTexturePath);
+    _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    createSphere();
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -81,35 +93,21 @@ RenderablePlanet::~RenderablePlanet() {
 }
 
 bool RenderablePlanet::initialize() {
-    
     bool completeSuccess = true;
-    if (_programObject == nullptr) {
-        completeSuccess = OsEng.ref().configurationManager().getValue("pscShader", _programObject);
-    }
+    if (_programObject == nullptr)
+        completeSuccess &= OsEng.ref().configurationManager().getValue("pscShader", _programObject);
     
-    if(_texturePath != "") {
-        _texture = ghoul::opengl::loadTexture(_texturePath);
-        if (_texture) {
-            LDEBUG("Loaded texture from '" << _texturePath <<"'");
-            _texture->uploadTexture();
-        } else {
-            completeSuccess = false;
-        }
-    }
+    loadTexture();
+    completeSuccess &= (_texture != nullptr);
+
     _planet->initialize();
     
     return completeSuccess;
 }
 
-
-
 bool RenderablePlanet::deinitialize() {
-    if(_planet)
-        delete _planet;
-    
-    if(_texture)
-        delete _texture;
-    
+    delete _planet;
+    delete _texture;
     return true;
 }
 
@@ -165,6 +163,29 @@ void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
 
 void RenderablePlanet::update() {
 
+}
+
+void RenderablePlanet::createSphere() {
+    // create the power scaled scalar
+
+    pss planetSize(_radius);
+    setBoundingSphere(planetSize);
+
+    delete _planet;
+    _planet = new PowerScaledSphere(planetSize, _segments);
+    _planet->initialize();
+}
+
+void RenderablePlanet::loadTexture() {
+    delete _texture;
+    _texture = nullptr;
+    if (_colorTexturePath.value() != "") {
+        _texture = ghoul::opengl::loadTexture(_colorTexturePath);
+        if (_texture) {
+            LDEBUG("Loaded texture from '" << _colorTexturePath.value() << "'");
+            _texture->uploadTexture();
+        }
+    }
 }
 
 } // namespace openspace

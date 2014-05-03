@@ -22,38 +22,33 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEMPLATEPROPERTY_H__
-#define __TEMPLATEPROPERTY_H__
+#ifndef __STRINGPROPERTY_H__
+#define __STRINGPROPERTY_H__
 
-#include "openspace/properties/property.h"
+#include <openspace/properties/templateproperty.h>
 
 namespace openspace {
 namespace properties {
 
-template <typename T>
-class TemplateProperty : public Property {
+class StringProperty : public TemplateProperty<std::string> {
 public:
-    TemplateProperty(std::string identifier, std::string guiName);
-    TemplateProperty(std::string identifier, std::string guiName, T value);
+    StringProperty(std::string identifier, std::string guiName);
+    StringProperty(std::string identifier, std::string guiName, std::string value);
 
-    virtual std::string className() const override;
-    virtual boost::any get() const override;
-    virtual void set(boost::any value) override;
-    virtual const std::type_info& type() const override;
-
-    operator T();
-    TemplateProperty<T>& operator=(T val);
-
-    void setValue(T val);
-    T value() const;
-
-protected:
-    T _value;
+    using TemplateProperty<std::string>::operator=;
 };
+
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::className();
+
+template <>
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>();
+
+//REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
+
 
 } // namespace properties
 } // namespace openspace
 
-#include "openspace/properties/templateproperty.inl"
-
-#endif // __TEMPLATEPROPERTY_H__
+#endif // __STRINGPROPERTY_H__

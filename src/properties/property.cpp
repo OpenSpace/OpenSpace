@@ -33,8 +33,11 @@ namespace {
     const std::string _metaDataKeyReadOnly = "isReadOnly";
 }
 
-const std::string Property::ViewOptions::LightPosition = "lightPosition";
 const std::string Property::ViewOptions::Color = "color";
+const std::string Property::ViewOptions::LightPosition = "lightPosition";
+const std::string Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
+const std::string Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
+ 
 
 Property::Property(std::string identifier, std::string guiName)
     : _identifier(std::move(identifier))
@@ -105,6 +108,21 @@ bool Property::viewOption(const std::string& option) const {
 
 const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
+}
+
+void Property::onChange(std::function<void()> callback) {
+    _onChangeCallbacks.emplace_back(std::move(callback));
+
+}
+
+PropertyOwner* Property::owner() const
+{
+    return _owner;
+}
+
+void Property::setPropertyOwner(PropertyOwner* owner)
+{
+    _owner = owner;
 }
 
 } // namespace properties

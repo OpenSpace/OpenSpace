@@ -29,10 +29,13 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <boost/any.hpp>
+#include <functional>
 #include <string>
 
 namespace openspace {
 namespace properties {
+
+class PropertyOwner;
 
 class Property {
 public:
@@ -46,8 +49,13 @@ public:
     virtual void set(boost::any value);
     virtual const std::type_info& type() const;
 
+    virtual void onChange(std::function<void()> callback);
+
     const std::string& identifier() const;
     const std::string& guiName() const;
+
+    PropertyOwner* owner() const;
+    void setPropertyOwner(PropertyOwner* owner);
 
     void setGroupIdentifier(std::string groupId);
     std::string groupIdentifier() const;
@@ -62,16 +70,22 @@ public:
     bool viewOption(const std::string& option) const;
 
     struct ViewOptions {
-        static const std::string LightPosition;
         static const std::string Color;
+        static const std::string LightPosition;
+        static const std::string PowerScaledScalar;
+        static const std::string PowerScaledCoordinate;
     };
 
     const ghoul::Dictionary& metaData() const;
 
 protected:
+    PropertyOwner* _owner;
+
     std::string _identifier;
     std::string _guiName;
     ghoul::Dictionary _metaData;
+
+    std::vector<std::function<void()>> _onChangeCallbacks;
 };
 
 } // namespace properties

@@ -75,9 +75,22 @@ TemplateProperty<T>::operator T() {
 
 template <typename T>
 TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    _value = val;
+    setValue(val);
     return *this;
 }
+
+template <typename T>
+T openspace::properties::TemplateProperty<T>::value() const
+{
+    return _value;
+}
+
+template <typename T>
+void openspace::properties::TemplateProperty<T>::setValue(T val)
+{
+    _value = val;
+}
+
 
 template <typename T>
 boost::any TemplateProperty<T>::get() const {

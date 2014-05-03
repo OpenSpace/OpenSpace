@@ -22,38 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEMPLATEPROPERTY_H__
-#define __TEMPLATEPROPERTY_H__
-
-#include "openspace/properties/property.h"
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 namespace properties {
 
-template <typename T>
-class TemplateProperty : public Property {
-public:
-    TemplateProperty(std::string identifier, std::string guiName);
-    TemplateProperty(std::string identifier, std::string guiName, T value);
+StringProperty::StringProperty(std::string identifier, std::string guiName)
+    : StringProperty(
+            std::move(identifier), std::move(guiName),
+            PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>())
+{
+}
 
-    virtual std::string className() const override;
-    virtual boost::any get() const override;
-    virtual void set(boost::any value) override;
-    virtual const std::type_info& type() const override;
+StringProperty::StringProperty(std::string identifier, std::string guiName,
+                                std::string value)
+    : TemplateProperty(std::move(identifier), std::move(guiName), std::move(value))
+{}
 
-    operator T();
-    TemplateProperty<T>& operator=(T val);
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::className() {
+    return "StringProperty";
+}
 
-    void setValue(T val);
-    T value() const;
+template <>
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>() {
+    return "";
+}
 
-protected:
-    T _value;
-};
+
+//REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "");
+//
+//std::string openspace::properties::StringProperty::className() const {
+//    return "StringProperty";
+//}
 
 } // namespace properties
 } // namespace openspace
-
-#include "openspace/properties/templateproperty.inl"
-
-#endif // __TEMPLATEPROPERTY_H__

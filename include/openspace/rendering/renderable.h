@@ -51,6 +51,7 @@ public:
 
 	virtual void render(const Camera *camera, const psc &thisPosition) = 0;
 	virtual void update();
+
 protected:
 	//Renderable();
 private:

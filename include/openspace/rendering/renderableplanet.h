@@ -28,41 +28,46 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/powerscaledsphere.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+
 namespace openspace {
 
-class RenderablePlanet: public Renderable {
+class RenderablePlanet : public Renderable {
 public:
+    // constructors & destructor
+    RenderablePlanet(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanet();
 
-	// constructors & destructor
-	RenderablePlanet(const ghoul::Dictionary& dictionary);
-	~RenderablePlanet();
+    bool initialize() override;
+    bool deinitialize() override;
 
-    bool initialize();
-    bool deinitialize();
+    void setProgramObject(ghoul::opengl::ProgramObject* programObject = nullptr);
+    void setTexture(ghoul::opengl::Texture* texture);
 
-	void setProgramObject(ghoul::opengl::ProgramObject *programObject = nullptr);
-	void setTexture(ghoul::opengl::Texture *texture);
+    void render(const Camera* camera, const psc& thisPosition) override;
+    void update() override;
 
-	virtual void render(const Camera *camera, const psc &thisPosition);
-	virtual void update();
+protected:
+    void createSphere();
+    void loadTexture();
 
 private:
-    // shader
+    properties::Vec2Property _radius;
+    properties::IntProperty _segments;
+    properties::StringProperty _colorTexturePath;
+
     ghoul::opengl::ProgramObject* _programObject;
-
-    // texture
-    std::string _texturePath;
     ghoul::opengl::Texture* _texture;
-
-    // Object
     PowerScaledSphere* _planet;
 };
 
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __RENDERABLEPLANET_H__
+#endif  // __RENDERABLEPLANET_H__

@@ -93,9 +93,11 @@ void PropertyOwner::addProperty(Property* prop) {
                                        << "' already present in PropertyOwner");
         return;
     }
-    else
+    else {
         // Otherwise we have found the correct position to add it in
         _properties.insert(it, prop);
+        prop->setPropertyOwner(this);
+    }
 }
 
 void PropertyOwner::addProperty(Property& prop) {
@@ -114,6 +116,7 @@ void PropertyOwner::removeProperty(Property* prop) {
 
     // If we found the property identifier, we can delete it
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
+        (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
     }
     else
