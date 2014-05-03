@@ -3,7 +3,7 @@
     #define RC_TF_TYPE image1d_t
     #define RC_TF_MAP(intensity) intensity
 #else
-    #define RC_TF_TYPE image1d_t
+    #define RC_TF_TYPE image2d_t
     #define RC_TF_MAP(intensity) (float2)(intensity,0.0f)
 #endif
 
