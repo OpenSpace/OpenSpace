@@ -43,9 +43,6 @@ public:
 
     template <typename U>
     static U defaultMaximumValue();
-
-    template <typename U>
-    static U defaultStepping();
 };
 
 } // namespace properties

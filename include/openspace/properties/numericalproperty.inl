@@ -25,57 +25,70 @@
 namespace openspace {
 namespace properties {
 
-// Delegating constructors seem to be necessary; Visual Studio 2013 compiler could not
+#define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE) \
+    typedef NumericalProperty<TYPE> CLASS_NAME; \
+    template <> std::string PropertyDelegate<NumericalProperty<TYPE>>::className(); \
+    template <> std::string PropertyDelegate<TemplateProperty<TYPE>>::className(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>(); \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>();
+
+
+#define REGISTER_NUMERICALPROPERTY_SOURCE(CLASS_NAME, TYPE, \
+    DEFAULT_VALUE, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_STEPPING) \
+    template <> \
+    std::string PropertyDelegate<NumericalProperty<TYPE>>::className() { \
+    return #CLASS_NAME; \
+} \
+    template <> \
+    std::string PropertyDelegate<TemplateProperty<TYPE>>::className() { \
+    return #CLASS_NAME; \
+} \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>() { \
+    return DEFAULT_VALUE; \
+} \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>() { \
+    return DEFAULT_MIN_VALUE; \
+} \
+    template <> template <> \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>() { \
+    return DEFAULT_MAX_VALUE; \
+}
+
+// Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
 // a single constructor    
         
 template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-    const std::string& guiName)
-    : NumericalProperty<T>(identifier, guiName,
+NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName)
+    : NumericalProperty<T>(std::move(identifier), std::move(guiName),
     PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
     PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultStepping<T>())
+    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>())
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-                                        const std::string& guiName, const T& value)
-    : NumericalProperty<T>(identifier, guiName, value,
+NumericalProperty<T>::NumericalProperty(std::string identifier,
+                                        std::string guiName, T value)
+    : NumericalProperty<T>(std::move(identifier), std::move(guiName), std::move(value),
     PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
+    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>())
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-                                        const std::string& guiName, const T& value,
-                                        const T& minimumValue)
-     : NumericalProperty<T>(identifier, guiName, value, minimumValue,
-     PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-     PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
- {}
-
-template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-                                        const std::string& guiName, const T& value,
-                                        const T& minimumValue, const T& maximumValue)
-    : NumericalProperty<T>(identifier, guiName, value, minimumValue, maximumValue,
-    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>())
+NumericalProperty<T>::NumericalProperty(std::string identifier,
+                                        std::string guiName, T value,
+                                        T minimumValue, T maximumValue)
+    : TemplateProperty<T>(std::move(identifier), std::move(guiName), std::move(value))
+    , _minimumValue(std::move(minimumValue))
+    , _maximumValue(std::move(maximumValue))
 {}
 
-
-template <typename T>
-NumericalProperty<T>::NumericalProperty(const std::string& identifier,
-                                        const std::string& guiName, const T& value,
-                                        const T& minimumValue, const T& maximumValue,
-                                        const T& stepping)
-    : TemplateProperty<T>(identifier, guiName, value)
-    , _minimumValue(minimumValue)
-    , _maximumValue(maximumValue)
-    , _stepping(stepping)
-{}
 
 template <typename T>
 std::string NumericalProperty<T>::className() const {

@@ -22,34 +22,41 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __NUMERICALPROPERTY_H__
-#define __NUMERICALPROPERTY_H__
+#ifndef __PROPERTYOWNER_H__
+#define __PROPERTYOWNER_H__
 
-#include "openspace/properties/templateproperty.h"
+#include <openspace/properties/property.h>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace openspace {
 namespace properties {
 
-template <typename T>
-class NumericalProperty : public TemplateProperty<T> {
+class PropertyOwner {
 public:
-    NumericalProperty(std::string identifier, std::string guiName);
-    NumericalProperty(std::string identifier, std::string guiName, T value);
-    NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue);
+    virtual ~PropertyOwner();
 
-    virtual std::string className() const override;
+    virtual const std::string& name() const = 0;
+    const std::vector<Property*>& properties() const;
+    Property* property(const std::string& id) const;
 
-    using TemplateProperty<T>::operator=;
+    void setPropertyGroupName(std::string groupID, std::string name);
+    const std::string& propertyGroupName(const std::string& groupID) const;
 
 protected:
-    T _minimumValue;
-    T _maximumValue;
+    void addProperty(Property* prop);
+    void addProperty(Property& prop);
+
+    void removeProperty(Property* prop);
+    void removeProperty(Property& prop);
+
+private:
+    std::vector<Property*> _properties;
+    std::map<std::string, std::string> _groupNames;
 };
 
 } // namespace properties
 } // namespace openspace
 
-#include "openspace/properties/numericalproperty.inl"
-
-#endif // __NUMERICALPROPERTY_H__
+#endif // __PROPERTYOWNER_H__

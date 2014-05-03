@@ -27,6 +27,7 @@
 
 #include "openspace/properties/propertydelegate.h"
 
+#include <ghoul/misc/dictionary.h>
 #include <boost/any.hpp>
 #include <string>
 
@@ -35,21 +36,21 @@ namespace properties {
 
 class Property {
 public:
-    Property(const std::string& identifier, const std::string& guiName);
+    Property(std::string identifier, std::string guiName);
     virtual ~Property();
 
     //virtual Property* create() const = 0;
     virtual std::string className() const = 0;
 
     virtual boost::any get() const;
-    virtual void set(const boost::any& value);
+    virtual void set(boost::any value);
     virtual const std::type_info& type() const;
 
     const std::string& identifier() const;
     const std::string& guiName() const;
 
-    void setGroupIdentifier(const std::string& groupId);
-    const std::string& groupIdentifier() const;
+    void setGroupIdentifier(std::string groupId);
+    std::string groupIdentifier() const;
 
     void setVisible(bool state);
     bool isVisible() const;
@@ -57,13 +58,20 @@ public:
     void setReadOnly(bool state);
     bool isReadOnly() const;
 
+    void setViewOption(std::string option, bool value = true);
+    bool viewOption(const std::string& option) const;
+
+    struct ViewOptions {
+        static const std::string LightPosition;
+        static const std::string Color;
+    };
+
+    const ghoul::Dictionary& metaData() const;
+
 protected:
     std::string _identifier;
     std::string _guiName;
-    std::string _groupId;
-
-    bool _isVisible;
-    bool _isReadOnly;
+    ghoul::Dictionary _metaData;
 };
 
 } // namespace properties

@@ -25,21 +25,43 @@
 namespace openspace {
 namespace properties {
 
-    // check!
-template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName)
-    : TemplateProperty<T>(identifier, guiName,
-    PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>())
-{}
+#define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE)                               \
+    typedef TemplateProperty<TYPE> CLASS_NAME;                                           \
+    template <>                                                                          \
+    std::string PropertyDelegate<TemplateProperty<TYPE>>::className();                   \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>();
 
+#define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE)                \
+    template <>                                                                          \
+    std::string PropertyDelegate<TemplateProperty<TYPE>>::className() {                  \
+        return #CLASS_NAME;                                                              \
+    \
+}                                                                                 \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>() {                \
+        return DEFAULT_VALUE;                                                            \
+    \
+}
+
+// Delegating constructors are necessary; automatic template deduction cannot
+// deduce template argument for 'U' if 'default' methods are used as default values in
+// a single constructor
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(const std::string& identifier,
-                                      const std::string& guiName, const T& value)
-    : Property(identifier, guiName)
-    , _value(value)
-{}
+TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName)
+    : TemplateProperty<T>(std::move(identifier), std::move(guiName),
+                          PropertyDelegate<TemplateProperty<T>>::defaultValue<T>()) {
+}
+
+template <typename T>
+TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
+                                      T value)
+    : Property(std::move(identifier), std::move(guiName))
+    , _value(value) {
+}
 
 template <typename T>
 std::string TemplateProperty<T>::className() const {
@@ -57,5 +79,25 @@ TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
     return *this;
 }
 
-} // namespace properties
-} // namespace openspace
+template <typename T>
+boost::any TemplateProperty<T>::get() const {
+    return boost::any(_value);
+}
+
+template <typename T>
+void TemplateProperty<T>::set(boost::any value) {
+    try {
+        _value = boost::any_cast<T>(std::move(value));
+    }
+    catch (boost::bad_any_cast&) {
+        LERRORC("TemplateProperty", "Illegal cast to '" << typeid(T).name() << "'");
+    }
+}
+
+template <typename T>
+const std::type_info& TemplateProperty<T>::type() const {
+    return typeid(T);
+}
+
+}  // namespace properties
+}  // namespace openspace

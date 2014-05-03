@@ -27,20 +27,23 @@
 namespace openspace {
 namespace properties {
 
-Property::Property(const std::string& identifier, const std::string& guiName)
-    : _identifier(identifier)
-    , _guiName(guiName)
-    , _groupId("")
-    , _isVisible(true)
-    , _isReadOnly(false)
-{}
+namespace {
+    const std::string _metaDataKeyGroup = "group";
+    const std::string _metaDataKeyVisible = "isVisible";
+    const std::string _metaDataKeyReadOnly = "isReadOnly";
+}
+
+const std::string Property::ViewOptions::LightPosition = "lightPosition";
+const std::string Property::ViewOptions::Color = "color";
+
+Property::Property(std::string identifier, std::string guiName)
+    : _identifier(std::move(identifier))
+    , _guiName(std::move(guiName))
+{
+    setVisible(true);
+}
 
 Property::~Property() {}
-
-//std::string Property::className() const {
-//    return classNameHelper(this);
-//    //return PropertyDelegate<Property>::className();
-//}
 
 const std::string& Property::identifier() const {
     return _identifier;
@@ -50,7 +53,7 @@ boost::any Property::get() const {
     return boost::any();
 }
 
-void Property::set(const boost::any& value) {}
+void Property::set(boost::any value) {}
 
 const std::type_info& Property::type() const {
     return typeid(void);
@@ -60,28 +63,48 @@ const std::string& Property::guiName() const {
     return _guiName;
 }
 
-void Property::setGroupIdentifier(const std::string& groupId) {
-    _groupId = groupId;
+void Property::setGroupIdentifier(std::string groupId) {
+    _metaData.setValue(_metaDataKeyGroup, std::move(groupId));
 }
 
-const std::string& Property::groupIdentifier() const {
-    return _groupId;
+std::string Property::groupIdentifier() const {
+    std::string result = "";
+    _metaData.getValue(_metaDataKeyGroup, result);
+    return std::move(result);
 }
 
 void Property::setVisible(bool state) {
-    _isVisible = state;
+    _metaData.setValue(_metaDataKeyVisible, state);
 }
 
 bool Property::isVisible() const {
-    return _isVisible;
+    bool result = false;
+    _metaData.getValue(_metaDataKeyVisible, result);
+    return result;
 }
 
 void Property::setReadOnly(bool state) {
-    _isReadOnly = state;
+    _metaData.setValue(_metaDataKeyReadOnly, state);
 }
 
 bool Property::isReadOnly() const {
-    return _isReadOnly;
+    bool result = false;
+    _metaData.getValue(_metaDataKeyReadOnly, result);
+    return result;
+}
+
+void Property::setViewOption(std::string option, bool value) {
+    _metaData.setValue("view." + option, value, true);
+}
+
+bool Property::viewOption(const std::string& option) const {
+    bool result = false;
+    _metaData.getValue("view." + option, result);
+    return result;
+}
+
+const ghoul::Dictionary& Property::metaData() const {
+    return _metaData;
 }
 
 } // namespace properties

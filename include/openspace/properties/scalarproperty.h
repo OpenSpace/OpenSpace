@@ -31,10 +31,7 @@ namespace openspace {
 namespace properties {
 
 REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
-
 REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
-//REGISTER_NUMERICALPROPERTY_HEADER(Char16Property, char16_t);
-//REGISTER_NUMERICALPROPERTY_HEADER(Char32Property, char32_t);
 REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
 REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
 REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char);

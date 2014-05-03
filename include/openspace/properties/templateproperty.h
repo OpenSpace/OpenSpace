@@ -33,12 +33,13 @@ namespace properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
-    TemplateProperty(const std::string& identifier, const std::string& guiName);
+    TemplateProperty(std::string identifier, std::string guiName);
+    TemplateProperty(std::string identifier, std::string guiName, T value);
 
-    TemplateProperty(const std::string& identifier, const std::string& guiName,
-        const T& value);
-
-    virtual std::string className() const;
+    virtual std::string className() const override;
+    virtual boost::any get() const override;
+    virtual void set(boost::any value) override;
+    virtual const std::type_info& type() const override;
 
     operator T();
     TemplateProperty<T>& operator=(T val);
@@ -49,23 +50,6 @@ protected:
 
 } // namespace properties
 } // namespace openspace
-
-// use inside namespace (?)
-#define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE) \
-    typedef TemplateProperty<TYPE> CLASS_NAME; \
-    template <> std::string PropertyDelegate<TemplateProperty<TYPE>>::className(); \
-    template <> template <> \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>(); 
-
-#define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE) \
-    template <> \
-    std::string PropertyDelegate<TemplateProperty<TYPE>>::className() { \
-        return #CLASS_NAME; \
-    } \
-    template <> template <> \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>() { \
-        return DEFAULT_VALUE; \
-    }
 
 #include "openspace/properties/templateproperty.inl"
 

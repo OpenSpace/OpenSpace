@@ -31,39 +31,29 @@ namespace properties {
 
 template <typename T>
 std::string PropertyDelegate<T>::className() {
-//    static_assert(false, "Unimplemented PropertyDelegate::className specialization");
+    static_assert(false, "Unimplemented PropertyDelegate::className specialization");
 }
 
 template <typename T>
 template <typename U>
 U PropertyDelegate<T>::defaultValue() {
-//    static_assert(false, "Unimplemented PropertyDelegate::defaultValue specialization");
+    static_assert(false, "Unimplemented PropertyDelegate::defaultValue specialization");
 }
 
 template <typename T>
 template <typename U>
 U PropertyDelegate<T>::defaultMinimumValue() {
-//    static_assert(false,
-//        "Unimplemented PropertyDelegate::defaultMinimumValue specialization");
+    static_assert(false,
+        "Unimplemented PropertyDelegate::defaultMinimumValue specialization");
 }
 
 
 template <typename T>
 template <typename U>
 U PropertyDelegate<T>::defaultMaximumValue() {
-//    static_assert(false,
-//        "Unimplemented PropertyDelegate::defaultMaximumValue specialization");
+    static_assert(false,
+        "Unimplemented PropertyDelegate::defaultMaximumValue specialization");
 }
-
-
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::defaultStepping() {
-//    static_assert(false,
-//        "Unimplemented PropertyDelegate::defaultStepping specialization");
-}
-
-
 
 } // namespace properties
 } // namespace openspace

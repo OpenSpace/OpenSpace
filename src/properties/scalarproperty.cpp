@@ -32,7 +32,7 @@ namespace openspace {
 namespace properties {
 
 // char16_t and char32_t are not supported on Visual Studio 2013 and are defined to
-// be equal to unsigned short and unsigned int
+// be equal to unsigned short and unsigned int which causes a compile error
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false);
 
