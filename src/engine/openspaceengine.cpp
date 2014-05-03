@@ -32,7 +32,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
-#include <openspace/util//spice.h>
+#include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -43,17 +43,20 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/commandlinecommand.h>
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-#include <ghoul/opencl/clworksize.h>
-#include <ghoul/opencl/clcommandqueue.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
 namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
+    const std::string _configurationFile = "openspace.cfg";
+    const std::string _basePathToken = "${BASE_PATH}";
+    const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
+
+    namespace configuration {
+        const std::string pathKey = "Paths";
+        const std::string sgctConfigKey = "SGCTConfig";
+    }
 }
 
 namespace openspace {
@@ -64,16 +67,18 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _configurationManager(nullptr)
     , _interactionHandler(nullptr)
     , _renderEngine(nullptr)
-    //, _scriptEngine(nullptr)
-{}
+//, _scriptEngine(nullptr)
+{
+}
 
-OpenSpaceEngine::~OpenSpaceEngine() {
+OpenSpaceEngine::~OpenSpaceEngine()
+{
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
-    
+
     // TODO deallocate scriptengine when starting to use it
-    //delete _scriptEngine;
+    // delete _scriptEngine;
 
     Spice::deinit();
     Time::deinit();
@@ -81,119 +86,118 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     LogManager::deinitialize();
 }
 
-OpenSpaceEngine& OpenSpaceEngine::ref() {
+OpenSpaceEngine& OpenSpaceEngine::ref()
+{
     assert(_engine);
     return *_engine;
 }
 
-bool OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary) {
-    auto path_keys = dictionary.keys();
-    for(auto key: path_keys) {
+void OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    const std::vector<std::string>& pathKeys = dictionary.keys();
+    for (const std::string& key : pathKeys) {
         std::string p;
-        if(dictionary.getValue(key, p)) {
-            std::stringstream ss;
-            ss << "${" << key << "}";
-            LDEBUG(ss.str() << ": " << p);
-            FileSys.registerPathToken(ss.str(), p);
+        if (dictionary.getValue(key, p)) {
+            const std::string fullKey
+                  = ghoul::filesystem::FileSystem::TokenOpeningBraces + key
+                    + ghoul::filesystem::FileSystem::TokenClosingBraces;
+            LDEBUG(fullKey << ": " << p);
+            FileSys.registerPathToken(fullKey, p);
         }
     }
-
-    return true;
 }
-bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& filename) {
-    if( ! FileSys.fileExists(filename))
+
+bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& filename)
+{
+    if (!FileSys.fileExists(filename))
         return false;
-    
+
     const std::string absolutePath = FileSys.absolutePath(filename);
-    
-#ifdef WIN32
-    auto last = absolutePath.find_last_of("\\");
-#else
-    auto last = absolutePath.find_last_of("/");
-#endif
-    if(last == absolutePath.npos)
+
+    std::string::size_type last
+          = absolutePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
+    if (last == std::string::npos)
         return false;
-    
+
     std::string basePath = absolutePath.substr(0, last);
-    
-    FileSys.registerPathToken("${BASE_PATH}", basePath);
-    
+
+    FileSys.registerPathToken(_basePathToken, basePath);
+
     return true;
 }
 
-bool OpenSpaceEngine::findConfiguration(std::string& filename) {
-    if (filename != "") {
+bool OpenSpaceEngine::findConfiguration(std::string& filename)
+{
+    if (!filename.empty())
         return FileSys.fileExists(filename);
-    }
-    std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
-#ifdef WIN32
-    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '\\');
-#else
-    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(), '/');
-#endif
-    
-    std::string cfgname = "openspace.cfg";
-    
-    for (int i = 0; i < occurrences; ++i) {
-        if(i > 0) {
-            cfgname = "../" + cfgname;
+    else {
+        std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
+        size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
+                                        ghoul::filesystem::FileSystem::PathSeparator);
+
+        std::string cfgname = _configurationFile;
+
+        bool cfgFileFound = false;
+        for (size_t i = 0; i < occurrences; ++i) {
+            if (i > 0)
+                cfgname = "../" + cfgname;
+            if (FileSys.fileExists(cfgname)) {
+                cfgFileFound = true;
+                break;
+            }
         }
-        
-        if(FileSys.fileExists(cfgname))
-            break;
+        if (!cfgFileFound)
+            return false;
+
+        filename = cfgname;
+
+        return true;
     }
-    if ( ! FileSys.fileExists(cfgname)) {
-        return false;
-    }
-    
-    filename = cfgname;
-    
-    return true;
 }
 
-void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sgctArguments) {
+void OpenSpaceEngine::create(int argc, char** argv,
+                             std::vector<std::string>& sgctArguments)
+{
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
-    
+
     // initialize ghoul logging
     LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
-    
+
     // TODO change so initialize is not called in the create function
     ghoul::filesystem::FileSystem::initialize();
-    
+
     // TODO parse arguments if filename is specified, if not use default
     std::string configurationFilePath = "";
-    
+
     LDEBUG("Finding configuration");
-    if( ! OpenSpaceEngine::findConfiguration(configurationFilePath)) {
+    if (!OpenSpaceEngine::findConfiguration(configurationFilePath)) {
         LFATAL("Could not find OpenSpace configuration file!");
         assert(false);
     }
-    
-    LDEBUG("registering base path");
-    if( ! OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
+
+    LDEBUG("Registering base path");
+    if (!OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
         LFATAL("Could not register base path");
         assert(false);
     }
-    
+
     ghoul::Dictionary configuration;
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    if(configuration.hasKey("paths")) {
+    if (configuration.hasKey(configuration::pathKey)) {
         ghoul::Dictionary pathsDictionary;
-        if(configuration.getValue("paths", pathsDictionary)) {
+        if (configuration.getValue(configuration::pathKey, pathsDictionary))
             OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
-        }
     }
-    
-    std::string sgctConfigurationPath = "${SGCT}/single.xml";
-    if(configuration.hasKey("sgctConfig")) {
-        configuration.getValue("sgctConfig", sgctConfigurationPath);
-    }
-    
-    sgctArguments.push_back("OpenSpace");
-    sgctArguments.push_back("-config");
-    sgctArguments.push_back(absPath(sgctConfigurationPath));
+
+    std::string sgctConfigurationPath = _sgctDefaultConfigFile;
+    if (configuration.hasKey(configuration::sgctConfigKey))
+        configuration.getValue(configuration::sgctConfigKey, sgctConfigurationPath);
+
+    sgctArguments.emplace_back(argv[0]);
+    sgctArguments.emplace_back("-config");
+    sgctArguments.emplace_back(absPath(sgctConfigurationPath));
 
     // create objects
     _engine = new OpenSpaceEngine;
@@ -202,29 +206,32 @@ void OpenSpaceEngine::create(int argc, char** argv, std::vector<std::string>& sg
     _engine->_configurationManager = new ghoul::Dictionary;
 }
 
-void OpenSpaceEngine::destroy() {
+void OpenSpaceEngine::destroy()
+{
     delete _engine;
 }
 
-bool OpenSpaceEngine::isInitialized() {
+bool OpenSpaceEngine::isInitialized()
+{
     return _engine != nullptr;
 }
 
-bool OpenSpaceEngine::initialize() {
-
-    // clear the screen so the user don't have to see old buffer contents from the graphics card
-    glClearColor(0,0,0,0);
+bool OpenSpaceEngine::initialize()
+{
+    // clear the screen so the user don't have to see old buffer contents from the
+    // graphics card
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
     glfwSwapBuffers(win);
 
     // Register the filepaths from static function enables easy testing
-    //registerFilePaths();
+    // registerFilePaths();
     _context.createContextFromGLContext();
 
     // initialize the configurationmanager with the default configuration
     //_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
-    
+
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
@@ -243,87 +250,102 @@ bool OpenSpaceEngine::initialize() {
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
 
-    // Initialize OpenSPace input devices
+    // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
-    
+
     return true;
 }
 
-ghoul::Dictionary& OpenSpaceEngine::configurationManager() {
+ghoul::Dictionary& OpenSpaceEngine::configurationManager()
+{
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_configurationManager;
 }
-    
-ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
+
+ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
+{
     return _context;
 }
 
-InteractionHandler& OpenSpaceEngine::interactionHandler() {
+InteractionHandler& OpenSpaceEngine::interactionHandler()
+{
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_interactionHandler;
 }
 
-RenderEngine& OpenSpaceEngine::renderEngine() {
+RenderEngine& OpenSpaceEngine::renderEngine()
+{
     // TODO custom assert (ticket #5)
     assert(_configurationManager != nullptr);
     return *_renderEngine;
 }
 
-bool OpenSpaceEngine::initializeGL() {
+bool OpenSpaceEngine::initializeGL()
+{
     return _renderEngine->initializeGL();
 }
 
-void OpenSpaceEngine::preSynchronization() {
+void OpenSpaceEngine::preSynchronization()
+{
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
-        
+
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
     }
 }
 
-void OpenSpaceEngine::postSynchronizationPreDraw() {
+void OpenSpaceEngine::postSynchronizationPreDraw()
+{
     _renderEngine->postSynchronizationPreDraw();
 }
 
-void OpenSpaceEngine::render() {
+void OpenSpaceEngine::render()
+{
     _renderEngine->render();
 }
 
-void OpenSpaceEngine::postDraw() {
+void OpenSpaceEngine::postDraw()
+{
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
     }
 }
 
-void OpenSpaceEngine::keyboardCallback(int key, int action) {
-	if (sgct::Engine::instance()->isMaster()) {
-		_interactionHandler->keyboardCallback(key, action);
-	}
+void OpenSpaceEngine::keyboardCallback(int key, int action)
+{
+    if (sgct::Engine::instance()->isMaster()) {
+        _interactionHandler->keyboardCallback(key, action);
+    }
 }
 
-void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
-	if (sgct::Engine::instance()->isMaster()) {
-		_interactionHandler->mouseButtonCallback(key, action);
-	}
+void OpenSpaceEngine::mouseButtonCallback(int key, int action)
+{
+    if (sgct::Engine::instance()->isMaster()) {
+        _interactionHandler->mouseButtonCallback(key, action);
+    }
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y) {
+void OpenSpaceEngine::mousePositionCallback(int x, int y)
+{
     _interactionHandler->mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
+{
     _interactionHandler->mouseScrollWheelCallback(pos);
 }
 
-void OpenSpaceEngine::encode() {
+void OpenSpaceEngine::encode()
+{
 }
 
-void OpenSpaceEngine::decode() {
+void OpenSpaceEngine::decode()
+{
 }
 
-} // namespace openspace
+}  // namespace openspace

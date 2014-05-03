@@ -36,12 +36,10 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
-
 namespace openspace {
 
 class RenderablePlanet : public Renderable {
 public:
-    // constructors & destructor
     RenderablePlanet(const ghoul::Dictionary& dictionary);
     ~RenderablePlanet();
 

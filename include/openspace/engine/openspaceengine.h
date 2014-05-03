@@ -48,11 +48,11 @@ public:
 
     static bool isInitialized();
     bool initialize();
-    
-    static bool registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
+
+    static void registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
     static bool registerBasePathFromConfigurationFile(const std::string& filename);
-    static bool findConfiguration(std::string& filename) ;
-    
+    static bool findConfiguration(std::string& filename);
+
     ghoul::Dictionary& configurationManager();
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
@@ -78,16 +78,15 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    //Flare* _flare;
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
-    //ScriptEngine* _scriptEngine;
+    // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
 };
-    
+
 #define OsEng (openspace::OpenSpaceEngine::ref())
 
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __OPENSPACEENGINE_H__
+#endif  // __OPENSPACEENGINE_H__
