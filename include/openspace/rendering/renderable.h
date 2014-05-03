@@ -6,12 +6,12 @@
 #include <openspace/util/pss.h>
 #include <openspace/util/camera.h>
 #include <ghoul/misc/dictionary.h>
+#include <openspace/properties/propertyowner.h>
 
 namespace openspace {
 
-class Renderable {
+class Renderable : public properties::PropertyOwner {
 public:
-    
 	// constructors & destructor
 	Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();

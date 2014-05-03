@@ -42,54 +42,61 @@ namespace {
 }
 
 namespace openspace {
-	
-SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary):
-    _parent(nullptr), _nodeName("Unnamed OpenSpace SceneGraphNode"), _position(nullptr),
-    _renderable(nullptr), _renderableVisible(false), _boundingSphereVisible(false)
+
+SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary)
+    : _parent(nullptr)
+    , _nodeName("Unnamed OpenSpace SceneGraphNode")
+    , _position(nullptr)
+    , _renderable(nullptr)
+    , _renderableVisible(false)
+    , _boundingSphereVisible(false)
 {
     ghoul::Dictionary localDictionary = dictionary;
-    
+
     // set the _nodeName if available
     localDictionary.getValue("Name", _nodeName);
-    
+
     std::string path = "";
     localDictionary.getValue("Path", path);
-    
-    if(localDictionary.hasKey("Renderable")) {
-        if(safeCreationWithDictionary<Renderable>(&_renderable, "Renderable", &localDictionary, path)) {
+
+    if (localDictionary.hasKey("Renderable")) {
+        if (safeCreationWithDictionary<Renderable>(&_renderable, "Renderable",
+                                                   &localDictionary, path)) {
             LDEBUG(_nodeName << ": Successful creation of renderable!");
         } else {
             LDEBUG(_nodeName << ": Failed to create renderable!");
         }
     }
-    if(localDictionary.hasKey("Position")) {
-        if(safeCreationWithDictionary<PositionInformation>(&_position, "Position", &localDictionary, path)) {
+    if (localDictionary.hasKey("Position")) {
+        if (safeCreationWithDictionary<PositionInformation>(&_position, "Position",
+                                                            &localDictionary, path)) {
             LDEBUG(_nodeName << ": Successful creation of position!");
         } else {
             LDEBUG(_nodeName << ": Failed to create position!");
         }
     }
-    
+
     if (_position == nullptr) {
         _position = new ConstantPositionInformation(ghoul::Dictionary());
         _position->initialize();
     }
 }
 
-SceneGraphNode::~SceneGraphNode() {
-	deinitialize();
+SceneGraphNode::~SceneGraphNode()
+{
+    deinitialize();
 }
 
-bool SceneGraphNode::initialize() {
-    if(_renderable != nullptr)
-		_renderable->initialize();
-    
+bool SceneGraphNode::initialize()
+{
+    if (_renderable != nullptr)
+        _renderable->initialize();
+
     // deallocate position
-    if(_position != nullptr)
+    if (_position != nullptr)
         _position->initialize();
     return true;
 }
-
 
 bool SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << _nodeName);

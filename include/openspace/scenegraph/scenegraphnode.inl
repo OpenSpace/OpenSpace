@@ -29,23 +29,22 @@
 
 namespace openspace {
 
-template<class T>
-bool safeCreationWithDictionary(  T** object,
-                                    const std::string& key,
-                                    ghoul::Dictionary* dictionary,
-                                    const std::string& path = "")
-{
-    if(dictionary->hasKey(key)) {
+template <class T>
+bool safeCreationWithDictionary(T** object, const std::string& key,
+                                ghoul::Dictionary* dictionary,
+                                const std::string& path = "") {
+    if (dictionary->hasKey(key)) {
         ghoul::Dictionary tmpDictionary;
-        if(dictionary->getValue(key, tmpDictionary)) {
-            if ( ! tmpDictionary.hasKey("Path") && path != "") {
+        if (dictionary->getValue(key, tmpDictionary)) {
+            if (!tmpDictionary.hasKey("Path") && path != "") {
                 tmpDictionary.setValue("Path", path);
             }
             std::string renderableType;
-            if(tmpDictionary.getValue("Type", renderableType)) {
-                ghoul::TemplateFactory<T>* factory = FactoryManager::ref().factoryByType<T>();
+            if (tmpDictionary.getValue("Type", renderableType)) {
+                ghoul::TemplateFactory<T>* factory
+                      = FactoryManager::ref().factoryByType<T>();
                 T* tmp = factory->create(renderableType, tmpDictionary);
-                if(tmp != nullptr) {
+                if (tmp != nullptr) {
                     *object = tmp;
                     return true;
                 }

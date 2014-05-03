@@ -56,7 +56,7 @@ private:
     std::map<std::string, std::string> _groupNames;
 };
 
-} // namespace properties
-} // namespace openspace
+}  // namespace properties
+}  // namespace openspace
 
 #endif // __PROPERTYOWNER_H__

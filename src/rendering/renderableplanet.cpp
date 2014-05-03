@@ -14,41 +14,41 @@ namespace {
 
 namespace openspace {
 
-RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary): programObject_(nullptr),
+RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary): _programObject(nullptr),
                                                                    _texturePath(""),
-                                                                   texture_(nullptr),
-                                                                   planet_(nullptr)
+                                                                   _texture(nullptr),
+                                                                   _planet(nullptr)
 {
-    double value = 1.0f, exponent= 0.0f;
+    double value = 1.0f, exponent = 0.0f;
     double segments = 20.0;
-    
-    if(dictionary.hasKey("Geometry.Radius.1"))
+
+    if (dictionary.hasKey("Geometry.Radius.1"))
         dictionary.getValue("Geometry.Radius.1", value);
-    
-    if(dictionary.hasKey("Geometry.Radius.2"))
+
+    if (dictionary.hasKey("Geometry.Radius.2"))
         dictionary.getValue("Geometry.Radius.2", exponent);
-    
-    if(dictionary.hasKey("Geometry.Segments"))
+
+    if (dictionary.hasKey("Geometry.Segments"))
         dictionary.getValue("Geometry.Segments", segments);
-    
+
     // create the power scaled scalar
     pss planetSize(value, exponent);
     setBoundingSphere(planetSize);
-    
+
     // get path if available
     std::string path = "";
-    if(dictionary.hasKey("Path")) {
-       dictionary.getValue("Path", path);
-       path += "/";
+    if (dictionary.hasKey("Path")) {
+        dictionary.getValue("Path", path);
+        path += "/";
     }
-    
-    if(dictionary.hasKey("Textures.Color")) {
+
+    if (dictionary.hasKey("Textures.Color")) {
         std::string texturePath;
         dictionary.getValue("Textures.Color", texturePath);
         _texturePath = path + texturePath;
     }
-    
-    planet_ = new PowerScaledSphere(pss(value, exponent), static_cast<int>(segments));
+
+    _planet = new PowerScaledSphere(pss(value, exponent), static_cast<int>(segments));
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -58,20 +58,20 @@ RenderablePlanet::~RenderablePlanet() {
 bool RenderablePlanet::initialize() {
     
     bool completeSuccess = true;
-    if (programObject_ == nullptr) {
-        completeSuccess = OsEng.ref().configurationManager().getValue("pscShader", programObject_);
+    if (_programObject == nullptr) {
+        completeSuccess = OsEng.ref().configurationManager().getValue("pscShader", _programObject);
     }
     
     if(_texturePath != "") {
-        texture_ = ghoul::opengl::loadTexture(_texturePath);
-        if (texture_) {
+        _texture = ghoul::opengl::loadTexture(_texturePath);
+        if (_texture) {
             LDEBUG("Loaded texture from '" << _texturePath <<"'");
-            texture_->uploadTexture();
+            _texture->uploadTexture();
         } else {
             completeSuccess = false;
         }
     }
-    planet_->initialize();
+    _planet->initialize();
     
     return completeSuccess;
 }
@@ -79,33 +79,33 @@ bool RenderablePlanet::initialize() {
 
 
 bool RenderablePlanet::deinitialize() {
-    if(planet_)
-        delete planet_;
+    if(_planet)
+        delete _planet;
     
-    if(texture_)
-        delete texture_;
+    if(_texture)
+        delete _texture;
     
     return true;
 }
 
 void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject) {
 	assert(programObject);
-	programObject_ = programObject;
+	_programObject = programObject;
 }
 
 void RenderablePlanet::setTexture(ghoul::opengl::Texture *texture) {
 	assert(texture);
-	texture_ = texture;
+	_texture = texture;
 }
 
 void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
 
 	// check so that the shader is set
-	assert(programObject_);
-	assert(texture_);
+	assert(_programObject);
+	assert(_texture);
     
 	// activate shader
-	programObject_->activate();
+	_programObject->activate();
 
 	// fetch data
 	psc currentPosition = thisPosition;
@@ -118,28 +118,38 @@ void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
 //    transform = glm::rotate(transform, 4.1f*static_cast<float>(sgct::Engine::instance()->getTime()), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// setup the data to the shader
-	programObject_->setUniform("ViewProjection", camera->getViewProjectionMatrix());
-	programObject_->setUniform("ModelTransform", transform);
-	programObject_->setUniform("campos", campos.getVec4f());
-	programObject_->setUniform("objpos", currentPosition.getVec4f());
-	programObject_->setUniform("camrot", camrot);
-	programObject_->setUniform("scaling", scaling.getVec2f());
+	_programObject->setUniform("ViewProjection", camera->getViewProjectionMatrix());
+	_programObject->setUniform("ModelTransform", transform);
+	_programObject->setUniform("campos", campos.getVec4f());
+	_programObject->setUniform("objpos", currentPosition.getVec4f());
+	_programObject->setUniform("camrot", camrot);
+	_programObject->setUniform("scaling", scaling.getVec2f());
 		
 	// Bind texture
     glActiveTexture(GL_TEXTURE0);
-    texture_->bind();
-    programObject_->setUniform("texture1", 0);
+    _texture->bind();
+    _programObject->setUniform("texture1", 0);
 		
 	// render
-	planet_->render();
+	_planet->render();
 
 	// disable shader
-	programObject_->deactivate();
+	_programObject->deactivate();
 	
 }
 
 void RenderablePlanet::update() {
 
 }
-	
+
+void RenderablePlanet::setName(std::string name) {
+    _name = std::move(name);
+}
+
+const std::string& RenderablePlanet::name() const {
+    return _name;
+}
+
+
+
 } // namespace openspace

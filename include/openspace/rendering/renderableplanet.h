@@ -17,6 +17,9 @@ public:
 	// constructors & destructor
 	RenderablePlanet(const ghoul::Dictionary& dictionary);
 	~RenderablePlanet();
+
+    void setName(std::string name);
+    const std::string& name() const override;
     
     bool initialize();
     bool deinitialize();
@@ -28,16 +31,17 @@ public:
 	virtual void update();
 
 private:
-	
+    std::string _name;
+
     // shader
-    ghoul::opengl::ProgramObject *programObject_;
-    
+    ghoul::opengl::ProgramObject* _programObject;
+
     // texture
     std::string _texturePath;
-	ghoul::opengl::Texture *texture_;
-    
+    ghoul::opengl::Texture* _texture;
+
     // Object
-	PowerScaledSphere *planet_;
+    PowerScaledSphere* _planet;
 };
 
 } // namespace openspace

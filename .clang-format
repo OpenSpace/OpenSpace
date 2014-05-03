@@ -11,7 +11,7 @@ AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackParameters: true
 BreakBeforeBinaryOperators: true
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Stroustrup
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: true
 ColumnLimit: 90
@@ -24,6 +24,7 @@ IndentCaseLabels: true
 #Check next
 IndentFunctionDeclarationAfterType: true
 IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks : false
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 PenaltyBreakBeforeFirstCallParameter: 19

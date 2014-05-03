@@ -64,7 +64,7 @@ void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) 
 }
 
 const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const {
-    auto it = std::find(_groupNames.begin(), _groupNames.end(), groupID);
+    auto it = _groupNames.find(groupID);
     if (it == _groupNames.end())
         return groupID;
     else
