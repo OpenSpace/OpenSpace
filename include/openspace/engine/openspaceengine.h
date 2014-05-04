@@ -83,6 +83,8 @@ private:
     RenderEngine* _renderEngine;
     // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
+
+    sgct::SharedVector<char> _synchronizationBuffer;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

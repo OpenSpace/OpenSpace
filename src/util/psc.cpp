@@ -81,7 +81,7 @@ glm::dvec4  psc::getVec4() const{
 	return vec_;
 }
 
-glm::vec4  psc::getVec4f() {
+glm::vec4  psc::getVec4f() const {
 	vecf_ = glm::vec4(vec_);
 	return vecf_;
 }
@@ -90,7 +90,7 @@ glm::dvec3 psc::getVec3() const {
 	return glm::dvec3(vec_[0]*pow(k,vec_[3]),vec_[1]*pow(k,vec_[3]),vec_[2]*pow(k,vec_[3]));
 }
 
-glm::vec3 psc::getVec3f() {
+glm::vec3 psc::getVec3f() const {
 	return glm::vec3(vec_[0]*pow(k,vec_[3]),vec_[1]*pow(k,vec_[3]),vec_[2]*pow(k,vec_[3]));
 }
 

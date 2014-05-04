@@ -28,9 +28,11 @@
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
 
-//#include "sgct.h"
+#include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
+
+#include <array>
 
 namespace {
 const std::string _loggerCat = "RenderEngine";
@@ -56,7 +58,7 @@ bool RenderEngine::initialize()
     _mainCamera->setPosition(psc(0.0, 0.0, 1.499823, 11.0));
 
     // if master, setup interaction
-    if (sgct::Engine::instance()->isMaster())
+    //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
 
     return true;
@@ -210,6 +212,180 @@ std::shared_ptr<SceneGraph> RenderEngine::sceneGraph()
 void RenderEngine::setSceneGraph(std::shared_ptr<SceneGraph> sceneGraph)
 {
     _sceneGraph = sceneGraph;
+}
+
+void RenderEngine::serialize(std::vector<char>& dataStream, size_t& offset) {
+    // TODO: This has to be redone properly (ab) [new class providing methods to serialize
+    // variables]
+
+    // _viewRotation
+    // _cameraDirection
+    // camera->position
+    // camera->viewRotationMatrix
+    // camera->scaling
+
+
+    const glm::vec2 scaling = _mainCamera->scaling();
+    const psc position = _mainCamera->position();
+    //const psc origin = OsEng.interactionHandler().getOrigin();
+    //const pss pssl = (position - origin).length();
+    //_mainCamera->cameraDirection()
+
+    union storage {
+        float value;
+        std::array<char, 4> representation;
+    } s;
+
+    s.value = _mainCamera->cameraDirection().x;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->cameraDirection().y;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->cameraDirection().z;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->rotation().x;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->rotation().y;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->rotation().z;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->rotation().w;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->position().getVec4f().x;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->position().getVec4f().y;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->position().getVec4f().z;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+
+    s.value = _mainCamera->position().getVec4f().w;
+    dataStream[offset++] = s.representation[0];
+    dataStream[offset++] = s.representation[1];
+    dataStream[offset++] = s.representation[2];
+    dataStream[offset++] = s.representation[3];
+}
+
+void RenderEngine::deserialize(const std::vector<char>& dataStream, size_t& offset) {
+    // TODO: This has to be redone properly (ab)
+
+    union storage {
+        float value;
+        std::array<char, 4> representation;
+    } s;
+
+    glm::vec3 cameraDirection;
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    cameraDirection.x = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    cameraDirection.y = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    cameraDirection.z = s.value;
+    _mainCamera->setCameraDirection(cameraDirection);
+
+    glm::quat rotation;
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    rotation.x = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    rotation.y = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    rotation.z = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    rotation.w = s.value;
+    _mainCamera->setRotation(rotation);
+
+    glm::vec4 position;
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    position.x = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    position.y = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    position.z = s.value;
+
+    s.representation[0] = dataStream[offset++];
+    s.representation[1] = dataStream[offset++];
+    s.representation[2] = dataStream[offset++];
+    s.representation[3] = dataStream[offset++];
+    position.w = s.value;
+    _mainCamera->setPosition(position);
+}
+
+Camera* RenderEngine::camera() const {
+    return _mainCamera;
 }
 
 }  // namespace openspace

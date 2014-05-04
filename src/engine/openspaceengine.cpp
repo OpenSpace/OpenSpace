@@ -201,6 +201,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.push_back(argv[0]);
     sgctArguments.push_back("-config");
     sgctArguments.push_back(absPath(sgctConfigurationPath));
+
+    for (int i = 1; i < argc; ++i)
+        sgctArguments.push_back(argv[i]);
 }
 
 void OpenSpaceEngine::destroy()
@@ -369,10 +372,24 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
 
 void OpenSpaceEngine::encode()
 {
+    std::vector<char> dataStream(1024);
+
+    size_t offset = 0;
+    // serialization
+    _renderEngine->serialize(dataStream, offset);
+
+    _synchronizationBuffer.setVal(dataStream);
+    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
 }
 
 void OpenSpaceEngine::decode()
 {
+    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+    std::vector<char> dataStream = std::move(_synchronizationBuffer.getVal());
+    size_t offset = 0;
+
+    // deserialize in the same order as done in serialization
+    _renderEngine->deserialize(dataStream, offset);
 }
 
 }  // namespace openspace

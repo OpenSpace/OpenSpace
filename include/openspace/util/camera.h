@@ -58,6 +58,7 @@ public:
     const glm::quat& rotation() const;
 
     const glm::vec3& viewDirection() const;
+    
     const float& maxFov() const;
     const float& sinMaxFov() const;
     void setMaxFov(float fov);

@@ -170,7 +170,8 @@ bool SceneGraph::initialize()
                                       << "'");
         SceneGraphNode* focusNode = focusIterator->second;
         SceneGraphNode* positionNode = positionIterator->second;
-        Camera* c = OsEng.interactionHandler().getCamera();
+        Camera* c = OsEng.ref().renderEngine().camera();
+        //Camera* c = OsEng.interactionHandler().getCamera();
 
         // TODO: Make distance depend on radius
         // TODO: Set distance and camera direction in some more smart way

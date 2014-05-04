@@ -36,9 +36,9 @@ public:
 	const double * value_ptr();
 	const float * value_ptrf();
 	glm::dvec4 getVec4() const;
-	glm::vec4 getVec4f();
+	glm::vec4 getVec4f() const;
 	glm::dvec3 getVec3() const;
-	glm::vec3 getVec3f();
+	glm::vec3 getVec3f() const;
 	pss length() const;
 	glm::dvec3 getDirection() const;
 	glm::vec3 getDirectionf() const;
@@ -88,7 +88,7 @@ private:
 	glm::dvec4 vec_;
 
 	// float vector used when returning float values
-	glm::vec4 vecf_;
+	mutable glm::vec4 vecf_;
 
 };
 

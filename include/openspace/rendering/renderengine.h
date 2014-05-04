@@ -44,15 +44,16 @@ public:
     void setSceneGraph(std::shared_ptr<SceneGraph> sceneGraph);
     std::shared_ptr<SceneGraph> sceneGraph();
 
+    Camera* camera() const;
+
 	// sgct wrapped functions
     bool initializeGL();
     void postSynchronizationPreDraw();
     void render();
     void postDraw();
 
-	// object extensions
-	//virtual void encode();
-	//virtual void decode();
+	void serialize(std::vector<char>& dataStream, size_t& offset);
+	void deserialize(const std::vector<char>& dataStream, size_t& offset);
 	
 private:
 	Camera* _mainCamera;
