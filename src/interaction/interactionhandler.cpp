@@ -150,7 +150,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	lockControls();
 	
 	// the camera position
-	psc relative = camera_->getPosition();
+	psc relative = camera_->position();
 
 	// should be changed to something more dynamic =)
 	psc origin;
@@ -172,7 +172,7 @@ void InteractionHandler::distance(const pss &distance) {
 	//assert(this_);
 	lockControls();
 	
-	psc relative = camera_->getPosition();
+	psc relative = camera_->position();
 	psc origin;
 	if(node_) {
 		origin = node_->getWorldPosition();
@@ -245,8 +245,8 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
 //	return glm::vec3((sgct::Engine::instance()->getActiveViewMatrix() * glm::vec4(trackballPos,0)));
 
     //Get x,y,z axis vectors of current camera view
-	glm::vec3 currentViewYaxis = glm::normalize(camera_->getLookUp());
-	psc viewDir = camera_->getPosition() - node_->getWorldPosition();
+	glm::vec3 currentViewYaxis = glm::normalize(camera_->lookUpVector());
+	psc viewDir = camera_->position() - node_->getWorldPosition();
 	glm::vec3 currentViewZaxis = glm::normalize(viewDir.getVec3f());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
@@ -293,7 +293,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 		// Apply quaternion to camera
 		orbit(glm::inverse(quaternion));
 		camera_->rotate(quaternion);
-		camera_->setLookUp(glm::rotate(quaternion, camera_->getLookUp()));
+		camera_->setLookUpVector(glm::rotate(quaternion, camera_->lookUpVector()));
 
 		_lastTrackballPos = curTrackballPos;
 	}

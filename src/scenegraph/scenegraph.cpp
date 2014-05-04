@@ -314,39 +314,6 @@ void SceneGraph::loadModule(const std::string& modulePath)
 
         _allNodes.emplace(node->nodeName(), node);
         _nodes.push_back(node);
-
-
-        //    std::string moduleName;
-        //    if (element.getValue(configuration::nameKey, moduleName)) {
-        //        std::string parentName;
-        //        if (!element.getValue(configuration::parentKey, parentName)) {
-        //            LWARNING("Could not find 'Parent' key, using 'Root'.");
-        //            parentName = "Root";
-        //        }
-
-        //        auto parentIterator = _allNodes.find(parentName);
-        //        if (parentIterator == _allNodes.end()) {
-        //            LFATAL("Could not find parent named '"
-        //                   << parentName << "' for '" << moduleName << "'."
-        //                   << " Check module definition order. Skipping module.");
-        //            continue;
-        //        }
-
-        //        // allocate SceneGraphNode and initialize with Dictionary
-        //        element.setValue("Path", modulePath);
-        //        SceneGraphNode* node = nullptr;
-        //        node = new SceneGraphNode(element);
-        //        if (node != nullptr) {
-        //            // add to internal data structures
-        //            _allNodes.insert(std::make_pair(moduleName, node));
-        //            _nodes.push_back(node);
-
-        //            // set child and parent
-        //            SceneGraphNode* parentNode = parentIterator->second;
-        //            parentNode->addNode(node);
-        //        }
-        //    }
-        //}
     }
 
     // Print the tree

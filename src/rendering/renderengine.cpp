@@ -110,7 +110,7 @@ bool RenderEngine::initializeGL()
         // get viewdirection, stores the direction in the camera, used for culling
         const glm::vec3 viewdir = glm::normalize(eyePosition - center);
         _mainCamera->setCameraDirection(-viewdir);
-        _mainCamera->setLookUp(glm::vec3(0.0, 1.0, 0.0));
+        _mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
 
         // set the initial fov to be 0.0 which means everything will be culled
         float maxFov = 0.0f;
@@ -172,9 +172,9 @@ void RenderEngine::render()
 #define FONT_SIZE 10
 #endif
 
-        const glm::vec2 scaling = _mainCamera->getScaling();
-        const glm::vec3 viewdirection = _mainCamera->getViewDirection();
-        const psc position = _mainCamera->getPosition();
+        const glm::vec2 scaling = _mainCamera->scaling();
+        const glm::vec3 viewdirection = _mainCamera->viewDirection();
+        const psc position = _mainCamera->position();
         const psc origin = OsEng.interactionHandler().getOrigin();
         const pss pssl = (position - origin).length();
 

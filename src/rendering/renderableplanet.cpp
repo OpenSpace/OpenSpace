@@ -133,16 +133,16 @@ void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
 
 	// fetch data
 	psc currentPosition = thisPosition;
-	psc campos = camera->getPosition();
-	glm::mat4 camrot = camera->getViewRotationMatrix();
-    pss scaling = camera->getScaling();
+	psc campos = camera->position();
+	glm::mat4 camrot = camera->viewRotationMatrix();
+    pss scaling = camera->scaling();
 
 	// scale the planet to appropriate size since the planet is a unit sphere
 	glm::mat4 transform = glm::mat4(1);
 //    transform = glm::rotate(transform, 4.1f*static_cast<float>(sgct::Engine::instance()->getTime()), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// setup the data to the shader
-	_programObject->setUniform("ViewProjection", camera->getViewProjectionMatrix());
+	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("campos", campos.getVec4f());
 	_programObject->setUniform("objpos", currentPosition.getVec4f());

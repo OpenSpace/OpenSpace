@@ -1,3 +1,26 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 // open space includes
 #include <openspace/util/camera.h>
@@ -8,95 +31,117 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace openspace {
-	
-Camera::Camera() {
-	scaling_ = glm::vec2(1.0,0.0);
-	glm::vec3 EulerAngles(0, 0, 0);
-	viewRotation_ = glm::quat(EulerAngles);
+
+Camera::Camera()
+    : _scaling(1.f, 0.f)
+    , _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
+{
 }
 
-Camera::~Camera() {
-
+Camera::~Camera()
+{
 }
 
-void Camera::setPosition(psc pos) {
-    position_ = pos;
+void Camera::setPosition(psc pos)
+{
+    _position = std::move(pos);
 }
 
-const psc& Camera::getPosition() const {
-	return position_;
+const psc& Camera::position() const
+{
+    return _position;
 }
 
-
-void Camera::setViewProjectionMatrix(const glm::mat4 &viewProjectionMatrix) {
-	viewProjectionMatrix_ = viewProjectionMatrix;
+void Camera::setViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
+{
+    _viewProjectionMatrix = std::move(viewProjectionMatrix);
 }
 
-void Camera::setCameraDirection(const glm::vec3 &cameraDirection) {
-	cameraDirection_ = cameraDirection;
+const glm::mat4& Camera::viewProjectionMatrix() const
+{
+    return _viewProjectionMatrix;
 }
 
-const glm::mat4 & Camera::getViewProjectionMatrix() const {
-	return viewProjectionMatrix_;
+void Camera::setCameraDirection(glm::vec3 cameraDirection)
+{
+    _cameraDirection = std::move(cameraDirection);
 }
 
-const glm::mat4 & Camera::getViewRotationMatrix() const {
-	return viewRotationMatrix_;
+glm::vec3 Camera::cameraDirection() const
+{
+    return _cameraDirection;
 }
 
-void Camera::compileViewRotationMatrix() {
-	// convert from quaternion to rotationmatrix using glm
-	viewRotationMatrix_ = glm::mat4_cast(viewRotation_);
-
-	// the camera matrix needs to be rotated inverse to the world
-	viewDirection_ = glm::rotate(glm::inverse(viewRotation_), cameraDirection_);
-	viewDirection_ = glm::normalize(viewDirection_);
+const glm::mat4& Camera::viewRotationMatrix() const
+{
+    return _viewRotationMatrix;
 }
 
-void Camera::rotate(glm::quat rotation) {
-	viewRotation_ = rotation * viewRotation_;
-	viewRotation_ = glm::normalize(viewRotation_);
+void Camera::compileViewRotationMatrix()
+{
+    // convert from quaternion to rotation matrix using glm
+    _viewRotationMatrix = glm::mat4_cast(_viewRotation);
+
+    // the camera matrix needs to be rotated inverse to the world
+    _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
+    _viewDirection = glm::normalize(_viewDirection);
 }
 
-void Camera::setRotation(glm::quat rotation) {
-	viewRotation_ = glm::normalize(rotation);
+void Camera::rotate(const glm::quat& rotation)
+{
+    _viewRotation = rotation * _viewRotation;
+    _viewRotation = glm::normalize(_viewRotation);
 }
 
-const glm::quat & Camera::getRotation() const {
-	return viewRotation_;
+void Camera::setRotation(glm::quat rotation)
+{
+    _viewRotation = glm::normalize(std::move(rotation));
 }
 
-const glm::vec3 & Camera::getViewDirection() const {
-	return viewDirection_;
+const glm::quat& Camera::rotation() const
+{
+    return _viewRotation;
 }
 
-const float & Camera::getMaxFov() const {
-	return maxFov_;
+const glm::vec3& Camera::viewDirection() const
+{
+    return _viewDirection;
 }
 
-const float & Camera::getSinMaxFov() const {
-	return sinMaxFov_;
+const float& Camera::maxFov() const
+{
+    return _maxFov;
 }
 
-void Camera::setMaxFov(const float &fov) {
-	maxFov_ = fov;
-	sinMaxFov_ = sin(maxFov_);
+const float& Camera::sinMaxFov() const
+{
+    return _sinMaxFov;
 }
 
-void Camera::setScaling(const glm::vec2 &scaling) {
-	scaling_ = scaling;
+void Camera::setMaxFov(float fov)
+{
+    _maxFov = fov;
+    _sinMaxFov = sin(_maxFov);
 }
 
-const glm::vec2 & Camera::getScaling() const {
-	return scaling_;
+void Camera::setScaling(glm::vec2 scaling)
+{
+    _scaling = std::move(scaling);
 }
 
-void Camera::setLookUp(glm::vec3 lookUp) {
-	lookUp_ = lookUp;
+const glm::vec2& Camera::scaling() const
+{
+    return _scaling;
 }
 
-const glm::vec3 Camera::getLookUp() const {
-	return lookUp_;
+void Camera::setLookUpVector(glm::vec3 lookUp)
+{
+    _lookUp = std::move(lookUp);
 }
-	
+
+const glm::vec3 Camera::lookUpVector() const
+{
+    return _lookUp;
+}
+
 } // namespace openspace

@@ -130,7 +130,6 @@ bool SceneGraphNode::initialize()
     if (_renderable != nullptr)
         _renderable->initialize();
 
-    // deallocate position
     if (_ephemeris != nullptr)
         _ephemeris->initialize();
     return true;
@@ -140,26 +139,19 @@ bool SceneGraphNode::deinitialize()
 {
     LDEBUG("Deinitialize: " << _nodeName);
 
-    // deallocate the renderable
-    if (_renderable != nullptr)
-        delete _renderable;
-
-    // deallocate position
-    if (_ephemeris != nullptr)
-        delete _ephemeris;
+    delete _renderable;
+    _renderable = nullptr;
+    delete _ephemeris;
+    _ephemeris = nullptr;
 
     // deallocate the child nodes and delete them, iterate c++11 style
-    for (auto child : _children)
+    for (SceneGraphNode* child : _children)
         delete child;
-
-    // empty the children vector
-    _children.erase(_children.begin(), _children.end());
+    _children.clear();
 
     // reset variables
     _parent = nullptr;
-    _renderable = nullptr;
-    _ephemeris = nullptr;
-    _nodeName = "Unnamed OpenSpace SceneGraphNode";
+    _nodeName = "";
     _renderableVisible = false;
     _boundingSphereVisible = false;
     _boundingSphere = pss(0.0, 0.0);
@@ -176,7 +168,7 @@ void SceneGraphNode::update()
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 {
     const psc thisPosition = parentPosition + _ephemeris->position();
-    const psc camPos = camera->getPosition();
+    const psc camPos = camera->position();
     const psc toCamera = thisPosition - camPos;
 
     // init as not visible
@@ -234,7 +226,6 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
 void SceneGraphNode::addNode(SceneGraphNode* child)
 {
     // add a child node and set this node to be the parent
-
     child->setParent(this);
     _children.push_back(child);
 }
@@ -281,7 +272,7 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const
 // bounding sphere
 pss SceneGraphNode::calculateBoundingSphere()
 {
-    // set the vounding sphere to 0.0
+    // set the bounding sphere to 0.0
     _boundingSphere = 0.0;
 
     if (_children.size() > 0) {  // node
@@ -290,7 +281,7 @@ pss SceneGraphNode::calculateBoundingSphere()
         // loop though all children and find the one furthest away/with the largest
         // bounding sphere
         for (size_t i = 0; i < _children.size(); ++i) {
-            // when positions is dynamix, change this part to fins the most distant
+            // when positions is dynamic, change this part to fins the most distant
             // position
             pss child = _children.at(i)->getPosition().length()
                         + _children.at(i)->calculateBoundingSphere();
@@ -326,20 +317,20 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss& s_rad,
                                          const Camera* camera)
 {
     // direction the camera is looking at in power scale
-    psc psc_camdir = psc(camera->getViewDirection());
+    psc psc_camdir = psc(camera->viewDirection());
 
     // the position of the camera, moved backwards in the view direction to encapsulate
     // the sphere radius
-    psc U = camera->getPosition() - psc_camdir * s_rad * (1.0 / camera->getSinMaxFov());
+    psc U = camera->position() - psc_camdir * s_rad * (1.0 / camera->sinMaxFov());
 
     // the vector to the object from the new position
     psc D = s_pos - U;
 
     const double a = psc_camdir.angle(D);
-    if (a < camera->getMaxFov()) {
+    if (a < camera->maxFov()) {
         // center is inside K''
-        D = s_pos - camera->getPosition();
-        if (D.length() * psc_camdir.length() * camera->getSinMaxFov()
+        D = s_pos - camera->position();
+        if (D.length() * psc_camdir.length() * camera->sinMaxFov()
             <= -psc_camdir.dot(D)) {
             // center is inside K'' and inside K'
             return D.length() <= s_rad;

@@ -199,7 +199,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     
 	float speed = 50.0f;
 	float time = sgct::Engine::getTime();
-    glm::mat4 transform = camera->getViewProjectionMatrix();
+    glm::mat4 transform = camera->viewProjectionMatrix();
     
     double factor = pow(10.0,thisPosition[3]);
     transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));

@@ -341,9 +341,9 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     if( ! _kernel.isValidKernel())
         return;
     
-    glm::mat4 transform = camera->getViewProjectionMatrix();
-    glm::mat4 camTransform = camera->getViewRotationMatrix();
-    psc relative = thisPosition-camera->getPosition();
+    glm::mat4 transform = camera->viewProjectionMatrix();
+    glm::mat4 camTransform = camera->viewRotationMatrix();
+    psc relative = thisPosition-camera->position();
 
     transform = transform*camTransform;
     transform = glm::translate(transform, relative.getVec3f());
