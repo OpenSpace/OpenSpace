@@ -36,8 +36,8 @@ namespace openspace {
 
 class Renderable : public properties::PropertyOwner {
 public:
-	// constructors & destructor
-	Renderable(const ghoul::Dictionary& dictionary);
+    // constructors & destructor
+    Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
     void setName(std::string name);
@@ -45,22 +45,21 @@ public:
 
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
-    
-	void setBoundingSphere(const pss &boundingSphere);
-	const pss &getBoundingSphere();
 
-	virtual void render(const Camera *camera, const psc &thisPosition) = 0;
-	virtual void update();
+    void setBoundingSphere(const pss& boundingSphere);
+    const pss& getBoundingSphere();
+
+    virtual void render(const Camera* camera, const psc& thisPosition) = 0;
+    virtual void update();
 
 protected:
-	//Renderable();
+    // Renderable();
 private:
     std::string _name;
 
     pss boundingSphere_;
-
 };
 
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __RENDERABLE_H__
+#endif  // __RENDERABLE_H__

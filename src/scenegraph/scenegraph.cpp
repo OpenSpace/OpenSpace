@@ -49,11 +49,13 @@ namespace {
 const std::string _loggerCat = "SceneGraph";
 const std::string _rootNodeName = "Root";
 const std::string _moduleExtension = ".mod";
+
 namespace configuration {
 const std::string modulesKey = "Modules";
 const std::string cameraKey = "Camera";
-const std::string nameKey = "Name";
-const std::string parentKey = "Parent";
+const std::string focusKey = "Focus";
+const std::string positionKey = "Position";
+const std::string modulePathKey = "ModulePath";
 }
 }
 
@@ -238,10 +240,10 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
 
 
     // initialize the root node
-    _root = new SceneGraphNode(Dictionary());
+    _root = new SceneGraphNode();
     _root->setName(_rootNodeName);
     _nodes.push_back(_root);
-    _allNodes.insert(std::make_pair("Root", _root));
+    _allNodes.emplace(_rootNodeName, _root);
 
     Dictionary dictionary;
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
@@ -263,8 +265,8 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
         std::string focus;
         std::string position;
 
-        if (cameraDictionary.hasKey("Focus")
-            && cameraDictionary.getValue("Focus", focus)) {
+        if (cameraDictionary.hasKey(configuration::focusKey)
+            && cameraDictionary.getValue(configuration::focusKey, focus)) {
             auto focusIterator = _allNodes.find(focus);
             if (focusIterator != _allNodes.end()) {
                 _focus = focus;
@@ -273,8 +275,8 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
             else
                 LERROR("Could not find focus object '" << focus << "'");
         }
-        if (cameraDictionary.hasKey("Position")
-            && cameraDictionary.getValue("Position", position)) {
+        if (cameraDictionary.hasKey(configuration::positionKey)
+            && cameraDictionary.getValue(configuration::positionKey, position)) {
             auto positionIterator = _allNodes.find(position);
             if (positionIterator != _allNodes.end()) {
                 _position = position;
@@ -303,39 +305,54 @@ void SceneGraph::loadModule(const std::string& modulePath)
     ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
     std::vector<std::string> keys = moduleDictionary.keys();
     for (const std::string& key : keys) {
-        ghoul::Dictionary singleModuleDictionary;
-        if (moduleDictionary.getValue(key, singleModuleDictionary)) {
-            std::string moduleName;
-            if (singleModuleDictionary.getValue(configuration::nameKey, moduleName)) {
-                std::string parentName;
-                if (!singleModuleDictionary.getValue(configuration::parentKey, parentName)) {
-                    LWARNING("Could not find 'Parent' key, using 'Root'.");
-                    parentName = "Root";
-                }
-
-                auto parentIterator = _allNodes.find(parentName);
-                if (parentIterator == _allNodes.end()) {
-                    LFATAL("Could not find parent named '"
-                           << parentName << "' for '" << moduleName << "'."
-                           << " Check module definition order. Skipping module.");
-                    continue;
-                }
-
-                // allocate SceneGraphNode and initialize with Dictionary
-                singleModuleDictionary.setValue("Path", modulePath);
-                SceneGraphNode* node = nullptr;
-                node = new SceneGraphNode(singleModuleDictionary);
-                if (node != nullptr) {
-                    // add to internal data structures
-                    _allNodes.insert(std::make_pair(moduleName, node));
-                    _nodes.push_back(node);
-
-                    // set child and parent
-                    SceneGraphNode* parentNode = parentIterator->second;
-                    parentNode->addNode(node);
-                }
-            }
+        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
+                                         << fullModule << "'");
+            continue;
         }
+        
+        ghoul::Dictionary element;
+        moduleDictionary.getValue(key, element);
+
+        element.setValue(configuration::modulePathKey, modulePath);
+
+        SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
+
+        _allNodes.emplace(node->nodeName(), node);
+        _nodes.push_back(node);
+
+
+        //    std::string moduleName;
+        //    if (element.getValue(configuration::nameKey, moduleName)) {
+        //        std::string parentName;
+        //        if (!element.getValue(configuration::parentKey, parentName)) {
+        //            LWARNING("Could not find 'Parent' key, using 'Root'.");
+        //            parentName = "Root";
+        //        }
+
+        //        auto parentIterator = _allNodes.find(parentName);
+        //        if (parentIterator == _allNodes.end()) {
+        //            LFATAL("Could not find parent named '"
+        //                   << parentName << "' for '" << moduleName << "'."
+        //                   << " Check module definition order. Skipping module.");
+        //            continue;
+        //        }
+
+        //        // allocate SceneGraphNode and initialize with Dictionary
+        //        element.setValue("Path", modulePath);
+        //        SceneGraphNode* node = nullptr;
+        //        node = new SceneGraphNode(element);
+        //        if (node != nullptr) {
+        //            // add to internal data structures
+        //            _allNodes.insert(std::make_pair(moduleName, node));
+        //            _nodes.push_back(node);
+
+        //            // set child and parent
+        //            SceneGraphNode* parentNode = parentIterator->second;
+        //            parentNode->addNode(node);
+        //        }
+        //    }
+        //}
     }
 
     // Print the tree

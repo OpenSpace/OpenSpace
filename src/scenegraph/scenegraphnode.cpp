@@ -25,6 +25,7 @@
 // open space includes
 #include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/util/spice.h>
+#include <openspace/query/query.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
@@ -39,27 +40,34 @@
 #include <openspace/util/factorymanager.h>
 
 namespace {
-	const std::string _loggerCat = "SceneGraphNode";
+const std::string _loggerCat = "SceneGraphNode";
 
-    const std::string _unnamedSceneGraphNodeName = "Unnamed";
+namespace configuration {
+const std::string nameKey = "Name";
+const std::string parentKey = "Parent";
+const std::string modulePathKey = "ModulePath";
+const std::string renderableKey = "Renderable";
+const std::string positionKey = "Position";
+}
 }
 
 namespace openspace {
 
 template <class T>
 bool safeCreationWithDictionary(T** object, const std::string& key,
-    ghoul::Dictionary* dictionary,
-    const std::string& path = "") {
-    if (dictionary->hasKey(key)) {
+                                const ghoul::Dictionary& dictionary,
+                                const std::string& path = "")
+{
+    if (dictionary.hasKey(key)) {
         ghoul::Dictionary tmpDictionary;
-        if (dictionary->getValue(key, tmpDictionary)) {
+        if (dictionary.getValue(key, tmpDictionary)) {
             if (!tmpDictionary.hasKey("Path") && path != "") {
                 tmpDictionary.setValue("Path", path);
             }
             std::string renderableType;
             if (tmpDictionary.getValue("Type", renderableType)) {
                 ghoul::TemplateFactory<T>* factory
-                    = FactoryManager::ref().factoryByType<T>();
+                      = FactoryManager::ref().factoryByType<T>();
                 T* tmp = factory->create(renderableType, tmpDictionary);
                 if (tmp != nullptr) {
                     *object = tmp;
@@ -71,45 +79,68 @@ bool safeCreationWithDictionary(T** object, const std::string& key,
     return false;
 }
 
+SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    SceneGraphNode* result = new SceneGraphNode;
 
-SceneGraphNode::SceneGraphNode(const ghoul::Dictionary& dictionary)
+    std::string path;
+    dictionary.getValue(configuration::modulePathKey, path);
+
+    if (!dictionary.hasValue<std::string>(configuration::nameKey)) {
+        LERROR("SceneGraphNode in '" << path << "' did not contain a '"
+                                     << configuration::nameKey << "' key");
+        return nullptr;
+    }
+    dictionary.getValue(configuration::nameKey, result->_nodeName);
+
+
+    if (dictionary.hasKey(configuration::renderableKey)) {
+        if (safeCreationWithDictionary<Renderable>(
+                  &result->_renderable, configuration::renderableKey, dictionary, path)) {
+            LDEBUG(result->_nodeName << ": Successful creation of renderable");
+            result->_renderable->setName(result->_nodeName);
+        }
+        else {
+            LDEBUG(result->_nodeName << ": Failed to create renderable");
+        }
+    }
+    if (dictionary.hasKey(configuration::positionKey)) {
+        if (safeCreationWithDictionary<PositionInformation>(
+                  &result->_position, configuration::positionKey, dictionary, path)) {
+            LDEBUG(result->_nodeName << ": Successful creation of position");
+        }
+        else {
+            LDEBUG(result->_nodeName << ": Failed to create position");
+        }
+    }
+
+    std::string parentName;
+    if (!dictionary.getValue(configuration::parentKey, parentName)) {
+        LWARNING("Could not find 'Parent' key, using 'Root'.");
+        parentName = "Root";
+    }
+
+    SceneGraphNode* parentNode = getSceneGraphNode(parentName);
+    if (parentNode == nullptr) {
+        LFATAL("Could not find parent named '"
+                << parentName << "' for '" << result->_nodeName << "'."
+                << " Check module definition order. Skipping module.");
+    }
+
+    parentNode->addNode(result);
+    
+    return result;
+}
+
+
+SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _nodeName(_unnamedSceneGraphNodeName)
-    , _position(nullptr)
+    , _nodeName("")
+    , _position(new ConstantPositionInformation)
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
 {
-    ghoul::Dictionary localDictionary = dictionary;
-
-    // set the _nodeName if available
-    localDictionary.getValue("Name", _nodeName);
-
-    std::string path = "";
-    localDictionary.getValue("Path", path);
-
-    if (localDictionary.hasKey("Renderable")) {
-        if (safeCreationWithDictionary<Renderable>(&_renderable, "Renderable",
-                                                   &localDictionary, path)) {
-            LDEBUG(_nodeName << ": Successful creation of renderable!");
-            _renderable->setName(_nodeName);
-        } else {
-            LDEBUG(_nodeName << ": Failed to create renderable!");
-        }
-    }
-    if (localDictionary.hasKey("Position")) {
-        if (safeCreationWithDictionary<PositionInformation>(&_position, "Position",
-                                                            &localDictionary, path)) {
-            LDEBUG(_nodeName << ": Successful creation of position!");
-        } else {
-            LDEBUG(_nodeName << ": Failed to create position!");
-        }
-    }
-
-    if (_position == nullptr) {
-        _position = new ConstantPositionInformation(ghoul::Dictionary());
-        _position->initialize();
-    }
 }
 
 SceneGraphNode::~SceneGraphNode()
@@ -128,24 +159,25 @@ bool SceneGraphNode::initialize()
     return true;
 }
 
-bool SceneGraphNode::deinitialize() {
+bool SceneGraphNode::deinitialize()
+{
     LDEBUG("Deinitialize: " << _nodeName);
-    
-	// deallocate the renderable
-	if(_renderable != nullptr)
-		delete _renderable;
-    
+
+    // deallocate the renderable
+    if (_renderable != nullptr)
+        delete _renderable;
+
     // deallocate position
-    if(_position != nullptr)
+    if (_position != nullptr)
         delete _position;
-    
-	// deallocate the child nodes and delete them, iterate c++11 style
-	for( auto child: _children)
-		delete child;
-    
+
+    // deallocate the child nodes and delete them, iterate c++11 style
+    for (auto child : _children)
+        delete child;
+
     // empty the children vector
     _children.erase(_children.begin(), _children.end());
-    
+
     // reset variables
     _parent = nullptr;
     _renderable = nullptr;
@@ -153,190 +185,199 @@ bool SceneGraphNode::deinitialize() {
     _nodeName = "Unnamed OpenSpace SceneGraphNode";
     _renderableVisible = false;
     _boundingSphereVisible = false;
-    _boundingSphere = pss(0.0,0.0);
-    
+    _boundingSphere = pss(0.0, 0.0);
+
     return true;
 }
 
 // essential
-void SceneGraphNode::update() {
+void SceneGraphNode::update()
+{
     _position->update();
 }
 
-void SceneGraphNode::evaluate(const Camera *camera, const psc& parentPosition) {
+void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
+{
+    const psc thisPosition = parentPosition + _position->position();
+    const psc camPos = camera->getPosition();
+    const psc toCamera = thisPosition - camPos;
 
-	const psc thisPosition = parentPosition + _position->position();
-	const psc camPos = camera->getPosition();
-	const psc toCamera = thisPosition - camPos;
-    
-	// init as not visible
-	_boundingSphereVisible = false;
-	_renderableVisible = false;
-    
-	// check if camera is outside the node boundingsphere
-	if(toCamera.length() > _boundingSphere) {
-		
-		// check if the boudningsphere is visible before avaluating children
-		if( ! sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
-			// the node is completely outside of the camera view, stop evaluating this node
-			return;
-		}
-		
-	}
-    
-	// inside boudningsphere or parts of the sphere is visible, individual
+    // init as not visible
+    _boundingSphereVisible = false;
+    _renderableVisible = false;
+
+    // check if camera is outside the node boundingsphere
+    if (toCamera.length() > _boundingSphere) {
+        // check if the boudningsphere is visible before avaluating children
+        if (!sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
+            // the node is completely outside of the camera view, stop evaluating this
+            // node
+            return;
+        }
+    }
+
+    // inside boudningsphere or parts of the sphere is visible, individual
     // children needs to be evaluated
-	_boundingSphereVisible = true;
-	
-	// this node has an renderable
-	if(_renderable) {
+    _boundingSphereVisible = true;
 
-		//  check if the renderable boundingsphere is visible
-		_renderableVisible = sphereInsideFrustum(thisPosition, _renderable->getBoundingSphere(), camera);
-	}
+    // this node has an renderable
+    if (_renderable) {
+        //  check if the renderable boundingsphere is visible
+        _renderableVisible = sphereInsideFrustum(
+              thisPosition, _renderable->getBoundingSphere(), camera);
+    }
 
-	// evaluate all the children, tail-recursive function(?)
-	for(auto &child: _children) {
-		child->evaluate(camera,psc());
-	}
-    
+    // evaluate all the children, tail-recursive function(?)
+    for (auto& child : _children) {
+        child->evaluate(camera, psc());
+    }
 }
 
-void SceneGraphNode::render(const Camera *camera, const psc & parentPosition) {
+void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
+{
+    const psc thisPosition = parentPosition + _position->position();
 
-	const psc thisPosition = parentPosition + _position->position();
-	
-	// check if camera is outside the node boundingsphere
-	if( ! _boundingSphereVisible) {
-		return;
-	}
-	if(_renderableVisible) {
-        //LDEBUG("Render");
-		_renderable->render(camera,thisPosition);
-	}
+    // check if camera is outside the node boundingsphere
+    if (!_boundingSphereVisible) {
+        return;
+    }
+    if (_renderableVisible) {
+        // LDEBUG("Render");
+        _renderable->render(camera, thisPosition);
+    }
 
-	// evaluate all the children, tail-recursive function(?)
-	
-    for(auto &child: _children) {
-		child->render(camera,thisPosition);
-	}
+    // evaluate all the children, tail-recursive function(?)
 
+    for (auto& child : _children) {
+        child->render(camera, thisPosition);
+    }
 }
 
 // set & get
-void SceneGraphNode::addNode(SceneGraphNode *child) {
-	// add a child node and set this node to be the parent
+void SceneGraphNode::addNode(SceneGraphNode* child)
+{
+    // add a child node and set this node to be the parent
 
     child->setParent(this);
     _children.push_back(child);
 }
 
-void SceneGraphNode::setName(const std::string &name) {
-	_nodeName = name;
+void SceneGraphNode::setName(const std::string& name)
+{
+    _nodeName = name;
 }
 
-void SceneGraphNode::setParent(SceneGraphNode *parent) {
-	_parent = parent;
+void SceneGraphNode::setParent(SceneGraphNode* parent)
+{
+    _parent = parent;
 }
 
-const psc &SceneGraphNode::getPosition() const {
-	return _position->position();
+const psc& SceneGraphNode::getPosition() const
+{
+    return _position->position();
 }
 
-psc SceneGraphNode::getWorldPosition() const {
-
-	// recursive up the hierarchy if there are parents available
-	if(_parent) {
-		return _position->position() + _parent->getWorldPosition();
-	} else {
-		return _position->position();
-	}
+psc SceneGraphNode::getWorldPosition() const
+{
+    // recursive up the hierarchy if there are parents available
+    if (_parent) {
+        return _position->position() + _parent->getWorldPosition();
+    } else {
+        return _position->position();
+    }
 }
 
-    
-std::string SceneGraphNode::nodeName() const {
+std::string SceneGraphNode::nodeName() const
+{
     return _nodeName;
 }
 
-SceneGraphNode* SceneGraphNode::parent() const {
+SceneGraphNode* SceneGraphNode::parent() const
+{
     return _parent;
 }
-const std::vector<SceneGraphNode*>& SceneGraphNode::children() const {
+const std::vector<SceneGraphNode*>& SceneGraphNode::children() const
+{
     return _children;
 }
 
 // bounding sphere
-pss SceneGraphNode::calculateBoundingSphere() {
-	
-	// set the vounding sphere to 0.0
-	_boundingSphere = 0.0;
+pss SceneGraphNode::calculateBoundingSphere()
+{
+    // set the vounding sphere to 0.0
+    _boundingSphere = 0.0;
 
-	if(_children.size() > 0) { // node
-		pss maxChild;
+    if (_children.size() > 0) {  // node
+        pss maxChild;
 
-		// loop though all children and find the one furthest away/with the largest bounding sphere
-		for(size_t i = 0; i < _children.size(); ++i) {
+        // loop though all children and find the one furthest away/with the largest
+        // bounding sphere
+        for (size_t i = 0; i < _children.size(); ++i) {
+            // when positions is dynamix, change this part to fins the most distant
+            // position
+            pss child = _children.at(i)->getPosition().length()
+                        + _children.at(i)->calculateBoundingSphere();
+            if (child > maxChild) {
+                maxChild = child;
+            }
+        }
+        _boundingSphere += maxChild;
+    } else {  // leaf
 
-			// when positions is dynamix, change this part to fins the most distant position
-			pss child = _children.at(i)->getPosition().length() +
-                        _children.at(i)->calculateBoundingSphere();
-			if(child > maxChild) {
-				maxChild = child;
-			}
-		}
-		_boundingSphere += maxChild;
-	} else { // leaf
+        // if has a renderable, use that boundingsphere
+        if (_renderable)
+            _boundingSphere += _renderable->getBoundingSphere();
+    }
 
-		// if has a renderable, use that boundingsphere
-		if(_renderable)
-			_boundingSphere += _renderable->getBoundingSphere();
-	}
-
-	return _boundingSphere;
+    return _boundingSphere;
 }
 
 // renderable
-void SceneGraphNode::setRenderable(Renderable *renderable) {
-	_renderable = renderable;
-	update();
+void SceneGraphNode::setRenderable(Renderable* renderable)
+{
+    _renderable = renderable;
+    update();
 }
 
-const Renderable *  SceneGraphNode::getRenderable() const{
-	return _renderable;
+const Renderable* SceneGraphNode::getRenderable() const
+{
+    return _renderable;
 }
 
 // private helper methods
-bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss & s_rad, const Camera *camera) {
+bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss& s_rad,
+                                         const Camera* camera)
+{
+    // direction the camera is looking at in power scale
+    psc psc_camdir = psc(camera->getViewDirection());
 
-	// direction the camera is looking at in power scale
-	psc psc_camdir = psc(camera->getViewDirection());
+    // the position of the camera, moved backwards in the view direction to encapsulate
+    // the sphere radius
+    psc U = camera->getPosition() - psc_camdir * s_rad * (1.0 / camera->getSinMaxFov());
 
-	// the position of the camera, moved backwards in the view direction to encapsulate the sphere radius
-	psc U = camera->getPosition() - psc_camdir * s_rad * ( 1.0 / camera->getSinMaxFov());
+    // the vector to the object from the new position
+    psc D = s_pos - U;
 
-	// the vector to the object from the new position
-	psc D = s_pos - U;
-	
     const double a = psc_camdir.angle(D);
-	if ( a < camera->getMaxFov())
-	{
-		// center is inside K''
-		D = s_pos - camera->getPosition();
-		if ( D.length()* psc_camdir.length() *camera->getSinMaxFov() <= -psc_camdir.dot(D)) {
-			// center is inside K'' and inside K'
-			return D.length() <= s_rad;
-		} else {
-			// center is inside K'' and outside K'
-			return true;
-		}
-	} else {
-		// outside the maximum angle
-		return false;
-	}
-	
+    if (a < camera->getMaxFov()) {
+        // center is inside K''
+        D = s_pos - camera->getPosition();
+        if (D.length() * psc_camdir.length() * camera->getSinMaxFov()
+            <= -psc_camdir.dot(D)) {
+            // center is inside K'' and inside K'
+            return D.length() <= s_rad;
+        } else {
+            // center is inside K'' and outside K'
+            return true;
+        }
+    } else {
+        // outside the maximum angle
+        return false;
+    }
 }
 
-SceneGraphNode* SceneGraphNode::get(const std::string& name) {
+SceneGraphNode* SceneGraphNode::get(const std::string& name)
+{
     if (_nodeName == name)
         return this;
     else
@@ -349,11 +390,12 @@ SceneGraphNode* SceneGraphNode::get(const std::string& name) {
     return nullptr;
 }
 
-void SceneGraphNode::print() const {
+void SceneGraphNode::print() const
+{
     std::cout << _nodeName << std::endl;
     for (auto it : _children) {
         it->print();
     }
 }
-	
-} // namespace openspace
+
+}  // namespace openspace

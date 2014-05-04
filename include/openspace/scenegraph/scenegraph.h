@@ -25,12 +25,11 @@
 #ifndef SCENEGRAPH_H
 #define SCENEGRAPH_H
 
-// open space includes
-#include <openspace/scenegraph/scenegraphnode.h>
-
 // std includes
 #include <vector>
 #include <map>
+
+#include <openspace/util/camera.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -38,23 +37,24 @@
 
 namespace openspace {
 
+class SceneGraphNode;
+
 class SceneGraph {
 public:
-
-	// constructors & destructor
-	SceneGraph();
-	~SceneGraph();
+    // constructors & destructor
+    SceneGraph();
+    ~SceneGraph();
 
     /**
      * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
      */
-	bool initialize();
-    
+    bool initialize();
+
     /*
      * Clean up everything
      */
     bool deinitialize();
-    
+
     /*
      * Load the scenegraph from the provided folder
      */
@@ -66,17 +66,17 @@ public:
     /*
      * Updates all SceneGraphNodes relative positions
      */
-	void update();
-    
+    void update();
+
     /*
      * Evaluates if the SceneGraphNodes are visible to the provided camera
      */
-	void evaluate(Camera *camera);
-    
+    void evaluate(Camera* camera);
+
     /*
      * Render visible SceneGraphNodes using the provided camera
      */
-	void render(Camera *camera);
+    void render(Camera* camera);
 
     /*
      * Prints the SceneGraph tree. For debugging purposes
@@ -90,12 +90,11 @@ public:
 
 private:
     std::string _focus, _position;
-    
-    // actual scenegraph
-	SceneGraphNode *_root;
-	std::vector<SceneGraphNode*> _nodes;
-	std::map<std::string, SceneGraphNode*> _allNodes;
 
+    // actual scenegraph
+    SceneGraphNode* _root;
+    std::vector<SceneGraphNode*> _nodes;
+    std::map<std::string, SceneGraphNode*> _allNodes;
 };
 
 } // namespace openspace

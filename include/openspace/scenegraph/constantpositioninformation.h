@@ -31,7 +31,8 @@ namespace openspace {
     
 class ConstantPositionInformation: public PositionInformation {
 public:
-    ConstantPositionInformation(const ghoul::Dictionary& dictionary);
+    ConstantPositionInformation(const ghoul::Dictionary& dictionary
+                                = ghoul::Dictionary());
     virtual ~ConstantPositionInformation();
     virtual bool initialize();
     virtual const psc& position() const;

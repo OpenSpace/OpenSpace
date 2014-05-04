@@ -29,12 +29,14 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scenegraph/positioninformation.h>
 
+#include <openspace/scenegraph/scenegraph.h>
 #include <ghoul/misc/dictionary.h>
 
 // std includes
 #include <iostream>
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace openspace {
 
@@ -42,8 +44,10 @@ class SceneGraphNode {
 public:
 
 	// constructors & destructor
-	SceneGraphNode(const ghoul::Dictionary& dictionary);
+	SceneGraphNode();
 	~SceneGraphNode();
+
+    static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
     
     bool initialize();
     bool deinitialize();
@@ -77,7 +81,6 @@ public:
 	const Renderable * getRenderable() const;
 	
 private:
-
 	// essential
 	std::vector<SceneGraphNode*> _children;
 	SceneGraphNode* _parent;
@@ -97,7 +100,5 @@ private:
 };
 
 } // namespace openspace
-
-#include <openspace/scenegraph/scenegraphnode.inl>
 
 #endif

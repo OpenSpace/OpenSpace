@@ -252,6 +252,7 @@ bool OpenSpaceEngine::initialize()
 
     // Load scenegraph
     std::shared_ptr<SceneGraph> sceneGraph(new SceneGraph);
+    _renderEngine->setSceneGraph(sceneGraph);
     if (!OsEng.configurationManager().hasValue<std::string>(
               configuration::sceneConfigurationKey)) {
         LFATAL("Configuration needs to point to the scene file");
