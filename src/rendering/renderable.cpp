@@ -24,12 +24,40 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/factorymanager.h>
+
+namespace {
+const std::string _loggerCat = "Renderable";
+}
 
 namespace openspace {
 
 //Renderable::Renderable()
 //    : _name("")
 //{}
+
+Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    if (!dictionary.hasValue<std::string>(constants::renderable::keyType)) {
+        LERROR("Renderable did not have key '" << constants::renderable::keyType << "'");
+        return nullptr;
+    }
+    std::string renderableType;
+    dictionary.getValue(constants::renderable::keyType, renderableType);
+    ghoul::TemplateFactory<Renderable>* factory = FactoryManager::ref().factoryByType<Renderable>();
+    Renderable* result = factory->create(renderableType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed creating Renderable object of type '" << renderableType << "'");
+        return nullptr;
+    }
+
+    std::string name;
+    dictionary.getValue(constants::scenegraphnode::keyName, name);
+    result->setName(name);
+
+    return result;
+}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _name("")

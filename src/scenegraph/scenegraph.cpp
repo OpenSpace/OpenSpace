@@ -242,7 +242,7 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
     Dictionary dictionary;
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
     Dictionary moduleDictionary;
-    if (dictionary.getValue(constants::scenegraph::modulesKey, moduleDictionary)) {
+    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
         std::vector<std::string> keys = moduleDictionary.keys();
         std::sort(keys.begin(), keys.end());
         for (const std::string& key : keys) {
@@ -254,13 +254,13 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     Dictionary cameraDictionary;
-    if (dictionary.getValue(constants::scenegraph::cameraKey, cameraDictionary)) {
+    if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
         std::string position;
 
-        if (cameraDictionary.hasKey(constants::scenegraph::focusKey)
-            && cameraDictionary.getValue(constants::scenegraph::focusKey, focus)) {
+        if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
+            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus)) {
             auto focusIterator = _allNodes.find(focus);
             if (focusIterator != _allNodes.end()) {
                 _focus = focus;
@@ -269,8 +269,8 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
             else
                 LERROR("Could not find focus object '" << focus << "'");
         }
-        if (cameraDictionary.hasKey(constants::scenegraph::positionKey)
-            && cameraDictionary.getValue(constants::scenegraph::positionKey, position)) {
+        if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
+            && cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
             auto positionIterator = _allNodes.find(position);
             if (positionIterator != _allNodes.end()) {
                 _position = position;
@@ -308,7 +308,7 @@ void SceneGraph::loadModule(const std::string& modulePath)
         ghoul::Dictionary element;
         moduleDictionary.getValue(key, element);
 
-        element.setValue(constants::scenegraph::modulePathKey, modulePath);
+        element.setValue(constants::scenegraph::keyPathModule, modulePath);
 
         SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
 

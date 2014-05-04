@@ -74,31 +74,38 @@ bool safeCreationWithDictionary(T** object, const std::string& key,
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
+    using namespace constants::scenegraph;
+    using namespace constants::scenegraphnode;
+
     SceneGraphNode* result = new SceneGraphNode;
 
     std::string path;
-    dictionary.getValue(constants::scenegraph::modulePathKey, path);
+    dictionary.getValue(keyPathModule, path);
 
-    if (!dictionary.hasValue<std::string>(constants::scenegraphnode::nameKey)) {
+    if (!dictionary.hasValue<std::string>(keyName)) {
         LERROR("SceneGraphNode in '" << path << "' did not contain a '"
-                                     << constants::scenegraphnode::nameKey << "' key");
+                                     << keyName << "' key");
         return nullptr;
     }
-    dictionary.getValue(constants::scenegraphnode::nameKey, result->_nodeName);
+    dictionary.getValue(keyName, result->_nodeName);
 
-    if (dictionary.hasKey(constants::scenegraphnode::renderableKey)) {
-        if (safeCreationWithDictionary<Renderable>(
-                  &result->_renderable, constants::scenegraphnode::renderableKey,
-                  dictionary, path)) {
-            LDEBUG(result->_nodeName << ": Successful creation of renderable");
-            result->_renderable->setName(result->_nodeName);
-        } else {
-            LDEBUG(result->_nodeName << ": Failed to create renderable");
+    if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
+        ghoul::Dictionary renderableDictionary;
+        dictionary.getValue(keyRenderable,
+                            renderableDictionary);
+        renderableDictionary.setValue(keyPathModule, path);
+        renderableDictionary.setValue(keyName, result->_nodeName);
+
+        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
+        if (result->_renderable == nullptr) {
+            LERROR("Failed to create renderable for SceneGraphNode '"
+                   << result->_nodeName);
+            return nullptr;
         }
     }
-    if (dictionary.hasKey(constants::scenegraphnode::ephemerisKey)) {
+    if (dictionary.hasKey(keyEphemeris)) {
         if (safeCreationWithDictionary<PositionInformation>(
-                  &result->_position, constants::scenegraphnode::ephemerisKey, dictionary,
+                  &result->_position, keyEphemeris, dictionary,
                   path)) {
             LDEBUG(result->_nodeName << ": Successful creation of position");
         } else {
@@ -107,7 +114,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     }
 
     std::string parentName;
-    if (!dictionary.getValue(constants::scenegraphnode::parentKey, parentName)) {
+    if (!dictionary.getValue(constants::scenegraphnode::keyParentName, parentName)) {
         LWARNING("Could not find 'Parent' key, using 'Root'.");
         parentName = "Root";
     }

@@ -188,15 +188,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     ghoul::Dictionary& configuration = *(_engine->_configurationManager);
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    if (configuration.hasKey(constants::openspaceengine::pathKey)) {
+    if (configuration.hasKey(constants::openspaceengine::keyPaths)) {
         ghoul::Dictionary pathsDictionary;
-        if (configuration.getValue(constants::openspaceengine::pathKey, pathsDictionary))
+        if (configuration.getValue(constants::openspaceengine::keyPaths, pathsDictionary))
             OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
     }
 
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-    if (configuration.hasKey(constants::openspaceengine::sgctConfigKey))
-        configuration.getValue(constants::openspaceengine::sgctConfigKey, sgctConfigurationPath);
+    if (configuration.hasKey(constants::openspaceengine::keyConfigSgct))
+        configuration.getValue(constants::openspaceengine::keyConfigSgct, sgctConfigurationPath);
 
     sgctArguments.push_back(argv[0]);
     sgctArguments.push_back("-config");
@@ -247,14 +247,14 @@ bool OpenSpaceEngine::initialize()
     std::shared_ptr<SceneGraph> sceneGraph(new SceneGraph);
     _renderEngine->setSceneGraph(sceneGraph);
     if (!OsEng.configurationManager().hasValue<std::string>(
-              constants::openspaceengine::sceneConfigurationKey)) {
+              constants::openspaceengine::keyConfigScene)) {
         LFATAL("Configuration needs to point to the scene file");
         return false;
     }
 
     std::string sceneDescriptionPath;
     bool success = _configurationManager->getValue(
-          constants::openspaceengine::sceneConfigurationKey, sceneDescriptionPath);
+          constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
 
     if (!FileSys.fileExists(sceneDescriptionPath)) {
         LFATAL("Could not find '" << sceneDescriptionPath << "'");
@@ -262,7 +262,7 @@ bool OpenSpaceEngine::initialize()
     }
 
     std::string scenePath;
-    success = _configurationManager->getValue(constants::openspaceengine::scenePathKey, scenePath);
+    success = _configurationManager->getValue(constants::openspaceengine::keyPathScene, scenePath);
     if (!success) {
         LFATAL("Could not find SCENEPATH key in configuration file");
         return false;

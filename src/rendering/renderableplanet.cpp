@@ -24,6 +24,7 @@
 
 // open space includes
 #include <openspace/rendering/renderableplanet.h>
+#include <openspace/util/constants.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -65,8 +66,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     // get path if available
     std::string path = "";
-    if (dictionary.hasKey("Path")) {
-        dictionary.getValue("Path", path);
+    if (dictionary.hasKey(constants::scenegraph::keyPathModule)) {
+        dictionary.getValue(constants::scenegraph::keyPathModule, path);
         path += "/";
     }
 

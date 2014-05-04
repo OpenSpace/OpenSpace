@@ -30,26 +30,30 @@
 namespace openspace {
 namespace constants {
 namespace openspaceengine {
-    const std::string pathKey = "Paths";
-    const std::string scenePathKey = "Paths.SCENEPATH";
-    const std::string sgctConfigKey = "SGCTConfig";
-    const std::string sceneConfigurationKey = "Scene";
+    const std::string keyPaths = "Paths";
+    const std::string keyPathScene = "Paths.SCENEPATH";
+    const std::string keyConfigSgct = "SGCTConfig";
+    const std::string keyConfigScene = "Scene";
 } // namespace openspaceengine
 
 namespace scenegraph {
-    const std::string modulesKey = "Modules";
-    const std::string cameraKey = "Camera";
-    const std::string focusKey = "Focus";
-    const std::string positionKey = "Position";
-    const std::string modulePathKey = "ModulePath";
+    const std::string keyModules = "Modules";
+    const std::string keyCamera = "Camera";
+    const std::string keyFocusObject = "Focus";
+    const std::string keyPositionObject = "Position";
+    const std::string keyPathModule = "ModulePath";
 }  // namespace scenegraph
 
 namespace scenegraphnode {
-    const std::string nameKey = "Name";
-    const std::string parentKey = "Parent";
-    const std::string renderableKey = "Renderable";
-    const std::string ephemerisKey = "Ephemeris";
+    const std::string keyName = "Name";
+    const std::string keyParentName = "Parent";
+    const std::string keyRenderable = "Renderable";
+    const std::string keyEphemeris = "Ephemeris";
 } // namespace scenegraphnode
+
+namespace renderable {
+    const std::string keyType = "Type";
+}
 
 }  // namespace constants
 }  // namespace openspace

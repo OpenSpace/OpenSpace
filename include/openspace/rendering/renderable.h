@@ -36,6 +36,8 @@ namespace openspace {
 
 class Renderable : public properties::PropertyOwner {
 public:
+    static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
+
     // constructors & destructor
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();

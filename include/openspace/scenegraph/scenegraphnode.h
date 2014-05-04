@@ -42,61 +42,60 @@ namespace openspace {
 
 class SceneGraphNode {
 public:
-
-	// constructors & destructor
-	SceneGraphNode();
-	~SceneGraphNode();
+    // constructors & destructor
+    SceneGraphNode();
+    ~SceneGraphNode();
 
     static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
-    
+
     bool initialize();
     bool deinitialize();
 
-	// essential
-	void update();
-	void evaluate(const Camera *camera, const psc &parentPosition = psc());
-	void render(const Camera *camera, const psc &parentPosition = psc());
+    // essential
+    void update();
+    void evaluate(const Camera* camera, const psc& parentPosition = psc());
+    void render(const Camera* camera, const psc& parentPosition = psc());
 
-	// set & get
-	void addNode(SceneGraphNode* child);
-	
-    void setName(const std::string &name);
-	void setParent(SceneGraphNode *parent);
-	const psc& getPosition() const;
-	psc getWorldPosition() const;
+    // set & get
+    void addNode(SceneGraphNode* child);
+
+    void setName(const std::string& name);
+    void setParent(SceneGraphNode* parent);
+    const psc& getPosition() const;
+    psc getWorldPosition() const;
     std::string nodeName() const;
 
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
 
-	// bounding sphere
-	pss calculateBoundingSphere();
-	
+    // bounding sphere
+    pss calculateBoundingSphere();
+
     SceneGraphNode* get(const std::string& name);
 
     void print() const;
 
-	// renderable
-	void setRenderable(Renderable *renderable);
-	const Renderable * getRenderable() const;
-	
+    // renderable
+    void setRenderable(Renderable* renderable);
+    const Renderable* getRenderable() const;
+
 private:
-	// essential
-	std::vector<SceneGraphNode*> _children;
-	SceneGraphNode* _parent;
-	std::string _nodeName;
+    // essential
+    std::vector<SceneGraphNode*> _children;
+    SceneGraphNode* _parent;
+    std::string _nodeName;
     PositionInformation* _position;
 
-	// renderable
-	Renderable *_renderable;
-	bool _renderableVisible;
-	
-	// bounding sphere
-	bool _boundingSphereVisible;
-	pss _boundingSphere;
-	
-	// private helper methods
-	bool sphereInsideFrustum(const psc s_pos, const pss & s_rad, const Camera *camera);
+    // renderable
+    Renderable* _renderable;
+    bool _renderableVisible;
+
+    // bounding sphere
+    bool _boundingSphereVisible;
+    pss _boundingSphere;
+
+    // private helper methods
+    bool sphereInsideFrustum(const psc s_pos, const pss& s_rad, const Camera* camera);
 };
 
 } // namespace openspace
