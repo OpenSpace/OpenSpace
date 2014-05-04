@@ -48,7 +48,7 @@ namespace scenegraphnode {
     const std::string nameKey = "Name";
     const std::string parentKey = "Parent";
     const std::string renderableKey = "Renderable";
-    const std::string ephemerisKey = "Position";
+    const std::string ephemerisKey = "Ephemeris";
 } // namespace scenegraphnode
 
 }  // namespace constants
