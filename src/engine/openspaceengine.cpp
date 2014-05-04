@@ -55,7 +55,10 @@ namespace {
 
     namespace configuration {
         const std::string pathKey = "Paths";
+        const std::string scenePathKey = "Paths.SCENEPATH";
         const std::string sgctConfigKey = "SGCTConfig";
+        const std::string sceneConfigurationKey = "Scene";
+
     }
 }
 
@@ -177,13 +180,20 @@ void OpenSpaceEngine::create(int argc, char** argv,
         assert(false);
     }
 
+    // create objects
+    _engine = new OpenSpaceEngine;
+    _engine->_renderEngine = new RenderEngine;
+    _engine->_interactionHandler = new InteractionHandler;
+    _engine->_configurationManager = new ghoul::Dictionary;
+
+
     LDEBUG("Registering base path");
     if (!OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
         LFATAL("Could not register base path");
         assert(false);
     }
 
-    ghoul::Dictionary configuration;
+    ghoul::Dictionary& configuration = *(_engine->_configurationManager);
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
     if (configuration.hasKey(configuration::pathKey)) {
         ghoul::Dictionary pathsDictionary;
@@ -195,15 +205,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
     if (configuration.hasKey(configuration::sgctConfigKey))
         configuration.getValue(configuration::sgctConfigKey, sgctConfigurationPath);
 
-    sgctArguments.emplace_back(argv[0]);
-    sgctArguments.emplace_back("-config");
-    sgctArguments.emplace_back(absPath(sgctConfigurationPath));
-
-    // create objects
-    _engine = new OpenSpaceEngine;
-    _engine->_renderEngine = new RenderEngine;
-    _engine->_interactionHandler = new InteractionHandler;
-    _engine->_configurationManager = new ghoul::Dictionary;
+    sgctArguments.push_back(argv[0]);
+    sgctArguments.push_back("-config");
+    sgctArguments.push_back(absPath(sgctConfigurationPath));
 }
 
 void OpenSpaceEngine::destroy()
@@ -246,9 +250,38 @@ bool OpenSpaceEngine::initialize()
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
 
-    // TODO add scenegraph file name
+    // Load scenegraph
+    std::shared_ptr<SceneGraph> sceneGraph(new SceneGraph);
+    if (!OsEng.configurationManager().hasValue<std::string>(
+              configuration::sceneConfigurationKey)) {
+        LFATAL("Configuration needs to point to the scene file");
+        return false;
+    }
+
+    std::string sceneDescriptionPath;
+    bool success = _configurationManager->getValue(
+          configuration::sceneConfigurationKey, sceneDescriptionPath);
+
+    if (!FileSys.fileExists(sceneDescriptionPath)) {
+        LFATAL("Could not find '" << sceneDescriptionPath << "'");
+        return false;
+    }
+
+    std::string scenePath;
+    success = _configurationManager->getValue(configuration::scenePathKey, scenePath);
+    if (!success) {
+        LFATAL("Could not find SCENEPATH key in configuration file");
+        return false;
+    }
+
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
+
+    sceneGraph->loadScene(sceneDescriptionPath, scenePath);
+    sceneGraph->initialize();
+
+    _renderEngine->setSceneGraph(sceneGraph);
+
 
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();

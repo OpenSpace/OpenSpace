@@ -45,12 +45,12 @@ namespace {
     }
 }
 
-SceneGraph* getSceneGraph() {
+std::shared_ptr<SceneGraph> getSceneGraph() {
     return OsEng.renderEngine().sceneGraph();
 }
 
 SceneGraphNode* getSceneGraphNode(const std::string& name) {
-    SceneGraph* sceneGraph = getSceneGraph();
+    std::shared_ptr<SceneGraph> sceneGraph = getSceneGraph();
 
     SceneGraphNode* rootNode = sceneGraph->root();
     return getSceneGraphNode(rootNode, name);

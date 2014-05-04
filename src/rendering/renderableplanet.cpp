@@ -122,7 +122,7 @@ void RenderablePlanet::setTexture(ghoul::opengl::Texture *texture) {
 }
 
 void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
-
+    // TODO replace with more robust assert
 	// check so that the shader is set
 	assert(_programObject);
 	assert(_texture);
@@ -180,9 +180,9 @@ void RenderablePlanet::loadTexture() {
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::opengl::loadTexture(_colorTexturePath);
+        _texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
         if (_texture) {
-            LDEBUG("Loaded texture from '" << _colorTexturePath.value() << "'");
+            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();
         }
     }

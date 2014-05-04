@@ -58,7 +58,10 @@ public:
     /*
      * Load the scenegraph from the provided folder
      */
-    bool loadFromModulePath(const std::string& path);
+    bool loadScene(const std::string& sceneDescriptionFilePath,
+                   const std::string& defaultModulePath);
+
+    void loadModule(const std::string& modulePath);
 
     /*
      * Updates all SceneGraphNodes relative positions
@@ -86,9 +89,6 @@ public:
     SceneGraphNode* root() const;
 
 private:
-
-    void loadModulesFromModulePath(const std::string& modulePath);
-    
     std::string _focus, _position;
     
     // actual scenegraph

@@ -111,7 +111,7 @@ const ghoul::Dictionary& Property::metaData() const {
 }
 
 void Property::onChange(std::function<void()> callback) {
-    _onChangeCallbacks.emplace_back(std::move(callback));
+    _onChangeCallbacks.push_back(std::move(callback));
 
 }
 

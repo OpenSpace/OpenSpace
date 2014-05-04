@@ -46,276 +46,290 @@
 #include <string>
 
 namespace {
-    std::string _loggerCat = "SceneGraph";
+const std::string _loggerCat = "SceneGraph";
+const std::string _rootNodeName = "Root";
+const std::string _moduleExtension = ".mod";
+namespace configuration {
+const std::string modulesKey = "Modules";
+const std::string cameraKey = "Camera";
+const std::string nameKey = "Name";
+const std::string parentKey = "Parent";
+}
 }
 
 namespace openspace {
 
-void printTree(SceneGraphNode* node, std::string pre = "") {
+void printTree(SceneGraphNode* node, std::string pre = "")
+{
     LDEBUGC("Tree", pre << node->nodeName());
-    auto children = node->children();
-    for(auto child: children) {
+    const std::vector<SceneGraphNode*>& children = node->children();
+    for (SceneGraphNode* child : children)
         printTree(child, pre + "    ");
-    }
-}
-	
-SceneGraph::SceneGraph(): _focus("Root"), _position("Root"), _root(nullptr) {}
-
-SceneGraph::~SceneGraph() {
-
-	deinitialize();
 }
 
-bool SceneGraph::initialize() {
+SceneGraph::SceneGraph()
+    : _focus("Root")
+    , _position("Root")
+    , _root(nullptr)
+{
+}
+
+SceneGraph::~SceneGraph()
+{
+    deinitialize();
+}
+
+bool SceneGraph::initialize()
+{
     LDEBUG("Initializing SceneGraph");
-    
+
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-    
+
     ProgramObject* po = nullptr;
-    if (    OsEng.ref().configurationManager().hasKey("pscShader") &&
-            OsEng.ref().configurationManager().getValue("pscShader", po)) {
+    if (OsEng.ref().configurationManager().hasKey("pscShader")
+        && OsEng.ref().configurationManager().getValue("pscShader", po)) {
         LWARNING("pscShader already in ConfigurationManager, deleting.");
         delete po;
         po = nullptr;
     }
-    
-    ShaderObject* powerscale_vs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                                                   absPath("${SHADERS}/pscstandard_vs.glsl"),
-                                                   "PS Vertex"
-                                                   );
-    ShaderObject* powerscale_fs = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                                                   absPath("${SHADERS}/pscstandard_fs.glsl"),
-                                                   "PS Fragment"
-                                                   );
-    
+
+    ShaderObject* powerscale_vs
+          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                             absPath("${SHADERS}/pscstandard_vs.glsl"), "PS Vertex");
+    ShaderObject* powerscale_fs
+          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
+                             absPath("${SHADERS}/pscstandard_fs.glsl"), "PS Fragment");
+
     po = new ProgramObject;
     po->attachObject(powerscale_vs);
     po->attachObject(powerscale_fs);
-    
-    if( ! po->compileShaderObjects())
+
+    if (!po->compileShaderObjects())
         return false;
-    if( ! po->linkProgramObject())
+    if (!po->linkProgramObject())
         return false;
-    
+
     OsEng.ref().configurationManager().setValue("pscShader", po);
-    
+
     ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
-	ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+    ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
                                                   absPath("${SHADERS}/exitpoints.vert"));
-	ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                                    absPath("${SHADERS}/exitpoints.frag"));
-	_fboProgram->attachObject(vertexShader);
-	_fboProgram->attachObject(fragmentShader);
-	_fboProgram->compileShaderObjects();
-	_fboProgram->linkProgramObject();
-    
-	ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
-	vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
+    ShaderObject* fragmentShader = new ShaderObject(
+          ShaderObject::ShaderTypeFragment, absPath("${SHADERS}/exitpoints.frag"));
+    _fboProgram->attachObject(vertexShader);
+    _fboProgram->attachObject(fragmentShader);
+    _fboProgram->compileShaderObjects();
+    _fboProgram->linkProgramObject();
+
+    ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
+    vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
                                     absPath("${SHADERS}/twopassraycaster.vert"));
-	fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
+    fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
                                       absPath("${SHADERS}/twopassraycaster.frag"));
-	_twopassProgram->attachObject(vertexShader);
-	_twopassProgram->attachObject(fragmentShader);
-	_twopassProgram->compileShaderObjects();
-	_twopassProgram->linkProgramObject();
-	_twopassProgram->setUniform("texBack", 0);
-	_twopassProgram->setUniform("texFront", 1);
-	_twopassProgram->setUniform("texVolume", 2);
-    
+    _twopassProgram->attachObject(vertexShader);
+    _twopassProgram->attachObject(fragmentShader);
+    _twopassProgram->compileShaderObjects();
+    _twopassProgram->linkProgramObject();
+    _twopassProgram->setUniform("texBack", 0);
+    _twopassProgram->setUniform("texFront", 1);
+    _twopassProgram->setUniform("texVolume", 2);
+
     ProgramObject* quad = new ProgramObject("Quad");
-	ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                    absPath("${SHADERS}/quadVert.glsl"));
-	ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                      absPath("${SHADERS}/quadFrag.glsl"));
-	quad->attachObject(quadv);
-	quad->attachObject(quadf);
-	quad->compileShaderObjects();
-	quad->linkProgramObject();
-	quad->setUniform("quadTex", 0);
-    
-    
+    ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
+                                           absPath("${SHADERS}/quadVert.glsl"));
+    ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
+                                           absPath("${SHADERS}/quadFrag.glsl"));
+    quad->attachObject(quadv);
+    quad->attachObject(quadf);
+    quad->compileShaderObjects();
+    quad->linkProgramObject();
+    quad->setUniform("quadTex", 0);
+
     OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
     OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
     OsEng.ref().configurationManager().setValue("Quad", quad);
-    
-    
+
     // Initialize all nodes
-    for(auto node: _nodes) {
+    for (auto node : _nodes) {
         bool success = node->initialize();
-        if (success) {
+        if (success)
             LDEBUG(node->nodeName() << " initialized successfully!");
-        } else {
+        else
             LWARNING(node->nodeName() << " not initialized.");
-        }
     }
-    
+
     // update the position of all nodes
     update();
-    
+
     // Calculate the bounding sphere for the scenegraph
-	_root->calculateBoundingSphere();
-    
+    _root->calculateBoundingSphere();
+
     // set the camera position
     auto focusIterator = _allNodes.find(_focus);
     auto positionIterator = _allNodes.find(_position);
-    
-    if(focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
-        LDEBUG("Camera position is '"<< _position <<"', camera focus is '" << _focus << "'");
+
+    if (focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
+        LDEBUG("Camera position is '" << _position << "', camera focus is '" << _focus
+                                      << "'");
         SceneGraphNode* focusNode = focusIterator->second;
         SceneGraphNode* positionNode = positionIterator->second;
         Camera* c = OsEng.interactionHandler().getCamera();
-        
+
         // TODO: Make distance depend on radius
         // TODO: Set distance and camera direction in some more smart way
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
         psc cameraPosition = positionNode->getPosition();
-        cameraPosition += psc(0.0,0.0,1.0,2.0);
+        cameraPosition += psc(0.0, 0.0, 1.0, 2.0);
         c->setPosition(cameraPosition);
-        c->setCameraDirection(glm::vec3(0,0,-1));
-        c->setScaling(glm::vec2(1.0,0.0));
-        
+        c->setCameraDirection(glm::vec3(0, 0, -1));
+        c->setScaling(glm::vec2(1.0, 0.0));
+
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler().setFocusNode(focusNode);
     }
 
-    
     return true;
 }
 
-bool SceneGraph::deinitialize() {
-
+bool SceneGraph::deinitialize()
+{
     // deallocate the scene graph. Recursive deallocation will occur
-    if(_root)
-        delete _root;
+    delete _root;
     _root = nullptr;
-    
+
     _nodes.erase(_nodes.begin(), _nodes.end());
     _allNodes.erase(_allNodes.begin(), _allNodes.end());
-    
+
     _focus = "";
     _position = "";
-    
+
     return true;
 }
 
-void SceneGraph::update() {
-    for(auto node: _nodes) {
+void SceneGraph::update()
+{
+    for (auto node : _nodes)
         node->update();
-    }
 }
 
-void SceneGraph::evaluate(Camera *camera) {
-	_root->evaluate(camera);
+void SceneGraph::evaluate(Camera* camera)
+{
+    _root->evaluate(camera);
 }
 
-void SceneGraph::render(Camera *camera) {
-	_root->render(camera);
+void SceneGraph::render(Camera* camera)
+{
+    _root->render(camera);
 }
 
-bool SceneGraph::loadFromModulePath(const std::string& path) {
-   
+bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
+                           const std::string& defaultModulePath)
+{
+    using ghoul::Dictionary;
+    using ghoul::lua::loadDictionaryFromFile;
+
     LDEBUG("Loading scenegraph nodes");
-    if(_root != nullptr) {
+    if (_root != nullptr) {
         LFATAL("Scenegraph already loaded");
         return false;
     }
-    
-    std::string defaultScene = path + "/default.scene";
-    if( ! FileSys.fileExists(defaultScene)) {
-        LFATAL("Could not find 'default.scene' in '" << path << "'");
-        return false;
-    }
-    
-    ghoul::Dictionary dictionary;
-    
-    // initialize the root node
-    _root = new SceneGraphNode(ghoul::Dictionary());
-    _root->setName("Root");
-    _nodes.push_back(_root);
-    _allNodes.insert ( std::make_pair("Root", _root));
 
-    ghoul::lua::loadDictionaryFromFile(defaultScene, dictionary);
-    ghoul::Dictionary moduleDictionary;
-    if(dictionary.getValue("Modules", moduleDictionary)) {
-        auto keys = moduleDictionary.keys();
+
+    // initialize the root node
+    _root = new SceneGraphNode(Dictionary());
+    _root->setName(_rootNodeName);
+    _nodes.push_back(_root);
+    _allNodes.insert(std::make_pair("Root", _root));
+
+    Dictionary dictionary;
+    loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
+    Dictionary moduleDictionary;
+    if (dictionary.getValue(configuration::modulesKey, moduleDictionary)) {
+        std::vector<std::string> keys = moduleDictionary.keys();
         std::sort(keys.begin(), keys.end());
-        for (auto key: keys) {
+        for (const std::string& key : keys) {
             std::string moduleFolder;
-            if(moduleDictionary.getValue(key, moduleFolder)) {
-                loadModulesFromModulePath(path +"/"+moduleFolder);
-            }
+            if (moduleDictionary.getValue(key, moduleFolder))
+                loadModule(defaultModulePath + "/" + moduleFolder);
         }
     }
-    
+
     // TODO: Make it less hard-coded and more flexible when nodes are not found
-    ghoul::Dictionary cameraDictionary;
-    if(dictionary.getValue("Camera", cameraDictionary)) {
-        LDEBUG("Cameradictionary found");
+    Dictionary cameraDictionary;
+    if (dictionary.getValue(configuration::cameraKey, cameraDictionary)) {
+        LDEBUG("Camera dictionary found");
         std::string focus;
         std::string position;
-        
-        if(cameraDictionary.hasKey("Focus") && cameraDictionary.getValue("Focus", focus)) {
+
+        if (cameraDictionary.hasKey("Focus")
+            && cameraDictionary.getValue("Focus", focus)) {
             auto focusIterator = _allNodes.find(focus);
             if (focusIterator != _allNodes.end()) {
                 _focus = focus;
-                LDEBUG("Setting camera focus to '"<< _focus << "'");
+                LDEBUG("Setting camera focus to '" << _focus << "'");
             }
+            else
+                LERROR("Could not find focus object '" << focus << "'");
         }
-        if(cameraDictionary.hasKey("Position") && cameraDictionary.getValue("Position", position)) {
+        if (cameraDictionary.hasKey("Position")
+            && cameraDictionary.getValue("Position", position)) {
             auto positionIterator = _allNodes.find(position);
             if (positionIterator != _allNodes.end()) {
                 _position = position;
-                LDEBUG("Setting camera position to '"<< _position << "'");
+                LDEBUG("Setting camera position to '" << _position << "'");
             }
+            else
+                LERROR("Could not find object '" << position << "' to position camera");
         }
     }
-    
+
     return true;
 }
 
-void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
+void SceneGraph::loadModule(const std::string& modulePath)
+{
     auto pos = modulePath.find_last_of("/");
     if (pos == modulePath.npos) {
-        LFATAL("Bad format for module path: " << modulePath);
+        LERROR("Bad format for module path: " << modulePath);
         return;
     }
-    
-    std::string fullModule = modulePath + modulePath.substr(pos) + ".mod";
+
+    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
     LDEBUG("Loading modules from: " << fullModule);
-    
+
     ghoul::Dictionary moduleDictionary;
     ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
-    auto keys = moduleDictionary.keys();
-    for (auto key: keys) {
+    std::vector<std::string> keys = moduleDictionary.keys();
+    for (const std::string& key : keys) {
         ghoul::Dictionary singleModuleDictionary;
-        if(moduleDictionary.getValue(key, singleModuleDictionary)) {
+        if (moduleDictionary.getValue(key, singleModuleDictionary)) {
             std::string moduleName;
-            if (singleModuleDictionary.getValue("Name", moduleName)) {
+            if (singleModuleDictionary.getValue(configuration::nameKey, moduleName)) {
                 std::string parentName;
-                if ( ! singleModuleDictionary.getValue("Parent", parentName)) {
+                if (!singleModuleDictionary.getValue(configuration::parentKey, parentName)) {
                     LWARNING("Could not find 'Parent' key, using 'Root'.");
                     parentName = "Root";
                 }
-                
+
                 auto parentIterator = _allNodes.find(parentName);
                 if (parentIterator == _allNodes.end()) {
-                    LFATAL("Could not find parent named '"<< parentName <<
-                           "' for '" << moduleName << "'." <<
-                           " Check module definition order. Skipping module.");
+                    LFATAL("Could not find parent named '"
+                           << parentName << "' for '" << moduleName << "'."
+                           << " Check module definition order. Skipping module.");
                     continue;
                 }
-                
+
                 // allocate SceneGraphNode and initialize with Dictionary
                 singleModuleDictionary.setValue("Path", modulePath);
                 SceneGraphNode* node = nullptr;
                 node = new SceneGraphNode(singleModuleDictionary);
-                if(node != nullptr) {
+                if (node != nullptr) {
                     // add to internal data structures
                     _allNodes.insert(std::make_pair(moduleName, node));
                     _nodes.push_back(node);
-                    
+
                     // set child and parent
                     SceneGraphNode* parentNode = parentIterator->second;
                     parentNode->addNode(node);
@@ -323,17 +337,19 @@ void SceneGraph::loadModulesFromModulePath(const std::string& modulePath) {
             }
         }
     }
-    
+
     // Print the tree
     printTree(_root);
 }
 
-void SceneGraph::printChildren() const {
+void SceneGraph::printChildren() const
+{
     _root->print();
 }
 
-SceneGraphNode* SceneGraph::root() const {
+SceneGraphNode* SceneGraph::root() const
+{
     return _root;
 }
-	
-} // namespace openspace
+
+}  // namespace openspace

@@ -27,6 +27,7 @@
 
 #include <openspace/scenegraph/scenegraph.h>
 
+#include <memory>
 #include <string>
 
 namespace openspace {
@@ -40,7 +41,8 @@ public:
 	
     bool initialize();
 
-    SceneGraph* sceneGraph();
+    void setSceneGraph(std::shared_ptr<SceneGraph> sceneGraph);
+    std::shared_ptr<SceneGraph> sceneGraph();
 
 	// sgct wrapped functions
     bool initializeGL();
@@ -54,7 +56,7 @@ public:
 	
 private:
 	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
+	std::shared_ptr<SceneGraph> _sceneGraph;
 };
 
 } // namespace openspace
