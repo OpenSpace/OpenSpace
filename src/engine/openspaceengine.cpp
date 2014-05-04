@@ -34,6 +34,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -52,14 +53,6 @@ namespace {
     const std::string _configurationFile = "openspace.cfg";
     const std::string _basePathToken = "${BASE_PATH}";
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
-
-    namespace configuration {
-        const std::string pathKey = "Paths";
-        const std::string scenePathKey = "Paths.SCENEPATH";
-        const std::string sgctConfigKey = "SGCTConfig";
-        const std::string sceneConfigurationKey = "Scene";
-
-    }
 }
 
 namespace openspace {
@@ -80,7 +73,7 @@ OpenSpaceEngine::~OpenSpaceEngine()
     delete _interactionHandler;
     delete _renderEngine;
 
-    // TODO deallocate scriptengine when starting to use it
+    // TODO deallocate script engine when starting to use it
     // delete _scriptEngine;
 
     Spice::deinit();
@@ -195,15 +188,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     ghoul::Dictionary& configuration = *(_engine->_configurationManager);
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    if (configuration.hasKey(configuration::pathKey)) {
+    if (configuration.hasKey(constants::openspaceengine::pathKey)) {
         ghoul::Dictionary pathsDictionary;
-        if (configuration.getValue(configuration::pathKey, pathsDictionary))
+        if (configuration.getValue(constants::openspaceengine::pathKey, pathsDictionary))
             OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
     }
 
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-    if (configuration.hasKey(configuration::sgctConfigKey))
-        configuration.getValue(configuration::sgctConfigKey, sgctConfigurationPath);
+    if (configuration.hasKey(constants::openspaceengine::sgctConfigKey))
+        configuration.getValue(constants::openspaceengine::sgctConfigKey, sgctConfigurationPath);
 
     sgctArguments.push_back(argv[0]);
     sgctArguments.push_back("-config");
@@ -254,14 +247,14 @@ bool OpenSpaceEngine::initialize()
     std::shared_ptr<SceneGraph> sceneGraph(new SceneGraph);
     _renderEngine->setSceneGraph(sceneGraph);
     if (!OsEng.configurationManager().hasValue<std::string>(
-              configuration::sceneConfigurationKey)) {
+              constants::openspaceengine::sceneConfigurationKey)) {
         LFATAL("Configuration needs to point to the scene file");
         return false;
     }
 
     std::string sceneDescriptionPath;
     bool success = _configurationManager->getValue(
-          configuration::sceneConfigurationKey, sceneDescriptionPath);
+          constants::openspaceengine::sceneConfigurationKey, sceneDescriptionPath);
 
     if (!FileSys.fileExists(sceneDescriptionPath)) {
         LFATAL("Could not find '" << sceneDescriptionPath << "'");
@@ -269,7 +262,7 @@ bool OpenSpaceEngine::initialize()
     }
 
     std::string scenePath;
-    success = _configurationManager->getValue(configuration::scenePathKey, scenePath);
+    success = _configurationManager->getValue(constants::openspaceengine::scenePathKey, scenePath);
     if (!success) {
         LFATAL("Could not find SCENEPATH key in configuration file");
         return false;

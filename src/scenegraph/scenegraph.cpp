@@ -28,6 +28,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/spice.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/constants.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -50,13 +51,6 @@ const std::string _loggerCat = "SceneGraph";
 const std::string _rootNodeName = "Root";
 const std::string _moduleExtension = ".mod";
 
-namespace configuration {
-const std::string modulesKey = "Modules";
-const std::string cameraKey = "Camera";
-const std::string focusKey = "Focus";
-const std::string positionKey = "Position";
-const std::string modulePathKey = "ModulePath";
-}
 }
 
 namespace openspace {
@@ -248,7 +242,7 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
     Dictionary dictionary;
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
     Dictionary moduleDictionary;
-    if (dictionary.getValue(configuration::modulesKey, moduleDictionary)) {
+    if (dictionary.getValue(constants::scenegraph::modulesKey, moduleDictionary)) {
         std::vector<std::string> keys = moduleDictionary.keys();
         std::sort(keys.begin(), keys.end());
         for (const std::string& key : keys) {
@@ -260,13 +254,13 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     Dictionary cameraDictionary;
-    if (dictionary.getValue(configuration::cameraKey, cameraDictionary)) {
+    if (dictionary.getValue(constants::scenegraph::cameraKey, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
         std::string position;
 
-        if (cameraDictionary.hasKey(configuration::focusKey)
-            && cameraDictionary.getValue(configuration::focusKey, focus)) {
+        if (cameraDictionary.hasKey(constants::scenegraph::focusKey)
+            && cameraDictionary.getValue(constants::scenegraph::focusKey, focus)) {
             auto focusIterator = _allNodes.find(focus);
             if (focusIterator != _allNodes.end()) {
                 _focus = focus;
@@ -275,8 +269,8 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
             else
                 LERROR("Could not find focus object '" << focus << "'");
         }
-        if (cameraDictionary.hasKey(configuration::positionKey)
-            && cameraDictionary.getValue(configuration::positionKey, position)) {
+        if (cameraDictionary.hasKey(constants::scenegraph::positionKey)
+            && cameraDictionary.getValue(constants::scenegraph::positionKey, position)) {
             auto positionIterator = _allNodes.find(position);
             if (positionIterator != _allNodes.end()) {
                 _position = position;
@@ -314,7 +308,7 @@ void SceneGraph::loadModule(const std::string& modulePath)
         ghoul::Dictionary element;
         moduleDictionary.getValue(key, element);
 
-        element.setValue(configuration::modulePathKey, modulePath);
+        element.setValue(constants::scenegraph::modulePathKey, modulePath);
 
         SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
 
