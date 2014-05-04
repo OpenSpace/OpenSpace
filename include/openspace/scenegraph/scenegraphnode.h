@@ -84,7 +84,7 @@ private:
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     std::string _nodeName;
-    Ephemeris* _position;
+    Ephemeris* _ephemeris;
 
     // renderable
     Renderable* _renderable;

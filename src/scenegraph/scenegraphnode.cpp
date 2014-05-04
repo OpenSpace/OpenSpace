@@ -36,7 +36,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <openspace/scenegraph/constantephemeris.h>
+#include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
@@ -45,32 +45,6 @@ const std::string _loggerCat = "SceneGraphNode";
 }
 
 namespace openspace {
-
-template <class T>
-bool safeCreationWithDictionary(T** object, const std::string& key,
-                                const ghoul::Dictionary& dictionary,
-                                const std::string& path = "")
-{
-    if (dictionary.hasKey(key)) {
-        ghoul::Dictionary tmpDictionary;
-        if (dictionary.getValue(key, tmpDictionary)) {
-            if (!tmpDictionary.hasKey("Path") && path != "") {
-                tmpDictionary.setValue("Path", path);
-            }
-            std::string renderableType;
-            if (tmpDictionary.getValue("Type", renderableType)) {
-                ghoul::TemplateFactory<T>* factory
-                      = FactoryManager::ref().factoryByType<T>();
-                T* tmp = factory->create(renderableType, tmpDictionary);
-                if (tmp != nullptr) {
-                    *object = tmp;
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
@@ -91,26 +65,29 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
         ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(keyRenderable,
-                            renderableDictionary);
+        dictionary.getValue(keyRenderable, renderableDictionary);
         renderableDictionary.setValue(keyPathModule, path);
         renderableDictionary.setValue(keyName, result->_nodeName);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
-                   << result->_nodeName);
+                   << result->_nodeName << "'");
             return nullptr;
         }
+        LDEBUG("Successfully create renderable for '" << result->_nodeName << "'");
     }
     if (dictionary.hasKey(keyEphemeris)) {
-        if (safeCreationWithDictionary<Ephemeris>(
-                  &result->_position, keyEphemeris, dictionary,
-                  path)) {
-            LDEBUG(result->_nodeName << ": Successful creation of position");
-        } else {
-            LDEBUG(result->_nodeName << ": Failed to create position");
+        ghoul::Dictionary ephemerisDictionary;
+        dictionary.getValue(keyEphemeris, ephemerisDictionary);
+        ephemerisDictionary.setValue(keyPathModule, path);
+        result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
+        if (result->_ephemeris == nullptr) {
+            LERROR("Failed to create ephemeris for SceneGraphNode '"
+                   << result->_nodeName << "'");
+            return nullptr;
         }
+        LDEBUG("Successfully create ephemeris for '" << result->_nodeName << "'");
     }
 
     std::string parentName;
@@ -128,13 +105,15 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     parentNode->addNode(result);
 
+    LDEBUG("Successfully created SceneGraphNode '"
+                   << result->_nodeName << "'");
     return result;
 }
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
     , _nodeName("")
-    , _position(new ConstantEphemeris)
+    , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
@@ -152,8 +131,8 @@ bool SceneGraphNode::initialize()
         _renderable->initialize();
 
     // deallocate position
-    if (_position != nullptr)
-        _position->initialize();
+    if (_ephemeris != nullptr)
+        _ephemeris->initialize();
     return true;
 }
 
@@ -166,8 +145,8 @@ bool SceneGraphNode::deinitialize()
         delete _renderable;
 
     // deallocate position
-    if (_position != nullptr)
-        delete _position;
+    if (_ephemeris != nullptr)
+        delete _ephemeris;
 
     // deallocate the child nodes and delete them, iterate c++11 style
     for (auto child : _children)
@@ -179,7 +158,7 @@ bool SceneGraphNode::deinitialize()
     // reset variables
     _parent = nullptr;
     _renderable = nullptr;
-    _position = nullptr;
+    _ephemeris = nullptr;
     _nodeName = "Unnamed OpenSpace SceneGraphNode";
     _renderableVisible = false;
     _boundingSphereVisible = false;
@@ -191,12 +170,12 @@ bool SceneGraphNode::deinitialize()
 // essential
 void SceneGraphNode::update()
 {
-    _position->update();
+    _ephemeris->update();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 {
-    const psc thisPosition = parentPosition + _position->position();
+    const psc thisPosition = parentPosition + _ephemeris->position();
     const psc camPos = camera->getPosition();
     const psc toCamera = thisPosition - camPos;
 
@@ -233,7 +212,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 
 void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
 {
-    const psc thisPosition = parentPosition + _position->position();
+    const psc thisPosition = parentPosition + _ephemeris->position();
 
     // check if camera is outside the node boundingsphere
     if (!_boundingSphereVisible) {
@@ -272,16 +251,16 @@ void SceneGraphNode::setParent(SceneGraphNode* parent)
 
 const psc& SceneGraphNode::getPosition() const
 {
-    return _position->position();
+    return _ephemeris->position();
 }
 
 psc SceneGraphNode::getWorldPosition() const
 {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _position->position() + _parent->getWorldPosition();
+        return _ephemeris->position() + _parent->getWorldPosition();
     } else {
-        return _position->position();
+        return _ephemeris->position();
     }
 }
 

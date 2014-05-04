@@ -53,6 +53,10 @@ namespace scenegraphnode {
 
 namespace renderable {
     const std::string keyType = "Type";
+} // namespace renderable
+
+namespace ephemeris {
+    const std::string keyType = "Type";
 }
 
 }  // namespace constants

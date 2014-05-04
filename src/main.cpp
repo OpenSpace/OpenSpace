@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
 
     // create sgct engine c arguments
-    int newArgc = sgctArguments.size();
+    int newArgc = static_cast<int>(sgctArguments.size());
     char** newArgv = new char* [newArgc];
     for (int i = 0; i < newArgc; ++i) {
         // newArgv[i] = new char[sgctArguments.at(i).length()];

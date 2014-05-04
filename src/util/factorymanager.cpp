@@ -34,7 +34,7 @@
 #include <openspace/flare/flare.h>
 
 // positioninformation
-#include <openspace/scenegraph/constantephemeris.h>
+#include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/scenegraph/spiceephemeris.h>
 
 namespace openspace {
@@ -71,7 +71,7 @@ void FactoryManager::initialize() {
     
     // Add PositionInformations
     _manager->factoryByType<Ephemeris>()->
-        registerClass<ConstantEphemeris>("Static");
+        registerClass<StaticEphemeris>("Static");
     _manager->factoryByType<Ephemeris>()->
         registerClass<SpiceEphemeris>("Spice");
 
