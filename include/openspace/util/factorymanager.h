@@ -29,7 +29,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/scenegraph/positioninformation.h>
+#include <openspace/scenegraph/ephemeris.h>
 #include <openspace/rendering/renderable.h>
 
 
@@ -68,7 +68,7 @@ private:
     static FactoryManager* _manager; ///<Singleton member
     
     ghoul::TemplateFactory<Renderable> _renderableFactory;
-    ghoul::TemplateFactory<PositionInformation> _positionInformationFactory;
+    ghoul::TemplateFactory<Ephemeris> _positionInformationFactory;
 
 };
     
@@ -76,7 +76,7 @@ private:
 template<>
 ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType();
 template<>
-ghoul::TemplateFactory<PositionInformation>* FactoryManager::factoryByType();
+ghoul::TemplateFactory<Ephemeris>* FactoryManager::factoryByType();
 
     
 } // namespace openspace

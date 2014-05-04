@@ -36,7 +36,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <openspace/scenegraph/constantpositioninformation.h>
+#include <openspace/scenegraph/constantephemeris.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
@@ -104,7 +104,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         }
     }
     if (dictionary.hasKey(keyEphemeris)) {
-        if (safeCreationWithDictionary<PositionInformation>(
+        if (safeCreationWithDictionary<Ephemeris>(
                   &result->_position, keyEphemeris, dictionary,
                   path)) {
             LDEBUG(result->_nodeName << ": Successful creation of position");
@@ -134,7 +134,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
     , _nodeName("")
-    , _position(new ConstantPositionInformation)
+    , _position(new ConstantEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)

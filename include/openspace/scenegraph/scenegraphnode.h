@@ -27,7 +27,7 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/positioninformation.h>
+#include <openspace/scenegraph/ephemeris.h>
 
 #include <openspace/scenegraph/scenegraph.h>
 #include <ghoul/misc/dictionary.h>
@@ -84,7 +84,7 @@ private:
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     std::string _nodeName;
-    PositionInformation* _position;
+    Ephemeris* _position;
 
     // renderable
     Renderable* _renderable;

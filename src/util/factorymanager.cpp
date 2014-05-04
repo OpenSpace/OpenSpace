@@ -34,8 +34,8 @@
 #include <openspace/flare/flare.h>
 
 // positioninformation
-#include <openspace/scenegraph/constantpositioninformation.h>
-#include <openspace/scenegraph/spicepositioninformation.h>
+#include <openspace/scenegraph/constantephemeris.h>
+#include <openspace/scenegraph/spiceephemeris.h>
 
 namespace openspace {
 
@@ -45,7 +45,7 @@ ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType() {
     return &_renderableFactory;
 }
 template<>
-ghoul::TemplateFactory<PositionInformation>* FactoryManager::factoryByType() {
+ghoul::TemplateFactory<Ephemeris>* FactoryManager::factoryByType() {
     return &_positionInformationFactory;
 }
     
@@ -70,10 +70,10 @@ void FactoryManager::initialize() {
         registerClass<Flare>("RenderableFlare");
     
     // Add PositionInformations
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<ConstantPositionInformation>("Static");
-    _manager->factoryByType<PositionInformation>()->
-        registerClass<SpicePositionInformation>("Spice");
+    _manager->factoryByType<Ephemeris>()->
+        registerClass<ConstantEphemeris>("Static");
+    _manager->factoryByType<Ephemeris>()->
+        registerClass<SpiceEphemeris>("Spice");
 
 }
 
