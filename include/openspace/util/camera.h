@@ -36,6 +36,52 @@
 
 namespace openspace {
 
+//class Camera {
+//public:
+//    Camera();
+//    
+//    void setPosition(psc pos);
+//    const psc& position() const;
+//
+//    void setFocus(psc focus);
+//    const psc& focus() const;
+//
+//    void setUpVector(psc upVector);
+//    const psc& upVector() const;
+//
+//    void setScaling(float scaling);
+//    float scaling() const;
+//
+//    const glm::mat4& viewMatrix() const;
+//
+//    void setProjectionMatrix(glm::mat4 projectionMatrix);
+//    const glm::mat4& projectionMatrix() const;
+//
+//    void setMaxFox(float fov);
+//    float maxFov() const;
+//
+//
+//    // derived values
+//    psc lookVector() const;
+//
+//private:
+//    void invalidateViewMatrix();
+//    void updateViewMatrix() const;  // has to be constant to be called from getter methods
+//
+//    psc _position;
+//    psc _focus;
+//    psc _upVector;
+//
+//    glm::mat4 _projectionMatrix;
+//    mutable glm::mat4 _viewMatrix;
+//    float _scaling;
+//
+//    float _maxFov;
+//
+//    mutable bool _viewMatrixIsDirty;
+//};
+
+
 class Camera {
 public:
     Camera();

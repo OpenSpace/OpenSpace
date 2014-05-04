@@ -30,6 +30,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/kameleonwrapper.h>
+#include <openspace/util/constants.h>
 
 #include <sgct.h>
 
@@ -41,7 +42,7 @@
 #include <type_traits>
 
 namespace {
-    std::string _loggerCat = "RenderableVolume";
+    const std::string _loggerCat = "RenderableVolume";
     
     bool hasExtension (std::string const &filepath, std::string const &extension)
     {
@@ -77,8 +78,8 @@ RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary)
 {
     // get path if available
     _relativePath = "";
-    if(dictionary.hasKey("Path")) {
-       dictionary.getValue("Path", _relativePath);
+    if(dictionary.hasKey(constants::scenegraph::keyPathModule)) {
+       dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
        _relativePath += "/";
     }
 }
