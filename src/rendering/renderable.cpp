@@ -50,7 +50,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
     std::string renderableType;
     dictionary.getValue(constants::renderable::keyType, renderableType);
     ghoul::TemplateFactory<Renderable>* factory
-          = FactoryManager::ref().factoryByType<Renderable>();
+          = FactoryManager::ref().factory<Renderable>();
     Renderable* result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Renderable object of type '" << renderableType << "'");

@@ -42,7 +42,7 @@ Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
     std::string ephemerisType;
     dictionary.getValue(constants::ephemeris::keyType, ephemerisType);
     ghoul::TemplateFactory<Ephemeris>* factory
-          = FactoryManager::ref().factoryByType<Ephemeris>();
+          = FactoryManager::ref().factory<Ephemeris>();
     Ephemeris* result = factory->create(ephemerisType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Ephemeris object of type '" << ephemerisType << "'");

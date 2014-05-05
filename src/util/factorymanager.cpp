@@ -39,60 +39,60 @@
 
 namespace openspace {
 
-// Template specializations for the different factories
-template<>
-ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType() {
-    return &_renderableFactory;
-}
-template<>
-ghoul::TemplateFactory<Ephemeris>* FactoryManager::factoryByType() {
-    return &_positionInformationFactory;
-}
-    
 FactoryManager* FactoryManager::_manager = nullptr;
 
-void FactoryManager::initialize() {
+void FactoryManager::initialize()
+{
     assert(_manager == nullptr);
     if (_manager == nullptr)
         _manager = new FactoryManager;
     assert(_manager != nullptr);
-    
-    // Add Renderables
-    _manager->factoryByType<Renderable>()->
-        registerClass<RenderablePlanet>("RenderablePlanet");
-    _manager->factoryByType<Renderable>()->
-        registerClass<RenderableVolumeCL>("RenderableVolumeCL");
-    _manager->factoryByType<Renderable>()->
-        registerClass<RenderableVolumeGL>("RenderableVolumeGL");
-    _manager->factoryByType<Renderable>()->
-        registerClass<RenderableVolumeExpert>("RenderableVolumeExpert");
-    _manager->factoryByType<Renderable>()->
-        registerClass<Flare>("RenderableFlare");
-    
-    // Add PositionInformations
-    _manager->factoryByType<Ephemeris>()->
-        registerClass<StaticEphemeris>("Static");
-    _manager->factoryByType<Ephemeris>()->
-        registerClass<SpiceEphemeris>("Spice");
 
+    // TODO: This has to be moved into a sort of module structure (ab)
+    // Add Renderables
+    _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
+    _manager->factory<Renderable>()->registerClass<RenderablePlanet>(
+          "RenderablePlanet");
+    _manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
+          "RenderableVolumeCL");
+    _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
+          "RenderableVolumeGL");
+    _manager->factory<Renderable>()->registerClass<RenderableVolumeExpert>(
+          "RenderableVolumeExpert");
+    _manager->factory<Renderable>()->registerClass<Flare>("RenderableFlare");
+
+    // Add Ephimerides
+    _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
+    _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
+    _manager->factory<Ephemeris>()->registerClass<SpiceEphemeris>("Spice");
 }
 
-void FactoryManager::deinitialize() {
+void FactoryManager::deinitialize()
+{
     assert(_manager != nullptr);
     delete _manager;
     _manager = nullptr;
 }
 
-FactoryManager& FactoryManager::ref() {
+FactoryManager& FactoryManager::ref()
+{
     assert(_manager != nullptr);
     return *_manager;
 }
-     
-FactoryManager::FactoryManager() {
-    
+
+FactoryManager::FactoryManager()
+{
 }
-FactoryManager::~FactoryManager() {
-    
+FactoryManager::~FactoryManager()
+{
+    for (ghoul::TemplateFactoryBase* factory : _factories)
+        delete factory;
+    _factories.clear();
 }
 
-} // namespace openspace
+void FactoryManager::addFactory(ghoul::TemplateFactoryBase* factory) {
+    _factories.push_back(factory);
+
+}
+
+}  // namespace openspace

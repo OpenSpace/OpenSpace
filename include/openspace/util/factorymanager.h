@@ -32,12 +32,10 @@
 #include <openspace/scenegraph/ephemeris.h>
 #include <openspace/rendering/renderable.h>
 
-
 namespace openspace {
-    
+
 class FactoryManager {
 public:
-    
     /**
      * Static initializer that initializes the static member. This needs to be done before
      * the FactoryManager can be used. If the manager has been already initialized, an
@@ -45,40 +43,35 @@ public:
      */
     static void initialize();
     static void deinitialize();
-    
+
     /**
      * This method returns a reference to the initialized FactoryManager. If the manager
      * has not been initialized, an assertion will be triggered.
      * \return An initialized reference to the singleton manager
      */
     static FactoryManager& ref();
-    
-    template<class T>
-    ghoul::TemplateFactory<T>* factoryByType();
-    
+
+    void addFactory(ghoul::TemplateFactoryBase* factory);
+
+    template <class T>
+    ghoul::TemplateFactory<T>* factory();
+
 private:
     FactoryManager();
-    
+
     /// Not implemented on purpose, using this should result in an error
     FactoryManager(const FactoryManager& c);
-    
+
     /// Not implemented on purpose, using this should result in an error
     ~FactoryManager();
-    
-    static FactoryManager* _manager; ///<Singleton member
-    
-    ghoul::TemplateFactory<Renderable> _renderableFactory;
-    ghoul::TemplateFactory<Ephemeris> _positionInformationFactory;
 
+    static FactoryManager* _manager;  ///<Singleton member
+
+    std::vector<ghoul::TemplateFactoryBase*> _factories;
 };
-    
-// Forward declare template specializations
-template<>
-ghoul::TemplateFactory<Renderable>* FactoryManager::factoryByType();
-template<>
-ghoul::TemplateFactory<Ephemeris>* FactoryManager::factoryByType();
 
-    
 } // namespace openspace
 
-#endif
+#include <openspace/util/factorymanager.inl>
+
+#endif // __FACTORYMANAGER_H__
