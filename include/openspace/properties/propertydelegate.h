@@ -48,6 +48,6 @@ public:
 } // namespace properties
 } // namespace openspace
 
-#include "openspace/properties/propertydelegate.inl"
+#include <openspace/properties/propertydelegate.inl>
 
 #endif // __PROPERTYDELEGATE_H__

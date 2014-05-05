@@ -25,7 +25,7 @@
 #ifndef __MATRIXPROPERTY_H__
 #define __MATRIXPROPERTY_H__
 
-#include "openspace/properties/numericalproperty.h"
+#include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
 

@@ -25,7 +25,7 @@
 #ifndef __PROPERTY_H__
 #define __PROPERTY_H__
 
-#include "openspace/properties/propertydelegate.h"
+#include <openspace/properties/propertydelegate.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <boost/any.hpp>

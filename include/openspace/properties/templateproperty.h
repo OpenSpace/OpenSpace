@@ -25,7 +25,7 @@
 #ifndef __TEMPLATEPROPERTY_H__
 #define __TEMPLATEPROPERTY_H__
 
-#include "openspace/properties/property.h"
+#include <openspace/properties/property.h>
 
 namespace openspace {
 namespace properties {

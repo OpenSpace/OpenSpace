@@ -53,7 +53,7 @@ namespace properties {
 template <typename T>
 TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName)
     : TemplateProperty<T>(std::move(identifier), std::move(guiName),
-                          PropertyDelegate<TemplateProperty<T>>::defaultValue<T>()) {
+                          PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>()) {
 }
 
 template <typename T>
