@@ -331,4 +331,12 @@ SceneGraphNode* SceneGraph::root() const
     return _root;
 }
 
+SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
+    auto it = _allNodes.find(name);
+    if (it == _allNodes.end())
+        return nullptr;
+    else
+        return it->second;
+}
+
 }  // namespace openspace

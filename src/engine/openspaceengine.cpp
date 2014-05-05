@@ -247,7 +247,7 @@ bool OpenSpaceEngine::initialize()
     FactoryManager::initialize();
 
     // Load scenegraph
-    std::shared_ptr<SceneGraph> sceneGraph(new SceneGraph);
+    SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);
     if (!OsEng.configurationManager().hasValue<std::string>(
               constants::openspaceengine::keyConfigScene)) {

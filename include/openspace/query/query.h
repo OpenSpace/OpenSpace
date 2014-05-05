@@ -25,7 +25,6 @@
 #ifndef __QUERY_H__
 #define __QUERY_H__
 
-#include <memory>
 #include <string>
 
 namespace openspace {
@@ -33,7 +32,7 @@ namespace openspace {
 class SceneGraph;
 class SceneGraphNode;
 
-std::shared_ptr<SceneGraph> getSceneGraph();
+SceneGraph* getSceneGraph();
 
 SceneGraphNode* getSceneGraphNode(const std::string& name);
 

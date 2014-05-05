@@ -41,8 +41,8 @@ public:
 	
     bool initialize();
 
-    void setSceneGraph(std::shared_ptr<SceneGraph> sceneGraph);
-    std::shared_ptr<SceneGraph> sceneGraph();
+    void setSceneGraph(SceneGraph* sceneGraph);
+    SceneGraph* sceneGraph();
 
     Camera* camera() const;
 
@@ -57,7 +57,7 @@ public:
 	
 private:
 	Camera* _mainCamera;
-	std::shared_ptr<SceneGraph> _sceneGraph;
+	SceneGraph* _sceneGraph;
 };
 
 } // namespace openspace

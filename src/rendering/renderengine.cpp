@@ -202,14 +202,14 @@ void RenderEngine::render()
     }
 }
 
-std::shared_ptr<SceneGraph> RenderEngine::sceneGraph()
+SceneGraph* RenderEngine::sceneGraph()
 {
     // TODO custom assert (ticket #5)
     assert(_sceneGraph);
     return _sceneGraph;
 }
 
-void RenderEngine::setSceneGraph(std::shared_ptr<SceneGraph> sceneGraph)
+void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 {
     _sceneGraph = sceneGraph;
 }

@@ -29,31 +29,18 @@
 namespace openspace {
 
 namespace {
-    const std::string _loggerCat = "Query";
-
-    SceneGraphNode* getSceneGraphNode(SceneGraphNode* thisNode, const std::string& name) {
-        if (thisNode->nodeName() == name)
-            return thisNode;
-        else {
-            for (auto it : thisNode->children()) {
-                SceneGraphNode* childNode = getSceneGraphNode(it, name);
-                if (childNode != nullptr)
-                    return childNode;
-            }
-            return nullptr;
-        }
-    }
+const std::string _loggerCat = "Query";
 }
 
-std::shared_ptr<SceneGraph> getSceneGraph() {
+SceneGraph* getSceneGraph()
+{
     return OsEng.renderEngine().sceneGraph();
 }
 
-SceneGraphNode* getSceneGraphNode(const std::string& name) {
-    std::shared_ptr<SceneGraph> sceneGraph = getSceneGraph();
-
-    SceneGraphNode* rootNode = sceneGraph->root();
-    return getSceneGraphNode(rootNode, name);
+SceneGraphNode* getSceneGraphNode(const std::string& name)
+{
+    SceneGraph* sceneGraph = getSceneGraph();
+    return sceneGraph->sceneGraphNode(name);
 }
 
-} // namespace
+}  // namespace

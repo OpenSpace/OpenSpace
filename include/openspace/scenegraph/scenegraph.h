@@ -88,6 +88,12 @@ public:
      */
     SceneGraphNode* root() const;
 
+    /**
+     * Return the scenegraph node with the specified name or <code>nullptr</code> if that
+     * name does not exist
+     */
+    SceneGraphNode* sceneGraphNode(const std::string& name) const;
+
 private:
     std::string _focus, _position;
 
