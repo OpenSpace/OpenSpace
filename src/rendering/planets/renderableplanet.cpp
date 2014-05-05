@@ -28,13 +28,14 @@
 #include <openspace/rendering/planets/planetgeometry.h>
 
 #include <ghoul/opengl/texturereader.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 
 namespace {
-    const std::string _loggerCat = "RenderablePlanet";
+const std::string _loggerCat = "RenderablePlanet";
 }
 
 namespace openspace {
@@ -70,30 +71,34 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     for (properties::Property* p : _geometry->properties())
         addProperty(p);
 
-    //addProperty(_colorTexturePath);
+    // addProperty(_colorTexturePath);
     //_colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 
-    //createSphere();
+    // createSphere();
 }
 
-RenderablePlanet::~RenderablePlanet() {
+RenderablePlanet::~RenderablePlanet()
+{
     deinitialize();
 }
 
-bool RenderablePlanet::initialize() {
+bool RenderablePlanet::initialize()
+{
     bool completeSuccess = true;
     if (_programObject == nullptr)
-        completeSuccess &= OsEng.ref().configurationManager().getValue("pscShader", _programObject);
-    
+        completeSuccess
+              &= OsEng.ref().configurationManager().getValue("pscShader", _programObject);
+
     loadTexture();
     completeSuccess &= (_texture != nullptr);
 
     _geometry->initialize(this);
-    
+
     return completeSuccess;
 }
 
-bool RenderablePlanet::deinitialize() {
+bool RenderablePlanet::deinitialize()
+{
     _geometry->deinitialize();
     delete _geometry;
     _geometry = nullptr;
@@ -102,59 +107,67 @@ bool RenderablePlanet::deinitialize() {
     return true;
 }
 
-void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject *programObject) {
-	assert(programObject);
-	_programObject = programObject;
+void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject* programObject)
+{
+    assert(programObject);
+    _programObject = programObject;
 }
 
-void RenderablePlanet::setTexture(ghoul::opengl::Texture *texture) {
-	assert(texture);
-	_texture = texture;
+void RenderablePlanet::setTexture(ghoul::opengl::Texture* texture)
+{
+    assert(texture);
+    _texture = texture;
 }
 
-void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
+void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
+{
     // TODO replace with more robust assert
-	// check so that the shader is set
-	assert(_programObject);
-	assert(_texture);
-    
-	// activate shader
-	_programObject->activate();
+    // check so that the shader is set
+    assert(_programObject);
+    assert(_texture);
 
-	// fetch data
-	psc currentPosition = thisPosition;
-	psc campos = camera->position();
-	glm::mat4 camrot = camera->viewRotationMatrix();
+    // activate shader
+    _programObject->activate();
+
+    // fetch data
+    psc currentPosition = thisPosition;
+    psc campos = camera->position();
+    glm::mat4 camrot = camera->viewRotationMatrix();
     pss scaling = camera->scaling();
 
-	// scale the planet to appropriate size since the planet is a unit sphere
-	glm::mat4 transform = glm::mat4(1);
-    transform = glm::rotate(transform, 4.1f*static_cast<float>(sgct::Engine::instance()->getTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+    // scale the planet to appropriate size since the planet is a unit sphere
+    glm::mat4 transform = glm::mat4(1);
+    transform = glm::rotate(
+          transform, 4.1f * static_cast<float>(sgct::Engine::instance()->getTime()),
+          glm::vec3(0.0f, 1.0f, 0.0f));
 
-	// setup the data to the shader
-	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	_programObject->setUniform("campos", campos.getVec4f());
-	_programObject->setUniform("objpos", currentPosition.getVec4f());
-	_programObject->setUniform("camrot", camrot);
-	_programObject->setUniform("scaling", scaling.getVec2f());
-		
-	// Bind texture
-    glActiveTexture(GL_TEXTURE0);
+    // setup the data to the shader
+    _programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
+    _programObject->setUniform("ModelTransform", transform);
+    _programObject->setUniform("campos", campos.getVec4f());
+    _programObject->setUniform("objpos", currentPosition.getVec4f());
+    _programObject->setUniform("camrot", camrot);
+    _programObject->setUniform("scaling", scaling.getVec2f());
+
+    // Bind texture
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
     _texture->bind();
-    _programObject->setUniform("texture1", 0);
-		
-	// render
+    _programObject->setUniform("texture1", unit);
+
+    // render
     _geometry->render();
 
-	// disable shader
-	_programObject->deactivate();
+    // disable shader
+    _programObject->deactivate();
 }
 
-void RenderablePlanet::update() {
+void RenderablePlanet::update()
+{
 }
 
-void RenderablePlanet::loadTexture() {
+void RenderablePlanet::loadTexture()
+{
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
@@ -166,4 +179,4 @@ void RenderablePlanet::loadTexture() {
     }
 }
 
-} // namespace openspace
+}  // namespace openspace
