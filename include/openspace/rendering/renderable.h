@@ -42,9 +42,6 @@ public:
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
-    void setName(std::string name);
-    const std::string& name() const override;
-
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
 
@@ -57,8 +54,6 @@ public:
 protected:
     // Renderable();
 private:
-    std::string _name;
-
     pss boundingSphere_;
 };
 

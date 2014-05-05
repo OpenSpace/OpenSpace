@@ -22,53 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FACTORYMANAGER_H__
-#define __FACTORYMANAGER_H__
+#include <openspace/rendering/planets/planetgeometry.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/factorymanager.h>
 
-// ghoul includes
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
+namespace {
+const std::string _loggerCat = "PlanetGeometry";
+}
 
 namespace openspace {
+namespace planetgeometry {
 
-class FactoryManager {
-public:
-    /**
-     * Static initializer that initializes the static member. This needs to be done before
-     * the FactoryManager can be used. If the manager has been already initialized, an
-     * assertion will be triggered.
-     */
-    static void initialize();
-    static void deinitialize();
+PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    std::string name;
+    dictionary.getValue(constants::scenegraphnode::keyName, name);
 
-    /**
-     * This method returns a reference to the initialized FactoryManager. If the manager
-     * has not been initialized, an assertion will be triggered.
-     * \return An initialized reference to the singleton manager
-     */
-    static FactoryManager& ref();
+    if (!dictionary.hasValue<std::string>(constants::planetgeometry::keyType)) {
+        LERROR("PlanetGeometry for '" << name << "' did not contain a '"
+                                      << constants::planetgeometry::keyType << "' key");
+        return nullptr;
+    }
+    std::string geometryType;
+    dictionary.getValue(constants::planetgeometry::keyType, geometryType);
 
-    void addFactory(ghoul::TemplateFactoryBase* factory);
+    ghoul::TemplateFactory<PlanetGeometry>* factory
+          = FactoryManager::ref().factory<PlanetGeometry>();
 
-    template <class T>
-    ghoul::TemplateFactory<T>* factory() const;
+    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
+                                                                    << "'");
+        return nullptr;
+    }
+    return result;
+}
 
-private:
-    FactoryManager();
+PlanetGeometry::PlanetGeometry()
+    : _parent(nullptr)
+{
+}
 
-    /// Not implemented on purpose, using this should result in an error
-    FactoryManager(const FactoryManager& c);
+PlanetGeometry::~PlanetGeometry()
+{
+}
 
-    /// Not implemented on purpose, using this should result in an error
-    ~FactoryManager();
+void PlanetGeometry::initialize(RenderablePlanet* parent)
+{
+    _parent = parent;
+}
 
-    static FactoryManager* _manager;  ///<Singleton member
+void PlanetGeometry::deinitialize()
+{
+}
 
-    std::vector<ghoul::TemplateFactoryBase*> _factories;
-};
-
-} // namespace openspace
-
-#include <openspace/util/factorymanager.inl>
-
-#endif // __FACTORYMANAGER_H__
+}  // namespace planetgeometry
+}  // namespace openspace

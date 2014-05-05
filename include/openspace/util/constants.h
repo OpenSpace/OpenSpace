@@ -55,9 +55,19 @@ namespace renderable {
     const std::string keyType = "Type";
 } // namespace renderable
 
+namespace renderableplanet {
+    const std::string keyGeometry = "Geometry";
+} // namespace renderableplanet
+
+namespace planetgeometry {
+    const std::string keyType = "Type";
+} // namespace planetgeometry
+
+
+
 namespace ephemeris {
     const std::string keyType = "Type";
-}
+} // namespace ephemeris
 
 }  // namespace constants
 }  // namespace openspace

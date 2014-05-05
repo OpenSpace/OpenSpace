@@ -31,20 +31,31 @@ namespace openspace {
 namespace properties {
 
 namespace {
-    const std::string _loggerCat = "PropertyOwner";
+const std::string _loggerCat = "PropertyOwner";
 
-    bool propertyLess(Property* lhs, Property* rhs) {
-        return lhs->identifier() < rhs->identifier();
-    }
+bool propertyLess(Property* lhs, Property* rhs)
+{
+    return lhs->identifier() < rhs->identifier();
+}
 }
 
-PropertyOwner::~PropertyOwner() {}
+PropertyOwner::PropertyOwner()
+    : _name("")
+{
 
-const std::vector<Property*>& PropertyOwner::properties() const {
+}
+
+PropertyOwner::~PropertyOwner()
+{
+}
+
+const std::vector<Property*>& PropertyOwner::properties() const
+{
     return _properties;
 }
 
-Property* PropertyOwner::property(const std::string& id) const {
+Property* PropertyOwner::property(const std::string& id) const
+{
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
 
     std::vector<Property*>::const_iterator it
@@ -59,11 +70,13 @@ Property* PropertyOwner::property(const std::string& id) const {
         return *it;
 }
 
-void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) {
+void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name)
+{
     _groupNames[std::move(groupID)] = std::move(name);
 }
 
-const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const {
+const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const
+{
     auto it = _groupNames.find(groupID);
     if (it == _groupNames.end())
         return groupID;
@@ -71,7 +84,8 @@ const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) 
         return it->second;
 }
 
-void PropertyOwner::addProperty(Property* prop) {
+void PropertyOwner::addProperty(Property* prop)
+{
     assert(prop != nullptr);
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
 
@@ -82,50 +96,61 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::iterator it
-        = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
-        [](Property* prop, const std::string& str) {
-        return prop->identifier() < str;
-    });
+          = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
+                             [](Property* prop, const std::string& str) {
+              return prop->identifier() < str;
+          });
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         LERROR("Property identifier '" << prop->identifier()
                                        << "' already present in PropertyOwner");
         return;
-    }
-    else {
+    } else {
         // Otherwise we have found the correct position to add it in
         _properties.insert(it, prop);
         prop->setPropertyOwner(this);
     }
 }
 
-void PropertyOwner::addProperty(Property& prop) {
+void PropertyOwner::addProperty(Property& prop)
+{
     addProperty(&prop);
 }
 
-void PropertyOwner::removeProperty(Property* prop) {
+void PropertyOwner::removeProperty(Property* prop)
+{
     assert(prop != nullptr);
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::iterator it
-        = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
-        [](Property* prop, const std::string& str) {
-        return prop->identifier() < str;
-    });
+          = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
+                             [](Property* prop, const std::string& str) {
+              return prop->identifier() < str;
+          });
 
     // If we found the property identifier, we can delete it
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
-    }
-    else
+    } else
         LERROR("Property with identifier '" << prop->identifier()
                                             << "' not found for removal.");
 }
 
-void PropertyOwner::removeProperty(Property& prop) {
+void PropertyOwner::removeProperty(Property& prop)
+{
     removeProperty(&prop);
+}
+
+void PropertyOwner::setName(std::string name)
+{
+    _name = std::move(name);
+}
+
+const std::string& PropertyOwner::name() const
+{
+    return _name;
 }
 
 } // namespace properties

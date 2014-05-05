@@ -37,6 +37,8 @@
 #include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/scenegraph/spiceephemeris.h>
 
+#include <openspace/rendering/planets/simplespheregeometry.h>
+
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
@@ -66,7 +68,10 @@ void FactoryManager::initialize()
     _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
     _manager->factory<Ephemeris>()->registerClass<SpiceEphemeris>("Spice");
 
-
+    // Add PlanetGeometry
+    _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
+    _manager->factory<planetgeometry::PlanetGeometry>()
+          ->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 }
 
 void FactoryManager::deinitialize()

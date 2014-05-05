@@ -25,6 +25,7 @@
 // open space includes
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/util/constants.h>
+#include <openspace/rendering/planets/planetgeometry.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -33,43 +34,32 @@
 #include <sgct.h>
 
 namespace {
-    std::string _loggerCat = "RenderablePlanet";
+    const std::string _loggerCat = "RenderablePlanet";
 }
 
 namespace openspace {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
-              glm::vec2(10.f, 20.f))
-    , _segments("segments", "Segments", 20, 1, 1000)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
     , _texture(nullptr)
-    , _planet(nullptr)
+    //, _planet(nullptr)
+    , _geometry(nullptr)
 {
-    double value = 1.0f, exponent = 0.0f;
-    int segments = 20;
+    std::string path;
+    dictionary.getValue(constants::scenegraph::keyPathModule, path);
 
-    if (dictionary.hasKey("Geometry.Radius.1"))
-        dictionary.getValue("Geometry.Radius.1", value);
+    if (dictionary.hasKey(constants::renderableplanet::keyGeometry)) {
+        ghoul::Dictionary geometryDictionary;
+        dictionary.getValue(constants::renderableplanet::keyGeometry, geometryDictionary);
+        geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
+        geometryDictionary.setValue(constants::scenegraphnode::keyName, name());
 
-    if (dictionary.hasKey("Geometry.Radius.2"))
-        dictionary.getValue("Geometry.Radius.2", exponent);
-
-    _radius = glm::vec2(value, exponent);
-
-    if (dictionary.hasKey("Geometry.Segments"))
-        dictionary.getValue("Geometry.Segments", segments);
-
-    _segments = segments;
-
-    // get path if available
-    std::string path = "";
-    if (dictionary.hasKey(constants::scenegraph::keyPathModule)) {
-        dictionary.getValue(constants::scenegraph::keyPathModule, path);
-        path += "/";
+        _geometry
+              = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
+    path += "/";
 
     std::string texturePath = "";
     if (dictionary.hasKey("Textures.Color"))
@@ -77,16 +67,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     _colorTexturePath = path + texturePath;
 
+    for (properties::Property* p : _geometry->properties())
+        addProperty(p);
 
-    addProperty(_radius);
-    _radius.onChange(std::bind(&RenderablePlanet::createSphere, this));
-    addProperty(_segments);
-    _segments.onChange(std::bind(&RenderablePlanet::createSphere, this));
+    //addProperty(_colorTexturePath);
+    //_colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 
-    addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
-
-    createSphere();
+    //createSphere();
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -101,14 +88,17 @@ bool RenderablePlanet::initialize() {
     loadTexture();
     completeSuccess &= (_texture != nullptr);
 
-    _planet->initialize();
+    _geometry->initialize(this);
     
     return completeSuccess;
 }
 
 bool RenderablePlanet::deinitialize() {
-    delete _planet;
+    _geometry->deinitialize();
+    delete _geometry;
+    _geometry = nullptr;
     delete _texture;
+    _texture = nullptr;
     return true;
 }
 
@@ -155,26 +145,13 @@ void RenderablePlanet::render(const Camera *camera, const psc &thisPosition) {
     _programObject->setUniform("texture1", 0);
 		
 	// render
-	_planet->render();
+    _geometry->render();
 
 	// disable shader
 	_programObject->deactivate();
-	
 }
 
 void RenderablePlanet::update() {
-
-}
-
-void RenderablePlanet::createSphere() {
-    // create the power scaled scalar
-
-    pss planetSize(_radius);
-    setBoundingSphere(planetSize);
-
-    delete _planet;
-    _planet = new PowerScaledSphere(planetSize, _segments);
-    _planet->initialize();
 }
 
 void RenderablePlanet::loadTexture() {

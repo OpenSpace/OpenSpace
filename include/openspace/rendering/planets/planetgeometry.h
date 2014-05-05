@@ -22,53 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FACTORYMANAGER_H__
-#define __FACTORYMANAGER_H__
+#ifndef __PLANETGEOMETRY_H__
+#define __PLANETGEOMETRY_H__
 
-// ghoul includes
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/planets/renderableplanet.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class FactoryManager {
+namespace planetgeometry {
+
+class PlanetGeometry : public properties::PropertyOwner {
 public:
-    /**
-     * Static initializer that initializes the static member. This needs to be done before
-     * the FactoryManager can be used. If the manager has been already initialized, an
-     * assertion will be triggered.
-     */
-    static void initialize();
-    static void deinitialize();
+    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    /**
-     * This method returns a reference to the initialized FactoryManager. If the manager
-     * has not been initialized, an assertion will be triggered.
-     * \return An initialized reference to the singleton manager
-     */
-    static FactoryManager& ref();
+    PlanetGeometry();
+    virtual ~PlanetGeometry();
+    virtual void initialize(RenderablePlanet* parent);
+    virtual void deinitialize();
+    virtual void render() = 0;
 
-    void addFactory(ghoul::TemplateFactoryBase* factory);
-
-    template <class T>
-    ghoul::TemplateFactory<T>* factory() const;
-
-private:
-    FactoryManager();
-
-    /// Not implemented on purpose, using this should result in an error
-    FactoryManager(const FactoryManager& c);
-
-    /// Not implemented on purpose, using this should result in an error
-    ~FactoryManager();
-
-    static FactoryManager* _manager;  ///<Singleton member
-
-    std::vector<ghoul::TemplateFactoryBase*> _factories;
+protected:
+    RenderablePlanet* _parent;
 };
 
-} // namespace openspace
+}  // namespace planetgeometry
+}  // namespace openspace
 
-#include <openspace/util/factorymanager.inl>
-
-#endif // __FACTORYMANAGER_H__
+#endif  // __PLANETGEOMETRY_H__

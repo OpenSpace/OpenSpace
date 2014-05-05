@@ -25,7 +25,7 @@
 namespace openspace {
 
 template <class T>
-ghoul::TemplateFactory<T>* FactoryManager::factory()
+ghoul::TemplateFactory<T>* FactoryManager::factory() const
 {
     for (ghoul::TemplateFactoryBase* factory : _factories) {
         if (factory->baseClassType() == typeid(T))

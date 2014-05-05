@@ -33,10 +33,6 @@ const std::string _loggerCat = "Renderable";
 
 namespace openspace {
 
-//Renderable::Renderable()
-//    : _name("")
-//{}
-
 Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
     std::string name;
@@ -53,7 +49,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
           = FactoryManager::ref().factory<Renderable>();
     Renderable* result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
-        LERROR("Failed creating Renderable object of type '" << renderableType << "'");
+        LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
         return nullptr;
     }
 
@@ -63,22 +59,14 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : _name("")
 {
+    std::string name;
+    dictionary.getValue(constants::scenegraphnode::keyName, name);
+    setName(name);
 }
 
-Renderable::~Renderable() {
-
-}
-
-void Renderable::setName(std::string name)
+Renderable::~Renderable()
 {
-    _name = std::move(name);
-}
-
-const std::string& Renderable::name() const
-{
-    return _name;
 }
 
 void Renderable::setBoundingSphere(const pss& boundingSphere)
@@ -95,4 +83,4 @@ void Renderable::update()
 {
 }
 
-} // namespace openspace
+}  // namespace openspace

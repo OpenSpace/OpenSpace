@@ -35,9 +35,11 @@ namespace properties {
 
 class PropertyOwner {
 public:
+    PropertyOwner();
     virtual ~PropertyOwner();
 
-    virtual const std::string& name() const = 0;
+    void setName(std::string name);
+    virtual const std::string& name() const;
     const std::vector<Property*>& properties() const;
     Property* property(const std::string& id) const;
 
@@ -52,6 +54,7 @@ protected:
     void removeProperty(Property& prop);
 
 private:
+    std::string _name;
     std::vector<Property*> _properties;
     std::map<std::string, std::string> _groupNames;
 };

@@ -22,49 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __SIMPLESPHEREGEOMETRY_H__
+#define __SIMPLESPHEREGEOMETRY_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/rendering/planets/planetgeometry.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/util/powerscaledsphere.h>
 
 namespace openspace {
 
+class RenderablePlanet;
+
 namespace planetgeometry {
-class PlanetGeometry;
-}
 
-class RenderablePlanet : public Renderable {
+class SimpleSphereGeometry : public PlanetGeometry {
 public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
+    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
+    ~SimpleSphereGeometry();
 
-    bool initialize() override;
-    bool deinitialize() override;
 
-    void setProgramObject(ghoul::opengl::ProgramObject* programObject = nullptr);
-    void setTexture(ghoul::opengl::Texture* texture);
-
-    void render(const Camera* camera, const psc& thisPosition) override;
-    void update() override;
-
-protected:
-    void loadTexture();
+    void initialize(RenderablePlanet* parent) override;
+    void deinitialize() override;
+    void render() override;
 
 private:
-    properties::StringProperty _colorTexturePath;
+    void createSphere();
 
-    ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry;
+    properties::Vec2Property _radius;
+    properties::IntProperty _segments;
+
+    PowerScaledSphere* _planet;
 };
 
+}  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANET_H__
+#endif // __SIMPLESPHEREGEOMETRY_H__
