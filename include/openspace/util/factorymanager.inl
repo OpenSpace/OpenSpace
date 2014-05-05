@@ -22,79 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
-
-#include <cassert>
-
-// renderables
-#include <openspace/rendering/planets/renderableplanet.h>
-#include <openspace/rendering/renderablevolumeexpert.h>
-#include <openspace/rendering/renderablevolumecl.h>
-#include <openspace/rendering/renderablevolumegl.h>
-#include <openspace/flare/flare.h>
-
-// positioninformation
-#include <openspace/scenegraph/staticephemeris.h>
-#include <openspace/scenegraph/spiceephemeris.h>
-
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
-
-void FactoryManager::initialize()
+template <class T>
+ghoul::TemplateFactory<T>* FactoryManager::factory()
 {
-    assert(_manager == nullptr);
-    if (_manager == nullptr)
-        _manager = new FactoryManager;
-    assert(_manager != nullptr);
-
-    // TODO: This has to be moved into a sort of module structure (ab)
-    // Add Renderables
-    _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-    _manager->factory<Renderable>()->registerClass<RenderablePlanet>(
-          "RenderablePlanet");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
-          "RenderableVolumeCL");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
-          "RenderableVolumeGL");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeExpert>(
-          "RenderableVolumeExpert");
-    _manager->factory<Renderable>()->registerClass<Flare>("RenderableFlare");
-
-    // Add Ephimerides
-    _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
-    _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
-    _manager->factory<Ephemeris>()->registerClass<SpiceEphemeris>("Spice");
-
-
-}
-
-void FactoryManager::deinitialize()
-{
-    assert(_manager != nullptr);
-    delete _manager;
-    _manager = nullptr;
-}
-
-FactoryManager& FactoryManager::ref()
-{
-    assert(_manager != nullptr);
-    return *_manager;
-}
-
-FactoryManager::FactoryManager()
-{
-}
-FactoryManager::~FactoryManager()
-{
-    for (ghoul::TemplateFactoryBase* factory : _factories)
-        delete factory;
-    _factories.clear();
-}
-
-void FactoryManager::addFactory(ghoul::TemplateFactoryBase* factory) {
-    _factories.push_back(factory);
-
+    for (ghoul::TemplateFactoryBase* factory : _factories) {
+        if (factory->baseClassType() == typeid(T))
+            return dynamic_cast<ghoul::TemplateFactory<T>*>(factory);
+    }
+    LERRORC("FactoryManager", "Could not find factory for type '" << typeid(T).name()
+                                                                 << "'");
+    return nullptr;
 }
 
 }  // namespace openspace

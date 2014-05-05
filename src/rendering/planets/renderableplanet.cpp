@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/renderableplanet.h>
+#include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/util/constants.h>
 
 #include <ghoul/opengl/texturereader.h>

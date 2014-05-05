@@ -24,7 +24,7 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraph.h>
-#include <openspace/rendering/renderableplanet.h>
+#include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/spice.h>
 #include <openspace/engine/openspaceengine.h>
