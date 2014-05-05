@@ -39,7 +39,7 @@ public:
 
     PlanetGeometry();
     virtual ~PlanetGeometry();
-    virtual void initialize(RenderablePlanet* parent);
+    virtual bool initialize(RenderablePlanet* parent);
     virtual void deinitialize();
     virtual void render() = 0;
 

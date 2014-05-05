@@ -42,7 +42,7 @@ public:
     ~SimpleSphereGeometry();
 
 
-    void initialize(RenderablePlanet* parent) override;
+    bool initialize(RenderablePlanet* parent) override;
     void deinitialize() override;
     void render() override;
 

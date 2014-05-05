@@ -48,9 +48,6 @@ public:
     bool initialize() override;
     bool deinitialize() override;
 
-    void setProgramObject(ghoul::opengl::ProgramObject* programObject = nullptr);
-    void setTexture(ghoul::opengl::Texture* texture);
-
     void render(const Camera* camera, const psc& thisPosition) override;
     void update() override;
 

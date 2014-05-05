@@ -70,7 +70,7 @@ glm::dvec2  pss::getVec2() const{
 	return vec_;
 }
 
-glm::vec2  pss::getVec2f() {
+glm::vec2  pss::getVec2f() const {
 	vecf_ = glm::vec2(vec_);
 	return vecf_;
 }

@@ -177,8 +177,9 @@ bool SceneGraph::initialize()
         // TODO: Set distance and camera direction in some more smart way
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
+        const pss bound = positionNode->calculateBoundingSphere();
         psc cameraPosition = positionNode->getPosition();
-        cameraPosition += psc(0.0, 0.0, 1.0, 2.0);
+        cameraPosition += psc(glm::vec4(0.f, 0.f, bound.getVec2f()));
         c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
         c->setScaling(glm::vec2(1.0, 0.0));

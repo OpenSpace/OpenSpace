@@ -85,10 +85,11 @@ SimpleSphereGeometry::~SimpleSphereGeometry()
 {
 }
 
-void SimpleSphereGeometry::initialize(RenderablePlanet* parent)
+bool SimpleSphereGeometry::initialize(RenderablePlanet* parent)
 {
-    PlanetGeometry::initialize(parent);
+    bool success = PlanetGeometry::initialize(parent);
     createSphere();
+    return success;
 }
 
 void SimpleSphereGeometry::deinitialize()

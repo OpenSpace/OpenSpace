@@ -68,9 +68,10 @@ PlanetGeometry::~PlanetGeometry()
 {
 }
 
-void PlanetGeometry::initialize(RenderablePlanet* parent)
+bool PlanetGeometry::initialize(RenderablePlanet* parent)
 {
     _parent = parent;
+    return true;
 }
 
 void PlanetGeometry::deinitialize()

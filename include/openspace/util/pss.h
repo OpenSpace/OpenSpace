@@ -33,7 +33,7 @@ public:
 	const double * value_ptr();
 	const float * value_ptrf();
 	glm::dvec2 getVec2() const;
-	glm::vec2 getVec2f();
+	glm::vec2 getVec2f() const;
 	double length() const;
 	float lengthf() const;
 
@@ -81,7 +81,7 @@ private:
 	glm::dvec2 vec_;
 
 	// float vector used when returning float values
-	glm::vec2 vecf_;
+	mutable glm::vec2 vecf_;
 
 };
 

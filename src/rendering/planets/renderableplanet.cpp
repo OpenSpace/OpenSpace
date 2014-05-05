@@ -60,21 +60,20 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _geometry
               = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
-    path += "/";
 
+    // TODO: textures need to be replaced by a good system similar to the geometry as soon
+    // as the requirements are fixed (ab)
     std::string texturePath = "";
-    if (dictionary.hasKey("Textures.Color"))
+    if (dictionary.hasKey("Textures.Color")) {
         dictionary.getValue("Textures.Color", texturePath);
-
-    _colorTexturePath = path + texturePath;
+        _colorTexturePath = path + "/" + texturePath;
+    }
 
     for (properties::Property* p : _geometry->properties())
         addProperty(p);
 
-    // addProperty(_colorTexturePath);
-    //_colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
-
-    // createSphere();
+     addProperty(_colorTexturePath);
+    _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
 RenderablePlanet::~RenderablePlanet()
@@ -92,7 +91,7 @@ bool RenderablePlanet::initialize()
     loadTexture();
     completeSuccess &= (_texture != nullptr);
 
-    _geometry->initialize(this);
+    completeSuccess &= _geometry->initialize(this);
 
     return completeSuccess;
 }
@@ -105,18 +104,6 @@ bool RenderablePlanet::deinitialize()
     delete _texture;
     _texture = nullptr;
     return true;
-}
-
-void RenderablePlanet::setProgramObject(ghoul::opengl::ProgramObject* programObject)
-{
-    assert(programObject);
-    _programObject = programObject;
-}
-
-void RenderablePlanet::setTexture(ghoul::opengl::Texture* texture)
-{
-    assert(texture);
-    _texture = texture;
 }
 
 void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)

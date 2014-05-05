@@ -351,6 +351,14 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         pss dist(speed * dt, 0.0);
         distance(dist);
     }
+    if (key == 'T') {
+        pss dist(-speed * 100.0 * dt, 0.0);
+        distance(dist);
+    }
+    if (key == 'G') {
+        pss dist(speed * 100.0 * dt, 0.0);
+        distance(dist);
+    }
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");
