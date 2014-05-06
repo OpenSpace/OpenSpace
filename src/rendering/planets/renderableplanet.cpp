@@ -45,7 +45,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
     , _texture(nullptr)
-    //, _planet(nullptr)
     , _geometry(nullptr)
 {
     std::string path;
