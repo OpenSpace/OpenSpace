@@ -178,11 +178,17 @@ bool SceneGraph::initialize()
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
         const pss bound = positionNode->calculateBoundingSphere();
+        
+        // this part is full of magic!
+        glm::vec2 boundf = bound.getVec2f();
+        glm::vec2 scaling{1.0f, -boundf[1]};
+        boundf[0] *= 5.0f;
+        
         psc cameraPosition = positionNode->getPosition();
-        cameraPosition += psc(glm::vec4(0.f, 0.f, bound.getVec2f()));
+        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
         c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
-        c->setScaling(glm::vec2(1.0, 0.0));
+        c->setScaling(scaling);
 
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler().setFocusNode(focusNode);

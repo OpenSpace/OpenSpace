@@ -35,9 +35,9 @@ namespace openspace {
 
     
 Camera::Camera()
-    : _scaling(1.f, 0.f)
+    : _cameraDirection(0.f, 0.f, 0.f)
+    , _scaling(1.f, 0.f)
     , _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
-    , _cameraDirection(0.f, 0.f, 0.f)
 {
 }
 
