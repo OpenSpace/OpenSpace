@@ -50,9 +50,10 @@ protected:
 };
 
 TEST_F(SceneGraphTest, SceneGraphNode) {
-    
-    openspace::SceneGraphNode* node = new openspace::SceneGraphNode(ghoul::Dictionary());
-    
+
+    openspace::SceneGraphNode *node =
+        openspace::SceneGraphNode::createFromDictionary(ghoul::Dictionary());
+
     // Should not have a renderable and position should be 0,0,0,0 (undefined).
     EXPECT_EQ(nullptr, node->getRenderable());
     EXPECT_EQ(openspace::psc(), node->getPosition());
@@ -78,7 +79,8 @@ TEST_F(SceneGraphTest, SceneGraphNode) {
     nodeDictionary.setValue("Position", positionDictionary);
     nodeDictionary.setValue("Renderable", renderableDictionary);
     
-    node = new openspace::SceneGraphNode(nodeDictionary);
+    node =
+        openspace::SceneGraphNode::createFromDictionary(nodeDictionary);
     
     // This node should have a renderable (probably no good values but an existing one)
     EXPECT_TRUE(node->getRenderable());
@@ -93,26 +95,26 @@ TEST_F(SceneGraphTest, Loading) {
     
     
     // Should not successfully load a non existing scenegraph
-    EXPECT_FALSE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTestNonExisting")));
+    EXPECT_FALSE(_scenegraph->loadScene(absPath("${TESTDIR}/ScenegraphTestNonExisting"), absPath("${TESTDIR}")));
     
     // Existing scenegraph should load
-    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    EXPECT_TRUE(_scenegraph->loadScene(absPath("${TESTDIR}/ScenegraphTest"), absPath("${TESTDIR}")));
     // TODO need to check for correctness
     
     // This loading should fail regardless of existing or not since the
     // scenegraph is already loaded
-    EXPECT_FALSE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    EXPECT_FALSE(_scenegraph->loadScene(absPath("${TESTDIR}/ScenegraphTest"), absPath("${TESTDIR}")));
 }
 
 TEST_F(SceneGraphTest, Reinitializing) {
     
     // Existing scenegraph should load
-    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    EXPECT_TRUE(_scenegraph->loadScene(absPath("${TESTDIR}/ScenegraphTest"), absPath("${TESTDIR}")));
     
     _scenegraph->deinitialize();
     
     // Existing scenegraph should load
-    EXPECT_TRUE(_scenegraph->loadFromModulePath(absPath("${TESTDIR}/ScenegraphTest")));
+    EXPECT_TRUE(_scenegraph->loadScene(absPath("${TESTDIR}/ScenegraphTest"), absPath("${TESTDIR}")));
     // TODO need to check for correctness
 }
 
