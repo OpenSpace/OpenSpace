@@ -321,6 +321,10 @@ bool OpenSpaceEngine::initializeGL()
 
 void OpenSpaceEngine::preSynchronization()
 {
+#ifdef WIN32
+    // Sleeping for 0 milliseconds will trigger any pending asynchronous procedure calls 
+    SleepEx(0, TRUE);
+#endif
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
 
