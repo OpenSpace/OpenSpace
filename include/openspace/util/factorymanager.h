@@ -55,12 +55,9 @@ public:
 
 private:
     FactoryManager();
-
-    /// Not implemented on purpose, using this should result in an error
-    FactoryManager(const FactoryManager& c);
-
-    /// Not implemented on purpose, using this should result in an error
     ~FactoryManager();
+
+    FactoryManager(const FactoryManager& c) = delete;
 
     static FactoryManager* _manager;  ///<Singleton member
 
