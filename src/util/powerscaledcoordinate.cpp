@@ -38,37 +38,29 @@ const double k = 10.0;
 }
 
 PowerScaledCoordinate::PowerScaledCoordinate()
+    : _vec(0.f)
 {
+}
+
+PowerScaledCoordinate::PowerScaledCoordinate(PowerScaledCoordinate&& rhs)
+{
+    _vec = std::move(rhs._vec);
 }
 
 PowerScaledCoordinate::PowerScaledCoordinate(glm::vec4 v)
-{
-    _vec = glm::dvec4(std::move(v));
-}
-
-PowerScaledCoordinate::PowerScaledCoordinate(glm::dvec4 v)
 {
     _vec = std::move(v);
 }
 
 PowerScaledCoordinate::PowerScaledCoordinate(glm::vec3 v)
 {
-    _vec = glm::dvec4(v[0], v[1], v[2], 0.0);
+    _vec = glm::vec4(v[0], v[1], v[2], 0.f);
 }
 
-PowerScaledCoordinate::PowerScaledCoordinate(glm::dvec3 v)
-{
-    _vec = glm::dvec4(v[0], v[1], v[2], 0.0);
-}
 
 PowerScaledCoordinate::PowerScaledCoordinate(float f1, float f2, float f3, float f4)
 {
-    _vec = glm::dvec4(f1, f2, f3, f4);
-}
-
-PowerScaledCoordinate::PowerScaledCoordinate(double d1, double d2, double d3, double d4)
-{
-    _vec = glm::dvec4(d1, d2, d3, d4);
+    _vec = glm::vec4(f1, f2, f3, f4);
 }
 
 PowerScaledCoordinate
@@ -83,31 +75,21 @@ PowerScaledCoordinate
     double max = (ad2 > ad1) ? ad2 : (ad3 > ad1) ? ad3 : ad1;
 
     // find out how many digits
+    // TODO: profile the next two lines and replace with something more efficient (ab)
     sprintf(buff, "%.0f", max);
-    unsigned int digits = static_cast<unsigned int>(strlen(buff)) - 1;
+    unsigned int digits = static_cast<unsigned int>(strlen(buff));
 
     // rescale and return
     double tp = 1.0 / pow(k, digits);
     return PowerScaledCoordinate(d1 * tp, d2 * tp, d3 * tp, digits);
 }
 
-const glm::dvec4& PowerScaledCoordinate::vec4() const
+const glm::vec4& PowerScaledCoordinate::vec4() const
 {
     return _vec;
 }
 
-glm::vec4 PowerScaledCoordinate::vec4f() const
-{
-    return  glm::vec4(_vec);
-}
-
-glm::dvec3 PowerScaledCoordinate::getVec3() const
-{
-    return glm::dvec3(_vec[0] * pow(k, _vec[3]), _vec[1] * pow(k, _vec[3]),
-                      _vec[2] * pow(k, _vec[3]));
-}
-
-glm::vec3 PowerScaledCoordinate::getVec3f() const
+glm::vec3 PowerScaledCoordinate::vec3() const
 {
     return glm::vec3(_vec[0] * pow(k, _vec[3]), _vec[1] * pow(k, _vec[3]),
                      _vec[2] * pow(k, _vec[3]));
@@ -115,84 +97,71 @@ glm::vec3 PowerScaledCoordinate::getVec3f() const
 
 pss PowerScaledCoordinate::length() const
 {
-    return pss(glm::length(glm::dvec3(_vec[0], _vec[1], _vec[2])), _vec[3]);
+    return pss(glm::length(glm::vec3(_vec[0], _vec[1], _vec[2])), _vec[3]);
 }
 
-glm::dvec3 PowerScaledCoordinate::getDirection() const
-{
-    if (_vec[0] == 0.0 && _vec[1] == 0.0 && _vec[2] == 0.0)
-        return glm::dvec3(0.0, 0.0, 1.0);
-    glm::dvec3 tmp(_vec[0], _vec[1], _vec[2]);
-    return glm::normalize(tmp);
-}
-
-glm::vec3 PowerScaledCoordinate::getDirectionf() const
+glm::vec3 PowerScaledCoordinate::direction() const
 {
     glm::vec3 tmp(_vec[0], _vec[1], _vec[2]);
-    return glm::normalize(tmp);
-}
-
-PowerScaledCoordinate PowerScaledCoordinate::mul(const glm::mat4& m) const
-{
-    return mul(glm::dmat4(m));
-}
-PowerScaledCoordinate PowerScaledCoordinate::mul(const glm::dmat4& m) const
-{
-    glm::dvec4 tmp = m * _vec;
-    return PowerScaledCoordinate(tmp[0], tmp[1], tmp[2], _vec[3]);
+    return glm::normalize(glm::vec3(_vec[0], _vec[1], _vec[2]));
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const PowerScaledCoordinate& rhs)
 {
-    if (this != &rhs) {
-        this->_vec = rhs._vec;
-    }
+    if (this != &rhs)
+        _vec = rhs._vec;
     return *this;  // Return a reference to myself.
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec4& rhs)
 {
-    this->_vec = glm::dvec4(rhs);
+    _vec = rhs;
     return *this;  // Return a reference to myself.
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec3& rhs)
 {
-    this->_vec = glm::dvec4(rhs[0], rhs[1], rhs[2], 0.0);
+    _vec = glm::vec4(rhs[0], rhs[1], rhs[2], 0.0);
     return *this;  // Return a reference to myself.
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec4& rhs)
 {
-    this->_vec = rhs;
+    _vec = glm::vec4(rhs);
     return *this;  // Return a reference to myself.
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec3& rhs)
 {
-    this->_vec = glm::dvec4(rhs[0], rhs[1], rhs[2], 0.0);
+    _vec = glm::vec4(rhs[0], rhs[1], rhs[2], 0.0);
     return *this;  // Return a reference to myself.
+}
+
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(PowerScaledCoordinate&& rhs)
+{
+    _vec = std::move(rhs._vec);
+    return *this;
 }
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator+=(const PowerScaledCoordinate& rhs)
 {
-    double ds = this->_vec[3] - rhs._vec[3];
+    double ds = _vec[3] - rhs._vec[3];
     if (ds >= 0) {
         double p = pow(k, -ds);
-        *this = PowerScaledCoordinate(rhs._vec[0] * p + this->_vec[0],
-                                      rhs._vec[1] * p + this->_vec[1],
-                                      rhs._vec[2] * p + this->_vec[2], this->_vec[3]);
+        *this = PowerScaledCoordinate(rhs._vec[0] * p + _vec[0],
+                                      rhs._vec[1] * p + _vec[1],
+                                      rhs._vec[2] * p + _vec[2], _vec[3]);
     } else {
         double p = pow(k, ds);
-        *this = PowerScaledCoordinate(rhs._vec[0] + this->_vec[0] * p,
-                                      rhs._vec[1] + this->_vec[1] * p,
-                                      rhs._vec[2] + this->_vec[2] * p, rhs._vec[3]);
+        *this = PowerScaledCoordinate(rhs._vec[0] + _vec[0] * p,
+                                      rhs._vec[1] + _vec[1] * p,
+                                      rhs._vec[2] + _vec[2] * p, rhs._vec[3]);
     }
 
     return *this;
 }
 
-const PowerScaledCoordinate PowerScaledCoordinate::
+PowerScaledCoordinate PowerScaledCoordinate::
       operator+(const PowerScaledCoordinate& rhs) const
 {
     return PowerScaledCoordinate(*this) += rhs;
@@ -203,25 +172,25 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator-=(const PowerScaledCoordi
     double ds = this->_vec[3] - rhs._vec[3];
     if (ds >= 0) {
         double p = pow(k, -ds);
-        *this = PowerScaledCoordinate(-rhs._vec[0] * p + this->_vec[0],
-                                      -rhs._vec[1] * p + this->_vec[1],
-                                      -rhs._vec[2] * p + this->_vec[2], this->_vec[3]);
+        *this = PowerScaledCoordinate(-rhs._vec[0] * p + _vec[0],
+                                      -rhs._vec[1] * p + _vec[1],
+                                      -rhs._vec[2] * p + _vec[2], _vec[3]);
     } else {
         double p = pow(k, ds);
-        *this = PowerScaledCoordinate(-rhs._vec[0] + this->_vec[0] * p,
-                                      -rhs._vec[1] + this->_vec[1] * p,
-                                      -rhs._vec[2] + this->_vec[2] * p, rhs._vec[3]);
+        *this = PowerScaledCoordinate(-rhs._vec[0] + _vec[0] * p,
+                                      -rhs._vec[1] + _vec[1] * p,
+                                      -rhs._vec[2] + _vec[2] * p, rhs._vec[3]);
     }
 
     return *this;
 }
 
-const PowerScaledCoordinate PowerScaledCoordinate::operator*(const double& rhs) const
+PowerScaledCoordinate PowerScaledCoordinate::operator*(const double& rhs) const
 {
     return PowerScaledCoordinate(_vec[0] * rhs, _vec[1] * rhs, _vec[2] * rhs, _vec[3]);
 }
 
-const PowerScaledCoordinate PowerScaledCoordinate::operator*(const float& rhs) const
+PowerScaledCoordinate PowerScaledCoordinate::operator*(const float& rhs) const
 {
     return PowerScaledCoordinate(_vec[0] * rhs, _vec[1] * rhs, _vec[2] * rhs, _vec[3]);
 }
@@ -232,40 +201,46 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator*=(const pss& rhs)
     if (ds >= 0) {
         double p = pow(k, -ds);
         *this = PowerScaledCoordinate(
-              rhs.vec_[0] * p * this->_vec[0], rhs.vec_[0] * p * this->_vec[1],
-              rhs.vec_[0] * p * this->_vec[2], this->_vec[3] + this->_vec[3]);
+              rhs.vec_[0] * p * _vec[0], rhs.vec_[0] * p * _vec[1],
+              rhs.vec_[0] * p * _vec[2], this->_vec[3] + _vec[3]);
     } else {
         double p = pow(k, ds);
         *this = PowerScaledCoordinate(
-              rhs.vec_[0] * this->_vec[0] * p, rhs.vec_[0] * this->_vec[1] * p,
-              rhs.vec_[0] * this->_vec[2] * p, rhs.vec_[1] + rhs.vec_[1]);
+              rhs.vec_[0] * _vec[0] * p, rhs.vec_[0] * _vec[1] * p,
+              rhs.vec_[0] * _vec[2] * p, rhs.vec_[1] + rhs.vec_[1]);
     }
     return *this;
 }
 
-const PowerScaledCoordinate PowerScaledCoordinate::operator*(const pss& rhs) const
+PowerScaledCoordinate PowerScaledCoordinate::operator*(const pss& rhs) const
 {
     return PowerScaledCoordinate(*this) *= rhs;
 }
 
-const PowerScaledCoordinate PowerScaledCoordinate::
+PowerScaledCoordinate PowerScaledCoordinate::operator*(const glm::mat4& matrix) const
+{
+    return matrix * _vec;
+}
+
+PowerScaledCoordinate PowerScaledCoordinate::
       operator-(const PowerScaledCoordinate& rhs) const
 {
     return PowerScaledCoordinate(*this) -= rhs;
 }
 
-double& PowerScaledCoordinate::operator[](unsigned int idx)
+float& PowerScaledCoordinate::operator[](unsigned int idx)
 {
     return _vec[idx];
 }
-const double& PowerScaledCoordinate::operator[](unsigned int idx) const
+
+float PowerScaledCoordinate::operator[](unsigned int idx) const
 {
     return _vec[idx];
 }
 
 const double PowerScaledCoordinate::dot(const PowerScaledCoordinate& rhs) const
 {
-    double ds = this->_vec[3] - rhs._vec[3];
+    double ds = _vec[3] - rhs._vec[3];
     if (ds >= 0) {
         double p = pow(k, -ds);
         glm::dvec3 uPowerScaledCoordinatealed(rhs._vec[0] * p, rhs._vec[1] * p,
@@ -302,18 +277,18 @@ bool PowerScaledCoordinate::operator!=(const PowerScaledCoordinate& other) const
 
 bool PowerScaledCoordinate::operator<(const PowerScaledCoordinate& other) const
 {
-    double ds = this->_vec[3] - other._vec[3];
+    double ds = _vec[3] - other._vec[3];
     if (ds >= 0) {
         double p = pow(k, -ds);
-        glm::dvec3 uPowerScaledCoordinatealed(other._vec[0] * p, other._vec[1] * p,
+        glm::dvec3 upscaled(other._vec[0] * p, other._vec[1] * p,
                                               other._vec[2] * p);
         glm::dvec3 shortened(_vec[0], _vec[1], _vec[2]);
-        return glm::length(shortened) < glm::length(uPowerScaledCoordinatealed);
+        return glm::length(shortened) < glm::length(upscaled);
     } else {
         double p = pow(k, ds);
-        glm::dvec3 uPowerScaledCoordinatealed(_vec[0] * p, _vec[1] * p, _vec[2] * p);
+        glm::dvec3 upscaled(_vec[0] * p, _vec[1] * p, _vec[2] * p);
         glm::dvec3 shortened(other._vec[0], other._vec[1], other._vec[2]);
-        return glm::length(shortened) < glm::length(uPowerScaledCoordinatealed);
+        return glm::length(shortened) < glm::length(upscaled);
     }
 }
 
@@ -322,15 +297,15 @@ bool PowerScaledCoordinate::operator>(const PowerScaledCoordinate& other) const
     double ds = this->_vec[3] - other._vec[3];
     if (ds >= 0) {
         double p = pow(k, -ds);
-        glm::dvec3 uPowerScaledCoordinatealed(other._vec[0] * p, other._vec[1] * p,
+        glm::dvec3 upscaled(other._vec[0] * p, other._vec[1] * p,
                                               other._vec[2] * p);
         glm::dvec3 shortened(_vec[0], _vec[1], _vec[2]);
-        return glm::length(shortened) > glm::length(uPowerScaledCoordinatealed);
+        return glm::length(shortened) > glm::length(upscaled);
     } else {
         double p = pow(k, ds);
-        glm::dvec3 uPowerScaledCoordinatealed(_vec[0] * p, _vec[1] * p, _vec[2] * p);
+        glm::dvec3 upscaled(_vec[0] * p, _vec[1] * p, _vec[2] * p);
         glm::dvec3 shortened(other._vec[0], other._vec[1], other._vec[2]);
-        return glm::length(shortened) > glm::length(uPowerScaledCoordinatealed);
+        return glm::length(shortened) > glm::length(upscaled);
     }
 }
 
@@ -346,7 +321,7 @@ bool PowerScaledCoordinate::operator>=(const PowerScaledCoordinate& other) const
 
 std::ostream& operator<<(::std::ostream& os, const PowerScaledCoordinate& rhs)
 {
-    os << "(" << rhs[0] << ", " << rhs[1] << ", " << rhs[2] << ", " << rhs[3] << ")";
+    os << "(" << rhs[0] << ", " << rhs[1] << ", " << rhs[2] << "; " << rhs[3] << ")";
     return os;
 }
 

@@ -160,7 +160,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 
 	psc relative_origin_coordinate = relative - origin;
 	glm::mat4 rotation_matrix = glm::mat4_cast(rotation);
-	relative_origin_coordinate = relative_origin_coordinate.mul(rotation_matrix);
+	relative_origin_coordinate = relative_origin_coordinate * rotation_matrix;
 	relative = relative_origin_coordinate + origin;
 
 	camera_->setPosition(relative);
@@ -179,7 +179,7 @@ void InteractionHandler::distance(const pss &distance) {
 	}
 
 	psc relative_origin_coordinate = relative - origin;
-	glm::dvec3 dir = relative_origin_coordinate.getDirection();
+	glm::dvec3 dir(relative_origin_coordinate.direction());
 	dir = dir * distance[0];
 	relative_origin_coordinate = dir;
 	relative_origin_coordinate[3] = distance[1];
@@ -247,7 +247,7 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
     //Get x,y,z axis vectors of current camera view
 	glm::vec3 currentViewYaxis = glm::normalize(camera_->lookUpVector());
 	psc viewDir = camera_->position() - node_->getWorldPosition();
-	glm::vec3 currentViewZaxis = glm::normalize(viewDir.getVec3f());
+	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
     //mapping to camera co-ordinate

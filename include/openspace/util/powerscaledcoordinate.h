@@ -43,50 +43,47 @@ public:
     // constructors
     PowerScaledCoordinate();
 
+    PowerScaledCoordinate(PowerScaledCoordinate&& rhs);
+
     // Sets the power scaled coordinates directly
     PowerScaledCoordinate(glm::vec4 v);
-    PowerScaledCoordinate(glm::dvec4 v);
     PowerScaledCoordinate(float f1, float f2, float f3, float f4);
-    PowerScaledCoordinate(double d1, double d2, double d3, double d4);
     // Sets the power scaled coordinates with w = 0
     PowerScaledCoordinate(glm::vec3 v);
-    PowerScaledCoordinate(glm::dvec3 v);
 
     static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2, double d3);
 
     // get functions
     // return the full, unmodified PSC 
-    const glm::dvec4& vec4() const;
-    glm::vec4 vec4f() const;
+    const glm::vec4& vec4() const;
 
-    glm::dvec3 getVec3() const;
-    glm::vec3 getVec3f() const;
+    // returns the rescaled, "normal" coordinates
+    glm::vec3 vec3() const;
+    // length of the vector as a pss
     pss length() const;
-    glm::dvec3 getDirection() const;
-    glm::vec3 getDirectionf() const;
-
-    // multiplication
-    PowerScaledCoordinate mul(const glm::mat4& m) const;
-    PowerScaledCoordinate mul(const glm::dmat4& m) const;
+    glm::vec3 direction() const;
 
     // operator overloading
     PowerScaledCoordinate& operator=(const PowerScaledCoordinate& rhs);
+    PowerScaledCoordinate& operator=(PowerScaledCoordinate&& rhs);
     PowerScaledCoordinate& operator+=(const PowerScaledCoordinate& rhs);
-    const PowerScaledCoordinate operator+(const PowerScaledCoordinate& rhs) const;
+    PowerScaledCoordinate operator+(const PowerScaledCoordinate& rhs) const;
     PowerScaledCoordinate& operator-=(const PowerScaledCoordinate& rhs);
-    const PowerScaledCoordinate operator-(const PowerScaledCoordinate& rhs) const;
-    double& operator[](unsigned int idx);
-    const double& operator[](unsigned int idx) const;
+    PowerScaledCoordinate operator-(const PowerScaledCoordinate& rhs) const;
+    float& operator[](unsigned int idx);
+    float operator[](unsigned int idx) const;
     const double dot(const PowerScaledCoordinate& rhs) const;
     const double angle(const PowerScaledCoordinate& rhs) const;
 
     // scalar operators
-    const PowerScaledCoordinate operator*(const double& rhs) const;
-    const PowerScaledCoordinate operator*(const float& rhs) const;
+    PowerScaledCoordinate operator*(const double& rhs) const;
+    PowerScaledCoordinate operator*(const float& rhs) const;
     PowerScaledCoordinate& operator*=(const pss& rhs);
-    const PowerScaledCoordinate operator*(const pss& rhs) const;
+    PowerScaledCoordinate operator*(const pss& rhs) const;
+    PowerScaledCoordinate operator*(const glm::mat4& matrix) const;
 
-    // comparasion
+
+    // comparison
     bool operator==(const PowerScaledCoordinate& other) const;
     bool operator!=(const PowerScaledCoordinate& other) const;
     bool operator<(const PowerScaledCoordinate& other) const;
@@ -95,10 +92,10 @@ public:
     bool operator>=(const PowerScaledCoordinate& other) const;
 
     // glm integration
-    PowerScaledCoordinate& operator=(const glm::vec4& rhs);
-    PowerScaledCoordinate& operator=(const glm::vec3& rhs);
     PowerScaledCoordinate& operator=(const glm::dvec4& rhs);
+    PowerScaledCoordinate& operator=(const glm::vec4& rhs);
     PowerScaledCoordinate& operator=(const glm::dvec3& rhs);
+    PowerScaledCoordinate& operator=(const glm::vec3& rhs);
 
     friend std::ostream& operator<<(std::ostream& os, const PowerScaledCoordinate& rhs);
 
@@ -107,11 +104,10 @@ public:
 
 private:
     // internal glm vector
-    glm::dvec4 _vec;
+    glm::vec4 _vec;
 };
 
 typedef PowerScaledCoordinate psc;
-//typedef PowerScaledCoordinate psc;
 
 } // namespace openspace
 

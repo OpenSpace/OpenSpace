@@ -130,8 +130,8 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
-    _programObject->setUniform("campos", campos.vec4f());
-    _programObject->setUniform("objpos", currentPosition.vec4f());
+    _programObject->setUniform("campos", campos.vec4());
+    _programObject->setUniform("objpos", currentPosition.vec4());
     _programObject->setUniform("camrot", camrot);
     _programObject->setUniform("scaling", scaling.getVec2f());
 

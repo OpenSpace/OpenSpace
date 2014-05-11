@@ -346,7 +346,7 @@ void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPositio
     psc relative = thisPosition-camera->position();
 
     transform = transform*camTransform;
-    transform = glm::translate(transform, relative.getVec3f());
+    transform = glm::translate(transform, relative.vec3());
     transform = glm::scale(transform, _boxScaling);
 
     _colorBoxRenderer->render(transform);
