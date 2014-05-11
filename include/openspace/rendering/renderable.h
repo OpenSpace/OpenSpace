@@ -45,8 +45,8 @@ public:
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
 
-    void setBoundingSphere(const pss& boundingSphere);
-    const pss& getBoundingSphere();
+    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
+    const PowerScaledScalar& getBoundingSphere();
 
     virtual void render(const Camera* camera, const psc& thisPosition) = 0;
     virtual void update();
@@ -54,7 +54,7 @@ public:
 protected:
     // Renderable();
 private:
-    pss boundingSphere_;
+    PowerScaledScalar boundingSphere_;
 };
 
 }  // namespace openspace

@@ -32,7 +32,7 @@ class Planet
 {
 public:
 	//initializers
-	Planet(pss radius, int levels = 4);
+	Planet(PowerScaledScalar radius, int levels = 4);
 	~Planet();
 	
 	void setHeightMap(const std::string &path);

@@ -119,7 +119,7 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
     psc currentPosition = thisPosition;
     psc campos = camera->position();
     glm::mat4 camrot = camera->viewRotationMatrix();
-    pss scaling = camera->scaling();
+    PowerScaledScalar scaling = camera->scaling();
 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
@@ -133,7 +133,7 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
     _programObject->setUniform("campos", campos.vec4());
     _programObject->setUniform("objpos", currentPosition.vec4());
     _programObject->setUniform("camrot", camrot);
-    _programObject->setUniform("scaling", scaling.getVec2f());
+    _programObject->setUniform("scaling", scaling.vec2());
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;

@@ -107,7 +107,7 @@ void SimpleSphereGeometry::createSphere()
 {
     //create the power scaled scalar
 
-    pss planetSize(_radius);
+    PowerScaledScalar planetSize(_radius);
     _parent->setBoundingSphere(planetSize);
 
     delete _planet;

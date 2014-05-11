@@ -178,7 +178,7 @@ void RenderEngine::render()
         const glm::vec3 viewdirection = _mainCamera->viewDirection();
         const psc position = _mainCamera->position();
         const psc origin = OsEng.interactionHandler().getOrigin();
-        const pss pssl = (position - origin).length();
+        const PowerScaledScalar pssl = (position - origin).length();
 
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),

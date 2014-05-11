@@ -168,7 +168,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	unlockControls();
 }
 
-void InteractionHandler::distance(const pss &distance) {
+void InteractionHandler::distance(const PowerScaledScalar &distance) {
 	//assert(this_);
 	lockControls();
 	
@@ -179,7 +179,7 @@ void InteractionHandler::distance(const pss &distance) {
 	}
 
 	psc relative_origin_coordinate = relative - origin;
-	glm::dvec3 dir(relative_origin_coordinate.direction());
+	glm::vec3 dir(relative_origin_coordinate.direction());
 	dir = dir * distance[0];
 	relative_origin_coordinate = dir;
 	relative_origin_coordinate[3] = distance[1];
@@ -344,19 +344,19 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         rotate(rot);
     }
     if (key == 'R') {
-        pss dist(-speed * dt, 0.0);
+        PowerScaledScalar dist(-speed * dt, 0.0);
         distance(dist);
     }
     if (key == 'F') {
-        pss dist(speed * dt, 0.0);
+        PowerScaledScalar dist(speed * dt, 0.0);
         distance(dist);
     }
     if (key == 'T') {
-        pss dist(-speed * 100.0 * dt, 0.0);
+        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
         distance(dist);
     }
     if (key == 'G') {
-        pss dist(speed * 100.0 * dt, 0.0);
+        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
         distance(dist);
     }
     /*

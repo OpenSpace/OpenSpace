@@ -43,7 +43,7 @@ public:
 	
 	void orbit(const glm::quat &rotation);
 	void rotate(const glm::quat &rotation);
-	void distance(const pss &distance);
+	void distance(const PowerScaledScalar &distance);
 
 	void lookAt(const glm::quat &rotation);
 	void setRotation(const glm::quat &rotation);

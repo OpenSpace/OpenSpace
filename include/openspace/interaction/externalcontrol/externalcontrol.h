@@ -18,7 +18,7 @@ public:
 	
 	void rotate(const glm::quat &rotation);
 	void orbit(const glm::quat &rotation);
-	void distance(const pss &distance);
+	void distance(const PowerScaledScalar &distance);
 
 	
 protected:

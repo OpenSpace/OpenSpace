@@ -36,7 +36,7 @@ const std::string _loggerCat = "PowerScaledSphere";
 
 namespace openspace {
 
-PowerScaledSphere::PowerScaledSphere(const pss& radius, int segments)
+PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segments)
     : _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)

@@ -20,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace openspace
 {
 
-Planet::Planet(pss radius, int levels) {
+Planet::Planet(PowerScaledScalar radius, int levels) {
 	
 	// describe datatype and Vertex structure to the vbo template
 	std::vector<std::tuple<int, GLenum, int> > descriptor;

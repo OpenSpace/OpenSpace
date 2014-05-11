@@ -69,12 +69,12 @@ Renderable::~Renderable()
 {
 }
 
-void Renderable::setBoundingSphere(const pss& boundingSphere)
+void Renderable::setBoundingSphere(const PowerScaledScalar& boundingSphere)
 {
     boundingSphere_ = boundingSphere;
 }
 
-const pss& Renderable::getBoundingSphere()
+const PowerScaledScalar& Renderable::getBoundingSphere()
 {
     return boundingSphere_;
 }

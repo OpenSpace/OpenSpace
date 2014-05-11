@@ -69,7 +69,7 @@ public:
     const std::vector<SceneGraphNode*>& children() const;
 
     // bounding sphere
-    pss calculateBoundingSphere();
+    PowerScaledScalar calculateBoundingSphere();
 
     SceneGraphNode* get(const std::string& name);
 
@@ -92,10 +92,10 @@ private:
 
     // bounding sphere
     bool _boundingSphereVisible;
-    pss _boundingSphere;
+    PowerScaledScalar _boundingSphere;
 
     // private helper methods
-    bool sphereInsideFrustum(const psc s_pos, const pss& s_rad, const Camera* camera);
+    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 };
 
 } // namespace openspace

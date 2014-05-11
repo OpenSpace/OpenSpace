@@ -154,7 +154,7 @@ bool SceneGraphNode::deinitialize()
     _nodeName = "";
     _renderableVisible = false;
     _boundingSphereVisible = false;
-    _boundingSphere = pss(0.0, 0.0);
+    _boundingSphere = PowerScaledScalar(0.0, 0.0);
 
     return true;
 }
@@ -270,20 +270,20 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const
 }
 
 // bounding sphere
-pss SceneGraphNode::calculateBoundingSphere()
+PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
 {
     // set the bounding sphere to 0.0
     _boundingSphere = 0.0;
 
     if (_children.size() > 0) {  // node
-        pss maxChild;
+        PowerScaledScalar maxChild;
 
         // loop though all children and find the one furthest away/with the largest
         // bounding sphere
         for (size_t i = 0; i < _children.size(); ++i) {
             // when positions is dynamic, change this part to fins the most distant
             // position
-            pss child = _children.at(i)->getPosition().length()
+            PowerScaledScalar child = _children.at(i)->getPosition().length()
                         + _children.at(i)->calculateBoundingSphere();
             if (child > maxChild) {
                 maxChild = child;
@@ -313,7 +313,7 @@ const Renderable* SceneGraphNode::getRenderable() const
 }
 
 // private helper methods
-bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const pss& s_rad,
+bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad,
                                          const Camera* camera)
 {
     // direction the camera is looking at in power scale

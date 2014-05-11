@@ -36,7 +36,7 @@ namespace openspace
 {
 
 // forward declare the power scaled scalars
-class pss;
+class PowerScaledScalar;
 
 class PowerScaledCoordinate {
 public:
@@ -60,7 +60,7 @@ public:
     // returns the rescaled, "normal" coordinates
     glm::vec3 vec3() const;
     // length of the vector as a pss
-    pss length() const;
+    PowerScaledScalar length() const;
     glm::vec3 direction() const;
 
     // operator overloading
@@ -78,8 +78,8 @@ public:
     // scalar operators
     PowerScaledCoordinate operator*(const double& rhs) const;
     PowerScaledCoordinate operator*(const float& rhs) const;
-    PowerScaledCoordinate& operator*=(const pss& rhs);
-    PowerScaledCoordinate operator*(const pss& rhs) const;
+    PowerScaledCoordinate& operator*=(const PowerScaledScalar& rhs);
+    PowerScaledCoordinate operator*(const PowerScaledScalar& rhs) const;
     PowerScaledCoordinate operator*(const glm::mat4& matrix) const;
 
 
@@ -100,7 +100,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const PowerScaledCoordinate& rhs);
 
     // allow the power scaled scalars to access private members
-    friend class pss;
+    friend class PowerScaledScalar;
 
 private:
     // internal glm vector

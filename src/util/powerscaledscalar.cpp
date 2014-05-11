@@ -37,27 +37,19 @@ namespace openspace {
     }
 
 
-pss::pss() {
+PowerScaledScalar::PowerScaledScalar() : _data(0.f) {
 
 }
 
-pss::pss(const glm::vec2 &v) {
-	vec_ = glm::dvec2(v);
+PowerScaledScalar::PowerScaledScalar(const glm::vec2 &v) {
+	_data = std::move(v);
 }
 
-pss::pss(const glm::dvec2 &v) {
-	vec_ = v;
+PowerScaledScalar::PowerScaledScalar(float f1, float f2) {
+	_data = glm::vec2(f1, f2);
 }
 
-pss::pss(const float &f1,const float &f2) {
-	vec_ = glm::dvec2(f1, f2);
-}
-
-pss::pss(const double &d1,const double &d2) {
-	vec_ = glm::dvec2(d1, d2);
-}
-
-pss pss::CreatePSS(double d1) {
+PowerScaledScalar PowerScaledScalar::CreatePSS(double d1) {
 	char buff[30];
 
 	// find the number with maximum number of digits
@@ -69,237 +61,187 @@ pss pss::CreatePSS(double d1) {
 
 	// rescale and return
 	double tp = 1.0 / pow(k, digits);
-	return pss(d1*tp, digits);
+	return PowerScaledScalar(d1*tp, digits);
 }
 
-void pss::print() const {
-	std::printf("[\n  %f\n  %f\n]\n",vec_[0], vec_[1]);
-}
-void pss::print(const char *name) const {
-	std::printf("%s = [\n  %f\n  %f\n]\n", name, vec_[0], vec_[1]);
+const glm::vec2& PowerScaledScalar::vec2() const {
+	return _data;
 }
 
-const double * pss::value_ptr() {
-	return glm::value_ptr(vec_);
+float PowerScaledScalar::lengthf() const {
+	return static_cast<float>(_data[0] * pow(k,_data[1]));
 }
 
-const float * pss::value_ptrf() {
-	// need existing variable to return pointer to, local variables perish..
-	vecf_ = glm::vec2(vec_);
-	return glm::value_ptr(vecf_);
-}
-
-glm::dvec2  pss::getVec2() const{
-	return vec_;
-}
-
-glm::vec2  pss::getVec2f() const {
-	vecf_ = glm::vec2(vec_);
-	return vecf_;
-}
-
-double pss::length() const {
-	return vec_[0] * pow(k,vec_[1]);
-}
-
-float pss::lengthf() const {
-	return static_cast<float>(vec_[0] * pow(k,vec_[1]));
-}
-
-pss& pss::operator=(const pss &rhs) {
+PowerScaledScalar& PowerScaledScalar::operator=(const PowerScaledScalar &rhs) {
 	if (this != &rhs){
-		this->vec_ = rhs.vec_;
+		this->_data = rhs._data;
 	}
 	return *this;  // Return a reference to myself.
 }
 
-pss & pss::operator=(const glm::vec2 &rhs) {
-	this->vec_ = glm::dvec2(rhs);
+PowerScaledScalar & PowerScaledScalar::operator=(const glm::vec2 &rhs) {
+	this->_data = glm::vec2(rhs);
 	return *this;  // Return a reference to myself.
 }
 
-pss & pss::operator=(const float &rhs) {
-	this->vec_ = glm::dvec2(rhs,0.0);
+PowerScaledScalar & PowerScaledScalar::operator=(float rhs) {
+	this->_data = glm::vec2(rhs,0.0);
 	return *this;  // Return a reference to myself.
 }
 
-pss & pss::operator=(const glm::dvec2 &rhs) {
-	this->vec_ = rhs;
-	return *this;  // Return a reference to myself.
-}
+PowerScaledScalar & PowerScaledScalar::operator+=(const PowerScaledScalar &rhs) {
 
-pss & pss::operator=(const double&rhs) {
-	this->vec_ = glm::dvec2(rhs,0.0);
-	return *this;  // Return a reference to myself.
-}
-
-pss & pss::operator+=(const pss &rhs) {
-
-	double ds = this->vec_[1] - rhs.vec_[1];
+	double ds = this->_data[1] - rhs._data[1];
 	if(ds >= 0) {
-		*this = pss(rhs.vec_[0]*pow(k,-ds) + this->vec_[0], this->vec_[1]);
+		*this = PowerScaledScalar(rhs._data[0]*pow(k,-ds) + this->_data[0], this->_data[1]);
 	} else {
-		*this = pss(rhs.vec_[0] + this->vec_[0]*pow(k,ds), rhs.vec_[1]);
+		*this = PowerScaledScalar(rhs._data[0] + this->_data[0]*pow(k,ds), rhs._data[1]);
 	}
 
 	return *this;
 }
 
-const pss pss::operator+(const pss &rhs) const {
-	return pss(*this) += rhs;
+const PowerScaledScalar PowerScaledScalar::operator+(const PowerScaledScalar &rhs) const {
+	return PowerScaledScalar(*this) += rhs;
 }
 
-pss & pss::operator-=(const pss &rhs) {
+PowerScaledScalar & PowerScaledScalar::operator-=(const PowerScaledScalar &rhs) {
 
-	double ds = this->vec_[1] - rhs.vec_[1];
+	double ds = this->_data[1] - rhs._data[1];
 	if(ds >= 0) {
-		*this = pss(-rhs.vec_[0]*pow(k,-ds) + this->vec_[0], this->vec_[1]);
+		*this = PowerScaledScalar(-rhs._data[0]*pow(k,-ds) + this->_data[0], this->_data[1]);
 	} else {
-		*this = pss(-rhs.vec_[0] + this->vec_[0]*pow(k,ds), rhs.vec_[1]);
+		*this = PowerScaledScalar(-rhs._data[0] + this->_data[0]*pow(k,ds), rhs._data[1]);
 	}
 
 	return *this;
 }
 
-const pss pss::operator-(const pss &rhs) const {
-	return pss(*this) -= rhs;
+const PowerScaledScalar PowerScaledScalar::operator-(const PowerScaledScalar &rhs) const {
+	return PowerScaledScalar(*this) -= rhs;
 }
 
-pss & pss::operator*=(const pss &rhs) {
-	double ds = this->vec_[1] - rhs.vec_[1];
+PowerScaledScalar & PowerScaledScalar::operator*=(const PowerScaledScalar &rhs) {
+	double ds = this->_data[1] - rhs._data[1];
 	if(ds >= 0) {
-		*this = pss(rhs.vec_[0]*pow(k,-ds) * this->vec_[0], this->vec_[1]+this->vec_[1]);
+		*this = PowerScaledScalar(rhs._data[0]*pow(k,-ds) * this->_data[0], this->_data[1]+this->_data[1]);
 	} else {
-		*this = pss(rhs.vec_[0] * this->vec_[0]*pow(k,ds), rhs.vec_[1]+rhs.vec_[1]);
+		*this = PowerScaledScalar(rhs._data[0] * this->_data[0]*pow(k,ds), rhs._data[1]+rhs._data[1]);
 	}
 
 	return *this;
 }
 
 
-const pss pss::operator*(const pss &rhs) const {
-	return pss(*this) *= rhs;
+const PowerScaledScalar PowerScaledScalar::operator*(const PowerScaledScalar &rhs) const {
+	return PowerScaledScalar(*this) *= rhs;
 }
 
-pss & pss::operator*=(const double &rhs) {
-	double ds = this->vec_[1];
+
+PowerScaledScalar & PowerScaledScalar::operator*=(const float &rhs) {
+	double ds = this->_data[1];
 	if(ds >= 0) {
-		*this = pss(rhs*pow(k,-ds) * this->vec_[0], this->vec_[1]);
+		*this = PowerScaledScalar(rhs*pow(k,-ds) * this->_data[0],this->_data[1]+this->_data[1]);
 	} else {
-		*this = pss(rhs * this->vec_[0]*pow(k,ds), 0.0);
+		*this = PowerScaledScalar(rhs * this->_data[0]*pow(k,ds), 0.0);
 	}
 
 	return *this;
 }
 
-
-const pss pss::operator*(const double &rhs) const {
-	return pss(*this) *= rhs;
+const PowerScaledScalar PowerScaledScalar::operator*(const float &rhs) const {
+	return PowerScaledScalar(*this) *= rhs;
 }
 
-pss & pss::operator*=(const float &rhs) {
-	double ds = this->vec_[1];
+float& PowerScaledScalar::operator[](unsigned int idx) {
+	return _data[idx];
+}
+
+float PowerScaledScalar::operator[](unsigned int idx) const {
+	return _data[idx];
+}
+
+bool PowerScaledScalar::operator==(const PowerScaledScalar &other) const {
+	return _data == other._data;
+}
+
+bool PowerScaledScalar::operator<(const PowerScaledScalar &other) const {
+	double ds = this->_data[1] - other._data[1];
 	if(ds >= 0) {
-		*this = pss(rhs*pow(k,-ds) * this->vec_[0],this->vec_[1]+this->vec_[1]);
-	} else {
-		*this = pss(rhs * this->vec_[0]*pow(k,ds), 0.0);
-	}
-
-	return *this;
-}
-
-const pss pss::operator*(const float &rhs) const {
-	return pss(*this) *= rhs;
-}
-
-double& pss::operator[](unsigned int idx) {
-	return vec_[idx];
-}
-const double& pss::operator[](unsigned int idx) const {
-	return vec_[idx];
-}
-
-bool pss::operator==(const pss &other) const {
-	return vec_ == other.vec_;
-}
-
-bool pss::operator<(const pss &other) const {
-	double ds = this->vec_[1] - other.vec_[1];
-	if(ds >= 0) {
-		double upscaled = other.vec_[0]*pow(k,-ds);
-        return vec_[0] < upscaled;
+		double upscaled = other._data[0]*pow(k,-ds);
+        return _data[0] < upscaled;
         /*
         bool retur =(vec_[0] < upscaled);
         std::printf("this: %f, upscaled: %f, this<upscaled: %i\n", vec_[0], upscaled, retur);
 		return retur;
         */
 	} else {
-		double upscaled = vec_[0]*pow(k,-ds);
-		return other.vec_[0] > upscaled;
+		double upscaled = _data[0]*pow(k,-ds);
+		return other._data[0] > upscaled;
 	}
 }
 
-bool pss::operator>(const pss &other) const {
-	double ds = this->vec_[1] - other.vec_[1];
+bool PowerScaledScalar::operator>(const PowerScaledScalar &other) const {
+	double ds = this->_data[1] - other._data[1];
 	if(ds >= 0) {
-		double upscaled = other.vec_[0]*pow(k,-ds);
-		return vec_[0] > upscaled;
+		double upscaled = other._data[0]*pow(k,-ds);
+		return _data[0] > upscaled;
 	} else {
-		double upscaled = vec_[0]*pow(k,-ds);
-		return other.vec_[0] < upscaled;
+		double upscaled = _data[0]*pow(k,-ds);
+		return other._data[0] < upscaled;
 	}
 }
 
-bool pss::operator<=(const pss &other) const {
+bool PowerScaledScalar::operator<=(const PowerScaledScalar &other) const {
 	return *this < other || *this == other;
 }
 
-bool pss::operator>=(const pss &other) const {
+bool PowerScaledScalar::operator>=(const PowerScaledScalar &other) const {
 	return *this > other || *this == other;
 }
 
-bool pss::operator==(const double &other) const {
-	double ds = this->vec_[1];
+bool PowerScaledScalar::operator==(double other) const {
+	double ds = this->_data[1];
 	if(ds >= 0) {
 		double upscaled = other*pow(k,-ds);
-		return vec_[0] == upscaled;
+		return _data[0] == upscaled;
 	} else {
-		double upscaled = vec_[0]*pow(k,-ds);
+		double upscaled = _data[0]*pow(k,-ds);
 		return other == upscaled;
 	}
 }
 
-bool pss::operator<(const double &other) const {
-	double ds = this->vec_[1];
+bool PowerScaledScalar::operator<(double other) const {
+	double ds = this->_data[1];
 	if(ds >= 0) {
 		double upscaled = other*pow(k,-ds);
-		return vec_[0] < upscaled;
+		return _data[0] < upscaled;
 	} else {
-		double upscaled = vec_[0]*pow(k,-ds);
+		double upscaled = _data[0]*pow(k,-ds);
 		return other > upscaled;
 	}
 }
 
-bool pss::operator>(const double &other) const {
-	double ds = this->vec_[1];
+bool PowerScaledScalar::operator>(double other) const {
+	double ds = this->_data[1];
 	if(ds >= 0) {
 		double upscaled = other*pow(k,-ds);
-		return vec_[0] > upscaled;
+		return _data[0] > upscaled;
 	} else {
-		double upscaled = vec_[0]*pow(k,-ds);
+		double upscaled = _data[0]*pow(k,-ds);
 		return other < upscaled;
 	}
 }
 
-bool pss::operator<=(const double &other) const {
+bool PowerScaledScalar::operator<=(double other) const {
 	return *this < other || *this == other;
 }
 
-bool pss::operator>=(const double &other) const {
+bool PowerScaledScalar::operator>=(double other) const {
 	return *this > other || *this == other;
 }
 
-std::ostream& operator<<(::std::ostream& os, const pss& rhs) {
+std::ostream& operator<<(::std::ostream& os, const PowerScaledScalar& rhs) {
     os << "(" << rhs[0] << ", " << rhs[1] << ")";
     return os;
 }

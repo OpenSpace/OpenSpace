@@ -95,9 +95,9 @@ glm::vec3 PowerScaledCoordinate::vec3() const
                      _vec[2] * pow(k, _vec[3]));
 }
 
-pss PowerScaledCoordinate::length() const
+PowerScaledScalar PowerScaledCoordinate::length() const
 {
-    return pss(glm::length(glm::vec3(_vec[0], _vec[1], _vec[2])), _vec[3]);
+    return PowerScaledScalar(glm::length(glm::vec3(_vec[0], _vec[1], _vec[2])), _vec[3]);
 }
 
 glm::vec3 PowerScaledCoordinate::direction() const
@@ -195,24 +195,24 @@ PowerScaledCoordinate PowerScaledCoordinate::operator*(const float& rhs) const
     return PowerScaledCoordinate(_vec[0] * rhs, _vec[1] * rhs, _vec[2] * rhs, _vec[3]);
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator*=(const pss& rhs)
+PowerScaledCoordinate& PowerScaledCoordinate::operator*=(const PowerScaledScalar& rhs)
 {
-    double ds = this->_vec[3] - rhs.vec_[1];
+    double ds = this->_vec[3] - rhs._data[1];
     if (ds >= 0) {
         double p = pow(k, -ds);
         *this = PowerScaledCoordinate(
-              rhs.vec_[0] * p * _vec[0], rhs.vec_[0] * p * _vec[1],
-              rhs.vec_[0] * p * _vec[2], this->_vec[3] + _vec[3]);
+              rhs._data[0] * p * _vec[0], rhs._data[0] * p * _vec[1],
+              rhs._data[0] * p * _vec[2], this->_vec[3] + _vec[3]);
     } else {
         double p = pow(k, ds);
         *this = PowerScaledCoordinate(
-              rhs.vec_[0] * _vec[0] * p, rhs.vec_[0] * _vec[1] * p,
-              rhs.vec_[0] * _vec[2] * p, rhs.vec_[1] + rhs.vec_[1]);
+              rhs._data[0] * _vec[0] * p, rhs._data[0] * _vec[1] * p,
+              rhs._data[0] * _vec[2] * p, rhs._data[1] + rhs._data[1]);
     }
     return *this;
 }
 
-PowerScaledCoordinate PowerScaledCoordinate::operator*(const pss& rhs) const
+PowerScaledCoordinate PowerScaledCoordinate::operator*(const PowerScaledScalar& rhs) const
 {
     return PowerScaledCoordinate(*this) *= rhs;
 }
