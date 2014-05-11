@@ -72,8 +72,8 @@ public:
     PowerScaledCoordinate operator-(const PowerScaledCoordinate& rhs) const;
     float& operator[](unsigned int idx);
     float operator[](unsigned int idx) const;
-    const double dot(const PowerScaledCoordinate& rhs) const;
-    const double angle(const PowerScaledCoordinate& rhs) const;
+    double dot(const PowerScaledCoordinate& rhs) const;
+    double angle(const PowerScaledCoordinate& rhs) const;
 
     // scalar operators
     PowerScaledCoordinate operator*(const double& rhs) const;

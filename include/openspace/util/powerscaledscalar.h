@@ -32,15 +32,10 @@
 
 #include <iostream>
 
-namespace openspace
-{
-
-// forward declare the power scaled coordinates
-//class psc;
+namespace openspace {
 
 class pss {
 public:
-
 	// constructors
 	pss();
 	pss(const glm::vec2 &v);

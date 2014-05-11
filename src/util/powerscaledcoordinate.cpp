@@ -238,7 +238,7 @@ float PowerScaledCoordinate::operator[](unsigned int idx) const
     return _vec[idx];
 }
 
-const double PowerScaledCoordinate::dot(const PowerScaledCoordinate& rhs) const
+double PowerScaledCoordinate::dot(const PowerScaledCoordinate& rhs) const
 {
     double ds = _vec[3] - rhs._vec[3];
     if (ds >= 0) {
@@ -255,7 +255,7 @@ const double PowerScaledCoordinate::dot(const PowerScaledCoordinate& rhs) const
     }
 }
 
-const double PowerScaledCoordinate::angle(const PowerScaledCoordinate& rhs) const
+double PowerScaledCoordinate::angle(const PowerScaledCoordinate& rhs) const
 {
     glm::dvec3 uPowerScaledCoordinatealed(rhs._vec[0], rhs._vec[1], rhs._vec[2]);
     glm::dvec3 shortened(_vec[0], _vec[1], _vec[2]);
