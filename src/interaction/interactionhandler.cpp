@@ -7,7 +7,7 @@
 #include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/psc.h>
+#include <openspace/util/powerscaledcoordinate.h>
 #include <glm/gtx/vector_angle.hpp>
 
 // std includes

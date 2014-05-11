@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define PLANET_H
 
 // open space includes
-#include <openspace/util/pss.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/vbo_template.h>
 
 // std includes

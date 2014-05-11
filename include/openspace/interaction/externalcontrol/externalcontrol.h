@@ -1,7 +1,7 @@
 #ifndef EXTERNALCONTROL_H
 #define EXTERNALCONTROL_H
 
-#include <openspace/util/pss.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 

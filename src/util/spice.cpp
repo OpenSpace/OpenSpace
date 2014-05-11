@@ -2,7 +2,7 @@
 // openspace stuff
 #include <openspace/util/spice.h>
 #include <openspace/util/time.h>
-#include <openspace/util/psc.h>
+#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/interaction/interactionhandler.h>
 
 // spice

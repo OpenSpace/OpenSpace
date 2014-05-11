@@ -27,8 +27,8 @@
 
 // open space includes
 #include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/psc.h>
-#include <openspace/util/pss.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
 
 namespace openspace {

@@ -25,7 +25,7 @@
 #ifndef __EPHEMERIS_H__
 #define __EPHEMERIS_H__
 
-#include <openspace/util/psc.h>
+#include <openspace/util/powerscaledcoordinate.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {

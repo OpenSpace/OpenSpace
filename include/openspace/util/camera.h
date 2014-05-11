@@ -26,7 +26,7 @@
 #define __CAMERA_H__
 
 // open space includes
-#include <openspace/util/psc.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 // glm includes
 #include <glm/glm.hpp>
@@ -38,8 +38,15 @@ namespace openspace {
 
 //class Camera {
 //public:
+//    enum class ProjectionMode {
+//        Perspective,
+//        Orthographic,
+//        Frustum,
+//        FixedPerspective
+//    };
+//
 //    Camera();
-//    
+//
 //    void setPosition(psc pos);
 //    const psc& position() const;
 //

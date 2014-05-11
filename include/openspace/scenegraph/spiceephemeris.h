@@ -27,7 +27,7 @@
 
 #include <openspace/scenegraph/ephemeris.h>
 
-#include <openspace/util/psc.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     

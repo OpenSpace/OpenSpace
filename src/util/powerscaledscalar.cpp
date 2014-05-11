@@ -1,6 +1,6 @@
 
 // open space includes
-#include <openspace/util/pss.h>
+#include <openspace/util/powerscaledscalar.h>
 
 // std includes
 #include <cstdio>

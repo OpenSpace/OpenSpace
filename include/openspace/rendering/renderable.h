@@ -26,8 +26,8 @@
 #define __RENDERABLE_H__
 
 // open space includes
-#include <openspace/util/psc.h>
-#include <openspace/util/pss.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/camera.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/properties/propertyowner.h>
