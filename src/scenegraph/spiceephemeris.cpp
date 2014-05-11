@@ -63,7 +63,7 @@ void SpiceEphemeris::update() {
     double state[3];
     
     Spice::ref().spk_getPosition(_target, _origin, state);
-    _position = psc::CreatePSC(state[0], state[1], state[2]);
+    _position = psc::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
 }
 
 } // namespace openspace

@@ -1,5 +1,29 @@
-#ifndef PSC_H
-#define PSC_H
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __POWERSCALEDCOORDINATE_H__
+#define __POWERSCALEDCOORDINATE_H__
 
 // open space includes
 // glm includes
@@ -14,85 +38,81 @@ namespace openspace
 // forward declare the power scaled scalars
 class pss;
 
-class psc {
+class PowerScaledCoordinate {
 public:
+    // constructors
+    PowerScaledCoordinate();
 
-	// constructors
-	psc();
-	psc(const glm::vec4 &v);
-	psc(const glm::dvec4 &v);
-	psc(const glm::vec3 &v);
-	psc(const glm::dvec3 &v);
-	psc(const float &f1,const float &f2,const float &f3,const float &f4);
-	psc(const double &d1,const double &d2,const double &d3,const double &d4);
+    // Sets the power scaled coordinates directly
+    PowerScaledCoordinate(glm::vec4 v);
+    PowerScaledCoordinate(glm::dvec4 v);
+    PowerScaledCoordinate(float f1, float f2, float f3, float f4);
+    PowerScaledCoordinate(double d1, double d2, double d3, double d4);
+    // Sets the power scaled coordinates with w = 0
+    PowerScaledCoordinate(glm::vec3 v);
+    PowerScaledCoordinate(glm::dvec3 v);
 
-	static psc CreatePSC(double d1, double d2, double d3);
+    static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2, double d3);
 
-	// print n' debug
-	void print() const;
-	void print(const char *name) const;
+    // get functions
+    // return the full, unmodified PSC 
+    const glm::dvec4& vec4() const;
+    glm::vec4 vec4f() const;
 
-	// get functions
-	const double * value_ptr();
-	const float * value_ptrf();
-	glm::dvec4 getVec4() const;
-	glm::vec4 getVec4f() const;
-	glm::dvec3 getVec3() const;
-	glm::vec3 getVec3f() const;
-	pss length() const;
-	glm::dvec3 getDirection() const;
-	glm::vec3 getDirectionf() const;
+    glm::dvec3 getVec3() const;
+    glm::vec3 getVec3f() const;
+    pss length() const;
+    glm::dvec3 getDirection() const;
+    glm::vec3 getDirectionf() const;
 
-	// multiplication
-	psc mul(const glm::mat4 &m) const;
-	psc mul(const glm::dmat4 &m) const;
+    // multiplication
+    PowerScaledCoordinate mul(const glm::mat4& m) const;
+    PowerScaledCoordinate mul(const glm::dmat4& m) const;
 
-	// operator overloading
-	psc & operator=(const psc &rhs);
-	psc & operator+=(const psc &rhs);
-	const psc operator+(const psc &rhs) const;
-	psc & operator-=(const psc &rhs);
-	const psc operator-(const psc &rhs) const;
-	double& operator[](unsigned int idx);
-	const double& operator[](unsigned int idx) const;
-	const double dot(const psc &rhs) const;
-	const double angle(const psc &rhs) const;
+    // operator overloading
+    PowerScaledCoordinate& operator=(const PowerScaledCoordinate& rhs);
+    PowerScaledCoordinate& operator+=(const PowerScaledCoordinate& rhs);
+    const PowerScaledCoordinate operator+(const PowerScaledCoordinate& rhs) const;
+    PowerScaledCoordinate& operator-=(const PowerScaledCoordinate& rhs);
+    const PowerScaledCoordinate operator-(const PowerScaledCoordinate& rhs) const;
+    double& operator[](unsigned int idx);
+    const double& operator[](unsigned int idx) const;
+    const double dot(const PowerScaledCoordinate& rhs) const;
+    const double angle(const PowerScaledCoordinate& rhs) const;
 
-	// scalar operators
-	const psc operator*(const double &rhs) const;
-	const psc operator*(const float &rhs) const;
-	psc &operator*=(const pss &rhs);
-	const psc operator*(const pss &rhs) const;
+    // scalar operators
+    const PowerScaledCoordinate operator*(const double& rhs) const;
+    const PowerScaledCoordinate operator*(const float& rhs) const;
+    PowerScaledCoordinate& operator*=(const pss& rhs);
+    const PowerScaledCoordinate operator*(const pss& rhs) const;
 
-	// comparasion
-     bool operator==(const psc &other) const;
-     bool operator!=(const psc &other) const;
-	 bool operator<(const psc &other) const;
-	 bool operator>(const psc &other) const;
-	 bool operator<=(const psc &other) const;
-	 bool operator>=(const psc &other) const;
+    // comparasion
+    bool operator==(const PowerScaledCoordinate& other) const;
+    bool operator!=(const PowerScaledCoordinate& other) const;
+    bool operator<(const PowerScaledCoordinate& other) const;
+    bool operator>(const PowerScaledCoordinate& other) const;
+    bool operator<=(const PowerScaledCoordinate& other) const;
+    bool operator>=(const PowerScaledCoordinate& other) const;
 
-	// glm integration
-	psc & operator=(const glm::vec4 &rhs);
-	psc & operator=(const glm::vec3 &rhs);
-	psc & operator=(const glm::dvec4 &rhs);
-	psc & operator=(const glm::dvec3 &rhs);
-    
-    friend std::ostream& operator<<(::std::ostream& os, const psc& rhs);
-	
-	// allow the power scaled scalars to acces private members
-	friend class pss;
+    // glm integration
+    PowerScaledCoordinate& operator=(const glm::vec4& rhs);
+    PowerScaledCoordinate& operator=(const glm::vec3& rhs);
+    PowerScaledCoordinate& operator=(const glm::dvec4& rhs);
+    PowerScaledCoordinate& operator=(const glm::dvec3& rhs);
+
+    friend std::ostream& operator<<(std::ostream& os, const PowerScaledCoordinate& rhs);
+
+    // allow the power scaled scalars to access private members
+    friend class pss;
+
 private:
-
-	// internal glm vector
-	glm::dvec4 vec_;
-
-	// float vector used when returning float values
-	mutable glm::vec4 vecf_;
-
+    // internal glm vector
+    glm::dvec4 _vec;
 };
 
+typedef PowerScaledCoordinate psc;
+//typedef PowerScaledCoordinate psc;
 
 } // namespace openspace
 
-#endif
+#endif // __POWERSCALEDCOORDINATE_H__

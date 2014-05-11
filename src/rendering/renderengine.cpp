@@ -278,25 +278,25 @@ void RenderEngine::serialize(std::vector<char>& dataStream, size_t& offset) {
     dataStream[offset++] = s.representation[2];
     dataStream[offset++] = s.representation[3];
 
-    s.value = _mainCamera->position().getVec4f().x;
+    s.value = _mainCamera->position().vec4f().x;
     dataStream[offset++] = s.representation[0];
     dataStream[offset++] = s.representation[1];
     dataStream[offset++] = s.representation[2];
     dataStream[offset++] = s.representation[3];
 
-    s.value = _mainCamera->position().getVec4f().y;
+    s.value = _mainCamera->position().vec4f().y;
     dataStream[offset++] = s.representation[0];
     dataStream[offset++] = s.representation[1];
     dataStream[offset++] = s.representation[2];
     dataStream[offset++] = s.representation[3];
 
-    s.value = _mainCamera->position().getVec4f().z;
+    s.value = _mainCamera->position().vec4f().z;
     dataStream[offset++] = s.representation[0];
     dataStream[offset++] = s.representation[1];
     dataStream[offset++] = s.representation[2];
     dataStream[offset++] = s.representation[3];
 
-    s.value = _mainCamera->position().getVec4f().w;
+    s.value = _mainCamera->position().vec4f().w;
     dataStream[offset++] = s.representation[0];
     dataStream[offset++] = s.representation[1];
     dataStream[offset++] = s.representation[2];
