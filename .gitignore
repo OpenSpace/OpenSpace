@@ -1,7 +1,6 @@
 bin/
 build/
 ext/SGCT
-ext/kameleon
 .DS_Store
 *.swp
 
