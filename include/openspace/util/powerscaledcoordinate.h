@@ -44,6 +44,7 @@ public:
     PowerScaledCoordinate();
 
     PowerScaledCoordinate(PowerScaledCoordinate&& rhs);
+	PowerScaledCoordinate(const PowerScaledCoordinate& rhs);
 
     // Sets the power scaled coordinates directly
     PowerScaledCoordinate(glm::vec4 v);

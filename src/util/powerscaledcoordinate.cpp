@@ -63,6 +63,11 @@ PowerScaledCoordinate::PowerScaledCoordinate(float f1, float f2, float f3, float
     _vec = glm::vec4(f1, f2, f3, f4);
 }
 
+PowerScaledCoordinate::PowerScaledCoordinate(const PowerScaledCoordinate& rhs) {
+	_vec = rhs._vec;
+
+}
+
 PowerScaledCoordinate
       PowerScaledCoordinate::CreatePowerScaledCoordinate(double d1, double d2, double d3)
 {
