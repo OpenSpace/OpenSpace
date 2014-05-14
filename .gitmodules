@@ -7,3 +7,6 @@
 [submodule "openspace-data"]
 	path = openspace-data
 	url = git@openspace.itn.liu.se:/openspace-data
+[submodule "ext/kameleon"]
+	path = ext/kameleon
+	url = git@openspace.itn.liu.se:/kameleon
