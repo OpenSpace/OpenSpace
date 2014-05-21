@@ -59,6 +59,7 @@ KameleonWrapper::KameleonWrapper(const std::string& filename, Model model): _typ
         default:
             LERROR("No valid model type provided!");
 	}
+	_lastiProgress = -1; // for progressbar
 }
 
 KameleonWrapper::~KameleonWrapper() {
@@ -101,21 +102,8 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
     
-    int barWidth = 70;
-    int lastiProgress = -1;
     for (int x = 0; x < outDimensions.x; ++x) {
-        float progress = static_cast<float>(x) / static_cast<float>(outDimensions.x-1);
-        int iprogress = static_cast<int>(progress*100.0f);
-		if (iprogress != lastiProgress) {
-            
-            int pos = barWidth * progress;
-            int eqWidth = pos+1;
-            int spWidth = barWidth - pos + 2;
-            std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
-                        << ">" << std::setfill(' ') << std::setw(spWidth)
-                        << "] " << iprogress << " %  \r" << std::flush;
-		}
-        lastiProgress = iprogress;
+    	progressBar(x, outDimensions.x);
         
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
@@ -189,7 +177,8 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Loading variables " << xVar << " " << yVar << " " << zVar << " from CDF data with a uniform sampling");
 
-	int size = 4*outDimensions.x*outDimensions.y*outDimensions.z;
+	int channels = 4;
+	int size = channels*outDimensions.x*outDimensions.y*outDimensions.z;
 	float* data = new float[size];
 
 	std::string v_x, v_y, v_z;
@@ -226,26 +215,13 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	LDEBUG(zVar << "Min: " << varZMin);
 	LDEBUG(zVar << "Max: " << varZMax);
 
-	int barWidth = 70;
-	int lastiProgress = -1;
 	for (int x = 0; x < outDimensions.x; ++x) {
-		float progress = static_cast<float>(x) / static_cast<float>(outDimensions.x-1);
-		int iprogress = static_cast<int>(progress*100.0f);
-		if (iprogress != lastiProgress) {
-
-			int pos = barWidth * progress;
-			int eqWidth = pos+1;
-			int spWidth = barWidth - pos + 2;
-			std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
-			<< ">" << std::setfill(' ') << std::setw(spWidth)
-			<< "] " << iprogress << " %  \r" << std::flush;
-		}
-		lastiProgress = iprogress;
+		progressBar(x, outDimensions.x);
 
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
 
-				int index = 4*x + 4*y*outDimensions.x + 4*z*outDimensions.x*outDimensions.y;
+				int index = x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y;
 
 				if(_type == Model::BATSRUS) {
 					float xPos = xMin + stepX*x;
@@ -258,12 +234,12 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 					float zValue = _interpolator->interpolate(zVar, xPos, yPos, zPos);
 
 					// scale to [0,1]
-					data[index] 	= (xValue-varXMin)/(varXMax-varXMin);
-					data[index + 1] = (yValue-varYMin)/(varYMax-varYMin);
-					data[index + 2] = (zValue-varZMin)/(varZMax-varZMin);
-					data[index + 3] = 1.0;
+					data[index] 	= (xValue-varXMin)/(varXMax-varXMin); // R
+					data[index + 1] = (yValue-varYMin)/(varYMax-varYMin); // G
+					data[index + 2] = (zValue-varZMin)/(varZMax-varZMin); // B
+					data[index + 3] = 1.0; // GL_RGB refuses to work. Workaround by doing a GL_RGBA with hardcoded alpha
 				} else {
-					LERROR("Only BATSRUS supported for getUniformSampledVectorValues");
+					LERROR("Only BATSRUS supported for getUniformSampledVectorValues (for now)");
 				}
 			}
 		}
@@ -292,13 +268,26 @@ void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::stri
 	std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},std::istream_iterator<std::string>{}};
 
 	// validate
-	if (tokens.size() != 3) {
-		LERROR("Something went wrong");
-	}
+	if (tokens.size() != 3) LERROR("Something went wrong");
 
 	x = tokens.at(0);
 	y = tokens.at(1);
 	z = tokens.at(2);
+}
+
+void KameleonWrapper::progressBar(int current, int end) {
+	float progress = static_cast<float>(current) / static_cast<float>(end-1);
+	int iprogress = static_cast<int>(progress*100.0f);
+	int barWidth = 70;
+	if (iprogress != _lastiProgress) {
+		int pos = barWidth * progress;
+		int eqWidth = pos+1;
+		int spWidth = barWidth - pos + 2;
+		std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
+		<< ">" << std::setfill(' ') << std::setw(spWidth)
+		<< "] " << iprogress << " %  \r" << std::flush;
+	}
+	_lastiProgress = iprogress;
 }
 
 } // namespace openspace

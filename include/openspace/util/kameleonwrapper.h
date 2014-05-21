@@ -50,9 +50,13 @@ public:
 
 private:
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
+	void progressBar(int current, int end);
+
 	ccmc::Model* _model;
     Model _type;
 	ccmc::Interpolator* _interpolator;
+
+	int _lastiProgress; // for progressbar
 };
 
 } // namespace openspace

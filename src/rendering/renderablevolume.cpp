@@ -168,31 +168,6 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath
 				LWARNING("Hints does not specify a 'Variable' or 'Variables'");
 			}
 
-
-
-
-			//                float* data = kw.getUniformSampledVectorValues(variableString, dimensions);
-			//                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
-
-			//                float* data = kw.getUniformSampledValues(variableString, dimensions);
-			//                new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-
-//			ghoul::opengl::Texture* texture;
-//			float* data;
-
-			//                if (hintsDictionary.hasKey("VectorData") && hintsDictionary.getValue("VectorData", variableString)) {
-			//                	if (variableString == "1") { // Vector data
-			//                		LDEBUG("VectorData");
-			//                		data = kw.getUniformSampledVectorValues(variableString, dimensions);
-			//                		texture = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGB, GL_RGB8, GL_FLOAT);
-			//                	} else { // Scalar data
-			//                		LDEBUG("ScalarData");
-			//                		data = kw.getUniformSampledValues(variableString, dimensions);
-			//                		texture = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-			//                	}
-			//                }
-
-
 		}
 		LWARNING("Hints does not specify a 'Model'");
 	} else {
