@@ -248,14 +248,17 @@ bool RenderableVolumeExpert::initialize() {
     
     for (int i = 0; i < _volumePaths.size(); ++i) {
         ghoul::opengl::Texture* volume = loadVolume(_volumePaths.at(i), _volumeHints.at(i));
-        if(volume) {
+        if(volume != nullptr) {
+        	LDEBUG("All is well");
             volume->uploadTexture();
             
             LDEBUG("Creating CL texture from GL texture with path '" << _volumePaths.at(i) << "'");
             cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
-            
+
             _volumes.push_back(volume);
             _clVolumes.push_back(volumeTexture);
+        } else {
+        	LDEBUG("nullptr, derp");
         }
     }
     

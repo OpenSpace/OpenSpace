@@ -102,63 +102,103 @@ std::string RenderableVolume::findPath(const std::string& path) {
 }
 
 ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary) {
-    if( ! FileSys.fileExists(filepath)) {
-        LWARNING("Could not load volume, could not find '" << filepath << "'");
-        return nullptr;
-    }
-    
-    if(hasExtension(filepath, "raw")) {
-        ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
-        ghoul::RawVolumeReader rawReader(hints);
-        return rawReader.read(filepath);
-    } else if(hasExtension(filepath, "cdf")) {
-        
-        std::string modelString;
-        if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
-            KameleonWrapper::Model model;
-            if (modelString == "BATSRUS") {
-                model = KameleonWrapper::Model::BATSRUS;
-            } else if (modelString == "ENLIL") {
-                model = KameleonWrapper::Model::ENLIL;
-            } else {
-                LWARNING("Hints does not specify a valid 'Model'");
-                return nullptr;
-            }
-            
-            std::string variableString;
-            if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
-                glm::size3_t dimensions(1,1,1);
-                double tempValue;
-                if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[0] = intVal;
-                }
-                if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[1] = intVal;
-                }
-                if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[2] = intVal;
-                }
-                
-                KameleonWrapper kw(filepath, model);
-                float* data = kw.getUniformSampledValues(variableString, dimensions);
-                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-            } else {
-                LWARNING("Hints does not specify a 'Variable'");
-            }
-            
-            
-        }
-        LWARNING("Hints does not specify a 'Model'");
-    } else {
-        LWARNING("No valid file extension.");
-    }
-    return nullptr;
+	if( ! FileSys.fileExists(filepath)) {
+		LWARNING("Could not load volume, could not find '" << filepath << "'");
+		return nullptr;
+	}
+
+	if(hasExtension(filepath, "raw")) {
+		ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
+		ghoul::RawVolumeReader rawReader(hints);
+		return rawReader.read(filepath);
+	} else if(hasExtension(filepath, "cdf")) {
+
+		std::string modelString;
+		if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
+			KameleonWrapper::Model model;
+			if (modelString == "BATSRUS") {
+				model = KameleonWrapper::Model::BATSRUS;
+			} else if (modelString == "ENLIL") {
+				model = KameleonWrapper::Model::ENLIL;
+			} else {
+				LWARNING("Hints does not specify a valid 'Model'");
+				return nullptr;
+			}
+
+			glm::size3_t dimensions(1,1,1);
+			double tempValue;
+			if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
+				int intVal = static_cast<int>(tempValue);
+				if(intVal > 0)
+					dimensions[0] = intVal;
+			}
+			if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
+				int intVal = static_cast<int>(tempValue);
+				if(intVal > 0)
+					dimensions[1] = intVal;
+			}
+			if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
+				int intVal = static_cast<int>(tempValue);
+				if(intVal > 0)
+					dimensions[2] = intVal;
+			}
+
+			KameleonWrapper kw(filepath, model);
+
+			std::string variableString;
+			if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
+				float* data = kw.getUniformSampledValues(variableString, dimensions);
+				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+
+			} else if (hintsDictionary.hasKey("Variables")) {
+				std::string xVariable, yVariable, zVariable;
+				bool xVar, yVar, zVar;
+				xVar = hintsDictionary.getValue("Variables.1", xVariable);
+				yVar = hintsDictionary.getValue("Variables.2", yVariable);
+				zVar = hintsDictionary.getValue("Variables.3", zVariable);
+
+				if (!xVar || !yVar || !zVar) {
+					LERROR("Error reading variables! Must be 3 and must exist in CDF data");
+				} else {
+					float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
+					return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+				}
+
+			} else {
+				LWARNING("Hints does not specify a 'Variable' or 'Variables'");
+			}
+
+
+
+
+			//                float* data = kw.getUniformSampledVectorValues(variableString, dimensions);
+			//                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
+
+			//                float* data = kw.getUniformSampledValues(variableString, dimensions);
+			//                new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+
+//			ghoul::opengl::Texture* texture;
+//			float* data;
+
+			//                if (hintsDictionary.hasKey("VectorData") && hintsDictionary.getValue("VectorData", variableString)) {
+			//                	if (variableString == "1") { // Vector data
+			//                		LDEBUG("VectorData");
+			//                		data = kw.getUniformSampledVectorValues(variableString, dimensions);
+			//                		texture = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGB, GL_RGB8, GL_FLOAT);
+			//                	} else { // Scalar data
+			//                		LDEBUG("ScalarData");
+			//                		data = kw.getUniformSampledValues(variableString, dimensions);
+			//                		texture = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+			//                	}
+			//                }
+
+
+		}
+		LWARNING("Hints does not specify a 'Model'");
+	} else {
+		LWARNING("No valid file extension.");
+	}
+	return nullptr;
 }
 
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {

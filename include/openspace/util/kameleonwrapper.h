@@ -46,8 +46,10 @@ public:
 	KameleonWrapper(const std::string& filename, Model model);
 	~KameleonWrapper();
 	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
+	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar, const std::string& zVar, glm::size3_t outDimensions);
 
 private:
+	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	ccmc::Model* _model;
     Model _type;
 	ccmc::Interpolator* _interpolator;
