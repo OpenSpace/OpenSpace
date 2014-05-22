@@ -34,7 +34,9 @@ Flare::Flare()
     , _lastMouseY(0)
     , _oldTime(0.f)
     , _currentTime(0.f)
-{}
+{
+	setBoundingSphere(PowerScaledScalar::CreatePSS(sqrt(3.0f)));
+}
 
 Flare::~Flare() {
 	// Clean up like a good citizen
@@ -66,7 +68,8 @@ void Flare::update() {
 
 void Flare::render() {
 	// Sync timestep
-	_animator->SetCurrentTimestep(static_cast<unsigned int>(_timeStep.getVal()));
+	//unsigned int ts = static_cast<unsigned int>(_timeStep.getVal());
+	//LDEBUG("ts: " << ts);
 	// Reload config if flag is set
 	if (_reloadFlag.getVal()) _raycaster->Reload();
 
@@ -379,6 +382,7 @@ void Flare::preSync() {
 	_oldTime = _currentTime;
 	_currentTime = static_cast<float>(sgct::Engine::getTime());
 	_elapsedTime.setVal(_currentTime - _oldTime);
+	_timeStep.setVal(_animator->CurrentTimestep());
 
 	// Update automatic model transform
 	if (!_animationPaused.getVal()) {
@@ -396,6 +400,10 @@ void Flare::preSync() {
 		_roll.setVal(_roll.getVal() + _config->MouseRollFactor() *
 				static_cast<float>(_currentMouseY-_lastMouseY));
 	}
+}
+
+void Flare::postSyncPreDraw() {
+	_animator->SetCurrentTimestep(static_cast<unsigned int>(_timeStep.getVal()));
 }
 
 void Flare::postDraw() {

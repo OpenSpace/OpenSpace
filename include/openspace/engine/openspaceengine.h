@@ -34,6 +34,8 @@
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
+#define FLARE_ONLY
+
 #include <openspace/flare/flare.h>
 
 namespace openspace {
@@ -81,6 +83,9 @@ private:
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
+#ifdef FLARE_ONLY
+    Flare* _flare;
+#endif
     // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
 

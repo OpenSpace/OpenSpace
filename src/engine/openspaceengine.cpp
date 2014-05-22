@@ -273,12 +273,14 @@ bool OpenSpaceEngine::initialize()
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
-
     sceneGraph->loadScene(sceneDescriptionPath, scenePath);
     sceneGraph->initialize();
-
     _renderEngine->setSceneGraph(sceneGraph);
 
+#ifdef FLARE_ONLY
+    _flare = new Flare();
+    _flare->initialize();
+#endif
 
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
@@ -331,16 +333,26 @@ void OpenSpaceEngine::preSynchronization()
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
     }
+#ifdef FLARE_ONLY
+    _flare->preSync();
+#endif
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw()
 {
     _renderEngine->postSynchronizationPreDraw();
+#ifdef FLARE_ONLY
+    _flare->postSyncPreDraw();
+#endif
 }
 
 void OpenSpaceEngine::render()
 {
+#ifdef FLARE_ONLY
+    _flare->render();
+#else 
     _renderEngine->render();
+#endif
 }
 
 void OpenSpaceEngine::postDraw()
@@ -348,6 +360,9 @@ void OpenSpaceEngine::postDraw()
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
     }
+#ifdef FLARE_ONLY
+    _flare->postDraw();
+#endif
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action)
@@ -355,6 +370,9 @@ void OpenSpaceEngine::keyboardCallback(int key, int action)
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->keyboardCallback(key, action);
     }
+#ifdef FLARE_ONLY
+    _flare->keyboard(key, action);
+#endif
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action)
@@ -362,6 +380,9 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action)
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->mouseButtonCallback(key, action);
     }
+#ifdef FLARE_ONLY
+    _flare->mouse(key, action);
+#endif
 }
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y)
@@ -384,6 +405,9 @@ void OpenSpaceEngine::encode()
 
     _synchronizationBuffer.setVal(dataStream);
     sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+#ifdef FLARE_ONLY
+    _flare->encode();
+#endif
 }
 
 void OpenSpaceEngine::decode()
@@ -394,6 +418,9 @@ void OpenSpaceEngine::decode()
 
     // deserialize in the same order as done in serialization
     _renderEngine->deserialize(dataStream, offset);
+#ifdef FLARE_ONLY
+    _flare->decode();
+#endif
 }
 
 }  // namespace openspace
