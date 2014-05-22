@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<Cluster masterAddress="127.0.0.1">
+	<Node address="127.0.0.1" port="20401">
+		<Window fullScreen="false">
+			<Pos x="0" y="300" />
+			<!-- 16:9 aspect ratio -->
+			<Size x="640" y="360" />
+			<Viewport>
+				<Pos x="0.0" y="0.0" />
+				<Size x="1.0" y="1.0" />
+				<Viewplane>
+					<!-- Lower left -->
+					<Pos x="-1.778" y="-1.0" z="0.0" />
+					<!-- Upper left -->
+					<Pos x="-1.778" y="1.0" z="0.0" />
+					<!-- Upper right -->
+					<Pos x="1.778" y="1.0" z="0.0" />
+				</Viewplane>
+			</Viewport>
+		</Window>
+	</Node>
+	<Node address="127.0.0.2" port="20402">
+		<Window fullScreen="false">
+			<Pos x="640" y="300" />
+			<!-- 16:9 aspect ratio -->
+			<Size x="640" y="360" />
+			<Viewport>
+				<Pos x="0.0" y="0.0" />
+				<Size x="1.0" y="1.0" />
+				<Viewplane>
+					<!-- Lower left -->
+					<Pos x="-1.778" y="-1.0" z="0.0" />
+					<!-- Upper left -->
+					<Pos x="-1.778" y="1.0" z="0.0" />
+					<!-- Upper right -->
+					<Pos x="1.778" y="1.0" z="0.0" />
+				</Viewplane>
+			</Viewport>
+		</Window>
+	</Node>
+	<User eyeSeparation="0.065">
+		<Pos x="0.0" y="0.0" z="4.0" />
+	</User>
+</Cluster>

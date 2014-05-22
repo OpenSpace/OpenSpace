@@ -397,6 +397,9 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
 
 void OpenSpaceEngine::encode()
 {
+#ifdef FLARE_ONLY
+    _flare->encode();
+#else
     std::vector<char> dataStream(1024);
 
     size_t offset = 0;
@@ -405,21 +408,20 @@ void OpenSpaceEngine::encode()
 
     _synchronizationBuffer.setVal(dataStream);
     sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
-#ifdef FLARE_ONLY
-    _flare->encode();
 #endif
 }
 
 void OpenSpaceEngine::decode()
 {
+#ifdef FLARE_ONLY
+    _flare->decode();
+#else
     sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
     std::vector<char> dataStream = std::move(_synchronizationBuffer.getVal());
     size_t offset = 0;
 
     // deserialize in the same order as done in serialization
     _renderEngine->deserialize(dataStream, offset);
-#ifdef FLARE_ONLY
-    _flare->decode();
 #endif
 }
 
