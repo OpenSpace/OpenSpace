@@ -31,7 +31,8 @@
 #include <ccmc/ENLIL.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include <stdio.h>
+#include <string.h>
 #include <iomanip>
 
 namespace openspace {
@@ -181,6 +182,10 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	int size = channels*outDimensions.x*outDimensions.y*outDimensions.z;
 	float* data = new float[size];
 
+//	memset(data, 0.0, sizeof(data));
+
+
+
 	std::string v_x, v_y, v_z;
 	getGridVariables(v_x, v_y, v_z);
 	LDEBUG("Using coordinate system variables: " << v_x << ", " << v_y << ", " << v_z);
@@ -273,6 +278,67 @@ void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::stri
 	x = tokens.at(0);
 	y = tokens.at(1);
 	z = tokens.at(2);
+}
+
+float* KameleonWrapper::getFieldLines(const std::string& xVar,
+		const std::string& yVar, const std::string& zVar,
+		glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints) {
+	assert(_model && _interpolator);
+	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
+	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
+
+	std::string v_x, v_y, v_z;
+	getGridVariables(v_x, v_y, v_z);
+	LDEBUG("Using coordinate system variables: " << v_x << ", " << v_y << ", " << v_z);
+
+	float xMin = _model->getVariableAttribute(v_x, "actual_min").getAttributeFloat();
+	float xMax = _model->getVariableAttribute(v_x, "actual_max").getAttributeFloat();
+	float yMin = _model->getVariableAttribute(v_y, "actual_min").getAttributeFloat();
+	float yMax = _model->getVariableAttribute(v_y, "actual_max").getAttributeFloat();
+	float zMin = _model->getVariableAttribute(v_z, "actual_min").getAttributeFloat();
+	float zMax = _model->getVariableAttribute(v_z, "actual_max").getAttributeFloat();
+
+	float stepSize = 0.001;
+	float stepX = stepSize*(xMax-xMin)/(static_cast<float>(outDimensions.x));
+	float stepY = stepSize*(yMax-yMin)/(static_cast<float>(outDimensions.y));
+	float stepZ = stepSize*(zMax-zMin)/(static_cast<float>(outDimensions.z));
+
+	int size = outDimensions.x*outDimensions.y*outDimensions.z;
+	float* data = new float[size];
+	glm::vec3 dir, pos;
+
+	int highNumber = 100000;
+
+	for (int i = 0; i < seedPoints.size(); ++i) {
+		progressBar(i, seedPoints.size());
+		pos = seedPoints.at(i);
+		int avoidInfLoopPlz = 0;
+		while (pos.x < xMax && pos.x > xMin &&
+			   pos.y < yMax && pos.y > yMin &&
+			   pos.z < zMax && pos.z > zMin) {
+
+			// Save position
+			int vPosX = std::floor(outDimensions.x*(pos.x-xMin)/(xMax-xMin));
+			int vPosY = std::floor(outDimensions.y*(pos.y-yMin)/(yMax-yMin));
+			int vPosZ = std::floor(outDimensions.z*(pos.z-zMin)/(zMax-zMin));
+			int index = vPosX + vPosY*outDimensions.x + vPosZ*outDimensions.x*outDimensions.y;
+			data[index] = 1.0;
+
+			// Calculate the next position
+			dir.x = _interpolator->interpolate(xVar, pos.x, pos.y, pos.z);
+			dir.y = _interpolator->interpolate(yVar, pos.x, pos.y, pos.z);
+			dir.z = _interpolator->interpolate(zVar, pos.x, pos.y, pos.z);
+			pos = glm::vec3(stepX*dir.x+pos.x, stepY*dir.y+pos.y, stepZ*dir.z+pos.z);
+			++avoidInfLoopPlz;
+
+			if (avoidInfLoopPlz > highNumber) {
+				LDEBUG("Inf loop averted");
+				break;
+			}
+		}
+	}
+	return data;
 }
 
 void KameleonWrapper::progressBar(int current, int end) {
