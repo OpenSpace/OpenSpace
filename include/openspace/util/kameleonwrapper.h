@@ -43,6 +43,11 @@ public:
 		BATSRUS		// Magnetosphere
 	};
 
+	enum TraceDirection {
+		FORWARD = 1,
+		BACK 	= -1
+	};
+
 	KameleonWrapper(const std::string& filename, Model model);
 	~KameleonWrapper();
 	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
@@ -53,6 +58,9 @@ public:
 			const std::string& zVar, glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints);
 
 private:
+	void traceCartesianFieldlines(const std::string& xVar, const std::string& yVar,
+			const std::string& zVar, glm::size3_t outDimensions,
+			std::vector<glm::vec3> seedPoints, TraceDirection direction, float* data);
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	void progressBar(int current, int end);
 
@@ -60,7 +68,12 @@ private:
     Model _type;
 	ccmc::Interpolator* _interpolator;
 
-	int _lastiProgress; // for progressbar
+	// Model parameters
+	float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
+	std::string _xCoordVar, _yCoordVar, _zCoordVar;
+
+	 // For progressbar
+	int _lastiProgress;
 };
 
 } // namespace openspace

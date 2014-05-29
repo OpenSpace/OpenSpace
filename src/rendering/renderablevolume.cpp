@@ -163,20 +163,23 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath
 
 					// Seed 'em all
 					std::vector<glm::vec3> seedPoints;
-					for (int z = -20; z <= 20; z+=20) {
-						for (int y = -20; y <= 20; y+=20)
-							seedPoints.push_back(glm::vec3(-10.0, (float)y, (float)z));
+					for (int z = -5; z <= 5; z+=5) {
+						for (int y = -5; y <= 5; y+=5)
+							seedPoints.push_back(glm::vec3(5.0, (float)y, (float)z));
 					}
 
 					float* fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
-					float* rhoData = kw.getUniformSampledValues("rho", dimensions);
+//					float* rhoData = kw.getUniformSampledValues("rho", dimensions);
+//
+//					// Combine fieldlines with rhoData, clamp to [0,1]
+//					float* data = new float[dimensions.x*dimensions.y*dimensions.z];
+//					for (int i = 0; i < dimensions.x*dimensions.y*dimensions.z; ++i)
+//						data[i] = std::min(fieldlinesData[i]+rhoData[i], 1.0f);
+//
+//					delete fieldlinesData;
+//					delete rhoData;
 
-					// Combine fieldlines with rhoData, clamp to [0,1]
-					float* data = new float[dimensions.x*dimensions.y*dimensions.z];
-					for (int i = 0; i < dimensions.x*dimensions.y*dimensions.z; ++i)
-						data[i] = std::min(fieldlinesData[i]+rhoData[i], 1.0f);
-
-					return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+					return new ghoul::opengl::Texture(fieldlinesData, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
 				}
 
 			} else {
