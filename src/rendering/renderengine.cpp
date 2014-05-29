@@ -34,6 +34,8 @@
 
 #include <array>
 
+#include <openspace/abuffer/abufferSingleLinked.h>
+
 namespace {
 const std::string _loggerCat = "RenderEngine";
 }
@@ -42,6 +44,7 @@ namespace openspace {
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
+    , _abuffer(nullptr)
 {
 }
 
@@ -60,6 +63,8 @@ bool RenderEngine::initialize()
     // if master, setup interaction
     //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
+
+    _abuffer = new ABufferSingleLinked();
 
     return true;
 }
@@ -132,6 +137,8 @@ bool RenderEngine::initializeGL()
         _mainCamera->setMaxFov(maxFov);
     }
 
+    _abuffer->initialize();
+
     // successful init
     return true;
 }
@@ -163,8 +170,11 @@ void RenderEngine::render()
           sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * view);
 
     // render the scene starting from the root node
+    _abuffer->clear();
+    _abuffer->preRender();
     _sceneGraph->render(_mainCamera);
-
+    _abuffer->postRender();
+/*
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {
 // Apple usually has retina screens
@@ -200,6 +210,7 @@ void RenderEngine::render()
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
     }
+    */
 }
 
 SceneGraph* RenderEngine::sceneGraph()

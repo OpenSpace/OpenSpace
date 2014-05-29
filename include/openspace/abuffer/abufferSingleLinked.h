@@ -27,6 +27,7 @@
 
 #include <openspace/abuffer/abuffer_i.h>
 
+#include <ghoul/opengl/programobject.h>
 
 namespace openspace {
 
@@ -46,9 +47,15 @@ private:
 
 	unsigned int width, height, totalPixels, maxFragments;
 
-	ghoul::opengl::Texture* data;
-	ghoul::opengl::Texture* anchorPointer;
-	ghoul::opengl::Texture* anchorPointerInitializer;
+	GLuint *data;
+	GLuint anchorPointerTexture;
+	GLuint anchorPointerTextureInitializer;
+	GLuint atomicCounterBuffer;
+	GLuint fragmentBuffer;
+	GLuint fragmentTexture;
+	GLuint _screenQuad;
+
+	ghoul::opengl::ProgramObject* resolveShader;
 
 }; 		// ABuffer_I
 } 		// openspace

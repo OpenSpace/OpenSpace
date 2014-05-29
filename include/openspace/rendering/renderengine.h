@@ -30,6 +30,8 @@
 #include <memory>
 #include <string>
 
+#include <openspace/abuffer/abuffer_i.h>
+
 namespace openspace {
 
 class Camera;
@@ -58,6 +60,8 @@ public:
 private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
+
+	ABuffer_I* _abuffer;
 };
 
 } // namespace openspace

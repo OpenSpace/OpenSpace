@@ -7,7 +7,11 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#version 400 core
+#version 430
+
+layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
+layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
+layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
@@ -15,12 +19,8 @@ uniform vec4 campos;
 uniform vec4 objpos;
 uniform float time;
 uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D texture3;
-uniform float TessLevel;
-uniform bool Wireframe;
-uniform bool Lightsource;
-uniform bool UseTexture;
+
+vec3 light_position = vec3(40.0, 20.0, 100.0);
 
 in vec2 vs_st;
 //in vec3 vs_stp;
@@ -97,6 +97,8 @@ void main()
 		// do I need to be discarded?
 		// discard;
 	}
+
+
 	
 	
 	// set the depth
@@ -112,4 +114,14 @@ void main()
     //diffuse = vec4(depth*5,0.0, 0.0, 1.0);
     //diffuse = vec4(vs_position.w,0.0, 0.0, 1.0);
 	//diffuse = vec4(1.0,0.0,0.0,1.0);
+	uint index = atomicCounterIncrement(atomicCounterBuffer);
+    uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
+	uvec4 item;
+	item.x = old_head;
+	item.y = packUnorm4x8(diffuse);
+	item.z = floatBitsToUint(gl_FragCoord.z / gl_FragCoord.w);
+	item.w = 0;
+	imageStore(fragmentTexture, int(index), item);
+
+	discard;
 }
