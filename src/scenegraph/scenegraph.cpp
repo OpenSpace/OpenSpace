@@ -51,17 +51,17 @@ const std::string _loggerCat = "SceneGraph";
 const std::string _rootNodeName = "Root";
 const std::string _moduleExtension = ".mod";
 
+void printTree(openspace::SceneGraphNode* node, std::string pre = "")
+{
+    LDEBUGC("Tree", pre << node->nodeName());
+    const std::vector<openspace::SceneGraphNode*>& children = node->children();
+    for (openspace::SceneGraphNode* child : children)
+        printTree(child, pre + "    ");
+}
+
 }
 
 namespace openspace {
-
-void printTree(SceneGraphNode* node, std::string pre = "")
-{
-    LDEBUGC("Tree", pre << node->nodeName());
-    const std::vector<SceneGraphNode*>& children = node->children();
-    for (SceneGraphNode* child : children)
-        printTree(child, pre + "    ");
-}
 
 SceneGraph::SceneGraph()
     : _focus("Root")
@@ -82,69 +82,94 @@ bool SceneGraph::initialize()
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ProgramObject* po = nullptr;
-    if (OsEng.ref().configurationManager().hasKey("pscShader")
-        && OsEng.ref().configurationManager().getValue("pscShader", po)) {
-        LWARNING("pscShader already in ConfigurationManager, deleting.");
-        delete po;
-        po = nullptr;
+    // pscstandard
+    {
+        std::string programObjectName = "pscstandard";
+        ProgramObject* po   = new ProgramObject(programObjectName);
+        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
+                                                absPath("${SHADERS}/pscstandard_vs.glsl"), 
+                                                programObjectName + "Vertex");
+        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
+                                                absPath("${SHADERS}/pscstandard_fs.glsl"), 
+                                                programObjectName + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( ! po->compileShaderObjects()) return false;
+        if ( ! po->linkProgramObject()) return false;
+        OsEng.ref().configurationManager().setValue("pscShader", po);
     }
 
-    ShaderObject* powerscale_vs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                             absPath("${SHADERS}/pscstandard_vs.glsl"), "PS Vertex");
-    ShaderObject* powerscale_fs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                             absPath("${SHADERS}/pscstandard_fs.glsl"), "PS Fragment");
+    // pscVolume
+    {
+        std::string programObjectName = "pscVolume";
+        ProgramObject* po   = new ProgramObject(programObjectName);
+        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
+                                                absPath("${SHADERS}/pscvolume_vs.glsl"), 
+                                                programObjectName + "Vertex");
+        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
+                                                absPath("${SHADERS}/pscvolume_fs.glsl"), 
+                                                programObjectName + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( ! po->compileShaderObjects()) return false;
+        if ( ! po->linkProgramObject()) return false;
+        OsEng.ref().configurationManager().setValue("pscVolume", po);
+    }
 
-    po = new ProgramObject;
-    po->attachObject(powerscale_vs);
-    po->attachObject(powerscale_fs);
+    // RaycastProgram
+    {
+        std::string programObjectName = "RaycastProgram";
+        ProgramObject* po   = new ProgramObject(programObjectName);
+        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
+                                                absPath("${SHADERS}/exitpoints.vert"), 
+                                                programObjectName + "Vertex");
+        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
+                                                absPath("${SHADERS}/exitpoints.frag"), 
+                                                programObjectName + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( ! po->compileShaderObjects()) return false;
+        if ( ! po->linkProgramObject()) return false;
+        OsEng.ref().configurationManager().setValue("RaycastProgram", po);
+    }
 
-    if (!po->compileShaderObjects())
-        return false;
-    if (!po->linkProgramObject())
-        return false;
+    // TwoPassProgram
+    {
+        std::string programObjectName = "TwoPassProgram";
+        ProgramObject* po   = new ProgramObject(programObjectName);
+        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
+                                                absPath("${SHADERS}/twopassraycaster.vert"), 
+                                                programObjectName + "Vertex");
+        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
+                                                absPath("${SHADERS}/twopassraycaster.frag"), 
+                                                programObjectName + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( ! po->compileShaderObjects()) return false;
+        if ( ! po->linkProgramObject()) return false;
+        po->setUniform("texBack", 0);
+        po->setUniform("texFront", 1);
+        po->setUniform("texVolume", 2);
+        OsEng.ref().configurationManager().setValue("TwoPassProgram", po);
+    }
 
-    OsEng.ref().configurationManager().setValue("pscShader", po);
-
-    ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
-    ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                                  absPath("${SHADERS}/exitpoints.vert"));
-    ShaderObject* fragmentShader = new ShaderObject(
-          ShaderObject::ShaderTypeFragment, absPath("${SHADERS}/exitpoints.frag"));
-    _fboProgram->attachObject(vertexShader);
-    _fboProgram->attachObject(fragmentShader);
-    _fboProgram->compileShaderObjects();
-    _fboProgram->linkProgramObject();
-
-    ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
-    vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                    absPath("${SHADERS}/twopassraycaster.vert"));
-    fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                      absPath("${SHADERS}/twopassraycaster.frag"));
-    _twopassProgram->attachObject(vertexShader);
-    _twopassProgram->attachObject(fragmentShader);
-    _twopassProgram->compileShaderObjects();
-    _twopassProgram->linkProgramObject();
-    _twopassProgram->setUniform("texBack", 0);
-    _twopassProgram->setUniform("texFront", 1);
-    _twopassProgram->setUniform("texVolume", 2);
-
-    ProgramObject* quad = new ProgramObject("Quad");
-    ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                           absPath("${SHADERS}/quadVert.glsl"));
-    ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                           absPath("${SHADERS}/quadFrag.glsl"));
-    quad->attachObject(quadv);
-    quad->attachObject(quadf);
-    quad->compileShaderObjects();
-    quad->linkProgramObject();
-    quad->setUniform("quadTex", 0);
-
-    OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
-    OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
-    OsEng.ref().configurationManager().setValue("Quad", quad);
+    // Quad
+    {
+        std::string programObjectName = "Quad";
+        ProgramObject* po   = new ProgramObject(programObjectName);
+        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
+                                                absPath("${SHADERS}/quadVert.glsl"), 
+                                                programObjectName + "Vertex");
+        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
+                                                absPath("${SHADERS}/quadFrag.glsl"), 
+                                                programObjectName + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( ! po->compileShaderObjects()) return false;
+        if ( ! po->linkProgramObject()) return false;
+        po->setUniform("quadTex", 0);
+        OsEng.ref().configurationManager().setValue("Quad", po);
+    }
 
     // Initialize all nodes
     for (auto node : _nodes) {

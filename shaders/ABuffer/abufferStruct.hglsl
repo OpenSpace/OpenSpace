@@ -9,7 +9,7 @@ struct ABufferStruct_t {
 	uint z;			// the depth value
 	uint id;		// bits 0-28 next, bits 29-32 type
 	uint color;		// packed rgba
-	uint type;	// packed position
+	uint type;		// packed position
 };
 
 //=======================================================
@@ -42,7 +42,6 @@ int bitextract_i(in int pack, uint mask, uint shift) {
 	return int( (uint(pack) >> shift) & (mask >> shift) );
 }
 
-
 //=======================================================
 // Access functions
 //=======================================================
@@ -73,14 +72,6 @@ uint _type_(ABufferStruct_t frag) {
 void _type_(inout ABufferStruct_t frag, uint type) {
 	frag.type = type;;
 }
-
-/*
-_id_
-_type_
-uint _type_(ABufferStruct_t frag) {
-	return frag
-}
-*/
 
 ABufferStruct_t _ABufferStruct_t_(uvec4 frag) {
 	return ABufferStruct_t(frag.x, frag.y, frag.z, frag.w);
