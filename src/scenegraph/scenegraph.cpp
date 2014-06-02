@@ -99,23 +99,6 @@ bool SceneGraph::initialize()
         OsEng.ref().configurationManager().setValue("pscShader", po);
     }
 
-    // pscVolume
-    {
-        std::string programObjectName = "pscVolume";
-        ProgramObject* po   = new ProgramObject(programObjectName);
-        ShaderObject* vs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeVertex,
-                                                absPath("${SHADERS}/pscvolume_vs.glsl"), 
-                                                programObjectName + "Vertex");
-        ShaderObject* fs    = new ShaderObject( ShaderObject::ShaderType::ShaderTypeFragment,
-                                                absPath("${SHADERS}/pscvolume_fs.glsl"), 
-                                                programObjectName + "Fragment");
-        po->attachObject(vs);
-        po->attachObject(fs);
-        if ( ! po->compileShaderObjects()) return false;
-        if ( ! po->linkProgramObject()) return false;
-        OsEng.ref().configurationManager().setValue("pscVolume", po);
-    }
-
     // RaycastProgram
     {
         std::string programObjectName = "RaycastProgram";

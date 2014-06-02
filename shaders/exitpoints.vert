@@ -1,4 +1,4 @@
-#version 400 core
+#version 430 core
 
 layout(location = 2) in vec3 vertPosition;
 uniform mat4 modelViewProjection;

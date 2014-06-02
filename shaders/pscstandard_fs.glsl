@@ -9,10 +9,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 #version 430
 
-layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
-layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
-layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
-
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 uniform vec4 campos;
