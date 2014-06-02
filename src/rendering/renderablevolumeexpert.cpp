@@ -210,7 +210,7 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
         }
     }
     
-    setBoundingSphere(PowerScaledScalar::CreatePSS(_boxScaling.length()));
+    setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
