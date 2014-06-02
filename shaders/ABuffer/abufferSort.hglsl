@@ -1,0 +1,32 @@
+
+int build_local_fragments_list() {
+	uint current;
+	int frag_count = 0;
+
+	current = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
+
+	while(current != 0 && frag_count < MAX_FRAGMENTS) {
+		ABufferStruct_t item = _ABufferStruct_t_(imageLoad(fragmentTexture, int(current)));
+		current = _next_(item);
+
+		fragments[frag_count] = item;
+
+		frag_count++;
+	}
+
+	return frag_count;
+}
+
+void sort_fragments_list(uint frag_count) {
+	uint i,j;
+	ABufferStruct_t tmp;
+
+	// INSERTION SORT
+	for(i = 1; i < frag_count; ++i) {
+		tmp = fragments[i];
+		for(j = i; j > 0 && _z_(tmp) > _z_(fragments[j-1]); --j) {
+			fragments[j] = fragments[j-1];
+		}
+		fragments[j] = tmp;
+	}
+}

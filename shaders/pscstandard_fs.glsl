@@ -31,6 +31,10 @@ out vec4 diffuse;
 
 const float k = 10.0;
 
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+
+
 vec4 psc_normlization(vec4 invec) {
 	
 	float xymax = max(invec.x,invec.y);
@@ -106,7 +110,7 @@ void main()
 	//gl_FragDepth = 0.5;
 
 	// color 
-	   diffuse = texture(texture1, vs_st);
+	diffuse = texture(texture1, vs_st);
     //diffuse = vec4(vs_position.z,0.0, 0.0, 1.0);
     // diffuse = vec4(vs_position.xyz * pow(10, vs_position.w), 1.0);
 	//diffuse = vec4(vs_st, 0.0, 1.0);
@@ -114,6 +118,14 @@ void main()
     //diffuse = vec4(depth*5,0.0, 0.0, 1.0);
     //diffuse = vec4(vs_position.w,0.0, 0.0, 1.0);
 	//diffuse = vec4(1.0,0.0,0.0,1.0);
+
+	ABufferStruct_t frag;
+	_col_(frag, diffuse);
+	_z_(frag, depth);
+	_type_(frag, 0);
+	addToBuffer(frag);
+
+	/*
 	uint index = atomicCounterIncrement(atomicCounterBuffer);
     uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
 	uvec4 item;
@@ -122,6 +134,6 @@ void main()
 	item.z = floatBitsToUint(gl_FragCoord.z / gl_FragCoord.w);
 	item.w = 0;
 	imageStore(fragmentTexture, int(index), item);
-
+*/
 	discard;
 }

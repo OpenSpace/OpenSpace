@@ -1,0 +1,91 @@
+#ifndef ABUFFERSTRUCT_H_HGLSL
+#define ABUFFERSTRUCT_H_HGLSL
+
+
+//=======================================================
+// ABufferStruct_t declaration
+//=======================================================
+struct ABufferStruct_t { 
+	uint z;			// the depth value
+	uint id;		// bits 0-28 next, bits 29-32 type
+	uint color;		// packed rgba
+	uint type;	// packed position
+};
+
+//=======================================================
+// Bitwise operations
+//=======================================================
+const uint mask_1 = 1;
+const uint mask_8 = 255;
+const uint mask_16 = 65535;
+const uint mask_24 = 16777215;
+const uint mask_29 = 536870911;
+const uint mask_30 = 1073741823;
+const uint mask_31 = 2147483647;
+const uint mask_32 = 4294967295;
+const uint  mask_id = mask_16;
+const uint shift_id = 0;
+const uint  mask_type = mask_24 - mask_16;
+const uint shift_type = 16;
+void bitinsert_u(inout uint pack, uint val, uint mask, uint shift) {
+	pack &= ~mask;
+	pack |= (val << shift) & mask;
+}
+uint bitextract_u(in uint pack, uint mask, uint shift) {
+	return (pack >> shift) & (mask >> shift);
+}
+void bitinsert_i(inout int pack, int val, uint mask, uint shift) {
+	pack &= int( ~mask );
+	pack |= int( (uint(val) << shift) & mask );
+}
+int bitextract_i(in int pack, uint mask, uint shift) {
+	return int( (uint(pack) >> shift) & (mask >> shift) );
+}
+
+
+//=======================================================
+// Access functions
+//=======================================================
+float _z_(ABufferStruct_t frag) {
+	return uintBitsToFloat(frag.z);
+}
+void _z_(inout ABufferStruct_t frag, float z) {
+	frag.z = floatBitsToUint(z);
+}
+
+uint _next_(ABufferStruct_t frag) {
+	return frag.id;
+}
+void _next_(inout ABufferStruct_t frag, uint id) {
+	frag.id = id;
+}
+
+vec4 _col_(ABufferStruct_t frag) {
+	return unpackUnorm4x8(frag.color);
+}
+void _col_(inout ABufferStruct_t frag, vec4 color) {
+	frag.color = packUnorm4x8(color);
+}
+
+uint _type_(ABufferStruct_t frag) {
+	return frag.type;
+}
+void _type_(inout ABufferStruct_t frag, uint type) {
+	frag.type = type;;
+}
+
+/*
+_id_
+_type_
+uint _type_(ABufferStruct_t frag) {
+	return frag
+}
+*/
+
+ABufferStruct_t _ABufferStruct_t_(uvec4 frag) {
+	return ABufferStruct_t(frag.x, frag.y, frag.z, frag.w);
+};
+uvec4 _uvec4_(ABufferStruct_t frag) {
+	return uvec4(frag.z, frag.id, frag.color, frag.type);
+};
+#endif

@@ -157,8 +157,10 @@ void RenderEngine::postSynchronizationPreDraw()
 void RenderEngine::render()
 {
     // SGCT resets certain settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition

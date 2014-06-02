@@ -1,0 +1,9 @@
+
+
+void addToBuffer(ABufferStruct_t frag) {
+
+	uint index = atomicCounterIncrement(atomicCounterBuffer);
+    uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
+    _next_(frag,old_head);
+	imageStore(fragmentTexture, int(index), _uvec4_(frag));
+}
