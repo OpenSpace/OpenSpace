@@ -1,4 +1,11 @@
 
+// texture bindings
+layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
+layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
+
+// atomic buffer bindings
+layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
+
 int build_local_fragments_list() {
 	uint current;
 	int frag_count = 0;
@@ -24,7 +31,7 @@ void sort_fragments_list(uint frag_count) {
 	// INSERTION SORT
 	for(i = 1; i < frag_count; ++i) {
 		tmp = fragments[i];
-		for(j = i; j > 0 && _z_(tmp) > _z_(fragments[j-1]); --j) {
+		for(j = i; j > 0 && _z_(tmp) < _z_(fragments[j-1]); --j) {
 			fragments[j] = fragments[j-1];
 		}
 		fragments[j] = tmp;

@@ -70,6 +70,7 @@ public:
 
     // bounding sphere
     PowerScaledScalar calculateBoundingSphere();
+    PowerScaledScalar boundingSphere() const;
 
     SceneGraphNode* get(const std::string& name);
 

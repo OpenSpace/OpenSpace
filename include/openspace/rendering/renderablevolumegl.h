@@ -27,6 +27,7 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
+#include <openspace/rendering/volumeraycasterbox.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -35,24 +36,16 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-
 #ifdef __APPLE__
     #include <memory>
 #else
     #include <mutex>
 #endif
 
-namespace sgct_utils {
-    class SGCTBox;
-}
-
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
 public:
-
 	// constructors & destructor
 	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
 	~RenderableVolumeGL();
@@ -64,18 +57,15 @@ public:
 	virtual void update();
 
 private:
-    
-    
+	ghoul::Dictionary _hintsDictionary;
     std::string _filename;
-    ghoul::RawVolumeReader::ReadHints _hints;
     float _stepSize;
-	ghoul::opengl::FramebufferObject* _fbo;
-	ghoul::opengl::Texture* _backTexture;
-	ghoul::opengl::Texture* _frontTexture;
 	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::ProgramObject *_fboProgram, *_twopassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
+	ghoul::opengl::ProgramObject* _twopassProgram;
 	GLuint _screenQuad;
+
+	VolumeRaycasterBox* _colorBoxRenderer;
+	glm::vec3 _boxScaling;
     
     std::mutex* _shaderMutex;
     
@@ -84,7 +74,6 @@ private:
     bool _programUpdateOnSave;
     
     void safeShaderCompilation();
-    
 };
 
 } // namespace openspace

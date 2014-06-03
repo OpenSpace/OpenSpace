@@ -117,7 +117,7 @@ void main()
 
 	ABufferStruct_t frag;
 	_col_(frag, diffuse);
-	_z_(frag, depth);
+	_z_(frag, gl_FragDepth);
 	_type_(frag, 0);
 	addToBuffer(frag);
 

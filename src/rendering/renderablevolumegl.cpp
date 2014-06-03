@@ -24,14 +24,12 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolumegl.h>
-
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opencl/clworksize.h>
 #include <ghoul/filesystem/filesystem.h>
-
-#include <sgct.h>
 
 #include <algorithm>
 
@@ -42,8 +40,7 @@ namespace {
 namespace openspace {
 
 RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
-    RenderableVolume(dictionary),
-    _backTexture(nullptr), _frontTexture(nullptr), _screenQuad(0),
+    RenderableVolume(dictionary), _screenQuad(0), _boxScaling(1.0, 1.0, 1.0),
     _programUpdateOnSave(false) {
         
     _shaderMutex = new std::mutex;
@@ -54,13 +51,11 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
             _filename = findPath(_filename);
         }
     }
-    
+
     LDEBUG("filename: " << _filename);
     
-    ghoul::Dictionary hintsDictionary;
     if(dictionary.hasKey("Hints"))
-        dictionary.getValue("Hints", hintsDictionary);
-    _hints = readHints(hintsDictionary);
+        dictionary.getValue("Hints", _hintsDictionary);
 
     std::string vshaderpath = "";
     std::string fshaderpath = "";
@@ -87,35 +82,43 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
             _twopassProgram->attachObject(vertexShader);
             _twopassProgram->attachObject(fragmentShader);
         }
-        
-        
     }
     
     if(dictionary.hasKey("UpdateOnSave")) {
         dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
     }
 
+    double tempValue;
+    if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
+    	if(tempValue > 0.0)
+    		_boxScaling[0] = tempValue;
+    }
+    if(dictionary.hasKey("BoxScaling.2") && dictionary.getValue("BoxScaling.2", tempValue)) {
+    	if(tempValue > 0.0)
+    		_boxScaling[1] = tempValue;
+    }
+    if(dictionary.hasKey("BoxScaling.3") && dictionary.getValue("BoxScaling.3", tempValue)) {
+    	if(tempValue > 0.0)
+    		_boxScaling[2] = tempValue;
+    }
+
+    _colorBoxRenderer = new VolumeRaycasterBox();
+    setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
 }
 
 RenderableVolumeGL::~RenderableVolumeGL() {
     deinitialize();
-    if(_fbo)
-        delete _fbo;
-    if(_backTexture)
-        delete _backTexture;
-    if(_frontTexture)
-        delete _frontTexture;
     if(_volume)
         delete _volume;
-    if(_boundingBox)
-        delete _boundingBox;
+    if(_colorBoxRenderer)
+        delete _colorBoxRenderer;
 }
 
 bool RenderableVolumeGL::initialize() {
     assert(_filename != "");
     //	------ VOLUME READING ----------------
-	ghoul::RawVolumeReader rawReader(_hints);
-	_volume = rawReader.read(_filename);
+	_volume = loadVolume(_filename, _hintsDictionary);
+	_volume->uploadTexture();
     
     //	------ SETUP GEOMETRY ----------------
 	const GLfloat size = 1.0f;
@@ -149,12 +152,9 @@ bool RenderableVolumeGL::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
     
-	_boundingBox = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
+	_colorBoxRenderer->initialize();
     
     //	------ SETUP SHADERS -----------------
-    // TODO error control or better design pattern
-	OsEng.ref().configurationManager().getValue("RaycastProgram", _fboProgram);
-    
     auto privateCallback = [this](const ghoul::filesystem::File& file) {
         safeShaderCompilation();
     };
@@ -168,76 +168,27 @@ bool RenderableVolumeGL::initialize() {
     _twopassProgram->setUniform("texBack", 0);
     _twopassProgram->setUniform("texFront", 1);
     _twopassProgram->setUniform("texVolume", 2);
-	//OsEng.ref().configurationManager().getValue("TwoPassProgram", _twopassProgram);
-    
-    //	------ SETUP FBO ---------------------
-	_fbo = new ghoul::opengl::FramebufferObject();
-	_fbo->activate();
-    
-	int x = sgct::Engine::instance()->getActiveXResolution();
-	int y = sgct::Engine::instance()->getActiveYResolution();
-	_backTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
-	_frontTexture = new ghoul::opengl::Texture(glm::size3_t(x,y,1));
-	_backTexture->uploadTexture();
-	_frontTexture->uploadTexture();
-	_fbo->attachTexture(_backTexture, GL_COLOR_ATTACHMENT0);
-	_fbo->attachTexture(_frontTexture, GL_COLOR_ATTACHMENT1);
-    
-	_fbo->deactivate();
-
     
     return true;
 }
 
 bool RenderableVolumeGL::deinitialize() {
-
-    
     return true;
 }
 
 void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
-    
-	float speed = 50.0f;
-	float time = sgct::Engine::getTime();
-    glm::mat4 transform = camera->viewProjectionMatrix();
-    
-    double factor = pow(10.0,thisPosition[3]);
-    transform = glm::translate(transform, glm::vec3(thisPosition[0]*factor, thisPosition[1]*factor, thisPosition[2]*factor));
-	transform = glm::rotate(transform, time*speed, glm::vec3(0.0f, 1.0f, 0.0f));
-	
-        
     _stepSize = 0.01f;
-	
-    //	------ DRAW TO FBO -------------------
-	GLuint sgctFBO = ghoul::opengl::FramebufferObject::getActiveObject(); // Save SGCTs main FBO
-	_fbo->activate();
-	_fboProgram->activate();
-	_fboProgram->setUniform("modelViewProjection", transform);
-    
-	//	Draw backface
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	_boundingBox->draw();
-	glDisable(GL_CULL_FACE);
-    
-	//	Draw frontface
-	glDrawBuffer(GL_COLOR_ATTACHMENT1);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.2f, 0.2f, 0.2f, 0);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	_boundingBox->draw();
-	glDisable(GL_CULL_FACE);
-    
-	_fboProgram->deactivate();
-	_fbo->deactivate();
-    
-    //	------ DRAW TO SCREEN ----------------
-	glBindFramebuffer(GL_FRAMEBUFFER, sgctFBO); // Re-bind SGCTs main FBO
-    
+
+    glm::mat4 transform = camera->viewProjectionMatrix();
+    glm::mat4 camTransform = camera->viewRotationMatrix();
+    psc relative = thisPosition-camera->position();
+
+    transform = transform*camTransform;
+    transform = glm::translate(transform, relative.vec3());
+    transform = glm::scale(transform, _boxScaling);
+
+    _colorBoxRenderer->render(transform);
+	/*
 	//	Draw screenquad
 	glClearColor(0.2f, 0.2f, 0.2f, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -248,9 +199,9 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     
 	//	 Set textures
 	glActiveTexture(GL_TEXTURE0);
-	_backTexture->bind();
+	_colorBoxRenderer->backFace()->bind();
 	glActiveTexture(GL_TEXTURE1);
-	_frontTexture->bind();
+	_colorBoxRenderer->frontFace()->bind();
 	glActiveTexture(GL_TEXTURE2);
 	_volume->bind();
     
@@ -260,7 +211,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     
 	_twopassProgram->deactivate();
     _shaderMutex->unlock();
-
+    */
 }
 
 void RenderableVolumeGL::update() {
@@ -268,6 +219,7 @@ void RenderableVolumeGL::update() {
 }
 
 void RenderableVolumeGL::safeShaderCompilation() {
+    /*
     _shaderMutex->lock();
     _twopassProgram->rebuildFromFile();
     _twopassProgram->compileShaderObjects();
@@ -276,8 +228,7 @@ void RenderableVolumeGL::safeShaderCompilation() {
     _twopassProgram->setUniform("texFront", 1);
     _twopassProgram->setUniform("texVolume", 2);
     _shaderMutex->unlock();
+    */
 }
-    
 
-	
 } // namespace openspace

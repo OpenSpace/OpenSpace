@@ -9,7 +9,7 @@ struct ABufferStruct_t {
 	uint z;			// the depth value
 	uint id;		// bits 0-28 next, bits 29-32 type
 	uint color;		// packed rgba
-	uint type;		// packed position
+	uint position;		// packed position
 };
 
 //=======================================================
@@ -27,6 +27,22 @@ const uint  mask_id = mask_16;
 const uint shift_id = 0;
 const uint  mask_type = mask_24 - mask_16;
 const uint shift_type = 16;
+/*
+const uint  mask_zid_z  = mask_24;
+const uint shift_zid_z  = 0;
+const uint  mask_zid_id = mask_29 - mask_24;
+const uint shift_zid_id = 24;
+const uint  mask_zid_type = mask_31 - mask_29;
+const uint shift_zid_type = 29;
+const uint  mask_zid_xxx = mask_32 - mask_31;
+const uint shift_zid_xxx = 31;
+*/
+
+const uint mask_id_next		= mask_29;
+const uint shift_id_next  	= 0;
+const uint mask_id_type		= mask_32 - mask_29;
+const uint shift_id_type  	= 29;
+
 void bitinsert_u(inout uint pack, uint val, uint mask, uint shift) {
 	pack &= ~mask;
 	pack |= (val << shift) & mask;
@@ -53,10 +69,19 @@ void _z_(inout ABufferStruct_t frag, float z) {
 }
 
 uint _next_(ABufferStruct_t frag) {
-	return frag.id;
+	return bitextract_u(frag.id, mask_id_next, shift_id_next); 
+	//return frag.id;
 }
 void _next_(inout ABufferStruct_t frag, uint id) {
-	frag.id = id;
+	bitinsert_u(frag.id, id, mask_id_next, shift_id_next); 
+	//frag.id = id;
+}
+
+vec4 _pos_(ABufferStruct_t frag) {
+	return unpackUnorm4x8(frag.position);
+}
+void _pos_(inout ABufferStruct_t frag, vec4 position) {
+	frag.position = packUnorm4x8(position);
 }
 
 vec4 _col_(ABufferStruct_t frag) {
@@ -67,16 +92,18 @@ void _col_(inout ABufferStruct_t frag, vec4 color) {
 }
 
 uint _type_(ABufferStruct_t frag) {
-	return frag.type;
+	return bitextract_u(frag.id, mask_id_type, shift_id_type); 
+	//return frag.type;
 }
 void _type_(inout ABufferStruct_t frag, uint type) {
-	frag.type = type;;
+	bitinsert_u(frag.id, type, mask_id_type, shift_id_type); 
+	//frag.type = type;
 }
 
 ABufferStruct_t _ABufferStruct_t_(uvec4 frag) {
 	return ABufferStruct_t(frag.x, frag.y, frag.z, frag.w);
 };
 uvec4 _uvec4_(ABufferStruct_t frag) {
-	return uvec4(frag.z, frag.id, frag.color, frag.type);
+	return uvec4(frag.z, frag.id, frag.color, frag.position);
 };
 #endif

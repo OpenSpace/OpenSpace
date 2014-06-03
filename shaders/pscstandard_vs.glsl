@@ -107,7 +107,7 @@ void main()
 	// project using the rescaled coordinates,
 	//vec4 vs_position_rescaled = psc_scaling(vs_position, scaling);
 	vec4 vs_position_rescaled = psc_to_meter(vs_position, scaling);
-	//vs_position = vs_position_rescaled;
+	vs_position = vs_position_rescaled;
 
 
 	// project the position to view space
