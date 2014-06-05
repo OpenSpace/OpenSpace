@@ -34,20 +34,46 @@ namespace {
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) :
-			RenderableVolume(dictionary), _VAO(0), _programUpdateOnSave(false) {
+			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false) {
 	_shaderMutex = new std::mutex;
 
-	_filename = "";
-	if(dictionary.hasKey("Volume")) {
-		if(dictionary.getValue("Volume", _filename)) {
-			_filename = findPath(_filename);
+	if(dictionary.hasKey("Fieldlines")) {
+		ghoul::Dictionary fieldlines;
+		if(dictionary.getValue("Fieldlines", fieldlines)) {
+			for(auto key: fieldlines.keys()) {
+				ghoul::Dictionary fieldline;
+				if(fieldlines.getValue(key, fieldline)) {
+					if (fieldline.hasKey("File")) {
+						std::string file = "";
+						if (fieldline.getValue("File", file)) {
+							file = findPath(file);
+							if (file != "") {
+
+								// parse hints
+								ghoul::Dictionary hintsDictionary;
+								if(fieldline.hasKey("Hints"))
+									fieldline.getValue("Hints", hintsDictionary);
+
+								// TODO Vectors of filenames and dictionaries
+								_filename = file;
+								_hintsDictionary = hintsDictionary;
+
+								ghoul::Dictionary seedpointsDictionary;
+								if (fieldline.hasKey("Seedpoints") && fieldline.getValue("Seedpoints", seedpointsDictionary)) {
+									glm::vec3 tmpVal;
+									for (int i = 0; i < seedpointsDictionary.keys().size(); ++i) {
+										fieldline.getValue("Seedpoints."+std::to_string(i+1), tmpVal);
+										_seedPoints.push_back(tmpVal);
+									}
+								}
+							} else
+								LERROR("File not found!");
+						}
+					}
+				}
+			}
 		}
 	}
-
-	LDEBUG("filename: " << _filename);
-
-	if(dictionary.hasKey("Hints"))
-		dictionary.getValue("Hints", _hintsDictionary);
 
 	std::string vshaderpath = "";
 	std::string fshaderpath = "";
@@ -89,30 +115,35 @@ RenderableFieldlines::~RenderableFieldlines() {
 
 bool RenderableFieldlines::initialize() {
 	assert(_filename != "");
+
+//	std::vector<glm::vec3> seedPoints;
+//	for (int x = -6; x <= 6; x+=3) {
+//		for (int y = -6; y <= 6; y+=3) {
+//			for (int z = -6; z <= 6; z+=3) {
+//				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
+//			}
+//		}
+//	}
+
 	KameleonWrapper kameleon(_filename, KameleonWrapper::Model::BATSRUS);
-	std::vector<glm::vec3> seedPoints;
+	std::vector<std::vector<glm::vec3> > fieldlines = kameleon.getFieldLines("bx", "by", "bz", _seedPoints);
 
-	for (int x = -3; x <= 3; x+=3) {
-		for (int y = -3; y <= 3; y+=3) {
-			for (int z = -3; z <= 3; z+=3) {
-				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
-			}
-		}
-	}
-
-	std::vector<std::vector<glm::vec3> > fieldlines = kameleon.getFieldLines("bx", "by", "bz", seedPoints);
 	std::vector<glm::vec3> vertexData;
-	LDEBUG("Fieldlines.size() = " << fieldlines.size());
-
 	int prevEnd = 0;
+
+	int vertexSum = 0;
 
 	for (int i = 0; i < fieldlines.size(); i++) {
 		_lineStart.push_back(prevEnd);
 		_lineCount.push_back(fieldlines[i].size());
 		prevEnd = prevEnd + fieldlines[i].size();
+		vertexSum += fieldlines[i].size();
 
 		vertexData.insert( vertexData.end(), fieldlines[i].begin(), fieldlines[i].end());
 	}
+
+	LDEBUG("Vertex size: " << vertexSum);
+	LDEBUG("Line average : " << (float)vertexSum/(float)fieldlines.size());
 
 	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_VAO); // generate array
@@ -128,6 +159,15 @@ bool RenderableFieldlines::initialize() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
+
+	//	------ SETUP SHADERS -----------------
+	auto privateCallback = [this](const ghoul::filesystem::File& file) {
+		safeShaderCompilation();
+	};
+	if(_programUpdateOnSave) {
+		_vertexSourceFile->setCallback(privateCallback);
+		_fragmentSourceFile->setCallback(privateCallback);
+	}
 
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
@@ -165,6 +205,11 @@ void RenderableFieldlines::update() {
 }
 
 void RenderableFieldlines::safeShaderCompilation() {
+	_shaderMutex->lock();
+	_fieldlinesProgram->rebuildFromFile();
+	_fieldlinesProgram->compileShaderObjects();
+	_fieldlinesProgram->linkProgramObject();
+	_shaderMutex->unlock();
 }
 
 } // namespace openspace

@@ -26,7 +26,7 @@
 #define RENDERABLEFIELDLINES_H_
 
 // open space includes
-#include <openspace/rendering/renderablevolume.h>
+#include <openspace/rendering/renderable.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -40,7 +40,7 @@
 
 namespace openspace {
 
-class RenderableFieldlines : public RenderableVolume {
+class RenderableFieldlines : public Renderable {
 public:
 	RenderableFieldlines(const ghoul::Dictionary& dictionary);
 	~RenderableFieldlines();
@@ -54,6 +54,7 @@ public:
 private:
 	ghoul::Dictionary _hintsDictionary;
 	std::string _filename;
+	std::vector<glm::vec3> _seedPoints;
 
 	ghoul::opengl::ProgramObject* _fieldlinesProgram;
 	GLuint _VAO;
@@ -62,12 +63,14 @@ private:
 
 	ghoul::filesystem::File* _vertexSourceFile;
 	ghoul::filesystem::File* _fragmentSourceFile;
-	bool _programUpdateOnSave;
-
-	void safeShaderCompilation();
 
 	std::vector<GLint> _lineStart;
 	std::vector<GLsizei> _lineCount;
+
+	bool _programUpdateOnSave;
+	void safeShaderCompilation();
+
+
 };
 
 } // namespace openspace

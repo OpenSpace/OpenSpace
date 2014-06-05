@@ -24,15 +24,13 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
-
-#include <ghoul/opengl/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
-#include <sgct.h>
+// ghoul includes
+#include <ghoul/opengl/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <iostream>
 #include <fstream>
@@ -73,32 +71,10 @@ namespace {
 
 namespace openspace {
 
-RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-{
-    // get path if available
-    _relativePath = "";
-    if(dictionary.hasKey(constants::scenegraph::keyPathModule)) {
-       dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
-       _relativePath += "/";
-    }
+RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary) : Renderable(dictionary) {
 }
 
 RenderableVolume::~RenderableVolume() {
-}
-
-std::string RenderableVolume::findPath(const std::string& path) {
-    std::string tmp = absPath(path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-    
-    tmp = absPath(_relativePath + path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-    
-    LERROR("Could not find file '" << path << "'");
-    
-    return "";
 }
 
 ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary) {
