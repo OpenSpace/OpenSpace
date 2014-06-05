@@ -31,7 +31,8 @@
 #include <ccmc/ENLIL.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include <stdio.h>
+#include <string.h>
 #include <iomanip>
 
 namespace openspace {
@@ -42,23 +43,42 @@ KameleonWrapper::KameleonWrapper(const std::string& filename, Model model): _typ
 	switch (_type) {
         case Model::BATSRUS:
             _model = new ccmc::BATSRUS();
-            if(!_model) LERROR("BATSRUS:Failed to create model instance");
+            if(!_model) LERROR("BATSRUS:Failed to create BATSRUS model instance");
             if (_model->open(filename) != ccmc::FileReader::OK)
 				LERROR("BATSRUS:Failed to open "+filename);
             _interpolator = _model->createNewInterpolator();
-            if (!_interpolator) LERROR("BATSRUS:Failed to create interpolator");
+            if (!_interpolator) LERROR("BATSRUS:Failed to create BATSRUS interpolator");
             break;
         case Model::ENLIL:
             _model = new ccmc::ENLIL();
-            if(!_model) LERROR("Failed to create model instance");
+            if(!_model) LERROR("Failed to create ENLIL model instance");
             if (_model->open(filename) != ccmc::FileReader::OK)
 				LERROR("Failed to open "+filename);
             _interpolator = _model->createNewInterpolator();
-            if (!_interpolator) LERROR("Failed to create interpolator");
+            if (!_interpolator) LERROR("Failed to create ENLIL interpolator");
             break;
         default:
             LERROR("No valid model type provided!");
 	}
+
+	getGridVariables(_xCoordVar, _yCoordVar, _zCoordVar);
+	LDEBUG("Using coordinate system variables: " << _xCoordVar << ", " << _yCoordVar << ", " << _zCoordVar);
+
+	_xMin =    _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
+	_xMax =    _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
+	_yMin =    _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
+	_yMax =    _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
+	_zMin =    _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
+	_zMax =    _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
+
+	LDEBUG(_xCoordVar << "Min: " << _xMin);
+	LDEBUG(_xCoordVar << "Max: " << _xMax);
+	LDEBUG(_yCoordVar << "Min: " << _yMin);
+	LDEBUG(_yCoordVar << "Max: " << _yMax);
+	LDEBUG(_zCoordVar << "Min: " << _zMin);
+	LDEBUG(_zCoordVar << "Max: " << _zMax);
+
+	_lastiProgress = -1; // For progressbar
 }
 
 KameleonWrapper::~KameleonWrapper() {
@@ -70,93 +90,23 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
 	assert(_model && _interpolator);
 	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
     assert(_type == Model::ENLIL || _type == Model::BATSRUS);
-    LINFO("Loading CDF data");
+    LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
 	int size = outDimensions.x*outDimensions.y*outDimensions.z;
 	float* data = new float[size];
-    
-    // get the grid system string
-    std::string gridSystem = _model->getGlobalAttribute("grid_system_1").getAttributeString();
-    
-    // remove leading and trailing brackets
-    gridSystem = gridSystem.substr(1,gridSystem.length()-2);
-    
-    // remove all whitespaces
-    gridSystem.erase(remove_if(gridSystem.begin(), gridSystem.end(), isspace), gridSystem.end());
-    
-    // replace all comma signs with whitespaces
-    std::replace( gridSystem.begin(), gridSystem.end(), ',', ' ');
-    
-    // tokenize
-    std::istringstream iss(gridSystem);
-    std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},std::istream_iterator<std::string>{}};
-    
-    // validate
-    if (tokens.size() != 3) {
-        LERROR("Something went wrong");
-        delete[] data;
-        return 0;
-    }
 
-    std::string v_x = tokens.at(0), v_y = tokens.at(1), v_z = tokens.at(2);
-    /*
-    for(auto t: tokens)
-        LDEBUG("t: " << t);
-    */
-    /*
-    LERROR("getVariableAttributeNames");
-    std::vector<std::string> attributeNames = _model->getVariableAttributeNames();
-    for(auto name : attributeNames)
-        LDEBUG(name);
-    */
-        //_model->getVa
-    
-    //auto fan = std::find(attributeNames.begin(), attributeNames.end(), "");
-    
-    
-    //KameleonWrapper (Debug)	grid_system_1
-    //KameleonWrapper (Debug)	grid_1_type
-    
-    LDEBUG("Using coordinate system: " << v_x << ", " << v_y << ", " << v_z);
-    
-	float xMin =    _model->getVariableAttribute(v_x, "actual_min").getAttributeFloat();
-	float xMax =    _model->getVariableAttribute(v_x, "actual_max").getAttributeFloat();
-	float yMin =    _model->getVariableAttribute(v_y, "actual_min").getAttributeFloat();
-	float yMax =    _model->getVariableAttribute(v_y, "actual_max").getAttributeFloat();
-	float zMin =    _model->getVariableAttribute(v_z, "actual_min").getAttributeFloat();
-	float zMax =    _model->getVariableAttribute(v_z, "actual_max").getAttributeFloat();
 	float varMin =  _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
 	float varMax =  _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
 
-	float stepX = (xMax-xMin)/(static_cast<float>(outDimensions.x));
-	float stepY = (yMax-yMin)/(static_cast<float>(outDimensions.y));
-	float stepZ = (zMax-zMin)/(static_cast<float>(outDimensions.z));
+	float stepX = (_xMax-_xMin)/(static_cast<float>(outDimensions.x));
+	float stepY = (_yMax-_yMin)/(static_cast<float>(outDimensions.y));
+	float stepZ = (_zMax-_zMin)/(static_cast<float>(outDimensions.z));
     
-    
-    LDEBUG(v_x << "Min: " << xMin);
-    LDEBUG(v_x << "Max: " << xMax);
-    LDEBUG(v_y << "Min: " << yMin);
-    LDEBUG(v_y << "Max: " << yMax);
-    LDEBUG(v_z << "Min: " << zMin);
-    LDEBUG(v_z << "Max: " << zMax);
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
     
-    int barWidth = 70;
-    int lastiProgress = -1;
     for (int x = 0; x < outDimensions.x; ++x) {
-        float progress = static_cast<float>(x) / static_cast<float>(outDimensions.x-1);
-        int iprogress = static_cast<int>(progress*100.0f);
-		if (iprogress != lastiProgress) {
-            
-            int pos = barWidth * progress;
-            int eqWidth = pos+1;
-            int spWidth = barWidth - pos + 2;
-            std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
-                        << ">" << std::setfill(' ') << std::setw(spWidth)
-                        << "] " << iprogress << " %  \r" << std::flush;
-		}
-        lastiProgress = iprogress;
+    	progressBar(x, outDimensions.x);
         
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
@@ -164,9 +114,9 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                 int index = x + y*outDimensions.x + z*outDimensions.x*outDimensions.y;
                 
                 if(_type == Model::BATSRUS) {
-                    float xPos = xMin + stepX*x;
-                    float yPos = yMin + stepY*y;
-                    float zPos = zMin + stepZ*z;
+                    float xPos = _xMin + stepX*x;
+                    float yPos = _yMin + stepY*y;
+                    float zPos = _zMin + stepZ*z;
                     
                     // get interpolated data value for (xPos, yPos, zPos)
                     float value = _interpolator->interpolate(var, xPos, yPos, zPos);
@@ -174,10 +124,6 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     // scale to [0,1]
                     data[index] = (value-varMin)/(varMax-varMin);
                 } else if (_type == Model::ENLIL) {
-                    //LDEBUG("data: " << theval);
-                    
-                    // Calculate array index
-                    //unsigned int index = r + theta*xDim_ + phi*xDim_*yDim_;
                     
                     // Put r in the [0..sqrt(3)] range
                     float rNorm = sqrt(3.0)*(float)x/(float)(outDimensions.x-1);
@@ -189,21 +135,18 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     float phiNorm = 2.0*M_PI*(float)z/(float)(outDimensions.z-1);
                     
                     // Go to physical coordinates before sampling
-                    float rPh = xMin + rNorm*(xMax-xMin);
+                    float rPh = _xMin + rNorm*(_xMax-_xMin);
                     float thetaPh = thetaNorm;
-                    //phi range needs to be mapped to the slightly different
-                    // model range to avoid gaps in the data
-                    // Subtract a small term to avoid rounding errors when comparing
-                    // to phiMax.
-                    float phiPh = zMin + phiNorm/(2.0*M_PI)*(zMax-zMin-0.000001);
+                    // phi range needs to be mapped to the slightly different model
+                    // range to avoid gaps in the data Subtract a small term to
+                    // avoid rounding errors when comparing to phiMax.
+                    float phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
                     
-                    // Hardcoded variables (rho or rho - rho_back)
-                    // TODO Don't hardcode, make more flexible
-                    float varValue = 0.f;//, rho_back = 0.f, diff = 0.f;
+                    float varValue = 0.f;
                     // See if sample point is inside domain
-                    if (rPh < xMin || rPh > xMax || thetaPh < yMin ||
-                        thetaPh > yMax || phiPh < zMin || phiPh > zMax) {
-                        if (phiPh > zMax) {
+                    if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
+                        thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
+                        if (phiPh > _zMax) {
                             std::cout << "Warning: There might be a gap in the data\n";
                         }
                         // Leave values at zero if outside domain
@@ -218,22 +161,9 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                         phiPh = phiPh*180.f/M_PI;
                         // Sample
                         varValue = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
-                        //rho_back = _interpolator->interpolate("rho-back",rPh,thetaPh,phiPh);
-                        
-                        // Calculate difference (or just rho)
-                        //diff = rho;
-                        //diff = rho - rho_back;
-                        
-                        // Clamp to 0
-                        //if (diff < 0.f) diff = 0.f;
                     }
-                    //if(var < 0.0f) var = 0.0f;
-                    //data[index] = var;
+
                     data[index] = (varValue-varMin)/(varMax-varMin);
-                    //LDEBUG("varValue:" << varValue);
-                    //LDEBUG("data[index]:" << data[index]);
-                    //data[index] = var;
-                    //data[index] = diff;
                 }
 			}
 		}
@@ -244,5 +174,221 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
 	return data;
 }
 
-} // namespace openspace
+float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar, const std::string& zVar, glm::size3_t outDimensions) {
+	assert(_model && _interpolator);
+	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
+	LINFO("Loading variables " << xVar << " " << yVar << " " << zVar << " from CDF data with a uniform sampling");
 
+	int channels = 4;
+	int size = channels*outDimensions.x*outDimensions.y*outDimensions.z;
+	float* data = new float[size];
+
+	float varXMin =  _model->getVariableAttribute(xVar, "actual_min").getAttributeFloat();
+	float varXMax =  _model->getVariableAttribute(xVar, "actual_max").getAttributeFloat();
+	float varYMin =  _model->getVariableAttribute(yVar, "actual_min").getAttributeFloat();
+	float varYMax =  _model->getVariableAttribute(yVar, "actual_max").getAttributeFloat();
+	float varZMin =  _model->getVariableAttribute(zVar, "actual_min").getAttributeFloat();
+	float varZMax =  _model->getVariableAttribute(zVar, "actual_max").getAttributeFloat();
+
+	float stepX = (_xMax-_xMin)/(static_cast<float>(outDimensions.x));
+	float stepY = (_yMax-_yMin)/(static_cast<float>(outDimensions.y));
+	float stepZ = (_zMax-_zMin)/(static_cast<float>(outDimensions.z));
+
+	LDEBUG(xVar << "Min: " << varXMin);
+	LDEBUG(xVar << "Max: " << varXMax);
+	LDEBUG(yVar << "Min: " << varYMin);
+	LDEBUG(yVar << "Max: " << varYMax);
+	LDEBUG(zVar << "Min: " << varZMin);
+	LDEBUG(zVar << "Max: " << varZMax);
+
+	for (int x = 0; x < outDimensions.x; ++x) {
+		progressBar(x, outDimensions.x);
+
+		for (int y = 0; y < outDimensions.y; ++y) {
+			for (int z = 0; z < outDimensions.z; ++z) {
+
+				int index = x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y;
+
+				if(_type == Model::BATSRUS) {
+					float xPos = _xMin + stepX*x;
+					float yPos = _yMin + stepY*y;
+					float zPos = _zMin + stepZ*z;
+
+					// get interpolated data value for (xPos, yPos, zPos)
+					float xValue = _interpolator->interpolate(xVar, xPos, yPos, zPos);
+					float yValue = _interpolator->interpolate(yVar, xPos, yPos, zPos);
+					float zValue = _interpolator->interpolate(zVar, xPos, yPos, zPos);
+
+					// scale to [0,1]
+					data[index] 	= (xValue-varXMin)/(varXMax-varXMin); // R
+					data[index + 1] = (yValue-varYMin)/(varYMax-varYMin); // G
+					data[index + 2] = (zValue-varZMin)/(varZMax-varZMin); // B
+					data[index + 3] = 1.0; // GL_RGB refuses to work. Workaround by doing a GL_RGBA with hardcoded alpha
+				} else {
+					LERROR("Only BATSRUS supported for getUniformSampledVectorValues (for now)");
+				}
+			}
+		}
+	}
+	std::cout << std::endl;
+	LINFO("Done!");
+
+	return data;
+}
+
+float* KameleonWrapper::getVolumeFieldLines(const std::string& xVar,
+		const std::string& yVar, const std::string& zVar,
+		glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints) {
+	assert(_model && _interpolator);
+	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
+	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
+
+	int size = outDimensions.x*outDimensions.y*outDimensions.z;
+	float* data = new float[size];
+	std::vector<glm::vec3> line;
+
+	if (_type == Model::BATSRUS) {
+		for (glm::vec3 seedPoint : seedPoints) {
+			line = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::FORWARD);
+			for (glm::vec3 point : line) {
+				int vPosX = std::floor(outDimensions.x*(point.x-_xMin)/(_xMax-_xMin));
+				int vPosY = std::floor(outDimensions.y*(point.y-_yMin)/(_yMax-_yMin));
+				int vPosZ = std::floor(outDimensions.z*(point.z-_zMin)/(_zMax-_zMin));
+				int index = vPosX + vPosY*outDimensions.x + vPosZ*outDimensions.x*outDimensions.y;
+				data[index] = 1.0;
+			}
+
+			line = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::BACK);
+			for (glm::vec3 point : line) {
+				int vPosX = std::floor(outDimensions.x*(point.x-_xMin)/(_xMax-_xMin));
+				int vPosY = std::floor(outDimensions.y*(point.y-_yMin)/(_yMax-_yMin));
+				int vPosZ = std::floor(outDimensions.z*(point.z-_zMin)/(_zMax-_zMin));
+				int index = vPosX + vPosY*outDimensions.x + vPosZ*outDimensions.x*outDimensions.y;
+				data[index] = 1.0;
+			}
+		}
+	} else {
+		LERROR("Fieldlines are only supported for BATSRUS model");
+	}
+
+	return data;
+}
+
+std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
+		const std::string& xVar, const std::string& yVar,
+		const std::string& zVar, std::vector<glm::vec3> seedPoints) {
+	assert(_model && _interpolator);
+	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
+	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
+
+	std::vector<glm::vec3> fLine, bLine;
+	std::vector<std::vector<glm::vec3> > fieldLines;
+
+	if (_type == Model::BATSRUS) {
+		for (glm::vec3 seedPoint : seedPoints) {
+			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::FORWARD);
+			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::BACK);
+			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
+			fieldLines.push_back(bLine);
+		}
+	} else {
+		LERROR("Fieldlines are only supported for BATSRUS model");
+	}
+
+	return fieldLines;
+}
+
+std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
+		const std::string& xVar, const std::string& yVar,
+		const std::string& zVar, glm::vec3 seedPoint, TraceDirection direction) {
+
+	glm::vec3 pos, k1, k2, k3, k4;
+	std::vector<glm::vec3> line;
+
+	float stepX = 0.5, stepY = 0.5, stepZ = 0.5;
+
+	int numSteps = 0;
+	int maxSteps = 1000;
+	pos = seedPoint;
+
+	// While we are inside the models boundries and not inside earth
+	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
+			pos.z < _zMax && pos.z > _zMin) && !(pos.x < 1.0 && pos.x > -1.0 &&
+			pos.y < 1.0 && pos.y > -1.0 && pos.z < 1.0 && pos.z > -1.0)) {
+
+		// Save position
+		line.push_back(pos);
+
+		// Calculate new position with Runge-Kutta 4th order
+		k1.x = _interpolator->interpolate(xVar, pos.x, pos.y, pos.z);
+		k1.y = _interpolator->interpolate(yVar, pos.x, pos.y, pos.z);
+		k1.z = _interpolator->interpolate(zVar, pos.x, pos.y, pos.z);
+		k1 = (float)direction*glm::normalize(k1);
+		k2.x = _interpolator->interpolate(xVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2.y = _interpolator->interpolate(yVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2.z = _interpolator->interpolate(zVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2 = (float)direction*glm::normalize(k2);
+		k3.x = _interpolator->interpolate(xVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.y = _interpolator->interpolate(yVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.z = _interpolator->interpolate(zVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3 = (float)direction*glm::normalize(k3);
+		k4.x = _interpolator->interpolate(xVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4.y = _interpolator->interpolate(yVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4.z = _interpolator->interpolate(zVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4 = (float)direction*glm::normalize(k4);
+		pos.x = pos.x + (stepX/6.0)*(k1.x + 2.0*k2.x + 2.0*k3.x + k4.x);
+		pos.y = pos.y + (stepY/6.0)*(k1.y + 2.0*k2.y + 2.0*k3.y + k4.y);
+		pos.z = pos.z + (stepZ/6.0)*(k1.z + 2.0*k2.z + 2.0*k3.z + k4.z);
+
+		++numSteps;
+		if (numSteps > maxSteps) {
+			LDEBUG("Max number of steps taken");
+			break;
+		}
+	}
+	return line;
+}
+
+void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::string& z) {
+	// get the grid system string
+	std::string gridSystem = _model->getGlobalAttribute("grid_system_1").getAttributeString();
+
+	// remove leading and trailing brackets
+	gridSystem = gridSystem.substr(1,gridSystem.length()-2);
+
+	// remove all whitespaces
+	gridSystem.erase(remove_if(gridSystem.begin(), gridSystem.end(), isspace), gridSystem.end());
+
+	// replace all comma signs with whitespaces
+	std::replace( gridSystem.begin(), gridSystem.end(), ',', ' ');
+
+	// tokenize
+	std::istringstream iss(gridSystem);
+	std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},std::istream_iterator<std::string>{}};
+
+	// validate
+	if (tokens.size() != 3) LERROR("Something went wrong");
+
+	x = tokens.at(0);
+	y = tokens.at(1);
+	z = tokens.at(2);
+}
+
+void KameleonWrapper::progressBar(int current, int end) {
+	float progress = static_cast<float>(current) / static_cast<float>(end-1);
+	int iprogress = static_cast<int>(progress*100.0f);
+	int barWidth = 70;
+	if (iprogress != _lastiProgress) {
+		int pos = barWidth * progress;
+		int eqWidth = pos+1;
+		int spWidth = barWidth - pos + 2;
+		std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
+		<< ">" << std::setfill(' ') << std::setw(spWidth)
+		<< "] " << iprogress << " %  \r" << std::flush;
+	}
+	_lastiProgress = iprogress;
+}
+
+} // namespace openspace

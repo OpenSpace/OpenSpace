@@ -118,9 +118,9 @@ vec4 calculate_final_color(uint frag_count) {
 		//	final_color = blend(final_color, _col_(endFrag));
 
 	}
-
-	//int id =2;
-	//if(id < frag_count)final_color = blend(final_color, _col_(fragments[id]));
+	// final_color = vec4(0);
+	// int id =0;
+	// if(id < frag_count)final_color = blend(final_color, _col_(fragments[id]));
 
 	return final_color;
 

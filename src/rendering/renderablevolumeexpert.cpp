@@ -210,7 +210,7 @@ RenderableVolumeExpert::RenderableVolumeExpert(const ghoul::Dictionary& dictiona
         }
     }
     
-    setBoundingSphere(PowerScaledScalar::CreatePSS(_boxScaling.length()));
+    setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
 }
 
 RenderableVolumeExpert::~RenderableVolumeExpert() {
@@ -253,9 +253,11 @@ bool RenderableVolumeExpert::initialize() {
             
             LDEBUG("Creating CL texture from GL texture with path '" << _volumePaths.at(i) << "'");
             cl_mem volumeTexture = _context.createTextureFromGLTexture(CL_MEM_READ_ONLY, *volume);
-            
+
             _volumes.push_back(volume);
             _clVolumes.push_back(volumeTexture);
+        } else {
+        	LERROR("Invalid volume");
         }
     }
     

@@ -22,65 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef KAMELEONWRAPPER_H_
-#define KAMELEONWRAPPER_H_
+#ifndef RENDERABLEFIELDLINES_H_
+#define RENDERABLEFIELDLINES_H_
 
-//#include <glm/glm.hpp>
-#include <glm/gtx/std_based_type.hpp>
+// open space includes
+#include <openspace/rendering/renderable.h>
 
-namespace ccmc {
-    class Model;
-    class Interpolator;
-}
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/file.h>
+
+#ifdef __APPLE__
+    #include <memory>
+#else
+    #include <mutex>
+#endif
 
 namespace openspace {
 
-class KameleonWrapper {
+class RenderableFieldlines : public Renderable {
 public:
+	RenderableFieldlines(const ghoul::Dictionary& dictionary);
+	~RenderableFieldlines();
 
-	enum class Model {
-		ENLIL,		// Heliosphere
-		BATSRUS		// Magnetosphere
-	};
+	bool initialize();
+	bool deinitialize();
 
-	enum TraceDirection {
-		FORWARD = 1,
-		BACK 	= -1
-	};
-
-	KameleonWrapper(const std::string& filename, Model model);
-	~KameleonWrapper();
-	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
-	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
-			const std::string& zVar, glm::size3_t outDimensions);
-
-	float* getVolumeFieldLines(const std::string& xVar, const std::string& yVar,
-			const std::string& zVar, glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints);
-
-	std::vector<std::vector<glm::vec3> > getFieldLines(const std::string& xVar,
-			const std::string& yVar, const std::string& zVar,
-			std::vector<glm::vec3> seedPoints);
+	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void update();
 
 private:
-	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
-			const std::string& yVar, const std::string& zVar,
-			glm::vec3 seedPoint, TraceDirection direction);
+	ghoul::Dictionary _hintsDictionary;
+	std::string _filename;
+	std::vector<glm::vec3> _seedPoints;
 
-	void getGridVariables(std::string& x, std::string& y, std::string& z);
-	void progressBar(int current, int end);
+	ghoul::opengl::ProgramObject* _fieldlinesProgram;
+	GLuint _VAO;
 
-	ccmc::Model* _model;
-    Model _type;
-	ccmc::Interpolator* _interpolator;
+	std::mutex* _shaderMutex;
 
-	// Model parameters
-	float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
-	std::string _xCoordVar, _yCoordVar, _zCoordVar;
+	ghoul::filesystem::File* _vertexSourceFile;
+	ghoul::filesystem::File* _fragmentSourceFile;
 
-	 // For progressbar
-	int _lastiProgress;
+	std::vector<GLint> _lineStart;
+	std::vector<GLsizei> _lineCount;
+
+	bool _programUpdateOnSave;
+	void safeShaderCompilation();
+
+
 };
 
 } // namespace openspace
-
-#endif // KAMELEONWRAPPER_H_
+#endif // RENDERABLEFIELDLINES_H_
