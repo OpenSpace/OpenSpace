@@ -61,7 +61,8 @@ bool VolumeRaycasterBox::initialize() {
     
     //	------ SETUP SHADER -----------------
     OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
-	_MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
+    _MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
+    _modelTransformLocation = _boxProgram->uniformLocation("modelTransform");
     
 	//	------ SETUP FBO ---------------------
 	_fbo = new FramebufferObject();
@@ -89,11 +90,12 @@ bool VolumeRaycasterBox::initialize() {
     return true;
 }
 
-void VolumeRaycasterBox::render(const glm::mat4& MVP) {
+void VolumeRaycasterBox::render(const glm::mat4& MVP,const glm::mat4& transform) {
     GLuint activeFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
 	_fbo->activate();
 	_boxProgram->activate();
-	_boxProgram->setUniform(_MVPLocation, MVP);
+    _boxProgram->setUniform(_MVPLocation, MVP);
+    _boxProgram->setUniform(_modelTransformLocation, transform);
     
     sgct_core::Frustum::FrustumMode mode =  sgct::Engine::instance()->
                                             getActiveWindowPtr()->

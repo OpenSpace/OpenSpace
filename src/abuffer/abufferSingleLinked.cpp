@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -168,7 +169,13 @@ void ABufferSingleLinked::preRender() {
 }
 
 void ABufferSingleLinked::postRender() {
+
+	ghoul::opengl::Texture* volume;
+    OsEng.configurationManager().getValue("firstVolume", volume);
 	resolveShader->activate();
+	glActiveTexture(GL_TEXTURE0);
+	volume->bind();
+	resolveShader->setUniform("volume", 0);
 	//resolveShader->setUniform("SCREEN_WIDTH", width);
 	//resolveShader->setUniform("SCREEN_HEIGHT", height);
     glBindVertexArray(_screenQuad);

@@ -24,6 +24,20 @@ int build_local_fragments_list() {
 	return frag_count;
 }
 
+float pscLength(vec4 v1, vec4 v2) {
+	const float k = 10.0;
+	float ds = v2.w - v1.w;
+	vec4 vector;
+	if(ds >= 0) {
+		float p = pow(k,-ds);
+		vector = vec4(v1.x*p - v2.x, v1.y*p - v2.y, v1.z*p - v2.z, v2.w);
+	} else {
+		float p = pow(k,ds);
+		vector = vec4(v1.x - v2.x*p, v1.y - v2.y*p, v1.z - v2.z*p, v1.w);
+	}
+	return length(vector.xyz)*pow(k,vector.w);
+}
+
 void sort_fragments_list(uint frag_count) {
 	uint i,j;
 	ABufferStruct_t tmp;
@@ -36,4 +50,30 @@ void sort_fragments_list(uint frag_count) {
 		}
 		fragments[j] = tmp;
 	}
+
+	int ii, jj;
+	for(ii = 0; ii < MAX_VOLUMES; ++ii) {
+		bool start = true;
+		vec3 startColor;
+		vec4 startPosition;
+		for(jj = 0; jj < frag_count; ++jj) {
+			int type = int(_type_(fragments[jj])) -1;
+			if(type== ii) {
+				if(start) {
+					startColor = _col_(fragments[jj]).rgb;
+					startPosition = _pos_(fragments[jj]);
+					start = false;
+				} else {
+					vec3 dir = _col_(fragments[jj]).rgb - startColor;
+					volume_direction[ii] = normalize(dir);
+					volume_position[ii] = startColor;
+					volume_length[ii] = length(dir);
+					//volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+					break;
+				}
+			}
+		}
+	}
+	//volume_direction[0] = vec3(1.0,0.0,0.0);
+	//volume_direction[0] = _col_(fragments[0]).rgb;
 }

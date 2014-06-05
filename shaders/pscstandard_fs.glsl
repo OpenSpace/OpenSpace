@@ -9,10 +9,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 #version 430
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-uniform vec4 campos;
-uniform vec4 objpos;
 uniform float time;
 uniform sampler2D texture1;
 
@@ -119,6 +115,7 @@ void main()
 	_col_(frag, diffuse);
 	_z_(frag, gl_FragDepth);
 	_type_(frag, 0);
+	_pos_(frag, vs_position);
 	addToBuffer(frag);
 
 	/*

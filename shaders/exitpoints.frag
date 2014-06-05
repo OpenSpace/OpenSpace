@@ -1,6 +1,7 @@
 #version 430 core
 
 in vec3 vPosition;
+in vec3 worldPosition;
 out vec4 fragColor;
 
 #include "ABuffer/abufferStruct.hglsl"
@@ -13,6 +14,7 @@ void main() {
 	_col_(frag, fragColor);
 	_z_(frag, gl_FragDepth);
 	_type_(frag, 1);
+	_pos_(frag, vec4(worldPosition,0));
 	addToBuffer(frag);
 
 	//discard;

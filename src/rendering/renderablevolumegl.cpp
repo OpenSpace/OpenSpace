@@ -33,6 +33,8 @@
 
 #include <algorithm>
 
+#include <openspace/engine/openspaceengine.h>
+
 namespace {
     std::string _loggerCat = "RenderableVolumeGL";
 }
@@ -119,6 +121,8 @@ bool RenderableVolumeGL::initialize() {
     //	------ VOLUME READING ----------------
 	_volume = loadVolume(_filename, _hintsDictionary);
 	_volume->uploadTexture();
+    OsEng.configurationManager().setValue("firstVolume", _volume);
+    //glBindImageTexture(2, *_volume, 0, GL_FALSE, 0, GL_READ_ONLY, _volume->type());
     
     //	------ SETUP GEOMETRY ----------------
 	const GLfloat size = 1.0f;
@@ -179,15 +183,15 @@ bool RenderableVolumeGL::deinitialize() {
 void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     _stepSize = 0.01f;
 
-    glm::mat4 transform = camera->viewProjectionMatrix();
+    glm::mat4 transform ;
     glm::mat4 camTransform = camera->viewRotationMatrix();
     psc relative = thisPosition-camera->position();
 
-    transform = transform*camTransform;
+    transform = camTransform;
     transform = glm::translate(transform, relative.vec3());
     transform = glm::scale(transform, _boxScaling);
 
-    _colorBoxRenderer->render(transform);
+    _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform);
 	/*
 	//	Draw screenquad
 	glClearColor(0.2f, 0.2f, 0.2f, 0);
