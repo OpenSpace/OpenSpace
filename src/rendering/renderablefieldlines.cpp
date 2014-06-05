@@ -115,6 +115,8 @@ RenderableFieldlines::~RenderableFieldlines() {
 
 bool RenderableFieldlines::initialize() {
 	assert(_filename != "");
+	assert(_hintsDictionary.size() != 0);
+	assert(_seedPoints.size() != 0);
 
 //	std::vector<glm::vec3> seedPoints;
 //	for (int x = -6; x <= 6; x+=3) {
@@ -125,25 +127,52 @@ bool RenderableFieldlines::initialize() {
 //		}
 //	}
 
-	KameleonWrapper kameleon(_filename, KameleonWrapper::Model::BATSRUS);
-	std::vector<std::vector<glm::vec3> > fieldlines = kameleon.getFieldLines("bx", "by", "bz", _seedPoints);
+	std::string modelString;
+	std::vector<std::vector<glm::vec3> > fieldlinesData;
+
+	if (_hintsDictionary.hasKey("Model") && _hintsDictionary.getValue("Model", modelString)) {
+		KameleonWrapper::Model model;
+		if (modelString == "BATSRUS") {
+			model = KameleonWrapper::Model::BATSRUS;
+		} else if (modelString == "ENLIL") {
+			LWARNING("ENLIL model not supported for fieldlines");
+			return false;
+		} else {
+			LWARNING("Hints does not specify a valid 'Model'");
+			return false;
+		}
+
+		std::string xVariable, yVariable, zVariable;
+		if (_hintsDictionary.hasKey("Variables")) {
+			bool xVar, yVar, zVar;
+			xVar = _hintsDictionary.getValue("Variables.1", xVariable);
+			yVar = _hintsDictionary.getValue("Variables.2", yVariable);
+			zVar = _hintsDictionary.getValue("Variables.3", zVariable);
+
+			if (xVar || yVar || zVar) {
+				KameleonWrapper kw(_filename, model);
+				fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints);
+
+			} else {
+				LWARNING("Error reading variables! Must be 3 and must exist in CDF data");
+				return false;
+			}
+		} else {
+			LWARNING("Hints does not specify  valid 'Variables'");
+			return false;
+		}
+	}
 
 	std::vector<glm::vec3> vertexData;
 	int prevEnd = 0;
 
-	int vertexSum = 0;
-
-	for (int i = 0; i < fieldlines.size(); i++) {
+	for (int i = 0; i < fieldlinesData.size(); i++) {
 		_lineStart.push_back(prevEnd);
-		_lineCount.push_back(fieldlines[i].size());
-		prevEnd = prevEnd + fieldlines[i].size();
-		vertexSum += fieldlines[i].size();
+		_lineCount.push_back(fieldlinesData[i].size());
+		prevEnd = prevEnd + fieldlinesData[i].size();
 
-		vertexData.insert( vertexData.end(), fieldlines[i].begin(), fieldlines[i].end());
+		vertexData.insert( vertexData.end(), fieldlinesData[i].begin(), fieldlinesData[i].end());
 	}
-
-	LDEBUG("Vertex size: " << vertexSum);
-	LDEBUG("Line average : " << (float)vertexSum/(float)fieldlines.size());
 
 	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_VAO); // generate array
