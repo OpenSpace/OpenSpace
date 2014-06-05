@@ -163,12 +163,13 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath
 
 					// Seed 'em all
 					std::vector<glm::vec3> seedPoints;
+//					seedPoints.push_back(glm::vec3(5.0, 0.0, 0.0));
 					for (int z = -5; z <= 5; z+=5) {
 						for (int y = -5; y <= 5; y+=5)
 							seedPoints.push_back(glm::vec3(5.0, (float)y, (float)z));
 					}
 
-					float* fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
+					float* fieldlinesData = kw.getVolumeFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
 //					float* rhoData = kw.getUniformSampledValues("rho", dimensions);
 //
 //					// Combine fieldlines with rhoData, clamp to [0,1]
