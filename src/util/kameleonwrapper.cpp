@@ -237,48 +237,10 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	return data;
 }
 
-float* KameleonWrapper::getVolumeFieldLines(const std::string& xVar,
-		const std::string& yVar, const std::string& zVar,
-		glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints) {
-	assert(_model && _interpolator);
-	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
-	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
-	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
-
-	int size = outDimensions.x*outDimensions.y*outDimensions.z;
-	float* data = new float[size];
-	std::vector<glm::vec3> line;
-
-	if (_type == Model::BATSRUS) {
-		for (glm::vec3 seedPoint : seedPoints) {
-			line = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::FORWARD);
-			for (glm::vec3 point : line) {
-				int vPosX = std::floor(outDimensions.x*(point.x-_xMin)/(_xMax-_xMin));
-				int vPosY = std::floor(outDimensions.y*(point.y-_yMin)/(_yMax-_yMin));
-				int vPosZ = std::floor(outDimensions.z*(point.z-_zMin)/(_zMax-_zMin));
-				int index = vPosX + vPosY*outDimensions.x + vPosZ*outDimensions.x*outDimensions.y;
-				data[index] = 1.0;
-			}
-
-			line = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::BACK);
-			for (glm::vec3 point : line) {
-				int vPosX = std::floor(outDimensions.x*(point.x-_xMin)/(_xMax-_xMin));
-				int vPosY = std::floor(outDimensions.y*(point.y-_yMin)/(_yMax-_yMin));
-				int vPosZ = std::floor(outDimensions.z*(point.z-_zMin)/(_zMax-_zMin));
-				int index = vPosX + vPosY*outDimensions.x + vPosZ*outDimensions.x*outDimensions.y;
-				data[index] = 1.0;
-			}
-		}
-	} else {
-		LERROR("Fieldlines are only supported for BATSRUS model");
-	}
-
-	return data;
-}
-
 std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 		const std::string& xVar, const std::string& yVar,
-		const std::string& zVar, std::vector<glm::vec3> seedPoints) {
+		const std::string& zVar, std::vector<glm::vec3> seedPoints,
+		float stepSize ) {
 	assert(_model && _interpolator);
 	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
@@ -288,8 +250,8 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 
 	if (_type == Model::BATSRUS) {
 		for (glm::vec3 seedPoint : seedPoints) {
-			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::FORWARD);
-			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, TraceDirection::BACK);
+			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD);
+			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK);
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
 			fieldLines.push_back(bLine);
 		}
@@ -302,15 +264,16 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 
 std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 		const std::string& xVar, const std::string& yVar,
-		const std::string& zVar, glm::vec3 seedPoint, TraceDirection direction) {
+		const std::string& zVar, glm::vec3 seedPoint,
+		float stepSize, TraceDirection direction) {
 
 	glm::vec3 pos, k1, k2, k3, k4;
 	std::vector<glm::vec3> line;
 
-	float stepX = 0.5, stepY = 0.5, stepZ = 0.5;
+	float stepX = stepSize, stepY = stepSize, stepZ = stepSize; // Should I do different stepsizes?
 
 	int numSteps = 0;
-	int maxSteps = 1000;
+	int maxSteps = 5000;
 	pos = seedPoint;
 
 	// While we are inside the models boundries and not inside earth

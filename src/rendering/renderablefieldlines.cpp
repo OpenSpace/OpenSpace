@@ -118,20 +118,22 @@ bool RenderableFieldlines::initialize() {
 	assert(_hintsDictionary.size() != 0);
 	assert(_seedPoints.size() != 0);
 
-//	std::vector<glm::vec3> seedPoints;
-//	for (int x = -6; x <= 6; x+=3) {
-//		for (int y = -6; y <= 6; y+=3) {
-//			for (int z = -6; z <= 6; z+=3) {
-//				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
-//			}
-//		}
-//	}
+	std::vector<glm::vec3> seedPoints;
+	for (int x = -6; x <= 6; x+=3) {
+		for (int y = -6; y <= 6; y+=3) {
+			for (int z = -6; z <= 6; z+=3) {
+				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
+			}
+		}
+	}
 
 	std::string modelString;
 	std::vector<std::vector<glm::vec3> > fieldlinesData;
+	float stepSize;
+	std::string xVariable, yVariable, zVariable;
+	KameleonWrapper::Model model;
 
 	if (_hintsDictionary.hasKey("Model") && _hintsDictionary.getValue("Model", modelString)) {
-		KameleonWrapper::Model model;
 		if (modelString == "BATSRUS") {
 			model = KameleonWrapper::Model::BATSRUS;
 		} else if (modelString == "ENLIL") {
@@ -142,18 +144,13 @@ bool RenderableFieldlines::initialize() {
 			return false;
 		}
 
-		std::string xVariable, yVariable, zVariable;
 		if (_hintsDictionary.hasKey("Variables")) {
 			bool xVar, yVar, zVar;
 			xVar = _hintsDictionary.getValue("Variables.1", xVariable);
 			yVar = _hintsDictionary.getValue("Variables.2", yVariable);
 			zVar = _hintsDictionary.getValue("Variables.3", zVariable);
 
-			if (xVar || yVar || zVar) {
-				KameleonWrapper kw(_filename, model);
-				fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints);
-
-			} else {
+			if (!xVar || !yVar || !zVar) {
 				LWARNING("Error reading variables! Must be 3 and must exist in CDF data");
 				return false;
 			}
@@ -161,7 +158,15 @@ bool RenderableFieldlines::initialize() {
 			LWARNING("Hints does not specify  valid 'Variables'");
 			return false;
 		}
+
+		if (!_hintsDictionary.hasKey("Stepsize") || !_hintsDictionary.getValue("Stepsize", stepSize)) {
+			LDEBUG("No stepsize set for fieldlines. Setting to default value (0.5)");
+			stepSize = 0.5;
+		}
 	}
+
+	KameleonWrapper kw(_filename, model);
+	fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints, stepSize);
 
 	std::vector<glm::vec3> vertexData;
 	int prevEnd = 0;
@@ -215,6 +220,7 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	transform = transform*camTransform;
 	transform = glm::translate(transform, relative.vec3());
+	transform = glm::rotate(transform, 90.0f, glm::vec3(1.0, 0.0, 0.0));
 	transform = glm::scale(transform, glm::vec3(0.1));
 
 	_shaderMutex->lock();
