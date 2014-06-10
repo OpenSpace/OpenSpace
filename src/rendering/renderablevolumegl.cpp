@@ -85,6 +85,18 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
             _twopassProgram->attachObject(fragmentShader);
         }
     }
+
+    _transferFunction = nullptr;
+    if (dictionary.hasKey("TransferFunction")) {
+        std::string transferFunctionPath = "";
+        if(dictionary.getValue("TransferFunction", transferFunctionPath)) {
+            _transferFunctionPath = findPath(transferFunctionPath);
+        }
+    }
+    if( _transferFunctionPath == "") {
+        LERROR("No transferFunction!");
+    }
+
     
     if(dictionary.hasKey("UpdateOnSave")) {
         dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
@@ -121,7 +133,10 @@ bool RenderableVolumeGL::initialize() {
     //	------ VOLUME READING ----------------
 	_volume = loadVolume(_filename, _hintsDictionary);
 	_volume->uploadTexture();
+    _transferFunction = loadTransferFunction(_transferFunctionPath);
+    _transferFunction->uploadTexture();
     OsEng.configurationManager().setValue("firstVolume", _volume);
+    OsEng.configurationManager().setValue("firstTransferFunction", _transferFunction);
     //glBindImageTexture(2, *_volume, 0, GL_FALSE, 0, GL_READ_ONLY, _volume->type());
     
     //	------ SETUP GEOMETRY ----------------
@@ -189,6 +204,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
 
     transform = camTransform;
     transform = glm::translate(transform, relative.vec3());
+    transform = glm::translate(transform, glm::vec3(-1.1,0.0,0.0));
     transform = glm::scale(transform, _boxScaling);
 
     _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform);

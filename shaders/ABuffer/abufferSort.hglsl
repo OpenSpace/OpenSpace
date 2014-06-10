@@ -62,12 +62,14 @@ void sort_fragments_list(uint frag_count) {
 				if(start) {
 					startColor = _col_(fragments[jj]).rgb;
 					startPosition = _pos_(fragments[jj]);
+					volume_zlength[ii].x = _z_(fragments[jj]);
 					start = false;
 				} else {
 					vec3 dir = _col_(fragments[jj]).rgb - startColor;
 					volume_direction[ii] = normalize(dir);
 					volume_position[ii] = startColor;
 					volume_length[ii] = length(dir);
+					volume_zlength[ii].y = _z_(fragments[jj]);
 					//volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 					break;
 				}

@@ -59,8 +59,10 @@ public:
 private:
 	ghoul::Dictionary _hintsDictionary;
     std::string _filename;
+    std::string _transferFunctionPath;
     float _stepSize;
 	ghoul::opengl::Texture* _volume;
+	ghoul::opengl::Texture* _transferFunction;
 	ghoul::opengl::ProgramObject* _twopassProgram;
 	GLuint _screenQuad;
 

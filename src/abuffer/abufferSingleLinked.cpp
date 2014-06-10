@@ -121,6 +121,8 @@ bool ABufferSingleLinked::initialize() {
     	LERROR("Could not link shader");
         return false;
     }
+	resolveShader->setUniform("volume", 0);
+	resolveShader->setUniform("transferFunction", 1);
 
     // ============================
     // 		GEOMETRY (quad)
@@ -170,12 +172,21 @@ void ABufferSingleLinked::preRender() {
 
 void ABufferSingleLinked::postRender() {
 
-	ghoul::opengl::Texture* volume;
+	ghoul::opengl::Texture* volume 	= nullptr;
+	ghoul::opengl::Texture* tf 		= nullptr;
     OsEng.configurationManager().getValue("firstVolume", volume);
+    OsEng.configurationManager().getValue("firstTransferFunction", tf);
 	resolveShader->activate();
-	glActiveTexture(GL_TEXTURE0);
-	volume->bind();
-	resolveShader->setUniform("volume", 0);
+
+	if(volume) {
+		glActiveTexture(GL_TEXTURE0);
+		volume->bind();
+	}
+
+	if(tf) {
+		glActiveTexture(GL_TEXTURE1);
+		tf->bind();
+	}
 	//resolveShader->setUniform("SCREEN_WIDTH", width);
 	//resolveShader->setUniform("SCREEN_HEIGHT", height);
     glBindVertexArray(_screenQuad);

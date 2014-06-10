@@ -186,7 +186,7 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	transform = transform*camTransform;
 	transform = glm::translate(transform, relative.vec3());
-	transform = glm::scale(transform, glm::vec3(0.1));
+	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
 
 	_shaderMutex->lock();
 	_fieldlinesProgram->activate();

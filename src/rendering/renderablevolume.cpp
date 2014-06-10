@@ -89,63 +89,115 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath
 		return rawReader.read(filepath);
 	} else if(hasExtension(filepath, "cdf")) {
 
-		std::string modelString;
-		if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
-			KameleonWrapper::Model model;
-			if (modelString == "BATSRUS") {
-				model = KameleonWrapper::Model::BATSRUS;
-			} else if (modelString == "ENLIL") {
-				model = KameleonWrapper::Model::ENLIL;
+        glm::size3_t dimensions(1,1,1);
+        double tempValue;
+        if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[0] = intVal;
+        }
+        if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[1] = intVal;
+        }
+        if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[2] = intVal;
+        }
+
+        std::string modelString = "";
+        if (hintsDictionary.hasKey("Model")) 
+            hintsDictionary.getValue("Model", modelString);
+
+        if(modelString == "") {
+            LWARNING("Model not specified.");
+            return nullptr;
+        }
+
+        std::string variableCacheString = "";
+        if (hintsDictionary.hasKey("Variable")) {
+            hintsDictionary.getValue("Variable", variableCacheString);
+        } else if(hintsDictionary.hasKey("Variables")) {  
+            std::string xVariable, yVariable, zVariable;
+            bool xVar, yVar, zVar;
+            xVar = hintsDictionary.getValue("Variables.1", xVariable);
+            yVar = hintsDictionary.getValue("Variables.2", yVariable);
+            zVar = hintsDictionary.getValue("Variables.3", zVariable);
+            if (xVar && yVar && zVar) {
+                variableCacheString = xVariable + "." + yVariable + "." + zVariable;
+            }
+        }
+
+        bool cache = false;
+        hintsDictionary.hasKey("Cache");
+        if (hintsDictionary.hasKey("Cache"))
+            hintsDictionary.getValue("Cache", cache);
+
+        std::stringstream ss;
+        ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
+        std::string cachepath = filepath + ss.str();
+        if( cache && FileSys.fileExists(cachepath)) {
+
+            FILE* file = fopen (cachepath.c_str(), "rb");
+
+            int length = dimensions[0] *dimensions[1] *dimensions[2];
+            float* data = new float[length];
+
+            for(int i = 0; i< length; i++){
+                float f;
+                fread(&f, sizeof(float), 1, file);
+                data[i] = f;
+            }
+
+            fclose(file);
+            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, ghoul::opengl::Texture::FilterMode::Linear, ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+        }
+
+		KameleonWrapper::Model model;
+		if (modelString == "BATSRUS") {
+			model = KameleonWrapper::Model::BATSRUS;
+		} else if (modelString == "ENLIL") {
+			model = KameleonWrapper::Model::ENLIL;
+		} else {
+			LWARNING("Hints does not specify a valid 'Model'");
+			return nullptr;
+		}
+
+		KameleonWrapper kw(filepath, model);
+
+		std::string variableString;
+		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
+			float* data = kw.getUniformSampledValues(variableString, dimensions);
+            if(cache) {
+                FILE* file = fopen (cachepath.c_str(), "wb");
+                int length = dimensions[0] *dimensions[1] *dimensions[2];
+                fwrite(data, sizeof(float), length, file);
+                fclose(file);
+            }
+        	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, ghoul::opengl::Texture::FilterMode::Linear, ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+
+		} else if (hintsDictionary.hasKey("Variables")) {
+			std::string xVariable, yVariable, zVariable;
+			bool xVar, yVar, zVar;
+			xVar = hintsDictionary.getValue("Variables.1", xVariable);
+			yVar = hintsDictionary.getValue("Variables.2", yVariable);
+			zVar = hintsDictionary.getValue("Variables.3", zVariable);
+
+			if (!xVar || !yVar || !zVar) {
+				LERROR("Error reading variables! Must be 3 and must exist in CDF data");
 			} else {
-				LWARNING("Hints does not specify a valid 'Model'");
-				return nullptr;
-			}
 
-			glm::size3_t dimensions(1,1,1);
-			double tempValue;
-			if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
-				int intVal = static_cast<int>(tempValue);
-				if(intVal > 0)
-					dimensions[0] = intVal;
-			}
-			if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
-				int intVal = static_cast<int>(tempValue);
-				if(intVal > 0)
-					dimensions[1] = intVal;
-			}
-			if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
-				int intVal = static_cast<int>(tempValue);
-				if(intVal > 0)
-					dimensions[2] = intVal;
-			}
-
-			KameleonWrapper kw(filepath, model);
-
-			std::string variableString;
-			if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
-				float* data = kw.getUniformSampledValues(variableString, dimensions);
-				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-
-			} else if (hintsDictionary.hasKey("Variables")) {
-				std::string xVariable, yVariable, zVariable;
-				bool xVar, yVar, zVar;
-				xVar = hintsDictionary.getValue("Variables.1", xVariable);
-				yVar = hintsDictionary.getValue("Variables.2", yVariable);
-				zVar = hintsDictionary.getValue("Variables.3", zVariable);
-
-				if (!xVar || !yVar || !zVar) {
-					LERROR("Error reading variables! Must be 3 and must exist in CDF data");
-				} else {
-
-					// Seed 'em all
-					std::vector<glm::vec3> seedPoints;
+				// Seed 'em all
+				std::vector<glm::vec3> seedPoints;
 //					seedPoints.push_back(glm::vec3(5.0, 0.0, 0.0));
-					for (int z = -5; z <= 5; z+=5) {
-						for (int y = -5; y <= 5; y+=5)
-							seedPoints.push_back(glm::vec3(5.0, (float)y, (float)z));
-					}
+				for (int z = -5; z <= 5; z+=5) {
+					for (int y = -5; y <= 5; y+=5)
+						seedPoints.push_back(glm::vec3(5.0, (float)y, (float)z));
+				}
 
-					float* fieldlinesData = kw.getVolumeFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
+				float* fieldlinesData = kw.getVolumeFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
 //					float* rhoData = kw.getUniformSampledValues("rho", dimensions);
 //
 //					// Combine fieldlines with rhoData, clamp to [0,1]
@@ -156,15 +208,12 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath
 //					delete fieldlinesData;
 //					delete rhoData;
 
-					return new ghoul::opengl::Texture(fieldlinesData, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-				}
-
-			} else {
-				LWARNING("Hints does not specify a 'Variable' or 'Variables'");
+				return new ghoul::opengl::Texture(fieldlinesData, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
 			}
 
+		} else {
+			LWARNING("Hints does not specify a 'Variable' or 'Variables'");
 		}
-		LWARNING("Hints does not specify a 'Model'");
 	} else {
 		LWARNING("No valid file extension.");
 	}
@@ -371,12 +420,13 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             //LDEBUG("["<< position <<"] " << value);
             
         }
-//        LDEBUG(weight << ", (" <<
-//               transferFunction[4*i+0] << ", " <<
-//               transferFunction[4*i+1] << ", " <<
-//               transferFunction[4*i+2] << ", " <<
-//               transferFunction[4*i+3] << ")");
+       LDEBUG(weight << ", (" <<
+              transferFunction[4*i+0] << ", " <<
+              transferFunction[4*i+1] << ", " <<
+              transferFunction[4*i+2] << ", " <<
+              transferFunction[4*i+3] << ")");
     }
+
 
     return new ghoul::opengl::Texture(transferFunction,
     		glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,

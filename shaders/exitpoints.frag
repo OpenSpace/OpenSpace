@@ -12,7 +12,7 @@ void main() {
 
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
-	_z_(frag, gl_FragDepth);
+	_z_(frag, gl_FragCoord.z);
 	_type_(frag, 1);
 	_pos_(frag, vec4(worldPosition,0));
 	addToBuffer(frag);

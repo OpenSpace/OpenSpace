@@ -173,19 +173,21 @@ void InteractionHandler::distance(const PowerScaledScalar &distance) {
 	lockControls();
 	
 	psc relative = camera_->position();
-	psc origin;
-	if(node_) {
-		origin = node_->getWorldPosition();
-	}
+	const psc origin = (node_) ? node_->getWorldPosition() : psc();
 
 	psc relative_origin_coordinate = relative - origin;
-	glm::vec3 dir(relative_origin_coordinate.direction());
-	dir = dir * distance[0];
-	relative_origin_coordinate = dir;
+	const glm::vec3 dir(relative_origin_coordinate.direction());
+	glm:: vec3 newdir = dir * distance[0];
+	relative_origin_coordinate = newdir;
 	relative_origin_coordinate[3] = distance[1];
 	relative = relative + relative_origin_coordinate;
 
-	camera_->setPosition(relative);
+	relative_origin_coordinate = relative - origin;
+	newdir = relative_origin_coordinate.direction();
+
+	// update only if on the same side of the origin
+	if(glm::angle(newdir, dir) < 90.0f)
+		camera_->setPosition(relative);
 	
 	unlockControls();
 }
@@ -303,62 +305,65 @@ void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const double speed = 2.75;
     const double dt = getDt();
-    if (key == 'S') {
-        glm::vec3 euler(speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'W') {
-        glm::vec3 euler(-speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'A') {
-        glm::vec3 euler(0.0, -speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'D') {
-        glm::vec3 euler(0.0, speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 262) {
-        glm::vec3 euler(0.0, speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 263) {
-        glm::vec3 euler(0.0, -speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 264) {
-        glm::vec3 euler(speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 265) {
-        glm::vec3 euler(-speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 'R') {
-        PowerScaledScalar dist(-speed * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'F') {
-        PowerScaledScalar dist(speed * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'T') {
-        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'G') {
-        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
-        distance(dist);
-    }
+
+    if(action == SGCT_PRESS || action == SGCT_REPEAT) {
+	    if (key == 'S') {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == 'W') {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == 'A') {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == 'D') {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == 262) {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 263) {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 264) {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 265) {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 'R') {
+	        PowerScaledScalar dist(-speed * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == 'F') {
+	        PowerScaledScalar dist(speed * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == 'T') {
+	        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == 'G') {
+	        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
+	        distance(dist);
+	    }
+	}
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");
