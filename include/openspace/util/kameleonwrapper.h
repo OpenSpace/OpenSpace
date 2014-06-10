@@ -48,6 +48,12 @@ public:
 		BACK 	= -1
 	};
 
+	enum FieldlineEnd {
+		NORTH,
+		SOUTH,
+		OUT
+	};
+
 	KameleonWrapper(const std::string& filename, Model model);
 	~KameleonWrapper();
 	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
@@ -61,10 +67,11 @@ public:
 private:
 	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar, glm::vec3 seedPoint,
-			float stepSize, TraceDirection direction);
+			float stepSize, TraceDirection direction, FieldlineEnd& end);
 
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	void progressBar(int current, int end);
+	glm::vec3 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
 	ccmc::Model* _model;
     Model _type;

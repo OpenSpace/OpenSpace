@@ -102,6 +102,14 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 		}
 	}
 
+	_seedpointsProgram = new ghoul::opengl::ProgramObject("SeedpointsProgram");
+	ghoul::opengl::ShaderObject* seedpointVertexShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeVertex,
+			"/home/hhellteg/openspace/openspace-data/scene/fieldlines/seedPoints.vert");
+	ghoul::opengl::ShaderObject* seedpointFragmentShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeFragment,
+			"/home/hhellteg/openspace/openspace-data/scene/fieldlines/seedPoints.frag");
+	_seedpointsProgram->attachObject(seedpointVertexShader);
+	_seedpointsProgram->attachObject(seedpointFragmentShader);
+
 	if(dictionary.hasKey("UpdateOnSave")) {
 		dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
 	}
@@ -117,15 +125,6 @@ bool RenderableFieldlines::initialize() {
 	assert(_filename != "");
 	assert(_hintsDictionary.size() != 0);
 	assert(_seedPoints.size() != 0);
-
-	std::vector<glm::vec3> seedPoints;
-	for (int x = -6; x <= 6; x+=3) {
-		for (int y = -6; y <= 6; y+=3) {
-			for (int z = -6; z <= 6; z+=3) {
-				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
-			}
-		}
-	}
 
 	std::string modelString;
 	std::vector<std::vector<glm::vec3> > fieldlinesData;
@@ -173,12 +172,16 @@ bool RenderableFieldlines::initialize() {
 
 	for (int i = 0; i < fieldlinesData.size(); i++) {
 		_lineStart.push_back(prevEnd);
-		_lineCount.push_back(fieldlinesData[i].size());
-		prevEnd = prevEnd + fieldlinesData[i].size();
+		_lineCount.push_back(fieldlinesData[i].size()/2.0);
+		prevEnd = prevEnd + fieldlinesData[i].size()/2.0;
+
+		_seedpointStart.push_back(i);
+		_seedpointCount.push_back(1);
 
 		vertexData.insert( vertexData.end(), fieldlinesData[i].begin(), fieldlinesData[i].end());
 	}
 
+	//	------ FIELDLINES -----------------
 	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_VAO); // generate array
 	glBindVertexArray(_VAO); // bind array
@@ -189,10 +192,31 @@ bool RenderableFieldlines::initialize() {
 	// Vertex positions
 	GLuint vertexLocation = 0;
 	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), reinterpret_cast<void*>(0));
+	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), reinterpret_cast<void*>(0));
+
+	// Texture coordinates
+	GLuint texcoordLocation = 1;
+	glEnableVertexAttribArray(texcoordLocation);
+	glVertexAttribPointer(texcoordLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), (void*)(sizeof(glm::vec3)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
+
+//	//	------ SEEDPOINTS -----------------
+//	GLuint seedpointPositionBuffer;
+//	glGenVertexArrays(1, &_seedpointVAO); // generate array
+//	glBindVertexArray(_seedpointVAO); // bind array
+//	glGenBuffers(1, &seedpointPositionBuffer); // generate buffer
+//	glBindBuffer(GL_ARRAY_BUFFER, seedpointPositionBuffer); // bind buffer
+//	glBufferData(GL_ARRAY_BUFFER, _seedPoints.size()*sizeof(glm::vec3), &_seedPoints.front(), GL_STATIC_DRAW);
+//
+//	// Vertex positions
+//	GLuint seedpointLocation = 0;
+//	glEnableVertexAttribArray(seedpointLocation);
+//	glVertexAttribPointer(seedpointLocation, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), reinterpret_cast<void*>(0));
+//
+//	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
+//	glBindVertexArray(0); //unbind array
 
 	//	------ SETUP SHADERS -----------------
 	auto privateCallback = [this](const ghoul::filesystem::File& file) {
@@ -205,6 +229,9 @@ bool RenderableFieldlines::initialize() {
 
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
+
+	_seedpointsProgram->compileShaderObjects();
+	_seedpointsProgram->linkProgramObject();
 
 	return true;
 }
@@ -220,13 +247,13 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	transform = transform*camTransform;
 	transform = glm::translate(transform, relative.vec3());
-	transform = glm::rotate(transform, 90.0f, glm::vec3(1.0, 0.0, 0.0));
+	transform = glm::rotate(transform, -90.0f, glm::vec3(1.0, 0.0, 0.0));
 	transform = glm::scale(transform, glm::vec3(0.1));
 
+	//	------ FIELDLINES -----------------
 	_shaderMutex->lock();
 	_fieldlinesProgram->activate();
 	_fieldlinesProgram->setUniform("modelViewProjection", transform);
-
 
 	glBindVertexArray(_VAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
@@ -234,6 +261,19 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	_fieldlinesProgram->deactivate();
 	_shaderMutex->unlock();
+
+//	//	------ SEEDPOINTS -----------------
+//	_shaderMutex->lock();
+//	_seedpointsProgram->activate();
+//	_seedpointsProgram->setUniform("modelViewProjection", transform);
+//
+//	glBindVertexArray(_seedpointVAO);
+//	glPointSize(3);
+//	glMultiDrawArrays(GL_POINTS, &_seedpointStart[0], &_seedpointCount[0], _seedPoints.size());
+//	glBindVertexArray(0);
+//
+//	_seedpointsProgram->deactivate();
+//	_shaderMutex->unlock();
 }
 
 void RenderableFieldlines::update() {

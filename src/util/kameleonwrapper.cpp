@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iomanip>
+#include <stdlib.h>
 
 namespace openspace {
 
@@ -247,13 +248,26 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 
 	std::vector<glm::vec3> fLine, bLine;
 	std::vector<std::vector<glm::vec3> > fieldLines;
+	glm::vec3 color;
+	FieldlineEnd forwardEnd, backEnd;
 
 	if (_type == Model::BATSRUS) {
 		for (glm::vec3 seedPoint : seedPoints) {
-			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD);
-			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK);
+			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
+			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK, backEnd);
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
-			fieldLines.push_back(bLine);
+
+			// classify
+			color = classifyFieldline(forwardEnd, backEnd);
+
+			// write colors
+			std::vector<glm::vec3> line;
+			for (glm::vec3 position : bLine) {
+				line.push_back(position);
+				line.push_back(color);
+			}
+
+			fieldLines.push_back(line);
 		}
 	} else {
 		LERROR("Fieldlines are only supported for BATSRUS model");
@@ -265,9 +279,9 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 		const std::string& xVar, const std::string& yVar,
 		const std::string& zVar, glm::vec3 seedPoint,
-		float stepSize, TraceDirection direction) {
+		float stepSize, TraceDirection direction, FieldlineEnd& end) {
 
-	glm::vec3 pos, k1, k2, k3, k4;
+	glm::vec3 color, pos, k1, k2, k3, k4;
 	std::vector<glm::vec3> line;
 
 	float stepX = stepSize, stepY = stepSize, stepZ = stepSize; // Should I do different stepsizes?
@@ -311,6 +325,14 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 			break;
 		}
 	}
+
+	if (pos.z > 0.0 && pos.x < 1.0 && pos.x > -1.0 && pos.y < 1.0 && pos.y > -1.0)
+		end = FieldlineEnd::NORTH;
+	else if (pos.z < 0.0 && pos.x < 1.0 && pos.x > -1.0 && pos.y < 1.0 && pos.y > -1.0)
+		end = FieldlineEnd::SOUTH;
+	else
+		end = FieldlineEnd::OUT;
+
 	return line;
 }
 
@@ -352,6 +374,27 @@ void KameleonWrapper::progressBar(int current, int end) {
 		<< "] " << iprogress << " %  \r" << std::flush;
 	}
 	_lastiProgress = iprogress;
+}
+
+glm::vec3 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd) {
+	glm::vec3 color;
+	if (		(fEnd == FieldlineEnd::NORTH || fEnd == FieldlineEnd::SOUTH)
+			&& 	(bEnd == FieldlineEnd::NORTH || bEnd == FieldlineEnd::SOUTH)) {
+		// closed
+		color = glm::vec3(1.0, 0.0, 0.0);
+	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::NORTH)
+			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::NORTH)) {
+		// north
+		color = glm::vec3(1.0, 1.0, 0.0);
+	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::SOUTH)
+			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::SOUTH)) {
+		// south
+		color = glm::vec3(0.0, 1.0, 0.0);
+	} else if (fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::OUT) {
+		// solar wind
+		color = glm::vec3(0.0, 0.0, 1.0);
+	}
+	return color;
 }
 
 } // namespace openspace
