@@ -63,21 +63,12 @@ KameleonWrapper::KameleonWrapper(const std::string& filename, Model model): _typ
 	}
 
 	getGridVariables(_xCoordVar, _yCoordVar, _zCoordVar);
-	LDEBUG("Using coordinate system variables: " << _xCoordVar << ", " << _yCoordVar << ", " << _zCoordVar);
-
 	_xMin =    _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
 	_xMax =    _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
 	_yMin =    _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
 	_yMax =    _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
 	_zMin =    _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
 	_zMax =    _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
-
-	LDEBUG(_xCoordVar << "Min: " << _xMin);
-	LDEBUG(_xCoordVar << "Max: " << _xMax);
-	LDEBUG(_yCoordVar << "Min: " << _yMin);
-	LDEBUG(_yCoordVar << "Max: " << _yMax);
-	LDEBUG(_zCoordVar << "Min: " << _zMin);
-	LDEBUG(_zCoordVar << "Max: " << _zMax);
 
 	_lastiProgress = -1; // For progressbar
 }
@@ -255,6 +246,7 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 		for (glm::vec3 seedPoint : seedPoints) {
 			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
 			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK, backEnd);
+
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
 
 			// classify
@@ -283,37 +275,43 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 
 	glm::vec3 color, pos, k1, k2, k3, k4;
 	std::vector<glm::vec3> line;
-
-	float stepX = stepSize, stepY = stepSize, stepZ = stepSize; // Should I do different stepsizes?
-
+	float stepX, stepY, stepZ;
 	int numSteps = 0;
 	int maxSteps = 5000;
 	pos = seedPoint;
 
+	_model->loadVariable(xVar);
+	_model->loadVariable(yVar);
+	_model->loadVariable(zVar);
+
+	long int xID = _model->getVariableID(xVar);
+	long int yID = _model->getVariableID(yVar);
+	long int zID = _model->getVariableID(zVar);
+
 	// While we are inside the models boundries and not inside earth
 	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
-			pos.z < _zMax && pos.z > _zMin) && !(pos.x < 1.0 && pos.x > -1.0 &&
-			pos.y < 1.0 && pos.y > -1.0 && pos.z < 1.0 && pos.z > -1.0)) {
+			pos.z < _zMax && pos.z > _zMin) && !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
 
 		// Save position
 		line.push_back(pos);
 
 		// Calculate new position with Runge-Kutta 4th order
-		k1.x = _interpolator->interpolate(xVar, pos.x, pos.y, pos.z);
-		k1.y = _interpolator->interpolate(yVar, pos.x, pos.y, pos.z);
-		k1.z = _interpolator->interpolate(zVar, pos.x, pos.y, pos.z);
+		k1.x = _interpolator->interpolate(xID, pos.x, pos.y, pos.z, stepX, stepY, stepZ);
+		k1.y = _interpolator->interpolate(yID, pos.x, pos.y, pos.z);
+		k1.z = _interpolator->interpolate(zID, pos.x, pos.y, pos.z);
 		k1 = (float)direction*glm::normalize(k1);
-		k2.x = _interpolator->interpolate(xVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
-		k2.y = _interpolator->interpolate(yVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
-		k2.z = _interpolator->interpolate(zVar, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+//		stepX*=stepSize, stepY*=stepSize, stepZ*=stepSize;
+		k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
 		k2 = (float)direction*glm::normalize(k2);
-		k3.x = _interpolator->interpolate(xVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
-		k3.y = _interpolator->interpolate(yVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
-		k3.z = _interpolator->interpolate(zVar, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
 		k3 = (float)direction*glm::normalize(k3);
-		k4.x = _interpolator->interpolate(xVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
-		k4.y = _interpolator->interpolate(yVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
-		k4.z = _interpolator->interpolate(zVar, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4.x = _interpolator->interpolate(xID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4.y = _interpolator->interpolate(yID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
+		k4.z = _interpolator->interpolate(zID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
 		k4 = (float)direction*glm::normalize(k4);
 		pos.x = pos.x + (stepX/6.0)*(k1.x + 2.0*k2.x + 2.0*k3.x + k4.x);
 		pos.y = pos.y + (stepY/6.0)*(k1.y + 2.0*k2.y + 2.0*k3.y + k4.y);
@@ -321,14 +319,15 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 
 		++numSteps;
 		if (numSteps > maxSteps) {
-			LDEBUG("Max number of steps taken");
+			LDEBUG("Max number of steps taken (" << maxSteps <<")");
 			break;
 		}
 	}
+	line.push_back(pos);
 
-	if (pos.z > 0.0 && pos.x < 1.0 && pos.x > -1.0 && pos.y < 1.0 && pos.y > -1.0)
+	if (pos.z > 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
 		end = FieldlineEnd::NORTH;
-	else if (pos.z < 0.0 && pos.x < 1.0 && pos.x > -1.0 && pos.y < 1.0 && pos.y > -1.0)
+	else if (pos.z < 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
 		end = FieldlineEnd::SOUTH;
 	else
 		end = FieldlineEnd::OUT;

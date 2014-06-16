@@ -52,8 +52,10 @@ public:
 	virtual void update();
 
 private:
-	ghoul::Dictionary _hintsDictionary;
-	std::string _filename;
+	std::vector<std::vector<glm::vec3> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+
+	std::vector<ghoul::Dictionary> _hintsDictionaries;
+	std::vector<std::string> _filenames;
 	std::vector<glm::vec3> _seedPoints;
 
 	ghoul::opengl::ProgramObject *_fieldlinesProgram, *_seedpointsProgram;
@@ -69,8 +71,6 @@ private:
 
 	bool _programUpdateOnSave;
 	void safeShaderCompilation();
-
-
 };
 
 } // namespace openspace
