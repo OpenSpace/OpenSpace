@@ -198,32 +198,15 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 				LERROR("Error reading variables! Must be 3 and must exist in CDF data");
 			} else {
 
-				// Seed 'em all
-				std::vector<glm::vec3> seedPoints;
-//					seedPoints.push_back(glm::vec3(5.0, 0.0, 0.0));
-				for (int z = -5; z <= 5; z+=5) {
-					for (int y = -5; y <= 5; y+=5)
-						seedPoints.push_back(glm::vec3(5.0, (float)y, (float)z));
-				}
-
-				float* fieldlinesData = kw.getVolumeFieldLines(xVariable, yVariable, zVariable, dimensions, seedPoints);
-//					float* rhoData = kw.getUniformSampledValues("rho", dimensions);
-//
-//					// Combine fieldlines with rhoData, clamp to [0,1]
-//					float* data = new float[dimensions.x*dimensions.y*dimensions.z];
-//					for (int i = 0; i < dimensions.x*dimensions.y*dimensions.z; ++i)
-//						data[i] = std::min(fieldlinesData[i]+rhoData[i], 1.0f);
-//
-//					delete fieldlinesData;
-//					delete rhoData;
+				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
                 if(cache) {
                     FILE* file = fopen (cachepath.c_str(), "wb");
                     int length = dimensions[0] *dimensions[1] *dimensions[2];
-                    fwrite(fieldlinesData, sizeof(float), length, file);
+                    fwrite(data, sizeof(float), length, file);
                     fclose(file);
                 }
 
-                ghoul::opengl::Texture* t = new ghoul::opengl::Texture(fieldlinesData, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
+                ghoul::opengl::Texture* t = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
                 t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);   
 				return t;
 			}

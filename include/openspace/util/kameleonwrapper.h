@@ -48,26 +48,30 @@ public:
 		BACK 	= -1
 	};
 
+	enum FieldlineEnd {
+		NORTH,
+		SOUTH,
+		OUT
+	};
+
 	KameleonWrapper(const std::string& filename, Model model);
 	~KameleonWrapper();
 	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
 	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
 			const std::string& zVar, glm::size3_t outDimensions);
 
-	float* getVolumeFieldLines(const std::string& xVar, const std::string& yVar,
-			const std::string& zVar, glm::size3_t outDimensions, std::vector<glm::vec3> seedPoints);
-
 	std::vector<std::vector<glm::vec3> > getFieldLines(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar,
-			std::vector<glm::vec3> seedPoints);
+			std::vector<glm::vec3> seedPoints, float stepSize);
 
 private:
 	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
-			const std::string& yVar, const std::string& zVar,
-			glm::vec3 seedPoint, TraceDirection direction);
+			const std::string& yVar, const std::string& zVar, glm::vec3 seedPoint,
+			float stepSize, TraceDirection direction, FieldlineEnd& end);
 
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	void progressBar(int current, int end);
+	glm::vec3 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
 	ccmc::Model* _model;
     Model _type;

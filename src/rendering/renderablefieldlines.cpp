@@ -49,23 +49,15 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 							file = findPath(file);
 							if (file != "") {
 
-								// parse hints
+								// read hints into dictionary
 								ghoul::Dictionary hintsDictionary;
 								if(fieldline.hasKey("Hints"))
 									fieldline.getValue("Hints", hintsDictionary);
 
 								// TODO Vectors of filenames and dictionaries
-								_filename = file;
-								_hintsDictionary = hintsDictionary;
+								_filenames.push_back(file);
+								_hintsDictionaries.push_back(hintsDictionary);
 
-								ghoul::Dictionary seedpointsDictionary;
-								if (fieldline.hasKey("Seedpoints") && fieldline.getValue("Seedpoints", seedpointsDictionary)) {
-									glm::vec3 tmpVal;
-									for (int i = 0; i < seedpointsDictionary.keys().size(); ++i) {
-										fieldline.getValue("Seedpoints."+std::to_string(i+1), tmpVal);
-										_seedPoints.push_back(tmpVal);
-									}
-								}
 							} else
 								LERROR("File not found!");
 						}
@@ -101,7 +93,15 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 			_fieldlinesProgram->attachObject(fragmentShader);
 		}
 	}
-
+/*
+	_seedpointsProgram = new ghoul::opengl::ProgramObject("SeedpointsProgram");
+	ghoul::opengl::ShaderObject* seedpointVertexShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeVertex,
+			"/home/hhellteg/openspace/openspace-data/scene/fieldlines/seedPoints.vert");
+	ghoul::opengl::ShaderObject* seedpointFragmentShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeFragment,
+			"/home/hhellteg/openspace/openspace-data/scene/fieldlines/seedPoints.frag");
+	_seedpointsProgram->attachObject(seedpointVertexShader);
+	_seedpointsProgram->attachObject(seedpointFragmentShader);
+*/
 	if(dictionary.hasKey("UpdateOnSave")) {
 		dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
 	}
@@ -114,37 +114,31 @@ RenderableFieldlines::~RenderableFieldlines() {
 }
 
 bool RenderableFieldlines::initialize() {
-	assert(_filename != "");
+	assert(_filenames.size() != 0);
+	assert(_hintsDictionaries.size() != 0);
 
-//	std::vector<glm::vec3> seedPoints;
-//	for (int x = -6; x <= 6; x+=3) {
-//		for (int y = -6; y <= 6; y+=3) {
-//			for (int z = -6; z <= 6; z+=3) {
-//				seedPoints.push_back(glm::vec3((float)x, (float)y, (float)z));
-//			}
-//		}
-//	}
-
-	KameleonWrapper kameleon(_filename, KameleonWrapper::Model::BATSRUS);
-	std::vector<std::vector<glm::vec3> > fieldlines = kameleon.getFieldLines("bx", "by", "bz", _seedPoints);
-
-	std::vector<glm::vec3> vertexData;
 	int prevEnd = 0;
+	std::vector<glm::vec3> vertexData;
+	std::vector<std::vector<glm::vec3> > fieldlinesData;
 
-	int vertexSum = 0;
+	for (int i = 0; i < _filenames.size(); ++i) {
+		fieldlinesData = getFieldlinesData(_filenames[i], _hintsDictionaries[i]);
 
-	for (int i = 0; i < fieldlines.size(); i++) {
-		_lineStart.push_back(prevEnd);
-		_lineCount.push_back(fieldlines[i].size());
-		prevEnd = prevEnd + fieldlines[i].size();
-		vertexSum += fieldlines[i].size();
+		for (int j = 0; j < fieldlinesData.size(); j++) {
+			_lineStart.push_back(prevEnd);
+			_lineCount.push_back(fieldlinesData[j].size()/2.0);
+			prevEnd = prevEnd + fieldlinesData[j].size()/2.0;
 
-		vertexData.insert( vertexData.end(), fieldlines[i].begin(), fieldlines[i].end());
+			_seedpointStart.push_back(j);
+			_seedpointCount.push_back(1);
+
+			vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
+		}
 	}
 
-	LDEBUG("Vertex size: " << vertexSum);
-	LDEBUG("Line average : " << (float)vertexSum/(float)fieldlines.size());
+	LDEBUG("Vertex orginal : " << vertexData.size()/2.0);
 
+	//	------ FIELDLINES -----------------
 	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_VAO); // generate array
 	glBindVertexArray(_VAO); // bind array
@@ -155,7 +149,28 @@ bool RenderableFieldlines::initialize() {
 	// Vertex positions
 	GLuint vertexLocation = 0;
 	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), reinterpret_cast<void*>(0));
+	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), reinterpret_cast<void*>(0));
+
+	// Texture coordinates
+	GLuint texcoordLocation = 1;
+	glEnableVertexAttribArray(texcoordLocation);
+	glVertexAttribPointer(texcoordLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), (void*)(sizeof(glm::vec3)));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
+	glBindVertexArray(0); //unbind array
+
+//	//	------ SEEDPOINTS -----------------
+	GLuint seedpointPositionBuffer;
+	glGenVertexArrays(1, &_seedpointVAO); // generate array
+	glBindVertexArray(_seedpointVAO); // bind array
+	glGenBuffers(1, &seedpointPositionBuffer); // generate buffer
+	glBindBuffer(GL_ARRAY_BUFFER, seedpointPositionBuffer); // bind buffer
+	glBufferData(GL_ARRAY_BUFFER, _seedPoints.size()*sizeof(glm::vec3), &_seedPoints.front(), GL_STATIC_DRAW);
+
+	// Vertex positions
+	GLuint seedpointLocation = 0;
+	glEnableVertexAttribArray(seedpointLocation);
+	glVertexAttribPointer(seedpointLocation, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), reinterpret_cast<void*>(0));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
@@ -172,6 +187,9 @@ bool RenderableFieldlines::initialize() {
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
 
+	//_seedpointsProgram->compileShaderObjects();
+	//_seedpointsProgram->linkProgramObject();
+
 	return true;
 }
 
@@ -186,12 +204,15 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	transform = transform*camTransform;
 	transform = glm::translate(transform, relative.vec3());
+	transform = glm::rotate(transform, -90.0f, glm::vec3(1.0, 0.0, 0.0)); // Model has positive Z as up
 	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
+	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
 
+
+	//	------ FIELDLINES -----------------
 	_shaderMutex->lock();
 	_fieldlinesProgram->activate();
 	_fieldlinesProgram->setUniform("modelViewProjection", transform);
-
 
 	glBindVertexArray(_VAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
@@ -199,6 +220,20 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	_fieldlinesProgram->deactivate();
 	_shaderMutex->unlock();
+/*
+	//	------ SEEDPOINTS -----------------
+	_shaderMutex->lock();
+	_seedpointsProgram->activate();
+	_seedpointsProgram->setUniform("modelViewProjection", transform);
+
+	glBindVertexArray(_seedpointVAO);
+	glPointSize(5);
+	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
+	glBindVertexArray(0);
+
+	_seedpointsProgram->deactivate();
+	_shaderMutex->unlock();
+*/
 }
 
 void RenderableFieldlines::update() {
@@ -210,6 +245,57 @@ void RenderableFieldlines::safeShaderCompilation() {
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
 	_shaderMutex->unlock();
+}
+
+std::vector<std::vector<glm::vec3> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {
+	std::string modelString;
+	float stepSize = 0.5; // default if no stepsize is specified in hints
+	std::string xVariable, yVariable, zVariable;
+	KameleonWrapper::Model model;
+	std::vector<std::vector<glm::vec3> > fieldlinesData;
+
+	if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
+		if (modelString == "BATSRUS") {
+			model = KameleonWrapper::Model::BATSRUS;
+		} else if (modelString == "ENLIL") {
+			LWARNING("ENLIL model not supported for fieldlines");
+			return fieldlinesData;
+		} else {
+			LWARNING("Hints does not specify a valid 'Model'");
+			return fieldlinesData;
+		}
+
+		if (hintsDictionary.hasKey("Variables")) {
+			bool xVar, yVar, zVar;
+			xVar = hintsDictionary.getValue("Variables.1", xVariable);
+			yVar = hintsDictionary.getValue("Variables.2", yVariable);
+			zVar = hintsDictionary.getValue("Variables.3", zVariable);
+
+			if (!xVar || !yVar || !zVar) {
+				LWARNING("Error reading variables! Must be 3 and must exist in CDF data");
+				return fieldlinesData;
+			}
+		} else {
+			LWARNING("Hints does not specify  valid 'Variables'");
+			return fieldlinesData;
+		}
+
+		if (!hintsDictionary.hasKey("Stepsize") || !hintsDictionary.getValue("Stepsize", stepSize)) {
+			LDEBUG("No stepsize set for fieldlines. Setting to default value (" << stepSize << ")");
+		}
+		ghoul::Dictionary seedpointsDictionary;
+		if (hintsDictionary.hasKey("Seedpoints") && hintsDictionary.getValue("Seedpoints", seedpointsDictionary)) {
+			glm::vec3 seedPos;
+			for (auto index : seedpointsDictionary.keys()) {
+				hintsDictionary.getValue("Seedpoints."+index, seedPos);
+				_seedPoints.push_back(seedPos);
+			}
+		}
+	}
+
+	KameleonWrapper kw(filename, model);
+	fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints, stepSize);
+	return fieldlinesData;
 }
 
 } // namespace openspace
