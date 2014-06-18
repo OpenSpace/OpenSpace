@@ -29,11 +29,43 @@
 #include <ghoul/logging/logmanager.h>
 #include <sgct.h>
 
+#include <iostream>
+#include <fstream>
+
 #define MAX_LAYERS 10
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 namespace {
 	std::string _loggerCat = "ABufferSingleLinked";
+
+const std::string openspaceHeaders = R"(
+#define MAX_VOLUMES 1
+// VOLUME1
+uniform sampler3D volume;
+uniform sampler1D transferFunction;
+void sampleVolume1(inout vec4 finalColor, vec3 position);
+
+
+const vec3 volume_dim[] = {
+	vec3(300.0,100.0,100.0)
+};
+)";
+
+const std::string openspaceSamplerCalls = R"(
+if((currentVolumeBitmask & (1 << 0)) == 1)
+    sampleVolume1(final_color,volume_position[volID]);
+)";
+
+const std::string openspaceSamplers = R"(
+void sampleVolume1(inout vec4 finalColor, vec3 position) {
+	float intensity = texture(volume, position).x;
+	//intensity *=25.0;
+	//intensity = clamp(intensity*100.0, 0.0, 1.0);
+	vec4 color = texture(transferFunction, intensity);
+	blendStep(finalColor, color, stepSize);
+}
+)";
+
 }
 
 namespace openspace {
@@ -51,11 +83,26 @@ ABufferSingleLinked::ABufferSingleLinked() {
 	atomicCounterBuffer = 0;
 	fragmentBuffer = 0;
 	fragmentTexture = 0;
+
+	const std::string fragmentShaderSourcePath = absPath("${SHADERS}/ABuffer/abufferResolveFragment.glsl");
+	_fragmentShaderFile = new ghoul::filesystem::File(fragmentShaderSourcePath, true);
+	_updateShader = false;
+	_fragmentShaderPath = fragmentShaderSourcePath + ".ABuffer.gglsl";
+
+	generateShaderSource();
+	
+
 }
 
 ABufferSingleLinked::~ABufferSingleLinked() {
 	if(data != 0)
 		delete data;
+
+	if(_fragmentShaderFile)
+		delete _fragmentShaderFile;
+
+	if(_resolveShader)
+		delete _resolveShader;
 
 	glDeleteTextures(1,&anchorPointerTexture);
 	glDeleteTextures(1,&fragmentTexture);
@@ -99,30 +146,13 @@ bool ABufferSingleLinked::initialize() {
     // ============================
     // 			SHADERS
     // ============================
-    resolveShader = nullptr;
-    using ghoul::opengl::ShaderObject;
-    using ghoul::opengl::ProgramObject;
-    ShaderObject* vs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                             absPath("${SHADERS}/ABuffer/abufferResolveVertex.glsl"), "Vertex");
-    ShaderObject* fs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                             absPath("${SHADERS}/ABuffer/abufferResolveFragment.glsl"), "Fragment");
+  	auto shaderCallback = [this](const ghoul::filesystem::File& file) {
+        _updateShader = true;
+    };
+    _fragmentShaderFile->setCallback(shaderCallback);
 
-    resolveShader = new ProgramObject;
-    resolveShader->attachObject(vs);
-    resolveShader->attachObject(fs);
-
-    if (!resolveShader->compileShaderObjects()) {
-    	LERROR("Could not compile shader");
-        return false;
-    }
-    if (!resolveShader->linkProgramObject()){
-    	LERROR("Could not link shader");
-        return false;
-    }
-	resolveShader->setUniform("volume", 0);
-	resolveShader->setUniform("transferFunction", 1);
+    _resolveShader = nullptr;
+    updateShader();
 
     // ============================
     // 		GEOMETRY (quad)
@@ -172,26 +202,95 @@ void ABufferSingleLinked::preRender() {
 
 void ABufferSingleLinked::postRender() {
 
-	ghoul::opengl::Texture* volume 	= nullptr;
-	ghoul::opengl::Texture* tf 		= nullptr;
-    OsEng.configurationManager().getValue("firstVolume", volume);
-    OsEng.configurationManager().getValue("firstTransferFunction", tf);
-	resolveShader->activate();
+	if(_updateShader) {
+		_updateShader = false;
+		generateShaderSource();
+		updateShader();
 
-	if(volume) {
-		glActiveTexture(GL_TEXTURE0);
-		volume->bind();
 	}
+}
 
-	if(tf) {
-		glActiveTexture(GL_TEXTURE1);
-		tf->bind();
+void ABufferSingleLinked::resolve() {
+
+	if(_resolveShader) {
+		ghoul::opengl::Texture* volume 	= nullptr;
+		ghoul::opengl::Texture* tf 		= nullptr;
+	    OsEng.configurationManager().getValue("firstVolume", volume);
+	    OsEng.configurationManager().getValue("firstTransferFunction", tf);
+		_resolveShader->activate();
+
+		if(volume) {
+			glActiveTexture(GL_TEXTURE0);
+			volume->bind();
+		}
+
+		if(tf) {
+			glActiveTexture(GL_TEXTURE1);
+			tf->bind();
+		}
+		//LDEBUG("SCREEN_WIDTH" << width);
+	    glBindVertexArray(_screenQuad);
+	    glDrawArrays(GL_TRIANGLES, 0, 6);
+		_resolveShader->deactivate();
 	}
-	//resolveShader->setUniform("SCREEN_WIDTH", width);
-	//resolveShader->setUniform("SCREEN_HEIGHT", height);
-    glBindVertexArray(_screenQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-	resolveShader->deactivate();
+	
+}
+
+bool ABufferSingleLinked::updateShader() {
+
+	using ghoul::opengl::ShaderObject;
+    using ghoul::opengl::ProgramObject;
+    ShaderObject* vs
+          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
+                             absPath("${SHADERS}/ABuffer/abufferResolveVertex.glsl"), "Vertex");
+    ShaderObject* fs
+          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,_fragmentShaderPath, "Fragment");
+
+    ghoul::opengl::ProgramObject* resolveShader = new ProgramObject;
+    resolveShader->attachObject(vs);
+    resolveShader->attachObject(fs);
+
+    if (!resolveShader->compileShaderObjects()) {
+    	LERROR("Could not compile shader");
+        return false;
+    }
+    if (!resolveShader->linkProgramObject()){
+    	LERROR("Could not link shader");
+        return false;
+    }
+	resolveShader->setUniform("volume", 0);
+	resolveShader->setUniform("transferFunction", 1);
+	resolveShader->setUniform("SCREEN_WIDTH", static_cast<int>(width));
+	resolveShader->setUniform("SCREEN_HEIGHT", static_cast<int>(height));
+
+	if(_resolveShader)
+		delete _resolveShader;
+
+	_resolveShader = resolveShader;
+	LDEBUG("Successfully updated shader!");
+	return true;
+}
+
+void ABufferSingleLinked::generateShaderSource() {
+	std::string line, source = "";
+	std::ifstream fragmentShaderFile(_fragmentShaderFile->path());
+	if(fragmentShaderFile.is_open()) {
+		while(std::getline(fragmentShaderFile, line)) {
+			if(line == "#pragma openspace insert HEADERS") {
+				line = openspaceHeaders;
+			} else if(line == "#pragma openspace insert SAMPLERCALLS") {
+				line = openspaceSamplerCalls;
+			} else if(line == "#pragma openspace insert SAMPLERS") {
+				line = openspaceSamplers;
+			}
+			source += line + "\n";
+		}
+	}
+	fragmentShaderFile.close();
+
+	std::ofstream fragmentShaderOut(_fragmentShaderPath);
+	fragmentShaderOut << source;
+	fragmentShaderOut.close();
 }
 
 } // openspace

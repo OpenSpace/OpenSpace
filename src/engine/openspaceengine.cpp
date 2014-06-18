@@ -124,9 +124,9 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
 
 bool OpenSpaceEngine::findConfiguration(std::string& filename)
 {
-    if (!filename.empty())
+    if (!filename.empty()) {
         return FileSys.fileExists(filename);
-    else {
+    } else {
         std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
         size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
                                         ghoul::filesystem::FileSystem::PathSeparator);

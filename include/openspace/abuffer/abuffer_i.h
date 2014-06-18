@@ -38,6 +38,7 @@ public:
 	virtual void clear() = 0;
 	virtual void preRender() = 0;
 	virtual void postRender() = 0;
+	virtual void resolve() = 0;
 
 };		// ABuffer_I
 }		// openspace

@@ -28,6 +28,7 @@
 #include <openspace/abuffer/abuffer_i.h>
 
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/file.h>
 
 namespace openspace {
 
@@ -41,6 +42,7 @@ public:
 	virtual void clear();
 	virtual void preRender();
 	virtual void postRender();
+	virtual void resolve();
 
 private:
 
@@ -55,7 +57,13 @@ private:
 	GLuint fragmentTexture;
 	GLuint _screenQuad;
 
-	ghoul::opengl::ProgramObject* resolveShader;
+	ghoul::opengl::ProgramObject* _resolveShader;
+	ghoul::filesystem::File* _fragmentShaderFile;
+	std::string _fragmentShaderPath;
+	bool _updateShader;
+
+	void generateShaderSource();
+	bool updateShader();
 
 }; 		// ABuffer_I
 } 		// openspace

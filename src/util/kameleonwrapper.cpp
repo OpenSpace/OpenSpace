@@ -94,16 +94,27 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
 
 	int size = outDimensions.x*outDimensions.y*outDimensions.z;
 	float* data = new float[size];
+	double* doubleData = new double[size];
 
-	float varMin =  _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
-	float varMax =  _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-
-	float stepX = (_xMax-_xMin)/(static_cast<float>(outDimensions.x));
-	float stepY = (_yMax-_yMin)/(static_cast<float>(outDimensions.y));
-	float stepZ = (_zMax-_zMin)/(static_cast<float>(outDimensions.z));
+	double varMin =  _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
+	double varMax =  _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
+	
+	double stepX = (_xMax-_xMin)/(static_cast<double>(outDimensions.x));
+	double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
+	double stepZ = (_zMax-_zMin)/(static_cast<double>(outDimensions.z));
     
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
+
+    // HISTOGRAM
+    const int bins = 200;
+    const float truncLim = 0.9;
+    std::vector<int> histogram (bins,0);
+    auto mapToHistogram = [varMin, varMax, bins](double val) {
+    	double zeroToOne = (val-varMin)/(varMax-varMin);
+    	zeroToOne *= static_cast<double>(bins);
+    	return static_cast<int>(zeroToOne);
+    };
     
     for (int x = 0; x < outDimensions.x; ++x) {
     	progressBar(x, outDimensions.x);
@@ -114,35 +125,37 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                 int index = x + y*outDimensions.x + z*outDimensions.x*outDimensions.y;
                 
                 if(_type == Model::BATSRUS) {
-                    float xPos = _xMin + stepX*x;
-                    float yPos = _yMin + stepY*y;
-                    float zPos = _zMin + stepZ*z;
+                    double xPos = _xMin + stepX*x;
+                    double yPos = _yMin + stepY*y;
+                    double zPos = _zMin + stepZ*z;
                     
                     // get interpolated data value for (xPos, yPos, zPos)
-                    float value = _interpolator->interpolate(var, xPos, yPos, zPos);
+                    double value = _interpolator->interpolate(var, xPos, yPos, zPos);
                     
                     // scale to [0,1]
-                    data[index] = (value-varMin)/(varMax-varMin);
+                    //doubleData[index] = (value-varMin)/(varMax-varMin);
+                    doubleData[index] = value;
+					histogram[mapToHistogram(value)]++;
                 } else if (_type == Model::ENLIL) {
                     
                     // Put r in the [0..sqrt(3)] range
-                    float rNorm = sqrt(3.0)*(float)x/(float)(outDimensions.x-1);
+                    double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
                     
                     // Put theta in the [0..PI] range
-                    float thetaNorm = M_PI*(float)y/(float)(outDimensions.y-1);
+                    double thetaNorm = M_PI*(double)y/(double)(outDimensions.y-1);
                     
                     // Put phi in the [0..2PI] range
-                    float phiNorm = 2.0*M_PI*(float)z/(float)(outDimensions.z-1);
+                    double phiNorm = 2.0*M_PI*(double)z/(double)(outDimensions.z-1);
                     
                     // Go to physical coordinates before sampling
-                    float rPh = _xMin + rNorm*(_xMax-_xMin);
-                    float thetaPh = thetaNorm;
+                    double rPh = _xMin + rNorm*(_xMax-_xMin);
+                    double thetaPh = thetaNorm;
                     // phi range needs to be mapped to the slightly different model
                     // range to avoid gaps in the data Subtract a small term to
                     // avoid rounding errors when comparing to phiMax.
-                    float phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
+                    double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
                     
-                    float varValue = 0.f;
+                    double varValue = 0.f;
                     // See if sample point is inside domain
                     if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
                         thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
@@ -163,13 +176,37 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                         varValue = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
                     }
 
-                    data[index] = (varValue-varMin)/(varMax-varMin);
+                    doubleData[index] = (varValue-varMin)/(varMax-varMin);
                 }
 			}
 		}
 	}
     std::cout << std::endl;
     LINFO("Done!");
+
+    int sum = 0;
+    int stop;
+    const int sumuntil = size * truncLim;
+    for(int i = 0; i < bins-1; ++i) {
+    	sum += histogram[i];
+    	if(sum + histogram[i+1] > sumuntil) {
+    		stop = i;
+    		LDEBUG("====================");
+    		break;
+    	}
+    	LDEBUG(histogram[i]);
+    }
+
+    double dist = varMax - varMin;
+    dist = (dist / static_cast<double>(bins)) * static_cast<double>(stop);
+
+	varMax = varMin + dist;
+    for(int i = 0; i < size; ++i) {
+    	double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
+
+    	data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
+    }
+    delete[] doubleData;
 
 	return data;
 }

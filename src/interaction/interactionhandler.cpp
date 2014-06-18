@@ -307,22 +307,22 @@ void InteractionHandler::keyboardCallback(int key, int action) {
     const double dt = getDt();
 
     if(action == SGCT_PRESS || action == SGCT_REPEAT) {
-	    if (key == 'S') {
+	    if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
 	    }
-	    if (key == 'W') {
+	    if (key == SGCT_KEY_W) {
 	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
 	    }
-	    if (key == 'A') {
+	    if (key == SGCT_KEY_A) {
 	        glm::vec3 euler(0.0, -speed * dt, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
 	    }
-	    if (key == 'D') {
+	    if (key == SGCT_KEY_D) {
 	        glm::vec3 euler(0.0, speed * dt, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
@@ -347,19 +347,19 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        glm::quat rot = glm::quat(euler);
 	        rotate(rot);
 	    }
-	    if (key == 'R') {
+	    if (key == SGCT_KEY_R) {
 	        PowerScaledScalar dist(-speed * dt, 0.0);
 	        distance(dist);
 	    }
-	    if (key == 'F') {
+	    if (key == SGCT_KEY_F) {
 	        PowerScaledScalar dist(speed * dt, 0.0);
 	        distance(dist);
 	    }
-	    if (key == 'T') {
+	    if (key == SGCT_KEY_T) {
 	        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
 	        distance(dist);
 	    }
-	    if (key == 'G') {
+	    if (key == SGCT_KEY_G) {
 	        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
 	        distance(dist);
 	    }
@@ -417,6 +417,15 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseScrollCallback(pos);
     //}
+    const double speed = 4.75;
+    const double dt = getDt();
+    if(pos < 0) {
+	    PowerScaledScalar dist(speed * dt, 0.0);
+	    distance(dist);
+    } else if(pos > 0) {
+	    PowerScaledScalar dist(-speed * dt, 0.0);
+	    distance(dist);
+    }
 }
 
 

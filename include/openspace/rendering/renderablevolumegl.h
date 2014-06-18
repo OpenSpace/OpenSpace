@@ -58,24 +58,19 @@ public:
 
 private:
 	ghoul::Dictionary _hintsDictionary;
+
     std::string _filename;
     std::string _transferFunctionPath;
-    float _stepSize;
+    
+    ghoul::filesystem::File* _transferFunctionFile;
+
 	ghoul::opengl::Texture* _volume;
 	ghoul::opengl::Texture* _transferFunction;
-	ghoul::opengl::ProgramObject* _twopassProgram;
-	GLuint _screenQuad;
 
 	VolumeRaycasterBox* _colorBoxRenderer;
 	glm::vec3 _boxScaling;
     
-    std::mutex* _shaderMutex;
-    
-    ghoul::filesystem::File* _vertexSourceFile;
-    ghoul::filesystem::File* _fragmentSourceFile;
-    bool _programUpdateOnSave;
-    
-    void safeShaderCompilation();
+    bool _updateTransferfunction;
 };
 
 } // namespace openspace

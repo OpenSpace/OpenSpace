@@ -1,17 +1,28 @@
 #version 430
 
-// uniforms
-uniform sampler3D volume;
-uniform sampler1D transferFunction;
+uniform int SCREEN_WIDTH;
+uniform int SCREEN_HEIGHT;
+uniform float ALPHA_LIMIT = 0.95;
 
 in vec2 texCoord;
 out vec4 color;
 
 // settings
-#define ALPHA_LIMIT 0.98
-#define LOOP_LIMIT 200
+#define LOOP_LIMIT 800
 #define MAX_FRAGMENTS 16
-#define MAX_VOLUMES 4
+#define SHOWFUNC
+
+// GENERATED CONTENT
+#pragma openspace insert HEADERS
+// END GENERATED CONTENT
+
+
+const float stepSize = 0.01;
+const float samplingRate = 1.0;
+float volumeStepSize[] = {
+	stepSize
+};
+
 
 #include "abufferStruct.hglsl"
 ABufferStruct_t fragments[MAX_FRAGMENTS];
@@ -49,8 +60,22 @@ void blendGeometry(inout vec4 color, ABufferStruct_t frag) {
 }
 */
 
+float globz(float z) {
+	return z;
+	// return log(2.0*z-1.0);
+	// return exp(2.0*z-1.0);
+	// const float zNear = 0.1f;
+	// const float zFar = 1.0f;
+	// //float z_b = texture2D(depthBuffTex, vTexCoord).x;
+	// float z_b = z;
+ //    float z_n = 2.0 * z_b - 1.0;
+ //    float z_e = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+	// return z_e;
+	//return (2.0 * z - near - far) / (far - near);
+}
+
 vec4 calculate_final_color(uint frag_count) {
-	
+	// volumeStepSize[volID] = 0.01;
 	int currentVolumeBitmask = 0;
 	vec4 final_color = vec4(0);
 
@@ -72,19 +97,23 @@ vec4 calculate_final_color(uint frag_count) {
 		currentVolumeBitmask = currentVolumeBitmask ^ (type);
 		
 		if(type == 0)
+			//blendStep(final_color, _col_(startFrag), stepSize);
 			final_color = blend(final_color, _col_(startFrag));
 
 		if(bool(currentVolumeBitmask)) {
 			int volID = type -1;
 			float p = 0.0f;
 
-			const float stepSize = 0.01;
 			//const float l = volume_length[volID];
 			const float S1 = volume_zlength[volID].x;
 			const float S2 = volume_zlength[volID].y;
 			const float L = S1 - S2;
-			const float l = (_z_(startFrag) - S1) / L - (_z_(endFrag) - S1) / L;
-			const vec3 direction = volume_direction[volID];
+			const float z1 = globz(_z_(startFrag));
+			const float z2 = globz(_z_(endFrag));
+			// const float z1 = _z_(startFrag);
+			// const float z2 = _z_(endFrag);
+			const float l = ((z1 - S1) / L - (z2 - S1) / L) * volume_length[volID];
+			int max_iterations = int(l / volumeStepSize[volID]);
 			int iterations = 0;
 			vec3 position;
 			
@@ -104,15 +133,18 @@ vec4 calculate_final_color(uint frag_count) {
 
 			// TransferFunction
 			vec4 color = vec4(0);
-			float intensity;
-			while(p < l && iterations < LOOP_LIMIT) {
-				intensity = length(texture(volume, volume_position[volID]));
-				color = 	texture(transferFunction, intensity);
-				blendStep(final_color, color, stepSize);
+			for(int k = 0; k < max_iterations && k < LOOP_LIMIT; ++k) {
+			//while(p < l && iterations < LOOP_LIMIT) {
+
+// GENERATED CONTENT
+#pragma openspace insert SAMPLERCALLS
+// END GENERATED CONTENT
+
 				//final_color = blend(final_color, color*stepSize);
-				p+= stepSize;
-				volume_position[volID] += direction*stepSize;
-				++iterations;
+
+				volume_position[volID] += volume_direction[volID]*volumeStepSize[volID];
+				//p+= stepSize;
+				//++iterations;
 			}
 			
 		}
@@ -125,13 +157,28 @@ vec4 calculate_final_color(uint frag_count) {
 		//	blendGeometry(final_color, endFrag);
 	
 		// final_color = blend(final_color, frag_color);
-		if(i == frag_count_1 -1 && _type_(endFrag) == 0)
+		 if(i == frag_count_1 -1 && _type_(endFrag) == 0)
+		 // if(i == frag_count_1 -1)
 			final_color = blend(final_color, _col_(endFrag));
 
 	}
 	// final_color = vec4(0);
 	// int id =3;
 	// if(id < frag_count)final_color = blend(final_color, _col_(fragments[id]));
+
+	// if(frag_count > 0)
+	// 	final_color = _col_(fragments[0]);
+#ifdef SHOWFUNC  
+  float showfunc_size = 20.0;
+  if(gl_FragCoord.y > float(SCREEN_HEIGHT) - showfunc_size) {
+    float normalizedIntensity = gl_FragCoord.x / float(SCREEN_WIDTH) ;
+    vec4 tfc = texture(transferFunction, normalizedIntensity);
+    final_color = tfc;
+  } else if(ceil(gl_FragCoord.y) == float(SCREEN_HEIGHT) - showfunc_size) {
+  	const float intensity = 0.4;
+  	final_color = vec4(intensity,intensity,intensity,1.0);
+  }
+#endif
 
 	return final_color;
 
@@ -149,3 +196,11 @@ void main() {
 
     //color = vec4(float(frag_count) / 5.0, 0.0, 0.0, 1.0);
 }
+
+// GENERATED CONTENT
+#pragma openspace insert SAMPLERS
+// END GENERATED CONTENT
+
+
+
+

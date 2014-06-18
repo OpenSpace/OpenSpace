@@ -176,6 +176,7 @@ void RenderEngine::render()
     _abuffer->preRender();
     _sceneGraph->render(_mainCamera);
     _abuffer->postRender();
+    _abuffer->resolve();
 /*
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {

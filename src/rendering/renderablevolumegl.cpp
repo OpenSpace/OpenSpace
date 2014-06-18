@@ -42,10 +42,9 @@ namespace {
 namespace openspace {
 
 RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
-    RenderableVolume(dictionary), _screenQuad(0), _boxScaling(1.0, 1.0, 1.0),
-    _programUpdateOnSave(false) {
+    RenderableVolume(dictionary), _boxScaling(1.0, 1.0, 1.0),
+    _updateTransferfunction(false) {
         
-    _shaderMutex = new std::mutex;
     
     _filename = "";
     if(dictionary.hasKey("Volume")) {
@@ -59,34 +58,8 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     if(dictionary.hasKey("Hints"))
         dictionary.getValue("Hints", _hintsDictionary);
 
-    std::string vshaderpath = "";
-    std::string fshaderpath = "";
-        
-    if (dictionary.hasKey("Shaders")) {
-        ghoul::Dictionary shaderDictionary;
-        if(dictionary.getValue("Shaders", shaderDictionary)) {
-            if (shaderDictionary.hasKey("VertexShader")) {
-                shaderDictionary.getValue("VertexShader", vshaderpath);
-            }
-            if (shaderDictionary.hasKey("FragmentShader")) {
-                shaderDictionary.getValue("FragmentShader", fshaderpath);
-            }
-            
-            vshaderpath = findPath(vshaderpath);
-            fshaderpath = findPath(fshaderpath);
-            
-            _vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
-            _fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
-            
-            _twopassProgram = new ghoul::opengl::ProgramObject("TwoPassProgram");
-            ghoul::opengl::ShaderObject* vertexShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeVertex,vshaderpath);
-            ghoul::opengl::ShaderObject* fragmentShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeFragment,fshaderpath);
-            _twopassProgram->attachObject(vertexShader);
-            _twopassProgram->attachObject(fragmentShader);
-        }
-    }
-
     _transferFunction = nullptr;
+    _transferFunctionFile = nullptr;
     if (dictionary.hasKey("TransferFunction")) {
         std::string transferFunctionPath = "";
         if(dictionary.getValue("TransferFunction", transferFunctionPath)) {
@@ -95,12 +68,10 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     }
     if( _transferFunctionPath == "") {
         LERROR("No transferFunction!");
+    } else {
+        _transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
     }
 
-    
-    if(dictionary.hasKey("UpdateOnSave")) {
-        dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
-    }
 
     double tempValue;
     if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
@@ -137,56 +108,14 @@ bool RenderableVolumeGL::initialize() {
     _transferFunction->uploadTexture();
     OsEng.configurationManager().setValue("firstVolume", _volume);
     OsEng.configurationManager().setValue("firstTransferFunction", _transferFunction);
-    //glBindImageTexture(2, *_volume, 0, GL_FALSE, 0, GL_READ_ONLY, _volume->type());
-    
-    //	------ SETUP GEOMETRY ----------------
-	const GLfloat size = 1.0f;
-	const GLfloat vertex_texcoord_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     s     t
-        -size, -size, 0.0f, 0.0f, 0.0f,
-        size,	size, 0.0f, 1.0f, 1.0f,
-        -size,  size, 0.0f, 0.0f, 1.0f,
-        -size, -size, 0.0f, 0.0f, 0.0f,
-        size, -size, 0.0f, 1.0f, 0.0f,
-        size,	size, 0.0f, 1.0f, 1.0f
+
+    auto textureCallback = [this](const ghoul::filesystem::File& file) {
+        _updateTransferfunction = true;
     };
-    
-	GLuint vertexPositionBuffer;
-	glGenVertexArrays(1, &_screenQuad); // generate array
-	glBindVertexArray(_screenQuad); // bind array
-	glGenBuffers(1, &vertexPositionBuffer); // generate buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_texcoord_data), vertex_texcoord_data, GL_STATIC_DRAW);
-    
-	// Vertex positions
-	GLuint vertexLocation = 2;
-	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), reinterpret_cast<void*>(0));
-    
-	// Texture coordinates
-	GLuint texcoordLocation = 0;
-	glEnableVertexAttribArray(texcoordLocation);
-	glVertexAttribPointer(texcoordLocation, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));
-    
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
-	glBindVertexArray(0); //unbind array
-    
+    _transferFunctionFile->setCallback(textureCallback);
+
 	_colorBoxRenderer->initialize();
     
-    //	------ SETUP SHADERS -----------------
-    auto privateCallback = [this](const ghoul::filesystem::File& file) {
-        safeShaderCompilation();
-    };
-    if(_programUpdateOnSave) {
-        _vertexSourceFile->setCallback(privateCallback);
-        _fragmentSourceFile->setCallback(privateCallback);
-    }
-    
-    _twopassProgram->compileShaderObjects();
-    _twopassProgram->linkProgramObject();
-    _twopassProgram->setUniform("texBack", 0);
-    _twopassProgram->setUniform("texFront", 1);
-    _twopassProgram->setUniform("texVolume", 2);
     
     return true;
 }
@@ -196,7 +125,20 @@ bool RenderableVolumeGL::deinitialize() {
 }
 
 void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
-    _stepSize = 0.01f;
+    if(_updateTransferfunction) {
+        _updateTransferfunction = false;
+        ghoul::opengl::Texture* transferFunction = loadTransferFunction(_transferFunctionPath);
+        if(transferFunction) {
+            const void* data = transferFunction->pixelData();
+            glBindBuffer(GL_COPY_READ_BUFFER, *transferFunction);
+            _transferFunction->bind();
+            glTexImage1D(GL_TEXTURE_1D, 0, _transferFunction->internalFormat(), _transferFunction->width(),0, _transferFunction->format(), _transferFunction->dataType(), data);
+            //delete data;
+            delete transferFunction;
+            LDEBUG("Updated transferfunction!");
+
+        }
+    }
 
     glm::mat4 transform ;
     glm::mat4 camTransform = camera->viewRotationMatrix();
@@ -208,44 +150,12 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     transform = glm::scale(transform, _boxScaling);
 
     _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform);
-	/*
-	//	Draw screenquad
-    _shaderMutex->lock();
-	_twopassProgram->activate();
-	_twopassProgram->setUniform("stepSize", _stepSize);
-    
-	//	 Set textures
-	glActiveTexture(GL_TEXTURE0);
-	_colorBoxRenderer->backFace()->bind();
-	glActiveTexture(GL_TEXTURE1);
-	_colorBoxRenderer->frontFace()->bind();
-	glActiveTexture(GL_TEXTURE2);
-	_volume->bind();
-    
-	glBindVertexArray(_screenQuad);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
-    
-	_twopassProgram->deactivate();
-    _shaderMutex->unlock();
-    */
+
 }
 
 void RenderableVolumeGL::update() {
     
 }
 
-void RenderableVolumeGL::safeShaderCompilation() {
-    /*
-    _shaderMutex->lock();
-    _twopassProgram->rebuildFromFile();
-    _twopassProgram->compileShaderObjects();
-    _twopassProgram->linkProgramObject();
-    _twopassProgram->setUniform("texBack", 0);
-    _twopassProgram->setUniform("texFront", 1);
-    _twopassProgram->setUniform("texVolume", 2);
-    _shaderMutex->unlock();
-    */
-}
 
 } // namespace openspace

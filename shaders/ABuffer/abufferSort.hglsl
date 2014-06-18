@@ -56,8 +56,8 @@ void sort_fragments_list(uint frag_count) {
 		bool start = true;
 		vec3 startColor;
 		vec4 startPosition;
-		for(jj = 0; jj < frag_count; ++jj) {
-			int type = int(_type_(fragments[jj])) -1;
+		for(jj = ii; jj < frag_count; ++jj) {
+			int type = int(_type_(fragments[jj])) - 1;
 			if(type== ii) {
 				if(start) {
 					startColor = _col_(fragments[jj]).rgb;
@@ -66,10 +66,11 @@ void sort_fragments_list(uint frag_count) {
 					start = false;
 				} else {
 					vec3 dir = _col_(fragments[jj]).rgb - startColor;
-					volume_direction[ii] = normalize(dir);
 					volume_position[ii] = startColor;
 					volume_length[ii] = length(dir);
+					volume_direction[ii] = normalize(dir);
 					volume_zlength[ii].y = _z_(fragments[jj]);
+					volumeStepSize[ii] = 1.0/(length(volume_direction[ii]*volume_dim[ii]));
 					//volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 					break;
 				}
