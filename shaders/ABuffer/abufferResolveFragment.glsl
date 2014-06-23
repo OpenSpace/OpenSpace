@@ -1,39 +1,73 @@
+/*****************************************************************************************
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014                                                                    *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
+
 #version 430
+
+// ================================================================================
+// Settings
+// ================================================================================
+#pragma openspace insert SETTINGS
+#define LOOP_LIMIT 800
+#define MAX_FRAGMENTS 16
+#define SHOWFUNC
+const float stepSize = 0.01;
+const float samplingRate = 1.0;
 
 uniform int SCREEN_WIDTH;
 uniform int SCREEN_HEIGHT;
-uniform float ALPHA_LIMIT = 0.95;
+uniform float ALPHA_LIMIT = 0.98;
 
 in vec2 texCoord;
 out vec4 color;
 
-// settings
-#define LOOP_LIMIT 800
-#define MAX_FRAGMENTS 16
-#define SHOWFUNC
-
-// GENERATED CONTENT
+// ================================================================================ 
+// Headers, 
+// volume and transferfunctions uniforms
+// ================================================================================
 #pragma openspace insert HEADERS
-// END GENERATED CONTENT
 
 
-const float stepSize = 0.01;
-const float samplingRate = 1.0;
 float volumeStepSize[] = {
 	stepSize
 };
 
-
+// ================================================================================
+// The ABuffer specific includes and definitions
+// ================================================================================
 #include "abufferStruct.hglsl"
 ABufferStruct_t fragments[MAX_FRAGMENTS];
 vec3 volume_direction[MAX_VOLUMES];
 float volume_length[MAX_VOLUMES];
 vec2 volume_zlength[MAX_VOLUMES];
+// float volume_zlength[MAX_VOLUMES];
 vec3 volume_position[MAX_VOLUMES];
 
 #include "abufferSort.hglsl"
 
-
+// ================================================================================
+// Blend functions
+// ================================================================================
 vec4 blend(vec4 src, vec4 dst) {
 	vec4 o;
 	o.a = src.a + dst.a * (1.0f - src.a);
@@ -104,7 +138,7 @@ vec4 calculate_final_color(uint frag_count) {
 			int volID = type -1;
 			float p = 0.0f;
 
-			//const float l = volume_length[volID];
+			// const float l = volume_length[volID];
 			const float S1 = volume_zlength[volID].x;
 			const float S2 = volume_zlength[volID].y;
 			const float L = S1 - S2;
@@ -116,6 +150,21 @@ vec4 calculate_final_color(uint frag_count) {
 			int max_iterations = int(l / volumeStepSize[volID]);
 			int iterations = 0;
 			vec3 position;
+
+
+			// const float S1 = volume_zlength[volID].x;
+			// const float S2 = volume_zlength[volID].y;
+
+			// const float L = volume_zlength[volID];
+			// const vec4 p1 = _pos_(startFrag);
+			// const vec4 p2 = _pos_(endFrag);
+			// const float dist = pscLength(p1, p2);
+			// // const float z1 = _z_(startFrag);
+			// // const float z2 = _z_(endFrag);
+			// const float l = (dist / L) * volume_length[volID];
+			// int max_iterations = int(l / volumeStepSize[volID]);
+			// int iterations = 0;
+			// vec3 position;
 			
 			// MIP
 			// vec4 tmp, color = vec4(0);
@@ -136,13 +185,11 @@ vec4 calculate_final_color(uint frag_count) {
 			for(int k = 0; k < max_iterations && k < LOOP_LIMIT; ++k) {
 			//while(p < l && iterations < LOOP_LIMIT) {
 
-// GENERATED CONTENT
 #pragma openspace insert SAMPLERCALLS
-// END GENERATED CONTENT
 
 				//final_color = blend(final_color, color*stepSize);
 
-				volume_position[volID] += volume_direction[volID]*volumeStepSize[volID];
+				//volume_position[volID] += volume_direction[volID]*volumeStepSize[volID];
 				//p+= stepSize;
 				//++iterations;
 			}
@@ -168,38 +215,48 @@ vec4 calculate_final_color(uint frag_count) {
 
 	// if(frag_count > 0)
 	// 	final_color = _col_(fragments[0]);
+
+// ================================================================================
+// Transferfunction visualizer
+// ================================================================================
 #ifdef SHOWFUNC  
-  float showfunc_size = 20.0;
-  if(gl_FragCoord.y > float(SCREEN_HEIGHT) - showfunc_size) {
-    float normalizedIntensity = gl_FragCoord.x / float(SCREEN_WIDTH) ;
-    vec4 tfc = texture(transferFunction, normalizedIntensity);
-    final_color = tfc;
-  } else if(ceil(gl_FragCoord.y) == float(SCREEN_HEIGHT) - showfunc_size) {
-  	const float intensity = 0.4;
-  	final_color = vec4(intensity,intensity,intensity,1.0);
-  }
+	float showfunc_size = 20.0;
+	if(gl_FragCoord.y > float(SCREEN_HEIGHT) - showfunc_size) {
+		float normalizedIntensity = gl_FragCoord.x / float(SCREEN_WIDTH) ;
+		vec4 tfc = texture(transferFunction1, normalizedIntensity);
+		final_color = tfc;
+	} else if(ceil(gl_FragCoord.y) == float(SCREEN_HEIGHT) - showfunc_size) {
+		const float intensity = 0.4;
+		final_color = vec4(intensity,intensity,intensity,1.0);
+	}
 #endif
+
+	// if(frag_count == 1) {
+	// 	final_color = vec4(0.0,0.0,1.0,1.0);
+	// } else if(frag_count == 2) {
+	// 	final_color = vec4(volume_direction[0],1.0);
+	// } else {
+	// 	final_color = vec4(1.0,1.0,1.0,1.0);
+	// }
 
 	return final_color;
 
 }
 
-
+// ================================================================================
+// Main function
+// ================================================================================
 void main() {
     color = vec4(texCoord,0.0,1.0);
     int frag_count = build_local_fragments_list();
     sort_fragments_list(frag_count);
-
-
-
     color = calculate_final_color(frag_count);
-
-    //color = vec4(float(frag_count) / 5.0, 0.0, 0.0, 1.0);
 }
 
-// GENERATED CONTENT
+// ================================================================================
+// 	The samplers implementations
+// ================================================================================
 #pragma openspace insert SAMPLERS
-// END GENERATED CONTENT
 
 
 

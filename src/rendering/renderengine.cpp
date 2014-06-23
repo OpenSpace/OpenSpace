@@ -55,6 +55,7 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::initialize()
 {
+    // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
@@ -71,6 +72,7 @@ bool RenderEngine::initialize()
 
 bool RenderEngine::initializeGL()
 {
+    // LDEBUG("RenderEngine::initializeGL()");
     sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
 
     // TODO:    Fix the power scaled coordinates in such a way that these values can be

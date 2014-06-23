@@ -1,10 +1,5 @@
 
-// texture bindings
-layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
-layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
-
-// atomic buffer bindings
-layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
+#include "abufferAddToBuffer.hglsl"
 
 int build_local_fragments_list() {
 	uint current;
@@ -13,7 +8,7 @@ int build_local_fragments_list() {
 	current = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
 
 	while(current != 0 && frag_count < MAX_FRAGMENTS) {
-		ABufferStruct_t item = _ABufferStruct_t_(imageLoad(fragmentTexture, int(current)));
+		ABufferStruct_t item = loadFromBuffer(current);
 		current = _next_(item);
 
 		fragments[frag_count] = item;
@@ -70,8 +65,9 @@ void sort_fragments_list(uint frag_count) {
 					volume_length[ii] = length(dir);
 					volume_direction[ii] = normalize(dir);
 					volume_zlength[ii].y = _z_(fragments[jj]);
+					// volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 					volumeStepSize[ii] = 1.0/(length(volume_direction[ii]*volume_dim[ii]));
-					//volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+					// volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 					break;
 				}
 			}

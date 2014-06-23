@@ -275,7 +275,6 @@ bool OpenSpaceEngine::initialize()
     _renderEngine->initialize();
     sceneGraph->loadScene(sceneDescriptionPath, scenePath);
     sceneGraph->initialize();
-    _renderEngine->setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY
     _flare = new Flare();

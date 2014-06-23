@@ -5,12 +5,22 @@
 //=======================================================
 // ABufferStruct_t declaration
 //=======================================================
+// struct ABufferStruct_t { 
+// 	uint z;			// the depth value
+// 	uint id;		// bits 0-28 next, bits 29-32 type
+// 	vec4 color;		// packed rgba
+// 	//vec4 position;		// packed position
+// 	// uint padding1;
+// 	// uint padding2;
+// };
 struct ABufferStruct_t { 
 	uint z;			// the depth value
 	uint id;		// bits 0-28 next, bits 29-32 type
-	uint color;		// packed rgba
-	uint position;		// packed position
+	uint rg;		// packed red  green color
+	uint ba;		// packed blue alpha color
+	vec4 position;	// position
 };
+
 
 //=======================================================
 // Bitwise operations
@@ -78,17 +88,23 @@ void _next_(inout ABufferStruct_t frag, uint id) {
 }
 
 vec4 _pos_(ABufferStruct_t frag) {
-	return unpackUnorm4x8(frag.position);
+	// return vec4(0.0,0.0,0.0,0.0);
+	return frag.position;
+	//return unpackUnorm4x8(frag.position);
 }
 void _pos_(inout ABufferStruct_t frag, vec4 position) {
-	frag.position = packUnorm4x8(position);
+	frag.position = position;
+	// frag.position = packUnorm4x8(position);
 }
 
 vec4 _col_(ABufferStruct_t frag) {
-	return unpackUnorm4x8(frag.color);
+	return vec4(unpackUnorm2x16(frag.rg),unpackUnorm2x16(frag.ba));
+	//return unpackUnorm4x8(frag.color);
 }
 void _col_(inout ABufferStruct_t frag, vec4 color) {
-	frag.color = packUnorm4x8(color);
+	frag.rg = packUnorm2x16(color.rg);
+	frag.ba = packUnorm2x16(color.ba);
+	//frag.color = packUnorm4x8(color);
 }
 
 uint _type_(ABufferStruct_t frag) {
@@ -100,10 +116,4 @@ void _type_(inout ABufferStruct_t frag, uint type) {
 	//frag.type = type;
 }
 
-ABufferStruct_t _ABufferStruct_t_(uvec4 frag) {
-	return ABufferStruct_t(frag.x, frag.y, frag.z, frag.w);
-};
-uvec4 _uvec4_(ABufferStruct_t frag) {
-	return uvec4(frag.z, frag.id, frag.color, frag.position);
-};
 #endif

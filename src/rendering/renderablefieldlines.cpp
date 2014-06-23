@@ -34,8 +34,7 @@ namespace {
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) :
-			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false) {
-	_shaderMutex = new std::mutex;
+			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false),_update(false) {
 
 	if(dictionary.hasKey("Fieldlines")) {
 		ghoul::Dictionary fieldlines;
@@ -177,8 +176,9 @@ bool RenderableFieldlines::initialize() {
 
 	//	------ SETUP SHADERS -----------------
 	auto privateCallback = [this](const ghoul::filesystem::File& file) {
-		safeShaderCompilation();
+		_update = true;
 	};
+
 	if(_programUpdateOnSave) {
 		_vertexSourceFile->setCallback(privateCallback);
 		_fragmentSourceFile->setCallback(privateCallback);
@@ -186,9 +186,6 @@ bool RenderableFieldlines::initialize() {
 
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
-
-	//_seedpointsProgram->compileShaderObjects();
-	//_seedpointsProgram->linkProgramObject();
 
 	return true;
 }
@@ -198,6 +195,12 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition) {
+
+	if(_update) {
+		_update = false;
+		safeShaderCompilation();
+	}
+
 	glm::mat4 transform = camera->viewProjectionMatrix();
 	glm::mat4 camTransform = camera->viewRotationMatrix();
 	psc relative = thisPosition-camera->position();
@@ -208,43 +211,33 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
 	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
 
-
-	//	------ FIELDLINES -----------------
-	_shaderMutex->lock();
+	// Activate shader
 	_fieldlinesProgram->activate();
 	_fieldlinesProgram->setUniform("modelViewProjection", transform);
 
+	//	------ FIELDLINES -----------------
 	glBindVertexArray(_VAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
 	glBindVertexArray(0);
 
-	_fieldlinesProgram->deactivate();
-	_shaderMutex->unlock();
-/*
 	//	------ SEEDPOINTS -----------------
-	_shaderMutex->lock();
-	_seedpointsProgram->activate();
-	_seedpointsProgram->setUniform("modelViewProjection", transform);
+	// glBindVertexArray(_seedpointVAO);
+	// glPointSize(5);
+	// glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
+	// glBindVertexArray(0);
 
-	glBindVertexArray(_seedpointVAO);
-	glPointSize(5);
-	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
-	glBindVertexArray(0);
 
-	_seedpointsProgram->deactivate();
-	_shaderMutex->unlock();
-*/
+	// Deactivate shader
+	_fieldlinesProgram->deactivate();
 }
 
 void RenderableFieldlines::update() {
 }
 
 void RenderableFieldlines::safeShaderCompilation() {
-	_shaderMutex->lock();
 	_fieldlinesProgram->rebuildFromFile();
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
-	_shaderMutex->unlock();
 }
 
 std::vector<std::vector<glm::vec3> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {

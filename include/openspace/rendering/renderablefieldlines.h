@@ -32,12 +32,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/filesystem/file.h>
 
-#ifdef __APPLE__
-    #include <memory>
-#else
-    #include <mutex>
-#endif
-
 namespace openspace {
 
 class RenderableFieldlines : public Renderable {
@@ -61,8 +55,6 @@ private:
 	ghoul::opengl::ProgramObject *_fieldlinesProgram, *_seedpointsProgram;
 	GLuint _VAO, _seedpointVAO;
 
-	std::mutex* _shaderMutex;
-
 	ghoul::filesystem::File* _vertexSourceFile;
 	ghoul::filesystem::File* _fragmentSourceFile;
 
@@ -70,6 +62,7 @@ private:
 	std::vector<GLsizei> _lineCount, _seedpointCount;
 
 	bool _programUpdateOnSave;
+	bool _update;
 	void safeShaderCompilation();
 };
 

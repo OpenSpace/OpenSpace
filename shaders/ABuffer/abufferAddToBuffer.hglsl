@@ -3,10 +3,38 @@ layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
 
+ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position = vec4(0), float z = gl_FragCoord.z) {
+	ABufferStruct_t frag;
+	_col_(frag, fragColor);
+	_z_(frag, z);
+	_type_(frag, 0);
+	_pos_(frag, position);
+	return frag;
+}
+
 void addToBuffer(ABufferStruct_t frag) {
 
 	uint index = atomicCounterIncrement(atomicCounterBuffer);
+	index *= 2;
     uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
     _next_(frag,old_head);
-	imageStore(fragmentTexture, int(index), _uvec4_(frag));
+
+    uvec4 p1 = uvec4(frag.z, frag.id, frag.rg, frag.ba);
+    uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
+
+	imageStore(fragmentTexture, int(index), p1);
+	imageStore(fragmentTexture, int(index+1), p2);
+}
+
+ABufferStruct_t loadFromBuffer(uint id) {
+
+	uvec4 u1 = imageLoad(fragmentTexture, int(id));
+	uvec4 u2 = imageLoad(fragmentTexture, int(id+1));
+	
+	vec4 position = vec4(	uintBitsToFloat(u2.x),
+						uintBitsToFloat(u2.y),
+						uintBitsToFloat(u2.z),
+						uintBitsToFloat(u2.w));
+	
+	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w, position);
 }

@@ -22,22 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFER_I_H__
-#define __ABUFFER_I_H__
+#ifndef __ABUFFER_H__
+#define __ABUFFER_H__
+
+#include <openspace/abuffer/abuffer_i.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/file.h>
+
+namespace ghoul {
+	namespace opengl {
+		class Texture;
+	}
+}
 
 namespace openspace {
 
-class ABuffer_I {
+class ABuffer: public ABuffer_I {
 public:
-	virtual ~ABuffer_I() {};
-	virtual bool initialize() = 0;
+	ABuffer();
+	virtual ~ABuffer() {};
+	virtual void resolve();
 
-	virtual void clear() = 0;
-	virtual void preRender() = 0;
-	virtual void postRender() = 0;
-	virtual void resolve() = 0;
+protected:
+	virtual std::string settings() = 0;
 
-};		// ABuffer_I
+	bool initializeABuffer();
+
+	void generateShaderSource();
+	bool updateShader();
+
+	std::string openspaceHeaders();
+	std::string openspaceSamplerCalls();
+	std::string openspaceSamplers();
+
+	unsigned int _width, _height, _totalPixels;
+	GLuint _screenQuad;
+
+	bool _validShader;
+	std::string _fragmentShaderPath;
+	ghoul::filesystem::File* _fragmentShaderFile;
+	ghoul::opengl::ProgramObject* _resolveShader;
+
+	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
+	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;
+	std::vector<std::string> _samplers;
+
+private:
+
+
+
+};		// ABuffer
 }		// openspace
 
-#endif 	// __ABUFFER_I_H__
+#endif 	// __ABUFFER_H__

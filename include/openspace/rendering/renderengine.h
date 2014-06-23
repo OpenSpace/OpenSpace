@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 
-#include <openspace/abuffer/abuffer_i.h>
+#include <openspace/abuffer/abuffer.h>
 
 namespace openspace {
 
@@ -61,7 +61,7 @@ private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
 
-	ABuffer_I* _abuffer;
+	ABuffer* _abuffer;
 };
 
 } // namespace openspace

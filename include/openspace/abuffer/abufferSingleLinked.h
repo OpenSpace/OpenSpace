@@ -25,14 +25,11 @@
 #ifndef __ABUFFERSINGLELINKED_H__
 #define __ABUFFERSINGLELINKED_H__
 
-#include <openspace/abuffer/abuffer_i.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/abuffer/abuffer.h>
 
 namespace openspace {
 
-class ABufferSingleLinked: public ABuffer_I {
+class ABufferSingleLinked: public ABuffer {
 public:
 
 	ABufferSingleLinked();
@@ -42,28 +39,20 @@ public:
 	virtual void clear();
 	virtual void preRender();
 	virtual void postRender();
-	virtual void resolve();
+
+	virtual std::string settings();
 
 private:
 
+	GLuint *_data;
+	GLuint _anchorPointerTexture;
+	GLuint _anchorPointerTextureInitializer;
+	GLuint _atomicCounterBuffer;
+	GLuint _fragmentBuffer;
+	GLuint _fragmentTexture;
 
-	unsigned int width, height, totalPixels, maxFragments;
 
-	GLuint *data;
-	GLuint anchorPointerTexture;
-	GLuint anchorPointerTextureInitializer;
-	GLuint atomicCounterBuffer;
-	GLuint fragmentBuffer;
-	GLuint fragmentTexture;
-	GLuint _screenQuad;
 
-	ghoul::opengl::ProgramObject* _resolveShader;
-	ghoul::filesystem::File* _fragmentShaderFile;
-	std::string _fragmentShaderPath;
-	bool _updateShader;
-
-	void generateShaderSource();
-	bool updateShader();
 
 }; 		// ABuffer_I
 } 		// openspace
