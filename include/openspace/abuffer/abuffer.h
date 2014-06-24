@@ -43,9 +43,14 @@ namespace openspace {
 
 class ABuffer: public ABuffer_I {
 public:
+
 	ABuffer();
-	virtual ~ABuffer() {};
+	virtual ~ABuffer();
 	virtual void resolve();
+
+	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
+	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
+	void addSamplerfile(const std::string& filename);
 
 protected:
 	virtual std::string settings() = 0;
@@ -60,6 +65,8 @@ protected:
 	std::string openspaceSamplers();
 
 	unsigned int _width, _height, _totalPixels;
+
+private:
 	GLuint _screenQuad;
 
 	bool _validShader;
@@ -69,9 +76,8 @@ protected:
 
 	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
 	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;
+	std::vector<ghoul::filesystem::File*> _samplerFiles;
 	std::vector<std::string> _samplers;
-
-private:
 
 
 

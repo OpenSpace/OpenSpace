@@ -36,12 +36,6 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
-#ifdef __APPLE__
-    #include <memory>
-#else
-    #include <mutex>
-#endif
-
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
@@ -61,6 +55,7 @@ private:
 
     std::string _filename;
     std::string _transferFunctionPath;
+	std::string _samplerFilename;
     
     ghoul::filesystem::File* _transferFunctionFile;
 

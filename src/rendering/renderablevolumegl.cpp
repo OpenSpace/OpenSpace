@@ -66,11 +66,20 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
             _transferFunctionPath = findPath(transferFunctionPath);
         }
     }
+    _samplerFilename = "";
+    if (dictionary.hasKey("Sampler")) {
+        if(dictionary.getValue("Sampler", _samplerFilename)) {
+            _samplerFilename = findPath(_samplerFilename);
+        }
+    }
     if( _transferFunctionPath == "") {
         LERROR("No transferFunction!");
     } else {
         _transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
     }
+    if( _samplerFilename == "") {
+        LERROR("No samplerfile!");
+    } 
 
 
     double tempValue;
@@ -108,6 +117,7 @@ bool RenderableVolumeGL::initialize() {
     _transferFunction->uploadTexture();
     OsEng.configurationManager().setValue("firstVolume", _volume);
     OsEng.configurationManager().setValue("firstTransferFunction", _transferFunction);
+    OsEng.configurationManager().setValue("firstSampler", _samplerFilename);
 
     auto textureCallback = [this](const ghoul::filesystem::File& file) {
         _updateTransferfunction = true;

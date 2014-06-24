@@ -50,12 +50,6 @@ ABufferSingleLinked::~ABufferSingleLinked() {
 	if(_data != 0)
 		delete _data;
 
-	if(_fragmentShaderFile)
-		delete _fragmentShaderFile;
-
-	if(_resolveShader)
-		delete _resolveShader;
-
 	glDeleteTextures(1,&_anchorPointerTexture);
 	glDeleteTextures(1,&_fragmentTexture);
 	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
@@ -100,19 +94,16 @@ bool ABufferSingleLinked::initialize() {
     // ============================
 	ghoul::opengl::Texture* volume 	= nullptr;
 	ghoul::opengl::Texture* tf 		= nullptr;
+	std::string sampler = "";
 	OsEng.configurationManager().getValue("firstVolume", volume);
 	OsEng.configurationManager().getValue("firstTransferFunction", tf);
+	OsEng.configurationManager().getValue("firstSampler", sampler);
 	if(volume)
-		_volumes.push_back(std::make_pair(std::string("volume1"), volume));
+		addVolume("volume1", volume);
 	if(tf)
-		_transferFunctions.push_back(std::make_pair(std::string("transferFunction1"), tf));
-	_samplers.push_back(R"(
-void sampleVolume1(inout vec4 finalColor, vec3 position) {
-	float intensity = texture(volume1, position).x;
-	vec4 color = texture(transferFunction1, intensity);
-	blendStep(finalColor, color, stepSize);
-}
-)");
+		addTransferFunction("transferFunction1", tf);
+	if(sampler != "")
+		addSamplerfile(sampler);
 
 	return initializeABuffer();
 }

@@ -56,6 +56,14 @@ ABuffer::ABuffer(): _validShader(true) {
 	_fragmentShaderPath = fragmentShaderSourcePath.substr(0, fragmentShaderSourcePath.length()-4) + "gglsl";
 }
 
+ABuffer::~ABuffer() {
+	if(_fragmentShaderFile)
+		delete _fragmentShaderFile;
+
+	if(_resolveShader)
+		delete _resolveShader;
+}
+
 bool ABuffer::initializeABuffer() {
 	// ============================
     // 			SHADERS
@@ -122,6 +130,27 @@ void ABuffer::resolve() {
 	}
 }
 
+void ABuffer::addVolume(const std::string& tag,ghoul::opengl::Texture* volume) {
+	_volumes.push_back(std::make_pair(tag, volume));
+}
+
+void ABuffer::addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction) {
+	_transferFunctions.push_back(std::make_pair(tag, transferFunction));
+}
+
+void ABuffer::addSamplerfile(const std::string& filename) {
+	if( ! FileSys.fileExists(filename))
+		return;
+
+  	auto fileCallback = [this](const ghoul::filesystem::File& file) {
+        _validShader = false;
+    };
+	ghoul::filesystem::File* file = new ghoul::filesystem::File(filename);
+	file->setCallback(fileCallback);
+	_samplerFiles.push_back(file);
+	_samplers.push_back("");
+}
+
 bool ABuffer::updateShader() {
 
 	using ghoul::opengl::ShaderObject;
@@ -166,6 +195,19 @@ bool ABuffer::updateShader() {
 }
 
 void ABuffer::generateShaderSource() {
+
+	for(int i = 0; i < _samplerFiles.size(); ++i) {
+		std::string line, source = "";
+		std::ifstream samplerFile(_samplerFiles.at(i)->path());
+		if(samplerFile.is_open()) {
+			while(std::getline(samplerFile, line)) {
+				source += line + "\n";
+			}
+		}
+		samplerFile.close();
+		_samplers.at(i) = source;
+	}
+
 	std::string line, source = "";
 	std::ifstream fragmentShaderFile(_fragmentShaderFile->path());
 	if(fragmentShaderFile.is_open()) {
