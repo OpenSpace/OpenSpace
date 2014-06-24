@@ -138,9 +138,9 @@ void ABuffer::addTransferFunction(const std::string& tag,ghoul::opengl::Texture*
 	_transferFunctions.push_back(std::make_pair(tag, transferFunction));
 }
 
-void ABuffer::addSamplerfile(const std::string& filename) {
+int ABuffer::addSamplerfile(const std::string& filename) {
 	if( ! FileSys.fileExists(filename))
-		return;
+		return -1;
 
   	auto fileCallback = [this](const ghoul::filesystem::File& file) {
         _validShader = false;
@@ -148,7 +148,10 @@ void ABuffer::addSamplerfile(const std::string& filename) {
 	ghoul::filesystem::File* file = new ghoul::filesystem::File(filename);
 	file->setCallback(fileCallback);
 	_samplerFiles.push_back(file);
+
+	int size = _samplers.size();
 	_samplers.push_back("");
+	return size;
 }
 
 bool ABuffer::updateShader() {
@@ -234,10 +237,9 @@ void ABuffer::generateShaderSource() {
 std::string ABuffer::openspaceHeaders() {
 
 	std::string headers;
-	headers += "#define MAX_VOLUMES " + std::to_string(_volumes.size()) + "\n";
+	headers += "#define MAX_VOLUMES " + std::to_string(_samplers.size()) + "\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		headers += "uniform sampler3D " + _volumes.at(i).first + ";\n";
-		//headers += "void sampleVolume" +  std::to_string(i+1) + "(inout vec4, vec3);\n";
 	}
 	for (int i = 0; i < _transferFunctions.size(); ++i) {
 		headers += "uniform sampler1D " + _transferFunctions.at(i).first + ";\n";
@@ -257,12 +259,20 @@ std::string ABuffer::openspaceHeaders() {
 			    + std::to_string(size[2]) + ".0),\n";
 	}
 	headers += "};\n";
+
+	headers += "float volumeStepSize[] = {\n";
+	for (int i = 0; i < _volumes.size(); ++i) {
+		glm::size3_t size = _volumes.at(i).second->dimensions();
+		headers += "    stepSize,\n";
+	}
+	headers += "};\n";
+
 	return headers;
 }
 
 std::string ABuffer::openspaceSamplerCalls() {
 	std::string samplercalls;
-	for (int i = 0; i < _volumes.size(); ++i) {
+	for (int i = 0; i < _samplers.size(); ++i) {
 
 		auto found1 = _samplers.at(i).find_first_not_of("void ");
 		auto found2 = _samplers.at(i).find_first_of("(",found1);

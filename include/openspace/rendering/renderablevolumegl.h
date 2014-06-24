@@ -66,6 +66,7 @@ private:
 	glm::vec3 _boxScaling;
     
     bool _updateTransferfunction;
+    int _id;
 };
 
 } // namespace openspace

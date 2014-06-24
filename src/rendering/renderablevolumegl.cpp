@@ -43,7 +43,7 @@ namespace openspace {
 
 RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     RenderableVolume(dictionary), _boxScaling(1.0, 1.0, 1.0),
-    _updateTransferfunction(false) {
+    _updateTransferfunction(false), _id(-1) {
         
     
     _filename = "";
@@ -119,9 +119,11 @@ bool RenderableVolumeGL::initialize() {
 	_volume->uploadTexture();
     _transferFunction = loadTransferFunction(_transferFunctionPath);
     _transferFunction->uploadTexture();
-    OsEng.configurationManager().setValue("firstVolume", _volume);
-    OsEng.configurationManager().setValue("firstTransferFunction", _transferFunction);
-    OsEng.configurationManager().setValue("firstSampler", _samplerFilename);
+
+    // TODO: fix volume an transferfunction names
+    OsEng.renderEngine().abuffer()->addVolume("volume1", _volume);
+    OsEng.renderEngine().abuffer()->addTransferFunction("transferFunction1", _transferFunction);
+    _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
 
     auto textureCallback = [this](const ghoul::filesystem::File& file) {
         _updateTransferfunction = true;
@@ -146,7 +148,9 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
             const void* data = transferFunction->pixelData();
             glBindBuffer(GL_COPY_READ_BUFFER, *transferFunction);
             _transferFunction->bind();
-            glTexImage1D(GL_TEXTURE_1D, 0, _transferFunction->internalFormat(), _transferFunction->width(),0, _transferFunction->format(), _transferFunction->dataType(), data);
+            glTexImage1D(   GL_TEXTURE_1D, 0, _transferFunction->internalFormat(), 
+                            _transferFunction->width(),0, _transferFunction->format(), 
+                            _transferFunction->dataType(), data);
             //delete data;
             delete transferFunction;
             LDEBUG("Updated transferfunction!");
@@ -154,15 +158,14 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
         }
     }
 
-    glm::mat4 transform ;
-    glm::mat4 camTransform = camera->viewRotationMatrix();
     psc relative = thisPosition-camera->position();
 
-    transform = camTransform;
+    glm::mat4 transform = camera->viewRotationMatrix();
     transform = glm::translate(transform, relative.vec3());
     transform = glm::translate(transform, glm::vec3(-1.1,0.0,0.0));
     transform = glm::scale(transform, _boxScaling);
 
+    // TODO: Use _id to identify this volume
     _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform);
 
 }

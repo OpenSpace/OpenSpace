@@ -404,4 +404,8 @@ Camera* RenderEngine::camera() const {
     return _mainCamera;
 }
 
+ABuffer* RenderEngine::abuffer() const {
+    return _abuffer;
+}
+
 }  // namespace openspace

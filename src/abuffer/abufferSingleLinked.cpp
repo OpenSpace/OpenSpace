@@ -89,22 +89,6 @@ bool ABufferSingleLinked::initialize() {
 
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 
-	// ============================
-    // Volume and transferfunction data
-    // ============================
-	ghoul::opengl::Texture* volume 	= nullptr;
-	ghoul::opengl::Texture* tf 		= nullptr;
-	std::string sampler = "";
-	OsEng.configurationManager().getValue("firstVolume", volume);
-	OsEng.configurationManager().getValue("firstTransferFunction", tf);
-	OsEng.configurationManager().getValue("firstSampler", sampler);
-	if(volume)
-		addVolume("volume1", volume);
-	if(tf)
-		addTransferFunction("transferFunction1", tf);
-	if(sampler != "")
-		addSamplerfile(sampler);
-
 	return initializeABuffer();
 }
 

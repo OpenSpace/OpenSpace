@@ -47,6 +47,7 @@ public:
     SceneGraph* sceneGraph();
 
     Camera* camera() const;
+    ABuffer* abuffer() const;
 
 	// sgct wrapped functions
     bool initializeGL();

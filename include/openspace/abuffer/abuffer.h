@@ -50,7 +50,7 @@ public:
 
 	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
 	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
-	void addSamplerfile(const std::string& filename);
+	int addSamplerfile(const std::string& filename);
 
 protected:
 	virtual std::string settings() = 0;
