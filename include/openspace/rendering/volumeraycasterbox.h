@@ -45,7 +45,7 @@ public:
 	VolumeRaycasterBox();
 	~VolumeRaycasterBox();
     bool initialize();
-	void render(const glm::mat4& MVP,const glm::mat4& transform = glm::mat4(1.0));
+	void render(const glm::mat4& MVP, const glm::mat4& transform = glm::mat4(1.0), int type = 0);
     
 	ghoul::opengl::Texture* backFace();
 	ghoul::opengl::Texture* frontFace();
@@ -56,7 +56,7 @@ private:
 	ghoul::opengl::Texture *_backTexture, *_frontTexture;
 	ghoul::opengl::ProgramObject *_boxProgram;
 	sgct_utils::SGCTBox* _boundingBox;
-	GLint _MVPLocation, _modelTransformLocation;
+	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
     glm::size2_t _dimensions;
 };

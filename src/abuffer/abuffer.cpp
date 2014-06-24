@@ -148,10 +148,10 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 	ghoul::filesystem::File* file = new ghoul::filesystem::File(filename);
 	file->setCallback(fileCallback);
 	_samplerFiles.push_back(file);
-
-	int size = _samplers.size();
 	_samplers.push_back("");
-	return size;
+
+	// ID is one more than "actual" position since ID=0 is considered geometry
+	return _samplers.size();
 }
 
 bool ABuffer::updateShader() {

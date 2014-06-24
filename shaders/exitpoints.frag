@@ -1,5 +1,7 @@
 #version 430 core
 
+uniform int volumeType;
+
 in vec3 vPosition;
 in vec3 worldPosition;
 out vec4 fragColor;
@@ -13,7 +15,7 @@ void main() {
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
 	_z_(frag, gl_FragCoord.z);
-	_type_(frag, 1);
+	_type_(frag, volumeType);
 	_pos_(frag, vec4(worldPosition,0));
 	addToBuffer(frag);
 

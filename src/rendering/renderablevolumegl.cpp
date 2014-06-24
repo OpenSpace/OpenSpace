@@ -166,7 +166,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     transform = glm::scale(transform, _boxScaling);
 
     // TODO: Use _id to identify this volume
-    _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform);
+    _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform, _id);
 
 }
 
