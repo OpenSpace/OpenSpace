@@ -263,10 +263,18 @@ std::string ABuffer::openspaceHeaders() {
 std::string ABuffer::openspaceSamplerCalls() {
 	std::string samplercalls;
 	for (int i = 0; i < _volumes.size(); ++i) {
-		samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == 1) {\n";
-		samplercalls += "sampleVolume" + std::to_string(i + 1) + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
-		samplercalls += "volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];;\n";
-		samplercalls += "}\n";
+
+		auto found1 = _samplers.at(i).find_first_not_of("void ");
+		auto found2 = _samplers.at(i).find_first_of("(",found1);
+		if(found1 != std::string::npos && found2 != std::string::npos) {
+			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
+			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == 1) {\n";
+			samplercalls += functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
+			samplercalls += "volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];;\n";
+			samplercalls += "}\n";
+		}
+
+		
 	}
 	return samplercalls;
 }

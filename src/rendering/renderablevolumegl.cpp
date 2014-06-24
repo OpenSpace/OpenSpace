@@ -106,6 +106,10 @@ RenderableVolumeGL::~RenderableVolumeGL() {
         delete _volume;
     if(_colorBoxRenderer)
         delete _colorBoxRenderer;
+    if(_transferFunctionFile)
+        delete _transferFunctionFile;
+    if(_transferFunction)
+        delete _transferFunction;
 }
 
 bool RenderableVolumeGL::initialize() {
