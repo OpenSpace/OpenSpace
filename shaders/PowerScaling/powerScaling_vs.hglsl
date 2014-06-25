@@ -22,69 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_H_HGLSL
-#define POWERSCALING_H_HGLSL
+#ifndef POWERSCALING_VS_H_HGLSL
+#define POWERSCALING_VS_H_HGLSL
 
-// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
+const float k = 10.0;
 
-const float k 				= 10.0;
-const float s_far			= 27.0f; //= gl_DepthRange.far;	// 40
-const float s_farcutoff		= 12.0f;
-const float s_nearcutoff	= 7.00f;
-const float s_near			= 0.00f;// gl_DepthRange.near;	// 0.1
-
-vec4 psc_normlization(vec4 invec) {
-	
-	float xymax = max(invec.x,invec.y);
-
-	if(invec.z > 0.0f || invec.z < 0.0f) {
-		return invec / abs(invec.z);
-	} else if (xymax != 0.0f) {
-		return invec / xymax;
+vec4 psc_addition(vec4 v1, vec4 v2) {
+	float ds = v2.w - v1.w;
+	if(ds >= 0) {
+		float p = pow(k,-ds);
+		return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
 	} else {
-		return invec / -.0;
+		float p = pow(k,ds);
+		return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
 	}
 }
 
-float pscDepth(vec4 position) {
-	float depth = 0.0f;
-	if(position.w <= 0.5) {
-		//depth = abs(position.z * pow(10, position.w)) / pow(k,s_far);
-		depth = (position.w+log(abs(position.z)))/pow(k, position.w);
-	} else if(position.w < 3.0) {
-		depth = position.w+log(abs(position.z))/pow(k, position.w);
+vec4 psc_to_meter(vec4 v1, vec2 v2) {
+	float factor = v2.x * pow(k,v2.y + v1.w);
+	return vec4(v1.xyz * factor, 1.0);
+}
+
+vec4 psc_scaling(vec4 v1, vec2 v2) {
+	float ds = v2.y - v1.w;
+	if(ds >= 0) {
+		return vec4(v1.xyz * v2.x * pow(k,v1.w), v2.y);
 	} else {
-		depth = position.w+log(abs(position.z));
+		return vec4(v1.xyz * v2.x * pow(k,v2.y), v1.w);
 	}
+}
+
+vec4 pscTransform(vec4 vertexPosition, vec4 cameraPosition, vec2 scaling, mat4 modelTransform) {
+	vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
+	//vec4 lvp = ModelTransform * vertexPosition;
 	
-
-	// DEBUG
-	float depth_orig = depth;
-	float x = 0.0f;
-	float cutoffs = 0.0;
-	float orig_z = position.z;
+	// PSC addition; local vertex position and the object power scaled world position
+	vec4 position = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
+	//position = psc_addition(lvp,objpos);
 	
-	// calculate a normalized depth [0.0 1.0]
-	if((depth > s_near && depth <= s_nearcutoff) || (depth > s_farcutoff && depth < s_far)) {
+	// PSC addition; rotated and viewscaled vertex and the cmaeras negative position
+	position = psc_addition(position,vec4(-cameraPosition.xyz,cameraPosition.w));
+	
+	// rotate the camera
+	local_vertex_pos =  mat3(camrot) * position.xyz;
+	position = vec4(local_vertex_pos, position.w);
+	//position =  camrot* position;
 
-		// completely linear interpolation [s_near .. depth .. s_far]
-		depth = (depth - s_near) / (s_far - s_near);
+	// rescales the scene to fit inside the view frustum
+	// is set from the main program, but these are decent values
+	// scaling = vec2(1.0, -8.0);
 
-	} else if(depth > s_nearcutoff && depth < s_farcutoff) {
-
-		// DEBUG
-		cutoffs = 1.0;
-
-		// interpolate [10^s_nearcutoff .. 10^depth .. 10^s_farcutoff]
-		// calculate between 0..1 where the depth is
-		x = (pow(10,depth) - pow(10, s_nearcutoff)) / (pow(10,s_farcutoff) - pow(10, s_nearcutoff));
-
-		// remap the depth to the 0..1 depth buffer
-		depth = s_nearcutoff + x * (s_farcutoff - s_nearcutoff);
-		depth = (depth - s_near) / (s_far - s_near);
-
-	}
-	return depth;
+	// project using the rescaled coordinates,
+	//vec4 vs_position_rescaled = psc_scaling(position, scaling);
+	return psc_to_meter(position, scaling);
 }
 
 #endif

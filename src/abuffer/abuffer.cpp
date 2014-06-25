@@ -90,6 +90,9 @@ bool ABuffer::initializeABuffer() {
     addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
+    addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
+    addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");
+
     
 
     _resolveShader = nullptr;
