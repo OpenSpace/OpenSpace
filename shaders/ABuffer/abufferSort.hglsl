@@ -101,8 +101,7 @@ void sort_fragments_list(uint frag_count) {
 						float x = gl_FragCoord.x;
 	            		float y = gl_FragCoord.y;
 	            		float jitterValue = float(permute(x + permute(y))) / 961.0;
-	            		jitterValue *= 0.004;
-	            		vec3 frontPosNew = startColor + (jitterValue*volume_length[ii])*volume_direction[ii];
+	            		vec3 frontPosNew = startColor + (jitterValue*volumeStepSize[ii])*volume_direction[ii];
 	            		volume_position[ii] = frontPosNew;
 					}
 					
