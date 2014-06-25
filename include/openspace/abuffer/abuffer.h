@@ -79,6 +79,9 @@ private:
 	std::vector<ghoul::filesystem::File*> _samplerFiles;
 	std::vector<std::string> _samplers;
 
+	// Development functionality to update shader for changes in several files
+	std::vector<ghoul::filesystem::File*> _shaderFiles;
+
 
 
 };		// ABuffer

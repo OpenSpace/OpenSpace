@@ -56,6 +56,10 @@ float pscLength(vec4 v1, vec4 v2) {
 	return length(vector.xyz)*pow(k,vector.w);
 }
 
+float permute(float i) {
+    return mod((62.0*i*i + i), 961.0); // permutation polynomial; 62=2*31; 961=31*31
+}
+
 void sort_fragments_list(uint frag_count) {
 	uint i,j;
 	ABufferStruct_t tmp;
@@ -91,6 +95,17 @@ void sort_fragments_list(uint frag_count) {
 					// volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 					volumeStepSize[ii] = 1.0/(length(volume_direction[ii]*volume_dim[ii]));
 					// volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+
+					if(volumeStepSize[ii] < volume_length[ii]) {
+						// jittering
+						float x = gl_FragCoord.x;
+	            		float y = gl_FragCoord.y;
+	            		float jitterValue = float(permute(x + permute(y))) / 961.0;
+	            		jitterValue *= 0.004;
+	            		vec3 frontPosNew = startColor + (jitterValue*volume_length[ii])*volume_direction[ii];
+	            		volume_position[ii] = frontPosNew;
+					}
+					
 					break;
 				}
 			}

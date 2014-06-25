@@ -29,7 +29,8 @@ uniform sampler2D texture1;
 
 in vec2 vs_st;
 in vec4 vs_normal;
-in vec4 vs_position;
+in vec3 vs_position;
+in float s;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -37,10 +38,11 @@ in vec4 vs_position;
 
 void main()
 {
-	float depth = pscDepth(vs_position);
+	vec4 position = vec4(vs_position,s);
+	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
 
-	ABufferStruct_t frag = createGeometryFragment(diffuse, vs_position, depth);
+	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
 
 	discard;

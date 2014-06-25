@@ -33,7 +33,6 @@
 #include <string>
 
 #define MAX_LAYERS 10
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 namespace {
 	std::string _loggerCat = "ABufferSingleLinked";

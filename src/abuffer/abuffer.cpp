@@ -62,6 +62,14 @@ ABuffer::~ABuffer() {
 
 	if(_resolveShader)
 		delete _resolveShader;
+
+	for(auto file: _samplerFiles) {
+		delete file;
+	}
+	for(auto file: _shaderFiles) {
+		delete file;
+	}
+
 }
 
 bool ABuffer::initializeABuffer() {
@@ -72,6 +80,17 @@ bool ABuffer::initializeABuffer() {
         _validShader = false;
     };
     _fragmentShaderFile->setCallback(shaderCallback);
+
+    // Development functionality to update shader for changes in several files
+    auto addFunc = [this, shaderCallback](const std::string& path) {
+    	ghoul::filesystem::File* f = new ghoul::filesystem::File(path, false);
+    	f->setCallback(shaderCallback);
+    	_shaderFiles.push_back(f);
+    };
+    addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
+    addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
+    addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
+    
 
     _resolveShader = nullptr;
     generateShaderSource();
