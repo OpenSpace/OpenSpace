@@ -34,6 +34,7 @@
 #include <algorithm>
 
 #include <openspace/engine/openspaceengine.h>
+#include <sgct.h>
 
 namespace {
     std::string _loggerCat = "RenderableVolumeGL";
@@ -42,7 +43,7 @@ namespace {
 namespace openspace {
 
 RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
-    RenderableVolume(dictionary), _boxScaling(1.0, 1.0, 1.0),
+    RenderableVolume(dictionary),  _box(nullptr), _boxScaling(1.0, 1.0, 1.0),
     _updateTransferfunction(false), _id(-1) {
         
     
@@ -96,7 +97,6 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     		_boxScaling[2] = tempValue;
     }
 
-    _colorBoxRenderer = new VolumeRaycasterBox();
     setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
 }
 
@@ -104,12 +104,12 @@ RenderableVolumeGL::~RenderableVolumeGL() {
     deinitialize();
     if(_volume)
         delete _volume;
-    if(_colorBoxRenderer)
-        delete _colorBoxRenderer;
     if(_transferFunctionFile)
         delete _transferFunctionFile;
     if(_transferFunction)
         delete _transferFunction;
+    if(_box)
+        delete _box;
 }
 
 bool RenderableVolumeGL::initialize() {
@@ -130,7 +130,70 @@ bool RenderableVolumeGL::initialize() {
     };
     _transferFunctionFile->setCallback(textureCallback);
 
-	_colorBoxRenderer->initialize();
+    _box = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
+    OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
+    _MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
+    _modelTransformLocation = _boxProgram->uniformLocation("modelTransform");
+    _typeLocation = _boxProgram->uniformLocation("volumeType");
+
+    // ============================
+    //      GEOMETRY (quad)
+    // ============================
+    const GLfloat size = 0.5f;
+    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+        //  x,     y,     z,     s,
+        -size, -size,  size,  0.0f,
+         size,  size,  size,  0.0f,
+        -size,  size,  size,  0.0f,
+        -size, -size,  size,  0.0f,
+         size, -size,  size,  0.0f,
+         size,  size,  size,  0.0f,
+
+        -size, -size, -size,  0.0f,
+         size,  size, -size,  0.0f,
+        -size,  size, -size,  0.0f,
+        -size, -size, -size,  0.0f,
+         size, -size, -size,  0.0f,
+         size,  size, -size,  0.0f,
+
+         size, -size, -size,  0.0f,
+         size,  size,  size,  0.0f,
+         size, -size,  size,  0.0f,
+         size, -size, -size,  0.0f,
+         size,  size, -size,  0.0f,
+         size,  size,  size,  0.0f,
+
+        -size, -size, -size,  0.0f,
+        -size,  size,  size,  0.0f,
+        -size, -size,  size,  0.0f,
+        -size, -size, -size,  0.0f,
+        -size,  size, -size,  0.0f,
+        -size,  size,  size,  0.0f,
+
+        -size,  size, -size,  0.0f,
+         size,  size,  size,  0.0f,
+        -size,  size,  size,  0.0f,
+        -size,  size, -size,  0.0f,
+         size,  size, -size,  0.0f,
+         size,  size,  size,  0.0f,
+
+        -size, -size, -size,  0.0f,
+         size, -size,  size,  0.0f,
+        -size, -size,  size,  0.0f,
+        -size, -size, -size,  0.0f,
+         size, -size, -size,  0.0f,
+         size, -size,  size,  0.0f,
+    };
+    GLuint vertexPositionBuffer;
+    glGenVertexArrays(1, &_boxArray); // generate array
+    glBindVertexArray(_boxArray); // bind array
+    glGenBuffers(1, &vertexPositionBuffer); // generate buffer
+    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*7, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(0);
+    //glEnableVertexAttribArray(1);
     
     
     return true;
@@ -151,22 +214,58 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
             glTexImage1D(   GL_TEXTURE_1D, 0, _transferFunction->internalFormat(), 
                             _transferFunction->width(),0, _transferFunction->format(), 
                             _transferFunction->dataType(), data);
-            //delete data;
             delete transferFunction;
             LDEBUG("Updated transferfunction!");
 
         }
     }
 
-    psc relative = thisPosition-camera->position();
+    //psc relative = thisPosition-camera->position();
 
-    glm::mat4 transform = camera->viewRotationMatrix();
-    transform = glm::translate(transform, relative.vec3());
-    transform = glm::translate(transform, glm::vec3(-1.1,0.0,0.0));
+    // glm::mat4 transform = camera->viewRotationMatrix();
+    // transform = glm::translate(transform, relative.vec3());
+    // transform = glm::translate(transform, glm::vec3(-1.1,0.0,0.0));
+    // transform = glm::scale(transform, _boxScaling);
+    glm::mat4 transform = glm::mat4(1.0);
     transform = glm::scale(transform, _boxScaling);
 
+    // fetch data
+    psc currentPosition         = thisPosition;
+    psc campos                  = camera->position();
+    glm::mat4 camrot            = camera->viewRotationMatrix();
+    PowerScaledScalar scaling   = camera->scaling();
+
+    psc addon(-1.1,0.0,0.0,0.0);
+    currentPosition += addon;
+
     // TODO: Use _id to identify this volume
-    _colorBoxRenderer->render(camera->viewProjectionMatrix(), transform, _id);
+    _boxProgram->activate();
+    // _boxProgram->setUniform(_MVPLocation, camera->viewProjectionMatrix());
+    // _boxProgram->setUniform(_modelTransformLocation, transform);
+    _boxProgram->setUniform(_typeLocation, _id);
+
+    _boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+    _boxProgram->setUniform("modelTransform", transform);
+    _boxProgram->setUniform("campos", campos.vec4());
+    _boxProgram->setUniform("objpos", currentPosition.vec4());
+    _boxProgram->setUniform("camrot", camrot);
+    _boxProgram->setUniform("scaling", scaling.vec2());
+
+    // make sure GL_CULL_FACE is enabled (it should be)
+    glEnable(GL_CULL_FACE);
+
+    //  Draw backface
+    glCullFace(GL_FRONT);
+    glBindVertexArray(_boxArray);
+    glDrawArrays(GL_TRIANGLES, 0, 6*6);
+    // _box->draw();
+
+    //  Draw frontface (now the normal cull face is is set)
+    glCullFace(GL_BACK);
+    glDrawArrays(GL_TRIANGLES, 0, 6*6);
+    // _box->draw();
+
+    _boxProgram->deactivate();
 
 }
 

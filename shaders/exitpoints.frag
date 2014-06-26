@@ -28,20 +28,23 @@ uniform int volumeType;
 
 in vec3 vPosition;
 in vec3 worldPosition;
-out vec4 fragColor;
+in float s;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
  
 void main() {
-	fragColor = vec4(vPosition+0.5, 0.3);
+	vec4 fragColor = vec4(vPosition+0.5, 0.3);
+	vec4 position = vec4(worldPosition,s);
+	float depth = pscDepth(position);
 
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
-	_z_(frag, gl_FragCoord.z);
+	_z_(frag, depth);
 	_type_(frag, volumeType);
-	_pos_(frag, vec4(worldPosition,0));
+	_pos_(frag, position);
 	addToBuffer(frag);
 
-	//discard;
+	discard;
 }

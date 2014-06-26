@@ -27,7 +27,6 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
-#include <openspace/rendering/volumeraycasterbox.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -35,6 +34,10 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
+
+ namespace sgct_utils {
+    class SGCTBox;
+}
 
 namespace openspace {
 
@@ -62,8 +65,11 @@ private:
 	ghoul::opengl::Texture* _volume;
 	ghoul::opengl::Texture* _transferFunction;
 
-	VolumeRaycasterBox* _colorBoxRenderer;
+	GLuint _boxArray;
+	ghoul::opengl::ProgramObject *_boxProgram;
+	sgct_utils::SGCTBox* _box;
 	glm::vec3 _boxScaling;
+	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
     bool _updateTransferfunction;
     int _id;

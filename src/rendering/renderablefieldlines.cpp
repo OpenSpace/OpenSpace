@@ -206,14 +206,27 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	psc relative = thisPosition-camera->position();
 
 	transform = transform*camTransform;
-	transform = glm::translate(transform, relative.vec3());
+	//transform = glm::translate(transform, relative.vec3());
+	transform = glm::mat4(1.0);
 	transform = glm::rotate(transform, -90.0f, glm::vec3(1.0, 0.0, 0.0)); // Model has positive Z as up
 	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
 	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
 
+	psc currentPosition = thisPosition;
+    psc campos = camera->position();
+    glm::mat4 camrot = camera->viewRotationMatrix();
+    PowerScaledScalar scaling = camera->scaling();
+
 	// Activate shader
 	_fieldlinesProgram->activate();
-	_fieldlinesProgram->setUniform("modelViewProjection", transform);
+	//_fieldlinesProgram->setUniform("modelViewProjection", transform);
+
+    _fieldlinesProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+    _fieldlinesProgram->setUniform("modelTransform", transform);
+    _fieldlinesProgram->setUniform("campos", campos.vec4());
+    _fieldlinesProgram->setUniform("objpos", currentPosition.vec4());
+    _fieldlinesProgram->setUniform("camrot", camrot);
+    _fieldlinesProgram->setUniform("scaling", scaling.vec2());
 
 	//	------ FIELDLINES -----------------
 	glBindVertexArray(_VAO);

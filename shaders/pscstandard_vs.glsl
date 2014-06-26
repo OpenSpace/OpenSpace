@@ -43,7 +43,6 @@ out vec4 vs_normal;
 out vec3 vs_position;
 out float s;
 
-
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main()
