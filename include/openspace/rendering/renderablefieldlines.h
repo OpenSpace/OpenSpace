@@ -58,7 +58,7 @@ private:
 	std::vector<std::string> _filenames;
 	std::vector<glm::vec3> _seedPoints;
 
-	ghoul::opengl::ProgramObject *_fieldlinesProgram, *_seedpointsProgram;
+	ghoul::opengl::ProgramObject *_fieldlinesProgram;
 	GLuint _VAO, _seedpointVAO;
 
 	std::mutex* _shaderMutex;
@@ -66,8 +66,8 @@ private:
 	ghoul::filesystem::File* _vertexSourceFile;
 	ghoul::filesystem::File* _fragmentSourceFile;
 
-	std::vector<GLint> _lineStart, _seedpointStart;
-	std::vector<GLsizei> _lineCount, _seedpointCount;
+	std::vector<GLint> _lineStart;
+	std::vector<GLsizei> _lineCount;
 
 	bool _programUpdateOnSave;
 	void safeShaderCompilation();
