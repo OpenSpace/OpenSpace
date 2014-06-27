@@ -1,0 +1,115 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+ 
+#include "abufferAddToBuffer.hglsl"
+
+int build_local_fragments_list() {
+	uint current;
+	int frag_count = 0;
+
+	current = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
+
+	while(current != 0 && frag_count < MAX_FRAGMENTS) {
+		ABufferStruct_t item = loadFromBuffer(current);
+		current = _next_(item);
+
+		fragments[frag_count] = item;
+
+		frag_count++;
+	}
+
+	return frag_count;
+}
+
+float pscLength(vec4 v1, vec4 v2) {
+	const float k = 10.0;
+	float ds = v2.w - v1.w;
+	vec4 vector;
+	if(ds >= 0) {
+		float p = pow(k,-ds);
+		vector = vec4(v1.x*p - v2.x, v1.y*p - v2.y, v1.z*p - v2.z, v2.w);
+	} else {
+		float p = pow(k,ds);
+		vector = vec4(v1.x - v2.x*p, v1.y - v2.y*p, v1.z - v2.z*p, v1.w);
+	}
+	return length(vector.xyz)*pow(k,vector.w);
+}
+
+float permute(float i) {
+    return mod((62.0*i*i + i), 961.0); // permutation polynomial; 62=2*31; 961=31*31
+}
+
+void sort_fragments_list(uint frag_count) {
+	uint i,j;
+	ABufferStruct_t tmp;
+
+	// INSERTION SORT
+	for(i = 1; i < frag_count; ++i) {
+		tmp = fragments[i];
+		for(j = i; j > 0 && _z_(tmp) < _z_(fragments[j-1]); --j) {
+			fragments[j] = fragments[j-1];
+		}
+		fragments[j] = tmp;
+	}
+
+	int ii, jj;
+	for(ii = 0; ii < MAX_VOLUMES; ++ii) {
+		bool start = true;
+		vec3 startColor;
+		vec4 startPosition;
+		for(jj = ii; jj < frag_count; ++jj) {
+			int type = int(_type_(fragments[jj])) - 1;
+			if(type== ii) {
+				if(start) {
+					startColor = _col_(fragments[jj]).rgb;
+					startPosition = _pos_(fragments[jj]);
+					volume_zlength[ii].x = _z_(fragments[jj]);
+					start = false;
+				} else {
+					vec3 dir = _col_(fragments[jj]).rgb - startColor;
+					volume_position[ii] = startColor;
+					volume_length[ii] = length(dir);
+					volume_direction[ii] = normalize(dir);
+					volume_zlength[ii].y = _z_(fragments[jj]);
+					// volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+					volumeStepSize[ii] = 1.0/(length(volume_direction[ii]*volume_dim[ii]));
+					// volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+
+					if(volumeStepSize[ii] < volume_length[ii]) {
+						// jittering
+						float x = gl_FragCoord.x;
+	            		float y = gl_FragCoord.y;
+	            		float jitterValue = float(permute(x + permute(y))) / 961.0;
+	            		vec3 frontPosNew = startColor + (jitterValue*volumeStepSize[ii])*volume_direction[ii];
+	            		volume_position[ii] = frontPosNew;
+					}
+					
+					break;
+				}
+			}
+		}
+	}
+	//volume_direction[0] = vec3(1.0,0.0,0.0);
+	//volume_direction[0] = _col_(fragments[0]).rgb;
+}

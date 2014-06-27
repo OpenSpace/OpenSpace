@@ -34,6 +34,8 @@
 
 #include <array>
 
+#include <openspace/abuffer/abufferSingleLinked.h>
+
 namespace {
 const std::string _loggerCat = "RenderEngine";
 }
@@ -42,6 +44,7 @@ namespace openspace {
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
+    , _abuffer(nullptr)
 {
 }
 
@@ -52,6 +55,7 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::initialize()
 {
+    // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
@@ -61,11 +65,14 @@ bool RenderEngine::initialize()
     //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
 
+    _abuffer = new ABufferSingleLinked();
+
     return true;
 }
 
 bool RenderEngine::initializeGL()
 {
+    // LDEBUG("RenderEngine::initializeGL()");
     sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
 
     // TODO:    Fix the power scaled coordinates in such a way that these values can be
@@ -132,6 +139,8 @@ bool RenderEngine::initializeGL()
         _mainCamera->setMaxFov(maxFov);
     }
 
+    _abuffer->initialize();
+
     // successful init
     return true;
 }
@@ -150,8 +159,10 @@ void RenderEngine::postSynchronizationPreDraw()
 void RenderEngine::render()
 {
     // SGCT resets certain settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition
@@ -163,8 +174,12 @@ void RenderEngine::render()
           sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * view);
 
     // render the scene starting from the root node
+    _abuffer->clear();
+    _abuffer->preRender();
     _sceneGraph->render(_mainCamera);
-
+    _abuffer->postRender();
+    _abuffer->resolve();
+/*
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {
 // Apple usually has retina screens
@@ -200,6 +215,7 @@ void RenderEngine::render()
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
     }
+    */
 }
 
 SceneGraph* RenderEngine::sceneGraph()
@@ -386,6 +402,10 @@ void RenderEngine::deserialize(const std::vector<char>& dataStream, size_t& offs
 
 Camera* RenderEngine::camera() const {
     return _mainCamera;
+}
+
+ABuffer* RenderEngine::abuffer() const {
+    return _abuffer;
 }
 
 }  // namespace openspace

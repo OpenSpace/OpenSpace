@@ -34,8 +34,7 @@ namespace {
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) :
-			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false) {
-	_shaderMutex = new std::mutex;
+			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false),_update(false) {
 
 	if(dictionary.hasKey("Fieldlines")) {
 		ghoul::Dictionary fieldlines;
@@ -177,7 +176,7 @@ bool RenderableFieldlines::initialize() {
 
 	//	------ SETUP SHADERS -----------------
 	auto privateCallback = [this](const ghoul::filesystem::File& file) {
-		safeShaderCompilation();
+		_update = true;
 	};
 	if(_programUpdateOnSave) {
 		_vertexSourceFile->setCallback(privateCallback);
@@ -195,19 +194,40 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition) {
+
+	if(_update) {
+		_update = false;
+		safeShaderCompilation();
+	}
+
 	glm::mat4 transform = camera->viewProjectionMatrix();
 	glm::mat4 camTransform = camera->viewRotationMatrix();
 	psc relative = thisPosition-camera->position();
 
 	transform = transform*camTransform;
-	transform = glm::translate(transform, relative.vec3());
+	//transform = glm::translate(transform, relative.vec3());
+	transform = glm::mat4(1.0);
 	transform = glm::rotate(transform, -90.0f, glm::vec3(1.0, 0.0, 0.0)); // Model has positive Z as up
-	transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
+	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
+	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
+
+	psc currentPosition = thisPosition;
+    psc campos = camera->position();
+    glm::mat4 camrot = camera->viewRotationMatrix();
+    PowerScaledScalar scaling = camera->scaling();
+
+	// Activate shader
+	_fieldlinesProgram->activate();
+	//_fieldlinesProgram->setUniform("modelViewProjection", transform);
+
+    _fieldlinesProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+    _fieldlinesProgram->setUniform("modelTransform", transform);
+    _fieldlinesProgram->setUniform("campos", campos.vec4());
+    _fieldlinesProgram->setUniform("objpos", currentPosition.vec4());
+    _fieldlinesProgram->setUniform("camrot", camrot);
+    _fieldlinesProgram->setUniform("scaling", scaling.vec2());
 
 	//	------ FIELDLINES -----------------
-	_shaderMutex->lock();
-	_fieldlinesProgram->activate();
-	_fieldlinesProgram->setUniform("modelViewProjection", transform);
 	glBindVertexArray(_VAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
 
@@ -216,19 +236,17 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
 	glBindVertexArray(0);
 
+	// Deactivate shader
 	_fieldlinesProgram->deactivate();
-	_shaderMutex->unlock();
 }
 
 void RenderableFieldlines::update() {
 }
 
 void RenderableFieldlines::safeShaderCompilation() {
-	_shaderMutex->lock();
 	_fieldlinesProgram->rebuildFromFile();
 	_fieldlinesProgram->compileShaderObjects();
 	_fieldlinesProgram->linkProgramObject();
-	_shaderMutex->unlock();
 }
 
 std::vector<std::vector<glm::vec3> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {

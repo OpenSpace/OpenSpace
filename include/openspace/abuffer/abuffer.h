@@ -22,12 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 330
+#ifndef __ABUFFER_H__
+#define __ABUFFER_H__
 
-in vec4 position;
-out vec2 texCoord;
+#include <openspace/abuffer/abuffer_i.h>
 
-void main() {
-  gl_Position = position;
-  texCoord = position.xy/2.0 + 0.5;
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/file.h>
+
+namespace ghoul {
+	namespace opengl {
+		class Texture;
+	}
 }
+
+namespace openspace {
+
+class ABuffer: public ABuffer_I {
+public:
+
+	ABuffer();
+	virtual ~ABuffer();
+	virtual void resolve();
+
+	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
+	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
+	int addSamplerfile(const std::string& filename);
+
+protected:
+	virtual std::string settings() = 0;
+
+	bool initializeABuffer();
+
+	void generateShaderSource();
+	bool updateShader();
+
+	std::string openspaceHeaders();
+	std::string openspaceSamplerCalls();
+	std::string openspaceSamplers();
+
+	unsigned int _width, _height, _totalPixels;
+
+private:
+	GLuint _screenQuad;
+
+	bool _validShader;
+	std::string _fragmentShaderPath;
+	ghoul::filesystem::File* _fragmentShaderFile;
+	ghoul::opengl::ProgramObject* _resolveShader;
+
+	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
+	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;
+	std::vector<ghoul::filesystem::File*> _samplerFiles;
+	std::vector<std::string> _samplers;
+
+	// Development functionality to update shader for changes in several files
+	std::vector<ghoul::filesystem::File*> _shaderFiles;
+
+
+
+};		// ABuffer
+}		// openspace
+
+#endif 	// __ABUFFER_H__

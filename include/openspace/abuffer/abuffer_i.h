@@ -22,12 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 330
+#ifndef __ABUFFER_I_H__
+#define __ABUFFER_I_H__
 
-in vec4 position;
-out vec2 texCoord;
+namespace openspace {
 
-void main() {
-  gl_Position = position;
-  texCoord = position.xy/2.0 + 0.5;
-}
+class ABuffer_I {
+public:
+	virtual ~ABuffer_I() {};
+	virtual bool initialize() = 0;
+
+	virtual void clear() = 0;
+	virtual void preRender() = 0;
+	virtual void postRender() = 0;
+	virtual void resolve() = 0;
+
+};		// ABuffer_I
+}		// openspace
+
+#endif 	// __ABUFFER_I_H__

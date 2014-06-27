@@ -159,11 +159,11 @@ void mainMousePosCallback(double x, double y)
         OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
 }
 
-void mainMouseScrollCallback(double pos, double /*pos2*/)
+void mainMouseScrollCallback(double posX, double posY)
 {
     // TODO use float instead
     if (_sgctEngine->isMaster())
-        OsEng.mouseScrollWheelCallback(static_cast<int>(pos));
+        OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
 }
 
 void mainEncodeFun()

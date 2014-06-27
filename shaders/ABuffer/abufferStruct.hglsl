@@ -1,0 +1,143 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef ABUFFERSTRUCT_H_HGLSL
+#define ABUFFERSTRUCT_H_HGLSL
+
+
+//=======================================================
+// ABufferStruct_t declaration
+//=======================================================
+// struct ABufferStruct_t { 
+// 	uint z;			// the depth value
+// 	uint id;		// bits 0-28 next, bits 29-32 type
+// 	vec4 color;		// packed rgba
+// 	//vec4 position;		// packed position
+// 	// uint padding1;
+// 	// uint padding2;
+// };
+struct ABufferStruct_t { 
+	uint z;			// the depth value
+	uint id;		// bits 0-28 next, bits 29-32 type
+	uint rg;		// packed red  green color
+	uint ba;		// packed blue alpha color
+	vec4 position;	// position
+};
+
+
+//=======================================================
+// Bitwise operations
+//=======================================================
+const uint mask_1 = 1;
+const uint mask_8 = 255;
+const uint mask_16 = 65535;
+const uint mask_24 = 16777215;
+const uint mask_29 = 536870911;
+const uint mask_30 = 1073741823;
+const uint mask_31 = 2147483647;
+const uint mask_32 = 4294967295;
+const uint  mask_id = mask_16;
+const uint shift_id = 0;
+const uint  mask_type = mask_24 - mask_16;
+const uint shift_type = 16;
+/*
+const uint  mask_zid_z  = mask_24;
+const uint shift_zid_z  = 0;
+const uint  mask_zid_id = mask_29 - mask_24;
+const uint shift_zid_id = 24;
+const uint  mask_zid_type = mask_31 - mask_29;
+const uint shift_zid_type = 29;
+const uint  mask_zid_xxx = mask_32 - mask_31;
+const uint shift_zid_xxx = 31;
+*/
+
+const uint mask_id_next		= mask_29;
+const uint shift_id_next  	= 0;
+const uint mask_id_type		= mask_32 - mask_29;
+const uint shift_id_type  	= 29;
+
+void bitinsert_u(inout uint pack, uint val, uint mask, uint shift) {
+	pack &= ~mask;
+	pack |= (val << shift) & mask;
+}
+uint bitextract_u(in uint pack, uint mask, uint shift) {
+	return (pack >> shift) & (mask >> shift);
+}
+void bitinsert_i(inout int pack, int val, uint mask, uint shift) {
+	pack &= int( ~mask );
+	pack |= int( (uint(val) << shift) & mask );
+}
+int bitextract_i(in int pack, uint mask, uint shift) {
+	return int( (uint(pack) >> shift) & (mask >> shift) );
+}
+
+//=======================================================
+// Access functions
+//=======================================================
+float _z_(ABufferStruct_t frag) {
+	return uintBitsToFloat(frag.z);
+}
+void _z_(inout ABufferStruct_t frag, float z) {
+	frag.z = floatBitsToUint(z);
+}
+
+uint _next_(ABufferStruct_t frag) {
+	return bitextract_u(frag.id, mask_id_next, shift_id_next); 
+	//return frag.id;
+}
+void _next_(inout ABufferStruct_t frag, uint id) {
+	bitinsert_u(frag.id, id, mask_id_next, shift_id_next); 
+	//frag.id = id;
+}
+
+vec4 _pos_(ABufferStruct_t frag) {
+	// return vec4(0.0,0.0,0.0,0.0);
+	return frag.position;
+	//return unpackUnorm4x8(frag.position);
+}
+void _pos_(inout ABufferStruct_t frag, vec4 position) {
+	frag.position = position;
+	// frag.position = packUnorm4x8(position);
+}
+
+vec4 _col_(ABufferStruct_t frag) {
+	return vec4(unpackUnorm2x16(frag.rg),unpackUnorm2x16(frag.ba));
+	//return unpackUnorm4x8(frag.color);
+}
+void _col_(inout ABufferStruct_t frag, vec4 color) {
+	frag.rg = packUnorm2x16(color.rg);
+	frag.ba = packUnorm2x16(color.ba);
+	//frag.color = packUnorm4x8(color);
+}
+
+uint _type_(ABufferStruct_t frag) {
+	return bitextract_u(frag.id, mask_id_type, shift_id_type); 
+	//return frag.type;
+}
+void _type_(inout ABufferStruct_t frag, uint type) {
+	bitinsert_u(frag.id, type, mask_id_type, shift_id_type); 
+	//frag.type = type;
+}
+
+#endif

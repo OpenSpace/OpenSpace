@@ -45,7 +45,7 @@ raycaster_stepsize              0.005
 raycaster_intensity             1.0
 
 # Animation speed
-animator_refresh_interval       0.05
+animator_refresh_interval       0.5
 
 # Various paths
 raycaster_kernel_filename       ${KERNELS}/RaycasterTSP.cl

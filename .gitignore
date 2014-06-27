@@ -4,6 +4,9 @@ ext/SGCT
 .DS_Store
 *.swp
 
+# generated glsl files
+*.gglsl
+
 # CMake stuff
 CMakeCache.txt
 CMakeFiles

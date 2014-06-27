@@ -22,12 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 330
+#ifndef __ABUFFERSINGLELINKED_H__
+#define __ABUFFERSINGLELINKED_H__
 
-in vec4 position;
-out vec2 texCoord;
+#include <openspace/abuffer/abuffer.h>
 
-void main() {
-  gl_Position = position;
-  texCoord = position.xy/2.0 + 0.5;
-}
+namespace openspace {
+
+class ABufferSingleLinked: public ABuffer {
+public:
+
+	ABufferSingleLinked();
+	virtual ~ABufferSingleLinked();
+	virtual bool initialize();
+
+	virtual void clear();
+	virtual void preRender();
+	virtual void postRender();
+
+	virtual std::string settings();
+
+private:
+
+	GLuint *_data;
+	GLuint _anchorPointerTexture;
+	GLuint _anchorPointerTextureInitializer;
+	GLuint _atomicCounterBuffer;
+	GLuint _fragmentBuffer;
+	GLuint _fragmentTexture;
+
+
+
+
+}; 		// ABuffer_I
+} 		// openspace
+
+#endif 	// __ABUFFERSINGLELINKED_H__

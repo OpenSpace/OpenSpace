@@ -53,6 +53,7 @@ public:
 	void keyboard(int key, int action);
 	void mouse(int button, int action);
 	void preSync();
+	void postSyncPreDraw();
 	void postDraw();
 	void encode();
 	void decode();

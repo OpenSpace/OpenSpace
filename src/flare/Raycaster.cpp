@@ -6,6 +6,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <sgct.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <fstream>
 #include <openspace/flare/Raycaster.h>
 #include <openspace/flare/BrickManager.h>
@@ -94,6 +95,7 @@ Raycaster * Raycaster::New(Config *_config) {
 
 bool Raycaster::Render(float _timestep) {
   proj_ = sgct::Engine::instance()->getActiveProjectionMatrix();
+  GLuint activeFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
   // Clear cache for benchmarking
   if (config_->ClearCache()) {
@@ -270,7 +272,7 @@ bool Raycaster::Render(float _timestep) {
 
 
   // Render to framebuffer using quad
-  glBindFramebuffer(GL_FRAMEBUFFER, sgct::Engine::instance()->getActiveWindowPtr()->getFBOPtr()->getBufferID());
+  glBindFramebuffer(GL_FRAMEBUFFER, activeFBO);
 
     glGetError();
     quadShaderProgram_->activate();

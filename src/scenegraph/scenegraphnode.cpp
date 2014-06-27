@@ -181,6 +181,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
         if (!sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
             // the node is completely outside of the camera view, stop evaluating this
             // node
+            //LFATAL(_nodeName << " is outside of frustum");
             return;
         }
     }
@@ -198,7 +199,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 
     // evaluate all the children, tail-recursive function(?)
     for (auto& child : _children) {
-        child->evaluate(camera, psc());
+        child->evaluate(camera, thisPosition);
     }
 }
 
@@ -290,13 +291,22 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
             }
         }
         _boundingSphere += maxChild;
-    } else {  // leaf
+    } 
 
-        // if has a renderable, use that boundingsphere
-        if (_renderable)
-            _boundingSphere += _renderable->getBoundingSphere();
+    // if has a renderable, use that boundingsphere
+    if (_renderable ) {
+        PowerScaledScalar renderableBS = _renderable->getBoundingSphere();
+        if(renderableBS > _boundingSphere)
+            _boundingSphere = renderableBS;
     }
+    
 
+    LWARNING(_nodeName << ": " << _boundingSphere);
+
+    return _boundingSphere;
+}
+
+PowerScaledScalar SceneGraphNode::boundingSphere() const{
     return _boundingSphere;
 }
 
