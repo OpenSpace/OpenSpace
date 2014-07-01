@@ -25,7 +25,6 @@
 #ifndef KAMELEONWRAPPER_H_
 #define KAMELEONWRAPPER_H_
 
-//#include <glm/glm.hpp>
 #include <glm/gtx/std_based_type.hpp>
 
 namespace ccmc {
@@ -43,12 +42,12 @@ public:
 		BATSRUS		// Magnetosphere
 	};
 
-	enum TraceDirection {
+	enum class TraceDirection {
 		FORWARD = 1,
 		BACK 	= -1
 	};
 
-	enum FieldlineEnd {
+	enum class FieldlineEnd {
 		NORTH,
 		SOUTH,
 		OUT
@@ -60,14 +59,24 @@ public:
 	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
 			const std::string& zVar, glm::size3_t outDimensions);
 
-	std::vector<std::vector<glm::vec3> > getFieldLines(const std::string& xVar,
+	std::vector<std::vector<glm::vec3> > getClassifiedFieldLines(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar,
 			std::vector<glm::vec3> seedPoints, float stepSize);
+
+	std::vector<std::vector<glm::vec3> > getFieldLines(const std::string& xVar,
+				const std::string& yVar, const std::string& zVar,
+				std::vector<glm::vec3> seedPoints, float stepSize, glm::vec3 color);
+
+	std::vector<std::vector<glm::vec3> > getLorentzTrajectories(std::vector<glm::vec3> seedPoints,
+			glm::vec3 color, float stepsize);
 
 private:
 	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar, glm::vec3 seedPoint,
 			float stepSize, TraceDirection direction, FieldlineEnd& end);
+
+	std::vector<glm::vec3> traceLorentzTrajectory(glm::vec3 seedPoint,
+			float stepsize, float eCharge);
 
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	void progressBar(int current, int end);

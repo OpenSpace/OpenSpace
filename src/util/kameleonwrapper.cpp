@@ -36,6 +36,8 @@
 #include <iomanip>
 #include <stdlib.h>
 
+#include <glm/gtx/rotate_vector.hpp>
+
 namespace openspace {
 
 std::string _loggerCat = "KameleonWrapper";
@@ -122,7 +124,8 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     double zPos = _zMin + stepZ*z;
                     
                     // get interpolated data value for (xPos, yPos, zPos)
-                    double value = _interpolator->interpolate(var, xPos, yPos, zPos);
+                    // swap yPos and zPos because model has Z as up
+                    double value = _interpolator->interpolate(var, xPos, zPos, yPos);
                     
                     // scale to [0,1]
                     //doubleData[index] = (value-varMin)/(varMax-varMin);
@@ -266,7 +269,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	return data;
 }
 
-std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
+std::vector<std::vector<glm::vec3> > KameleonWrapper::getClassifiedFieldLines(
 		const std::string& xVar, const std::string& yVar,
 		const std::string& zVar, std::vector<glm::vec3> seedPoints,
 		float stepSize ) {
@@ -305,6 +308,66 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 	return fieldLines;
 }
 
+std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
+		const std::string& xVar, const std::string& yVar,
+		const std::string& zVar, std::vector<glm::vec3> seedPoints,
+		float stepSize, glm::vec3 color ) {
+	assert(_model && _interpolator);
+	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
+	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
+
+	std::vector<glm::vec3> fLine, bLine;
+	std::vector<std::vector<glm::vec3> > fieldLines;
+	FieldlineEnd forwardEnd, backEnd;
+
+	if (_type == Model::BATSRUS) {
+		for (glm::vec3 seedPoint : seedPoints) {
+			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
+			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK, backEnd);
+
+			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
+
+			// write colors
+			std::vector<glm::vec3> line;
+			for (glm::vec3 position : bLine) {
+				line.push_back(position);
+				line.push_back(color);
+			}
+
+			fieldLines.push_back(line);
+		}
+	} else {
+		LERROR("Fieldlines are only supported for BATSRUS model");
+	}
+
+	return fieldLines;
+}
+
+std::vector<std::vector<glm::vec3> > KameleonWrapper::getLorentzTrajectories(
+		std::vector<glm::vec3> seedPoints, glm::vec3 color, float stepsize) {
+	LINFO("Creating " << seedPoints.size() << " Lorentz force trajectories");
+
+	std::vector<std::vector<glm::vec3> > trajectories;
+	std::vector<glm::vec3> plusTraj, minusTraj;
+
+	for (auto seedPoint : seedPoints) {
+		plusTraj = traceLorentzTrajectory(seedPoint, stepsize, 1.0);
+		minusTraj = traceLorentzTrajectory(seedPoint, stepsize, -1.0);
+
+		minusTraj.insert(minusTraj.begin(), plusTraj.rbegin(), plusTraj.rend());
+
+		// write colors
+		std::vector<glm::vec3> trajectory;
+		for (glm::vec3 position : minusTraj) {
+			trajectory.push_back(position);
+			trajectory.push_back(color);
+		}
+		trajectories.push_back(trajectory);
+	}
+
+	return trajectories;
+}
+
 std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 		const std::string& xVar, const std::string& yVar,
 		const std::string& zVar, glm::vec3 seedPoint,
@@ -313,8 +376,7 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 	glm::vec3 color, pos, k1, k2, k3, k4;
 	std::vector<glm::vec3> line;
 	float stepX, stepY, stepZ;
-	int numSteps = 0;
-	int maxSteps = 5000;
+	int numSteps = 0, maxSteps = 5000;
 	pos = seedPoint;
 
 	_model->loadVariable(xVar);
@@ -329,15 +391,15 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
 			pos.z < _zMax && pos.z > _zMin) && !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
 
-		// Save position
-		line.push_back(pos);
+		// Save position. Model has +Z as up
+		line.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
 		// Calculate new position with Runge-Kutta 4th order
 		k1.x = _interpolator->interpolate(xID, pos.x, pos.y, pos.z, stepX, stepY, stepZ);
 		k1.y = _interpolator->interpolate(yID, pos.x, pos.y, pos.z);
 		k1.z = _interpolator->interpolate(zID, pos.x, pos.y, pos.z);
 		k1 = (float)direction*glm::normalize(k1);
-//		stepX*=stepSize, stepY*=stepSize, stepZ*=stepSize;
+		stepX=stepX*stepSize, stepY=stepY*stepSize, stepZ=stepZ*stepSize;
 		k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
 		k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
 		k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
@@ -360,7 +422,8 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 			break;
 		}
 	}
-	line.push_back(pos);
+	// Save last position. Model has +Z as up
+	line.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
 	if (pos.z > 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
 		end = FieldlineEnd::NORTH;
@@ -370,6 +433,98 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 		end = FieldlineEnd::OUT;
 
 	return line;
+}
+
+std::vector<glm::vec3> KameleonWrapper::traceLorentzTrajectory(glm::vec3 seedPoint,
+		float stepsize, float eCharge) {
+	glm::vec3 B, E, v0, k1, k2, k3, k4, sPos, tmpV;
+	float stepX = stepsize, stepY = stepsize, stepZ = stepsize;
+
+	long int bxID = _model->getVariableID("bx");
+	long int byID = _model->getVariableID("by");
+	long int bzID = _model->getVariableID("bz");
+	long int jxID = _model->getVariableID("jx");
+	long int jyID = _model->getVariableID("jy");
+	long int jzID = _model->getVariableID("jz");
+
+	std::vector<glm::vec3> trajectory;
+	glm::vec3 pos = seedPoint;
+	int numSteps = 0, maxSteps = 5000;
+	v0.x = _interpolator->interpolate("ux", pos.x, pos.y, pos.z);
+	v0.y = _interpolator->interpolate("uy", pos.x, pos.y, pos.z);
+	v0.z = _interpolator->interpolate("uz", pos.x, pos.y, pos.z);
+	v0 = glm::normalize(v0);
+
+	// While we are inside the models boundries and not inside earth
+	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
+			pos.z < _zMax && pos.z > _zMin) && !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
+
+		// Save position. Model has +Z as up
+		trajectory.push_back(glm::vec3(pos.x, pos.z, pos.y));
+
+		// Calculate new position with Lorentz force quation and Runge-Kutta 4th order
+		B.x = _interpolator->interpolate(bxID, pos.x, pos.y, pos.z);
+		B.y = _interpolator->interpolate(byID, pos.x, pos.y, pos.z);
+		B.z = _interpolator->interpolate(bzID, pos.x, pos.y, pos.z);
+		E.x = _interpolator->interpolate(jxID, pos.x, pos.y, pos.z);
+		E.y = _interpolator->interpolate(jyID, pos.x, pos.y, pos.z);
+		E.z = _interpolator->interpolate(jzID, pos.x, pos.y, pos.z);
+		k1 = eCharge*(E + glm::cross(v0, B));
+		k1 = glm::normalize(k1);
+
+		sPos = glm::vec3(	pos.x+(stepX/2.0)*v0.x+(stepX*stepX/8.0)*k1.x,
+							pos.y+(stepY/2.0)*v0.y+(stepY*stepY/8.0)*k1.y,
+							pos.z+(stepZ/2.0)*v0.z+(stepZ*stepZ/8.0)*k1.z);
+		B.x = _interpolator->interpolate(bxID, sPos.x, sPos.y, sPos.z);
+		B.y = _interpolator->interpolate(byID, sPos.x, sPos.y, sPos.z);
+		B.z = _interpolator->interpolate(bzID, sPos.x, sPos.y, sPos.z);
+		E.x = _interpolator->interpolate(jxID, sPos.x, sPos.y, sPos.z);
+		E.y = _interpolator->interpolate(jyID, sPos.x, sPos.y, sPos.z);
+		E.z = _interpolator->interpolate(jzID, sPos.x, sPos.y, sPos.z);
+		tmpV = v0+(stepX/2.0f)*k1;
+		k2 = eCharge*(E + glm::cross(tmpV, B));
+		k2 = glm::normalize(k2);
+
+		B.x = _interpolator->interpolate(bxID, sPos.x, sPos.y, sPos.z);
+		B.y = _interpolator->interpolate(byID, sPos.x, sPos.y, sPos.z);
+		B.z = _interpolator->interpolate(bzID, sPos.x, sPos.y, sPos.z);
+		E.x = _interpolator->interpolate(jxID, sPos.x, sPos.y, sPos.z);
+		E.y = _interpolator->interpolate(jyID, sPos.x, sPos.y, sPos.z);
+		E.z = _interpolator->interpolate(jzID, sPos.x, sPos.y, sPos.z);
+		tmpV = v0+(stepX/2.0f)*k2;
+		k3 = eCharge*(E + glm::cross(tmpV, B));
+		k3 = glm::normalize(k3);
+
+		sPos = glm::vec3(	pos.x+stepX*v0.x+(stepX*stepX/2.0)*k1.x,
+							pos.y+stepY*v0.y+(stepY*stepY/2.0)*k1.y,
+							pos.z+stepZ*v0.z+(stepZ*stepZ/2.0)*k1.z);
+		B.x = _interpolator->interpolate(bxID, sPos.x, sPos.y, sPos.z);
+		B.y = _interpolator->interpolate(byID, sPos.x, sPos.y, sPos.z);
+		B.z = _interpolator->interpolate(bzID, sPos.x, sPos.y, sPos.z);
+		E.x = _interpolator->interpolate(jxID, sPos.x, sPos.y, sPos.z);
+		E.y = _interpolator->interpolate(jyID, sPos.x, sPos.y, sPos.z);
+		E.z = _interpolator->interpolate(jzID, sPos.x, sPos.y, sPos.z);
+		tmpV = v0+stepX*k3;
+		k4 = eCharge*(E + glm::cross(tmpV, B));
+		k4 = glm::normalize(k4);
+
+		pos.x = pos.x + stepX*v0.x + (stepX*stepX/6.0)*(k1.x + k2.x + k3.x);
+		pos.y = pos.y + stepY*v0.y + (stepY*stepY/6.0)*(k1.y + k2.y + k3.y);
+		pos.z = pos.z + stepZ*v0.z + (stepZ*stepZ/6.0)*(k1.z + k2.z + k3.z);
+
+		v0.x = v0.x + (stepX/6.0)*(k1.x + 2.0*k2.x + 2.0*k3.x + k4.z);
+		v0.y = v0.y + (stepY/6.0)*(k1.y + 2.0*k2.y + 2.0*k3.y + k4.y);
+		v0.z = v0.z + (stepZ/6.0)*(k1.z + 2.0*k2.z + 2.0*k3.z + k4.z);
+
+		++numSteps;
+		if (numSteps > maxSteps) {
+			LDEBUG("Max number of steps taken (" << maxSteps <<")");
+			break;
+		}
+	}
+	// Save last position. Model has +Z as up
+	trajectory.push_back(glm::vec3(pos.x, pos.z, pos.y));
+	return trajectory;
 }
 
 void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::string& z) {
