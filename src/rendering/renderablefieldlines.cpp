@@ -129,7 +129,7 @@ bool RenderableFieldlines::initialize() {
 	std::vector<glm::vec3> seedPointsData;
 	for (int i = 0; i < _seedPoints.size(); ++i) {
 		seedPointsData.push_back(_seedPoints[i]);
-		seedPointsData.push_back(glm::vec3(1.0, 0.0, 1.0));
+		seedPointsData.push_back(glm::vec3(1.0, 0.5, 0.0));
 	}
 
 	//	------ FIELDLINES -----------------
@@ -207,8 +207,8 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	transform = transform*camTransform;
 	//transform = glm::translate(transform, relative.vec3());
 	transform = glm::mat4(1.0);
-	transform = glm::rotate(transform, -90.0f, glm::vec3(1.0, 0.0, 0.0)); // Model has positive Z as up
-	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
+//	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
+	transform = glm::scale(transform, glm::vec3(0.01));
 	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
 
 	psc currentPosition = thisPosition;

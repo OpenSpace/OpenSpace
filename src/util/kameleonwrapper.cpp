@@ -36,6 +36,8 @@
 #include <iomanip>
 #include <stdlib.h>
 
+#include <glm/gtx/rotate_vector.hpp>
+
 namespace openspace {
 
 std::string _loggerCat = "KameleonWrapper";
@@ -122,7 +124,8 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     double zPos = _zMin + stepZ*z;
                     
                     // get interpolated data value for (xPos, yPos, zPos)
-                    double value = _interpolator->interpolate(var, xPos, yPos, zPos);
+                    // swap yPos and zPos because model has Z as up
+                    double value = _interpolator->interpolate(var, xPos, zPos, yPos);
                     
                     // scale to [0,1]
                     //doubleData[index] = (value-varMin)/(varMax-varMin);
@@ -360,7 +363,6 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getLorentzTrajectories(
 			trajectory.push_back(color);
 		}
 		trajectories.push_back(trajectory);
-
 	}
 
 	return trajectories;
@@ -389,8 +391,8 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
 			pos.z < _zMax && pos.z > _zMin) && !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
 
-		// Save position
-		line.push_back(pos);
+		// Save position. Model has +Z as up
+		line.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
 		// Calculate new position with Runge-Kutta 4th order
 		k1.x = _interpolator->interpolate(xID, pos.x, pos.y, pos.z, stepX, stepY, stepZ);
@@ -420,7 +422,8 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 			break;
 		}
 	}
-	line.push_back(pos);
+	// Save last position. Model has +Z as up
+	line.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
 	if (pos.z > 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
 		end = FieldlineEnd::NORTH;
@@ -456,8 +459,8 @@ std::vector<glm::vec3> KameleonWrapper::traceLorentzTrajectory(glm::vec3 seedPoi
 	while ((pos.x < _xMax && pos.x > _xMin && pos.y < _yMax && pos.y > _yMin &&
 			pos.z < _zMax && pos.z > _zMin) && !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
 
-		// Save position
-		trajectory.push_back(pos);
+		// Save position. Model has +Z as up
+		trajectory.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
 		// Calculate new position with Lorentz force quation and Runge-Kutta 4th order
 		B.x = _interpolator->interpolate(bxID, pos.x, pos.y, pos.z);
@@ -519,6 +522,8 @@ std::vector<glm::vec3> KameleonWrapper::traceLorentzTrajectory(glm::vec3 seedPoi
 			break;
 		}
 	}
+	// Save last position. Model has +Z as up
+	trajectory.push_back(glm::vec3(pos.x, pos.z, pos.y));
 	return trajectory;
 }
 
