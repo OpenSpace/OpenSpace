@@ -24,6 +24,8 @@
  
 #include "abufferAddToBuffer.hglsl"
 
+uniform float volumeStepFactor = 1.0f;
+
 int build_local_fragments_list() {
 	uint current;
 	int frag_count = 0;
@@ -84,17 +86,21 @@ void sort_fragments_list(uint frag_count) {
 				if(start) {
 					startColor = _col_(fragments[jj]).rgb;
 					startPosition = _pos_(fragments[jj]);
+#if ZTYPE == ZDEPTH
 					volume_zlength[ii].x = _z_(fragments[jj]);
+#endif
 					start = false;
 				} else {
 					vec3 dir = _col_(fragments[jj]).rgb - startColor;
 					volume_position[ii] = startColor;
 					volume_length[ii] = length(dir);
 					volume_direction[ii] = normalize(dir);
+					volumeStepSize[ii] = 1.0/(volumeStepFactor * length(volume_direction[ii]*volume_dim[ii]));
+#if ZTYPE == ZDEPTH
 					volume_zlength[ii].y = _z_(fragments[jj]);
-					// volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
-					volumeStepSize[ii] = 1.0/(length(volume_direction[ii]*volume_dim[ii]));
-					// volume_length[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+#elif ZTYPE == PSCDEPTH
+					volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
+#endif
 
 					if(volumeStepSize[ii] < volume_length[ii]) {
 						// jittering

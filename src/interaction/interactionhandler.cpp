@@ -396,9 +396,9 @@ void InteractionHandler::mouseButtonCallback(int key, int action) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseButtonCallback(key,action);
     //}
-	if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_PRESS)
 		_leftMouseButtonDown = true;
-	else if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+	else if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_RELEASE) {
 		_leftMouseButtonDown = false;
 		_isMouseBeingPressedAndHeld = false;
 	}

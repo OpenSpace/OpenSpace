@@ -28,15 +28,20 @@
 // Settings
 // ================================================================================
 #pragma openspace insert SETTINGS
-#define LOOP_LIMIT 800
+// #define LOOP_LIMIT 500
 #define MAX_FRAGMENTS 16
-#define SHOWFUNC
+
+#define SHOWFUNC 0
+
+#define PSCDEPTH 1
+#define ZDEPTH 2
+#define ZTYPE PSCDEPTH
 const float stepSize = 0.01;
 const float samplingRate = 1.0;
 
 uniform int SCREEN_WIDTH;
 uniform int SCREEN_HEIGHT;
-uniform float ALPHA_LIMIT = 0.98;
+uniform float ALPHA_LIMIT = 0.95;
 
 in vec2 texCoord;
 out vec4 color;
@@ -54,9 +59,14 @@ out vec4 color;
 ABufferStruct_t fragments[MAX_FRAGMENTS];
 vec3 volume_direction[MAX_VOLUMES];
 float volume_length[MAX_VOLUMES];
-vec2 volume_zlength[MAX_VOLUMES];
-// float volume_zlength[MAX_VOLUMES];
 vec3 volume_position[MAX_VOLUMES];
+
+#if ZTYPE == ZDEPTH
+	vec2 volume_zlength[MAX_VOLUMES];
+#elif ZTYPE == PSCDEPTH
+	float volume_zlength[MAX_VOLUMES];
+#endif
+
 
 #include "abufferSort.hglsl"
 
@@ -132,8 +142,7 @@ vec4 calculate_final_color(uint frag_count) {
 		if(bool(currentVolumeBitmask)) {
 			int volID = type -1;
 			float p = 0.0f;
-
-			// const float l = volume_length[volID];
+#if ZTYPE == ZDEPTH
 			const float S1 = volume_zlength[volID].x;
 			const float S2 = volume_zlength[volID].y;
 			const float L = S1 - S2;
@@ -145,21 +154,21 @@ vec4 calculate_final_color(uint frag_count) {
 			int max_iterations = int(l / volumeStepSize[volID]);
 			int iterations = 0;
 			vec3 position;
+#elif ZTYPE == PSCDEPTH
+			const float L = volume_zlength[volID];
+			const vec4 p1 = _pos_(startFrag);
+			const vec4 p2 = _pos_(endFrag);
+			const float dist = pscLength(p1, p2);
+			// const float z1 = _z_(startFrag);
+			// const float z2 = _z_(endFrag);
+			const float l = (dist / L) * volume_length[volID];
+			int max_iterations = int(l / volumeStepSize[volID]);
+			int iterations = 0;
+			vec3 position;
+#endif
 
 
-			// const float S1 = volume_zlength[volID].x;
-			// const float S2 = volume_zlength[volID].y;
 
-			// const float L = volume_zlength[volID];
-			// const vec4 p1 = _pos_(startFrag);
-			// const vec4 p2 = _pos_(endFrag);
-			// const float dist = pscLength(p1, p2);
-			// // const float z1 = _z_(startFrag);
-			// // const float z2 = _z_(endFrag);
-			// const float l = (dist / L) * volume_length[volID];
-			// int max_iterations = int(l / volumeStepSize[volID]);
-			// int iterations = 0;
-			// vec3 position;
 			
 			// MIP
 			// vec4 tmp, color = vec4(0);
@@ -177,7 +186,7 @@ vec4 calculate_final_color(uint frag_count) {
 
 			// TransferFunction
 			vec4 color = vec4(0);
-			for(int k = 0; k < max_iterations && k < LOOP_LIMIT; ++k) {
+			for(int k = 0; k < max_iterations && final_color.a < ALPHA_LIMIT && k < LOOP_LIMIT; ++k) {
 			//while(p < l && iterations < LOOP_LIMIT) {
 
 #pragma openspace insert SAMPLERCALLS
@@ -214,7 +223,7 @@ vec4 calculate_final_color(uint frag_count) {
 // ================================================================================
 // Transferfunction visualizer
 // ================================================================================
-#ifdef SHOWFUNC  
+#if (SHOWFUNC >= 0) && (SHOWFUNC < MAX_TF)
 	float showfunc_size = 20.0;
 	if(gl_FragCoord.y > float(SCREEN_HEIGHT) - showfunc_size) {
 		float normalizedIntensity = gl_FragCoord.x / float(SCREEN_WIDTH) ;

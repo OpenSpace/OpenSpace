@@ -145,6 +145,15 @@ void ABuffer::resolve() {
 			_transferFunctions.at(i).second->bind();
 		}
 
+		// Decrease stepsize in volumes if right click is pressed
+		// TODO: Let the interactionhandler handle this
+		int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
+		if(val) {
+			_resolveShader->setUniform("volumeStepFactor", 0.2f);
+		} else {
+			_resolveShader->setUniform("volumeStepFactor", 1.0f);
+		}
+
 	    glBindVertexArray(_screenQuad);
 	    glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -260,6 +269,7 @@ std::string ABuffer::openspaceHeaders() {
 
 	std::string headers;
 	headers += "#define MAX_VOLUMES " + std::to_string(_samplers.size()) + "\n";
+	headers += "#define MAX_TF " + std::to_string(_transferFunctions.size()) + "\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		headers += "uniform sampler3D " + _volumes.at(i).first + ";\n";
 	}
@@ -274,13 +284,17 @@ std::string ABuffer::openspaceHeaders() {
 		}
 	}
 
+	size_t maxLoop = 0;
 	headers += "const vec3 volume_dim[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		glm::size3_t size = _volumes.at(i).second->dimensions();
+		for(int k = 0; k < 3; ++k)
+			maxLoop = glm::max(maxLoop, size[k]);
 		headers += "    vec3(" + std::to_string(size[0]) + ".0," + std::to_string(size[1]) + ".0," 
 			    + std::to_string(size[2]) + ".0),\n";
 	}
 	headers += "};\n";
+	headers += "#define LOOP_LIMIT " + std::to_string(maxLoop) + "\n";
 
 	headers += "float volumeStepSize[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
