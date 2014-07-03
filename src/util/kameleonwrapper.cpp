@@ -269,7 +269,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	return data;
 }
 
-std::vector<std::vector<glm::vec3> > KameleonWrapper::getClassifiedFieldLines(
+std::vector<std::vector<LinePoint> > KameleonWrapper::getClassifiedFieldLines(
 		const std::string& xVar, const std::string& yVar,
 		const std::string& zVar, std::vector<glm::vec3> seedPoints,
 		float stepSize ) {
@@ -278,8 +278,8 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getClassifiedFieldLines(
 	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
 
 	std::vector<glm::vec3> fLine, bLine;
-	std::vector<std::vector<glm::vec3> > fieldLines;
-	glm::vec3 color;
+	std::vector<std::vector<LinePoint> > fieldLines;
+	glm::vec4 color;
 	FieldlineEnd forwardEnd, backEnd;
 
 	if (_type == Model::BATSRUS) {
@@ -293,10 +293,9 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getClassifiedFieldLines(
 			color = classifyFieldline(forwardEnd, backEnd);
 
 			// write colors
-			std::vector<glm::vec3> line;
+			std::vector<LinePoint> line;
 			for (glm::vec3 position : bLine) {
-				line.push_back(position);
-				line.push_back(color);
+				line.push_back(LinePoint(position, color));
 			}
 
 			fieldLines.push_back(line);
@@ -308,16 +307,16 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getClassifiedFieldLines(
 	return fieldLines;
 }
 
-std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
+std::vector<std::vector<LinePoint> > KameleonWrapper::getFieldLines(
 		const std::string& xVar, const std::string& yVar,
 		const std::string& zVar, std::vector<glm::vec3> seedPoints,
-		float stepSize, glm::vec3 color ) {
+		float stepSize, glm::vec4 color ) {
 	assert(_model && _interpolator);
 	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
 
 	std::vector<glm::vec3> fLine, bLine;
-	std::vector<std::vector<glm::vec3> > fieldLines;
+	std::vector<std::vector<LinePoint> > fieldLines;
 	FieldlineEnd forwardEnd, backEnd;
 
 	if (_type == Model::BATSRUS) {
@@ -328,10 +327,9 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
 
 			// write colors
-			std::vector<glm::vec3> line;
+			std::vector<LinePoint> line;
 			for (glm::vec3 position : bLine) {
-				line.push_back(position);
-				line.push_back(color);
+				line.push_back(LinePoint(position, color));
 			}
 
 			fieldLines.push_back(line);
@@ -343,11 +341,11 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getFieldLines(
 	return fieldLines;
 }
 
-std::vector<std::vector<glm::vec3> > KameleonWrapper::getLorentzTrajectories(
-		std::vector<glm::vec3> seedPoints, glm::vec3 color, float stepsize) {
+std::vector<std::vector<LinePoint> > KameleonWrapper::getLorentzTrajectories(
+		std::vector<glm::vec3> seedPoints, glm::vec4 color, float stepsize) {
 	LINFO("Creating " << seedPoints.size() << " Lorentz force trajectories");
 
-	std::vector<std::vector<glm::vec3> > trajectories;
+	std::vector<std::vector<LinePoint> > trajectories;
 	std::vector<glm::vec3> plusTraj, minusTraj;
 
 	for (auto seedPoint : seedPoints) {
@@ -357,10 +355,9 @@ std::vector<std::vector<glm::vec3> > KameleonWrapper::getLorentzTrajectories(
 		minusTraj.insert(minusTraj.begin(), plusTraj.rbegin(), plusTraj.rend());
 
 		// write colors
-		std::vector<glm::vec3> trajectory;
+		std::vector<LinePoint> trajectory;
 		for (glm::vec3 position : minusTraj) {
-			trajectory.push_back(position);
-			trajectory.push_back(color);
+			trajectory.push_back(LinePoint(position, color));
 		}
 		trajectories.push_back(trajectory);
 	}
@@ -567,23 +564,23 @@ void KameleonWrapper::progressBar(int current, int end) {
 	_lastiProgress = iprogress;
 }
 
-glm::vec3 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd) {
-	glm::vec3 color;
+glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd) {
+	glm::vec4 color;
 	if (		(fEnd == FieldlineEnd::NORTH || fEnd == FieldlineEnd::SOUTH)
 			&& 	(bEnd == FieldlineEnd::NORTH || bEnd == FieldlineEnd::SOUTH)) {
 		// closed
-		color = glm::vec3(1.0, 0.0, 0.0);
+		color = glm::vec4(1.0, 0.0, 0.0, 1.0);
 	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::NORTH)
 			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::NORTH)) {
 		// north
-		color = glm::vec3(1.0, 1.0, 0.0);
+		color = glm::vec4(1.0, 1.0, 0.0, 1.0);
 	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::SOUTH)
 			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::SOUTH)) {
 		// south
-		color = glm::vec3(0.0, 1.0, 0.0);
+		color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 	} else if (fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::OUT) {
 		// solar wind
-		color = glm::vec3(0.0, 0.0, 1.0);
+		color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	}
 	return color;
 }

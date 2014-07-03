@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/file.h>
 
 namespace openspace {
+	struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
@@ -46,7 +47,7 @@ public:
 	virtual void update();
 
 private:
-	std::vector<std::vector<glm::vec3> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
 
 	std::vector<ghoul::Dictionary> _hintsDictionaries;
 	std::vector<std::string> _filenames;
