@@ -79,8 +79,8 @@ RenderableVolume::~RenderableVolume() {
 
 ghoul::opengl::Texture* RenderableVolume::loadVolume(
     const std::string& filepath, 
-    const ghoul::Dictionary& hintsDictionary) 
-{
+    const ghoul::Dictionary& hintsDictionary) {
+
 	if( ! FileSys.fileExists(filepath)) {
 		LWARNING("Could not load volume, could not find '" << filepath << "'");
 		return nullptr;
@@ -174,7 +174,6 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 		}
 
 		KameleonWrapper kw(filepath, model);
-
 		std::string variableString;
 		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
 			float* data = kw.getUniformSampledValues(variableString, dimensions);
@@ -218,6 +217,33 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 		LWARNING("No valid file extension.");
 	}
 	return nullptr;
+}
+
+glm::vec3 RenderableVolume::getVolumeOffset(
+		const std::string& filepath,
+		const ghoul::Dictionary& hintsDictionary) {
+
+	std::string modelString = "";
+	if (hintsDictionary.hasKey("Model"))
+		hintsDictionary.getValue("Model", modelString);
+
+	if(modelString == "") {
+		LWARNING("Model not specified.");
+		return glm::vec3(0);
+	}
+	KameleonWrapper::Model model;
+	if (modelString == "BATSRUS") {
+		model = KameleonWrapper::Model::BATSRUS;
+	} else if (modelString == "ENLIL") {
+		model = KameleonWrapper::Model::ENLIL;
+	} else {
+		LWARNING("Hints does not specify a valid 'Model'");
+		return glm::vec3(0);
+	}
+
+	KameleonWrapper kw(filepath, model);
+
+	return kw.getModelBarycenterOffset();
 }
 
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {

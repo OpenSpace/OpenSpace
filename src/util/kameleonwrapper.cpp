@@ -65,12 +65,12 @@ KameleonWrapper::KameleonWrapper(const std::string& filename, Model model): _typ
 	}
 
 	getGridVariables(_xCoordVar, _yCoordVar, _zCoordVar);
-	_xMin =    _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
-	_xMax =    _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
-	_yMin =    _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
-	_yMax =    _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
-	_zMin =    _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
-	_zMax =    _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
+	_xMin = _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
+	_xMax = _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
+	_yMin = _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
+	_yMax = _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
+	_zMin = _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
+	_zMax = _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
 
 	_lastiProgress = -1; // For progressbar
 }
@@ -259,6 +259,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 					data[index + 3] = 1.0; // GL_RGB refuses to work. Workaround by doing a GL_RGBA with hardcoded alpha
 				} else {
 					LERROR("Only BATSRUS supported for getUniformSampledVectorValues (for now)");
+					return data;
 				}
 			}
 		}
@@ -363,6 +364,14 @@ std::vector<std::vector<LinePoint> > KameleonWrapper::getLorentzTrajectories(
 	}
 
 	return trajectories;
+}
+
+glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
+	glm::vec3 offset;
+	offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
+	offset.y = _yMin+(std::abs(_yMin)+std::abs(_yMax))/2.0f;
+	offset.z = _zMin+(std::abs(_zMin)+std::abs(_zMax))/2.0f;
+	return offset;
 }
 
 std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(

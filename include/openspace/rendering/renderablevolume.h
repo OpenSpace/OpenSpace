@@ -42,6 +42,7 @@ public:
     
 protected:
     ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
+    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
     ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
     ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
 
