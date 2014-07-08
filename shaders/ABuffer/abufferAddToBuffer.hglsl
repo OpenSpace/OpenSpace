@@ -22,11 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
+#endif
 
-ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position = vec4(0), float z = gl_FragCoord.z) {
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
+layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
+layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
+
+	#define _MAX_LAYERS_ 16
+	#define _SCREEN_WIDTH_ 1280
+	#define _SCREEN_HEIGHT_ 720
+#endif 
+
+ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z = gl_FragCoord.z) {
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
 	_z_(frag, z);
@@ -37,6 +48,7 @@ ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position = vec4(0), 
 
 void addToBuffer(ABufferStruct_t frag) {
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uint index = atomicCounterIncrement(atomicCounterBuffer);
 	index *= 2;
     uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
@@ -47,17 +59,44 @@ void addToBuffer(ABufferStruct_t frag) {
 
 	imageStore(fragmentTexture, int(index), p1);
 	imageStore(fragmentTexture, int(index+1), p2);
+#endif 
+
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
+	uint index = imageAtomicAdd(anchorPointerTexture, ivec2(gl_FragCoord.xy), 1);
+	if(index < _MAX_LAYERS_) {
+		int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(index)*2;
+
+	    uvec4 p1 = uvec4(frag.z, frag.id, frag.rg, frag.ba);
+	    uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
+
+		imageStore(fragmentTexture, int(offset  ), p1);
+		imageStore(fragmentTexture, int(offset+1), p2);
+	} else {
+		imageAtomicAdd(anchorPointerTexture, ivec2(gl_FragCoord.xy), -1);
+	}
+	
+#endif 
+
 }
 
 ABufferStruct_t loadFromBuffer(uint id) {
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uvec4 u1 = imageLoad(fragmentTexture, int(id));
-	uvec4 u2 = imageLoad(fragmentTexture, int(id+1));
-	
+	uvec4 u2 = imageLoad(fragmentTexture, int(id+1));	
+#endif 
+
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
+	int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(id)*2;
+	uvec4 u1 = imageLoad(fragmentTexture, int(offset));
+	uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
+#endif 
+
 	vec4 position = vec4(	uintBitsToFloat(u2.x),
 						uintBitsToFloat(u2.y),
 						uintBitsToFloat(u2.z),
 						uintBitsToFloat(u2.w));
 	
 	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w, position);
+
 }

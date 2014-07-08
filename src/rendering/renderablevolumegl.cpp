@@ -97,6 +97,13 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     		_boxScaling[2] = tempValue;
     }
 
+    _volumeName = "";
+    if (dictionary.hasKey("VolumeName"))
+        dictionary.getValue("VolumeName", _volumeName);
+    _transferFunctionName = "";
+    if (dictionary.hasKey("TransferFunctionName"))
+        dictionary.getValue("TransferFunctionName", _transferFunctionName);
+
     setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
 }
 
@@ -121,8 +128,8 @@ bool RenderableVolumeGL::initialize() {
     _transferFunction->uploadTexture();
 
     // TODO: fix volume an transferfunction names
-    OsEng.renderEngine().abuffer()->addVolume("volume1", _volume);
-    OsEng.renderEngine().abuffer()->addTransferFunction("transferFunction1", _transferFunction);
+    OsEng.renderEngine().abuffer()->addVolume(_volumeName, _volume);
+    OsEng.renderEngine().abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
     _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
 
     auto textureCallback = [this](const ghoul::filesystem::File& file) {
@@ -235,8 +242,8 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     glm::mat4 camrot            = camera->viewRotationMatrix();
     PowerScaledScalar scaling   = camera->scaling();
 
-    psc addon(-1.1,0.0,0.0,0.0);
-    currentPosition += addon;
+    // psc addon(-1.1,0.0,0.0,0.0);
+    // currentPosition += addon;
 
     // TODO: Use _id to identify this volume
     _boxProgram->activate();

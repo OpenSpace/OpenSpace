@@ -25,10 +25,17 @@
 #ifndef ABUFFERSTRUCT_H_HGLSL
 #define ABUFFERSTRUCT_H_HGLSL
 
+// The different kinds of implementation
+#define  ABUFFER_SINGLE_LINKED    1
+#define  ABUFFER_FIXED            2
+#define  ABUFFER_DYNAMIC          3
 
-//=======================================================
+#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+
+
+//========================================================================================
 // ABufferStruct_t declaration
-//=======================================================
+//========================================================================================
 // struct ABufferStruct_t { 
 // 	uint z;			// the depth value
 // 	uint id;		// bits 0-28 next, bits 29-32 type
@@ -46,9 +53,9 @@ struct ABufferStruct_t {
 };
 
 
-//=======================================================
+//========================================================================================
 // Bitwise operations
-//=======================================================
+//========================================================================================
 const uint mask_1 = 1;
 const uint mask_8 = 255;
 const uint mask_16 = 65535;
@@ -92,23 +99,14 @@ int bitextract_i(in int pack, uint mask, uint shift) {
 	return int( (uint(pack) >> shift) & (mask >> shift) );
 }
 
-//=======================================================
+//========================================================================================
 // Access functions
-//=======================================================
+//========================================================================================
 float _z_(ABufferStruct_t frag) {
 	return uintBitsToFloat(frag.z);
 }
 void _z_(inout ABufferStruct_t frag, float z) {
 	frag.z = floatBitsToUint(z);
-}
-
-uint _next_(ABufferStruct_t frag) {
-	return bitextract_u(frag.id, mask_id_next, shift_id_next); 
-	//return frag.id;
-}
-void _next_(inout ABufferStruct_t frag, uint id) {
-	bitinsert_u(frag.id, id, mask_id_next, shift_id_next); 
-	//frag.id = id;
 }
 
 vec4 _pos_(ABufferStruct_t frag) {
@@ -132,12 +130,34 @@ void _col_(inout ABufferStruct_t frag, vec4 color) {
 }
 
 uint _type_(ABufferStruct_t frag) {
-	return bitextract_u(frag.id, mask_id_type, shift_id_type); 
-	//return frag.type;
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+	return bitextract_u(frag.id, mask_id_type, shift_id_type);
+#else
+	return frag.id;
+#endif
 }
 void _type_(inout ABufferStruct_t frag, uint type) {
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	bitinsert_u(frag.id, type, mask_id_type, shift_id_type); 
-	//frag.type = type;
+#else
+	frag.id = type;
+#endif
 }
+
+//========================================================================================
+// Implementation specific functions
+//========================================================================================
+
+// _next_ is only needed for the single linked implementation
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+uint _next_(ABufferStruct_t frag) {
+	return bitextract_u(frag.id, mask_id_next, shift_id_next); 
+	//return frag.id;
+}
+void _next_(inout ABufferStruct_t frag, uint id) {
+	bitinsert_u(frag.id, id, mask_id_next, shift_id_next); 
+	//frag.id = id;
+}
+#endif
 
 #endif

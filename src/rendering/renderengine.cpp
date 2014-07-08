@@ -35,6 +35,8 @@
 #include <array>
 
 #include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abufferfixed.h>
+#include <openspace/abuffer/abufferdynamic.h>
 
 namespace {
 const std::string _loggerCat = "RenderEngine";
@@ -66,6 +68,8 @@ bool RenderEngine::initialize()
         OsEng.interactionHandler().setCamera(_mainCamera);
 
     _abuffer = new ABufferSingleLinked();
+    // _abuffer = new ABufferFixed();
+    // _abuffer = new ABufferDynamic();
 
     return true;
 }
@@ -82,7 +86,7 @@ bool RenderEngine::initializeGL()
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.00001f, 100.0f);
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph

@@ -193,8 +193,9 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     // this node has an renderable
     if (_renderable) {
         //  check if the renderable boundingsphere is visible
-        _renderableVisible = sphereInsideFrustum(
-              thisPosition, _renderable->getBoundingSphere(), camera);
+        // _renderableVisible = sphereInsideFrustum(
+        //       thisPosition, _renderable->getBoundingSphere(), camera);
+        _renderableVisible = true;
     }
 
     // evaluate all the children, tail-recursive function(?)

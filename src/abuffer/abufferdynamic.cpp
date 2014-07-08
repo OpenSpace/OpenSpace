@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abufferdynamic.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -35,17 +35,17 @@
 #define MAX_LAYERS 10
 
 namespace {
-	std::string _loggerCat = "ABufferSingleLinked";
+	std::string _loggerCat = "ABufferDynamic";
 }
 
 namespace openspace {
 
-ABufferSingleLinked::ABufferSingleLinked(): _data(0), _anchorPointerTexture(0), 
+ABufferDynamic::ABufferDynamic(): _data(0), _anchorPointerTexture(0), 
 	_anchorPointerTextureInitializer(0), _atomicCounterBuffer(0), _fragmentBuffer(0), 
 	_fragmentTexture(0) 
 {}
 
-ABufferSingleLinked::~ABufferSingleLinked() {
+ABufferDynamic::~ABufferDynamic() {
 	if(_data != 0)
 		delete _data;
 
@@ -56,7 +56,7 @@ ABufferSingleLinked::~ABufferSingleLinked() {
 	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
 }
 
-bool ABufferSingleLinked::initialize() {
+bool ABufferDynamic::initialize() {
 	// ============================
 	//          BUFFERS
 	// ============================
@@ -91,7 +91,7 @@ bool ABufferSingleLinked::initialize() {
 	return initializeABuffer();
 }
 
-void ABufferSingleLinked::clear() {
+void ABufferDynamic::clear() {
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
 	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
 
@@ -104,7 +104,7 @@ void ABufferSingleLinked::clear() {
 	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
 }
 
-void ABufferSingleLinked::preRender() {
+void ABufferDynamic::preRender() {
 
 	// Bind head-pointer image for read-write
 	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
@@ -112,12 +112,12 @@ void ABufferSingleLinked::preRender() {
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32UI);
 }
 
-void ABufferSingleLinked::postRender() {
+void ABufferDynamic::postRender() {
 
 }
 
-std::string ABufferSingleLinked::settings() {
-	return R"()";
+std::string ABufferDynamic::settings() {
+	return R"(#define ABUFFER_SINGLE_LINKED)";
 }
 
 

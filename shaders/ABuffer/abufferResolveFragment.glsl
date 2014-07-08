@@ -28,15 +28,32 @@
 // Settings
 // ================================================================================
 #pragma openspace insert SETTINGS
-// #define LOOP_LIMIT 500
 #define MAX_FRAGMENTS 16
 
-#define SHOWFUNC 0
+#define SHOWFUNC
+// #define JITTERING
 
 #define PSCDEPTH 1
 #define ZDEPTH 2
-#define ZTYPE PSCDEPTH
-const float stepSize = 0.01;
+#define ZTYPE ZDEPTH
+
+// Math defintions
+#define 	M_E   		2.7182818284590452354
+#define 	M_LOG2E   	1.4426950408889634074 	/* log_2 e */
+#define 	M_LOG10E   	0.43429448190325182765 	/* log_10 e */
+#define 	M_LN2   	0.69314718055994530942 	/* log_e 2 */
+#define 	M_LN10   	2.30258509299404568402 	/* log_e 10 */
+#define 	M_PI   		3.14159265358979323846 	/* pi */
+// #define     M_PI 		3.141592653589793238462643383279 /* pi */
+#define 	M_PI_2   	1.57079632679489661923 	/* pi/2 */
+#define 	M_PI_4   	0.78539816339744830962 	/* pi/4 */
+#define 	M_1_PI   	0.31830988618379067154 	/* 1/pi */
+#define 	M_2_PI   	0.63661977236758134308 	/* 2/pi */
+#define 	M_2_SQRTPI	1.12837916709551257390 	/* 2/sqrt(pi) */
+#define 	M_SQRT2 	1.41421356237309504880 	/* sqrt(2) */
+#define 	M_SQRT1_2   0.70710678118654752440 	/* 1/sqrt(2) */
+
+const float stepSize = 	0.01;
 const float samplingRate = 1.0;
 
 uniform int SCREEN_WIDTH;
@@ -52,11 +69,36 @@ out vec4 color;
 // ================================================================================
 #pragma openspace insert HEADERS
 
+vec3 CartesianToSpherical(vec3 _cartesian) {
+  // Put cartesian in [-1..1] range first
+  vec3 cartesian = vec3(-1.0,-1.0,-1.0) + _cartesian * 2.0f;
+  
+  float r = length(cartesian);
+  float theta, phi;
+
+  if (r == 0.0) {
+    theta = phi = 0.0;
+  } else {
+    theta = acos(cartesian.z/r) / M_PI;
+    phi = (M_PI + atan(cartesian.y, cartesian.x)) / (2.0*M_PI);
+    // phi = (M_PI + atan(cartesian.x, cartesian.y)) / (2.0*M_PI);
+  }
+  // r *= 0.57735026919;
+  r = r / sqrt(3.0f);
+  
+  // Sampler ignores w component
+  // return vec3(r, phi, theta);
+  return vec3(r, theta, phi);
+  // return vec3(r, phi*0.7, theta);
+}
+
 // ================================================================================
 // The ABuffer specific includes and definitions
 // ================================================================================
 #include "abufferStruct.hglsl"
 ABufferStruct_t fragments[MAX_FRAGMENTS];
+
+#if MAX_VOLUMES > 0
 vec3 volume_direction[MAX_VOLUMES];
 float volume_length[MAX_VOLUMES];
 vec3 volume_position[MAX_VOLUMES];
@@ -66,8 +108,7 @@ vec3 volume_position[MAX_VOLUMES];
 #elif ZTYPE == PSCDEPTH
 	float volume_zlength[MAX_VOLUMES];
 #endif
-
-
+#endif
 #include "abufferSort.hglsl"
 
 // ================================================================================
@@ -83,6 +124,7 @@ vec4 blend(vec4 src, vec4 dst) {
 
 void blendStep(inout vec4 dst, in vec4 src, in float stepSize) {
     src.a = 1.0 - pow(1.0 - src.a, stepSize );
+    // src.a = 1.0 -(1.0 - src.a*stepSize);
     dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
     dst.a = dst.a + (1.0 -dst.a) * src.a;
 }
@@ -126,20 +168,18 @@ vec4 calculate_final_color(uint frag_count) {
 	int frag_count_1 = int(frag_count)-1;
 	for(int i = 0; i < frag_count_1 && final_color.a < ALPHA_LIMIT; i++) {
 
-	//int maxFrags = int(frag_count)-1;
-	//for(int i = 0; i < frag_count; i++) {
 		ABufferStruct_t startFrag = fragments[i];
 		ABufferStruct_t endFrag = fragments[i+1];
-		//vec4 frag_color = _col_(startFrag);
-		//vec4 position = _pos_(startFrag);
 		int type = int(_type_(startFrag));
-		currentVolumeBitmask = currentVolumeBitmask ^ (type);
 		
 		if(type == 0)
 			//blendStep(final_color, _col_(startFrag), stepSize);
 			final_color = blend(final_color, _col_(startFrag));
 
-		if(bool(currentVolumeBitmask)) {
+
+#if MAX_VOLUMES > 0
+		currentVolumeBitmask = currentVolumeBitmask ^ type;
+		if(currentVolumeBitmask != 0) {
 			int volID = type -1;
 			float p = 0.0f;
 #if ZTYPE == ZDEPTH
@@ -152,7 +192,6 @@ vec4 calculate_final_color(uint frag_count) {
 			// const float z2 = _z_(endFrag);
 			const float l = ((z1 - S1) / L - (z2 - S1) / L) * volume_length[volID];
 			int max_iterations = int(l / volumeStepSize[volID]);
-			int iterations = 0;
 			vec3 position;
 #elif ZTYPE == PSCDEPTH
 			const float L = volume_zlength[volID];
@@ -163,7 +202,6 @@ vec4 calculate_final_color(uint frag_count) {
 			// const float z2 = _z_(endFrag);
 			const float l = (dist / L) * volume_length[volID];
 			int max_iterations = int(l / volumeStepSize[volID]);
-			int iterations = 0;
 			vec3 position;
 #endif
 
@@ -199,6 +237,7 @@ vec4 calculate_final_color(uint frag_count) {
 			}
 			
 		}
+#endif
 
 		
 
@@ -223,25 +262,27 @@ vec4 calculate_final_color(uint frag_count) {
 // ================================================================================
 // Transferfunction visualizer
 // ================================================================================
-#if (SHOWFUNC >= 0) && (SHOWFUNC < MAX_TF)
-	float showfunc_size = 20.0;
-	if(gl_FragCoord.y > float(SCREEN_HEIGHT) - showfunc_size) {
-		float normalizedIntensity = gl_FragCoord.x / float(SCREEN_WIDTH) ;
-		vec4 tfc = texture(transferFunction1, normalizedIntensity);
-		final_color = tfc;
-	} else if(ceil(gl_FragCoord.y) == float(SCREEN_HEIGHT) - showfunc_size) {
-		const float intensity = 0.4;
-		final_color = vec4(intensity,intensity,intensity,1.0);
-	}
+#ifdef SHOWFUNC
+#pragma openspace insert TRANSFERFUNC
 #endif
 
 	// if(frag_count == 1) {
-	// 	final_color = vec4(0.0,0.0,1.0,1.0);
+	// 	final_color = vec4(1.0,0.0,0.0,1.0);
 	// } else if(frag_count == 2) {
-	// 	final_color = vec4(volume_direction[0],1.0);
+	// 	final_color = vec4(0.0,1.0,0.0,1.0);
+	// 	// final_color = vec4(volume_direction[0],1.0);
+	// } else if(frag_count == 3) {
+	// 	final_color = vec4(0.0,0.0,1.0,1.0);
+	// 	// final_color = vec4(volume_direction[0],1.0);
+	// } else if(frag_count == 4) {
+	// 	final_color = vec4(1.0,1.0,0.0,1.0);
+	// 	// final_color = vec4(volume_direction[0],1.0);
 	// } else {
 	// 	final_color = vec4(1.0,1.0,1.0,1.0);
 	// }
+
+	final_color.rgb = final_color.rgb * final_color.a;
+	final_color.a = 1.0;
 
 	return final_color;
 

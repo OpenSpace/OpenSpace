@@ -63,6 +63,7 @@ protected:
 	std::string openspaceHeaders();
 	std::string openspaceSamplerCalls();
 	std::string openspaceSamplers();
+	std::string openspaceTransferFunction();
 
 	unsigned int _width, _height, _totalPixels;
 
@@ -81,6 +82,8 @@ private:
 
 	// Development functionality to update shader for changes in several files
 	std::vector<ghoul::filesystem::File*> _shaderFiles;
+
+	float _volumeStepFactor;
 
 
 

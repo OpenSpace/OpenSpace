@@ -54,7 +54,7 @@ private:
 
 
 
-}; 		// ABuffer_I
+}; 		// ABufferSingleLinked
 } 		// openspace
 
 #endif 	// __ABUFFERSINGLELINKED_H__

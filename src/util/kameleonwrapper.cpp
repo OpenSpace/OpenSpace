@@ -126,11 +126,9 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     // get interpolated data value for (xPos, yPos, zPos)
                     // swap yPos and zPos because model has Z as up
                     double value = _interpolator->interpolate(var, xPos, zPos, yPos);
-                    
-                    // scale to [0,1]
-                    //doubleData[index] = (value-varMin)/(varMax-varMin);
                     doubleData[index] = value;
 					histogram[mapToHistogram(value)]++;
+
                 } else if (_type == Model::ENLIL) {
                     
                     // Put r in the [0..sqrt(3)] range
@@ -150,7 +148,7 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                     // avoid rounding errors when comparing to phiMax.
                     double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
                     
-                    double varValue = 0.f;
+                    double value = 0.0;
                     // See if sample point is inside domain
                     if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
                         thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
@@ -168,10 +166,12 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                         // Convert from [0, 2pi] rad to [0, 360] degrees
                         phiPh = phiPh*180.f/M_PI;
                         // Sample
-                        varValue = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
+                        value = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
+                        // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
                     }
 
-                    doubleData[index] = (varValue-varMin)/(varMax-varMin);
+                    doubleData[index] = value;
+					histogram[mapToHistogram(value)]++;
                 }
 			}
 		}
@@ -179,17 +179,34 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
     std::cout << std::endl;
     LINFO("Done!");
 
+    // for (int i = 0; i <  outDimensions.x *  outDimensions.y *  outDimensions.z; ++i)
+    // {
+    // 	std::cout << std::setfill(' ') << std::setw(15) << doubleData[i] << ", ";
+    // 	if(i % 10 == 0)
+    // 		std::cout << std::endl;
+    // }
+     //    
+    // for(int i = 0; i < bins-1; ++i) {
+    // 	// sum += histogram[i];
+    // 	// if(sum + histogram[i+1] > sumuntil) {
+    // 	// 	stop = i;
+    // 	// 	LDEBUG("====================");
+    // 	// 	break;
+    // 	// }
+    // 	LDEBUG("histogram[" << i << "]: " << histogram[i]);
+    // }
+
     int sum = 0;
     int stop;
     const int sumuntil = size * truncLim;
-    for(int i = 0; i < bins-1; ++i) {
+    for(int i = 0; i < bins; ++i) {
     	sum += histogram[i];
-    	if(sum + histogram[i+1] > sumuntil) {
+    	if(sum > sumuntil) {
     		stop = i;
-    		LDEBUG("====================");
+    		// LDEBUG("====================");
     		break;
     	}
-    	LDEBUG(histogram[i]);
+    	// LDEBUG("histogram[" << i << "]: " << histogram[i]);
     }
 
     double dist = varMax - varMin;
@@ -201,8 +218,14 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
 
     	data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
     }
-    delete[] doubleData;
 
+    // for(int i = 0; i < size; ++i) {
+    // 	double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
+    // 	// data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
+    // 	data[i] = static_cast<float>(normalizedVal);
+    // }
+
+    delete[] doubleData;
 	return data;
 }
 

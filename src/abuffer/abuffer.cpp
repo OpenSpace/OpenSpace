@@ -91,9 +91,7 @@ bool ABuffer::initializeABuffer() {
     addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
     addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
-    addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");
-
-    
+    addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");    
 
     _resolveShader = nullptr;
     generateShaderSource();
@@ -148,10 +146,10 @@ void ABuffer::resolve() {
 		// Decrease stepsize in volumes if right click is pressed
 		// TODO: Let the interactionhandler handle this
 		int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
-		if(val) {
-			_resolveShader->setUniform("volumeStepFactor", 0.2f);
-		} else {
-			_resolveShader->setUniform("volumeStepFactor", 1.0f);
+		float volumeStepFactor = (val) ? 0.2: 1.0;
+		if(volumeStepFactor != _volumeStepFactor) {
+			_volumeStepFactor = volumeStepFactor;
+			_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
 		}
 
 	    glBindVertexArray(_screenQuad);
@@ -254,6 +252,8 @@ void ABuffer::generateShaderSource() {
 				line = padGeneratedString(openspaceSamplers());
 			} else if(line == "#pragma openspace insert SETTINGS") {
 				line = padGeneratedString(settings());
+			} else if(line == "#pragma openspace insert TRANSFERFUNC") {
+				line = padGeneratedString(openspaceTransferFunction());
 			}
 			source += line + "\n";
 		}
@@ -270,6 +270,8 @@ std::string ABuffer::openspaceHeaders() {
 	std::string headers;
 	headers += "#define MAX_VOLUMES " + std::to_string(_samplers.size()) + "\n";
 	headers += "#define MAX_TF " + std::to_string(_transferFunctions.size()) + "\n";
+
+
 	for (int i = 0; i < _volumes.size(); ++i) {
 		headers += "uniform sampler3D " + _volumes.at(i).first + ";\n";
 	}
@@ -284,6 +286,9 @@ std::string ABuffer::openspaceHeaders() {
 		}
 	}
 
+	if(_volumes.size() < 1)
+		return headers;
+
 	size_t maxLoop = 0;
 	headers += "const vec3 volume_dim[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
@@ -294,9 +299,17 @@ std::string ABuffer::openspaceHeaders() {
 			    + std::to_string(size[2]) + ".0),\n";
 	}
 	headers += "};\n";
+
 	headers += "#define LOOP_LIMIT " + std::to_string(maxLoop) + "\n";
 
 	headers += "float volumeStepSize[] = {\n";
+	for (int i = 0; i < _volumes.size(); ++i) {
+		glm::size3_t size = _volumes.at(i).second->dimensions();
+		headers += "    stepSize,\n";
+	}
+	headers += "};\n";
+
+	headers += "float volumeStepSizeOriginal[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		glm::size3_t size = _volumes.at(i).second->dimensions();
 		headers += "    stepSize,\n";
@@ -310,13 +323,23 @@ std::string ABuffer::openspaceSamplerCalls() {
 	std::string samplercalls;
 	for (int i = 0; i < _samplers.size(); ++i) {
 
-		auto found1 = _samplers.at(i).find_first_not_of("void ");
+		auto found1 = _samplers.at(i).find_first_not_of("vec4 ");
 		auto found2 = _samplers.at(i).find_first_of("(",found1);
 		if(found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
-			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == 1) {\n";
-			samplercalls += functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
-			samplercalls += "volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];;\n";
+			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(i+1)+") {\n";
+			samplercalls += "    vec4 c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
+			// samplercalls += "    if(c.a < 0.1) { \n";
+			// samplercalls += "        if( volumeStepSize[" + std::to_string(i) + "] < 16.0*volumeStepSizeOriginal[" + std::to_string(i) + "]) \n";
+			// samplercalls += "            volumeStepSize[" + std::to_string(i) + "] *= 2.0; \n";
+			// samplercalls += "    } else {\n";
+			// samplercalls += "        //volume_position[" + std::to_string(i) + "] -= volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
+			// samplercalls += "        volumeStepSize[" + std::to_string(i) + "] = volumeStepSizeOriginal[" + std::to_string(i) + "]; \n";
+			// samplercalls += "        //c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
+			// samplercalls += "    } \n";
+			samplercalls += "    blendStep(final_color, c, volumeStepSize[" + std::to_string(i) + "]);\n";
+			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
+			samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
 			samplercalls += "}\n";
 		}
 
@@ -331,6 +354,32 @@ std::string ABuffer::openspaceSamplers() {
 		samplers += _samplers.at(i) + "\n";
 	}
 	return samplers;
+}
+
+std::string ABuffer::openspaceTransferFunction() {
+	std::string tf;
+	tf += "float showfunc_size = 20.0;\n";
+	tf += "float SCREEN_HEIGHTf = float(SCREEN_HEIGHT);\n";
+	tf += "float SCREEN_WIDTHf = float(SCREEN_WIDTH);\n";
+	for(int i = 0; i < _transferFunctions.size(); ++i) {
+		tf += 	"if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+
+				" && gl_FragCoord.y < SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i)+") {\n";
+		tf += "    float normalizedIntensity = gl_FragCoord.x / SCREEN_WIDTHf ;\n";
+		tf += "    vec4 tfc = texture("+ _transferFunctions.at(i).first +", normalizedIntensity);\n";
+		tf += "    final_color = tfc;\n";
+		tf += "    float cmpf = SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+" + tfc.a*showfunc_size;\n";
+		tf += "    if(gl_FragCoord.y > cmpf) {\n";
+		tf += "        final_color = vec4(0,0,0,0);\n";
+		tf += "    } else {\n";
+		tf += "        final_color.a = 1.0;\n";
+		tf += "    }\n";
+		tf += "} else if(ceil(gl_FragCoord.y) == SCREEN_HEIGHTf - showfunc_size*"+std::to_string(i+1)+") {\n";
+		tf += "    const float intensity = 0.4;\n";
+		tf += "    final_color = vec4(intensity,intensity,intensity,1.0);\n";
+		tf += "}\n";
+	}
+
+	return tf;
 }
 
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abufferfixed.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -32,31 +32,32 @@
 #include <fstream>
 #include <string>
 
-#define MAX_LAYERS 10
+#define MAX_LAYERS 32
 
 namespace {
-	std::string _loggerCat = "ABufferSingleLinked";
+	std::string _loggerCat = "ABufferFixed";
 }
 
 namespace openspace {
 
-ABufferSingleLinked::ABufferSingleLinked(): _data(0), _anchorPointerTexture(0), 
+ABufferFixed::ABufferFixed(): _data(0), _anchorPointerTexture(0), 
 	_anchorPointerTextureInitializer(0), _atomicCounterBuffer(0), _fragmentBuffer(0), 
 	_fragmentTexture(0) 
 {}
 
-ABufferSingleLinked::~ABufferSingleLinked() {
+ABufferFixed::~ABufferFixed() {
 	if(_data != 0)
 		delete _data;
 
 	glDeleteTextures(1,&_anchorPointerTexture);
 	glDeleteTextures(1,&_fragmentTexture);
+	// glDeleteTextures(1,&_atomicCounterTexture);
 	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
-	glDeleteBuffers(1,&_atomicCounterBuffer);
+	// glDeleteBuffers(1,&_atomicCounterBuffer);
 	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
 }
 
-bool ABufferSingleLinked::initialize() {
+bool ABufferFixed::initialize() {
 	// ============================
 	//          BUFFERS
 	// ============================
@@ -73,9 +74,16 @@ bool ABufferSingleLinked::initialize() {
 	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	glGenBuffers(1, &_atomicCounterBuffer);
-	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
-	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
+
+	// glGenBuffers(1, &_atomicCounterBuffer);
+	// glBindBuffer(GL_TEXTURE_BUFFER, _atomicCounterBuffer);
+	// glBufferData(GL_TEXTURE_BUFFER, _totalPixels*sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
+
+	// glGenTextures(1, &_atomicCounterTexture);
+	// glBindTexture(GL_TEXTURE_2D, _atomicCounterTexture);
+ //    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, _atomicCounterBuffer);
+ //    glBindTexture(GL_TEXTURE_BUFFER, 0);
+
 
 	glGenBuffers(1, &_fragmentBuffer);
 	glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
@@ -91,32 +99,37 @@ bool ABufferSingleLinked::initialize() {
 	return initializeABuffer();
 }
 
-void ABufferSingleLinked::clear() {
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
-	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
+void ABufferFixed::clear() {
 
+	// Bind texture initializer
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
+
+	// clear _anchorPointerTexture
+	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+	
+	// // clear _atomicCounterTexture
+	// glBindTexture(GL_TEXTURE_2D, _atomicCounterTexture);
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+
+	// reset GL_PIXEL_UNPACK_BUFFER
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	static const GLuint zero = 1;
-	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
-	glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
-	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
 }
 
-void ABufferSingleLinked::preRender() {
+void ABufferFixed::preRender() {
 
 	// Bind head-pointer image for read-write
-	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
     glBindImageTexture(0, _anchorPointerTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32UI);
+    // glBindImageTexture(2, _atomicCounterTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 }
 
-void ABufferSingleLinked::postRender() {
+void ABufferFixed::postRender() {
 
 }
 
-std::string ABufferSingleLinked::settings() {
+std::string ABufferFixed::settings() {
 	return R"()";
 }
 

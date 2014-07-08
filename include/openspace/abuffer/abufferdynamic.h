@@ -22,63 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEVOLUMEGL_H__
-#define __RENDERABLEVOLUMEGL_H__
+#ifndef __ABUFFERDYNAMIC_H__
+#define __ABUFFERDYNAMIC_H__
 
-// open space includes
-#include <openspace/rendering/renderablevolume.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/io/rawvolumereader.h>
-#include <ghoul/filesystem/file.h>
-
- namespace sgct_utils {
-    class SGCTBox;
-}
+#include <openspace/abuffer/abuffer.h>
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
+class ABufferDynamic: public ABuffer {
 public:
-	// constructors & destructor
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
-    
-    bool initialize();
-    bool deinitialize();
 
-	virtual void render(const Camera *camera, const psc& thisPosition);
-	virtual void update();
+	ABufferDynamic();
+	virtual ~ABufferDynamic();
+	virtual bool initialize();
+
+	virtual void clear();
+	virtual void preRender();
+	virtual void postRender();
+
+	virtual std::string settings();
 
 private:
-	ghoul::Dictionary _hintsDictionary;
 
-    std::string _filename;
+	GLuint *_data;
+	GLuint _anchorPointerTexture;
+	GLuint _anchorPointerTextureInitializer;
+	GLuint _atomicCounterBuffer;
+	GLuint _fragmentBuffer;
+	GLuint _fragmentTexture;
 
-    std::string _transferFunctionName;
-	std::string _volumeName;
 
-    std::string _transferFunctionPath;
-	std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
 
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::Texture* _transferFunction;
 
-	GLuint _boxArray;
-	ghoul::opengl::ProgramObject *_boxProgram;
-	sgct_utils::SGCTBox* _box;
-	glm::vec3 _boxScaling;
-	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
-    
-    bool _updateTransferfunction;
-    int _id;
-};
+}; 		// ABufferDynamic
+} 		// openspace
 
-} // namespace openspace
-
-#endif
+#endif 	// __ABUFFERDYNAMIC_H__

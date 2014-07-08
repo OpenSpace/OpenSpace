@@ -35,9 +35,11 @@ in float s;
 #include "PowerScaling/powerScaling_fs.hglsl"
  
 void main() {
-	vec4 fragColor = vec4(vPosition+0.5, 0.3);
+	vec4 fragColor = vec4(vPosition+0.5, 1.0);
 	vec4 position = vec4(worldPosition,s);
 	float depth = pscDepth(position);
+
+	gl_FragDepth = depth;
 
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
