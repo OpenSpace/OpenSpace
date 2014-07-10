@@ -34,9 +34,15 @@
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
-//#define FLARE_ONLY
+// #define FLARE_ONLY
 
 #include <openspace/flare/flare.h>
+#include <openspace/util/shadercreator.h>
+
+#define  ABUFFER_SINGLE_LINKED    1
+#define  ABUFFER_FIXED            2
+#define  ABUFFER_DYNAMIC          3
+#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
 
 namespace openspace {
 
@@ -59,6 +65,7 @@ public:
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
+    ShaderCreator& shaderBuilder();
 
     // SGCT callbacks
     bool initializeGL();
@@ -90,6 +97,7 @@ private:
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
+    ShaderCreator _shaderBuilder;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

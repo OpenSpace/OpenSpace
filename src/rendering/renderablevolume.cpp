@@ -371,8 +371,8 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
         transferFunction[i] = 0.0f;
     }
     
-    size_t lowerIndex = static_cast<size_t>(floorf(lower*static_cast<float>(width)));
-    size_t upperIndex = static_cast<size_t>(floorf(upper*static_cast<float>(width)));
+    size_t lowerIndex = static_cast<size_t>(floorf(lower*static_cast<float>(width-1)));
+    size_t upperIndex = static_cast<size_t>(floorf(upper*static_cast<float>(width-1)));
     
 //    LDEBUG("width: " << width);
 //    LDEBUG("lower: " << lower);
@@ -385,9 +385,9 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     auto currentKey = prevKey + 1;
     auto lastKey = mappingKeys.end() -1;
     
-    for (size_t i=lowerIndex; i<upperIndex; i++) {
+    for (size_t i=lowerIndex; i<=upperIndex; i++) {
         
-        float fpos = static_cast<float>(i)/static_cast<float>(width);
+        float fpos = static_cast<float>(i)/static_cast<float>(width-1);
         
         if (fpos > (*currentKey).position) {
             prevKey = currentKey;

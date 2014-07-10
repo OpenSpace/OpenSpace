@@ -29,6 +29,7 @@
 #include <openspace/util/spice.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/shadercreator.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -45,6 +46,9 @@
 
 #include <iostream>
 #include <string>
+
+#include <chrono>
+ #include <unistd.h>
 
 namespace {
 const std::string _loggerCat = "SceneGraph";
@@ -82,6 +86,55 @@ bool SceneGraph::initialize()
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
+    ShaderCreator sc = OsEng.shaderBuilder();
+    ProgramObject* tmpProgram;
+
+    typedef std::chrono::high_resolution_clock clock_;
+    typedef std::chrono::duration<double, std::ratio<1> > second_;
+
+    std::chrono::time_point<clock_> beg_(clock_::now());
+
+
+    // pscstandard
+    tmpProgram = sc.buildShader("pscstandard",
+                                "${SHADERS}/pscstandard_vs.glsl",
+                                "${SHADERS}/pscstandard_fs.glsl");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
+
+    // RaycastProgram
+    tmpProgram = sc.buildShader("RaycastProgram",
+                                "${SHADERS}/exitpoints.vert",
+                                "${SHADERS}/exitpoints.frag");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
+
+
+    // // TwoPassProgram
+    // tmpProgram = sc.buildShader("TwoPassProgram",
+    //                             "${SHADERS}/twopassraycaster.vert",
+    //                             "${SHADERS}/twopassraycaster.frag");
+    // if( ! tmpProgram) return false;
+    // tmpProgram->setUniform("texBack", 0);
+    // tmpProgram->setUniform("texFront", 1);
+    // tmpProgram->setUniform("texVolume", 2);
+    // OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
+
+    // Quad
+    tmpProgram = sc.buildShader("Quad",
+                                "${SHADERS}/quadVert.glsl",
+                                "${SHADERS}/quadFrag.glsl");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("quadTex", 0);
+    OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+
+
+
+    double elapsed = std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
+    LERROR("Time to load shaders: " << elapsed);
+
+    /*
+
     auto programCreator = [] (  const std::string& name, 
                                 const std::string& vpath, 
                                 const std::string& fpath) 
@@ -104,9 +157,6 @@ bool SceneGraph::initialize()
         po = nullptr;
         return po;
     };
-
-    ProgramObject* tmpProgram;
-
     // pscstandard
     tmpProgram = programCreator("pscstandard",
                                 "${SHADERS}/pscstandard_vs.glsl",
@@ -139,6 +189,7 @@ bool SceneGraph::initialize()
     if( ! tmpProgram) return false;
     tmpProgram->setUniform("quadTex", 0);
     OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+    */
 
     // Initialize all nodes
     for (auto node : _nodes) {

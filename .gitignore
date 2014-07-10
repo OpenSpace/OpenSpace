@@ -6,6 +6,7 @@ ext/SGCT
 
 # generated glsl files
 *.gglsl
+*.OpenSpaceGenerated.glsl
 
 # CMake stuff
 CMakeCache.txt

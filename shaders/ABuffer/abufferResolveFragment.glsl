@@ -35,7 +35,7 @@
 
 #define PSCDEPTH 1
 #define ZDEPTH 2
-#define ZTYPE ZDEPTH
+#define ZTYPE PSCDEPTH
 
 // Math defintions
 #define 	M_E   		2.7182818284590452354
@@ -56,8 +56,8 @@
 const float stepSize = 	0.01;
 const float samplingRate = 1.0;
 
-uniform int SCREEN_WIDTH;
-uniform int SCREEN_HEIGHT;
+// uniform int SCREEN_WIDTH;
+// uniform int SCREEN_HEIGHT;
 uniform float ALPHA_LIMIT = 0.95;
 
 in vec2 texCoord;
@@ -146,13 +146,12 @@ float globz(float z) {
 	// return log(2.0*z-1.0);
 	// return exp(2.0*z-1.0);
 	// const float zNear = 0.1f;
-	// const float zFar = 1.0f;
-	// //float z_b = texture2D(depthBuffTex, vTexCoord).x;
+	// const float zFar = 100.0f;
 	// float z_b = z;
  //    float z_n = 2.0 * z_b - 1.0;
  //    float z_e = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
 	// return z_e;
-	//return (2.0 * z - near - far) / (far - near);
+	// return (2.0 * z - near - far) / (far - near);
 }
 
 vec4 calculate_final_color(uint frag_count) {
@@ -192,7 +191,6 @@ vec4 calculate_final_color(uint frag_count) {
 			// const float z2 = _z_(endFrag);
 			const float l = ((z1 - S1) / L - (z2 - S1) / L) * volume_length[volID];
 			int max_iterations = int(l / volumeStepSize[volID]);
-			vec3 position;
 #elif ZTYPE == PSCDEPTH
 			const float L = volume_zlength[volID];
 			const vec4 p1 = _pos_(startFrag);
@@ -202,7 +200,6 @@ vec4 calculate_final_color(uint frag_count) {
 			// const float z2 = _z_(endFrag);
 			const float l = (dist / L) * volume_length[volID];
 			int max_iterations = int(l / volumeStepSize[volID]);
-			vec3 position;
 #endif
 
 
@@ -281,8 +278,8 @@ vec4 calculate_final_color(uint frag_count) {
 	// 	final_color = vec4(1.0,1.0,1.0,1.0);
 	// }
 
-	final_color.rgb = final_color.rgb * final_color.a;
-	final_color.a = 1.0;
+	// final_color.rgb = final_color.rgb * final_color.a;
+	// final_color.a = 1.0;
 
 	return final_color;
 
@@ -302,7 +299,6 @@ void main() {
 // 	The samplers implementations
 // ================================================================================
 #pragma openspace insert SAMPLERS
-
 
 
 

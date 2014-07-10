@@ -85,11 +85,9 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 			_vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
 			_fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
 
-			_fieldlinesProgram = new ghoul::opengl::ProgramObject("FieldlinesProgram");
-			ghoul::opengl::ShaderObject* vertexShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeVertex,vshaderpath);
-			ghoul::opengl::ShaderObject* fragmentShader = new ghoul::opengl::ShaderObject(ghoul::opengl::ShaderObject::ShaderTypeFragment,fshaderpath);
-			_fieldlinesProgram->attachObject(vertexShader);
-			_fieldlinesProgram->attachObject(fragmentShader);
+
+    		ShaderCreator sc = OsEng.shaderBuilder();
+    		_fieldlinesProgram = sc.buildShader("FieldlinesProgram", vshaderpath, fshaderpath);
 		}
 	}
 

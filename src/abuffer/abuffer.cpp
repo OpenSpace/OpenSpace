@@ -187,23 +187,11 @@ bool ABuffer::updateShader() {
 
 	using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-    ShaderObject* vs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                             absPath("${SHADERS}/ABuffer/abufferResolveVertex.glsl"), "Vertex");
-    ShaderObject* fs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,_fragmentShaderPath, "Fragment");
-
-    ghoul::opengl::ProgramObject* resolveShader = new ProgramObject;
-    resolveShader->attachObject(vs);
-    resolveShader->attachObject(fs);
-
-    if (!resolveShader->compileShaderObjects()) {
-    	LERROR("Could not compile shader");
-        return false;
-    }
-    if (!resolveShader->linkProgramObject()){
-    	LERROR("Could not link shader");
-        return false;
+    ShaderCreator sc = OsEng.shaderBuilder();
+    ghoul::opengl::ProgramObject* resolveShader = sc.buildShader("ABuffer resolve", absPath("${SHADERS}/ABuffer/abufferResolveVertex.glsl"), _fragmentShaderPath);
+    if( ! resolveShader) {
+    	LERROR("Resolve shader not updated");
+    	return false;
     }
 
     int startAt = 0;
@@ -214,9 +202,6 @@ bool ABuffer::updateShader() {
 	for(int i = 0; i < _transferFunctions.size(); ++i) {
 		resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
 	}
-
-	resolveShader->setUniform("SCREEN_WIDTH", static_cast<int>(_width));
-	resolveShader->setUniform("SCREEN_HEIGHT", static_cast<int>(_height));
 
 	if(_resolveShader)
 		delete _resolveShader;
@@ -321,7 +306,7 @@ std::string ABuffer::openspaceHeaders() {
 
 std::string ABuffer::openspaceSamplerCalls() {
 	std::string samplercalls;
-	for (int i = 0; i < _samplers.size(); ++i) {
+	for (int i = 1; i < 2; ++i) {
 
 		auto found1 = _samplers.at(i).find_first_not_of("vec4 ");
 		auto found2 = _samplers.at(i).find_first_of("(",found1);

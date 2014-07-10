@@ -67,10 +67,13 @@ bool RenderEngine::initialize()
     //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
     _abuffer = new ABufferSingleLinked();
-    // _abuffer = new ABufferFixed();
-    // _abuffer = new ABufferDynamic();
-
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
+    _abuffer = new ABufferFixed();
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
+    _abuffer = new ABufferDynamic();
+#endif
     return true;
 }
 
