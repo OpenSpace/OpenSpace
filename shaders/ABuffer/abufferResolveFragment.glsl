@@ -32,6 +32,7 @@
 
 #define SHOWFUNC
 // #define JITTERING
+#define SHOWENLIL
 
 #define PSCDEPTH 1
 #define ZDEPTH 2
@@ -171,13 +172,15 @@ vec4 calculate_final_color(uint frag_count) {
 		ABufferStruct_t endFrag = fragments[i+1];
 		int type = int(_type_(startFrag));
 		
-		if(type == 0)
+		if(type == 0) {
 			//blendStep(final_color, _col_(startFrag), stepSize);
 			final_color = blend(final_color, _col_(startFrag));
+		} else {
+			currentVolumeBitmask = currentVolumeBitmask ^ (1 << (type-1));
+		}
 
 
 #if MAX_VOLUMES > 0
-		currentVolumeBitmask = currentVolumeBitmask ^ type;
 		if(currentVolumeBitmask != 0) {
 			int volID = type -1;
 			float p = 0.0f;

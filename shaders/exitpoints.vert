@@ -32,7 +32,6 @@ uniform vec4 campos;
 uniform mat4 camrot;
 uniform vec2 scaling;
 uniform vec4 objpos;
-uniform float time;
 
 out vec3 vPosition;
 out vec3 worldPosition;

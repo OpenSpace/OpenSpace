@@ -180,6 +180,7 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 	_samplers.push_back("");
 
 	// ID is one more than "actual" position since ID=0 is considered geometry
+	//return 1 << (_samplers.size()-1);
 	return _samplers.size();
 }
 
@@ -306,13 +307,15 @@ std::string ABuffer::openspaceHeaders() {
 
 std::string ABuffer::openspaceSamplerCalls() {
 	std::string samplercalls;
-	for (int i = 1; i < 2; ++i) {
+	for (int i = 0; i < _samplers.size(); ++i) {
 
 		auto found1 = _samplers.at(i).find_first_not_of("vec4 ");
 		auto found2 = _samplers.at(i).find_first_of("(",found1);
 		if(found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
-			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(i+1)+") {\n";
+			if(i == 0)
+				samplercalls += "#ifdef SHOWENLIL\n";
+			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(1 << i)+") {\n";
 			samplercalls += "    vec4 c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    if(c.a < 0.1) { \n";
 			// samplercalls += "        if( volumeStepSize[" + std::to_string(i) + "] < 16.0*volumeStepSizeOriginal[" + std::to_string(i) + "]) \n";
@@ -326,6 +329,8 @@ std::string ABuffer::openspaceSamplerCalls() {
 			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
 			samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
 			samplercalls += "}\n";
+			if(i == 0)
+				samplercalls += "#endif\n";
 		}
 
 		

@@ -61,6 +61,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
 
     _transferFunction = nullptr;
     _transferFunctionFile = nullptr;
+    _transferFunctionPath = "";
     if (dictionary.hasKey("TransferFunction")) {
         std::string transferFunctionPath = "";
         if(dictionary.getValue("TransferFunction", transferFunctionPath)) {
@@ -120,22 +121,28 @@ RenderableVolumeGL::~RenderableVolumeGL() {
 }
 
 bool RenderableVolumeGL::initialize() {
-    assert(_filename != "");
+    // assert(_filename != "");
     //	------ VOLUME READING ----------------
-	_volume = loadVolume(_filename, _hintsDictionary);
-	_volume->uploadTexture();
-    _transferFunction = loadTransferFunction(_transferFunctionPath);
-    _transferFunction->uploadTexture();
-
     // TODO: fix volume an transferfunction names
-    OsEng.renderEngine().abuffer()->addVolume(_volumeName, _volume);
-    OsEng.renderEngine().abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
-    _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
+    if(_filename != "") {
+        _volume = loadVolume(_filename, _hintsDictionary);
+        _volume->uploadTexture();
+        OsEng.renderEngine().abuffer()->addVolume(_volumeName, _volume);
+    }
 
-    auto textureCallback = [this](const ghoul::filesystem::File& file) {
-        _updateTransferfunction = true;
-    };
-    _transferFunctionFile->setCallback(textureCallback);
+    if(_transferFunctionPath != "") {
+        _transferFunction = loadTransferFunction(_transferFunctionPath);
+        _transferFunction->uploadTexture();
+        OsEng.renderEngine().abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
+
+        auto textureCallback = [this](const ghoul::filesystem::File& file) {
+            _updateTransferfunction = true;
+        };
+        _transferFunctionFile->setCallback(textureCallback);
+    }
+
+    // add the sampler and get the ID
+    _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
 
     _box = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
     OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
