@@ -80,6 +80,8 @@ public:
 	std::vector<std::vector<LinePoint> > getLorentzTrajectories(std::vector<glm::vec3> seedPoints,
 			glm::vec4 color, float stepsize);
 
+	glm::vec3 getModelBarycenterOffset();
+
 private:
 	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar, glm::vec3 seedPoint,
