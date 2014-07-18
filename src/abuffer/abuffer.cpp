@@ -327,7 +327,11 @@ std::string ABuffer::openspaceSamplerCalls() {
 			// samplercalls += "    } \n";
 			samplercalls += "    blendStep(final_color, c, volumeStepSize[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
+			// samplercalls += "    float aaa = volume_length[i]/myMaxSteps;\n";
 			samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
+			// float aaa = ray[v].w/myMaxSteps;
+			// 				pos[v] += vec4(ray[v].xyz*vec3(aaa),aaa);
+			// samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
 			samplercalls += "}\n";
 			if(i == 0)
 				samplercalls += "#endif\n";

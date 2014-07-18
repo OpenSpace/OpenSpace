@@ -31,12 +31,12 @@
 #define MAX_FRAGMENTS 16
 
 #define SHOWFUNC
-// #define JITTERING
+#define JITTERING
 #define SHOWENLIL
 
 #define PSCDEPTH 1
 #define ZDEPTH 2
-#define ZTYPE PSCDEPTH
+#define ZTYPE ZDEPTH
 
 // Math defintions
 #define 	M_E   		2.7182818284590452354
@@ -181,9 +181,24 @@ vec4 calculate_final_color(uint frag_count) {
 
 
 #if MAX_VOLUMES > 0
-		if(currentVolumeBitmask != 0) {
+		if(currentVolumeBitmask > 0) {
+
+			// TODO: Fix this non-working normalization for volumes with different stepsize
+			// float myMaxSteps = 0.0000001;
+			// for(int v = 0; v < MAX_VOLUMES; ++v) {
+			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
+			// 		myMaxSteps = max(myMaxSteps, volume_length[v]/volumeStepSize[v]);
+			// 	}
+			// }
+			// for(int v = 0; v < MAX_VOLUMES; ++v) {
+			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
+			// 		float aaa = volume_length[v]/myMaxSteps;
+			// 		volumeStepSize[v] = volumeStepSizeOriginal[v]*vec3(aaa);
+			// 	}
+			// }
+
+
 			int volID = type -1;
-			float p = 0.0f;
 #if ZTYPE == ZDEPTH
 			const float S1 = volume_zlength[volID].x;
 			const float S2 = volume_zlength[volID].y;
