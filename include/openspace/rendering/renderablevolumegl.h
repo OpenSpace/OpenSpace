@@ -35,10 +35,6 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
- namespace sgct_utils {
-    class SGCTBox;
-}
-
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
@@ -71,8 +67,7 @@ private:
 
 	GLuint _boxArray;
 	ghoul::opengl::ProgramObject *_boxProgram;
-	sgct_utils::SGCTBox* _box;
-	glm::vec3 _boxScaling;
+	glm::vec3 _boxScaling, _boxOffset;
 	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
     bool _updateTransferfunction;

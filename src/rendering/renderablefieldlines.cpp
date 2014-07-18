@@ -53,10 +53,8 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 								if(fieldline.hasKey("Hints"))
 									fieldline.getValue("Hints", hintsDictionary);
 
-								// TODO Vectors of filenames and dictionaries
 								_filenames.push_back(file);
 								_hintsDictionaries.push_back(hintsDictionary);
-
 							} else
 								LERROR("File not found!");
 						}
@@ -72,12 +70,11 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 	if (dictionary.hasKey("Shaders")) {
 		ghoul::Dictionary shaderDictionary;
 		if(dictionary.getValue("Shaders", shaderDictionary)) {
-			if (shaderDictionary.hasKey("VertexShader")) {
+			if (shaderDictionary.hasKey("VertexShader"))
 				shaderDictionary.getValue("VertexShader", vshaderpath);
-			}
-			if (shaderDictionary.hasKey("FragmentShader")) {
+
+			if (shaderDictionary.hasKey("FragmentShader"))
 				shaderDictionary.getValue("FragmentShader", fshaderpath);
-			}
 
 			vshaderpath = findPath(vshaderpath);
 			fshaderpath = findPath(fshaderpath);
@@ -95,11 +92,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 		dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
 	}
 
-	setBoundingSphere(PowerScaledScalar::CreatePSS(5));
+	setBoundingSphere(PowerScaledScalar::CreatePSS(5)); // FIXME a non-magic number perhaps
 }
 
 RenderableFieldlines::~RenderableFieldlines() {
-
 }
 
 bool RenderableFieldlines::initialize() {
@@ -107,28 +103,25 @@ bool RenderableFieldlines::initialize() {
 	assert(_hintsDictionaries.size() != 0);
 
 	int prevEnd = 0;
-	std::vector<glm::vec3> vertexData;
-	std::vector<std::vector<glm::vec3> > fieldlinesData;
+	std::vector<LinePoint> vertexData, seedPointsData;
+	std::vector<std::vector<LinePoint> > fieldlinesData;
+	glm::vec4 seedPointsColor = glm::vec4(1.0, 0.5, 0.0, 1.0);
 
 	for (int i = 0; i < _filenames.size(); ++i) {
 		fieldlinesData = getFieldlinesData(_filenames[i], _hintsDictionaries[i]);
 
-		for (int j = 0; j < fieldlinesData.size(); j++) {
+		for (int j = 0; j < fieldlinesData.size(); ++j) {
 			_lineStart.push_back(prevEnd);
-			_lineCount.push_back(fieldlinesData[j].size()/2.0);
-			prevEnd = prevEnd + fieldlinesData[j].size()/2.0;
-
+			_lineCount.push_back(fieldlinesData[j].size());
+			prevEnd = prevEnd + fieldlinesData[j].size();
 			vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
 		}
+		// Give seedpoints a color for visualizing as GL_POINTS
+		for (glm::vec3 seedPoint : _seedPoints) {
+			seedPointsData.push_back(LinePoint(seedPoint, seedPointsColor));
+		}
 	}
-	LDEBUG("Number of vertices : " << vertexData.size()/2.0);
-
-	// Give seedpoints a color for visualizing as GL_POINTS
-	std::vector<glm::vec3> seedPointsData;
-	for (int i = 0; i < _seedPoints.size(); ++i) {
-		seedPointsData.push_back(_seedPoints[i]);
-		seedPointsData.push_back(glm::vec3(1.0, 0.5, 0.0));
-	}
+	LDEBUG("Number of vertices : " << vertexData.size());
 
 	//	------ FIELDLINES -----------------
 	GLuint vertexPositionBuffer;
@@ -136,17 +129,17 @@ bool RenderableFieldlines::initialize() {
 	glBindVertexArray(_VAO); // bind array
 	glGenBuffers(1, &vertexPositionBuffer); // generate buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(glm::vec3), &vertexData.front(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
 
 	// Vertex positions
 	GLuint vertexLocation = 0;
 	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), reinterpret_cast<void*>(0));
+	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
 
 	// Texture coordinates
 	GLuint texcoordLocation = 1;
 	glEnableVertexAttribArray(texcoordLocation);
-	glVertexAttribPointer(texcoordLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), (void*)(sizeof(glm::vec3)));
+	glVertexAttribPointer(texcoordLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
@@ -157,15 +150,15 @@ bool RenderableFieldlines::initialize() {
 	glBindVertexArray(_seedpointVAO); // bind array
 	glGenBuffers(1, &seedpointPositionBuffer); // generate buffer
 	glBindBuffer(GL_ARRAY_BUFFER, seedpointPositionBuffer); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, seedPointsData.size()*sizeof(glm::vec3), &seedPointsData.front(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, seedPointsData.size()*sizeof(LinePoint), &seedPointsData.front(), GL_STATIC_DRAW);
 
 	// Vertex positions
 	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), reinterpret_cast<void*>(0));
+	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
 
 	// Texture coordinates
 	glEnableVertexAttribArray(texcoordLocation);
-	glVertexAttribPointer(texcoordLocation, 3, GL_FLOAT, GL_FALSE, 2*sizeof(glm::vec3), (void*)(sizeof(glm::vec3)));
+	glVertexAttribPointer(texcoordLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(3*sizeof(float)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
@@ -192,7 +185,6 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition) {
-
 	if(_update) {
 		_update = false;
 		safeShaderCompilation();
@@ -203,11 +195,8 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	psc relative = thisPosition-camera->position();
 
 	transform = transform*camTransform;
-	//transform = glm::translate(transform, relative.vec3());
 	transform = glm::mat4(1.0);
-//	transform = glm::scale(transform, glm::vec3(0.036*0.5*0.5));
 	transform = glm::scale(transform, glm::vec3(0.01));
-	//transform = glm::scale(transform, glm::vec3(0.1)); // Scale to avoid depth buffer problems
 
 	psc currentPosition = thisPosition;
     psc campos = camera->position();
@@ -216,7 +205,6 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 
 	// Activate shader
 	_fieldlinesProgram->activate();
-	//_fieldlinesProgram->setUniform("modelViewProjection", transform);
 
     _fieldlinesProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
     _fieldlinesProgram->setUniform("modelTransform", transform);
@@ -247,15 +235,15 @@ void RenderableFieldlines::safeShaderCompilation() {
 	_fieldlinesProgram->linkProgramObject();
 }
 
-std::vector<std::vector<glm::vec3> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {
+std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {
 	std::string modelString;
 	float stepSize = 0.5; // default if no stepsize is specified in hints
 	std::string xVariable, yVariable, zVariable;
 	KameleonWrapper::Model model;
-	std::vector<std::vector<glm::vec3> > fieldlinesData;
+	std::vector<std::vector<LinePoint> > fieldlinesData;
 
 	bool classification = false, lorentz = false;
-	glm::vec3 fieldlineColor = glm::vec3(1.0, 1.0, 1.0); // default color if no color or classification is specified
+	glm::vec4 fieldlineColor = glm::vec4(1.0, 1.0, 1.0, 1.0); // default color if no color or classification is specified
 
 	if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
 		//	------ MODEL -----------------

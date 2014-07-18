@@ -26,6 +26,7 @@
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/kameleonwrapper.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opencl/clworksize.h>
@@ -34,7 +35,6 @@
 #include <algorithm>
 
 #include <openspace/engine/openspaceengine.h>
-#include <sgct.h>
 
 namespace {
     std::string _loggerCat = "RenderableVolumeGL";
@@ -43,9 +43,8 @@ namespace {
 namespace openspace {
 
 RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
-    RenderableVolume(dictionary),  _box(nullptr), _boxScaling(1.0, 1.0, 1.0),
+    RenderableVolume(dictionary), _boxScaling(1.0, 1.0, 1.0),
     _updateTransferfunction(false), _id(-1) {
-        
     
     _filename = "";
     if(dictionary.hasKey("Volume")) {
@@ -81,8 +80,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     }
     if( _samplerFilename == "") {
         LERROR("No samplerfile!");
-    } 
-
+    }
 
     double tempValue;
     if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
@@ -116,16 +114,23 @@ RenderableVolumeGL::~RenderableVolumeGL() {
         delete _transferFunctionFile;
     if(_transferFunction)
         delete _transferFunction;
-    if(_box)
-        delete _box;
 }
 
 bool RenderableVolumeGL::initialize() {
     // assert(_filename != "");
     //	------ VOLUME READING ----------------
+// <<<<<<< HEAD
+// =======
+// 	_volume = loadVolume(_filename, _hintsDictionary);
+// 	_volume->uploadTexture();
+//     _transferFunction = loadTransferFunction(_transferFunctionPath);
+//     _transferFunction->uploadTexture();
+
+// >>>>>>> feature/fieldlines
     // TODO: fix volume an transferfunction names
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);
+        _boxOffset = getVolumeOffset(_filename, _hintsDictionary);
         _volume->uploadTexture();
         OsEng.renderEngine().abuffer()->addVolume(_volumeName, _volume);
     }
@@ -144,7 +149,6 @@ bool RenderableVolumeGL::initialize() {
     // add the sampler and get the ID
     _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
 
-    _box = new sgct_utils::SGCTBox(1.0f, sgct_utils::SGCTBox::Regular);
     OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
     _MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
     _modelTransformLocation = _boxProgram->uniformLocation("modelTransform");
@@ -205,10 +209,7 @@ bool RenderableVolumeGL::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*7, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
-    //glEnableVertexAttribArray(1);
-    
     
     return true;
 }
@@ -234,12 +235,6 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
         }
     }
 
-    //psc relative = thisPosition-camera->position();
-
-    // glm::mat4 transform = camera->viewRotationMatrix();
-    // transform = glm::translate(transform, relative.vec3());
-    // transform = glm::translate(transform, glm::vec3(-1.1,0.0,0.0));
-    // transform = glm::scale(transform, _boxScaling);
     glm::mat4 transform = glm::mat4(1.0);
     transform = glm::scale(transform, _boxScaling);
 
@@ -251,11 +246,11 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
 
     // psc addon(-1.1,0.0,0.0,0.0);
     // currentPosition += addon;
+    psc addon(_boxOffset/100.0f); // TODO: Proper scaling/units
+    currentPosition += addon; // Move box to model barycenter
 
     // TODO: Use _id to identify this volume
     _boxProgram->activate();
-    // _boxProgram->setUniform(_MVPLocation, camera->viewProjectionMatrix());
-    // _boxProgram->setUniform(_modelTransformLocation, transform);
     _boxProgram->setUniform(_typeLocation, _id);
 
     _boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
@@ -272,20 +267,15 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
     glCullFace(GL_FRONT);
     glBindVertexArray(_boxArray);
     glDrawArrays(GL_TRIANGLES, 0, 6*6);
-    // _box->draw();
 
     //  Draw frontface (now the normal cull face is is set)
     glCullFace(GL_BACK);
     glDrawArrays(GL_TRIANGLES, 0, 6*6);
-    // _box->draw();
 
     _boxProgram->deactivate();
-
 }
 
 void RenderableVolumeGL::update() {
-    
 }
-
 
 } // namespace openspace

@@ -34,6 +34,16 @@ namespace ccmc {
 
 namespace openspace {
 
+struct LinePoint {
+	glm::vec3 position;
+	glm::vec4 color;
+
+	LinePoint(glm::vec3 pos, glm::vec4 col) {
+		position = pos;
+		color = col;
+	}
+};
+
 class KameleonWrapper {
 public:
 
@@ -59,16 +69,16 @@ public:
 	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
 			const std::string& zVar, glm::size3_t outDimensions);
 
-	std::vector<std::vector<glm::vec3> > getClassifiedFieldLines(const std::string& xVar,
+	std::vector<std::vector<LinePoint> > getClassifiedFieldLines(const std::string& xVar,
 			const std::string& yVar, const std::string& zVar,
 			std::vector<glm::vec3> seedPoints, float stepSize);
 
-	std::vector<std::vector<glm::vec3> > getFieldLines(const std::string& xVar,
+	std::vector<std::vector<LinePoint> > getFieldLines(const std::string& xVar,
 				const std::string& yVar, const std::string& zVar,
-				std::vector<glm::vec3> seedPoints, float stepSize, glm::vec3 color);
+				std::vector<glm::vec3> seedPoints, float stepSize, glm::vec4 color);
 
-	std::vector<std::vector<glm::vec3> > getLorentzTrajectories(std::vector<glm::vec3> seedPoints,
-			glm::vec3 color, float stepsize);
+	std::vector<std::vector<LinePoint> > getLorentzTrajectories(std::vector<glm::vec3> seedPoints,
+			glm::vec4 color, float stepsize);
 
 private:
 	std::vector<glm::vec3> traceCartesianFieldline(const std::string& xVar,
@@ -80,7 +90,7 @@ private:
 
 	void getGridVariables(std::string& x, std::string& y, std::string& z);
 	void progressBar(int current, int end);
-	glm::vec3 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
+	glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
 	ccmc::Model* _model;
     Model _type;
