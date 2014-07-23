@@ -30,9 +30,10 @@
 #pragma openspace insert SETTINGS
 #define MAX_FRAGMENTS 16
 
-#define SHOWFUNC
-#define JITTERING
-#define SHOWENLIL
+// #define SHOWFUNC
+// #define JITTERING
+#define SAMPLEFIRSTVOLUME
+// #define COLORNORMALIZATION
 
 #define PSCDEPTH 1
 #define ZDEPTH 2
@@ -59,7 +60,8 @@ const float samplingRate = 1.0;
 
 // uniform int SCREEN_WIDTH;
 // uniform int SCREEN_HEIGHT;
-uniform float ALPHA_LIMIT = 0.95;
+uniform float ALPHA_LIMIT = 0.99;
+uniform float EPSILON = 0.01;
 
 in vec2 texCoord;
 out vec4 color;
@@ -81,7 +83,9 @@ vec3 CartesianToSpherical(vec3 _cartesian) {
     theta = phi = 0.0;
   } else {
     theta = acos(cartesian.z/r) / M_PI;
-    phi = (M_PI + atan(cartesian.y, cartesian.x)) / (2.0*M_PI);
+    // float diff = -.0f;
+    phi = (M_PI + atan(cartesian.y, cartesian.x)) / (2.0*M_PI );
+    // phi = (M_PI+radians(diff)  + atan(cartesian.y, cartesian.x)) / (2.0*M_PI+radians(diff) );
     // phi = (M_PI + atan(cartesian.x, cartesian.y)) / (2.0*M_PI);
   }
   // r *= 0.57735026919;
@@ -142,6 +146,27 @@ void blendGeometry(inout vec4 color, ABufferStruct_t frag) {
 }
 */
 
+float volumeRaycastingDistance(in int id, in ABufferStruct_t startFrag, in ABufferStruct_t endFrag) {
+#if ZTYPE == ZDEPTH
+	const float S1 = volume_zlength[id].x;
+	const float S2 = volume_zlength[id].y;
+	const float L = S1 - S2;
+	// const float z1 = globz(_z_(startFrag));
+	// const float z2 = globz(_z_(endFrag));
+	const float z1 = _z_(startFrag);
+	const float z2 = _z_(endFrag);
+	return ((z1 - S1) / L - (z2 - S1) / L) * volume_length[id];
+#elif ZTYPE == PSCDEPTH
+	const float L = volume_zlength[id];
+	const vec4 p1 = _pos_(startFrag);
+	const vec4 p2 = _pos_(endFrag);
+	const float dist = pscLength(p1, p2);
+	// const float z1 = _z_(startFrag);
+	// const float z2 = _z_(endFrag);
+	return (dist / L) * volume_length[id];
+#endif
+}
+
 float globz(float z) {
 	return z;
 	// return log(2.0*z-1.0);
@@ -183,59 +208,81 @@ vec4 calculate_final_color(uint frag_count) {
 #if MAX_VOLUMES > 0
 		if(currentVolumeBitmask > 0) {
 
+			int volbit = currentVolumeBitmask;
+			int endbittype = int(_type_(endFrag));
+			if(endbittype > 0)
+				volbit = volbit ^ (1 << (endbittype-1));
+
+			// int volID = type -1;
+			// int volID = type-1;
+			int volID;
+			
 			// TODO: Fix this non-working normalization for volumes with different stepsize
-			// float myMaxSteps = 0.0000001;
-			// for(int v = 0; v < MAX_VOLUMES; ++v) {
-			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
-			// 		myMaxSteps = max(myMaxSteps, volume_length[v]/volumeStepSize[v]);
-			// 	}
-			// }
+			float myMaxSteps = 0.0000001;
+			float vlength;
+			for(int v = 0; v < MAX_VOLUMES; ++v) {
+				if((currentVolumeBitmask & (1 << v)) > 0) {
+
+					// float l = volume_length[v]/volumeStepSize[v];
+					// if(myMaxSteps < l) {
+					// 	myMaxSteps = l;
+					// 	volID = v;
+					// }
+					float l = volumeRaycastingDistance(v, startFrag, endFrag);
+					// myMaxSteps = max(myMaxSteps, L/volumeStepSizeOriginal[v]);
+					myMaxSteps = max(myMaxSteps, l/volumeStepSizeOriginal[v]);
+
+					// if((volbit & (1 << v)) > 0)
+					// 	volID = v;
+					// if(volbit == 0)
+					// 	volID = v;
+					// if(type - 1 != v &&  type == endbittype)
+					// 	volID = v;
+
+					// if(volID < 0) volID = v;
+					// volID = v;
+				}
+			}
 			// for(int v = 0; v < MAX_VOLUMES; ++v) {
 			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
 			// 		float aaa = volume_length[v]/myMaxSteps;
 			// 		volumeStepSize[v] = volumeStepSizeOriginal[v]*vec3(aaa);
 			// 	}
 			// }
-
-
-			int volID = type -1;
-#if ZTYPE == ZDEPTH
-			const float S1 = volume_zlength[volID].x;
-			const float S2 = volume_zlength[volID].y;
-			const float L = S1 - S2;
-			const float z1 = globz(_z_(startFrag));
-			const float z2 = globz(_z_(endFrag));
-			// const float z1 = _z_(startFrag);
-			// const float z2 = _z_(endFrag);
-			const float l = ((z1 - S1) / L - (z2 - S1) / L) * volume_length[volID];
-			int max_iterations = int(l / volumeStepSize[volID]);
-#elif ZTYPE == PSCDEPTH
-			const float L = volume_zlength[volID];
-			const vec4 p1 = _pos_(startFrag);
-			const vec4 p2 = _pos_(endFrag);
-			const float dist = pscLength(p1, p2);
-			// const float z1 = _z_(startFrag);
-			// const float z2 = _z_(endFrag);
-			const float l = (dist / L) * volume_length[volID];
-			int max_iterations = int(l / volumeStepSize[volID]);
-#endif
-
-
-
-			
-			// MIP
-			// vec4 tmp, color = vec4(0);
-			// while(p < l && iterations < LOOP_LIMIT) {
-			// 	tmp = texture(volume, volume_position[volID]);
-			// 	color = max(color, tmp);
-			// 	p+= stepSize;
-			// 	volume_position[volID] += direction*stepSize;
-			// 	++iterations;
+			// float myMaxSteps = stepSize;
+			// for(int v = 0; v < MAX_VOLUMES; ++v) {
+			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
+			// 		myMaxSteps = min(myMaxSteps, volumeStepSize[v]);
+			// 	}
 			// }
-			// vec4 volume_color = vec4(color.r,color.r,color.r,color.r*2.0);
-			// if(volume_color.a < 0.1) volume_color = vec4(0.0,0.0,0.0,0.0);
-			// final_color = blend(final_color, volume_color);
-			
+
+			for(int v = 0; v < MAX_VOLUMES; ++v) {
+				if((currentVolumeBitmask & (1 << v)) > 0) {
+					// float aaa = myMaxSteps;
+					float l = volumeRaycastingDistance(v, startFrag, endFrag);
+					float aaa = l/myMaxSteps;
+					// float aaa = volume_length[v]/myMaxSteps;
+					// volumeStepSize[v] = volumeStepSizeOriginal[v]*vec3(aaa);
+					// float aaa = volume_length[v]/volumeStepSizeOriginal[v];
+					volumeStepSize[v] = aaa;
+
+					// if(vlength >= volume_length[v]) {
+					// 	// vlength = volume_length[v];
+					// 	const float S1 = volume_zlength[v].x;
+					// 	const float S2 = volume_zlength[v].y;
+					// 	const float L = S1 - S2;
+					// 	vlength = volume_length[v];
+					// 	vlength = L;
+					// 	volID = v;
+					// }
+					// if(volID < 0) volID = v;
+					volID = v;
+				}
+			}
+
+
+			float l = volumeRaycastingDistance(volID, startFrag, endFrag);
+			int max_iterations = int(l / volumeStepSize[volID]);
 
 			// TransferFunction
 			vec4 color = vec4(0);
@@ -296,8 +343,10 @@ vec4 calculate_final_color(uint frag_count) {
 	// 	final_color = vec4(1.0,1.0,1.0,1.0);
 	// }
 
-	// final_color.rgb = final_color.rgb * final_color.a;
-	// final_color.a = 1.0;
+#ifdef COLORNORMALIZATION
+	final_color.rgb = final_color.rgb * final_color.a;
+	final_color.a = 1.0;
+#endif
 
 	return final_color;
 

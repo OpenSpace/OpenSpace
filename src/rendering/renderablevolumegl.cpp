@@ -92,8 +92,11 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     		_boxScaling[1] = tempValue;
     }
     if(dictionary.hasKey("BoxScaling.3") && dictionary.getValue("BoxScaling.3", tempValue)) {
-    	if(tempValue > 0.0)
-    		_boxScaling[2] = tempValue;
+        if(tempValue > 0.0)
+            _boxScaling[2] = tempValue;
+    }
+    if(dictionary.hasKey("BoxScaling.4") && dictionary.getValue("BoxScaling.4", tempValue)) {
+        _w = tempValue;
     }
 
     _volumeName = "";
@@ -103,7 +106,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     if (dictionary.hasKey("TransferFunctionName"))
         dictionary.getValue("TransferFunctionName", _transferFunctionName);
 
-    setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)));
+    setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
 }
 
 RenderableVolumeGL::~RenderableVolumeGL() {
@@ -160,47 +163,47 @@ bool RenderableVolumeGL::initialize() {
     const GLfloat size = 0.5f;
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //  x,     y,     z,     s,
-        -size, -size,  size,  0.0f,
-         size,  size,  size,  0.0f,
-        -size,  size,  size,  0.0f,
-        -size, -size,  size,  0.0f,
-         size, -size,  size,  0.0f,
-         size,  size,  size,  0.0f,
+        -size, -size,  size,  _w,
+         size,  size,  size,  _w,
+        -size,  size,  size,  _w,
+        -size, -size,  size,  _w,
+         size, -size,  size,  _w,
+         size,  size,  size,  _w,
 
-        -size, -size, -size,  0.0f,
-         size,  size, -size,  0.0f,
-        -size,  size, -size,  0.0f,
-        -size, -size, -size,  0.0f,
-         size, -size, -size,  0.0f,
-         size,  size, -size,  0.0f,
+        -size, -size, -size,  _w,
+         size,  size, -size,  _w,
+        -size,  size, -size,  _w,
+        -size, -size, -size,  _w,
+         size, -size, -size,  _w,
+         size,  size, -size,  _w,
 
-         size, -size, -size,  0.0f,
-         size,  size,  size,  0.0f,
-         size, -size,  size,  0.0f,
-         size, -size, -size,  0.0f,
-         size,  size, -size,  0.0f,
-         size,  size,  size,  0.0f,
+         size, -size, -size,  _w,
+         size,  size,  size,  _w,
+         size, -size,  size,  _w,
+         size, -size, -size,  _w,
+         size,  size, -size,  _w,
+         size,  size,  size,  _w,
 
-        -size, -size, -size,  0.0f,
-        -size,  size,  size,  0.0f,
-        -size, -size,  size,  0.0f,
-        -size, -size, -size,  0.0f,
-        -size,  size, -size,  0.0f,
-        -size,  size,  size,  0.0f,
+        -size, -size, -size,  _w,
+        -size,  size,  size,  _w,
+        -size, -size,  size,  _w,
+        -size, -size, -size,  _w,
+        -size,  size, -size,  _w,
+        -size,  size,  size,  _w,
 
-        -size,  size, -size,  0.0f,
-         size,  size,  size,  0.0f,
-        -size,  size,  size,  0.0f,
-        -size,  size, -size,  0.0f,
-         size,  size, -size,  0.0f,
-         size,  size,  size,  0.0f,
+        -size,  size, -size,  _w,
+         size,  size,  size,  _w,
+        -size,  size,  size,  _w,
+        -size,  size, -size,  _w,
+         size,  size, -size,  _w,
+         size,  size,  size,  _w,
 
-        -size, -size, -size,  0.0f,
-         size, -size,  size,  0.0f,
-        -size, -size,  size,  0.0f,
-        -size, -size, -size,  0.0f,
-         size, -size, -size,  0.0f,
-         size, -size,  size,  0.0f,
+        -size, -size, -size,  _w,
+         size, -size,  size,  _w,
+        -size, -size,  size,  _w,
+        -size, -size, -size,  _w,
+         size, -size, -size,  _w,
+         size, -size,  size,  _w,
     };
     GLuint vertexPositionBuffer;
     glGenVertexArrays(1, &_boxArray); // generate array

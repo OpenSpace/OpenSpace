@@ -77,6 +77,25 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         }
         LDEBUG("Successfully create renderable for '" << result->_nodeName << "'");
     }
+
+    if (dictionary.hasKey("RenderableToggle")) {
+        std::string val;
+        dictionary.getValue("RenderableToggle", val);
+
+        if(val.length() == 1) {
+            char c = std::toupper(val[0]);
+            int key = static_cast<int>(c);
+            auto func = [result]() {
+                result->_renderableToggle = ! result->_renderableToggle;
+            };
+            LERROR("Found key:" << key);
+            OsEng.interactionHandler().addKeyCallback(key, func);
+        }
+
+        // LERROR("Found key:" << val);
+        // LERROR("key 1:" << static_cast<int>('1'));
+    }
+
     if (dictionary.hasKey(keyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
         dictionary.getValue(keyEphemeris, ephemerisDictionary);
@@ -116,6 +135,7 @@ SceneGraphNode::SceneGraphNode()
     , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
+    , _renderableToggle(true)
     , _boundingSphereVisible(false)
 {
 }
@@ -212,7 +232,7 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
     if (!_boundingSphereVisible) {
         return;
     }
-    if (_renderableVisible) {
+    if (_renderableVisible && _renderableToggle) {
         // LDEBUG("Render");
         _renderable->render(camera, thisPosition);
     }

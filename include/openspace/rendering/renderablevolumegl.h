@@ -68,6 +68,7 @@ private:
 	GLuint _boxArray;
 	ghoul::opengl::ProgramObject *_boxProgram;
 	glm::vec3 _boxScaling, _boxOffset;
+	float _w;
 	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
     bool _updateTransferfunction;

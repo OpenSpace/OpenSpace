@@ -314,7 +314,7 @@ std::string ABuffer::openspaceSamplerCalls() {
 		if(found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
 			if(i == 0)
-				samplercalls += "#ifdef SHOWENLIL\n";
+				samplercalls += "#ifdef SAMPLEFIRSTVOLUME\n";
 			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(1 << i)+") {\n";
 			samplercalls += "    vec4 c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    if(c.a < 0.1) { \n";
@@ -325,6 +325,7 @@ std::string ABuffer::openspaceSamplerCalls() {
 			// samplercalls += "        volumeStepSize[" + std::to_string(i) + "] = volumeStepSizeOriginal[" + std::to_string(i) + "]; \n";
 			// samplercalls += "        //c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    } \n";
+			samplercalls += "    if(c.a > EPSILON)\n";
 			samplercalls += "    blendStep(final_color, c, volumeStepSize[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
 			// samplercalls += "    float aaa = volume_length[i]/myMaxSteps;\n";
@@ -358,7 +359,7 @@ std::string ABuffer::openspaceTransferFunction() {
 	for(int i = 0; i < _transferFunctions.size(); ++i) {
 		tf += 	"if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+
 				" && gl_FragCoord.y < SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i)+") {\n";
-		tf += "    float normalizedIntensity = gl_FragCoord.x / SCREEN_WIDTHf ;\n";
+		tf += "    float normalizedIntensity = gl_FragCoord.x / (SCREEN_WIDTHf-1) ;\n";
 		tf += "    vec4 tfc = texture("+ _transferFunctions.at(i).first +", normalizedIntensity);\n";
 		tf += "    final_color = tfc;\n";
 		tf += "    float cmpf = SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+" + tfc.a*showfunc_size;\n";

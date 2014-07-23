@@ -390,6 +390,14 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
     }
 */
+    // std::pair <std::multimap<int,std::function<void(void)> >::iterator, std::multimap<int , std::function<void(void)> >::iterator> ret;
+    if(action == SGCT_PRESS) {
+    	auto ret = _keyCallbacks.equal_range(key);
+	    for (auto it=ret.first; it!=ret.second; ++it)
+	    	it->second();
+    }
+    
+
 }
 
 void InteractionHandler::mouseButtonCallback(int key, int action) {
@@ -428,5 +436,10 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     }
 }
 
+void InteractionHandler::addKeyCallback(int key, std::function<void(void)> f) {
+	//std::map<int, std::vector<std::function<void(void)> > > _keyCallbacks;
+
+	_keyCallbacks.insert(std::make_pair(key, f));
+}
 
 } // namespace openspace

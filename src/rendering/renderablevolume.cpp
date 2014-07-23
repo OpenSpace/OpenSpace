@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -81,6 +82,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
     const std::string& filepath, 
     const ghoul::Dictionary& hintsDictionary) {
 
+
 	if( ! FileSys.fileExists(filepath)) {
 		LWARNING("Could not load volume, could not find '" << filepath << "'");
 		return nullptr;
@@ -91,6 +93,9 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 		ghoul::RawVolumeReader rawReader(hints);
 		return rawReader.read(filepath);
 	} else if(hasExtension(filepath, "cdf")) {
+
+        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
         glm::size3_t dimensions(1,1,1);
         double tempValue;
@@ -158,9 +163,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
             }
 
             fclose(file);
-            ghoul::opengl::Texture* t = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, ghoul::opengl::Texture::FilterMode::Linear, ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-            t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);   
-            return t;
+            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
         }
 
 		KameleonWrapper::Model model;
@@ -183,9 +186,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
                 fwrite(data, sizeof(float), length, file);
                 fclose(file);
             }
-        	ghoul::opengl::Texture* t = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, ghoul::opengl::Texture::FilterMode::Linear, ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-            t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);   
-            return t;
+        	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		} else if (hintsDictionary.hasKey("Variables")) {
 			std::string xVariable, yVariable, zVariable;
 			bool xVar, yVar, zVar;
@@ -205,9 +206,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
                     fclose(file);
                 }
 
-                ghoul::opengl::Texture* t = new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT);
-                t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);   
-				return t;
+				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
 			}
 
 		} else {
@@ -236,6 +235,7 @@ glm::vec3 RenderableVolume::getVolumeOffset(
 		model = KameleonWrapper::Model::BATSRUS;
 	} else if (modelString == "ENLIL") {
 		model = KameleonWrapper::Model::ENLIL;
+        return glm::vec3(0);
 	} else {
 		LWARNING("Hints does not specify a valid 'Model'");
 		return glm::vec3(0);
@@ -313,11 +313,14 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     if ( ! FileSys.fileExists(f)) {
         return nullptr;
     }
+    ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+    ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
     
     // check if not a txt based texture
     if ( ! hasExtension(filepath, "txt")) {
         ghoul::opengl::Texture* t = ghoul::opengl::loadTexture(f);
-        t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+        t->setWrapping(wrappingmode);
         return t;
     }
     
@@ -346,7 +349,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     auto widthValidator = [](size_t in) { if(in > 0) return in; return static_cast<size_t>(1); };
     auto upperLowerValidator = [](float in) { return glm::clamp(in, 0.0f, 1.0f); };
-    auto intensityValidator = [](float in) { if(in > 0.0f) return in; return 1.0f; };
+    auto intensityValidator = [](float in) { return glm::clamp(in, 0.0f, 1.0f); };
     
     std::string line;
     while (std::getline(in, line)) {
@@ -381,15 +384,26 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     if (mappingKeys.size() < 1) {
         return nullptr;
     }
+
+    // for(auto key: mappingKeys) {
+    //     glm::vec4 rgba = key.color;
+    //    LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    // }
+    // LDEBUG("insert....");
     
-    mappingKeys.insert(mappingKeys.begin(), {lower});
-    mappingKeys.push_back({upper});
-    
-    
-    for(auto key: mappingKeys) {
-        glm::vec4 rgba = key.color;
-//        LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    if (mappingKeys.front().position > lower){
+        mappingKeys.insert(mappingKeys.begin(), {lower,mappingKeys.front().color});
     }
+
+    if (mappingKeys.back().position < upper){
+        mappingKeys.push_back({upper,mappingKeys.back().color});
+    }
+    
+    
+    // for(auto key: mappingKeys) {
+    //     glm::vec4 rgba = key.color;
+    //    LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    // }
     
     // allocate new float array with zeros
     float* transferFunction = new float[width*4]();
@@ -448,18 +462,25 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             //LDEBUG("["<< position <<"] " << value);
             
         }
-       // LDEBUG(weight << ", (" <<
-       //        transferFunction[4*i+0] << ", " <<
-       //        transferFunction[4*i+1] << ", " <<
-       //        transferFunction[4*i+2] << ", " <<
-       //        transferFunction[4*i+3] << ")");
+       // LDEBUG(std::fixed << std::setw(10) << std::left << std::setprecision(8) << weight << ", (" <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+0] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+1] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+2] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+3] << ")");
     }
 
-    ghoul::opengl::Texture* t = new ghoul::opengl::Texture(transferFunction,
+    // for (int i = 0; i <= width; ++i) {
+
+    //    LDEBUG(std::fixed  << "(" <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+0] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+1] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+2] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+3] << ")");
+    // }
+
+    return new ghoul::opengl::Texture(transferFunction,
     		glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
-    		GL_RGBA, GL_FLOAT, ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-    return t;
+    		GL_RGBA, GL_FLOAT,filtermode, wrappingmode);
 }
 
 } // namespace openspace

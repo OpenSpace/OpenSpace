@@ -213,10 +213,18 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
     dist = (dist / static_cast<double>(bins)) * static_cast<double>(stop);
 
 	varMax = varMin + dist;
+    LDEBUG(var << "Min: " << varMin);
+    LDEBUG(var << "Max: " << varMax);
     for(int i = 0; i < size; ++i) {
     	double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
 
     	data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
+    	if(data[i] < 0.0) {
+    		LERROR("Datapoint " << i << " less than 0");
+    	}
+    	if(data[i] > 1.0) {
+    		LERROR("Datapoint " << i << " more than 1");
+    	}
     }
 
     // for(int i = 0; i < size; ++i) {

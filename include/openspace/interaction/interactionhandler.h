@@ -11,6 +11,8 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <map>
+#include <functional>
 
 namespace openspace {
 
@@ -56,6 +58,8 @@ public:
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
+
+    void addKeyCallback(int key, std::function<void(void)> f);
 	
 private:
     glm::vec3 mapToTrackball(glm::vec2 mousePos);
@@ -77,6 +81,8 @@ private:
 
 	// for locking and unlocking
 	std::mutex cameraGuard_;
+
+	std::multimap<int, std::function<void(void)> > _keyCallbacks;
 	
 };
 
