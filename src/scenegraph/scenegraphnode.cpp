@@ -40,6 +40,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace {
 const std::string _loggerCat = "SceneGraphNode";
 }
@@ -79,21 +81,49 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey("RenderableToggle")) {
-        std::string val;
+        std::string val = "";
         dictionary.getValue("RenderableToggle", val);
 
-        if(val.length() == 1) {
-            char c = std::toupper(val[0]);
-            int key = static_cast<int>(c);
+        if(val.length() > 0) {
             auto func = [result]() {
                 result->_renderableToggle = ! result->_renderableToggle;
             };
-            LERROR("Found key:" << key);
-            OsEng.interactionHandler().addKeyCallback(key, func);
-        }
+            int key = SGCT_KEY_UNKNOWN;
 
-        // LERROR("Found key:" << val);
-        // LERROR("key 1:" << static_cast<int>('1'));
+            if(val.length() == 1) {
+                char c = std::toupper(val[0]);
+                key = static_cast<int>(c);
+            } else if (boost::iequals(val, "left")) {
+                key = SGCT_KEY_LEFT;
+            } else if (boost::iequals(val, "right")) {
+                key = SGCT_KEY_RIGHT;
+            } else if (boost::iequals(val, "up")) {
+                key = SGCT_KEY_UP;
+            } else if (boost::iequals(val, "down")) {
+                key = SGCT_KEY_DOWN;
+            } else if (boost::iequals(val, "space")) {
+                key = SGCT_KEY_SPACE;
+            } else if (boost::iequals(val, "enter")) {
+                key = SGCT_KEY_ENTER;
+            } else if (boost::iequals(val, "backspace")) {
+                key = SGCT_KEY_BACKSPACE;
+            } else if (boost::iequals(val, "del")) {
+                key = SGCT_KEY_DEL;
+            } else if (boost::iequals(val, "delete")) {
+                key = SGCT_KEY_DELETE;
+            } else {
+                // Loop through all F keys
+                for(int i = 0; i < 25; ++i) {
+                    std::string stringKey = "F" + std::to_string(i+1);
+                    if(boost::iequals(val, stringKey)) {
+                        key = SGCT_KEY_F1 + i;
+                    }
+                }
+            }
+
+            if(key != SGCT_KEY_UNKNOWN)
+                OsEng.interactionHandler().addKeyCallback(key, func);
+        }
     }
 
     if (dictionary.hasKey(keyEphemeris)) {

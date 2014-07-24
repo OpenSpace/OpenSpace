@@ -28,16 +28,29 @@
 // Settings
 // ================================================================================
 #pragma openspace insert SETTINGS
-#define MAX_FRAGMENTS 16
 
-// #define SHOWFUNC
-// #define JITTERING
-#define SAMPLEFIRSTVOLUME
-// #define COLORNORMALIZATION
+// Select type of depth calculations
+#define 	PSCDEPTH 		1
+#define 	ZDEPTH 			2
+#define 	ZTYPE 			ZDEPTH
 
-#define PSCDEPTH 1
-#define ZDEPTH 2
-#define ZTYPE ZDEPTH
+// Maximum number of fragments
+#define 	MAX_FRAGMENTS 	16 				// The size of the local fragment list
+// #define 	VISUALIZE_TRANSFERFUNCTIONS		// 
+#define 	USE_JITTERING					//
+// #define 	USE_COLORNORMALIZATION			//
+
+// If you need to render a volume box but not sample the volume (debug purpose)
+// #define 	SKIP_VOLUME_0
+// #define 	SKIP_VOLUME_1
+// #define 	SKIP_VOLUME_2
+// #define 	SKIP_VOLUME_3
+
+// constants
+const float stepSize = 	0.01;
+const float samplingRate = 1.0;
+uniform float ALPHA_LIMIT = 0.99;
+
 
 // Math defintions
 #define 	M_E   		2.7182818284590452354
@@ -46,7 +59,6 @@
 #define 	M_LN2   	0.69314718055994530942 	/* log_e 2 */
 #define 	M_LN10   	2.30258509299404568402 	/* log_e 10 */
 #define 	M_PI   		3.14159265358979323846 	/* pi */
-// #define     M_PI 		3.141592653589793238462643383279 /* pi */
 #define 	M_PI_2   	1.57079632679489661923 	/* pi/2 */
 #define 	M_PI_4   	0.78539816339744830962 	/* pi/4 */
 #define 	M_1_PI   	0.31830988618379067154 	/* 1/pi */
@@ -54,17 +66,10 @@
 #define 	M_2_SQRTPI	1.12837916709551257390 	/* 2/sqrt(pi) */
 #define 	M_SQRT2 	1.41421356237309504880 	/* sqrt(2) */
 #define 	M_SQRT1_2   0.70710678118654752440 	/* 1/sqrt(2) */
-
-const float stepSize = 	0.01;
-const float samplingRate = 1.0;
-
-// uniform int SCREEN_WIDTH;
-// uniform int SCREEN_HEIGHT;
-uniform float ALPHA_LIMIT = 0.99;
-uniform float EPSILON = 0.01;
+#define		M_SQRT1_3	0.57735026919			/* 1/sqrt(3) */
 
 in vec2 texCoord;
-out vec4 color;
+out vec4 out_color;
 
 // ================================================================================ 
 // Headers, 
@@ -72,6 +77,30 @@ out vec4 color;
 // ================================================================================
 #pragma openspace insert HEADERS
 
+// ================================================================================
+// The ABuffer specific includes and definitions
+// ================================================================================
+#include "abufferStruct.hglsl"
+ABufferStruct_t fragments[MAX_FRAGMENTS];
+
+#if MAX_VOLUMES > 0
+	vec3 volume_direction[MAX_VOLUMES];
+	float volume_length[MAX_VOLUMES];
+	vec3 volume_position[MAX_VOLUMES];
+	int volumes_in_fragment[MAX_VOLUMES];
+	int volume_count = 0;
+
+	#if ZTYPE == ZDEPTH
+		vec2 volume_zlength[MAX_VOLUMES];
+	#elif ZTYPE == PSCDEPTH
+		float volume_zlength[MAX_VOLUMES];
+	#endif
+#endif
+#include "abufferSort.hglsl"
+
+// ================================================================================
+// Helper functions functions
+// ================================================================================
 vec3 CartesianToSpherical(vec3 _cartesian) {
   // Put cartesian in [-1..1] range first
   vec3 cartesian = vec3(-1.0,-1.0,-1.0) + _cartesian * 2.0f;
@@ -83,42 +112,15 @@ vec3 CartesianToSpherical(vec3 _cartesian) {
     theta = phi = 0.0;
   } else {
     theta = acos(cartesian.z/r) / M_PI;
-    // float diff = -.0f;
     phi = (M_PI + atan(cartesian.y, cartesian.x)) / (2.0*M_PI );
-    // phi = (M_PI+radians(diff)  + atan(cartesian.y, cartesian.x)) / (2.0*M_PI+radians(diff) );
-    // phi = (M_PI + atan(cartesian.x, cartesian.y)) / (2.0*M_PI);
   }
-  // r *= 0.57735026919;
-  r = r / sqrt(3.0f);
+  r *= M_SQRT1_3;
+  // r = r / sqrt(3.0f);
   
   // Sampler ignores w component
-  // return vec3(r, phi, theta);
   return vec3(r, theta, phi);
-  // return vec3(r, phi*0.7, theta);
 }
 
-// ================================================================================
-// The ABuffer specific includes and definitions
-// ================================================================================
-#include "abufferStruct.hglsl"
-ABufferStruct_t fragments[MAX_FRAGMENTS];
-
-#if MAX_VOLUMES > 0
-vec3 volume_direction[MAX_VOLUMES];
-float volume_length[MAX_VOLUMES];
-vec3 volume_position[MAX_VOLUMES];
-
-#if ZTYPE == ZDEPTH
-	vec2 volume_zlength[MAX_VOLUMES];
-#elif ZTYPE == PSCDEPTH
-	float volume_zlength[MAX_VOLUMES];
-#endif
-#endif
-#include "abufferSort.hglsl"
-
-// ================================================================================
-// Blend functions
-// ================================================================================
 vec4 blend(vec4 src, vec4 dst) {
 	vec4 o;
 	o.a = src.a + dst.a * (1.0f - src.a);
@@ -133,18 +135,6 @@ void blendStep(inout vec4 dst, in vec4 src, in float stepSize) {
     dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
     dst.a = dst.a + (1.0 -dst.a) * src.a;
 }
-/*
-//Color geometry
-void blendGeometry(inout vec4 color, ABufferStruct_t frag) {
-	//vec4 c;
-	//c.rg = unpackHalf2x16(frag.rg);
-	//c.ba = unpackHalf2x16(frag.ba);
-	vec4 c = _col_(frag);
-	c.a = clamp(c.a, 0.0,1.0);
-	blend(color, c, 0.01);
-	return;
-}
-*/
 
 float volumeRaycastingDistance(in int id, in ABufferStruct_t startFrag, in ABufferStruct_t endFrag) {
 #if ZTYPE == ZDEPTH
@@ -165,19 +155,6 @@ float volumeRaycastingDistance(in int id, in ABufferStruct_t startFrag, in ABuff
 	// const float z2 = _z_(endFrag);
 	return (dist / L) * volume_length[id];
 #endif
-}
-
-float globz(float z) {
-	return z;
-	// return log(2.0*z-1.0);
-	// return exp(2.0*z-1.0);
-	// const float zNear = 0.1f;
-	// const float zFar = 100.0f;
-	// float z_b = z;
- //    float z_n = 2.0 * z_b - 1.0;
- //    float z_e = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
-	// return z_e;
-	// return (2.0 * z - near - far) / (far - near);
 }
 
 vec4 calculate_final_color(uint frag_count) {
@@ -208,78 +185,26 @@ vec4 calculate_final_color(uint frag_count) {
 #if MAX_VOLUMES > 0
 		if(currentVolumeBitmask > 0) {
 
-			int volbit = currentVolumeBitmask;
-			int endbittype = int(_type_(endFrag));
-			if(endbittype > 0)
-				volbit = volbit ^ (1 << (endbittype-1));
 
-			// int volID = type -1;
-			// int volID = type-1;
 			int volID;
-			
-			// TODO: Fix this non-working normalization for volumes with different stepsize
 			float myMaxSteps = 0.0000001;
-			float vlength;
-			for(int v = 0; v < MAX_VOLUMES; ++v) {
-				if((currentVolumeBitmask & (1 << v)) > 0) {
-
-					// float l = volume_length[v]/volumeStepSize[v];
-					// if(myMaxSteps < l) {
-					// 	myMaxSteps = l;
-					// 	volID = v;
-					// }
-					float l = volumeRaycastingDistance(v, startFrag, endFrag);
-					// myMaxSteps = max(myMaxSteps, L/volumeStepSizeOriginal[v]);
-					myMaxSteps = max(myMaxSteps, l/volumeStepSizeOriginal[v]);
-
-					// if((volbit & (1 << v)) > 0)
-					// 	volID = v;
-					// if(volbit == 0)
-					// 	volID = v;
-					// if(type - 1 != v &&  type == endbittype)
-					// 	volID = v;
-
-					// if(volID < 0) volID = v;
-					// volID = v;
+			if(volume_count > 1) {
+				for(int v = 0; v < volume_count; ++v) {
+					int vol = volumes_in_fragment[v];
+					float l = volumeRaycastingDistance(vol, startFrag, endFrag);
+					myMaxSteps = max(myMaxSteps, l/volumeStepSizeOriginal[vol]);
 				}
-			}
-			// for(int v = 0; v < MAX_VOLUMES; ++v) {
-			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
-			// 		float aaa = volume_length[v]/myMaxSteps;
-			// 		volumeStepSize[v] = volumeStepSizeOriginal[v]*vec3(aaa);
-			// 	}
-			// }
-			// float myMaxSteps = stepSize;
-			// for(int v = 0; v < MAX_VOLUMES; ++v) {
-			// 	if((currentVolumeBitmask & (1 << v)) > 0) {
-			// 		myMaxSteps = min(myMaxSteps, volumeStepSize[v]);
-			// 	}
-			// }
 
-			for(int v = 0; v < MAX_VOLUMES; ++v) {
-				if((currentVolumeBitmask & (1 << v)) > 0) {
-					// float aaa = myMaxSteps;
-					float l = volumeRaycastingDistance(v, startFrag, endFrag);
+				for(int v = 0; v < volume_count; ++v) {
+					int vol = volumes_in_fragment[v];
+					float l = volumeRaycastingDistance(vol, startFrag, endFrag);
 					float aaa = l/myMaxSteps;
-					// float aaa = volume_length[v]/myMaxSteps;
-					// volumeStepSize[v] = volumeStepSizeOriginal[v]*vec3(aaa);
-					// float aaa = volume_length[v]/volumeStepSizeOriginal[v];
-					volumeStepSize[v] = aaa;
-
-					// if(vlength >= volume_length[v]) {
-					// 	// vlength = volume_length[v];
-					// 	const float S1 = volume_zlength[v].x;
-					// 	const float S2 = volume_zlength[v].y;
-					// 	const float L = S1 - S2;
-					// 	vlength = volume_length[v];
-					// 	vlength = L;
-					// 	volID = v;
-					// }
-					// if(volID < 0) volID = v;
-					volID = v;
+					volumeStepSize[vol] = aaa;
+					volID = vol;
 				}
+			} else {
+				volID = type -1;
 			}
-
 
 			float l = volumeRaycastingDistance(volID, startFrag, endFrag);
 			int max_iterations = int(l / volumeStepSize[volID]);
@@ -287,15 +212,10 @@ vec4 calculate_final_color(uint frag_count) {
 			// TransferFunction
 			vec4 color = vec4(0);
 			for(int k = 0; k < max_iterations && final_color.a < ALPHA_LIMIT && k < LOOP_LIMIT; ++k) {
-			//while(p < l && iterations < LOOP_LIMIT) {
 
 #pragma openspace insert SAMPLERCALLS
 
-				//final_color = blend(final_color, color*stepSize);
 
-				//volume_position[volID] += volume_direction[volID]*volumeStepSize[volID];
-				//p+= stepSize;
-				//++iterations;
 			}
 			
 		}
@@ -324,7 +244,7 @@ vec4 calculate_final_color(uint frag_count) {
 // ================================================================================
 // Transferfunction visualizer
 // ================================================================================
-#ifdef SHOWFUNC
+#ifdef VISUALIZE_TRANSFERFUNCTIONS
 #pragma openspace insert TRANSFERFUNC
 #endif
 
@@ -343,7 +263,7 @@ vec4 calculate_final_color(uint frag_count) {
 	// 	final_color = vec4(1.0,1.0,1.0,1.0);
 	// }
 
-#ifdef COLORNORMALIZATION
+#ifdef USE_COLORNORMALIZATION
 	final_color.rgb = final_color.rgb * final_color.a;
 	final_color.a = 1.0;
 #endif
@@ -356,10 +276,10 @@ vec4 calculate_final_color(uint frag_count) {
 // Main function
 // ================================================================================
 void main() {
-    color = vec4(texCoord,0.0,1.0);
+    out_color = vec4(texCoord,0.0,1.0);
     int frag_count = build_local_fragments_list();
     sort_fragments_list(frag_count);
-    color = calculate_final_color(frag_count);
+    out_color = calculate_final_color(frag_count);
 }
 
 // ================================================================================

@@ -313,8 +313,7 @@ std::string ABuffer::openspaceSamplerCalls() {
 		auto found2 = _samplers.at(i).find_first_of("(",found1);
 		if(found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
-			if(i == 0)
-				samplercalls += "#ifdef SAMPLEFIRSTVOLUME\n";
+			samplercalls += "#ifndef SKIP_VOLUME_"+std::to_string(i)+"\n";
 			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(1 << i)+") {\n";
 			samplercalls += "    vec4 c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    if(c.a < 0.1) { \n";
@@ -325,7 +324,7 @@ std::string ABuffer::openspaceSamplerCalls() {
 			// samplercalls += "        volumeStepSize[" + std::to_string(i) + "] = volumeStepSizeOriginal[" + std::to_string(i) + "]; \n";
 			// samplercalls += "        //c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    } \n";
-			samplercalls += "    if(c.a > EPSILON)\n";
+			// samplercalls += "    if(c.a > EPSILON)\n";
 			samplercalls += "    blendStep(final_color, c, volumeStepSize[" + std::to_string(i) + "]);\n";
 			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
 			// samplercalls += "    float aaa = volume_length[i]/myMaxSteps;\n";
@@ -334,8 +333,7 @@ std::string ABuffer::openspaceSamplerCalls() {
 			// 				pos[v] += vec4(ray[v].xyz*vec3(aaa),aaa);
 			// samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
 			samplercalls += "}\n";
-			if(i == 0)
-				samplercalls += "#endif\n";
+			samplercalls += "#endif\n";
 		}
 
 		

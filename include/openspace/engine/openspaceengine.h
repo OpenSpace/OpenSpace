@@ -42,7 +42,7 @@
 #define  ABUFFER_SINGLE_LINKED    1
 #define  ABUFFER_FIXED            2
 #define  ABUFFER_DYNAMIC          3
-#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+#define  ABUFFER_IMPLEMENTATION   ABUFFER_FIXED
 
 namespace openspace {
 

@@ -107,6 +107,7 @@ void sort_fragments_list(uint frag_count) {
 #endif
 					start = false;
 				} else {
+					volumes_in_fragment[volume_count++] = ii;
 					vec3 dir = _col_(fragments[jj]).rgb - startColor;
 					volume_position[ii] = startColor;
 					volume_length[ii] = length(dir);
@@ -118,7 +119,7 @@ void sort_fragments_list(uint frag_count) {
 #elif ZTYPE == PSCDEPTH
 					volume_zlength[ii] = pscLength(_pos_(fragments[jj]), startPosition);
 #endif
-#ifdef JITTERING
+#ifdef USE_JITTERING
 					if(volumeStepSize[ii] < volume_length[ii]) {
 						// jittering
 						float x = gl_FragCoord.x;
