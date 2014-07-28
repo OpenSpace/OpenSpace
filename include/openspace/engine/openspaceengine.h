@@ -34,7 +34,7 @@
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
-#define FLARE_ONLY
+//#define FLARE_ONLY
 
 #include <openspace/flare/flare.h>
 

@@ -97,8 +97,11 @@ void OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dicti
             const std::string fullKey
                   = ghoul::filesystem::FileSystem::TokenOpeningBraces + key
                     + ghoul::filesystem::FileSystem::TokenClosingBraces;
-            LDEBUG(fullKey << ": " << p);
-            FileSys.registerPathToken(fullKey, p);
+            LDEBUG(fullKey << ": " << p);			
+			
+			bool override = (_basePathToken == fullKey);
+			
+            FileSys.registerPathToken(fullKey, p, override);
         }
     }
 }
@@ -114,6 +117,7 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
           = absolutePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
     if (last == std::string::npos)
         return false;
+
 
     std::string basePath = absolutePath.substr(0, last);
 
@@ -172,6 +176,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
         LFATAL("Could not find OpenSpace configuration file!");
         assert(false);
     }
+
+	LINFO(FileSys.absolutePath(configurationFilePath));
 
     // create objects
     _engine = new OpenSpaceEngine;

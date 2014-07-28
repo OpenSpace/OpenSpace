@@ -1,0 +1,986 @@
+KPL/PCK
+
+
+
+
+\begindata
+   CASSINI_PCK_VERSION     = ( '2004-MAR-05' )
+\begintext
+
+
+P_constants (PcK) SPICE kernel file
+
+
+Refer to the notes at the bottom of the file for help, contacts, version history,
+references, and Cassini-specific parameter descriptions. All radii and orientation
+values are from reference [1] unless otherwise noted.
+
+
+-------- SUN
+
+
+         Value for the Sun radii is from [2], page K7. BODY10_GM from [10].
+
+
+         \begindata 
+         BODY10_GM              = (   132712440017.9870         )
+         BODY10_RADII           = (   696000.     696000.      696000.     )
+         BODY10_POLE_RA         = (  286.13       0.          0. )
+         BODY10_POLE_DEC        = (   63.87       0.          0. )
+         BODY10_PM              = (   84.10     +14.18440     0. )
+         BODY10_LONG_AXIS       = (    0.                        )
+         \begintext
+
+
+-------- VENUS
+
+
+         BODY299_GM from [10].
+
+
+         \begindata
+         BODY2_GM            =  (         324858.5988264598  )
+         BODY299_GM          =  (         324858.5988264598  )   
+         BODY299_RADII            = (  6051.8       6051.8      6051.8 ) 
+         BODY299_POLE_RA          = (  272.76       0.          0. )
+         BODY299_POLE_DEC         = (  +67.16       0.          0. )
+         BODY299_PM               = (  160.20      -1.4813688   0. )
+         BODY299_LONG_AXIS        = (    0.                        )
+         \begintext
+
+
+-------- EARTH
+
+
+         BODY3_GM, BODY399_GM from [10]. Northern hemisphere projection of the 
+         Earth's magnetic dipole: coordinates are planetocentric, values are from [3].
+         
+         \begindata
+         BODY3_GM            =  (         403503.2334790870  )
+         BODY399_GM          =  (         398600.4328969392  )
+         BODY399_RADII     = (     6378.140    6378.140     6356.75   )
+         BODY399_POLE_RA        = (    0.      -0.641         0. )
+         BODY399_POLE_DEC       = (  +90.      -0.557         0. )
+         BODY399_PM             = (  190.147  +360.9856235     0. )
+         BODY399_LONG_AXIS      = (    0.                        )
+         BODY3_NUT_PREC_ANGLES  = ( 125.045         -1935.5364525000
+                                    250.089         -3871.0729050000
+                                    260.008        475263.3328725000
+                                    176.625        487269.6299850000
+                                    357.529         35999.0509575000
+                                    311.589        964468.4993100001
+                                    134.963        477198.8693250000
+                                    276.617         12006.3007650000
+                                     34.226         63863.5132425000
+                                     15.134         -5806.6093575000
+                                    119.743           131.8406400000
+                                    239.961          6003.1503825000
+                                     25.053        473327.7964200000 )
+         BODY399_MAG_NORTH_POLE_LON  =  ( -69.761 )
+         BODY399_MAG_NORTH_POLE_LAT  =  (  78.565 )
+         \begintext
+
+
+-------- JUPITER
+
+
+         BODY599_GM value = BODY5_GM - Sum(BODY5xx_gm) where xx = 01,16. BODY5_GM 
+         value from [10].
+            
+         \begindata
+         BODY5_GM            =  (       126712767.8577960      )
+         BODY599_GM          =  (       126686536.9637693      )
+         BODY599_RADII     = (    71492.      71492.       66854.     )
+         BODY599_POLE_RA        = (   268.05    -0.009      0.  )
+         BODY599_POLE_DEC       = (   +64.49    +0.003      0.  )
+         BODY599_PM             = (   284.95  +870.5366420  0.  )
+         BODY599_LONG_AXIS      = (     0.                      )
+         BODY5_NUT_PREC_ANGLES  = (   73.32   +91472.9
+                                      24.62   +45137.2
+                                     283.90    +4850.7
+                                     355.80    +1191.3
+                                     119.90     +262.1
+                                     229.80      +64.3
+                                     352.35    +2382.6
+                                     113.35    +6070.0  )
+         \begintext
+
+
+-------- SATURN
+
+
+         BODY6_GM value from [10]. BODY699_GM value = BODY6_GM - Sum(BODY6xx_gm)
+         where xx = 1,9. Nonzero gravitational harmonics listed below are J2, J4, J6, C22,
+         S22 from [7]. In the future, the navigation team may track and report these
+         values. The first seven angles given in NUT_PREC are the angles S1 
+         through S7 from the 2000 IAU report; the eighth and ninth angles are 2*S1 
+         and 2*S2, respectively.
+         
+         Ring models are from a variety of sources, but are documented in references
+         [11] and [12]. F Ring Data are from [8]. MIMI zone reflects the old flight rule 
+         for MIMI INCA, +/- 30000 km thickness inside of 8.74 Rs.
+         
+         The optical altitude is for PDT to determine at what altitude delta (km)
+         from the RADII that Saturn first starts to cast a discernible shadow.
+         
+         Eventually three different magnetospheric models will be provided. This 
+         section currently serves as a placeholder.
+
+         BODY699_RADII_RS keyword is provided since the value 60330 is a standard number
+         for most ring scientists.
+
+
+         BODY699_MAG_NORTH_POLE_LON = (   0.0 )
+         BODY699_MAG_NORTH_POLE_LAT = ( +90.0 )
+         BODY699_M1COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_G1COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_H1COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_M2COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_G2COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_H2COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_M3COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_G3COEF          = ( 0.0   0.0   0.0  0.0)
+         BODY699_H3COEF          = ( 0.0   0.0   0.0  0.0)
+
+
+         \begindata
+         BODY6_GM            =  (        37940629.764            )
+         BODY699_GM          =  (        37931267.73             )
+         BODY699_RADII     = (     60268.      60268.       54364.     )
+         BODY699_RADII_1BAR = (    60268.      60268.       54364.     )
+         BODY699_RADII_OPTICAL = ( 60430.      60430.       54508.     )
+         BODY699_RADII_RS = (    60330.      60330.       60330.     )
+         BODY699_POLE_RA        = (    40.589    -0.036      0.  )
+         BODY699_POLE_DEC       = (   +83.537    -0.004      0.  )
+         BODY699_PM             = (    38.90   +810.7939024  0.  )
+         BODY699_LONG_AXIS      = (     0.                       )
+         BODY699_JCOEF          = ( 0.0, 0.016298, 0.0, -0.000915, 0.0, 0.000103 )
+         BODY699_CCOEF          = ( 0.0, 0.0,      0.00000070 )
+         BODY699_SCOEF          = ( 0.0, 0.0,     -0.00000020 )
+         BODY6_NUT_PREC_ANGLES  = (  353.32   75706.7
+                                      28.72   75706.7
+                                     177.40  -36505.5
+                                     300.00   -7225.9
+                                     316.45     506.2
+                                     345.20   -1016.3
+                                      29.80     -52.1
+                                     706.64  151413.4
+                                      57.44  151413.4  )
+         BODY699_RING1_NAME     = 'A Ring'
+         BODY699_RING1          = (122170.0 136780.0 0.1 0.1 0.5)
+         BODY699_RING1_1_NAME   = 'Encke Gap'
+         BODY699_RING1_1        = (133405.0 133730.0 0.0 0.0 0.0)
+         BODY699_RING2_NAME     = 'Cassini Division'
+         BODY699_RING2          = (117580.0 122170.0 0.0 0.0 0.0)
+         BODY699_RING3_NAME     = 'B Ring'
+         BODY699_RING3          = (92000.0 117580.0 0.1 0.1 1.5)
+         BODY699_RING4_NAME     = 'C Ring'
+         BODY699_RING4          = (74510.0 92000.0 0.1 0.1 0.1)
+         BODY699_RING5_NAME     = 'D Ring'
+         BODY699_RING5          = (66970.0 74510.0 0.1 0.1 0.00001)
+         BODY699_RING6_NAME     = 'E ring'
+         BODY699_RING6_A        = (189870.0 256900.0 9000.0 9000.0 0.000003)
+         BODY699_RING6_B        = (256900.0 420000.0 9000.0 17000.0 0.000003)
+         BODY699_RING7_NAME     = 'F Ring'
+         BODY699_RING7          = (140180.0 140270.0 6.5 6.5 0.1)
+         BODY699_RING7_FCENTER  = (140223.7, 0.00254, 24.1, 2.7001, 0.0065, 16.1, -2.6876)
+         BODY699_RING8_NAME     = 'G Ring'
+         BODY699_RING8          = (165000.0 176000.0 280.0 280.0 0.000001)
+         BODY699_MIMI_DUST_ZONE = ( 0.0 527284.2 60000.0 60000.0 )
+         \begintext
+
+
+-------- URANUS
+
+
+         BODY7_GM value from [10].
+
+
+         \begindata
+         BODY7_GM          = (      5794549.007071874       )
+         BODY799_GM        = (      5793939.2128179700      )
+         BODY799_RADII     = (    25559.      25559.       24973.     )
+         BODY799_POLE_RA        = (  257.311     0.         0.  )
+         BODY799_POLE_DEC       = (  -15.175     0.         0.  )
+         BODY799_PM             = (  203.81   -501.1600928  0.  )
+         BODY799_LONG_AXIS      = (    0.                       )
+         \begintext
+
+
+-------- MOON
+
+
+         BODY301_GM from [10].
+         
+         \begindata
+         BODY301_GM          =  (           4902.800582147764 )
+         BODY301_RADII     = (     1737.4      1737.4       1737.4    )
+         BODY301_POLE_RA      = (  269.9949    0.0031        0.        )
+         BODY301_POLE_DEC     = (   66.5392    0.0130        0.        )
+         BODY301_PM           = (   38.3213   13.17635815   -1.4D-12   )
+         BODY301_LONG_AXIS    = (    0.                                )
+         BODY301_NUT_PREC_RA  = (  -3.8787   -0.1204  +0.0700  -0.0172
+                                    0.       +0.0072   0.       0.
+                                    0.       -0.0052   0.       0.
+                                   +0.0043                             )
+         BODY301_NUT_PREC_DEC = (   1.5419   0.0239   -0.0278  +0.0068
+                                    0.      -0.0029   +0.0009   0.
+                                    0.      +0.0008    0.       0.
+                                   -0.0009                             )
+         BODY301_NUT_PREC_PM  = (  3.5610   +0.1208   -0.0642  +0.0158
+                                  +0.0252   -0.0066   -0.0047  -0.0046
+                                  +0.0028   +0.0052   +0.0040  +0.0019
+                                  -0.0044                              )
+         \begintext
+
+
+-------- IO
+
+
+         BODY501_GM value from [5].
+
+
+         \begindata
+         BODY501_GM          =  (              5959.92     )
+         BODY501_RADII     = (     1829.4      1819.3       1815.7    )
+         BODY501_POLE_RA       = (  268.05          -0.009      0.  )
+         BODY501_POLE_DEC      = (  +64.50          +0.003      0.  )
+         BODY501_PM            = (  200.39        +203.4889538  0.  )
+         BODY501_LONG_AXIS     = (    0.                            )
+         BODY501_NUT_PREC_RA   = (    0.   0.    +0.094   +0.024   )
+         BODY501_NUT_PREC_DEC  = (    0.   0.    +0.040   +0.011   )
+         BODY501_NUT_PREC_PM   = (    0.   0.    -0.085   -0.022   )
+         \begintext
+
+
+-------- EUROPA
+
+
+         BODY502_GM value from [5].
+         
+         \begindata
+         BODY502_GM          =  (              3202.72       )
+         BODY502_RADII     = (     1564.13     1561.23      1560.93   )
+         BODY502_POLE_RA       = (  268.08          -0.009      0.   )
+         BODY502_POLE_DEC      = (  +64.51          +0.003      0.   )
+         BODY502_PM            = (   36.022         +101.3747235  0. )
+         BODY502_LONG_AXIS     = (    0.                             )
+         BODY502_NUT_PREC_RA   = ( 0. 0. 0. +1.086  +0.060  +0.015  +0.009 )
+         BODY502_NUT_PREC_DEC  = ( 0. 0. 0. +0.468  +0.026  +0.007  +0.002 )
+         BODY502_NUT_PREC_PM   = ( 0. 0. 0. -0.980  -0.054  -0.014  -0.008 )
+         \begintext
+
+
+-------- GANYMEDE
+
+
+         BODY503_GM value from [5].
+
+
+         \begindata
+         BODY503_GM          =  (              9887.83     )
+         BODY503_RADII     = (     2632.4      2632.29      2632.35   ) 
+         BODY503_POLE_RA       = (  268.20          -0.009      0.   )
+         BODY503_POLE_DEC      = (  +64.57          +0.003      0.   )
+         BODY503_PM            = (   44.04         +50.3176081  0.   )
+         BODY503_LONG_AXIS     = (    0.                             )
+         BODY503_NUT_PREC_RA   = ( 0. 0. 0.  -0.037  +0.431  +0.091   )
+         BODY503_NUT_PREC_DEC  = ( 0. 0. 0.  -0.016  +0.186  +0.039   )
+         BODY503_NUT_PREC_PM   = ( 0. 0. 0.  +0.033  -0.389  -0.082   )
+         \begintext
+
+
+-------- CALLISTO
+
+
+         BODY504_GM value from [5].
+         
+         \begindata
+         BODY504_GM          =  (              7179.29     )
+         BODY504_RADII     = (     2409.4      2409.2       2409.3    )
+         BODY504_POLE_RA       = (   268.72   -0.009      0.  )
+         BODY504_POLE_DEC      = (   +64.83   +0.003      0.  )
+         BODY504_PM            = (   259.51  +21.5710715  0.  )
+         BODY504_LONG_AXIS     = (     0.                     )
+         BODY504_NUT_PREC_RA   = ( 0. 0. 0. 0. -0.068 +0.590  0. +0.010 )
+         BODY504_NUT_PREC_DEC  = ( 0. 0. 0. 0. -0.029 +0.254  0. -0.004 )
+         BODY504_NUT_PREC_PM   = ( 0. 0. 0. 0. +0.061 -0.533  0. -0.009 )
+         \begintext
+
+
+-------- HIMALIA
+
+
+         BODY506_GM values from [7].
+         
+         \begindata
+         BODY506_GM       = (          0.45         )
+         BODY506_RADII    = (  85      85      85   )
+         BODY506_POLE_RA       = (   268.72   -0.009      0.  )
+         BODY506_POLE_DEC      = (   +64.83   +0.003      0.  )
+         BODY506_PM            = (   259.51  +21.5710715  0.  )
+         BODY506_LONG_AXIS     = (     0.                     )
+         \begintext
+
+
+-------- MIMAS
+
+
+         BODY601_GM from [6].
+         
+         \begindata
+         BODY601_GM          =  (               2.5    )
+         BODY601_RADII     = (      209.1       196.2        191.4    ) 
+         BODY601_POLE_RA       = (    40.66    -0.036      0.  )
+         BODY601_POLE_DEC      = (   +83.52    -0.004      0.  )
+         BODY601_PM            = (   337.46  +381.9945550  0.  )
+         BODY601_LONG_AXIS     = (     0.                      )
+         BODY601_NUT_PREC_RA   = ( 0. 0. +13.56  0.    0.   0. 0. 0. 0. )
+         BODY601_NUT_PREC_DEC  = ( 0. 0.  -1.53  0.    0.   0. 0. 0. 0. )
+         BODY601_NUT_PREC_PM   = ( 0. 0. -13.48  0. -44.85  0. 0. 0. 0. )
+         \begintext
+
+
+-------- ENCELADUS
+
+
+         BODY602_GM from [6].
+
+
+         \begindata
+         BODY602_GM          =  (               4.9     )
+         BODY602_RADII     = (      256.3       247.3        244.6    )
+         BODY602_POLE_RA       = (   40.66    -0.036      0.  )
+         BODY602_POLE_DEC      = (  +83.52    -0.004      0.  )
+         BODY602_PM            = (    2.82  +262.7318996  0.  )
+         BODY602_LONG_AXIS     = (    0.                      )
+         \begintext
+
+
+-------- TETHYS
+
+
+         BODY603_GM from [6].
+
+
+         \begindata
+         BODY603_GM          =  (              41.808     )
+         BODY603_RADII     = (      535.6       528.2        525.8    )
+         BODY603_POLE_RA       = (    40.66    -0.036      0.  )
+         BODY603_POLE_DEC      = (   +83.52    -0.004      0.  )
+         BODY603_PM            = (    10.45  +190.6979085  0.  )
+         BODY603_LONG_AXIS     = (     0.                      )
+         BODY603_NUT_PREC_RA   = ( 0. 0. 0.  +9.66   0.    0.  0.  0.  0. )
+         BODY603_NUT_PREC_DEC  = ( 0. 0. 0.  -1.09   0.    0.  0.  0.  0. )
+         BODY603_NUT_PREC_PM   = ( 0. 0. 0.  -9.60  +2.23  0.  0.  0.  0. )
+         \begintext
+
+
+-------- DIONE
+
+
+         BODY604_GM from [6].
+
+
+         \begindata
+         BODY604_GM          =  (              73.156     )
+         BODY604_RADII     = (      560.        560.         560.     )
+         BODY604_POLE_RA       = (    40.66    -0.036      0.  )
+         BODY604_POLE_DEC      = (   +83.52    -0.004      0.  )
+         BODY604_PM            = (   357.00  +131.5349316  0.  )
+         BODY604_LONG_AXIS     = (     0.                      )
+         \begintext
+
+
+-------- RHEA
+
+
+         BODY605_GM from [6].
+
+
+         \begindata
+         BODY605_GM          =  (             154.000      )
+         BODY605_RADII     = (      764.        764.         764.     )
+         BODY605_POLE_RA       = (   40.38    -0.036      0.   )
+         BODY605_POLE_DEC      = (  +83.55    -0.004      0.   )
+         BODY605_PM            = (  235.16   +79.6900478  0.   )
+         BODY605_LONG_AXIS     = (    0.                       )
+         BODY605_NUT_PREC_RA   = ( 0. 0. 0. 0. 0.  +3.10  0. 0. 0. )
+         BODY605_NUT_PREC_DEC  = ( 0. 0. 0. 0. 0.  -0.35  0. 0. 0. )
+         BODY605_NUT_PREC_PM   = ( 0. 0. 0. 0. 0.  -3.08  0. 0. 0. )
+         \begintext
+
+
+-------- TITAN
+
+
+         BODY606_GM from [6].
+
+
+         \begindata
+         BODY606_GM          =  (            8978.2       )
+         BODY606_RADII     = (     2575.       2575.        2575.     )
+         BODY606_POLE_RA       = (    36.41   -0.036      0.   )
+         BODY606_POLE_DEC      = (   +83.94   -0.004      0.   )
+         BODY606_PM            = (   189.64  +22.5769768  0.   )
+         BODY606_LONG_AXIS     = (     0.                      )
+         BODY606_NUT_PREC_RA   = ( 0. 0. 0. 0. 0. 0. +2.66  0. 0. )
+         BODY606_NUT_PREC_DEC  = ( 0. 0. 0. 0. 0. 0. -0.30  0. 0. )
+         BODY606_NUT_PREC_PM   = ( 0. 0. 0. 0. 0. 0. -2.64  0. 0. )
+         BODY606_ATMOSPHERE = ( 175.0 10.0 
+                                0.000006350 11400.0 76.0 
+                                0.000000513 8030.0 -429.0 
+                                0.000073500 15000.0 44.0 )
+         \begintext
+
+
+-------- HYPERION
+
+
+         BODY607_GM from [6].
+
+
+         While Hyperion's spin state is chaotic, Voyager and ground-based
+         observations suggest some states are common (Thomas et al 1995, 
+         Icarus 117, 128-148).  The  spin pole orientation is from the
+         Voyager observations; both the spin pole orientation and spin rate
+         will probably differ during Cassini's mission. Hyperion radii and 
+         orientation from Peter Thomas @ Cornell
+
+
+         \begindata
+         BODY607_GM          =  (               0.99    )
+         BODY607_RADII     = (      164.        130.         107.    )
+         BODY607_POLE_RA = ( 226. 0 0 )
+         BODY607_POLE_DEC = ( 35. 0 0 )
+         BODY607_PM = ( 20.02 72.0 0 )
+         BODY607_LONG_AXIS     = (     0.                    )
+         \begintext
+
+
+-------- IAPETUS
+
+
+         BODY608_GM from [6].
+
+
+         \begindata
+         BODY608_GM          =  (             106.0      )
+         BODY608_RADII     = (      718.        718.         718.     )
+         BODY608_POLE_RA       = (   318.16  -3.949      0.  )
+         BODY608_POLE_DEC      = (   +75.03  -1.143      0.  )
+         BODY608_PM            = (   350.20  +4.5379572  0.  )
+         BODY608_LONG_AXIS     = (     0.                    )
+         \begintext
+
+
+-------- PHOEBE
+
+
+         BODY609_GM from [6].
+         BODY609_PM from [13].
+
+
+         \begindata
+         BODY609_GM          =  (               0.48 )
+         BODY609_RADII     = (      115.        110.         105.     )
+         BODY609_POLE_RA       = (  355.00      0.         0.  )
+         BODY609_POLE_DEC      = (  +68.70      0.         0.  )
+         BODY609_PM            = (  178.58   +931.639  0.  )
+         BODY609_LONG_AXIS     = (    0.                       )
+         \begintext
+
+
+-------- JANUS
+
+
+         BODY610_GM is from [7].
+
+
+         \begindata
+         BODY610_GM          =  (              0.1284  )
+         BODY610_RADII     = (       97.         95.          77.     )
+         BODY610_POLE_RA       = (   40.58     -0.036      0.  )
+         BODY610_POLE_DEC      = (   83.52     -0.004      0.  )
+         BODY610_PM            = (   58.83   +518.2359876   0. )
+         BODY610_LONG_AXIS     = (    0.                       )
+         BODY610_NUT_PREC_RA   = ( 0. -1.623  0. 0. 0. 0. 0. 0. +0.023 )
+         BODY610_NUT_PREC_DEC  = ( 0. -0.183  0. 0. 0. 0. 0. 0. +0.001 )
+         BODY610_NUT_PREC_PM   = ( 0. +1.613  0. 0. 0. 0. 0. 0. -0.023 )
+         \begintext
+
+
+-------- EPIMETHEUS
+
+
+         BODY611_GM is from [7].
+
+
+         \begindata
+         BODY611_GM          =  (              .0357  )
+         BODY611_RADII     = (       69.         55.          55.     )
+         BODY611_POLE_RA       = (   40.58     -0.036      0.  )
+         BODY611_POLE_DEC      = (   83.52     -0.004      0.  )
+         BODY611_PM            = (  293.87   +518.4907239  0.  )
+         BODY611_LONG_AXIS     = (    0.                       )
+         BODY611_NUT_PREC_RA   = ( -3.153  0. 0. 0. 0. 0. 0. +0.086  0. )
+         BODY611_NUT_PREC_DEC  = ( -0.356  0. 0. 0. 0. 0. 0. +0.005  0. )
+         BODY611_NUT_PREC_PM   = ( +3.133  0. 0. 0. 0. 0. 0. -0.086  0. )
+         \begintext
+
+
+-------- HELENE
+
+
+         BODY612_GM is from [7].
+
+
+         Only the subplanetary equatorial radius and polar radius for Helene 
+         (body 612) are listed in the 2000 IAU report, i.e.:
+
+
+         BODY612_RADII     = (       17.5        ---        0.7     )
+
+
+         The mean radius is 16km; we use the mean radius for each axis when all 
+         three are not available.
+
+
+         \begindata
+         BODY612_GM          =  (              .0017  )
+         BODY612_RADII     = (       16          16           16      )
+         BODY612_POLE_RA       = (   40.85     -0.036      0.  )
+         BODY612_POLE_DEC      = (   83.34     -0.004      0.  )
+         BODY612_PM            = (  245.12   +131.6174056  0.  )
+         BODY612_LONG_AXIS     = (    0.                       )
+         \begintext
+
+
+-------- TELESTO
+
+
+         BODY613_GM is from [7].
+
+
+         \begindata
+         BODY613_GM          =  (               .00048 )
+         BODY613_RADII     = (       15          12.5          7.5    )
+         BODY613_POLE_RA       = (    50.51    -0.036      0.  )
+         BODY613_POLE_DEC      = (    84.06    -0.004      0.  )
+         BODY613_PM            = (    56.88  +190.6979332  0.  )
+         BODY613_LONG_AXIS     = (     0.                      )
+         \begintext
+         
+-------- CALYPSO
+
+
+         BODY614_GM is from [7].
+
+
+         \begindata
+         BODY614_GM          =  (               0.00024 )
+         BODY614_RADII     = (       15           8            8      )
+         BODY614_POLE_RA       = (   36.41     -0.036       0.  )
+         BODY614_POLE_DEC      = (   85.04     -0.004       0.  )
+         BODY614_PM            = (  153.51   +190.6742373   0.  )
+         BODY614_LONG_AXIS     = (    0.                        )
+         \begintext
+
+
+-------- ATLAS
+
+
+         BODY615_GM is from [7].
+
+
+         \begindata
+         BODY615_GM          =  (              0.00072  )
+         BODY615_RADII     = (       18.5        17.2         13.5    )
+         BODY615_POLE_RA       = (    40.58    -0.036      0.  )
+         BODY615_POLE_DEC      = (    83.53    -0.004      0.  )
+         BODY615_PM            = (   137.88  +598.3060000  0.  )
+         BODY615_LONG_AXIS     = (     0.                      )
+         \begintext
+
+
+-------- PROMETHEUS
+
+
+         BODY616_GM is from [7].
+
+
+         \begindata
+         BODY616_GM          =  (               0.022 )
+         BODY616_RADII     = (       74          50           34      )
+         BODY616_POLE_RA       = (    40.58    -0.036      0.  )
+         BODY616_POLE_DEC      = (    83.53    -0.004      0.  )
+         BODY616_PM            = (   296.14  +587.2890000  0.  )
+         BODY616_LONG_AXIS     = (     0.                      )
+         \begintext
+
+
+-------- PANDORA
+
+
+         BODY617_GM is from [7].
+
+
+         \begindata
+         BODY617_GM          =  (              0.013  )
+         BODY617_RADII     = (       55          44           31      )
+         BODY617_POLE_RA       = (    40.58    -0.036      0.  )
+         BODY617_POLE_DEC      = (    83.53    -0.004      0.  )
+         BODY617_PM            = (   162.92  +572.7891000  0.  )
+         BODY617_LONG_AXIS     = (     0.                      )
+         \begintext
+
+
+-------- PAN
+
+
+         BODY618_GM is from [7]. For Pan, only a mean radius is given in the 2000 IAU report.
+
+
+         \begindata
+         BODY618_GM          =  (              0.00018  )
+         BODY618_RADII     = (       10          10           10      )
+         BODY618_POLE_RA       = (   40.6     -0.036       0.  )
+         BODY618_POLE_DEC      = (   83.5     -0.004       0.  )
+         BODY618_PM            = (   48.8   +626.0440000   0.  )
+         BODY618_LONG_AXIS     = (    0.                       )
+         \begintext
+
+
+-------- CONSTANTS AND NOTES FOR PDT USERS
+
+
+         The astronomical unit AU, given in kilometers.
+
+
+         \begindata
+         AU                  =  (      149597870.7           )
+         \begintext
+         
+         
+
+         Saturn reference radius (Rs) is the base for measuring body 
+         distances and ring radial distances in mulitples of saturn radius.
+
+         
+         \begindata
+         RS                  = (       60330.0       )
+         \begintext
+
+
+         Note that GM values >= 1.0 are packaged as is into 7CONIC_VEC 
+         commands for AACS to propagate the body's ephemeris. 
+         For GM values < 1.0, the value in the G_MASS parameter 
+         of the 7CONIC_VEC command is set to 1.0.  One is the minimum 
+         value for the G_MASS parameter. The resetting of the G_MASS 
+         parameter to the minimum acceptable where the actual 
+         GM is < 1.0 is acceptable since CAS will not pass close enough 
+         to any of the affected bodies for the gravitational mass 
+         to have an effect.
+         
+-------- OBLATE SPHEROIDS VERSUS TRIAXIAL ELLIPSOIDS
+
+
+         Some Cassini software cannot model triaxial ellipsoids, where the
+         RADII are all different. Instead, they model bodies as oblate
+         spheroids, where the equatorial RADII values (the first two) must
+         be identical. In cases here where the equatorial radii are not
+         identical, the average of the two should be used when constructing
+         an oblate spheroid. The polar radius (the third RADII) can be used
+         as given in both cases.
+
+
+-------- CONSTANTS AND NOTES FOR CASPER USERS
+
+
+         \begindata
+         BODY601_GM/PRIMARY  =  (              6.59087D-08             )
+         BODY602_GM/PRIMARY  =  (              1.29181D-07             )
+         BODY603_GM/PRIMARY  =  (              1.1022D-06              )
+         BODY604_GM/PRIMARY  =  (              1.92865D-06             )
+         BODY605_GM/PRIMARY  =  (              4.05998D-06             )
+         BODY606_GM/PRIMARY  =  (              2.36697D-04             )
+         BODY607_GM/PRIMARY  =  (              2.60998D-08             )
+         BODY608_GM/PRIMARY  =  (              2.79453D-06             )
+         BODY609_GM/PRIMARY  =  (              1.26545D-08             )
+         BODY610_GM/PRIMARY  =  (              3.38507D-09             )
+         BODY611_GM/PRIMARY  =  (              9.41176D-10             )
+         BODY612_GM/PRIMARY  =  (              4.48179D-11             )
+         BODY613_GM/PRIMARY  =  (              1.26545D-11            )
+         BODY614_GM/PRIMARY  =  (              6.32723D-12            )
+         BODY615_GM/PRIMARY  =  (              1.89817D-11             )
+         BODY616_GM/PRIMARY  =  (              5.79996D-10             )
+         BODY617_GM/PRIMARY  =  (              3.42725D-10             )
+         BODY618_GM/PRIMARY  =  (              4.74543D-12             )
+         \begintext
+         
+-------- URLS AND CONTACTS
+
+
+Description of PCK format and contents can be found in NAIF's PCK "required
+reading" document, at:
+
+ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/ascii/individual_docs/pck.req
+
+
+NAIF tutorial on PCK formatting and use at:
+
+ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/office/individual_docs/16_pck.ppt
+ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/office/packages/
+SPICE_tutorials_Oct-12-2003.zip
+
+
+The Cassini PCK & ephemeris files can be found on the DOM, and at:
+
+ftp://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/
+
+
+Questions regarding this file can be directed to:
+
+Diane Conner (818)354-8586 Diane.Conner@jpl.nasa.gov
+David Seal   (818)354-2707 David.Seal@jpl.nasa.gov
+
+
+-------- VERSION HISTORY
+
+
+Only the noted versions were officially published; the others were
+created and circulated for internal review only.
+
+2004 Mar 05 (published)  
+
+  Updated descriptive text preceeding RS keyword.
+  Updated contact information and verified URLs.
+
+  Updates per ECR 103313:
+      Change 1:  Update the values for Pheobe Prime Meridian
+                 TO:
+                 BODY609_PM            = (  178.58   +931.639  0.  )
+
+                 Reference: Bauer, Simonelli, Buratti, IAU Circular 8279, 
+                            1/30/2004; re-reduced by Owen 2/5/2004
+
+      Change 2:  Saturn Reference Radius
+           ADD:
+           BODY699_RADII_RS = (    60330.      60330.       60330.     )
+           60330 is such a standard number for almost all ring scientists 
+                 and is needed in the PCK.  
+                 Date: Tue, 25 Nov 2003 16:22:41 -0700
+                 From: Carolyn Porco <carolyn@ciclops.org>
+
+2002 Oct 01 (published)
+  Changed BODY699_RADII_OPTICAL to be consistent with recommendation of Phil
+  Nicholson dated 24 Sep. Added notes in the version history as to which
+  versions were published to the DOM, as opposed to the versions that were
+  intermediate for review.
+  
+2002 Aug 28
+  Expanded some version histories. Added radii for alternate models of Saturn.
+  Added notes on oblate spheroids vs. triaxial ellipsoids. Fixed the reference
+  for BODY10_GM. Provided more description of URL links.
+
+
+2002 Aug 12
+   Added notes on gravitational harmonics. Added link to NAIF required reading
+   document. Removed unused references.
+
+
+2002 Jun 21
+   Made cosmetic changes to organization. Added begindata flag to Venus area
+   so that Venus data would not be lost. Copied Venus GM to Venus system GM
+   (since Venus has no satellites). Removed entries for small Jovian
+   satellites except for Himalia (no small satellites were observed by Cassini
+   except Himalia). Added dummy orientation values for Himalia (since 
+   IAU_HIMALIA is a possible coordinate frame). Removed last two NUT_PREC entries 
+   for Jupiter (big 4 satellites + Himalia only require 8 angles, not 10). Fixed 
+   the BODY3_NUT_PREC angles to the full set that is required for Earth and Moon 
+   orientation. Corrected errors in the orientation for Callisto and Jupiter. 
+   Removed BODY7_NUT_PREC angles since no Uranian satellites are present. 
+   Adjusted Jovian satellite radii to match IAU 2000 report. Added LONG_AXIS 
+   statement for Hyperion.
+   By: David Seal
+
+
+2002 Jun 20
+   Added BODY299_GM and BODY299_RADII.
+   By: John Aiello
+
+
+2002 Jun 17
+   Changes to reflect values listed in IAU/IAG/COSPAR 2000 report:
+   BODY399_PM, BODY502_PM, BODY504_PM, BODY505_RADII, BODY514_RADII,
+   BODY515_RADII, BODY516_RADII,  BODY607_RADII. 
+   By: John Aiello
+
+
+2002 Jun 10  
+   Updated BODY5_GM, BODY599_GM, and BODY301_GM per NAV OD solution SM828D.
+   By: John Aiello
+
+
+2002 Jun 06
+   Reference added for Saturn gravitational field.
+   By: John Aiello
+
+
+2002 May 02
+   Corrected values for: BODY3_NUT_PREC_ANGLES, BODY599_PM (rotation rate was missing 
+   last four digits), BODY610_PM (rotation rate was missing last digit). These values
+   were changed to be consistent with the IAU 2000 report.
+   By: John Aiello
+   2 May 2002
+
+
+2001 Dec 14 (published)
+   Corrected typo in BODY699_RING1
+   By: John Aiello
+   14 Dec 2001
+
+
+2001 Nov 20 (published)
+   Saturn ring model (updated version per series of telecons between PDT software 
+   architects and Mark Showalter, Jeff Cuzzi, Carolyn Porco, Linda Spilker, John Aiello)
+   By: John Aiello
+   20 Nov 2001
+
+
+2001 Oct 26 (published)
+   First release. Contents as follows.
+   GM values for Sun, Earth, Moon, Jupiter, Saturn, Mimas, Enceladus,
+   Tethys, Dione, Rhea, Titan, Hyperion, Iapetus, Phoebe  
+   Saturn ring model
+   Saturn magnetosphere model
+   Titan atmosphere model
+   Dummy values for Himalia froim Kevin Yau (Cassini PDT) 2000 May 11
+   Based on pck0007.tpc by Nat Bachman (NAIF) 2000 April 24
+   By:  Dave Seal, John Aiello (Cassini Mission Planning)
+
+
+  
+-------- FORMATTING FOR SPECIAL PARAMETERS
+
+
+BODYNNN_GM
+   GM in km^3/s^2
+   
+BODYNNN_RADII_OPTICAL
+BODYNNN_RADII_1BAR
+BOYDNNN_RADII_RS
+   Alternate radii that are required for modeling purposes. These radii are
+   not necessarily identical to the IAU standard, and may have to be updated
+   during tour at a frequency not compatible with the IAU standard update
+   process. (For this reason, these were added so that Cassini would not be
+   required to use the existing RADII for not-IAU-approved values.) The OPTICAL 
+   radii are typically used to determine the point at which Saturn's atmosphere 
+   begins to attenuate light rays (e.g. for shadowing). The 1 bar radii may be 
+   used as a markpoint for some radio or atmospheric observations.  The RS radii
+   may be used by ring scientists that model Saturn as a sphere.  
+
+
+BODYNNN_ATMOSPHERE
+   Exponential atmospheric model in the form of one set of 
+        two values To, f, followed by any number of sets of 
+        three numbers Do, K, Zo. The atmospheric density in g/cm3 
+        can be calculated as follows: 
+        Z = height above surface (km) 
+        R = radius of body (km) 
+        T = thermospheric temperature (K) = To + f * sigma, where 
+        sigma is the number of standard deviations (conservatism) 
+        desired. If f > 0, positive sigma will result in a hotter 
+        thermosphere and higher density. 
+        H = scale height of atmosphere (km) = T * ( R + Z ) / K 
+        (K is a curve-fit parameter with units of degrees K) 
+        D = density (g/cm3) = Do * exp( - ( Z - Zo ) / H ) 
+        If there are more than one set of Do, K, Zo, sum each 
+        value to get the total atmospheric density.
+
+
+BODYNNN_RING*
+   The ring identification scheme is numeric with keyword-associated names.
+   The defnition of a ring is in a set of keywords. The BODYNNN_RING...
+   keyword set includes 
+
+
+   1) a required NAME keyword (BODYNNN_RING<n>_NAME), 
+   2) either a complete ring keyword (BODYNNN_RING<n>) or a set of segmented
+      ring keywords (BODYNNN_RING<n>_<X>), and 
+   3) optional embedded ringlet/gap keywords (BODYNNN_RING<n>_<n>) with
+      required names (BODYNNN_RING<n>_<n>_NAME). 
+
+
+   The total number of rings (BODYNNN_RING<n>) that can be defined is from
+   01 to 99. A complete ring can be segmented (BODYNNN_RING<n>_<X>) in upto
+   26 (A-Z) sub-segments. Embedded ringlets/gaps (BODYNNN_RING<n>_<n>) can
+   be defined from 1 to 99. Ring geometry is defined in the form of one set
+   of R1, R2, Z1, Z2, OD where R1 and R2 are inner and outer radii
+   respectively of the ring (in kilometers), Z1 and Z2 are the vertical
+   heights of the ring at R1 and R2 respectively (also in km, equal to 
+   one-half of the total thickness of the ring), and OD is the average optical
+   depth of the ring sub-segment/gap across R1 to R2. A complex ring
+   thickness model is pieced together by sub-segmenting Rs, Zs, & ODs; each
+   sub-segment is uniquely numbered.
+
+
+BODYNNN_*COEF
+   Where * = J, C, or S. These coefficients are the normalized gravity field
+   coefficients. J's are 1 to N, C's and S's have two indexes. Index 1 goes from
+   1 to N, and Index 2 goes from 1 to (Index 1). E.g. C11, C21, C22, C31, C32,
+   C33, C41, etc.
+
+
+BODY699_RING7_FCENTER  
+   Elliptical orbital characteristics for the F Ring: The array items (and
+   units) are (in order):
+
+
+   SEMIMAJOR_AXIS (km)
+   ECCENTRICITY (degrees)
+   LONGITUDE_PERICENTER_EPOCH (degrees)
+   PERICENTER_PRECESSION_RATE (degrees)
+   INCLINATION (degrees)
+   LONGITUDE_ASCENDING_NODE_EPOCH (degrees)
+   NODAL_REGRESSION_RATE (degrees).
+
+
+   The epoch for the elements is J2000 (noon UTC on 1/1/2000) at the ring
+   (i.e., with no light-time correction). Longitudes are measured in the
+   prograde direction from the ascending node of Saturn's equatorial plane
+   on Earth's J2000 equator.
+
+
+-------- REFERENCES
+
+   1.   "Report of the IAU/IAG/COSPAR Working Group on
+         Cartographic Coordinates and Rotational Elements of
+         the Planets and Satellites: 2000."
+    2.   "The Astronomical Almanac," 2002.
+    3.   Russell, Christopher T., "Geophysical Coordinate Transformations," 
+         Cosmic Electrodynamics 2 (1971) 184-186.
+    4.   Showalter, Mark R. "Properties  of Saturn's E and G Rings from the
+         1995 Ring Plane Crossings", presented at Ames ring hazard
+         workshop, 25 January 1996.
+    5.   Jacobson, R. A., JPL IOM 312.F-00-102, 29 Jun 2000, "Jup171" 
+         ephemeris file
+    6.   Jacobson, R.A., JPL IOM 312.F-99-084, 13 Oct 1999, "Sat105" 
+         ephemeris file
+    7.   Jacobson, R., private communication;  data will be presented in 
+         forthcoming web site listing Satellite Physical Properties 
+    8.   Bosh, A. S., et. al., (2002) Icarus 157, 57.
+    9.   Campbell, J.K. and Anderson, J.D. (1989) Astron J. 97, 1485.
+   10.   Cassini NAV OD solution SM828D.
+   11.   Cassini Mission Plan, JPL D-5564, Cassini document 699-100, 
+         revision N, May 2002.
+   12.   Cassini Dust Protection Plan, JPL D-24251, Cassini document 699-525,
+         revision A, October 2002. 
+   13.   Bauer, Simonelli, Buratti, IAU Circular 8279, 1/30/2004; 
+         re-reduced by Owen 2/5/2004
+ 
+   Most values are from the "IAU/IAG/COSPAR Working Group on
+   Cartographic Coordinates and Rotational Elements of the
+   Planets and Satellites: 2000." All exceptions are commented
+   where they occur in this file.
+
