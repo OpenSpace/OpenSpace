@@ -42,7 +42,9 @@
 #define  ABUFFER_SINGLE_LINKED    1
 #define  ABUFFER_FIXED            2
 #define  ABUFFER_DYNAMIC          3
-#define  ABUFFER_IMPLEMENTATION   ABUFFER_FIXED
+#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+
+// #define OPENSPACE_VIDEO_EXPORT
 
 namespace openspace {
 
@@ -90,6 +92,9 @@ private:
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
+#ifdef OPENSPACE_VIDEO_EXPORT
+    bool _doVideoExport;
+#endif
 #ifdef FLARE_ONLY
     Flare* _flare;
 #endif

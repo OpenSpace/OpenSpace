@@ -186,7 +186,8 @@ void RenderEngine::render()
     _sceneGraph->render(_mainCamera);
     _abuffer->postRender();
     _abuffer->resolve();
-/*
+
+#ifndef OPENSPACE_VIDEO_EXPORT
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {
 // Apple usually has retina screens
@@ -222,7 +223,8 @@ void RenderEngine::render()
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
     }
-    */
+#endif
+    
 }
 
 SceneGraph* RenderEngine::sceneGraph()

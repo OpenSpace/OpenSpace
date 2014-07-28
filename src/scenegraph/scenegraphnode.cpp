@@ -225,6 +225,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     _boundingSphereVisible = false;
     _renderableVisible = false;
 
+#ifndef OPENSPACE_VIDEO_EXPORT
     // check if camera is outside the node boundingsphere
     if (toCamera.length() > _boundingSphere) {
         // check if the boudningsphere is visible before avaluating children
@@ -235,6 +236,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
             return;
         }
     }
+#endif
 
     // inside boudningsphere or parts of the sphere is visible, individual
     // children needs to be evaluated

@@ -224,6 +224,8 @@ bool OpenSpaceEngine::initialize()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
     glfwSwapBuffers(win);
+    int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
+    LDEBUG("samples: " << samples);
 
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
@@ -297,6 +299,10 @@ bool OpenSpaceEngine::initialize()
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
+
+#ifdef OPENSPACE_VIDEO_EXPORT
+    LINFO("OpenSpace compiled with video export; press Print Screen to start/stop recording");
+#endif
 
     return true;
 }
@@ -378,6 +384,17 @@ void OpenSpaceEngine::postDraw()
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
     }
+#ifdef OPENSPACE_VIDEO_EXPORT
+    float speed = 0.01;
+    glm::vec3 euler(0.0, speed, 0.0);
+    glm::quat rot = glm::quat(euler);
+    glm::vec3 euler2(0.0, -speed, 0.0);
+    glm::quat rot2 = glm::quat(euler2);
+    _interactionHandler->orbit(rot);
+    _interactionHandler->rotate(rot2);
+    if(_doVideoExport)
+        sgct::Engine::instance()->takeScreenshot();
+#endif
 #ifdef FLARE_ONLY
     _flare->postDraw();
 #endif
@@ -388,6 +405,12 @@ void OpenSpaceEngine::keyboardCallback(int key, int action)
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->keyboardCallback(key, action);
     }
+#ifdef OPENSPACE_VIDEO_EXPORT
+    // LDEBUG("key: " << key);
+    // LDEBUG("SGCT_KEY_PRINT_SCREEN: " << SGCT_KEY_PRINT_SCREEN);
+    if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
+        _doVideoExport = !_doVideoExport;
+#endif
 #ifdef FLARE_ONLY
     _flare->keyboard(key, action);
 #endif
