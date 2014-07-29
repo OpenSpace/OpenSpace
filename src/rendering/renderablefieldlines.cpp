@@ -217,9 +217,9 @@ void RenderableFieldlines::render(const Camera* camera,	const psc& thisPosition)
 	glBindVertexArray(_VAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
 
-	//	------ SEEDPOINTS -----------------
-	glBindVertexArray(_seedpointVAO);
-	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
+//	//	------ SEEDPOINTS -----------------
+//	glBindVertexArray(_seedpointVAO);
+//	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
 	glBindVertexArray(0);
 
 	// Deactivate shader
