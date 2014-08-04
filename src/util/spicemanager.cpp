@@ -32,8 +32,6 @@
 #include "openspace/util/spicemanager.h"
 #include "ghoul/filesystem/filesystem.h"
 
-#define BUFSIZE 64
-
 namespace {
 	const std::string _loggerCat = "SpiceManager";
 }
@@ -63,8 +61,7 @@ SpiceManager& SpiceManager::ref() {
 }
 
 int SpiceManager::loadKernel(const std::string& fullPath, const std::string& shorthand){
-
-	unsigned int kernelId = ++kernelCount;
+	unsigned int kernelId = ++_kernelCount;
 	assert(kernelId > 0);
 
 	std::string currentDirectory = FileSys.currentDirectory();
@@ -77,8 +74,8 @@ int SpiceManager::loadKernel(const std::string& fullPath, const std::string& sho
 	FileSys.setCurrentDirectory(currentDirectory);
 
 	spiceKernel current = { fullPath, 
-		                   shorthand, 
-						   kernelId };
+		                    shorthand, 
+						    kernelId  };
 
 	_loadedKernels.push_back(current);
 
@@ -118,8 +115,8 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 	                              const std::string& kernelPoolValue,
 	                              double& value) const{
 	int n;
-	SpiceInt code;
-	SpiceBoolean found;
+	int code;
+	int found;
 
 	bodn2c_c(bodyname.c_str(), &code, &found);
 	if (!found) return false;
@@ -133,9 +130,9 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 		                          const std::string& kernelPoolValueName,
 	                              glm::dvec2& value) const{
 	int n;
-	SpiceDouble val[2];
-	SpiceInt code;
-	SpiceBoolean found;
+	double val[2];
+	int code;
+	int found;
 
 	bodn2c_c(bodyname.c_str(), &code, &found);
 	if (!found) return false;
@@ -153,17 +150,15 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 	                              const std::string& kernelPoolValueName,
 	                              glm::dvec3& value) const{
 	int n;
-	SpiceDouble val[3];
-	SpiceInt code;
-	SpiceBoolean found;
+	double val[3];
+	int code;
+	int found;
 
 	bodn2c_c(bodyname.c_str(), &code, &found);
 	if (!found) return false;
 	bodvrd_c(bodyname.c_str(), kernelPoolValueName.c_str(), 3, &n, val);
 
-	value[0] = val[0];
-	value[1] = val[1];
-	value[2] = val[2];
+	memcpy(&value, val, sizeof(double)* 3);
 
 	return true;
 }
@@ -173,9 +168,9 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 	                              const std::string& kernelPoolValueName,
 	                              glm::dvec4& value) const{
 	int n;
-	SpiceDouble val[4];
-	SpiceInt code;
-	SpiceBoolean found;
+	double val[4];
+	int code;
+	int found;
 
 	bodn2c_c(bodyname.c_str(), &code, &found);
 	if (!found) return false;
@@ -192,12 +187,13 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 // ND
 bool SpiceManager::getValueFromID(const std::string& bodyname,
 	                              const std::string& kernelPoolValueName,
-							      std::vector<double>& values, unsigned int num) const{
-	SpiceInt n;
-	SpiceDouble *val;
-	val = (SpiceDouble*)malloc(num*sizeof(SpiceDouble));
-	SpiceInt code;
-	SpiceBoolean found;
+							      std::vector<double>& values, 
+								  unsigned int num) const{
+	int n;
+	double *val;
+	val = (double*)malloc(num*sizeof(double));
+	int code;
+	int found;
 
 	bodn2c_c(bodyname.c_str(), &code, &found);
 	if (!found) return false;
@@ -211,7 +207,7 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 }
 
 double SpiceManager::stringToEphemerisTime(const std::string& epochString) const{
-	SpiceDouble et;
+	double et;
 	str2et_c(epochString.c_str(), &et);
 	return et;
 }
@@ -224,17 +220,14 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 glm::dvec3& targetPosition,
 	                                 double lightTime) const{
 	double pos[3] = { NULL, NULL, NULL };
+	//method to put error out...
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
 		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
 	
-	if (pos[0] == NULL || 
-		pos[1] == NULL || 
-		pos[2] == NULL) 
+	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL) 
 		return false;
 
-	targetPosition[0] = pos[0];
-	targetPosition[1] = pos[1];
-	targetPosition[2] = pos[2];
+	memcpy(&targetPosition, pos, sizeof(double)* 3);
 
 	return true;
 }
@@ -250,14 +243,14 @@ bool SpiceManager::getTargetState(const std::string& target,
 	std::fill_n(state, 6, NULL);
 
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+	    	aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
 
 	for (int i = 0; i < 3; i++){
 		if (state[i] == NULL || state[i + 3] == NULL){
 			return false;
 		}
-		targetPosition[i] = state[i];
-		targetVelocity[i] = state[i+3];
+		memcpy(&targetPosition, state   , sizeof(double)* 3);
+		memcpy(&targetVelocity, state +3, sizeof(double)* 3);
 	}
 	return true;
 }
@@ -265,12 +258,152 @@ bool SpiceManager::getTargetState(const std::string& target,
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 							const std::string& toFrame,
 							double ephemerisTime,
-							mat6x6& stateMatrix) const{
+							transformMatrix& stateMatrix) const{
+	sxform_c(fromFrame.c_str(), toFrame.c_str(), 
+		     ephemerisTime, (double(*)[6])stateMatrix.ptr());
+	return true; 
+}
 
-	sxform_c(fromFrame.c_str(), toFrame.c_str(), ephemerisTime, stateMatrix);
-	//error handling?
+bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
+	                                          const std::string& toFrame,
+	                                          double ephemerisTime,
+											  transformMatrix& positionMatrix) const{
+
+	pxform_c(fromFrame.c_str(), toFrame.c_str(), 
+		     ephemerisTime, (double(*)[3])positionMatrix.ptr());
+
 	return true;
 }
 
+bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
+	                              std::string& fovShape,
+	                              std::string& frameName,
+	                              double boresightVector[],
+	                              std::vector<glm::dvec3>& bounds,
+								  int& nrReturned) const{
+	int n;
+	int found;
+	int naifId;
+	int maxVectors = 12;
+	double *boundsArr = new double[maxVectors * 3];
+
+	for (int i = 0; i < maxVectors; i++){
+		for (int j = 0; j < 3; j++){
+			boundsArr[j + i*3] = NULL;
+		}
+	}
+
+	bodn2c_c(naifInstrumentId.c_str(), &naifId, &found);
+	if (!found) return false;
+
+	if (fovShape.size() != 0 && frameName.size() != 0){
+		getfov_c(naifId, 
+			     maxVectors,
+				 fovShape.size(), 
+				 frameName.size(), 
+				 const_cast<char*>(fovShape.c_str()),
+			     const_cast<char*>(frameName.c_str()), 
+				 boresightVector, 
+				 &nrReturned,
+				 (double(*)[3])boundsArr);
+	}else{
+		std::cout << "Frame name and FOV shape \
+			          need to be preallocated" << std::endl;
+		return false;
+ 	}
+
+	for (int i = 0; i < nrReturned; i++){
+		glm::dvec3 tmp;
+		for (int j = 0; j < 3; j++){
+			tmp[j] = boundsArr[j + i*3];
+		}
+		bounds.push_back(tmp);
+	}
+	return true;
+}
+
+bool SpiceManager::rectangularToLatitudal(const glm::dvec3 coordinates,
+	                                      double& radius,
+	                                      double& longitude,
+	                                      double& latitude) const{
+	double point[3] = { coordinates.x, coordinates.y, coordinates.z };
+	reclat_c(point, &radius, &longitude, &latitude);
+	//check if returns values
+	return (radius && longitude && latitude);
+}
+
+bool SpiceManager::latidudinalToRectangular(double  radius,
+	                                        double& longitude,
+	                                        double& latitude,
+	                                        glm::dvec3& coordinates) const{
+	double point[3] = { coordinates.x, coordinates.y, coordinates.z };
+	latrec_c(radius, longitude, latitude, point);
+	//check if returns values
+	return (radius && longitude && latitude);
+}
+
+bool SpiceManager::planetocentricToRectangular(const   std::string& naifName,
+								               double& longitude,
+								               double& latitude,
+								               glm::dvec3& coordinates) const{
+	int naifId;
+	int found;
+	double rectangular[3];
+
+	bodn2c_c(naifName.c_str(), &naifId, &found);
+	if (!found) return false;
+	srfrec_c(naifId, longitude*rpd_c(), latitude*rpd_c(), rectangular);
+
+	memcpy(&coordinates, rectangular, sizeof(double) * 3);
+
+	return true;
+}
+
+bool SpiceManager::getSubObserverPoint(std::string computationMethod,
+	                                   std::string target,
+	                                   double      ephemeris,
+	                                   std::string bodyFixedFrame,
+	                                   std::string aberrationCorrection,
+	                                   std::string observer,
+	                                   glm::dvec3& subObserverPoint,
+	                                   double&     targetEpoch,
+	                                   glm::dvec3& vectorToSurfacePoint) const{
+	double subPoint[3], vecToSurf[3];
+	
+	subpnt_c(computationMethod.c_str(), 
+		     target.c_str(), 
+			 ephemeris,
+			 bodyFixedFrame.c_str(), 
+			 aberrationCorrection.c_str(), 
+			 observer.c_str(), subPoint, &targetEpoch, vecToSurf);
+
+	memcpy(&subObserverPoint    , subPoint , sizeof(double) * 3);
+	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double) * 3);
+
+	return true;
+}
+bool SpiceManager::getSubSolarPoint(std::string computationMethod,
+	                                std::string target,
+	                                double      ephemeris,
+	                                std::string bodyFixedFrame,
+	                                std::string aberrationCorrection,
+	                                std::string observer,
+									glm::dvec3& subSolarPoint,
+	                                double&     targetEpoch,
+	                                glm::dvec3& vectorToSurfacePoint) const{
+	double subPoint[3], vecToSurf[3];
+
+	subslr_c(computationMethod.c_str(),
+		     target.c_str(),
+		     ephemeris,
+		     bodyFixedFrame.c_str(),
+		     aberrationCorrection.c_str(),
+		     observer.c_str(), subPoint, &targetEpoch, vecToSurf);
+
+	memcpy(&subSolarPoint, subPoint, sizeof(double)* 3);
+	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double)* 3);
+
+	return true;
+}
 
 }

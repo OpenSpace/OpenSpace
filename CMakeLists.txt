@@ -30,6 +30,8 @@
 cmake_minimum_required (VERSION 2.8) 
 project (OpenSpace)
 
+SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
+
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 

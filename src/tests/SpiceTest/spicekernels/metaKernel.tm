@@ -9,5 +9,6 @@ KPL/MK
 						  '030201AP_SK_SM546_T45.bsp'
 						  'cas_v37.tf',
 						  '04135_04171pc_psiv2.bc',
-						  'cpck05Mar2004.tpc')
+						  'cpck05Mar2004.tpc',
+						  'cas_iss_v09.ti')
 \begintext

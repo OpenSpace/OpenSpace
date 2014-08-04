@@ -1,0 +1,779 @@
+KPL/IK
+ 
+ 
+ISS Instrument Kernel
+==============================================================================
+ 
+   This instrument kernel (I-kernel) contains references to the mounting
+   alignment, internal and FOV geometry for the Cassini Imaging Science
+   Subsystem (ISS) instruments.
+ 
+ 
+Version and Date
+----------------------------------------------------------
+ 
+   The TEXT_KERNEL_ID stores version information of loaded project text
+   kernels. Each entry associated with the keyword is a string that consists
+   of four parts: the kernel name, version, entry date, and type. For example,
+   the ISS I-kernel might have an entry as follows:
+ 
+           TEXT_KERNEL_ID += 'CASSINI_ISS V0.0.0 29-SEPTEMBER-1999 IK'
+                                  |          |         |            |
+                                  |          |         |            |
+              KERNEL NAME <-------+          |         |            |
+                                             |         |            V
+                             VERSION <-------+         |       KERNEL TYPE
+                                                       |
+                                                       V
+                                                  ENTRY DATE
+ 
+   ISS I-Kernel Version:
+ 
+           \begindata
+ 
+           TEXT_KERNEL_ID += 'CASSINI_ISS V0.9.0 23-JANUARY-2004 IK'
+ 
+           \begintext
+ 
+   Version 0.9 -- January 23, 2004 -- Josh Riley and Lee Elson
+ 
+            --   Updated focal lengths using inflight calibration results.
+ 
+   Version 0.8 -- April 23, 2001 -- Scott Turner
+ 
+            --   Updated kernel to utilize new FOV ANGLES specification.
+ 
+   Version 0.7 -- September 27, 2000 -- Scott Turner
+ 
+            --   The value of IFOV for the NAC recorded in previous kernels as
+                 60 should have been 6. The value associated with
+                 INS-82360_IFOV and the table in the documentation have been
+                 updated to reflect this correction.
+ 
+   Version 0.6 -- August 15, 2000 -- Scott Turner
+ 
+            --   Recalculated the FOV definitions to enhance precision.
+ 
+   Version 0.5 -- June 7, 2000 -- Scott Turner
+ 
+            --   Changed the INS[#]_FOV_CENTER_PIXEL keyword to reflect
+                 changes in the I-kernel SIS.
+ 
+   Version 0.4 -- March 27, 2000 -- Scott Turner
+ 
+            --   Included sample code in FORTRAN and C for computing the
+                 angular extents of the ISS fields of view.
+ 
+            --   Added the TEXT_KERNEL_ID keyword.
+ 
+            --   Minor cosmetic alterations to the structure of the kernel to
+                 improve readability.
+ 
+   Version 0.3 -- March 17, 2000 -- Scott Turner
+ 
+            --   This I-kernel reflects changes discussed at the SPICE team
+                 meeting on 3/16/2000.
+ 
+            --   All of the INS[ID]_SEQ_[WORD] keywords were eliminated.
+ 
+            --   INS[ID]_SEQ_FOV_CENTER is now keyed to
+                 INS[ID]_FOV_CENTER_PIXEL.
+ 
+   Version 0.2 -- March 6, 2000 -- Scott Turner
+ 
+            --   Fixed a few errors in the comment text describing the ISS and
+                 this kernel's intended usage.
+ 
+            --   Removed 'NAC' and 'WAC' from keywords. These values were
+                 necessary when both the NAC and WAC shared a single
+                 instrument ID code.
+ 
+            --   Added 'SEQ_' to the FOV keywords that are to be used by PDT
+                 and possibly other sequence tools.
+ 
+            --   Added name to ID code mappings for 'CASSINI_ISS_NAC' and
+                 'CASSINI_ISS_WAC'
+ 
+            --   Added the keywords 'INS-82360_SEQ_PIXEL_SIZE',
+                 'INS-82361_SEQ_PIXEL_SIZE', 'INS-82360_FOV_NAME',
+                 'INS-82361_FOV_NAME', 'INS-82360_BORESIGHT_ID',
+                 'INS-82361_BORESIGHT_ID', 'INS-82360_BORESIGHT_NAME',
+                 'INS-82361_BORESIGHT_NAME'
+ 
+   Version 0.1 -- October 8, 1999 -- Scott Turner
+ 
+            --   Added an additional set of keywords that describe the FOVs of
+                 the instruments to maintain compatibility with previously
+                 discussed standards. These keywords may change or be
+                 eliminated when the kernel evolves. Placeholders for the NAC
+                 and WAC radiators were also placed into keywords conforming
+                 to this standard.
+ 
+            --   Altered the NAC/WAC FOV definition parameters to conform with
+                 GETFOV's expectations. Added documentation describing the
+                 parameters.
+ 
+            --   Changed NAC and WAC ID codes from -82010 and -82020 to -82360
+                 and -82361 respectively.
+ 
+            --   Altered reference No. 4 to include proper document title and
+                 project document number.
+ 
+            --   Added a section for data to store instrument mode timing. The
+                 values present are just place holders until the actual ones
+                 are uncovered.
+ 
+   Version 0.0 -- June 21, 1999 -- Scott Turner
+ 
+            --   Initial Prototype Release for Review.
+ 
+ 
+References
+----------------------------------------------------------
+ 
+            1.   ``Cassini Science Instruments and Investigations'', Revised
+                 Second Printing. Stephen J. Edberg.
+ 
+            2.   Cassini Spacecraft Frames Definition Kernel.
+ 
+            3.   JPL Cassini Project Web Page describing the instruments.
+ 
+            4.   Cassini Document No. 699-416 Imaging Science Subsystem
+                 Calibration Report
+ 
+            5.   Email from Jeff Boyer regarding necessary data for footprint
+                 calculations.
+ 
+            6.   Email discussion with Vance Haemmerle regarding the location
+                 of the (0,0) pixel on the CCD and it's correlation to the NAC
+                 and WAC FOV definition.
+ 
+            7.   Cassini/NAIF SPICE Workshop, November 8-9, 1999.
+ 
+            8.   Email from Vance Haemmerle regarding an incorrect value
+                 recorded for the NAC IFOV parameter.
+ 
+            9.   Memo from P. Thomas "Geometric calibration of the ISS NAC and
+                 WAC", December 18, 2002.
+ 
+ 
+Contact Information
+----------------------------------------------------------
+ 
+   Direct questions, comments or concerns about the contents of this kernel
+   to:
+ 
+           Lee Elson, NAIF/JPL, (818)-354-4223, Lee.Elson@jpl.nasa.gov
+ 
+ 
+Implementation Notes
+----------------------------------------------------------
+ 
+   This file is used by the SPICE system as follows: programs that make use of
+   this instrument kernel must ``load'' the kernel, normally during program
+   initialization. Loading the kernel associates data items with their names
+   in a data structure called the ``kernel pool''. The SPICELIB routine FURNSH
+   and CSPICE routine furnsh_c load SPICE kernels as shown below:
+ 
+   FORTRAN (SPICELIB)
+ 
+           CALL FURNSH ( 'kernel_name' )
+ 
+   C (CSPICE)
+ 
+           furnsh_c ( "kernel_name" )
+ 
+   In order for a program or subroutine to extract data from the pool, the
+   SPICELIB routines GDPOOL and GIPOOL are used. See [2] for details.
+ 
+   This file was created and may be updated with a text editor or word
+   processor.
+ 
+ 
+Naming Conventions
+----------------------------------------------------------
+ 
+   All names referencing values in this I-kernel start with the characters
+   `INS' followed by the NAIF Cassini spacecraft ID number (-82) followed by a
+   NAIF three digit ID code for the ISS instruments. (NAC = 360, WAC = 361).
+ 
+   The remainder of the name is an underscore character followed by the unique
+   name of the data item. For example, the ISS NAC boresight direction in the
+   ISS NAC optics frame (``CASSINI_ISS_NAC'' -- see [2]) is specified by:
+ 
+           INS-82360_BORESIGHT
+ 
+   The upper bound on the length of the name of any data item is 32
+   characters.
+ 
+   If the same item is included in more than one file, or if the same item
+   appears more than once within a single file, the latest value supersedes
+   any earlier values.
+ 
+ 
+ISS description
+----------------------------------------------------------
+ 
+   From [3]:
+ 
+   ``IMAGING SCIENCE SUBSYSTEM (ISS)
+ 
+   The Cassini orbiter imaging experiments will encompass a wide variety of
+   targets (Saturn, the rings, Titan, the icy satellites, and star fields) and
+   a wide range of observing distances for various scientific purposes. The
+   science objectives include studying the atmospheres of Saturn and Titan,
+   the rings of Saturn and their interactions with the planet's satellites,
+   and the surface characteristics of the satellites, including Titan. Because
+   of these multiple objectives, the Imaging Science Subsystem (ISS) has two
+   separate camera designs. The first is a narrow-angle camera (NAC) design
+   that will obtain high-resolution images of the target of interest. The
+   second is a wide-angle camera (WAC) design that provides a different scale
+   of image resolution and more complete coverage spatially. The spacecraft
+   will carry one NAC and one WAC. The NAC is also used to obtain optical
+   navigation images for the mission with the WAC acting as a functionally
+   redundant backup unit for this purpose.
+ 
+   The cameras are charge-coupled device (CCD) imagers. A CCD is essentially a
+   large-scale integrated circuit (IC) that has a two-dimensional array of
+   hundreds or thousands of charge-isolated wells, each representing a picture
+   element or "pixel." Light falling on a well is absorbed by a
+   photoconductive substrate, such as silicon, which releases a quantity of
+   electrons proportional to the intensity of the light. The CCD detects and
+   stores an accumulated electrical charge representing the light level on
+   each well. These charges are subsequently read out for conversion to
+   digital data. CCDs are much more sensitive to light of a wider spectrum
+   than vidicon tube-type imagers, and they are less massive, require less
+   energy, and interface more easily with digital circuitry.
+ 
+   The Cassini imagers differ primarily in the design of the optics. The NAC
+   has a focal length of 2000 mm, and the WAC , which uses optics inherited
+   from the Voyager mission, has a focal length of 200 mm. The cameras each
+   have a focal plane shutter of the same type as used on both Voyager and
+   Galileo, and they have a two-wheel filter-changing mechanism derived from
+   the Hubble Space Telescope Wide Field/Planetary Camera (WF/PC) design. The
+   CCD detector is cooled to suppress dark current (residual current in the
+   CCD beyond that released by incident light), which is dependent upon
+   temperature. It is also shielded from ionizing radiation.
+ 
+   The CCD detector design is a square array of 1024x1024 pixels, each pixel
+   12 micrometers on a side. The IC chip will use three-phase,
+   front-side-illuminated architecture, with a coating of lumogen phosphor to
+   provide ultraviolet response. The detector is passively cooled by a
+   radiator to approximately 10 degrees C below its nominal operating
+   temperature (approximately minus 90 degrees C), and then it is controlled
+   to the operating temperature by a proportional control heater. To minimize
+   radiator size and heater power, the detector/radiator combination is
+   thermally isolated from the rest of the camera head assembly (CHA).
+ 
+   The entire NAC is thermally isolated from the remote sensing pallet (RSP)
+   on which it is mounted in order to minimize the effects of RSP thermal
+   variations on NAC image quality. The WAC, being an inherited design with
+   less stringent imaging requirements, is not thermally isolated.
+ 
+   The electronics for each camera are identical. All ISS command and
+   telemetry functions will be handled by the electronics, including receipt
+   of commands from the Command and Data Subsystem, expansion of commands, and
+   collection and transmission of imaging data and telemetry to the CDS.
+ 
+   The ISS controls the amount of power it draws from the spacecraft during
+   operations. To accomplish this, the profile of ISS command timing is
+   structured to reduce the power the ISS requires for certain internal
+   functions (e.g., shutter or filter wheel movement). When the filter is
+   moving, the power from the optical heater (if present) in the active camera
+   is turned off. When the movement is complete, the optical heater is turned
+   on (if needed). In addition, simultaneous filter positioning within a
+   single camera, either the WAC or NAC, is not permitted.
+ 
+   During the cruise phase of the mission, the cameras will periodically be
+   turned on for maintenance, calibration, and monitoring of instrument health
+   and performance. Other than these specified times, the ISS will be off and
+   replacement heaters will be on. In addition, decontamination/radiation
+   heater 1 will be on throughout most of the cruise.
+ 
+   Upon arrival at the Saturnian system, the cameras will be on most of the
+   time. Spacecraft power limitations will be the controlling parameter
+   determining whether the ISS will be turned off or put into a low-power
+   state. During the Saturn tour, high-activity periods for Saturn and its
+   rings will be clustered around periapsis (the point in the orbit closest to
+   the planet); for the satellites, the high-activity periods will be when the
+   spacecraft is closest to them. At these times, high-resolution images of
+   all targets will be acquired through various camera filters, and the data
+   will be stored in the spacecraft solid-state recorder (SSR). During lower
+   activity periods (i.e., when the spacecraft is orbiting farther from the
+   targets), long-term atmospheric and ring monitoring will take place, and
+   ISS calibrations will be performed.''
+ 
+ 
+ISS First Order Optical Parameters
+----------------------------------------------------------
+ 
+   The first order optical parameters for the two cameras that constitute the
+   ISS detectors:
+ 
+            --   Narrow Angle Camera
+ 
+            --   Wide Angle Camera
+ 
+   as provided by [4 and 9] for the CL filter combinations compiled into the
+   following table:
+ 
+           ------------------------------  -----------  -----------
+                     parameter                 NAC          WAC
+           ------------------------------  -----------  -----------
+            Effective Focal Length, mm        2003.44      200.77
+               Estimated Uncertainty, mm         0.03        0.01
+            Spectral Band, nm               200-1100     400-1000
+            F/number                          10.5          3.44
+           ------------------------------  -----------  -----------
+ 
+   These values are given in the keywords below in the same units as the table
+   above:
+ 
+   Narrow Angle Camera (NAC):
+ 
+           \begindata
+ 
+           INS-82360_FOCAL_LENGTH     = ( 2003.44   )
+           INS-82360_FL_UNCERTAINTY   = (    0.03   )
+           INS-82360_WAVELENGTH_RANGE = ( 200, 1100 )
+           INS-82360_F/NUMBER         = ( 10.5      )
+ 
+           \begintext
+ 
+   Wide Angle Camera (WAC):
+ 
+           \begindata
+ 
+           INS-82361_FOCAL_LENGTH     = ( 200.77    )
+           INS-82361_FL_UNCERTAINTY   = (   0.01    )
+           INS-82361_WAVELENGTH_RANGE = ( 400, 1000 )
+           INS-82361_F/NUMBER         = ( 3.44      )
+ 
+           \begintext
+ 
+ 
+ISS Field of View Parameters
+----------------------------------------------------------
+ 
+ 
+FOV Sizes (in degrees)
+ 
+                          Spacecraft Frame:
+ 
+                                             Xsc
+                                              ^
+                                              |
+                                              |
+                                              o----->
+                                           Ysc      Zsc
+ 
+ 
+                                              ^
+                        Samples               | Ycm
+              (0,0) + + + >                   |
+                +  \_____________________________________________________  ___
+                +  |                                                     |  |
+                +  |                Samples                              |  |
+                V  |      (0,0) + + + >                                  |  |
+           Lines   |        +  \_____________________________  ___       |  |
+                   |        +  |                             |  |        |  |
+                   |        +  |                             |  |        |  |
+                   |        V  |                             |  |        |  |
+                   |   Lines   |                             |  |        |  |
+                   |           |                             |  |        |  |
+              <--- |           |              x              | 0.35      | 3.4
+            Xcm    |           |                Zcm          |  |        |  |
+                   |           |                             |  |        |  |
+                   |           |                             |  |        |  |
+                   |           |                             |  |        |  |
+                   |           |_____________________________| _|_       |  |
+                   |            NAC                                      |  |
+                   |           |------------0.35-------------|           |  |
+                   |                                                     |  |
+                   |_____________________________________________________| _|_
+                    WAC
+                   |------------------------3.48-------------------------|
+ 
+ 
+   Note that although the above diagram suggests that the NAC and WAC
+   boresights are co-aligned, this is not the case. As [1] and [2] point out,
+   the NAC and WAC are both mounted to the Remote Sensing Palette in different
+   locations. From [6], the CCD samples and lines increase with decreasing X
+   and Y in the NAC and WAC frames. Thus the (0,0) corners of the CCDs are as
+   illustrated on the diagram above.
+ 
+   The FOVs of the ISS detectors have the following angular sizes (from [4]):
+ 
+           ------------  ----------------  ----------------
+             Detector       Horizontal         Vertical
+           ------------  ----------------  ----------------
+               NAC         0.35 degrees      0.35 degrees
+ 
+               WAC         3.48 degrees      3.48 degrees
+           ------------  ----------------  ----------------
+ 
+   The CCD geometry parameters as presented in [1] and [4] are provided below:
+ 
+           ------------------------------  -----------  -----------
+                     parameter                 NAC          WAC
+           ------------------------------  -----------  -----------
+            Detector Array Size             1024x1024    1024x1024
+            Pixel Size, microns               12x12        12x12
+            FOV Angular Size, degrees       0.35x0.35    3.48x3.48
+            IFOV, microradian/pixel            6            60
+           ------------------------------  -----------  -----------
+ 
+   With the keywords and their values:
+ 
+   Narrow Angle Camera (NAC):
+ 
+           \begindata
+ 
+           INS-82360_PIXEL_SAMPLES     =  (  1024  )
+           INS-82360_PIXEL_LINES       =  (  1024  )
+           INS-82360_PIXEL_SIZE        =  (   12   )
+           INS-82360_CCD_CENTER        =  (  512.5, 512.5 )
+           INS-82360_IFOV              =  (   6    )
+ 
+           \begintext
+ 
+   Wide Angle Camera (WAC):
+ 
+           \begindata
+ 
+           INS-82361_PIXEL_SAMPLES     =  (  1024  )
+           INS-82361_PIXEL_LINES       =  (  1024  )
+           INS-82361_PIXEL_SIZE        =  (   12   )
+           INS-82361_CCD_CENTER        =  (  512.5, 512.5 )
+           INS-82361_IFOV              =  (   60   )
+ 
+           \begintext
+ 
+   The keywords INS[ID]_FOV_FRAME, INS[ID]_FOV_SHAPE, INS[ID]_BORESIGHT, and
+   FOV ANGLES specification keywords defined below are used to describe the
+   instrument field of view. Since both the NAC and WAC have square fields of
+   view, the INS[ID]_FOV_SHAPE keyword will always be 'RECTANGLE', and GETFOV
+   will return the four vectors in the instrument frame that describe the
+   edges of the FOV cone. Both the NAC and WAC boresights lie along the
+   Z-axis.
+ 
+ 
+Narrow Angle Camera (NAC) FOV Definition
+ 
+   Since the NAC's angular separation is 0.35 degrees, looking up the Y-axis
+   in the CASSINI_ISS_NAC frame we have: (Note we are arbitrarily choosing
+   vectors that terminate in the Z=1 plane.)
+ 
+ 
+                                  ^ X
+                                  |  ins
+                                  |
+                                  |        /|
+                                  |      /  |
+                                  |    /    |
+                                  |  /    o |
+                                  |/ 0.175  |
+                                  o--------------->
+                                Y  \        |    Z
+                                 ins \      |     ins
+                                       \    |
+                                         \  |
+                                           \|
+ 
+                                  |-- 1.0 --|
+                                                Plane Y = 0
+ 
+ 
+   Now from here we see that the X components of the boundary corners are:
+ 
+           X Component = +/- 1.0 * tan ( 0.175 degrees ) = +/- 0.003054335689
+ 
+   Since the field of view is square this holds for the Y components as well.
+ 
+   These FOV values as well as the values from the preceding table are given
+   in the keywords below in the same units as listed above:
+ 
+   Narrow Angle Camera (NAC):
+ 
+           \begindata
+ 
+           INS-82360_FOV_FRAME                 = 'CASSINI_ISS_NAC'
+           INS-82360_FOV_SHAPE                 = 'RECTANGLE'
+           INS-82360_BORESIGHT                 = (
+ 
+                  0.0000000000000000   0.0000000000000000  +1.0000000000000000
+ 
+                     )
+           INS-82360_FOV_CLASS_SPEC            = 'ANGLES'
+           INS-82360_FOV_REF_VECTOR            = (
+ 
+                 +1.0000000000000000   0.0000000000000000   0.0000000000000000
+ 
+                     )
+           INS-82360_FOV_REF_ANGLE             = ( 0.175 )
+           INS-82360_FOV_CROSS_ANGLE           = ( 0.175 )
+           INS-82360_FOV_ANGLE_UNITS           = 'DEGREES'
+ 
+           \begintext
+ 
+ 
+Wide Angle Camera (WAC) FOV Definition
+ 
+   Since the WAC is also a square field of view, similar calculations as to
+   those made for the NAC hold. The half angle of interest is 1.74 degrees as
+   opposed to 0.175. Looking up the Y-axis in the CASSINI_ISS_WAC frame we
+   have: (Note we are arbitrarily choosing vectors that terminate in the Z=1
+   plane.)
+ 
+ 
+                                  ^ X
+                                  |  ins
+                                  |
+                                  |        /|
+                                  |      /  |
+                                  |    /    |
+                                  |  /    o |
+                                  |/ 1.740  |
+                                  o--------------->
+                                Y  \        |    Z
+                                 ins \      |     ins
+                                       \    |
+                                         \  |
+                                           \|
+ 
+                                  |-- 1.0 --|
+                                                Plane Y = 0
+ 
+ 
+   Now from here we see that the X components of the boundary corners are:
+ 
+           X Component = +/- 1.0 * tan ( 1.74 degrees ) = +/- 0.030378068382
+ 
+   Since the field of view is square this holds for the Y components as well.
+ 
+   Again since the field of view is square this computation holds for the Y
+   components as well. All of these values are collected in the FOV keywords
+   defined below. Utilizing the ANGLES FOV specification:
+ 
+   Wide Angle Camera (WAC):
+ 
+           \begindata
+ 
+           INS-82361_FOV_FRAME                 = 'CASSINI_ISS_WAC'
+           INS-82361_FOV_SHAPE                 = 'RECTANGLE'
+           INS-82361_BORESIGHT                 = (
+ 
+                  0.0000000000000000   0.0000000000000000  +1.0000000000000000
+ 
+                     )
+           INS-82361_FOV_CLASS_SPEC            = 'ANGLES'
+           INS-82361_FOV_REF_VECTOR            = (
+ 
+                 +1.0000000000000000   0.0000000000000000   0.0000000000000000
+ 
+                     )
+           INS-82361_FOV_REF_ANGLE             = ( 1.74 )
+           INS-82361_FOV_CROSS_ANGLE           = ( 1.74 )
+           INS-82361_FOV_ANGLE_UNITS           = 'DEGREES'
+ 
+           \begintext
+ 
+ 
+ISS Radiator FOV Definitions
+ 
+   The FOV values for the ISS radiators are place holders until a time when
+   real values are provided.
+ 
+   Narrow Angle Camera Radiator (NAC_RAD):
+ 
+           \begindata
+ 
+           INS-82368_FOV_FRAME                 = 'CASSINI_ISS_NAC_RAD'
+           INS-82368_FOV_SHAPE                 = 'CIRCLE'
+           INS-82368_BORESIGHT                 = (
+ 
+                  0.0000000000000000   0.0000000000000000  +1.0000000000000000
+ 
+                                                 )
+           INS-82368_FOV_CLASS_SPEC            = 'ANGLES'
+           INS-82368_FOV_REF_VECTOR            = (
+ 
+                  0.0000000000000000  +1.0000000000000000  +0.0000000000000001
+ 
+                                                 )
+           INS-82368_FOV_REF_ANGLE             = ( 90.0 )
+           INS-82368_FOV_ANGLE_UNITS           = 'DEGREES'
+ 
+           \begintext
+ 
+   Wide Angle Camera Radiator (WAC_RAD):
+ 
+           \begindata
+ 
+           INS-82369_FOV_FRAME                 = 'CASSINI_ISS_WAC_RAD'
+           INS-82369_FOV_SHAPE                 = 'CIRCLE'
+           INS-82369_BORESIGHT                 = (
+ 
+                  0.0000000000000000   0.0000000000000000  +1.0000000000000000
+ 
+                                                 )
+           INS-82369_FOV_CLASS_SPEC            = 'ANGLES'
+           INS-82369_FOV_REF_VECTOR            = (
+ 
+                  0.0000000000000000  +1.0000000000000000  +0.0000000000000001
+ 
+                                                 )
+           INS-82369_FOV_REF_ANGLE             = ( 90.0 )
+           INS-82369_FOV_ANGLE_UNITS           = 'DEGREES'
+ 
+           \begintext
+ 
+ 
+Pixel Parameters
+----------------------------------------------------------
+ 
+   These parameters describe the pixel structure associated with the
+   instruments and their fields of views. In some cases this is a
+   generalization of the notion of pixel, in that instead of representing
+   pixels on a CCD they may represent a collection of individual detectors.
+ 
+   The FOV_CENTER_PIXEL keyword is precisely the same as the CCD_CENTER
+   defined in the CCD geometry keywords above.
+ 
+ 
+Narrow Angle Camera (NAC)
+ 
+           \begindata
+ 
+           INS-82360_FOV_CENTER_PIXEL = ( 511.5, 511.5 )
+ 
+           \begintext
+ 
+ 
+Wide Angle Camera (WAC)
+ 
+           \begindata
+ 
+           INS-82361_FOV_CENTER_PIXEL = ( 511.5, 511.5 )
+ 
+           \begintext
+ 
+ 
+Narrow Angle Camera Radiator (NAC_RAD)
+ 
+           \begindata
+ 
+           INS-82368_FOV_CENTER_PIXEL  = ( 0, 0 )
+           INS-82368_PIXEL_SAMPLES     = ( 1 )
+           INS-82368_PIXEL_LINES       = ( 1 )
+ 
+ 
+           \begintext
+ 
+ 
+Wide Angle Camera Radiator (WAC_RAD)
+ 
+           \begindata
+ 
+           INS-82369_FOV_CENTER_PIXEL  = ( 0, 0 )
+           INS-82369_PIXEL_SAMPLES     = ( 1 )
+           INS-82369_PIXEL_LINES       = ( 1 )
+ 
+           \begintext
+ 
+ 
+Instrument Mode Timing
+----------------------------------------------------------
+ 
+   The following values were provided as samples in [5]. The values are
+   defined in [5] as follows:
+ 
+ 
+           ``The initial values for the following keywords are given
+           per instrument number:
+ 
+           INS[instrument number]_[instrument acronym]_MODE_NAME
+           INS[instrument number]_[instrument acronym]_TRIGGER_OFFSET
+           INS[instrument number]_[instrument acronym]_CYCLE_DURATION
+ 
+           INS..._MODE_NAME contains the name of the instrument mode for
+           the INS..._TRIGGER_OFFSET and INS..._CYCLE_DURATION
+           keywords.
+ 
+           INS..._TRIGGER_OFFSET specifies the reference time of the
+           first instrument frame (to be calculated for a footprint)
+           relative to the time of transacting the corresponding TRIGGER
+           command. The units are SFOC duration.
+ 
+           INS..._CYCLE_DURATION specifies the duration between successive
+           instrument frames (from the first one) for the INS..._MODE_NAME.''
+ 
+ 
+ 
+NAC Mode Timing
+ 
+   The following values define the instrument modes and timing for the ISS
+   NAC.
+ 
+           \begindata
+ 
+           INS-82360_MODE_NAME      = 'NOMINAL'
+           INS-82360_TRIGGER_OFFSET = '0:01:00.0'
+           INS-82360_CYCLE_DURATION = '0:01:00.0'
+ 
+           \begintext
+ 
+ 
+WAC Mode Timing
+ 
+   The following values define the instrument modes and timing for the ISS
+   WAC.
+ 
+           \begindata
+ 
+           INS-82361_MODE_NAME      = 'NOMINAL'
+           INS-82361_TRIGGER_OFFSET = '0:01:00.0'
+           INS-82361_CYCLE_DURATION = '0:01:00.0'
+ 
+           \begintext
+ 
+ 
+NAIF ID Code to Name Mapping
+----------------------------------------------------------
+ 
+   The following keywords define names for the corresponding ID Codes. See
+   [10] for details.
+ 
+           \begindata
+ 
+           NAIF_BODY_NAME += ( 'CASSINI_ISS_NAC' )
+           NAIF_BODY_CODE += ( -82360 )
+ 
+           NAIF_BODY_NAME += ( 'CASSINI_ISS_WAC' )
+           NAIF_BODY_CODE += ( -82361 )
+ 
+           NAIF_BODY_NAME += ( 'CASSINI_ISS_NAC_RAD' )
+           NAIF_BODY_CODE += ( -82368 )
+ 
+           NAIF_BODY_NAME += ( 'CASSINI_ISS_WAC_RAD' )
+           NAIF_BODY_CODE += ( -82369 )
+ 
+           \begintext
+ 
+ 
+Platform ID
+----------------------------------------------------------
+ 
+   The ISS instrument is mounted on the Remote Sensing Palette, which is
+   connected to the Cassini Spacecraft body. Therefore the value in the
+   keywords below is -82000.
+ 
+           \begindata
+ 
+           INS-82360_PLATFORM_ID = ( -82000 )
+           INS-82361_PLATFORM_ID = ( -82000 )
+           INS-82368_PLATFORM_ID = ( -82000 )
+           INS-82369_PLATFORM_ID = ( -82000 )
+ 
+           \begintext
+ 

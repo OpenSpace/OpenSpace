@@ -32,9 +32,14 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 #include <openspace/tests/test_common.inl>
-#include <openspace/tests/test_scenegraph.inl>
-#include <openspace/tests/test_powerscalecoordinates.inl>
+#include <openspace/tests/test_spicemanager.inl>
+//#include <openspace/tests/test_scenegraph.inl>
+//#include <openspace/tests/test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/spice.h>
+#include <openspace/util/time.h>
 
 #include <iostream>
 
@@ -57,6 +62,7 @@ int main(int argc, char** argv) {
         LFATAL("Could not find OpenSpace configuration file!");
         assert(false);
     }
+	LINFO("Configuration file found: " << FileSys.absolutePath(configurationFilePath));
     
     LDEBUG("registering base path");
     if( ! openspace::OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
@@ -66,16 +72,16 @@ int main(int argc, char** argv) {
     
     ghoul::Dictionary configuration;
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    if(configuration.hasKey("paths")) {
+	if (configuration.hasKey(openspace::constants::openspaceengine::keyPaths)) {
         ghoul::Dictionary pathsDictionary;
-        if(configuration.getValue("paths", pathsDictionary)) {
+		if (configuration.getValue(openspace::constants::openspaceengine::keyPaths, pathsDictionary)) {
             openspace::OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
         }
     }
     
-    openspace::Time::init();
+    /*openspace::Time::init();
     openspace::Spice::init();
-    openspace::Spice::ref().loadDefaultKernels();
+    openspace::Spice::ref().loadDefaultKernels();*/
     openspace::FactoryManager::initialize();
     
     testing::InitGoogleTest(&argc, argv);

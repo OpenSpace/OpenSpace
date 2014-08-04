@@ -21,7 +21,6 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
 #ifndef __SPICEWRAPPER_H__
 #define __SPICEWRAPPER_H__
 
@@ -33,23 +32,10 @@
 #include <map>
 
 namespace openspace{
-
-//just a typedef for now..
-typedef double mat6x6[6][6];
-
-class matrix6{
-private:
-	int row, col;
-	double data[6][6];
-public: 
-	matrix6& operator= (const matrix6& lhs){
-		if (this != &lhs)
-	}
-};
-
+class transformMatrix;
 class SpiceManager{
 public:
-// Initialization
+// Initialization ----------------------------------------------------------------------- //
 	/**
 	* Static initializer that initializes the static member. 
 	*/
@@ -79,12 +65,13 @@ public:
 	 *
 	 * \param either correspondign unique ID or shorthand with 
 	 *   which the kernel was loaded and is to be unloaded. 
+	 * \return Whether the function succeeded or not
 	 */
 
 	bool unloadKernel(const std::string& shorthand);
 	bool unloadKernel(int kernelId);
 	
-// Acessing Kernel Data - Constants and Ids 
+// Acessing Kernel Data - Constants and Ids --------------------------------------------- //
 
 	/**
 	 *  Determine whether values exist for some item for any body in the kernel pool.
@@ -92,6 +79,7 @@ public:
 	 *
 	 *  \param naifId  ID code of body.
      *  \param item    Item to find ("RADII", "NUT_AMP_RA", etc.).
+	 *  \return        Whether the function succeeded or not
 	 */
 	bool hasValue(int naifId, const std::string& kernelPoolValueName) const;
 
@@ -100,28 +88,27 @@ public:
 	 *  item associated with a body. 
 	 *  For further details, please refer to 'bodvrd_c' in SPICE Docummentation
 	 *
-	 *  \param bodyName         Body name.
+	 *  \param bodyName             Body name.
 	 *  \param kernelPoolValueName  Item for which values are desired. ("RADII", "NUT_PREC_ANGLES", etc. )
-	 */
+	 *  \return                     Whether the function succeeded or not
+   	 */
 	bool SpiceManager::getValueFromID(const std::string& bodyname,
 		                              const std::string& kernelPoolValueName, 
 									  double& value) const;
-	/*
-	bool SpiceManager::getValueFromID(const std::string& bodyname, 
-		                              const std::string& kernelPoolValueName, 
-		                              glm::dvec2& value) const;
-    */
+	/* Overloaded method for 3dim vectors, see above specification.*/
 	bool SpiceManager::getValueFromID(const std::string& bodyname, 
 		                              const std::string& kernelPoolValueName,
 		                              glm::dvec3& value) const;
+	/* Overloaded method for 4dim vectors, see above specification.*/
 	bool SpiceManager::getValueFromID(const std::string& bodyname, 
 		                              const std::string& kernelPoolValueName,
 		                              glm::dvec4& value) const;
+	/* Overloaded method for Ndim vectors, see above specification.*/
 	bool SpiceManager::getValueFromID(const std::string& bodyname, 
 		                              const std::string& kernelPoolValueName,
 									  std::vector<double>& values, unsigned int num) const;
 
-// Converting between UTC and Ephemeris Time (LSK)
+// Converting between UTC and Ephemeris Time (LSK)  ------------------------------------- //
 
 	/**
 	 *  Convert a string representing an epoch to a double precision
@@ -134,7 +121,7 @@ public:
 	 */
 	double stringToEphemerisTime(const std::string& epochString) const;
 
-// Computing Positions of Spacecraft and Natural Bodies(SPK)
+// Computing Positions of Spacecraft and Natural Bodies(SPK) ---------------------------- //
 
 	/**
 	 *  Return the position of a target body relative to an observing 
@@ -158,7 +145,6 @@ public:
 						   const std::string& observer,
 						   glm::dvec3& targetPosition, 
 						   double lightTime) const;
-
 	/**
 	 *  Return the state (position and velocity) of a target body 
      *  relative to an observing body, optionally corrected for light 
@@ -184,7 +170,7 @@ public:
 						glm::dvec3& targetVelocity,
 						double lightTime) const;
 
-// Computing Transformations Between Frames (FK)
+// Computing Transformations Between Frames (FK) -------------------------------------- //
 
 	/** 
 	 *  Return the state transformation matrix from one frame to 
@@ -200,15 +186,7 @@ public:
 	bool getStateTransformMatrix(const std::string& fromFrame,
 		                         const std::string& toFrame,
 		                         double ephemerisTime,
-		                         mat6x6& stateMatrix) const;
-	
-
-	/**
-	 *  Multiply the 6x6 stateTransformMatrix and two 3D vector, postion and velocity.
-	 */
-	bool multiplyWithStateTransmMat6x6(mat6x6 stateMatrix,
-		                               glm::dvec3 position,
-									   glm::dvec3 velocity) const;
+								 transformMatrix& stateMatrix) const;
 
 	/**
 	 *  Return the matrix that transforms position vectors from one 
@@ -224,9 +202,9 @@ public:
 	bool getPositionTransformMatrix(const std::string& fromFrame, 
 		                            const std::string& toFrame,
 		                            double ephemerisTime, 
-						            glm::mat3x3& positionTransformationMatrix) const;
+									transformMatrix& positionMatrix) const;
 	
-// Retrieving Instrument Parameters (IK)
+// Retrieving Instrument Parameters (IK)  ------------------------------------------ //
 
 	/**
 	 *  This routine returns the field-of-view (FOV) parameters for a
@@ -239,15 +217,17 @@ public:
 	 * \param boresightVector          Boresight vector.
 	 * \param numberOfBoundaryVectors  Number of boundary vectors returned. 
 	 * \param bounds                   Field Of View boundary vectors
+	 * \param room                     Maximum number of vectors that can be returned.
 	 * \return                         Whether the function succeeded or not
 	 */
 	bool getFieldOfView(const std::string& naifInstrumentId, 
-						std::string& instrumentFovShape, 
-						std::string& nameOfFrame, 
-						double boresightVector, 
-						std::vector<glm::vec3>& bounds) const;
+						std::string& fovShape,
+						std::string& frameName,
+						double boresightVector[], 
+						std::vector<glm::dvec3>& bounds,
+						int& nrReturned) const;
 	
-// Computing Planetocentric, Planetodetic, and Planetographic Coordinates
+// Computing Planetocentric, Planetodetic, and Planetographic Coordinates ---------- //
 
 	/**
 	 *  Convert from rectangular coordinates to latitudinal coordinates.
@@ -259,13 +239,13 @@ public:
 	 * \param latitude    Latitude of the point in radians.  The range is [-pi/2, pi/2].
 	 * \return             Whether the function succeeded or not
 	 */
-	bool rectangularToLatitudal(const glm::vec3 coordinates, 
+	bool rectangularToLatitudal(const glm::dvec3 coordinates, 
 		                        double& radius, 
 								double& longitude, 
 								double& latitude) const;
 	/**
   	 *  Convert from latitudinal coordinates to rectangular coordinates.
-	 *  For further details, please refer to 'reclat_c ' in SPICE Docummentation
+	 *  For further details, please refer to 'latrec_c ' in SPICE Docummentation
 	 *
 	 * \param radius         Distance of a point from the origin.
      * \param longitude      Longitude of point in radians.
@@ -276,7 +256,7 @@ public:
 	bool latidudinalToRectangular(double radius, 
 		                          double& longitude, 
 								  double& latitude, 
-								  glm::vec3& coordinates) const;
+								  glm::dvec3& coordinates) const;
 
 	/**
 	 *  Convert planetocentric latitude and longitude of a surface 
@@ -289,12 +269,12 @@ public:
      * \param coordinates    Rectangular coordinates of the point. 
 	 * \return               Whether the function succeeded or not
 	 */
-	bool planetocentricToRectangular(int naif_id,
+	bool planetocentricToRectangular(const   std::string& naifName,
 									 double& longitude,
 									 double& latitude,
-									 glm::vec3& coordinates) const;
+									 glm::dvec3& coordinates) const;
 
-// Computing Sub - observer and Sub - solar Points
+// Computing Sub - observer and Sub - solar Points --------------------------------- //
 	
 	/**
 	 * Compute the rectangular coordinates of the sub-observer point on 
@@ -319,9 +299,9 @@ public:
 		                     std::string bodyFixedFrame,
 		                     std::string aberrationCorrection,
 		                     std::string observer,
-		                     glm::vec3& subObserverPoint,
+		                     glm::dvec3& subObserverPoint,
 		                     double& targetEpoch,
-							 glm::vec3& vectorToSurfacePoint) const;
+							 glm::dvec3& vectorToSurfacePoint) const;
 
 	/**
 	* Compute the rectangular coordinates of the sub-observer point on
@@ -342,34 +322,102 @@ public:
 	*/
 	bool getSubSolarPoint(std::string computationMethod,
 		                  std::string target,
-		                  double ephemeris,
+		                  double      ephemeris,
 		                  std::string bodyFixedFrame,
 		                  std::string aberrationCorrection,
 		                  std::string observer,
-		                  glm::vec3& subObserverPoint,
-		                  double& targetEpoch,
-		                  glm::vec3& vectorToSurfacePoint) const;
-	
-
-	//TODO: add additional functions for 'mxvg_c'
-
+						  glm::dvec3& subSolarPoint,
+		                  double&     targetEpoch,
+		                  glm::dvec3& vectorToSurfacePoint) const;
 private:
 	SpiceManager() = default;
 	~SpiceManager();
-	
 	SpiceManager(const SpiceManager& c) = delete;
-
 	static SpiceManager* _manager;
-
 	struct spiceKernel {
 		std::string path;
 		std::string name;
 		int id;
 	};
-
 	std::vector<spiceKernel> _loadedKernels;
-	unsigned int kernelCount = 0;
+	unsigned int _kernelCount = 0;
 };
-}
 
+/**
+* SpiceManager helper class, a storage container used to 
+* transform state vectors from one reference frame to another.
+* The client creates an instance of <code>transformMatrix</code>
+* and after its been passed to either <code>getStateTransformMatrix</code>
+* or <code>getPositionTransformMatrix</code> the instantiated object
+* can transform position and velocity to any specified reference frame. 
+*
+* Client-sied example: 
+* openspace::transformMatrix m(6);
+* openspace::SpiceManager::ref().getStateTransformMatrix("J2000",
+*                                                        "IAU_PHOEBE",
+*                                                         et,
+*                                                         stateMatrix);
+* stateMatrix.transform(position, velocity);
+* (or if transformMatrix is 3x3:)
+* stateMatrix.transform(position);
+*/
+#define COPY(to, from) memcpy(to, from, sizeof(double)* 3);
+class transformMatrix{
+private:
+	int N;
+	double *data;
+	bool empty;
+	double* ptr()   {
+		empty = false;
+		return data;
+	}
+	friend class SpiceManager;
+public:
+	/* default constructor */
+	transformMatrix();
+	/* default destructor */
+	~transformMatrix(){ delete[] data; };
+	/* allocation of memory */
+	transformMatrix(int n) : N(n){
+		data = new double[N*N];
+		empty = true;
+	}
+	/** As the spice function mxvg_c requires a 6dim vector
+	*  the two 3dim state vectors are packed into 'state'.
+	*  Transformed values are then copied back from state_t
+	*  to each corresponding statevector.
+	* 
+	*  \param position, positional vector to be expressed in 
+	*   the new reference frame.
+	*  \param velocity, (optional) velocity input is only 
+	*   transformed in conjunction with a 6x6 matrix, otherwise
+	*   the method ignores its second argument. 
+	*/
+	void transform(glm::dvec3& position,
+		glm::dvec3& velocity = glm::dvec3()){
+		assert(("transformation matrix is empty", !empty));
+
+		double *state;
+		double *state_t;
+		state   = new double[N];
+		state_t = new double[N];
+
+		COPY(state, &position);
+		if (N == 6) COPY(state + velocity.length(), &velocity);
+
+		mxvg_c(data, state, N, N, state_t);
+
+		COPY(&position, state_t);
+		if (N == 6)  COPY(&velocity, state_t + velocity.length());
+	}
+	/* overloaded operator() 
+	 * asserts matrix has been filled
+	 */
+	inline double operator()(int i, int j) const{
+		assert(("transformation matrix is empty", !empty));
+		return data[j + i*N];
+	}
+};
+#undef COPY
+}
 #endif
