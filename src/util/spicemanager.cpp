@@ -281,7 +281,6 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 	                              double boresightVector[],
 	                              std::vector<glm::dvec3>& bounds,
 								  int& nrReturned) const{
-	int n;
 	int found;
 	int naifId;
 	int maxVectors = 12;

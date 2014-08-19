@@ -66,7 +66,7 @@ private:
 	void handleNodes();
 	void loadIntoNodes(const boost::property_tree::ptree& tree, std::string parent = "", const int depth = 0);
 
-	OpenSpaceEngine* _engine;
+    //	OpenSpaceEngine* _engine;
 	std::vector<Node> _nodes;
 };
 

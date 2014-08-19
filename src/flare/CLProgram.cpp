@@ -2,6 +2,7 @@
  * Author: Victor Sand (victor.sand@gmail.com)
  *
  */
+
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/flare/CLProgram.h>
 #include <openspace/flare/CLManager.h>
@@ -248,14 +249,13 @@ bool CLProgram::ReleaseBuffer(unsigned int _argNr) {
 
 bool CLProgram::PrepareProgram() {
 //ghoulFinishGL();
-/*
-#ifdef __APPLE__
+//#ifdef __APPLE__
     
     //glFlushRenderAPPLE();
-    glFinish();
+    //  glFinish();
     //glFlush();
-#else
-*/
+    //#else
+
     
     glFinish();
   // Let OpenCL take control of the shared GL textures
@@ -341,15 +341,13 @@ bool CLProgram::FinishProgram() {
         LERROR("Failed to finish program");
         return false;
     }
-  /*
-#else
-    error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
-    if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
-        ERROR("Failed to finish program");
-        return false;
-    }
-#endif
-*/
+    //#else
+    //error_ = clFinish(clManager_->commandQueues_[CLManager::EXECUTE]);
+    //if (!clManager_->CheckSuccess(error_, "FinishProgram, clFinish")) {
+    //    ERROR("Failed to finish program");
+    //    return false;
+    //}
+    //#endif
   return true;
 }
 
