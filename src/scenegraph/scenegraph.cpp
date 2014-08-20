@@ -47,10 +47,8 @@
 #include <string>
 
 namespace {
-const std::string _loggerCat = "SceneGraph";
-const std::string _rootNodeName = "Root";
-const std::string _moduleExtension = ".mod";
-
+    const std::string _loggerCat = "SceneGraph";
+    const std::string _moduleExtension = ".mod";
 }
 
 namespace openspace {
@@ -64,8 +62,8 @@ void printTree(SceneGraphNode* node, std::string pre = "")
 }
 
 SceneGraph::SceneGraph()
-    : _focus("Root")
-    , _position("Root")
+    : _focus(SceneGraphNode::RootNodeName)
+    , _position(SceneGraphNode::RootNodeName)
     , _root(nullptr)
 {
 }
@@ -206,8 +204,8 @@ bool SceneGraph::deinitialize()
     _nodes.erase(_nodes.begin(), _nodes.end());
     _allNodes.erase(_allNodes.begin(), _allNodes.end());
 
-    _focus = "";
-    _position = "";
+    _focus.clear();
+    _position.clear();
 
     return true;
 }
@@ -243,9 +241,9 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
 
     // initialize the root node
     _root = new SceneGraphNode();
-    _root->setName(_rootNodeName);
+    _root->setName(SceneGraphNode::RootNodeName);
     _nodes.push_back(_root);
-    _allNodes.emplace(_rootNodeName, _root);
+    _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
 
     Dictionary dictionary;
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);

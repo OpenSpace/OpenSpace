@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef SCENEGRAPH_H
-#define SCENEGRAPH_H
+#ifndef __SCENEGRAPH_H__
+#define __SCENEGRAPH_H__
 
 // std includes
 #include <vector>
@@ -105,4 +105,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __SCENEGRAPH_H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef SCENEGRAPHNODE_H
-#define SCENEGRAPHNODE_H
+#ifndef __SCENEGRAPHNODE_H__
+#define __SCENEGRAPHNODE_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -42,6 +42,8 @@ namespace openspace {
 
 class SceneGraphNode {
 public:
+    static std::string RootNodeName;
+    
     // constructors & destructor
     SceneGraphNode();
     ~SceneGraphNode();
@@ -100,4 +102,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __SCENEGRAPHNODE_H__

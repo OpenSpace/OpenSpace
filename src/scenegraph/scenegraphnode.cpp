@@ -45,6 +45,8 @@ const std::string _loggerCat = "SceneGraphNode";
 }
 
 namespace openspace {
+    
+std::string SceneGraphNode::RootNodeName = "Root";
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
 {

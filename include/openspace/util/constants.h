@@ -63,11 +63,18 @@ namespace planetgeometry {
     const std::string keyType = "Type";
 } // namespace planetgeometry
 
-
-
 namespace ephemeris {
     const std::string keyType = "Type";
 } // namespace ephemeris
+
+namespace staticephemeris {
+    const std::string keyPosition = "Position";
+} // namespace staticephemeris
+
+namespace spiceephemeris {
+    const std::string keyBody = "Body";
+    const std::string keyOrigin = "Observer";
+} // namespace spiceephemeris
 
 }  // namespace constants
 }  // namespace openspace
