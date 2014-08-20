@@ -38,13 +38,20 @@
 
 #include <openspace/flare/flare.h>
 
+namespace ghoul {
+    namespace cmdparser {
+        class CommandlineCommand;
+        class CommandlineParser;
+    }
+}
+
 namespace openspace {
 
 class ScriptEngine;
 
 class OpenSpaceEngine {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -75,14 +82,17 @@ public:
     void decode();
 
 private:
-    OpenSpaceEngine();
+    OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
-
+    
+    bool gatherCommandlineArguments();
+    
     static OpenSpaceEngine* _engine;
 
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
+    ghoul::cmdparser::CommandlineParser* _commandlineParser;
 #ifdef FLARE_ONLY
     Flare* _flare;
 #endif

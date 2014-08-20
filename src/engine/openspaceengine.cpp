@@ -43,7 +43,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/commandlinecommand.h>
+#include <ghoul/cmdparser/singlecommand.h>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -53,17 +53,25 @@ namespace {
     const std::string _configurationFile = "openspace.cfg";
     const std::string _basePathToken = "${BASE_PATH}";
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
+    
+    const std::string _sgctConfigArgumentCommand = "-config";
+    
+    struct {
+        std::string configurationName;
+    } commandlineArgumentPlaceholders;
 }
+
+using namespace ghoul::cmdparser;
 
 namespace openspace {
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine()
-    : _configurationManager(nullptr)
-    , _interactionHandler(nullptr)
-    , _renderEngine(nullptr)
-//, _scriptEngine(nullptr)
+OpenSpaceEngine::OpenSpaceEngine(std::string programName)
+    : _configurationManager(new ghoul::Dictionary)
+    , _interactionHandler(new InteractionHandler)
+    , _renderEngine(new RenderEngine)
+    , _commandlineParser(new CommandlineParser(programName, true))
 {
 }
 
@@ -72,13 +80,12 @@ OpenSpaceEngine::~OpenSpaceEngine()
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
-
-    // TODO deallocate script engine when starting to use it
-    // delete _scriptEngine;
+    delete _commandlineParser;
 
     Spice::deinit();
     Time::deinit();
     DeviceIdentifier::deinit();
+    FileSystem::deinitialize();
     LogManager::deinitialize();
 }
 
@@ -86,6 +93,16 @@ OpenSpaceEngine& OpenSpaceEngine::ref()
 {
     assert(_engine);
     return *_engine;
+}
+    
+bool OpenSpaceEngine::gatherCommandlineArguments()
+{
+    // TODO: Get commandline arguments from all modules
+    
+    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(&commandlineArgumentPlaceholders.configurationName, "-config", "-c", "Provides the path to the OpenSpace configuration file");
+    _commandlineParser->addCommand(configurationFileCommand);
+    
+    return true;
 }
 
 void OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary)
@@ -97,10 +114,12 @@ void OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dicti
             const std::string fullKey
                   = ghoul::filesystem::FileSystem::TokenOpeningBraces + key
                     + ghoul::filesystem::FileSystem::TokenClosingBraces;
-            LDEBUG(fullKey << ": " << p);			
+            LDEBUG("Registering path " << fullKey << ": " << p);
 			
 			bool override = (_basePathToken == fullKey);
 			
+            if (override)
+                LINFO("Overriding base path with '" << p << "'");
             FileSys.registerPathToken(fullKey, p, override);
         }
     }
@@ -155,61 +174,98 @@ bool OpenSpaceEngine::findConfiguration(std::string& filename)
     }
 }
 
-void OpenSpaceEngine::create(int argc, char** argv,
+bool OpenSpaceEngine::create(int argc, char** argv,
                              std::vector<std::string>& sgctArguments)
 {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
 
-    // initialize ghoul logging
+    // initialize Ghoul logging
     LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
 
-    // TODO change so initialize is not called in the create function
+    
+    // Initialize FileSystem
     ghoul::filesystem::FileSystem::initialize();
-
-    // TODO parse arguments if filename is specified, if not use default
-    std::string configurationFilePath = "";
-
-    LDEBUG("Finding configuration");
-    if (!OpenSpaceEngine::findConfiguration(configurationFilePath)) {
-        LFATAL("Could not find OpenSpace configuration file!");
-        assert(false);
+    
+    
+    // Sanity check of values
+    if (argc < 1) {
+        LFATAL("No arguments were passed to the function");
+        return false;
     }
+    
+    // create other objects
+    LDEBUG("Creating OpenSpaceEngine");
+    _engine = new OpenSpaceEngine(std::string(argv[0]));
+    
+    
+    // Query modules for commandline arguments
+    const bool gatherSuccess = _engine->gatherCommandlineArguments();
+    if (!gatherSuccess)
+        return false;
+    
 
-	LINFO(FileSys.absolutePath(configurationFilePath));
+    // Parse commandline arguments
+    std::vector<std::string> remainingArguments;
+    _engine->_commandlineParser->setCommandLine(argc, argv, &sgctArguments);
+    const bool executeSuccess = _engine->_commandlineParser->execute();
+    if (!executeSuccess)
+        return false;
+    
+    
+    // Find configuration
+    std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
+    if (configurationFilePath.empty()) {
+        LDEBUG("Finding configuration");
+        const bool findConfigurationSuccess = OpenSpaceEngine::findConfiguration(configurationFilePath);
+        if (!findConfigurationSuccess) {
+            LFATAL("Could not find OpenSpace configuration file!");
+            return false;
+        }
+    }
+	LINFO("Configuration Path: '" << FileSys.absolutePath(configurationFilePath) << "'");
 
-    // create objects
-    _engine = new OpenSpaceEngine;
-    _engine->_renderEngine = new RenderEngine;
-    _engine->_interactionHandler = new InteractionHandler;
-    _engine->_configurationManager = new ghoul::Dictionary;
 
-
+    // Registering base path
     LDEBUG("Registering base path");
     if (!OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
         LFATAL("Could not register base path");
-        assert(false);
+        return false;
     }
 
-    ghoul::Dictionary& configuration = *(_engine->_configurationManager);
+    
+    // Loading configuration from disk
+    LDEBUG("Loading configuration from disk");
+    ghoul::Dictionary& configuration = _engine->configurationManager();
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    if (configuration.hasKey(constants::openspaceengine::keyPaths)) {
+    const bool hasKey = configuration.hasKey(constants::openspaceengine::keyPaths);
+    const bool hasValue = configuration.hasValue<ghoul::Dictionary>(constants::openspaceengine::keyPaths);
+    if (hasKey && hasValue) {
         ghoul::Dictionary pathsDictionary;
-        if (configuration.getValue(constants::openspaceengine::keyPaths, pathsDictionary))
-            OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
+        configuration.getValue(constants::openspaceengine::keyPaths, pathsDictionary);
+        OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
+    }
+    else {
+        LFATAL("Configuration file does not contain paths token '" << constants::openspaceengine::keyPaths << "'");
+        return false;
     }
 
+    
+    // Determining SGCT configuration file
+    LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
     if (configuration.hasKey(constants::openspaceengine::keyConfigSgct))
         configuration.getValue(constants::openspaceengine::keyConfigSgct, sgctConfigurationPath);
 
-    sgctArguments.push_back(argv[0]);
-    sgctArguments.push_back("-config");
-    sgctArguments.push_back(absPath(sgctConfigurationPath));
-
-    for (int i = 1; i < argc; ++i)
-        sgctArguments.push_back(argv[i]);
+    
+    // Prepend the outgoing sgctArguments with the program name
+    // as well as the configuration file that sgct is supposed to use
+    sgctArguments.insert(sgctArguments.begin(), argv[0]);
+    sgctArguments.insert(sgctArguments.begin() + 1, _sgctConfigArgumentCommand);
+    sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
+    
+    return true;
 }
 
 void OpenSpaceEngine::destroy()

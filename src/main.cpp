@@ -51,7 +51,9 @@ int main(int argc, char** argv)
 {
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
-    openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+    const bool success = openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+    if (!success)
+        return EXIT_FAILURE;
 
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());

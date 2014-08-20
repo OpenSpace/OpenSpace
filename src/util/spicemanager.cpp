@@ -31,6 +31,7 @@
 
 #include "openspace/util/spicemanager.h"
 #include "ghoul/filesystem/filesystem.h"
+#include "ghoul/logging/logmanager.h"
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
@@ -223,10 +224,18 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	//method to put error out...
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
 		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-	
-	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL) 
-		return false;
+    
+    int failed = failed_c();
+    if(failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error retrieving position of target '" + target + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return false;
+    }
 
+	
 	memcpy(&targetPosition, pos, sizeof(double)* 3);
 
 	return true;
@@ -244,11 +253,18 @@ bool SpiceManager::getTargetState(const std::string& target,
 
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 	    	aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+    
+    int failed = failed_c();
+    if(failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error retrieving state of target '" + target + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return false;
+    }
 
 	for (int i = 0; i < 3; i++){
-		if (state[i] == NULL || state[i + 3] == NULL){
-			return false;
-		}
 		memcpy(&targetPosition, state   , sizeof(double)* 3);
 		memcpy(&targetVelocity, state +3, sizeof(double)* 3);
 	}
