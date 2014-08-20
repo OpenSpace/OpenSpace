@@ -59,6 +59,10 @@ namespace renderableplanet {
     const std::string keyGeometry = "Geometry";
 } // namespace renderableplanet
 
+namespace renderablestars {
+	const std::string keySpeckFile = "SpeckFile";
+} // namespace renderablestars
+
 namespace planetgeometry {
     const std::string keyType = "Type";
 } // namespace planetgeometry
