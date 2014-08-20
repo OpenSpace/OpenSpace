@@ -138,9 +138,10 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 					  [](std::string const& val) {return std::stod(val); });
 
 			// convert to powerscaled coordinate
-			const psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0],
-																					   doubleData[1], 
-																					   doubleData[2]);
+			const psc powerscaled = 
+			PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0],
+															   doubleData[1], 
+															   doubleData[2]);
 			for (int i = 0; i < 4; i++){
 				positions.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
@@ -164,7 +165,12 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	// pass in the vectors internal array to create vbo method
 	v_size = positions.size();
 	std::cout << v_size << std::endl;
-
+	/* // use fread() instead ??
+	FILE * pFile;
+	pFile = fopen("myfile.bin", "wb");
+	fwrite(&positions[0], sizeof(double), positions.size(), pFile);
+	fclose(pFile);
+	*/
 	_starPositionsVBO = createVBO(&positions[0], v_size*sizeof(GLdouble), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 	return true;
