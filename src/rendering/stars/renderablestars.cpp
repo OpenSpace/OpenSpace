@@ -26,13 +26,11 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
-
 #include <vector>
 
 // open space includes
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/util/constants.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
@@ -48,7 +46,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 	std::string path;
 	dictionary.getValue(constants::renderablestars::keySpeckFile, path);
-	_speckPath = absPath(path);
+	_speckPath = FileSys.absolutePath(path);
 }
 
 RenderableStars::~RenderableStars(){
@@ -82,66 +80,92 @@ std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num
 	return file;
 }
 
-
 bool RenderableStars::readSpeckFile(const std::string& path){
 	std::ifstream file;
-	std::string str, name, datastr;
+	std::string str, starDescription, datastr;
 	std::vector<std::string> strvec;
 	std::vector<double> positions;
 	std::vector<double> doubleData;
     int count = 0;
-
-	file.open(path);
-
-	if (!file.is_open()){
-		LERROR("Failed to open spec file for : '" << path << "'");
-		return false;
-	}
-	// count metadata lines.
-	do{
-		getline(file, str);
-		count++;
-	} while (str[0] != ' ');
-	// set seek pointer to first line with actual data
-	skipToLine(file, count);
-	count = 0;
 	
-	do{
-		getline(file, str);
-		if (file.eof()) break;
-		// split the line on pound symbol. 
-	   std::size_t mid = str.find('#');
-		if (mid != std::string::npos){
-			datastr = str.substr(0, mid);
-			std::size_t end = str.find('\n');
-			if (end == std::string::npos)
-				name = str.substr(mid, end);
-		} 
-		// split data string on whitespace to vector
-		std::istringstream ss(datastr);
-		std::copy(std::istream_iterator<std::string>(ss),
-			      std::istream_iterator<std::string>(),
-			      std::back_inserter<std::vector<std::string> >(strvec));
-		ss.clear();
-		// conv. string vector to doubles
-		doubleData.reserve(strvec.size());
-		transform(strvec.begin(), strvec.end(), back_inserter(doubleData),
-				  [](std::string const& val) {return std::stod(val); });
+	const std::string absPath = FileSys.absolutePath(path);
+	std::string::size_type last
+		= absPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
+	if (last == std::string::npos) return false;
+	std::string cacheName = absPath.substr(last + 1, absPath.size() - absPath.rfind('.') - 1);
+	std::string basePath = absPath.substr(0, last);
+	cacheName = basePath + "\\" + cacheName + ".bin";
 
-		// convert to powerscaled coordinate
-		psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0],
-			                                                                 doubleData[1], 
-														                     doubleData[2]);
-		for ( int i = 0; i < 4; i++ ) 
-			positions.push_back(powerscaled[i]);
-		strvec.clear();
-		doubleData.clear();
-		count++;
-	} while (file.good());
+	// check if cache exists, if not create it. 
+	if (!FileSys.fileExists(cacheName)){ 
+		std::ofstream cache;
+		cache.open(cacheName, std::ios::binary);
+	
+		file.open(absPath);
+		if (!file.is_open()){
+			LERROR("Failed to open spec file for : '" << path << "'");
+			return false;
+		}
+		// count metadata lines to skip.
+		do{
+			getline(file, str);
+			count++;
+		} while (str[0] != ' ');
+		// set seek pointer to first line with actual data
+		skipToLine(file, count);
+		count = 0;
+	
+		do{ 
+			getline(file, str);
+			if (file.eof()) break;
+			// split the line on pound symbol. 
+		    std::size_t mid = str.find('#');
+			if (mid != std::string::npos){
+				datastr = str.substr(0, mid);
+				std::size_t end = str.find('\n');
+				if (end == std::string::npos)
+					starDescription = str.substr(mid, end);
+			} 
+			// split data string on whitespace to vector
+			std::istringstream ss(datastr);
+			std::copy(std::istream_iterator<std::string>(ss),
+					  std::istream_iterator<std::string>(),
+					  std::back_inserter<std::vector<std::string> >(strvec));
+			ss.clear();
+			// conv. string vector to doubles
+			doubleData.reserve(strvec.size());
+			transform(strvec.begin(), strvec.end(), back_inserter(doubleData),
+					  [](std::string const& val) {return std::stod(val); });
 
+			// convert to powerscaled coordinate
+			const psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0],
+																					   doubleData[1], 
+																					   doubleData[2]);
+			for (int i = 0; i < 4; i++){
+				positions.push_back(powerscaled[i]);
+				cache << ' ' << powerscaled[i];
+			}
+			strvec.clear();
+			doubleData.clear();
+			count++;
+		} while (file.good());
+	}
+	else // read cached positions
+	{
+		LINFO("Found cached data, loading");
+		file.open(cacheName, std::ios::binary);
+		while (file.good()){
+			if (file.eof()) break;
+			double cachedValue;
+			file >> cachedValue;
+			positions.push_back(cachedValue);
+		}
+	}
 	// pass in the vectors internal array to create vbo method
-	// v_size = positions.size();
-	//_starPositionsVBO = createVBO(&positions[0], v_size*sizeof(GLdouble), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+	v_size = positions.size();
+	std::cout << v_size << std::endl;
+
+	_starPositionsVBO = createVBO(&positions[0], v_size*sizeof(GLdouble), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 	return true;
 }
