@@ -309,6 +309,11 @@ void SceneGraphNode::setRenderable(Renderable* renderable)
     update();
 }
 
+Renderable* SceneGraphNode::renderable()
+{
+    return _renderable;
+}
+
 const Renderable* SceneGraphNode::renderable() const
 {
     return _renderable;

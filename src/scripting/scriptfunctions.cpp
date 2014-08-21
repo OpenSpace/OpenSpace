@@ -32,7 +32,7 @@
 using namespace openspace;
 using namespace openspace::properties;
 
-static int property_setValue(lua_State* L)
+int property_setValue(lua_State* L)
 {
     const std::string _loggerCat = "property_setValue";
     using ghoul::lua::luaTypeToString;
@@ -77,7 +77,7 @@ static int property_setValue(lua_State* L)
     return 0;
 }
 
-static int property_getValue(lua_State* L)
-{
-    
-}
+//int property_getValue(lua_State* L)
+//{
+//    
+//}

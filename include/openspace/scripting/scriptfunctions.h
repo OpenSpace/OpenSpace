@@ -29,8 +29,8 @@ struct lua_State;
 
 // Properties
 
-static int property_setValue(lua_State* L);
-static int property_getValue(lua_State* L);
+int property_setValue(lua_State* L);
+//static int property_getValue(lua_State* L);
 
 
 #endif // __SCRIPTFUNCTIONS_H__

@@ -351,9 +351,8 @@ bool SceneGraph::registerScriptFunctions()
     ScriptEngine::LuaLibrary l = {
         "",
         {
-        { "setPropertyValue", &property_setValue},
-        { "getPropertyValue", &property_getValue},
-        { NULL, NULL }
+        { "setPropertyValue", &property_setValue}
+//        { "getPropertyValue", &property_getValue},
         }
     };
     return true;
