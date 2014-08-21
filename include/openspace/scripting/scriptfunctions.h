@@ -21,86 +21,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/ephemeris.h>
+#ifndef __SCRIPTFUNCTIONS_H__
+#define __SCRIPTFUNCTIONS_H__
 
-#include <openspace/scenegraph/scenegraph.h>
-#include <ghoul/misc/dictionary.h>
+struct lua_State;
 
-// std includes
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
+// Properties
 
-namespace openspace {
+static int property_setValue(lua_State* L);
+static int property_getValue(lua_State* L);
 
-class SceneGraphNode {
-public:
-    static std::string RootNodeName;
-    
-    // constructors & destructor
-    SceneGraphNode();
-    ~SceneGraphNode();
 
-    static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
-
-    bool initialize();
-    bool deinitialize();
-
-    // essential
-    void update();
-    void evaluate(const Camera* camera, const psc& parentPosition = psc());
-    void render(const Camera* camera, const psc& parentPosition = psc());
-
-    // set & get
-    void addNode(SceneGraphNode* child);
-
-    void setName(const std::string& name);
-    void setParent(SceneGraphNode* parent);
-    const psc& position() const;
-    psc worldPosition() const;
-    std::string nodeName() const;
-
-    SceneGraphNode* parent() const;
-    const std::vector<SceneGraphNode*>& children() const;
-
-    // bounding sphere
-    PowerScaledScalar calculateBoundingSphere();
-
-    SceneGraphNode* childNode(const std::string& name);
-
-    void print() const;
-
-    // renderable
-    void setRenderable(Renderable* renderable);
-    const Renderable* renderable() const;
-    Renderable* renderable();
-
-private:
-    // essential
-    std::vector<SceneGraphNode*> _children;
-    SceneGraphNode* _parent;
-    std::string _nodeName;
-    Ephemeris* _ephemeris;
-
-    // renderable
-    Renderable* _renderable;
-    bool _renderableVisible;
-
-    // bounding sphere
-    bool _boundingSphereVisible;
-    PowerScaledScalar _boundingSphere;
-
-    // private helper methods
-    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
-};
-
-} // namespace openspace
-
-#endif // __SCENEGRAPHNODE_H__
+#endif // __SCRIPTFUNCTIONS_H__

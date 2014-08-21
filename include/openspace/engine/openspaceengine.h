@@ -27,6 +27,7 @@
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
@@ -47,8 +48,6 @@ namespace ghoul {
 
 namespace openspace {
 
-class ScriptEngine;
-
 class OpenSpaceEngine {
 public:
     static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
@@ -66,6 +65,7 @@ public:
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
+    ScriptEngine& scriptEngine();
 
     // SGCT callbacks
     bool initializeGL();
@@ -92,11 +92,11 @@ private:
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
+    ScriptEngine* _scriptEngine;
     ghoul::cmdparser::CommandlineParser* _commandlineParser;
 #ifdef FLARE_ONLY
     Flare* _flare;
 #endif
-    // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;

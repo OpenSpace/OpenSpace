@@ -119,7 +119,7 @@ Camera * InteractionHandler::getCamera() const {
 
 const psc InteractionHandler::getOrigin() const {
 	if(node_)
-		return node_->getWorldPosition();
+		return node_->worldPosition();
 	return psc();
 }
 
@@ -155,7 +155,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	// should be changed to something more dynamic =)
 	psc origin;
 	if(node_) {
-		origin = node_->getWorldPosition();
+		origin = node_->worldPosition();
 	}
 
 	psc relative_origin_coordinate = relative - origin;
@@ -175,7 +175,7 @@ void InteractionHandler::distance(const PowerScaledScalar &distance) {
 	psc relative = camera_->position();
 	psc origin;
 	if(node_) {
-		origin = node_->getWorldPosition();
+		origin = node_->worldPosition();
 	}
 
 	psc relative_origin_coordinate = relative - origin;
@@ -246,7 +246,7 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
 
     //Get x,y,z axis vectors of current camera view
 	glm::vec3 currentViewYaxis = glm::normalize(camera_->lookUpVector());
-	psc viewDir = camera_->position() - node_->getWorldPosition();
+	psc viewDir = camera_->position() - node_->worldPosition();
 	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 

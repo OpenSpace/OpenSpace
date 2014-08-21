@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
 
@@ -32,15 +33,29 @@ namespace {
 const std::string _loggerCat = "Query";
 }
 
-SceneGraph* getSceneGraph()
+SceneGraph* sceneGraph()
 {
     return OsEng.renderEngine().sceneGraph();
 }
 
-SceneGraphNode* getSceneGraphNode(const std::string& name)
+SceneGraphNode* sceneGraphNode(const std::string& name)
 {
-    SceneGraph* sceneGraph = getSceneGraph();
-    return sceneGraph->sceneGraphNode(name);
+    const SceneGraph* graph = sceneGraph();
+    return graph->sceneGraphNode(name);
+}
+    
+properties::Property* property(const std::string& uri)
+{
+    const size_t separator = uri.find('.');
+    return property(uri.substr(0, separator), uri.substr(separator));
+}
+    
+properties::Property* property(const std::string& nodeName, const std::string& propertyName)
+{
+    SceneGraphNode* node = sceneGraphNode(nodeName);
+    Renderable* propertyOwner = node->renderable();
+    properties::Property* property = propertyOwner->property(propertyName);;
+    return property;
 }
 
 }  // namespace

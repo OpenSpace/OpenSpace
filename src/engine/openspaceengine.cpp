@@ -71,6 +71,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _configurationManager(new ghoul::Dictionary)
     , _interactionHandler(new InteractionHandler)
     , _renderEngine(new RenderEngine)
+    , _scriptEngine(new ScriptEngine)
     , _commandlineParser(new CommandlineParser(programName, true))
 {
 }
@@ -78,9 +79,15 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 OpenSpaceEngine::~OpenSpaceEngine()
 {
     delete _configurationManager;
+    _configurationManager = nullptr;
     delete _interactionHandler;
+    _interactionHandler = nullptr;
     delete _renderEngine;
+    _renderEngine = nullptr;
+    delete _scriptEngine;
+    _scriptEngine = nullptr;
     delete _commandlineParser;
+    _commandlineParser = nullptr;
 
     Spice::deinit();
     Time::deinit();
@@ -308,6 +315,12 @@ bool OpenSpaceEngine::initialize()
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
 
+    scriptEngine().initialize();
+    scriptEngine().addLibrary(ScriptEngine::LuaLibrary());
+    
+    _engine->scriptEngine().runScript("return mylib.mysin(4)");
+    
+
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);
@@ -355,7 +368,7 @@ bool OpenSpaceEngine::initialize()
 ghoul::Dictionary& OpenSpaceEngine::configurationManager()
 {
     // TODO custom assert (ticket #5)
-    assert(_configurationManager != nullptr);
+    assert(_configurationManager);
     return *_configurationManager;
 }
 
@@ -367,15 +380,22 @@ ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
 InteractionHandler& OpenSpaceEngine::interactionHandler()
 {
     // TODO custom assert (ticket #5)
-    assert(_configurationManager != nullptr);
+    assert(_interactionHandler);
     return *_interactionHandler;
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine()
 {
     // TODO custom assert (ticket #5)
-    assert(_configurationManager != nullptr);
+    assert(_renderEngine);
     return *_renderEngine;
+}
+
+ScriptEngine& OpenSpaceEngine::scriptEngine()
+{
+    // TODO custom assert (ticket #5)
+    assert(_scriptEngine);
+    return *_scriptEngine;
 }
 
 bool OpenSpaceEngine::initializeGL()

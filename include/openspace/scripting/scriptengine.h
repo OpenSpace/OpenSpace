@@ -21,86 +21,36 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/ephemeris.h>
+#ifndef __SCRIPTENGINE_H__
+#define __SCRIPTENGINE_H__
 
-#include <openspace/scenegraph/scenegraph.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <set>
 
-// std includes
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-
-namespace openspace {
-
-class SceneGraphNode {
+class ScriptEngine {
 public:
-    static std::string RootNodeName;
+    struct LuaLibrary {
+        std::string name;
+        std::vector<std::pair<std::string, lua_CFunction>> functions;
+    };
     
-    // constructors & destructor
-    SceneGraphNode();
-    ~SceneGraphNode();
-
-    static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
-
+    ScriptEngine();
+    
     bool initialize();
-    bool deinitialize();
-
-    // essential
-    void update();
-    void evaluate(const Camera* camera, const psc& parentPosition = psc());
-    void render(const Camera* camera, const psc& parentPosition = psc());
-
-    // set & get
-    void addNode(SceneGraphNode* child);
-
-    void setName(const std::string& name);
-    void setParent(SceneGraphNode* parent);
-    const psc& position() const;
-    psc worldPosition() const;
-    std::string nodeName() const;
-
-    SceneGraphNode* parent() const;
-    const std::vector<SceneGraphNode*>& children() const;
-
-    // bounding sphere
-    PowerScaledScalar calculateBoundingSphere();
-
-    SceneGraphNode* childNode(const std::string& name);
-
-    void print() const;
-
-    // renderable
-    void setRenderable(Renderable* renderable);
-    const Renderable* renderable() const;
-    Renderable* renderable();
-
+    void deinitialize();
+    
+    bool addLibrary(const LuaLibrary& library);
+    bool hasLibrary(const std::string& name);
+    
+    bool runScript(std::string script);
+    
 private:
-    // essential
-    std::vector<SceneGraphNode*> _children;
-    SceneGraphNode* _parent;
-    std::string _nodeName;
-    Ephemeris* _ephemeris;
-
-    // renderable
-    Renderable* _renderable;
-    bool _renderableVisible;
-
-    // bounding sphere
-    bool _boundingSphereVisible;
-    PowerScaledScalar _boundingSphere;
-
-    // private helper methods
-    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
+    bool isLibraryNameAllowed(const std::string& name);
+    void addLibraryFunctions(const LuaLibrary& library, bool replace);
+    
+    lua_State* _state;
+    std::set<unsigned int> _registeredLibraries;
 };
 
-} // namespace openspace
-
-#endif // __SCENEGRAPHNODE_H__
+#endif // __SCRIPTENGINE_H__

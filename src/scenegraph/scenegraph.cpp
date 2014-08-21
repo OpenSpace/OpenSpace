@@ -24,10 +24,12 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraph.h>
-#include <openspace/rendering/planets/renderableplanet.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/util/spice.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/rendering/planets/renderableplanet.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/scriptfunctions.h>
+#include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
 
 // ghoul includes
@@ -76,7 +78,12 @@ SceneGraph::~SceneGraph()
 bool SceneGraph::initialize()
 {
     LDEBUG("Initializing SceneGraph");
-
+    
+    const bool scriptSuccess = registerScriptFunctions();
+    if (!scriptSuccess)
+        return false;
+    
+    LDEBUG("Creating ProgramObjects");
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
@@ -182,7 +189,7 @@ bool SceneGraph::initialize()
         glm::vec2 scaling{1.0f, -boundf[1]};
         boundf[0] *= 5.0f;
         
-        psc cameraPosition = positionNode->getPosition();
+        psc cameraPosition = positionNode->position();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
         c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
@@ -334,6 +341,22 @@ void SceneGraph::printChildren() const
 SceneGraphNode* SceneGraph::root() const
 {
     return _root;
+}
+    
+bool SceneGraph::registerScriptFunctions()
+{
+    LDEBUG("Registering Script Functions");
+    
+    
+    ScriptEngine::LuaLibrary l = {
+        "",
+        {
+        { "setPropertyValue", &property_setValue},
+        { "getPropertyValue", &property_getValue},
+        { NULL, NULL }
+        }
+    };
+    return true;
 }
 
 SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {

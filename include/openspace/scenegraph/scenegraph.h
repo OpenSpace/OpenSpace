@@ -95,6 +95,8 @@ public:
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
 private:
+    bool registerScriptFunctions();
+    
     std::string _focus, _position;
 
     // actual scenegraph

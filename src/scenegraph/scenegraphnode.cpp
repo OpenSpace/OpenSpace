@@ -98,7 +98,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         parentName = "Root";
     }
 
-    SceneGraphNode* parentNode = getSceneGraphNode(parentName);
+    SceneGraphNode* parentNode = sceneGraphNode(parentName);
     if (parentNode == nullptr) {
         LFATAL("Could not find parent named '"
                << parentName << "' for '" << result->_nodeName << "'."
@@ -242,16 +242,16 @@ void SceneGraphNode::setParent(SceneGraphNode* parent)
     _parent = parent;
 }
 
-const psc& SceneGraphNode::getPosition() const
+const psc& SceneGraphNode::position() const
 {
     return _ephemeris->position();
 }
 
-psc SceneGraphNode::getWorldPosition() const
+psc SceneGraphNode::worldPosition() const
 {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->getWorldPosition();
+        return _ephemeris->position() + _parent->worldPosition();
     } else {
         return _ephemeris->position();
     }
@@ -285,7 +285,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
         for (size_t i = 0; i < _children.size(); ++i) {
             // when positions is dynamic, change this part to fins the most distant
             // position
-            PowerScaledScalar child = _children.at(i)->getPosition().length()
+            PowerScaledScalar child = _children.at(i)->position().length()
                         + _children.at(i)->calculateBoundingSphere();
             if (child > maxChild) {
                 maxChild = child;
@@ -309,7 +309,7 @@ void SceneGraphNode::setRenderable(Renderable* renderable)
     update();
 }
 
-const Renderable* SceneGraphNode::getRenderable() const
+const Renderable* SceneGraphNode::renderable() const
 {
     return _renderable;
 }
@@ -346,13 +346,13 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScala
     }
 }
 
-SceneGraphNode* SceneGraphNode::get(const std::string& name)
+SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 {
     if (_nodeName == name)
         return this;
     else
         for (auto it : _children) {
-            SceneGraphNode* tmp = it->get(name);
+            SceneGraphNode* tmp = it->childNode(name);
             if (tmp != nullptr) {
                 return tmp;
             }

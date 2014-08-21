@@ -21,86 +21,63 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/ephemeris.h>
+#include <openspace/scripting/scriptfunctions.h>
 
-#include <openspace/scenegraph/scenegraph.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/query/query.h>
 
-// std includes
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
+#include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
+using namespace openspace;
+using namespace openspace::properties;
 
-class SceneGraphNode {
-public:
-    static std::string RootNodeName;
+static int property_setValue(lua_State* L)
+{
+    const std::string _loggerCat = "property_setValue";
+    using ghoul::lua::luaTypeToString;
+
+    // TODO Check for argument number (ab)
+    std::string nodeName = luaL_checkstring(L, -3);
+    std::string propertyName = luaL_checkstring(L, -2);
+    const int type = lua_type(L, -1);
+    boost::any propertyValue;
+    switch (type) {
+        case LUA_TNONE:
+        case LUA_TLIGHTUSERDATA:
+        case LUA_TTABLE:
+        case LUA_TFUNCTION:
+        case LUA_TUSERDATA:
+        case LUA_TTHREAD:
+            LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
+            return 0;
+        case LUA_TNIL:
+            propertyValue = 0;
+            break;
+        case LUA_TBOOLEAN:
+            propertyValue = lua_toboolean(L, -1);
+            break;
+        case LUA_TNUMBER:
+            propertyValue = lua_tonumber(L, -1);
+            break;
+        case LUA_TSTRING:
+            propertyValue = std::string(lua_tostring(L, -1));
+            break;
+    }
     
-    // constructors & destructor
-    SceneGraphNode();
-    ~SceneGraphNode();
+    Property* prop = property(nodeName, propertyName);
+    if (!prop) {
+        LERROR("Property at " << nodeName << "." << propertyName <<
+               " could not be found");
+        return 0;
+    }
 
-    static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
+    prop->set(propertyValue);
+    
+    return 0;
+}
 
-    bool initialize();
-    bool deinitialize();
-
-    // essential
-    void update();
-    void evaluate(const Camera* camera, const psc& parentPosition = psc());
-    void render(const Camera* camera, const psc& parentPosition = psc());
-
-    // set & get
-    void addNode(SceneGraphNode* child);
-
-    void setName(const std::string& name);
-    void setParent(SceneGraphNode* parent);
-    const psc& position() const;
-    psc worldPosition() const;
-    std::string nodeName() const;
-
-    SceneGraphNode* parent() const;
-    const std::vector<SceneGraphNode*>& children() const;
-
-    // bounding sphere
-    PowerScaledScalar calculateBoundingSphere();
-
-    SceneGraphNode* childNode(const std::string& name);
-
-    void print() const;
-
-    // renderable
-    void setRenderable(Renderable* renderable);
-    const Renderable* renderable() const;
-    Renderable* renderable();
-
-private:
-    // essential
-    std::vector<SceneGraphNode*> _children;
-    SceneGraphNode* _parent;
-    std::string _nodeName;
-    Ephemeris* _ephemeris;
-
-    // renderable
-    Renderable* _renderable;
-    bool _renderableVisible;
-
-    // bounding sphere
-    bool _boundingSphereVisible;
-    PowerScaledScalar _boundingSphere;
-
-    // private helper methods
-    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
-};
-
-} // namespace openspace
-
-#endif // __SCENEGRAPHNODE_H__
+static int property_getValue(lua_State* L)
+{
+    
+}
