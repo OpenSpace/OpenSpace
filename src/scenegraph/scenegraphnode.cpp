@@ -176,7 +176,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     _renderableVisible = false;
 
     // check if camera is outside the node boundingsphere
-    if (toCamera.length() > _boundingSphere) {
+  /*  if (toCamera.length() > _boundingSphere) {
         // check if the boudningsphere is visible before avaluating children
         if (!sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
             // the node is completely outside of the camera view, stop evaluating this
@@ -184,7 +184,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
             return;
         }
     }
-
+	*/
     // inside boudningsphere or parts of the sphere is visible, individual
     // children needs to be evaluated
     _boundingSphereVisible = true;
@@ -192,8 +192,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     // this node has an renderable
     if (_renderable) {
         //  check if the renderable boundingsphere is visible
-        _renderableVisible = sphereInsideFrustum(
-              thisPosition, _renderable->getBoundingSphere(), camera);
+		_renderableVisible = true;// sphereInsideFrustum(thisPosition, _renderable->getBoundingSphere(), camera);
     }
 
     // evaluate all the children, tail-recursive function(?)
@@ -207,9 +206,10 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
     const psc thisPosition = parentPosition + _ephemeris->position();
 
     // check if camera is outside the node boundingsphere
-    if (!_boundingSphereVisible) {
+    /*if (!_boundingSphereVisible) {
         return;
-    }
+    }*/
+
     if (_renderableVisible) {
         // LDEBUG("Render");
         _renderable->render(camera, thisPosition);
@@ -255,26 +255,22 @@ psc SceneGraphNode::getWorldPosition() const
     }
 }
 
-std::string SceneGraphNode::nodeName() const
-{
+std::string SceneGraphNode::nodeName() const{
     return _nodeName;
 }
 
-SceneGraphNode* SceneGraphNode::parent() const
-{
+SceneGraphNode* SceneGraphNode::parent() const{
     return _parent;
 }
-const std::vector<SceneGraphNode*>& SceneGraphNode::children() const
-{
+const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
     return _children;
 }
 
 // bounding sphere
-PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
-{
+PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
-    _boundingSphere = 0.0;
-
+    _boundingSphere = 1000.0;
+	
     if (_children.size() > 0) {  // node
         PowerScaledScalar maxChild;
 
@@ -296,19 +292,17 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
         if (_renderable)
             _boundingSphere += _renderable->getBoundingSphere();
     }
-
+	
     return _boundingSphere;
 }
 
 // renderable
-void SceneGraphNode::setRenderable(Renderable* renderable)
-{
+void SceneGraphNode::setRenderable(Renderable* renderable) {
     _renderable = renderable;
     update();
 }
 
-const Renderable* SceneGraphNode::getRenderable() const
-{
+const Renderable* SceneGraphNode::getRenderable() const{
     return _renderable;
 }
 

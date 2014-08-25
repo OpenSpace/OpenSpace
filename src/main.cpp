@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     _interface = new openspace::Interface(&OsEng);
 
     // try to open a window
-    if (!_sgctEngine->init(sgct::Engine::OpenGL_3_3_Core_Profile)) {
+	if (!_sgctEngine->init(sgct::Engine::OpenGL_4_3_Core_Profile)) {
         // could not open a window, deallocates and exits
         delete _sgctEngine;
         openspace::OpenSpaceEngine::destroy();

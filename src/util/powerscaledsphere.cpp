@@ -121,6 +121,7 @@ PowerScaledSphere::~PowerScaledSphere()
     glDeleteBuffers(1, &_iBufferID);
     glDeleteVertexArrays(1, &_vaoID);
 }
+#define cppOffsetOf(s, m) ((size_t)&(((s *)NULL)->m))
 
 bool PowerScaledSphere::initialize()
 {

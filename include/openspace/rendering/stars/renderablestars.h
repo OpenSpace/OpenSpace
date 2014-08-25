@@ -52,7 +52,9 @@ private:
 	ghoul::opengl::ProgramObject* _programObject;
 	std::string _speckPath;
 
-	GLuint _starPositionsVBO;
+	GLuint _vboID;
+	GLuint _vaoID;
+	//GLint positionAttrib;
 	int v_size;
 };
 

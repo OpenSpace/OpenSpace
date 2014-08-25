@@ -35,6 +35,27 @@
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 
+#define printOpenGLError() printOglError(__FILE__, __LINE__)
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+int printOglError(char *file, int line)
+{
+
+	GLenum glErr;
+	int    retCode = 0;
+
+	glErr = glGetError();
+	if (glErr != GL_NO_ERROR)
+	{
+		printf("glError in file %s @ line %d: %s\n",
+			file, line, gluErrorString(glErr));
+		retCode = 1;
+	}
+	return retCode;
+}
+
 namespace {
 	const std::string _loggerCat = "RenderableStars";
 }
@@ -44,6 +65,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary),
 	_programObject(nullptr){
 
+	//setBoundingSphere(PowerScaledScalar::CreatePSS(100));
 	std::string path;
 	dictionary.getValue(constants::renderablestars::keySpeckFile, path);
 	_speckPath = FileSys.absolutePath(path);
@@ -84,8 +106,8 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::ifstream file;
 	std::string str, starDescription, datastr;
 	std::vector<std::string> strvec;
-	std::vector<double> positions;
-	std::vector<double> doubleData;
+	std::vector<float> positions;
+	std::vector<float> doubleData;
     int count = 0;
 	
 	const std::string absPath = FileSys.absolutePath(path);
@@ -136,16 +158,13 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			doubleData.reserve(strvec.size());
 			transform(strvec.begin(), strvec.end(), back_inserter(doubleData),
 					  [](std::string const& val) {return std::stod(val); });
-
 			// convert to powerscaled coordinate
-			const psc powerscaled = 
-			PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0],
-															   doubleData[1], 
-															   doubleData[2]);
+			const psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0], doubleData[1], doubleData[2]);
 			for (int i = 0; i < 4; i++){
 				positions.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
 			}
+			
 			strvec.clear();
 			doubleData.clear();
 			count++;
@@ -157,50 +176,44 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 		file.open(cacheName, std::ios::binary);
 		while (file.good()){
 			if (file.eof()) break;
-			double cachedValue;
+			count++;
+			float cachedValue;
 			file >> cachedValue;
 			positions.push_back(cachedValue);
 		}
 	}
 	// pass in the vectors internal array to create vbo method
 	v_size = positions.size();
-	std::cout << v_size << std::endl;
-	/* // use fread() instead ??
-	FILE * pFile;
-	pFile = fopen("myfile.bin", "wb");
-	fwrite(&positions[0], sizeof(double), positions.size(), pFile);
-	fclose(pFile);
-	*/
-	_starPositionsVBO = createVBO(&positions[0], v_size*sizeof(GLdouble), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+	
+	glGenVertexArrays(1, &_vaoID);
+	glGenBuffers(1, &_vboID);
+
+	glBindVertexArray(_vaoID);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW);
+
+	glBindVertexArray(0);
 
 	return true;
 }
 
 bool RenderableStars::initialize(){
+	using ghoul::opengl::ShaderObject;
+	using ghoul::opengl::ProgramObject;
+
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("pscShader", _programObject);
+		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _programObject);
 	
 	if (!readSpeckFile(_speckPath)) 
 		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
 
-	/*
-	loadTexture();
-	completeSuccess &= (_texture != nullptr);
-
-	completeSuccess &= _geometry->initialize(this);
-	*/
 	return completeSuccess;
 }
 
 bool RenderableStars::deinitialize(){
 	// TODO: set private VBO and deinitialize here.. 
-	/*_geometry->deinitialize();
-	delete _geometry;
-	_geometry = nullptr;
-	delete _texture;
-	_texture = nullptr;*/
-	glDeleteBuffers(1, &_starPositionsVBO);
 	return true;
 }
 
@@ -210,46 +223,42 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	// activate shader
 	_programObject->activate();
 
-	psc currentPosition = thisPosition;
+	// fetch data
+	psc currentPosition = glm::vec4(0);// thisPosition; // NOTE : currentPosition now same as Earth. 
 	psc campos = camera->position();
 	glm::mat4 camrot = camera->viewRotationMatrix();
 	PowerScaledScalar scaling = camera->scaling();
-
+	// scale the planet to appropriate size since the planet is a unit sphere
 	glm::mat4 transform = glm::mat4(1);
+
+	//scaling = glm::vec2(1,0);
+	/*
+	transform = glm::rotate(
+		transform, 8.1f * static_cast<float>(sgct::Engine::instance()->getTime()),
+		glm::vec3(0.0f, 1.0f, 0.0f));
+	*/
 	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("campos", campos.vec4());
 	_programObject->setUniform("objpos", currentPosition.vec4());
 	_programObject->setUniform("camrot", camrot);
 	_programObject->setUniform("scaling", scaling.vec2());
+	_programObject->setUniform("Color", glm::vec3(1, 1, 1));
+
+	glPointSize(1.0);
 	
-	glColor4f(1.f, 1.f, 1.f, 1.f);
-	glBindBuffer(GL_ARRAY_BUFFER, _starPositionsVBO);
-	glVertexPointer(4, GL_FLOAT, 0, 0);
-	glEnableClientState(GL_VERTEX_ARRAY);
+	GLint vertsToDraw = v_size / 4;
+	
+	GLint positionAttrib = _programObject->attributeLocation("in_position");
+	glBindVertexArray(_vaoID);
+	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glDrawArrays(GL_POINTS, 0, vertsToDraw);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(positionAttrib);
+	glBindVertexArray(0);
 
-	glDrawArrays(GL_POINTS, 0, 4*v_size);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-	/*
-	// REQUIRES OWN SHADER. 
-	GLint vertexLoc = _programObject->attributeLocation("in_position");
-	glEnableVertexAttribArray(vertexLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, _starPositionsVBO);
-	glVertexAttribPointer(vertexLoc,                 // attribute
-								  4,                 // size
-								  GL_DOUBLE,          // type
-								  GL_FALSE,          // normalized?
-								  0,                 // stride
-								  (void*)0);
-
-	glDrawElements(GL_POINTS,         // mode
-		           v_size/4,            // count
-				   GL_DOUBLE,   // type
-				   (void*)0);         // element array buffer offset
-				   */
 	_programObject->deactivate();
 
 }

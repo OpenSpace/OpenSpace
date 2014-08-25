@@ -26,7 +26,7 @@ uniform mat4 ModelTransform;
 uniform vec4 campos;
 uniform mat4 camrot;
 uniform vec2 scaling;
-uniform vec4 objpos;
+//uniform vec4 objpos;
 uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
@@ -40,6 +40,7 @@ layout(location = 0) in vec4 in_position;
 //in vec3 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
+layout(location = 3) in vec4 objpos;
 
 out vec2 vs_st;
 out vec3 vs_stp;
@@ -87,7 +88,7 @@ void main()
 	// rotate and scale vertex with model transform and add the translation
 	vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
 	//vec4 lvp = ModelTransform * in_position;
-
+	
 	// PSC addition; local vertex position and the object power scaled world position
 	vs_position = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);
 	//vs_position = psc_addition(lvp,objpos);
@@ -98,7 +99,7 @@ void main()
 	// rotate the camera
 	local_vertex_pos =  mat3(camrot) * vs_position.xyz;
 	vs_position = vec4(local_vertex_pos, vs_position.w);
-	//vs_position =  camrot* vs_position;
+	//vs_position =  camrot * vs_position;
 
 	// rescales the scene to fit inside the view frustum
 	// is set from the main program, but these are decent values

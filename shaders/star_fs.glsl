@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 uniform vec4 campos;
-uniform vec4 objpos;
+//uniform vec4 objpos;
 uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
@@ -100,11 +100,12 @@ void main()
 	
 	
 	// set the depth
-//	gl_FragDepth = depth;
+	gl_FragDepth = depth;
 	//gl_FragDepth = 0.5;
 
 	// color 
-	   diffuse = texture(texture1, vs_st);
+	diffuse = vec4(1.0,1.0,1.0,1.0);
+	 //  diffuse = texture(texture1, vs_st);
     //diffuse = vec4(vs_position.z,0.0, 0.0, 1.0);
     // diffuse = vec4(vs_position.xyz * pow(10, vs_position.w), 1.0);
 	//diffuse = vec4(vs_st, 0.0, 1.0);

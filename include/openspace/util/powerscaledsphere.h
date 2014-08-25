@@ -36,7 +36,8 @@ namespace openspace {
 class PowerScaledSphere {
 public:
     // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, int segments = 8);
+    PowerScaledSphere(const PowerScaledScalar& radius, 
+		int segments = 8);
     ~PowerScaledSphere();
 
     bool initialize();

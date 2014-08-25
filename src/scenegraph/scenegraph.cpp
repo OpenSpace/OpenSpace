@@ -108,6 +108,18 @@ bool SceneGraph::initialize()
 
     OsEng.ref().configurationManager().setValue("pscShader", po);
 
+	ProgramObject* _starProgram = new ProgramObject("StarProgram");
+	ShaderObject* starvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
+					                        absPath("${SHADERS}/simpleVert.glsl"));
+	ShaderObject* starfs = new ShaderObject(ShaderObject::ShaderTypeFragment, 
+											absPath("${SHADERS}/simpleFrag.glsl"));
+	_starProgram->attachObject(starvs);
+	_starProgram->attachObject(starfs);
+	_starProgram->compileShaderObjects();
+	_starProgram->linkProgramObject();
+	
+	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
+
     ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
     ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
                                                   absPath("${SHADERS}/exitpoints.vert"));
@@ -248,6 +260,7 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
     _allNodes.emplace(_rootNodeName, _root);
 
     Dictionary dictionary;
+	//load default.scene 
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
     Dictionary moduleDictionary;
     if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
@@ -255,7 +268,7 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
         std::sort(keys.begin(), keys.end());
         for (const std::string& key : keys) {
             std::string moduleFolder;
-            if (moduleDictionary.getValue(key, moduleFolder))
+			if (moduleDictionary.getValue(key, moduleFolder))
                 loadModule(defaultModulePath + "/" + moduleFolder);
         }
     }
@@ -318,6 +331,7 @@ void SceneGraph::loadModule(const std::string& modulePath)
 
         element.setValue(constants::scenegraph::keyPathModule, modulePath);
 
+		//each element in this new dictionary becomes a scenegraph node. 
         SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
 
         _allNodes.emplace(node->nodeName(), node);
