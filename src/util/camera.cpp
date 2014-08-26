@@ -55,6 +55,30 @@ const psc& Camera::position() const
     return _position;
 }
 
+void Camera::setModelMatrix(glm::mat4 modelMatrix){
+	_modelMatrix = std::move(modelMatrix);
+}
+
+const glm::mat4& Camera::modelMatrix() const{
+	return _modelMatrix;
+}
+
+void Camera::setViewMatrix(glm::mat4 viewMatrix){
+	_viewMatrix = std::move(viewMatrix);
+}
+
+const glm::mat4& Camera::viewMatrix() const{
+	return _viewMatrix;
+}
+
+void Camera::setProjectionMatrix(glm::mat4 projectionMatrix){
+	_projectionMatrix = std::move(projectionMatrix);
+}
+
+const glm::mat4& Camera::projectionMatrix() const{
+	return _projectionMatrix;
+}
+
 void Camera::setViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
 {
     _viewProjectionMatrix = std::move(viewProjectionMatrix);

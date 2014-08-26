@@ -162,6 +162,16 @@ void RenderEngine::render()
     _mainCamera->setViewProjectionMatrix(
           sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * view);
 
+	_mainCamera->setModelMatrix(
+		sgct::Engine::instance()->getModelMatrix());
+	
+	_mainCamera->setViewMatrix(
+		sgct::Engine::instance()->getActiveViewMatrix());
+
+	_mainCamera->setProjectionMatrix(
+		sgct::Engine::instance()->getActiveProjectionMatrix());
+
+
     // render the scene starting from the root node
     _sceneGraph->render(_mainCamera);
 

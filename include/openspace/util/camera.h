@@ -97,6 +97,15 @@ public:
     void setPosition(psc pos);
     const psc& position() const;
 
+	void setModelMatrix(glm::mat4 modelMatrix);
+	const glm::mat4& modelMatrix() const;
+
+	void setViewMatrix(glm::mat4 viewMatrix);
+	const glm::mat4& viewMatrix() const;
+
+	void setProjectionMatrix(glm::mat4 projectionMatrix);
+	const glm::mat4& projectionMatrix() const;
+
     void setViewProjectionMatrix(glm::mat4 viewProjectionMatrix);
     const glm::mat4& viewProjectionMatrix() const;
 
@@ -126,10 +135,12 @@ private:
     float _sinMaxFov;
     psc _position;
     glm::mat4 _viewProjectionMatrix;
+	glm::mat4 _modelMatrix;
+	glm::mat4 _viewMatrix;
+	glm::mat4 _projectionMatrix;
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
     glm::vec2 _scaling;
-
     glm::quat _viewRotation;
     glm::mat4 _viewRotationMatrix;  // compiled from the quaternion
 

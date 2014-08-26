@@ -31,6 +31,9 @@
 // open space includes
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/util/constants.h>
+
+#include <ghoul/opengl/texturereader.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
@@ -62,37 +65,34 @@ namespace {
 
 namespace openspace {
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary),
-	_programObject(nullptr){
+	: Renderable(dictionary)
+	, _colorTexturePath("colorTexture", "Color Texture")
+	, _programObject(nullptr)
+	, _texture(nullptr)
+{
 
 	//setBoundingSphere(PowerScaledScalar::CreatePSS(100));
 	std::string path;
+	dictionary.getValue(constants::renderablestars::keyPathModule, path);
+
+	std::string texturePath = "";
+	if (dictionary.hasKey("Textures.Color")) {
+		dictionary.getValue("Textures.Color", texturePath);
+		_colorTexturePath = path + "/" + texturePath;
+		std::cout << _colorTexturePath.value() << std::endl;
+	}
 	dictionary.getValue(constants::renderablestars::keySpeckFile, path);
+
 	_speckPath = FileSys.absolutePath(path);
+
+	addProperty(_colorTexturePath);
+	_colorTexturePath.onChange(std::bind(&RenderableStars::loadTexture, this));
 }
 
 RenderableStars::~RenderableStars(){
 	deinitialize();
 }
 
-GLuint createVBO(const void* data, int dataSize, GLenum target, GLenum usage){
-	GLuint id = 0;  // 0 is reserved, glGenBuffersARB() will return non-zero id if success
-	glGenBuffers(1, &id);                        // create a vbo
-	glBindBuffer(target, id);                    // activate vbo id to use
-	glBufferData(target, dataSize, data, usage); // upload data to video card
-
-	// check data size in VBO is same as input array, if not return 0 and delete VBO
-	int bufferSize = 0;
-	glGetBufferParameteriv(target, GL_BUFFER_SIZE, &bufferSize);
-	if (dataSize != bufferSize)
-	{
-		glDeleteBuffers(1, &id);
-		id = 0;
-		printf("[createVBO()] Data size is mismatch with input array\n");
-	}
-	glBindBuffer(target, 0);
-	return id;      // return VBO id
-}
 
 std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num){
 	file.seekg(std::ios::beg);
@@ -108,6 +108,10 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::vector<std::string> strvec;
 	std::vector<float> positions;
 	std::vector<float> doubleData;
+	std::vector<float> luminocities;
+	std::vector<float> absoluteMagnitudes;
+	std::vector<float> apparentMagnitudes;
+
     int count = 0;
 	
 	const std::string absPath = FileSys.absolutePath(path);
@@ -120,6 +124,7 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 
 	// check if cache exists, if not create it. 
 	if (!FileSys.fileExists(cacheName)){ 
+	//if (FileSys.fileExists(cacheName)){             // TODO: fix so that reads/writes cache. 
 		std::ofstream cache;
 		cache.open(cacheName, std::ios::binary);
 	
@@ -158,8 +163,16 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			doubleData.reserve(strvec.size());
 			transform(strvec.begin(), strvec.end(), back_inserter(doubleData),
 					  [](std::string const& val) {return std::stod(val); });
+
+			luminocities.push_back(doubleData[3]); 
+			absoluteMagnitudes.push_back(doubleData[4]);
+			apparentMagnitudes.push_back(doubleData[5]);
+
 			// convert to powerscaled coordinate
-			const psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0], doubleData[1], doubleData[2]);
+			const psc powerscaled = 
+				PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0], 
+																   doubleData[1], 
+																   doubleData[2]);
 			for (int i = 0; i < 4; i++){
 				positions.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
@@ -193,15 +206,15 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
 	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW);
 
+	positionAttrib = _programObject->attributeLocation("in_position");
+
 	glBindVertexArray(0);
+
 
 	return true;
 }
 
 bool RenderableStars::initialize(){
-	using ghoul::opengl::ShaderObject;
-	using ghoul::opengl::ProgramObject;
-
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _programObject);
@@ -209,12 +222,16 @@ bool RenderableStars::initialize(){
 	if (!readSpeckFile(_speckPath)) 
 		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
 
+	loadTexture();
+	completeSuccess &= (_texture != nullptr);
+
 	return completeSuccess;
 }
 
 bool RenderableStars::deinitialize(){
-	// TODO: set private VBO and deinitialize here.. 
-	return true;
+	delete _texture;
+	_texture = nullptr;
+	return true;	
 }
 
 void RenderableStars::render(const Camera* camera, const psc& thisPosition){
@@ -231,36 +248,57 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	// scale the planet to appropriate size since the planet is a unit sphere
 	glm::mat4 transform = glm::mat4(1);
 
-	//scaling = glm::vec2(1,0);
-	/*
+	//PowerScaledScalar scaling = glm::vec2(1, -4);
+	
 	transform = glm::rotate(
 		transform, 8.1f * static_cast<float>(sgct::Engine::instance()->getTime()),
 		glm::vec3(0.0f, 1.0f, 0.0f));
-	*/
-	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	
+	_programObject->setUniform("model", camera->modelMatrix());
+	_programObject->setUniform("view", camera->viewMatrix());
+	_programObject->setUniform("projection", camera->projectionMatrix());
+
+	//_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("campos", campos.vec4());
 	_programObject->setUniform("objpos", currentPosition.vec4());
 	_programObject->setUniform("camrot", camrot);
 	_programObject->setUniform("scaling", scaling.vec2());
-	_programObject->setUniform("Color", glm::vec3(1, 1, 1));
+	_programObject->setUniform("Color", glm::vec3(1, 0, 1));
 
-	glPointSize(1.0);
+	//glPointSize(1.0);
 	
 	GLint vertsToDraw = v_size / 4;
 	
-	GLint positionAttrib = _programObject->attributeLocation("in_position");
 	glBindVertexArray(_vaoID);
 	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glVertexAttribPointer(positionAttrib, 4, 
+			                  GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glDrawArrays(GL_POINTS, 0, vertsToDraw);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(positionAttrib);
 	glBindVertexArray(0);
-
+	
+	// Bind texure
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
+	_texture->bind();
+	_programObject->setUniform("texture1", unit);
+	
 	_programObject->deactivate();
+}
 
+void RenderableStars::loadTexture(){
+	delete _texture;
+	_texture = nullptr;
+	if (_colorTexturePath.value() != "") {
+		_texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
+		if (_texture) {
+			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+			_texture->uploadTexture();
+		}
+	}
 }
 
 void RenderableStars::update()

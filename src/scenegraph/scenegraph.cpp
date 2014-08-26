@@ -110,10 +110,14 @@ bool SceneGraph::initialize()
 
 	ProgramObject* _starProgram = new ProgramObject("StarProgram");
 	ShaderObject* starvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
-					                        absPath("${SHADERS}/simpleVert.glsl"));
+					                        absPath("${SHADERS}/star_vs.glsl"));
+	ShaderObject* starge = new ShaderObject(ShaderObject::ShaderTypeGeometry,
+											absPath("${SHADERS}/star_ge.glsl"));
+
 	ShaderObject* starfs = new ShaderObject(ShaderObject::ShaderTypeFragment, 
-											absPath("${SHADERS}/simpleFrag.glsl"));
+											absPath("${SHADERS}/star_fs.glsl"));
 	_starProgram->attachObject(starvs);
+	_starProgram->attachObject(starge);
 	_starProgram->attachObject(starfs);
 	_starProgram->compileShaderObjects();
 	_starProgram->linkProgramObject();

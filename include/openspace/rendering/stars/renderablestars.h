@@ -30,6 +30,8 @@
 #include <openspace/properties/stringproperty.h>
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+
 
 namespace openspace{
 
@@ -44,17 +46,23 @@ public:
 	void render(const Camera* camera, const psc& position) override;
 	void update() override;
 
+protected:
+	void loadTexture();
 
 private:
 	std::ifstream& skipToLine(std::ifstream& file, unsigned int num);
 	bool readSpeckFile(const std::string& path);
 
+	properties::StringProperty _colorTexturePath;
+
 	ghoul::opengl::ProgramObject* _programObject;
+	ghoul::opengl::Texture* _texture;
+
 	std::string _speckPath;
 
 	GLuint _vboID;
 	GLuint _vaoID;
-	//GLint positionAttrib;
+	GLint positionAttrib;
 	int v_size;
 };
 

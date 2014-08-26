@@ -61,6 +61,7 @@ namespace renderableplanet {
 
 namespace renderablestars {
 	const std::string keySpeckFile = "SpeckFile";
+	const std::string keyPathModule = "ModulePath";
 } // namespace renderablestars
 
 namespace planetgeometry {
