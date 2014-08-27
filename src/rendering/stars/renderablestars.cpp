@@ -270,6 +270,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	
 	GLint vertsToDraw = v_size / 4;
 	
+	// activate the VBO. 
 	glBindVertexArray(_vaoID);
 	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 

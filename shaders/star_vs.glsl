@@ -11,7 +11,6 @@ uniform vec4 objpos;
 
 uniform sampler2D texture1;
 
-
 in vec4 in_position; 
 
 out vec4 vs_position;

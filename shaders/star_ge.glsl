@@ -11,7 +11,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 uniform mat4 projection;
-float spriteSize = 1.0; // set here for now.
+float spriteSize = 0.05; // set here for now.
 out vec2 texCoord;
 
 void main()

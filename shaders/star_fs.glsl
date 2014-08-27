@@ -77,7 +77,7 @@ void main(void)
 	// set the depth
 	gl_FragDepth = depth;
 
-	diffuse = vec4(Color, 1); //<--- works, obviously
-   // diffuse = texture(texture1, texCoord); //<--- SHOULD work, but doesn't. agh!!
+	// diffuse = vec4(Color, 1); //<--- works, obviously
+    diffuse = texture(texture1, texCoord); //<--- SHOULD work, but doesn't. agh!!
     
 }
