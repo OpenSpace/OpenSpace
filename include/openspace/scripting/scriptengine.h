@@ -28,6 +28,9 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <set>
 
+namespace openspace {
+namespace scripting {
+
 class ScriptEngine {
 public:
     struct LuaLibrary {
@@ -43,14 +46,21 @@ public:
     bool addLibrary(const LuaLibrary& library);
     bool hasLibrary(const std::string& name);
     
-    bool runScript(std::string script);
+    bool runScript(const std::string& script);
+    bool runScriptFile(const std::string& filename);
     
 private:
     bool isLibraryNameAllowed(const std::string& name);
     void addLibraryFunctions(const LuaLibrary& library, bool replace);
     
+    void addBaseLibrary();
+    void remapPrintFunction();
+    
     lua_State* _state;
     std::set<unsigned int> _registeredLibraries;
 };
+  
+} // namespace scripting
+} // namespace openspace
 
 #endif // __SCRIPTENGINE_H__

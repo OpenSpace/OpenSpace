@@ -34,6 +34,7 @@ namespace openspaceengine {
     const std::string keyPathScene = "Paths.SCENEPATH";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
+    const std::string keyStartupScript = "StartupScripts";
 } // namespace openspaceengine
 
 namespace scenegraph {

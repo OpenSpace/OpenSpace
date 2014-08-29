@@ -65,7 +65,7 @@ public:
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
-    ScriptEngine& scriptEngine();
+    scripting::ScriptEngine& scriptEngine();
 
     // SGCT callbacks
     bool initializeGL();
@@ -92,7 +92,7 @@ private:
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
-    ScriptEngine* _scriptEngine;
+    scripting::ScriptEngine* _scriptEngine;
     ghoul::cmdparser::CommandlineParser* _commandlineParser;
 #ifdef FLARE_ONLY
     Flare* _flare;

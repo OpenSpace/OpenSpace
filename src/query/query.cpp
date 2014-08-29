@@ -53,8 +53,21 @@ properties::Property* property(const std::string& uri)
 properties::Property* property(const std::string& nodeName, const std::string& propertyName)
 {
     SceneGraphNode* node = sceneGraphNode(nodeName);
+    if (!node) {
+        LERROR("Node '" << nodeName << "' did not exist");
+        return nullptr;
+    }
     Renderable* propertyOwner = node->renderable();
+    if (!propertyOwner) {
+        LERROR("Node '" << nodeName << "' is not a PropertyOwner");
+        return nullptr;
+    }
     properties::Property* property = propertyOwner->property(propertyName);;
+    if (!property) {
+        LERROR("Node '" << nodeName << "' did not have property '" <<
+               propertyName << "'");
+        return nullptr;
+    }
     return property;
 }
 

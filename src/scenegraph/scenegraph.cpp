@@ -347,14 +347,17 @@ bool SceneGraph::registerScriptFunctions()
 {
     LDEBUG("Registering Script Functions");
     
+    using namespace scripting;
     
-    ScriptEngine::LuaLibrary l = {
+    ScriptEngine::LuaLibrary sceneGraphLibrary = {
         "",
         {
         { "setPropertyValue", &property_setValue}
 //        { "getPropertyValue", &property_getValue},
         }
     };
+    
+    OsEng.scriptEngine().addLibrary(sceneGraphLibrary);
     return true;
 }
 

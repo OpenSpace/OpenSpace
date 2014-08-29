@@ -27,10 +27,22 @@
 
 struct lua_State;
 
+namespace openspace {
+namespace scripting {
+    
+// Helper functions
+int printDebug(lua_State* L);
+int printInfo(lua_State* L);
+int printWarning(lua_State* L);
+int printError(lua_State* L);
+int printFatal(lua_State* L);
+
 // Properties
 
 int property_setValue(lua_State* L);
 //static int property_getValue(lua_State* L);
 
+} // namespace scripting
+} // namespace openspace
 
 #endif // __SCRIPTFUNCTIONS_H__

@@ -24,13 +24,26 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/scripting/scriptfunctions.h>
+
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/crc32.h>
+
+#include <fstream>
+
+namespace openspace {
+namespace scripting {
 
 namespace {
     const std::string _loggerCat = "ScriptEngine";
     
     const std::string _openspaceLibraryName = "openspace";
+    const std::string _luaGlobalNamespace = "_G";
+    const std::string _printFunctionName = "print";
+    const lua_CFunction _printFunctionReplacement = printInfo;
+    
+    const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 }
 
 ScriptEngine::ScriptEngine()
@@ -50,8 +63,15 @@ bool ScriptEngine::initialize() {
     
     LDEBUG("Add OpenSpace modules");
     
+    LDEBUG("Create openspace base library");
     lua_newtable(_state);
     lua_setglobal(_state, _openspaceLibraryName.c_str());
+    
+    LDEBUG("Adding base functions");
+    addBaseLibrary();
+    
+    LDEBUG("Remap print function");
+    remapPrintFunction();
     
     return true;
 }
@@ -80,14 +100,16 @@ bool ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
         lua_pushstring(_state, library.name.c_str());
         lua_newtable(_state);
         addLibraryFunctions(library, false);
-        lua_settable(_state, -3);
+        lua_settable(_state, _setTableOffset);
         
         _registeredLibraries.insert(ghoul::hashCRC32(library.name));
     }
     return true;
 }
 
-bool ScriptEngine::runScript(std::string script) {
+bool ScriptEngine::runScript(const std::string& script) {
+    if (script.empty())
+        return false;
     int status = luaL_loadstring(_state, script.c_str());
     if (status != LUA_OK) {
         LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
@@ -101,6 +123,29 @@ bool ScriptEngine::runScript(std::string script) {
     }
     
     return true;
+}
+
+bool ScriptEngine::runScriptFile(const std::string& filename) {
+    if (filename.empty()) {
+        LWARNING("Filename was empty");
+        return false;
+    }
+    if (!FileSys.fileExists(filename)) {
+        LERROR("Script with name '" << filename << "' did not exist");
+        return false;
+    }
+    std::ifstream file(filename.c_str());
+    if (file.bad()) {
+        LERROR("Error opening file '" << filename << "'");
+        return false;
+    }
+    
+    // Read the contents of the script
+    std::string script((std::istreambuf_iterator<char>(file)),
+                    std::istreambuf_iterator<char>());
+    
+    const bool runSuccess = runScript(script);
+    return runSuccess;
 }
 
 bool ScriptEngine::hasLibrary(const std::string& name)
@@ -172,6 +217,38 @@ void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
         }
         lua_pushstring(_state, p.first.c_str());
         lua_pushcfunction(_state, p.second);
-        lua_settable(_state, -3);
+        lua_settable(_state, _setTableOffset);
     }
 }
+    
+void ScriptEngine::addBaseLibrary() {
+    ScriptEngine::LuaLibrary sceneGraphLibrary = {
+        "",
+        {
+            { "setPropertyValue", &property_setValue}
+            //        { "getPropertyValue", &property_getValue},
+        }
+    };
+
+    LuaLibrary lib = {
+        "",
+        {
+            { "printDebug", &printDebug },
+            { "printInfo", &printInfo },
+            { "printWarning", &printWarning },
+            { "printError", &printError },
+            { "printFatal", &printFatal }
+        }
+    };
+    addLibrary(lib);
+}
+    
+void ScriptEngine::remapPrintFunction() {
+    lua_getglobal(_state, _luaGlobalNamespace.c_str());
+    lua_pushstring(_state, _printFunctionName.c_str());
+    lua_pushcfunction(_state, _printFunctionReplacement);
+    lua_settable(_state, _setTableOffset);
+}
+    
+} // namespace scripting
+} // namespace openspace

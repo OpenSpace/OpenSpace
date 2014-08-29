@@ -27,15 +27,72 @@
 #include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/query/query.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 
-using namespace openspace;
+namespace openspace {
+namespace scripting {
+    
 using namespace openspace::properties;
+    
+void printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "print";
+    
+    const int type = lua_type(L, -1);
+    switch (type) {
+        case LUA_TNONE:
+        case LUA_TLIGHTUSERDATA:
+        case LUA_TTABLE:
+        case LUA_TFUNCTION:
+        case LUA_TUSERDATA:
+        case LUA_TTHREAD:
+            LOG(level, "Function parameter was of type '" <<
+                 luaTypeToString(type) << "'");
+        case LUA_TNIL:
+            break;
+        case LUA_TBOOLEAN:
+            LOG(level, lua_toboolean(L, -1));
+            break;
+        case LUA_TNUMBER:
+            LOG(level, lua_tonumber(L, -1));
+            break;
+        case LUA_TSTRING:
+            LOG(level, lua_tostring(L, -1));
+            break;
+    }
+}
+    
+int printDebug(lua_State* L) {
+    printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
+    return 0;
+}
 
+int printInfo(lua_State* L) {
+    printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
+    return 0;
+}
+
+int printWarning(lua_State* L) {
+    printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
+    return 0;
+}
+
+int printError(lua_State* L) {
+    printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
+    return 0;
+}
+    
+int printFatal(lua_State* L) {
+    printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
+    return 0;
+}
+
+    
 int property_setValue(lua_State* L)
 {
-    const std::string _loggerCat = "property_setValue";
     using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "property_setValue";
 
     // TODO Check for argument number (ab)
     std::string nodeName = luaL_checkstring(L, -3);
@@ -81,3 +138,6 @@ int property_setValue(lua_State* L)
 //{
 //    
 //}
+    
+} // namespace scripting
+} // namespace openspace

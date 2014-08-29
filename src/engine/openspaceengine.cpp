@@ -48,6 +48,8 @@
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
+using namespace openspace::scripting;
+
 namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
     const std::string _configurationFile = "openspace.cfg";
@@ -316,9 +318,9 @@ bool OpenSpaceEngine::initialize()
     FactoryManager::initialize();
 
     scriptEngine().initialize();
-    scriptEngine().addLibrary(ScriptEngine::LuaLibrary());
+//    scriptEngine().addLibrary(ScriptEngine::LuaLibrary());
     
-    _engine->scriptEngine().runScript("return mylib.mysin(4)");
+//    _engine->scriptEngine().runScript("return mylib.mysin(4)");
     
 
     // Load scenegraph
@@ -361,6 +363,32 @@ bool OpenSpaceEngine::initialize()
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _engine->_interactionHandler->connectDevices();
+
+    // Run start up scripts
+    using ghoul::Dictionary;
+    using constants::openspaceengine::keyStartupScript;
+    const bool hasScript = _engine->configurationManager().hasKeyAndValue<Dictionary>(keyStartupScript);
+    if (hasScript) {
+        Dictionary scripts;
+        _engine->configurationManager().getValue(keyStartupScript, scripts);
+        
+        for (size_t i = 0; i < scripts.size(); ++i) {
+            std::stringstream stream;
+            // Dictionary-size is 0-based; script numbers are 1-based
+            stream << (i + 1);
+            const std::string& key = stream.str();
+            const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
+            if (!hasKey) {
+                LERROR("The startup scripts have to be declared in a simple array format");
+                break;
+            }
+            
+            std::string scriptPath;
+            scripts.getValue(key, scriptPath);
+            const std::string absoluteScriptPath = absPath(scriptPath);
+            _engine->scriptEngine().runScriptFile(absoluteScriptPath);
+        }
+    }
 
     return true;
 }
