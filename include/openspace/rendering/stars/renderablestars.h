@@ -56,6 +56,8 @@ private:
 	properties::StringProperty _colorTexturePath;
 
 	ghoul::opengl::ProgramObject* _programObject;
+	ghoul::opengl::ProgramObject* _programObjectPoints;
+
 	ghoul::opengl::Texture* _texture;
 
 	std::string _speckPath;

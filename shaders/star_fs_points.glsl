@@ -77,7 +77,13 @@ void main(void)
 	// set the depth
 	gl_FragDepth = depth;
 	
-    diffuse = texture2D(texture1, texCoord);
-   ///diffuse = vec4(Color, 1.0);
+	
+	if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) // HAX METHOD.
+		discard;
+	else
+		diffuse = vec4(Color, 1);
+	
+  //  diffuse = texture2D(texture1, texCoord);
+   //diffuse = vec4(Color, 1.0);
     
 }

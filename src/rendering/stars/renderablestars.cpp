@@ -37,12 +37,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
-
-#define printOpenGLError() printOglError(__FILE__, __LINE__)
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#define printOpenGLError() printOglError(__FILE__, __LINE__)
 int printOglError(char *file, int line)
 {
 
@@ -59,6 +57,8 @@ int printOglError(char *file, int line)
 	return retCode;
 }
 
+#define SPRITES
+
 namespace {
 	const std::string _loggerCat = "RenderableStars";
 }
@@ -68,10 +68,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
 	, _programObject(nullptr)
+	, _programObjectPoints(nullptr)
 	, _texture(nullptr)
 {
-
-	//setBoundingSphere(PowerScaledScalar::CreatePSS(100));
+	//setBoundingSphere(PowerScaledScalar::CreatePSS(100)); // <---- do we need this?
 	std::string path;
 	dictionary.getValue(constants::renderablestars::keyPathModule, path);
 
@@ -79,7 +79,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	if (dictionary.hasKey("Textures.Color")) {
 		dictionary.getValue("Textures.Color", texturePath);
 		_colorTexturePath = path + "/" + texturePath;
-		std::cout << _colorTexturePath.value() << std::endl;
 	}
 	dictionary.getValue(constants::renderablestars::keySpeckFile, path);
 
@@ -92,7 +91,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars(){
 	deinitialize();
 }
-
 
 std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num){
 	file.seekg(std::ios::beg);
@@ -107,7 +105,7 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::string str, starDescription, datastr;
 	std::vector<std::string> strvec;
 	std::vector<float> positions;
-	std::vector<float> doubleData;
+	std::vector<float> floatingPointData;
 	std::vector<float> luminocities;
 	std::vector<float> absoluteMagnitudes;
 	std::vector<float> apparentMagnitudes;
@@ -122,9 +120,25 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::string basePath = absPath.substr(0, last);
 	cacheName = basePath + "\\" + cacheName + ".bin";
 
-	// check if cache exists, if not create it. 
-	if (!FileSys.fileExists(cacheName)){ 
-	//if (FileSys.fileExists(cacheName)){             // TODO: fix so that reads/writes cache. 
+	/**
+		TODO:
+		Right now we are not reading cache files as luminocity, appmag etc are not cached 
+		in the first place. This is the reason for longer loading times, will get fixed.
+
+		The READ LOGIC is simple:
+		1. skip metadata 
+		2. read everything in line until # symbol (nongeneric reader)
+		3. split line on whitespaces
+		4. (FOR NOW) grab x,y,z only
+		5. convert x,y,z to floats
+		6. convert m -> pc
+		7. convert to psc
+		8. pass to vector
+		9. pass vectors internal arr for vbo creation
+	*/
+
+	//if (!FileSys.fileExists(cacheName)){ 
+	if (FileSys.fileExists(cacheName)){             // TODO: fix so that reads/writes cache. 
 		std::ofstream cache;
 		cache.open(cacheName, std::ios::binary);
 	
@@ -145,7 +159,7 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 		do{ 
 			getline(file, str);
 			if (file.eof()) break;
-			// split the line on pound symbol. 
+			// split the line on pound symbol. we only want data.
 		    std::size_t mid = str.find('#');
 			if (mid != std::string::npos){
 				datastr = str.substr(0, mid);
@@ -153,37 +167,49 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 				if (end == std::string::npos)
 					starDescription = str.substr(mid, end);
 			} 
-			// split data string on whitespace to vector
+			// split data string on whitespace -> push to to vector
 			std::istringstream ss(datastr);
 			std::copy(std::istream_iterator<std::string>(ss),
 					  std::istream_iterator<std::string>(),
 					  std::back_inserter<std::vector<std::string> >(strvec));
 			ss.clear();
 			// conv. string vector to doubles
-			doubleData.reserve(strvec.size());
-			transform(strvec.begin(), strvec.end(), back_inserter(doubleData),
+			floatingPointData.reserve(strvec.size());
+			transform(strvec.begin(), strvec.end(), back_inserter(floatingPointData),
 					  [](std::string const& val) {return std::stod(val); });
 
-			luminocities.push_back(doubleData[3]); 
-			absoluteMagnitudes.push_back(doubleData[4]);
-			apparentMagnitudes.push_back(doubleData[5]);
+			// store data concerning apparent luminocity, brigthness etc. 
+			luminocities.push_back(floatingPointData[3]); 
+			absoluteMagnitudes.push_back(floatingPointData[4]);
+			apparentMagnitudes.push_back(floatingPointData[5]);
 
 			// convert to powerscaled coordinate
-			const psc powerscaled = 
-				PowerScaledCoordinate::CreatePowerScaledCoordinate(doubleData[0], 
-																   doubleData[1], 
-																   doubleData[2]);
+			psc powerscaled = 
+				PowerScaledCoordinate::CreatePowerScaledCoordinate(floatingPointData[0], 
+																   floatingPointData[1], 
+																   floatingPointData[2]);
+			// Convert parsecs -> meter
+			// Could convert floatingPointData instead 
+			// (possible as 3.4 × 10^38 is max rep nr of float)
+			PowerScaledScalar parsecsToMetersFactor = glm::vec2(0.308567758, 17);
+			//powerscaled *= parsecsToMetersFactor; //<--- buggy. 
+			powerscaled[0] *= parsecsToMetersFactor[0];
+			powerscaled[1] *= parsecsToMetersFactor[0];
+			powerscaled[2] *= parsecsToMetersFactor[0];
+			powerscaled[3] += parsecsToMetersFactor[1];
+			
+			// We use vector to store data
+			// needs no preallocation and has tightly packed arr.
 			for (int i = 0; i < 4; i++){
 				positions.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
 			}
-			
 			strvec.clear();
-			doubleData.clear();
+			floatingPointData.clear();
 			count++;
 		} while (file.good());
 	}
-	else // read cached positions
+	else // read cached positions, NOTE: this is not fully functional. 
 	{
 		LINFO("Found cached data, loading");
 		file.open(cacheName, std::ios::binary);
@@ -198,31 +224,34 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	// pass in the vectors internal array to create vbo method
 	v_size = positions.size();
 	
+	// create vbo (now positions ONLY)
 	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vboID);
+		glGenBuffers(1, &_vboID);
+		glBindVertexArray(_vaoID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+		glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW);
 
-	glBindVertexArray(_vaoID);
-
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW);
-
-	positionAttrib = _programObject->attributeLocation("in_position");
-
+		positionAttrib = _programObject->attributeLocation("in_position");
 	glBindVertexArray(0);
-
-
 	return true;
 }
 
 bool RenderableStars::initialize(){
+	// We use two shaders, compiled and linked by scenegraph.cpp
+	// 1. StarProgram  - Generates quads with png image of halo
+	// 2. PointProgram - Generates gl_Points in geom shader.
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _programObject);
+	if (_programObjectPoints == nullptr)
+		completeSuccess &= OsEng.ref().configurationManager().getValue("PointProgram", _programObjectPoints);
 	
+	// Run read routine.
 	if (!readSpeckFile(_speckPath)) 
 		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
-
+#ifdef SPRITES
 	loadTexture();
+#endif
 	completeSuccess &= (_texture != nullptr);
 
 	return completeSuccess;
@@ -236,7 +265,7 @@ bool RenderableStars::deinitialize(){
 
 void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	assert(_programObject);
-
+	printOpenGLError();
 	// activate shader
 	_programObject->activate();
 
@@ -246,48 +275,77 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	glm::mat4 camrot = camera->viewRotationMatrix();
 	PowerScaledScalar scaling = camera->scaling();
 	// scale the planet to appropriate size since the planet is a unit sphere
-	glm::mat4 transform = glm::mat4(1);
+	glm::mat4 transform = glm::mat4(1); 
 
-	//PowerScaledScalar scaling = glm::vec2(1, -4);
-	
-	transform = glm::rotate(
-		transform, 8.1f * static_cast<float>(sgct::Engine::instance()->getTime()),
-		glm::vec3(0.0f, 1.0f, 0.0f));
-	
-	_programObject->setUniform("model", camera->modelMatrix());
-	_programObject->setUniform("view", camera->viewMatrix());
-	_programObject->setUniform("projection", camera->projectionMatrix());
+	// why?
+	scaling = glm::vec2(1, -22);
+	//scaling = glm::vec2(1, -4);
 
-	//_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	GLint vertsToDraw = v_size / 4;
+	/*
+	transform = glm::rotate(transform, 
+		                    1.1f * static_cast<float>(sgct::Engine::instance()->getTime()),  
+							glm::vec3(0.0f, 1.0f, 0.0f));
+    */
+// ---------------------- RENDER HALOS -----------------------------
+	
+	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("campos", campos.vec4());
 	_programObject->setUniform("objpos", currentPosition.vec4());
 	_programObject->setUniform("camrot", camrot);
 	_programObject->setUniform("scaling", scaling.vec2());
-	_programObject->setUniform("Color", glm::vec3(1, 0, 1));
 
-	//glPointSize(1.0);
-	
-	GLint vertsToDraw = v_size / 4;
-	
-	// activate the VBO. 
-	glBindVertexArray(_vaoID);
-	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
-		glVertexAttribPointer(positionAttrib, 4, 
-			                  GL_FLOAT, GL_FALSE, 0, (void*)0);
-		glDrawArrays(GL_POINTS, 0, vertsToDraw);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDisableVertexAttribArray(positionAttrib);
-	glBindVertexArray(0);
-	
 	// Bind texure
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
 	_programObject->setUniform("texture1", unit);
-	
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); // additative blending. 
+
+	// activate the VBO. 
+	glBindVertexArray(_vaoID);
+	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glDrawArrays(GL_POINTS, 0, vertsToDraw);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(positionAttrib);
+	glBindVertexArray(0);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
 	_programObject->deactivate();
+
+// ---------------------- RENDER POINTS -----------------------------
+
+	_programObjectPoints->activate();
+
+	_programObjectPoints->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_programObjectPoints->setUniform("ModelTransform", transform);
+	_programObjectPoints->setUniform("campos", campos.vec4());
+	_programObjectPoints->setUniform("objpos", currentPosition.vec4());
+	_programObjectPoints->setUniform("camrot", camrot);
+	_programObjectPoints->setUniform("scaling", scaling.vec2());
+
+	_programObjectPoints->setUniform("Color", glm::vec3(1)); // TODO: determine color in shader. 
+
+	glEnable(GL_PROGRAM_POINT_SIZE_EXT); //Allows shader to determine pointsize. 
+
+	glBindVertexArray(_vaoID);
+	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glDrawArrays(GL_POINTS, 0, vertsToDraw);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(positionAttrib);
+	glBindVertexArray(0);
+
+	_programObjectPoints->deactivate();
 }
 
 void RenderableStars::loadTexture(){

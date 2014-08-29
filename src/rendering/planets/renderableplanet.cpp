@@ -119,7 +119,10 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
     psc currentPosition = thisPosition;
     psc campos = camera->position();
     glm::mat4 camrot = camera->viewRotationMatrix();
-    PowerScaledScalar scaling = camera->scaling();
+    //PowerScaledScalar scaling = camera->scaling();
+	//std::cout << scaling << std::endl;
+
+	PowerScaledScalar scaling = glm::vec2(1, -6);
 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);

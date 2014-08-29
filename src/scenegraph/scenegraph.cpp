@@ -108,12 +108,12 @@ bool SceneGraph::initialize()
 
     OsEng.ref().configurationManager().setValue("pscShader", po);
 
+	// STAR HALO RENDERING
 	ProgramObject* _starProgram = new ProgramObject("StarProgram");
 	ShaderObject* starvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
 					                        absPath("${SHADERS}/star_vs.glsl"));
 	ShaderObject* starge = new ShaderObject(ShaderObject::ShaderTypeGeometry,
 											absPath("${SHADERS}/star_ge.glsl"));
-
 	ShaderObject* starfs = new ShaderObject(ShaderObject::ShaderTypeFragment, 
 											absPath("${SHADERS}/star_fs.glsl"));
 	_starProgram->attachObject(starvs);
@@ -121,8 +121,23 @@ bool SceneGraph::initialize()
 	_starProgram->attachObject(starfs);
 	_starProgram->compileShaderObjects();
 	_starProgram->linkProgramObject();
-	
 	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
+	
+	// STAR POINT RENDERING
+	ProgramObject* _pointProgram = new ProgramObject("PointProgram");
+	ShaderObject* starvs_point = new ShaderObject(ShaderObject::ShaderTypeVertex,
+		absPath("${SHADERS}/star_vs_points.glsl"));
+	ShaderObject* starge_point = new ShaderObject(ShaderObject::ShaderTypeGeometry,
+		absPath("${SHADERS}/star_ge_points.glsl"));
+	ShaderObject* starfs_point = new ShaderObject(ShaderObject::ShaderTypeFragment,
+		absPath("${SHADERS}/star_fs_points.glsl"));
+
+	_pointProgram->attachObject(starvs_point);
+	_pointProgram->attachObject(starge_point);
+	_pointProgram->attachObject(starfs_point);
+	_pointProgram->compileShaderObjects();
+	_pointProgram->linkProgramObject();
+	OsEng.ref().configurationManager().setValue("PointProgram", _pointProgram);
 
     ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
     ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,

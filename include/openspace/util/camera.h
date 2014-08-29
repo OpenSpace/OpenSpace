@@ -88,7 +88,6 @@ namespace openspace {
 //    mutable bool _viewMatrixIsDirty;
 //};
 
-
 class Camera {
 public:
     Camera();
