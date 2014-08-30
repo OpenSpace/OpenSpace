@@ -57,7 +57,7 @@ namespace openspace {
 
 void printTree(SceneGraphNode* node, std::string pre = "")
 {
-    LDEBUGC("Tree", pre << node->nodeName());
+    LDEBUGC("Tree", pre << node->name());
     const std::vector<SceneGraphNode*>& children = node->children();
     for (SceneGraphNode* child : children)
         printTree(child, pre + "    ");
@@ -155,9 +155,9 @@ bool SceneGraph::initialize()
     for (auto node : _nodes) {
         bool success = node->initialize();
         if (success)
-            LDEBUG(node->nodeName() << " initialized successfully!");
+            LDEBUG(node->name() << " initialized successfully!");
         else
-            LWARNING(node->nodeName() << " not initialized.");
+            LWARNING(node->name() << " not initialized.");
     }
 
     // update the position of all nodes
@@ -325,7 +325,7 @@ void SceneGraph::loadModule(const std::string& modulePath)
 
         SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
 
-        _allNodes.emplace(node->nodeName(), node);
+        _allNodes.emplace(node->name(), node);
         _nodes.push_back(node);
     }
 

@@ -35,27 +35,42 @@ namespace properties {
 
 class PropertyOwner {
 public:
+    static const char URISeparator = '.';
+    
     PropertyOwner();
     virtual ~PropertyOwner();
 
     void setName(std::string name);
     virtual const std::string& name() const;
+
     const std::vector<Property*>& properties() const;
     Property* property(const std::string& id) const;
+    bool hasProperty(const std::string& id) const;
+    
+    const std::vector<PropertyOwner*>& subOwners() const;
+    PropertyOwner* subOwner(const std::string& name) const;
+    bool hasSubOwner(const std::string& name) const;
 
     void setPropertyGroupName(std::string groupID, std::string name);
     const std::string& propertyGroupName(const std::string& groupID) const;
-
+    
 protected:
     void addProperty(Property* prop);
     void addProperty(Property& prop);
+    
+    void addPropertySubOwner(PropertyOwner* owner);
+    void addPropertySubOwner(PropertyOwner& owner);
 
     void removeProperty(Property* prop);
     void removeProperty(Property& prop);
+    
+    void removePropertySubOwner(PropertyOwner* owner);
+    void removePropertySubOwner(PropertyOwner& owner);
 
 private:
     std::string _name;
     std::vector<Property*> _properties;
+    std::vector<PropertyOwner*> _subOwners;
     std::map<std::string, std::string> _groupNames;
 };
 

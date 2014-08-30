@@ -28,6 +28,7 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/scenegraph/ephemeris.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/scenegraph/scenegraph.h>
 #include <ghoul/misc/dictionary.h>
@@ -40,7 +41,7 @@
 
 namespace openspace {
 
-class SceneGraphNode {
+class SceneGraphNode : public properties::PropertyOwner {
 public:
     static std::string RootNodeName;
     
@@ -61,11 +62,9 @@ public:
     // set & get
     void addNode(SceneGraphNode* child);
 
-    void setName(const std::string& name);
     void setParent(SceneGraphNode* parent);
     const psc& position() const;
     psc worldPosition() const;
-    std::string nodeName() const;
 
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
@@ -86,7 +85,6 @@ private:
     // essential
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
-    std::string _nodeName;
     Ephemeris* _ephemeris;
 
     // renderable

@@ -63,21 +63,22 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
                                      << keyName << "' key");
         return nullptr;
     }
-    dictionary.getValue(keyName, result->_nodeName);
+    std::string name;
+    dictionary.getValue(keyName, name);
+    result->setName(name);
 
     if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(keyRenderable, renderableDictionary);
         renderableDictionary.setValue(keyPathModule, path);
-        renderableDictionary.setValue(keyName, result->_nodeName);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
             return nullptr;
         }
-        LDEBUG("Successfully create renderable for '" << result->_nodeName << "'");
+        LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
     if (dictionary.hasKey(keyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
@@ -86,10 +87,10 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
             return nullptr;
         }
-        LDEBUG("Successfully create ephemeris for '" << result->_nodeName << "'");
+        LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
     }
 
     std::string parentName;
@@ -101,20 +102,19 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     SceneGraphNode* parentNode = sceneGraphNode(parentName);
     if (parentNode == nullptr) {
         LFATAL("Could not find parent named '"
-               << parentName << "' for '" << result->_nodeName << "'."
+               << parentName << "' for '" << result->name() << "'."
                << " Check module definition order. Skipping module.");
     }
 
     parentNode->addNode(result);
 
     LDEBUG("Successfully created SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
     return result;
 }
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _nodeName("")
     , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -139,7 +139,7 @@ bool SceneGraphNode::initialize()
 
 bool SceneGraphNode::deinitialize()
 {
-    LDEBUG("Deinitialize: " << _nodeName);
+    LDEBUG("Deinitialize: " << name());
 
     delete _renderable;
     _renderable = nullptr;
@@ -153,7 +153,6 @@ bool SceneGraphNode::deinitialize()
 
     // reset variables
     _parent = nullptr;
-    _nodeName = "";
     _renderableVisible = false;
     _boundingSphereVisible = false;
     _boundingSphere = PowerScaledScalar(0.0, 0.0);
@@ -232,11 +231,6 @@ void SceneGraphNode::addNode(SceneGraphNode* child)
     _children.push_back(child);
 }
 
-void SceneGraphNode::setName(const std::string& name)
-{
-    _nodeName = name;
-}
-
 void SceneGraphNode::setParent(SceneGraphNode* parent)
 {
     _parent = parent;
@@ -255,11 +249,6 @@ psc SceneGraphNode::worldPosition() const
     } else {
         return _ephemeris->position();
     }
-}
-
-std::string SceneGraphNode::nodeName() const
-{
-    return _nodeName;
 }
 
 SceneGraphNode* SceneGraphNode::parent() const
@@ -353,7 +342,7 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScala
 
 SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 {
-    if (_nodeName == name)
+    if (this->name() == name)
         return this;
     else
         for (auto it : _children) {
@@ -367,7 +356,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 
 void SceneGraphNode::print() const
 {
-    std::cout << _nodeName << std::endl;
+    std::cout << name() << std::endl;
     for (auto it : _children) {
         it->print();
     }

@@ -95,8 +95,7 @@ int property_setValue(lua_State* L)
     const std::string _loggerCat = "property_setValue";
 
     // TODO Check for argument number (ab)
-    std::string nodeName = luaL_checkstring(L, -3);
-    std::string propertyName = luaL_checkstring(L, -2);
+    std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
     boost::any propertyValue;
     switch (type) {
@@ -122,10 +121,9 @@ int property_setValue(lua_State* L)
             break;
     }
     
-    Property* prop = property(nodeName, propertyName);
+    Property* prop = property(uri);
     if (!prop) {
-        LERROR("Property at " << nodeName << "." << propertyName <<
-               " could not be found");
+        LERROR("Property with uri '" << uri << "' could not be found");
         return 0;
     }
 

@@ -60,9 +60,9 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
 {
-    std::string name;
-    dictionary.getValue(constants::scenegraphnode::keyName, name);
-    setName(name);
+//    std::string name;
+//    dictionary.getValue(constants::scenegraphnode::keyName, name);
+    setName("Renderable");
 }
 
 Renderable::~Renderable()

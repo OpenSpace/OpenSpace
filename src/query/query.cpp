@@ -30,7 +30,7 @@
 namespace openspace {
 
 namespace {
-const std::string _loggerCat = "Query";
+    const std::string _loggerCat = "Query";
 }
 
 SceneGraph* sceneGraph()
@@ -46,28 +46,25 @@ SceneGraphNode* sceneGraphNode(const std::string& name)
     
 properties::Property* property(const std::string& uri)
 {
-    const size_t separator = uri.find('.');
-    return property(uri.substr(0, separator), uri.substr(separator));
-}
+    // The URI consists of the following form at this stage:
+    // <node name>.{<property owner>.}^(0..n)<property id>
     
-properties::Property* property(const std::string& nodeName, const std::string& propertyName)
-{
+    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
+    if (nodeNameSeparator == std::string::npos) {
+        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
+               << "' separator must be present.");
+        return nullptr;
+    }
+    const std::string nodeName = uri.substr(0, nodeNameSeparator);
+    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
+    
     SceneGraphNode* node = sceneGraphNode(nodeName);
     if (!node) {
         LERROR("Node '" << nodeName << "' did not exist");
         return nullptr;
     }
-    Renderable* propertyOwner = node->renderable();
-    if (!propertyOwner) {
-        LERROR("Node '" << nodeName << "' is not a PropertyOwner");
-        return nullptr;
-    }
-    properties::Property* property = propertyOwner->property(propertyName);;
-    if (!property) {
-        LERROR("Node '" << nodeName << "' did not have property '" <<
-               propertyName << "'");
-        return nullptr;
-    }
+    
+    properties::Property* property = node->property(remainingUri);
     return property;
 }
 
