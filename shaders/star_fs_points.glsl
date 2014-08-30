@@ -5,6 +5,8 @@ uniform vec3 Color;
 in vec4 vs_position;
 in vec2 texCoord;
 
+layout(location = 2) in vec3 vs_brightness;
+
 out vec4 diffuse;
 
 const float k = 10.0;
@@ -77,12 +79,14 @@ void main(void)
 	// set the depth
 	gl_FragDepth = depth;
 	
+	diffuse = vec4(vs_brightness[0],0.5,0.5,1);//vs_brightness[1],vs_brightness[2],1);
 	
+	/*
 	if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) // HAX METHOD.
 		discard;
 	else
 		diffuse = vec4(Color, 1);
-	
+	*/
   //  diffuse = texture2D(texture1, texCoord);
    //diffuse = vec4(Color, 1.0);
     

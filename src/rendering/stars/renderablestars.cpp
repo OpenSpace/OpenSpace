@@ -106,9 +106,6 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::vector<std::string> strvec;
 	std::vector<float> positions;
 	std::vector<float> floatingPointData;
-	std::vector<float> luminocities;
-	std::vector<float> absoluteMagnitudes;
-	std::vector<float> apparentMagnitudes;
 
     int count = 0;
 	
@@ -179,9 +176,6 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 					  [](std::string const& val) {return std::stod(val); });
 
 			// store data concerning apparent luminocity, brigthness etc. 
-			luminocities.push_back(floatingPointData[3]); 
-			absoluteMagnitudes.push_back(floatingPointData[4]);
-			apparentMagnitudes.push_back(floatingPointData[5]);
 
 			// convert to powerscaled coordinate
 			psc powerscaled = 
@@ -204,6 +198,11 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 				positions.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
 			}
+			// will need more elegant solution here. // TODO
+			positions.push_back(floatingPointData[3]);
+			positions.push_back(floatingPointData[4]);
+			positions.push_back(floatingPointData[5]);
+			
 			strvec.clear();
 			floatingPointData.clear();
 			count++;
@@ -222,16 +221,15 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 		}
 	}
 	// pass in the vectors internal array to create vbo method
-	v_size = positions.size();
-	
+	v_size = positions.size(); // account for size of extra data. 
+
 	// create vbo (now positions ONLY)
 	glGenVertexArrays(1, &_vaoID);
 		glGenBuffers(1, &_vboID);
 		glBindVertexArray(_vaoID);
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-		glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &positions[0], GL_DYNAMIC_DRAW); // x,y,z,lum,appmag,absol..
 
-		positionAttrib = _programObject->attributeLocation("in_position");
 	glBindVertexArray(0);
 	return true;
 }
@@ -240,6 +238,7 @@ bool RenderableStars::initialize(){
 	// We use two shaders, compiled and linked by scenegraph.cpp
 	// 1. StarProgram  - Generates quads with png image of halo
 	// 2. PointProgram - Generates gl_Points in geom shader.
+
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _programObject);
@@ -249,6 +248,7 @@ bool RenderableStars::initialize(){
 	// Run read routine.
 	if (!readSpeckFile(_speckPath)) 
 		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
+
 #ifdef SPRITES
 	loadTexture();
 #endif
@@ -263,6 +263,8 @@ bool RenderableStars::deinitialize(){
 	return true;	
 }
 
+#define GLSPRITES
+#define GLPOINTS
 void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	assert(_programObject);
 	printOpenGLError();
@@ -281,14 +283,22 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	scaling = glm::vec2(1, -22);
 	//scaling = glm::vec2(1, -4);
 
-	GLint vertsToDraw = v_size / 4;
-	/*
+	GLint vertsToDraw = v_size / 7; // account for data size. 
+	GLsizei stride = sizeof(GLfloat) * 7; // 7 component stride
+	
 	transform = glm::rotate(transform, 
 		                    1.1f * static_cast<float>(sgct::Engine::instance()->getTime()),  
 							glm::vec3(0.0f, 1.0f, 0.0f));
-    */
+    
+	positionAttrib = _programObject->attributeLocation("in_position");
+
+	// disable depth test, enable additative blending
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
+
 // ---------------------- RENDER HALOS -----------------------------
-	
+#ifdef GLSPRITES	
 	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("campos", campos.vec4());
@@ -302,27 +312,23 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	_texture->bind();
 	_programObject->setUniform("texture1", unit);
 
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); // additative blending. 
-
 	// activate the VBO. 
 	glBindVertexArray(_vaoID);
-	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+	glEnableVertexAttribArray(positionAttrib);  
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);
 		glDrawArrays(GL_POINTS, 0, vertsToDraw);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(positionAttrib);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-
+#endif
 	_programObject->deactivate();
 
 // ---------------------- RENDER POINTS -----------------------------
-
+#ifdef GLPOINTS
 	_programObjectPoints->activate();
 
 	_programObjectPoints->setUniform("ViewProjection", camera->viewProjectionMatrix());
@@ -332,20 +338,23 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	_programObjectPoints->setUniform("camrot", camrot);
 	_programObjectPoints->setUniform("scaling", scaling.vec2());
 
-	_programObjectPoints->setUniform("Color", glm::vec3(1)); // TODO: determine color in shader. 
-
 	glEnable(GL_PROGRAM_POINT_SIZE_EXT); //Allows shader to determine pointsize. 
+	brightnessDataAttrib = _programObjectPoints->attributeLocation("in_brightness");
 
 	glBindVertexArray(_vaoID);
-	glEnableVertexAttribArray(positionAttrib);     // use specific input in shader
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);     // bind vbo 
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+	glEnableVertexAttribArray(positionAttrib);  
+	glEnableVertexAttribArray(brightnessDataAttrib);
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0); // xyz
+		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat)));
 		glDrawArrays(GL_POINTS, 0, vertsToDraw);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(positionAttrib);
+	glDisableVertexAttribArray(brightnessDataAttrib);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
+	
 	_programObjectPoints->deactivate();
+#endif
 }
 
 void RenderableStars::loadTexture(){

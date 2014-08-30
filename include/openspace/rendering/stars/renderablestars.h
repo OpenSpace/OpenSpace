@@ -65,6 +65,7 @@ private:
 	GLuint _vboID;
 	GLuint _vaoID;
 	GLint positionAttrib;
+	GLint brightnessDataAttrib;
 	int v_size;
 };
 
