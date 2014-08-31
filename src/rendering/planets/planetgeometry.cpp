@@ -62,6 +62,7 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
 PlanetGeometry::PlanetGeometry()
     : _parent(nullptr)
 {
+	setName("PlanetGeometry");
 }
 
 PlanetGeometry::~PlanetGeometry()

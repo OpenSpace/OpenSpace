@@ -81,7 +81,7 @@ Property* PropertyOwner::property(const std::string& id) const
         }
         else {
             const std::string ownerName = id.substr(0, ownerSeparator);
-            const std::string propertyName = id.substr(ownerSeparator);
+            const std::string propertyName = id.substr(ownerSeparator + 1);
             
             PropertyOwner* owner = subOwner(ownerName);
             if (owner == nullptr) {

@@ -78,6 +78,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
                    << result->name() << "'");
             return nullptr;
         }
+		result->addPropertySubOwner(result->_renderable);
         LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
     if (dictionary.hasKey(keyEphemeris)) {
@@ -90,6 +91,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
                    << result->name() << "'");
             return nullptr;
         }
+		//result->addPropertySubOwner(result->_ephemeris);
         LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
     }
 

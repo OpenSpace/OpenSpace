@@ -125,5 +125,10 @@ void Property::setPropertyOwner(PropertyOwner* owner)
     _owner = owner;
 }
 
+void Property::notifyListeners() {
+	for (std::function<void()>& f : _onChangeCallbacks)
+		f();
+}
+
 } // namespace properties
 } // namespace openspace

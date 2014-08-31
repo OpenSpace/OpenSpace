@@ -68,10 +68,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _colorTexturePath = path + "/" + texturePath;
     }
 
-    for (properties::Property* p : _geometry->properties())
-        addProperty(p);
+	addPropertySubOwner(_geometry);
 
-     addProperty(_colorTexturePath);
+    addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
@@ -107,10 +106,10 @@ bool RenderablePlanet::deinitialize()
 
 void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
 {
-    // TODO replace with more robust assert
-    // check so that the shader is set
-    assert(_programObject);
-    assert(_texture);
+	if (!_programObject)
+		return;
+	if (!_texture)
+		return;
 
     // activate shader
     _programObject->activate();

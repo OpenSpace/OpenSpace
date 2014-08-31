@@ -101,6 +101,7 @@ template <typename T>
 void TemplateProperty<T>::set(boost::any value) {
     try {
         _value = boost::any_cast<T>(std::move(value));
+		notifyListeners();
     }
     catch (boost::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast to '" << typeid(T).name() << "'");

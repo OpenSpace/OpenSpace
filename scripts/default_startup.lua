@@ -1,1 +1,1 @@
-print "foo"
+--openspace.setPropertyValue('Earth.renderable.colorTexture', '${OPENSPACE_DATA}/modules/mars/textures/mars.png')

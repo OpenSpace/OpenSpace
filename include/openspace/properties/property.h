@@ -79,6 +79,8 @@ public:
     const ghoul::Dictionary& metaData() const;
 
 protected:
+	void notifyListeners();
+
     PropertyOwner* _owner;
 
     std::string _identifier;
