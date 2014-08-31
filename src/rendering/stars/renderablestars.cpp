@@ -41,15 +41,11 @@
 #include <math.h>
 
 #define printOpenGLError() printOglError(__FILE__, __LINE__)
-int printOglError(char *file, int line)
-{
-
+int printOglError(char *file, int line){
 	GLenum glErr;
 	int    retCode = 0;
-
 	glErr = glGetError();
-	if (glErr != GL_NO_ERROR)
-	{
+	if (glErr != GL_NO_ERROR){
 		printf("glError in file %s @ line %d: %s\n",
 			file, line, gluErrorString(glErr));
 		retCode = 1;
@@ -69,8 +65,8 @@ namespace openspace {
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
-	, _programObject(nullptr)
-	, _programObjectPoints(nullptr)
+	, _haloProgram(nullptr)
+	, _pointProgram(nullptr)
 	, _texture(nullptr)
 {
 	//setBoundingSphere(PowerScaledScalar::CreatePSS(100)); // <---- do we need this?
@@ -127,12 +123,11 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 		1. skip metadata 
 		2. read everything in line until # symbol (nongeneric reader)
 		3. split line on whitespaces
-		4. (FOR NOW) grab x,y,z only
-		5. convert x,y,z to floats
-		6. convert m -> pc
-		7. convert to psc
-		8. pass to vector
-		9. pass vectors internal arr for vbo creation
+		4. convert x,y,z to floats
+		5. convert m -> pc
+		6. convert to psc
+		7. pass to vector
+		8. pass vectors internal arr for vbo creation
 
 		TODO:
 		Right now we are not reading cache files as luminocity, appmag etc are not cached
@@ -166,12 +161,9 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			if (mid != std::string::npos){
 				datastr = str.substr(0, mid);
 				std::size_t end = str.find('\n');
-				if (end == std::string::npos){
+				if (end == std::string::npos)
 					starDescription = str.substr(mid, end);
-				}
 			} 
-
-			std::cout << datastr << std::endl;
 			// split data string on whitespace -> push to to vector
 			std::istringstream ss(datastr);
 			std::copy(std::istream_iterator<std::string>(ss),
@@ -198,13 +190,13 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			powerscaled[2] *= parsecsToMetersFactor[0];
 			powerscaled[3] += parsecsToMetersFactor[1];
 			
-			// We use vector to store data
+			// We use std::vector to store data
 			// needs no preallocation and has tightly packed arr.
 			for (int i = 0; i < 4; i++){
 				starcluster.push_back(powerscaled[i]);
 				cache << ' ' << powerscaled[i];
 			}
-			// will need more elegant solution here. // TODO
+			// will need more elegant solution here.
 			starcluster.push_back(floatingPointData[3]);
 			starcluster.push_back(floatingPointData[4]);
 			starcluster.push_back(floatingPointData[5]);
@@ -224,31 +216,51 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			starcluster.push_back(cachedValue);
 		}
 	}
-	// pass in the vectors internal array to create vbo method
-	v_size = starcluster.size();  
 
-	// create vao and interleaved vbo
-	glGenVertexArrays(1, &_vaoID);
-		glGenBuffers(1, &_vboID);
-		glBindVertexArray(_vaoID);
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-		glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &starcluster[0], GL_DYNAMIC_DRAW); // x,y,z,lum,appmag,absol..
-	glBindVertexArray(0);
+	v_stride    = 7;                      // stride in VBO, set manually for now.
+	v_size      = starcluster.size();     // size of VBO
+	v_total     = v_size / v_stride;      // total number of vertecies 
+
+	// create vao and interleaved vbo from vectors internal array
+	generateBufferObjects(&starcluster[0]);
+	
 	return true;
 }
 
-bool RenderableStars::initialize(){
-	// We use two shaders, compiled and linked by scenegraph.cpp
-	// 1. StarProgram  - Generates quads with png image of halo
-	// 2. PointProgram - Generates gl_Points in geom shader.
+void RenderableStars::generateBufferObjects(const void* data){
+	// generate and buffer data 
+	glGenVertexArrays(1, &_vaoID);
+	glGenBuffers(1, &_vboID);
+	glBindVertexArray(_vaoID);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), data, GL_DYNAMIC_DRAW); // order : x, y, z, lum, appmag, absmag
 
+	positionAttrib       = _haloProgram->attributeLocation ( "in_position"   );
+	brightnessDataAttrib = _pointProgram->attributeLocation( "in_brightness" );
+
+	GLsizei stride = sizeof(GLfloat) * v_stride;
+
+	glBindVertexArray(_vaoID);                                                                                // vao holds ref. to vbo
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID);																	  // bind vbo
+	glEnableVertexAttribArray(positionAttrib);                                                                // enable acess attribute in_position
+	glEnableVertexAttribArray(brightnessDataAttrib);                                                          // enable acess attribute in_brigthness
+	glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);                           // psc coordinates
+	glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat))); // brigthness properties 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);																		  // unbind
+	glBindVertexArray(0);
+}
+bool RenderableStars::initialize(){
 	bool completeSuccess = true;
-	if (_programObject == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _programObject);
-	if (_programObjectPoints == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("PointProgram", _programObjectPoints);
+
+	// 1. StarProgram  - Generates quads with png image of halo
+	if (_haloProgram == nullptr)
+		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _haloProgram);
+
+	// 2. PointProgram - Generates gl_Points in geom shader.
+	if (_pointProgram == nullptr)
+		completeSuccess &= OsEng.ref().configurationManager().getValue("PointProgram", _pointProgram);
 	
-	// Run read routine.
+	// Run read star-datafile routine.
 	if (!readSpeckFile(_speckPath)) 
 		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
 
@@ -264,30 +276,26 @@ bool RenderableStars::deinitialize(){
 	return true;	
 }
 
+//#define TMAT
 void RenderableStars::render(const Camera* camera, const psc& thisPosition){
-	assert(_programObject);
+	assert(_haloProgram);
 	printOpenGLError();
 	// activate shader
-	_programObject->activate();
+	_haloProgram->activate();
 
 	// fetch data
-	psc currentPosition = glm::vec4(0); // thisPosition;
-	psc campos = camera->position();
-	glm::mat4 camrot = camera->viewRotationMatrix();
+	psc currentPosition       = glm::vec4(0);        // thisPosition;
+	psc campos                = camera->position();
+	glm::mat4 camrot          = camera->viewRotationMatrix();
 	PowerScaledScalar scaling = camera->scaling();
-	glm::mat4 transform = glm::mat4(1); 
+	glm::mat4 transform       = glm::mat4(1); 
+	scaling                   = glm::vec2(1, -22);   // we have no boundingsphere?
 
-	scaling = glm::vec2(1, -22);           // we have no boundingsphere?
-	GLint vertsToDraw = v_size / 7;        // account for data size. 
-	GLsizei stride = sizeof(GLfloat) * 7;  // 7 component stride
-	/*
+#ifdef TMAT
 	transform = glm::rotate(transform, 
 		                    1.1f * static_cast<float>(sgct::Engine::instance()->getTime()),  
 							glm::vec3(0.0f, 1.0f, 0.0f));
-    */
-	positionAttrib = _programObject->attributeLocation("in_position");
-	brightnessDataAttrib = _programObjectPoints->attributeLocation("in_brightness");
-
+#endif
 	// disable depth test, enable additative blending
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -295,66 +303,48 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 
 #ifdef GLSPRITES	
 // ---------------------- RENDER HALOS -----------------------------
-	_programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	_programObject->setUniform("campos", campos.vec4());
-	_programObject->setUniform("objpos", currentPosition.vec4());
-	_programObject->setUniform("camrot", camrot);
-	_programObject->setUniform("scaling", scaling.vec2());
+	_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_haloProgram->setUniform("ModelTransform", transform);
+	_haloProgram->setUniform("campos", campos.vec4());
+	_haloProgram->setUniform("objpos", currentPosition.vec4());
+	_haloProgram->setUniform("camrot", camrot);
+	_haloProgram->setUniform("scaling", scaling.vec2());
 
 	// Bind texure
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
-	_programObject->setUniform("texture1", unit);
+	_haloProgram->setUniform("texture1", unit);
 
 	// activate the VBO. 
 	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-	glEnableVertexAttribArray(positionAttrib);                                                                   // enable acess attribute in_position
-	glEnableVertexAttribArray(brightnessDataAttrib);                                                             // enable acess attribute in_brigthness
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);                          // psc coordinates
-		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat)));// brigthness properties 
-		glDrawArrays(GL_POINTS, 0, vertsToDraw);                                                                 // render!
-	glDisableVertexAttribArray(positionAttrib);
-	glDisableVertexAttribArray(brightnessDataAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_POINTS, 0, v_total);  
 	glBindVertexArray(0);
-
-
 #endif
-	_programObject->deactivate();
+	_haloProgram->deactivate();
 
 #ifdef GLPOINTS
 // ---------------------- RENDER POINTS -----------------------------
-	_programObjectPoints->activate();
+	_pointProgram->activate();
 
-	_programObjectPoints->setUniform("ViewProjection", camera->viewProjectionMatrix());
-	_programObjectPoints->setUniform("ModelTransform", transform);
-	_programObjectPoints->setUniform("campos", campos.vec4());
-	_programObjectPoints->setUniform("objpos", currentPosition.vec4());
-	_programObjectPoints->setUniform("camrot", camrot);
-	_programObjectPoints->setUniform("scaling", scaling.vec2());
+	_pointProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_pointProgram->setUniform("ModelTransform", transform);
+	_pointProgram->setUniform("campos", campos.vec4());
+	_pointProgram->setUniform("objpos", currentPosition.vec4());
+	_pointProgram->setUniform("camrot", camrot);
+	_pointProgram->setUniform("scaling", scaling.vec2());
 
 	glEnable(GL_PROGRAM_POINT_SIZE_EXT); // Allows shader to determine pointsize. 
 
-	//glEnable(GL_POINT_SMOOTH); //decrepated in core profile, workaround in frag.
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID);             
-	glEnableVertexAttribArray(positionAttrib);                                                                     // enable acess attribute in_position
-	glEnableVertexAttribArray(brightnessDataAttrib);															   // enable acess attribute in_brigthness
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);							   // psc coordinates
-		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat)));  // brigthness properties 
-		glDrawArrays(GL_POINTS, 0, vertsToDraw);                                                                   // render!
-	glDisableVertexAttribArray(positionAttrib);
-	glDisableVertexAttribArray(brightnessDataAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glEnable(GL_POINT_SMOOTH);         // decrepated in core profile, workaround in frag.
+	glBindVertexArray(_vaoID); 
+		glDrawArrays(GL_POINTS, 0, v_total);
 	glBindVertexArray(0);
 	
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
-	_programObjectPoints->deactivate();
+	_pointProgram->deactivate();
 
 #endif
 }
@@ -373,6 +363,7 @@ void RenderableStars::loadTexture(){
 
 void RenderableStars::update()
 {
+	
 }
 
 	

@@ -52,21 +52,26 @@ protected:
 private:
 	std::ifstream& skipToLine(std::ifstream& file, unsigned int num);
 	bool readSpeckFile(const std::string& path);
+	void generateBufferObjects(const void* data);
 
 	properties::StringProperty _colorTexturePath;
 
-	ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _programObjectPoints;
+	ghoul::opengl::ProgramObject* _haloProgram;
+	ghoul::opengl::ProgramObject* _pointProgram;
 
 	ghoul::opengl::Texture* _texture;
 
 	std::string _speckPath;
+
+	GLint vertsToDraw;
 
 	GLuint _vboID;
 	GLuint _vaoID;
 	GLint positionAttrib;
 	GLint brightnessDataAttrib;
 	int v_size;
+	int v_stride;
+	int v_total;
 };
 
 } // namespace openspace
