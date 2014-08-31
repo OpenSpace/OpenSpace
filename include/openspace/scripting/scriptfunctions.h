@@ -40,7 +40,7 @@ int printFatal(lua_State* L);
 // Properties
 
 int property_setValue(lua_State* L);
-//static int property_getValue(lua_State* L);
+int property_getValue(lua_State* L);
 
 } // namespace scripting
 } // namespace openspace

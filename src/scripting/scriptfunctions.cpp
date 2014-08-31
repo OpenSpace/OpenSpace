@@ -29,6 +29,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace {
 namespace scripting {
@@ -97,29 +98,34 @@ int property_setValue(lua_State* L)
     // TODO Check for argument number (ab)
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
-    boost::any propertyValue;
-    switch (type) {
-        case LUA_TNONE:
-        case LUA_TLIGHTUSERDATA:
-        case LUA_TTABLE:
-        case LUA_TFUNCTION:
-        case LUA_TUSERDATA:
-        case LUA_TTHREAD:
-            LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
-            return 0;
-        case LUA_TNIL:
-            propertyValue = 0;
-            break;
-        case LUA_TBOOLEAN:
-            propertyValue = lua_toboolean(L, -1);
-            break;
-        case LUA_TNUMBER:
-            propertyValue = lua_tonumber(L, -1);
-            break;
-        case LUA_TSTRING:
-            propertyValue = std::string(lua_tostring(L, -1));
-            break;
-    }
+  //  boost::any propertyValue;
+  //  switch (type) {
+  //      case LUA_TNONE:
+  //      case LUA_TLIGHTUSERDATA:
+  //      case LUA_TFUNCTION:
+  //      case LUA_TUSERDATA:
+  //      case LUA_TTHREAD:
+  //          LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
+  //          return 0;
+  //      case LUA_TNIL:
+  //          propertyValue = 0;
+  //          break;
+  //      case LUA_TBOOLEAN:
+  //          propertyValue = lua_toboolean(L, -1);
+  //          break;
+  //      case LUA_TNUMBER:
+  //          propertyValue = lua_tonumber(L, -1);
+  //          break;
+  //      case LUA_TSTRING:
+  //          propertyValue = std::string(lua_tostring(L, -1));
+  //          break;
+		//case LUA_TTABLE: {
+		//	ghoul::Dictionary d;
+		//	ghoul::lua::populateDictionary(L, d);
+		//	propertyValue = d;
+		//	break;
+		//}
+  //  }
     
     Property* prop = property(uri);
     if (!prop) {
@@ -127,15 +133,64 @@ int property_setValue(lua_State* L)
         return 0;
     }
 
-    prop->set(propertyValue);
+	//if (propertyValue.type() != prop->type()) {
+	if (type != prop->typeLua())
+		LERROR("Property '" << uri << "' does not accept input of type '"
+			<< luaTypeToString(type) << "'. Requested type: '"
+			<< luaTypeToString(prop->typeLua() << "'");
+	}
+	else
+		prop->setLua(L);
+		//prop->set(propertyValue);
     
     return 0;
 }
 
-//int property_getValue(lua_State* L)
-//{
-//    
-//}
+int property_getValue(lua_State* L) {
+    const std::string _loggerCat = "property_getValue";
+
+    // TODO Check for argument number (ab)
+    std::string uri = luaL_checkstring(L, -1);
+
+	Property* prop = property(uri);
+	if (!prop) {
+		LERROR("Property with uri '" << uri << "' could not be found");
+		lua_pushnil(L);
+	}
+	else {
+		prop->getLua(L);
+
+        //switch (type) {
+        //    case LUA_TNONE:
+        //    case LUA_TLIGHTUSERDATA:
+        //    case LUA_TFUNCTION:
+        //    case LUA_TUSERDATA:
+        //    case LUA_TTHREAD:
+        //        LERROR("Function parameter was of type '" << luaTypeToString(type)
+        //                                                    << "'");
+        //        return 0;
+        //    case LUA_TNIL:
+        //        propertyValue = 0;
+        //        break;
+        //    case LUA_TBOOLEAN:
+        //        propertyValue = lua_toboolean(L, -1);
+        //        break;
+        //    case LUA_TNUMBER:
+        //        propertyValue = lua_tonumber(L, -1);
+        //        break;
+        //    case LUA_TSTRING:
+        //        propertyValue = std::string(lua_tostring(L, -1));
+        //        break;
+        //    case LUA_TTABLE: {
+        //        ghoul::Dictionary d;
+        //        ghoul::lua::populateDictionary(L, d);
+        //        propertyValue = d;
+        //        break;
+        //    }
+        //}
+}
+    return 1;
+}
     
 } // namespace scripting
 } // namespace openspace

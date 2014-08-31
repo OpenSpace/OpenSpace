@@ -27,6 +27,8 @@
 
 #include <string>
 
+struct lua_State;
+
 namespace openspace {
 namespace properties {
 
@@ -43,6 +45,12 @@ public:
 
     template <typename U>
     static U defaultMaximumValue();
+
+	template <typename U>
+	static U fromLuaValue(lua_State* state, bool& success);
+
+	template <typename U>
+	static bool toLuaValue(lua_State* state, U value);
 };
 
 } // namespace properties

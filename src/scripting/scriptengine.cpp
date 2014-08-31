@@ -222,14 +222,6 @@ void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
 }
     
 void ScriptEngine::addBaseLibrary() {
-    ScriptEngine::LuaLibrary sceneGraphLibrary = {
-        "",
-        {
-            { "setPropertyValue", &property_setValue}
-            //        { "getPropertyValue", &property_getValue},
-        }
-    };
-
     LuaLibrary lib = {
         "",
         {

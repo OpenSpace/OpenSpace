@@ -57,5 +57,19 @@ U PropertyDelegate<T>::defaultMaximumValue() {
         "Unimplemented PropertyDelegate::defaultMaximumValue specialization");
 }
 
+template <typename T>
+template <typename U>
+U PropertyDelegate<T>::fromLuaValue(lua_State* state, bool& success) {
+	static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::fromLuaValue specialization");
+}
+
+template <typename T>
+template <typename U>
+bool PropertyDelegate<T>::toLuaValue(lua_State* state, U value) {
+	static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::toLuaValue specialization");
+}
+
 } // namespace properties
 } // namespace openspace

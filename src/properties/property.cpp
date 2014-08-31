@@ -24,6 +24,8 @@
 
 #include "openspace/properties/property.h"
 
+#include <ghoul/lua/ghoul_lua.h>
+
 namespace openspace {
 namespace properties {
 
@@ -56,10 +58,22 @@ boost::any Property::get() const {
     return boost::any();
 }
 
+bool Property::getLua(lua_State* state) const {
+	return true;
+}
+
 void Property::set(boost::any value) {}
+
+bool Property::setLua(lua_State* state) {
+	return true;
+}
 
 const std::type_info& Property::type() const {
     return typeid(void);
+}
+
+int Property::typeLua() const {
+	return LUA_TNONE;
 }
 
 const std::string& Property::guiName() const {

@@ -32,6 +32,8 @@
 #include <functional>
 #include <string>
 
+struct lua_State;
+
 namespace openspace {
 namespace properties {
 
@@ -48,6 +50,10 @@ public:
     virtual boost::any get() const;
     virtual void set(boost::any value);
     virtual const std::type_info& type() const;
+
+	virtual bool getLua(lua_State* state) const;
+	virtual bool setLua(lua_State* state);
+	virtual int typeLua() const;
 
     virtual void onChange(std::function<void()> callback);
 

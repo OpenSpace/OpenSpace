@@ -104,7 +104,8 @@ void TemplateProperty<T>::set(boost::any value) {
 		notifyListeners();
     }
     catch (boost::bad_any_cast&) {
-        LERRORC("TemplateProperty", "Illegal cast to '" << typeid(T).name() << "'");
+        LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
+			<< "' to '" << typeid(T).name() << "'");
     }
 }
 
