@@ -8,8 +8,11 @@ uniform vec4 objpos;
 
 uniform sampler2D texture1;
 
-in vec4 in_position; 
+layout(location = 0) in vec4 in_position;
+layout(location = 2) in vec3 in_brightness;
+
 out vec4 vs_position;
+out vec3 vs_brightness;
 
 //out vec4 distanceToStar;
 
@@ -54,6 +57,8 @@ vec4 psc_scaling(vec4 v1, vec2 v2) {
 
 void main()
 { 
+	vs_brightness = in_brightness;
+
 	// rotate and scale vertex with model transform and add the translation
 	vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
 	//vec4 lvp = ModelTransform * in_position;

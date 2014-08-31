@@ -79,7 +79,7 @@ void main(void)
 	// set the depth
 	gl_FragDepth = depth;
 	
-	diffuse = vec4(vs_brightness[0],0.5,0.5,1);//vs_brightness[1],vs_brightness[2],1);
+	diffuse = vec4(1,1,1,1);//vs_brightness[1],vs_brightness[2],1);
 	
 	/*
 	if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) // HAX METHOD.

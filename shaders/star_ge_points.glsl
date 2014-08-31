@@ -21,13 +21,12 @@ out vec2 texCoord;
 
 void main(){
 	ge_brightness[0] = vs_brightness[0];
-
-
+	
 	float distToPoint = 1;//(50.0*(length(gl_in[0].gl_Position - campos)) );
 
 	float radius = 1.f;
 	// EMIT POINT
-	// pointscaling not enabled yet
+	// pointscaling not enabled yet, but possible. 
 	gl_Position = gl_in[0].gl_Position;
 	/*float dist = length(gl_Position.xyz - campos.xyz);
 	float psize = (radius*1000000.f) / dist;*/

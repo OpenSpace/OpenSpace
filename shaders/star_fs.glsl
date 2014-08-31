@@ -5,6 +5,9 @@ uniform vec3 Color;
 in vec4 vs_position;
 in vec2 texCoord;
 
+layout(location = 2) in vec3 vs_brightness;
+
+
 out vec4 diffuse;
 
 const float k = 10.0;
