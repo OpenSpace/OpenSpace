@@ -33,7 +33,7 @@ using std::numeric_limits;
 namespace openspace {
 namespace properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE) \
+#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE, FUNCTION) \
 	[](lua_State* state, bool& success) -> TYPE { \
 		success = (lua_isnumber(state, -1) == 1); \
 		if (success) \
