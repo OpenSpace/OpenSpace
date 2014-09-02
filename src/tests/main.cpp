@@ -34,7 +34,7 @@
 #include <openspace/tests/test_common.inl>
 #include <openspace/tests/test_spicemanager.inl>
 //#include <openspace/tests/test_scenegraph.inl>
-//#include <openspace/tests/test_powerscalecoordinates.inl>
+#include <openspace/tests/test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
