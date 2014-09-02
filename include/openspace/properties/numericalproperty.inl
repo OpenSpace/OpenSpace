@@ -66,7 +66,7 @@ namespace properties {
 #define REGISTER_NUMERICALPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE,               \
                                           DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE,          \
                                           DEFAULT_STEPPING, FROM_LUA_LAMBDA_EXPRESSION,  \
-                                          TO_LUA_LAMBDA_EXPRESSION)                      \
+                                          TO_LUA_LAMBDA_EXPRESSION, LUA_TYPE)            \
     template <>                                                                          \
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className()                    \
     {                                                                                    \
@@ -134,7 +134,7 @@ namespace properties {
     template <>                                                                          \
     int PropertyDelegate<TemplateProperty<TYPE>>::typeLua()                              \
     {                                                                                    \
-        return LUA_TNUMBER;                                                              \
+        return LUA_TYPE;                                                                 \
     }                                                                                    \
     template <>                                                                          \
     int PropertyDelegate<NumericalProperty<TYPE>>::typeLua()                             \
