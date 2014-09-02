@@ -41,13 +41,13 @@ namespace properties {
         int number = 1;                                                                  \
         for (__TYPE__::size_type i = 0; i < result.length(); ++i) {                      \
             lua_getfield(state, -1, std::to_string(number).c_str());                     \
-            if (__TESTFUNC__(state, -1) != 1) {                                          \
+			if (__TESTFUNC__(state, -1) != 1) {                                          \
                 success = false;                                                         \
                 return __TYPE__(0);                                                      \
             } else {                                                                     \
-                result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
-                lua_pop(state, 1);                                                       \
-                ++number;                                                                \
+				result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
+				lua_pop(state, 1);                                                       \
+				++number;                                                                \
             }                                                                            \
         }                                                                                \
         success = true;                                                                  \
@@ -66,6 +66,13 @@ namespace properties {
         return true;                                                                     \
     }
 
+
+// Forcing value from int to bool is acceptable here (line 48)
+#ifdef WIN32
+#pragma warning(disable : 4800)
+#endif
+
+
 REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
 								 DEFAULT_FROM_LUA_LAMBDA(glm::bvec2, lua_toboolean,
 														 lua_isboolean),
@@ -80,6 +87,11 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
                                  DEFAULT_FROM_LUA_LAMBDA(glm::bvec4, lua_toboolean,
                                                          lua_isboolean),
                                  DEFAULT_TO_LUA_LAMBDA(glm::bvec4), LUA_TTABLE);
+
+#ifdef WIN32
+#pragma warning(default : 4800)
+#endif
+
 
 REGISTER_NUMERICALPROPERTY_SOURCE(
       Vec2Property, glm::vec2, glm::vec2(0), glm::vec2(numeric_limits<float>::lowest()),
