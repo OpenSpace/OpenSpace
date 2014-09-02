@@ -51,6 +51,8 @@ public:
 
 	template <typename U>
 	static bool toLuaValue(lua_State* state, U value);
+
+	static int typeLua();
 };
 
 } // namespace properties

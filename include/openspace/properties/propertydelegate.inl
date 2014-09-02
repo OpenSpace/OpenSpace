@@ -71,5 +71,11 @@ bool PropertyDelegate<T>::toLuaValue(lua_State* state, U value) {
 		"Unimplemented PropertyDelegate::toLuaValue specialization");
 }
 
+template <typename T>
+int PropertyDelegate<T>::typeLua() {
+	static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::luaType specialization");
+}
+
 } // namespace properties
 } // namespace openspace

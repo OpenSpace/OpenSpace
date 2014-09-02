@@ -41,6 +41,11 @@ public:
     virtual void set(boost::any value) override;
     virtual const std::type_info& type() const override;
 
+	bool getLua(lua_State* state) const override;
+	bool setLua(lua_State* state) override;
+	int typeLua() const override;
+
+
     operator T();
     TemplateProperty<T>& operator=(T val);
 

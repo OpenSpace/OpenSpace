@@ -102,14 +102,71 @@ namespace properties {
     \
 }
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false));
-REGISTER_TEMPLATEPROPERTY_SOURCE(BVec3Property, glm::bvec3, glm::bvec3(false));
-REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false));
+REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
+	[](lua_State* state, bool& success) -> glm::bvec2 {
+		success = (lua_isboolean(state, -1) == 1) && (lua_isboolean(state, -2) == 1);
+		if (success)
+			return glm::bvec2(lua_toboolean(state, -1), lua_toboolean(state, -2));
+		else
+			return glm::bvec2(false);
+	},
+	[](lua_State* state, glm::bvec2 value) -> bool {
+		lua_pushboolean(state, value.x);
+		lua_pushboolean(state, value.y);
+		return true;
+	},
+	LUA_TTABLE
+	);
+
+REGISTER_TEMPLATEPROPERTY_SOURCE(BVec3Property, glm::bvec3, glm::bvec3(false),
+	[](lua_State* state, bool& success) -> glm::bvec3 {
+		success = (lua_isboolean(state, -1) == 1) &&
+				  (lua_isboolean(state, -2) == 1) &&
+				  (lua_isboolean(state, -3) == 1);
+		if (success)
+			return glm::bvec3(lua_toboolean(state, -1),
+						      lua_toboolean(state, -2),
+							  lua_toboolean(state, -3));
+		else
+			return glm::bvec3(false);
+	},
+	[](lua_State* state, glm::bvec3 value) -> bool {
+		lua_pushboolean(state, value.x);
+		lua_pushboolean(state, value.y);
+		lua_pushboolean(state, value.z);
+		return true;
+	},
+	LUA_TTABLE
+	);
+
+REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
+	[](lua_State* state, bool& success) -> glm::bvec4 {
+		success = (lua_isboolean(state, -1) == 1) &&
+				  (lua_isboolean(state, -2) == 1) &&
+				  (lua_isboolean(state, -3) == 1) &&
+				  (lua_isboolean(state, -4) == 1);
+		if (success)
+			return glm::bvec4(lua_toboolean(state, -1),
+							  lua_toboolean(state, -2),
+							  lua_toboolean(state, -3),
+							  lua_toboolean(state, -4));
+		else
+			return glm::bvec4(false);
+	},
+	[](lua_State* state, glm::bvec4 value) -> bool {
+		lua_pushboolean(state, value.x);
+		lua_pushboolean(state, value.y);
+		lua_pushboolean(state, value.z);
+		lua_pushboolean(state, value.w);
+		return true;
+	},
+	LUA_TTABLE
+	);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(Vec2Property, glm::vec2, glm::vec2(0),
     glm::vec2(numeric_limits<float>::lowest()), glm::vec2(numeric_limits<float>::max()),
     glm::vec2(0.01f), DEFAULT_FROM_LUA_LAMBDA_2(glm::vec2, glm::vec2(0)),
-	DEFAULT_TO_LUA_LAMBDA_2(glm::vec2));
+	DEFAULT_TO_LUA_LAMBDA_2(glm::vec2)); // , LUA_TTABLE
 
 REGISTER_NUMERICALPROPERTY_SOURCE(Vec3Property, glm::vec3, glm::vec3(0),
     glm::vec3(numeric_limits<float>::lowest()), glm::vec3(numeric_limits<float>::max()),

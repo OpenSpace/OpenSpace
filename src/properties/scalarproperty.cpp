@@ -51,7 +51,20 @@ namespace properties {
 // char16_t and char32_t are not supported on Visual Studio 2013 and are defined to
 // be equal to unsigned short and unsigned int which causes a compile error
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false);
+REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false, 
+	[](lua_State* state, bool& success) -> bool {
+		success = (lua_isboolean(state, -1) == 1);
+		if (success)
+			return lua_toboolean(state, -1) == 1;
+		else
+			return false;
+	},
+	[](lua_State* state, bool value) -> bool {
+		lua_pushboolean(state, value);
+		return true;
+	},
+	LUA_TBOOLEAN
+	);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
     numeric_limits<char>::lowest(), numeric_limits<char>::max(), char(1),

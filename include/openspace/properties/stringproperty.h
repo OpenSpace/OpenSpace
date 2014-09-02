@@ -45,7 +45,19 @@ template <>
 template <>
 std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>();
 
-//REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
+template <>
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
+      lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
+      lua_State* state, std::string value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::string>>::typeLua();
+
 
 
 } // namespace properties

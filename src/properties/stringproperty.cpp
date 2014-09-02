@@ -24,6 +24,8 @@
 
 #include <openspace/properties/stringproperty.h>
 
+#include <ghoul/lua/ghoul_lua.h>
+
 namespace openspace {
 namespace properties {
 
@@ -50,12 +52,31 @@ std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::s
     return "";
 }
 
+template <>
+template <>
+std::string PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
+      lua_State* state, bool& success)
+{
+	success = lua_isstring(state, -1) == 1;
+	if (success)
+		return lua_tostring(state, -1);
+	else
+		return "";
+}
 
-//REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "");
-//
-//std::string openspace::properties::StringProperty::className() const {
-//    return "StringProperty";
-//}
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
+      lua_State* state, std::string value)
+{
+	lua_pushstring(state, value.c_str());
+	return true;
+}
+
+template <>
+int PropertyDelegate<TemplateProperty<std::string>>::typeLua() {
+	return LUA_TSTRING;
+}
 
 } // namespace properties
 } // namespace openspace
