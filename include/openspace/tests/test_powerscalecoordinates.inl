@@ -25,6 +25,8 @@
 
 #include "gtest/gtest.h"
 
+#include <openspace/scenegraph/scenegraph.h>
+
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
 
@@ -45,10 +47,10 @@ protected:
 
 TEST_F(PowerscaleCoordinatesTest, psc) {
 
-    openspace::psc reference(2.0, 1.0, 1.1, 1.0);
+    openspace::psc reference(2.f, 1.f, 1.1f, 1.f);
     
-    openspace::psc first(1.0,0.0,1.0,0.0);
-    openspace::psc second(1.9,1.0,1.0,1.0);
+    openspace::psc first(1.f, 0.f, 1.f, 0.f);
+    openspace::psc second(1.9f, 1.f, 1.f, 1.f);
     
     EXPECT_EQ(reference, first + second);
     EXPECT_TRUE(reference == (first + second));
@@ -63,10 +65,10 @@ TEST_F(PowerscaleCoordinatesTest, psc) {
 
 TEST_F(PowerscaleCoordinatesTest, pss) {
     
-    openspace::pss first(1.0,1.0);
-    openspace::pss second(1.0,-1.0);
-    EXPECT_EQ(openspace::pss(1.01,1.0), first + second);
-    EXPECT_EQ(openspace::pss(1.01,1.0), second + first);
+    openspace::pss first(1.f, 1.f);
+    openspace::pss second(1.f, -1.f);
+    EXPECT_EQ(openspace::pss(1.01f, 1.f), first + second);
+    EXPECT_EQ(openspace::pss(1.01f, 1.f), second + first);
     /*
     EXPECT_TRUE(first < (first + second));
     bool retu =(second < (first + second));
