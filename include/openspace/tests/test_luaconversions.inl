@@ -29,6 +29,7 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/matrixproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 class LuaConversionTest : public testing::Test {
 protected:
@@ -55,6 +56,21 @@ TEST_F(LuaConversionTest, LuaExecution) {
 	EXPECT_EQ(status, LUA_OK);
 }
 
+#define CONVERSION_TEST_TEMPLATE(__NAME__, __TYPE__, __VALUE__)                          \
+    TEST_F(LuaConversionTest, __NAME__)                                                  \
+    {                                                                                    \
+        using namespace openspace::properties;                                           \
+        bool success                                                                     \
+              = PropertyDelegate<TemplateProperty<__TYPE__>>::toLuaValue<__TYPE__>(      \
+                    state, __VALUE__);                                                   \
+        EXPECT_TRUE(success) << "toLuaValue";                                            \
+        __TYPE__ value = __TYPE__(0);                                                    \
+        value = PropertyDelegate<TemplateProperty<__TYPE__>>::fromLuaValue<__TYPE__>(    \
+              state, success);                                                           \
+        EXPECT_TRUE(success) << "fromLuaValue";                                          \
+        EXPECT_EQ(value, __VALUE__) << "fromLuaValue";                                   \
+    }
+
 #define CONVERSION_TEST_NUMERICAL(__NAME__, __TYPE__, __VALUE__)                         \
     TEST_F(LuaConversionTest, __NAME__)                                                  \
     {                                                                                    \
@@ -63,12 +79,14 @@ TEST_F(LuaConversionTest, LuaExecution) {
               = PropertyDelegate<NumericalProperty<__TYPE__>>::toLuaValue<__TYPE__>(     \
                     state, __VALUE__);                                                   \
         EXPECT_TRUE(success) << "toLuaValue";                                            \
-        __TYPE__ value                                                                        \
-              = PropertyDelegate<NumericalProperty<__TYPE__>>::fromLuaValue<__TYPE__>(   \
-                    state, success);                                                     \
+        __TYPE__ value = __TYPE__(0);                                                    \
+        value = PropertyDelegate<NumericalProperty<__TYPE__>>::fromLuaValue<__TYPE__>(   \
+              state, success);                                                           \
         EXPECT_TRUE(success) << "fromLuaValue";                                          \
         EXPECT_EQ(value, __VALUE__) << "fromLuaValue";                                   \
     }
+
+CONVERSION_TEST_TEMPLATE(Bool, bool, true);
 
 CONVERSION_TEST_NUMERICAL(Char, char, 1);
 CONVERSION_TEST_NUMERICAL(WChar, wchar_t, 1);
@@ -117,3 +135,17 @@ CONVERSION_TEST_NUMERICAL(DMat3x4, glm::dmat3x4, glm::dmat3x4(1.f));
 CONVERSION_TEST_NUMERICAL(DMat4x2, glm::dmat4x2, glm::dmat4x2(1.f));
 CONVERSION_TEST_NUMERICAL(DMat4x3, glm::dmat4x3, glm::dmat4x3(1.f));
 CONVERSION_TEST_NUMERICAL(DMat4x4, glm::dmat4x4, glm::dmat4x4(1.f));
+
+TEST_F(LuaConversionTest, String)
+{
+	using namespace openspace::properties;
+	bool success
+		  = PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
+				state, "value");
+	EXPECT_TRUE(success) << "toLuaValue";
+	std::string value = "";
+	value = PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
+		  state, success);
+	EXPECT_TRUE(success) << "fromLuaValue";
+	EXPECT_EQ(value, "value") << "fromLuaValue";
+}
