@@ -171,7 +171,6 @@ const glm::vec3 Camera::lookUpVector() const
     return _lookUp;
 }
 
-
 //
 //Camera::Camera()
 //    : _position(0.f, 0.f, 1.f, 0.f)

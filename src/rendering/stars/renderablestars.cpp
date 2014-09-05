@@ -27,6 +27,8 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+#include <iomanip>      // std::setw
+
 
 // open space includes
 #include <openspace/rendering/stars/renderablestars.h>
@@ -55,7 +57,7 @@ int printOglError(char *file, int line){
 
 
 #define GLSPRITES
-#define GLPOINTS
+//#define GLPOINTS
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
@@ -97,6 +99,22 @@ std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num
 	}
 	return file;
 }
+
+//these two methods exist only to debug geom shaders code. 
+float log10(float x){ return log(x)/ log(10); }
+psc psc_addition(psc v1, psc v2) {
+	float k = 10.f;
+	float ds = v2[3] - v1[3];
+	if (ds >= 0) {
+		float p = pow(k, -ds);
+		return psc(v1[0]*p + v2[0], v1[1]*p + v2[1], v1[2]*p + v2[2], v2[3]);
+	}
+	else {
+		float p = pow(k, ds);
+		return psc(v1[0] + v2[0]*p, v1[1] + v2[1]*p, v1[2] + v2[2]*p, v1[3]);
+	}
+}
+
 
 bool RenderableStars::readSpeckFile(const std::string& path){
 
@@ -176,10 +194,9 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 					  [](std::string const& val) {return std::stod(val); });
 			// store data concerning apparent luminocity, brigthness etc. 
 			// convert to powerscaled coordinate
-			psc powerscaled = 
-			PowerScaledCoordinate::CreatePowerScaledCoordinate(floatingPointData[0], 
-															   floatingPointData[1], 
-															   floatingPointData[2]);
+			psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(floatingPointData[0], 
+												  							     floatingPointData[1], 
+												  							     floatingPointData[2]);
 			// Convert parsecs -> meter
 			// Could convert floatingPointData instead ??
 			// (possible as 3.4 × 10^38 is max rep nr of float)
@@ -190,6 +207,42 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			powerscaled[2] *= parsecsToMetersFactor[0];
 			powerscaled[3] += parsecsToMetersFactor[1];
 			
+			// TESTING DISTANCE MODULUS FORMULA LOGIC (see: star_ge.glsl) ------------------------------------
+					//psc campos(3.17657, 0.0, 0.0, 4.0); // same input as in shader.
+					psc campos(0.8, 0.0, 0.0, 4.0);
+					psc psc_position = powerscaled;
+
+					float k = 10.f;
+
+					psc cam_negative = psc(-campos[0], -campos[1], -campos[2], campos[3]);
+					psc result = psc_addition(psc_position, cam_negative);
+					// checked with wolfram, correct. 
+					//std::cout << result << std::endl;
+					float x, y, z, w;
+					x = result[0];
+					y = result[1];
+					z = result[2];
+					w = result[3];
+		
+					glm::vec2 dpc_psc( sqrt(x*x + y*y + z*z), w );
+					// checked with wolfram, correct. 
+
+					dpc_psc[0] *= 0.324077929;
+					dpc_psc[1] += -18;
+
+					float parsecDist = dpc_psc[0] * pow(10, dpc_psc[1]);
+					// checked with wolfram, 100% correct to the 8th decimal. 
+
+					float M = floatingPointData[3];
+					float apparent = (M - 5.0f * (1.f - log10(parsecDist)));
+					// checked with wolfram, 100% correct to the 7th decimal. 
+
+					// WORKS, REPRODUCE ON SHADER!!!!!!
+
+					//std::cout << std::setw(3) << round(apparent) << " ";
+					//if (count % 15 == 0) std::cout << std::endl;
+			// --------------------------------------------------------------------------------
+			
 			// We use std::vector to store data
 			// needs no preallocation and has tightly packed arr.
 			for (int i = 0; i < 4; i++){
@@ -199,7 +252,7 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			// will need more elegant solution here.
 			starcluster.push_back(floatingPointData[3]);
 			starcluster.push_back(floatingPointData[4]);
-			starcluster.push_back(floatingPointData[5]);
+			starcluster.push_back(floatingPointData[5]); 
 
 			strvec.clear();
 			floatingPointData.clear();
@@ -216,7 +269,6 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			starcluster.push_back(cachedValue);
 		}
 	}
-
 	v_stride    = 7;                      // stride in VBO, set manually for now.
 	v_size      = starcluster.size();     // size of VBO
 	v_total     = v_size / v_stride;      // total number of vertecies 
@@ -233,10 +285,16 @@ void RenderableStars::generateBufferObjects(const void* data){
 	glGenBuffers(1, &_vboID);
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), data, GL_DYNAMIC_DRAW); // order : x, y, z, lum, appmag, absmag
+	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), data, GL_STATIC_DRAW); // order : x, y, z, lum, appmag, absmag
 
-	positionAttrib       = _haloProgram->attributeLocation ( "in_position"   );
-	brightnessDataAttrib = _pointProgram->attributeLocation( "in_brightness" );
+	positionAttrib       = _haloProgram->attributeLocation( "in_position"   );
+	brightnessDataAttrib = _haloProgram->attributeLocation( "in_brightness" );
+
+	GLint postest = _pointProgram->attributeLocation("in_position");
+	GLint britest = _pointProgram->attributeLocation("in_brightness");
+
+	assert(postest == positionAttrib); // assume pointer locations same for both programs. 
+	assert(britest == brightnessDataAttrib);
 
 	GLsizei stride = sizeof(GLfloat) * v_stride;
 
@@ -249,6 +307,7 @@ void RenderableStars::generateBufferObjects(const void* data){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);																		  // unbind
 	glBindVertexArray(0);
 }
+
 bool RenderableStars::initialize(){
 	bool completeSuccess = true;
 
@@ -283,13 +342,17 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	// activate shader
 	_haloProgram->activate();
 
+//	psc vantagePointTestTarget = PowerScaledCoordinate::CreatePowerScaledCoordinate(8000, 0.0, 0.0);
+	//	psc campos = vantagePointTestTarget;
+
 	// fetch data
-	psc currentPosition       = glm::vec4(0);        // thisPosition;
+	psc currentPosition       = thisPosition;
 	psc campos                = camera->position();
 	glm::mat4 camrot          = camera->viewRotationMatrix();
 	PowerScaledScalar scaling = camera->scaling();
 	glm::mat4 transform       = glm::mat4(1); 
-	scaling                   = glm::vec2(1, -22);   // we have no boundingsphere?
+	//scaling                   = glm::vec2(1, -22);   
+	scaling = glm::vec2(1, -19);  
 
 #ifdef TMAT
 	transform = glm::rotate(transform, 
@@ -301,9 +364,17 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 
-#ifdef GLSPRITES	
+#ifdef GLSPRITES
+	glm::mat4 modelMatrix      = camera->modelMatrix();
+	glm::mat4 viewMatrix       = camera->viewMatrix();
+	glm::mat4 projectionMatrix = camera->projectionMatrix();
+
 // ---------------------- RENDER HALOS -----------------------------
-	_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_haloProgram->setUniform("model", modelMatrix);
+	_haloProgram->setUniform("view", viewMatrix);
+	_haloProgram->setUniform("projection", projectionMatrix);
+
+	//_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_haloProgram->setUniform("ModelTransform", transform);
 	_haloProgram->setUniform("campos", campos.vec4());
 	_haloProgram->setUniform("objpos", currentPosition.vec4());
@@ -332,18 +403,17 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	_pointProgram->setUniform("campos", campos.vec4());
 	_pointProgram->setUniform("objpos", currentPosition.vec4());
 	_pointProgram->setUniform("camrot", camrot);
-	_pointProgram->setUniform("scaling", scaling.vec2());
+	//_pointProgram->setUniform("scaling", scaling.vec2());
 
 	glEnable(GL_PROGRAM_POINT_SIZE_EXT); // Allows shader to determine pointsize. 
 
 	//glEnable(GL_POINT_SMOOTH);         // decrepated in core profile, workaround in frag.
 	glBindVertexArray(_vaoID); 
-		glDrawArrays(GL_POINTS, 0, v_total);
+		glDrawArrays(GL_POINTS, 0, v_total*7);
 	glBindVertexArray(0);
 	
 	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-
+	
 	_pointProgram->deactivate();
 
 #endif

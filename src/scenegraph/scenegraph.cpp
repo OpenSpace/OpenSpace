@@ -142,8 +142,8 @@ bool SceneGraph::initialize()
     ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
     ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
                                                   absPath("${SHADERS}/exitpoints.vert"));
-    ShaderObject* fragmentShader = new ShaderObject(
-          ShaderObject::ShaderTypeFragment, absPath("${SHADERS}/exitpoints.frag"));
+    ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment, 
+		                                          absPath("${SHADERS}/exitpoints.frag"));
     _fboProgram->attachObject(vertexShader);
     _fboProgram->attachObject(fragmentShader);
     _fboProgram->compileShaderObjects();
@@ -217,7 +217,10 @@ bool SceneGraph::initialize()
         
         psc cameraPosition = positionNode->getPosition();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
-        c->setPosition(cameraPosition);
+
+		//psc vantagePointTestTarget = PowerScaledCoordinate::CreatePowerScaledCoordinate(8000, 0.0, 0.0);
+
+		c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
         c->setScaling(scaling);
 

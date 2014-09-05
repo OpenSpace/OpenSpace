@@ -5,11 +5,32 @@ uniform vec3 Color;
 in vec4 vs_position;
 in vec2 texCoord;
 
-layout(location = 2) in vec3 vs_brightness;
+layout(location = 2) in vec3 ge_brightness;
 
 out vec4 diffuse;
 
 const float k = 10.0;
+
+//---------------------------------------------------------------------------
+vec4 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
+{
+    float t; 
+	vec4 c;
+	if (t<-0.4) t=-0.4; if (t> 2.0) t= 2.0;
+         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.r=0.61+(0.11*t)+(0.1*t*t); }
+    else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.r=0.83+(0.17*t)          ; }
+    else if ((bv>= 0.40)&&(bv<2.10)) { t=(bv-0.40)/(2.10-0.40); c.r=1.00                   ; }
+         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.g=0.70+(0.07*t)+(0.1*t*t); }
+    else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.g=0.87+(0.11*t)          ; }
+    else if ((bv>= 0.40)&&(bv<1.60)) { t=(bv-0.40)/(1.60-0.40); c.g=0.98-(0.16*t)          ; }
+    else if ((bv>= 1.60)&&(bv<2.00)) { t=(bv-1.60)/(2.00-1.60); c.g=0.82         -(0.5*t*t); }
+         if ((bv>=-0.40)&&(bv<0.40)) { t=(bv+0.40)/(0.40+0.40); c.b=1.00                   ; }
+    else if ((bv>= 0.40)&&(bv<1.50)) { t=(bv-0.40)/(1.50-0.40); c.b=1.00-(0.47*t)+(0.1*t*t); }
+    else if ((bv>= 1.50)&&(bv<1.94)) { t=(bv-1.50)/(1.94-1.50); c.b=0.63         -(0.6*t*t); }
+	
+	return c;
+}
+//---------------------------------------------------------------------------
 
 vec4 psc_normlization(vec4 invec) {
 	
@@ -61,7 +82,6 @@ void main(void)
 
 		// DEBUG
 		cutoffs = 1.0;
-
 		// interpolate [10^s_nearcutoff .. 10^depth .. 10^s_farcutoff]
 		// calculate between 0..1 where the depth is
 		x = (pow(10,depth) - pow(10, s_nearcutoff)) / (pow(10,s_farcutoff) - pow(10, s_nearcutoff));
@@ -78,16 +98,19 @@ void main(void)
 	
 	// set the depth
 	gl_FragDepth = depth;
+
 	
-	diffuse = vec4(1,1,1,1);//vs_brightness[1],vs_brightness[2],1);
+	//float a = ge_brightness[2]/500;
 	
-	/*
-	if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) // HAX METHOD.
+	vec4 color = bv2rgb(ge_brightness[0]);/*250;
+
+	// GL_SMOOTH_POINTS decrepated in core profile. 
+	/*if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) 
 		discard;
-	else
-		diffuse = vec4(Color, 1);
-	*/
-  //  diffuse = texture2D(texture1, texCoord);
+	else*/
+		diffuse = vec4(color.xyz, 1);
+		//diffuse = vec4(1);
+		
    //diffuse = vec4(Color, 1.0);
     
 }

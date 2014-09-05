@@ -166,7 +166,7 @@ void RenderEngine::render()
 		sgct::Engine::instance()->getModelMatrix());
 	
 	_mainCamera->setViewMatrix(
-		sgct::Engine::instance()->getActiveViewMatrix());
+		sgct::Engine::instance()->getActiveViewMatrix()* view);
 
 	_mainCamera->setProjectionMatrix(
 		sgct::Engine::instance()->getActiveProjectionMatrix());
@@ -391,7 +391,8 @@ void RenderEngine::deserialize(const std::vector<char>& dataStream, size_t& offs
     s.representation[2] = dataStream[offset++];
     s.representation[3] = dataStream[offset++];
     position.w = s.value;
-    _mainCamera->setPosition(position);
+
+	_mainCamera->setPosition(position);
 }
 
 Camera* RenderEngine::camera() const {

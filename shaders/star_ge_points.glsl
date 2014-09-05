@@ -1,36 +1,72 @@
 #version 440
-
-
-const vec2 corners[4] = { 
-    vec2(0.0, 1.0), 
-	vec2(0.0, 0.0), 
-	vec2(1.0, 1.0), 
-	vec2(1.0, 0.0) 
-};
-
 layout(points) in;
 layout(points, max_vertices = 1) out; // Draw points 
 //layout(triangle_strip, max_vertices = 4) out; // Draw quads
 layout(location = 2) in vec3  vs_brightness[];
 layout(location = 2) out vec3 ge_brightness[];
 
-uniform vec4 campos;
-
-float spriteSize = 0.000005; // set here for now.
+float spriteSize = 0.1; // set here for now.
 out vec2 texCoord;
+
+in vec4 psc_position[];
+in vec4 campos[];
+
+float k = 10.f;
+vec4 psc_addition(vec4 v1, vec4 v2) {
+	float ds = v2.w - v1.w;
+	if(ds >= 0) {
+		float p = pow(k,-ds);
+		return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
+	} else {
+		float p = pow(k,ds);
+		return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
+	}
+}
+float log10( float x ){  return log(x) / log(10);   }
 
 void main(){
 	ge_brightness[0] = vs_brightness[0];
 	
-	float distToPoint = 1;//(50.0*(length(gl_in[0].gl_Position - campos)) );
+	float distToPoint = 1;
 
-	float radius = 1.f;
-	// EMIT POINT
-	// pointscaling not enabled yet, but possible. 
+	float radius = 0.3f;
+	// EMIT POINT 
 	gl_Position = gl_in[0].gl_Position;
-	/*float dist = length(gl_Position.xyz - campos.xyz);
-	float psize = (radius*1000000.f) / dist;*/
-	gl_PointSize = 1.f;
+		
+	// right now only threshing with absolute magnitude. 
+	float absMag = 2.0f;
+	if(vs_brightness[0].x <  0.0) absMag = 3;
+	if(vs_brightness[0].x < -3.0) absMag = 6;
+	if(vs_brightness[0].x < -6.0) absMag = 9;
+	
+	/*
+	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+	vec4 cam = vec4(-campos[0].xyz, campos[0].w);                  // get negative camera position   
+    // does swizzle work?? FFS!  do it manually:
+	//vec4 cam = vec4(-campos[0][0], -campos[0][1], -campos[0][2], campos[0][3]);
+	vec4 pos = psc_position[0];                                    // get OK star position
+	
+	vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
+	float x, y, z, w;
+	x = result[0];
+	y = result[1];
+	z = result[2];
+	w = result[3];
+	                                                               // I dont trust the legnth function at this point
+	vec2 pc = vec2(sqrt(x*x +y*y + z*z), result[3]);               // form vec2 
+	 
+	pc[0] *= 0.324077929;                                          // convert meters -> parsecs
+	pc[1] += -18;
+	
+	float pc_psc = pc[0] * pow(10, pc[1]);                         // psc scale out
+	float apparent = (M - 5.0f * (1.f - log10(pc_psc)));           // formula, get appMagnitude. 
+     
+	float weight = 0.001; // otherwise this takes over.
+	float same = gl_in[0].gl_Position.z;
+	same *=apparent;
+	spriteSize += (same*weight); 
+	*/
+	gl_PointSize = radius;
 	
 	EmitVertex();
 	EndPrimitive();
