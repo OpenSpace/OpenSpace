@@ -33,6 +33,7 @@
 #include <openspace/tests/test_common.inl>
 #include <openspace/tests/test_spicemanager.inl>
 //#include <openspace/tests/test_scenegraph.inl>
+#include <openspace/tests/test_luaconversions.inl>
 #include <openspace/tests/test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
     }
 	LINFO("Configuration file found: " << FileSys.absolutePath(configurationFilePath));
     
-    LDEBUG("registering base path");
+    LDEBUG("Registering base path");
     if( ! openspace::OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
         LFATAL("Could not register base path");
         assert(false);
@@ -78,9 +79,6 @@ int main(int argc, char** argv) {
         }
     }
     
-    /*openspace::Time::init();
-    openspace::Spice::init();
-    openspace::Spice::ref().loadDefaultKernels();*/
     openspace::FactoryManager::initialize();
     
     testing::InitGoogleTest(&argc, argv);
