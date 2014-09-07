@@ -24,22 +24,20 @@
 
 #include <typeinfo>
 
-#include <ghoul/logging/logmanager.h>
-
-#include <cassert>
-
 namespace openspace {
 namespace properties {
 
 template <typename T>
 std::string PropertyDelegate<T>::className() {
-    static_assert(sizeof(T) == 0, "Unimplemented PropertyDelegate::className specialization");
+    static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::className specialization");
 }
 
 template <typename T>
 template <typename U>
 U PropertyDelegate<T>::defaultValue() {
-    static_assert(sizeof(T) == 0, "Unimplemented PropertyDelegate::defaultValue specialization");
+    static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::defaultValue specialization");
 }
 
 template <typename T>
@@ -48,7 +46,6 @@ U PropertyDelegate<T>::defaultMinimumValue() {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::defaultMinimumValue specialization");
 }
-
 
 template <typename T>
 template <typename U>
