@@ -127,7 +127,8 @@ void Property::setPropertyOwner(PropertyOwner* owner)
 }
 
 void Property::notifyListener() {
-	_onChangeCallback();
+	if (_onChangeCallback)
+		_onChangeCallback();
 }
 
 } // namespace properties
