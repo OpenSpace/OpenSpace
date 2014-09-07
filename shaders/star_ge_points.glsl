@@ -7,6 +7,7 @@ layout(location = 2) out vec3 ge_brightness[];
 
 float spriteSize = 0.1; // set here for now.
 out vec2 texCoord;
+out float scale;
 
 in vec4 psc_position[];
 in vec4 campos[];
@@ -29,21 +30,20 @@ void main(){
 	
 	float distToPoint = 1;
 
-	float radius = 0.3f;
+	float radius = 2f;
 	// EMIT POINT 
 	gl_Position = gl_in[0].gl_Position;
 		
 	// right now only threshing with absolute magnitude. 
-	float absMag = 2.0f;
+	float absMag = 1.0f;
 	if(vs_brightness[0].x <  0.0) absMag = 3;
 	if(vs_brightness[0].x < -3.0) absMag = 6;
 	if(vs_brightness[0].x < -6.0) absMag = 9;
 	
-	/*
-	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+	float M  = vs_brightness[0][2]; // if NOT running test-target.
 	vec4 cam = vec4(-campos[0].xyz, campos[0].w);                  // get negative camera position   
     // does swizzle work?? FFS!  do it manually:
-	//vec4 cam = vec4(-campos[0][0], -campos[0][1], -campos[0][2], campos[0][3]);
 	vec4 pos = psc_position[0];                                    // get OK star position
 	
 	vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
@@ -61,12 +61,15 @@ void main(){
 	float pc_psc = pc[0] * pow(10, pc[1]);                         // psc scale out
 	float apparent = (M - 5.0f * (1.f - log10(pc_psc)));           // formula, get appMagnitude. 
      
-	float weight = 0.001; // otherwise this takes over.
-	float same = gl_in[0].gl_Position.z;
-	same *=apparent;
-	spriteSize += (same*weight); 
-	*/
-	gl_PointSize = radius;
+	vec4 P = gl_in[0].gl_Position;
+	 
+	float weight = 0.1f; 										    // otherwise this takes over.
+	float depth  = -P.z;
+	//depth       *= pow(apparent,6);
+	//if(round(apparent) > 10)
+	scale = -apparent*weight;
+	
+	gl_PointSize = -apparent*0.3;
 	
 	EmitVertex();
 	EndPrimitive();

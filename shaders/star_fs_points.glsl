@@ -9,6 +9,8 @@ layout(location = 2) in vec3 ge_brightness;
 
 out vec4 diffuse;
 
+in float scale; 
+
 const float k = 10.0;
 
 //---------------------------------------------------------------------------
@@ -101,15 +103,16 @@ void main(void)
 
 	
 	//float a = ge_brightness[2]/500;
+	float b = scale;
+	vec4 color = bv2rgb(ge_brightness[0]*b)/250;
+	//color*=b;
 	
-	vec4 color = bv2rgb(ge_brightness[0]);/*250;
-
 	// GL_SMOOTH_POINTS decrepated in core profile. 
-	/*if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) 
+	if(dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) 
 		discard;
-	else*/
-		diffuse = vec4(color.xyz, 1);
-		//diffuse = vec4(1);
+	else
+		//diffuse = vec4(color.xyz, 1);//*b;
+		diffuse = vec4(1)*b;
 		
    //diffuse = vec4(Color, 1.0);
     

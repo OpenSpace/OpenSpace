@@ -57,7 +57,7 @@ int printOglError(char *file, int line){
 
 
 #define GLSPRITES
-//#define GLPOINTS
+#define GLPOINTS
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";

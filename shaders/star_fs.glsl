@@ -102,7 +102,6 @@ void main(void)
 	gl_FragDepth = depth;
 	
 	vec4 color = bv2rgb(ge_brightness[0])/1.1;
-
 	
     diffuse = texture2D(texture1, texCoord)*color;
    ///diffuse = vec4(Color, 1.0);

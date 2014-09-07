@@ -39,7 +39,7 @@ void main(){
 	
 	/// --- distance modulus --- NOT OPTIMIZED YET.
  	
-	//float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
 	float M  = vs_brightness[0][2]; // if NOT running test-target.
 	vec4 cam = vec4(-campos[0].xyz, campos[0].w);                  // get negative camera position   
 	vec4 pos = psc_position[0];                                    // get OK star position
@@ -53,20 +53,19 @@ void main(){
 	                                                               // I dont trust the legnth function at this point
 	vec2 pc = vec2(sqrt(x*x +y*y + z*z), result[3]);               // form vec2 
 	 
-	pc[0] *= 0.324077929;                                          // convert meters -> parsecs
-	pc[1] += -18;
+	pc[0] *= 0.324077929f;                                          // convert meters -> parsecs
+	pc[1] += -18f;
 	
 	float pc_psc   = pc[0] * pow(10, pc[1]);                       // psc scale out
 	float apparent = -(M - 5.0f * (1.f - log10(pc_psc)));          // get APPARENT magnitude. 
      
 	vec4 P = gl_in[0].gl_Position;
 	 
-	float weight = 0.001; 										    // otherwise this takes over.
+	float weight = 0.00000005f; 										    // otherwise this takes over.
 	float depth  = -P.z;
-	depth       *= apparent;
-	//if(round(apparent) < -13)
+	depth       *= pow(apparent,6);
+	//if(round(apparent) > 10)
 	spriteSize  += (depth*weight); 
-	
 	
 	// EMIT QUAD
 	for(int i = 0; i < 4; i++){
