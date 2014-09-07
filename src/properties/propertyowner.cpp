@@ -151,6 +151,7 @@ void PropertyOwner::addProperty(Property* prop)
 {
     assert(prop != nullptr);
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
+	assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -172,9 +173,18 @@ void PropertyOwner::addProperty(Property* prop)
                                        << name() << "'");
         return;
     } else {
-        // Otherwise we have found the correct position to add it in
-        _properties.insert(it, prop);
-        prop->setPropertyOwner(this);
+        // Otherwise we still have to look if there is a PropertyOwner with the same name
+		const bool hasOwner = hasSubOwner(prop->identifier());
+		if (hasOwner) {
+			LERROR("Property identifier '" << prop->identifier() << "' already names a"
+				<< "registed PropertyOwner");
+			return;
+		}					
+		else {
+			// now have found the correct position to add it in
+			_properties.insert(it, prop);
+			prop->setPropertyOwner(this);
+		}
     }
 }
 
@@ -185,6 +195,7 @@ void PropertyOwner::addProperty(Property& prop)
     
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
     assert(owner != nullptr);
+	assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
     assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
     
     if (owner->name().empty()) {
@@ -205,8 +216,17 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
                << "' already present in PropertyOwner '" << name() << "'");
         return;
     } else {
-        // Otherwise we have found the correct position to add it in
-        _subOwners.insert(it, owner);
+		// We still need to check if the PropertyOwners name is used in a Property
+		const bool hasProp = hasProperty(owner->name());
+		if (hasProp) {
+			LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
+				 << "Property");
+			return;
+		}
+		else {
+			// Otherwise we have found the correct position to add it in
+			_subOwners.insert(it, owner);
+		}
     }
     
 }
