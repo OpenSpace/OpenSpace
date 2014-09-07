@@ -30,9 +30,12 @@ namespace openspace {
 namespace properties {
 
 namespace {
+	const std::string _metaDataKeyGuiName = "guiName";
     const std::string _metaDataKeyGroup = "group";
     const std::string _metaDataKeyVisible = "isVisible";
     const std::string _metaDataKeyReadOnly = "isReadOnly";
+
+	const std::string _metaDataKeyViewPrefix = "view.";
 }
 
 const std::string Property::ViewOptions::Color = "color";
@@ -43,9 +46,9 @@ const std::string Property::ViewOptions::PowerScaledScalar = "powerScaledScalar"
 
 Property::Property(std::string identifier, std::string guiName)
     : _identifier(std::move(identifier))
-    , _guiName(std::move(guiName))
 {
     setVisible(true);
+	_metaData.setValue(_metaDataKeyGuiName, std::move(guiName));
 }
 
 Property::~Property() {}
@@ -77,7 +80,9 @@ int Property::typeLua() const {
 }
 
 const std::string& Property::guiName() const {
-    return _guiName;
+	std::string result = "";
+	_metaData.getValue(_metaDataKeyGuiName, result);
+    return std::move(result);
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
@@ -94,30 +99,12 @@ void Property::setVisible(bool state) {
     _metaData.setValue(_metaDataKeyVisible, state);
 }
 
-bool Property::isVisible() const {
-    bool result = false;
-    _metaData.getValue(_metaDataKeyVisible, result);
-    return result;
-}
-
 void Property::setReadOnly(bool state) {
     _metaData.setValue(_metaDataKeyReadOnly, state);
 }
 
-bool Property::isReadOnly() const {
-    bool result = false;
-    _metaData.getValue(_metaDataKeyReadOnly, result);
-    return result;
-}
-
 void Property::setViewOption(std::string option, bool value) {
-    _metaData.setValue("view." + option, value, true);
-}
-
-bool Property::viewOption(const std::string& option) const {
-    bool result = false;
-    _metaData.getValue("view." + option, result);
-    return result;
+    _metaData.setValue(_metaDataKeyViewPrefix + option, value, true);
 }
 
 const ghoul::Dictionary& Property::metaData() const {
@@ -125,7 +112,7 @@ const ghoul::Dictionary& Property::metaData() const {
 }
 
 void Property::onChange(std::function<void()> callback) {
-    _onChangeCallbacks.push_back(std::move(callback));
+    _onChangeCallback = std::move(callback);
 
 }
 
@@ -139,9 +126,8 @@ void Property::setPropertyOwner(PropertyOwner* owner)
     _owner = owner;
 }
 
-void Property::notifyListeners() {
-	for (std::function<void()>& f : _onChangeCallbacks)
-		f();
+void Property::notifyListener() {
+	_onChangeCallback();
 }
 
 } // namespace properties
