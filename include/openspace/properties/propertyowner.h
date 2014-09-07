@@ -97,7 +97,7 @@ public:
     Property* property(const std::string& URI) const;
 
 	/**
-	 * This method checks if a Propetry with the provided <code>URI</code> exists in this
+	 * This method checks if a Property with the provided <code>URI</code> exists in this
 	 * PropertyOwner (or any sub-owner). If the identifier contains one or more
 	 * <code>.</code>, the first part of the name will be recursively extracted and is
 	 * used as a name for a sub-owner and only the last part of the identifier is
@@ -109,7 +109,7 @@ public:
     
 	/**
 	 * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
-	 * has to be unique with respect to other sub-owners as well as Propertys owned by
+	 * has to be unique with respect to other sub-owners as well as Property's owned by
 	 * this PropertyOwner.
 	 * \return A list of all sub-owners this PropertyOwner has
 	 */
@@ -128,15 +128,15 @@ public:
 
 	/**
 	 * Returns <code>true</code> if this PropertyOwner owns a sub-owner with the provided
-	 * <code>name>/code>; returns <code>false</code> otherwise.
+	 * <code>name</code>; returns <code>false</code> otherwise.
 	 * \param name The name of the sub-owner that should be looked up
 	 * \return <code>true</code> if this PropertyOwner owns a sub-owner with the provided
-	 * <code>name>/code>; returns <code>false</code> otherwise
+	 * <code>name</code>; returns <code>false</code> otherwise
 	 */
     bool hasSubOwner(const std::string& name) const;
 
 	/**
-	 * This method converts a provided <code>groupID</code, used by the Propertys, into a
+	 * This method converts a provided <code>groupID</code>, used by the Propertys, into a
 	 * human-readable <code>name</code> which can be used by some external application.
 	 * \param groupID The group identifier whose human-readable name should be set
 	 * \param name The human-readable name for the group identifier
