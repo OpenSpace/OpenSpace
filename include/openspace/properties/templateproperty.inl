@@ -92,7 +92,7 @@ template <typename T>
 TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
                                       T value)
     : Property(std::move(identifier), std::move(guiName))
-    , _value(value) {
+    , _value(std::move(value)) {
 }
 
 template <typename T>
@@ -120,7 +120,11 @@ T openspace::properties::TemplateProperty<T>::value() const
 template <typename T>
 void openspace::properties::TemplateProperty<T>::setValue(T val)
 {
-    _value = val;
+	const bool changed = (val != _value);
+	if (changed) {
+		_value = std::move(val);
+		notifyListener();
+	}
 }
 
 
@@ -132,8 +136,11 @@ boost::any TemplateProperty<T>::get() const {
 template <typename T>
 void TemplateProperty<T>::set(boost::any value) {
     try {
-        _value = boost::any_cast<T>(std::move(value));
-		notifyListener();
+        T value = boost::any_cast<T>(std::move(value));
+		if (value != _value) {
+			_value = std::move(value);
+			notifyListener();
+		}
     }
     catch (boost::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
