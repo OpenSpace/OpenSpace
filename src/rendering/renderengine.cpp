@@ -55,7 +55,7 @@ bool RenderEngine::initialize()
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
-    _mainCamera->setPosition(psc(0.0, 0.0, 1.499823, 11.0));
+    _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 
     // if master, setup interaction
     //if (sgct::Engine::instance()->isMaster())
