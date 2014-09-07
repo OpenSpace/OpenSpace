@@ -47,11 +47,16 @@ bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
 PropertyOwner::PropertyOwner()
     : _name("")
 {
-
 }
 
 PropertyOwner::~PropertyOwner()
 {
+	for (Property* p : _properties)
+		delete p;
+	_properties.clear();
+	for (PropertyOwner* s : _subOwners)
+		delete s;
+	_subOwners.clear();
 }
 
 const std::vector<Property*>& PropertyOwner::properties() const
@@ -63,6 +68,7 @@ Property* PropertyOwner::property(const std::string& id) const
 {
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
 
+	// As the _properties list is sorted, just finding the lower bound is sufficient
     std::vector<Property*>::const_iterator it
           = std::lower_bound(_properties.begin(), _properties.end(), id,
                              [](Property* prop, const std::string& str) {
@@ -110,6 +116,7 @@ const std::vector<PropertyOwner*>& PropertyOwner::subOwners() const {
 PropertyOwner* PropertyOwner::subOwner(const std::string& name) const {
     assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
     
+	// As the _subOwners list is sorted, getting the lower bound is sufficient
     std::vector<PropertyOwner*>::const_iterator it
     = std::lower_bound(_subOwners.begin(), _subOwners.end(), name,
                        [](PropertyOwner* owner, const std::string& str) {
@@ -151,6 +158,7 @@ void PropertyOwner::addProperty(Property* prop)
     }
 
     // See if we can find the identifier of the property to add in the properties list
+	// The _properties list is sorted, so getting the lower bound is sufficient
     std::vector<Property*>::iterator it
           = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
                              [](Property* prop, const std::string& str) {
@@ -184,7 +192,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         return;
     }
     
-    // See if we can find the name of the propertyowner to add
+    // See if we can find the name of the propertyowner to add using the lower bound
     std::vector<PropertyOwner*>::iterator it
     = std::lower_bound(_subOwners.begin(), _subOwners.end(), owner->name(),
                        [](PropertyOwner* owner, const std::string& str) {

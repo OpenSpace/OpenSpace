@@ -69,7 +69,7 @@ public:
 	 * visibility settings is <code>true</code>, whereas the default read-only state is
 	 * <code>false</code>.
 	 * \param identifier A unique identifier for this property. It has to be unique to the
-	 * PropertyOwner
+	 * PropertyOwner and cannot contain any <code>.</code>s
 	 * \param guiName The human-readable GUI name for this Property
 	 */
     Property(std::string identifier, std::string guiName);
