@@ -129,6 +129,7 @@ bool RenderEngine::initializeGL()
                 maxFov = radsbetween;
             }
         }
+	//	std::cout << maxFov << std::endl;
         _mainCamera->setMaxFov(maxFov);
     }
 

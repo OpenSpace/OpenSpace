@@ -351,7 +351,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	glm::mat4 camrot          = camera->viewRotationMatrix();
 	PowerScaledScalar scaling = camera->scaling();
 	glm::mat4 transform       = glm::mat4(1); 
-	//scaling                   = glm::vec2(1, -22);   
+	//scaling                   = glm::vec2(1, -22);  
 	scaling = glm::vec2(1, -19);  
 
 #ifdef TMAT

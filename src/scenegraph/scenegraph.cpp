@@ -218,8 +218,6 @@ bool SceneGraph::initialize()
         psc cameraPosition = positionNode->getPosition();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
-		//psc vantagePointTestTarget = PowerScaledCoordinate::CreatePowerScaledCoordinate(8000, 0.0, 0.0);
-
 		c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
         c->setScaling(scaling);

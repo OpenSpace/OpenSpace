@@ -61,9 +61,9 @@ void main(){
      
 	vec4 P = gl_in[0].gl_Position;
 	 
-	float weight = 0.00000005f; 										    // otherwise this takes over.
-	float depth  = -P.z;
-	depth       *= pow(apparent,6);
+	float weight = 0.00001f; 										    // otherwise this takes over.
+	float depth  = pc[0] * pow(10, pc[1]);
+	depth       *= pow(apparent,3);
 	//if(round(apparent) > 10)
 	spriteSize  += (depth*weight); 
 	
