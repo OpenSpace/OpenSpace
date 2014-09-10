@@ -352,11 +352,11 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         distance(dist);
     }
     if (key == 'T') {
-        PowerScaledScalar dist(-speed * pow(10,17) * dt, 0.0);
+        PowerScaledScalar dist(-speed * pow(10,8) * dt, 0.0);
         distance(dist);
     }
     if (key == 'G') {
-		PowerScaledScalar dist(speed * pow(10, 17) * dt, 0.0);
+		PowerScaledScalar dist(speed * pow(10, 8) * dt, 0.0);
         distance(dist);
     }
     /*

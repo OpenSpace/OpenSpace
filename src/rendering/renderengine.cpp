@@ -143,7 +143,8 @@ void RenderEngine::postSynchronizationPreDraw()
     _mainCamera->compileViewRotationMatrix();
 
     // update and evaluate the scene starting from the root node
-    _sceneGraph->update();
+    _sceneGraph->update(); // old time + time
+	                       // in time setTime using double!
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 }

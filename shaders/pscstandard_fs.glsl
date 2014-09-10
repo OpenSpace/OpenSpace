@@ -48,7 +48,7 @@ void main()
 {
 
 	// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
-	float s_far			= 27.0; //= gl_DepthRange.far;	// 40
+	float s_far			= 40.0; //= gl_DepthRange.far;	// 40
 	float s_farcutoff	= 12.0;
 	float s_nearcutoff	= 7.0;
 	float s_near		= 0.0f;// gl_DepthRange.near;	// 0.1
@@ -100,7 +100,7 @@ void main()
 	
 	
 	// set the depth
-//	gl_FragDepth = depth;
+	gl_FragDepth = depth;
 	//gl_FragDepth = 0.5;
 
 	// color 

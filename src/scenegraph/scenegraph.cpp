@@ -121,7 +121,6 @@ bool SceneGraph::initialize()
 	_starProgram->attachObject(starfs);
 	_starProgram->compileShaderObjects();
 	_starProgram->linkProgramObject();
-	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
 	
 	// STAR POINT RENDERING
 	ProgramObject* _pointProgram = new ProgramObject("PointProgram");
@@ -137,7 +136,6 @@ bool SceneGraph::initialize()
 	_pointProgram->attachObject(starfs_point);
 	_pointProgram->compileShaderObjects();
 	_pointProgram->linkProgramObject();
-	OsEng.ref().configurationManager().setValue("PointProgram", _pointProgram);
 
     ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
     ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
@@ -176,6 +174,10 @@ bool SceneGraph::initialize()
     OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
     OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
     OsEng.ref().configurationManager().setValue("Quad", quad);
+	OsEng.ref().configurationManager().setValue("PointProgram", _pointProgram);
+	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
+
+
 
     // Initialize all nodes
     for (auto node : _nodes) {
