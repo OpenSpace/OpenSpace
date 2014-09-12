@@ -29,54 +29,20 @@
 namespace openspace {
 namespace properties {
 
-StringProperty::StringProperty(std::string identifier, std::string guiName)
-    : StringProperty(
-            std::move(identifier), std::move(guiName),
-            PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>())
-{
-}
-
-StringProperty::StringProperty(std::string identifier, std::string guiName,
-                                std::string value)
-    : TemplateProperty(std::move(identifier), std::move(guiName), std::move(value))
-{}
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::string>>::className() {
-    return "StringProperty";
-}
-
-template <>
-template <>
-std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>() {
-    return "";
-}
-
-template <>
-template <>
-std::string PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
-      lua_State* state, bool& success)
-{
-	success = lua_isstring(state, -1) == 1;
-	if (success)
-		return lua_tostring(state, -1);
-	else
-		return "";
-}
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
-      lua_State* state, std::string value)
-{
-	lua_pushstring(state, value.c_str());
-	return true;
-}
-
-template <>
-int PropertyDelegate<TemplateProperty<std::string>>::typeLua() {
-	return LUA_TSTRING;
-}
+REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
+[](lua_State* state, bool& success) -> std::string {
+		success = lua_isstring(state, -1) == 1;
+		if (success)
+			return lua_tostring(state, -1);
+		else
+			return "";
+	},
+[](lua_State* state, std::string value) -> bool {
+		lua_pushstring(state, value.c_str());
+		return true;
+	},
+LUA_TSTRING
+);
 
 } // namespace properties
 } // namespace openspace
