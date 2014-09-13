@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interface/interface.h>
@@ -47,6 +46,10 @@ void mainEncodeFun();
 void mainDecodeFun();
 void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
 
+namespace {
+	const std::string _loggerCat = "main";
+}
+
 int main(int argc, char** argv)
 {
     // create the OpenSpace engine and get arguments for the sgct engine
@@ -57,19 +60,16 @@ int main(int argc, char** argv)
 
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
-    char** newArgv = new char* [newArgc];
-    for (int i = 0; i < newArgc; ++i) {
-        // newArgv[i] = new char[sgctArguments.at(i).length()];
-        // std::strcpy(newArgv[i], sgctArguments.at(i).c_str());
+    char** newArgv = new char*[newArgc];
+    for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
-    }
 
+	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 
     // deallocate sgct c arguments
-    for (int i = 0; i < newArgc; ++i) {
-        // delete newArgv[i];
-    }
+    for (int i = 0; i < newArgc; ++i)
+         delete newArgv[i];
     delete[] newArgv;
 
     // Bind functions
@@ -90,10 +90,14 @@ int main(int argc, char** argv)
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
 
     // init the interface which will handle callbacks from an external gui
+	LDEBUG("Creating Interface module");
     _interface = new openspace::Interface(&OsEng);
 
     // try to open a window
-    if (!_sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile)) {
+	LDEBUG("Initialize SGCT Engine");
+	const bool initSuccess = _sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile);
+    if (!initSuccess) {
+		LFATAL("Initializing failed");
         // could not open a window, deallocates and exits
         delete _sgctEngine;
         openspace::OpenSpaceEngine::destroy();
@@ -101,9 +105,14 @@ int main(int argc, char** argv)
     }
 
     // Main loop
+	LDEBUG("Starting rendering loop");
     _sgctEngine->render();
 
+	LDEBUG("Destroying OpenSpaceEngine");
+	openspace::OpenSpaceEngine::destroy();
+
     // Clean up (de-allocate)
+	LDEBUG("Destroying SGCT Engine");
     delete _sgctEngine;
 
     // Exit program
