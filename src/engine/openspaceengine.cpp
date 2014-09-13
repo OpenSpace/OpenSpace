@@ -337,11 +337,6 @@ bool OpenSpaceEngine::initialize()
 	// Register Lua script functions
 	scriptEngine().addLibrary(Time::luaLibrary());
 
-	//scripting::ScriptEngine::LuaLibrary timeLibrary = {
-	//	"time",
-	//}
-
-
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);

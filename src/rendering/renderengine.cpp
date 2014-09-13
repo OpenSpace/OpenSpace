@@ -205,7 +205,6 @@ void RenderEngine::render()
         const PowerScaledScalar pssl = (position - origin).length();
 
 		const std::string time = Time::ref().currentTimeUTC().c_str();
-		LINFO(time);
 		Freetype::print(
 			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
 			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()

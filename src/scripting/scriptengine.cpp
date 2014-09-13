@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/crc32.h>
 
+#include <ghoul/lua/lua_helper.h>
 #include <fstream>
 
 namespace openspace {
@@ -88,22 +89,34 @@ bool ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
         return false;
     }
 
+	//ghoul::lua::logStack(_state);
     lua_getglobal(_state, _openspaceLibraryName.c_str());
+	//ghoul::lua::logStack(_state);
     if (library.name.empty()) {
+		//ghoul::lua::logStack(_state);
         addLibraryFunctions(library, true);
+		//ghoul::lua::logStack(_state);
+		lua_pop(_state, 1);
+		//ghoul::lua::logStack(_state);
     }
     else {
         const bool allowed = isLibraryNameAllowed(library.name);
         if (!allowed)
             return false;
         
+		//ghoul::lua::logStack(_state);
+		
         lua_pushstring(_state, library.name.c_str());
+		//ghoul::lua::logStack(_state);
         lua_newtable(_state);
+		//ghoul::lua::logStack(_state);
         addLibraryFunctions(library, false);
         lua_settable(_state, _setTableOffset);
-        
+        //ghoul::lua::logStack(_state);
+
         _registeredLibraries.insert(ghoul::hashCRC32(library.name));
     }
+
     return true;
 }
 
@@ -199,8 +212,8 @@ bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
             LERROR("Library name '" << name << "' specifies a thread");
             break;
     }
-    
-    lua_pop(_state, 1);
+
+    lua_pop(_state, 2);
     return result;
 }
 
@@ -208,16 +221,23 @@ void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
 {
     for (std::pair<std::string, lua_CFunction> p : library.functions) {
         if (!replace) {
+			ghoul::lua::logStack(_state);
             lua_getfield(_state, -1, p.first.c_str());
+			ghoul::lua::logStack(_state);
             const bool isNil = lua_isnil(_state, -1);
             if (!isNil) {
                 LERROR("Function name '" << p.first << "' was already assigned");
                 return;
             }
+			lua_pop(_state, 1);
         }
+		//ghoul::lua::logStack(_state);
         lua_pushstring(_state, p.first.c_str());
+		//ghoul::lua::logStack(_state);
         lua_pushcfunction(_state, p.second);
+		//ghoul::lua::logStack(_state);
         lua_settable(_state, _setTableOffset);
+		//ghoul::lua::logStack(_state);
     }
 }
     
@@ -236,10 +256,15 @@ void ScriptEngine::addBaseLibrary() {
 }
     
 void ScriptEngine::remapPrintFunction() {
-    lua_getglobal(_state, _luaGlobalNamespace.c_str());
-    lua_pushstring(_state, _printFunctionName.c_str());
-    lua_pushcfunction(_state, _printFunctionReplacement);
-    lua_settable(_state, _setTableOffset);
+	//ghoul::lua::logStack(_state);
+ //   lua_getglobal(_state, _luaGlobalNamespace.c_str());
+	//ghoul::lua::logStack(_state);
+ //   lua_pushstring(_state, _printFunctionName.c_str());
+	//ghoul::lua::logStack(_state);
+ //   lua_pushcfunction(_state, _printFunctionReplacement);
+	//ghoul::lua::logStack(_state);
+ //   lua_settable(_state, _setTableOffset);
+	//ghoul::lua::logStack(_state);
 }
     
 } // namespace scripting

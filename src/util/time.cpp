@@ -136,7 +136,7 @@ std::string Time::currentTimeUTC() const {
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 	scripting::ScriptEngine::LuaLibrary timeLibrary = {
-		"",
+		"time",
 		{
 			{"setDeltaTime", &time_setDeltaTime},
 			{"deltaTime", &time_deltaTime},
