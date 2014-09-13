@@ -25,6 +25,8 @@
 #ifndef __TIME_H__
 #define __TIME_H__
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <string>
 
 namespace openspace {
@@ -45,6 +47,8 @@ public:
 
 	void setDeltaTime(double deltaT);
 	double deltaTime() const;
+
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
 	Time();

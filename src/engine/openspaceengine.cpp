@@ -110,8 +110,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref()
 bool OpenSpaceEngine::gatherCommandlineArguments()
 {
     // TODO: Get commandline arguments from all modules
-    
-    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(&commandlineArgumentPlaceholders.configurationName, "-config", "-c", "Provides the path to the OpenSpace configuration file");
+
+    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
+          &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+          "Provides the path to the OpenSpace configuration file");
     _commandlineParser->addCommand(configurationFileCommand);
     
     return true;
@@ -313,9 +315,6 @@ bool OpenSpaceEngine::initialize()
     // registerFilePaths();
     _context.createContextFromGLContext();
 
-    // initialize the configurationmanager with the default configuration
-    //_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
-
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
@@ -324,6 +323,7 @@ bool OpenSpaceEngine::initialize()
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
 
+
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
     Time::initialize();
@@ -331,11 +331,16 @@ bool OpenSpaceEngine::initialize()
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
 
+
     scriptEngine().initialize();
-//    scriptEngine().addLibrary(ScriptEngine::LuaLibrary());
-    
-//    _engine->scriptEngine().runScript("return mylib.mysin(4)");
-    
+
+	// Register Lua script functions
+	scriptEngine().addLibrary(Time::luaLibrary());
+
+	//scripting::ScriptEngine::LuaLibrary timeLibrary = {
+	//	"time",
+	//}
+
 
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;

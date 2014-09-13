@@ -33,6 +33,33 @@
 
 namespace {
 	const std::string _loggerCat = "Time";
+
+	int time_setDeltaTime(lua_State* L) {
+		const std::string _loggerCat = "time_setDeltaTime";
+		double value = luaL_checknumber(L, -1);
+		openspace::Time::ref().setDeltaTime(value);
+		return 0;
+	}
+
+	int time_deltaTime(lua_State* L) {
+		const std::string _loggerCat = "time_deltaTime";
+		lua_pushnumber(L, openspace::Time::ref().deltaTime());
+		return 1;
+	}
+
+	int time_setTime(lua_State* L) {
+		const std::string _loggerCat = "time_setTime";
+		double value = luaL_checknumber(L, -1);
+		openspace::Time::ref().setTime(value);
+		return 0;
+	}
+
+	int time_currentTime(lua_State* L) {
+		const std::string _loggerCat = "time_time";
+		lua_pushnumber(L, openspace::Time::ref().currentTime());
+		return 1;
+	}
+
 }
 
 namespace openspace {
@@ -105,6 +132,19 @@ void Time::setTimeUTC(std::string time) {
 
 std::string Time::currentTimeUTC() const {
 	return SpiceManager::ref().convertTdbSecondsToString(_time, "MON DD,YYYY  HR:MN:SC.#### (TDB) ::TDB");
+}
+
+scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
+	scripting::ScriptEngine::LuaLibrary timeLibrary = {
+		"",
+		{
+			{"setDeltaTime", &time_setDeltaTime},
+			{"deltaTime", &time_deltaTime},
+			{"setTime", &time_setTime},
+			{"currentTime", &time_currentTime}
+		}
+	};
+	return std::move(timeLibrary);
 }
 
 } // namespace openspace
