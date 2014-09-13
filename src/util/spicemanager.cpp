@@ -207,10 +207,30 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 	return true;
 }
 
-double SpiceManager::stringToEphemerisTime(const std::string& epochString) const{
+double SpiceManager::convertStringToTdbSeconds(const std::string& epochString) const{
 	double et;
 	str2et_c(epochString.c_str(), &et);
 	return et;
+}
+
+std::string SpiceManager::convertTdbSecondsToString(double seconds,
+                                                    const std::string& format) const
+{
+	const int bufferSize = 128;
+	SpiceChar buffer[bufferSize];
+	timout_c(seconds, format.c_str(), bufferSize - 1, buffer);
+
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		//LERROR("Error retrieving position of target '" + target + "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return "";
+	}
+
+	return std::string(buffer);
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,

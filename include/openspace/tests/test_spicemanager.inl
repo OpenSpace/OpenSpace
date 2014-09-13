@@ -226,7 +226,7 @@ TEST_F(SpiceManagerTest, stringToEphemerisTime){
 	char   *date = "Thu Mar 20 12:53:29 PST 1997";
 	str2et_c(date, &control_ephemerisTime);
 
-	ephemerisTime = openspace::SpiceManager::ref().stringToEphemerisTime(date);
+	ephemerisTime = openspace::SpiceManager::ref().convertStringToTdbSeconds(date);
 	
 	EXPECT_EQ(ephemerisTime, control_ephemerisTime) << "Ephemeries times differ / not found";
 	unload_c(LSK.c_str());

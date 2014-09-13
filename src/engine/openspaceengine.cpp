@@ -36,6 +36,7 @@
 #include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -92,8 +93,9 @@ OpenSpaceEngine::~OpenSpaceEngine()
     delete _commandlineParser;
     _commandlineParser = nullptr;
 
+	SpiceManager::deinitialize();
     Spice::deinit();
-    Time::deinit();
+    Time::deinitialize();
     DeviceIdentifier::deinit();
     FileSystem::deinitialize();
     LogManager::deinitialize();
@@ -323,7 +325,8 @@ bool OpenSpaceEngine::initialize()
     SysCap.logCapabilities();
 
     // initialize OpenSpace helpers
-    Time::init();
+	SpiceManager::initialize();
+    Time::initialize();
     Spice::init();
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
@@ -463,6 +466,8 @@ void OpenSpaceEngine::preSynchronization()
 
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
+
+		Time::ref().advanceTime(dt);
     }
 #ifdef FLARE_ONLY
     _flare->preSync();
