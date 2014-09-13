@@ -31,6 +31,7 @@
 #include <openspace/scripting/scriptfunctions.h>
 #include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/shadercreator.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -48,20 +49,22 @@
 #include <iostream>
 #include <string>
 
+#include <chrono>
+ #include <unistd.h>
+
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
+{
+    LDEBUGC("Tree", pre << node->name());
+    const std::vector<openspace::SceneGraphNode*>& children = node->children();
+    for (openspace::SceneGraphNode* child : children)
+        printTree(child, pre + "    ");
+}
+
 }
 
 namespace openspace {
-
-void printTree(SceneGraphNode* node, std::string pre = "")
-{
-    LDEBUGC("Tree", pre << node->name());
-    const std::vector<SceneGraphNode*>& children = node->children();
-    for (SceneGraphNode* child : children)
-        printTree(child, pre + "    ");
-}
 
 SceneGraph::SceneGraph()
     : _focus(SceneGraphNode::RootNodeName)
@@ -87,69 +90,110 @@ bool SceneGraph::initialize()
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ProgramObject* po = nullptr;
-    if (OsEng.ref().configurationManager().hasKey("pscShader")
-        && OsEng.ref().configurationManager().getValue("pscShader", po)) {
-        LWARNING("pscShader already in ConfigurationManager, deleting.");
+    ShaderCreator sc = OsEng.shaderBuilder();
+    ProgramObject* tmpProgram;
+
+    typedef std::chrono::high_resolution_clock clock_;
+    typedef std::chrono::duration<double, std::ratio<1> > second_;
+
+    std::chrono::time_point<clock_> beg_(clock_::now());
+
+
+    // pscstandard
+    tmpProgram = sc.buildShader("pscstandard",
+                                "${SHADERS}/pscstandard_vs.glsl",
+                                "${SHADERS}/pscstandard_fs.glsl");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
+
+    // RaycastProgram
+    tmpProgram = sc.buildShader("RaycastProgram",
+                                "${SHADERS}/exitpoints.vert",
+                                "${SHADERS}/exitpoints.frag");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
+
+
+    // // TwoPassProgram
+    // tmpProgram = sc.buildShader("TwoPassProgram",
+    //                             "${SHADERS}/twopassraycaster.vert",
+    //                             "${SHADERS}/twopassraycaster.frag");
+    // if( ! tmpProgram) return false;
+    // tmpProgram->setUniform("texBack", 0);
+    // tmpProgram->setUniform("texFront", 1);
+    // tmpProgram->setUniform("texVolume", 2);
+    // OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
+
+    // Quad
+    tmpProgram = sc.buildShader("Quad",
+                                "${SHADERS}/quadVert.glsl",
+                                "${SHADERS}/quadFrag.glsl");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("quadTex", 0);
+    OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+
+
+
+    double elapsed = std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
+    LERROR("Time to load shaders: " << elapsed);
+
+    /*
+
+    auto programCreator = [] (  const std::string& name, 
+                                const std::string& vpath, 
+                                const std::string& fpath) 
+    {
+        const std::string vsPath = absPath(vpath);
+        const std::string fsPath = absPath(fpath);
+        const ShaderObject::ShaderType vsType = ShaderObject::ShaderType::ShaderTypeVertex;
+        const ShaderObject::ShaderType fsType = ShaderObject::ShaderType::ShaderTypeFragment;
+
+        ProgramObject* po = new ProgramObject(name);
+        ShaderObject* vs = new ShaderObject(vsType, vsPath, name + "Vertex");
+        ShaderObject* fs = new ShaderObject(fsType, fsPath, name + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( po->compileShaderObjects() && po->linkProgramObject())
+            return po;
+
+        // unsuccessful compilation, cleanup and return nullptr
         delete po;
         po = nullptr;
-    }
+        return po;
+    };
+    // pscstandard
+    tmpProgram = programCreator("pscstandard",
+                                "${SHADERS}/pscstandard_vs.glsl",
+                                "${SHADERS}/pscstandard_fs.glsl");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
-    ShaderObject* powerscale_vs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                             absPath("${SHADERS}/pscstandard_vs.glsl"), "PS Vertex");
-    ShaderObject* powerscale_fs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                             absPath("${SHADERS}/pscstandard_fs.glsl"), "PS Fragment");
+    // RaycastProgram
+    tmpProgram = programCreator("RaycastProgram",
+                                "${SHADERS}/exitpoints.vert",
+                                "${SHADERS}/exitpoints.frag");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-    po = new ProgramObject;
-    po->attachObject(powerscale_vs);
-    po->attachObject(powerscale_fs);
 
-    if (!po->compileShaderObjects())
-        return false;
-    if (!po->linkProgramObject())
-        return false;
+    // TwoPassProgram
+    tmpProgram = programCreator("TwoPassProgram",
+                                "${SHADERS}/twopassraycaster.vert",
+                                "${SHADERS}/twopassraycaster.frag");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("texBack", 0);
+    tmpProgram->setUniform("texFront", 1);
+    tmpProgram->setUniform("texVolume", 2);
+    OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
 
-    OsEng.ref().configurationManager().setValue("pscShader", po);
-
-    ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
-    ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                                  absPath("${SHADERS}/exitpoints.vert"));
-    ShaderObject* fragmentShader = new ShaderObject(
-          ShaderObject::ShaderTypeFragment, absPath("${SHADERS}/exitpoints.frag"));
-    _fboProgram->attachObject(vertexShader);
-    _fboProgram->attachObject(fragmentShader);
-    _fboProgram->compileShaderObjects();
-    _fboProgram->linkProgramObject();
-
-    ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
-    vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                    absPath("${SHADERS}/twopassraycaster.vert"));
-    fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                      absPath("${SHADERS}/twopassraycaster.frag"));
-    _twopassProgram->attachObject(vertexShader);
-    _twopassProgram->attachObject(fragmentShader);
-    _twopassProgram->compileShaderObjects();
-    _twopassProgram->linkProgramObject();
-    _twopassProgram->setUniform("texBack", 0);
-    _twopassProgram->setUniform("texFront", 1);
-    _twopassProgram->setUniform("texVolume", 2);
-
-    ProgramObject* quad = new ProgramObject("Quad");
-    ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                           absPath("${SHADERS}/quadVert.glsl"));
-    ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                           absPath("${SHADERS}/quadFrag.glsl"));
-    quad->attachObject(quadv);
-    quad->attachObject(quadf);
-    quad->compileShaderObjects();
-    quad->linkProgramObject();
-    quad->setUniform("quadTex", 0);
-
-    OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
-    OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
-    OsEng.ref().configurationManager().setValue("Quad", quad);
+    // Quad
+    tmpProgram = programCreator("Quad",
+                                "${SHADERS}/quadVert.glsl",
+                                "${SHADERS}/quadFrag.glsl");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("quadTex", 0);
+    OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+    */
 
     // Initialize all nodes
     for (auto node : _nodes) {

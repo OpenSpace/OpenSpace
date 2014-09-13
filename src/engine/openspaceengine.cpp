@@ -146,7 +146,6 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
     if (last == std::string::npos)
         return false;
 
-
     std::string basePath = absolutePath.substr(0, last);
 
     FileSys.registerPathToken(_basePathToken, basePath);
@@ -156,9 +155,7 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
 
 bool OpenSpaceEngine::findConfiguration(std::string& filename)
 {
-    if (!filename.empty())
         return FileSys.fileExists(filename);
-    else {
         std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
         size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
                                         ghoul::filesystem::FileSystem::PathSeparator);
@@ -295,6 +292,20 @@ bool OpenSpaceEngine::initialize()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
     glfwSwapBuffers(win);
+    int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
+    LDEBUG("samples: " << samples);
+
+    int x1, xSize, y1, ySize;
+    sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+    std::string sourceHeader = "";
+    sourceHeader += "#define SCREEN_WIDTH  " + std::to_string(xSize) + "\n";
+    sourceHeader += "#define SCREEN_HEIGHT " + std::to_string(ySize) + "\n";
+    sourceHeader += "#define ABUFFER_SINGLE_LINKED     " + std::to_string(ABUFFER_SINGLE_LINKED) + "\n";
+    sourceHeader += "#define ABUFFER_FIXED             " + std::to_string(ABUFFER_FIXED) + "\n";
+    sourceHeader += "#define ABUFFER_DYNAMIC           " + std::to_string(ABUFFER_DYNAMIC) + "\n";
+    sourceHeader += "#define ABUFFER_IMPLEMENTATION    " + std::to_string(ABUFFER_IMPLEMENTATION) + "\n";
+    _shaderBuilder.createSourceFile(true);
+    _shaderBuilder.sourceFileHeader(sourceHeader);
 
     // Register the filepaths from static function enables easy testing
     // registerFilePaths();
@@ -352,7 +363,6 @@ bool OpenSpaceEngine::initialize()
     _renderEngine->initialize();
     sceneGraph->loadScene(sceneDescriptionPath, scenePath);
     sceneGraph->initialize();
-    _renderEngine->setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY
     _flare = new Flare();
@@ -390,6 +400,10 @@ bool OpenSpaceEngine::initialize()
         }
     }
 
+#ifdef OPENSPACE_VIDEO_EXPORT
+    LINFO("OpenSpace compiled with video export; press Print Screen to start/stop recording");
+#endif
+
     return true;
 }
 
@@ -424,6 +438,13 @@ ScriptEngine& OpenSpaceEngine::scriptEngine()
     // TODO custom assert (ticket #5)
     assert(_scriptEngine);
     return *_scriptEngine;
+}
+
+
+ShaderCreator& OpenSpaceEngine::shaderBuilder()
+{
+    // TODO custom assert (ticket #5)
+    return _shaderBuilder;
 }
 
 bool OpenSpaceEngine::initializeGL()
@@ -470,6 +491,17 @@ void OpenSpaceEngine::postDraw()
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->unlockControls();
     }
+#ifdef OPENSPACE_VIDEO_EXPORT
+    float speed = 0.01;
+    glm::vec3 euler(0.0, speed, 0.0);
+    glm::quat rot = glm::quat(euler);
+    glm::vec3 euler2(0.0, -speed, 0.0);
+    glm::quat rot2 = glm::quat(euler2);
+    _interactionHandler->orbit(rot);
+    _interactionHandler->rotate(rot2);
+    if(_doVideoExport)
+        sgct::Engine::instance()->takeScreenshot();
+#endif
 #ifdef FLARE_ONLY
     _flare->postDraw();
 #endif
@@ -480,6 +512,12 @@ void OpenSpaceEngine::keyboardCallback(int key, int action)
     if (sgct::Engine::instance()->isMaster()) {
         _interactionHandler->keyboardCallback(key, action);
     }
+#ifdef OPENSPACE_VIDEO_EXPORT
+    // LDEBUG("key: " << key);
+    // LDEBUG("SGCT_KEY_PRINT_SCREEN: " << SGCT_KEY_PRINT_SCREEN);
+    if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
+        _doVideoExport = !_doVideoExport;
+#endif
 #ifdef FLARE_ONLY
     _flare->keyboard(key, action);
 #endif

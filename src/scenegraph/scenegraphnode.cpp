@@ -40,6 +40,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace {
 const std::string _loggerCat = "SceneGraphNode";
 }
@@ -81,6 +83,53 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 		result->addPropertySubOwner(result->_renderable);
         LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
+
+    if (dictionary.hasKey("RenderableToggle")) {
+        std::string val = "";
+        dictionary.getValue("RenderableToggle", val);
+
+        if(val.length() > 0) {
+            auto func = [result]() {
+                result->_renderableToggle = ! result->_renderableToggle;
+            };
+            int key = SGCT_KEY_UNKNOWN;
+
+            if(val.length() == 1) {
+                char c = std::toupper(val[0]);
+                key = static_cast<int>(c);
+            } else if (boost::iequals(val, "left")) {
+                key = SGCT_KEY_LEFT;
+            } else if (boost::iequals(val, "right")) {
+                key = SGCT_KEY_RIGHT;
+            } else if (boost::iequals(val, "up")) {
+                key = SGCT_KEY_UP;
+            } else if (boost::iequals(val, "down")) {
+                key = SGCT_KEY_DOWN;
+            } else if (boost::iequals(val, "space")) {
+                key = SGCT_KEY_SPACE;
+            } else if (boost::iequals(val, "enter")) {
+                key = SGCT_KEY_ENTER;
+            } else if (boost::iequals(val, "backspace")) {
+                key = SGCT_KEY_BACKSPACE;
+            } else if (boost::iequals(val, "del")) {
+                key = SGCT_KEY_DEL;
+            } else if (boost::iequals(val, "delete")) {
+                key = SGCT_KEY_DELETE;
+            } else {
+                // Loop through all F keys
+                for(int i = 0; i < 25; ++i) {
+                    std::string stringKey = "F" + std::to_string(i+1);
+                    if(boost::iequals(val, stringKey)) {
+                        key = SGCT_KEY_F1 + i;
+                    }
+                }
+            }
+
+            if(key != SGCT_KEY_UNKNOWN)
+                OsEng.interactionHandler().addKeyCallback(key, func);
+        }
+    }
+
     if (dictionary.hasKey(keyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
         dictionary.getValue(keyEphemeris, ephemerisDictionary);
@@ -120,6 +169,7 @@ SceneGraphNode::SceneGraphNode()
     , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
+    , _renderableToggle(true)
     , _boundingSphereVisible(false)
 {
 }
@@ -178,15 +228,18 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     _boundingSphereVisible = false;
     _renderableVisible = false;
 
+#ifndef OPENSPACE_VIDEO_EXPORT
     // check if camera is outside the node boundingsphere
     if (toCamera.length() > _boundingSphere) {
         // check if the boudningsphere is visible before avaluating children
         if (!sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
             // the node is completely outside of the camera view, stop evaluating this
             // node
+            //LFATAL(_nodeName << " is outside of frustum");
             return;
         }
     }
+#endif
 
     // inside boudningsphere or parts of the sphere is visible, individual
     // children needs to be evaluated
@@ -195,13 +248,14 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     // this node has an renderable
     if (_renderable) {
         //  check if the renderable boundingsphere is visible
-        _renderableVisible = sphereInsideFrustum(
-              thisPosition, _renderable->getBoundingSphere(), camera);
+        // _renderableVisible = sphereInsideFrustum(
+        //       thisPosition, _renderable->getBoundingSphere(), camera);
+        _renderableVisible = true;
     }
 
     // evaluate all the children, tail-recursive function(?)
     for (auto& child : _children) {
-        child->evaluate(camera, psc());
+        child->evaluate(camera, thisPosition);
     }
 }
 
@@ -213,7 +267,7 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
     if (!_boundingSphereVisible) {
         return;
     }
-    if (_renderableVisible) {
+    if (_renderableVisible && _renderableToggle) {
         // LDEBUG("Render");
         _renderable->render(camera, thisPosition);
     }
@@ -283,13 +337,22 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
             }
         }
         _boundingSphere += maxChild;
-    } else {  // leaf
+    } 
 
-        // if has a renderable, use that boundingsphere
-        if (_renderable)
-            _boundingSphere += _renderable->getBoundingSphere();
+    // if has a renderable, use that boundingsphere
+    if (_renderable ) {
+        PowerScaledScalar renderableBS = _renderable->getBoundingSphere();
+        if(renderableBS > _boundingSphere)
+            _boundingSphere = renderableBS;
     }
+    
 
+    LWARNING(_nodeName << ": " << _boundingSphere);
+
+    return _boundingSphere;
+}
+
+PowerScaledScalar SceneGraphNode::boundingSphere() const{
     return _boundingSphere;
 }
 

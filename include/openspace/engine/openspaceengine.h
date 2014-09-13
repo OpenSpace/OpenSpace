@@ -27,7 +27,6 @@
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
@@ -35,22 +34,25 @@
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
-//#define FLARE_ONLY
+// #define FLARE_ONLY
 
 #include <openspace/flare/flare.h>
+#include <openspace/util/shadercreator.h>
 
-namespace ghoul {
-    namespace cmdparser {
-        class CommandlineCommand;
-        class CommandlineParser;
-    }
-}
+#define  ABUFFER_SINGLE_LINKED    1
+#define  ABUFFER_FIXED            2
+#define  ABUFFER_DYNAMIC          3
+#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+
+// #define OPENSPACE_VIDEO_EXPORT
 
 namespace openspace {
 
+class ScriptEngine;
+
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
+    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -65,7 +67,7 @@ public:
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
-    scripting::ScriptEngine& scriptEngine();
+    ShaderCreator& shaderBuilder();
 
     // SGCT callbacks
     bool initializeGL();
@@ -82,24 +84,25 @@ public:
     void decode();
 
 private:
-    OpenSpaceEngine(std::string programName);
+    OpenSpaceEngine();
     ~OpenSpaceEngine();
-    
-    bool gatherCommandlineArguments();
-    
+
     static OpenSpaceEngine* _engine;
 
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
-    scripting::ScriptEngine* _scriptEngine;
-    ghoul::cmdparser::CommandlineParser* _commandlineParser;
+#ifdef OPENSPACE_VIDEO_EXPORT
+    bool _doVideoExport;
+#endif
 #ifdef FLARE_ONLY
     Flare* _flare;
 #endif
+    // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
+    ShaderCreator _shaderBuilder;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

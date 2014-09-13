@@ -27,6 +27,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
 namespace {
 const std::string _loggerCat = "Renderable";
 }
@@ -61,6 +63,13 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 //    std::string name;
 //    dictionary.getValue(constants::scenegraphnode::keyName, name);
     setName("renderable");
+
+    // get path if available
+    _relativePath = "";
+    if(dictionary.hasKey(constants::scenegraph::keyPathModule)) {
+    	dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
+    	_relativePath += "/";
+    }
 }
 
 Renderable::~Renderable()
@@ -79,6 +88,20 @@ const PowerScaledScalar& Renderable::getBoundingSphere()
 
 void Renderable::update()
 {
+}
+
+std::string Renderable::findPath(const std::string& path) {
+    std::string tmp = absPath(path);
+    if(FileSys.fileExists(tmp))
+        return tmp;
+
+    tmp = absPath(_relativePath + path);
+    if(FileSys.fileExists(tmp))
+        return tmp;
+
+    LERROR("Could not find file '" << path << "'");
+
+    return "";
 }
 
 }  // namespace openspace

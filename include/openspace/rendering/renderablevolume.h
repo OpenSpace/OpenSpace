@@ -29,7 +29,6 @@
 #include <openspace/rendering/renderable.h>
 
 // ghoul includes
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/io/rawvolumereader.h>
 
@@ -37,21 +36,17 @@ namespace openspace {
 
 class RenderableVolume: public Renderable {
 public:
-
 	// constructors & destructor
 	RenderableVolume(const ghoul::Dictionary& dictionary);
 	~RenderableVolume();
     
 protected:
-    std::string findPath(const std::string& path);
     ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
+    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
     ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
     ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
 
 private:
-
-    // relative path
-    std::string _relativePath;
 };
 
 } // namespace openspace

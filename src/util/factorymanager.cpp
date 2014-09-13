@@ -27,6 +27,7 @@
 #include <cassert>
 
 // renderables
+#include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderablevolumeexpert.h>
 #include <openspace/rendering/renderablevolumecl.h>
@@ -62,6 +63,7 @@ void FactoryManager::initialize()
     _manager->factory<Renderable>()->registerClass<RenderableVolumeExpert>(
           "RenderableVolumeExpert");
     _manager->factory<Renderable>()->registerClass<Flare>("RenderableFlare");
+    _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");
 
     // Add Ephimerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);

@@ -24,17 +24,16 @@
 
 // open space includes
 #include <openspace/rendering/renderablevolume.h>
-
-#include <ghoul/opengl/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
-#include <sgct.h>
+// ghoul includes
+#include <ghoul/opengl/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -73,92 +72,178 @@ namespace {
 
 namespace openspace {
 
-RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-{
-    // get path if available
-    _relativePath = "";
-    if(dictionary.hasKey(constants::scenegraph::keyPathModule)) {
-       dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
-       _relativePath += "/";
-    }
+RenderableVolume::RenderableVolume(const ghoul::Dictionary& dictionary) : Renderable(dictionary) {
 }
 
 RenderableVolume::~RenderableVolume() {
 }
 
-std::string RenderableVolume::findPath(const std::string& path) {
-    std::string tmp = absPath(path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-    
-    tmp = absPath(_relativePath + path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-    
-    LERROR("Could not find file '" << path << "'");
-    
-    return "";
+ghoul::opengl::Texture* RenderableVolume::loadVolume(
+    const std::string& filepath, 
+    const ghoul::Dictionary& hintsDictionary) {
+
+
+	if( ! FileSys.fileExists(filepath)) {
+		LWARNING("Could not load volume, could not find '" << filepath << "'");
+		return nullptr;
+	}
+
+	if(hasExtension(filepath, "raw")) {
+		ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
+		ghoul::RawVolumeReader rawReader(hints);
+		return rawReader.read(filepath);
+	} else if(hasExtension(filepath, "cdf")) {
+
+        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
+        glm::size3_t dimensions(1,1,1);
+        double tempValue;
+        if (hintsDictionary.hasKey("Dimensions.1") && 
+            hintsDictionary.getValue("Dimensions.1", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[0] = intVal;
+        }
+        if (hintsDictionary.hasKey("Dimensions.2") && 
+            hintsDictionary.getValue("Dimensions.2", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[1] = intVal;
+        }
+        if (hintsDictionary.hasKey("Dimensions.3") && 
+            hintsDictionary.getValue("Dimensions.3", tempValue)) {
+            int intVal = static_cast<int>(tempValue);
+            if(intVal > 0)
+                dimensions[2] = intVal;
+        }
+
+        std::string modelString = "";
+        if (hintsDictionary.hasKey("Model")) 
+            hintsDictionary.getValue("Model", modelString);
+
+        if(modelString == "") {
+            LWARNING("Model not specified.");
+            return nullptr;
+        }
+
+        std::string variableCacheString = "";
+        if (hintsDictionary.hasKey("Variable")) {
+            hintsDictionary.getValue("Variable", variableCacheString);
+        } else if(hintsDictionary.hasKey("Variables")) {  
+            std::string xVariable, yVariable, zVariable;
+            bool xVar, yVar, zVar;
+            xVar = hintsDictionary.getValue("Variables.1", xVariable);
+            yVar = hintsDictionary.getValue("Variables.2", yVariable);
+            zVar = hintsDictionary.getValue("Variables.3", zVariable);
+            if (xVar && yVar && zVar) {
+                variableCacheString = xVariable + "." + yVariable + "." + zVariable;
+            }
+        }
+
+        bool cache = false;
+        hintsDictionary.hasKey("Cache");
+        if (hintsDictionary.hasKey("Cache"))
+            hintsDictionary.getValue("Cache", cache);
+
+        std::stringstream ss;
+        ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
+        std::string cachepath = filepath + ss.str();
+        if( cache && FileSys.fileExists(cachepath)) {
+
+            FILE* file = fopen (cachepath.c_str(), "rb");
+
+            int length = dimensions[0] *dimensions[1] *dimensions[2];
+            float* data = new float[length];
+
+            for(int i = 0; i< length; i++){
+                float f;
+                fread(&f, sizeof(float), 1, file);
+                data[i] = f;
+            }
+
+            fclose(file);
+            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+        }
+
+		KameleonWrapper::Model model;
+		if (modelString == "BATSRUS") {
+			model = KameleonWrapper::Model::BATSRUS;
+		} else if (modelString == "ENLIL") {
+			model = KameleonWrapper::Model::ENLIL;
+		} else {
+			LWARNING("Hints does not specify a valid 'Model'");
+			return nullptr;
+		}
+
+		KameleonWrapper kw(filepath, model);
+		std::string variableString;
+		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
+			float* data = kw.getUniformSampledValues(variableString, dimensions);
+            if(cache) {
+                FILE* file = fopen (cachepath.c_str(), "wb");
+                int length = dimensions[0] *dimensions[1] *dimensions[2];
+                fwrite(data, sizeof(float), length, file);
+                fclose(file);
+            }
+        	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+		} else if (hintsDictionary.hasKey("Variables")) {
+			std::string xVariable, yVariable, zVariable;
+			bool xVar, yVar, zVar;
+			xVar = hintsDictionary.getValue("Variables.1", xVariable);
+			yVar = hintsDictionary.getValue("Variables.2", yVariable);
+			zVar = hintsDictionary.getValue("Variables.3", zVariable);
+
+			if (!xVar || !yVar || !zVar) {
+				LERROR("Error reading variables! Must be 3 and must exist in CDF data");
+			} else {
+
+				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
+                if(cache) {
+                    FILE* file = fopen (cachepath.c_str(), "wb");
+                    int length = dimensions[0] *dimensions[1] *dimensions[2];
+                    fwrite(data, sizeof(float), length, file);
+                    fclose(file);
+                }
+
+				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
+			}
+
+		} else {
+			LWARNING("Hints does not specify a 'Variable' or 'Variables'");
+		}
+	} else {
+		LWARNING("No valid file extension.");
+	}
+	return nullptr;
 }
 
-ghoul::opengl::Texture* RenderableVolume::loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary) {
-    if( ! FileSys.fileExists(filepath)) {
-        LWARNING("Could not load volume, could not find '" << filepath << "'");
-        return nullptr;
-    }
-    
-    if(hasExtension(filepath, "raw")) {
-        ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
-        ghoul::RawVolumeReader rawReader(hints);
-        return rawReader.read(filepath);
-    } else if(hasExtension(filepath, "cdf")) {
-        
-        std::string modelString;
-        if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
-            KameleonWrapper::Model model;
-            if (modelString == "BATSRUS") {
-                model = KameleonWrapper::Model::BATSRUS;
-            } else if (modelString == "ENLIL") {
-                model = KameleonWrapper::Model::ENLIL;
-            } else {
-                LWARNING("Hints does not specify a valid 'Model'");
-                return nullptr;
-            }
-            
-            std::string variableString;
-            if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
-                glm::size3_t dimensions(1,1,1);
-                double tempValue;
-                if (hintsDictionary.hasKey("Dimensions.1") && hintsDictionary.getValue("Dimensions.1", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[0] = intVal;
-                }
-                if (hintsDictionary.hasKey("Dimensions.2") && hintsDictionary.getValue("Dimensions.2", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[1] = intVal;
-                }
-                if (hintsDictionary.hasKey("Dimensions.3") && hintsDictionary.getValue("Dimensions.3", tempValue)) {
-                    int intVal = static_cast<int>(tempValue);
-                    if(intVal > 0)
-                        dimensions[2] = intVal;
-                }
-                
-                KameleonWrapper kw(filepath, model);
-                float* data = kw.getUniformSampledValues(variableString, dimensions);
-                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT);
-            } else {
-                LWARNING("Hints does not specify a 'Variable'");
-            }
-            
-            
-        }
-        LWARNING("Hints does not specify a 'Model'");
-    } else {
-        LWARNING("No valid file extension.");
-    }
-    return nullptr;
+glm::vec3 RenderableVolume::getVolumeOffset(
+		const std::string& filepath,
+		const ghoul::Dictionary& hintsDictionary) {
+
+	std::string modelString = "";
+	if (hintsDictionary.hasKey("Model"))
+		hintsDictionary.getValue("Model", modelString);
+
+	if(modelString == "") {
+		LWARNING("Model not specified.");
+		return glm::vec3(0);
+	}
+	KameleonWrapper::Model model;
+	if (modelString == "BATSRUS") {
+		model = KameleonWrapper::Model::BATSRUS;
+	} else if (modelString == "ENLIL") {
+		model = KameleonWrapper::Model::ENLIL;
+        return glm::vec3(0);
+	} else {
+		LWARNING("Hints does not specify a valid 'Model'");
+		return glm::vec3(0);
+	}
+
+	KameleonWrapper kw(filepath, model);
+
+	return kw.getModelBarycenterOffset();
 }
 
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {
@@ -228,10 +313,15 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     if ( ! FileSys.fileExists(f)) {
         return nullptr;
     }
+    ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+    ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
     
     // check if not a txt based texture
     if ( ! hasExtension(filepath, "txt")) {
-        return ghoul::opengl::loadTexture(f);
+        ghoul::opengl::Texture* t = ghoul::opengl::loadTexture(f);
+        t->setWrapping(wrappingmode);
+        return t;
     }
     
     // it is a txt based texture
@@ -259,7 +349,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     auto widthValidator = [](size_t in) { if(in > 0) return in; return static_cast<size_t>(1); };
     auto upperLowerValidator = [](float in) { return glm::clamp(in, 0.0f, 1.0f); };
-    auto intensityValidator = [](float in) { if(in > 0.0f) return in; return 1.0f; };
+    auto intensityValidator = [](float in) { return glm::clamp(in, 0.0f, 1.0f); };
     
     std::string line;
     while (std::getline(in, line)) {
@@ -294,15 +384,26 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     if (mappingKeys.size() < 1) {
         return nullptr;
     }
+
+    // for(auto key: mappingKeys) {
+    //     glm::vec4 rgba = key.color;
+    //    LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    // }
+    // LDEBUG("insert....");
     
-    mappingKeys.insert(mappingKeys.begin(), {lower});
-    mappingKeys.push_back({upper});
-    
-    
-    for(auto key: mappingKeys) {
-        glm::vec4 rgba = key.color;
-//        LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    if (mappingKeys.front().position > lower){
+        mappingKeys.insert(mappingKeys.begin(), {lower,mappingKeys.front().color});
     }
+
+    if (mappingKeys.back().position < upper){
+        mappingKeys.push_back({upper,mappingKeys.back().color});
+    }
+    
+    
+    // for(auto key: mappingKeys) {
+    //     glm::vec4 rgba = key.color;
+    //    LDEBUG("i: " << key.position << ", rgba: (" << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3] << ")");
+    // }
     
     // allocate new float array with zeros
     float* transferFunction = new float[width*4]();
@@ -310,8 +411,8 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
         transferFunction[i] = 0.0f;
     }
     
-    size_t lowerIndex = static_cast<size_t>(floorf(lower*static_cast<float>(width)));
-    size_t upperIndex = static_cast<size_t>(floorf(upper*static_cast<float>(width)));
+    size_t lowerIndex = static_cast<size_t>(floorf(lower*static_cast<float>(width-1)));
+    size_t upperIndex = static_cast<size_t>(floorf(upper*static_cast<float>(width-1)));
     
 //    LDEBUG("width: " << width);
 //    LDEBUG("lower: " << lower);
@@ -324,9 +425,9 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     auto currentKey = prevKey + 1;
     auto lastKey = mappingKeys.end() -1;
     
-    for (size_t i=lowerIndex; i<upperIndex; i++) {
+    for (size_t i=lowerIndex; i<=upperIndex; i++) {
         
-        float fpos = static_cast<float>(i)/static_cast<float>(width);
+        float fpos = static_cast<float>(i)/static_cast<float>(width-1);
         
         if (fpos > (*currentKey).position) {
             prevKey = currentKey;
@@ -361,16 +462,25 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             //LDEBUG("["<< position <<"] " << value);
             
         }
-//        LDEBUG(weight << ", (" <<
-//               transferFunction[4*i+0] << ", " <<
-//               transferFunction[4*i+1] << ", " <<
-//               transferFunction[4*i+2] << ", " <<
-//               transferFunction[4*i+3] << ")");
+       // LDEBUG(std::fixed << std::setw(10) << std::left << std::setprecision(8) << weight << ", (" <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+0] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+1] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+2] << ", " <<
+       //        std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+3] << ")");
     }
+
+    // for (int i = 0; i <= width; ++i) {
+
+    //    LDEBUG(std::fixed  << "(" <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+0] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+1] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+2] << ", " <<
+    //           std::setw(10) << std::left << std::setprecision(8) << transferFunction[4*i+3] << ")");
+    // }
 
     return new ghoul::opengl::Texture(transferFunction,
     		glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
-    		GL_RGBA, GL_FLOAT);;
+    		GL_RGBA, GL_FLOAT,filtermode, wrappingmode);
 }
 
 } // namespace openspace

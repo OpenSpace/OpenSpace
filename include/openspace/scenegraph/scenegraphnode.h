@@ -71,6 +71,7 @@ public:
 
     // bounding sphere
     PowerScaledScalar calculateBoundingSphere();
+    PowerScaledScalar boundingSphere() const;
 
     SceneGraphNode* childNode(const std::string& name);
 
@@ -90,6 +91,7 @@ private:
     // renderable
     Renderable* _renderable;
     bool _renderableVisible;
+    bool _renderableToggle;
 
     // bounding sphere
     bool _boundingSphereVisible;

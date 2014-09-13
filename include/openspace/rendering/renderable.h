@@ -52,9 +52,10 @@ public:
     virtual void update();
 
 protected:
-    // Renderable();
+    std::string findPath(const std::string& path);
 private:
     PowerScaledScalar boundingSphere_;
+    std::string _relativePath;
 };
 
 }  // namespace openspace
