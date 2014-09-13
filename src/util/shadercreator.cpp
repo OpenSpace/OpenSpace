@@ -28,7 +28,7 @@
 #include <ghoul/opengl/shaderobject.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <boost/regex.hpp>
+#include <regex>
 #include <iostream>
 #include <fstream>
 // #include <ifstream>
@@ -143,15 +143,18 @@ std::string ShaderCreator::_loadSource(const std::string& filename, unsigned int
 		return contents;
 	}
 
-	boost::regex e1(R"(^\s*#include \"(.+)\"\s*)");
-	boost::regex e2(R"(^\s*#include <(.+)>\s*)");
+	std::regex e1(R"(^\s*#include \"(.+)\"\s*)");
+	std::regex e2(R"(^\s*#include <(.+)>\s*)");
 	while(std::getline(f, line)) {
-		boost::smatch m;
-		if(boost::regex_search(line, m, e1)) {
+		std::smatch m;
+		if(std::regex_search(line, m, e1)) {
+			using namespace ghoul::filesystem;
 			std::string includeFilename = m[1];
-			includeFilename = filename.substr(0, filename.find_last_of("/")+1) + includeFilename;
+			File f(filename);
+			includeFilename = f.directoryName() + FileSystem::PathSeparator + includeFilename;
+			//includeFilename = filename.substr(0, filename.find_last_of("/")+1) + includeFilename;
 			line = _loadSource(includeFilename, depth + 1);
-		} else if(boost::regex_search(line, m, e2)) {
+		} else if(std::regex_search(line, m, e2)) {
 			std::string includeFilename = m[1];
 			line = _loadSource(absPath(includeFilename), depth + 1);
 		}

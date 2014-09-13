@@ -42,6 +42,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <cctype>
+
 namespace {
 const std::string _loggerCat = "SceneGraphNode";
 }
@@ -347,7 +349,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere()
     }
     
 
-    LWARNING(_nodeName << ": " << _boundingSphere);
+    LWARNING(name() << ": " << _boundingSphere);
 
     return _boundingSphere;
 }

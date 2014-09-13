@@ -137,6 +137,7 @@ void blendStep(inout vec4 dst, in vec4 src, in float stepSize) {
 }
 
 float volumeRaycastingDistance(in int id, in ABufferStruct_t startFrag, in ABufferStruct_t endFrag) {
+#if MAX_VOLUMES > 0
 #if ZTYPE == ZDEPTH
 	const float S1 = volume_zlength[id].x;
 	const float S2 = volume_zlength[id].y;
@@ -154,6 +155,9 @@ float volumeRaycastingDistance(in int id, in ABufferStruct_t startFrag, in ABuff
 	// const float z1 = _z_(startFrag);
 	// const float z2 = _z_(endFrag);
 	return (dist / L) * volume_length[id];
+#endif
+#else
+	return 0.f;
 #endif
 }
 

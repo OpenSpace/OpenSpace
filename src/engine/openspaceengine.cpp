@@ -31,6 +31,7 @@
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
@@ -155,29 +156,28 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
 
 bool OpenSpaceEngine::findConfiguration(std::string& filename)
 {
-        return FileSys.fileExists(filename);
-        std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
-        size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
-                                        ghoul::filesystem::FileSystem::PathSeparator);
+    //return FileSys.fileExists(filename);
+    std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
+    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
+                                    ghoul::filesystem::FileSystem::PathSeparator);
 
-        std::string cfgname = _configurationFile;
+    std::string cfgname = _configurationFile;
 
-        bool cfgFileFound = false;
-        for (size_t i = 0; i < occurrences; ++i) {
-            if (i > 0)
-                cfgname = "../" + cfgname;
-            if (FileSys.fileExists(cfgname)) {
-                cfgFileFound = true;
-                break;
-            }
+    bool cfgFileFound = false;
+    for (size_t i = 0; i < occurrences; ++i) {
+        if (i > 0)
+            cfgname = "../" + cfgname;
+        if (FileSys.fileExists(cfgname)) {
+            cfgFileFound = true;
+            break;
         }
-        if (!cfgFileFound)
-            return false;
-
-        filename = cfgname;
-
-        return true;
     }
+    if (!cfgFileFound)
+        return false;
+
+    filename = cfgname;
+
+    return true;
 }
 
 bool OpenSpaceEngine::create(int argc, char** argv,

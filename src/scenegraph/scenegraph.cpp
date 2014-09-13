@@ -50,18 +50,18 @@
 #include <string>
 
 #include <chrono>
- #include <unistd.h>
+ //#include <unistd.h>
 
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
-{
-    LDEBUGC("Tree", pre << node->name());
-    const std::vector<openspace::SceneGraphNode*>& children = node->children();
-    for (openspace::SceneGraphNode* child : children)
-        printTree(child, pre + "    ");
-}
-
+//{
+//    LDEBUGC("Tree", pre << node->name());
+//    const std::vector<openspace::SceneGraphNode*>& children = node->children();
+//    for (openspace::SceneGraphNode* child : children)
+//        printTree(child, pre + "    ");
+//}
+//
 }
 
 namespace openspace {
@@ -374,7 +374,7 @@ void SceneGraph::loadModule(const std::string& modulePath)
     }
 
     // Print the tree
-    printTree(_root);
+    //printTree(_root);
 }
 
 void SceneGraph::printChildren() const

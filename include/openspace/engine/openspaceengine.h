@@ -46,13 +46,22 @@
 
 // #define OPENSPACE_VIDEO_EXPORT
 
+namespace ghoul {
+	namespace cmdparser {
+		class CommandlineParser;
+		class CommandlineCommand;
+	}
+}
+
 namespace openspace {
 
-class ScriptEngine;
+namespace scripting {
+	class ScriptEngine;
+}
 
 class OpenSpaceEngine {
 public:
-    static void create(int argc, char** argv, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -67,6 +76,7 @@ public:
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
+	scripting::ScriptEngine& scriptEngine();
     ShaderCreator& shaderBuilder();
 
     // SGCT callbacks
@@ -84,14 +94,18 @@ public:
     void decode();
 
 private:
-    OpenSpaceEngine();
+    OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
+
+	bool gatherCommandlineArguments();
 
     static OpenSpaceEngine* _engine;
 
     ghoul::Dictionary* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
+	scripting::ScriptEngine* _scriptEngine;
+	ghoul::cmdparser::CommandlineParser* _commandlineParser;
 #ifdef OPENSPACE_VIDEO_EXPORT
     bool _doVideoExport;
 #endif
