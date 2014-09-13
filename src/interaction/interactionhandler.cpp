@@ -173,10 +173,7 @@ void InteractionHandler::distance(const PowerScaledScalar &distance) {
 	lockControls();
 	
 	psc relative = camera_->position();
-	psc origin;
-	if(node_) {
-		origin = node_->worldPosition();
-	}
+	const psc origin = (node_) ? node_->worldPosition() : psc();
 
 	psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
