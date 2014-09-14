@@ -181,16 +181,16 @@ template <typename T>
 bool NumericalProperty<T>::setLua(lua_State* state)
 {
 	bool success;
-	T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(state, success);
+	T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
-		set(value);
+		TemplateProperty<T>::setValue(value);
 	return success;
 }
 
 template <typename T>
 bool NumericalProperty<T>::getLua(lua_State* state) const
 {
-	bool success = PropertyDelegate<NumericalProperty<T>>::toLuaValue<T>(state, TemplateProperty::_value);
+	bool success = PropertyDelegate<NumericalProperty<T>>::template toLuaValue<T>(state, TemplateProperty<T>::_value);
 	return success;
 }
 

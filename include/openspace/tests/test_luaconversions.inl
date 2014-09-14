@@ -64,7 +64,7 @@ TEST_F(LuaConversionTest, LuaExecution) {
               = PropertyDelegate<TemplateProperty<__TYPE__>>::toLuaValue<__TYPE__>(      \
                     state, __VALUE__);                                                   \
         EXPECT_TRUE(success) << "toLuaValue";                                            \
-        __TYPE__ value = __TYPE__(0);                                                    \
+        __TYPE__ value = (__TYPE__)(0);                                                    \
         value = PropertyDelegate<TemplateProperty<__TYPE__>>::fromLuaValue<__TYPE__>(    \
               state, success);                                                           \
         EXPECT_TRUE(success) << "fromLuaValue";                                          \
@@ -79,7 +79,7 @@ TEST_F(LuaConversionTest, LuaExecution) {
               = PropertyDelegate<NumericalProperty<__TYPE__>>::toLuaValue<__TYPE__>(     \
                     state, __VALUE__);                                                   \
         EXPECT_TRUE(success) << "toLuaValue";                                            \
-        __TYPE__ value = __TYPE__(0);                                                    \
+        __TYPE__ value = (__TYPE__)(0);                                                    \
         value = PropertyDelegate<NumericalProperty<__TYPE__>>::fromLuaValue<__TYPE__>(   \
               state, success);                                                           \
         EXPECT_TRUE(success) << "fromLuaValue";                                          \
