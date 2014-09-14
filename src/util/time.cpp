@@ -24,42 +24,86 @@
 
 #include <openspace/util/time.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
 #include <cassert>
+#include <string>
 
 namespace {
 	const std::string _loggerCat = "Time";
 
+	//tag_error(L, narg, LUA_TNUMBER);
+
 	int time_setDeltaTime(lua_State* L) {
-		const std::string _loggerCat = "time_setDeltaTime";
-		double value = luaL_checknumber(L, -1);
-		openspace::Time::ref().setDeltaTime(value);
-		return 0;
+		const bool isFunction = (lua_isfunction(L, -1) != 0);
+		if (isFunction) {
+			// If the top of the stack is a function, it is ourself
+			const char* msg = lua_pushfstring(L, "method called without argument");
+			return luaL_error(L, "bad argument (%s)", msg);
+		}
+
+		const bool isNumber = (lua_isnumber(L, -1) != 0);
+		if (isNumber) {
+			double value = lua_tonumber(L, -1);
+			openspace::Time::ref().setDeltaTime(value);
+			return 0;
+		}
+		else {
+			const char* msg = lua_pushfstring(L, "%s expected, got %s",
+								  lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
+			return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+		}
+			
 	}
 
 	int time_deltaTime(lua_State* L) {
-		const std::string _loggerCat = "time_deltaTime";
 		lua_pushnumber(L, openspace::Time::ref().deltaTime());
 		return 1;
 	}
 
 	int time_setTime(lua_State* L) {
-		const std::string _loggerCat = "time_setTime";
-		double value = luaL_checknumber(L, -1);
-		openspace::Time::ref().setTime(value);
+		const bool isFunction = (lua_isfunction(L, -1) != 0);
+		if (isFunction) {
+			// If the top of the stack is a function, it is ourself
+			const char* msg = lua_pushfstring(L, "method called without argument");
+			return luaL_error(L, "bad argument (%s)", 1, msg);
+		}
+
+		const bool isNumber = (lua_isnumber(L, -1) != 0);
+		const bool isString = (lua_isstring(L, -1) != 0);
+		if (!isNumber && !isString) {
+			const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
+								  lua_typename(L, LUA_TNUMBER),
+								  lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
+			return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+		}
+		if (isNumber) {
+			double value = lua_tonumber(L, -1);
+			openspace::Time::ref().setTime(value);
+			return 0;
+		}
+		if (isString) {
+			const char* time = lua_tostring(L, -1);
+			openspace::Time::ref().setTime(time);
+			return 0;
+		}
 		return 0;
 	}
 
 	int time_currentTime(lua_State* L) {
-		const std::string _loggerCat = "time_time";
 		lua_pushnumber(L, openspace::Time::ref().currentTime());
 		return 1;
 	}
 
+	int time_currentTimeUTC(lua_State* L) {
+		lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
+		return 1;
+	}
 }
 
 namespace openspace {
@@ -70,17 +114,23 @@ Time::Time()
 	: _time(-1.0)
 	, _deltaTimePerSecond(1.0)
 {
-	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/naif0010.tls"), "leap");
-	// load spice time kernel
-	//furnsh_c (absPath("${OPENSPACE_DATA}/spice/naif0010.tls").c_str());
-
-	// convert UTC to ET 
-	//str2et_c ( "2006 JAN 31 01:00", &_time );
 }
 
 bool Time::initialize() {
 	assert( _instance == nullptr);
 	 _instance = new Time();
+
+	 using constants::openspaceengine::keyConfigTimekernel;
+	 if (OsEng.configurationManager().hasKeyAndValue<std::string>(keyConfigTimekernel)) {
+		 std::string value;
+		 OsEng.configurationManager().getValue(keyConfigTimekernel, value);
+		 const int success = SpiceManager::ref().loadKernel(absPath(value), "TimeKernel");
+		 if (success == 0) {
+			 LERROR("Error loading SPICE time kernel '" << value << "'");
+			return false;
+		 }
+	 }
+
 	 return true;
 }
 
@@ -96,14 +146,8 @@ Time& Time::ref() {
 }
 
 bool Time::isInitialized() {
-	return _instance != nullptr;
+	return (_instance != nullptr);
 }
-
-//void Time::setTime(const char* stringTime) {
-//	assert(_instance);
-//	// convert UTC to ET 
-//	//str2et_c ( stringTime, &_time );
-//}
 
 void Time::setTime(double value) {
 	_time = std::move(value);
@@ -126,22 +170,50 @@ double Time::deltaTime() const {
 	return _deltaTimePerSecond;
 }
 
-void Time::setTimeUTC(std::string time) {
+void Time::setTime(std::string time) {
 	_time = SpiceManager::ref().convertStringToTdbSeconds(std::move(time));
 }
 
 std::string Time::currentTimeUTC() const {
-	return SpiceManager::ref().convertTdbSecondsToString(_time, "MON DD,YYYY  HR:MN:SC.#### (TDB) ::TDB");
+	return SpiceManager::ref().convertTdbSecondsToString(_time, "YYYY-MM-DDTHR:MN:SC.#####");
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 	scripting::ScriptEngine::LuaLibrary timeLibrary = {
 		"time",
 		{
-			{"setDeltaTime", &time_setDeltaTime},
-			{"deltaTime", &time_deltaTime},
-			{"setTime", &time_setTime},
-			{"currentTime", &time_currentTime}
+			{
+				"setDeltaTime",
+				&time_setDeltaTime,
+				"setDeltaTime(number): Sets the amount of simulation time that happens "
+				"in one second of real time"
+			},
+			{
+				"deltaTime",
+				&time_deltaTime,
+				"deltaTime: Returns the amount of simulated time that passes in one "
+				"second of real time"
+			},
+			{
+				"setTime",
+				&time_setTime,
+				"setTime({number, string}): Sets the current simulation time to the "
+				"specified value. If the parameter is a number, the value is the number "
+				"of seconds past the J2000 epoch. If it is a string, it has to be a "
+				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
+			},
+			{
+				"currentTime",
+				&time_currentTime,
+				"currentTime(): Returns the current time as the number of seconds since "
+				"the J2000 epoch"
+			},
+			{
+				"currentTimeUTC",
+				&time_currentTimeUTC,
+				"currentTimeUTC: Returns the current time as an ISO 8601 date string "
+				"(YYYY-MM-DDTHH:MN:SS"
+			}
 		}
 	};
 	return std::move(timeLibrary);

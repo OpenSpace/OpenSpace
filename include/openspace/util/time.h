@@ -42,7 +42,7 @@ public:
 	
 	void setTime(double value);
 	double currentTime() const;
-	void setTimeUTC(std::string time);
+	void setTime(std::string time);
 	std::string currentTimeUTC() const;
 
 	void setDeltaTime(double deltaT);

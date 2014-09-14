@@ -68,7 +68,7 @@ int SpiceManager::loadKernel(const std::string& fullPath, const std::string& sho
 	std::string currentDirectory = FileSys.currentDirectory();
 	std::string::size_type last = fullPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
 	if (last == std::string::npos)
-		return false;
+		return 0;
 	std::string kernelDir = fullPath.substr(0, last);
 	FileSys.setCurrentDirectory(kernelDir);
 	furnsh_c(fullPath.c_str());

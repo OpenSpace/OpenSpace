@@ -28,7 +28,6 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/crc32.h>
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
@@ -45,6 +44,11 @@ namespace {
     const lua_CFunction _printFunctionReplacement = printInfo;
     
     const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
+
+}
+
+bool ScriptEngine::LuaLibrary::operator<(const LuaLibrary& rhs) const {
+	return name < rhs.name;
 }
 
 ScriptEngine::ScriptEngine()
@@ -114,7 +118,7 @@ bool ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
         lua_settable(_state, _setTableOffset);
         //ghoul::lua::logStack(_state);
 
-        _registeredLibraries.insert(ghoul::hashCRC32(library.name));
+        _registeredLibraries.insert(library);
     }
 
     return true;
@@ -163,8 +167,10 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
 
 bool ScriptEngine::hasLibrary(const std::string& name)
 {
-    const unsigned int hash = ghoul::hashCRC32(name);
-    return (_registeredLibraries.find(hash) != _registeredLibraries.end());
+	for (auto it = _registeredLibraries.begin(); it != _registeredLibraries.end(); ++it)
+		if (it->name == name)
+			return true;
+	return false;
 }
 
 bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
@@ -219,22 +225,22 @@ bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
 
 void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
 {
-    for (std::pair<std::string, lua_CFunction> p : library.functions) {
+    for (LuaLibrary::Function p : library.functions) {
         if (!replace) {
 			ghoul::lua::logStack(_state);
-            lua_getfield(_state, -1, p.first.c_str());
+            lua_getfield(_state, -1, p.name.c_str());
 			ghoul::lua::logStack(_state);
             const bool isNil = lua_isnil(_state, -1);
             if (!isNil) {
-                LERROR("Function name '" << p.first << "' was already assigned");
+                LERROR("Function name '" << p.name << "' was already assigned");
                 return;
             }
 			lua_pop(_state, 1);
         }
 		//ghoul::lua::logStack(_state);
-        lua_pushstring(_state, p.first.c_str());
+        lua_pushstring(_state, p.name.c_str());
 		//ghoul::lua::logStack(_state);
-        lua_pushcfunction(_state, p.second);
+        lua_pushcfunction(_state, p.function);
 		//ghoul::lua::logStack(_state);
         lua_settable(_state, _setTableOffset);
 		//ghoul::lua::logStack(_state);
@@ -245,11 +251,16 @@ void ScriptEngine::addBaseLibrary() {
     LuaLibrary lib = {
         "",
         {
-            { "printDebug", &printDebug },
-            { "printInfo", &printInfo },
-            { "printWarning", &printWarning },
-            { "printError", &printError },
-            { "printFatal", &printFatal }
+            { "printDebug", &printDebug, "printDebug(*): Logs the passed value to the "
+				"installed LogManager with a LogLevel of 'Debug'" },
+			{ "printInfo", &printInfo, "printInfo(*): Logs the passed value to the "
+			"installed LogManager with a LogLevel of 'Info'" },
+			{ "printWarning", &printWarning, "printWarning(*): Logs the passed value to "
+				"the installed LogManager with a LogLevel of 'Warning'" },
+			{ "printError", &printError, "printError(*): Logs the passed value to the "
+			"installed LogManager with a LogLevel of 'Error'" },
+			{ "printFatal", &printFatal, "printFatal(*): Logs the passed value to the "
+			"installed LogManager with a LogLevel of 'Fatal'" }
         }
     };
     addLibrary(lib);
