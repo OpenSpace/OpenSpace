@@ -28,6 +28,10 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <set>
 
+/**
+ * \defgroup LuaScripts Lua Scripts
+ */
+
 namespace openspace {
 namespace scripting {
 

@@ -323,10 +323,15 @@ bool OpenSpaceEngine::initialize()
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
 
+	std::string timeKernel = "";
+	using constants::openspaceengine::keyConfigTimekernel;
+	if (OsEng.configurationManager().hasKeyAndValue<std::string>(keyConfigTimekernel)) {
+		OsEng.configurationManager().getValue(keyConfigTimekernel, timeKernel);
+	}
 
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
-    Time::initialize();
+    Time::initialize(timeKernel);
     Spice::init();
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
