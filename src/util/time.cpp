@@ -139,7 +139,7 @@ int time_currentTimeUTC(lua_State* L) {
 	return 1;
 }
 
-} // namespace luascripts
+} // namespace luascriptfunctions
 
 
 Time* Time::_instance = nullptr;

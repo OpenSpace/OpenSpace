@@ -140,10 +140,11 @@ public:
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
 	 * current time, retrieve the current time etc. The functions contained are
-	 * - time_setDeltaTime
-	 * - time_deltaTime
-	 * - time_currentTime
-	 * - time_currentTimeUTC
+	 * - openspace::luascriptfunctions::time_setDeltaTime
+	 * - openspace::luascriptfunctions::time_deltaTime
+	 * - openspace::luascriptfunctions::time_setTime
+	 * - openspace::luascriptfunctions::time_currentTime
+	 * - openspace::luascriptfunctions::time_currentTimeUTC
 	 * \return The Lua library that contains all Lua functions available to change the
 	 * Time singleton
 	 */
