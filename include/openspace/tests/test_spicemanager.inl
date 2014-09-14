@@ -223,7 +223,7 @@ TEST_F(SpiceManagerTest, stringToEphemerisTime){
 
 	double ephemerisTime;
 	double control_ephemerisTime;
-	char   *date = "Thu Mar 20 12:53:29 PST 1997";
+	char   date[SRCLEN] = "Thu Mar 20 12:53:29 PST 1997";
 	str2et_c(date, &control_ephemerisTime);
 
 	ephemerisTime = openspace::SpiceManager::ref().stringToEphemerisTime(date);
