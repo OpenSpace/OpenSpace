@@ -183,7 +183,7 @@ template <typename T>
 bool TemplateProperty<T>::setLua(lua_State* state)
 {
 	bool success;
-	T value = PropertyDelegate<TemplateProperty<typename T>>::fromLuaValue<T>(state, success);
+	T value = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
 		set(value);
 	return success;
@@ -192,13 +192,13 @@ bool TemplateProperty<T>::setLua(lua_State* state)
 template <typename T>
 bool TemplateProperty<T>::getLua(lua_State* state) const
 {
-	bool success = PropertyDelegate<TemplateProperty<typename T>>::toLuaValue<T>(state, _value);
+	bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(state, _value);
 	return success;
 }
 
 template <typename T>
 int TemplateProperty<T>::typeLua() const {
-	return PropertyDelegate<TemplateProperty<typename T>>::typeLua();
+	return PropertyDelegate<TemplateProperty<T>>::typeLua();
 }
 
 }  // namespace properties
