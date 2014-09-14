@@ -183,7 +183,7 @@ bool NumericalProperty<T>::setLua(lua_State* state)
 	bool success;
 	T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
-		setValue(value);
+		TemplateProperty<T>::setValue(value);
 	return success;
 }
 
