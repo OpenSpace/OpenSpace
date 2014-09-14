@@ -24,8 +24,6 @@
 
 #include <openspace/scripting/scriptengine.h>
 
-#include <openspace/scripting/scriptfunctions.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -33,6 +31,99 @@
 #include <fstream>
 
 namespace openspace {
+
+namespace luascriptfunctions {
+
+	void printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
+		using ghoul::lua::luaTypeToString;
+		const std::string _loggerCat = "print";
+
+		const int type = lua_type(L, -1);
+		switch (type) {
+		case LUA_TNONE:
+		case LUA_TLIGHTUSERDATA:
+		case LUA_TTABLE:
+		case LUA_TFUNCTION:
+		case LUA_TUSERDATA:
+		case LUA_TTHREAD:
+		LOG(level, "Function parameter was of type '" <<
+			 luaTypeToString(type) << "'");
+		case LUA_TNIL:
+		break;
+		case LUA_TBOOLEAN:
+		LOG(level, lua_toboolean(L, -1));
+		break;
+		case LUA_TNUMBER:
+		LOG(level, lua_tonumber(L, -1));
+		break;
+		case LUA_TSTRING:
+		LOG(level, lua_tostring(L, -1));
+		break;
+		}
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * printDebug(*):
+	 * Logs the passed value to the installed LogManager with a LogLevel of 'Debug'.
+	 * For Boolean, numbers, and strings, the internal values are printed, for all other
+	 * types, the type is printed instead
+	 */
+	int printDebug(lua_State* L) {
+		printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
+		return 0;
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * printInfo(*):
+	 * Logs the passed value to the installed LogManager with a LogLevel of 'Info'.
+	 * For Boolean, numbers, and strings, the internal values are printed, for all other
+	 * types, the type is printed instead
+	 */
+	int printInfo(lua_State* L) {
+		printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
+		return 0;
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * printWarning(*):
+	 * Logs the passed value to the installed LogManager with a LogLevel of 'Warning'.
+	 * For Boolean, numbers, and strings, the internal values are printed, for all other
+	 * types, the type is printed instead
+	 */
+	int printWarning(lua_State* L) {
+		printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
+		return 0;
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * printError(*):
+	 * Logs the passed value to the installed LogManager with a LogLevel of 'Error'.
+	 * For Boolean, numbers, and strings, the internal values are printed, for all other
+	 * types, the type is printed instead
+	 */
+	int printError(lua_State* L) {
+		printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
+		return 0;
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * printFatal(*):
+	 * Logs the passed value to the installed LogManager with a LogLevel of 'Fatal'.
+	 * For Boolean, numbers, and strings, the internal values are printed, for all other
+	 * types, the type is printed instead
+	 */
+	int printFatal(lua_State* L) {
+		printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
+		return 0;
+	}
+
+} // namespace luascriptfunctions
+
 namespace scripting {
 
 namespace {
@@ -41,7 +132,7 @@ namespace {
     const std::string _openspaceLibraryName = "openspace";
     const std::string _luaGlobalNamespace = "_G";
     const std::string _printFunctionName = "print";
-    const lua_CFunction _printFunctionReplacement = printInfo;
+    const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
     
     const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 
@@ -251,16 +342,36 @@ void ScriptEngine::addBaseLibrary() {
     LuaLibrary lib = {
         "",
         {
-            { "printDebug", &printDebug, "printDebug(*): Logs the passed value to the "
-				"installed LogManager with a LogLevel of 'Debug'" },
-			{ "printInfo", &printInfo, "printInfo(*): Logs the passed value to the "
-			"installed LogManager with a LogLevel of 'Info'" },
-			{ "printWarning", &printWarning, "printWarning(*): Logs the passed value to "
-				"the installed LogManager with a LogLevel of 'Warning'" },
-			{ "printError", &printError, "printError(*): Logs the passed value to the "
-			"installed LogManager with a LogLevel of 'Error'" },
-			{ "printFatal", &printFatal, "printFatal(*): Logs the passed value to the "
-			"installed LogManager with a LogLevel of 'Fatal'" }
+            {
+				"printDebug",
+				&luascriptfunctions::printDebug,
+				"printDebug(*): Logs the passed value to the installed LogManager with a "
+				"LogLevel of 'Debug'"
+			},
+			{
+				"printInfo",
+				&luascriptfunctions::printInfo,
+				"printInfo(*): Logs the passed value to the installed LogManager with a "
+				" LogLevel of 'Info'"
+			},
+			{
+				"printWarning",
+				&luascriptfunctions::printWarning,
+				"printWarning(*): Logs the passed value to the installed LogManager with "
+				"a LogLevel of 'Warning'"
+			},
+			{
+				"printError",
+				&luascriptfunctions::printError,
+				"printError(*): Logs the passed value to the installed LogManager with a "
+				"LogLevel of 'Error'"
+			},
+			{
+				"printFatal",
+				&luascriptfunctions::printFatal,
+				"printFatal(*): Logs the passed value to the installed LogManager with a "
+				"LogLevel of 'Fatal'"
+			}
         }
     };
     addLibrary(lib);

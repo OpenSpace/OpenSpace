@@ -31,11 +31,14 @@
 
 #include <openspace/util/camera.h>
 
+#include <openspace/scripting/scriptengine.h>
+
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
 
 class SceneGraphNode;
 
@@ -94,9 +97,17 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
+	/**
+	 * Returns the Lua library that contains all Lua functions available to change the
+	 * scene graph. The functions contained are
+	 * - openspace::luascriptfunctions::property_setValue
+	 * - openspace::luascriptfunctions::property_getValue
+	 * \return The Lua library that contains all Lua functions available to change the
+	 * scene graph
+	 */
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
 private:
-    bool registerScriptFunctions();
-    
     std::string _focus, _position;
 
     // actual scenegraph

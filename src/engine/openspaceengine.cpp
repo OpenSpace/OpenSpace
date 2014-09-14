@@ -340,6 +340,8 @@ bool OpenSpaceEngine::initialize()
     scriptEngine().initialize();
 
 	// Register Lua script functions
+	LDEBUG("Registering Lua libraries");
+	scriptEngine().addLibrary(SceneGraph::luaLibrary());
 	scriptEngine().addLibrary(Time::luaLibrary());
 
     // Load scenegraph
