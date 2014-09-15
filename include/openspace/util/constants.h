@@ -35,6 +35,7 @@ namespace openspaceengine {
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
+	const std::string keyConfigTimekernel = "SpiceTimeKernel";
 } // namespace openspaceengine
 
 namespace scenegraph {

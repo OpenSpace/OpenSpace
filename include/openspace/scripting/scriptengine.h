@@ -28,14 +28,25 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <set>
 
+/**
+ * \defgroup LuaScripts Lua Scripts
+ */
+
 namespace openspace {
 namespace scripting {
 
 class ScriptEngine {
 public:
     struct LuaLibrary {
+		struct Function {
+			std::string name;
+			lua_CFunction function;
+			std::string helpText;
+		};
         std::string name;
-        std::vector<std::pair<std::string, lua_CFunction>> functions;
+		std::vector<Function> functions;
+
+		bool operator<(const LuaLibrary& rhs) const;
     };
     
     ScriptEngine();
@@ -57,7 +68,7 @@ private:
     void remapPrintFunction();
     
     lua_State* _state;
-    std::set<unsigned int> _registeredLibraries;
+    std::set<LuaLibrary> _registeredLibraries;
 };
   
 } // namespace scripting

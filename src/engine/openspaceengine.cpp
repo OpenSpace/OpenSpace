@@ -36,6 +36,7 @@
 #include <openspace/util/spice.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -92,8 +93,9 @@ OpenSpaceEngine::~OpenSpaceEngine()
     delete _commandlineParser;
     _commandlineParser = nullptr;
 
+	SpiceManager::deinitialize();
     Spice::deinit();
-    Time::deinit();
+    Time::deinitialize();
     DeviceIdentifier::deinit();
     FileSystem::deinitialize();
     LogManager::deinitialize();
@@ -108,8 +110,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref()
 bool OpenSpaceEngine::gatherCommandlineArguments()
 {
     // TODO: Get commandline arguments from all modules
-    
-    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(&commandlineArgumentPlaceholders.configurationName, "-config", "-c", "Provides the path to the OpenSpace configuration file");
+
+    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
+          &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+          "Provides the path to the OpenSpace configuration file");
     _commandlineParser->addCommand(configurationFileCommand);
     
     return true;
@@ -311,9 +315,6 @@ bool OpenSpaceEngine::initialize()
     // registerFilePaths();
     _context.createContextFromGLContext();
 
-    // initialize the configurationmanager with the default configuration
-    //_configurationManager->loadConfiguration(absPath("${SCRIPTS}/DefaultConfig.lua"));
-
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
@@ -322,17 +323,26 @@ bool OpenSpaceEngine::initialize()
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
 
+	std::string timeKernel = "";
+	using constants::openspaceengine::keyConfigTimekernel;
+	if (OsEng.configurationManager().hasKeyAndValue<std::string>(keyConfigTimekernel)) {
+		OsEng.configurationManager().getValue(keyConfigTimekernel, timeKernel);
+	}
+
     // initialize OpenSpace helpers
-    Time::init();
+	SpiceManager::initialize();
+    Time::initialize(timeKernel);
     Spice::init();
     Spice::ref().loadDefaultKernels();
     FactoryManager::initialize();
 
+
     scriptEngine().initialize();
-//    scriptEngine().addLibrary(ScriptEngine::LuaLibrary());
-    
-//    _engine->scriptEngine().runScript("return mylib.mysin(4)");
-    
+
+	// Register Lua script functions
+	LDEBUG("Registering Lua libraries");
+	scriptEngine().addLibrary(SceneGraph::luaLibrary());
+	scriptEngine().addLibrary(Time::luaLibrary());
 
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
@@ -463,6 +473,8 @@ void OpenSpaceEngine::preSynchronization()
 
         _interactionHandler->update(dt);
         _interactionHandler->lockControls();
+
+		Time::ref().advanceTime(dt);
     }
 #ifdef FLARE_ONLY
     _flare->preSync();

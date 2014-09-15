@@ -28,10 +28,10 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/scriptfunctions.h>
 #include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/shadercreator.h>
+#include <openspace/query/query.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -55,16 +55,126 @@
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
-//{
-//    LDEBUGC("Tree", pre << node->name());
-//    const std::vector<openspace::SceneGraphNode*>& children = node->children();
-//    for (openspace::SceneGraphNode* child : children)
-//        printTree(child, pre + "    ");
-//}
-//
 }
 
 namespace openspace {
+
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * setPropertyValue(string, *):
+ * Sets the property identified by the URI in the first argument to the value passed to
+ * the second argument. The type of the second argument is arbitrary, but it must agree
+ * with the type the denoted Property expects
+ */
+int property_setValue(lua_State* L) {
+	using ghoul::lua::luaTypeToString;
+	const std::string _loggerCat = "property_setValue";
+
+	// TODO Check for argument number (ab)
+	std::string uri = luaL_checkstring(L, -2);
+	const int type = lua_type(L, -1);
+	//  boost::any propertyValue;
+	//  switch (type) {
+	//      case LUA_TNONE:
+	//      case LUA_TLIGHTUSERDATA:
+	//      case LUA_TFUNCTION:
+	//      case LUA_TUSERDATA:
+	//      case LUA_TTHREAD:
+	//          LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
+	//          return 0;
+	//      case LUA_TNIL:
+	//          propertyValue = 0;
+	//          break;
+	//      case LUA_TBOOLEAN:
+	//          propertyValue = lua_toboolean(L, -1);
+	//          break;
+	//      case LUA_TNUMBER:
+	//          propertyValue = lua_tonumber(L, -1);
+	//          break;
+	//      case LUA_TSTRING:
+	//          propertyValue = std::string(lua_tostring(L, -1));
+	//          break;
+	//case LUA_TTABLE: {
+	//	ghoul::Dictionary d;
+	//	ghoul::lua::populateDictionary(L, d);
+	//	propertyValue = d;
+	//	break;
+	//}
+	//  }
+
+	openspace::properties::Property* prop = property(uri);
+	if (!prop) {
+		LERROR("Property with uri '" << uri << "' could not be found");
+		return 0;
+	}
+
+	//if (propertyValue.type() != prop->type()) {
+	if (type != prop->typeLua())
+		LERROR("Property '" << uri << "' does not accept input of type '"
+			<< luaTypeToString(type) << "'. Requested type: '"
+			<< luaTypeToString(prop->typeLua()) << "'");
+	else
+		prop->setLua(L);
+	//prop->set(propertyValue);
+
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * getPropertyValue(string):
+ * Returns the value of the property identified by the passed URI as a Lua object that can
+ * be passed to the setPropertyValue method.
+ */
+int property_getValue(lua_State* L) {
+	const std::string _loggerCat = "property_getValue";
+
+	// TODO Check for argument number (ab)
+	std::string uri = luaL_checkstring(L, -1);
+
+	openspace::properties::Property* prop = property(uri);
+	if (!prop) {
+		LERROR("Property with uri '" << uri << "' could not be found");
+		lua_pushnil(L);
+	}
+	else {
+		prop->getLua(L);
+
+		//switch (type) {
+		//    case LUA_TNONE:
+		//    case LUA_TLIGHTUSERDATA:
+		//    case LUA_TFUNCTION:
+		//    case LUA_TUSERDATA:
+		//    case LUA_TTHREAD:
+		//        LERROR("Function parameter was of type '" << luaTypeToString(type)
+		//                                                    << "'");
+		//        return 0;
+		//    case LUA_TNIL:
+		//        propertyValue = 0;
+		//        break;
+		//    case LUA_TBOOLEAN:
+		//        propertyValue = lua_toboolean(L, -1);
+		//        break;
+		//    case LUA_TNUMBER:
+		//        propertyValue = lua_tonumber(L, -1);
+		//        break;
+		//    case LUA_TSTRING:
+		//        propertyValue = std::string(lua_tostring(L, -1));
+		//        break;
+		//    case LUA_TTABLE: {
+		//        ghoul::Dictionary d;
+		//        ghoul::lua::populateDictionary(L, d);
+		//        propertyValue = d;
+		//        break;
+		//    }
+		//}
+	}
+	return 1;
+}
+
+} // namespace luascriptfunctions
 
 SceneGraph::SceneGraph()
     : _focus(SceneGraphNode::RootNodeName)
@@ -81,10 +191,6 @@ SceneGraph::~SceneGraph()
 bool SceneGraph::initialize()
 {
     LDEBUG("Initializing SceneGraph");
-    
-    const bool scriptSuccess = registerScriptFunctions();
-    if (!scriptSuccess)
-        return false;
     
     LDEBUG("Creating ProgramObjects");
     using ghoul::opengl::ShaderObject;
@@ -387,30 +493,35 @@ SceneGraphNode* SceneGraph::root() const
     return _root;
 }
     
-bool SceneGraph::registerScriptFunctions()
-{
-    LDEBUG("Registering Script Functions");
-    
-    using namespace scripting;
-    
-    ScriptEngine::LuaLibrary sceneGraphLibrary = {
-        "",
-        {
-        { "setPropertyValue", &property_setValue},
-        { "getPropertyValue", &property_getValue}
-        }
-    };
-    
-    OsEng.scriptEngine().addLibrary(sceneGraphLibrary);
-    return true;
-}
-
 SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
     auto it = _allNodes.find(name);
     if (it == _allNodes.end())
         return nullptr;
     else
         return it->second;
+}
+
+scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
+	scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+		"",
+		{
+			{
+				"setPropertyValue",
+				&luascriptfunctions::property_setValue,
+				"setPropertyValue(string, *): Sets a property identified by the URI in "
+				"the first argument. The second argument can be any type, but it has to "
+				" agree with the type that the property expects"
+			},
+			{
+				"getPropertyValue",
+				&luascriptfunctions::property_getValue,
+				"getPropertyValue(string): Returns the value the property, identified by "
+				"the provided URI, has"
+			}
+		}
+	};
+
+	return std::move(sceneGraphLibrary);
 }
 
 }  // namespace openspace

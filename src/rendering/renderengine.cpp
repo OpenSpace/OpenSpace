@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/time.h>
 
 #include "sgct.h"
 
@@ -203,6 +204,23 @@ void RenderEngine::render()
         const psc origin = OsEng.interactionHandler().getOrigin();
         const PowerScaledScalar pssl = (position - origin).length();
 
+		const std::string time = Time::ref().currentTimeUTC().c_str();
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 16, "Avg. Frametime: %.10f", sgct::Engine::instance()->getAvgDt()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 14, "Drawtime: %.10f", sgct::Engine::instance()->getDrawTime()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 12, "Frametime: %.10f", sgct::Engine::instance()->getDt()
+			  );
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 10, "Origin: (%.5f, %.5f, %.5f, %.5f)", origin[0],
@@ -222,6 +240,7 @@ void RenderEngine::render()
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
+
     }
 #endif
     
