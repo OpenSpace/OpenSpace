@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     delete _sgctEngine;
 
     // Exit program
-    exit(EXIT_SUCCESS);s
+    exit(EXIT_SUCCESS);
 }
 
 void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
