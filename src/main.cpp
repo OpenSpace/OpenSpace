@@ -24,20 +24,18 @@
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interface/interface.h>
 
 // sgct includes
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;
-openspace::Interface* _interface;
 
 // function pointer declarations
-void mainInitFunc(void);
-void mainPreSyncFunc(void);
-void mainPostSyncPreDrawFunc(void);
-void mainRenderFunc(void);
-void mainPostDrawFunc(void);
+void mainInitFunc();
+void mainPreSyncFunc();
+void mainPostSyncPreDrawFunc();
+void mainRenderFunc();
+void mainPostDrawFunc();
 void mainKeyboardCallback(int key, int action);
 void mainMouseButtonCallback(int key, int action);
 void mainMousePosCallback(double x, double y);
@@ -89,10 +87,6 @@ int main(int argc, char** argv)
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
 
-    // init the interface which will handle callbacks from an external gui
-	LDEBUG("Creating Interface module");
-    _interface = new openspace::Interface(&OsEng);
-
     // try to open a window
 	LDEBUG("Initialize SGCT Engine");
 	const bool initSuccess = _sgctEngine->init(sgct::Engine::OpenGL_4_0_Core_Profile);
@@ -119,36 +113,36 @@ int main(int argc, char** argv)
     exit(EXIT_SUCCESS); 
 }
 
-void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
-{
-    if (_sgctEngine->isMaster())
-        _interface->callback(receivedChars);
-}
-
-void mainInitFunc(void)
+void mainInitFunc()
 {
     OsEng.initialize();
     OsEng.initializeGL();
 }
 
-void mainPreSyncFunc(void)
+void mainPreSyncFunc()
 {
     OsEng.preSynchronization();
 }
 
-void mainPostSyncPreDrawFunc(void)
+void mainPostSyncPreDrawFunc()
 {
     OsEng.postSynchronizationPreDraw();
 }
 
-void mainRenderFunc(void)
+void mainRenderFunc()
 {
     OsEng.render();
 }
 
-void mainPostDrawFunc(void)
+void mainPostDrawFunc()
 {
     OsEng.postDraw();
+}
+
+void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
+{
+    if (_sgctEngine->isMaster())
+		OsEng.externalControlCallback(receivedChars, size, clientId);
 }
 
 void mainKeyboardCallback(int key, int action)

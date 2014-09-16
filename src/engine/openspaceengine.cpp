@@ -585,4 +585,24 @@ void OpenSpaceEngine::decode()
 #endif
 }
 
+void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
+                                              int size, int clientId)
+{
+	if (size == 0)
+		return;
+
+	// The first byte determines the type of message
+	const char type = receivedChars[0];
+	switch (type) {
+		case '0':  // LuaScript
+		{
+			std::string script = std::string(receivedChars + 1);
+			LINFO("Received Lua Script: '" << script << "'");
+			_scriptEngine->runScript(script);
+		}
+	}
+
+
+}
+
 }  // namespace openspace
