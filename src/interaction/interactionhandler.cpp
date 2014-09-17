@@ -352,13 +352,21 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         distance(dist);
     }
     if (key == 'T') {
-        PowerScaledScalar dist(-speed * pow(10,8) * dt, 0.0);
+        PowerScaledScalar dist(-speed * dt, 8.0);
         distance(dist);
     }
     if (key == 'G') {
-		PowerScaledScalar dist(speed * pow(10, 8) * dt, 0.0);
+		PowerScaledScalar dist(speed * dt, 8.0);
         distance(dist);
     }
+	if (key == 'Y') {
+		PowerScaledScalar dist(-speed * dt, 18.0);
+		distance(dist);
+	}
+	if (key == 'H') {
+		PowerScaledScalar dist(speed * dt, 18.0);
+		distance(dist);
+	}
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");

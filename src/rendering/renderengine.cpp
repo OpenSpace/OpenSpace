@@ -75,7 +75,7 @@ bool RenderEngine::initializeGL()
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.00001f, 100.0f);
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
