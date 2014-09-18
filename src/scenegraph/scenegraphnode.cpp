@@ -86,52 +86,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
 
-    if (dictionary.hasKey("RenderableToggle")) {
-        std::string val = "";
-        dictionary.getValue("RenderableToggle", val);
-
-        if(val.length() > 0) {
-            auto func = [result]() {
-                result->_renderableToggle = ! result->_renderableToggle;
-            };
-            int key = SGCT_KEY_UNKNOWN;
-
-            if(val.length() == 1) {
-                char c = std::toupper(val[0]);
-                key = static_cast<int>(c);
-            } else if (boost::iequals(val, "left")) {
-                key = SGCT_KEY_LEFT;
-            } else if (boost::iequals(val, "right")) {
-                key = SGCT_KEY_RIGHT;
-            } else if (boost::iequals(val, "up")) {
-                key = SGCT_KEY_UP;
-            } else if (boost::iequals(val, "down")) {
-                key = SGCT_KEY_DOWN;
-            } else if (boost::iequals(val, "space")) {
-                key = SGCT_KEY_SPACE;
-            } else if (boost::iequals(val, "enter")) {
-                key = SGCT_KEY_ENTER;
-            } else if (boost::iequals(val, "backspace")) {
-                key = SGCT_KEY_BACKSPACE;
-            } else if (boost::iequals(val, "del")) {
-                key = SGCT_KEY_DEL;
-            } else if (boost::iequals(val, "delete")) {
-                key = SGCT_KEY_DELETE;
-            } else {
-                // Loop through all F keys
-                for(int i = 0; i < 25; ++i) {
-                    std::string stringKey = "F" + std::to_string(i+1);
-                    if(boost::iequals(val, stringKey)) {
-                        key = SGCT_KEY_F1 + i;
-                    }
-                }
-            }
-
-            if(key != SGCT_KEY_UNKNOWN)
-                OsEng.interactionHandler().addKeyCallback(key, func);
-        }
-    }
-
     if (dictionary.hasKey(keyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
         dictionary.getValue(keyEphemeris, ephemerisDictionary);
@@ -171,7 +125,6 @@ SceneGraphNode::SceneGraphNode()
     , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
-    , _renderableToggle(true)
     , _boundingSphereVisible(false)
 {
 }
@@ -270,7 +223,7 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
         return;
     }
 
-    if (_renderableVisible && _renderableToggle && _renderable->isVisible()) {
+    if (_renderableVisible && _renderable->isVisible()) {
         // LDEBUG("Render");
         _renderable->render(camera, thisPosition);
     }

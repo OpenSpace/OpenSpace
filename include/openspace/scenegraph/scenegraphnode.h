@@ -91,7 +91,6 @@ private:
     // renderable
     Renderable* _renderable;
     bool _renderableVisible;
-    bool _renderableToggle;
 
     // bounding sphere
     bool _boundingSphereVisible;
