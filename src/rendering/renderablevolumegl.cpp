@@ -98,6 +98,8 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
     if(dictionary.hasKey("BoxScaling.4") && dictionary.getValue("BoxScaling.4", tempValue)) {
         _w = tempValue;
     }
+	else
+		_w = 0.0;
 
     _volumeName = "";
     if (dictionary.hasKey("VolumeName"))
