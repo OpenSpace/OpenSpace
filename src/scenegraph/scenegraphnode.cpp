@@ -269,7 +269,8 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
     if (!_boundingSphereVisible) {
         return;
     }
-    if (_renderableVisible && _renderableToggle) {
+
+    if (_renderableVisible && _renderableToggle && _renderable->isVisible()) {
         // LDEBUG("Render");
         _renderable->render(camera, thisPosition);
     }

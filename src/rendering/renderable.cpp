@@ -59,9 +59,8 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
+	: _enabled("enabled", "Is Enabled", true)
 {
-//    std::string name;
-//    dictionary.getValue(constants::scenegraphnode::keyName, name);
     setName("renderable");
 
     // get path if available
@@ -70,6 +69,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     	dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
     	_relativePath += "/";
     }
+
+	addProperty(_enabled);
 }
 
 Renderable::~Renderable()
@@ -102,6 +103,10 @@ std::string Renderable::findPath(const std::string& path) {
     LERROR("Could not find file '" << path << "'");
 
     return "";
+}
+
+bool Renderable::isVisible() const {
+	return _enabled;
 }
 
 }  // namespace openspace

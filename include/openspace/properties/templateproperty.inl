@@ -132,6 +132,11 @@ TemplateProperty<T>::operator T() {
 }
 
 template <typename T>
+TemplateProperty<T>::operator T() const {
+	return _value;
+}
+
+template <typename T>
 TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
     setValue(val);
     return *this;
@@ -162,9 +167,9 @@ boost::any TemplateProperty<T>::get() const {
 template <typename T>
 void TemplateProperty<T>::set(boost::any value) {
     try {
-        T value = boost::any_cast<T>(std::move(value));
-		if (value != _value) {
-			_value = std::move(value);
+        T v = boost::any_cast<T>(std::move(value));
+		if (v != _value) {
+			_value = std::move(v);
 			notifyListener();
 		}
     }
@@ -183,9 +188,9 @@ template <typename T>
 bool TemplateProperty<T>::setLua(lua_State* state)
 {
 	bool success;
-	T value = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
+	T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
-		set(value);
+		set(boost::any(thisValue));
 	return success;
 }
 

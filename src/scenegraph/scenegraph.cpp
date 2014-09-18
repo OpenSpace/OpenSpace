@@ -110,7 +110,6 @@ int property_setValue(lua_State* L) {
 		return 0;
 	}
 
-	//if (propertyValue.type() != prop->type()) {
 	if (type != prop->typeLua())
 		LERROR("Property '" << uri << "' does not accept input of type '"
 			<< luaTypeToString(type) << "'. Requested type: '"

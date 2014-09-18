@@ -130,13 +130,23 @@ public:
 	 * was of the type <code>T</code>. It makes assignments such as
 	 * <code>T v = property;</code> possible by allowing implicit casts (even though,
 	 * internally, not casts are performed. This method is next to zero overhead).
+	 * \return The internal representation of the Property
 	 */
     operator T();
 
 	/**
+	 * This operator allows the TemplateProperty to be used almost transparently as if it
+	 * was of the type <code>T</code>. It makes assignments such as
+	 * <code>T v = property;</code> possible by allowing implicit casts (even though,
+	 * internally, not casts are performed. This method is next to zero overhead).
+	 * \return The internal representation of the Property
+	 */
+	operator T() const;
+
+	/**
 	 * The assignment operator allows the TemplateProperty's value to be set without using
 	 * the TemplateProperty::set method. It will be done internally by thos method and it
-	 * allows assigments such as <code>prop = T(1)</code>.
+	 * allows assignments such as <code>prop = T(1)</code>.
 	 * \param val The value that should be set.
 	 */
     TemplateProperty<T>& operator=(T val);
