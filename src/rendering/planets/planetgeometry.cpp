@@ -36,17 +36,14 @@ namespace planetgeometry {
 
 PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
-    std::string name;
-    dictionary.getValue(constants::scenegraphnode::keyName, name);
-
-    if (!dictionary.hasValue<std::string>(constants::planetgeometry::keyType)) {
-        LERROR("PlanetGeometry for '" << name << "' did not contain a '"
-                                      << constants::planetgeometry::keyType << "' key");
+	std::string geometryType;
+	const bool success = dictionary.getValueSafe(
+		constants::planetgeometry::keyType, geometryType);
+	if (!success) {
+        LERROR("PlanetGeometry did not contain a correct value of the key '"
+			<< constants::planetgeometry::keyType << "'");
         return nullptr;
-    }
-    std::string geometryType;
-    dictionary.getValue(constants::planetgeometry::keyType, geometryType);
-
+	}
     ghoul::TemplateFactory<PlanetGeometry>* factory
           = FactoryManager::ref().factory<PlanetGeometry>();
 

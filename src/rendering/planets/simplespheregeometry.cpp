@@ -47,38 +47,37 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _segments("segments", "Segments", 20, 1, 1000)
     , _planet(nullptr)
 {
-    if (!dictionary.hasValue<glm::vec2>(constants::simplespheregeometry::keyRadius)) {
-        std::string name;
-        dictionary.getValue(constants::scenegraphnode::keyName, name);
-        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
-                                           << constants::simplespheregeometry::keyRadius
-                                           << "'");
-    }
-    else {
-        glm::vec2 radius;
-        dictionary.getValue(constants::simplespheregeometry::keyRadius, radius);
-        _radius = radius;
-    }
+	using constants::scenegraphnode::keyName;
+	using constants::simplespheregeometry::keyRadius;
+	using constants::simplespheregeometry::keySegments;
 
-    if (!dictionary.hasValue<float>(constants::simplespheregeometry::keySegments)) {
-        std::string name;
-        dictionary.getValue(constants::scenegraphnode::keyName, name);
+	// The name is passed down from the SceneGraphNode
+    std::string name;
+    bool success = dictionary.getValue(keyName, name);
+	assert(success);
+
+    glm::vec2 radius;
+    success = dictionary.getValueSafe(keyRadius, radius);
+	if (!success) {
         LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
-                                           << constants::simplespheregeometry::keySegments
-                                           << "'");
-    }
-    else {
-        float segments;
-        dictionary.getValue(constants::simplespheregeometry::keySegments, segments);
-        _segments = static_cast<int>(segments);
-    }
+                                           << keyRadius << "'");
+	}
+	else
+		_radius = radius;
+
+    int segments;
+    success = dictionary.getValueSafe(keySegments, segments);
+	if (!success) {
+        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
+                                           << keySegments << "'");
+	}
+	else
+		_segments = segments;
 
     addProperty(_radius);
     _radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
     addProperty(_segments);
     _segments.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
-
-    //createSphere();
 }
 
 SimpleSphereGeometry::~SimpleSphereGeometry()

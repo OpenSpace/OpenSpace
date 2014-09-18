@@ -27,70 +27,97 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/kameleonwrapper.h>
 
+#include <openspace/util/constants.h>
+
 namespace {
-	std::string _loggerCat = "RenderableFieldlines";
+	const std::string _loggerCat = "RenderableFieldlines";
+
+	const std::string keyFieldlines = "Fieldlines";
+	const std::string keyFilename = "File";
+	const std::string keyHints = "Hints";
+	const std::string keyShaders = "Shaders";
+	const std::string keyVertexShader = "VertexShader";
+	const std::string keyFragmentShader = "FragmentShader";
 }
 
 namespace openspace {
 
-RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) :
-			Renderable(dictionary), _VAO(0), _programUpdateOnSave(false),_update(false) {
+RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
+	: Renderable(dictionary)
+	, _VAO(0)
+	, _programUpdateOnSave(false)
+	, _update(false)
+{
+	std::string name;
+	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
 
-	if(dictionary.hasKey("Fieldlines")) {
-		ghoul::Dictionary fieldlines;
-		if(dictionary.getValue("Fieldlines", fieldlines)) {
-			for(auto key: fieldlines.keys()) {
-				ghoul::Dictionary fieldline;
-				if(fieldlines.getValue(key, fieldline)) {
-					if (fieldline.hasKey("File")) {
-						std::string file = "";
-						if (fieldline.getValue("File", file)) {
-							file = findPath(file);
-							if (file != "") {
+	ghoul::Dictionary fieldlines;
+	success = dictionary.getValueSafe(keyFieldlines, fieldlines);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' did not contain a '" <<
+			keyFieldlines << "' key");
+		return;
+	}
+	for (const std::string& key : fieldlines.keys()) {
+		ghoul::Dictionary fieldline;
+		success = fieldlines.getValueSafe(key, fieldline);
 
-								// read hints into dictionary
-								ghoul::Dictionary hintsDictionary;
-								if(fieldline.hasKey("Hints"))
-									fieldline.getValue("Hints", hintsDictionary);
+		if (!success) {
+			LERROR("Key '" << key << "' in '" << keyFieldlines <<
+				"' of the RenderableFieldlines '" << name <<
+				"' does not have a table as value");
+			continue;
+		}
 
-								_filenames.push_back(file);
-								_hintsDictionaries.push_back(hintsDictionary);
-							} else
-								LERROR("File not found!");
-						}
-					}
-				}
-			}
+		std::string fileName;
+		fieldline.getValueSafe(keyFilename, fileName);
+		fileName = findPath(fileName);
+		if (fileName.empty())
+			LERROR("File not found!");
+		else {
+			ghoul::Dictionary hintsDictionary;
+			fieldline.getValueSafe(keyHints, hintsDictionary);
+
+			_filenames.push_back(fileName);
+			_hintsDictionaries.push_back(hintsDictionary);
 		}
 	}
 
-	std::string vshaderpath = "";
-	std::string fshaderpath = "";
-
-	if (dictionary.hasKey("Shaders")) {
-		ghoul::Dictionary shaderDictionary;
-		if(dictionary.getValue("Shaders", shaderDictionary)) {
-			if (shaderDictionary.hasKey("VertexShader"))
-				shaderDictionary.getValue("VertexShader", vshaderpath);
-
-			if (shaderDictionary.hasKey("FragmentShader"))
-				shaderDictionary.getValue("FragmentShader", fshaderpath);
-
-			vshaderpath = findPath(vshaderpath);
-			fshaderpath = findPath(fshaderpath);
-
-			_vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
-			_fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
-
-
-    		ShaderCreator sc = OsEng.shaderBuilder();
-    		_fieldlinesProgram = sc.buildShader("FieldlinesProgram", vshaderpath, fshaderpath);
-		}
+	ghoul::Dictionary shaderDictionary;
+	success = dictionary.getValueSafe(keyShaders, shaderDictionary);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' does not contain a '" <<
+			keyShaders << "' table");
+		return;
 	}
 
-	if(dictionary.hasKey("UpdateOnSave")) {
-		dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
+	std::string vshaderpath;
+	success = shaderDictionary.getValueSafe(keyVertexShader, vshaderpath);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
+			keyVertexShader << "'");
+		return;
 	}
+	vshaderpath = findPath(vshaderpath);
+
+	std::string fshaderpath;
+	success = shaderDictionary.getValueSafe(keyFragmentShader, fshaderpath);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
+			keyFragmentShader << "'");
+		return;
+	}
+	fshaderpath = findPath(fshaderpath);
+
+	_vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
+	_fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
+
+
+    ShaderCreator sc = OsEng.shaderBuilder();
+    _fieldlinesProgram = sc.buildShader("FieldlinesProgram", vshaderpath, fshaderpath);
+
+	dictionary.getValueSafe("UpdateOnSave", _programUpdateOnSave);
 
 	setBoundingSphere(PowerScaledScalar::CreatePSS(5)); // FIXME a non-magic number perhaps
 }

@@ -47,18 +47,22 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _geometry(nullptr)
 {
+	std::string name;
+	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
+
     std::string path;
     dictionary.getValue(constants::scenegraph::keyPathModule, path);
 
-    if (dictionary.hasKey(constants::renderableplanet::keyGeometry)) {
-        ghoul::Dictionary geometryDictionary;
-        dictionary.getValue(constants::renderableplanet::keyGeometry, geometryDictionary);
+    ghoul::Dictionary geometryDictionary;
+    success = dictionary.getValueSafe(
+		constants::renderableplanet::keyGeometry, geometryDictionary);
+	if (success) {
+		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
-        geometryDictionary.setValue(constants::scenegraphnode::keyName, name());
-
         _geometry
               = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
-    }
+	}
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)

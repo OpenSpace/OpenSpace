@@ -160,7 +160,6 @@ bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& f
 
 bool OpenSpaceEngine::findConfiguration(std::string& filename)
 {
-    //return FileSys.fileExists(filename);
     std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
     size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
                                     ghoul::filesystem::FileSystem::PathSeparator);
@@ -249,13 +248,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Loading configuration from disk");
     ghoul::Dictionary& configuration = _engine->configurationManager();
     ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    const bool hasKey = configuration.hasKey(constants::openspaceengine::keyPaths);
-    const bool hasValue = configuration.hasValue<ghoul::Dictionary>(constants::openspaceengine::keyPaths);
-    if (hasKey && hasValue) {
-        ghoul::Dictionary pathsDictionary;
-        configuration.getValue(constants::openspaceengine::keyPaths, pathsDictionary);
+    ghoul::Dictionary pathsDictionary;
+	const bool success = configuration.getValueSafe(constants::openspaceengine::keyPaths, pathsDictionary);
+	if (success)
         OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
-    }
     else {
         LFATAL("Configuration file does not contain paths token '" << constants::openspaceengine::keyPaths << "'");
         return false;
@@ -264,10 +260,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
-    std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-    if (configuration.hasKey(constants::openspaceengine::keyConfigSgct))
-        configuration.getValue(constants::openspaceengine::keyConfigSgct, sgctConfigurationPath);
-
+	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
+	configuration.getValueSafe(constants::openspaceengine::keyConfigSgct,
+								sgctConfigurationPath);
     
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
@@ -296,8 +291,8 @@ bool OpenSpaceEngine::initialize()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
     glfwSwapBuffers(win);
-    int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
-    LDEBUG("samples: " << samples);
+    //int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
+    //LDEBUG("samples: " << samples);
 
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
@@ -323,11 +318,8 @@ bool OpenSpaceEngine::initialize()
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
 
-	std::string timeKernel = "";
-	using constants::openspaceengine::keyConfigTimekernel;
-	if (OsEng.configurationManager().hasKeyAndValue<std::string>(keyConfigTimekernel)) {
-		OsEng.configurationManager().getValue(keyConfigTimekernel, timeKernel);
-	}
+	std::string timeKernel;
+	OsEng.configurationManager().getValueSafe(constants::openspaceengine::keyConfigTimekernel, timeKernel);
 
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
@@ -347,25 +339,27 @@ bool OpenSpaceEngine::initialize()
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);
-    if (!OsEng.configurationManager().hasValue<std::string>(
-              constants::openspaceengine::keyConfigScene)) {
-        LFATAL("Configuration needs to point to the scene file");
+	
+    std::string sceneDescriptionPath;
+	bool success = OsEng.configurationManager().getValueSafe(
+		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
+	if (!success) {
+        LFATAL("The configuration does not contain a scene file under key '" <<
+				constants::openspaceengine::keyConfigScene << "'");
         return false;
     }
 
-    std::string sceneDescriptionPath;
-    bool success = _configurationManager->getValue(
-          constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
-
-    if (!FileSys.fileExists(sceneDescriptionPath)) {
-        LFATAL("Could not find '" << sceneDescriptionPath << "'");
+	if (!FileSys.fileExists(sceneDescriptionPath)) {
+        LFATAL("Could not find scene description '" << sceneDescriptionPath << "'");
         return false;
     }
 
     std::string scenePath;
-    success = _configurationManager->getValue(constants::openspaceengine::keyPathScene, scenePath);
+    success = _configurationManager->getValueSafe(
+		constants::openspaceengine::keyPathScene, scenePath);
     if (!success) {
-        LFATAL("Could not find SCENEPATH key in configuration file");
+        LFATAL("Could not find key '" << constants::openspaceengine::keyPathScene <<
+			"' in configuration file '" << sceneDescriptionPath << "'");
         return false;
     }
 
@@ -385,13 +379,12 @@ bool OpenSpaceEngine::initialize()
     _engine->_interactionHandler->connectDevices();
 
     // Run start up scripts
-    using ghoul::Dictionary;
-    using constants::openspaceengine::keyStartupScript;
-    const bool hasScript = _engine->configurationManager().hasKeyAndValue<Dictionary>(keyStartupScript);
-    if (hasScript) {
-        Dictionary scripts;
-        _engine->configurationManager().getValue(keyStartupScript, scripts);
-        
+    //using ghoul::Dictionary;
+    //using constants::openspaceengine::keyStartupScript;
+    ghoul::Dictionary scripts;
+	success = _engine->configurationManager().getValueSafe(
+		constants::openspaceengine::keyStartupScript, scripts);
+    if (success) {
         for (size_t i = 0; i < scripts.size(); ++i) {
             std::stringstream stream;
             // Dictionary-size is 0-based; script numbers are 1-based
@@ -405,7 +398,7 @@ bool OpenSpaceEngine::initialize()
             
             std::string scriptPath;
             scripts.getValue(key, scriptPath);
-            const std::string absoluteScriptPath = absPath(scriptPath);
+            std::string&& absoluteScriptPath = absPath(scriptPath);
             _engine->scriptEngine().runScriptFile(absoluteScriptPath);
         }
     }

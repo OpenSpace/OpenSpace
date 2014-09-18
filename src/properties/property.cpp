@@ -30,6 +30,7 @@ namespace openspace {
 namespace properties {
 
 namespace {
+	const std::string _loggerCat = "Property";
 	const std::string _metaDataKeyGuiName = "guiName";
     const std::string _metaDataKeyGroup = "group";
     const std::string _metaDataKeyVisible = "isVisible";
@@ -47,6 +48,11 @@ const std::string Property::ViewOptions::PowerScaledScalar = "powerScaledScalar"
 Property::Property(std::string identifier, std::string guiName)
     : _identifier(std::move(identifier))
 {
+	if (_identifier.empty())
+		LWARNING("Property identifier is empty");
+	if (guiName.empty())
+		LWARNING("Property GUI name is empty");
+
     setVisible(true);
 	_metaData.setValue(_metaDataKeyGuiName, std::move(guiName));
 }
@@ -80,8 +86,8 @@ int Property::typeLua() const {
 }
 
 const std::string& Property::guiName() const {
-	std::string result = "";
-	_metaData.getValue(_metaDataKeyGuiName, result);
+	std::string result;
+	_metaData.getValueSafe(_metaDataKeyGuiName, result);
     return std::move(result);
 }
 
@@ -90,8 +96,8 @@ void Property::setGroupIdentifier(std::string groupId) {
 }
 
 std::string Property::groupIdentifier() const {
-    std::string result = "";
-    _metaData.getValue(_metaDataKeyGroup, result);
+	std::string result;
+	_metaData.getValueSafe(_metaDataKeyGroup, result);
     return std::move(result);
 }
 

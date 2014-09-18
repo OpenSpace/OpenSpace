@@ -74,6 +74,8 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(keyRenderable, renderableDictionary);
+
+		renderableDictionary.setValue(keyName, name);
         renderableDictionary.setValue(keyPathModule, path);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);

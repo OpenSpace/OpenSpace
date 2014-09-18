@@ -37,16 +37,19 @@ namespace openspace {
 
 Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
+	// The name is passed down from the SceneGraphNode
     std::string name;
-    dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
 
-    if (!dictionary.hasValue<std::string>(constants::renderable::keyType)) {
+    std::string renderableType;
+    success = dictionary.getValueSafe(constants::renderable::keyType, renderableType);
+	if (!success) {
         LERROR("Renderable '" << name << "' did not have key '"
                               << constants::renderable::keyType << "'");
         return nullptr;
-    }
-    std::string renderableType;
-    dictionary.getValue(constants::renderable::keyType, renderableType);
+	}
+
     ghoul::TemplateFactory<Renderable>* factory
           = FactoryManager::ref().factory<Renderable>();
     Renderable* result = factory->create(renderableType, dictionary);
@@ -64,11 +67,9 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     setName("renderable");
 
     // get path if available
-    _relativePath = "";
-    if(dictionary.hasKey(constants::scenegraph::keyPathModule)) {
-    	dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
-    	_relativePath += "/";
-    }
+	const bool success = dictionary.getValueSafe(constants::scenegraph::keyPathModule, _relativePath);
+	if (success)
+		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 
 	addProperty(_enabled);
 }
