@@ -318,9 +318,9 @@ void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
 {
     for (LuaLibrary::Function p : library.functions) {
         if (!replace) {
-			ghoul::lua::logStack(_state);
+			//ghoul::lua::logStack(_state);
             lua_getfield(_state, -1, p.name.c_str());
-			ghoul::lua::logStack(_state);
+			//ghoul::lua::logStack(_state);
             const bool isNil = lua_isnil(_state, -1);
             if (!isNil) {
                 LERROR("Function name '" << p.name << "' was already assigned");

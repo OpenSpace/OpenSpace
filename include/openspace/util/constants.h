@@ -61,6 +61,16 @@ namespace renderableplanet {
     const std::string keyGeometry = "Geometry";
 } // namespace renderableplanet
 
+namespace renderablevolumegl {
+	const std::string keyVolume = "Volume";
+	const std::string keyHints = "Hints";
+	const std::string keyTransferFunction = "TransferFunction";
+	const std::string keySampler = "Sampler";
+	const std::string keyBoxScaling = "BoxScaling";
+	const std::string keyVolumeName = "VolumeName";
+	const std::string keyTransferFunctionName = "TransferFunctionName";
+} // namespace renderablevolumegl
+
 namespace planetgeometry {
     const std::string keyType = "Type";
 } // namespace planetgeometry

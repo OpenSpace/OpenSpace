@@ -56,13 +56,8 @@ void FactoryManager::initialize()
     _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
     _manager->factory<Renderable>()->registerClass<RenderablePlanet>(
           "RenderablePlanet");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
-          "RenderableVolumeCL");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
           "RenderableVolumeGL");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeExpert>(
-          "RenderableVolumeExpert");
-    _manager->factory<Renderable>()->registerClass<Flare>("RenderableFlare");
     _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");
 
     // Add Ephimerides

@@ -52,7 +52,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	assert(success);
 
     std::string path;
-    dictionary.getValue(constants::scenegraph::keyPathModule, path);
+    success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+	assert(success);
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValueSafe(
@@ -67,10 +68,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-    if (dictionary.hasKey("Textures.Color")) {
-        dictionary.getValue("Textures.Color", texturePath);
+	success = dictionary.getValueSafe("Textures.Color", texturePath);
+	if (success)
         _colorTexturePath = path + "/" + texturePath;
-    }
 
 	addPropertySubOwner(_geometry);
 

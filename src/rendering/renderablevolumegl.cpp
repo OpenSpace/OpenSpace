@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -35,78 +34,84 @@
 #include <algorithm>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/constants.h>
 
 namespace {
-    std::string _loggerCat = "RenderableVolumeGL";
+    const std::string _loggerCat = "RenderableVolumeGL";
 }
 
 namespace openspace {
 
-RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary):
-    RenderableVolume(dictionary), _boxScaling(1.0, 1.0, 1.0),
-    _updateTransferfunction(false), _id(-1) {
+RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
+	: RenderableVolume(dictionary)
+	, _transferFunctionName("")
+	, _volumeName("")
+	, _boxScaling(1.0, 1.0, 1.0)
+	, _w(0.f)
+	, _updateTransferfunction(false)
+	, _id(-1)
+{
+	std::string name;
+	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
     
     _filename = "";
-    if(dictionary.hasKey("Volume")) {
-        if(dictionary.getValue("Volume", _filename)) {
-            _filename = findPath(_filename);
-        }
-    }
+	success = dictionary.getValueSafe(constants::renderablevolumegl::keyVolume,
+		_filename);
+	if (!success) {
+		LERROR("Node '" << name << "' did not contain a valid '" << 
+			constants::renderablevolumegl::keyVolume << "'");
+		return;
+	}
+	_filename = findPath(_filename);
 
-    LDEBUG("filename: " << _filename);
-    
-    if(dictionary.hasKey("Hints"))
-        dictionary.getValue("Hints", _hintsDictionary);
+    LDEBUG("Volume Filename: " << _filename);
+
+	dictionary.getValueSafe(constants::renderablevolumegl::keyHints, _hintsDictionary);
 
     _transferFunction = nullptr;
     _transferFunctionFile = nullptr;
     _transferFunctionPath = "";
-    if (dictionary.hasKey("TransferFunction")) {
-        std::string transferFunctionPath = "";
-        if(dictionary.getValue("TransferFunction", transferFunctionPath)) {
-            _transferFunctionPath = findPath(transferFunctionPath);
-        }
-    }
-    _samplerFilename = "";
-    if (dictionary.hasKey("Sampler")) {
-        if(dictionary.getValue("Sampler", _samplerFilename)) {
-            _samplerFilename = findPath(_samplerFilename);
-        }
-    }
-    if( _transferFunctionPath == "") {
-        LERROR("No transferFunction!");
-    } else {
-        _transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
-    }
-    if( _samplerFilename == "") {
-        LERROR("No samplerfile!");
-    }
+	success = dictionary.getValueSafe(
+		constants::renderablevolumegl::keyTransferFunction, _transferFunctionPath);
+	if (!success) {
+		LERROR("Node '" << name << "' did not contain a valid '" <<
+			constants::renderablevolumegl::keyTransferFunction << "'");
+		return;
+	}
+	_transferFunctionPath = findPath(_transferFunctionPath);
+	_transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
+    
+	_samplerFilename = "";
+	success = dictionary.getValueSafe(constants::renderablevolumegl::keySampler,
+		_samplerFilename);
+	if (!success) {
+		LERROR("Node '" << name << "' did not contain a valid '" <<
+			constants::renderablevolumegl::keySampler << "'");
+		return;
+	}
+    _samplerFilename = findPath(_samplerFilename);
 
-    double tempValue;
-    if(dictionary.hasKey("BoxScaling.1") && dictionary.getValue("BoxScaling.1", tempValue)) {
-    	if(tempValue > 0.0)
-    		_boxScaling[0] = tempValue;
-    }
-    if(dictionary.hasKey("BoxScaling.2") && dictionary.getValue("BoxScaling.2", tempValue)) {
-    	if(tempValue > 0.0)
-    		_boxScaling[1] = tempValue;
-    }
-    if(dictionary.hasKey("BoxScaling.3") && dictionary.getValue("BoxScaling.3", tempValue)) {
-        if(tempValue > 0.0)
-            _boxScaling[2] = tempValue;
-    }
-    if(dictionary.hasKey("BoxScaling.4") && dictionary.getValue("BoxScaling.4", tempValue)) {
-        _w = tempValue;
-    }
-	else
-		_w = 0.0;
+	glm::vec4 scalingVec4(_boxScaling, _w);
+	success = dictionary.getValueSafe(constants::renderablevolumegl::keyBoxScaling,
+		scalingVec4);
+	if (success) {
+		_boxScaling = scalingVec4.xyz;
+		_w = scalingVec4.w;
+	}
+	else {
+		success = dictionary.getValueSafe(constants::renderablevolumegl::keyBoxScaling,
+			_boxScaling);
+		if (!success) {
+			LERROR("Node '" << name << "' did not contain a valid '" <<
+				constants::renderablevolumegl::keyBoxScaling << "'");
+			return;
+		}
+	}
 
-    _volumeName = "";
-    if (dictionary.hasKey("VolumeName"))
-        dictionary.getValue("VolumeName", _volumeName);
-    _transferFunctionName = "";
-    if (dictionary.hasKey("TransferFunctionName"))
-        dictionary.getValue("TransferFunctionName", _transferFunctionName);
+	dictionary.getValueSafe(constants::renderablevolumegl::keyVolumeName, _volumeName);
+	dictionary.getValueSafe(constants::renderablevolumegl::keyTransferFunctionName,
+		_transferFunctionName);
 
     setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
 }

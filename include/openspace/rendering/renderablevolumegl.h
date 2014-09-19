@@ -25,7 +25,6 @@
 #ifndef __RENDERABLEVOLUMEGL_H__
 #define __RENDERABLEVOLUMEGL_H__
 
-// open space includes
 #include <openspace/rendering/renderablevolume.h>
 
 // ghoul includes
@@ -39,7 +38,6 @@ namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
 public:
-	// constructors & destructor
 	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
 	~RenderableVolumeGL();
     

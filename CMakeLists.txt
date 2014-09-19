@@ -74,6 +74,7 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SGCT_LIBRARIES})
 # GLM
 set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
 find_package(GLM REQUIRED)
+add_definitions(-DGLM_SWIZZLE)
 include_directories(${GLM_INCLUDE_DIRS})
 
 # GLEW
