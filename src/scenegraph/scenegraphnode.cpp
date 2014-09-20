@@ -117,6 +117,7 @@ SceneGraphNode::SceneGraphNode()
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
+	, _runtimeData(nullptr)
 {
 }
 
@@ -125,13 +126,15 @@ SceneGraphNode::~SceneGraphNode()
     deinitialize();
 }
 
-bool SceneGraphNode::initialize()
+bool SceneGraphNode::initialize(RuntimeData* runtimeData)
 {
     if (_renderable != nullptr)
         _renderable->initialize();
 
     if (_ephemeris != nullptr)
         _ephemeris->initialize();
+
+	_runtimeData = runtimeData;
     return true;
 }
 
@@ -162,7 +165,7 @@ bool SceneGraphNode::deinitialize()
 // essential
 void SceneGraphNode::update()
 {
-    _ephemeris->update();
+    _ephemeris->update(_runtimeData);
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
@@ -212,7 +215,7 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
 
     if (_renderableVisible) {
         // LDEBUG("Render");
-        _renderable->render(camera, thisPosition);
+		_renderable->render(camera, thisPosition, _runtimeData);
     }
 
     // evaluate all the children, tail-recursive function(?)

@@ -22,44 +22,54 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLE_H__
-#define __RENDERABLE_H__
+#ifndef __RENDERABLESPHERICALGRID_H__
+#define __RENDERABLESPHERICALGRID_H__
+
+// more or less a brutal adaptation of powerscaledsphere class
 
 // open space includes
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/camera.h>
-#include <ghoul/misc/dictionary.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/util/runtimedata.h>
-
+#include <openspace/rendering/renderable.h>
+#include <openspace/properties/stringproperty.h>
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
-
-class Renderable : public properties::PropertyOwner {
+class RenderableSphericalGrid : public Renderable{
 public:
-    static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
+	RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
+	~RenderableSphericalGrid();
 
-    // constructors & destructor
-    Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable();
+	bool initialize()   override;
+	bool deinitialize() override;
 
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
-
-    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
-    const PowerScaledScalar& getBoundingSphere();
-
-	virtual void render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData) = 0;
-    virtual void update();
-
-protected:
-    // Renderable();
+	void render(const Camera* camera, const psc& position, RuntimeData* runtimeData) override;
+	void update() override;
 private:
-    PowerScaledScalar boundingSphere_;
-	RuntimeData* _runtimeData;
+protected:
+	typedef struct {
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
+
+
+	ghoul::opengl::ProgramObject* _gridProgram;
+	std::string _gridType;
+	glm::vec4 _gridColor;
+	glm::mat4 _gridMatrix;
+	int _segments;
+
+	GLuint _vaoID = 3;
+	GLuint _vBufferID = 4;
+	GLuint _iBufferID = 5;
+
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	Vertex* _varray;
+	int* _iarray;
 };
-
-}  // namespace openspace
-
-#endif  // __RENDERABLE_H__
+}// namespace openspace
+#endif

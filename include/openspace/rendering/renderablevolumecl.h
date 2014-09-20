@@ -67,7 +67,7 @@ public:
     bool initialize();
     bool deinitialize();
 
-	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
 	virtual void update();
 
 private:
@@ -97,6 +97,8 @@ private:
     ghoul::filesystem::File* _kernelSourceFile;
     bool _kernelUpdateOnSave;
     std::mutex* _kernelMutex;
+
+	RuntimeData* _runtimeData;
     
 };
 

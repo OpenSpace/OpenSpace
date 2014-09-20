@@ -40,7 +40,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     : _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
-    , _mode(GL_TRIANGLES)
+	, _mode(GL_TRIANGLES)
     , _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
@@ -53,12 +53,13 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     const float fsegments = static_cast<float>(segments);
     const float r = static_cast<float>(radius[0]);
 
+	
+
     for (int i = 0; i <= segments; i++) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int j = 0; j <= segments; j++) {
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
-
             // inclination angle (north to south)
             const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
 
@@ -95,19 +96,32 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     for (int i = 1; i <= segments; ++i) {
         for (int j = 0; j < segments; ++j) {
             const int t = segments + 1;
-            _iarray[nr] = t * (i - 1) + j + 0;
+            _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0;
+            _iarray[nr] = t * (i + 0) + j + 0; //2 
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1;
+            _iarray[nr] = t * (i + 0) + j + 1; //3
             ++nr;
 
-            _iarray[nr] = t * (i - 1) + j + 0;
+            _iarray[nr] = t * (i - 1) + j + 0; //4 
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1;
+            _iarray[nr] = t * (i + 0) + j + 1; //5
             ++nr;
-            _iarray[nr] = t * (i - 1) + j + 1;
+            _iarray[nr] = t * (i - 1) + j + 1; //6
             ++nr;
+			
+			/*
+			_iarray[nr] = t * (i - 1) + j + 0; //1
+			++nr;
+			_iarray[nr] = t * (i + 0) + j + 0; //2 
+			++nr;
+			_iarray[nr] = t * (i + 0) + j + 1; //3
+			++nr;
+			_iarray[nr] = t * (i - 1) + j + 1; //6
+			++nr;
+			_iarray[nr] = t * (i - 1) + j + 0; //4 
+			++nr;
+			*/
         }
     }
 }
@@ -121,7 +135,6 @@ PowerScaledSphere::~PowerScaledSphere()
     glDeleteBuffers(1, &_iBufferID);
     glDeleteVertexArrays(1, &_vaoID);
 }
-#define cppOffsetOf(s, m) ((size_t)&(((s *)NULL)->m))
 
 bool PowerScaledSphere::initialize()
 {

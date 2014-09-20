@@ -34,6 +34,7 @@
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
+#include <openspace/util/runtimedata.h>
 
 namespace openspace {
 
@@ -44,6 +45,8 @@ public:
     // constructors & destructor
     SceneGraph();
     ~SceneGraph();
+
+	void setRuntimeData(RuntimeData* runtimeData);
 
     /**
      * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
@@ -94,6 +97,7 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
+
 private:
     std::string _focus, _position;
 
@@ -101,6 +105,7 @@ private:
     SceneGraphNode* _root;
     std::vector<SceneGraphNode*> _nodes;
     std::map<std::string, SceneGraphNode*> _allNodes;
+	RuntimeData* _runtimeData;
 };
 
 } // namespace openspace

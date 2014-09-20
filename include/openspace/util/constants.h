@@ -68,7 +68,12 @@ namespace planetgeometry {
     const std::string keyType = "Type";
 } // namespace planetgeometry
 
-
+namespace renderablesphericalgrid{
+	const std::string gridType = "GridType";
+	const std::string gridColor = "GridColor";
+	const std::string gridMatrix = "GridMatrix";
+	const std::string gridSegments = "GridSegments";
+}
 
 namespace ephemeris {
     const std::string keyType = "Type";

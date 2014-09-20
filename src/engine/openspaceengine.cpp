@@ -33,8 +33,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spice.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/runtimedata.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -248,8 +250,29 @@ bool OpenSpaceEngine::initialize()
 
     // initialize OpenSpace helpers
     Time::init();
+	//Time::ref().setTime("2007 feb 26 17:41:00");
+	Time::ref().setTime("2010 jun 13 13:50:00");
+
+	RuntimeData* initialData = new RuntimeData; 
+	initialData->setTime(Time::ref().getTime());
+
+	std::cout <<"Initial time  : " << initialData->getTime() << std::endl;
+
     Spice::init();
-    Spice::ref().loadDefaultKernels();
+    Spice::ref().loadDefaultKernels(); // changeto: instantiate spicemanager, load kernels. 
+
+	SpiceManager::initialize();
+	
+	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de431_part-1.bsp"), "SPK_LARGE1");
+	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de431_part-2.bsp"), "SPK_LARGE2");
+
+	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/981005_PLTEPH-DE405S.bsp"), "JUPITER");
+	
+	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
+	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");
+	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc")       , "PCK");
+	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/naif0010.tls")       , "LSK");
+
     FactoryManager::initialize();
 
     // Load scenegraph
@@ -277,10 +300,13 @@ bool OpenSpaceEngine::initialize()
         return false;
     }
 
+
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
+	_renderEngine->setRuntimeData(initialData);
+	sceneGraph->setRuntimeData(initialData);
     sceneGraph->loadScene(sceneDescriptionPath, scenePath);
-    sceneGraph->initialize();
+	sceneGraph->initialize();
     _renderEngine->setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY

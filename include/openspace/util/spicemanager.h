@@ -28,6 +28,7 @@
 
 #include <string>
 #include <ghoul/glm.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <map>
 
@@ -44,7 +45,7 @@ public:
 	static SpiceManager& ref();
 	
 	/**
-	 *  Load on or more SPICE kernels into a program. If client provides
+	 *  Load one or more SPICE kernels into a program. If client provides
 	 *  the path to a binary kernel or meta-kernel upon which its loaded 
 	 *  to the appropriate SPICE subsystem. if the file is a textkernel 
 	 *  it will be loaded into kernel pool. 
@@ -110,6 +111,7 @@ public:
 
 // Converting between UTC and Ephemeris Time (LSK)  ------------------------------------- //
 
+
 	/**
 	 *  Convert a string representing an epoch to a double precision
      *  value representing the number of TDB seconds past the J2000
@@ -120,6 +122,8 @@ public:
 	 *  \return Corresponding ephemeris time, equivalent value in seconds past J2000, TDB.
 	 */
 	double stringToEphemerisTime(const std::string& epochString) const;
+
+	std::string ephemerisTimeToString(const double et) const;
 
 // Computing Positions of Spacecraft and Natural Bodies(SPK) ---------------------------- //
 
@@ -144,7 +148,7 @@ public:
 						   const std::string& aberrationCorrection,
 						   const std::string& observer,
 						   glm::dvec3& targetPosition, 
-						   double lightTime) const;
+						   double& lightTime) const;
 	/**
 	 *  Return the state (position and velocity) of a target body 
      *  relative to an observing body, optionally corrected for light 
@@ -168,7 +172,7 @@ public:
 						const std::string& observer,
 						glm::dvec3& targetPosition, 
 						glm::dvec3& targetVelocity,
-						double lightTime) const;
+						double& lightTime) const;
 
 // Computing Transformations Between Frames (FK) -------------------------------------- //
 
@@ -203,6 +207,12 @@ public:
 		                            const std::string& toFrame,
 		                            double ephemerisTime, 
 									transformMatrix& positionMatrix) const;
+
+
+	void getPositionTransformMatrixGLM(const std::string& fromFrame,
+									   const std::string& toFrame,
+									   double ephemerisTime,
+									   glm::dmat3& positionMatrix) const;
 	
 // Retrieving Instrument Parameters (IK)  ------------------------------------------ //
 
@@ -351,8 +361,8 @@ private:
 * or <code>getPositionTransformMatrix</code> the instantiated object
 * can transform position and velocity to any specified reference frame. 
 *
-* Client-sied example: 
-* openspace::transformMatrix m(6);
+* Client-side example: 
+* openspace::transformMatrix stateMatrix(6);
 * openspace::SpiceManager::ref().getStateTransformMatrix("J2000",
 *                                                        "IAU_PHOEBE",
 *                                                         et,
@@ -367,16 +377,17 @@ private:
 	int N;
 	double *data;
 	bool empty;
+
+	friend class SpiceManager;
+public:
 	double* ptr()   {
 		empty = false;
 		return data;
 	}
-	friend class SpiceManager;
-public:
 	/* default constructor */
 	transformMatrix();
 	/* default destructor */
-	~transformMatrix(){ delete[] data; };
+//	~transformMatrix(){ delete[] data; };
 	/* allocation of memory */
 	transformMatrix(int n) : N(n){
 		data = new double[N*N];

@@ -212,15 +212,21 @@ double SpiceManager::stringToEphemerisTime(const std::string& epochString) const
 	return et;
 }
 
+std::string SpiceManager::ephemerisTimeToString(const double et) const{
+	char  utcstr[40];
+	timout_c(et, "YYYY MON DD HR:MN:SC.### ::RND", 32, utcstr);
+	return std::string(utcstr);
+}
+
 bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 double ephemerisTime,
 	                                 const std::string& referenceFrame,
 	                                 const std::string& aberrationCorrection,
 	                                 const std::string& observer,
 	                                 glm::dvec3& targetPosition,
-	                                 double lightTime) const{
+	                                 double& lightTime) const{
 	double pos[3] = { NULL, NULL, NULL };
-	//method to put error out...
+	
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
 		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
 	
@@ -238,7 +244,7 @@ bool SpiceManager::getTargetState(const std::string& target,
 	                              const std::string& observer,
 	                              glm::dvec3& targetPosition,
 	                              glm::dvec3& targetVelocity,
-	                              double lightTime) const{
+	                              double& lightTime) const{
 	double state[6];
 	std::fill_n(state, 6, NULL);
 
@@ -273,6 +279,14 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 		     ephemerisTime, (double(*)[3])positionMatrix.ptr());
 
 	return true;
+}
+
+void SpiceManager::getPositionTransformMatrixGLM(const std::string& fromFrame,
+												 const std::string& toFrame,
+												 double ephemerisTime,
+												 glm::dmat3& positionMatrix) const{
+	pxform_c(fromFrame.c_str(), toFrame.c_str(),
+		ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
 }
 
 bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,

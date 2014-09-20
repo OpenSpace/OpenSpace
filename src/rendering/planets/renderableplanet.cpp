@@ -31,6 +31,9 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 
@@ -56,9 +59,10 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         geometryDictionary.setValue(constants::scenegraphnode::keyName, name());
 
-        _geometry
-              = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
+
+	dictionary.getValue("Frame", _target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -105,7 +109,7 @@ bool RenderablePlanet::deinitialize()
     return true;
 }
 
-void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
+void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData)
 {
     // TODO replace with more robust assert
     // check so that the shader is set
@@ -117,19 +121,30 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
 
     // fetch data
     psc currentPosition = thisPosition;
-    psc campos = camera->position();
-    glm::mat4 camrot = camera->viewRotationMatrix();
-    //PowerScaledScalar scaling = camera->scaling();
-	//std::cout << scaling << std::endl;
+	psc campos          = camera->position();
+    glm::mat4 camrot    = camera->viewRotationMatrix();
+   // PowerScaledScalar scaling = camera->scaling();
 
-	PowerScaledScalar scaling = glm::vec2(1, -6);
+    PowerScaledScalar scaling = glm::vec2(1, -6);
 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
-    transform = glm::rotate(
-          transform, 4.1f * static_cast<float>(sgct::Engine::instance()->getTime()),
-          glm::vec3(0.0f, 1.0f, 0.0f));
-		  
+	
+	// set spice-orientation in accordance to timestamp
+	glm::dmat3 stateMatrix;
+	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", runtimeData->getTime(), stateMatrix);
+	
+	//earth needs to be rotated for that to work.
+	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+		
+	for (int i = 0; i < 3; i++){
+		for (int j = 0; j < 3; j++){
+			transform[i][j] = stateMatrix[i][j];
+		}
+	}
+	transform = transform* rot;
+	
+
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
@@ -137,7 +152,7 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
     _programObject->setUniform("objpos", currentPosition.vec4());
     _programObject->setUniform("camrot", camrot);
     _programObject->setUniform("scaling", scaling.vec2());
-
+	
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -149,6 +164,7 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition)
 
     // disable shader
     _programObject->deactivate();
+
 }
 
 void RenderablePlanet::update()

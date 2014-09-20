@@ -245,7 +245,7 @@ bool RenderableVolumeCL::deinitialize() {
     return true;
 }
 
-void RenderableVolumeCL::render(const Camera *camera, const psc &thisPosition) {
+void RenderableVolumeCL::render(const Camera *camera, const psc &thisPosition, RuntimeData* runtimeData) {
     
     if( ! _kernel.isValidKernel())
         return;

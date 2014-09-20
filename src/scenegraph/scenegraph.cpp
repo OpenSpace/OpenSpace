@@ -67,12 +67,17 @@ SceneGraph::SceneGraph()
     : _focus("Root")
     , _position("Root")
     , _root(nullptr)
+	, _runtimeData(nullptr)
 {
 }
 
 SceneGraph::~SceneGraph()
 {
     deinitialize();
+}
+
+void SceneGraph::setRuntimeData(RuntimeData* runtimeData){
+	_runtimeData = runtimeData;
 }
 
 bool SceneGraph::initialize()
@@ -107,6 +112,17 @@ bool SceneGraph::initialize()
         return false;
 
     OsEng.ref().configurationManager().setValue("pscShader", po);
+
+	ProgramObject* _gridProgram = new ProgramObject("GridProgram");
+	ShaderObject* gridvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
+		absPath("${SHADERS}/grid_vs.glsl"));
+	ShaderObject* gridfs = new ShaderObject(ShaderObject::ShaderTypeFragment,
+		absPath("${SHADERS}/grid_fs.glsl"));
+	_gridProgram->attachObject(gridvs);
+	_gridProgram->attachObject(gridfs);
+	_gridProgram->compileShaderObjects();
+	_gridProgram->linkProgramObject();
+
 
 	// STAR HALO RENDERING
 	ProgramObject* _starProgram = new ProgramObject("StarProgram");
@@ -176,12 +192,12 @@ bool SceneGraph::initialize()
     OsEng.ref().configurationManager().setValue("Quad", quad);
 	OsEng.ref().configurationManager().setValue("PointProgram", _pointProgram);
 	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
-
+	OsEng.ref().configurationManager().setValue("GridProgram", _gridProgram);
 
 
     // Initialize all nodes
     for (auto node : _nodes) {
-        bool success = node->initialize();
+		bool success = node->initialize(_runtimeData);
         if (success)
             LDEBUG(node->nodeName() << " initialized successfully!");
         else
@@ -189,7 +205,7 @@ bool SceneGraph::initialize()
     }
 
     // update the position of all nodes
-    update();
+	update();
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();

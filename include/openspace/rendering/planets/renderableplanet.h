@@ -33,6 +33,7 @@
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/util/runtimedata.h>
 
 namespace openspace {
 
@@ -48,7 +49,7 @@ public:
     bool initialize() override;
     bool deinitialize() override;
 
-    void render(const Camera* camera, const psc& thisPosition) override;
+	void render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData) override;
     void update() override;
 
 protected:
@@ -60,6 +61,8 @@ private:
     ghoul::opengl::ProgramObject* _programObject;
     ghoul::opengl::Texture* _texture;
     planetgeometry::PlanetGeometry* _geometry;
+
+	std::string _target;
 };
 
 }  // namespace openspace

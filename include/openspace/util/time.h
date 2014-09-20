@@ -14,6 +14,7 @@ public:
 	static bool isInitialized();
 
 	void setTime(const char* stringTime);
+	void setTime(double intTime);
 	double getTime();
 
 private:

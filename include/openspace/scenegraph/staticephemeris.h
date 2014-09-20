@@ -36,7 +36,7 @@ public:
     virtual ~StaticEphemeris();
     virtual bool initialize();
     virtual const psc& position() const;
-    virtual void update();
+	virtual void update(RuntimeData* runtimeData);
 protected:
 private:
     psc _position;

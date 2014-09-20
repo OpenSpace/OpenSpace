@@ -37,13 +37,14 @@ public:
     virtual ~SpiceEphemeris();
     virtual bool initialize();
     virtual const psc& position() const;
-    virtual void update();
+	virtual void update(RuntimeData* runtimeData);
 protected:
 private:
 
     std::string _targetName, _originName;
     int _target, _origin;
     psc _position;
+	double _currentEphemerisTime = -1;
     
 };
     

@@ -337,7 +337,7 @@ bool RenderableVolumeExpert::deinitialize() {
     return true;
 }
 
-void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPosition) {
+void RenderableVolumeExpert::render(const Camera *camera, const psc &thisPosition, RuntimeData* runtimeData) {
     if( ! _kernel.isValidKernel())
         return;
     

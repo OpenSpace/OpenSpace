@@ -25,14 +25,16 @@
 #include <openspace/scenegraph/spiceephemeris.h>
 
 #include <openspace/util/spice.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 namespace openspace {
     
 SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary): _targetName(""),
-                                                                                   _originName(""),
-                                                                                   _target(0),
-                                                                                   _origin(0),
-                                                                                   _position()
+                                                                     _originName(""),
+                                                                     _target(0),
+                                                                     _origin(0),
+                                                                     _position()
 {
     dictionary.getValue("Body", _targetName);
     dictionary.getValue("Observer", _originName);
@@ -59,11 +61,30 @@ const psc& SpiceEphemeris::position() const {
     return _position;
 }
 
-void SpiceEphemeris::update() {
+void SpiceEphemeris::update(RuntimeData* runtimeData) {
     double state[3];
-    
-    Spice::ref().spk_getPosition(_target, _origin, state);
-    _position = psc::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+   
+	_currentEphemerisTime = runtimeData->getTime();
+	
+	glm::dvec3 position(0,0,0);
+
+	double lightTime = 0.0;
+	SpiceManager::ref().getTargetPosition(_targetName, _currentEphemerisTime, "GALACTIC", "LT+S", _originName, position, lightTime);
+
+	/*
+	std::cout << _targetName  << " (";
+	std::cout << position[0] << ", ";
+	std::cout << position[1] << ", ";
+	std::cout << position[2] << ")";
+	std::cout << std::endl;
+	assert(_targetName != "JUPITER");
+	*/
+	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
+	_position[3] -= 0.01;
+
+	//_position[3] += 1;
+	//_position[3] += 3;
+
 }
 
 } // namespace openspace

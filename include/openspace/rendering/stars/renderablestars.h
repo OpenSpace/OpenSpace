@@ -43,7 +43,7 @@ public:
 	bool initialize()   override;
 	bool deinitialize() override;
 
-	void render(const Camera* camera, const psc& position) override;
+	void render(const Camera* camera, const psc& position, RuntimeData* runtimeData) override;
 	void update() override;
 
 protected:
@@ -72,6 +72,8 @@ private:
 	int v_size;
 	int v_stride;
 	int v_total;
+
+	RuntimeData* _runtimeData;
 };
 
 } // namespace openspace

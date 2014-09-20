@@ -28,6 +28,9 @@
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
 
+// We need to decide where this is set
+#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 #include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
@@ -39,9 +42,11 @@ const std::string _loggerCat = "RenderEngine";
 }
 namespace openspace {
 
+
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
+	, _runtimeData(nullptr)
 {
 }
 
@@ -60,8 +65,11 @@ bool RenderEngine::initialize()
     // if master, setup interaction
     //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
-
     return true;
+}
+
+void RenderEngine::setRuntimeData(RuntimeData* runtimeData){
+	_runtimeData = runtimeData;
 }
 
 bool RenderEngine::initializeGL()
@@ -75,7 +83,7 @@ bool RenderEngine::initializeGL()
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.00001f, 100.0f);
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -139,12 +147,18 @@ bool RenderEngine::initializeGL()
 
 void RenderEngine::postSynchronizationPreDraw()
 {
+	// Move time forward.
+	//_runtimeData->advanceTimeBy(1, DAY);
+	
+	_runtimeData->advanceTimeBy(1, HOUR);
+	//_runtimeData->advanceTimeBy(30, MINUTE);
+	//_runtimeData->advanceTimeBy(1, MILLISECOND);
+	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
 
     // update and evaluate the scene starting from the root node
-    _sceneGraph->update(); // old time + time
-	                       // in time setTime using double!
+    _sceneGraph->update(); 
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 }
@@ -186,12 +200,21 @@ void RenderEngine::render()
 #define FONT_SIZE 10
 #endif
 
+
+		std::string timeGUI =  SpiceManager::ref().ephemerisTimeToString(_runtimeData->getTime());
+
+		if (timeGUI == "") _runtimeData->setTime(0); // if time ends -> reset time to julian date 0.
+
         const glm::vec2 scaling = _mainCamera->scaling();
         const glm::vec3 viewdirection = _mainCamera->viewDirection();
         const psc position = _mainCamera->position();
         const psc origin = OsEng.interactionHandler().getOrigin();
         const PowerScaledScalar pssl = (position - origin).length();
+		/* GUI PRINT */
 
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 12, "OpenSpace Time: (%s)", timeGUI.c_str());
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 10, "Origin: (%.5f, %.5f, %.5f, %.5f)", origin[0],

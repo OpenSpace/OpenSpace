@@ -59,7 +59,7 @@ bool Flare::deinitialize() {
     return true;
 }
 
-void Flare::render(const Camera *camera, const psc& thisPosition) {
+void Flare::render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData) {
     render();
 }
 void Flare::update() {

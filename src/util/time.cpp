@@ -54,6 +54,11 @@ void Time::setTime(const char* stringTime) {
 	str2et_c ( stringTime, &time_ );
 }
 
+void Time::setTime(double intTime) {
+	assert(this_);
+	time_ = intTime;
+}
+
 double Time::getTime() {
 	assert(this_);
 	return time_;

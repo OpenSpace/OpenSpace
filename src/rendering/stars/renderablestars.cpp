@@ -27,17 +27,19 @@
 #include <fstream>
 #include <limits>
 #include <vector>
-#include <iomanip>      // std::setw
+#include <iomanip>      
 
 
-// open space includes
+// openspace includes
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
+
 #include <sgct.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -48,8 +50,7 @@ int printOglError(char *file, int line){
 	int    retCode = 0;
 	glErr = glGetError();
 	if (glErr != GL_NO_ERROR){
-		printf("glError in file %s @ line %d: %s\n",
-			file, line, gluErrorString(glErr));
+		printf("glError %s\n", gluErrorString(glErr));
 		retCode = 1;
 	}
 	return retCode;
@@ -71,7 +72,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _pointProgram(nullptr)
 	, _texture(nullptr)
 {
-	//setBoundingSphere(PowerScaledScalar::CreatePSS(100)); // <---- do we need this?
 	std::string path;
 	dictionary.getValue(constants::renderablestars::keyPathModule, path);
 
@@ -89,6 +89,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 }
 
 RenderableStars::~RenderableStars(){
+	glDeleteBuffers(1, &_vboID);
+	glDeleteVertexArrays(1, &_vaoID);
 	deinitialize();
 }
 
@@ -115,6 +117,7 @@ psc psc_addition(psc v1, psc v2) {
 	}
 }
 
+//#define ROTATESTARS 
 
 bool RenderableStars::readSpeckFile(const std::string& path){
 
@@ -127,7 +130,6 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::vector<float> floatingPointData;
 
     int count = 0;
-	std::cout << path << std::endl;
 	const std::string absPath = FileSys.absolutePath(path);
 	std::string::size_type last
 		= absPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
@@ -135,22 +137,6 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 	std::string cacheName = absPath.substr(last + 1, absPath.size() - absPath.rfind('.') - 1);
 	std::string basePath = absPath.substr(0, last);
 	cacheName = basePath + "\\" + cacheName + ".bin";
-
-	/**
-		The READ LOGIC:
-		1. skip metadata 
-		2. read everything in line until # symbol (nongeneric reader)
-		3. split line on whitespaces
-		4. convert x,y,z to floats
-		5. convert m -> pc
-		6. convert to psc
-		7. pass to vector
-		8. pass vectors internal arr for vbo creation
-
-		TODO:
-		Right now we are not reading cache files as luminocity, appmag etc are not cached
-		in the first place. This is the reason for longer loading times, will get fixed.
-	*/
 
 	//if (!FileSys.fileExists(cacheName)){ 
 	if (!readCache){  // dumb boolean for now.            
@@ -201,48 +187,32 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 			// Could convert floatingPointData instead ??
 			// (possible as 3.4 × 10^38 is max rep nr of float)
 			PowerScaledScalar parsecsToMetersFactor = glm::vec2(0.308567758, 17);
-			//powerscaled *= parsecsToMetersFactor; // <--- buggy dont use. 
 			powerscaled[0] *= parsecsToMetersFactor[0];
 			powerscaled[1] *= parsecsToMetersFactor[0];
 			powerscaled[2] *= parsecsToMetersFactor[0];
 			powerscaled[3] += parsecsToMetersFactor[1];
-			
-			// TESTING DISTANCE MODULUS FORMULA LOGIC (see: star_ge.glsl) ------------------------------------
-					//psc campos(3.17657, 0.0, 0.0, 4.0); // same input as in shader.
-					psc campos(0.8, 0.0, 0.0, 4.0);
-					psc psc_position = powerscaled;
 
-					float k = 10.f;
+#ifdef ROTATESTARS
+			glm::mat4 transform = glm::mat4(1);
 
-					psc cam_negative = psc(-campos[0], -campos[1], -campos[2], campos[3]);
-					psc result = psc_addition(psc_position, cam_negative);
-					// checked with wolfram, correct. 
-					//std::cout << result << std::endl;
-					float x, y, z, w;
-					x = result[0];
-					y = result[1];
-					z = result[2];
-					w = result[3];
-		
-					glm::vec2 dpc_psc( sqrt(x*x + y*y + z*z), w );
-					// checked with wolfram, correct. 
+			glm::dmat3 stateMatrix;
+			double initTime = 0; 
+			openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", 0, stateMatrix);
 
-					dpc_psc[0] *= 0.324077929;
-					dpc_psc[1] += -18;
+			for (int i = 0; i < 3; i++){
+				for (int j = 0; j < 3; j++){
+					transform[i][j] = stateMatrix[i][j];
+				}
+			}
 
-					float parsecDist = dpc_psc[0] * pow(10, dpc_psc[1]);
-					// checked with wolfram, 100% correct to the 8th decimal. 
+			glm::vec4 tmp(powerscaled[0], powerscaled[1], powerscaled[2], powerscaled[3] );
+			tmp = transform*tmp;
 
-					float M = floatingPointData[3];
-					float apparent = (M - 5.0f * (1.f - log10(parsecDist)));
-					// checked with wolfram, 100% correct to the 7th decimal. 
-
-					// WORKS, REPRODUCE ON SHADER!!!!!!
-
-					//std::cout << std::setw(3) << round(apparent) << " ";
-					//if (count % 15 == 0) std::cout << std::endl;
-			// --------------------------------------------------------------------------------
-			
+			powerscaled[0] = tmp[0];
+			powerscaled[1] = tmp[1];
+			powerscaled[2] = tmp[2];
+			powerscaled[3] = tmp[3];
+#endif
 			// We use std::vector to store data
 			// needs no preallocation and has tightly packed arr.
 			for (int i = 0; i < 4; i++){
@@ -336,14 +306,11 @@ bool RenderableStars::deinitialize(){
 }
 
 //#define TMAT
-void RenderableStars::render(const Camera* camera, const psc& thisPosition){
+void RenderableStars::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData){
 	assert(_haloProgram);
 	printOpenGLError();
 	// activate shader
 	_haloProgram->activate();
-
-//	psc vantagePointTestTarget = PowerScaledCoordinate::CreatePowerScaledCoordinate(8000, 0.0, 0.0);
-	//	psc campos = vantagePointTestTarget;
 
 	// fetch data
 	psc currentPosition       = thisPosition;
@@ -415,6 +382,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	glDisable(GL_BLEND);
 	
 	_pointProgram->deactivate();
+	glEnable(GL_DEPTH_TEST);
 
 #endif
 }

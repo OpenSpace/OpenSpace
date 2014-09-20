@@ -79,9 +79,6 @@ int main(int argc, char** argv) {
         }
     }
     
-    /*openspace::Time::init();
-    openspace::Spice::init();
-    openspace::Spice::ref().loadDefaultKernels();*/
     openspace::FactoryManager::initialize();
     
     testing::InitGoogleTest(&argc, argv);

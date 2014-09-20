@@ -195,7 +195,7 @@ bool RenderableVolumeGL::deinitialize() {
     return true;
 }
 
-void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition) {
+void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, RuntimeData* runtimeData) {
     
 	float speed = 50.0f;
 	float time = sgct::Engine::getTime();

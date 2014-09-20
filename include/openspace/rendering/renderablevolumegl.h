@@ -57,10 +57,10 @@ public:
 	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
 	~RenderableVolumeGL();
     
-    bool initialize();
+	bool initialize();
     bool deinitialize();
 
-	virtual void render(const Camera *camera, const psc& thisPosition);
+	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
 	virtual void update();
 
 private:
@@ -85,6 +85,8 @@ private:
     
     void safeShaderCompilation();
     
+	RuntimeData* _runtimeData;
+
 };
 
 } // namespace openspace
