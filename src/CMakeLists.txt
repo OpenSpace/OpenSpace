@@ -142,5 +142,23 @@ include_directories("${HEADER_ROOT_DIR}")
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
+if (WIN32)
+    if (CMAKE_CL_64)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/DevIL.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILU.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILUT.dll)
+    else (CMAKE_CL_64)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/DevIL.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILU.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILUT.dll)
+    endif (CMAKE_CL_64)
+    foreach( file_i ${OPENSPACE_DLL_LIBS})
+    	add_custom_command(TARGET OpenSpace POST_BUILD        # Adds a post-build event to MyTest
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        "${file_i}"      # <--this is in-file
+        $<TARGET_FILE_DIR:OpenSpace>)
+	endforeach( file_i )
+endif(WIN32)
+
 add_subdirectory(tests)
 

@@ -102,7 +102,12 @@ endif(OPENCL_FOUND)
 
 # Kameleon
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+if(WIN32)
+    option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+else(WIN32)
+    option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+endif(WIN32)
+option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
 set(KAMELEON_ROOT_DIR ${OPENSPACE_EXT_DIR}/kameleon)
 set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
 add_subdirectory(${KAMELEON_ROOT_DIR})
