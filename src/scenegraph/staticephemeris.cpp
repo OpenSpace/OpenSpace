@@ -24,31 +24,27 @@
 
 #include <openspace/scenegraph/staticephemeris.h>
 
+#include <openspace/util/constants.h>
+
 namespace openspace {
 
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary) {
-    double x = 0.0, y = 0.0, z = 0.0, e = 0.0;
-    if (dictionary.hasKey("Position.1")) {
-        dictionary.getValue("Position.1", x);
-        dictionary.getValue("Position.2", y);
-        dictionary.getValue("Position.3", z);
-        dictionary.getValue("Position.4", e);
+using namespace constants::staticephemeris;
+    
+StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
+    : _position(0.f, 0.f, 0.f, 0.f)
+{
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
+    if (hasPosition) {
+        glm::vec4 tmp;
+        dictionary.getValue(keyPosition, tmp);
+        _position = tmp;
     }
-    _position = psc(x, y, z, e);
 }
 
 StaticEphemeris::~StaticEphemeris() {}
 
-bool StaticEphemeris::initialize() {
-    return true;
-}
-
-const psc& StaticEphemeris::position() const {    
+const psc& StaticEphemeris::position() const {
     return _position;
-}
-
-void StaticEphemeris::update() {
-
 }
 
 } // namespace openspace

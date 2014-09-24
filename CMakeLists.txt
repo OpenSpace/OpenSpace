@@ -30,7 +30,9 @@
 cmake_minimum_required (VERSION 2.8) 
 project (OpenSpace)
 
-SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
+if (WIN32)
+    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
+endif ()
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
@@ -55,6 +57,7 @@ endif ()
 # Ghoul
 set(GHOUL_ROOT_DIR "${OPENSPACE_EXT_DIR}/ghoul")
 include_directories("${GHOUL_ROOT_DIR}/include")
+set(BOOST_ROOT "${GHOUL_ROOT_DIR}/ext/boost")
 add_subdirectory(${GHOUL_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
 
@@ -72,6 +75,7 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SGCT_LIBRARIES})
 # GLM
 set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
 find_package(GLM REQUIRED)
+add_definitions(-DGLM_SWIZZLE)
 include_directories(${GLM_INCLUDE_DIRS})
 
 # GLEW
@@ -99,7 +103,12 @@ endif(OPENCL_FOUND)
 
 # Kameleon
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+if(WIN32)
+    option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+else(WIN32)
+    option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+endif(WIN32)
+option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
 set(KAMELEON_ROOT_DIR ${OPENSPACE_EXT_DIR}/kameleon)
 set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
 add_subdirectory(${KAMELEON_ROOT_DIR})
@@ -120,3 +129,5 @@ endif ()
 #########################################################################################
 
 add_subdirectory(src)
+
+#add_subdirectory(gui)

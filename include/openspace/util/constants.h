@@ -34,6 +34,8 @@ namespace openspaceengine {
     const std::string keyPathScene = "Paths.SCENEPATH";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
+    const std::string keyStartupScript = "StartupScripts";
+	const std::string keyConfigTimekernel = "SpiceTimeKernel";
 } // namespace openspaceengine
 
 namespace scenegraph {
@@ -64,15 +66,32 @@ namespace renderablestars {
 	const std::string keyPathModule = "ModulePath";
 } // namespace renderablestars
 
+namespace renderablevolumegl {
+	const std::string keyVolume = "Volume";
+	const std::string keyHints = "Hints";
+	const std::string keyTransferFunction = "TransferFunction";
+	const std::string keySampler = "Sampler";
+	const std::string keyBoxScaling = "BoxScaling";
+	const std::string keyVolumeName = "VolumeName";
+	const std::string keyTransferFunctionName = "TransferFunctionName";
+} // namespace renderablevolumegl
+
 namespace planetgeometry {
     const std::string keyType = "Type";
 } // namespace planetgeometry
 
-
-
 namespace ephemeris {
     const std::string keyType = "Type";
 } // namespace ephemeris
+
+namespace staticephemeris {
+    const std::string keyPosition = "Position";
+} // namespace staticephemeris
+
+namespace spiceephemeris {
+    const std::string keyBody = "Body";
+    const std::string keyOrigin = "Observer";
+} // namespace spiceephemeris
 
 }  // namespace constants
 }  // namespace openspace

@@ -27,12 +27,17 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/time.h>
 
 #include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
 
 #include <array>
+
+#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abufferfixed.h>
+#include <openspace/abuffer/abufferdynamic.h>
 
 namespace {
 const std::string _loggerCat = "RenderEngine";
@@ -42,6 +47,7 @@ namespace openspace {
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
+    , _abuffer(nullptr)
 {
 }
 
@@ -52,20 +58,29 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::initialize()
 {
+    // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
-    _mainCamera->setPosition(psc(0.0, 0.0, 1.499823, 11.0));
+    _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 
     // if master, setup interaction
     //if (sgct::Engine::instance()->isMaster())
         OsEng.interactionHandler().setCamera(_mainCamera);
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+    _abuffer = new ABufferSingleLinked();
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
+    _abuffer = new ABufferFixed();
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
+    _abuffer = new ABufferDynamic();
+#endif
     return true;
 }
 
 bool RenderEngine::initializeGL()
 {
+    // LDEBUG("RenderEngine::initializeGL()");
     sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
 
     // TODO:    Fix the power scaled coordinates in such a way that these values can be
@@ -76,6 +91,7 @@ bool RenderEngine::initializeGL()
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -133,6 +149,8 @@ bool RenderEngine::initializeGL()
         _mainCamera->setMaxFov(maxFov);
     }
 
+    _abuffer->initialize();
+
     // successful init
     return true;
 }
@@ -152,8 +170,10 @@ void RenderEngine::postSynchronizationPreDraw()
 void RenderEngine::render()
 {
     // SGCT resets certain settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition
@@ -175,8 +195,13 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
+    _abuffer->clear();
+    _abuffer->preRender();
     _sceneGraph->render(_mainCamera);
+    _abuffer->postRender();
+    _abuffer->resolve();
 
+#ifndef OPENSPACE_VIDEO_EXPORT
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {
 // Apple usually has retina screens
@@ -192,6 +217,23 @@ void RenderEngine::render()
         const psc origin = OsEng.interactionHandler().getOrigin();
         const PowerScaledScalar pssl = (position - origin).length();
 
+		const std::string time = Time::ref().currentTimeUTC().c_str();
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 16, "Avg. Frametime: %.10f", sgct::Engine::instance()->getAvgDt()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 14, "Drawtime: %.10f", sgct::Engine::instance()->getDrawTime()
+			  );
+		Freetype::print(
+			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
+			  FONT_SIZE, FONT_SIZE * 12, "Frametime: %.10f", sgct::Engine::instance()->getDt()
+			  );
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 10, "Origin: (%.5f, %.5f, %.5f, %.5f)", origin[0],
@@ -211,7 +253,10 @@ void RenderEngine::render()
         Freetype::print(
               sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
+
     }
+#endif
+    
 }
 
 SceneGraph* RenderEngine::sceneGraph()
@@ -399,6 +444,10 @@ void RenderEngine::deserialize(const std::vector<char>& dataStream, size_t& offs
 
 Camera* RenderEngine::camera() const {
     return _mainCamera;
+}
+
+ABuffer* RenderEngine::abuffer() const {
+    return _abuffer;
 }
 
 }  // namespace openspace

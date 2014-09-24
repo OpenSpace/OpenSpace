@@ -38,6 +38,10 @@ public:
     NumericalProperty(std::string identifier, std::string guiName, T value,
         T minimumValue, T maximumValue);
 
+	bool getLua(lua_State* state) const override;
+	bool setLua(lua_State* state) override;
+	int typeLua() const override;
+
     virtual std::string className() const override;
 
     using TemplateProperty<T>::operator=;

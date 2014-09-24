@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2014                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,8 +54,8 @@ TEST_F(SceneGraphTest, SceneGraphNode) {
         openspace::SceneGraphNode::createFromDictionary(ghoul::Dictionary());
 
     // Should not have a renderable and position should be 0,0,0,0 (undefined).
-    EXPECT_EQ(nullptr, node->getRenderable());
-    EXPECT_EQ(openspace::psc(), node->getPosition());
+    EXPECT_EQ(nullptr, node->renderable());
+    EXPECT_EQ(openspace::psc(), node->position());
     
     delete node;
     ghoul::Dictionary nodeDictionary;
@@ -83,10 +82,10 @@ TEST_F(SceneGraphTest, SceneGraphNode) {
         openspace::SceneGraphNode::createFromDictionary(nodeDictionary);
     
     // This node should have a renderable (probably no good values but an existing one)
-    EXPECT_TRUE(node->getRenderable());
+    EXPECT_TRUE(node->renderable());
     
     // position should be initialized
-    EXPECT_EQ(openspace::psc(1.0,1.0,1.0,1.0), node->getPosition());
+    EXPECT_EQ(openspace::psc(1.0,1.0,1.0,1.0), node->position());
     
     delete node;
 }

@@ -30,23 +30,7 @@
 namespace openspace {
 namespace properties {
 
-class StringProperty : public TemplateProperty<std::string> {
-public:
-    StringProperty(std::string identifier, std::string guiName);
-    StringProperty(std::string identifier, std::string guiName, std::string value);
-
-    using TemplateProperty<std::string>::operator=;
-};
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::string>>::className();
-
-template <>
-template <>
-std::string PropertyDelegate<TemplateProperty<std::string>>::defaultValue<std::string>();
-
-//REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
-
+REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
 
 } // namespace properties
 } // namespace openspace

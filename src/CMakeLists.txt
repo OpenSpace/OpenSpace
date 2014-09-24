@@ -34,6 +34,12 @@ file(GLOB CONFIGURATION_HEADER ${HEADER_ROOT_DIR}/openspace/configuration/*.h)
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${CONFIGURATION_HEADER})
 source_group(Configuration FILES ${CONFIGURATION_SOURCE} ${CONFIGURATION_HEADER})
 
+file(GLOB ABUFFER_SOURCE ${SOURCE_ROOT_DIR}/abuffer/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${ABUFFER_SOURCE})
+file(GLOB ABUFFER_HEADER ${HEADER_ROOT_DIR}/openspace/abuffer/*.h)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${ABUFFER_HEADER})
+source_group(ABuffer FILES ${ABUFFER_SOURCE} ${ABUFFER_HEADER})
+
 file(GLOB ENGINE_SOURCE ${SOURCE_ROOT_DIR}/engine/*.cpp)
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${ENGINE_SOURCE})
 file(GLOB ENGINE_HEADER ${HEADER_ROOT_DIR}/openspace/engine/*.h)
@@ -90,6 +96,12 @@ file(GLOB SCENEGRAPH_HEADER ${HEADER_ROOT_DIR}/openspace/scenegraph/*.h ${HEADER
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${SCENEGRAPH_HEADER})
 source_group(SceneGraph FILES ${SCENEGRAPH_SOURCE} ${SCENEGRAPH_HEADER})
 
+file(GLOB SCRIPTING_SOURCE ${SOURCE_ROOT_DIR}/scripting/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${SCRIPTING_SOURCE})
+file(GLOB SCRIPTING_HEADER ${HEADER_ROOT_DIR}/openspace/scripting/*.h)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${SCRIPTING_HEADER})
+source_group(Scripting FILES ${SCRIPTING_SOURCE} ${SCRIPTING_HEADER})
+
 file(GLOB UTIL_SOURCE ${SOURCE_ROOT_DIR}/util/*.cpp)
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${UTIL_SOURCE})
 file(GLOB UTIL_HEADER ${HEADER_ROOT_DIR}/openspace/util/*.h)
@@ -135,6 +147,24 @@ include_directories("${HEADER_ROOT_DIR}")
 
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
+
+if (WIN32)
+    if (CMAKE_CL_64)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/DevIL.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILU.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILUT.dll)
+    else (CMAKE_CL_64)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/DevIL.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILU.dll)
+    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILUT.dll)
+    endif (CMAKE_CL_64)
+    foreach( file_i ${OPENSPACE_DLL_LIBS})
+    	add_custom_command(TARGET OpenSpace POST_BUILD        # Adds a post-build event to MyTest
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        "${file_i}"      # <--this is in-file
+        $<TARGET_FILE_DIR:OpenSpace>)
+	endforeach( file_i )
+endif(WIN32)
 
 add_subdirectory(tests)
 

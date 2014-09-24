@@ -22,23 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 // open space includes
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interface/interface.h>
 
 // sgct includes
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;
-openspace::Interface* _interface;
 
 // function pointer declarations
-void mainInitFunc(void);
-void mainPreSyncFunc(void);
-void mainPostSyncPreDrawFunc(void);
-void mainRenderFunc(void);
-void mainPostDrawFunc(void);
+void mainInitFunc();
+void mainPreSyncFunc();
+void mainPostSyncPreDrawFunc();
+void mainRenderFunc();
+void mainPostDrawFunc();
 void mainKeyboardCallback(int key, int action);
 void mainMouseButtonCallback(int key, int action);
 void mainMousePosCallback(double x, double y);
@@ -47,27 +44,30 @@ void mainEncodeFun();
 void mainDecodeFun();
 void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
 
+namespace {
+	const std::string _loggerCat = "main";
+}
+
 int main(int argc, char** argv)
 {
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
-    openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+    const bool success = openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+    if (!success)
+        return EXIT_FAILURE;
 
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
-    char** newArgv = new char* [newArgc];
-    for (int i = 0; i < newArgc; ++i) {
-        // newArgv[i] = new char[sgctArguments.at(i).length()];
-        // std::strcpy(newArgv[i], sgctArguments.at(i).c_str());
+    char** newArgv = new char*[newArgc];
+    for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
-    }
 
+	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 
     // deallocate sgct c arguments
-    for (int i = 0; i < newArgc; ++i) {
-        // delete newArgv[i];
-    }
+    for (int i = 0; i < newArgc; ++i)
+         delete newArgv[i];
     delete[] newArgv;
 
     // Bind functions
@@ -87,11 +87,11 @@ int main(int argc, char** argv)
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
 
-    // init the interface which will handle callbacks from an external gui
-    _interface = new openspace::Interface(&OsEng);
-
     // try to open a window
-	if (!_sgctEngine->init(sgct::Engine::OpenGL_4_3_Core_Profile)) {
+	LDEBUG("Initialize SGCT Engine");
+	const bool initSuccess = _sgctEngine->init(sgct::Engine::OpenGL_4_3_Core_Profile);
+    if (!initSuccess) {
+		LFATAL("Initializing failed");
         // could not open a window, deallocates and exits
         delete _sgctEngine;
         openspace::OpenSpaceEngine::destroy();
@@ -99,45 +99,50 @@ int main(int argc, char** argv)
     }
 
     // Main loop
+	LDEBUG("Starting rendering loop");
     _sgctEngine->render();
 
+	LDEBUG("Destroying OpenSpaceEngine");
+	openspace::OpenSpaceEngine::destroy();
+
     // Clean up (de-allocate)
+	LDEBUG("Destroying SGCT Engine");
     delete _sgctEngine;
 
     // Exit program
-    exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS); 
 }
 
-void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
-{
-    if (_sgctEngine->isMaster())
-        _interface->callback(receivedChars);
-}
-
-void mainInitFunc(void)
+void mainInitFunc()
 {
     OsEng.initialize();
     OsEng.initializeGL();
 }
 
-void mainPreSyncFunc(void)
+void mainPreSyncFunc()
 {
     OsEng.preSynchronization();
 }
 
-void mainPostSyncPreDrawFunc(void)
+void mainPostSyncPreDrawFunc()
 {
     OsEng.postSynchronizationPreDraw();
 }
 
-void mainRenderFunc(void)
+void mainRenderFunc()
 {
     OsEng.render();
 }
 
-void mainPostDrawFunc(void)
+void mainPostDrawFunc()
 {
     OsEng.postDraw();
+}
+
+void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
+{
+    if (_sgctEngine->isMaster())
+		OsEng.externalControlCallback(receivedChars, size, clientId);
 }
 
 void mainKeyboardCallback(int key, int action)
@@ -159,11 +164,11 @@ void mainMousePosCallback(double x, double y)
         OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
 }
 
-void mainMouseScrollCallback(double pos, double /*pos2*/)
+void mainMouseScrollCallback(double posX, double posY)
 {
     // TODO use float instead
     if (_sgctEngine->isMaster())
-        OsEng.mouseScrollWheelCallback(static_cast<int>(pos));
+        OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
 }
 
 void mainEncodeFun()

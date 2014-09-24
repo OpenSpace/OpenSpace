@@ -55,11 +55,19 @@ Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
 Ephemeris::Ephemeris()
 {
 }
+    
 Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary)
 {
 }
+    
 Ephemeris::~Ephemeris()
 {
 }
+    
+bool Ephemeris::initialize() {
+    return true;
+}
+    
+void Ephemeris::update() {}
 
 } // namespace openspace

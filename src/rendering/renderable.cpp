@@ -27,6 +27,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
 namespace {
 const std::string _loggerCat = "Renderable";
 }
@@ -35,16 +37,19 @@ namespace openspace {
 
 Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
+	// The name is passed down from the SceneGraphNode
     std::string name;
-    dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
 
-    if (!dictionary.hasValue<std::string>(constants::renderable::keyType)) {
+    std::string renderableType;
+    success = dictionary.getValueSafe(constants::renderable::keyType, renderableType);
+	if (!success) {
         LERROR("Renderable '" << name << "' did not have key '"
                               << constants::renderable::keyType << "'");
         return nullptr;
-    }
-    std::string renderableType;
-    dictionary.getValue(constants::renderable::keyType, renderableType);
+	}
+
     ghoul::TemplateFactory<Renderable>* factory
           = FactoryManager::ref().factory<Renderable>();
     Renderable* result = factory->create(renderableType, dictionary);
@@ -53,16 +58,20 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
         return nullptr;
     }
 
-    result->setName(name);
-
     return result;
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
+	: _enabled("enabled", "Is Enabled", true)
 {
-    std::string name;
-    dictionary.getValue(constants::scenegraphnode::keyName, name);
-    setName(name);
+    setName("renderable");
+
+    // get path if available
+	const bool success = dictionary.getValueSafe(constants::scenegraph::keyPathModule, _relativePath);
+	if (success)
+		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
+
+	addProperty(_enabled);
 }
 
 Renderable::~Renderable()
@@ -81,6 +90,24 @@ const PowerScaledScalar& Renderable::getBoundingSphere()
 
 void Renderable::update()
 {
+}
+
+std::string Renderable::findPath(const std::string& path) {
+    std::string tmp = absPath(path);
+    if(FileSys.fileExists(tmp))
+        return tmp;
+
+    tmp = absPath(_relativePath + path);
+    if(FileSys.fileExists(tmp))
+        return tmp;
+
+    LERROR("Could not find file '" << path << "'");
+
+    return "";
+}
+
+bool Renderable::isVisible() const {
+	return _enabled;
 }
 
 }  // namespace openspace

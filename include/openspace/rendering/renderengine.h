@@ -30,6 +30,8 @@
 #include <memory>
 #include <string>
 
+#include <openspace/abuffer/abuffer.h>
+
 namespace openspace {
 
 class Camera;
@@ -45,6 +47,7 @@ public:
     SceneGraph* sceneGraph();
 
     Camera* camera() const;
+    ABuffer* abuffer() const;
 
 	// sgct wrapped functions
     bool initializeGL();
@@ -58,6 +61,8 @@ public:
 private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
+
+	ABuffer* _abuffer;
 };
 
 } // namespace openspace

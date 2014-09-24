@@ -4,6 +4,10 @@ ext/SGCT
 .DS_Store
 *.swp
 
+# generated glsl files
+*.gglsl
+*.OpenSpaceGenerated.glsl
+
 # CMake stuff
 CMakeCache.txt
 CMakeFiles
@@ -18,4 +22,3 @@ install_manifest.txt
 # Doxygen stuff
 html/
 latex/
-Doxyfile

@@ -61,7 +61,9 @@ bool VolumeRaycasterBox::initialize() {
     
     //	------ SETUP SHADER -----------------
     OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
-	_MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
+    _MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
+    _modelTransformLocation = _boxProgram->uniformLocation("modelTransform");
+    _typeLocation = _boxProgram->uniformLocation("volumeType");
     
 	//	------ SETUP FBO ---------------------
 	_fbo = new FramebufferObject();
@@ -69,8 +71,6 @@ bool VolumeRaycasterBox::initialize() {
     
     // changed from getActiveXResolution to getCurrentViewportPixelCoords because
     // if there are more viewports in the same screen.
-	//size_t x = sgct::Engine::instance()->getActiveXResolution();
-	//size_t y = sgct::Engine::instance()->getActiveYResolution();
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
     size_t x = xSize;
@@ -89,11 +89,13 @@ bool VolumeRaycasterBox::initialize() {
     return true;
 }
 
-void VolumeRaycasterBox::render(const glm::mat4& MVP) {
+void VolumeRaycasterBox::render(const glm::mat4& MVP,const glm::mat4& transform, int type) {
     GLuint activeFBO = FramebufferObject::getActiveObject(); // Save SGCTs main FBO
 	_fbo->activate();
 	_boxProgram->activate();
-	_boxProgram->setUniform(_MVPLocation, MVP);
+    _boxProgram->setUniform(_MVPLocation, MVP);
+    _boxProgram->setUniform(_modelTransformLocation, transform);
+    _boxProgram->setUniform(_typeLocation, type);
     
     sgct_core::Frustum::FrustumMode mode =  sgct::Engine::instance()->
                                             getActiveWindowPtr()->

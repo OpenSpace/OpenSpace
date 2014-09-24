@@ -395,6 +395,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	_haloProgram->deactivate();
 
 #ifdef GLPOINTS
+	/*
 // ---------------------- RENDER POINTS -----------------------------
 	_pointProgram->activate();
 
@@ -415,7 +416,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition){
 	glDisable(GL_BLEND);
 	
 	_pointProgram->deactivate();
-
+	*/
 #endif
 }
 
