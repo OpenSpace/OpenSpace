@@ -432,55 +432,6 @@ bool SceneGraph::initialize()
     */
 //>>>>>>> develop
 
-    // Initialize all nodes
-    for (auto node : _nodes) {
-		bool success = node->initialize(_runtimeData);
-        if (success)
-            LDEBUG(node->name() << " initialized successfully!");
-        else
-            LWARNING(node->name() << " not initialized.");
-    }
-
-    // update the position of all nodes
-	update();
-
-    // Calculate the bounding sphere for the scenegraph
-    _root->calculateBoundingSphere();
-
-    // set the camera position
-    auto focusIterator = _allNodes.find(_focus);
-    auto positionIterator = _allNodes.find(_position);
-
-    if (focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
-        LDEBUG("Camera position is '" << _position << "', camera focus is '" << _focus
-                                      << "'");
-        SceneGraphNode* focusNode = focusIterator->second;
-        SceneGraphNode* positionNode = positionIterator->second;
-        Camera* c = OsEng.ref().renderEngine().camera();
-        //Camera* c = OsEng.interactionHandler().getCamera();
-
-        // TODO: Make distance depend on radius
-        // TODO: Set distance and camera direction in some more smart way
-        // TODO: Set scaling dependent on the position and distance
-        // set position for camera
-        const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
-        
-        // this part is full of magic!
-        glm::vec2 boundf = bound.vec2();
-        glm::vec2 scaling{1.0f, -boundf[1]};
-        boundf[0] *= 5.0f;
-        
-        psc cameraPosition = positionNode->position();
-        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
-
-		c->setPosition(cameraPosition);
-        c->setCameraDirection(glm::vec3(0, 0, -1));
-        c->setScaling(scaling);
-
-        // Set the focus node for the interactionhandler
-        OsEng.interactionHandler().setFocusNode(focusNode);
-    }
-
     return true;
 }
 
@@ -507,12 +458,14 @@ void SceneGraph::update()
 
 void SceneGraph::evaluate(Camera* camera)
 {
-    _root->evaluate(camera);
+	if (_root)
+		_root->evaluate(camera);
 }
 
 void SceneGraph::render(Camera* camera)
 {
-    _root->render(camera);
+	if (_root)
+		_root->render(camera);
 }
 
 bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
@@ -575,6 +528,55 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
             else
                 LERROR("Could not find object '" << position << "' to position camera");
         }
+    }
+
+    // Initialize all nodes
+    for (auto node : _nodes) {
+		bool success = node->initialize(_runtimeData);
+        if (success)
+            LDEBUG(node->name() << " initialized successfully!");
+        else
+            LWARNING(node->name() << " not initialized.");
+    }
+
+    // update the position of all nodes
+	update();
+
+    // Calculate the bounding sphere for the scenegraph
+    _root->calculateBoundingSphere();
+
+    // set the camera position
+    auto focusIterator = _allNodes.find(_focus);
+    auto positionIterator = _allNodes.find(_position);
+
+    if (focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
+        LDEBUG("Camera position is '" << _position << "', camera focus is '" << _focus
+                                      << "'");
+        SceneGraphNode* focusNode = focusIterator->second;
+        SceneGraphNode* positionNode = positionIterator->second;
+        Camera* c = OsEng.ref().renderEngine().camera();
+        //Camera* c = OsEng.interactionHandler().getCamera();
+
+        // TODO: Make distance depend on radius
+        // TODO: Set distance and camera direction in some more smart way
+        // TODO: Set scaling dependent on the position and distance
+        // set position for camera
+        const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
+        
+        // this part is full of magic!
+        glm::vec2 boundf = bound.vec2();
+        glm::vec2 scaling{1.0f, -boundf[1]};
+        boundf[0] *= 5.0f;
+        
+        psc cameraPosition = positionNode->position();
+        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+
+		c->setPosition(cameraPosition);
+        c->setCameraDirection(glm::vec3(0, 0, -1));
+        c->setScaling(scaling);
+
+        // Set the focus node for the interactionhandler
+        OsEng.interactionHandler().setFocusNode(focusNode);
     }
 
     return true;
