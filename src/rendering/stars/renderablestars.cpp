@@ -28,7 +28,7 @@
 #include <limits>
 #include <vector>
 #include <iomanip>      
-
+#include <iterator>
 
 // openspace includes
 #include <openspace/rendering/stars/renderablestars.h>
