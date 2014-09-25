@@ -599,7 +599,7 @@ void KameleonWrapper::progressBar(int current, int end) {
 		int spWidth = barWidth - pos + 2;
 		std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
 		<< ">" << std::setfill(' ') << std::setw(spWidth)
-		<< "] " << iprogress << " %  \r" << std::flush;
+		<< "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
 	}
 	_lastiProgress = iprogress;
 }
