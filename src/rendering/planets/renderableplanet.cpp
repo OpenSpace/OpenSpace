@@ -68,7 +68,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
               = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue("Frame", _target);
+	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)

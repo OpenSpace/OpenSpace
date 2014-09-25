@@ -59,6 +59,7 @@ namespace renderable {
 
 namespace renderableplanet {
     const std::string keyGeometry = "Geometry";
+	const std::string keyFrame = "Frame";
 } // namespace renderableplanet
 
 namespace renderablestars {
