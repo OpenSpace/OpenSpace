@@ -468,8 +468,7 @@ void SceneGraph::render(Camera* camera)
 		_root->render(camera);
 }
 
-bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
-                           const std::string& defaultModulePath)
+bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath)
 {
     using ghoul::Dictionary;
     using ghoul::lua::loadDictionaryFromFile;
@@ -490,6 +489,28 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
     Dictionary dictionary;
 	//load default.scene 
     loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
+
+	std::string&& sceneDescriptionDirectory =
+		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
+	std::string moduleDirectory(".");
+	dictionary.getValueSafe(constants::scenegraph::keyPathScene, moduleDirectory);
+
+	// The scene path could either be an absolute or relative path to the description
+	// paths directory
+	std::string&& relativeCandidate = sceneDescriptionDirectory +
+		ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
+	std::string&& absoluteCandidate = absPath(moduleDirectory);
+
+	if (FileSys.directoryExists(relativeCandidate))
+		moduleDirectory = relativeCandidate;
+	else if (FileSys.directoryExists(absoluteCandidate))
+		moduleDirectory = absoluteCandidate;
+	else {
+		LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
+			"path '" << moduleDirectory << "' that did not exist");
+		return false;
+	}
+
     Dictionary moduleDictionary;
     if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
         std::vector<std::string> keys = moduleDictionary.keys();
@@ -497,7 +518,7 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
         for (const std::string& key : keys) {
             std::string moduleFolder;
 			if (moduleDictionary.getValue(key, moduleFolder))
-                loadModule(defaultModulePath + "/" + moduleFolder);
+                loadModule(moduleDirectory + "/" + moduleFolder);
         }
     }
 

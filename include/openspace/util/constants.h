@@ -31,7 +31,6 @@ namespace openspace {
 namespace constants {
 namespace openspaceengine {
     const std::string keyPaths = "Paths";
-    const std::string keyPathScene = "Paths.SCENEPATH";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
@@ -39,6 +38,7 @@ namespace openspaceengine {
 } // namespace openspaceengine
 
 namespace scenegraph {
+    const std::string keyPathScene = "ScenePath";
     const std::string keyModules = "Modules";
     const std::string keyCamera = "Camera";
     const std::string keyFocusObject = "Focus";

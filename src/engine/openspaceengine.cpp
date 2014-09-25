@@ -351,28 +351,6 @@ bool OpenSpaceEngine::initialize()
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);
 	
-    std::string sceneDescriptionPath;
-	bool success = OsEng.configurationManager().getValueSafe(
-		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
-	if (!success) {
-        LFATAL("The configuration does not contain a scene file under key '" <<
-				constants::openspaceengine::keyConfigScene << "'");
-        return false;
-    }
-
-	if (!FileSys.fileExists(sceneDescriptionPath)) {
-        LFATAL("Could not find scene description '" << sceneDescriptionPath << "'");
-        return false;
-    }
-
-    std::string scenePath;
-    success = _configurationManager->getValueSafe(
-		constants::openspaceengine::keyPathScene, scenePath);
-    if (!success) {
-        LFATAL("Could not find key '" << constants::openspaceengine::keyPathScene <<
-			"' in configuration file '" << sceneDescriptionPath << "'");
-        return false;
-    }
 
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
@@ -380,7 +358,13 @@ bool OpenSpaceEngine::initialize()
 	_renderEngine->setRuntimeData(initialData);
 	sceneGraph->setRuntimeData(initialData);
 	sceneGraph->initialize();
-    sceneGraph->loadScene(sceneDescriptionPath, scenePath);
+
+    std::string sceneDescriptionPath;
+	bool success = OsEng.configurationManager().getValueSafe(
+		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
+	if (success)
+	    sceneGraph->loadScene(sceneDescriptionPath);
+
     _renderEngine->setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY

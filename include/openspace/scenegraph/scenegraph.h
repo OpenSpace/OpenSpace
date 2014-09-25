@@ -64,8 +64,7 @@ public:
     /*
      * Load the scenegraph from the provided folder
      */
-    bool loadScene(const std::string& sceneDescriptionFilePath,
-                   const std::string& defaultModulePath);
+    bool loadScene(const std::string& sceneDescriptionFilePath);
 
     void loadModule(const std::string& modulePath);
 
