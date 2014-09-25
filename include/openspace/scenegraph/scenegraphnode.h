@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef SCENEGRAPHNODE_H
-#define SCENEGRAPHNODE_H
+#ifndef __SCENEGRAPHNODE_H__
+#define __SCENEGRAPHNODE_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/scenegraph/ephemeris.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/scenegraph/scenegraph.h>
 #include <ghoul/misc/dictionary.h>
@@ -41,8 +42,10 @@
 
 namespace openspace {
 
-class SceneGraphNode {
+class SceneGraphNode : public properties::PropertyOwner {
 public:
+    static std::string RootNodeName;
+    
     // constructors & destructor
     SceneGraphNode();
     ~SceneGraphNode();
@@ -60,31 +63,30 @@ public:
     // set & get
     void addNode(SceneGraphNode* child);
 
-    void setName(const std::string& name);
     void setParent(SceneGraphNode* parent);
-    const psc& getPosition() const;
-    psc getWorldPosition() const;
-    std::string nodeName() const;
+    const psc& position() const;
+    psc worldPosition() const;
 
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
 
     // bounding sphere
     PowerScaledScalar calculateBoundingSphere();
+    PowerScaledScalar boundingSphere() const;
 
-    SceneGraphNode* get(const std::string& name);
+    SceneGraphNode* childNode(const std::string& name);
 
     void print() const;
 
     // renderable
     void setRenderable(Renderable* renderable);
-    const Renderable* getRenderable() const;
+    const Renderable* renderable() const;
+    Renderable* renderable();
 
 private:
     // essential
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
-    std::string _nodeName;
     Ephemeris* _ephemeris;
 	RuntimeData* _runtimeData;
 
@@ -102,4 +104,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __SCENEGRAPHNODE_H__

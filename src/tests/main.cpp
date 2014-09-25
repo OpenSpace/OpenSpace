@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2014                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +33,8 @@
 #include <openspace/tests/test_common.inl>
 #include <openspace/tests/test_spicemanager.inl>
 //#include <openspace/tests/test_scenegraph.inl>
-//#include <openspace/tests/test_powerscalecoordinates.inl>
+#include <openspace/tests/test_luaconversions.inl>
+#include <openspace/tests/test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     }
 	LINFO("Configuration file found: " << FileSys.absolutePath(configurationFilePath));
     
-    LDEBUG("registering base path");
+    LDEBUG("Registering base path");
     if( ! openspace::OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
         LFATAL("Could not register base path");
         assert(false);

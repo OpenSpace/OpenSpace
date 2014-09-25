@@ -24,34 +24,51 @@
 
 #include <openspace/scenegraph/spiceephemeris.h>
 
+#include <openspace/util/constants.h>
 #include <openspace/util/spice.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
+namespace {
+    const std::string _loggerCat = "SpiceEphemeris";
+}
+
 namespace openspace {
     
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary): _targetName(""),
-                                                                     _originName(""),
-                                                                     _target(0),
-                                                                     _origin(0),
-                                                                     _position()
+using namespace constants::spiceephemeris;
+    
+SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
+    : _targetName("")
+    , _originName("")
+    , _target(0)
+    , _origin(0)
+    , _position()
 {
-    dictionary.getValue("Body", _targetName);
-    dictionary.getValue("Observer", _originName);
+    const bool hasBody = dictionary.hasKeyAndValue<std::string>(keyBody);
+    if (hasBody)
+        dictionary.getValue(keyBody, _targetName);
+    else
+        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
+
+    const bool hasObserver = dictionary.hasKeyAndValue<std::string>(keyOrigin);
+    if (hasObserver)
+        dictionary.getValue(keyOrigin, _originName);
+    else
+        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
 }
+    
 SpiceEphemeris::~SpiceEphemeris() {}
 
-bool SpiceEphemeris::initialize() {
-    
-    if (_targetName != "" && _originName != "") {
+bool SpiceEphemeris::initialize()
+{
+    if (!_targetName.empty() && !_originName.empty()) {
         int bsuccess = 0;
         int osuccess = 0;
         Spice::ref().bod_NameToInt(_targetName, &_target, &bsuccess);
         Spice::ref().bod_NameToInt(_originName, &_origin, &osuccess);
         
-        if (bsuccess && osuccess) {
+        if (bsuccess && osuccess)
             return true;
-        }
     }
     
     return false;

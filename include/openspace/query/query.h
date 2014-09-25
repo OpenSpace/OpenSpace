@@ -29,12 +29,15 @@
 
 namespace openspace {
 
+namespace properties {
+    class Property;
+}
 class SceneGraph;
 class SceneGraphNode;
 
-SceneGraph* getSceneGraph();
-
-SceneGraphNode* getSceneGraphNode(const std::string& name);
+SceneGraph* sceneGraph();
+SceneGraphNode* sceneGraphNode(const std::string& name);
+properties::Property* property(const std::string& uri);
 
 } // namespace
 

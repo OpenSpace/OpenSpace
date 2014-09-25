@@ -119,7 +119,7 @@ Camera * InteractionHandler::getCamera() const {
 
 const psc InteractionHandler::getOrigin() const {
 	if(node_)
-		return node_->getWorldPosition();
+		return node_->worldPosition();
 	return psc();
 }
 
@@ -155,7 +155,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	// should be changed to something more dynamic =)
 	psc origin;
 	if(node_) {
-		origin = node_->getWorldPosition();
+		origin = node_->worldPosition();
 	}
 
 	psc relative_origin_coordinate = relative - origin;
@@ -173,19 +173,21 @@ void InteractionHandler::distance(const PowerScaledScalar &distance) {
 	lockControls();
 	
 	psc relative = camera_->position();
-	psc origin;
-	if(node_) {
-		origin = node_->getWorldPosition();
-	}
+	const psc origin = (node_) ? node_->worldPosition() : psc();
 
 	psc relative_origin_coordinate = relative - origin;
-	glm::vec3 dir(relative_origin_coordinate.direction());
-	dir = dir * distance[0];
-	relative_origin_coordinate = dir;
+	const glm::vec3 dir(relative_origin_coordinate.direction());
+	glm:: vec3 newdir = dir * distance[0];
+	relative_origin_coordinate = newdir;
 	relative_origin_coordinate[3] = distance[1];
 	relative = relative + relative_origin_coordinate;
 
-	camera_->setPosition(relative);
+	relative_origin_coordinate = relative - origin;
+	newdir = relative_origin_coordinate.direction();
+
+	// update only if on the same side of the origin
+	if(glm::angle(newdir, dir) < 90.0f)
+		camera_->setPosition(relative);
 	
 	unlockControls();
 }
@@ -246,7 +248,7 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
 
     //Get x,y,z axis vectors of current camera view
 	glm::vec3 currentViewYaxis = glm::normalize(camera_->lookUpVector());
-	psc viewDir = camera_->position() - node_->getWorldPosition();
+	psc viewDir = camera_->position() - node_->worldPosition();
 	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
@@ -303,62 +305,64 @@ void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const double speed = 2.75;
     const double dt = getDt();
-    if (key == 'S') {
-		glm::vec3 euler(speed * dt* pow(10, 17), 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'W') {
-		glm::vec3 euler(-speed * dt* pow(10, 17), 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'A') {
-        glm::vec3 euler(0.0, -speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 'D') {
-        glm::vec3 euler(0.0, speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        orbit(rot);
-    }
-    if (key == 262) {
-        glm::vec3 euler(0.0, speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 263) {
-        glm::vec3 euler(0.0, -speed * dt, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 264) {
-        glm::vec3 euler(speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 265) {
-        glm::vec3 euler(-speed * dt, 0.0, 0.0);
-        glm::quat rot = glm::quat(euler);
-        rotate(rot);
-    }
-    if (key == 'R') {
-        PowerScaledScalar dist(-speed * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'F') {
-        PowerScaledScalar dist(speed * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'T') {
-        PowerScaledScalar dist(-speed * pow(10,18) * dt, 0.0);
-        distance(dist);
-    }
-    if (key == 'G') {
-		PowerScaledScalar dist(speed * pow(10, 18) * dt, 0.0);
-        distance(dist);
-    }
+    if(action == SGCT_PRESS || action == SGCT_REPEAT) {
+	    if (key == SGCT_KEY_S) {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == SGCT_KEY_W) {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == SGCT_KEY_A) {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == SGCT_KEY_D) {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbit(rot);
+	    }
+	    if (key == 262) {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 263) {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 264) {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == 265) {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotate(rot);
+	    }
+	    if (key == SGCT_KEY_R) {
+	        PowerScaledScalar dist(-speed * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == SGCT_KEY_F) {
+	        PowerScaledScalar dist(speed * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == SGCT_KEY_T) {
+	        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
+	        distance(dist);
+	    }
+	    if (key == SGCT_KEY_G) {
+	        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
+	        distance(dist);
+	    }
+	}
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");
@@ -385,15 +389,23 @@ void InteractionHandler::keyboardCallback(int key, int action) {
         getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
     }
 */
+    // std::pair <std::multimap<int,std::function<void(void)> >::iterator, std::multimap<int , std::function<void(void)> >::iterator> ret;
+    if(action == SGCT_PRESS) {
+    	auto ret = _keyCallbacks.equal_range(key);
+	    for (auto it=ret.first; it!=ret.second; ++it)
+	    	it->second();
+    }
+    
+
 }
 
 void InteractionHandler::mouseButtonCallback(int key, int action) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseButtonCallback(key,action);
     //}
-	if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_PRESS)
 		_leftMouseButtonDown = true;
-	else if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+	else if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_RELEASE) {
 		_leftMouseButtonDown = false;
 		_isMouseBeingPressedAndHeld = false;
 	}
@@ -412,7 +424,21 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseScrollCallback(pos);
     //}
+    const double speed = 4.75;
+    const double dt = getDt();
+    if(pos < 0) {
+	    PowerScaledScalar dist(speed * dt, 0.0);
+	    distance(dist);
+    } else if(pos > 0) {
+	    PowerScaledScalar dist(-speed * dt, 0.0);
+	    distance(dist);
+    }
 }
 
+void InteractionHandler::addKeyCallback(int key, std::function<void(void)> f) {
+	//std::map<int, std::vector<std::function<void(void)> > > _keyCallbacks;
+
+	_keyCallbacks.insert(std::make_pair(key, f));
+}
 
 } // namespace openspace

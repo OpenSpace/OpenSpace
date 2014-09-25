@@ -27,13 +27,13 @@ using namespace osp;
 
 Flare::Flare()
     : Renderable(ghoul::Dictionary())
+    , _oldTime(0.f)
+    , _currentTime(0.f)
     , _leftMouseButton(false)
     , _currentMouseX(0)
     , _currentMouseY(0)
     , _lastMouseX(0)
     , _lastMouseY(0)
-    , _oldTime(0.f)
-    , _currentTime(0.f)
 {
 	setBoundingSphere(PowerScaledScalar::CreatePSS(sqrt(3.0f)));
 }

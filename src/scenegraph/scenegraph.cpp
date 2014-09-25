@@ -24,11 +24,14 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraph.h>
-#include <openspace/rendering/planets/renderableplanet.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/util/spice.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/rendering/planets/renderableplanet.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/shadercreator.h>
+#include <openspace/query/query.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -46,26 +49,135 @@
 #include <iostream>
 #include <string>
 
-namespace {
-const std::string _loggerCat = "SceneGraph";
-const std::string _rootNodeName = "Root";
-const std::string _moduleExtension = ".mod";
+#include <chrono>
+ //#include <unistd.h>
 
+namespace {
+    const std::string _loggerCat = "SceneGraph";
+    const std::string _moduleExtension = ".mod";
 }
 
 namespace openspace {
 
-void printTree(SceneGraphNode* node, std::string pre = "")
-{
-    LDEBUGC("Tree", pre << node->nodeName());
-    const std::vector<SceneGraphNode*>& children = node->children();
-    for (SceneGraphNode* child : children)
-        printTree(child, pre + "    ");
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * setPropertyValue(string, *):
+ * Sets the property identified by the URI in the first argument to the value passed to
+ * the second argument. The type of the second argument is arbitrary, but it must agree
+ * with the type the denoted Property expects
+ */
+int property_setValue(lua_State* L) {
+	using ghoul::lua::luaTypeToString;
+	const std::string _loggerCat = "property_setValue";
+
+	// TODO Check for argument number (ab)
+	std::string uri = luaL_checkstring(L, -2);
+	const int type = lua_type(L, -1);
+	//  boost::any propertyValue;
+	//  switch (type) {
+	//      case LUA_TNONE:
+	//      case LUA_TLIGHTUSERDATA:
+	//      case LUA_TFUNCTION:
+	//      case LUA_TUSERDATA:
+	//      case LUA_TTHREAD:
+	//          LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
+	//          return 0;
+	//      case LUA_TNIL:
+	//          propertyValue = 0;
+	//          break;
+	//      case LUA_TBOOLEAN:
+	//          propertyValue = lua_toboolean(L, -1);
+	//          break;
+	//      case LUA_TNUMBER:
+	//          propertyValue = lua_tonumber(L, -1);
+	//          break;
+	//      case LUA_TSTRING:
+	//          propertyValue = std::string(lua_tostring(L, -1));
+	//          break;
+	//case LUA_TTABLE: {
+	//	ghoul::Dictionary d;
+	//	ghoul::lua::populateDictionary(L, d);
+	//	propertyValue = d;
+	//	break;
+	//}
+	//  }
+
+	openspace::properties::Property* prop = property(uri);
+	if (!prop) {
+		LERROR("Property with uri '" << uri << "' could not be found");
+		return 0;
+	}
+
+	if (type != prop->typeLua())
+		LERROR("Property '" << uri << "' does not accept input of type '"
+			<< luaTypeToString(type) << "'. Requested type: '"
+			<< luaTypeToString(prop->typeLua()) << "'");
+	else
+		prop->setLua(L);
+	//prop->set(propertyValue);
+
+	return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * getPropertyValue(string):
+ * Returns the value of the property identified by the passed URI as a Lua object that can
+ * be passed to the setPropertyValue method.
+ */
+int property_getValue(lua_State* L) {
+	const std::string _loggerCat = "property_getValue";
+
+	// TODO Check for argument number (ab)
+	std::string uri = luaL_checkstring(L, -1);
+
+	openspace::properties::Property* prop = property(uri);
+	if (!prop) {
+		LERROR("Property with uri '" << uri << "' could not be found");
+		lua_pushnil(L);
+	}
+	else {
+		prop->getLua(L);
+
+		//switch (type) {
+		//    case LUA_TNONE:
+		//    case LUA_TLIGHTUSERDATA:
+		//    case LUA_TFUNCTION:
+		//    case LUA_TUSERDATA:
+		//    case LUA_TTHREAD:
+		//        LERROR("Function parameter was of type '" << luaTypeToString(type)
+		//                                                    << "'");
+		//        return 0;
+		//    case LUA_TNIL:
+		//        propertyValue = 0;
+		//        break;
+		//    case LUA_TBOOLEAN:
+		//        propertyValue = lua_toboolean(L, -1);
+		//        break;
+		//    case LUA_TNUMBER:
+		//        propertyValue = lua_tonumber(L, -1);
+		//        break;
+		//    case LUA_TSTRING:
+		//        propertyValue = std::string(lua_tostring(L, -1));
+		//        break;
+		//    case LUA_TTABLE: {
+		//        ghoul::Dictionary d;
+		//        ghoul::lua::populateDictionary(L, d);
+		//        propertyValue = d;
+		//        break;
+		//    }
+		//}
+	}
+	return 1;
+}
+
+} // namespace luascriptfunctions
+
 SceneGraph::SceneGraph()
-    : _focus("Root")
-    , _position("Root")
+    : _focus(SceneGraphNode::RootNodeName)
+    , _position(SceneGraphNode::RootNodeName)
     , _root(nullptr)
 	, _runtimeData(nullptr)
 {
@@ -83,16 +195,104 @@ void SceneGraph::setRuntimeData(RuntimeData* runtimeData){
 bool SceneGraph::initialize()
 {
     LDEBUG("Initializing SceneGraph");
-
+    
+    LDEBUG("Creating ProgramObjects");
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ProgramObject* po = nullptr;
-    if (OsEng.ref().configurationManager().hasKey("pscShader")
-        && OsEng.ref().configurationManager().getValue("pscShader", po)) {
-        LWARNING("pscShader already in ConfigurationManager, deleting.");
+    ShaderCreator sc = OsEng.shaderBuilder();
+    ProgramObject* tmpProgram;
+
+    typedef std::chrono::high_resolution_clock clock_;
+    typedef std::chrono::duration<double, std::ratio<1> > second_;
+
+    std::chrono::time_point<clock_> beg_(clock_::now());
+
+
+    // pscstandard
+    tmpProgram = sc.buildShader("pscstandard",
+                                "${SHADERS}/pscstandard_vs.glsl",
+                                "${SHADERS}/pscstandard_fs.glsl");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
+
+    // RaycastProgram
+    tmpProgram = sc.buildShader("RaycastProgram",
+                                "${SHADERS}/exitpoints.vert",
+                                "${SHADERS}/exitpoints.frag");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
+
+
+    // // TwoPassProgram
+    // tmpProgram = sc.buildShader("TwoPassProgram",
+    //                             "${SHADERS}/twopassraycaster.vert",
+    //                             "${SHADERS}/twopassraycaster.frag");
+    // if( ! tmpProgram) return false;
+    // tmpProgram->setUniform("texBack", 0);
+    // tmpProgram->setUniform("texFront", 1);
+    // tmpProgram->setUniform("texVolume", 2);
+    // OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
+
+	// Quad
+	tmpProgram = sc.buildShader("Quad",
+		"${SHADERS}/quadVert.glsl",
+		"${SHADERS}/quadFrag.glsl");
+	if (!tmpProgram) return false;
+	tmpProgram->setUniform("quadTex", 0);
+	OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+
+	// Star program
+	tmpProgram = sc.buildShader("Star",
+		"${SHADERS}/star_vs.glsl",
+		"${SHADERS}/star_fs.glsl",
+		"${SHADERS}/star_ge.glsl");
+	if (!tmpProgram) return false;
+	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
+
+	// Point program
+	tmpProgram = sc.buildShader("Point",
+		"${SHADERS}/star_vs.glsl",
+		"${SHADERS}/star_fs.glsl",
+		"${SHADERS}/star_ge.glsl");
+	if (!tmpProgram) return false;
+	OsEng.ref().configurationManager().setValue("PointProgram", tmpProgram);
+
+	// Grid program
+	tmpProgram = sc.buildShader("Grid",
+		"${SHADERS}/grid_vs.glsl",
+		"${SHADERS}/grid_fs.glsl");
+	if (!tmpProgram) return false;
+	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
+
+
+
+    double elapsed = std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
+    LERROR("Time to load shaders: " << elapsed);
+
+    /*
+
+    auto programCreator = [] (  const std::string& name, 
+                                const std::string& vpath, 
+                                const std::string& fpath) 
+    {
+        const std::string vsPath = absPath(vpath);
+        const std::string fsPath = absPath(fpath);
+        const ShaderObject::ShaderType vsType = ShaderObject::ShaderType::ShaderTypeVertex;
+        const ShaderObject::ShaderType fsType = ShaderObject::ShaderType::ShaderTypeFragment;
+
+        ProgramObject* po = new ProgramObject(name);
+        ShaderObject* vs = new ShaderObject(vsType, vsPath, name + "Vertex");
+        ShaderObject* fs = new ShaderObject(fsType, fsPath, name + "Fragment");
+        po->attachObject(vs);
+        po->attachObject(fs);
+        if ( po->compileShaderObjects() && po->linkProgramObject())
+            return po;
+
+        // unsuccessful compilation, cleanup and return nullptr
         delete po;
         po = nullptr;
+//<<<<<<< HEAD
     }
 
     ShaderObject* powerscale_vs
@@ -194,14 +394,51 @@ bool SceneGraph::initialize()
 	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", _gridProgram);
 
+=======
+        return po;
+    };
+    // pscstandard
+    tmpProgram = programCreator("pscstandard",
+                                "${SHADERS}/pscstandard_vs.glsl",
+                                "${SHADERS}/pscstandard_fs.glsl");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
+
+    // RaycastProgram
+    tmpProgram = programCreator("RaycastProgram",
+                                "${SHADERS}/exitpoints.vert",
+                                "${SHADERS}/exitpoints.frag");
+    if( ! tmpProgram) return false;
+    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
+
+
+    // TwoPassProgram
+    tmpProgram = programCreator("TwoPassProgram",
+                                "${SHADERS}/twopassraycaster.vert",
+                                "${SHADERS}/twopassraycaster.frag");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("texBack", 0);
+    tmpProgram->setUniform("texFront", 1);
+    tmpProgram->setUniform("texVolume", 2);
+    OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
+
+    // Quad
+    tmpProgram = programCreator("Quad",
+                                "${SHADERS}/quadVert.glsl",
+                                "${SHADERS}/quadFrag.glsl");
+    if( ! tmpProgram) return false;
+    tmpProgram->setUniform("quadTex", 0);
+    OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
+    */
+//>>>>>>> develop
 
     // Initialize all nodes
     for (auto node : _nodes) {
 		bool success = node->initialize(_runtimeData);
         if (success)
-            LDEBUG(node->nodeName() << " initialized successfully!");
+            LDEBUG(node->name() << " initialized successfully!");
         else
-            LWARNING(node->nodeName() << " not initialized.");
+            LWARNING(node->name() << " not initialized.");
     }
 
     // update the position of all nodes
@@ -233,7 +470,7 @@ bool SceneGraph::initialize()
         glm::vec2 scaling{1.0f, -boundf[1]};
         boundf[0] *= 5.0f;
         
-        psc cameraPosition = positionNode->getPosition();
+        psc cameraPosition = positionNode->position();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
 		c->setPosition(cameraPosition);
@@ -256,8 +493,8 @@ bool SceneGraph::deinitialize()
     _nodes.erase(_nodes.begin(), _nodes.end());
     _allNodes.erase(_allNodes.begin(), _allNodes.end());
 
-    _focus = "";
-    _position = "";
+    _focus.clear();
+    _position.clear();
 
     return true;
 }
@@ -293,9 +530,9 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
 
     // initialize the root node
     _root = new SceneGraphNode();
-    _root->setName(_rootNodeName);
+    _root->setName(SceneGraphNode::RootNodeName);
     _nodes.push_back(_root);
-    _allNodes.emplace(_rootNodeName, _root);
+    _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
 
     Dictionary dictionary;
 	//load default.scene 
@@ -372,12 +609,12 @@ void SceneGraph::loadModule(const std::string& modulePath)
 		//each element in this new dictionary becomes a scenegraph node. 
         SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
 
-        _allNodes.emplace(node->nodeName(), node);
+        _allNodes.emplace(node->name(), node);
         _nodes.push_back(node);
     }
 
     // Print the tree
-    printTree(_root);
+    //printTree(_root);
 }
 
 void SceneGraph::printChildren() const
@@ -389,13 +626,36 @@ SceneGraphNode* SceneGraph::root() const
 {
     return _root;
 }
-
+    
 SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
     auto it = _allNodes.find(name);
     if (it == _allNodes.end())
         return nullptr;
     else
         return it->second;
+}
+
+scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
+	scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+		"",
+		{
+			{
+				"setPropertyValue",
+				&luascriptfunctions::property_setValue,
+				"setPropertyValue(string, *): Sets a property identified by the URI in "
+				"the first argument. The second argument can be any type, but it has to "
+				" agree with the type that the property expects"
+			},
+			{
+				"getPropertyValue",
+				&luascriptfunctions::property_getValue,
+				"getPropertyValue(string): Returns the value the property, identified by "
+				"the provided URI, has"
+			}
+		}
+	};
+
+	return std::move(sceneGraphLibrary);
 }
 
 }  // namespace openspace

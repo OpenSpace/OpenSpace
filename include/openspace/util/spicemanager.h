@@ -93,19 +93,19 @@ public:
 	 *  \param kernelPoolValueName  Item for which values are desired. ("RADII", "NUT_PREC_ANGLES", etc. )
 	 *  \return                     Whether the function succeeded or not
    	 */
-	bool SpiceManager::getValueFromID(const std::string& bodyname,
+	bool getValueFromID(const std::string& bodyname,
 		                              const std::string& kernelPoolValueName, 
 									  double& value) const;
 	/* Overloaded method for 3dim vectors, see above specification.*/
-	bool SpiceManager::getValueFromID(const std::string& bodyname, 
+	bool getValueFromID(const std::string& bodyname,
 		                              const std::string& kernelPoolValueName,
 		                              glm::dvec3& value) const;
 	/* Overloaded method for 4dim vectors, see above specification.*/
-	bool SpiceManager::getValueFromID(const std::string& bodyname, 
+	bool getValueFromID(const std::string& bodyname,
 		                              const std::string& kernelPoolValueName,
 		                              glm::dvec4& value) const;
 	/* Overloaded method for Ndim vectors, see above specification.*/
-	bool SpiceManager::getValueFromID(const std::string& bodyname, 
+	bool getValueFromID(const std::string& bodyname,
 		                              const std::string& kernelPoolValueName,
 									  std::vector<double>& values, unsigned int num) const;
 
@@ -121,7 +121,19 @@ public:
 	 *  \param epochString, A string representing an epoch.
 	 *  \return Corresponding ephemeris time, equivalent value in seconds past J2000, TDB.
 	 */
-	double stringToEphemerisTime(const std::string& epochString) const;
+	double convertStringToTdbSeconds(const std::string& epochString) const;
+
+	/**
+	 * Convert the number of TDB seconds past the J2000 epoch into a human readable
+	 * string representation. Fur further details, please refer to 'timout_c' in SPICE
+	 * Documentation
+	 *
+	 * \param seconds The number of seconds that have passed since the J2000 epoch 
+	 * \param format The output format of the string
+	 * (see ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html)
+	 * \return The formatted date string 
+	 */
+	std::string convertTdbSecondsToString(double seconds, const std::string& format) const;
 
 	std::string ephemerisTimeToString(const double et) const;
 
@@ -347,7 +359,7 @@ private:
 	struct spiceKernel {
 		std::string path;
 		std::string name;
-		int id;
+		unsigned int id;
 	};
 	std::vector<spiceKernel> _loadedKernels;
 	unsigned int _kernelCount = 0;
@@ -393,6 +405,21 @@ public:
 		data = new double[N*N];
 		empty = true;
 	}
+    
+    void transform(glm::dvec3& position) {
+        assert(!empty); // transformation matrix is empty
+        
+		double *state;
+		double *state_t;
+		state   = new double[N];
+		state_t = new double[N];
+        
+		COPY(state, &position);
+		mxvg_c(data, state, N, N, state_t);
+        
+		COPY(&position, state_t);
+    }
+    
 	/** As the spice function mxvg_c requires a 6dim vector
 	*  the two 3dim state vectors are packed into 'state'.
 	*  Transformed values are then copied back from state_t
@@ -405,8 +432,8 @@ public:
 	*   the method ignores its second argument. 
 	*/
 	void transform(glm::dvec3& position,
-		glm::dvec3& velocity = glm::dvec3()){
-		assert(("transformation matrix is empty", !empty));
+		glm::dvec3& velocity) {
+        assert(!empty); // transformation matrix is empty
 
 		double *state;
 		double *state_t;
@@ -425,7 +452,7 @@ public:
 	 * asserts matrix has been filled
 	 */
 	inline double operator()(int i, int j) const{
-		assert(("transformation matrix is empty", !empty));
+        assert(!empty); // transformation matrix is empty
 		return data[j + i*N];
 	}
 };

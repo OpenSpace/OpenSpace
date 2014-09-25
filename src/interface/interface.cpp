@@ -33,7 +33,7 @@
 */
 namespace openspace {
 
-Interface::Interface(OpenSpaceEngine* engine) : _engine(engine) {}
+Interface::Interface(OpenSpaceEngine* ) {}
 Interface::~Interface() {}
 
 void Interface::callback(const char* receivedChars) {

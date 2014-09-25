@@ -21,9 +21,11 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+
 #include <stdio.h>
 #include <iostream>
 #include <cassert>
+#include <cstring>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -31,6 +33,7 @@
 
 #include "openspace/util/spicemanager.h"
 #include "ghoul/filesystem/filesystem.h"
+#include "ghoul/logging/logmanager.h"
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
@@ -67,7 +70,7 @@ int SpiceManager::loadKernel(const std::string& fullPath, const std::string& sho
 	std::string currentDirectory = FileSys.currentDirectory();
 	std::string::size_type last = fullPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
 	if (last == std::string::npos)
-		return false;
+		return 0;
 	std::string kernelDir = fullPath.substr(0, last);
 	FileSys.setCurrentDirectory(kernelDir);
 	furnsh_c(fullPath.c_str());
@@ -206,7 +209,7 @@ bool SpiceManager::getValueFromID(const std::string& bodyname,
 	return true;
 }
 
-double SpiceManager::stringToEphemerisTime(const std::string& epochString) const{
+double SpiceManager::convertStringToTdbSeconds(const std::string& epochString) const{
 	double et;
 	str2et_c(epochString.c_str(), &et);
 	return et;
@@ -216,6 +219,26 @@ std::string SpiceManager::ephemerisTimeToString(const double et) const{
 	char  utcstr[40];
 	timout_c(et, "YYYY MON DD HR:MN:SC.### ::RND", 32, utcstr);
 	return std::string(utcstr);
+}
+
+std::string SpiceManager::convertTdbSecondsToString(double seconds,
+                                                    const std::string& format) const
+{
+	const int bufferSize = 128;
+	SpiceChar buffer[bufferSize];
+	timout_c(seconds, format.c_str(), bufferSize - 1, buffer);
+
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		//LERROR("Error retrieving position of target '" + target + "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return "";
+	}
+
+	return std::string(buffer);
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,
@@ -229,10 +252,18 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
 		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-	
-	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL) 
-		return false;
+    
+    int failed = failed_c();
+    if(failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error retrieving position of target '" + target + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return false;
+    }
 
+	
 	memcpy(&targetPosition, pos, sizeof(double)* 3);
 
 	return true;
@@ -250,11 +281,18 @@ bool SpiceManager::getTargetState(const std::string& target,
 
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 	    	aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+    
+    int failed = failed_c();
+    if(failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error retrieving state of target '" + target + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return false;
+    }
 
 	for (int i = 0; i < 3; i++){
-		if (state[i] == NULL || state[i + 3] == NULL){
-			return false;
-		}
 		memcpy(&targetPosition, state   , sizeof(double)* 3);
 		memcpy(&targetVelocity, state +3, sizeof(double)* 3);
 	}
@@ -295,7 +333,6 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 	                              double boresightVector[],
 	                              std::vector<glm::dvec3>& bounds,
 								  int& nrReturned) const{
-	int n;
 	int found;
 	int naifId;
 	int maxVectors = 12;

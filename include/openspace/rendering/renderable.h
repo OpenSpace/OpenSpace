@@ -25,14 +25,15 @@
 #ifndef __RENDERABLE_H__
 #define __RENDERABLE_H__
 
-// open space includes
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/camera.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/runtimedata.h>
-
 
 namespace openspace {
 
@@ -53,11 +54,17 @@ public:
 	virtual void render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData) = 0;
     virtual void update();
 
+	bool isVisible() const;
+
 protected:
-    // Renderable();
+    std::string findPath(const std::string& path);
+
 private:
+	properties::BoolProperty _enabled;
+
     PowerScaledScalar boundingSphere_;
 	RuntimeData* _runtimeData;
+    std::string _relativePath;
 };
 
 }  // namespace openspace

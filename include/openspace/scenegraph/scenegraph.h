@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef SCENEGRAPH_H
-#define SCENEGRAPH_H
+#ifndef __SCENEGRAPH_H__
+#define __SCENEGRAPH_H__
 
 // std includes
 #include <vector>
@@ -31,12 +31,15 @@
 
 #include <openspace/util/camera.h>
 
+#include <openspace/scripting/scriptengine.h>
+
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/runtimedata.h>
 
 namespace openspace {
+
 
 class SceneGraphNode;
 
@@ -97,6 +100,15 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
+	/**
+	 * Returns the Lua library that contains all Lua functions available to change the
+	 * scene graph. The functions contained are
+	 * - openspace::luascriptfunctions::property_setValue
+	 * - openspace::luascriptfunctions::property_getValue
+	 * \return The Lua library that contains all Lua functions available to change the
+	 * scene graph
+	 */
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
     std::string _focus, _position;
@@ -110,4 +122,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __SCENEGRAPH_H__

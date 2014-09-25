@@ -128,7 +128,7 @@ bool Spice::spk_getPosition(const std::string &target, const std::string &origin
 	assert(this_);
 	assert(Time::ref().isInitialized());
 
-	SpiceDouble   et = Time::ref().getTime();
+	SpiceDouble   et = Time::ref().currentTime();
 	SpiceDouble   lt;
 	spkpos_c(target.c_str(), et, "J2000", "LT+S", origin.c_str(), state,  &lt);
 	int failed = failed_c();
@@ -143,7 +143,7 @@ void Spice::spk_getPosition(int target, int origin, double state[3]) {
 	assert(this_);
 	assert(Time::ref().isInitialized());
 
-	SpiceDouble   et = Time::ref().getTime();
+	SpiceDouble   et = Time::ref().currentTime();
 	SpiceDouble   lt;
 	spkezp_c  (target, et, "J2000", "NONE", origin, state,  &lt);
 }
@@ -156,7 +156,7 @@ bool Spice::spk_getOrientation(const std::string &target, double state[3][3]) {
 	// ghoul logging
 	std::string _loggerCat = "Spice::spk_getOrientation";
 
-	SpiceDouble et = Time::ref().getTime();
+	SpiceDouble et = Time::ref().currentTime();
 	std::string newname = "IAU_";
 	newname += target;
 	pxform_c ( "J2000", newname.c_str(), et, state );

@@ -40,11 +40,17 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
+#include <boost/algorithm/string.hpp>
+
+#include <cctype>
+
 namespace {
 const std::string _loggerCat = "SceneGraphNode";
 }
 
 namespace openspace {
+    
+std::string SceneGraphNode::RootNodeName = "Root";
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
@@ -61,22 +67,27 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
                                      << keyName << "' key");
         return nullptr;
     }
-    dictionary.getValue(keyName, result->_nodeName);
+    std::string name;
+    dictionary.getValue(keyName, name);
+    result->setName(name);
 
     if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(keyRenderable, renderableDictionary);
+
+		renderableDictionary.setValue(keyName, name);
         renderableDictionary.setValue(keyPathModule, path);
-        renderableDictionary.setValue(keyName, result->_nodeName);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
             return nullptr;
         }
-        LDEBUG("Successfully create renderable for '" << result->_nodeName << "'");
+		result->addPropertySubOwner(result->_renderable);
+        LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
+
     if (dictionary.hasKey(keyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
         dictionary.getValue(keyEphemeris, ephemerisDictionary);
@@ -84,10 +95,11 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
             return nullptr;
         }
-        LDEBUG("Successfully create ephemeris for '" << result->_nodeName << "'");
+		//result->addPropertySubOwner(result->_ephemeris);
+        LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
     }
 
     std::string parentName;
@@ -96,23 +108,22 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         parentName = "Root";
     }
 
-    SceneGraphNode* parentNode = getSceneGraphNode(parentName);
+    SceneGraphNode* parentNode = sceneGraphNode(parentName);
     if (parentNode == nullptr) {
         LFATAL("Could not find parent named '"
-               << parentName << "' for '" << result->_nodeName << "'."
+               << parentName << "' for '" << result->name() << "'."
                << " Check module definition order. Skipping module.");
     }
 
     parentNode->addNode(result);
 
     LDEBUG("Successfully created SceneGraphNode '"
-                   << result->_nodeName << "'");
+                   << result->name() << "'");
     return result;
 }
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _nodeName("")
     , _ephemeris(new StaticEphemeris)
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -140,7 +151,7 @@ bool SceneGraphNode::initialize(RuntimeData* runtimeData)
 
 bool SceneGraphNode::deinitialize()
 {
-    LDEBUG("Deinitialize: " << _nodeName);
+    LDEBUG("Deinitialize: " << name());
 
     delete _renderable;
     _renderable = nullptr;
@@ -154,7 +165,6 @@ bool SceneGraphNode::deinitialize()
 
     // reset variables
     _parent = nullptr;
-    _nodeName = "";
     _renderableVisible = false;
     _boundingSphereVisible = false;
     _boundingSphere = PowerScaledScalar(0.0, 0.0);
@@ -178,16 +188,20 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     _boundingSphereVisible = false;
     _renderableVisible = false;
 
+#ifndef OPENSPACE_VIDEO_EXPORT
     // check if camera is outside the node boundingsphere
   /*  if (toCamera.length() > _boundingSphere) {
         // check if the boudningsphere is visible before avaluating children
         if (!sphereInsideFrustum(thisPosition, _boundingSphere, camera)) {
             // the node is completely outside of the camera view, stop evaluating this
             // node
+            //LFATAL(_nodeName << " is outside of frustum");
             return;
         }
     }
 	*/
+#endif
+
     // inside boudningsphere or parts of the sphere is visible, individual
     // children needs to be evaluated
     _boundingSphereVisible = true;
@@ -195,12 +209,14 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     // this node has an renderable
     if (_renderable) {
         //  check if the renderable boundingsphere is visible
-		_renderableVisible = true;// sphereInsideFrustum(thisPosition, _renderable->getBoundingSphere(), camera);
+        // _renderableVisible = sphereInsideFrustum(
+        //       thisPosition, _renderable->getBoundingSphere(), camera);
+        _renderableVisible = true;
     }
 
     // evaluate all the children, tail-recursive function(?)
     for (auto& child : _children) {
-        child->evaluate(camera, psc());
+        child->evaluate(camera, thisPosition);
     }
 }
 
@@ -213,7 +229,7 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
         return;
     }*/
 
-    if (_renderableVisible) {
+    if (_renderableVisible && _renderable->isVisible()) {
         // LDEBUG("Render");
 		_renderable->render(camera, thisPosition, _runtimeData);
     }
@@ -233,36 +249,28 @@ void SceneGraphNode::addNode(SceneGraphNode* child)
     _children.push_back(child);
 }
 
-void SceneGraphNode::setName(const std::string& name)
-{
-    _nodeName = name;
-}
-
 void SceneGraphNode::setParent(SceneGraphNode* parent)
 {
     _parent = parent;
 }
 
-const psc& SceneGraphNode::getPosition() const
+const psc& SceneGraphNode::position() const
 {
     return _ephemeris->position();
 }
 
-psc SceneGraphNode::getWorldPosition() const
+psc SceneGraphNode::worldPosition() const
 {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->getWorldPosition();
+        return _ephemeris->position() + _parent->worldPosition();
     } else {
         return _ephemeris->position();
     }
 }
 
-std::string SceneGraphNode::nodeName() const{
-    return _nodeName;
-}
-
-SceneGraphNode* SceneGraphNode::parent() const{
+SceneGraphNode* SceneGraphNode::parent() const
+{
     return _parent;
 }
 const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
@@ -282,20 +290,27 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         for (size_t i = 0; i < _children.size(); ++i) {
             // when positions is dynamic, change this part to fins the most distant
             // position
-            PowerScaledScalar child = _children.at(i)->getPosition().length()
+            PowerScaledScalar child = _children.at(i)->position().length()
                         + _children.at(i)->calculateBoundingSphere();
             if (child > maxChild) {
                 maxChild = child;
             }
         }
         _boundingSphere += maxChild;
-    } else {  // leaf
+    } 
 
-        // if has a renderable, use that boundingsphere
-        if (_renderable)
-            _boundingSphere += _renderable->getBoundingSphere();
+    // if has a renderable, use that boundingsphere
+    if (_renderable ) {
+        PowerScaledScalar renderableBS = _renderable->getBoundingSphere();
+        if(renderableBS > _boundingSphere)
+            _boundingSphere = renderableBS;
     }
-	
+	LWARNING(name() << ": " << _boundingSphere);
+
+    return _boundingSphere;
+}
+
+PowerScaledScalar SceneGraphNode::boundingSphere() const{
     return _boundingSphere;
 }
 
@@ -305,7 +320,8 @@ void SceneGraphNode::setRenderable(Renderable* renderable) {
     update();
 }
 
-const Renderable* SceneGraphNode::getRenderable() const{
+const Renderable* SceneGraphNode::renderable() const
+{
     return _renderable;
 }
 
@@ -341,13 +357,13 @@ bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScala
     }
 }
 
-SceneGraphNode* SceneGraphNode::get(const std::string& name)
+SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 {
-    if (_nodeName == name)
+    if (this->name() == name)
         return this;
     else
         for (auto it : _children) {
-            SceneGraphNode* tmp = it->get(name);
+            SceneGraphNode* tmp = it->childNode(name);
             if (tmp != nullptr) {
                 return tmp;
             }
@@ -357,7 +373,7 @@ SceneGraphNode* SceneGraphNode::get(const std::string& name)
 
 void SceneGraphNode::print() const
 {
-    std::cout << _nodeName << std::endl;
+    std::cout << name() << std::endl;
     for (auto it : _children) {
         it->print();
     }

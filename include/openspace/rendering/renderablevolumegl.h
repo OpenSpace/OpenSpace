@@ -25,7 +25,6 @@
 #ifndef __RENDERABLEVOLUMEGL_H__
 #define __RENDERABLEVOLUMEGL_H__
 
-// open space includes
 #include <openspace/rendering/renderablevolume.h>
 
 // ghoul includes
@@ -35,25 +34,10 @@
 #include <ghoul/io/rawvolumereader.h>
 #include <ghoul/filesystem/file.h>
 
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-
-#ifdef __APPLE__
-    #include <memory>
-#else
-    #include <mutex>
-#endif
-
-namespace sgct_utils {
-    class SGCTBox;
-}
-
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
 public:
-
-	// constructors & destructor
 	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
 	~RenderableVolumeGL();
     
@@ -64,29 +48,30 @@ public:
 	virtual void update();
 
 private:
-    
-    
+	ghoul::Dictionary _hintsDictionary;
+
     std::string _filename;
-    ghoul::RawVolumeReader::ReadHints _hints;
-    float _stepSize;
-	ghoul::opengl::FramebufferObject* _fbo;
-	ghoul::opengl::Texture* _backTexture;
-	ghoul::opengl::Texture* _frontTexture;
+
+    std::string _transferFunctionName;
+	std::string _volumeName;
+
+    std::string _transferFunctionPath;
+	std::string _samplerFilename;
+    
+    ghoul::filesystem::File* _transferFunctionFile;
+
 	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::ProgramObject *_fboProgram, *_twopassProgram;
-	sgct_utils::SGCTBox* _boundingBox;
-	GLuint _screenQuad;
-    
-    std::mutex* _shaderMutex;
-    
-    ghoul::filesystem::File* _vertexSourceFile;
-    ghoul::filesystem::File* _fragmentSourceFile;
-    bool _programUpdateOnSave;
-    
-    void safeShaderCompilation();
+	ghoul::opengl::Texture* _transferFunction;
+
+	GLuint _boxArray;
+	ghoul::opengl::ProgramObject *_boxProgram;
+	glm::vec3 _boxScaling, _boxOffset;
+	float _w;
+	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
 	RuntimeData* _runtimeData;
-
+    bool _updateTransferfunction;
+    int _id;
 };
 
 } // namespace openspace

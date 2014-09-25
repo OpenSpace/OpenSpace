@@ -50,32 +50,36 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _geometry(nullptr)
 {
+	std::string name;
+	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	assert(success);
+
     std::string path;
-    dictionary.getValue(constants::scenegraph::keyPathModule, path);
+    success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+	assert(success);
 
-    if (dictionary.hasKey(constants::renderableplanet::keyGeometry)) {
-        ghoul::Dictionary geometryDictionary;
-        dictionary.getValue(constants::renderableplanet::keyGeometry, geometryDictionary);
+    ghoul::Dictionary geometryDictionary;
+    success = dictionary.getValueSafe(
+		constants::renderableplanet::keyGeometry, geometryDictionary);
+	if (success) {
+		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
-        geometryDictionary.setValue(constants::scenegraphnode::keyName, name());
-
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
-    }
+        _geometry
+              = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+	}
 
 	dictionary.getValue("Frame", _target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-    if (dictionary.hasKey("Textures.Color")) {
-        dictionary.getValue("Textures.Color", texturePath);
+	success = dictionary.getValueSafe("Textures.Color", texturePath);
+	if (success)
         _colorTexturePath = path + "/" + texturePath;
-    }
 
-    for (properties::Property* p : _geometry->properties())
-        addProperty(p);
+	addPropertySubOwner(_geometry);
 
-     addProperty(_colorTexturePath);
+    addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
@@ -111,10 +115,10 @@ bool RenderablePlanet::deinitialize()
 
 void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData)
 {
-    // TODO replace with more robust assert
-    // check so that the shader is set
-    assert(_programObject);
-    assert(_texture);
+	if (!_programObject)
+		return;
+	if (!_texture)
+		return;
 
     // activate shader
     _programObject->activate();

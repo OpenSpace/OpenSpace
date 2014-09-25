@@ -34,13 +34,10 @@ public:
     StaticEphemeris(const ghoul::Dictionary& dictionary
                                 = ghoul::Dictionary());
     virtual ~StaticEphemeris();
-    virtual bool initialize();
     virtual const psc& position() const;
 	virtual void update(RuntimeData* runtimeData);
-protected:
 private:
     psc _position;
-    
 };
     
 } // namespace openspace

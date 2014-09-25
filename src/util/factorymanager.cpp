@@ -29,6 +29,7 @@
 // renderables
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
+#include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderablevolumeexpert.h>
 #include <openspace/rendering/renderablevolumecl.h>
@@ -61,13 +62,11 @@ void FactoryManager::initialize()
 		"RenderableStars");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
-          "RenderableVolumeCL");
+    //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
+    //      "RenderableVolumeCL");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
           "RenderableVolumeGL");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeExpert>(
-          "RenderableVolumeExpert");
-    _manager->factory<Renderable>()->registerClass<Flare>("RenderableFlare");
+    _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");
 
     // Add Ephimerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);

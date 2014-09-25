@@ -25,22 +25,47 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
 
 namespace {
-const std::string _loggerCat = "Query";
+    const std::string _loggerCat = "Query";
 }
 
-SceneGraph* getSceneGraph()
+SceneGraph* sceneGraph()
 {
     return OsEng.renderEngine().sceneGraph();
 }
 
-SceneGraphNode* getSceneGraphNode(const std::string& name)
+SceneGraphNode* sceneGraphNode(const std::string& name)
 {
-    SceneGraph* sceneGraph = getSceneGraph();
-    return sceneGraph->sceneGraphNode(name);
+    const SceneGraph* graph = sceneGraph();
+    return graph->sceneGraphNode(name);
+}
+    
+properties::Property* property(const std::string& uri)
+{
+    // The URI consists of the following form at this stage:
+    // <node name>.{<property owner>.}^(0..n)<property id>
+    
+    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
+    if (nodeNameSeparator == std::string::npos) {
+        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
+               << "' separator must be present.");
+        return nullptr;
+    }
+    const std::string nodeName = uri.substr(0, nodeNameSeparator);
+    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
+    
+    SceneGraphNode* node = sceneGraphNode(nodeName);
+    if (!node) {
+        LERROR("Node '" << nodeName << "' did not exist");
+        return nullptr;
+    }
+    
+    properties::Property* property = node->property(remainingUri);
+    return property;
 }
 
 }  // namespace

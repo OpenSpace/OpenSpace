@@ -38,9 +38,10 @@ public:
 
     Ephemeris(const ghoul::Dictionary& dictionary);
     virtual ~Ephemeris();
-    virtual bool initialize() = 0;
+    virtual bool initialize();
     virtual const psc& position() const = 0;
 	virtual void update(RuntimeData* runtimeData) = 0;
+    virtual void update();
 
 protected:
     Ephemeris();

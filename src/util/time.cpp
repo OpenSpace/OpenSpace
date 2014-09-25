@@ -1,67 +1,252 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-// open space includes
 #include <openspace/util/time.h>
+
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
-// std includes
-#include <cassert>
-
-// spice includes
-#include "SpiceUsr.h"
 #include <ghoul/filesystem/filesystem.h>
+
+#include <cassert>
+#include <string>
+
+namespace {
+	const std::string _loggerCat = "Time";
+}
 
 namespace openspace {
 
-Time* Time::this_ = nullptr;
+namespace luascriptfunctions {
 
-Time::Time() {
-	time_ = 0.0;
+/**
+ * \ingroup LuaScripts
+ * setDeltaTime(number):
+ * Sets the delta time by calling the Time::setDeltaTime method
+ */
+int time_setDeltaTime(lua_State* L) {
+	const bool isFunction = (lua_isfunction(L, -1) != 0);
+	if (isFunction) {
+		// If the top of the stack is a function, it is ourself
+		const char* msg = lua_pushfstring(L, "method called without argument");
+		return luaL_error(L, "bad argument (%s)", msg);
+	}
 
-	// load spice time kernel
-	furnsh_c (absPath("${OPENSPACE_DATA}/spice/naif0010.tls").c_str());
+	const bool isNumber = (lua_isnumber(L, -1) != 0);
+	if (isNumber) {
+		double value = lua_tonumber(L, -1);
+		openspace::Time::ref().setDeltaTime(value);
+		return 0;
+	}
+	else {
+		const char* msg = lua_pushfstring(L, "%s expected, got %s",
+								lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
+		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+	}
 
-	// convert UTC to ET 
-	str2et_c ( "2006 JAN 31 01:00", &time_ );
 }
 
-Time::~Time() {
-
+/**
+ * \ingroup LuaScripts
+ * deltaTime():
+ * Returns the delta time by calling the Time::deltaTime method
+ */
+int time_deltaTime(lua_State* L) {
+	lua_pushnumber(L, openspace::Time::ref().deltaTime());
+	return 1;
 }
 
-void Time::init() {
-	assert( this_ == nullptr);
-	 this_ = new Time();
+/**
+ * \ingroup LuaScripts
+ * setTime({number, string}):
+ * Sets the simulation time to the passed value. If the parameter is a number, it is
+ * interpreted as the number of seconds past the J2000 epoch and the
+ * Time::setTime(double) method is called. If the parameter is a string, it is
+ * interpreted as a structured date string and the Time::setTime(std::string) method
+ * is called
+ */
+int time_setTime(lua_State* L) {
+	const bool isFunction = (lua_isfunction(L, -1) != 0);
+	if (isFunction) {
+		// If the top of the stack is a function, it is ourself
+		const char* msg = lua_pushfstring(L, "method called without argument");
+		return luaL_error(L, "bad argument (%s)", 1, msg);
+	}
+
+	const bool isNumber = (lua_isnumber(L, -1) != 0);
+	const bool isString = (lua_isstring(L, -1) != 0);
+	if (!isNumber && !isString) {
+		const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
+								lua_typename(L, LUA_TNUMBER),
+								lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
+		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+	}
+	if (isNumber) {
+		double value = lua_tonumber(L, -1);
+		openspace::Time::ref().setTime(value);
+		return 0;
+	}
+	if (isString) {
+		const char* time = lua_tostring(L, -1);
+		openspace::Time::ref().setTime(time);
+		return 0;
+	}
+	return 0;
 }
 
-void Time::deinit() {
-	assert(this_);
-	delete this_;
-	this_ = nullptr;
+/**
+ * \ingroup LuaScripts
+ * currentTime():
+ * Returns the current simulation time as the number of seconds past the J2000 epoch.
+ * It is returned by calling the Time::currentTime method.
+ */
+int time_currentTime(lua_State* L) {
+	lua_pushnumber(L, openspace::Time::ref().currentTime());
+	return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * currentTimeUTC():
+ * Returns the current simulation time as a structured ISO 8601 string using the UTC
+ * timezone by calling the Time::currentTimeUTC method
+ */
+int time_currentTimeUTC(lua_State* L) {
+	lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
+	return 1;
+}
+
+} // namespace luascriptfunctions
+
+
+Time* Time::_instance = nullptr;
+
+Time::Time() 
+	: _time(-1.0)
+	, _deltaTimePerSecond(1.0)
+{
+}
+
+bool Time::initialize(const std::string& lskKernel) {
+	assert( _instance == nullptr);
+
+	 if (!lskKernel.empty()) {
+		 const int success = SpiceManager::ref().loadKernel(
+			 absPath(lskKernel), "TimeKernel");
+		 if (success == 0) {
+			 LERROR("Error loading SPICE time kernel '" << lskKernel << "'");
+			 return false;
+		 }
+	 }
+	 _instance = new Time();
+	 return true;
+}
+
+void Time::deinitialize() {
+	assert(_instance);
+	delete _instance;
+	_instance = nullptr;
 }
 
 Time& Time::ref() {
-	assert(this_);
-    return *this_;
+	assert(_instance);
+    return *_instance;
 }
 
 bool Time::isInitialized() {
-	return this_ != nullptr;
+	return (_instance != nullptr);
 }
 
-void Time::setTime(const char* stringTime) {
-	assert(this_);
-	// convert UTC to ET 
-	str2et_c ( stringTime, &time_ );
+void Time::setTime(double value) {
+	_time = std::move(value);
 }
 
-void Time::setTime(double intTime) {
-	assert(this_);
-	time_ = intTime;
+double Time::currentTime() const {
+	assert(_instance);
+	return _time;
 }
 
-double Time::getTime() {
-	assert(this_);
-	return time_;
+double Time::advanceTime(double tickTime) {
+	return _time += _deltaTimePerSecond * tickTime;
+}
+
+void Time::setDeltaTime(double deltaT) {
+	_deltaTimePerSecond = std::move(deltaT);
+}
+
+double Time::deltaTime() const {
+	return _deltaTimePerSecond;
+}
+
+void Time::setTime(std::string time) {
+	_time = SpiceManager::ref().convertStringToTdbSeconds(std::move(time));
+}
+
+std::string Time::currentTimeUTC() const {
+	return SpiceManager::ref().convertTdbSecondsToString(_time, "YYYY-MM-DDTHR:MN:SC.#####");
+}
+scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
+	scripting::ScriptEngine::LuaLibrary timeLibrary = {
+		"time",
+		{
+			{
+				"setDeltaTime",
+				&luascriptfunctions::time_setDeltaTime,
+				"setDeltaTime(number): Sets the amount of simulation time that happens "
+				"in one second of real time"
+			},
+			{
+				"deltaTime",
+				&luascriptfunctions::time_deltaTime,
+				"deltaTime: Returns the amount of simulated time that passes in one "
+				"second of real time"
+			},
+			{
+				"setTime",
+				&luascriptfunctions::time_setTime,
+				"setTime({number, string}): Sets the current simulation time to the "
+				"specified value. If the parameter is a number, the value is the number "
+				"of seconds past the J2000 epoch. If it is a string, it has to be a "
+				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
+			},
+			{
+				"currentTime",
+				&luascriptfunctions::time_currentTime,
+				"currentTime(): Returns the current time as the number of seconds since "
+				"the J2000 epoch"
+			},
+			{
+				"currentTimeUTC",
+				&luascriptfunctions::time_currentTimeUTC,
+				"currentTimeUTC: Returns the current time as an ISO 8601 date string "
+				"(YYYY-MM-DDTHH:MN:SS"
+			}
+		}
+	};
+	return std::move(timeLibrary);
 }
 
 } // namespace openspace
