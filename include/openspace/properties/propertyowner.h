@@ -200,7 +200,7 @@ protected:
 private:
 	/// The name of this PropertyOwner
     std::string _name;
-	/// A list of all owned Property's
+	/// A list of all registered Property's
     std::vector<Property*> _properties;
 	/// A list of all sub-owners
     std::vector<PropertyOwner*> _subOwners;
