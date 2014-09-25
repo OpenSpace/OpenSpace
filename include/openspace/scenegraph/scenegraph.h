@@ -64,7 +64,8 @@ public:
     /*
      * Load the scenegraph from the provided folder
      */
-    bool loadScene(const std::string& sceneDescriptionFilePath);
+    void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
+	void clearSceneGraph();
 
     void loadModule(const std::string& modulePath);
 
@@ -110,6 +111,8 @@ public:
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
+	bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
+
     std::string _focus, _position;
 
     // actual scenegraph
@@ -117,6 +120,8 @@ private:
     std::vector<SceneGraphNode*> _nodes;
     std::map<std::string, SceneGraphNode*> _allNodes;
 	RuntimeData* _runtimeData;
+
+	std::string _sceneGraphToLoad;
 };
 
 } // namespace openspace

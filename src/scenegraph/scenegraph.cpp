@@ -173,6 +173,23 @@ int property_getValue(lua_State* L) {
 	return 1;
 }
 
+/**
+ * \ingroup LuaScripts
+ * getPropertyValue(string):
+ * Returns the value of the property identified by the passed URI as a Lua object that can
+ * be passed to the setPropertyValue method.
+ */
+int loadScene(lua_State* L) {
+	const std::string _loggerCat = "loadScene";
+
+	// TODO Check for argument number (ab)
+	std::string sceneFile = luaL_checkstring(L, -1);
+
+	OsEng.renderEngine().sceneGraph()->scheduleLoadSceneFile(sceneFile);
+
+	return 0;
+}
+
 } // namespace luascriptfunctions
 
 SceneGraph::SceneGraph()
@@ -206,8 +223,7 @@ bool SceneGraph::initialize()
     typedef std::chrono::high_resolution_clock clock_;
     typedef std::chrono::duration<double, std::ratio<1> > second_;
 
-    std::chrono::time_point<clock_> beg_(clock_::now());
-
+    std::chrono::time_point<clock_> beginning(clock_::now());
 
     // pscstandard
     tmpProgram = sc.buildShader("pscstandard",
@@ -267,8 +283,8 @@ bool SceneGraph::initialize()
 
 
 
-    double elapsed = std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
-    LERROR("Time to load shaders: " << elapsed);
+    double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
+    LINFO("Time to load shaders: " << elapsed);
 
     /*
 
@@ -437,21 +453,20 @@ bool SceneGraph::initialize()
 
 bool SceneGraph::deinitialize()
 {
-    // deallocate the scene graph. Recursive deallocation will occur
-    delete _root;
-    _root = nullptr;
-
-    _nodes.erase(_nodes.begin(), _nodes.end());
-    _allNodes.erase(_allNodes.begin(), _allNodes.end());
-
-    _focus.clear();
-    _position.clear();
-
+	clearSceneGraph();
     return true;
 }
 
 void SceneGraph::update()
 {
+	if (!_sceneGraphToLoad.empty()) {
+		OsEng.renderEngine().sceneGraph()->clearSceneGraph();
+		bool success = loadSceneInternal(_sceneGraphToLoad);
+		_sceneGraphToLoad = "";
+		if (!success)
+			return;
+	}
+
     for (auto node : _nodes)
         node->update();
 }
@@ -468,17 +483,37 @@ void SceneGraph::render(Camera* camera)
 		_root->render(camera);
 }
 
-bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath)
+void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
+	_sceneGraphToLoad = sceneDescriptionFilePath;
+}
+
+void SceneGraph::clearSceneGraph() {
+	    // deallocate the scene graph. Recursive deallocation will occur
+    delete _root;
+    _root = nullptr;
+
+    _nodes.erase(_nodes.begin(), _nodes.end());
+    _allNodes.erase(_allNodes.begin(), _allNodes.end());
+
+    _focus.clear();
+    _position.clear();
+}
+
+bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 {
     using ghoul::Dictionary;
     using ghoul::lua::loadDictionaryFromFile;
+
+	if (!FileSys.fileExists(sceneDescriptionFilePath)) {
+		LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
+		return false;
+	}
 
     LDEBUG("Loading scenegraph nodes");
     if (_root != nullptr) {
         LFATAL("Scenegraph already loaded");
         return false;
     }
-
 
     // initialize the root node
     _root = new SceneGraphNode();
@@ -561,7 +596,8 @@ bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath)
     }
 
     // update the position of all nodes
-	update();
+    for (auto node : _nodes)
+        node->update();
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();
@@ -673,7 +709,13 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 				"getPropertyValue",
 				&luascriptfunctions::property_getValue,
 				"getPropertyValue(string): Returns the value the property, identified by "
-				"the provided URI, has"
+				"the provided URI."
+			},
+			{
+				"loadScene",
+				&luascriptfunctions::loadScene,
+				"loadScene(string): Loads the scene found at the file passed as an "
+				"argument. If a scene is already loaded, it is unloaded first"
 			}
 		}
 	};

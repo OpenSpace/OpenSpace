@@ -363,7 +363,7 @@ bool OpenSpaceEngine::initialize()
 	bool success = OsEng.configurationManager().getValueSafe(
 		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
 	if (success)
-	    sceneGraph->loadScene(sceneDescriptionPath);
+	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
     _renderEngine->setSceneGraph(sceneGraph);
 
