@@ -65,14 +65,14 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
 	else
 		_radius = radius;
 
-    int segments;
+    double segments;
     success = dictionary.getValueSafe(keySegments, segments);
 	if (!success) {
         LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
                                            << keySegments << "'");
 	}
 	else
-		_segments = segments;
+		_segments = static_cast<int>(segments);
 
     addProperty(_radius);
     _radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));

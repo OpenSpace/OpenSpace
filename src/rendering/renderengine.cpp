@@ -169,7 +169,7 @@ void RenderEngine::postSynchronizationPreDraw()
 	// Move time forward.
 	//_runtimeData->advanceTimeBy(1, DAY);
 	
-	_runtimeData->advanceTimeBy(1, HOUR);
+	//_runtimeData->advanceTimeBy(1, HOUR);
 	//_runtimeData->advanceTimeBy(30, MINUTE);
 	//_runtimeData->advanceTimeBy(1, MILLISECOND);
 	

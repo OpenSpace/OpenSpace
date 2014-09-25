@@ -353,15 +353,23 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	    if (key == SGCT_KEY_F) {
 	        PowerScaledScalar dist(speed * dt, 0.0);
 	        distance(dist);
-	    }
-	    if (key == SGCT_KEY_T) {
-	        PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
-	        distance(dist);
-	    }
-	    if (key == SGCT_KEY_G) {
-	        PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
-	        distance(dist);
-	    }
+		}
+		if (key == SGCT_KEY_T) {
+			PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
+			distance(dist);
+		}
+		if (key == SGCT_KEY_G) {
+			PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
+			distance(dist);
+		}
+		if (key == SGCT_KEY_Y) {
+			PowerScaledScalar dist(-speed * 100.0 * dt, 2.0);
+			distance(dist);
+		}
+		if (key == SGCT_KEY_H) {
+			PowerScaledScalar dist(speed * 100.0 * dt, 2.0);
+			distance(dist);
+		}
 	}
     /*
     if (key == '1') {
