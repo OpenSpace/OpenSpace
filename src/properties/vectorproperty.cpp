@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <limits>
 

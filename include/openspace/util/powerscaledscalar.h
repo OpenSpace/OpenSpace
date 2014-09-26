@@ -26,7 +26,7 @@
 #define __POWERSCALEDSCALAR_H__
 
 // glm includes
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

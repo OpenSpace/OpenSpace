@@ -12,7 +12,7 @@ TODO: Iteratively break away parts from it into other classes.
 #include <map>
 #include <string>
 #include <vector>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opencl/ghoul_cl.h>
 #include <openspace/flare/KernelConstants.h>
 //#include <boost/timer/timer.hpp>
