@@ -51,7 +51,6 @@ namespace openspace {
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
-	, _runtimeData(nullptr)
     , _abuffer(nullptr)
 {
 }
@@ -80,10 +79,6 @@ bool RenderEngine::initialize()
     _abuffer = new ABufferDynamic();
 #endif
     return true;
-}
-
-void RenderEngine::setRuntimeData(RuntimeData* runtimeData){
-	_runtimeData = runtimeData;
 }
 
 bool RenderEngine::initializeGL()
@@ -177,7 +172,7 @@ void RenderEngine::postSynchronizationPreDraw()
     _mainCamera->compileViewRotationMatrix();
 
     // update and evaluate the scene starting from the root node
-    _sceneGraph->update(); 
+	_sceneGraph->update({Time::ref().currentTime()}); 
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 }
@@ -212,7 +207,7 @@ void RenderEngine::render()
     // render the scene starting from the root node
     _abuffer->clear();
     _abuffer->preRender();
-    _sceneGraph->render(_mainCamera);
+	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
     _abuffer->resolve();
 
@@ -227,21 +222,15 @@ void RenderEngine::render()
 #endif
 
 
-		std::string timeGUI =  SpiceManager::ref().ephemerisTimeToString(_runtimeData->getTime());
-
-		if (timeGUI == "") _runtimeData->setTime(0); // if time ends -> reset time to julian date 0.
-
         const glm::vec2 scaling = _mainCamera->scaling();
         const glm::vec3 viewdirection = _mainCamera->viewDirection();
         const psc position = _mainCamera->position();
         const psc origin = OsEng.interactionHandler().getOrigin();
         const PowerScaledScalar pssl = (position - origin).length();
+
 		/* GUI PRINT */
 
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 20, "OpenSpace Time: (%s)", timeGUI.c_str());
-		const std::string time = Time::ref().currentTimeUTC().c_str();
+		std::string&& time = Time::ref().currentTimeUTC().c_str();
 		Freetype::print(
 			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
 			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()

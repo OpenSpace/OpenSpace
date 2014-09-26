@@ -32,7 +32,7 @@
 
 #include <openspace/scenegraph/scenegraph.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/util/runtimedata.h>
+#include <openspace/util/updatestructures.h>
 
 // std includes
 #include <iostream>
@@ -52,13 +52,13 @@ public:
 
     static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	bool initialize(RuntimeData* runtimeData);
+	bool initialize();
     bool deinitialize();
 
     // essential
-    void update();
+    void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
-    void render(const Camera* camera, const psc& parentPosition = psc());
+    void render(const RenderData& data);
 
     // set & get
     void addNode(SceneGraphNode* child);
@@ -88,7 +88,6 @@ private:
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     Ephemeris* _ephemeris;
-	RuntimeData* _runtimeData;
 
     // renderable
     Renderable* _renderable;

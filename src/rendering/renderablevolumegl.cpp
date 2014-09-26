@@ -228,7 +228,7 @@ bool RenderableVolumeGL::deinitialize() {
     return true;
 }
 
-void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, RuntimeData* runtimeData) {
+void RenderableVolumeGL::render(const RenderData& data) {
     if(_updateTransferfunction) {
         _updateTransferfunction = false;
         ghoul::opengl::Texture* transferFunction = loadTransferFunction(_transferFunctionPath);
@@ -248,10 +248,10 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
     transform = glm::scale(transform, _boxScaling);
 
     // fetch data
-    psc currentPosition         = thisPosition;
-    psc campos                  = camera->position();
-    glm::mat4 camrot            = camera->viewRotationMatrix();
-    PowerScaledScalar scaling   = camera->scaling();
+    psc currentPosition         = data.position;
+    psc campos                  = data.camera.position();
+    glm::mat4 camrot            = data.camera.viewRotationMatrix();
+    PowerScaledScalar scaling   = data.camera.scaling();
 
     // psc addon(-1.1,0.0,0.0,0.0);
     // currentPosition += addon;
@@ -262,7 +262,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
     _boxProgram->activate();
     _boxProgram->setUniform(_typeLocation, _id);
 
-    _boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+    _boxProgram->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _boxProgram->setUniform("modelTransform", transform);
     _boxProgram->setUniform("campos", campos.vec4());
     _boxProgram->setUniform("objpos", currentPosition.vec4());
@@ -284,7 +284,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
     _boxProgram->deactivate();
 }
 
-void RenderableVolumeGL::update() {
+void RenderableVolumeGL::update(const UpdateData& data) {
 }
 
 } // namespace openspace

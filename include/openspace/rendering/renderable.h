@@ -33,7 +33,7 @@
 #include <openspace/util/camera.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/util/runtimedata.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 
@@ -51,8 +51,8 @@ public:
     void setBoundingSphere(const PowerScaledScalar& boundingSphere);
     const PowerScaledScalar& getBoundingSphere();
 
-	virtual void render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData) = 0;
-    virtual void update();
+	virtual void render(const RenderData& data) = 0;
+    virtual void update(const UpdateData& data);
 
 	bool isVisible() const;
 
@@ -63,7 +63,6 @@ private:
 	properties::BoolProperty _enabled;
 
     PowerScaledScalar boundingSphere_;
-	RuntimeData* _runtimeData;
     std::string _relativePath;
 };
 

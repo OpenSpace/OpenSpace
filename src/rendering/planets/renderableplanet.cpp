@@ -113,7 +113,7 @@ bool RenderablePlanet::deinitialize()
     return true;
 }
 
-void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData)
+void RenderablePlanet::render(const RenderData& data)
 {
 	if (!_programObject)
 		return;
@@ -124,9 +124,9 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, Run
     _programObject->activate();
 
     // fetch data
-    psc currentPosition = thisPosition;
-	psc campos          = camera->position();
-    glm::mat4 camrot    = camera->viewRotationMatrix();
+    psc currentPosition = data.position;
+	psc campos          = data.camera.position();
+    glm::mat4 camrot    = data.camera.viewRotationMatrix();
    // PowerScaledScalar scaling = camera->scaling();
 
     PowerScaledScalar scaling = glm::vec2(1, -6);
@@ -134,23 +134,19 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, Run
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
 	
-	// set spice-orientation in accordance to timestamp
-	glm::dmat3 stateMatrix;
-	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", runtimeData->getTime(), stateMatrix);
-	
 	//earth needs to be rotated for that to work.
 	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
 		
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			transform[i][j] = stateMatrix[i][j];
+			transform[i][j] = _stateMatrix[i][j];
 		}
 	}
 	transform = transform* rot;
 	
 
     // setup the data to the shader
-    _programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
+    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
     _programObject->setUniform("campos", campos.vec4());
     _programObject->setUniform("objpos", currentPosition.vec4());
@@ -171,8 +167,11 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, Run
 
 }
 
-void RenderablePlanet::update()
+void RenderablePlanet::update(const UpdateData& data)
 {
+	// set spice-orientation in accordance to timestamp
+	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
+
 }
 
 void RenderablePlanet::loadTexture()

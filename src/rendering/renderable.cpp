@@ -88,7 +88,7 @@ const PowerScaledScalar& Renderable::getBoundingSphere()
     return boundingSphere_;
 }
 
-void Renderable::update()
+void Renderable::update(const UpdateData&)
 {
 }
 

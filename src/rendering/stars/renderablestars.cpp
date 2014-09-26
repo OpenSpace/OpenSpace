@@ -306,17 +306,17 @@ bool RenderableStars::deinitialize(){
 }
 
 //#define TMAT
-void RenderableStars::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData){
+void RenderableStars::render(const RenderData& data){
 	assert(_haloProgram);
 	printOpenGLError();
 	// activate shader
 	_haloProgram->activate();
 
 	// fetch data
-	psc currentPosition       = thisPosition;
-	psc campos                = camera->position();
-	glm::mat4 camrot          = camera->viewRotationMatrix();
-	PowerScaledScalar scaling = camera->scaling();
+	psc currentPosition       = data.position;
+	psc campos                = data.camera.position();
+	glm::mat4 camrot          = data.camera.viewRotationMatrix();
+	PowerScaledScalar scaling = data.camera.scaling();
 	glm::mat4 transform       = glm::mat4(1); 
 	//scaling                   = glm::vec2(1, -22);  
 	scaling = glm::vec2(1, -19);  
@@ -332,9 +332,9 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 
 #ifdef GLSPRITES
-	glm::mat4 modelMatrix      = camera->modelMatrix();
-	glm::mat4 viewMatrix       = camera->viewMatrix();
-	glm::mat4 projectionMatrix = camera->projectionMatrix();
+	glm::mat4 modelMatrix      = data.camera.modelMatrix();
+	glm::mat4 viewMatrix       = data.camera.viewMatrix();
+	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
 // ---------------------- RENDER HALOS -----------------------------
 	_haloProgram->setUniform("model", modelMatrix);
@@ -404,7 +404,7 @@ void RenderableStars::loadTexture(){
 	}
 }
 
-void RenderableStars::update()
+void RenderableStars::update(const UpdateData& data)
 {
 	
 }

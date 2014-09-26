@@ -27,8 +27,7 @@
 
 #include <openspace/util/powerscaledcoordinate.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/util/runtimedata.h>
-
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 
@@ -40,14 +39,10 @@ public:
     virtual ~Ephemeris();
     virtual bool initialize();
     virtual const psc& position() const = 0;
-	virtual void update(RuntimeData* runtimeData) = 0;
-    virtual void update();
+    virtual void update(const UpdateData& data);
 
 protected:
     Ephemeris();
-
-private:
-	RuntimeData* _runtimeData;
 };
 
 }  // namespace openspace

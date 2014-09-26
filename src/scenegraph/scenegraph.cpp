@@ -32,6 +32,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/shadercreator.h>
 #include <openspace/query/query.h>
+#include <openspace/util/time.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -196,17 +197,12 @@ SceneGraph::SceneGraph()
     : _focus(SceneGraphNode::RootNodeName)
     , _position(SceneGraphNode::RootNodeName)
     , _root(nullptr)
-	, _runtimeData(nullptr)
 {
 }
 
 SceneGraph::~SceneGraph()
 {
     deinitialize();
-}
-
-void SceneGraph::setRuntimeData(RuntimeData* runtimeData){
-	_runtimeData = runtimeData;
 }
 
 bool SceneGraph::initialize()
@@ -457,7 +453,7 @@ bool SceneGraph::deinitialize()
     return true;
 }
 
-void SceneGraph::update()
+void SceneGraph::update(const UpdateData& data)
 {
 	if (!_sceneGraphToLoad.empty()) {
 		OsEng.renderEngine().sceneGraph()->clearSceneGraph();
@@ -468,7 +464,7 @@ void SceneGraph::update()
 	}
 
     for (auto node : _nodes)
-        node->update();
+        node->update(data);
 }
 
 void SceneGraph::evaluate(Camera* camera)
@@ -477,10 +473,10 @@ void SceneGraph::evaluate(Camera* camera)
 		_root->evaluate(camera);
 }
 
-void SceneGraph::render(Camera* camera)
+void SceneGraph::render(const RenderData& data)
 {
 	if (_root)
-		_root->render(camera);
+		_root->render(data);
 }
 
 void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
@@ -588,7 +584,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
     // Initialize all nodes
     for (auto node : _nodes) {
-		bool success = node->initialize(_runtimeData);
+		bool success = node->initialize();
         if (success)
             LDEBUG(node->name() << " initialized successfully!");
         else
@@ -596,8 +592,9 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     }
 
     // update the position of all nodes
+	// TODO need to check this; unnecessary? (ab)
     for (auto node : _nodes)
-        node->update();
+		node->update({Time::ref().currentTime()});
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();

@@ -78,15 +78,13 @@ const psc& SpiceEphemeris::position() const {
     return _position;
 }
 
-void SpiceEphemeris::update(RuntimeData* runtimeData) {
+void SpiceEphemeris::update(const UpdateData& data) {
     double state[3];
    
-	_currentEphemerisTime = runtimeData->getTime();
-	
 	glm::dvec3 position(0,0,0);
 
 	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _currentEphemerisTime, "GALACTIC", "LT+S", _originName, position, lightTime);
+	SpiceManager::ref().getTargetPosition(_targetName, data.time, "GALACTIC", "LT+S", _originName, position, lightTime);
 
 	/*
 	std::cout << _targetName  << " (";

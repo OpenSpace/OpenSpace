@@ -24,10 +24,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-// sgct header has to be included before all others due to Windows header
-#define SGCT_WINDOWS_INCLUDE
-#include "sgct.h"
-
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -37,7 +33,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/runtimedata.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -329,9 +324,6 @@ bool OpenSpaceEngine::initialize()
     Spice::init();
     Spice::ref().loadDefaultKernels(); // changeto: instantiate spicemanager, load kernels. 
 
-	RuntimeData* initialData = new RuntimeData;
-	initialData->setTime(Time::ref().currentTime());
-	
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc")       , "PCK");
@@ -355,8 +347,6 @@ bool OpenSpaceEngine::initialize()
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
-	_renderEngine->setRuntimeData(initialData);
-	sceneGraph->setRuntimeData(initialData);
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;

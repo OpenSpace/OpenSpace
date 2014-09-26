@@ -25,6 +25,10 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
+// sgct header has to be included before all others due to Windows header
+#define SGCT_WINDOWS_INCLUDE
+#include "sgct.h"
+
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/misc/dictionary.h>

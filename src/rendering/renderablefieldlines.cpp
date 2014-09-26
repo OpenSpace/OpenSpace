@@ -211,29 +211,29 @@ bool RenderableFieldlines::deinitialize() {
 	return true;
 }
 
-void RenderableFieldlines::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData) {
+void RenderableFieldlines::render(const RenderData& data) {
 	if(_update) {
 		_update = false;
 		safeShaderCompilation();
 	}
 
-	glm::mat4 transform = camera->viewProjectionMatrix();
-	glm::mat4 camTransform = camera->viewRotationMatrix();
-	psc relative = thisPosition-camera->position();
+	glm::mat4 transform = data.camera.viewProjectionMatrix();
+	glm::mat4 camTransform = data.camera.viewRotationMatrix();
+	psc relative = data.position - data.camera.position();
 
 	transform = transform*camTransform;
 	transform = glm::mat4(1.0);
 	transform = glm::scale(transform, glm::vec3(0.01));
 
-	psc currentPosition = thisPosition;
-    psc campos = camera->position();
-    glm::mat4 camrot = camera->viewRotationMatrix();
-    PowerScaledScalar scaling = camera->scaling();
+	psc currentPosition = data.position;
+    psc campos = data.camera.position();
+    glm::mat4 camrot = data.camera.viewRotationMatrix();
+    PowerScaledScalar scaling = data.camera.scaling();
 
 	// Activate shader
 	_fieldlinesProgram->activate();
 
-    _fieldlinesProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+    _fieldlinesProgram->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _fieldlinesProgram->setUniform("modelTransform", transform);
     _fieldlinesProgram->setUniform("campos", campos.vec4());
     _fieldlinesProgram->setUniform("objpos", currentPosition.vec4());
@@ -253,7 +253,7 @@ void RenderableFieldlines::render(const Camera* camera, const psc& thisPosition,
 	_fieldlinesProgram->deactivate();
 }
 
-void RenderableFieldlines::update() {
+void RenderableFieldlines::update(const UpdateData& data) {
 }
 
 void RenderableFieldlines::safeShaderCompilation() {

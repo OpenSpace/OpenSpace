@@ -30,13 +30,12 @@
 #include <map>
 
 #include <openspace/util/camera.h>
-
+#include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/util/runtimedata.h>
 
 namespace openspace {
 
@@ -48,8 +47,6 @@ public:
     // constructors & destructor
     SceneGraph();
     ~SceneGraph();
-
-	void setRuntimeData(RuntimeData* runtimeData);
 
     /**
      * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
@@ -72,7 +69,7 @@ public:
     /*
      * Updates all SceneGraphNodes relative positions
      */
-    void update();
+    void update(const UpdateData& data);
 
     /*
      * Evaluates if the SceneGraphNodes are visible to the provided camera
@@ -82,7 +79,7 @@ public:
     /*
      * Render visible SceneGraphNodes using the provided camera
      */
-    void render(Camera* camera);
+    void render(const RenderData& data);
 
     /*
      * Prints the SceneGraph tree. For debugging purposes
@@ -119,7 +116,6 @@ private:
     SceneGraphNode* _root;
     std::vector<SceneGraphNode*> _nodes;
     std::map<std::string, SceneGraphNode*> _allNodes;
-	RuntimeData* _runtimeData;
 
 	std::string _sceneGraphToLoad;
 };

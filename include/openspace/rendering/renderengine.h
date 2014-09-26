@@ -26,7 +26,6 @@
 #define __RENDERENGINE_H__
 
 #include <openspace/scenegraph/scenegraph.h>
-#include <openspace/util/runtimedata.h>
 
 #include <memory>
 #include <string>
@@ -44,7 +43,6 @@ public:
 	
 	bool initialize();
 
-	void setRuntimeData(RuntimeData* runtimeData);
     void setSceneGraph(SceneGraph* sceneGraph);
     SceneGraph* sceneGraph();
 
@@ -63,7 +61,6 @@ public:
 private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
-	RuntimeData* _runtimeData;
 	ABuffer* _abuffer;
 };
 
