@@ -25,6 +25,8 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
+#include <ghoul/logging/logmanager.h>
+
 // sgct header has to be included before all others due to Windows header
 #define SGCT_WINDOWS_INCLUDE
 #include "sgct.h"

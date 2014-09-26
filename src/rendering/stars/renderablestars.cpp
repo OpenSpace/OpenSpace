@@ -44,7 +44,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define printOpenGLError() printOglError(__FILE__, __LINE__)
 int printOglError(char *file, int line){
 	GLenum glErr;
 	int    retCode = 0;
@@ -96,14 +95,15 @@ RenderableStars::~RenderableStars(){
 
 std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num){
 	file.seekg(std::ios::beg);
-	for (int i = 0; i < num - 1; ++i){
+	for (size_t i = 0; i < num - 1; ++i){
 		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 	return file;
 }
 
 //these two methods exist only to debug geom shaders code. 
-float log10(float x){ return log(x)/ log(10); }
+float log10(float x){ return log(x)/ log(10.f); }
+
 psc psc_addition(psc v1, psc v2) {
 	float k = 10.f;
 	float ds = v2[3] - v1[3];
@@ -240,7 +240,7 @@ bool RenderableStars::readSpeckFile(const std::string& path){
 		}
 	}
 	v_stride    = 7;                      // stride in VBO, set manually for now.
-	v_size      = starcluster.size();     // size of VBO
+	v_size      = static_cast<int>(starcluster.size());     // size of VBO
 	v_total     = v_size / v_stride;      // total number of vertecies 
 
 	// create vao and interleaved vbo from vectors internal array
@@ -308,7 +308,7 @@ bool RenderableStars::deinitialize(){
 //#define TMAT
 void RenderableStars::render(const RenderData& data){
 	assert(_haloProgram);
-	printOpenGLError();
+	//printOpenGLError();
 	// activate shader
 	_haloProgram->activate();
 

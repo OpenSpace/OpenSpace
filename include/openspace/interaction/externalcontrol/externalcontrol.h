@@ -2,7 +2,7 @@
 #define EXTERNALCONTROL_H
 
 #include <openspace/util/powerscaledscalar.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtc/quaternion.hpp>
 
 namespace openspace {
