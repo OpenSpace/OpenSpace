@@ -248,7 +248,7 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 const std::string& observer,
 	                                 glm::dvec3& targetPosition,
 	                                 double& lightTime) const{
-	double pos[3] = { NULL, NULL, NULL };
+	double pos[3] = { 0.0, 0.0, 0.0 };
 	
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
 		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
@@ -340,7 +340,7 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 
 	for (int i = 0; i < maxVectors; i++){
 		for (int j = 0; j < 3; j++){
-			boundsArr[j + i*3] = NULL;
+			boundsArr[j + i*3] = 0.0;
 		}
 	}
 
