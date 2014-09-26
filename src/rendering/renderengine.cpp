@@ -94,8 +94,8 @@ bool RenderEngine::initializeGL()
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
+    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph

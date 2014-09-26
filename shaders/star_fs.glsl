@@ -8,7 +8,7 @@ in vec2 texCoord;
 layout(location = 2) in vec3 ge_brightness;
 
 
-//out vec4 diffuse;
+out vec4 diffuse;
 
 
 #include "ABuffer/abufferStruct.hglsl"
@@ -48,12 +48,12 @@ void main(void)
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 	vec4 color = bv2rgb(ge_brightness[0])/1.1;
-	//color.rgb = 1/ color.rgb;
-	color.a = 1-color.a;
-    vec4 diffuse = texture2D(texture1, texCoord)*color;
+	//color = 1/ color;
+	//color.a = 1-color.a;
+    diffuse = texture2D(texture1, texCoord)*color;
 
     
-   ///diffuse = vec4(Color, 1.0);
+  // diffuse = vec4(Color, 1.0);
 
    	vec4 position = vs_position;
 	float depth = pscDepth(position);
@@ -62,6 +62,6 @@ void main(void)
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
 
-	discard;
+	//discard;
     
 }
