@@ -45,7 +45,7 @@ namespace openspace {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
+	, _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
@@ -79,7 +79,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
 	addPropertySubOwner(_geometry);
 
-    addProperty(_colorTexturePath);
+	addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
@@ -151,11 +151,8 @@ void RenderablePlanet::render(const Camera* camera, const psc& thisPosition, Run
 
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", camera->viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
-    _programObject->setUniform("campos", campos.vec4());
-    _programObject->setUniform("objpos", currentPosition.vec4());
-    _programObject->setUniform("camrot", camrot);
-    _programObject->setUniform("scaling", scaling.vec2());
+	_programObject->setUniform("ModelTransform", transform);
+	setPscUniforms(_programObject, camera, currentPosition);
 	
     // Bind texture
     ghoul::opengl::TextureUnit unit;

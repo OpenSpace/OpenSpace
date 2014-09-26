@@ -32,6 +32,7 @@
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/camera.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/runtimedata.h>
 
@@ -58,6 +59,7 @@ public:
 
 protected:
     std::string findPath(const std::string& path);
+	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const psc& position);
 
 private:
 	properties::BoolProperty _enabled;

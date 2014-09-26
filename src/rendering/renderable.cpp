@@ -106,6 +106,13 @@ std::string Renderable::findPath(const std::string& path) {
     return "";
 }
 
+void Renderable::setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const psc& position) {
+	program->setUniform("campos", camera->position().vec4());
+	program->setUniform("objpos", position.vec4());
+	program->setUniform("camrot", camera->viewRotationMatrix());
+	program->setUniform("scaling", camera->scaling());
+}
+
 bool Renderable::isVisible() const {
 	return _enabled;
 }

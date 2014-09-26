@@ -249,25 +249,17 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
 
     // fetch data
     psc currentPosition         = thisPosition;
-    psc campos                  = camera->position();
-    glm::mat4 camrot            = camera->viewRotationMatrix();
-    PowerScaledScalar scaling   = camera->scaling();
 
     // psc addon(-1.1,0.0,0.0,0.0);
     // currentPosition += addon;
     psc addon(_boxOffset/100.0f); // TODO: Proper scaling/units
     currentPosition += addon; // Move box to model barycenter
 
-    // TODO: Use _id to identify this volume
     _boxProgram->activate();
-    _boxProgram->setUniform(_typeLocation, _id);
-
-    _boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
-    _boxProgram->setUniform("modelTransform", transform);
-    _boxProgram->setUniform("campos", campos.vec4());
-    _boxProgram->setUniform("objpos", currentPosition.vec4());
-    _boxProgram->setUniform("camrot", camrot);
-    _boxProgram->setUniform("scaling", scaling.vec2());
+	_boxProgram->setUniform(_typeLocation, _id);
+	_boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+	_boxProgram->setUniform("modelTransform", transform);
+	setPscUniforms(_boxProgram, camera, currentPosition);
 
     // make sure GL_CULL_FACE is enabled (it should be)
     glEnable(GL_CULL_FACE);

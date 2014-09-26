@@ -363,11 +363,11 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			distance(dist);
 		}
 		if (key == SGCT_KEY_Y) {
-			PowerScaledScalar dist(-speed * 100.0 * dt, 2.0);
+			PowerScaledScalar dist(-speed * 100.0 * dt, 6.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_H) {
-			PowerScaledScalar dist(speed * 100.0 * dt, 2.0);
+			PowerScaledScalar dist(speed * 100.0 * dt, 6.0);
 			distance(dist);
 		}
 	}

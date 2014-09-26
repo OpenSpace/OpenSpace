@@ -313,13 +313,8 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 	_haloProgram->activate();
 
 	// fetch data
-	psc currentPosition       = thisPosition;
-	psc campos                = camera->position();
-	glm::mat4 camrot          = camera->viewRotationMatrix();
-	PowerScaledScalar scaling = camera->scaling();
-	glm::mat4 transform       = glm::mat4(1); 
 	//scaling                   = glm::vec2(1, -22);  
-	scaling = glm::vec2(1, -19);  
+	glm::vec2 scaling = glm::vec2(1, -19);  
 
 #ifdef TMAT
 	transform = glm::rotate(transform, 
@@ -327,9 +322,9 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 							glm::vec3(0.0f, 1.0f, 0.0f));
 #endif
 	// disable depth test, enable additative blending
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
+	//glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 
 #ifdef GLSPRITES
 	glm::mat4 modelMatrix      = camera->modelMatrix();
@@ -342,11 +337,9 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 	_haloProgram->setUniform("projection", projectionMatrix);
 
 	//_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
-	_haloProgram->setUniform("ModelTransform", transform);
-	_haloProgram->setUniform("campos", campos.vec4());
-	_haloProgram->setUniform("objpos", currentPosition.vec4());
-	_haloProgram->setUniform("camrot", camrot);
-	_haloProgram->setUniform("scaling", scaling.vec2());
+	_haloProgram->setUniform("ModelTransform", glm::mat4(1));
+	setPscUniforms(_haloProgram, camera, thisPosition);
+	_haloProgram->setUniform("scaling", scaling);
 
 	// Bind texure
 	ghoul::opengl::TextureUnit unit;

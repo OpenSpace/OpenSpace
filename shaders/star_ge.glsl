@@ -6,17 +6,9 @@ const vec2 corners[4] = {
 	vec2(1.0, 1.0), 
 	vec2(1.0, 0.0) 
 };
-float k = 10.f;
-vec4 psc_addition(vec4 v1, vec4 v2) {
-	float ds = v2.w - v1.w;
-	if(ds >= 0) {
-		float p = pow(k,-ds);
-		return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-	} else {
-		float p = pow(k,ds);
-		return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-	}
-}
+
+#include "PowerScaling/powerScalingMath.hglsl"
+
 float log10( float x ){  return log(x) / log(10);   }
 
 in vec4 psc_position[];

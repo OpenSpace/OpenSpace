@@ -25,18 +25,12 @@
 #ifndef POWERSCALING_VS_H_HGLSL
 #define POWERSCALING_VS_H_HGLSL
 
-const float k = 10.0;
+uniform vec4 campos;
+uniform mat4 camrot;
+uniform vec2 scaling;
+uniform vec4 objpos;
 
-vec4 psc_addition(vec4 v1, vec4 v2) {
-	float ds = v2.w - v1.w;
-	if(ds >= 0) {
-		float p = pow(k,-ds);
-		return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-	} else {
-		float p = pow(k,ds);
-		return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-	}
-}
+#include "powerScalingMath.hglsl"
 
 vec4 psc_to_meter(vec4 v1, vec2 v2) {
 	float factor = v2.x * pow(k,v2.y + v1.w);
@@ -52,7 +46,7 @@ vec4 psc_scaling(vec4 v1, vec2 v2) {
 	}
 }
 
-vec4 pscTransform(vec4 vertexPosition, vec4 cameraPosition, vec2 scaling, mat4 modelTransform) {
+vec4 pscTransform(vec4 vertexPosition, mat4 modelTransform) {
 	vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
 	//vec4 lvp = ModelTransform * vertexPosition;
 	
@@ -61,7 +55,7 @@ vec4 pscTransform(vec4 vertexPosition, vec4 cameraPosition, vec2 scaling, mat4 m
 	//position = psc_addition(lvp,objpos);
 	
 	// PSC addition; rotated and viewscaled vertex and the cmaeras negative position
-	position = psc_addition(position,vec4(-cameraPosition.xyz,cameraPosition.w));
+	position = psc_addition(position,vec4(-campos.xyz,campos.w));
 	
 	// rotate the camera
 	local_vertex_pos =  mat3(camrot) * position.xyz;

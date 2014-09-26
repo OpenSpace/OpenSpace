@@ -1,10 +1,6 @@
 #version 440
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-uniform vec4 campos;
-uniform mat4 camrot;
-uniform vec2 scaling;
-uniform vec4 objpos;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -20,7 +16,7 @@ out vec3 vs_brightness;
 
 out vec4 psc_position;
 out vec4 cam_position;
-
+/*
 const float k = 10.0;
 const float dgr_to_rad = 0.0174532925;
 
@@ -48,12 +44,15 @@ vec4 psc_scaling(vec4 v1, vec2 v2) {
 		return vec4(v1.xyz * v2.x * pow(k,v2.y), v1.w);
 	}
 }
+*/
+
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 void main(){ 
 	vs_brightness = in_brightness;
 	psc_position  = in_position;
 	cam_position  = campos;
-	
+	/*
 	// rotate and scale vertex with model transform and add the translation
 	vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
 	//vec4 lvp = ModelTransform * in_position;
@@ -85,7 +84,19 @@ void main(){
 	// project the position to view space
 	//gl_Position =  ViewProjection * vs_position_rescaled;
 	gl_Position =  view * model * vs_position_rescaled;
+	*/
 	/*psc_position =  view * model * vs_position_rescaled;
 	gl_Position = psc_position; /// reduntant way but easier to go back. */
+
+
+
+	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+	//vs_normal = normalize(modelTransform * vec4(in_normal,0));
+	
+	vec4 position = pscTransform(in_position, ModelTransform);
+
+	// project the position to view space
+	//gl_Position =  ViewProjection * position;
+	gl_Position =  view * model * position;
 	
 }

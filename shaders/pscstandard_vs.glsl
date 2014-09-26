@@ -26,11 +26,6 @@
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-uniform vec4 campos;
-uniform mat4 camrot;
-uniform vec2 scaling;
-uniform vec4 objpos;
-uniform float time;
 
 layout(location = 0) in vec4 in_position;
 //in vec3 in_position;
@@ -54,7 +49,7 @@ void main()
 	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
 	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 	
-	vec4 position = pscTransform(in_position, campos, scaling, ModelTransform);
+	vec4 position = pscTransform(in_position, ModelTransform);
 	vs_position = position.xyz;
 	s = position.w;
 
