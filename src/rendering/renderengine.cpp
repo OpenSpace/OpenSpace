@@ -94,8 +94,8 @@ bool RenderEngine::initializeGL()
     // development
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+  //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
+   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -161,13 +161,6 @@ bool RenderEngine::initializeGL()
 
 void RenderEngine::postSynchronizationPreDraw()
 {
-	// Move time forward.
-	//_runtimeData->advanceTimeBy(1, DAY);
-	
-	//_runtimeData->advanceTimeBy(1, HOUR);
-	//_runtimeData->advanceTimeBy(30, MINUTE);
-	//_runtimeData->advanceTimeBy(1, MILLISECOND);
-	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
 
