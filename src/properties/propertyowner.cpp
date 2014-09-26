@@ -51,11 +51,7 @@ PropertyOwner::PropertyOwner()
 
 PropertyOwner::~PropertyOwner()
 {
-	for (Property* p : _properties)
-		delete p;
 	_properties.clear();
-	for (PropertyOwner* s : _subOwners)
-		delete s;
 	_subOwners.clear();
 }
 

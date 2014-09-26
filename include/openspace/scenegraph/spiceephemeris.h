@@ -34,10 +34,10 @@ namespace openspace {
 class SpiceEphemeris : public Ephemeris {
 public:
     SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    virtual ~SpiceEphemeris();
-    virtual bool initialize();
-    virtual const psc& position() const;
-	virtual void update(RuntimeData* runtimeData);
+    ~SpiceEphemeris();
+    bool initialize();
+    const psc& position() const;
+	void update(const UpdateData& data) override;
 
 private:
     std::string _targetName;
@@ -45,8 +45,6 @@ private:
     int _target;
     int _origin;
     psc _position;
-	double _currentEphemerisTime = -1;
-    
 };
     
 } // namespace openspace

@@ -28,7 +28,7 @@
 #include <limits>
 #include <vector>
 #include <iomanip>      
-
+#include <iterator>
 
 // openspace includes
 #include <openspace/rendering/stars/renderablestars.h>
@@ -306,7 +306,7 @@ bool RenderableStars::deinitialize(){
 }
 
 //#define TMAT
-void RenderableStars::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData){
+void RenderableStars::render(const RenderData& data){
 	assert(_haloProgram);
 	printOpenGLError();
 	// activate shader
@@ -327,9 +327,9 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 
 #ifdef GLSPRITES
-	glm::mat4 modelMatrix      = camera->modelMatrix();
-	glm::mat4 viewMatrix       = camera->viewMatrix();
-	glm::mat4 projectionMatrix = camera->projectionMatrix();
+	glm::mat4 modelMatrix      = data.camera.modelMatrix();
+	glm::mat4 viewMatrix       = data.camera.viewMatrix();
+	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
 // ---------------------- RENDER HALOS -----------------------------
 	_haloProgram->setUniform("model", modelMatrix);
@@ -338,7 +338,7 @@ void RenderableStars::render(const Camera* camera, const psc& thisPosition, Runt
 
 	//_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_haloProgram->setUniform("ModelTransform", glm::mat4(1));
-	setPscUniforms(_haloProgram, camera, thisPosition);
+	setPscUniforms(_haloProgram, &data.camera, data.position);
 	_haloProgram->setUniform("scaling", scaling);
 
 	// Bind texure
@@ -397,7 +397,7 @@ void RenderableStars::loadTexture(){
 	}
 }
 
-void RenderableStars::update()
+void RenderableStars::update(const UpdateData& data)
 {
 	
 }

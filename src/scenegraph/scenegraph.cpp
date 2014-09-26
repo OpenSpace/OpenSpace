@@ -32,6 +32,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/shadercreator.h>
 #include <openspace/query/query.h>
+#include <openspace/util/time.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
@@ -173,23 +174,35 @@ int property_getValue(lua_State* L) {
 	return 1;
 }
 
+/**
+ * \ingroup LuaScripts
+ * getPropertyValue(string):
+ * Returns the value of the property identified by the passed URI as a Lua object that can
+ * be passed to the setPropertyValue method.
+ */
+int loadScene(lua_State* L) {
+	const std::string _loggerCat = "loadScene";
+
+	// TODO Check for argument number (ab)
+	std::string sceneFile = luaL_checkstring(L, -1);
+
+	OsEng.renderEngine().sceneGraph()->scheduleLoadSceneFile(sceneFile);
+
+	return 0;
+}
+
 } // namespace luascriptfunctions
 
 SceneGraph::SceneGraph()
     : _focus(SceneGraphNode::RootNodeName)
     , _position(SceneGraphNode::RootNodeName)
     , _root(nullptr)
-	, _runtimeData(nullptr)
 {
 }
 
 SceneGraph::~SceneGraph()
 {
     deinitialize();
-}
-
-void SceneGraph::setRuntimeData(RuntimeData* runtimeData){
-	_runtimeData = runtimeData;
 }
 
 bool SceneGraph::initialize()
@@ -206,8 +219,7 @@ bool SceneGraph::initialize()
     typedef std::chrono::high_resolution_clock clock_;
     typedef std::chrono::duration<double, std::ratio<1> > second_;
 
-    std::chrono::time_point<clock_> beg_(clock_::now());
-
+    std::chrono::time_point<clock_> beginning(clock_::now());
 
     // pscstandard
     tmpProgram = sc.buildShader("pscstandard",
@@ -267,8 +279,8 @@ bool SceneGraph::initialize()
 
 
 
-    double elapsed = std::chrono::duration_cast<second_>(clock_::now() - beg_).count();
-    LERROR("Time to load shaders: " << elapsed);
+    double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
+    LINFO("Time to load shaders: " << elapsed);
 
     /*
 
@@ -432,9 +444,147 @@ bool SceneGraph::initialize()
     */
 //>>>>>>> develop
 
+    return true;
+}
+
+bool SceneGraph::deinitialize()
+{
+	clearSceneGraph();
+    return true;
+}
+
+void SceneGraph::update(const UpdateData& data)
+{
+	if (!_sceneGraphToLoad.empty()) {
+		OsEng.renderEngine().sceneGraph()->clearSceneGraph();
+		bool success = loadSceneInternal(_sceneGraphToLoad);
+		_sceneGraphToLoad = "";
+		if (!success)
+			return;
+	}
+
+    for (auto node : _nodes)
+        node->update(data);
+}
+
+void SceneGraph::evaluate(Camera* camera)
+{
+	if (_root)
+		_root->evaluate(camera);
+}
+
+void SceneGraph::render(const RenderData& data)
+{
+	if (_root)
+		_root->render(data);
+}
+
+void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
+	_sceneGraphToLoad = sceneDescriptionFilePath;
+}
+
+void SceneGraph::clearSceneGraph() {
+	    // deallocate the scene graph. Recursive deallocation will occur
+    delete _root;
+    _root = nullptr;
+
+    _nodes.erase(_nodes.begin(), _nodes.end());
+    _allNodes.erase(_allNodes.begin(), _allNodes.end());
+
+    _focus.clear();
+    _position.clear();
+}
+
+bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
+{
+    using ghoul::Dictionary;
+    using ghoul::lua::loadDictionaryFromFile;
+
+	if (!FileSys.fileExists(sceneDescriptionFilePath)) {
+		LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
+		return false;
+	}
+
+    LDEBUG("Loading scenegraph nodes");
+    if (_root != nullptr) {
+        LFATAL("Scenegraph already loaded");
+        return false;
+    }
+
+    // initialize the root node
+    _root = new SceneGraphNode();
+    _root->setName(SceneGraphNode::RootNodeName);
+    _nodes.push_back(_root);
+    _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
+
+    Dictionary dictionary;
+	//load default.scene 
+    loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
+
+	std::string&& sceneDescriptionDirectory =
+		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
+	std::string moduleDirectory(".");
+	dictionary.getValueSafe(constants::scenegraph::keyPathScene, moduleDirectory);
+
+	// The scene path could either be an absolute or relative path to the description
+	// paths directory
+	std::string&& relativeCandidate = sceneDescriptionDirectory +
+		ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
+	std::string&& absoluteCandidate = absPath(moduleDirectory);
+
+	if (FileSys.directoryExists(relativeCandidate))
+		moduleDirectory = relativeCandidate;
+	else if (FileSys.directoryExists(absoluteCandidate))
+		moduleDirectory = absoluteCandidate;
+	else {
+		LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
+			"path '" << moduleDirectory << "' that did not exist");
+		return false;
+	}
+
+    Dictionary moduleDictionary;
+    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
+        std::vector<std::string> keys = moduleDictionary.keys();
+        std::sort(keys.begin(), keys.end());
+        for (const std::string& key : keys) {
+            std::string moduleFolder;
+			if (moduleDictionary.getValue(key, moduleFolder))
+                loadModule(moduleDirectory + "/" + moduleFolder);
+        }
+    }
+
+    // TODO: Make it less hard-coded and more flexible when nodes are not found
+    Dictionary cameraDictionary;
+    if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
+        LDEBUG("Camera dictionary found");
+        std::string focus;
+        std::string position;
+
+        if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
+            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus)) {
+            auto focusIterator = _allNodes.find(focus);
+            if (focusIterator != _allNodes.end()) {
+                _focus = focus;
+                LDEBUG("Setting camera focus to '" << _focus << "'");
+            }
+            else
+                LERROR("Could not find focus object '" << focus << "'");
+        }
+        if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
+            && cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
+            auto positionIterator = _allNodes.find(position);
+            if (positionIterator != _allNodes.end()) {
+                _position = position;
+                LDEBUG("Setting camera position to '" << _position << "'");
+            }
+            else
+                LERROR("Could not find object '" << position << "' to position camera");
+        }
+    }
+
     // Initialize all nodes
     for (auto node : _nodes) {
-		bool success = node->initialize(_runtimeData);
+		bool success = node->initialize();
         if (success)
             LDEBUG(node->name() << " initialized successfully!");
         else
@@ -442,7 +592,9 @@ bool SceneGraph::initialize()
     }
 
     // update the position of all nodes
-	update();
+	// TODO need to check this; unnecessary? (ab)
+    for (auto node : _nodes)
+		node->update({Time::ref().currentTime()});
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();
@@ -479,102 +631,6 @@ bool SceneGraph::initialize()
 
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler().setFocusNode(focusNode);
-    }
-
-    return true;
-}
-
-bool SceneGraph::deinitialize()
-{
-    // deallocate the scene graph. Recursive deallocation will occur
-    delete _root;
-    _root = nullptr;
-
-    _nodes.erase(_nodes.begin(), _nodes.end());
-    _allNodes.erase(_allNodes.begin(), _allNodes.end());
-
-    _focus.clear();
-    _position.clear();
-
-    return true;
-}
-
-void SceneGraph::update()
-{
-    for (auto node : _nodes)
-        node->update();
-}
-
-void SceneGraph::evaluate(Camera* camera)
-{
-    _root->evaluate(camera);
-}
-
-void SceneGraph::render(Camera* camera)
-{
-    _root->render(camera);
-}
-
-bool SceneGraph::loadScene(const std::string& sceneDescriptionFilePath,
-                           const std::string& defaultModulePath)
-{
-    using ghoul::Dictionary;
-    using ghoul::lua::loadDictionaryFromFile;
-
-    LDEBUG("Loading scenegraph nodes");
-    if (_root != nullptr) {
-        LFATAL("Scenegraph already loaded");
-        return false;
-    }
-
-
-    // initialize the root node
-    _root = new SceneGraphNode();
-    _root->setName(SceneGraphNode::RootNodeName);
-    _nodes.push_back(_root);
-    _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
-
-    Dictionary dictionary;
-	//load default.scene 
-    loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
-    Dictionary moduleDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
-        std::vector<std::string> keys = moduleDictionary.keys();
-        std::sort(keys.begin(), keys.end());
-        for (const std::string& key : keys) {
-            std::string moduleFolder;
-			if (moduleDictionary.getValue(key, moduleFolder))
-                loadModule(defaultModulePath + "/" + moduleFolder);
-        }
-    }
-
-    // TODO: Make it less hard-coded and more flexible when nodes are not found
-    Dictionary cameraDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
-        LDEBUG("Camera dictionary found");
-        std::string focus;
-        std::string position;
-
-        if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus)) {
-            auto focusIterator = _allNodes.find(focus);
-            if (focusIterator != _allNodes.end()) {
-                _focus = focus;
-                LDEBUG("Setting camera focus to '" << _focus << "'");
-            }
-            else
-                LERROR("Could not find focus object '" << focus << "'");
-        }
-        if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
-            auto positionIterator = _allNodes.find(position);
-            if (positionIterator != _allNodes.end()) {
-                _position = position;
-                LDEBUG("Setting camera position to '" << _position << "'");
-            }
-            else
-                LERROR("Could not find object '" << position << "' to position camera");
-        }
     }
 
     return true;
@@ -650,7 +706,13 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 				"getPropertyValue",
 				&luascriptfunctions::property_getValue,
 				"getPropertyValue(string): Returns the value the property, identified by "
-				"the provided URI, has"
+				"the provided URI."
+			},
+			{
+				"loadScene",
+				&luascriptfunctions::loadScene,
+				"loadScene(string): Loads the scene found at the file passed as an "
+				"argument. If a scene is already loaded, it is unloaded first"
 			}
 		}
 	};

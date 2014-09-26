@@ -47,7 +47,7 @@ const psc& StaticEphemeris::position() const {
     return _position;
 }
 
-void StaticEphemeris::update(RuntimeData* runtimeData) {
+void StaticEphemeris::update(const UpdateData&) {
 
 }
 

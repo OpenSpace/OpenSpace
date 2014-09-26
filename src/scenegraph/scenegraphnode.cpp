@@ -128,7 +128,6 @@ SceneGraphNode::SceneGraphNode()
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
-	, _runtimeData(nullptr)
 {
 }
 
@@ -137,7 +136,7 @@ SceneGraphNode::~SceneGraphNode()
     deinitialize();
 }
 
-bool SceneGraphNode::initialize(RuntimeData* runtimeData)
+bool SceneGraphNode::initialize()
 {
     if (_renderable != nullptr)
         _renderable->initialize();
@@ -145,7 +144,6 @@ bool SceneGraphNode::initialize(RuntimeData* runtimeData)
     if (_ephemeris != nullptr)
         _ephemeris->initialize();
 
-	_runtimeData = runtimeData;
     return true;
 }
 
@@ -173,9 +171,12 @@ bool SceneGraphNode::deinitialize()
 }
 
 // essential
-void SceneGraphNode::update()
+void SceneGraphNode::update(const UpdateData& data)
 {
-    _ephemeris->update(_runtimeData);
+	if (_ephemeris)
+		_ephemeris->update(data);
+	if (_renderable)
+		_renderable->update(data);
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
@@ -220,9 +221,11 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     }
 }
 
-void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
+void SceneGraphNode::render(const RenderData& data)
 {
-    const psc thisPosition = parentPosition + _ephemeris->position();
+    const psc thisPosition = data.position + _ephemeris->position();
+
+	RenderData newData = {data.camera, thisPosition};
 
     // check if camera is outside the node boundingsphere
     /*if (!_boundingSphereVisible) {
@@ -231,13 +234,13 @@ void SceneGraphNode::render(const Camera* camera, const psc& parentPosition)
 
     if (_renderableVisible && _renderable->isVisible()) {
         // LDEBUG("Render");
-		_renderable->render(camera, thisPosition, _runtimeData);
+		_renderable->render(newData);
     }
 
     // evaluate all the children, tail-recursive function(?)
 
     for (auto& child : _children) {
-        child->render(camera, thisPosition);
+        child->render(newData);
     }
 }
 
@@ -317,7 +320,6 @@ PowerScaledScalar SceneGraphNode::boundingSphere() const{
 // renderable
 void SceneGraphNode::setRenderable(Renderable* renderable) {
     _renderable = renderable;
-    update();
 }
 
 const Renderable* SceneGraphNode::renderable() const

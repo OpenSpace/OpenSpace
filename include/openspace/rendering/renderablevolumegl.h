@@ -44,8 +44,8 @@ public:
 	bool initialize();
     bool deinitialize();
 
-	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
-	virtual void update();
+	virtual void render(const RenderData& data) override;
+	virtual void update(const UpdateData& data) override;
 
 private:
 	ghoul::Dictionary _hintsDictionary;
@@ -69,7 +69,6 @@ private:
 	float _w;
 	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
-	RuntimeData* _runtimeData;
     bool _updateTransferfunction;
     int _id;
 };

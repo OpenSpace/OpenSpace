@@ -24,10 +24,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-// sgct header has to be included before all others due to Windows header
-#define SGCT_WINDOWS_INCLUDE
-#include "sgct.h"
-
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -37,7 +33,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/runtimedata.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -324,26 +319,11 @@ bool OpenSpaceEngine::initialize()
 	OsEng.configurationManager().getValueSafe(constants::openspaceengine::keyConfigTimekernel, timeKernel);
 
     // initialize OpenSpace helpers
-    //Time::init();
-	//Time::ref().setTime("2007 feb 26 17:41:00");
-	//Time::ref().setTime("2010 jun 13 13:50:00");
-
-
-	//std::cout <<"Initial time  : " << initialData->getTime() << std::endl;
-
 	SpiceManager::initialize();
     Time::initialize(timeKernel);
     Spice::init();
     Spice::ref().loadDefaultKernels(); // changeto: instantiate spicemanager, load kernels. 
 
-	RuntimeData* initialData = new RuntimeData;
-	initialData->setTime(Time::ref().currentTime());
-	
-	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de431_part-1.bsp"), "SPK_LARGE1");
-	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de431_part-2.bsp"), "SPK_LARGE2");
-
-	//SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/981005_PLTEPH-DE405S.bsp"), "JUPITER");
-	
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc")       , "PCK");
@@ -363,36 +343,18 @@ bool OpenSpaceEngine::initialize()
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine->setSceneGraph(sceneGraph);
 	
-    std::string sceneDescriptionPath;
-	bool success = OsEng.configurationManager().getValueSafe(
-		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
-	if (!success) {
-        LFATAL("The configuration does not contain a scene file under key '" <<
-				constants::openspaceengine::keyConfigScene << "'");
-        return false;
-    }
-
-	if (!FileSys.fileExists(sceneDescriptionPath)) {
-        LFATAL("Could not find scene description '" << sceneDescriptionPath << "'");
-        return false;
-    }
-
-    std::string scenePath;
-    success = _configurationManager->getValueSafe(
-		constants::openspaceengine::keyPathScene, scenePath);
-    if (!success) {
-        LFATAL("Could not find key '" << constants::openspaceengine::keyPathScene <<
-			"' in configuration file '" << sceneDescriptionPath << "'");
-        return false;
-    }
 
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
     _renderEngine->initialize();
-	_renderEngine->setRuntimeData(initialData);
-	sceneGraph->setRuntimeData(initialData);
-    sceneGraph->loadScene(sceneDescriptionPath, scenePath);
 	sceneGraph->initialize();
+
+    std::string sceneDescriptionPath;
+	bool success = OsEng.configurationManager().getValueSafe(
+		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
+	if (success)
+	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
+
     _renderEngine->setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY
@@ -406,28 +368,24 @@ bool OpenSpaceEngine::initialize()
     _engine->_interactionHandler->connectDevices();
 
     // Run start up scripts
-    //using ghoul::Dictionary;
-    //using constants::openspaceengine::keyStartupScript;
     ghoul::Dictionary scripts;
 	success = _engine->configurationManager().getValueSafe(
 		constants::openspaceengine::keyStartupScript, scripts);
-    if (success) {
-        for (size_t i = 0; i < scripts.size(); ++i) {
-            std::stringstream stream;
-            // Dictionary-size is 0-based; script numbers are 1-based
-            stream << (i + 1);
-            const std::string& key = stream.str();
-            const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
-            if (!hasKey) {
-                LERROR("The startup scripts have to be declared in a simple array format");
-                break;
-            }
-            
-            std::string scriptPath;
-            scripts.getValue(key, scriptPath);
-            std::string&& absoluteScriptPath = absPath(scriptPath);
-            _engine->scriptEngine().runScriptFile(absoluteScriptPath);
+    for (size_t i = 1; i <= scripts.size(); ++i) {
+        std::stringstream stream;
+        stream << i;
+        const std::string& key = stream.str();
+        const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
+        if (!hasKey) {
+            LERROR("The startup scripts have to be declared in a simple array format."
+				" Startup scripts did not contain the key '" << key << "'");
+            break;
         }
+            
+        std::string scriptPath;
+        scripts.getValue(key, scriptPath);
+        std::string&& absoluteScriptPath = absPath(scriptPath);
+        _engine->scriptEngine().runScriptFile(absoluteScriptPath);
     }
 
 #ifdef OPENSPACE_VIDEO_EXPORT
@@ -545,8 +503,6 @@ void OpenSpaceEngine::keyboardCallback(int key, int action)
         _interactionHandler->keyboardCallback(key, action);
     }
 #ifdef OPENSPACE_VIDEO_EXPORT
-    // LDEBUG("key: " << key);
-    // LDEBUG("SGCT_KEY_PRINT_SCREEN: " << SGCT_KEY_PRINT_SCREEN);
     if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
         _doVideoExport = !_doVideoExport;
 #endif
@@ -577,32 +533,32 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
 
 void OpenSpaceEngine::encode()
 {
-#ifdef FLARE_ONLY
-    _flare->encode();
-#else
-    std::vector<char> dataStream(1024);
-
-    size_t offset = 0;
-    // serialization
-    _renderEngine->serialize(dataStream, offset);
-
-    _synchronizationBuffer.setVal(dataStream);
-    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
-#endif
+//#ifdef FLARE_ONLY
+//    _flare->encode();
+//#else
+//    std::vector<char> dataStream(1024);
+//
+//    size_t offset = 0;
+//    // serialization
+//    _renderEngine->serialize(dataStream, offset);
+//
+//    _synchronizationBuffer.setVal(dataStream);
+//    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+//#endif
 }
 
 void OpenSpaceEngine::decode()
 {
-#ifdef FLARE_ONLY
-    _flare->decode();
-#else
-    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-    std::vector<char> dataStream = std::move(_synchronizationBuffer.getVal());
-    size_t offset = 0;
-
-    // deserialize in the same order as done in serialization
-    _renderEngine->deserialize(dataStream, offset);
-#endif
+//#ifdef FLARE_ONLY
+//    _flare->decode();
+//#else
+//    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+//    std::vector<char> dataStream = std::move(_synchronizationBuffer.getVal());
+//    size_t offset = 0;
+//
+//    // deserialize in the same order as done in serialization
+//    _renderEngine->deserialize(dataStream, offset);
+//#endif
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars,

@@ -30,13 +30,12 @@
 #include <map>
 
 #include <openspace/util/camera.h>
-
+#include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/util/runtimedata.h>
 
 namespace openspace {
 
@@ -48,8 +47,6 @@ public:
     // constructors & destructor
     SceneGraph();
     ~SceneGraph();
-
-	void setRuntimeData(RuntimeData* runtimeData);
 
     /**
      * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
@@ -64,15 +61,15 @@ public:
     /*
      * Load the scenegraph from the provided folder
      */
-    bool loadScene(const std::string& sceneDescriptionFilePath,
-                   const std::string& defaultModulePath);
+    void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
+	void clearSceneGraph();
 
     void loadModule(const std::string& modulePath);
 
     /*
      * Updates all SceneGraphNodes relative positions
      */
-    void update();
+    void update(const UpdateData& data);
 
     /*
      * Evaluates if the SceneGraphNodes are visible to the provided camera
@@ -82,7 +79,7 @@ public:
     /*
      * Render visible SceneGraphNodes using the provided camera
      */
-    void render(Camera* camera);
+    void render(const RenderData& data);
 
     /*
      * Prints the SceneGraph tree. For debugging purposes
@@ -111,13 +108,16 @@ public:
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
+	bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
+
     std::string _focus, _position;
 
     // actual scenegraph
     SceneGraphNode* _root;
     std::vector<SceneGraphNode*> _nodes;
     std::map<std::string, SceneGraphNode*> _allNodes;
-	RuntimeData* _runtimeData;
+
+	std::string _sceneGraphToLoad;
 };
 
 } // namespace openspace

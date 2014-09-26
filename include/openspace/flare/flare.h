@@ -22,71 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FLARE_H__
-#define __FLARE_H__
+// Source is still in here to cannibalize later (ab)
 
-#include <GL/glew.h>
-#include <ghoul/logging/logmanager.h>
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-#include <openspace/flare/Animator.h>
-#include <openspace/flare/Raycaster.h>
-#include <openspace/flare/Config.h>
-#include <openspace/rendering/renderable.h>
-
-namespace openspace {
-
-class Flare: public Renderable {
-public:
-	Flare();
-	~Flare();
-    
-    bool initialize();
-    bool deinitialize();
-    
-	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
-	virtual void update();
-    
-	void render();
-	void initNavigation();
-
-	void keyboard(int key, int action);
-	void mouse(int button, int action);
-	void preSync();
-	void postSyncPreDraw();
-	void postDraw();
-	void encode();
-	void decode();
-
-private:
-	void init();
-
-	osp::Config* _config;
-	osp::Raycaster* _raycaster;
-	osp::Animator* _animator;
-
-	sgct::SharedInt _timeStep;
-	sgct::SharedBool _animationPaused;
-	sgct::SharedBool _fpsMode;
-	sgct::SharedFloat _elapsedTime;
-	sgct::SharedInt _manualTimestep;
-	sgct::SharedFloat _pitch;
-	sgct::SharedFloat _yaw;
-	sgct::SharedFloat _roll;
-	sgct::SharedFloat _translateX;
-	sgct::SharedFloat _translateY;
-	sgct::SharedFloat _translateZ;
-	sgct::SharedBool _reloadFlag;
-
-	float _oldTime;
-	float _currentTime;
-	bool _leftMouseButton;
-	double _currentMouseX;
-	double _currentMouseY;
-	double _lastMouseX;
-	double _lastMouseY;
-};
-
-} // namespace openspace
-
-#endif // __FLARE_H__
+//#ifndef __FLARE_H__
+//#define __FLARE_H__
+//
+//#include <GL/glew.h>
+//#include <ghoul/logging/logmanager.h>
+//#define SGCT_WINDOWS_INCLUDE
+//#include <sgct.h>
+//#include <openspace/flare/Animator.h>
+//#include <openspace/flare/Raycaster.h>
+//#include <openspace/flare/Config.h>
+//#include <openspace/rendering/renderable.h>
+//
+//namespace openspace {
+//
+//class Flare: public Renderable {
+//public:
+//	Flare();
+//	~Flare();
+//    
+//    bool initialize();
+//    bool deinitialize();
+//    
+//	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
+//	virtual void update();
+//    
+//	void render();
+//	void initNavigation();
+//
+//	void keyboard(int key, int action);
+//	void mouse(int button, int action);
+//	void preSync();
+//	void postSyncPreDraw();
+//	void postDraw();
+//	void encode();
+//	void decode();
+//
+//private:
+//	void init();
+//
+//	osp::Config* _config;
+//	osp::Raycaster* _raycaster;
+//	osp::Animator* _animator;
+//
+//	sgct::SharedInt _timeStep;
+//	sgct::SharedBool _animationPaused;
+//	sgct::SharedBool _fpsMode;
+//	sgct::SharedFloat _elapsedTime;
+//	sgct::SharedInt _manualTimestep;
+//	sgct::SharedFloat _pitch;
+//	sgct::SharedFloat _yaw;
+//	sgct::SharedFloat _roll;
+//	sgct::SharedFloat _translateX;
+//	sgct::SharedFloat _translateY;
+//	sgct::SharedFloat _translateZ;
+//	sgct::SharedBool _reloadFlag;
+//
+//	float _oldTime;
+//	float _currentTime;
+//	bool _leftMouseButton;
+//	double _currentMouseX;
+//	double _currentMouseY;
+//	double _lastMouseX;
+//	double _lastMouseY;
+//};
+//
+//} // namespace openspace
+//
+//#endif // __FLARE_H__

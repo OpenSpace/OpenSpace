@@ -181,21 +181,21 @@ bool RenderableSphericalGrid::initialize(){
 	return completeSuccess;
 }
 
-void RenderableSphericalGrid::render(const Camera* camera, const psc& thisPosition, RuntimeData* runtimeData){
+void RenderableSphericalGrid::render(const RenderData& data){
 	assert(_gridProgram);
 	_gridProgram->activate();
 
 	// fetch data
-	psc currentPosition = thisPosition;
-	psc campos = camera->position();
-	glm::mat4 camrot = camera->viewRotationMatrix();
+	psc currentPosition = data.position;
+	psc campos = data.camera.position();
+	glm::mat4 camrot = data.camera.viewRotationMatrix();
 	// PowerScaledScalar scaling = camera->scaling();
 	PowerScaledScalar scaling = glm::vec2(1, -6);
 
 	glm::mat4 transform = glm::mat4(1);
 
 	// setup the data to the shader
-	_gridProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_gridProgram->setUniform("ModelTransform", transform);
 	_gridProgram->setUniform("campos", campos.vec4());
 	_gridProgram->setUniform("objpos", currentPosition.vec4());
@@ -216,7 +216,7 @@ void RenderableSphericalGrid::render(const Camera* camera, const psc& thisPositi
 	_gridProgram->deactivate();
 	
 }
-void RenderableSphericalGrid::update(){
-
+void RenderableSphericalGrid::update(const UpdateData& data){
 }
+
 }

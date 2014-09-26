@@ -68,6 +68,6 @@ bool Ephemeris::initialize() {
     return true;
 }
     
-void Ephemeris::update() {}
+void Ephemeris::update(const UpdateData& data) {}
 
 } // namespace openspace

@@ -27,6 +27,7 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -43,8 +44,8 @@ public:
 	bool initialize();
 	bool deinitialize();
 
-	virtual void render(const Camera *camera, const psc& thisPosition, RuntimeData* runtimeData);
-	virtual void update();
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 
 private:
 	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);

@@ -22,51 +22,24 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __UPDATESTRUCTURES_H__
+#define __UPDATESTRUCTURES_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
-
-class RenderablePlanet : public Renderable {
-public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-protected:
-    void loadTexture();
-
-private:
-    properties::StringProperty _colorTexturePath;
-
-    ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry;
-
-	glm::dmat3 _stateMatrix;
-
-	std::string _target;
+struct UpdateData {
+	double time;
 };
 
-}  // namespace openspace
+struct RenderData {
+	const Camera& camera;
+	psc position;
 
-#endif  // __RENDERABLEPLANET_H__
+};
+
+}
+
+#endif // __UPDATESTRUCTURES_H__

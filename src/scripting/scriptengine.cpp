@@ -122,6 +122,20 @@ namespace luascriptfunctions {
 		return 0;
 	}
 
+	/**
+	 * \ingroup LuaScripts
+	 * absPath(string):
+	 * Passes the argument to FileSystem::absolutePath, which resolves occuring path
+	 * tokens and returns the absolute path.
+	 */
+	int absolutePath(lua_State* L) {
+		// TODO check number of arguments (ab)
+		std::string path = luaL_checkstring(L, -1);
+		path = absPath(path);
+		lua_pushstring(L, path.c_str());
+		return 1;
+	}
+
 } // namespace luascriptfunctions
 
 namespace scripting {
@@ -371,6 +385,12 @@ void ScriptEngine::addBaseLibrary() {
 				&luascriptfunctions::printFatal,
 				"printFatal(*): Logs the passed value to the installed LogManager with a "
 				"LogLevel of 'Fatal'"
+			},
+			{
+				"absPath",
+				&luascriptfunctions::absolutePath,
+				"absPath(string): Returns the absolute path to the passed path, resolving"
+				" path tokens as well as resolving relative paths"
 			}
         }
     };

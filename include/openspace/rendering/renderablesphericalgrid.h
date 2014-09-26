@@ -30,6 +30,7 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
+
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -43,8 +44,8 @@ public:
 	bool initialize()   override;
 	bool deinitialize() override;
 
-	void render(const Camera* camera, const psc& position, RuntimeData* runtimeData) override;
-	void update() override;
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 private:
 protected:
 	typedef struct {

@@ -228,7 +228,7 @@ bool RenderableVolumeGL::deinitialize() {
     return true;
 }
 
-void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, RuntimeData* runtimeData) {
+void RenderableVolumeGL::render(const RenderData& data) {
     if(_updateTransferfunction) {
         _updateTransferfunction = false;
         ghoul::opengl::Texture* transferFunction = loadTransferFunction(_transferFunctionPath);
@@ -248,7 +248,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
     transform = glm::scale(transform, _boxScaling);
 
     // fetch data
-    psc currentPosition         = thisPosition;
+    psc currentPosition         = data.position;
 
     // psc addon(-1.1,0.0,0.0,0.0);
     // currentPosition += addon;
@@ -257,9 +257,9 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
 
     _boxProgram->activate();
 	_boxProgram->setUniform(_typeLocation, _id);
-	_boxProgram->setUniform("modelViewProjection", camera->viewProjectionMatrix());
+	_boxProgram->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_boxProgram->setUniform("modelTransform", transform);
-	setPscUniforms(_boxProgram, camera, currentPosition);
+	setPscUniforms(_boxProgram, &data.camera, currentPosition);
 
     // make sure GL_CULL_FACE is enabled (it should be)
     glEnable(GL_CULL_FACE);
@@ -276,7 +276,7 @@ void RenderableVolumeGL::render(const Camera *camera, const psc &thisPosition, R
     _boxProgram->deactivate();
 }
 
-void RenderableVolumeGL::update() {
+void RenderableVolumeGL::update(const UpdateData& data) {
 }
 
 } // namespace openspace
