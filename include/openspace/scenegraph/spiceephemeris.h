@@ -42,8 +42,6 @@ public:
 private:
     std::string _targetName;
     std::string _originName;
-    int _target;
-    int _origin;
     psc _position;
 };
     

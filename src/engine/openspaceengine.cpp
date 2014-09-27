@@ -29,7 +29,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <openspace/util/spice.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
@@ -75,7 +74,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 OpenSpaceEngine::~OpenSpaceEngine()
 {
 	SpiceManager::deinitialize();
-    Spice::deinit();
     Time::deinitialize();
     DeviceIdentifier::deinit();
     FileSystem::deinitialize();
@@ -252,8 +250,6 @@ bool OpenSpaceEngine::initialize()
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
     Time::initialize(timeKernel);
-    Spice::init();
-    Spice::ref().loadDefaultKernels(); // changeto: instantiate spicemanager, load kernels. 
 
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");

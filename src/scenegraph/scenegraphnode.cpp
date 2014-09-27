@@ -24,7 +24,6 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraphnode.h>
-#include <openspace/util/spice.h>
 #include <openspace/query/query.h>
 #include <openspace/util/constants.h>
 

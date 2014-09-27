@@ -28,7 +28,6 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/shadercreator.h>
 #include <openspace/query/query.h>
