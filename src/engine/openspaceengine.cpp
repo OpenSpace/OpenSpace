@@ -52,7 +52,6 @@ using namespace openspace::scripting;
 namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
     const std::string _configurationFile = "openspace.cfg";
-    const std::string _basePathToken = "${BASE_PATH}";
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
     
     const std::string _sgctConfigArgumentCommand = "-config";
@@ -69,7 +68,7 @@ namespace openspace {
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
-    : _configurationManager(new ghoul::Dictionary)
+    : _configurationManager(new ConfigurationManager)
     , _interactionHandler(new InteractionHandler)
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new ScriptEngine)
@@ -113,45 +112,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments()
           "Provides the path to the OpenSpace configuration file");
     _commandlineParser->addCommand(configurationFileCommand);
     
-    return true;
-}
-
-void OpenSpaceEngine::registerPathsFromDictionary(const ghoul::Dictionary& dictionary)
-{
-    const std::vector<std::string>& pathKeys = dictionary.keys();
-    for (const std::string& key : pathKeys) {
-        std::string p;
-        if (dictionary.getValue(key, p)) {
-            const std::string fullKey
-                  = ghoul::filesystem::FileSystem::TokenOpeningBraces + key
-                    + ghoul::filesystem::FileSystem::TokenClosingBraces;
-            LDEBUG("Registering path " << fullKey << ": " << p);
-			
-			bool override = (_basePathToken == fullKey);
-			
-            if (override)
-                LINFO("Overriding base path with '" << p << "'");
-            FileSys.registerPathToken(fullKey, p, override);
-        }
-    }
-}
-
-bool OpenSpaceEngine::registerBasePathFromConfigurationFile(const std::string& filename)
-{
-    if (!FileSys.fileExists(filename))
-        return false;
-
-    const std::string absolutePath = FileSys.absolutePath(filename);
-
-    std::string::size_type last
-          = absolutePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-    if (last == std::string::npos)
-        return false;
-
-    std::string basePath = absolutePath.substr(0, last);
-
-    FileSys.registerPathToken(_basePathToken, basePath);
-
     return true;
 }
 
@@ -232,33 +192,19 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     }
 	LINFO("Configuration Path: '" << FileSys.absolutePath(configurationFilePath) << "'");
 
-
-    // Registering base path
-    LDEBUG("Registering base path");
-    if (!OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
-        LFATAL("Could not register base path");
-        return false;
-    }
-
-    
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
-    ghoul::Dictionary& configuration = _engine->configurationManager();
-    ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-    ghoul::Dictionary pathsDictionary;
-	const bool success = configuration.getValueSafe(constants::openspaceengine::keyPaths, pathsDictionary);
-	if (success)
-        OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
-    else {
-        LFATAL("Configuration file does not contain paths token '" << constants::openspaceengine::keyPaths << "'");
-        return false;
-    }
-
+	const bool configLoadSuccess = _engine->configurationManager().loadFromFile(
+																configurationFilePath);
+	if (!configLoadSuccess) {
+		LERROR("Loading of configuration file '" << configurationFilePath << "' failed");
+		return false;
+	}
     
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
 	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-	configuration.getValueSafe(constants::openspaceengine::keyConfigSgct,
+	_engine->configurationManager().getValueSafe(constants::configurationmanager::keyConfigSgct,
 								sgctConfigurationPath);
     
     // Prepend the outgoing sgctArguments with the program name
@@ -316,7 +262,7 @@ bool OpenSpaceEngine::initialize()
     SysCap.logCapabilities();
 
 	std::string timeKernel;
-	OsEng.configurationManager().getValueSafe(constants::openspaceengine::keyConfigTimekernel, timeKernel);
+	OsEng.configurationManager().getValueSafe(constants::configurationmanager::keyConfigTimekernel, timeKernel);
 
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
@@ -351,7 +297,7 @@ bool OpenSpaceEngine::initialize()
 
     std::string sceneDescriptionPath;
 	bool success = OsEng.configurationManager().getValueSafe(
-		constants::openspaceengine::keyConfigScene, sceneDescriptionPath);
+		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
@@ -370,7 +316,7 @@ bool OpenSpaceEngine::initialize()
     // Run start up scripts
     ghoul::Dictionary scripts;
 	success = _engine->configurationManager().getValueSafe(
-		constants::openspaceengine::keyStartupScript, scripts);
+		constants::configurationmanager::keyStartupScript, scripts);
     for (size_t i = 1; i <= scripts.size(); ++i) {
         std::stringstream stream;
         stream << i;
@@ -395,7 +341,7 @@ bool OpenSpaceEngine::initialize()
     return true;
 }
 
-ghoul::Dictionary& OpenSpaceEngine::configurationManager()
+ConfigurationManager& OpenSpaceEngine::configurationManager()
 {
     // TODO custom assert (ticket #5)
     assert(_configurationManager);

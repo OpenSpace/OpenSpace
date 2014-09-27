@@ -33,7 +33,8 @@
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/engine/configurationmanager.h>
+//#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
@@ -74,11 +75,9 @@ public:
     static bool isInitialized();
     bool initialize();
 
-    static void registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
     static bool findConfiguration(std::string& filename);
 
-    ghoul::Dictionary& configurationManager();
+    ConfigurationManager& configurationManager();
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
@@ -108,7 +107,7 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    ghoul::Dictionary* _configurationManager;
+    ConfigurationManager* _configurationManager;
     InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
 	scripting::ScriptEngine* _scriptEngine;

@@ -29,13 +29,17 @@
 
 namespace openspace {
 namespace constants {
-namespace openspaceengine {
+
+namespace configurationmanager {
     const std::string keyPaths = "Paths";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
 	const std::string keyConfigTimekernel = "SpiceTimeKernel";
-} // namespace openspaceengine
+	namespace paths {
+		const std::string keyBasePath = "BASE_PATH";
+	} // namespace paths
+} // namespace configurationmanager
 
 namespace scenegraph {
     const std::string keyPathScene = "ScenePath";
