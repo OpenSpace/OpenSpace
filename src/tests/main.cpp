@@ -36,6 +36,7 @@
 #include <openspace/tests/test_luaconversions.inl>
 #include <openspace/tests/test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spice.h>
@@ -64,20 +65,8 @@ int main(int argc, char** argv) {
     }
 	LINFO("Configuration file found: " << FileSys.absolutePath(configurationFilePath));
     
-    LDEBUG("Registering base path");
-    if( ! openspace::OpenSpaceEngine::registerBasePathFromConfigurationFile(configurationFilePath)) {
-        LFATAL("Could not register base path");
-        assert(false);
-    }
-    
-    ghoul::Dictionary configuration;
-    ghoul::lua::loadDictionaryFromFile(configurationFilePath, configuration);
-	if (configuration.hasKey(openspace::constants::openspaceengine::keyPaths)) {
-        ghoul::Dictionary pathsDictionary;
-		if (configuration.getValue(openspace::constants::openspaceengine::keyPaths, pathsDictionary)) {
-            openspace::OpenSpaceEngine::registerPathsFromDictionary(pathsDictionary);
-        }
-    }
+	openspace::ConfigurationManager manager;
+	manager.loadFromFile(configurationFilePath);
     
     openspace::FactoryManager::initialize();
     

@@ -107,11 +107,11 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    ConfigurationManager* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-	scripting::ScriptEngine* _scriptEngine;
-	ghoul::cmdparser::CommandlineParser* _commandlineParser;
+    std::unique_ptr<ConfigurationManager> _configurationManager;
+    std::unique_ptr<InteractionHandler> _interactionHandler;
+    std::unique_ptr<RenderEngine> _renderEngine;
+	std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+	std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
 #ifdef OPENSPACE_VIDEO_EXPORT
     bool _doVideoExport;
 #endif

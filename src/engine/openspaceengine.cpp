@@ -78,15 +78,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 
 OpenSpaceEngine::~OpenSpaceEngine()
 {
-    delete _configurationManager;
     _configurationManager = nullptr;
-    delete _interactionHandler;
     _interactionHandler = nullptr;
-    delete _renderEngine;
     _renderEngine = nullptr;
-    delete _scriptEngine;
     _scriptEngine = nullptr;
-    delete _commandlineParser;
     _commandlineParser = nullptr;
 
 	SpiceManager::deinitialize();
