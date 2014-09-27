@@ -81,12 +81,13 @@ int property_setValue(lua_State* L) {
 
 	openspace::properties::Property* prop = property(uri);
 	if (!prop)
-		return luaL_error(L, "Property with URL '%s' could not be found", uri);
+		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
 
 	if (type != prop->typeLua())
 		return luaL_error(L, "Property '%s' does not accept input of type '%s'. \
-							  Requested type: '%s'", uri, luaTypeToString(type),
-							  luaTypeToString(prop->typeLua()));
+							  Requested type: '%s'", uri.c_str(),
+							  luaTypeToString(type).c_str(),
+							  luaTypeToString(prop->typeLua()).c_str());
 	else
 		prop->setLua(L);
 
@@ -108,7 +109,7 @@ int property_getValue(lua_State* L) {
 
 	openspace::properties::Property* prop = property(uri);
 	if (!prop)
-		return luaL_error(L, "Property with URL '%s' could not be found", uri);
+		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
 	else
 		prop->getLua(L);
 	return 1;
