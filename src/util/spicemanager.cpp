@@ -63,9 +63,11 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
-int SpiceManager::loadKernel(const std::string& fullPath, const std::string& shorthand){
+int SpiceManager::loadKernel(std::string fullPath, const std::string& shorthand){
 	unsigned int kernelId = ++_kernelCount;
 	assert(kernelId > 0);
+
+	fullPath = absPath(fullPath);
 
 	std::string currentDirectory = FileSys.currentDirectory();
 	std::string::size_type last = fullPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);

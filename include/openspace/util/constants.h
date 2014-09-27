@@ -35,7 +35,8 @@ namespace configurationmanager {
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
-	const std::string keyConfigTimekernel = "SpiceTimeKernel";
+	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
+	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 } // namespace configurationmanager
 
 namespace scenegraph {
@@ -100,6 +101,7 @@ namespace staticephemeris {
 namespace spiceephemeris {
     const std::string keyBody = "Body";
     const std::string keyOrigin = "Observer";
+	const std::string keyKernels = "Kernels";
 } // namespace spiceephemeris
 
 }  // namespace constants

@@ -100,27 +100,27 @@ bool OpenSpaceEngine::gatherCommandlineArguments()
 
 bool OpenSpaceEngine::findConfiguration(std::string& filename)
 {
-    std::string currentDirectory = FileSys.absolutePath(FileSys.currentDirectory());
-    size_t occurrences = std::count(currentDirectory.begin(), currentDirectory.end(),
-                                    ghoul::filesystem::FileSystem::PathSeparator);
+	using ghoul::filesystem::Directory;
 
-    std::string cfgname = _configurationFile;
+	Directory directory = FileSys.currentDirectory();
+	std::string configurationName = _configurationFile;
 
-    bool cfgFileFound = false;
-    for (size_t i = 0; i < occurrences; ++i) {
-        if (i > 0)
-            cfgname = "../" + cfgname;
-        if (FileSys.fileExists(cfgname)) {
-            cfgFileFound = true;
-            break;
-        }
-    }
-    if (!cfgFileFound)
-        return false;
+	while (true) {
+		std::string&& fullPath = FileSys.pathByAppendingComponent(directory,
+																  configurationName);
+		bool exists = FileSys.fileExists(fullPath);
+		if (exists) {
+			filename = fullPath;
+			return true;
+		}
 
-    filename = cfgname;
+		Directory nextDirectory = directory.parentDirectory(true);
 
-    return true;
+		if (directory.path() == nextDirectory.path())
+			// We have reached the root of the file system and did not find the file
+			return false;
+		directory = nextDirectory;
+	}
 }
 
 bool OpenSpaceEngine::create(int argc, char** argv,
@@ -167,7 +167,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
     if (configurationFilePath.empty()) {
         LDEBUG("Finding configuration");
-        const bool findConfigurationSuccess = OpenSpaceEngine::findConfiguration(configurationFilePath);
+        const bool findConfigurationSuccess =
+            OpenSpaceEngine::findConfiguration(configurationFilePath);
         if (!findConfigurationSuccess) {
             LFATAL("Could not find OpenSpace configuration file!");
             return false;
@@ -186,10 +187,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
-	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-	_engine->configurationManager().getValue(constants::configurationmanager::keyConfigSgct,
-								sgctConfigurationPath);
-    
+    std::string sgctConfigurationPath = _sgctDefaultConfigFile;
+    _engine->configurationManager().getValue(
+        constants::configurationmanager::keyConfigSgct, sgctConfigurationPath);
+
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
@@ -244,20 +245,30 @@ bool OpenSpaceEngine::initialize()
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
 
-	std::string timeKernel;
-	OsEng.configurationManager().getValue(constants::configurationmanager::keyConfigTimekernel, timeKernel);
-
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
-    Time::initialize(timeKernel);
+    Time::initialize();
 
-	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
-	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");
-	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc")       , "PCK");
-	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/naif0010.tls")       , "LSK");
+	using constants::configurationmanager::keySpiceTimeKernel;
+	std::string timeKernel;
+	bool success = OsEng.configurationManager().getValue(keySpiceTimeKernel, timeKernel);
+	if (!success) {
+		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
+		return false;
+	}
+	SpiceManager::ref().loadKernel(timeKernel, timeKernel);
+
+	using constants::configurationmanager::keySpiceLeapsecondKernel;
+	std::string leapSecondKernel;
+	success = OsEng.configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	if (!success) {
+		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
+		return false;
+	}
+	SpiceManager::ref().loadKernel(leapSecondKernel, leapSecondKernel);
+	
 
     FactoryManager::initialize();
-
 
     scriptEngine().initialize();
 
@@ -277,7 +288,7 @@ bool OpenSpaceEngine::initialize()
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
-	bool success = OsEng.configurationManager().getValue(
+	success = OsEng.configurationManager().getValue(
 		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);

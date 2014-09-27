@@ -41,17 +41,24 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     , _originName("")
     , _position()
 {
-    const bool hasBody = dictionary.hasKeyAndValue<std::string>(keyBody);
-    if (hasBody)
-        dictionary.getValue(keyBody, _targetName);
-    else
+    const bool hasBody = dictionary.getValue(keyBody, _targetName);
+    if (!hasBody)
         LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
 
-    const bool hasObserver = dictionary.hasKeyAndValue<std::string>(keyOrigin);
-    if (hasObserver)
-        dictionary.getValue(keyOrigin, _originName);
-    else
+    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
+    if (!hasObserver)
         LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+
+	ghoul::Dictionary kernels;
+	dictionary.getValue(keyKernels, kernels);
+	for (size_t i = 1; i <= kernels.size(); ++i) {
+		std::string kernel;
+		bool success = kernels.getValue(std::to_string(i), kernel);
+		if (!success)
+			LERROR("'" << keyKernels << "' has to be an array-style table");
+
+		SpiceManager::ref().loadKernel(kernel, kernel);
+	}
 }
     
 SpiceEphemeris::~SpiceEphemeris() {}

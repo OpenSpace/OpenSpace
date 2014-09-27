@@ -57,7 +57,7 @@ public:
 	 * \param kernelId  unique integer ID for the loaded kernel
 	 * \return          loaded kernels/metakernels unique integer id
 	 */
-	int loadKernel(const std::string& fullPath, 
+	int loadKernel(std::string fullPath, 
 		           const std::string& shorthand);
 
 	/**

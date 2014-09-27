@@ -150,17 +150,8 @@ Time::Time()
 {
 }
 
-bool Time::initialize(const std::string& lskKernel) {
+bool Time::initialize() {
 	assert( _instance == nullptr);
-
-	 if (!lskKernel.empty()) {
-		 const int success = SpiceManager::ref().loadKernel(
-			 absPath(lskKernel), "TimeKernel");
-		 if (success == 0) {
-			 LERROR("Error loading SPICE time kernel '" << lskKernel << "'");
-			 return false;
-		 }
-	 }
 	 _instance = new Time();
 	 return true;
 }

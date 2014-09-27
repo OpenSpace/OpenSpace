@@ -52,14 +52,11 @@ namespace openspace {
 class Time {
 public:
 	/**
-	 * Initializes the Time singleton and loads an LSK spice kernel with the provided
-	 * name.
-	 * \param lskKernel The name of the kernel that should be loaded during the
-	 * initialization. If the parameter is empty, no kernel will be loaded
+	 * Initializes the Time singleton.
 	 * \return <code>true</code> if the initialization succeeded, <code>false</code>
 	 * otherwise
 	 */
-	static bool initialize(const std::string& lskKernel = "");
+	static bool initialize();
 
 	/**
 	 * Deinitializes the Time singleton. This method will not unload the kernel that was
