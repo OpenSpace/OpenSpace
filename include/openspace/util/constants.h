@@ -36,9 +36,6 @@ namespace configurationmanager {
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
 	const std::string keyConfigTimekernel = "SpiceTimeKernel";
-	namespace paths {
-		const std::string keyBasePath = "BASE_PATH";
-	} // namespace paths
 } // namespace configurationmanager
 
 namespace scenegraph {

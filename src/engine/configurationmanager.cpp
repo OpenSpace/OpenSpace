@@ -31,6 +31,8 @@
 
 namespace {
 	const std::string _loggerCat = "ConfigurationManager";
+
+	const std::string _keyBasePath = "BASE_PATH";
 }
 
 namespace openspace {
@@ -44,8 +46,7 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 	}
 
 	// ${BASE_PATH}
-	std::string&& basePathToken = FileSystem::TokenOpeningBraces +
-		constants::configurationmanager::paths::keyBasePath
+	std::string&& basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
         + FileSystem::TokenClosingBraces;
 
 	// Retrieving the directory in which the configuration file lies
@@ -84,6 +85,9 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
             FileSys.registerPathToken(std::move(fullKey), std::move(p), override);
         }
     }
+
+	
+
 	return true;
 }
 

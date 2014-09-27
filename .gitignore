@@ -1,5 +1,7 @@
 bin/
 build/
+cache/
+tmp/
 ext/SGCT
 .DS_Store
 *.swp
