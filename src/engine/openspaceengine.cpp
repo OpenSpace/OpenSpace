@@ -68,22 +68,12 @@ namespace openspace {
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
-    : _configurationManager(new ConfigurationManager)
-    , _interactionHandler(new InteractionHandler)
-    , _renderEngine(new RenderEngine)
-    , _scriptEngine(new ScriptEngine)
-    , _commandlineParser(new CommandlineParser(programName, true))
+	: _commandlineParser(programName, true)
 {
 }
 
 OpenSpaceEngine::~OpenSpaceEngine()
 {
-    _configurationManager = nullptr;
-    _interactionHandler = nullptr;
-    _renderEngine = nullptr;
-    _scriptEngine = nullptr;
-    _commandlineParser = nullptr;
-
 	SpiceManager::deinitialize();
     Spice::deinit();
     Time::deinitialize();
@@ -105,7 +95,7 @@ bool OpenSpaceEngine::gatherCommandlineArguments()
     CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
           &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
           "Provides the path to the OpenSpace configuration file");
-    _commandlineParser->addCommand(configurationFileCommand);
+    _commandlineParser.addCommand(configurationFileCommand);
     
     return true;
 }
@@ -169,8 +159,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> remainingArguments;
-    _engine->_commandlineParser->setCommandLine(argc, argv, &sgctArguments);
-    const bool executeSuccess = _engine->_commandlineParser->execute();
+    _engine->_commandlineParser.setCommandLine(argc, argv, &sgctArguments);
+    const bool executeSuccess = _engine->_commandlineParser.execute();
     if (!executeSuccess)
         return false;
     
@@ -282,12 +272,12 @@ bool OpenSpaceEngine::initialize()
 
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
-    _renderEngine->setSceneGraph(sceneGraph);
+    _renderEngine.setSceneGraph(sceneGraph);
 	
 
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
-    _renderEngine->initialize();
+    _renderEngine.initialize();
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
@@ -296,7 +286,7 @@ bool OpenSpaceEngine::initialize()
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
-    _renderEngine->setSceneGraph(sceneGraph);
+    _renderEngine.setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY
     _flare = new Flare();
@@ -306,7 +296,7 @@ bool OpenSpaceEngine::initialize()
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-    _engine->_interactionHandler->connectDevices();
+    _engine->_interactionHandler.connectDevices();
 
     // Run start up scripts
     ghoul::Dictionary scripts;
@@ -338,9 +328,7 @@ bool OpenSpaceEngine::initialize()
 
 ConfigurationManager& OpenSpaceEngine::configurationManager()
 {
-    // TODO custom assert (ticket #5)
-    assert(_configurationManager);
-    return *_configurationManager;
+    return _configurationManager;
 }
 
 ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
@@ -350,23 +338,17 @@ ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
 
 InteractionHandler& OpenSpaceEngine::interactionHandler()
 {
-    // TODO custom assert (ticket #5)
-    assert(_interactionHandler);
-    return *_interactionHandler;
+    return _interactionHandler;
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine()
 {
-    // TODO custom assert (ticket #5)
-    assert(_renderEngine);
-    return *_renderEngine;
+    return _renderEngine;
 }
 
 ScriptEngine& OpenSpaceEngine::scriptEngine()
 {
-    // TODO custom assert (ticket #5)
-    assert(_scriptEngine);
-    return *_scriptEngine;
+    return _scriptEngine;
 }
 
 
@@ -378,7 +360,7 @@ ShaderCreator& OpenSpaceEngine::shaderBuilder()
 
 bool OpenSpaceEngine::initializeGL()
 {
-    return _renderEngine->initializeGL();
+    return _renderEngine.initializeGL();
 }
 
 void OpenSpaceEngine::preSynchronization()
@@ -390,8 +372,8 @@ void OpenSpaceEngine::preSynchronization()
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
 
-        _interactionHandler->update(dt);
-        _interactionHandler->lockControls();
+        _interactionHandler.update(dt);
+        _interactionHandler.lockControls();
 
 		Time::ref().advanceTime(dt);
     }
@@ -402,7 +384,7 @@ void OpenSpaceEngine::preSynchronization()
 
 void OpenSpaceEngine::postSynchronizationPreDraw()
 {
-    _renderEngine->postSynchronizationPreDraw();
+    _renderEngine.postSynchronizationPreDraw();
 #ifdef FLARE_ONLY
     _flare->postSyncPreDraw();
 #endif
@@ -413,14 +395,14 @@ void OpenSpaceEngine::render()
 #ifdef FLARE_ONLY
     _flare->render();
 #else 
-    _renderEngine->render();
+    _renderEngine.render();
 #endif
 }
 
 void OpenSpaceEngine::postDraw()
 {
     if (sgct::Engine::instance()->isMaster()) {
-        _interactionHandler->unlockControls();
+        _interactionHandler.unlockControls();
     }
 #ifdef OPENSPACE_VIDEO_EXPORT
     float speed = 0.01;
@@ -441,7 +423,7 @@ void OpenSpaceEngine::postDraw()
 void OpenSpaceEngine::keyboardCallback(int key, int action)
 {
     if (sgct::Engine::instance()->isMaster()) {
-        _interactionHandler->keyboardCallback(key, action);
+        _interactionHandler.keyboardCallback(key, action);
     }
 #ifdef OPENSPACE_VIDEO_EXPORT
     if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
@@ -455,7 +437,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action)
 void OpenSpaceEngine::mouseButtonCallback(int key, int action)
 {
     if (sgct::Engine::instance()->isMaster()) {
-        _interactionHandler->mouseButtonCallback(key, action);
+        _interactionHandler.mouseButtonCallback(key, action);
     }
 #ifdef FLARE_ONLY
     _flare->mouse(key, action);
@@ -464,12 +446,12 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action)
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y)
 {
-    _interactionHandler->mousePositionCallback(x, y);
+    _interactionHandler.mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
 {
-    _interactionHandler->mouseScrollWheelCallback(pos);
+    _interactionHandler.mouseScrollWheelCallback(pos);
 }
 
 void OpenSpaceEngine::encode()
@@ -515,7 +497,7 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 		{
 			std::string script = std::string(receivedChars + 1);
 			LINFO("Received Lua Script: '" << script << "'");
-			_scriptEngine->runScript(script);
+			_scriptEngine.runScript(script);
 		}
 	}
 }
