@@ -34,32 +34,37 @@ namespace openspace {
 
 namespace luascriptfunctions {
 
-	void printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
+	int printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
 		using ghoul::lua::luaTypeToString;
 		const std::string _loggerCat = "print";
 
+		int nArguments = lua_gettop(L);
+		if (nArguments != 1)
+			return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
 		const int type = lua_type(L, -1);
 		switch (type) {
-		case LUA_TNONE:
-		case LUA_TLIGHTUSERDATA:
-		case LUA_TTABLE:
-		case LUA_TFUNCTION:
-		case LUA_TUSERDATA:
-		case LUA_TTHREAD:
-		LOG(level, "Function parameter was of type '" <<
-			 luaTypeToString(type) << "'");
-		case LUA_TNIL:
-		break;
-		case LUA_TBOOLEAN:
-		LOG(level, lua_toboolean(L, -1));
-		break;
-		case LUA_TNUMBER:
-		LOG(level, lua_tonumber(L, -1));
-		break;
-		case LUA_TSTRING:
-		LOG(level, lua_tostring(L, -1));
-		break;
+			case LUA_TNONE:
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TTABLE:
+			case LUA_TFUNCTION:
+			case LUA_TUSERDATA:
+			case LUA_TTHREAD:
+				LOG(level, "Function parameter was of type '" <<
+					 luaTypeToString(type) << "'");
+			case LUA_TNIL:
+				break;
+			case LUA_TBOOLEAN:
+				LOG(level, lua_toboolean(L, -1));
+				break;
+			case LUA_TNUMBER:
+				LOG(level, lua_tonumber(L, -1));
+				break;
+			case LUA_TSTRING:
+				LOG(level, lua_tostring(L, -1));
+				break;
 		}
+		return 0;
 	}
 
 	/**
@@ -70,8 +75,7 @@ namespace luascriptfunctions {
 	 * types, the type is printed instead
 	 */
 	int printDebug(lua_State* L) {
-		printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
-		return 0;
+		return printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
 	}
 
 	/**
@@ -82,8 +86,7 @@ namespace luascriptfunctions {
 	 * types, the type is printed instead
 	 */
 	int printInfo(lua_State* L) {
-		printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
-		return 0;
+		return printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
 	}
 
 	/**
@@ -94,8 +97,7 @@ namespace luascriptfunctions {
 	 * types, the type is printed instead
 	 */
 	int printWarning(lua_State* L) {
-		printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
-		return 0;
+		return printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
 	}
 
 	/**
@@ -106,8 +108,7 @@ namespace luascriptfunctions {
 	 * types, the type is printed instead
 	 */
 	int printError(lua_State* L) {
-		printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
-		return 0;
+		return printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
 	}
 
 	/**
@@ -118,8 +119,7 @@ namespace luascriptfunctions {
 	 * types, the type is printed instead
 	 */
 	int printFatal(lua_State* L) {
-		printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
-		return 0;
+		return printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
 	}
 
 	/**
@@ -129,11 +129,31 @@ namespace luascriptfunctions {
 	 * tokens and returns the absolute path.
 	 */
 	int absolutePath(lua_State* L) {
-		// TODO check number of arguments (ab)
+		int nArguments = lua_gettop(L);
+		if (nArguments != 1)
+			return luaL_error(L, "Expected %d arguments, got %d", 1, nArguments);
+
 		std::string path = luaL_checkstring(L, -1);
 		path = absPath(path);
 		lua_pushstring(L, path.c_str());
 		return 1;
+	}
+
+	/**
+	 * \ingroup LuaScripts
+	 * setPathToken(string, string):
+	 * Registers the path token provided by the first argument to the path in the second
+	 * argument. If the path token already exists, it will be silently overridden.
+	 */
+	int setPathToken(lua_State* L) {
+		int nArguments = lua_gettop(L);
+		if (nArguments != 2)
+			return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
+		std::string pathToken = luaL_checkstring(L, -1);
+		std::string path = luaL_checkstring(L, -2);
+		FileSys.registerPathToken(pathToken, path, true);
+		return 0;
 	}
 
 } // namespace luascriptfunctions
@@ -256,18 +276,20 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LERROR("Script with name '" << filename << "' did not exist");
         return false;
     }
-    std::ifstream file(filename.c_str());
-    if (file.bad()) {
-        LERROR("Error opening file '" << filename << "'");
+
+	int status = luaL_loadfile(_state, filename.c_str());
+	if (status != LUA_OK) {
+        LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
+        return false;
+    }
+
+	LDEBUG("Executing script '" << filename << "'");
+    if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
+        LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
     }
     
-    // Read the contents of the script
-    std::string script((std::istreambuf_iterator<char>(file)),
-                    std::istreambuf_iterator<char>());
-    
-    const bool runSuccess = runScript(script);
-    return runSuccess;
+    return true;
 }
 
 bool ScriptEngine::hasLibrary(const std::string& name)
@@ -391,6 +413,12 @@ void ScriptEngine::addBaseLibrary() {
 				&luascriptfunctions::absolutePath,
 				"absPath(string): Returns the absolute path to the passed path, resolving"
 				" path tokens as well as resolving relative paths"
+			},
+			{
+				"setPathToken",
+				&luascriptfunctions::setPathToken,
+				"setPathToken(string, string): Registers a new path token provided by the"
+				" first argument to the path provided in the second argument"
 			}
         }
     };

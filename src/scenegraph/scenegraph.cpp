@@ -71,53 +71,24 @@ namespace luascriptfunctions {
  */
 int property_setValue(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "property_setValue";
 
-	// TODO Check for argument number (ab)
+	int nArguments = lua_gettop(L);
+	if (nArguments != 2)
+		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
 	std::string uri = luaL_checkstring(L, -2);
 	const int type = lua_type(L, -1);
-	//  boost::any propertyValue;
-	//  switch (type) {
-	//      case LUA_TNONE:
-	//      case LUA_TLIGHTUSERDATA:
-	//      case LUA_TFUNCTION:
-	//      case LUA_TUSERDATA:
-	//      case LUA_TTHREAD:
-	//          LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
-	//          return 0;
-	//      case LUA_TNIL:
-	//          propertyValue = 0;
-	//          break;
-	//      case LUA_TBOOLEAN:
-	//          propertyValue = lua_toboolean(L, -1);
-	//          break;
-	//      case LUA_TNUMBER:
-	//          propertyValue = lua_tonumber(L, -1);
-	//          break;
-	//      case LUA_TSTRING:
-	//          propertyValue = std::string(lua_tostring(L, -1));
-	//          break;
-	//case LUA_TTABLE: {
-	//	ghoul::Dictionary d;
-	//	ghoul::lua::populateDictionary(L, d);
-	//	propertyValue = d;
-	//	break;
-	//}
-	//  }
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-		LERROR("Property with uri '" << uri << "' could not be found");
-		return 0;
-	}
+	if (!prop)
+		return luaL_error(L, "Property with URL '%s' could not be found", uri);
 
 	if (type != prop->typeLua())
-		LERROR("Property '" << uri << "' does not accept input of type '"
-			<< luaTypeToString(type) << "'. Requested type: '"
-			<< luaTypeToString(prop->typeLua()) << "'");
+		return luaL_error(L, "Property '%s' does not accept input of type '%s'. \
+							  Requested type: '%s'", uri, luaTypeToString(type),
+							  luaTypeToString(prop->typeLua()));
 	else
 		prop->setLua(L);
-	//prop->set(propertyValue);
 
 	return 0;
 }
@@ -129,48 +100,17 @@ int property_setValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int property_getValue(lua_State* L) {
-	const std::string _loggerCat = "property_getValue";
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	// TODO Check for argument number (ab)
 	std::string uri = luaL_checkstring(L, -1);
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-		LERROR("Property with uri '" << uri << "' could not be found");
-		lua_pushnil(L);
-	}
-	else {
+	if (!prop)
+		return luaL_error(L, "Property with URL '%s' could not be found", uri);
+	else
 		prop->getLua(L);
-
-		//switch (type) {
-		//    case LUA_TNONE:
-		//    case LUA_TLIGHTUSERDATA:
-		//    case LUA_TFUNCTION:
-		//    case LUA_TUSERDATA:
-		//    case LUA_TTHREAD:
-		//        LERROR("Function parameter was of type '" << luaTypeToString(type)
-		//                                                    << "'");
-		//        return 0;
-		//    case LUA_TNIL:
-		//        propertyValue = 0;
-		//        break;
-		//    case LUA_TBOOLEAN:
-		//        propertyValue = lua_toboolean(L, -1);
-		//        break;
-		//    case LUA_TNUMBER:
-		//        propertyValue = lua_tonumber(L, -1);
-		//        break;
-		//    case LUA_TSTRING:
-		//        propertyValue = std::string(lua_tostring(L, -1));
-		//        break;
-		//    case LUA_TTABLE: {
-		//        ghoul::Dictionary d;
-		//        ghoul::lua::populateDictionary(L, d);
-		//        propertyValue = d;
-		//        break;
-		//    }
-		//}
-	}
 	return 1;
 }
 
@@ -181,9 +121,10 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
-	const std::string _loggerCat = "loadScene";
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	// TODO Check for argument number (ab)
 	std::string sceneFile = luaL_checkstring(L, -1);
 
 	OsEng.renderEngine().sceneGraph()->scheduleLoadSceneFile(sceneFile);
