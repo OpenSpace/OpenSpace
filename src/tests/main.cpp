@@ -39,7 +39,6 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/spice.h>
 #include <openspace/util/time.h>
 
 #include <iostream>
