@@ -466,7 +466,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	std::string&& sceneDescriptionDirectory =
 		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
 	std::string moduleDirectory(".");
-	dictionary.getValueSafe(constants::scenegraph::keyPathScene, moduleDirectory);
+	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
 
 	// The scene path could either be an absolute or relative path to the description
 	// paths directory

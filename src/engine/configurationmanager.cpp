@@ -63,7 +63,7 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 
 	// Register all the paths
 	ghoul::Dictionary dictionary;
-	const bool success = getValueSafe(keyPaths, dictionary);
+	const bool success = getValue(keyPaths, dictionary);
 	if (!success) {
 		LERROR("Configuration does not contain the key '" << keyPaths << "'");
 		return false;

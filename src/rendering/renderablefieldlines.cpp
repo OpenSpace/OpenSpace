@@ -53,7 +53,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	assert(success);
 
 	ghoul::Dictionary fieldlines;
-	success = dictionary.getValueSafe(keyFieldlines, fieldlines);
+	success = dictionary.getValue(keyFieldlines, fieldlines);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' did not contain a '" <<
 			keyFieldlines << "' key");
@@ -61,7 +61,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	}
 	for (const std::string& key : fieldlines.keys()) {
 		ghoul::Dictionary fieldline;
-		success = fieldlines.getValueSafe(key, fieldline);
+		success = fieldlines.getValue(key, fieldline);
 
 		if (!success) {
 			LERROR("Key '" << key << "' in '" << keyFieldlines <<
@@ -71,13 +71,13 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 		}
 
 		std::string fileName;
-		fieldline.getValueSafe(keyFilename, fileName);
+		fieldline.getValue(keyFilename, fileName);
 		fileName = findPath(fileName);
 		if (fileName.empty())
 			LERROR("File not found!");
 		else {
 			ghoul::Dictionary hintsDictionary;
-			fieldline.getValueSafe(keyHints, hintsDictionary);
+			fieldline.getValue(keyHints, hintsDictionary);
 
 			_filenames.push_back(fileName);
 			_hintsDictionaries.push_back(hintsDictionary);
@@ -85,7 +85,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	}
 
 	ghoul::Dictionary shaderDictionary;
-	success = dictionary.getValueSafe(keyShaders, shaderDictionary);
+	success = dictionary.getValue(keyShaders, shaderDictionary);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' does not contain a '" <<
 			keyShaders << "' table");
@@ -93,7 +93,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	}
 
 	std::string vshaderpath;
-	success = shaderDictionary.getValueSafe(keyVertexShader, vshaderpath);
+	success = shaderDictionary.getValue(keyVertexShader, vshaderpath);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
 			keyVertexShader << "'");
@@ -102,7 +102,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	vshaderpath = findPath(vshaderpath);
 
 	std::string fshaderpath;
-	success = shaderDictionary.getValueSafe(keyFragmentShader, fshaderpath);
+	success = shaderDictionary.getValue(keyFragmentShader, fshaderpath);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
 			keyFragmentShader << "'");
@@ -117,7 +117,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     ShaderCreator sc = OsEng.shaderBuilder();
     _fieldlinesProgram = sc.buildShader("FieldlinesProgram", vshaderpath, fshaderpath);
 
-	dictionary.getValueSafe("UpdateOnSave", _programUpdateOnSave);
+	dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
 
 	setBoundingSphere(PowerScaledScalar::CreatePSS(5)); // FIXME a non-magic number perhaps
 }

@@ -43,7 +43,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 	assert(success);
 
     std::string renderableType;
-    success = dictionary.getValueSafe(constants::renderable::keyType, renderableType);
+    success = dictionary.getValue(constants::renderable::keyType, renderableType);
 	if (!success) {
         LERROR("Renderable '" << name << "' did not have key '"
                               << constants::renderable::keyType << "'");
@@ -67,7 +67,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     setName("renderable");
 
     // get path if available
-	const bool success = dictionary.getValueSafe(constants::scenegraph::keyPathModule, _relativePath);
+	const bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
 	if (success)
 		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 

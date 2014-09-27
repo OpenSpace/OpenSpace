@@ -189,7 +189,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
 	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
-	_engine->configurationManager().getValueSafe(constants::configurationmanager::keyConfigSgct,
+	_engine->configurationManager().getValue(constants::configurationmanager::keyConfigSgct,
 								sgctConfigurationPath);
     
     // Prepend the outgoing sgctArguments with the program name
@@ -247,7 +247,7 @@ bool OpenSpaceEngine::initialize()
     SysCap.logCapabilities();
 
 	std::string timeKernel;
-	OsEng.configurationManager().getValueSafe(constants::configurationmanager::keyConfigTimekernel, timeKernel);
+	OsEng.configurationManager().getValue(constants::configurationmanager::keyConfigTimekernel, timeKernel);
 
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
@@ -281,7 +281,7 @@ bool OpenSpaceEngine::initialize()
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
-	bool success = OsEng.configurationManager().getValueSafe(
+	bool success = OsEng.configurationManager().getValue(
 		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
@@ -300,7 +300,7 @@ bool OpenSpaceEngine::initialize()
 
     // Run start up scripts
     ghoul::Dictionary scripts;
-	success = _engine->configurationManager().getValueSafe(
+	success = _engine->configurationManager().getValue(
 		constants::configurationmanager::keyStartupScript, scripts);
     for (size_t i = 1; i <= scripts.size(); ++i) {
         std::stringstream stream;

@@ -37,7 +37,7 @@ namespace planetgeometry {
 PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
 	std::string geometryType;
-	const bool success = dictionary.getValueSafe(
+	const bool success = dictionary.getValue(
 		constants::planetgeometry::keyType, geometryType);
 	if (!success) {
         LERROR("PlanetGeometry did not contain a correct value of the key '"
