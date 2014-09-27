@@ -86,7 +86,9 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
         }
     }
 
-	
+	// Remove the Paths dictionary from the configuration manager as those paths might
+	// change later and we don't want to be forced to keep our local copy up to date
+	removeKey(keyPaths);
 
 	return true;
 }
