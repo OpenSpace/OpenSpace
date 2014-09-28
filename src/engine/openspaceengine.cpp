@@ -256,7 +256,7 @@ bool OpenSpaceEngine::initialize()
 		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(timeKernel, timeKernel);
+	SpiceManager::ref().loadKernel(std::move(timeKernel));
 
 	using constants::configurationmanager::keySpiceLeapsecondKernel;
 	std::string leapSecondKernel;
@@ -265,9 +265,8 @@ bool OpenSpaceEngine::initialize()
 		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(leapSecondKernel, leapSecondKernel);
+	SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
 	
-
     FactoryManager::initialize();
 
     scriptEngine().initialize();

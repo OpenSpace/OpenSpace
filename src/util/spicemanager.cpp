@@ -22,25 +22,29 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <openspace/util/spicemanager.h>
+
+#include <algorithm>
 #include <stdio.h>
 #include <iostream>
 #include <cassert>
 #include <cstring>
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
+//#ifdef WIN32
+//#include <Windows.h>
+//#endif
 
-#include "openspace/util/spicemanager.h"
-#include "ghoul/filesystem/filesystem.h"
-#include "ghoul/logging/logmanager.h"
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
 }
 
-namespace openspace{
+namespace openspace {
+
 SpiceManager* SpiceManager::_manager = nullptr;
+unsigned int SpiceManager::_kernelCount = 0;
 
 SpiceManager::~SpiceManager(){
 	// cleanup...
@@ -48,14 +52,22 @@ SpiceManager::~SpiceManager(){
 
 void SpiceManager::initialize(){
 	assert(_manager == nullptr);
-	if (_manager == nullptr) _manager = new SpiceManager;
-	assert(_manager != nullptr);
+	_manager = new SpiceManager;
+
+	// Set the SPICE library to not exit the program if an error occurs
+	erract_c("SET", 0, "REPORT");
+	// But we do not want SPICE to print the errors, we will fetch them ourselves
+	errprt_c("SET", 0, "NONE");
 }
 
 void SpiceManager::deinitialize(){
-	assert(_manager != nullptr);
 	delete _manager;
 	_manager = nullptr;
+	_kernelCount = 0;
+
+	// Set values back to default
+	erract_c("SET", 0, "DEFAULT");
+	errprt_c("SET", 0, "DEFAULT");
 }
 
 SpiceManager& SpiceManager::ref() {
@@ -63,55 +75,40 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
-int SpiceManager::loadKernel(std::string fullPath, const std::string& shorthand){
+int SpiceManager::loadKernel(std::string filePath) {
 	unsigned int kernelId = ++_kernelCount;
 	assert(kernelId > 0);
 
-	fullPath = absPath(fullPath);
+	filePath = std::move(absPath(filePath));
+	furnsh_c(filePath.c_str());
 
-	std::string currentDirectory = FileSys.currentDirectory();
-	std::string::size_type last = fullPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-	if (last == std::string::npos)
-		return 0;
-	std::string kernelDir = fullPath.substr(0, last);
-	FileSys.setCurrentDirectory(kernelDir);
-	furnsh_c(fullPath.c_str());
-	FileSys.setCurrentDirectory(currentDirectory);
-
-	spiceKernel current = { fullPath, 
-		                    shorthand, 
-						    kernelId  };
-
-	_loadedKernels.push_back(current);
-
+	KernelInformation&& info = { std::move(filePath), std::move(kernelId) };
+	_loadedKernels.push_back(info);
 	return kernelId;
 }
 
-bool SpiceManager::unloadKernel(const std::string& shorthand){
-	assert(shorthand != "");
+void SpiceManager::unloadKernel(int kernelId) {
+	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
+		[&kernelId](const KernelInformation& info) { return info.id == kernelId ; });
 
-	std::vector<spiceKernel>::iterator it;
-	for (it = _loadedKernels.begin(); it != _loadedKernels.end(); it++){
-		if (it->name == shorthand){
-			unload_c((it->path).c_str());
-			return true;
-		}
+	if (it != _loadedKernels.end()) {
+		unload_c(it->path.c_str());
+		_loadedKernels.erase(it);
 	}
-	return false;
 }
 
-bool SpiceManager::unloadKernel(int kernelId){
-	std::vector<spiceKernel>::iterator it;
-	for (it = _loadedKernels.begin(); it != _loadedKernels.end(); it++){
-		if (it->id == kernelId){
-			unload_c((it->path).c_str());
-			return true;
-		}
-	}
-	return false;
+void SpiceManager::unloadKernel(std::string filePath) {
+	filePath = absPath(filePath);
+	unload_c(filePath.c_str());
+
+	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
+		[&filePath](const KernelInformation& info) { return info.path == filePath; });
+
+	if (it != _loadedKernels.end())
+		_loadedKernels.erase(it);
 }
 
-bool SpiceManager::hasValue(int naifId, const std::string& kernelPoolValue) const{
+bool SpiceManager::hasValue(int naifId, const std::string& kernelPoolValue) const {
 	return bodfnd_c(naifId, kernelPoolValue.c_str());
 }
 

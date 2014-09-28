@@ -1,28 +1,29 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
-#ifndef __SPICEWRAPPER_H__
-#define __SPICEWRAPPER_H__
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __SPICEMANAGER_H__
+#define __SPICEMANAGER_H__
 
 #include "SpiceUsr.h"
 
@@ -32,45 +33,59 @@
 #include <vector>
 #include <map>
 
-namespace openspace{
+namespace openspace {
+
 class transformMatrix;
+
 class SpiceManager{
 public:
-// Initialization ----------------------------------------------------------------------- //
 	/**
-	* Static initializer that initializes the static member. 
+	* Initializer that initializes the static member. 
 	*/
 	static void initialize();
+
+	/**
+	 * Deinitializes the SpiceManager and unloads all kernels which have been loaded using
+	 * this manager.
+	 */
 	static void deinitialize();
+
+	/**
+	 * Returns the reference to the singleton SpiceManager object that must have been
+	 * initialized by a call to the initialize method earlier.
+	 * \return The SpiceManager singleton
+	 */
 	static SpiceManager& ref();
 	
 	/**
-	 *  Load one or more SPICE kernels into a program. If client provides
-	 *  the path to a binary kernel or meta-kernel upon which its loaded 
-	 *  to the appropriate SPICE subsystem. if the file is a textkernel 
-	 *  it will be loaded into kernel pool. 
-	 *  In order to locate the spice kernels, the method temorarily changes the 
-	 *  current working directory to the client-provided <code>filePath</code>. 
-	 *  For further details, please refer to <code>furnsh_c</code> in SPICE Docummentation
-	 *  
-	 * \param filePath  path to single kernel or meta-kernel to load.  
-	 * \param kernelId  unique integer ID for the loaded kernel
-	 * \return          loaded kernels/metakernels unique integer id
+	 * Loads one or more SPICE kernels into a program. The provided path can either be a
+	 * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
+	 * loading is done by passing the <code>filePath</code> to the <code>furnsh_c</code>
+	 * function. http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
+	 * \param filePath The path to the kernel that should be loaded
+	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
-	int loadKernel(std::string fullPath, 
-		           const std::string& shorthand);
+	int loadKernel(std::string filePath);
 
 	/**
-	 *  Unload SPICE kernel.
-	 *  For further details, please refer to 'unload_c' in SPICE Docummentation
-	 *
-	 * \param either correspondign unique ID or shorthand with 
-	 *   which the kernel was loaded and is to be unloaded. 
-	 * \return Whether the function succeeded or not
+	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
+	 * by the loading call to loadKernel. The unloading is done by calling the
+	 * <code>unload_c</code> function.
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+	 * \param kernelId The unique identifier that was returned from the call to
+	 * loadKernel which loaded the kernel
 	 */
+	void unloadKernel(int kernelId);
 
-	bool unloadKernel(const std::string& shorthand);
-	bool unloadKernel(int kernelId);
+	/**
+	 * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
+	 * the loading call to loadKernel. The unloading is done by calling the
+	 * <code>unload_c</code> function.
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+	 * \param filePath The path of the kernel that should be unloaded, it has to refer to
+	 * a file that was loaded in using the loadKernel method
+	 */
+	void unloadKernel(std::string filePath);
 	
 // Acessing Kernel Data - Constants and Ids --------------------------------------------- //
 
@@ -352,17 +367,19 @@ public:
 		                  double&     targetEpoch,
 		                  glm::dvec3& vectorToSurfacePoint) const;
 private:
+	struct KernelInformation {
+		std::string path;
+		unsigned int id;
+	};
+
 	SpiceManager() = default;
 	~SpiceManager();
 	SpiceManager(const SpiceManager& c) = delete;
+
+	std::vector<KernelInformation> _loadedKernels;
+	static unsigned int _kernelCount;
+
 	static SpiceManager* _manager;
-	struct spiceKernel {
-		std::string path;
-		std::string name;
-		unsigned int id;
-	};
-	std::vector<spiceKernel> _loadedKernels;
-	unsigned int _kernelCount = 0;
 };
 
 /**
@@ -457,5 +474,7 @@ public:
 	}
 };
 #undef COPY
-}
-#endif
+
+} // namespace openspace
+
+#endif // __SPICEMANAGER_H__
