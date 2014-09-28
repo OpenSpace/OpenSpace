@@ -30,6 +30,8 @@
 #include <cassert>
 #include <cstring>
 
+#include <glm/gtc/type_ptr.hpp>
+
 //#ifdef WIN32
 //#include <Windows.h>
 //#endif
@@ -130,145 +132,151 @@ bool SpiceManager::hasValue(int naifId, const std::string& item) const {
 
 bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
 	int id;
-	bool success = getNaifIdForBody(body, id);
+	bool success = getNaifId(body, id);
 	if (success)
 		return hasValue(id, item);
 	else
 		return false;
 }
 
-bool SpiceManager::getNaifIdForBody(const std::string& body, int& id) const {
+bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 	SpiceBoolean success;
 	bods2c_c(body.c_str(), &id, &success);
 	return (success == SPICETRUE);
 }
 
-// 1D
-bool SpiceManager::getValueFromID(const std::string& bodyname,
-	                              const std::string& kernelPoolValue,
-	                              double& value) const{
-	int n;
-	int code;
-	int found;
-
-	bodn2c_c(bodyname.c_str(), &code, &found);
-	if (!found) return false;
-	bodvrd_c(bodyname.c_str(), kernelPoolValue.c_str(), 1, &n, &value);
-
-	return true;
-}
-// 2D
-/*
-bool SpiceManager::getValueFromID(const std::string& bodyname,
-		                          const std::string& kernelPoolValueName,
-	                              glm::dvec2& value) const{
-	int n;
-	double val[2];
-	int code;
-	int found;
-
-	bodn2c_c(bodyname.c_str(), &code, &found);
-	if (!found) return false;
-	bodvrd_c(bodyname.c_str(), kernelPoolValueName.c_str(), 2, &n, val);
-
-	value[0] = val[0];
-	value[1] = val[1];
-
-	return true;
-
-}
-*/
-// 3D
-bool SpiceManager::getValueFromID(const std::string& bodyname,
-	                              const std::string& kernelPoolValueName,
-	                              glm::dvec3& value) const{
-	int n;
-	double val[3];
-	int code;
-	int found;
-
-	bodn2c_c(bodyname.c_str(), &code, &found);
-	if (!found) return false;
-	bodvrd_c(bodyname.c_str(), kernelPoolValueName.c_str(), 3, &n, val);
-
-	memcpy(&value, val, sizeof(double)* 3);
-
-	return true;
-}
-// 4D
-/*
-bool SpiceManager::getValueFromID(const std::string& bodyname,
-	                              const std::string& kernelPoolValueName,
-	                              glm::dvec4& value) const{
-	int n;
-	double val[4];
-	int code;
-	int found;
-
-	bodn2c_c(bodyname.c_str(), &code, &found);
-	if (!found) return false;
-	bodvrd_c(bodyname.c_str(), kernelPoolValueName.c_str(), 4, &n, val);
-
-	value[0] = val[0];
-	value[1] = val[1];
-	value[2] = val[2];
-	value[3] = val[3];
-
-	return true;
-}
-*/
-// ND
-bool SpiceManager::getValueFromID(const std::string& bodyname,
-	                              const std::string& kernelPoolValueName,
-							      std::vector<double>& values, 
-								  unsigned int num) const{
-	int n;
-	double *val;
-	val = (double*)malloc(num*sizeof(double));
-	int code;
-	int found;
-
-	bodn2c_c(bodyname.c_str(), &code, &found);
-	if (!found) return false;
-	bodvrd_c(bodyname.c_str(), kernelPoolValueName.c_str(), num, &n, val);
-
-	for (int i = 0; i < num; i++){
-		values.push_back(val[i]);
-	}
-
-	return true;
-}
-
-double SpiceManager::convertStringToTdbSeconds(const std::string& epochString) const{
-	double et;
-	str2et_c(epochString.c_str(), &et);
-	return et;
-}
-
-std::string SpiceManager::ephemerisTimeToString(const double et) const{
-	char  utcstr[40];
-	timout_c(et, "YYYY MON DD HR:MN:SC.### ::RND", 32, utcstr);
-	return std::string(utcstr);
-}
-
-std::string SpiceManager::convertTdbSecondsToString(double seconds,
-                                                    const std::string& format) const
+bool SpiceManager::getValue(const std::string& body, const std::string& value,
+	double& v) const
 {
-	const int bufferSize = 128;
-	SpiceChar buffer[bufferSize];
-	timout_c(seconds, format.c_str(), bufferSize - 1, buffer);
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), 1, &n, &v);
 
 	int failed = failed_c();
 	if (failed) {
 		char msg[1024];
 		getmsg_c("LONG", 1024, msg);
-		//LERROR("Error retrieving position of target '" + target + "'");
+		LERROR("Error getting value '" << value << "' for body '" << body << "'");
 		LERROR("Spice reported: " + std::string(msg));
 		reset_c();
-		return "";
+		return false;
 	}
 
-	return std::string(buffer);
+	return true;
+}
+
+bool SpiceManager::getValue(int id, const std::string& value, double& v) const {
+	return getValue(std::to_string(id), value, v);
+}
+
+bool SpiceManager::getValue(const std::string& body, const std::string& value,
+	glm::dvec3& v) const
+{
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), 3, &n, glm::value_ptr(v));
+
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error getting value '" << value << "' for body '" << body << "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+
+	return true;
+}
+
+bool SpiceManager::getValue(int id, const std::string& value, glm::dvec3& v) const
+{
+	return getValue(std::to_string(id), value, v);
+}
+
+bool SpiceManager::getValue(const std::string& body, const std::string& value,
+	glm::dvec4& v) const
+{
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), 4, &n, glm::value_ptr(v));
+
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error getting value '" << value << "' for body '" << body << "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+
+	return true;
+}
+
+bool SpiceManager::getValue(int id, const std::string& value, glm::dvec4& v) const
+{
+	return getValue(std::to_string(id), value, v);
+}
+
+bool SpiceManager::getValue(const std::string& body, const std::string& value,
+	std::vector<double>& v) const 
+{
+	assert(v.size() > 0);
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), static_cast<SpiceInt>(v.size()), &n, &v[0]);
+
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error getting value '" << value << "' for body '" << body << "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+
+	return true;
+}
+
+bool SpiceManager::getValue(int id, const std::string& value, 
+	std::vector<double>& v) const
+{
+	return getValue(std::to_string(id), value, v);
+}
+
+bool SpiceManager::getETfromDate(const std::string& epochString,
+	double& ephemerisTime) const
+{
+	str2et_c(epochString.c_str(), &ephemerisTime);
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error converting date '" + epochString+ "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+	return true;
+}
+
+bool SpiceManager::getDateFromET(double ephemerisTime, std::string& date,
+	const std::string& format)
+{
+	static const int BufferSize = 256;
+	SpiceChar buffer[BufferSize];
+
+	timout_c(ephemerisTime, format.c_str(), BufferSize - 1, buffer);
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error converting ephemeris time to date with format '" + format + "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+
+	date = std::string(buffer);
+	return true;
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,

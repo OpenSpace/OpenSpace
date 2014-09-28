@@ -173,7 +173,7 @@ TEST_F(SpiceManagerTest, getValueFromID_1D){
 	std::string value1D = "MAG_NORTH_POLE_LAT";
 
 	double return1D;
-	bool found = openspace::SpiceManager::ref().getValueFromID(target, value1D, return1D);
+	bool found = openspace::SpiceManager::ref().getValue(target, value1D, return1D);
 	ASSERT_TRUE(found) << "Could not retrieve value";
 	EXPECT_EQ(return1D, 78.565) << "Value not found / differs from expected return";
 	unload_c(PCK.c_str());
@@ -186,7 +186,7 @@ TEST_F(SpiceManagerTest, getValueFromID_3D){
 	std::string value3D = "RADII";
 
 	glm::dvec3 return3D;
-    openspace::SpiceManager::ref().getValueFromID(target, value3D, return3D);
+    openspace::SpiceManager::ref().getValue(target, value3D, return3D);
 
 	EXPECT_EQ(return3D.x, 6378.14) << "Value not found / differs from expected return";
 	EXPECT_EQ(return3D.y, 6378.14) << "Value not found / differs from expected return";
@@ -200,16 +200,15 @@ TEST_F(SpiceManagerTest, getValueFromID_ND){
 	std::string target  = "SATURN";
 	std::string valueND = "RING6_A";
 
-	std::vector<double> returnND;
-	unsigned int nr = 5;
-	bool found = openspace::SpiceManager::ref().getValueFromID(target, valueND, returnND, nr);
+	std::vector<double> returnND(5);
+	bool found = openspace::SpiceManager::ref().getValue(target, valueND, returnND);
 	ASSERT_TRUE(found) << "Could not retrieve value for specified kernel";
 
 	std::vector<double> controlVec{ 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
 	
 	ASSERT_EQ(controlVec.size(), returnND.size()) << "Vectors differ in size";
 
-	for (unsigned int i = 0; i < nr; ++i){
+	for (unsigned int i = 0; i < returnND.size(); ++i){
 		EXPECT_EQ(controlVec[i], returnND[i]) << "Vector value not equal";
 	}
 	unload_c(PCK.c_str());
@@ -223,7 +222,8 @@ TEST_F(SpiceManagerTest, stringToEphemerisTime){
 	char   date[SRCLEN] = "Thu Mar 20 12:53:29 PST 1997";
 	str2et_c(date, &control_ephemerisTime);
 
-	ephemerisTime = openspace::SpiceManager::ref().convertStringToTdbSeconds(date);
+	bool success = openspace::SpiceManager::ref().getETfromDate(date, ephemerisTime);
+	EXPECT_EQ(success, true);
 	
 	EXPECT_EQ(ephemerisTime, control_ephemerisTime) << "Ephemeries times differ / not found";
 	unload_c(LSK.c_str());

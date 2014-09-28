@@ -30,6 +30,7 @@
 #include <string>
 #include <ghoul/glm.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <array>
 #include <vector>
 #include <map>
 
@@ -122,62 +123,196 @@ public:
 	 * \return <code>true</code> if the <code>body</code> was found, <code>false</code>
 	 * otherwise
 	 */
-	bool getNaifIdForBody(const std::string& body, int& id) const;
-
-	/** 
-	 *  Fetch from the kernel pool the double precision values of an 
-	 *  item associated with a body. 
-	 *  For further details, please refer to 'bodvrd_c' in SPICE Docummentation
-	 *
-	 *  \param bodyName             Body name.
-	 *  \param kernelPoolValueName  Item for which values are desired. ("RADII", "NUT_PREC_ANGLES", etc. )
-	 *  \return                     Whether the function succeeded or not
-   	 */
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName, 
-									  double& value) const;
-	/* Overloaded method for 3dim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-		                              glm::dvec3& value) const;
-	/* Overloaded method for 4dim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-		                              glm::dvec4& value) const;
-	/* Overloaded method for Ndim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-									  std::vector<double>& values, unsigned int num) const;
-
-// Converting between UTC and Ephemeris Time (LSK)  ------------------------------------- //
-
+	bool getNaifId(const std::string& body, int& id) const;
 
 	/**
-	 *  Convert a string representing an epoch to a double precision
-     *  value representing the number of TDB seconds past the J2000
-     *  epoch corresponding to the input epoch.
-	 *  For further details, please refer to 'str2et_c' in SPICE Docummentation
-	 *
-	 *  \param epochString, A string representing an epoch.
-	 *  \return Corresponding ephemeris time, equivalent value in seconds past J2000, TDB.
+	 * Retrieves a single <code>value</code> for a certain <code>body</code>. This method
+	 * succeeds iff <code>body</code> is the name of a valid body, <code>value</code>
+	 * is a value associated with the body, and the value consists of only a single
+	 * <code>double</code> value. If all conditions are true, the value is retrieved using
+	 * the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged.
+	 * \param body The name of the body whose value should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved value
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
 	 */
-	double convertStringToTdbSeconds(const std::string& epochString) const;
+	bool getValue(const std::string& body, const std::string& value, double& v) const;
 
 	/**
-	 * Convert the number of TDB seconds past the J2000 epoch into a human readable
-	 * string representation. Fur further details, please refer to 'timout_c' in SPICE
-	 * Documentation
-	 *
-	 * \param seconds The number of seconds that have passed since the J2000 epoch 
-	 * \param format The output format of the string
-	 * (see ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html)
-	 * \return The formatted date string 
+	 * Retrieves a single <code>value</code> for a certain body with a NAIF ID of
+	 * <code>id</code>. This method succeeds iff <code>id</code> is the ID of a valid
+	 * body, <code>value</code> is a value associated with the body, and the value
+	 * consists of only a single <code>double</code> value. If all conditions are true,
+	 * the value is retrieved using the method <code>bodvrd_c</code> and stored in
+	 * <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param id The NAIF ID of the body whose information should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved value
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
 	 */
-	std::string convertTdbSecondsToString(double seconds, const std::string& format) const;
+	bool getValue(int id, const std::string& value, double& v) const;
 
-	std::string ephemerisTimeToString(const double et) const;
+	/**
+	 * Retrieves a <code>value</code> with three components for a certain
+	 * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of three <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged.
+	 * \param body The name of the body whose value should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
 
-// Computing Positions of Spacecraft and Natural Bodies(SPK) ---------------------------- //
+	/**
+	 * Retrieves a <code>value</code> with three components for a certain body with a
+	 * NAIF ID of <code>id</code>. This method succeeds <code>id</code> is the ID of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of three <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param id The NAIF ID of the body whose information should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(int id, const std::string& value, glm::dvec3& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with four components for a certain
+	 * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of four <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged.
+	 * \param body The name of the body whose value should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with four components for a certain body with a
+	 * NAIF ID of <code>id</code>. This method succeeds <code>id</code> is the ID of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of four <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param id The NAIF ID of the body whose information should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(int id, const std::string& value, glm::dvec4& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with an arbitrary number of components for a certain
+	 * <code>body</code>. This method succeeds <code>body</code> is a valid body,
+	 * <code>value</code> is a value associated with the body, and the value consists of a
+	 * number of <code>double</code> values. The requested number is equal to the
+	 * <code>size</code> of the passed vector <code>v</code> which means that this vector
+	 * has to be preallocated. If all conditions are true, the value is retrieved using
+	 * the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged.
+	 * \param body The body whose information should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values. The size of this vector
+	 * determines how many values will be retrieved
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value,
+		std::vector<double>& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with an arbitrary number of components for a certain
+	 * body with a NAIF ID of <code>id</code>. This method succeeds <code>id</code> is the
+	 * ID of a valid body, <code>value</code> is a value associated with the body, and the
+	 * value consists of a number of <code>double</code> values. The requested number is
+	 * equal to the <code>size</code> of the passed vector <code>v</code> which means that
+	 * this vector has to be preallocated. If all conditions are true, the value is
+	 * retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param id The NAIF ID of the body whose information should be retrieved
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values. The size of this vector
+	 * determines how many values will be retrieved
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(int id, const std::string& value, std::vector<double>& v) const;
+
+	/**
+	 * Converts the <code>epochString</code> representing a date to a double precision
+     * value representing the <code>ephemerisTime</code>; that is the number of TDB
+	 * seconds past the J2000 epoch. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html. If an error
+	 * occurs, an error is logged, the method returns <code>false</code> and the
+	 * <code>ephemerisTime</code> remains unchanged.
+	 * \param epochString A string representing an epoch
+	 * \param ephemerisTime The destination for the converted time; the number of TDB
+	 * seconds past the J2000 epoch, representing the passed <code>epochString</code>
+	 * \return <code>true</code> if the <code>epochString</code> is a valid string and
+	 * the conversion succeeded, <code>false</code> otherwise
+	 */
+	bool getETfromDate(const std::string& epochString, double& ephemerisTime) const;
+
+	/**
+	 * Converts the passed <code>ephemerisTime</code> into a human-readable
+	 * <code>date</code> string with a specific <code>format</code>. For details on the
+	 * formatting, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html. In case of
+	 * an error, <code>date</code> will not be modified, an error will be logged and the
+	 * method returns <code>false</code>.
+	 * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
+	 * J2000 epoch
+	 * \param date The destination for the converted date. This will only be changed if 
+	 * the conversion succeeded
+	 * \param format The format string describing the output format for the
+	 * <code>date</code>
+	 * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
+	 */
+	bool getDateFromET(double ephemerisTime, std::string& date,
+		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
 
 	/**
 	 *  Return the position of a target body relative to an observing 
