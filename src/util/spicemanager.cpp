@@ -44,13 +44,9 @@ namespace {
 namespace openspace {
 
 SpiceManager* SpiceManager::_manager = nullptr;
-unsigned int SpiceManager::_kernelCount = 0;
+unsigned int SpiceManager::_lastAssignedKernel = 0;
 
-SpiceManager::~SpiceManager(){
-	// cleanup...
-}
-
-void SpiceManager::initialize(){
+void SpiceManager::initialize() {
 	assert(_manager == nullptr);
 	_manager = new SpiceManager;
 
@@ -60,10 +56,13 @@ void SpiceManager::initialize(){
 	errprt_c("SET", 0, "NONE");
 }
 
-void SpiceManager::deinitialize(){
+void SpiceManager::deinitialize() {
+	for (const KernelInformation& i : _manager->_loadedKernels)
+		unload_c(i.path.c_str());
+
 	delete _manager;
 	_manager = nullptr;
-	_kernelCount = 0;
+	_lastAssignedKernel = 0;
 
 	// Set values back to default
 	erract_c("SET", 0, "DEFAULT");
@@ -76,11 +75,28 @@ SpiceManager& SpiceManager::ref() {
 }
 
 int SpiceManager::loadKernel(std::string filePath) {
-	unsigned int kernelId = ++_kernelCount;
+	unsigned int kernelId = ++_lastAssignedKernel;
 	assert(kernelId > 0);
 
 	filePath = std::move(absPath(filePath));
+	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
+	std::string&& fileDirectory = ghoul::filesystem::File(filePath).directoryName();
+	FileSys.setCurrentDirectory(fileDirectory);
+
 	furnsh_c(filePath.c_str());
+	
+	FileSys.setCurrentDirectory(currentDirectory);
+
+	int failed = failed_c();
+    if (failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error loading kernel '" + filePath + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return false;
+    }
+
 
 	KernelInformation&& info = { std::move(filePath), std::move(kernelId) };
 	_loadedKernels.push_back(info);
@@ -108,8 +124,23 @@ void SpiceManager::unloadKernel(std::string filePath) {
 		_loadedKernels.erase(it);
 }
 
-bool SpiceManager::hasValue(int naifId, const std::string& kernelPoolValue) const {
-	return bodfnd_c(naifId, kernelPoolValue.c_str());
+bool SpiceManager::hasValue(int naifId, const std::string& item) const {
+	return (bodfnd_c(naifId, item.c_str()) == SPICETRUE);
+}
+
+bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
+	int id;
+	bool success = getNaifIdForBody(body, id);
+	if (success)
+		return hasValue(id, item);
+	else
+		return false;
+}
+
+bool SpiceManager::getNaifIdForBody(const std::string& body, int& id) const {
+	SpiceBoolean success;
+	bods2c_c(body.c_str(), &id, &success);
+	return (success == SPICETRUE);
 }
 
 // 1D

@@ -59,14 +59,14 @@ double abs_error = 0.00001;
 
 // In this testclass only a handset of the testfunctions require a single kernel.
 // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'.
-#define KERNEL(param, name) int kernelID = -1; \
-	                        kernelID = openspace::SpiceManager::ref().loadKernel(param, name); \
+#define KERNEL(param) int kernelID = -1; \
+	                        kernelID = openspace::SpiceManager::ref().loadKernel(param); \
 	                        EXPECT_TRUE(kernelID != -1) << "loadKernel did not return proper id"; \
 	                        return kernelID; \
 
-int loadMetaKernel() { KERNEL(META , "METAKERNEL" ); }
-int loadLSKKernel()  { KERNEL(LSK  , "LEAPSECONDS"); }
-int loadPCKKernel()  { KERNEL(PCK  , "CASSINI_PCK"); }
+int loadMetaKernel() { KERNEL(META); }
+int loadLSKKernel()  { KERNEL(LSK); }
+int loadPCKKernel()  { KERNEL(PCK); }
 
 std::string fileType(char type[]){
 	std::string str(type);
@@ -108,8 +108,7 @@ TEST_F(SpiceManagerTest, unloadKernelString){
 	ASSERT_TRUE(found == SPICETRUE);
 
 	//unload using string keyword
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel("LEAPSECONDS");
-	EXPECT_TRUE(unloaded);
+	openspace::SpiceManager::ref().unloadKernel(LSK);
 
 	found = SPICEFALSE;
 	kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
@@ -124,8 +123,7 @@ TEST_F(SpiceManagerTest, unloadKernelInteger){
 	ASSERT_TRUE(found == SPICETRUE);
 
 	//unload using unique int ID
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel(kernelID);
-	EXPECT_TRUE(unloaded) << "Kernel did not unload";
+	openspace::SpiceManager::ref().unloadKernel(kernelID);
 
 	found = SPICEFALSE;
 	kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
@@ -145,8 +143,7 @@ TEST_F(SpiceManagerTest, unloadMetaKernel){
 		kdata_c(i, "all", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
 		EXPECT_EQ(fileType(filtyp), typeArr[i]) << "One or more kernels did not load properly";
 	}
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel("METAKERNEL");
-	EXPECT_TRUE(unloaded);
+	openspace::SpiceManager::ref().unloadKernel(META);
 
 	for (int i = 0; i < nrMetaKernels; i++){
 		// the values should by now be unloaded

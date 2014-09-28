@@ -37,7 +37,7 @@ namespace openspace {
 
 class transformMatrix;
 
-class SpiceManager{
+class SpiceManager {
 public:
 	/**
 	* Initializer that initializes the static member. 
@@ -81,23 +81,48 @@ public:
 	 * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
 	 * the loading call to loadKernel. The unloading is done by calling the
 	 * <code>unload_c</code> function.
-	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html.
 	 * \param filePath The path of the kernel that should be unloaded, it has to refer to
 	 * a file that was loaded in using the loadKernel method
 	 */
 	void unloadKernel(std::string filePath);
 	
-// Acessing Kernel Data - Constants and Ids --------------------------------------------- //
+	/**
+	 * Determines whether values exist for some <code>item</code> for any body,
+	 * identified by it's <code>naifId</code>, in the kernel pool by passing it to the
+	 * <code>bodfnd_c</code> function. 
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+	 * For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param naifId NAIF ID code of body
+     * \param item The item to find
+	 * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
+	 */
+	bool hasValue(int naifId, const std::string& item) const;
 
 	/**
-	 *  Determine whether values exist for some item for any body in the kernel pool.
-	 *  For further details, please refer to 'bodfnd_c' in SPICE Docummentation
-	 *
-	 *  \param naifId  ID code of body.
-     *  \param item    Item to find ("RADII", "NUT_AMP_RA", etc.).
-	 *  \return        Whether the function succeeded or not
+	 * Determines whether values exist for some <code>item</code> for any
+	 * code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
+	 * function. 
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+	 * \param body The name of the body that should be sampled
+     * \param item The item to find
+	 * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
 	 */
-	bool hasValue(int naifId, const std::string& kernelPoolValueName) const;
+	bool hasValue(const std::string& body, const std::string& item) const;
+
+	/**
+	 * Returns the NAIF ID for a specific body. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html. The
+	 * <code>id</code> will only be set if the retrieval was successful, otherwise it will
+	 * remain unchanged.
+	 * \param body The body name that should be retrieved
+	 * \param id The ID of the <code>body</code> will be stored in this variable. The
+	 * value will only be changed if the retrieval was successful
+	 * \return <code>true</code> if the <code>body</code> was found, <code>false</code>
+	 * otherwise
+	 */
+	bool getNaifIdForBody(const std::string& body, int& id) const;
 
 	/** 
 	 *  Fetch from the kernel pool the double precision values of an 
@@ -373,11 +398,10 @@ private:
 	};
 
 	SpiceManager() = default;
-	~SpiceManager();
 	SpiceManager(const SpiceManager& c) = delete;
 
 	std::vector<KernelInformation> _loadedKernels;
-	static unsigned int _kernelCount;
+	static unsigned int _lastAssignedKernel;
 
 	static SpiceManager* _manager;
 };
