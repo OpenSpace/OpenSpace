@@ -52,6 +52,8 @@ public:
 	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
 	int addSamplerfile(const std::string& filename);
 
+	void invalidateABuffer();
+
 protected:
 	virtual std::string settings() = 0;
 

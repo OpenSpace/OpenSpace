@@ -283,7 +283,7 @@ bool OpenSpaceEngine::initialize()
 
 
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
-    _renderEngine.initialize();
+	_renderEngine.initialize();
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
@@ -292,7 +292,7 @@ bool OpenSpaceEngine::initialize()
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
-    _renderEngine.setSceneGraph(sceneGraph);
+    //_renderEngine.setSceneGraph(sceneGraph);
 
 #ifdef FLARE_ONLY
     _flare = new Flare();

@@ -45,7 +45,7 @@ std::string padGeneratedString(const std::string& content) {
 
 namespace openspace {
 
-ABuffer::ABuffer(): _validShader(true) {
+ABuffer::ABuffer() : _validShader(false), _resolveShader(nullptr) {
 	int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
     _width = xSize;
@@ -69,7 +69,6 @@ ABuffer::~ABuffer() {
 	for(auto file: _shaderFiles) {
 		delete file;
 	}
-
 }
 
 bool ABuffer::initializeABuffer() {
@@ -92,10 +91,6 @@ bool ABuffer::initializeABuffer() {
     addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
     addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
     addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");    
-
-    _resolveShader = nullptr;
-    generateShaderSource();
-    updateShader();
 
     // ============================
     // 		GEOMETRY (quad)
@@ -127,7 +122,6 @@ void ABuffer::resolve() {
 		_validShader = true;
 		generateShaderSource();
 		updateShader();
-
 	}
 
 	if(_resolveShader) {
@@ -373,6 +367,10 @@ std::string ABuffer::openspaceTransferFunction() {
 	}
 
 	return tf;
+}
+
+void ABuffer::invalidateABuffer() {
+	_validShader = false;
 }
 
 

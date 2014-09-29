@@ -223,167 +223,6 @@ bool SceneGraph::initialize()
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
 
-    /*
-
-    auto programCreator = [] (  const std::string& name, 
-                                const std::string& vpath, 
-                                const std::string& fpath) 
-    {
-        const std::string vsPath = absPath(vpath);
-        const std::string fsPath = absPath(fpath);
-        const ShaderObject::ShaderType vsType = ShaderObject::ShaderType::ShaderTypeVertex;
-        const ShaderObject::ShaderType fsType = ShaderObject::ShaderType::ShaderTypeFragment;
-
-        ProgramObject* po = new ProgramObject(name);
-        ShaderObject* vs = new ShaderObject(vsType, vsPath, name + "Vertex");
-        ShaderObject* fs = new ShaderObject(fsType, fsPath, name + "Fragment");
-        po->attachObject(vs);
-        po->attachObject(fs);
-        if ( po->compileShaderObjects() && po->linkProgramObject())
-            return po;
-
-        // unsuccessful compilation, cleanup and return nullptr
-        delete po;
-        po = nullptr;
-//<<<<<<< HEAD
-    }
-
-    ShaderObject* powerscale_vs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeVertex,
-                             absPath("${SHADERS}/pscstandard_vs.glsl"), "PS Vertex");
-    ShaderObject* powerscale_fs
-          = new ShaderObject(ShaderObject::ShaderType::ShaderTypeFragment,
-                             absPath("${SHADERS}/pscstandard_fs.glsl"), "PS Fragment");
-
-    po = new ProgramObject;
-    po->attachObject(powerscale_vs);
-    po->attachObject(powerscale_fs);
-
-    if (!po->compileShaderObjects())
-        return false;
-    if (!po->linkProgramObject())
-        return false;
-
-    OsEng.ref().configurationManager().setValue("pscShader", po);
-
-	ProgramObject* _gridProgram = new ProgramObject("GridProgram");
-	ShaderObject* gridvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
-		absPath("${SHADERS}/grid_vs.glsl"));
-	ShaderObject* gridfs = new ShaderObject(ShaderObject::ShaderTypeFragment,
-		absPath("${SHADERS}/grid_fs.glsl"));
-	_gridProgram->attachObject(gridvs);
-	_gridProgram->attachObject(gridfs);
-	_gridProgram->compileShaderObjects();
-	_gridProgram->linkProgramObject();
-
-
-	// STAR HALO RENDERING
-	ProgramObject* _starProgram = new ProgramObject("StarProgram");
-	ShaderObject* starvs = new ShaderObject(ShaderObject::ShaderTypeVertex,
-					                        absPath("${SHADERS}/star_vs.glsl"));
-	ShaderObject* starge = new ShaderObject(ShaderObject::ShaderTypeGeometry,
-											absPath("${SHADERS}/star_ge.glsl"));
-	ShaderObject* starfs = new ShaderObject(ShaderObject::ShaderTypeFragment, 
-											absPath("${SHADERS}/star_fs.glsl"));
-	_starProgram->attachObject(starvs);
-	_starProgram->attachObject(starge);
-	_starProgram->attachObject(starfs);
-	_starProgram->compileShaderObjects();
-	_starProgram->linkProgramObject();
-	
-	// STAR POINT RENDERING
-	ProgramObject* _pointProgram = new ProgramObject("PointProgram");
-	ShaderObject* starvs_point = new ShaderObject(ShaderObject::ShaderTypeVertex,
-		absPath("${SHADERS}/star_vs_points.glsl"));
-	ShaderObject* starge_point = new ShaderObject(ShaderObject::ShaderTypeGeometry,
-		absPath("${SHADERS}/star_ge_points.glsl"));
-	ShaderObject* starfs_point = new ShaderObject(ShaderObject::ShaderTypeFragment,
-		absPath("${SHADERS}/star_fs_points.glsl"));
-
-	_pointProgram->attachObject(starvs_point);
-	_pointProgram->attachObject(starge_point);
-	_pointProgram->attachObject(starfs_point);
-	_pointProgram->compileShaderObjects();
-	_pointProgram->linkProgramObject();
-
-    ProgramObject* _fboProgram = new ProgramObject("RaycastProgram");
-    ShaderObject* vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                                  absPath("${SHADERS}/exitpoints.vert"));
-    ShaderObject* fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment, 
-		                                          absPath("${SHADERS}/exitpoints.frag"));
-    _fboProgram->attachObject(vertexShader);
-    _fboProgram->attachObject(fragmentShader);
-    _fboProgram->compileShaderObjects();
-    _fboProgram->linkProgramObject();
-
-    ProgramObject* _twopassProgram = new ProgramObject("TwoPassProgram");
-    vertexShader = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                    absPath("${SHADERS}/twopassraycaster.vert"));
-    fragmentShader = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                      absPath("${SHADERS}/twopassraycaster.frag"));
-    _twopassProgram->attachObject(vertexShader);
-    _twopassProgram->attachObject(fragmentShader);
-    _twopassProgram->compileShaderObjects();
-    _twopassProgram->linkProgramObject();
-    _twopassProgram->setUniform("texBack", 0);
-    _twopassProgram->setUniform("texFront", 1);
-    _twopassProgram->setUniform("texVolume", 2);
-
-    ProgramObject* quad = new ProgramObject("Quad");
-    ShaderObject* quadv = new ShaderObject(ShaderObject::ShaderTypeVertex,
-                                           absPath("${SHADERS}/quadVert.glsl"));
-    ShaderObject* quadf = new ShaderObject(ShaderObject::ShaderTypeFragment,
-                                           absPath("${SHADERS}/quadFrag.glsl"));
-    quad->attachObject(quadv);
-    quad->attachObject(quadf);
-    quad->compileShaderObjects();
-    quad->linkProgramObject();
-    quad->setUniform("quadTex", 0);
-
-    OsEng.ref().configurationManager().setValue("RaycastProgram", _fboProgram);
-    OsEng.ref().configurationManager().setValue("TwoPassProgram", _twopassProgram);
-    OsEng.ref().configurationManager().setValue("Quad", quad);
-	OsEng.ref().configurationManager().setValue("PointProgram", _pointProgram);
-	OsEng.ref().configurationManager().setValue("StarProgram", _starProgram);
-	OsEng.ref().configurationManager().setValue("GridProgram", _gridProgram);
-
-=======
-        return po;
-    };
-    // pscstandard
-    tmpProgram = programCreator("pscstandard",
-                                "${SHADERS}/pscstandard_vs.glsl",
-                                "${SHADERS}/pscstandard_fs.glsl");
-    if( ! tmpProgram) return false;
-    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
-
-    // RaycastProgram
-    tmpProgram = programCreator("RaycastProgram",
-                                "${SHADERS}/exitpoints.vert",
-                                "${SHADERS}/exitpoints.frag");
-    if( ! tmpProgram) return false;
-    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
-
-
-    // TwoPassProgram
-    tmpProgram = programCreator("TwoPassProgram",
-                                "${SHADERS}/twopassraycaster.vert",
-                                "${SHADERS}/twopassraycaster.frag");
-    if( ! tmpProgram) return false;
-    tmpProgram->setUniform("texBack", 0);
-    tmpProgram->setUniform("texFront", 1);
-    tmpProgram->setUniform("texVolume", 2);
-    OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
-
-    // Quad
-    tmpProgram = programCreator("Quad",
-                                "${SHADERS}/quadVert.glsl",
-                                "${SHADERS}/quadFrag.glsl");
-    if( ! tmpProgram) return false;
-    tmpProgram->setUniform("quadTex", 0);
-    OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
-    */
-//>>>>>>> develop
 
     return true;
 }
@@ -402,6 +241,8 @@ void SceneGraph::update(const UpdateData& data)
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
+
+		OsEng.renderEngine().abuffer()->invalidateABuffer();
 	}
 
     for (auto node : _nodes)
@@ -534,8 +375,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
-    for (auto node : _nodes)
-		node->update({Time::ref().currentTime()});
+	for (auto node : _nodes)
+		node->update({ Time::ref().currentTime() });
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();
@@ -557,7 +398,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
         const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
-        
+
         // this part is full of magic!
         glm::vec2 boundf = bound.vec2();
         glm::vec2 scaling{1.0f, -boundf[1]};

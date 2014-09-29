@@ -127,16 +127,6 @@ RenderableVolumeGL::~RenderableVolumeGL() {
 }
 
 bool RenderableVolumeGL::initialize() {
-    // assert(_filename != "");
-    //	------ VOLUME READING ----------------
-// <<<<<<< HEAD
-// =======
-// 	_volume = loadVolume(_filename, _hintsDictionary);
-// 	_volume->uploadTexture();
-//     _transferFunction = loadTransferFunction(_transferFunctionPath);
-//     _transferFunction->uploadTexture();
-
-// >>>>>>> feature/fieldlines
     // TODO: fix volume an transferfunction names
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);

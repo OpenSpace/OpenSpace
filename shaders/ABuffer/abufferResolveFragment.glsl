@@ -252,7 +252,9 @@ vec4 calculate_final_color(uint frag_count) {
 #pragma openspace insert TRANSFERFUNC
 #endif
 
-	// if(frag_count == 1) {
+	// if(frag_count == 0) {
+	// 	final_color = vec4(0.5,0.5,0.5,1.0);
+	// } else if(frag_count == 1) {
 	// 	final_color = vec4(1.0,0.0,0.0,1.0);
 	// } else if(frag_count == 2) {
 	// 	final_color = vec4(0.0,1.0,0.0,1.0);
