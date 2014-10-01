@@ -28,6 +28,8 @@
 // std includes
 #include <vector>
 #include <map>
+#include <set>
+#include <mutex>
 
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
@@ -118,6 +120,10 @@ private:
     std::map<std::string, SceneGraphNode*> _allNodes;
 
 	std::string _sceneGraphToLoad;
+
+	std::mutex _programUpdateLock;
+	std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
+	std::vector<ghoul::opengl::ProgramObject*> _programs;
 };
 
 } // namespace openspace

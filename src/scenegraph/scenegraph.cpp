@@ -29,7 +29,6 @@
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/shadercreator.h>
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
 
@@ -47,6 +46,7 @@
 #include <ghoul/opengl/shadermanager.h>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include <chrono>
@@ -149,80 +149,91 @@ SceneGraph::~SceneGraph()
 bool SceneGraph::initialize()
 {
     LDEBUG("Initializing SceneGraph");
-    
-    LDEBUG("Creating ProgramObjects");
+   
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ShaderCreator sc = OsEng.shaderBuilder();
     ProgramObject* tmpProgram;
 
-    typedef std::chrono::high_resolution_clock clock_;
-    typedef std::chrono::duration<double, std::ratio<1> > second_;
+	int x1, xSize, y1, ySize;
+	sgct::Engine::instance()->
+		getActiveWindowPtr()->
+		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 
-    std::chrono::time_point<clock_> beginning(clock_::now());
+	// TODO: Make this file creation dynamic and better in every way
+	// TODO: If the screen size changes it is enough if this file is regenerated to
+	// recompile all necessary files
+	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
+		os << "#define SCREEN_WIDTH  " << xSize << "\n"
+			<< "#define SCREEN_HEIGHT " << ySize << "\n"
+		<< "#define ABUFFER_SINGLE_LINKED     1\n"
+		<< "#define ABUFFER_FIXED             2\n"
+		<< "#define ABUFFER_DYNAMIC           3\n"
+		<< "#define ABUFFER_IMPLEMENTATION    1\n";
+	os.close();
 
-    // pscstandard
-    tmpProgram = sc.buildShader("pscstandard",
-                                "${SHADERS}/pscstandard_vs.glsl",
-                                "${SHADERS}/pscstandard_fs.glsl");
+	// TODO: Figure out why the callback is called twice
+	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
+		_programUpdateLock.lock();
+		_programsToUpdate.insert(program);
+		_programUpdateLock.unlock();
+	};
+
+	// Start Timing for building SceneGraph shaders
+	typedef std::chrono::high_resolution_clock clock_;
+	typedef std::chrono::duration<double, std::ratio<1> > second_;
+	std::chrono::time_point<clock_> beginning(clock_::now());
+
+	// pscstandard
+	tmpProgram = ProgramObject::Build("pscstandard",
+		"${SHADERS}/pscstandard_vs.glsl",
+		"${SHADERS}/pscstandard_fs.glsl",
+		cb);
     if( ! tmpProgram) return false;
+	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
     // RaycastProgram
-    tmpProgram = sc.buildShader("RaycastProgram",
-                                "${SHADERS}/exitpoints.vert",
-                                "${SHADERS}/exitpoints.frag");
-    if( ! tmpProgram) return false;
+	tmpProgram = ProgramObject::Build("RaycastProgram",
+		"${SHADERS}/exitpoints.vert",
+		"${SHADERS}/exitpoints.frag",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-
-    // // TwoPassProgram
-    // tmpProgram = sc.buildShader("TwoPassProgram",
-    //                             "${SHADERS}/twopassraycaster.vert",
-    //                             "${SHADERS}/twopassraycaster.frag");
-    // if( ! tmpProgram) return false;
-    // tmpProgram->setUniform("texBack", 0);
-    // tmpProgram->setUniform("texFront", 1);
-    // tmpProgram->setUniform("texVolume", 2);
-    // OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
-
-	// Quad
-	tmpProgram = sc.buildShader("Quad",
-		"${SHADERS}/quadVert.glsl",
-		"${SHADERS}/quadFrag.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setUniform("quadTex", 0);
-	OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
-
 	// Star program
-	tmpProgram = sc.buildShader("Star",
+	tmpProgram = ProgramObject::Build("Star",
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl");
+		"${SHADERS}/star_ge.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
 
 	// Point program
-	tmpProgram = sc.buildShader("Point",
+	tmpProgram = ProgramObject::Build("Point",
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl");
+		"${SHADERS}/star_ge.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PointProgram", tmpProgram);
 
 	// Grid program
-	tmpProgram = sc.buildShader("Grid",
+	tmpProgram = ProgramObject::Build("Grid",
 		"${SHADERS}/grid_vs.glsl",
-		"${SHADERS}/grid_fs.glsl");
+		"${SHADERS}/grid_fs.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
-
-
+	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
-
 
     return true;
 }
@@ -230,6 +241,13 @@ bool SceneGraph::initialize()
 bool SceneGraph::deinitialize()
 {
 	clearSceneGraph();
+
+	// clean up all programs
+	_programsToUpdate.clear();
+	for (auto program : _programs) {
+		delete program;
+	}
+	_programs.clear();
     return true;
 }
 
@@ -257,6 +275,13 @@ void SceneGraph::evaluate(Camera* camera)
 
 void SceneGraph::render(const RenderData& data)
 {
+	_programUpdateLock.lock();
+	for (auto program : _programsToUpdate) {
+		LDEBUG("Attempting to recompile " << program->name());
+		program->rebuildFromFile();
+	}
+	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
+	_programUpdateLock.unlock();
 	if (_root)
 		_root->render(data);
 }
@@ -474,7 +499,8 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
 }
 
 scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
-	scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+	//scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+	return {
 		"",
 		{
 			{
@@ -498,8 +524,7 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 			}
 		}
 	};
-
-	return std::move(sceneGraphLibrary);
+	//return std::move(sceneGraphLibrary);
 }
 
 }  // namespace openspace

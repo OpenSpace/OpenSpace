@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <${SHADERS}/ABuffer/constants.hglsl>
+
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;

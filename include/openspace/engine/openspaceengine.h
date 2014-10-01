@@ -45,7 +45,6 @@
 // #define FLARE_ONLY
 
 #include <openspace/flare/flare.h>
-#include <openspace/util/shadercreator.h>
 
 #define  ABUFFER_SINGLE_LINKED    1
 #define  ABUFFER_FIXED            2
@@ -76,7 +75,6 @@ public:
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
-    ShaderCreator& shaderBuilder();
 
     // SGCT callbacks
     bool initializeGL();
@@ -116,7 +114,6 @@ private:
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
-    ShaderCreator _shaderBuilder;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

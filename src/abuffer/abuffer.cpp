@@ -89,8 +89,9 @@ bool ABuffer::initializeABuffer() {
     addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
-    addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
-    addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");    
+	addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
+	addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");
+	addFunc("${SHADERS}/PowerScaling/powerScalingMath.hglsl");
 
     // ============================
     // 		GEOMETRY (quad)
@@ -182,9 +183,11 @@ bool ABuffer::updateShader() {
 
 	using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-    ShaderCreator sc = OsEng.shaderBuilder();
-    ghoul::opengl::ProgramObject* resolveShader = sc.buildShader("ABuffer resolve", absPath("${SHADERS}/ABuffer/abufferResolveVertex.glsl"), _fragmentShaderPath);
-    if( ! resolveShader) {
+	ProgramObject* resolveShader = ProgramObject::Build("ABuffer resolve",
+		"${SHADERS}/ABuffer/abufferResolveVertex.glsl",
+		_fragmentShaderPath);
+   
+	if( ! resolveShader) {
     	LERROR("Resolve shader not updated");
     	return false;
     }

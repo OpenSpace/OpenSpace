@@ -221,17 +221,6 @@ bool OpenSpaceEngine::initialize()
     //int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
     //LDEBUG("samples: " << samples);
 
-    int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-    std::string sourceHeader = "";
-    sourceHeader += "#define SCREEN_WIDTH  " + std::to_string(xSize) + "\n";
-    sourceHeader += "#define SCREEN_HEIGHT " + std::to_string(ySize) + "\n";
-    sourceHeader += "#define ABUFFER_SINGLE_LINKED     " + std::to_string(ABUFFER_SINGLE_LINKED) + "\n";
-    sourceHeader += "#define ABUFFER_FIXED             " + std::to_string(ABUFFER_FIXED) + "\n";
-    sourceHeader += "#define ABUFFER_DYNAMIC           " + std::to_string(ABUFFER_DYNAMIC) + "\n";
-    sourceHeader += "#define ABUFFER_IMPLEMENTATION    " + std::to_string(ABUFFER_IMPLEMENTATION) + "\n";
-    _shaderBuilder.createSourceFile(true);
-    _shaderBuilder.sourceFileHeader(sourceHeader);
 
     // Register the filepaths from static function enables easy testing
     // registerFilePaths();
@@ -355,13 +344,6 @@ RenderEngine& OpenSpaceEngine::renderEngine()
 ScriptEngine& OpenSpaceEngine::scriptEngine()
 {
     return _scriptEngine;
-}
-
-
-ShaderCreator& OpenSpaceEngine::shaderBuilder()
-{
-    // TODO custom assert (ticket #5)
-    return _shaderBuilder;
 }
 
 bool OpenSpaceEngine::initializeGL()

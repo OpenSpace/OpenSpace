@@ -114,8 +114,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	_fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
 
 
-    ShaderCreator sc = OsEng.shaderBuilder();
-    _fieldlinesProgram = sc.buildShader("FieldlinesProgram", vshaderpath, fshaderpath);
+    _fieldlinesProgram = ghoul::opengl::ProgramObject::Build("FieldlinesProgram", vshaderpath, fshaderpath);
 
 	dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
 
