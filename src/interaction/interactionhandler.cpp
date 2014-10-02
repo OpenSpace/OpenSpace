@@ -10,6 +10,8 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <glm/gtx/vector_angle.hpp>
 
+#include <openspace/util/time.h>
+
 // std includes
 #include <cassert>
 
@@ -326,6 +328,9 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
 	    }
+		if (key == SGCT_KEY_Q) {
+			Time::ref().advanceTime(dt);
+		}
 	    if (key == 262) {
 	        glm::vec3 euler(0.0, speed * dt, 0.0);
 	        glm::quat rot = glm::quat(euler);

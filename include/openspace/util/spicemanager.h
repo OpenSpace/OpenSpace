@@ -25,6 +25,7 @@
 #define __SPICEWRAPPER_H__
 
 #include "SpiceUsr.h"
+#include <openspace\util\powerscaledcoordinate.h>
 
 #include <string>
 #include <ghoul/glm.h>
@@ -161,6 +162,14 @@ public:
 						   const std::string& observer,
 						   glm::dvec3& targetPosition, 
 						   double& lightTime) const;
+
+	bool getTargetPscPosition(const std::string& target,
+						  	  double ephemerisTime,
+						  	  const std::string& referenceFrame,
+						  	  const std::string& aberrationCorrection,
+						  	  const std::string& observer,
+						  	  PowerScaledCoordinate& targetPosition,
+						  	  double& lightTime) const;
 	/**
 	 *  Return the state (position and velocity) of a target body 
      *  relative to an observing body, optionally corrected for light 
@@ -185,6 +194,15 @@ public:
 						glm::dvec3& targetPosition, 
 						glm::dvec3& targetVelocity,
 						double& lightTime) const;
+
+	bool getTargetPscState(const std::string& target,
+						   double ephemerisTime,
+						   const std::string& referenceFrame,
+						   const std::string& aberrationCorrection,
+						   const std::string& observer,
+						   PowerScaledCoordinate& targetPosition,
+						   PowerScaledCoordinate& targetVelocity,
+						   double& lightTime) const;
 
 // Computing Transformations Between Frames (FK) -------------------------------------- //
 
@@ -364,6 +382,9 @@ private:
 	std::vector<spiceKernel> _loadedKernels;
 	unsigned int _kernelCount = 0;
 };
+
+#define SM (openspace::SpiceManager::ref())
+
 
 /**
 * SpiceManager helper class, a storage container used to 

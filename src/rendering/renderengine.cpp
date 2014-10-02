@@ -163,9 +163,11 @@ void RenderEngine::postSynchronizationPreDraw()
 {
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
+	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
+	//std::cout << a.delta << std::endl;
     // update and evaluate the scene starting from the root node
-	_sceneGraph->update({Time::ref().currentTime()}); 
+	_sceneGraph->update(a);
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 }

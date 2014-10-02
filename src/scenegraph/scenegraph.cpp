@@ -277,6 +277,12 @@ bool SceneGraph::initialize()
 	if (!tmpProgram) return false;
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
+	tmpProgram = sc.buildShader("Ephemeris",
+		"${SHADERS}/ephemeris_vs.glsl",
+		"${SHADERS}/ephemeris_fs.glsl");
+	if (!tmpProgram) return false;
+	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
+
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
 
@@ -298,7 +304,6 @@ void SceneGraph::update(const UpdateData& data)
 		if (!success)
 			return;
 	}
-
     for (auto node : _nodes)
         node->update(data);
 }

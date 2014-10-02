@@ -268,6 +268,27 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 
 	return true;
 }
+
+bool SpiceManager::getTargetPscPosition(const std::string& target,
+										double ephemerisTime,
+										const std::string& referenceFrame,
+										const std::string& aberrationCorrection,
+										const std::string& observer,
+										PowerScaledCoordinate& targetPosition,
+										double& lightTime) const{
+										double pos[3] = { NULL, NULL, NULL };
+
+	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
+
+	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL)
+		return false;
+
+	targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+
+	return true;
+}
+
 bool SpiceManager::getTargetState(const std::string& target,
 	                              double ephemerisTime,
 	                              const std::string& referenceFrame,
@@ -296,6 +317,26 @@ bool SpiceManager::getTargetState(const std::string& target,
 		memcpy(&targetPosition, state   , sizeof(double)* 3);
 		memcpy(&targetVelocity, state +3, sizeof(double)* 3);
 	}
+	return true;
+}
+
+bool SpiceManager::getTargetPscState(const std::string& target,
+									 double ephemerisTime,
+									 const std::string& referenceFrame,
+									 const std::string& aberrationCorrection,
+									 const std::string& observer,
+									 PowerScaledCoordinate& targetPosition,
+									 PowerScaledCoordinate& targetVelocity,
+									 double& lightTime) const{
+									 double state[6];
+									 std::fill_n(state, 6, NULL);
+
+	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+
+	targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+	targetVelocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+
 	return true;
 }
 
