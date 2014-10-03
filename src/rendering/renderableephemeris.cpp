@@ -31,6 +31,8 @@
 
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
+#include <utility>      // std::move
+
 
 namespace {
 	const std::string _loggerCat = "RenderableEphemeris";
@@ -73,7 +75,7 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 	SM.getTargetPscState("EARTH", et, "GALACTIC", "LT+S", "SUN", pscpos, pscvel, lightTime);
 
 	memcpy(_varray[indx].location, glm::value_ptr(pscpos.vec4()), 4 * sizeof(double));
-	memcpy(_varray[indx].velocity, glm::value_ptr(glm::vec4(1, 0, 1, 1)), 4 * sizeof(double));
+	memcpy(_varray[indx].velocity, glm::value_ptr(glm::vec4(1, 1, 0, 1)), 4 * sizeof(double));
 
 	_intervals.push_back(std::pair<int, double>(indx, et));
 
@@ -89,7 +91,7 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 				break;
 			}
 			memcpy(_varray[indx].location, glm::value_ptr(pscpos.vec4()), 4 * sizeof(double));
-			memcpy(_varray[indx].velocity, glm::value_ptr(glm::vec4(0, 0, 0, 1)), 4 * sizeof(double));
+			memcpy(_varray[indx].velocity, glm::value_ptr(glm::vec4(1, 1, 0, 1)), 4 * sizeof(double));
 
 			_intervals.push_back(std::pair<int, double>(indx, et));
 
@@ -99,6 +101,27 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 		}
 	}
 	_delta = _vsize;
+	
+	/// testing std::move()
+	int array1[10] = { 10, 9, 8 , 7, 6, 5, 4, 3, 2 , 1 };
+
+	int size =  sizeof(array1)/(sizeof(int));
+	std::cout << "before : ";
+	for (int i = 0; i < 10; i++){
+		std::cout << array1[i] << " ";
+	}
+	for (int i = size-1; i != 0; i--){
+		array1[i] = std::move(array1[i-1]);
+		if (i == 1){
+			array1[0] = 11;
+		}
+	}
+	std::cout << "after : ";
+	for (int i = 0; i < 10; i++){
+		std::cout << array1[i] << " ";
+	}
+	std::cout << std::endl;
+	
 }
 
 RenderableEphemeris::~RenderableEphemeris(){
@@ -205,7 +228,7 @@ void RenderableEphemeris::render(const RenderData& data){
 		_varray[i].velocity[1] -= 0.00006;
 		_varray[i].velocity[2] -= 0.00004;
 	}
-	/*
+	
 	if (_delta > 0){
 		int i = _index[0];
 		int j = _index[1];
@@ -226,10 +249,11 @@ void RenderableEphemeris::render(const RenderData& data){
 			}
 			i = (i - 2 < 0) ? _vsize - 1 : i - 2;
 			j = (j - 1 < 0) ? _vsize - 1 : j - 2;
+
+			std::cout << i << " " << j << std::endl;
 		}
 	}
-	*/
-	
+	/*
 	if (_updated[_index[1]] == false && _updated[_index[0]] == false){
 		
 		_updated[_index[0]] = true;
@@ -241,20 +265,21 @@ void RenderableEphemeris::render(const RenderData& data){
 		memcpy(_varray[_index[0]].location, glm::value_ptr(_pscpos.vec4()), 4 * sizeof(double));
 		memcpy(_varray[_index[1]].location, glm::value_ptr(_pscpos.vec4()), 4 * sizeof(double));
 		
-		memcpy(_varray[_index[0]].velocity, glm::value_ptr(glm::vec4(1, 1, 1, 1)), 4 * sizeof(double));
-		memcpy(_varray[_index[1]].velocity, glm::value_ptr(glm::vec4(1, 1, 1, 1)), 4 * sizeof(double));
+	//	memcpy(_varray[_index[0]].velocity, glm::value_ptr(glm::vec4(1, 1, 1, 1)), 4 * sizeof(double));
+	//	memcpy(_varray[_index[1]].velocity, glm::value_ptr(glm::vec4(1, 1, 1, 1)), 4 * sizeof(double));
 		
 		// DEBUGGING COLOR CODING
-		/*
+		
 		memcpy(_varray[_index[0]].velocity, glm::value_ptr(glm::vec4(0, 0, 1, 1)), 4 * sizeof(double));    // blue if updated
 		memcpy(_varray[_index[1]].velocity, glm::value_ptr(glm::vec4(0, 0, 1, 1)), 4 * sizeof(double));
 			
 		memcpy(_varray[_index[2]].velocity, glm::value_ptr(glm::vec4(1, 0, 0, 1)), 4 * sizeof(double));    // red
 		memcpy(_varray[_index[3]].velocity, glm::value_ptr(glm::vec4(1, 0, 0, 1)), 4 * sizeof(double));
-		*/	
+			
 		_updated[_index[2]] = false;
 		_updated[_index[3]] = false;
 	}
+	*/
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);

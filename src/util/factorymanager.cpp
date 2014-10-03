@@ -29,6 +29,7 @@
 // renderables
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
+#include <openspace/rendering/renderabletrail.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
@@ -63,6 +64,9 @@ void FactoryManager::initialize()
 		"RenderableStars");
 	_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
 		"RenderableEphemeris");
+	//will replace ephemeris class soon...
+	_manager->factory<Renderable>()->registerClass<RenderableTrail>(
+		"RenderableTrail");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
     //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
