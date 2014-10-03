@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/planets/renderableplanet.h>
+#include <openspace/rendering/renderablewavefrontobject.h>
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometry.h>
 
@@ -38,12 +38,12 @@
 #include <sgct.h>
 
 namespace {
-const std::string _loggerCat = "RenderablePlanet";
+const std::string _loggerCat = "RenderableWavefrontObject";
 }
 
 namespace openspace {
 
-RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
+RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
@@ -64,7 +64,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+        _geometry
+              = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
 	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
@@ -79,15 +80,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	addPropertySubOwner(_geometry);
 
 	addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+	_colorTexturePath.onChange(std::bind(&RenderableWavefrontObject::loadTexture, this));
 }
 
-RenderablePlanet::~RenderablePlanet()
-{
+RenderableWavefrontObject::~RenderableWavefrontObject(){
     deinitialize();
 }
 
-bool RenderablePlanet::initialize()
+bool RenderableWavefrontObject::initialize()
 {
     bool completeSuccess = true;
     if (_programObject == nullptr)
@@ -97,12 +97,12 @@ bool RenderablePlanet::initialize()
     loadTexture();
     completeSuccess &= (_texture != nullptr);
 
-    completeSuccess &= _geometry->initialize(this);
+    //completeSuccess &= _geometry->initialize(this);
 
     return completeSuccess;
 }
 
-bool RenderablePlanet::deinitialize()
+bool RenderableWavefrontObject::deinitialize()
 {
     _geometry->deinitialize();
     delete _geometry;
@@ -112,7 +112,7 @@ bool RenderablePlanet::deinitialize()
     return true;
 }
 
-void RenderablePlanet::render(const RenderData& data)
+void RenderableWavefrontObject::render(const RenderData& data)
 {
 	if (!_programObject)
 		return;
@@ -163,14 +163,14 @@ void RenderablePlanet::render(const RenderData& data)
 
 }
 
-void RenderablePlanet::update(const UpdateData& data)
+void RenderableWavefrontObject::update(const UpdateData& data)
 {
 	// set spice-orientation in accordance to timestamp
 	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
 
 }
 
-void RenderablePlanet::loadTexture()
+void RenderableWavefrontObject::loadTexture()
 {
     delete _texture;
     _texture = nullptr;

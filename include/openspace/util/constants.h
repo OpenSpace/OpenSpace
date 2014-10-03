@@ -62,6 +62,15 @@ namespace renderableplanet {
 	const std::string keyFrame = "Frame";
 } // namespace renderableplanet
 
+namespace planetgeometry {
+	const std::string keyType = "Type";
+} // namespace planetgeometry
+
+namespace renderablewavefrontobject {
+	const std::string keyGeometry = "Geometry";
+	const std::string keyFrame = "Frame";
+} // namespace renderableplanet
+
 namespace renderablestars {
 	const std::string keySpeckFile = "SpeckFile";
 	const std::string keyPathModule = "ModulePath";
@@ -76,10 +85,6 @@ namespace renderablevolumegl {
 	const std::string keyVolumeName = "VolumeName";
 	const std::string keyTransferFunctionName = "TransferFunctionName";
 } // namespace renderablevolumegl
-
-namespace planetgeometry {
-    const std::string keyType = "Type";
-} // namespace planetgeometry
 
 namespace renderablesphericalgrid {
 	const std::string gridType = "GridType";
