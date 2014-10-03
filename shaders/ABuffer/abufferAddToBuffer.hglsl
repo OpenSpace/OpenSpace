@@ -34,7 +34,7 @@ layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 
-	#define _MAX_LAYERS_ 16
+	#define _MAX_LAYERS_ 64
 	#define _SCREEN_WIDTH_ 1280
 	#define _SCREEN_HEIGHT_ 720
 #endif 

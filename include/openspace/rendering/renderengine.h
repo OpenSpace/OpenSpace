@@ -62,6 +62,8 @@ private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
 	ABuffer* _abuffer;
+
+	void generateGlslConfig();
 };
 
 } // namespace openspace

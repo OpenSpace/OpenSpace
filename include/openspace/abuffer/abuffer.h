@@ -44,6 +44,8 @@ namespace openspace {
 class ABuffer: public ABuffer_I {
 public:
 
+	static const int MAX_LAYERS = 32;
+
 	ABuffer();
 	virtual ~ABuffer();
 	virtual void resolve();

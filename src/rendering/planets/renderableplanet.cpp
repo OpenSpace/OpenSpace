@@ -123,12 +123,6 @@ void RenderablePlanet::render(const RenderData& data)
     // activate shader
     _programObject->activate();
 
-    // fetch data
-    psc currentPosition = data.position;
-	psc campos          = data.camera.position();
-    glm::mat4 camrot    = data.camera.viewRotationMatrix();
-   // PowerScaledScalar scaling = camera->scaling();
-
     PowerScaledScalar scaling = glm::vec2(1, -6);
 
     // scale the planet to appropriate size since the planet is a unit sphere
@@ -179,7 +173,10 @@ void RenderablePlanet::loadTexture()
         _texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-            _texture->uploadTexture();
+			_texture->uploadTexture();
+
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         }
     }
 }

@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <array>
+#include <fstream>
 
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
@@ -62,6 +63,8 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::initialize()
 {
+	generateGlslConfig();
+
     // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
@@ -161,6 +164,10 @@ bool RenderEngine::initializeGL()
 
 void RenderEngine::postSynchronizationPreDraw()
 {
+	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
+	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++)
+		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized())
+			generateGlslConfig();
 	// Move time forward.
 	//_runtimeData->advanceTimeBy(1, DAY);
 	
@@ -461,6 +468,27 @@ Camera* RenderEngine::camera() const {
 
 ABuffer* RenderEngine::abuffer() const {
     return _abuffer;
+}
+
+void RenderEngine::generateGlslConfig() {
+	LDEBUG("Generating GLSLS config, expect shader recompilation");
+	int x1, xSize, y1, ySize;
+	sgct::Engine::instance()->
+		getActiveWindowPtr()->
+		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+
+	// TODO: Make this file creation dynamic and better in every way
+	// TODO: If the screen size changes it is enough if this file is regenerated to
+	// recompile all necessary files
+	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
+	os << "#define SCREEN_WIDTH  " << xSize << "\n"
+		<< "#define SCREEN_HEIGHT " << ySize << "\n"
+		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
+		<< "#define ABUFFER_SINGLE_LINKED     1\n"
+		<< "#define ABUFFER_FIXED             2\n"
+		<< "#define ABUFFER_DYNAMIC           3\n"
+		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
+	os.close();
 }
 
 }  // namespace openspace

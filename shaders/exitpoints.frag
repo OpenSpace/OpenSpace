@@ -27,7 +27,7 @@
 uniform int volumeType;
 
 in vec3 vPosition;
-in vec3 worldPosition;
+in vec4 worldPosition;
 in float s;
 
 #include "ABuffer/abufferStruct.hglsl"
@@ -36,7 +36,7 @@ in float s;
  
 void main() {
 	vec4 fragColor = vec4(vPosition+0.5, 1.0);
-	vec4 position = vec4(worldPosition,s);
+	vec4 position = worldPosition;
 	float depth = pscDepth(position);
 
 	gl_FragDepth = depth;

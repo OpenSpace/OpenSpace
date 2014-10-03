@@ -185,22 +185,11 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	assert(_gridProgram);
 	_gridProgram->activate();
 
-	// fetch data
-	psc currentPosition = data.position;
-	psc campos = data.camera.position();
-	glm::mat4 camrot = data.camera.viewRotationMatrix();
-	// PowerScaledScalar scaling = camera->scaling();
-	PowerScaledScalar scaling = glm::vec2(1, -6);
-
-	glm::mat4 transform = glm::mat4(1);
-
 	// setup the data to the shader
+	_gridProgram->setIgnoreUniformLocationError(true);
 	_gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_gridProgram->setUniform("ModelTransform", transform);
-	_gridProgram->setUniform("campos", campos.vec4());
-	_gridProgram->setUniform("objpos", currentPosition.vec4());
-	_gridProgram->setUniform("camrot", camrot);
-	_gridProgram->setUniform("scaling", scaling.vec2());
+	_gridProgram->setUniform("ModelTransform", glm::mat4(1));
+	setPscUniforms(_gridProgram, &data.camera, data.position);
 	_gridProgram->setUniform("gridColor", _gridColor);
 
 	glLineWidth(1.0f);

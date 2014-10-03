@@ -155,24 +155,6 @@ bool SceneGraph::initialize()
 
     ProgramObject* tmpProgram;
 
-	int x1, xSize, y1, ySize;
-	sgct::Engine::instance()->
-		getActiveWindowPtr()->
-		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-
-	// TODO: Make this file creation dynamic and better in every way
-	// TODO: If the screen size changes it is enough if this file is regenerated to
-	// recompile all necessary files
-	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
-		os << "#define SCREEN_WIDTH  " << xSize << "\n"
-			<< "#define SCREEN_HEIGHT " << ySize << "\n"
-		<< "#define ABUFFER_SINGLE_LINKED     1\n"
-		<< "#define ABUFFER_FIXED             2\n"
-		<< "#define ABUFFER_DYNAMIC           3\n"
-		<< "#define ABUFFER_IMPLEMENTATION    1\n";
-	os.close();
-
-	// TODO: Figure out why the callback is called twice
 	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
 		_programUpdateLock.lock();
 		_programsToUpdate.insert(program);
@@ -235,6 +217,7 @@ bool SceneGraph::initialize()
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
 
+
     return true;
 }
 
@@ -275,6 +258,8 @@ void SceneGraph::evaluate(Camera* camera)
 
 void SceneGraph::render(const RenderData& data)
 {
+	bool emptyProgramsToUpdate = _programsToUpdate.empty();
+		
 	_programUpdateLock.lock();
 	for (auto program : _programsToUpdate) {
 		LDEBUG("Attempting to recompile " << program->name());
@@ -282,6 +267,15 @@ void SceneGraph::render(const RenderData& data)
 	}
 	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
 	_programUpdateLock.unlock();
+
+	if (!emptyProgramsToUpdate) {
+		LDEBUG("Setting uniforms");
+		// Ignore attribute locations
+		for (auto program : _programs) {
+			program->setIgnoreSubroutineUniformLocationError(true);
+		}
+	}
+
 	if (_root)
 		_root->render(data);
 }

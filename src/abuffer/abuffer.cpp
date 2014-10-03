@@ -85,10 +85,12 @@ bool ABuffer::initializeABuffer() {
     	ghoul::filesystem::File* f = new ghoul::filesystem::File(path, false);
     	f->setCallback(shaderCallback);
     	_shaderFiles.push_back(f);
-    };
-    addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
+	};
+	addFunc("${SHADERS}/ABuffer/constants.hglsl");
+	addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
     addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
-    addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
+	addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
+	addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
 	addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
 	addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");
 	addFunc("${SHADERS}/PowerScaling/powerScalingMath.hglsl");
