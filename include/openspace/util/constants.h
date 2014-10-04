@@ -67,8 +67,7 @@ namespace planetgeometry {
 } // namespace planetgeometry
 
 namespace renderablewavefrontobject {
-	const std::string keyGeometry = "Geometry";
-	const std::string keyFrame = "Frame";
+	const std::string keyObjFile = "ObjFile";
 } // namespace renderableplanet
 
 namespace renderablestars {

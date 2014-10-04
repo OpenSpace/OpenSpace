@@ -52,15 +52,35 @@ public:
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+	typedef struct
+	{
+		GLfloat location[3];
+		GLfloat tex[2];
+		GLfloat normal[3];
+	/*	GLfloat color[4];
+		GLfloat attribute[3];
+		GLfloat float_attribute;*/
+		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
+
 protected:
     void loadTexture();
+	void loadObj(const char *filename);
 
 private:
     properties::StringProperty _colorTexturePath;
-
     ghoul::opengl::ProgramObject* _programObject; // remember to add shaders!
     ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry; // < -- change
+
+	GLuint _vaoID = 6;
+	GLuint _vBufferID = 7;
+	GLuint _iBufferID = 8;
+
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	Vertex *_varray;
+	int *_iarray;
 
 	glm::dmat3 _stateMatrix; // might need this
 
