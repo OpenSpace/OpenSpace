@@ -35,6 +35,7 @@
 #include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include <array>
 #include <fstream>
@@ -44,9 +45,27 @@
 #include <openspace/abuffer/abufferdynamic.h>
 
 namespace {
-const std::string _loggerCat = "RenderEngine";
+	const std::string _loggerCat = "RenderEngine";
 }
+
 namespace openspace {
+
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * printImage():
+ * Save the rendering to an image file
+ */
+int printImage(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+	sgct::Engine::instance()->takeScreenshot();
+	return 0;
+}
+
+} // namespace luascriptfunctions
 
 
 RenderEngine::RenderEngine()
@@ -489,6 +508,20 @@ void RenderEngine::generateGlslConfig() {
 		<< "#define ABUFFER_DYNAMIC           3\n"
 		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
 	os.close();
+}
+
+scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
+	return {
+		"",
+		{
+			{
+				"printImage",
+				&luascriptfunctions::printImage,
+				"printImage(): Renders the current image to a file on disk"
+			}
+		}
+	};
+
 }
 
 }  // namespace openspace

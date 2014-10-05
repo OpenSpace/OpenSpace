@@ -27,6 +27,8 @@
 
 #include <openspace/scenegraph/scenegraph.h>
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <memory>
 #include <string>
 
@@ -58,6 +60,16 @@ public:
 	void serialize(std::vector<char>& dataStream, size_t& offset);
 	void deserialize(const std::vector<char>& dataStream, size_t& offset);
 	
+	/**
+	 * Returns the Lua library that contains all Lua functions available to affect the
+	 * rendering. The functions contained are
+	 * - openspace::luascriptfunctions::printScreen
+	 * \return The Lua library that contains all Lua functions available to affect the
+	 * rendering
+	 */
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+
 private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
