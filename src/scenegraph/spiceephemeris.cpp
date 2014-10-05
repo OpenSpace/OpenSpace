@@ -88,7 +88,7 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	glm::dvec3 position(0,0,0);
 
 	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, data.time, "GALACTIC", "LT+S", _originName, position, lightTime);
+	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "LT+S", data.time, position, lightTime);
 
 	/*
 	std::cout << _targetName  << " (";

@@ -80,7 +80,7 @@ int SpiceManager::loadKernel(std::string filePath) {
 	unsigned int kernelId = ++_lastAssignedKernel;
 	assert(kernelId > 0);
 
-	filePath = std::move(absPath(filePath));
+	filePath = absPath(filePath);
 	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
 	std::string&& fileDirectory = ghoul::filesystem::File(filePath).directoryName();
 	FileSys.setCurrentDirectory(fileDirectory);
@@ -164,10 +164,6 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	return true;
 }
 
-bool SpiceManager::getValue(int id, const std::string& value, double& v) const {
-	return getValue(std::to_string(id), value, v);
-}
-
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	glm::dvec3& v) const
 {
@@ -185,11 +181,6 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	}
 
 	return true;
-}
-
-bool SpiceManager::getValue(int id, const std::string& value, glm::dvec3& v) const
-{
-	return getValue(std::to_string(id), value, v);
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
@@ -211,11 +202,6 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	return true;
 }
 
-bool SpiceManager::getValue(int id, const std::string& value, glm::dvec4& v) const
-{
-	return getValue(std::to_string(id), value, v);
-}
-
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	std::vector<double>& v) const 
 {
@@ -234,12 +220,6 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	}
 
 	return true;
-}
-
-bool SpiceManager::getValue(int id, const std::string& value, 
-	std::vector<double>& v) const
-{
-	return getValue(std::to_string(id), value, v);
 }
 
 bool SpiceManager::getETfromDate(const std::string& epochString,
@@ -280,10 +260,10 @@ bool SpiceManager::getDateFromET(double ephemerisTime, std::string& date,
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,
-	                                 double ephemerisTime,
+	                                 const std::string& observer,
 	                                 const std::string& referenceFrame,
 	                                 const std::string& aberrationCorrection,
-	                                 const std::string& observer,
+	                                 double ephemerisTime,
 	                                 glm::dvec3& targetPosition,
 	                                 double& lightTime) const{
 	double pos[3] = { 0.0, 0.0, 0.0 };
@@ -307,10 +287,10 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	return true;
 }
 bool SpiceManager::getTargetState(const std::string& target,
-	                              double ephemerisTime,
+	                              const std::string& observer,
 	                              const std::string& referenceFrame,
 	                              const std::string& aberrationCorrection,
-	                              const std::string& observer,
+	                              double ephemerisTime,
 	                              glm::dvec3& targetPosition,
 	                              glm::dvec3& targetVelocity,
 	                              double& lightTime) const{
@@ -340,40 +320,31 @@ bool SpiceManager::getTargetState(const std::string& target,
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 							const std::string& toFrame,
 							double ephemerisTime,
-							transformMatrix& stateMatrix) const{
+							TransformMatrix& stateMatrix) const{
 	sxform_c(fromFrame.c_str(), toFrame.c_str(), 
-		     ephemerisTime, (double(*)[6])stateMatrix.ptr());
+		     ephemerisTime, (double(*)[6])stateMatrix.data());
 	return true; 
 }
 
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-	                                          const std::string& toFrame,
-	                                          double ephemerisTime,
-											  transformMatrix& positionMatrix) const{
-
-	pxform_c(fromFrame.c_str(), toFrame.c_str(), 
-		     ephemerisTime, (double(*)[3])positionMatrix.ptr());
-
-	return true;
-}
-
-void SpiceManager::getPositionTransformMatrixGLM(const std::string& fromFrame,
 												 const std::string& toFrame,
 												 double ephemerisTime,
 												 glm::dmat3& positionMatrix) const{
 	pxform_c(fromFrame.c_str(), toFrame.c_str(),
 		ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
+	positionMatrix = glm::transpose(positionMatrix);
+	return true;
 }
 
-bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
+bool SpiceManager::getFieldOfView(const std::string& instrument,
 	                              std::string& fovShape,
 	                              std::string& frameName,
-	                              double boresightVector[],
-	                              std::vector<glm::dvec3>& bounds,
-								  int& nrReturned) const{
+	                              glm::dvec3& boresightVector,
+	                              std::vector<glm::dvec3>& bounds) const{
 	int found;
 	int naifId;
 	int maxVectors = 12;
+	int nrReturned;
 	double *boundsArr = new double[maxVectors * 3];
 
 	for (int i = 0; i < maxVectors; i++){
@@ -382,7 +353,7 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 		}
 	}
 
-	bodn2c_c(naifInstrumentId.c_str(), &naifId, &found);
+	bodn2c_c(instrument.c_str(), &naifId, &found);
 	if (!found) return false;
 
 	if (fovShape.size() != 0 && frameName.size() != 0){
@@ -392,7 +363,7 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 				 frameName.size(), 
 				 const_cast<char*>(fovShape.c_str()),
 			     const_cast<char*>(frameName.c_str()), 
-				 boresightVector, 
+				 glm::value_ptr(boresightVector), 
 				 &nrReturned,
 				 (double(*)[3])boundsArr);
 	}else{
@@ -411,35 +382,15 @@ bool SpiceManager::getFieldOfView(const std::string& naifInstrumentId,
 	return true;
 }
 
-bool SpiceManager::rectangularToLatitudal(const glm::dvec3 coordinates,
-	                                      double& radius,
-	                                      double& longitude,
-	                                      double& latitude) const{
-	double point[3] = { coordinates.x, coordinates.y, coordinates.z };
-	reclat_c(point, &radius, &longitude, &latitude);
-	//check if returns values
-	return (radius && longitude && latitude);
-}
-
-bool SpiceManager::latidudinalToRectangular(double  radius,
-	                                        double& longitude,
-	                                        double& latitude,
-	                                        glm::dvec3& coordinates) const{
-	double point[3] = { coordinates.x, coordinates.y, coordinates.z };
-	latrec_c(radius, longitude, latitude, point);
-	//check if returns values
-	return (radius && longitude && latitude);
-}
-
-bool SpiceManager::planetocentricToRectangular(const   std::string& naifName,
-								               double& longitude,
-								               double& latitude,
+bool SpiceManager::planetocentricToRectangular(const  std::string& body,
+								               double longitude,
+								               double latitude,
 								               glm::dvec3& coordinates) const{
 	int naifId;
 	int found;
 	double rectangular[3];
 
-	bodn2c_c(naifName.c_str(), &naifId, &found);
+	bodn2c_c(body.c_str(), &naifId, &found);
 	if (!found) return false;
 	srfrec_c(naifId, longitude*rpd_c(), latitude*rpd_c(), rectangular);
 
@@ -448,51 +399,61 @@ bool SpiceManager::planetocentricToRectangular(const   std::string& naifName,
 	return true;
 }
 
-bool SpiceManager::getSubObserverPoint(std::string computationMethod,
-	                                   std::string target,
-	                                   double      ephemeris,
+bool SpiceManager::getSubObserverPoint(std::string target,
+	                                   std::string observer,
+									   std::string computationMethod,
 	                                   std::string bodyFixedFrame,
 	                                   std::string aberrationCorrection,
-	                                   std::string observer,
+	                                   double      ephemerisTime,
 	                                   glm::dvec3& subObserverPoint,
-	                                   double&     targetEpoch,
+	                                   double&     targetEphemerisTime,
 	                                   glm::dvec3& vectorToSurfacePoint) const{
-	double subPoint[3], vecToSurf[3];
-	
 	subpnt_c(computationMethod.c_str(), 
 		     target.c_str(), 
-			 ephemeris,
+			 ephemerisTime,
 			 bodyFixedFrame.c_str(), 
 			 aberrationCorrection.c_str(), 
-			 observer.c_str(), subPoint, &targetEpoch, vecToSurf);
-
-	memcpy(&subObserverPoint    , subPoint , sizeof(double) * 3);
-	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double) * 3);
+			 observer.c_str(), glm::value_ptr(subObserverPoint), &targetEphemerisTime,
+			 glm::value_ptr(vectorToSurfacePoint));
 
 	return true;
 }
-bool SpiceManager::getSubSolarPoint(std::string computationMethod,
-	                                std::string target,
-	                                double      ephemeris,
-	                                std::string bodyFixedFrame,
-	                                std::string aberrationCorrection,
-	                                std::string observer,
-									glm::dvec3& subSolarPoint,
-	                                double&     targetEpoch,
-	                                glm::dvec3& vectorToSurfacePoint) const{
-	double subPoint[3], vecToSurf[3];
 
-	subslr_c(computationMethod.c_str(),
-		     target.c_str(),
-		     ephemeris,
-		     bodyFixedFrame.c_str(),
-		     aberrationCorrection.c_str(),
-		     observer.c_str(), subPoint, &targetEpoch, vecToSurf);
-
-	memcpy(&subSolarPoint, subPoint, sizeof(double)* 3);
-	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double)* 3);
-
-	return true;
+void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
+											 glm::dvec3& velocity,
+											 const TransformMatrix& transformationMatrix)
+{
+	double input[6];
+	double output[6];
+	memmove(input, glm::value_ptr(position), 3 * sizeof(glm::dvec3::value_type));
+	memmove(input + 3, glm::value_ptr(velocity), 3 * sizeof(glm::dvec3::value_type));
+	mxvg_c(transformationMatrix.data(), input, 6, 6, output);
+	memmove(glm::value_ptr(position), output, 3 * sizeof(glm::dvec3::value_type));
+	memmove(glm::value_ptr(velocity), output + 3, 3 * sizeof(glm::dvec3::value_type));
 }
+
+//bool SpiceManager::getSubSolarPoint(std::string computationMethod,
+//	                                std::string target,
+//	                                double      ephemeris,
+//	                                std::string bodyFixedFrame,
+//	                                std::string aberrationCorrection,
+//	                                std::string observer,
+//									glm::dvec3& subSolarPoint,
+//	                                double&     targetEpoch,
+//	                                glm::dvec3& vectorToSurfacePoint) const{
+//	double subPoint[3], vecToSurf[3];
+//
+//	subslr_c(computationMethod.c_str(),
+//		     target.c_str(),
+//		     ephemeris,
+//		     bodyFixedFrame.c_str(),
+//		     aberrationCorrection.c_str(),
+//		     observer.c_str(), subPoint, &targetEpoch, vecToSurf);
+//
+//	memcpy(&subSolarPoint, subPoint, sizeof(double)* 3);
+//	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double)* 3);
+//
+//	return true;
+//}
 
 }

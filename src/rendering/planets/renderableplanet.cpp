@@ -161,7 +161,7 @@ void RenderablePlanet::render(const RenderData& data)
 void RenderablePlanet::update(const UpdateData& data)
 {
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
 
 }
 
