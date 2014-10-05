@@ -336,7 +336,7 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix){
 	//check for matrix consistency
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], positionMatrix[i][j]) << "Position-matrix not set or has wrong values";
+			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], positionMatrix[j][i]) << "Position-matrix not set or has wrong values";
 		}
 	}
 	//transform reference position into new frame
