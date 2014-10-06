@@ -52,7 +52,6 @@ void main(void)
 	//color.a = 1-color.a;
     diffuse = texture2D(texture1, texCoord)*color;
 
-    
   // diffuse = vec4(Color, 1.0);
 
    	vec4 position = vs_position;

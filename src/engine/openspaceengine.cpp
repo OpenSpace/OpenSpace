@@ -324,6 +324,7 @@ bool OpenSpaceEngine::initialize()
     Spice::init();
     Spice::ref().loadDefaultKernels(); // changeto: instantiate spicemanager, load kernels. 
 
+	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/NewHorizonsJupiterEncounter/fov.tm"), "JUPITER_ENCOUNTER");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"), "SPK_EARTH");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/MAR063.bsp")         , "SPK_MARS");
 	SpiceManager::ref().loadKernel(absPath("${OPENSPACE_DATA}/spice/pck00010.tpc")       , "PCK");

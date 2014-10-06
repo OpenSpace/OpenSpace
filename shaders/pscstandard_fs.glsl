@@ -24,6 +24,11 @@
 
 #version 430
 
+uniform vec4 campos;
+uniform vec4 objpos;
+uniform vec4 camdir;
+
+
 uniform float time;
 uniform sampler2D texture1;
 
@@ -36,11 +41,40 @@ in float s;
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
+//#include "PowerScaling/powerScaling_vs.hglsl"
 void main()
 {
 	vec4 position = vec4(vs_position,s);
 	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
+	
+	// directional lighting
+	vec3 origin = vec3(0.0);
+	vec4 spec = vec4(0.0);
+	
+	vec4 tmp = camdir;
+	
+	vec3 n = normalize(vs_normal.xyz);
+	vec3 e = normalize(tmp.xyz);
+	vec3 l_pos = vec3(0.0); // sun.
+	vec3 l_dir = normalize(l_pos-objpos.xyz);
+	float intensity = max(dot(n,l_dir), 0.0)*1.5;
+	
+	float shine = 19.0;
+
+	vec4 specular = vec4(0.5);
+	vec4 ambient = vec4(0.0,0.0,0.0,1);
+	
+	if(intensity > 0.f){
+		// halfway vector
+		vec3 h = normalize(l_dir + e);
+		// specular factor
+		float intSpec = max(dot(h,n),0.0);
+		spec = specular * pow(intSpec, shine);
+	}
+	diffuse = max(intensity * diffuse , ambient);
+
+
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);

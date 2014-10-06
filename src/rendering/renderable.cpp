@@ -110,6 +110,7 @@ void Renderable::setPscUniforms(ghoul::opengl::ProgramObject* program, const Cam
 	program->setUniform("campos", camera->position().vec4());
 	program->setUniform("objpos", position.vec4());
 	program->setUniform("camrot", camera->viewRotationMatrix());
+	//const glm::vec2 scaletmp(1, 1);
 	program->setUniform("scaling", camera->scaling());
 }
 

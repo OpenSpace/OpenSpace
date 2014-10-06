@@ -22,71 +22,70 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEWAVEFRONTOBJECT_H__
-#define __RENDERABLEWAVEFRONTOBJECT_H__
+#ifndef __RENDERABLETPATH_H__
+#define __RENDERABLETPATH_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+//#include <openspace/util/runtimedata.h>
 
 namespace openspace {
-
-namespace planetgeometry {
-class PlanetGeometry; // for now - this HAS to change!!! REMMBER MICHAL
-}
-
-class RenderableWavefrontObject : public Renderable {
+class RenderablePath : public Renderable{
 public:
-	RenderableWavefrontObject(const ghoul::Dictionary& dictionary);
-	~RenderableWavefrontObject();
+	RenderablePath(const ghoul::Dictionary& dictionary);
+	~RenderablePath();
 
-    bool initialize() override;
-    bool deinitialize() override;
+	bool initialize() override;
+	bool deinitialize() override;
 
 	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+	void update(const UpdateData& data) override;
+ private:
+	 properties::StringProperty _colorTexturePath; // not used now, will be later though.
 
-	typedef struct
-	{
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-	/*	GLfloat color[4];
-		GLfloat attribute[3];
-		GLfloat float_attribute;*/
-		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+	 ghoul::opengl::ProgramObject* _programObject;
+	 ghoul::opengl::Texture* _texture;
+	 void loadTexture();
 
-protected:
-    void loadTexture();
-	void loadObj(const char *filename);
+	/* typedef struct {
+		 GLfloat location[4];
+		 GLfloat velocity[4];
+		 GLubyte padding[32];  // Pads the struct out to 64 bytes for performance increase
+	 } Vertex;
+	 */
+	 // need to write robust method for vbo id selection 
+	 // (right now galactic grid has to be present) (why though?) solve later...
+	 GLuint _vaoID = 6;
+	 GLuint _vBufferID = 7;
+	 GLuint _iBufferID = 8;
 
-private:
-    properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject; // remember to add shaders!
-    ghoul::opengl::Texture* _texture;
+	 void nextIndex();
 
-	GLuint _vaoID = 6;
-	GLuint _vBufferID = 7;
-	GLuint _iBufferID = 8;
+	 GLenum _mode;
+	 unsigned int _isize;
+	 unsigned int _vsize;
+	 unsigned int _vtotal;
+	 unsigned int _stride;
+	
+	 //Vertex* _varray;
+	 std::vector<float> _varray;
+	 int* _iarray;
 
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex *_varray;
-	int *_iarray;
+	 bool* _updated;
 
-	glm::dmat3 _stateMatrix; // might need this
+	 psc _pscpos, _pscvel;
 
-	std::string _target;
+	 std::vector<std::pair<int, double>> _intervals;
+	 double _increment;
+	 // etc...
+	 double _time = 0;
+	 double _oldTime = 0;
 };
-
-}  // namespace openspace
-
-#endif  // __RENDERABLEWAVEFRONTOBJECT_H__
+}
+#endif

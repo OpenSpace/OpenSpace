@@ -27,6 +27,7 @@
 #include <cassert>
 
 // renderables
+#include <openspace/rendering/renderablewavefrontobject.h>
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
@@ -69,6 +70,8 @@ void FactoryManager::initialize()
 		"RenderableTrail");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
+	_manager->factory<Renderable>()->registerClass<RenderableWavefrontObject>(
+		"RenderableWavefrontObject");
     //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
     //      "RenderableVolumeCL");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(

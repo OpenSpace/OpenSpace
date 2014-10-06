@@ -25,7 +25,6 @@
 // temporary includes (will fix as soon as I figure out how class hierarchy should work, 
 //                     ie after I see model on screen)
 #include<fstream>
-#include <openspace/objloadertemp/Geometry.h>
 
 // open space includes
 #include <openspace/rendering/renderablewavefrontobject.h>
@@ -58,7 +57,7 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
 	assert(success);
 
 	std::string path;
-	dictionary.getValue(constants::renderablestars::keyPathModule, path);
+	dictionary.getValue(constants::scenegraph::keyPathModule, path);
 
 	std::string texturePath = "";
 	if (dictionary.hasKey("Textures.Color")) {
@@ -71,8 +70,15 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
 
 	_mode = GL_TRIANGLES;
 
-	std::string filename;
+	std::string file;
+	dictionary.getValue(constants::renderablewavefrontobject::keyObjFile, file);
+
+	const std::string filename = FileSys.absolutePath(file);
+
+	std::cout << "OBJECT LOADER FILENAME : " << filename << std::endl;
+	
 	std::ifstream ifile(filename.c_str());
+
 	if (ifile){
 		LDEBUG("Found file..\n");
 		ifile.close();
@@ -82,6 +88,16 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
 	}
 
 }
+
+void normalize(glm::vec3 v) {
+	float magnitude = 0.0f;
+	for (int i = 0; i < 3; i++)
+		magnitude += pow(v[i], 2.0f);
+	magnitude = sqrt(magnitude);
+	for (int i = 0; i < 3; i++)
+		v[i] /= magnitude;
+}
+
 
 void RenderableWavefrontObject::loadObj(const char *filename){
 	// temporary 
@@ -104,7 +120,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	while (fgets(line, 150, fi) != NULL)
 	{
 		if (sscanf(line, "v %f%f%f", &f1, &f2, &f3)) {
-			vertexSize += 3;
+			vertexSize += 4;
 		}
 		if (sscanf(line, "vn %f%f%f", &f1, &f2, &f3)) {
 			vertexNormalSize += 3;
@@ -124,7 +140,6 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		}
 	}
 	/*	END LINE COUNT */
-
 	// allocate memory for all arrays
 	_isize = indicesSize;
 	_vsize = indicesSize;
@@ -167,13 +182,10 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		}
 		if (sscanf(line, "vt %f%f%f", &f1, &f2, &f3)){
 			(tempVertexTextureArray)[w] = f1;
-			maxtex = ((tempVertexTextureArray)[w] > maxtex) ? (tempVertexTextureArray)[w] : maxtex;
 			w++;
 			(tempVertexTextureArray)[w] = f2;
-			maxtex = ((tempVertexTextureArray)[w] > maxtex) ? (tempVertexTextureArray)[w] : maxtex;
 			w++;
 			(tempVertexTextureArray)[w] = f3;
-			maxtex = ((tempVertexTextureArray)[w] > maxtex) ? (tempVertexTextureArray)[w] : maxtex;
 			w++;
 		}
 		if (vertexTextureSize > 0){
@@ -191,7 +203,8 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 				(tempNormalIndicesArray)[m] = i9 - 1;
 				m++;
 			}
-		}else{
+		}
+		else{
 			if (sscanf(line, "f %i//%i %i//%i %i//%i", &i1, &i2, &i3, &i4, &i5, &i6)){
 				(_iarray)[m] = i1 - 1;
 				(tempNormalIndicesArray)[m] = i2 - 1;
@@ -206,40 +219,32 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		}
 	}
 	fclose(fi);
+
 	// end of file read
 	// creating the vertex array
 	i = 0; n = 0; m = 0;
 	int normalIndex = 0;
 	int textureIndex = 0;
 	int vertexIndex = 0;
-	while (m<_vsize){
+	while (m < _vsize){
 		normalIndex = tempNormalIndicesArray[m] * 3;
 		textureIndex = tempTextureIndicesArray[m] * 3;
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
+		_varray[m].location[3] = 6;
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
 			_varray[m].normal[q] = tempVertexNormalArray[normalIndex + q];
 			q++;
 		}
-		// needs to be added at some point...
-		/*
-		_varray[m].color[0] = 1;
-		_varray[m].color[1] = 1;
-		_varray[m].color[2] = 1;
-		_varray[m].color[3] = 1.0;
 
-		_varray[m].attribute[0] = 0;
-		_varray[m].attribute[1] = 0;
-		_varray[m].attribute[2] = 0;
-		_varray[m].float_attribute = 0;
-		*/
 		if (vertexTextureSize > 0){
 			_varray[m].tex[0] = tempVertexTextureArray[textureIndex];
 			_varray[m].tex[1] = tempVertexTextureArray[textureIndex + 1];
-		}else{
+		}
+		else{
 			_varray[m].tex[0] = 1.0;
 			_varray[m].tex[1] = 1.0;
 		}
@@ -252,6 +257,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	free(tempVertexTextureArray);
 	free(tempTextureIndicesArray);
 }
+
 
 RenderableWavefrontObject::~RenderableWavefrontObject(){
     deinitialize();
@@ -267,27 +273,12 @@ bool RenderableWavefrontObject::initialize()
     loadTexture();
     completeSuccess &= (_texture != nullptr);
    //completeSuccess &= _geometry->initialize(this); 
-// --------------------------------------------------------------------------------- powerscaled sphere -----
-	// Initialize and upload to graphics card
+
 	GLuint errorID;
-	if (_vaoID == 0) glGenVertexArrays(1, &_vaoID);
-	if (_vBufferID == 0) {
-		glGenBuffers(1, &_vBufferID);
-		if (_vBufferID == 0) {
-			LERROR("Could not create vertex buffer");
-			return false;
-		}
-	}
+	glGenVertexArrays(1, &_vaoID);
+	glGenBuffers(1, &_vBufferID);
+	glGenBuffers(1, &_iBufferID);
 
-	if (_iBufferID == 0) {
-		glGenBuffers(1, &_iBufferID);
-		if (_iBufferID == 0) {
-			LERROR("Could not create index buffer");
-			return false;
-		}
-	}
-
-	// First VAO setup
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
 	glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
@@ -296,11 +287,11 @@ bool RenderableWavefrontObject::initialize()
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
+						  reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
+						  reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+						  reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
@@ -317,6 +308,13 @@ bool RenderableWavefrontObject::initialize()
 
 bool RenderableWavefrontObject::deinitialize()
 {
+	delete[] _varray;
+	delete[] _iarray;
+
+	glDeleteBuffers(1, &_vBufferID);
+	glDeleteBuffers(1, &_iBufferID);
+	glDeleteVertexArrays(1, &_vaoID);
+
     delete _texture;
     _texture = nullptr;
     return true;
@@ -333,30 +331,34 @@ void RenderableWavefrontObject::render(const RenderData& data)
     _programObject->activate();
 
     // fetch data
-    psc currentPosition = data.position;
+	psc currentPosition = data.position;
 	psc campos          = data.camera.position();
     glm::mat4 camrot    = data.camera.viewRotationMatrix();
    // PowerScaledScalar scaling = camera->scaling();
 
-    PowerScaledScalar scaling = glm::vec2(1, -6);
 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 1, 0));
 		
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			transform[i][j] = _stateMatrix[i][j];
 		}
 	}
-	transform = transform* rot;
+	transform = transform *rot;
 
-    // setup the data to the shader
+	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
+	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());
+
+	// setup the data to the shader
+	_programObject->setUniform("camdir", camSpaceEye);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject, &data.camera, glm::vec4(0, 0, -1,8 ));
+
 	
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -365,7 +367,10 @@ void RenderableWavefrontObject::render(const RenderData& data)
     _programObject->setUniform("texture1", unit);
 
     // render
-    //_geometry->render();
+	glBindVertexArray(_vaoID);  // select first VAO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
+	glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 
     // disable shader
     _programObject->deactivate();
@@ -375,7 +380,7 @@ void RenderableWavefrontObject::render(const RenderData& data)
 void RenderableWavefrontObject::update(const UpdateData& data)
 {
 	// set spice-orientation in accordance to timestamp
-	//openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_MARS", data.time, _stateMatrix);
 
 }
 

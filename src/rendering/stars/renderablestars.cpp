@@ -101,21 +101,6 @@ std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num
 	return file;
 }
 
-//these two methods exist only to debug geom shaders code. 
-float log10(float x){ return log(x)/ log(10.f); }
-
-psc psc_addition(psc v1, psc v2) {
-	float k = 10.f;
-	float ds = v2[3] - v1[3];
-	if (ds >= 0) {
-		float p = pow(k, -ds);
-		return psc(v1[0]*p + v2[0], v1[1]*p + v2[1], v1[2]*p + v2[2], v2[3]);
-	}
-	else {
-		float p = pow(k, ds);
-		return psc(v1[0] + v2[0]*p, v1[1] + v2[1]*p, v1[2] + v2[2]*p, v1[3]);
-	}
-}
 
 //#define ROTATESTARS 
 
