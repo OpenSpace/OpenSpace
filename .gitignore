@@ -22,3 +22,6 @@ install_manifest.txt
 # Doxygen stuff
 html/
 latex/
+include/openspace/objloadertemp/Geometry.h
+include/openspace/objloadertemp/Model.cpp
+include/openspace/objloadertemp/Model.h
