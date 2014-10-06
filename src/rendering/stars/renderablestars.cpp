@@ -57,7 +57,7 @@ int printOglError(char *file, int line){
 
 
 #define GLSPRITES
-#define GLPOINTS
+//#define GLPOINTS
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
@@ -341,11 +341,11 @@ void RenderableStars::render(const RenderData& data){
 	_haloProgram->deactivate();
 
 #ifdef GLPOINTS
-	/*
+
 // ---------------------- RENDER POINTS -----------------------------
 	_pointProgram->activate();
 
-	_pointProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_pointProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix);
 	_pointProgram->setUniform("ModelTransform", transform);
 	_pointProgram->setUniform("campos", campos.vec4());
 	_pointProgram->setUniform("objpos", currentPosition.vec4());
@@ -362,12 +362,8 @@ void RenderableStars::render(const RenderData& data){
 	glDisable(GL_BLEND);
 	
 	_pointProgram->deactivate();
-<<<<<<< HEAD
 	glEnable(GL_DEPTH_TEST);
 
-=======
-	*/
-//>>>>>>> develop
 #endif
 }
 

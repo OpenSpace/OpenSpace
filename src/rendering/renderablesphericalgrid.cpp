@@ -41,7 +41,7 @@ namespace {
 namespace openspace {
 
 // needs to be set from dictionary - REMEMBER
-const PowerScaledScalar radius = PowerScaledScalar(1000.f, 6.f);
+const PowerScaledScalar radius = PowerScaledScalar(1.f, 20.f);
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
 : Renderable(dictionary)
@@ -101,19 +101,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 			if (round(y) == 0.0f) _varray[nr].tex[0] = -2;
 			_varray[nr].tex[1] = t2;
 
-			/* // we wont do this anymore, old code, now static grids. ignore or remove.
-			glm::mat4 rot = glm::rotate(glm::mat4(1), 90.f, glm::vec3(1, 0, 0));
-			glm::mat4 transform(1);
-			glm::dmat3 stateMatrix;
-			double initTime = 0;
-			openspace::SpiceManager::ref().getPositionTransformMatrixGLM("IAU_EARTH", "GALACTIC", 0, stateMatrix);
-			
-			for (int i = 0; i < 3; i++){
-				for (int j = 0; j < 3; j++){
-					transform[i][j] = stateMatrix[i][j];
-				}
-			}
-			*/
 			glm::vec4 tmp(x, y, z, 1);
 			glm::mat4 rot = glm::rotate(glm::mat4(1), 90.f, glm::vec3(1, 0, 0));
 			tmp = _gridMatrix*rot*tmp;
