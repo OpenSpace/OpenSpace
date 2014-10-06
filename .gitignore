@@ -24,3 +24,4 @@ install_manifest.txt
 # Doxygen stuff
 html/
 latex/
+shaders/ABuffer/constants.hglsl
