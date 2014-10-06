@@ -24,7 +24,6 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraphnode.h>
-#include <openspace/util/spice.h>
 #include <openspace/query/query.h>
 #include <openspace/util/constants.h>
 
@@ -283,7 +282,8 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 // bounding sphere
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
-    _boundingSphere = 1000.0;
+	_boundingSphere = 0.0;
+	_boundingSphere = 1000.0;
 	_boundingSphere = 0.0;
 
 	

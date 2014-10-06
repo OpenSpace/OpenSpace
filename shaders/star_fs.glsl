@@ -48,18 +48,21 @@ void main(void)
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
 	vec4 color = bv2rgb(ge_brightness[0])/1.1;
-	//color = 1/ color;
-	//color.a = 1-color.a;
+	// color.rgb = 1/ color.rgb;
+	// color.a = 1-color.a;
     diffuse = texture2D(texture1, texCoord)*color;
 
-  // diffuse = vec4(Color, 1.0);
+    //diffuse = vec4(1,1,0,1);
+   ///diffuse = vec4(Color, 1.0);
 
    	vec4 position = vs_position;
 	float depth = pscDepth(position);
+	gl_FragDepth = depth;
+	gl_FragDepth = 10.0;
 
 	//ABufferStruct_t frag = createGeometryFragment(vec4(1,0,0,1), position, depth);
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+	//ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	//addToBuffer(frag);
 
 	//discard;
     

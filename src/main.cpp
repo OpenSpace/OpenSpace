@@ -66,8 +66,6 @@ int main(int argc, char** argv)
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 
     // deallocate sgct c arguments
-    for (int i = 0; i < newArgc; ++i)
-         delete newArgv[i];
     delete[] newArgv;
 
     // Bind functions

@@ -51,7 +51,7 @@ namespace openspace{
 
 	double lightTime = 0.0;
 	double planetYear = 31536000;
-	_time = SM.convertStringToTdbSeconds("2005 nov 01 00:00:00");
+	SpiceManager::ref().getETfromDate("2005 nov 01 00:00:00", _time);
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 
 	double et = _time - planetYear;
@@ -72,7 +72,7 @@ namespace openspace{
 	_increment = planetYear / segments;
 	for (int i = 0; i < segments+1; i++){
 		
-		SM.getTargetPscState("EARTH", et, "GALACTIC", "LT+S", "SUN", pscpos, pscvel, lightTime);
+		SpiceManager::ref().getTargetState("EARTH", "SUN", "GALACTIC", "LT+S", et, pscpos, pscvel, lightTime);
 		
 		psc tmppos = glm::vec4(i, i, i, 7);
 		_varray.push_back(tmppos[0]);
@@ -222,7 +222,7 @@ void RenderableTrail::update(const UpdateData& data){
 	double lightTime;
 	_time = data.time;
 
-	SM.getTargetPscState("EARTH", data.time, "GALACTIC", "LT+S", "SUN", _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetState("EARTH", "SUN", "GALACTIC", "LT+S", data.time, _pscpos, _pscvel, lightTime);
 }
 
 void RenderableTrail::loadTexture()

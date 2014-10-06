@@ -25,7 +25,6 @@
 #include <openspace/scenegraph/spiceephemeris.h>
 
 #include <openspace/util/constants.h>
-#include <openspace/util/spice.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
@@ -40,38 +39,43 @@ using namespace constants::spiceephemeris;
 SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     : _targetName("")
     , _originName("")
-    , _target(0)
-    , _origin(0)
     , _position()
 {
-    const bool hasBody = dictionary.hasKeyAndValue<std::string>(keyBody);
-    if (hasBody)
-        dictionary.getValue(keyBody, _targetName);
-    else
+    const bool hasBody = dictionary.getValue(keyBody, _targetName);
+    if (!hasBody)
         LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
 
-    const bool hasObserver = dictionary.hasKeyAndValue<std::string>(keyOrigin);
-    if (hasObserver)
-        dictionary.getValue(keyOrigin, _originName);
-    else
+    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
+    if (!hasObserver)
         LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+
+	ghoul::Dictionary kernels;
+	dictionary.getValue(keyKernels, kernels);
+	for (size_t i = 1; i <= kernels.size(); ++i) {
+		std::string kernel;
+		bool success = kernels.getValue(std::to_string(i), kernel);
+		if (!success)
+			LERROR("'" << keyKernels << "' has to be an array-style table");
+
+		SpiceManager::ref().loadKernel(kernel);
+	}
 }
     
 SpiceEphemeris::~SpiceEphemeris() {}
 
 bool SpiceEphemeris::initialize()
 {
-    if (!_targetName.empty() && !_originName.empty()) {
-        int bsuccess = 0;
-        int osuccess = 0;
-        Spice::ref().bod_NameToInt(_targetName, &_target, &bsuccess);
-        Spice::ref().bod_NameToInt(_originName, &_origin, &osuccess);
-        
-        if (bsuccess && osuccess)
-            return true;
-    }
-    
-    return false;
+    //if (!_targetName.empty() && !_originName.empty()) {
+    //    int bsuccess = 0;
+    //    int osuccess = 0;
+    //    Spice::ref().bod_NameToInt(_targetName, &_target, &bsuccess);
+    //    Spice::ref().bod_NameToInt(_originName, &_origin, &osuccess);
+    //    
+    //    if (bsuccess && osuccess)
+    //        return true;
+    //}
+    //
+    return true;
 }
 
 const psc& SpiceEphemeris::position() const {
@@ -84,7 +88,7 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	glm::dvec3 position(0,0,0);
 
 	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, data.time, "GALACTIC", "LT+S", _originName, position, lightTime);
+	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "LT+S", data.time, position, lightTime);
 
 	/*
 	std::cout << _targetName  << " (";

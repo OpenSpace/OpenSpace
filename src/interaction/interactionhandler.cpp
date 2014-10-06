@@ -375,6 +375,17 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			PowerScaledScalar dist(speed * 100.0 * dt, 6.0);
 			distance(dist);
 		}
+
+		if (key == SGCT_KEY_KP_SUBTRACT) {
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			s[1] -= 0.5;
+			OsEng.renderEngine().camera()->setScaling(s);
+		}
+		if (key == SGCT_KEY_KP_ADD) {
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			s[1] += 0.5;
+			OsEng.renderEngine().camera()->setScaling(s);
+		}
 	}
     /*
     if (key == '1') {

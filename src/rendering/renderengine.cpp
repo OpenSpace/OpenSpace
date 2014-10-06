@@ -35,17 +35,37 @@
 #include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include <array>
+#include <fstream>
 
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
 
 namespace {
-const std::string _loggerCat = "RenderEngine";
+	const std::string _loggerCat = "RenderEngine";
 }
+
 namespace openspace {
+
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * printImage():
+ * Save the rendering to an image file
+ */
+int printImage(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+	sgct::Engine::instance()->takeScreenshot();
+	return 0;
+}
+
+} // namespace luascriptfunctions
 
 
 RenderEngine::RenderEngine()
@@ -62,6 +82,8 @@ RenderEngine::~RenderEngine()
 
 bool RenderEngine::initialize()
 {
+	generateGlslConfig();
+
     // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
@@ -161,6 +183,17 @@ bool RenderEngine::initializeGL()
 
 void RenderEngine::postSynchronizationPreDraw()
 {
+	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
+	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++)
+		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized())
+			generateGlslConfig();
+	// Move time forward.
+	//_runtimeData->advanceTimeBy(1, DAY);
+	
+	//_runtimeData->advanceTimeBy(1, HOUR);
+	//_runtimeData->advanceTimeBy(30, MINUTE);
+	//_runtimeData->advanceTimeBy(1, MILLISECOND);
+	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
 	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
@@ -456,6 +489,41 @@ Camera* RenderEngine::camera() const {
 
 ABuffer* RenderEngine::abuffer() const {
     return _abuffer;
+}
+
+void RenderEngine::generateGlslConfig() {
+	LDEBUG("Generating GLSLS config, expect shader recompilation");
+	int x1, xSize, y1, ySize;
+	sgct::Engine::instance()->
+		getActiveWindowPtr()->
+		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+
+	// TODO: Make this file creation dynamic and better in every way
+	// TODO: If the screen size changes it is enough if this file is regenerated to
+	// recompile all necessary files
+	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
+	os << "#define SCREEN_WIDTH  " << xSize << "\n"
+		<< "#define SCREEN_HEIGHT " << ySize << "\n"
+		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
+		<< "#define ABUFFER_SINGLE_LINKED     1\n"
+		<< "#define ABUFFER_FIXED             2\n"
+		<< "#define ABUFFER_DYNAMIC           3\n"
+		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
+	os.close();
+}
+
+scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
+	return {
+		"",
+		{
+			{
+				"printImage",
+				&luascriptfunctions::printImage,
+				"printImage(): Renders the current image to a file on disk"
+			}
+		}
+	};
+
 }
 
 }  // namespace openspace

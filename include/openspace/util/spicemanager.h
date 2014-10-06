@@ -1,350 +1,481 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
-#ifndef __SPICEWRAPPER_H__
-#define __SPICEWRAPPER_H__
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __SPICEMANAGER_H__
+#define __SPICEMANAGER_H__
 
 #include "SpiceUsr.h"
-#include <openspace\util\powerscaledcoordinate.h>
 
-#include <string>
+#include <openspace/util/powerscaledcoordinate.h>
+
 #include <ghoul/glm.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <vector>
-#include <map>
 
-namespace openspace{
-class transformMatrix;
-class SpiceManager{
+#include <glm/gtc/type_ptr.hpp>
+
+#include <array>
+#include <map>
+#include <string>
+#include <vector>
+
+namespace openspace {
+
+class SpiceManager {
 public:
-// Initialization ----------------------------------------------------------------------- //
+	typedef std::array<double, 36> TransformMatrix;
+
 	/**
-	* Static initializer that initializes the static member. 
+	* Initializer that initializes the static member. 
 	*/
 	static void initialize();
+
+	/**
+	 * Deinitializes the SpiceManager and unloads all kernels which have been loaded using
+	 * this manager.
+	 */
 	static void deinitialize();
+
+	/**
+	 * Returns the reference to the singleton SpiceManager object that must have been
+	 * initialized by a call to the initialize method earlier.
+	 * \return The SpiceManager singleton
+	 */
 	static SpiceManager& ref();
 	
 	/**
-	 *  Load one or more SPICE kernels into a program. If client provides
-	 *  the path to a binary kernel or meta-kernel upon which its loaded 
-	 *  to the appropriate SPICE subsystem. if the file is a textkernel 
-	 *  it will be loaded into kernel pool. 
-	 *  In order to locate the spice kernels, the method temorarily changes the 
-	 *  current working directory to the client-provided <code>filePath</code>. 
-	 *  For further details, please refer to <code>furnsh_c</code> in SPICE Docummentation
-	 *  
-	 * \param filePath  path to single kernel or meta-kernel to load.  
-	 * \param kernelId  unique integer ID for the loaded kernel
-	 * \return          loaded kernels/metakernels unique integer id
+	 * Loads one or more SPICE kernels into a program. The provided path can either be a
+	 * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
+	 * loading is done by passing the <code>filePath</code> to the <code>furnsh_c</code>
+	 * function. http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
+	 * \param filePath The path to the kernel that should be loaded
+	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
-	int loadKernel(const std::string& fullPath, 
-		           const std::string& shorthand);
+	int loadKernel(std::string filePath);
 
 	/**
-	 *  Unload SPICE kernel.
-	 *  For further details, please refer to 'unload_c' in SPICE Docummentation
-	 *
-	 * \param either correspondign unique ID or shorthand with 
-	 *   which the kernel was loaded and is to be unloaded. 
-	 * \return Whether the function succeeded or not
+	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
+	 * by the loading call to loadKernel. The unloading is done by calling the
+	 * <code>unload_c</code> function.
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+	 * \param kernelId The unique identifier that was returned from the call to
+	 * loadKernel which loaded the kernel
 	 */
+	void unloadKernel(int kernelId);
 
-	bool unloadKernel(const std::string& shorthand);
-	bool unloadKernel(int kernelId);
+	/**
+	 * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
+	 * the loading call to loadKernel. The unloading is done by calling the
+	 * <code>unload_c</code> function.
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html.
+	 * \param filePath The path of the kernel that should be unloaded, it has to refer to
+	 * a file that was loaded in using the loadKernel method
+	 */
+	void unloadKernel(std::string filePath);
 	
-// Acessing Kernel Data - Constants and Ids --------------------------------------------- //
-
 	/**
-	 *  Determine whether values exist for some item for any body in the kernel pool.
-	 *  For further details, please refer to 'bodfnd_c' in SPICE Docummentation
-	 *
-	 *  \param naifId  ID code of body.
-     *  \param item    Item to find ("RADII", "NUT_AMP_RA", etc.).
-	 *  \return        Whether the function succeeded or not
+	 * Determines whether values exist for some <code>item</code> for any body,
+	 * identified by it's <code>naifId</code>, in the kernel pool by passing it to the
+	 * <code>bodfnd_c</code> function. 
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+	 * For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param naifId NAIF ID code of body
+     * \param item The item to find
+	 * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
 	 */
-	bool hasValue(int naifId, const std::string& kernelPoolValueName) const;
-
-	/** 
-	 *  Fetch from the kernel pool the double precision values of an 
-	 *  item associated with a body. 
-	 *  For further details, please refer to 'bodvrd_c' in SPICE Docummentation
-	 *
-	 *  \param bodyName             Body name.
-	 *  \param kernelPoolValueName  Item for which values are desired. ("RADII", "NUT_PREC_ANGLES", etc. )
-	 *  \return                     Whether the function succeeded or not
-   	 */
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName, 
-									  double& value) const;
-	/* Overloaded method for 3dim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-		                              glm::dvec3& value) const;
-	/* Overloaded method for 4dim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-		                              glm::dvec4& value) const;
-	/* Overloaded method for Ndim vectors, see above specification.*/
-	bool getValueFromID(const std::string& bodyname,
-		                              const std::string& kernelPoolValueName,
-									  std::vector<double>& values, unsigned int num) const;
-
-// Converting between UTC and Ephemeris Time (LSK)  ------------------------------------- //
-
+	bool hasValue(int naifId, const std::string& item) const;
 
 	/**
-	 *  Convert a string representing an epoch to a double precision
-     *  value representing the number of TDB seconds past the J2000
-     *  epoch corresponding to the input epoch.
-	 *  For further details, please refer to 'str2et_c' in SPICE Docummentation
-	 *
-	 *  \param epochString, A string representing an epoch.
-	 *  \return Corresponding ephemeris time, equivalent value in seconds past J2000, TDB.
+	 * Determines whether values exist for some <code>item</code> for any
+	 * code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
+	 * function. 
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+	 * \param body The name of the body that should be sampled
+     * \param item The item to find
+	 * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
 	 */
-	double convertStringToTdbSeconds(const std::string& epochString) const;
+	bool hasValue(const std::string& body, const std::string& item) const;
 
 	/**
-	 * Convert the number of TDB seconds past the J2000 epoch into a human readable
-	 * string representation. Fur further details, please refer to 'timout_c' in SPICE
-	 * Documentation
-	 *
-	 * \param seconds The number of seconds that have passed since the J2000 epoch 
-	 * \param format The output format of the string
-	 * (see ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html)
-	 * \return The formatted date string 
+	 * Returns the NAIF ID for a specific body. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html. The
+	 * <code>id</code> will only be set if the retrieval was successful, otherwise it will
+	 * remain unchanged.
+	 * \param body The body name that should be retrieved
+	 * \param id The ID of the <code>body</code> will be stored in this variable. The
+	 * value will only be changed if the retrieval was successful
+	 * \return <code>true</code> if the <code>body</code> was found, <code>false</code>
+	 * otherwise
 	 */
-	std::string convertTdbSecondsToString(double seconds, const std::string& format) const;
-
-	std::string ephemerisTimeToString(const double et) const;
-
-// Computing Positions of Spacecraft and Natural Bodies(SPK) ---------------------------- //
+	bool getNaifId(const std::string& body, int& id) const;
 
 	/**
-	 *  Return the position of a target body relative to an observing 
-     *  body, optionally corrected for light time (planetary aberration) 
-     *  and stellar aberration.
-	 *  For further details, please refer to 'spkpos_c' in SPICE Docummentation
-	 *
-	 * \param target                Target body name.
-	 * \param ephemeris             Observer epoch.
-	 * \param referenceFrame        Reference frame of output position vector.
-	 * \param aberrationCorrection  Aberration correction flag.
-	 * \param observer              Observing body name.
-	 * \param targetPosition        Position of target.
-	 * \param lightTime             One way light time between observer and target.
-	 * \return                      Whether the function succeeded or not
+	 * Retrieves a single <code>value</code> for a certain <code>body</code>. This method
+	 * succeeds iff <code>body</code> is the name of a valid body, <code>value</code>
+	 * is a value associated with the body, and the value consists of only a single
+	 * <code>double</code> value. If all conditions are true, the value is retrieved using
+	 * the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged.  For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param body The name of the body whose value should be retrieved or the NAIF ID of
+	 * this body
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved value
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value, double& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with three components for a certain
+	 * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of three <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param body The name of the body whose value should be retrieved or the NAIF ID of
+	 * the body
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with four components for a certain
+	 * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
+	 * valid body, <code>value</code> is a value associated with the body, and the value
+	 * consists of four <code>double</code> values. If all conditions are true, the value
+	 * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param body The name of the body whose value should be retrieved or the NAIF ID of
+	 * the body
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
+
+	/**
+	 * Retrieves a <code>value</code> with an arbitrary number of components for a certain
+	 * <code>body</code>. This method succeeds <code>body</code> is a valid body,
+	 * <code>value</code> is a value associated with the body, and the value consists of a
+	 * number of <code>double</code> values. The requested number is equal to the
+	 * <code>size</code> of the passed vector <code>v</code> which means that this vector
+	 * has to be preallocated. If all conditions are true, the value is retrieved using
+	 * the method <code>bodvrd_c</code> and stored in <code>v</code>
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
+	 * the conditions is false an error is logged and the value <code>v</code> is
+	 * unchanged. For a description on NAIF IDs, see
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+	 * \param body The body whose information should be retrieved or the NAIF ID of that
+	 * body
+	 * \param value The value of that should be retrieved, this value is case-sensitive
+	 * \param v The destination for the retrieved values. The size of this vector
+	 * determines how many values will be retrieved
+	 * \return <code>true</code> if the <code>body</code> named a valid body,
+	 * <code>value</code> is a valid item for the <code>body</code> and the retrieved
+	 * value is only a single value. <code>false</code> otherwise
+	 */
+	bool getValue(const std::string& body, const std::string& value,
+		std::vector<double>& v) const;
+
+	/**
+	 * Converts the <code>epochString</code> representing a date to a double precision
+     * value representing the <code>ephemerisTime</code>; that is the number of TDB
+	 * seconds past the J2000 epoch. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html. If an error
+	 * occurs, an error is logged, the method returns <code>false</code> and the
+	 * <code>ephemerisTime</code> remains unchanged.
+	 * \param epochString A string representing an epoch
+	 * \param ephemerisTime The destination for the converted time; the number of TDB
+	 * seconds past the J2000 epoch, representing the passed <code>epochString</code>
+	 * \return <code>true</code> if the <code>epochString</code> is a valid string and
+	 * the conversion succeeded, <code>false</code> otherwise
+	 */
+	bool getETfromDate(const std::string& epochString, double& ephemerisTime) const;
+
+	/**
+	 * Converts the passed <code>ephemerisTime</code> into a human-readable
+	 * <code>date</code> string with a specific <code>format</code>. For details on the
+	 * formatting, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html. In case of
+	 * an error, <code>date</code> will not be modified, an error will be logged and the
+	 * method returns <code>false</code>.
+	 * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
+	 * J2000 epoch
+	 * \param date The destination for the converted date. This will only be changed if 
+	 * the conversion succeeded
+	 * \param format The format string describing the output format for the
+	 * <code>date</code>
+	 * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
+	 */
+	bool getDateFromET(double ephemerisTime, std::string& date,
+		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
+
+	/**
+	 * Returns the <code>position</code> of a <code>target</code> body relative to an
+	 * <code>observer</code> in a specific <code>referenceFrame</code>, optionally
+	 * corrected for light time (planetary aberration) and stellar aberration
+	 * (<code>aberrationCorrection</code>). For further details, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html. For more
+	 * information on NAIF IDs, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+	 * \param target The target body name or the target body's NAIF ID
+	 * \param observer The observing body name or the observing body's NAIF ID
+	 * \param referenceFrame The reference frame of the output position vector
+	 * \param aberrationCorrection The aberration correction flag out of the list of
+	 * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
+	 * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
+	 * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
+	 * \param ephemerisTime The time at which the position is to be queried
+	 * \param position The output containing the position of the target; if the method
+	 * fails, the target position is unchanged
+	 * \param lightTime If the <code>aberrationCorrection</code> is different from
+	 * <code>NONE</code>, this variable will contain the one-way light time between the
+	 * observer and the target. If the method fails, the lightTime is unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
 	 */
 	bool getTargetPosition(const std::string& target, 
-		                   double ephemerisTime,
+						   const std::string& observer,
 		                   const std::string& referenceFrame, 
 						   const std::string& aberrationCorrection,
-						   const std::string& observer,
-						   glm::dvec3& targetPosition, 
+		                   double ephemerisTime,
+						   glm::dvec3& position, 
 						   double& lightTime) const;
 
-	bool getTargetPscPosition(const std::string& target,
-						  	  double ephemerisTime,
-						  	  const std::string& referenceFrame,
-						  	  const std::string& aberrationCorrection,
-						  	  const std::string& observer,
-						  	  PowerScaledCoordinate& targetPosition,
-						  	  double& lightTime) const;
+	bool getTargetPosition(const std::string& target,
+						   const std::string& observer,
+		                   const std::string& referenceFrame, 
+						   const std::string& aberrationCorrection,
+		                   double ephemerisTime,
+						   psc& position, 
+						   double& lightTime) const;
+
 	/**
-	 *  Return the state (position and velocity) of a target body 
-     *  relative to an observing body, optionally corrected for light 
-     *  time (planetary aberration) and stellar aberration. 
-     *  For further details, please refer to 'spkezr_c' in SPICE Docummentation
-	 *
-	 * \param target                Target body name.
-	 * \param ephemerisTime         Observer epoch.
-	 * \param referenceFrame        Reference frame of output state vector.
-	 * \param aberrationCorrection  Aberration correction flag.                                                
-	 * \param observer              Observing body name.
-	 * \param targetPosition        Position of target.
-	 * \param targetVelocity        Velocity of target.
-	 * \param lightTime             One way light time between observer and target.
-	 * \return                      Whether the function succeeded or not 
+	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
+	 * <code>target</code> body relative to an <code>observer</code> in a specific
+	 * <code>referenceFrame</code>, optionally corrected for light time (planetary
+	 * aberration) and stellar aberration (<code>aberrationCorrection</code>). For further
+	 * details, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html. For more
+	 * information on NAIF IDs, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+	 * \param target The target body name or the target body's NAIF ID
+	 * \param observer The observing body name or the observing body's NAIF ID
+	 * \param referenceFrame The reference frame of the output position vector
+	 * \param aberrationCorrection The aberration correction flag out of the list of
+	 * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
+	 * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
+	 * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
+	 * \param ephemerisTime The time at which the position is to be queried
+	 * \param position The output containing the position of the target; if the method
+	 * fails, the position is unchanged
+	 * \param velocity The output containing the velocity of the target; if the method
+	 * fails, the velocity is unchanged
+	 * \param lightTime If the <code>aberrationCorrection</code> is different from
+	 * <code>NONE</code>, this variable will contain the one-way light time between the
+	 * observer and the target.If the method fails, the lightTime is unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
 	 */
 	bool getTargetState(const std::string& target, 
-		                double ephemerisTime, 
+						const std::string& observer,
 						const std::string& referenceFrame,
 					    const std::string& aberrationCorrection,
-						const std::string& observer,
-						glm::dvec3& targetPosition, 
-						glm::dvec3& targetVelocity,
+		                double ephemerisTime, 
+						glm::dvec3& position, 
+						glm::dvec3& velocity,
 						double& lightTime) const;
 
-	bool getTargetPscState(const std::string& target,
-						   double ephemerisTime,
-						   const std::string& referenceFrame,
-						   const std::string& aberrationCorrection,
-						   const std::string& observer,
-						   PowerScaledCoordinate& targetPosition,
-						   PowerScaledCoordinate& targetVelocity,
-						   double& lightTime) const;
-
-// Computing Transformations Between Frames (FK) -------------------------------------- //
+	bool getTargetState(const std::string& target, 
+						const std::string& observer,
+						const std::string& referenceFrame,
+					    const std::string& aberrationCorrection,
+		                double ephemerisTime, 
+						PowerScaledCoordinate& position, 
+						PowerScaledCoordinate& velocity,
+						double& lightTime) const;
 
 	/** 
-	 *  Return the state transformation matrix from one frame to 
-     *  another at a specified epoch. 
-	 *  For further details, please refer to 'sxform_c' in SPICE Docummentation
-	 *
-	 * \param fromFrame    Name of the frame to transform from.
-	 * \param toFrame      Name of the frame to transform to.
-	 * \param et           Epoch of the rotation matrix.
-	 * \param posTransMat  A rotation matrix.
-	 * \return             Whether the function succeeded or not
+	 * Returns the state transformation matrix used to convert from one frame to another
+	 * at a specified <code>ephemerisTime</code>. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html.
+	 * \param sourceFrame The name of the source reference frame
+	 * \param destinationFrame The name of the destination reference frame
+	 * \param ephemerisTime The time at which the transformation matrix is to be queried
+	 * \param transformationMatrix The output containing the TransformMatrix containing
+	 * the transformation matrix that defines the transformation from the
+	 * <code>sourceFrame</code> to the <code>destinationFrame</code>. If the method fails
+	 * the <code>transformationMatrix</code> is unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
 	 */
-	bool getStateTransformMatrix(const std::string& fromFrame,
-		                         const std::string& toFrame,
+	bool getStateTransformMatrix(const std::string& sourceFrame,
+		                         const std::string& destinationFrame,
 		                         double ephemerisTime,
-								 transformMatrix& stateMatrix) const;
+								 TransformMatrix& transformationMatrix) const;
 
 	/**
-	 *  Return the matrix that transforms position vectors from one 
-     *  specified frame to another at a specified epoch.
-	 *  For further details, please refer to 'pxform_c' in SPICE Docummentation
-	 *
-	 * \param fromFrame      Name of the frame to transform from.
-     * \param toFrame        Name of the frame to transform to.
-     * \param et             Epoch of the state transformation matrix.
-     * \param stateTransMat  A state transformation matrix.
-	 * \return               Whether the function succeeded or not
+	 * Returns the matrix that transforms position vectors from one reference frame to
+	 * another at a specified <code>ephemerisTime</code>. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html.
+	 * \param sourceFrame The name of the source reference frame
+	 * \param destinationFrame The name of the destination reference frame
+	 * \param ephemerisTime The time at which the transformation matrix is to be queried
+     * \param transformationMatrix The output containing the transformation matrix that 
+	 * defines the transformation from the <code>sourceFrame</code> to the
+	 * <code>destinationFrame</code>. If the method fails the
+	 * <code>transformationMatrix</code> is unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
 	 */
-	bool getPositionTransformMatrix(const std::string& fromFrame, 
-		                            const std::string& toFrame,
-		                            double ephemerisTime, 
-									transformMatrix& positionMatrix) const;
-
-
-	void getPositionTransformMatrixGLM(const std::string& fromFrame,
-									   const std::string& toFrame,
+	bool getPositionTransformMatrix(const std::string& sourceFrame,
+									   const std::string& destinationFrame,
 									   double ephemerisTime,
-									   glm::dmat3& positionMatrix) const;
-	
-// Retrieving Instrument Parameters (IK)  ------------------------------------------ //
+									   glm::dmat3& transformationMatrix) const;
 
 	/**
-	 *  This routine returns the field-of-view (FOV) parameters for a
-     *  specified instrument.
-	 *  For further details, please refer to 'getfov_c' in SPICE Docummentation
-	 *
-	 * \param naifInstrumentId         NAIF ID of an instrument.
-	 * \param instrumentFovShape       Instrument Field Of View shape.
-	 * \param nameOfFrame              Name of fram in which FOV vectors are defines.
-	 * \param boresightVector          Boresight vector.
-	 * \param numberOfBoundaryVectors  Number of boundary vectors returned. 
-	 * \param bounds                   Field Of View boundary vectors
-	 * \param room                     Maximum number of vectors that can be returned.
-	 * \return                         Whether the function succeeded or not
+	 * Applies the <code>transformationMatrix</code> retrieved from
+	 * getStateTransformMatrix to the <code>position</code> and <code>velocity</code>. The
+	 * <code>position</code> and <code>velocity</code> parameters are used as input and
+	 * output.
+	 * \param position The position that should be transformed. The transformed position
+	 * will be stored back in this parameter
+	 * \param velocity The velocity that should be transformed. The transformed velocity
+	 * will be stored back in this parameter
+	 * \param transformationMatrix The 6x6 transformation matrix retrieved from
+	 * getStateTransformMatrix that is used to transform the <code>position</code> and
+	 * <code>velocity</code> vectors
 	 */
-	bool getFieldOfView(const std::string& naifInstrumentId, 
+	void applyTransformationMatrix(glm::dvec3& position,
+								   glm::dvec3& velocity,
+								   const TransformMatrix& transformationMatrix);
+	
+	/**
+	 * This routine returns the field-of-view (FOV) parameters for a specified
+	 * <code>instrument</code>. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
+	 * \param instrument The name of the instrument for which the FOV is to be retrieved
+	 * \param fovShape The output containing the rough shape of the returned FOV. If the
+	 * method fails, this value remains unchanged
+	 * \param frameName The output containing the name of the frame in which the FOV
+	 * <code>bounds</code> are computed. If the method fails, this value remains unchanged
+	 * \param boresightVector The output containing the boresight, that is the vector for
+	 * the center direction of the FOV. If the method fails, this value remains unchanged
+	 * \param bounds The output containing the values defining the bounds of the FOV as
+	 * explained by http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
+	 * If the method fails, this value remains unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
+	 */
+	bool getFieldOfView(const std::string& instrument, 
 						std::string& fovShape,
 						std::string& frameName,
-						double boresightVector[], 
-						std::vector<glm::dvec3>& bounds,
-						int& nrReturned) const;
-	
-// Computing Planetocentric, Planetodetic, and Planetographic Coordinates ---------- //
-
-	/**
-	 *  Convert from rectangular coordinates to latitudinal coordinates.
-	 *  For further details, please refer to 'reclat_c ' in SPICE Docummentation
-	 *
-	 * \param coordinates  Rectangular coordinates of a point, 3-vectors
-	 * \param radius       Distance of the point from the origin.
-	 * \param longitude    Longitude of the point in radians. The range is [-pi, pi].
-	 * \param latitude    Latitude of the point in radians.  The range is [-pi/2, pi/2].
-	 * \return             Whether the function succeeded or not
-	 */
-	bool rectangularToLatitudal(const glm::dvec3 coordinates, 
-		                        double& radius, 
-								double& longitude, 
-								double& latitude) const;
-	/**
-  	 *  Convert from latitudinal coordinates to rectangular coordinates.
-	 *  For further details, please refer to 'latrec_c ' in SPICE Docummentation
-	 *
-	 * \param radius         Distance of a point from the origin.
-     * \param longitude      Longitude of point in radians.
-     * \param longitude      Latitude of point in radians.
-     * \param latitude       Rectangular coordinates of the point.
-	 * \return               Whether the function succeeded or not
-  	 */
-	bool latidudinalToRectangular(double radius, 
-		                          double& longitude, 
-								  double& latitude, 
-								  glm::dvec3& coordinates) const;
-
-	/**
-	 *  Convert planetocentric latitude and longitude of a surface 
-     *  point on a specified body to rectangular coordinates.
-	 *  For further details, please refer to 'srfrec_c ' in SPICE Docummentation
-	 *
-	 * \param naif_id      NAIF integer code of an extended body. 
-     * \param longitude Longitude of point in radians.
-     * \param latitude  Latitude of point in radians.
-     * \param coordinates    Rectangular coordinates of the point. 
-	 * \return               Whether the function succeeded or not
-	 */
-	bool planetocentricToRectangular(const   std::string& naifName,
-									 double& longitude,
-									 double& latitude,
-									 glm::dvec3& coordinates) const;
-
-// Computing Sub - observer and Sub - solar Points --------------------------------- //
+						glm::dvec3& boresightVector, 
+						std::vector<glm::dvec3>& bounds) const;
 	
 	/**
-	 * Compute the rectangular coordinates of the sub-observer point on 
-     * a target body at a specified epoch, optionally corrected for 
-     * light time and stellar aberration. 
-	 *  For further details, please refer to 'subpnt_c ' in SPICE Docummentation
-	 *
-	 * \param computationMethod          Computation method.
-	 * \param target                     Name of target body.
-	 * \param ephemeris                  Epoch in ephemeris seconds past J2000 TDB.
-	 * \param bodyFixedFrame             Body-fixed, body-centered target body frame.
-	 * \param aberrationCorrection       Aberration correction.
-	 * \param observer                   Name of observing body.
-	 * \param subObserverPoint           Sub-observer point on the target body.
-	 * \param targetEpoch                Sub-observer point epoch.
-	 * \param observerToSubObserverVec   Vector from observer to sub-observer point.
-	 * \return                           Whether the function succeeded or not
+	 * Converts planeto-centric <code>latitude</code> and <code>longitude</code> of a
+	 * surface point on a specified <code>body</code> to rectangular
+	 * <code>coordinates</code>. For further details, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
+	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
+	 * are defined. This body needs to have a defined radius for this function to work
+     * \param longitude The longitude of the point on the <code>body</code> in radians
+     * \param latitude The latitude of the point on the <code>body</code> in radians
+     * \param coordinates The output containing the rectangular coordinates of the point
+	 * defined by <code>longitude</code> and <code>latitude</code> on the
+	 * <code>body</code>. If the method fails, the coordinate are unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
 	 */
-	bool getSubObserverPoint(std::string computationMethod,
-		                     std::string target,
-		                     double ephemeris,
+	bool planetocentricToRectangular(const std::string& body, double longitude,
+									 double latitude, glm::dvec3& coordinates) const;
+
+	/**
+	 * Compute the rectangular coordinates of the sub-observer point of an
+	 * <code>observer</code> on a target <code>body</code> at a specified
+	 * <code>ephemerisTime</code>, optionally corrected for light time and stellar
+	 * aberration. For further details, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subpnt_c.html.
+	 * Example: If the sub-observer point on Mars for MRO is requested, the
+	 * <code>target</code> would be <code>Mars</code> and the <code>observer</code> would
+	 * be <code>MRO</code>.
+	 * \param target The name of the target body on which the sub-observer point lies
+	 * \param observer The name of the ephemeris object whose sub-observer point should be
+	 * retrieved
+	 * \param computationMethod The computation method used for the sub-observer point.
+	 * Must be one of <code>Near point: ellipsoid</code> or
+	 * <code>Intercept: ellipsoid</code> and it determines the interpretation of the
+	 * results; see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subpnt_c.html
+	 * for detailed description on the computation methods
+	 * \param bodyFixedFrame The body-fixed, body-centered frame belonging to the
+	 * <code>target</code>
+	 * \param aberrationCorrection The aberration correction flag out of the list of
+	 * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
+	 * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
+	 * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
+	 * \param ephemerisTime The ephemeris time for which the sub-observer point should be
+	 * retrieved
+	 * \param subObserverPoint The output containing the observer's sub-observer point on
+	 * the target body. If the method fails, the value remains unchanged
+	 * \param targetEphemerisTime The output containing the target's ephemeris time
+	 * accounting for the aberration, if an <code>aberrationCorrection</code> value
+	 * different from <code>NONE</code> is chosen. If the method fails, the value remains
+	 * unchanged
+	 * \param vectorToSurfacePoint The output containing the vector from the observer to
+	 * the, potentially aberration corrected, sub-observer point. If the method fails the
+	 * value remains unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
+	 */
+	bool getSubObserverPoint(std::string target,
+		                     std::string observer,
+ 							 std::string computationMethod,
 		                     std::string bodyFixedFrame,
 		                     std::string aberrationCorrection,
-		                     std::string observer,
+		                     double ephemerisTime,
 		                     glm::dvec3& subObserverPoint,
-		                     double& targetEpoch,
+		                     double& targetEphemerisTime,
 							 glm::dvec3& vectorToSurfacePoint) const;
 
 	/**
-	* Compute the rectangular coordinates of the sub-observer point on
+	* Computes the rectangular coordinates of the sub-solar point on
 	* a target body at a specified epoch, optionally corrected for
 	* light time and stellar aberration.
 	*  For further details, please refer to 'subslr_c ' in SPICE Docummentation
@@ -360,123 +491,33 @@ public:
 	* \param observerToSubObserverVec   Vector from observer to sub-observer point.
 	* \return                           Whether the function succeeded or not
 	*/
-	bool getSubSolarPoint(std::string computationMethod,
-		                  std::string target,
-		                  double      ephemeris,
-		                  std::string bodyFixedFrame,
-		                  std::string aberrationCorrection,
-		                  std::string observer,
-						  glm::dvec3& subSolarPoint,
-		                  double&     targetEpoch,
-		                  glm::dvec3& vectorToSurfacePoint) const;
+	//bool getSubSolarPoint(std::string target,
+	//					 std::string computationMethod,
+	//	                  
+	//	                  double      ephemeris,
+	//	                  std::string bodyFixedFrame,
+	//	                  std::string aberrationCorrection,
+	//	                  
+	//					  glm::dvec3& subSolarPoint,
+	//	                  double&     targetEpoch,
+	//	                  glm::dvec3& vectorToSurfacePoint) const;
 private:
-	SpiceManager() = default;
-	~SpiceManager();
-	SpiceManager(const SpiceManager& c) = delete;
-	static SpiceManager* _manager;
-	struct spiceKernel {
+	struct KernelInformation {
 		std::string path;
-		std::string name;
 		unsigned int id;
 	};
-	std::vector<spiceKernel> _loadedKernels;
-	unsigned int _kernelCount = 0;
+
+	SpiceManager() = default;
+	SpiceManager(const SpiceManager& c) = delete;
+	SpiceManager& operator=(const SpiceManager& r) = delete;
+	SpiceManager(SpiceManager&& r) = delete;
+
+	std::vector<KernelInformation> _loadedKernels;
+	static unsigned int _lastAssignedKernel;
+
+	static SpiceManager* _manager;
 };
 
-#define SM (openspace::SpiceManager::ref())
+} // namespace openspace
 
-
-/**
-* SpiceManager helper class, a storage container used to 
-* transform state vectors from one reference frame to another.
-* The client creates an instance of <code>transformMatrix</code>
-* and after its been passed to either <code>getStateTransformMatrix</code>
-* or <code>getPositionTransformMatrix</code> the instantiated object
-* can transform position and velocity to any specified reference frame. 
-*
-* Client-side example: 
-* openspace::transformMatrix stateMatrix(6);
-* openspace::SpiceManager::ref().getStateTransformMatrix("J2000",
-*                                                        "IAU_PHOEBE",
-*                                                         et,
-*                                                         stateMatrix);
-* stateMatrix.transform(position, velocity);
-* (or if transformMatrix is 3x3:)
-* stateMatrix.transform(position);
-*/
-#define COPY(to, from) memcpy(to, from, sizeof(double)* 3);
-class transformMatrix{
-private:
-	int N;
-	double *data;
-	bool empty;
-
-	friend class SpiceManager;
-public:
-	double* ptr()   {
-		empty = false;
-		return data;
-	}
-	/* default constructor */
-	transformMatrix();
-	/* default destructor */
-//	~transformMatrix(){ delete[] data; };
-	/* allocation of memory */
-	transformMatrix(int n) : N(n){
-		data = new double[N*N];
-		empty = true;
-	}
-    
-    void transform(glm::dvec3& position) {
-        assert(!empty); // transformation matrix is empty
-        
-		double *state;
-		double *state_t;
-		state   = new double[N];
-		state_t = new double[N];
-        
-		COPY(state, &position);
-		mxvg_c(data, state, N, N, state_t);
-        
-		COPY(&position, state_t);
-    }
-    
-	/** As the spice function mxvg_c requires a 6dim vector
-	*  the two 3dim state vectors are packed into 'state'.
-	*  Transformed values are then copied back from state_t
-	*  to each corresponding statevector.
-	* 
-	*  \param position, positional vector to be expressed in 
-	*   the new reference frame.
-	*  \param velocity, (optional) velocity input is only 
-	*   transformed in conjunction with a 6x6 matrix, otherwise
-	*   the method ignores its second argument. 
-	*/
-	void transform(glm::dvec3& position,
-		glm::dvec3& velocity) {
-        assert(!empty); // transformation matrix is empty
-
-		double *state;
-		double *state_t;
-		state   = new double[N];
-		state_t = new double[N];
-
-		COPY(state, &position);
-		if (N == 6) COPY(state + velocity.length(), &velocity);
-
-		mxvg_c(data, state, N, N, state_t);
-
-		COPY(&position, state_t);
-		if (N == 6)  COPY(&velocity, state_t + velocity.length());
-	}
-	/* overloaded operator() 
-	 * asserts matrix has been filled
-	 */
-	inline double operator()(int i, int j) const{
-        assert(!empty); // transformation matrix is empty
-		return data[j + i*N];
-	}
-};
-#undef COPY
-}
-#endif
+#endif // __SPICEMANAGER_H__

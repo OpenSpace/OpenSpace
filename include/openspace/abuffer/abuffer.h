@@ -44,6 +44,8 @@ namespace openspace {
 class ABuffer: public ABuffer_I {
 public:
 
+	static const int MAX_LAYERS = 32;
+
 	ABuffer();
 	virtual ~ABuffer();
 	virtual void resolve();
@@ -51,6 +53,8 @@ public:
 	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
 	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
 	int addSamplerfile(const std::string& filename);
+
+	void invalidateABuffer();
 
 protected:
 	virtual std::string settings() = 0;

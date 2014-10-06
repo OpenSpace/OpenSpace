@@ -32,8 +32,6 @@
 #include <fstream>
 #include <string>
 
-#define MAX_LAYERS 32
-
 namespace {
 	std::string _loggerCat = "ABufferFixed";
 }

@@ -22,59 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/planets/planetgeometry.h>
-#include <openspace/util/factorymanager.h>
+#include <openspace/engine/configurationmanager.h>
+
 #include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
+
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/filesystem/filesystem.h>
 
 namespace {
-const std::string _loggerCat = "PlanetGeometry";
+	const std::string _loggerCat = "ConfigurationManager";
+
+	const std::string _keyBasePath = "BASE_PATH";
 }
 
 namespace openspace {
-namespace planetgeometry {
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
-	std::string geometryType;
-	const bool success = dictionary.getValue(
-		constants::planetgeometry::keyType, geometryType);
-	if (!success) {
-        LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< constants::planetgeometry::keyType << "'");
-        return nullptr;
+bool ConfigurationManager::loadFromFile(const std::string& filename) {
+	using ghoul::filesystem::FileSystem;
+	using constants::configurationmanager::keyPaths;
+    if (!FileSys.fileExists(filename)) {
+		LERROR("Could not find file '" << filename << "'");
+        return false;
 	}
-    ghoul::TemplateFactory<PlanetGeometry>* factory
-          = FactoryManager::ref().factory<PlanetGeometry>();
 
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
-                                                                    << "'");
-        return nullptr;
+	// ${BASE_PATH}
+	std::string&& basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
+        + FileSystem::TokenClosingBraces;
+
+	// Retrieving the directory in which the configuration file lies
+    std::string absolutePath = FileSys.absolutePath(filename);
+	std::string basePath = ghoul::filesystem::File(absolutePath).directoryName();
+	FileSys.registerPathToken(basePathToken, basePath);
+
+	// Loading the configuration file into ourselves
+	const bool loadingSuccess = ghoul::lua::loadDictionaryFromFile(filename, *this);
+	if (!loadingSuccess) {
+		LERROR("Loading dictionary from file failed");
+		return false;
+	}
+
+	// Register all the paths
+	ghoul::Dictionary dictionary;
+	const bool success = getValue(keyPaths, dictionary);
+	if (!success) {
+		LERROR("Configuration does not contain the key '" << keyPaths << "'");
+		return false;
+	}
+
+    std::vector<std::string> pathKeys = dictionary.keys();
+    for (std::string key : pathKeys) {
+        std::string p;
+        if (dictionary.getValue(key, p)) {
+            std::string fullKey
+                  = FileSystem::TokenOpeningBraces + key
+                    + FileSystem::TokenClosingBraces;
+            LDEBUG("Registering path " << fullKey << ": " << p);
+			
+			bool override = (basePathToken == fullKey);
+			
+            if (override)
+                LINFO("Overriding base path with '" << p << "'");
+            FileSys.registerPathToken(std::move(fullKey), std::move(p), override);
+        }
     }
-    return result;
+
+	// Remove the Paths dictionary from the configuration manager as those paths might
+	// change later and we don't want to be forced to keep our local copy up to date
+	removeKey(keyPaths);
+
+	return true;
 }
 
-PlanetGeometry::PlanetGeometry()
-    : _parent(nullptr)
-{
-	setName("PlanetGeometry");
-}
 
-PlanetGeometry::~PlanetGeometry()
-{
-}
-
-bool PlanetGeometry::initialize(RenderablePlanet* parent)
-{
-    _parent = parent;
-    return true;
-}
-
-void PlanetGeometry::deinitialize()
-{
-}
-
-}  // namespace planetgeometry
 }  // namespace openspace

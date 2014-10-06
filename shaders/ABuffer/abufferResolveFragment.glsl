@@ -35,7 +35,11 @@
 #define 	ZTYPE 			ZDEPTH
 
 // Maximum number of fragments
+#ifdef MAX_LAYERS
+#define 	MAX_FRAGMENTS 	MAX_LAYERS
+#else
 #define 	MAX_FRAGMENTS 	16 				// The size of the local fragment list
+#endif
 // #define 	VISUALIZE_TRANSFERFUNCTIONS		// 
 #define 	USE_JITTERING					//
 // #define 	USE_COLORNORMALIZATION			//
@@ -252,7 +256,9 @@ vec4 calculate_final_color(uint frag_count) {
 #pragma openspace insert TRANSFERFUNC
 #endif
 
-	// if(frag_count == 1) {
+	// if(frag_count == 0) {
+	// 	final_color = vec4(0.5,0.5,0.5,1.0);
+	// } else if(frag_count == 1) {
 	// 	final_color = vec4(1.0,0.0,0.0,1.0);
 	// } else if(frag_count == 2) {
 	// 	final_color = vec4(0.0,1.0,0.0,1.0);
@@ -266,6 +272,11 @@ vec4 calculate_final_color(uint frag_count) {
 	// } else {
 	// 	final_color = vec4(1.0,1.0,1.0,1.0);
 	// }
+
+	// if(frag_count > 12) {
+	// 	final_color = vec4(1.0,0.0,1.0,1.0);
+	// }
+
 
 #ifdef USE_COLORNORMALIZATION
 	final_color.rgb = final_color.rgb * final_color.a;

@@ -35,9 +35,8 @@ layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
 out vec2 vs_st;
-out vec3 vs_stp;
 out vec4 vs_normal;
-out vec3 vs_position;
+out vec4 vs_position;
 out float s;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -47,14 +46,14 @@ void main()
 	// set variables
 	vs_st = in_st;
 	//vs_stp = in_position.xyz;
+	vs_position = in_position;
+	vec4 tmp = in_position;
 
 	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
 	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 	
-	vec4 position = pscTransform(in_position, ModelTransform);
-	vs_position = position.xyz;
-	s = position.w;
-
-	// project the position to view space
-	gl_Position =  ViewProjection * position;
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
 }

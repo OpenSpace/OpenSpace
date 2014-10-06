@@ -87,7 +87,7 @@ int Property::typeLua() const {
 
 const std::string& Property::guiName() const {
 	std::string result;
-	_metaData.getValueSafe(_metaDataKeyGuiName, result);
+	_metaData.getValue(_metaDataKeyGuiName, result);
     return std::move(result);
 }
 
@@ -97,7 +97,7 @@ void Property::setGroupIdentifier(std::string groupId) {
 
 std::string Property::groupIdentifier() const {
 	std::string result;
-	_metaData.getValueSafe(_metaDataKeyGroup, result);
+	_metaData.getValue(_metaDataKeyGroup, result);
     return std::move(result);
 }
 

@@ -52,7 +52,7 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 
 	double lightTime = 0.0;
 	double planetYear = 31536000;
-	_time = SM.convertStringToTdbSeconds("2005 nov 01 00:00:00");
+	SpiceManager::ref().getETfromDate("2005 nov 01 00:00:00", _time);
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 
 	double et = _time - planetYear;
@@ -72,7 +72,7 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 	static_assert(sizeof(Vertex) == 64, "The size of the Vertex needs to be 64 for performance");
 	
 	// get first position, ephemeris start-point
-	SM.getTargetPscState("EARTH", et, "GALACTIC", "LT+S", "SUN", pscpos, pscvel, lightTime);
+	SpiceManager::ref().getTargetState("EARTH", "SUN", "GALACTIC", "LT+S", et, pscpos, pscvel, lightTime);
 
 	memcpy(_varray[indx].location, glm::value_ptr(pscpos.vec4()), 4 * sizeof(double));
 	memcpy(_varray[indx].velocity, glm::value_ptr(glm::vec4(1, 1, 0, 1)), 4 * sizeof(double));
@@ -85,7 +85,7 @@ RenderableEphemeris::RenderableEphemeris(const ghoul::Dictionary& dictionary)
 	_increment = planetYear / segments;
 	for (int i = 0; i < segments; i++){
 		et += _increment;
-		SM.getTargetPscState("EARTH", et, "GALACTIC", "LT+S", "SUN", pscpos, pscvel, lightTime);
+		SpiceManager::ref().getTargetState("EARTH", "SUN", "GALACTIC", "LT+S", et, pscpos, pscvel, lightTime);
 		for (int k = 0; k < 2; k++){
 			if (i == segments - 1 && k == 1) { // do copy first to last
 				break;
@@ -307,7 +307,7 @@ void RenderableEphemeris::update(const UpdateData& data){
 	double lightTime;
 	_time = data.time;
 
-	SM.getTargetPscState("EARTH", data.time, "GALACTIC", "LT+S", "SUN", _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetState("EARTH", "SUN", "GALACTIC", "LT+S", data.time, _pscpos, _pscvel, lightTime);
 }
 
 void RenderableEphemeris::loadTexture()

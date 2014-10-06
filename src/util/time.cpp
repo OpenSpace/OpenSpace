@@ -150,17 +150,8 @@ Time::Time()
 {
 }
 
-bool Time::initialize(const std::string& lskKernel) {
+bool Time::initialize() {
 	assert( _instance == nullptr);
-
-	 if (!lskKernel.empty()) {
-		 const int success = SpiceManager::ref().loadKernel(
-			 absPath(lskKernel), "TimeKernel");
-		 if (success == 0) {
-			 LERROR("Error loading SPICE time kernel '" << lskKernel << "'");
-			 return false;
-		 }
-	 }
 	 _instance = new Time();
 	 return true;
 }
@@ -202,11 +193,13 @@ double Time::deltaTime() const {
 }
 
 void Time::setTime(std::string time) {
-	_time = SpiceManager::ref().convertStringToTdbSeconds(std::move(time));
+	SpiceManager::ref().getETfromDate(std::move(time), _time);
 }
 
 std::string Time::currentTimeUTC() const {
-	return SpiceManager::ref().convertTdbSecondsToString(_time, "YYYY-MM-DDTHR:MN:SC.#####");
+	std::string date;
+	SpiceManager::ref().getDateFromET(_time, date);
+	return std::move(date);
 }
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 	scripting::ScriptEngine::LuaLibrary timeLibrary = {

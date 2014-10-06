@@ -57,7 +57,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
 	assert(success);
 
     glm::vec2 radius;
-    success = dictionary.getValueSafe(keyRadius, radius);
+    success = dictionary.getValue(keyRadius, radius);
 	if (!success) {
         LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
                                            << keyRadius << "'");
@@ -66,7 +66,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
 		_radius = radius;
 
     double segments;
-    success = dictionary.getValueSafe(keySegments, segments);
+    success = dictionary.getValue(keySegments, segments);
 	if (!success) {
         LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
                                            << keySegments << "'");

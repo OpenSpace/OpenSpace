@@ -30,7 +30,7 @@ uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
 
 out vec3 vPosition;
-out vec3 worldPosition;
+out vec4 worldPosition;
 out float s;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -41,16 +41,15 @@ void main() {
 	//vs_stp = in_position.xyz;
 
 	vPosition = vertPosition.xyz;
+	worldPosition = vertPosition;
 
 	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
 	//vs_normal = normalize(modelTransform * vec4(in_normal,0));
 	
-	vec4 position = pscTransform(vertPosition, modelTransform);
-	worldPosition = position.xyz;
-	s = position.w;
+	vec4 position = pscTransform(worldPosition, modelTransform);
 
 	// project the position to view space
-	gl_Position =  modelViewProjection * position;
+	gl_Position =  z_normalization(modelViewProjection * position);
 
 	// vPosition = vertPosition.xyz;
 	// worldPosition = (modelTransform *vec4(vPosition, 1.0)).xyz;

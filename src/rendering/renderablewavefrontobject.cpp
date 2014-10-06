@@ -380,7 +380,7 @@ void RenderableWavefrontObject::render(const RenderData& data)
 void RenderableWavefrontObject::update(const UpdateData& data)
 {
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_MARS", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix("GALACTIC", "IAU_MARS", data.time, _stateMatrix);
 
 }
 

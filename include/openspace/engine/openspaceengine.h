@@ -33,17 +33,18 @@
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/engine/configurationmanager.h>
+//#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
 #include <ghoul/opencl/clprogram.h>
 #include <ghoul/opencl/clkernel.h>
 
+#include <ghoul/cmdparser/commandlineparser.h>
 // #define FLARE_ONLY
 
 #include <openspace/flare/flare.h>
-#include <openspace/util/shadercreator.h>
 
 #define  ABUFFER_SINGLE_LINKED    1
 #define  ABUFFER_FIXED            2
@@ -51,13 +52,6 @@
 #define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
 
 // #define OPENSPACE_VIDEO_EXPORT
-
-namespace ghoul {
-	namespace cmdparser {
-		class CommandlineParser;
-		class CommandlineCommand;
-	}
-}
 
 namespace openspace {
 
@@ -74,16 +68,13 @@ public:
     static bool isInitialized();
     bool initialize();
 
-    static void registerPathsFromDictionary(const ghoul::Dictionary& dictionary);
-    static bool registerBasePathFromConfigurationFile(const std::string& filename);
     static bool findConfiguration(std::string& filename);
 
-    ghoul::Dictionary& configurationManager();
+    ConfigurationManager& configurationManager();
     ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
-    ShaderCreator& shaderBuilder();
 
     // SGCT callbacks
     bool initializeGL();
@@ -108,11 +99,11 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    ghoul::Dictionary* _configurationManager;
-    InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-	scripting::ScriptEngine* _scriptEngine;
-	ghoul::cmdparser::CommandlineParser* _commandlineParser;
+    ConfigurationManager _configurationManager;
+    InteractionHandler _interactionHandler;
+    RenderEngine _renderEngine;
+	scripting::ScriptEngine _scriptEngine;
+	ghoul::cmdparser::CommandlineParser _commandlineParser;
 #ifdef OPENSPACE_VIDEO_EXPORT
     bool _doVideoExport;
 #endif
@@ -123,7 +114,6 @@ private:
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
-    ShaderCreator _shaderBuilder;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

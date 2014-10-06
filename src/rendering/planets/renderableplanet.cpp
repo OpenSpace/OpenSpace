@@ -59,7 +59,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	assert(success);
 
     ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValueSafe(
+    success = dictionary.getValue(
 		constants::renderableplanet::keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
@@ -72,7 +72,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-	success = dictionary.getValueSafe("Textures.Color", texturePath);
+	success = dictionary.getValue("Textures.Color", texturePath);
 	if (success)
         _colorTexturePath = path + "/" + texturePath;
 
@@ -122,12 +122,6 @@ void RenderablePlanet::render(const RenderData& data)
     // activate shader
     _programObject->activate();
 
-    // fetch data
-    psc currentPosition = data.position;
-	psc campos          = data.camera.position();
-    glm::mat4 camrot    = data.camera.viewRotationMatrix();
-   // PowerScaledScalar scaling = camera->scaling();
-
     PowerScaledScalar scaling = glm::vec2(1, -6);
 
     // scale the planet to appropriate size since the planet is a unit sphere
@@ -144,7 +138,7 @@ void RenderablePlanet::render(const RenderData& data)
 	transform = transform* rot;
 	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
-	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());
+	glm::vec4 camSpaceEye = -(modelview*data.position.vec4());
 
     // setup the data to the shader
 	_programObject->setUniform("camdir", camSpaceEye);
@@ -169,7 +163,7 @@ void RenderablePlanet::render(const RenderData& data)
 void RenderablePlanet::update(const UpdateData& data)
 {
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
 
 }
 
@@ -181,7 +175,10 @@ void RenderablePlanet::loadTexture()
         _texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-            _texture->uploadTexture();
+			_texture->uploadTexture();
+
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         }
     }
 }

@@ -59,14 +59,14 @@ double abs_error = 0.00001;
 
 // In this testclass only a handset of the testfunctions require a single kernel.
 // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'.
-#define KERNEL(param, name) int kernelID = -1; \
-	                        kernelID = openspace::SpiceManager::ref().loadKernel(param, name); \
+#define KERNEL(param) int kernelID = -1; \
+	                        kernelID = openspace::SpiceManager::ref().loadKernel(param); \
 	                        EXPECT_TRUE(kernelID != -1) << "loadKernel did not return proper id"; \
 	                        return kernelID; \
 
-int loadMetaKernel() { KERNEL(META , "METAKERNEL" ); }
-int loadLSKKernel()  { KERNEL(LSK  , "LEAPSECONDS"); }
-int loadPCKKernel()  { KERNEL(PCK  , "CASSINI_PCK"); }
+int loadMetaKernel() { KERNEL(META); }
+int loadLSKKernel()  { KERNEL(LSK); }
+int loadPCKKernel()  { KERNEL(PCK); }
 
 std::string fileType(char type[]){
 	std::string str(type);
@@ -108,8 +108,7 @@ TEST_F(SpiceManagerTest, unloadKernelString){
 	ASSERT_TRUE(found == SPICETRUE);
 
 	//unload using string keyword
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel("LEAPSECONDS");
-	EXPECT_TRUE(unloaded);
+	openspace::SpiceManager::ref().unloadKernel(LSK);
 
 	found = SPICEFALSE;
 	kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
@@ -124,8 +123,7 @@ TEST_F(SpiceManagerTest, unloadKernelInteger){
 	ASSERT_TRUE(found == SPICETRUE);
 
 	//unload using unique int ID
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel(kernelID);
-	EXPECT_TRUE(unloaded) << "Kernel did not unload";
+	openspace::SpiceManager::ref().unloadKernel(kernelID);
 
 	found = SPICEFALSE;
 	kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
@@ -145,8 +143,7 @@ TEST_F(SpiceManagerTest, unloadMetaKernel){
 		kdata_c(i, "all", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
 		EXPECT_EQ(fileType(filtyp), typeArr[i]) << "One or more kernels did not load properly";
 	}
-	bool unloaded = openspace::SpiceManager::ref().unloadKernel("METAKERNEL");
-	EXPECT_TRUE(unloaded);
+	openspace::SpiceManager::ref().unloadKernel(META);
 
 	for (int i = 0; i < nrMetaKernels; i++){
 		// the values should by now be unloaded
@@ -176,7 +173,7 @@ TEST_F(SpiceManagerTest, getValueFromID_1D){
 	std::string value1D = "MAG_NORTH_POLE_LAT";
 
 	double return1D;
-	bool found = openspace::SpiceManager::ref().getValueFromID(target, value1D, return1D);
+	bool found = openspace::SpiceManager::ref().getValue(target, value1D, return1D);
 	ASSERT_TRUE(found) << "Could not retrieve value";
 	EXPECT_EQ(return1D, 78.565) << "Value not found / differs from expected return";
 	unload_c(PCK.c_str());
@@ -189,7 +186,7 @@ TEST_F(SpiceManagerTest, getValueFromID_3D){
 	std::string value3D = "RADII";
 
 	glm::dvec3 return3D;
-    openspace::SpiceManager::ref().getValueFromID(target, value3D, return3D);
+    openspace::SpiceManager::ref().getValue(target, value3D, return3D);
 
 	EXPECT_EQ(return3D.x, 6378.14) << "Value not found / differs from expected return";
 	EXPECT_EQ(return3D.y, 6378.14) << "Value not found / differs from expected return";
@@ -203,16 +200,15 @@ TEST_F(SpiceManagerTest, getValueFromID_ND){
 	std::string target  = "SATURN";
 	std::string valueND = "RING6_A";
 
-	std::vector<double> returnND;
-	unsigned int nr = 5;
-	bool found = openspace::SpiceManager::ref().getValueFromID(target, valueND, returnND, nr);
+	std::vector<double> returnND(5);
+	bool found = openspace::SpiceManager::ref().getValue(target, valueND, returnND);
 	ASSERT_TRUE(found) << "Could not retrieve value for specified kernel";
 
 	std::vector<double> controlVec{ 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
 	
 	ASSERT_EQ(controlVec.size(), returnND.size()) << "Vectors differ in size";
 
-	for (unsigned int i = 0; i < nr; ++i){
+	for (unsigned int i = 0; i < returnND.size(); ++i){
 		EXPECT_EQ(controlVec[i], returnND[i]) << "Vector value not equal";
 	}
 	unload_c(PCK.c_str());
@@ -226,7 +222,8 @@ TEST_F(SpiceManagerTest, stringToEphemerisTime){
 	char   date[SRCLEN] = "Thu Mar 20 12:53:29 PST 1997";
 	str2et_c(date, &control_ephemerisTime);
 
-	ephemerisTime = openspace::SpiceManager::ref().convertStringToTdbSeconds(date);
+	bool success = openspace::SpiceManager::ref().getETfromDate(date, ephemerisTime);
+	EXPECT_EQ(success, true);
 	
 	EXPECT_EQ(ephemerisTime, control_ephemerisTime) << "Ephemeries times differ / not found";
 	unload_c(LSK.c_str());
@@ -245,7 +242,7 @@ TEST_F(SpiceManagerTest, getTargetPosition){
 
 	glm::dvec3 targetPosition;
 	double lightTime = 0.0;
-	bool found = openspace::SpiceManager::ref().getTargetPosition("EARTH", et, "J2000", "LT+S", "CASSINI",
+	bool found = openspace::SpiceManager::ref().getTargetPosition("EARTH", "CASSINI", "J2000", "LT+S", et,
 		targetPosition, lightTime);
 	ASSERT_TRUE(found);
 	EXPECT_DOUBLE_EQ(pos[0], targetPosition[0]) << "Position not found or differs from expected return";
@@ -268,7 +265,7 @@ TEST_F(SpiceManagerTest, getTargetState){
 	glm::dvec3 targetPosition;
 	glm::dvec3 targetVelocity;
 	double lightTime = 0.0;
-	bool found = openspace::SpiceManager::ref().getTargetState("EARTH", et, "J2000", "LT+S", "CASSINI",
+	bool found = openspace::SpiceManager::ref().getTargetState("EARTH", "CASSINI", "J2000", "LT+S", et, 
 		                                                  targetPosition, targetVelocity, lightTime);
 	ASSERT_TRUE(found);
 	//x,y,z
@@ -295,7 +292,7 @@ TEST_F(SpiceManagerTest, getStateTransformMatrix){
 	glm::dvec3 position(state[0], state[1], state[2]);
 	glm::dvec3 velocity(state[3], state[4], state[5]);
 
-	openspace::transformMatrix stateMatrix(6);
+	openspace::SpiceManager::TransformMatrix stateMatrix;
 	bool found = openspace::SpiceManager::ref().getStateTransformMatrix("J2000",
 		                                                           "IAU_PHOEBE",
 		                                                           et,
@@ -304,12 +301,12 @@ TEST_F(SpiceManagerTest, getStateTransformMatrix){
 	//check for matrix consistency
 	for (int i = 0; i < 6; i++){
 		for (int j = 0; j < 6; j++){
-			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], stateMatrix(i, j)) << "State-matrix not set or has wrong values";
+			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], stateMatrix[i * 6 + j]) << "State-matrix not set or has wrong values";
 		}
 	}
 	mxvg_c(referenceMatrix, state, 6, 6, state_t);
 
-	stateMatrix.transform(position, velocity);
+	openspace::SpiceManager::ref().applyTransformationMatrix(position, velocity, stateMatrix);
 
 	for (int i = 0; i < 3; i++){
 		EXPECT_DOUBLE_EQ(position[i], state_t[i])     << "Position vector differs from its reference";
@@ -329,7 +326,7 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix){
 	str2et_c("2004 jun 11 19:32:00", &et);
 	pxform_c("CASSINI_HGA", "J2000", et, referenceMatrix);
 
-	openspace::transformMatrix positionMatrix(3);
+	glm::dmat3 positionMatrix;
 	glm::dvec3 position(state[0], state[1], state[2]);
 	bool found = openspace::SpiceManager::ref().getPositionTransformMatrix("CASSINI_HGA", 
 		                                                              "J2000", 
@@ -339,13 +336,13 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix){
 	//check for matrix consistency
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], positionMatrix(i, j)) << "Position-matrix not set or has wrong values";
+			EXPECT_DOUBLE_EQ(referenceMatrix[i][j], positionMatrix[j][i]) << "Position-matrix not set or has wrong values";
 		}
 	}
 	//transform reference position into new frame
 	mxvg_c(referenceMatrix, state, 3, 3, state_t);
 
-	positionMatrix.transform(position);
+	position = positionMatrix * position;
 	//check transformed values match 
 	for (int i = 0; i < 3; i++){
 		EXPECT_DOUBLE_EQ(position[i], state_t[i]) << "Position vector differs from its reference";
@@ -359,111 +356,36 @@ TEST_F(SpiceManagerTest, getFieldOfView){
 	int n;
 	int cassini_ID;
 	double et;
-	double boresight[3];
+	glm::dvec3 boresight;
 	double bounds_ref[5][3];
 	char shape_ref[TYPLEN];
 	char name_ref[FILLEN];
+	double boresightVec[3];
 
 	str2et_c("2004 jun 11 19:32:00", &et);
 	SpiceBoolean found;
 	bodn2c_c("CASSINI_ISS_NAC", &cassini_ID, &found);
 	ASSERT_TRUE(found == SPICETRUE) << "Cannot locate ID for Cassini";
 
-	getfov_c(cassini_ID, 5, TYPLEN, TYPLEN, shape_ref, name_ref, boresight, &n, bounds_ref);
+	getfov_c(cassini_ID, 5, TYPLEN, TYPLEN, shape_ref, name_ref, boresightVec, &n, bounds_ref);
 
 	std::string shape, name;
 	shape.resize(32);
 	name.resize(32);
 	std::vector<glm::dvec3> bounds;
-	int nrReturned;
 	found = openspace::SpiceManager::ref().getFieldOfView("CASSINI_ISS_NAC", 
 		                                                  shape, 
 														  name, 
 														  boresight, 
-														  bounds,
-														  nrReturned);
+														  bounds);
 	ASSERT_TRUE(found == SPICETRUE);
 	//check vectors have correct values
-	for (int i = 0; i < nrReturned; i++){
+	for (int i = 0; i < bounds.size(); i++){
 		for (int j = 0; j < 3; j++){
 			EXPECT_DOUBLE_EQ(bounds_ref[i][j], bounds[i][j]) << "One or more Field of View Boundary vectors \
 																 differ from expected output";
 		}
 	}
-	unload_c(META.c_str());
-}
-// Try converting rectangular coordinates to latitudal
-TEST_F(SpiceManagerTest, rectangularToLatitudal){
-	loadMetaKernel();
-
-	char    frame[FILLEN], shape[FILLEN];
-	double  lat, lon;
-	double  bounds[4][3], bsight[3], 
-		         obspos[3], point_ref[3];
-	double  dist, et, radius_ref, trgepc;
-	int     n, naifId;
-	bool     found;
-	SpiceBoolean foundSpice;
-
-	// First, find an intersection point to convert to rectangular coordinates 
-	str2et_c("2004 jun 11 19:32:00", &et);
-	bodn2c_c("CASSINI_ISS_NAC", &naifId, &foundSpice);
-	ASSERT_TRUE(foundSpice == SPICETRUE);
-	getfov_c(naifId, 4, FILLEN, FILLEN, shape, frame, bsight, &n, bounds);
-	srfxpt_c("Ellipsoid", "PHOEBE", et, "LT+S", "CASSINI", frame, bsight,
-		     point_ref, &dist, &trgepc, obspos, &foundSpice);
-	ASSERT_TRUE(foundSpice == SPICETRUE);
-
-	reclat_c(point_ref, &radius_ref, &lon, &lat);
-	glm::dvec3 point(point_ref[0], point_ref[1], point_ref[2]);
-	double radius, longitude, latitude;
-	found = openspace::SpiceManager::ref().rectangularToLatitudal(point, radius, longitude, latitude);
-
-	ASSERT_TRUE(found);
-	ASSERT_NEAR(radius,    radius_ref, abs_error) << "radius is not set / has incorrect values";
-	ASSERT_NEAR(longitude, lon,        abs_error) << "longitude is not set / has incorrect values";
-	ASSERT_NEAR(latitude,  lat,        abs_error) << "latitude is not set / has incorrect values";
-	unload_c(META.c_str());
-}
-// Try converting latitudinal coordinates to rectangular
-TEST_F(SpiceManagerTest, latitudinalToRectangular){
-	loadMetaKernel();
-
-	char   frame[FILLEN], shape[FILLEN];
-	double lat, lon;
-	double bounds[4][3], bsight[3],
-		   obspos[3], point_ref[3];
-	double dist, et, radius_ref, trgepc;
-	int    n, naifId;
-	SpiceBoolean foundSpice;
-
-	// First, find an intersection point to convert to latitudinal coordinates //
-	str2et_c("2004 jun 11 19:32:00", &et);
-	bodn2c_c("CASSINI_ISS_NAC", &naifId, &foundSpice);
-	ASSERT_TRUE(foundSpice == SPICETRUE);
-	getfov_c(naifId, 4, FILLEN, FILLEN, shape, frame, bsight, &n, bounds);
-	foundSpice = SPICEFALSE;
-	srfxpt_c("Ellipsoid", "PHOEBE", et, "LT+S", "CASSINI", frame, bsight,
-		     point_ref, &dist, &trgepc, obspos, &foundSpice);
-	ASSERT_TRUE(foundSpice == SPICETRUE);
-
-	reclat_c(point_ref, &radius_ref, &lon, &lat);
-
-	lat *= rpd_c();
-	lon *= rpd_c();
-
-	double lat_ref = lat;
-	double lon_ref = lon;
-
-	double rectangular_ref[3];
-	latrec_c(radius_ref, lon, lat, rectangular_ref);
-
-	glm::dvec3 coordinates;
-	bool found = openspace::SpiceManager::ref().latidudinalToRectangular(radius_ref, lon, lat, coordinates);
-
-	ASSERT_TRUE(found);
-	ASSERT_NEAR(lon_ref, lon, abs_error) << "longitude is not set / has incorrect values";
-	ASSERT_NEAR(lat_ref, lat, abs_error) << "latitude is not set / has incorrect values";
 	unload_c(META.c_str());
 }
 // Try to convert planetocentric coordinates to rectangular
@@ -509,9 +431,9 @@ TEST_F(SpiceManagerTest, getSubObserverPoint){
 		subpnt_c(method[i], "phoebe", et, "iau_phoebe", 
 			"lt+s", "earth", subObserverPoint_ref, &targetEt_ref, vectorToSurfacePoint_ref);
 
-		bool found = openspace::SpiceManager::ref().getSubObserverPoint(method[i], "phoebe", et, "iau_phoebe",
-			                                                      "lt+s", "earth", subObserverPoint, 
-																  targetEt, vectorToSurfacePoint);
+		bool found = openspace::SpiceManager::ref().getSubObserverPoint(
+			"phoebe", "earth", method[i], "iau_phoebe", "lt+s", et, subObserverPoint, 
+			targetEt, vectorToSurfacePoint);
 		ASSERT_TRUE(found);
 		EXPECT_EQ(targetEt_ref, targetEt);
 		for (int i = 0; i < 3; i++){
@@ -524,34 +446,34 @@ TEST_F(SpiceManagerTest, getSubObserverPoint){
 	unload_c(META.c_str());
 }
 // Try getting sub-solar point
-TEST_F(SpiceManagerTest, getSubSolarPoint){
-	loadMetaKernel();
-
-	double et, targetEt_ref, targetEt;
-	double subSolarPoint_ref[3];
-	double vectorToSurfacePoint_ref[3];
-	static SpiceChar * method[2] = { "Intercept:  ellipsoid", "Near point: ellipsoid" };
-
-	str2et_c("2004 jun 11 19:32:00", &et);
-
-	glm::dvec3 subSolarPoint;
-	glm::dvec3 vectorToSurfacePoint;
-
-	for (int i = 0; i < 2; i++){
-		subslr_c(method[i], "phoebe", et, "iau_phoebe", 
-			"lt+s", "earth", subSolarPoint_ref, &targetEt_ref, vectorToSurfacePoint_ref);
-
-		bool found = openspace::SpiceManager::ref().getSubSolarPoint(method[i], "phoebe", et, "iau_phoebe",
-			                                                    "lt+s", "earth", subSolarPoint,
-			                                                    targetEt, vectorToSurfacePoint);
-		ASSERT_TRUE(found);
-		EXPECT_EQ(targetEt_ref, targetEt);
-		for (int i = 0; i < 3; i++){
-			EXPECT_EQ(subSolarPoint_ref[i], subSolarPoint[i])
-			     	 << "Sub-solar vector differs from its reference";
-			EXPECT_EQ(vectorToSurfacePoint_ref[i], vectorToSurfacePoint[i])
-				     << "Observer to surface point vector differs from its reference";
-		}
-	}
-	unload_c(META.c_str());
-}
+//TEST_F(SpiceManagerTest, getSubSolarPoint){
+//	loadMetaKernel();
+//
+//	double et, targetEt_ref, targetEt;
+//	double subSolarPoint_ref[3];
+//	double vectorToSurfacePoint_ref[3];
+//	static SpiceChar * method[2] = { "Intercept:  ellipsoid", "Near point: ellipsoid" };
+//
+//	str2et_c("2004 jun 11 19:32:00", &et);
+//
+//	glm::dvec3 subSolarPoint;
+//	glm::dvec3 vectorToSurfacePoint;
+//
+//	for (int i = 0; i < 2; i++){
+//		subslr_c(method[i], "phoebe", et, "iau_phoebe", 
+//			"lt+s", "earth", subSolarPoint_ref, &targetEt_ref, vectorToSurfacePoint_ref);
+//
+//		bool found = openspace::SpiceManager::ref().getSubSolarPoint(method[i], "phoebe", et, "iau_phoebe",
+//			                                                    "lt+s", "earth", subSolarPoint,
+//			                                                    targetEt, vectorToSurfacePoint);
+//		ASSERT_TRUE(found);
+//		EXPECT_EQ(targetEt_ref, targetEt);
+//		for (int i = 0; i < 3; i++){
+//			EXPECT_EQ(subSolarPoint_ref[i], subSolarPoint[i])
+//			     	 << "Sub-solar vector differs from its reference";
+//			EXPECT_EQ(vectorToSurfacePoint_ref[i], vectorToSurfacePoint[i])
+//				     << "Observer to surface point vector differs from its reference";
+//		}
+//	}
+//	unload_c(META.c_str());
+//}

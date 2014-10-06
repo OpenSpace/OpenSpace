@@ -28,9 +28,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/spice.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/shadercreator.h>
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
 
@@ -48,6 +46,7 @@
 #include <ghoul/opengl/shadermanager.h>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include <chrono>
@@ -71,53 +70,25 @@ namespace luascriptfunctions {
  */
 int property_setValue(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "property_setValue";
 
-	// TODO Check for argument number (ab)
+	int nArguments = lua_gettop(L);
+	if (nArguments != 2)
+		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
 	std::string uri = luaL_checkstring(L, -2);
 	const int type = lua_type(L, -1);
-	//  boost::any propertyValue;
-	//  switch (type) {
-	//      case LUA_TNONE:
-	//      case LUA_TLIGHTUSERDATA:
-	//      case LUA_TFUNCTION:
-	//      case LUA_TUSERDATA:
-	//      case LUA_TTHREAD:
-	//          LERROR("Function parameter was of type '" << luaTypeToString(type) << "'");
-	//          return 0;
-	//      case LUA_TNIL:
-	//          propertyValue = 0;
-	//          break;
-	//      case LUA_TBOOLEAN:
-	//          propertyValue = lua_toboolean(L, -1);
-	//          break;
-	//      case LUA_TNUMBER:
-	//          propertyValue = lua_tonumber(L, -1);
-	//          break;
-	//      case LUA_TSTRING:
-	//          propertyValue = std::string(lua_tostring(L, -1));
-	//          break;
-	//case LUA_TTABLE: {
-	//	ghoul::Dictionary d;
-	//	ghoul::lua::populateDictionary(L, d);
-	//	propertyValue = d;
-	//	break;
-	//}
-	//  }
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-		LERROR("Property with uri '" << uri << "' could not be found");
-		return 0;
-	}
+	if (!prop)
+		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
 
 	if (type != prop->typeLua())
-		LERROR("Property '" << uri << "' does not accept input of type '"
-			<< luaTypeToString(type) << "'. Requested type: '"
-			<< luaTypeToString(prop->typeLua()) << "'");
+		return luaL_error(L, "Property '%s' does not accept input of type '%s'. \
+							  Requested type: '%s'", uri.c_str(),
+							  luaTypeToString(type).c_str(),
+							  luaTypeToString(prop->typeLua()).c_str());
 	else
 		prop->setLua(L);
-	//prop->set(propertyValue);
 
 	return 0;
 }
@@ -129,48 +100,17 @@ int property_setValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int property_getValue(lua_State* L) {
-	const std::string _loggerCat = "property_getValue";
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	// TODO Check for argument number (ab)
 	std::string uri = luaL_checkstring(L, -1);
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-		LERROR("Property with uri '" << uri << "' could not be found");
-		lua_pushnil(L);
-	}
-	else {
+	if (!prop)
+		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
+	else
 		prop->getLua(L);
-
-		//switch (type) {
-		//    case LUA_TNONE:
-		//    case LUA_TLIGHTUSERDATA:
-		//    case LUA_TFUNCTION:
-		//    case LUA_TUSERDATA:
-		//    case LUA_TTHREAD:
-		//        LERROR("Function parameter was of type '" << luaTypeToString(type)
-		//                                                    << "'");
-		//        return 0;
-		//    case LUA_TNIL:
-		//        propertyValue = 0;
-		//        break;
-		//    case LUA_TBOOLEAN:
-		//        propertyValue = lua_toboolean(L, -1);
-		//        break;
-		//    case LUA_TNUMBER:
-		//        propertyValue = lua_tonumber(L, -1);
-		//        break;
-		//    case LUA_TSTRING:
-		//        propertyValue = std::string(lua_tostring(L, -1));
-		//        break;
-		//    case LUA_TTABLE: {
-		//        ghoul::Dictionary d;
-		//        ghoul::lua::populateDictionary(L, d);
-		//        propertyValue = d;
-		//        break;
-		//    }
-		//}
-	}
 	return 1;
 }
 
@@ -181,9 +121,10 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
-	const std::string _loggerCat = "loadScene";
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	// TODO Check for argument number (ab)
 	std::string sceneFile = luaL_checkstring(L, -1);
 
 	OsEng.renderEngine().sceneGraph()->scheduleLoadSceneFile(sceneFile);
@@ -208,83 +149,74 @@ SceneGraph::~SceneGraph()
 bool SceneGraph::initialize()
 {
     LDEBUG("Initializing SceneGraph");
-    
-    LDEBUG("Creating ProgramObjects");
+   
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ShaderCreator sc = OsEng.shaderBuilder();
     ProgramObject* tmpProgram;
 
-    typedef std::chrono::high_resolution_clock clock_;
-    typedef std::chrono::duration<double, std::ratio<1> > second_;
+	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
+		_programUpdateLock.lock();
+		_programsToUpdate.insert(program);
+		_programUpdateLock.unlock();
+	};
 
-    std::chrono::time_point<clock_> beginning(clock_::now());
+	// Start Timing for building SceneGraph shaders
+	typedef std::chrono::high_resolution_clock clock_;
+	typedef std::chrono::duration<double, std::ratio<1> > second_;
+	std::chrono::time_point<clock_> beginning(clock_::now());
 
-    // pscstandard
-    tmpProgram = sc.buildShader("pscstandard",
-                                "${SHADERS}/pscstandard_vs.glsl",
-                                "${SHADERS}/pscstandard_fs.glsl");
+	// pscstandard
+	tmpProgram = ProgramObject::Build("pscstandard",
+		"${SHADERS}/pscstandard_vs.glsl",
+		"${SHADERS}/pscstandard_fs.glsl",
+		cb);
     if( ! tmpProgram) return false;
+	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
     // RaycastProgram
-    tmpProgram = sc.buildShader("RaycastProgram",
-                                "${SHADERS}/exitpoints.vert",
-                                "${SHADERS}/exitpoints.frag");
-    if( ! tmpProgram) return false;
+	tmpProgram = ProgramObject::Build("RaycastProgram",
+		"${SHADERS}/exitpoints.vert",
+		"${SHADERS}/exitpoints.frag",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-
-    // // TwoPassProgram
-    // tmpProgram = sc.buildShader("TwoPassProgram",
-    //                             "${SHADERS}/twopassraycaster.vert",
-    //                             "${SHADERS}/twopassraycaster.frag");
-    // if( ! tmpProgram) return false;
-    // tmpProgram->setUniform("texBack", 0);
-    // tmpProgram->setUniform("texFront", 1);
-    // tmpProgram->setUniform("texVolume", 2);
-    // OsEng.ref().configurationManager().setValue("TwoPassProgram", tmpProgram);
-
-	// Quad
-	tmpProgram = sc.buildShader("Quad",
-		"${SHADERS}/quadVert.glsl",
-		"${SHADERS}/quadFrag.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setUniform("quadTex", 0);
-	OsEng.ref().configurationManager().setValue("Quad", tmpProgram);
-
 	// Star program
-	tmpProgram = sc.buildShader("Star",
+	tmpProgram = ProgramObject::Build("Star",
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl");
+		"${SHADERS}/star_ge.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
 
 	// Point program
-	tmpProgram = sc.buildShader("Point",
+	tmpProgram = ProgramObject::Build("Point",
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl");
+		"${SHADERS}/star_ge.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PointProgram", tmpProgram);
 
 	// Grid program
-	tmpProgram = sc.buildShader("Grid",
+	tmpProgram = ProgramObject::Build("Grid",
 		"${SHADERS}/grid_vs.glsl",
-		"${SHADERS}/grid_fs.glsl");
+		"${SHADERS}/grid_fs.glsl",
+		cb);
 	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
-	tmpProgram = sc.buildShader("Ephemeris",
-		"${SHADERS}/ephemeris_vs.glsl",
-		"${SHADERS}/ephemeris_fs.glsl");
-	if (!tmpProgram) return false;
-	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
-
+	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
+
 
     return true;
 }
@@ -292,6 +224,13 @@ bool SceneGraph::initialize()
 bool SceneGraph::deinitialize()
 {
 	clearSceneGraph();
+
+	// clean up all programs
+	_programsToUpdate.clear();
+	for (auto program : _programs) {
+		delete program;
+	}
+	_programs.clear();
     return true;
 }
 
@@ -303,6 +242,8 @@ void SceneGraph::update(const UpdateData& data)
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
+
+		OsEng.renderEngine().abuffer()->invalidateABuffer();
 	}
     for (auto node : _nodes)
         node->update(data);
@@ -316,6 +257,24 @@ void SceneGraph::evaluate(Camera* camera)
 
 void SceneGraph::render(const RenderData& data)
 {
+	bool emptyProgramsToUpdate = _programsToUpdate.empty();
+		
+	_programUpdateLock.lock();
+	for (auto program : _programsToUpdate) {
+		LDEBUG("Attempting to recompile " << program->name());
+		program->rebuildFromFile();
+	}
+	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
+	_programUpdateLock.unlock();
+
+	if (!emptyProgramsToUpdate) {
+		LDEBUG("Setting uniforms");
+		// Ignore attribute locations
+		for (auto program : _programs) {
+			program->setIgnoreSubroutineUniformLocationError(true);
+		}
+	}
+
 	if (_root)
 		_root->render(data);
 }
@@ -365,7 +324,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	std::string&& sceneDescriptionDirectory =
 		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
 	std::string moduleDirectory(".");
-	dictionary.getValueSafe(constants::scenegraph::keyPathScene, moduleDirectory);
+	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
 
 	// The scene path could either be an absolute or relative path to the description
 	// paths directory
@@ -434,8 +393,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
-    for (auto node : _nodes)
-		node->update({Time::ref().currentTime()});
+	for (auto node : _nodes)
+		node->update({ Time::ref().currentTime() });
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();
@@ -457,7 +416,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
         const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
-        
+
         // this part is full of magic!
 		glm::vec2 boundf = bound.vec2();
         glm::vec2 scaling{1.0f, -boundf[1]};
@@ -535,7 +494,8 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
 }
 
 scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
-	scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+	//scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
+	return {
 		"",
 		{
 			{
@@ -559,8 +519,7 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 			}
 		}
 	};
-
-	return std::move(sceneGraphLibrary);
+	//return std::move(sceneGraphLibrary);
 }
 
 }  // namespace openspace

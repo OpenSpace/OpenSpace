@@ -28,10 +28,11 @@
 // Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
 
 const float k 				= 10.0;
+
 const float s_far			= 27.0f; //= gl_DepthRange.far;	// 40
 const float s_farcutoff		= 12.0f;
 const float s_nearcutoff	= 7.00f;
-const float s_near			= 0.00f;// gl_DepthRange.near;	// 0.1
+const float s_near			= 1.00f;// gl_DepthRange.near;	// 0.1
 
 vec4 psc_normlization(vec4 invec) {
 	
@@ -56,7 +57,8 @@ float pscDepth(vec4 position) {
 	} else {
 		depth = position.w+log(abs(position.z));
 	}
-	
+	depth = (position.w+log(abs(position.z)))/pow(k, position.w);
+	// depth = (position.w+log(abs(position.z)))/pow(k, position.w);
 
 	// DEBUG
 	float depth_orig = depth;
@@ -84,6 +86,7 @@ float pscDepth(vec4 position) {
 		depth = (depth - s_near) / (s_far - s_near);
 
 	}
+	// return 1.0;
 	return depth;
 }
 

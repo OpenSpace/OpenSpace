@@ -21,6 +21,7 @@ layout(location = 2) out vec3 ge_brightness[];
 layout(triangle_strip, max_vertices = 4) out;
 
 out vec2 texCoord;
+out vec4 vs_position;
 
 uniform mat4 projection; // we do this after distance computation. 
 
@@ -63,7 +64,9 @@ void main(){
 	for(int i = 0; i < 4; i++){
 		vec4 p1     = P;                 
 		p1.xy      += spriteSize *(corners[i] - vec2(0.5)); 
-		gl_Position = projection * p1;                                 // projection here
+		vs_position = p1;
+		gl_Position = projection * p1;  
+		// gl_Position = z_normalization(projection * p1);                                 // projection here
 		texCoord    = corners[i];                           
 	  EmitVertex();
 	}

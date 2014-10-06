@@ -56,7 +56,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	assert(success);
     
     _filename = "";
-	success = dictionary.getValueSafe(constants::renderablevolumegl::keyVolume,
+	success = dictionary.getValue(constants::renderablevolumegl::keyVolume,
 		_filename);
 	if (!success) {
 		LERROR("Node '" << name << "' did not contain a valid '" << 
@@ -67,12 +67,12 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 
     LDEBUG("Volume Filename: " << _filename);
 
-	dictionary.getValueSafe(constants::renderablevolumegl::keyHints, _hintsDictionary);
+	dictionary.getValue(constants::renderablevolumegl::keyHints, _hintsDictionary);
 
     _transferFunction = nullptr;
     _transferFunctionFile = nullptr;
     _transferFunctionPath = "";
-	success = dictionary.getValueSafe(
+	success = dictionary.getValue(
 		constants::renderablevolumegl::keyTransferFunction, _transferFunctionPath);
 	if (!success) {
 		LERROR("Node '" << name << "' did not contain a valid '" <<
@@ -83,7 +83,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	_transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
     
 	_samplerFilename = "";
-	success = dictionary.getValueSafe(constants::renderablevolumegl::keySampler,
+	success = dictionary.getValue(constants::renderablevolumegl::keySampler,
 		_samplerFilename);
 	if (!success) {
 		LERROR("Node '" << name << "' did not contain a valid '" <<
@@ -93,14 +93,14 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
     _samplerFilename = findPath(_samplerFilename);
 
 	glm::vec4 scalingVec4(_boxScaling, _w);
-	success = dictionary.getValueSafe(constants::renderablevolumegl::keyBoxScaling,
+	success = dictionary.getValue(constants::renderablevolumegl::keyBoxScaling,
 		scalingVec4);
 	if (success) {
 		_boxScaling = scalingVec4.xyz;
 		_w = scalingVec4.w;
 	}
 	else {
-		success = dictionary.getValueSafe(constants::renderablevolumegl::keyBoxScaling,
+		success = dictionary.getValue(constants::renderablevolumegl::keyBoxScaling,
 			_boxScaling);
 		if (!success) {
 			LERROR("Node '" << name << "' did not contain a valid '" <<
@@ -109,8 +109,8 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 		}
 	}
 
-	dictionary.getValueSafe(constants::renderablevolumegl::keyVolumeName, _volumeName);
-	dictionary.getValueSafe(constants::renderablevolumegl::keyTransferFunctionName,
+	dictionary.getValue(constants::renderablevolumegl::keyVolumeName, _volumeName);
+	dictionary.getValue(constants::renderablevolumegl::keyTransferFunctionName,
 		_transferFunctionName);
 
     setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
@@ -127,16 +127,6 @@ RenderableVolumeGL::~RenderableVolumeGL() {
 }
 
 bool RenderableVolumeGL::initialize() {
-    // assert(_filename != "");
-    //	------ VOLUME READING ----------------
-// <<<<<<< HEAD
-// =======
-// 	_volume = loadVolume(_filename, _hintsDictionary);
-// 	_volume->uploadTexture();
-//     _transferFunction = loadTransferFunction(_transferFunctionPath);
-//     _transferFunction->uploadTexture();
-
-// >>>>>>> feature/fieldlines
     // TODO: fix volume an transferfunction names
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);

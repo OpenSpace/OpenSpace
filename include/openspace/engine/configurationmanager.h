@@ -22,39 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SHADERCREATOR_H__
-#define __SHADERCREATOR_H__
+#ifndef __CONFIGURATIONMANAGER_H__
+#define __CONFIGURATIONMANAGER_H__
 
-
-#include <ghoul/opengl/programobject.h>
-
-#include <string>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
-class ShaderCreator {
 
+class ConfigurationManager : public ghoul::Dictionary {
 public:
-	ShaderCreator();
-	~ShaderCreator();
-
-	void createSourceFile(bool b);
-	void sourceFileExtension(const std::string& extension);
-	void sourceFileHeader(const std::string& header);
-
-	ghoul::opengl::ProgramObject* buildShader(const std::string& name, const std::string& vpath, const std::string& fpath, const std::string& gpath = "");
-
-private:
-
-	void _generateSource(const std::string& filename);
-	std::string _loadSource(const std::string& filename, unsigned int depth = 0);
-	std::string _generateFilename(const std::string& filename);
-
-	bool _createSourceFile;
-	std::string _sourceFileExtension;
-	std::string _sourceFileHeader;
-	unsigned int _maxDepth;
-
+	bool loadFromFile(const std::string& filename);
 };
-}
 
-#endif
+} // namespace openspace
+
+#endif  // __CONFIGURATIONMANAGER_H__
