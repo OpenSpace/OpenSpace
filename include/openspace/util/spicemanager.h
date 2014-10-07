@@ -213,19 +213,19 @@ public:
 		std::vector<double>& v) const;
 
 	/**
-	 * Converts the <code>epochString</code> representing a date to a double precision
+	 * Converts the <code>timeString</code> representing a date to a double precision
      * value representing the <code>ephemerisTime</code>; that is the number of TDB
 	 * seconds past the J2000 epoch. For further details, please refer to
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html. If an error
 	 * occurs, an error is logged, the method returns <code>false</code> and the
 	 * <code>ephemerisTime</code> remains unchanged.
-	 * \param epochString A string representing an epoch
+	 * \param timeString A string representing the time to be converted
 	 * \param ephemerisTime The destination for the converted time; the number of TDB
 	 * seconds past the J2000 epoch, representing the passed <code>epochString</code>
 	 * \return <code>true</code> if the <code>epochString</code> is a valid string and
 	 * the conversion succeeded, <code>false</code> otherwise
 	 */
-	bool getETfromDate(const std::string& epochString, double& ephemerisTime) const;
+	bool getETfromDate(const std::string& timeString, double& ephemerisTime) const;
 
 	/**
 	 * Converts the passed <code>ephemerisTime</code> into a human-readable
@@ -391,6 +391,28 @@ public:
 						std::string& frameName,
 						glm::dvec3& boresightVector, 
 						std::vector<glm::dvec3>& bounds) const;
+
+	/**
+	 * This routine returns the field-of-view (FOV) parameters for a specified
+	 * <code>instrument</code>. For further details, please refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
+	 * \param instrument The NAIF id of the instrument for which the FOV is to be
+	 * retrieved. For more information on NAIF IDs, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+	 * \param fovShape The output containing the rough shape of the returned FOV. If the
+	 * method fails, this value remains unchanged
+	 * \param frameName The output containing the name of the frame in which the FOV
+	 * <code>bounds</code> are computed. If the method fails, this value remains unchanged
+	 * \param boresightVector The output containing the boresight, that is the vector for
+	 * the center direction of the FOV. If the method fails, this value remains unchanged
+	 * \param bounds The output containing the values defining the bounds of the FOV as
+	 * explained by http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
+	 * If the method fails, this value remains unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
+	 */
+	bool getFieldOfView(int instrument, std::string& fovShape, std::string& frameName,
+		glm::dvec3& boresightVector, std::vector<glm::dvec3>& bounds) const;
 	
 	/**
 	 * Converts planeto-centric <code>latitude</code> and <code>longitude</code> of a
@@ -407,9 +429,26 @@ public:
 	 * \return <code>true</code> if the function was successful, <code>false</code>
 	 * otherwise
 	 */
-	bool planetocentricToRectangular(const std::string& body, double longitude,
+	bool geographicToRectangular(const std::string& body, double longitude,
 									 double latitude, glm::dvec3& coordinates) const;
 
+	/**
+	 * Converts planeto-centric <code>latitude</code> and <code>longitude</code> of a
+	 * surface point on a body with the NAIF ID of <code>id</code> to rectangular
+	 * <code>coordinates</code>. For further details, refer to
+	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
+	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
+	 * are defined. This body needs to have a defined radius for this function to work
+     * \param longitude The longitude of the point on the <code>body</code> in radians
+     * \param latitude The latitude of the point on the <code>body</code> in radians
+     * \param coordinates The output containing the rectangular coordinates of the point
+	 * defined by <code>longitude</code> and <code>latitude</code> on the
+	 * <code>body</code>. If the method fails, the coordinate are unchanged
+	 * \return <code>true</code> if the function was successful, <code>false</code>
+	 * otherwise
+	 */
+	bool geographicToRectangular(int id, double longitude, double latitude,
+		glm::dvec3& coordinates) const;
 	/**
 	 * Compute the rectangular coordinates of the sub-observer point of an
 	 * <code>observer</code> on a target <code>body</code> at a specified
@@ -447,11 +486,11 @@ public:
 	 * \return <code>true</code> if the function was successful, <code>false</code>
 	 * otherwise
 	 */
-	bool getSubObserverPoint(std::string target,
-		                     std::string observer,
- 							 std::string computationMethod,
-		                     std::string bodyFixedFrame,
-		                     std::string aberrationCorrection,
+	bool getSubObserverPoint(const std::string& target,
+		                     const std::string& observer,
+ 							 const std::string& computationMethod,
+		                     const std::string& bodyFixedFrame,
+		                     const std::string& aberrationCorrection,
 		                     double ephemerisTime,
 		                     glm::dvec3& subObserverPoint,
 		                     double& targetEphemerisTime,
@@ -484,17 +523,18 @@ public:
 	//					  glm::dvec3& subSolarPoint,
 	//	                  double&     targetEpoch,
 	//	                  glm::dvec3& vectorToSurfacePoint) const;
-private:
-	/**
-	 * This method checks if one of the previous SPICE methods has failed. If it has, the
-	 * <code>errorMessage</code> is used to log an error along with the original SPICE
-	 * error message.
-	 * \param errorMessage The error message that will be logged if the method fails. If
-	 * the argument is empty, no error message will be logged
-	 * \return <code>true</code> if an error occurred, <code>false</code> otherwise
-	 */
-	bool checkForError(std::string errorMessage) const;
+    
+    /**
+     * This method checks if one of the previous SPICE methods has failed. If it has, the
+     * <code>errorMessage</code> is used to log an error along with the original SPICE
+     * error message.
+     * \param errorMessage The error message that will be logged if the method fails. If
+     * the argument is empty, no error message will be logged
+     * \return <code>true</code> if an error occurred, <code>false</code> otherwise
+     */
+    static bool checkForError(std::string errorMessage);
 
+private:
 	struct KernelInformation {
 		std::string path;
 		KernelIdentifier id;

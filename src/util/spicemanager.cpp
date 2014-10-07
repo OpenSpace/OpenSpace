@@ -56,7 +56,6 @@ void SpiceManager::deinitialize() {
 
 	delete _manager;
 	_manager = nullptr;
-	_manager->_lastAssignedKernel = 0;
 
 	// Set values back to default
 	erract_c("SET", 0, "DEFAULT");
@@ -148,12 +147,15 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 	else {
 		SpiceBoolean success;
 		bods2c_c(body.c_str(), &id, &success);
+        if (success == SPICEFALSE)
+            LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
 	}
 }
 
-template <typename T, size_t S>
-bool getValueInternal(const std::string& body, const std::string& value, T& v) {
+bool getValueInternal(const std::string& body, const std::string& value, int S,
+	double* v)
+{
 	if (body.empty()) {
 		LERROR("No body was provided");
 		return false;
@@ -164,29 +166,29 @@ bool getValueInternal(const std::string& body, const std::string& value, T& v) {
 	}
 
 	int n;
-	bodvrd_c(body.c_str(), value.c_str(), S, &n, &v);
+	bodvrd_c(body.c_str(), value.c_str(), S, &n, v);
 
-	bool hasError = checkForError("Error getting value '" + value + "' for body '" + 
-		body + "'");
+    bool hasError = SpiceManager::checkForError("Error getting value '" + value +
+                                                "' for body '" + body + "'");
 	return !hasError;
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	double& v) const
 {
-	return getValueInternal<double, 1>(body, value, v);
+	return getValueInternal(body, value, 1, &v);
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	glm::dvec3& v) const
 {
-	return getValueInternal<glm::dvec3, 3>(body, value, v);
+	return getValueInternal(body, value, 3, glm::value_ptr(v));
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	glm::dvec4& v) const
 {
-	return getValueInternal<glm::dvec4, 4>(body, value, v);
+	return getValueInternal(body, value, 4, glm::value_ptr(v));
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
@@ -200,7 +202,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 		LERROR("No value was provided");
 		return false;
 	}
-	if (v.size() > 0) {
+	if (v.size() == 0) {
 		LERROR("Array for values has to be preallocaed");
 		return false;
 	}
@@ -213,41 +215,38 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	return !hasError;
 }
 
-bool SpiceManager::getETfromDate(const std::string& epochString,
-	double& ephemerisTime) const
+bool SpiceManager::getETfromDate(const std::string& timeString,
+                                 double& ephemerisTime) const
 {
-	str2et_c(epochString.c_str(), &ephemerisTime);
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error converting date '" + epochString+ "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-	return true;
+    if (timeString.empty()) {
+        LERROR("No time string was provided");
+        return false;
+    }
+    
+	str2et_c(timeString.c_str(), &ephemerisTime);
+    bool hasError = checkForError("Error converting date '" + timeString + "'");
+    return !hasError;
 }
 
 bool SpiceManager::getDateFromET(double ephemerisTime, std::string& date,
 	const std::string& format)
 {
 	static const int BufferSize = 256;
+    
+    if (format.empty()) {
+        LERROR("No format string was provided for the date conversion");
+        return false;
+    }
 	SpiceChar buffer[BufferSize];
 
 	timout_c(ephemerisTime, format.c_str(), BufferSize - 1, buffer);
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error converting ephemeris time to date with format '" + format + "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-
-	date = std::string(buffer);
-	return true;
+    bool hasError = checkForError(
+                                  "Error converting ephemeris time '" +
+                                  std::to_string(ephemerisTime) +
+                                  "' to date with format '" + format + "'");
+    if (!hasError)
+        date = std::string(buffer);
+    return !hasError;
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,
@@ -255,28 +254,20 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 const std::string& referenceFrame,
 	                                 const std::string& aberrationCorrection,
 	                                 double ephemerisTime,
-	                                 glm::dvec3& targetPosition,
-	                                 double& lightTime) const{
-	double pos[3] = { 0.0, 0.0, 0.0 };
-	
-	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(), 
-		     aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-    
-    int failed = failed_c();
-    if(failed) {
-        char msg[1024];
-        getmsg_c ( "LONG", 1024, msg );
-        LERROR("Error retrieving position of target '" + target + "'");
-        LERROR("Spice reported: " + std::string(msg));
-        reset_c();
-        return false;
-    }
+	                                 glm::dvec3& position,
+	                                 double& lightTime) const
+{
+    spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+             aberrationCorrection.c_str(), observer.c_str(), glm::value_ptr(position),
+             &lightTime);
 
-	
-	memcpy(&targetPosition, pos, sizeof(double)* 3);
-
-	return true;
+    bool hasError = checkForError("Error retrieving position of target '" + target + "'" +
+                                  " viewed from observer '" + observer + "' in reference"+
+                                  " frame '" + referenceFrame + "' at time '" +
+                                  std::to_string(ephemerisTime) + "'");
+    return !hasError;
 }
+
 bool SpiceManager::getTargetState(const std::string& target,
 	                              const std::string& observer,
 	                              const std::string& referenceFrame,
@@ -284,37 +275,36 @@ bool SpiceManager::getTargetState(const std::string& target,
 	                              double ephemerisTime,
 	                              glm::dvec3& targetPosition,
 	                              glm::dvec3& targetVelocity,
-	                              double& lightTime) const{
-	double state[6];
-	std::fill_n(state, 6, NULL);
-
-	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-	    	aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+	                              double& lightTime) const
+{
+    double buffer[6];
     
-    int failed = failed_c();
-    if(failed) {
-        char msg[1024];
-        getmsg_c ( "LONG", 1024, msg );
-        LERROR("Error retrieving state of target '" + target + "'");
-        LERROR("Spice reported: " + std::string(msg));
-        reset_c();
-        return false;
-    }
+	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+	    	aberrationCorrection.c_str(), observer.c_str(), buffer, &lightTime);
 
-	for (int i = 0; i < 3; i++){
-		memcpy(&targetPosition, state   , sizeof(double)* 3);
-		memcpy(&targetVelocity, state +3, sizeof(double)* 3);
-	}
-	return true;
+    bool hasError = checkForError("Error retrieving state of target '" + target + "'" +
+                                  "viewed from observer '" + observer + "' in " +
+                                  "reference frame '" + referenceFrame + "' at time '" +
+                                  std::to_string(ephemerisTime) + "'");
+    if (!hasError) {
+        memmove(glm::value_ptr(targetPosition), buffer, sizeof(double) * 3);
+        memmove(glm::value_ptr(targetVelocity), buffer + 3, sizeof(double) * 3);
+    }
+    return !hasError;
 }
 
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 							const std::string& toFrame,
 							double ephemerisTime,
-							TransformMatrix& stateMatrix) const{
+							TransformMatrix& stateMatrix) const
+{
 	sxform_c(fromFrame.c_str(), toFrame.c_str(), 
 		     ephemerisTime, (double(*)[6])stateMatrix.data());
-	return true; 
+    
+    bool hasError = checkForError("Error retrieved state transform matrix from frame '" +
+                                  fromFrame + "' to frame '" + toFrame + "' at time '" +
+                                  std::to_string(ephemerisTime) + "'");
+	return !hasError;
 }
 
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
@@ -323,91 +313,137 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 												 glm::dmat3& positionMatrix) const{
 	pxform_c(fromFrame.c_str(), toFrame.c_str(),
 		ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
-	positionMatrix = glm::transpose(positionMatrix);
-	return true;
+    
+    bool hasError = checkForError("Error retrieving position transform matrix from "
+                                  "frame '" + fromFrame + "' to frame '" + toFrame +
+                                  "at time '" + std::to_string(ephemerisTime) + "'");
+    positionMatrix = glm::transpose(positionMatrix);
+    
+	return !hasError;
 }
 
-bool SpiceManager::getFieldOfView(const std::string& instrument,
+bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fovShape,
+	std::string& frameName, glm::dvec3& boresightVector,
+	std::vector<glm::dvec3>& bounds) const
+{
+	int id;
+	bool success = getNaifId(instrument, id);
+	if (!success)
+		return false;
+	else
+		return getFieldOfView(id, fovShape, frameName, boresightVector, bounds);
+}
+
+bool SpiceManager::getFieldOfView(int instrument,
 	                              std::string& fovShape,
 	                              std::string& frameName,
 	                              glm::dvec3& boresightVector,
-	                              std::vector<glm::dvec3>& bounds) const{
-	int found;
-	int naifId;
-	int maxVectors = 12;
+	                              std::vector<glm::dvec3>& bounds) const
+{
+	static const int maxBoundsSize = 20;
+	static const int bufferSize = 128;
+	static char fovShapeBuffer[bufferSize];
+	static char frameNameBuffer[bufferSize];
+
 	int nrReturned;
-	double *boundsArr = new double[maxVectors * 3];
+	double boundsArr[maxBoundsSize][3];
 
-	for (int i = 0; i < maxVectors; i++){
-		for (int j = 0; j < 3; j++){
-			boundsArr[j + i*3] = 0.0;
-		}
-	}
-
-	bodn2c_c(instrument.c_str(), &naifId, &found);
-	if (!found) return false;
-
-	if (fovShape.size() != 0 && frameName.size() != 0){
-		getfov_c(naifId, 
-			     maxVectors,
-				 fovShape.size(), 
-				 frameName.size(), 
-				 const_cast<char*>(fovShape.c_str()),
-			     const_cast<char*>(frameName.c_str()), 
-				 glm::value_ptr(boresightVector), 
-				 &nrReturned,
-				 (double(*)[3])boundsArr);
-	}else{
-		std::cout << "Frame name and FOV shape \
-			          need to be preallocated" << std::endl;
+	getfov_c(instrument,  // instrument id
+		maxBoundsSize,    // maximum size for the bounds vector
+		bufferSize,       // maximum size for the fov shape buffer
+		bufferSize,       // maximum size for the frame name buffer
+		fovShapeBuffer,   // the fov shape buffer
+		frameNameBuffer,  // the frame name buffer
+		glm::value_ptr(boresightVector), // the boresight vector
+		&nrReturned,      // the number of array values returned for the bounds
+		(double(*)[3])boundsArr // the bounds
+		);
+	bool hasError = checkForError("Error getting Field-of-View parameters for "
+		"instrument '" + std::to_string(instrument) + "'");
+	if (hasError)
 		return false;
- 	}
 
-	for (int i = 0; i < nrReturned; i++){
-		glm::dvec3 tmp;
-		for (int j = 0; j < 3; j++){
-			tmp[j] = boundsArr[j + i*3];
-		}
-		bounds.push_back(tmp);
+	bounds.resize(nrReturned);
+	for (int i = 0; i < nrReturned; ++i) {
+		bounds[i] = glm::dvec3(boundsArr[i][0],
+							   boundsArr[i][1],
+							   boundsArr[i][2]);
 	}
-	return true;
-}
 
-bool SpiceManager::planetocentricToRectangular(const  std::string& body,
-								               double longitude,
-								               double latitude,
-								               glm::dvec3& coordinates) const{
-	int naifId;
-	int found;
-	double rectangular[3];
-
-	bodn2c_c(body.c_str(), &naifId, &found);
-	if (!found) return false;
-	srfrec_c(naifId, longitude*rpd_c(), latitude*rpd_c(), rectangular);
-
-	memcpy(&coordinates, rectangular, sizeof(double) * 3);
+	fovShape = std::string(fovShapeBuffer);
+	frameName = std::string(frameNameBuffer);
 
 	return true;
 }
 
-bool SpiceManager::getSubObserverPoint(std::string target,
-	                                   std::string observer,
-									   std::string computationMethod,
-	                                   std::string bodyFixedFrame,
-	                                   std::string aberrationCorrection,
+bool SpiceManager::geographicToRectangular(const std::string& body,
+											   double longitude,
+											   double latitude,
+											   glm::dvec3& coordinates) const
+{
+	int id;
+	bool success = getNaifId(body, id);
+	if (!success)
+		return false;
+	else
+		return geographicToRectangular(id, longitude, latitude, coordinates);
+}
+
+bool SpiceManager::geographicToRectangular(int id, double longitude, double latitude,
+								               glm::dvec3& coordinates) const
+{
+	srfrec_c(id, longitude*rpd_c(), latitude*rpd_c(), glm::value_ptr(coordinates));
+	bool hasError = checkForError("Error transforming geographic coordinates for '" +
+		std::to_string(id) + "'");
+	return !hasError;
+}
+
+bool SpiceManager::getSubObserverPoint(const std::string& target,
+	                                   const std::string& observer,
+									   const std::string& computationMethod,
+	                                   const std::string& bodyFixedFrame,
+	                                   const std::string& aberrationCorrection,
 	                                   double      ephemerisTime,
 	                                   glm::dvec3& subObserverPoint,
 	                                   double&     targetEphemerisTime,
-	                                   glm::dvec3& vectorToSurfacePoint) const{
+	                                   glm::dvec3& vectorToSurfacePoint) const
+{
+	if (target.empty()) {
+		LERROR("No target was provided");
+		return false;
+	}
+	if (observer.empty()) {
+		LERROR("No observer was provided");
+		return false;
+	}
+	if (computationMethod.empty()) {
+		LERROR("No computation method was provided");
+		return false;
+	}
+	if (bodyFixedFrame.empty()) {
+		LERROR("No body fixed frame was provided");
+		return false;
+	}
+	if (aberrationCorrection.empty()) {
+		LERROR("No aberration correction was provided");
+		return false;
+	}
+	
 	subpnt_c(computationMethod.c_str(), 
 		     target.c_str(), 
 			 ephemerisTime,
 			 bodyFixedFrame.c_str(), 
 			 aberrationCorrection.c_str(), 
-			 observer.c_str(), glm::value_ptr(subObserverPoint), &targetEphemerisTime,
-			 glm::value_ptr(vectorToSurfacePoint));
+			 observer.c_str(),
+			 glm::value_ptr(subObserverPoint),
+			 &targetEphemerisTime,
+			 glm::value_ptr(vectorToSurfacePoint)
+			 );
 
-	return true;
+	bool hasError = checkForError("Error retrieving subobserver point on target '" +
+		target + "' of observer '" + observer + "' for computation method '" +
+		computationMethod + "' and body fixed frame '" + bodyFixedFrame + "'");
+	return !hasError;
 }
 
 void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
@@ -423,7 +459,7 @@ void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
 	memmove(glm::value_ptr(velocity), output + 3, 3 * sizeof(glm::dvec3::value_type));
 }
 
-bool SpiceManager::checkForError(std::string errorMessage) const {
+bool SpiceManager::checkForError(std::string errorMessage) {
 	static char msg[1024];
 
 	int failed = failed_c();
