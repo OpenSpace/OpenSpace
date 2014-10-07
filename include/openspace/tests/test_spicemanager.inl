@@ -403,7 +403,7 @@ TEST_F(SpiceManagerTest, planetocentricToRectangular){
 	srfrec_c(naifId, lon*rpd_c(), lat*rpd_c(), rectangular_ref);
 
 	glm::dvec3 rectangular;
-	bool found = openspace::SpiceManager::ref().planetocentricToRectangular("EARTH", lon, lat, rectangular);
+	bool found = openspace::SpiceManager::ref().geographicToRectangular("EARTH", lon, lat, rectangular);
 	ASSERT_TRUE(found);
 	
 	for (int i = 0; i < 3; i++){
