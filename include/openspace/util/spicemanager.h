@@ -39,6 +39,9 @@ namespace openspace {
 class SpiceManager {
 public:
 	typedef std::array<double, 36> TransformMatrix;
+	typedef unsigned int KernelIdentifier;
+	
+	static const KernelIdentifier KernelFailed = KernelIdentifier(-1);
 
 	/**
 	* Initializer that initializes the static member. 
@@ -66,7 +69,7 @@ public:
 	 * \param filePath The path to the kernel that should be loaded
 	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
-	int loadKernel(std::string filePath);
+	KernelIdentifier loadKernel(std::string filePath);
 
 	/**
 	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
@@ -76,7 +79,7 @@ public:
 	 * \param kernelId The unique identifier that was returned from the call to
 	 * loadKernel which loaded the kernel
 	 */
-	void unloadKernel(int kernelId);
+	void unloadKernel(KernelIdentifier kernelId);
 
 	/**
 	 * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
@@ -86,7 +89,7 @@ public:
 	 * \param filePath The path of the kernel that should be unloaded, it has to refer to
 	 * a file that was loaded in using the loadKernel method
 	 */
-	void unloadKernel(std::string filePath);
+	void unloadKernel(const std::string& filePath);
 	
 	/**
 	 * Determines whether values exist for some <code>item</code> for any body,
@@ -482,9 +485,19 @@ public:
 	//	                  double&     targetEpoch,
 	//	                  glm::dvec3& vectorToSurfacePoint) const;
 private:
+	/**
+	 * This method checks if one of the previous SPICE methods has failed. If it has, the
+	 * <code>errorMessage</code> is used to log an error along with the original SPICE
+	 * error message.
+	 * \param errorMessage The error message that will be logged if the method fails. If
+	 * the argument is empty, no error message will be logged
+	 * \return <code>true</code> if an error occurred, <code>false</code> otherwise
+	 */
+	bool checkForError(std::string errorMessage) const;
+
 	struct KernelInformation {
 		std::string path;
-		unsigned int id;
+		KernelIdentifier id;
 	};
 
 	SpiceManager() = default;
@@ -493,7 +506,7 @@ private:
 	SpiceManager(SpiceManager&& r) = delete;
 
 	std::vector<KernelInformation> _loadedKernels;
-	static unsigned int _lastAssignedKernel;
+	KernelIdentifier _lastAssignedKernel;
 
 	static SpiceManager* _manager;
 };

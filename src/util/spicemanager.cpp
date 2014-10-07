@@ -24,20 +24,12 @@
 
 #include <openspace/util/spicemanager.h>
 
-#include <algorithm>
-#include <stdio.h>
-#include <iostream>
-#include <cassert>
-#include <cstring>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
-//#ifdef WIN32
-//#include <Windows.h>
-//#endif
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <algorithm>
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
@@ -46,11 +38,11 @@ namespace {
 namespace openspace {
 
 SpiceManager* SpiceManager::_manager = nullptr;
-unsigned int SpiceManager::_lastAssignedKernel = 0;
 
 void SpiceManager::initialize() {
 	assert(_manager == nullptr);
 	_manager = new SpiceManager;
+	_manager->_lastAssignedKernel = 0;
 
 	// Set the SPICE library to not exit the program if an error occurs
 	erract_c("SET", 0, "REPORT");
@@ -64,7 +56,7 @@ void SpiceManager::deinitialize() {
 
 	delete _manager;
 	_manager = nullptr;
-	_lastAssignedKernel = 0;
+	_manager->_lastAssignedKernel = 0;
 
 	// Set values back to default
 	erract_c("SET", 0, "DEFAULT");
@@ -76,54 +68,63 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
-int SpiceManager::loadKernel(std::string filePath) {
-	unsigned int kernelId = ++_lastAssignedKernel;
-	assert(kernelId > 0);
+SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
+	if (filePath.empty()) {
+		LERROR("No filename provided");
+		return KernelFailed;
+	}
 
-	filePath = absPath(filePath);
+	KernelIdentifier kernelId = ++_lastAssignedKernel;
+
+	// We need to set the current directory as meta-kernels are usually defined relative
+	// to the directory they reside in. The directory change is not necessary for regular
+	// kernels
+	std::string&& path = absPath(std::move(filePath));
 	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
-	std::string&& fileDirectory = ghoul::filesystem::File(filePath).directoryName();
+	std::string&& fileDirectory = ghoul::filesystem::File(path).directoryName();
 	FileSys.setCurrentDirectory(fileDirectory);
 
-	furnsh_c(filePath.c_str());
+	// Load the kernel
+	furnsh_c(path.c_str());
 	
+	// Reset the current directory to the previous one
 	FileSys.setCurrentDirectory(currentDirectory);
 
-	int failed = failed_c();
-    if (failed) {
-        char msg[1024];
-        getmsg_c ( "LONG", 1024, msg );
-        LERROR("Error loading kernel '" + filePath + "'");
-        LERROR("Spice reported: " + std::string(msg));
-        reset_c();
-        return false;
-    }
-
-
-	KernelInformation&& info = { std::move(filePath), std::move(kernelId) };
-	_loadedKernels.push_back(info);
-	return kernelId;
+	bool hasError = checkForError("Error loading kernel '" + path + "'");
+	if (hasError)
+		return KernelFailed;
+	else {
+		KernelInformation&& info = { path, std::move(kernelId) };
+		_loadedKernels.push_back(info);
+		return kernelId;
+	}
 }
 
-void SpiceManager::unloadKernel(int kernelId) {
+void SpiceManager::unloadKernel(KernelIdentifier kernelId) {
 	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
 		[&kernelId](const KernelInformation& info) { return info.id == kernelId ; });
 
 	if (it != _loadedKernels.end()) {
+		// No need to check for errors as we do not allow empty path names
 		unload_c(it->path.c_str());
 		_loadedKernels.erase(it);
 	}
 }
 
-void SpiceManager::unloadKernel(std::string filePath) {
-	filePath = absPath(filePath);
-	unload_c(filePath.c_str());
+void SpiceManager::unloadKernel(const std::string& filePath) {
+	if (filePath.empty()) {
+		LERROR("No file path provided");
+		return;
+	}
+	std::string&& path = absPath(filePath);
 
 	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
-		[&filePath](const KernelInformation& info) { return info.path == filePath; });
+		[&path](const KernelInformation& info) { return info.path == path; });
 
-	if (it != _loadedKernels.end())
+	if (it != _loadedKernels.end()) {
+		unload_c(path.c_str());
 		_loadedKernels.erase(it);
+	}
 }
 
 bool SpiceManager::hasValue(int naifId, const std::string& item) const {
@@ -140,86 +141,76 @@ bool SpiceManager::hasValue(const std::string& body, const std::string& item) co
 }
 
 bool SpiceManager::getNaifId(const std::string& body, int& id) const {
-	SpiceBoolean success;
-	bods2c_c(body.c_str(), &id, &success);
-	return (success == SPICETRUE);
+	if (body.empty()) {
+		LERROR("No body was provided");
+		return false;
+	}
+	else {
+		SpiceBoolean success;
+		bods2c_c(body.c_str(), &id, &success);
+		return (success == SPICETRUE);
+	}
+}
+
+template <typename T, size_t S>
+bool getValueInternal(const std::string& body, const std::string& value, T& v) {
+	if (body.empty()) {
+		LERROR("No body was provided");
+		return false;
+	}
+	if (value.empty()) {
+		LERROR("No value was provided");
+		return false;
+	}
+
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), S, &n, &v);
+
+	bool hasError = checkForError("Error getting value '" + value + "' for body '" + 
+		body + "'");
+	return !hasError;
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	double& v) const
 {
-	int n;
-	bodvrd_c(body.c_str(), value.c_str(), 1, &n, &v);
-
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error getting value '" << value << "' for body '" << body << "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-
-	return true;
+	return getValueInternal<double, 1>(body, value, v);
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	glm::dvec3& v) const
 {
-	int n;
-	bodvrd_c(body.c_str(), value.c_str(), 3, &n, glm::value_ptr(v));
-
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error getting value '" << value << "' for body '" << body << "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-
-	return true;
+	return getValueInternal<glm::dvec3, 3>(body, value, v);
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	glm::dvec4& v) const
 {
-	int n;
-	bodvrd_c(body.c_str(), value.c_str(), 4, &n, glm::value_ptr(v));
-
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error getting value '" << value << "' for body '" << body << "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-
-	return true;
+	return getValueInternal<glm::dvec4, 4>(body, value, v);
 }
 
 bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	std::vector<double>& v) const 
 {
-	assert(v.size() > 0);
-	int n;
-	bodvrd_c(body.c_str(), value.c_str(), static_cast<SpiceInt>(v.size()), &n, &v[0]);
-
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error getting value '" << value << "' for body '" << body << "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
+	if (body.empty()) {
+		LERROR("No body was provided");
+		return false;
+	}
+	if (value.empty()) {
+		LERROR("No value was provided");
+		return false;
+	}
+	if (v.size() > 0) {
+		LERROR("Array for values has to be preallocaed");
 		return false;
 	}
 
-	return true;
+	int n;
+	bodvrd_c(body.c_str(), value.c_str(), static_cast<SpiceInt>(v.size()), &n, &v[0]);
+
+	bool hasError = checkForError("Error getting value '" + value + "' for body '" + 
+		body + "'");
+	return !hasError;
 }
 
 bool SpiceManager::getETfromDate(const std::string& epochString,
@@ -430,6 +421,22 @@ void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
 	mxvg_c(transformationMatrix.data(), input, 6, 6, output);
 	memmove(glm::value_ptr(position), output, 3 * sizeof(glm::dvec3::value_type));
 	memmove(glm::value_ptr(velocity), output + 3, 3 * sizeof(glm::dvec3::value_type));
+}
+
+bool SpiceManager::checkForError(std::string errorMessage) const {
+	static char msg[1024];
+
+	int failed = failed_c();
+    if (failed) {
+		if (!errorMessage.empty()) {
+			getmsg_c("LONG", 1024, msg);
+			LERROR(errorMessage);
+			LERROR("Spice reported: " + std::string(msg));
+		}
+        reset_c();
+        return true;
+    }
+	return false;
 }
 
 //bool SpiceManager::getSubSolarPoint(std::string computationMethod,
