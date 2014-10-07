@@ -241,6 +241,9 @@ bool OpenSpaceEngine::initialize()
 	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
 	bool success = OsEng.configurationManager().getValue(keySpiceTimeKernel, timeKernel);
+
+	std::cout << "timeKernel =  " << timeKernel << std::endl;
+ 
 	if (!success) {
 		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
 		return false;

@@ -114,8 +114,8 @@ bool RenderEngine::initializeGL()
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,100.0f);
-      sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
+     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,10000.0f);
+    //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
   //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 

@@ -352,9 +352,8 @@ void RenderableWavefrontObject::render(const RenderData& data)
 
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());
-
 	// setup the data to the shader
-	_programObject->setUniform("camdir", camSpaceEye);
+//	_programObject->setUniform("camdir", camSpaceEye);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, glm::vec4(0, 0, -1,8 ));

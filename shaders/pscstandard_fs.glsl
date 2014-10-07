@@ -26,7 +26,7 @@
 
 uniform vec4 campos;
 uniform vec4 objpos;
-uniform vec4 camdir;
+//uniform vec3 camdir; // add this for specular
 
 
 uniform float time;
@@ -51,19 +51,17 @@ void main()
 	vec3 origin = vec3(0.0);
 	vec4 spec = vec4(0.0);
 	
-	vec4 tmp = camdir;
-	
 	vec3 n = normalize(vs_normal.xyz);
-	vec3 e = normalize(tmp.xyz);
+	//vec3 e = normalize(camdir);
 	vec3 l_pos = vec3(0.0); // sun.
 	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = max(dot(n,l_dir), 0.0)*1.5;
+	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
 	
-	float shine = 19.0;
+	float shine = 0.0001;
 
 	vec4 specular = vec4(0.5);
 	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	
+	/*
 	if(intensity > 0.f){
 		// halfway vector
 		vec3 h = normalize(l_dir + e);
@@ -71,13 +69,9 @@ void main()
 		float intSpec = max(dot(h,n),0.0);
 		spec = specular * pow(intSpec, shine);
 	}
-	diffuse = max(intensity * diffuse , ambient);
+	*/
+	diffuse = max(intensity * diffuse, ambient);
 
-
-
-	// if(position.w > 9.0) {
-	// 	diffuse = vec4(1,0,0,1);
-	// }
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);

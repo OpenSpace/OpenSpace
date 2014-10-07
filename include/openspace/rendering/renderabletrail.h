@@ -47,47 +47,45 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
  private:
-	 properties::StringProperty _colorTexturePath; // not used now, will be later though.
+	properties::StringProperty _colorTexturePath; 
+	ghoul::opengl::ProgramObject* _programObject;
+	ghoul::opengl::Texture* _texture;
+	void loadTexture();
+	void fullYearSweep();
 
-	 ghoul::opengl::ProgramObject* _programObject;
-	 ghoul::opengl::Texture* _texture;
-	 void loadTexture();
+	// spice
+	std::string _target;
+	std::string _observer;
+	std::string _frame;
+	double _r, _g, _b;
 
-	/* typedef struct {
-		 GLfloat location[4];
-		 GLfloat velocity[4];
-		 GLubyte padding[32];  // Pads the struct out to 64 bytes for performance increase
-	 } Vertex;
-	 */
-	 // need to write robust method for vbo id selection 
-	 // (right now galactic grid has to be present) (why though?) solve later...
-	 GLuint _vaoID = 6;
-	 GLuint _vBufferID = 7;
-	 GLuint _iBufferID = 8;
+	// need to write robust method for vbo id selection 
+	// (right now galactic grid has to be present) (why though?) solve later...
+	GLuint _vaoID ;
+	GLuint _vBufferID ;
+	GLuint _iBufferID;
 
-	 void nextIndex();
+	void nextIndex();
 
-	 GLenum _mode;
-	 unsigned int _isize;
-	 unsigned int _vsize;
-	 unsigned int _vtotal;
-	 unsigned int _stride;
-	 
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	unsigned int _vtotal;
+	unsigned int _stride;
 
+	glm::vec3 _c;
+	//Vertex* _varray;
+	std::vector<float> _varray;
+	int* _iarray;
 
-	 //Vertex* _varray;
-	 std::vector<float> _varray;
-	 int* _iarray;
+	//used for update of trail
+	psc _pscpos, _pscvel;
+	double _increment;
+	double _time = 0;
+	double _oldTime = 0;
 
-	 bool* _updated;
-
-	 psc _pscpos, _pscvel;
-
-	 std::vector<std::pair<int, double>> _intervals;
-	 double _increment;
-	 // etc...
-	 double _time = 0;
-	 double _oldTime = 0;
+	int _delta  = 0;
+	int _dtprogress = 0;
 };
 }
 #endif

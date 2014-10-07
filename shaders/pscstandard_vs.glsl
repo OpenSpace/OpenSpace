@@ -27,8 +27,6 @@
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
-uniform vec4 camdir;
-
 layout(location = 0) in vec4 in_position;
 //in vec3 in_position;
 layout(location = 1) in vec2 in_st;

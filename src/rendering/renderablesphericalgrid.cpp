@@ -179,7 +179,7 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	setPscUniforms(_gridProgram, &data.camera, data.position);
 	_gridProgram->setUniform("gridColor", _gridColor);
 
-	glLineWidth(1.0f);
+	//glLineWidth(1.0f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
