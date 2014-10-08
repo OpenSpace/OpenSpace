@@ -212,6 +212,7 @@ void RenderEngine::render()
     //glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition
@@ -237,7 +238,11 @@ void RenderEngine::render()
     _abuffer->preRender();
 	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
-    _abuffer->resolve();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	_abuffer->resolve();
+	glDisable(GL_BLEND);
 
 #ifndef OPENSPACE_VIDEO_EXPORT
     // Print some useful information on the master viewport

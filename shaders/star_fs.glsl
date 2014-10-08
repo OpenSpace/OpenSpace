@@ -58,7 +58,7 @@ void main(void)
    	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	gl_FragDepth = depth;
-	gl_FragDepth = 10.0;
+	//gl_FragDepth = 10.0;
 
 	//ABufferStruct_t frag = createGeometryFragment(vec4(1,0,0,1), position, depth);
 	//ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);

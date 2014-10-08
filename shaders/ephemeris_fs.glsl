@@ -7,95 +7,37 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#version 400 core
+#version 430
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec4 etColor;
 
 in vec4 vs_point_position;
 in vec4 vs_point_velocity;
 
 
-out vec4 diffuse;
+//out vec4 diffuse;
 
-const float k = 10.0;
-
-vec4 psc_normlization(vec4 invec) {
-	
-	float xymax = max(invec.x,invec.y);
-
-	if(invec.z > 0.0f || invec.z < 0.0f) {
-		return invec / abs(invec.z);
-	} else if (xymax != 0.0f) {
-		return invec / xymax;
-	} else {
-		return invec / -.0;
-	}
-}
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 void main()
 {
 
-	// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
-	float s_far			= 40.0; //= gl_DepthRange.far;	// 40
-	float s_farcutoff	= 12.0;
-	float s_nearcutoff	= 7.0;
-	float s_near		= 0.0f;// gl_DepthRange.near;	// 0.1
-	float depth;
-
-	// the value can be normalized to 1
-	
-	vec4 p = vs_point_position;
-	if(vs_point_position.w <= 0.5) {
-		//depth = abs(vs_point_position.z * pow(10, vs_point_position.w)) / pow(k,s_far);
-		depth = (vs_point_position.w+log(abs(vs_point_position.z)))/pow(k, vs_point_position.w);
-	} else if(vs_point_position.w < 3.0) {
-		depth = vs_point_position.w+log(abs(vs_point_position.z))/pow(k, vs_point_position.w);
-	} else {
-		depth = vs_point_position.w+log(abs(vs_point_position.z));
-	}
-	
-
-	// DEBUG
-	float depth_orig = depth;
-	float x = 0.0f;
-	float cutoffs = 0.0;
-	float orig_z = vs_point_position.z;
-	
-	// calculate a normalized depth [0.0 1.0]
-	if((depth > s_near && depth <= s_nearcutoff) || (depth > s_farcutoff && depth < s_far)) {
-
-		// completely linear interpolation [s_near .. depth .. s_far]
-		depth = (depth - s_near) / (s_far - s_near);
-
-	} else if(depth > s_nearcutoff && depth < s_farcutoff) {
-
-		// DEBUG
-		cutoffs = 1.0;
-
-		// interpolate [10^s_nearcutoff .. 10^depth .. 10^s_farcutoff]
-		// calculate between 0..1 where the depth is
-		x = (pow(10,depth) - pow(10, s_nearcutoff)) / (pow(10,s_farcutoff) - pow(10, s_nearcutoff));
-
-		// remap the depth to the 0..1 depth buffer
-		depth = s_nearcutoff + x * (s_farcutoff - s_nearcutoff);
-		depth = (depth - s_near) / (s_far - s_near);
-
-	} else {
-		// where am I?
-		// do I need to be discarded?
-		// discard;
-	}
-	
+	vec4 position = vs_point_position;
+	float depth = pscDepth(position);
 	
 	// set the depth
-	gl_FragDepth = depth;
+	//gl_FragDepth = depth;
 
 	//float l = length(vs_point_velocity);
 	
-	diffuse = vs_point_velocity;
+	vec4 diffuse = vs_point_velocity;
+
+	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	addToBuffer(frag);
+
+	discard;
 	
 }

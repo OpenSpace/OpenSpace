@@ -201,24 +201,13 @@ void RenderableEphemeris::render(const RenderData& data){
 	assert(_programObject);
 	_programObject->activate();
 
-	// fetch data
-	psc currentPosition = data.position;
-	psc campos = data.camera.position();
-	glm::mat4 camrot = data.camera.viewRotationMatrix();
-	// PowerScaledScalar scaling = camera->scaling();
-	PowerScaledScalar scaling = glm::vec2(1, -6);
-
-	glm::mat4 transform = glm::mat4(1);
 
 	// setup the data to the shader
 	//_programObject->setUniform("objectVelocity", pscvel.vec4());
 
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	_programObject->setUniform("campos", campos.vec4());
-	_programObject->setUniform("objpos", currentPosition.vec4());
-	_programObject->setUniform("camrot", camrot);
-	_programObject->setUniform("scaling", scaling.vec2());
+	_programObject->setUniform("ModelTransform", glm::mat4(1));
+	setPscUniforms(_programObject, &data.camera, data.position);
 
 	nextIndex();
 	

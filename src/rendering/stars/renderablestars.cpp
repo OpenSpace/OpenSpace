@@ -310,7 +310,6 @@ void RenderableStars::render(const RenderData& data){
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_DST_COLOR);
 
 #ifdef GLSPRITES
 	glm::mat4 modelMatrix      = data.camera.modelMatrix();
@@ -365,6 +364,7 @@ void RenderableStars::render(const RenderData& data){
 	glEnable(GL_DEPTH_TEST);
 
 #endif
+	glDisable(GL_BLEND);
 }
 
 void RenderableStars::loadTexture(){

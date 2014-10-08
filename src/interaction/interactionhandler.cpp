@@ -161,12 +161,19 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	}
 
 	psc relative_origin_coordinate = relative - origin;
-	glm::mat4 rotation_matrix = glm::mat4_cast(rotation);
-	relative_origin_coordinate = relative_origin_coordinate * rotation_matrix;
+	//glm::mat4 rotation_matrix = glm::mat4_cast(glm::inverse(rotation));
+	//relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
+	relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
 	relative = relative_origin_coordinate + origin;
 
 	camera_->setPosition(relative);
-	
+	//camera_->rotate(rotation);
+	//camera_->setRotation(glm::mat4_cast(rotation));
+
+	glm::mat4 la = glm::lookAt(camera_->position().vec3(), node_->worldPosition().vec3(), glm::rotate(rotation, camera_->lookUpVector()));
+	camera_->setRotation(la);
+	//camera_->setLookUpVector();
+
 	unlockControls();
 }
 
@@ -268,7 +275,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 	glm::vec2 mousePos = glm::vec2((float)x/width, (float)y/height);
 
 	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
-    mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
+    //mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
 
 	glm::vec3 curTrackballPos = mapToTrackball(mousePos);
 //	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
@@ -295,9 +302,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 		glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
 
 		// Apply quaternion to camera
-		orbit(glm::inverse(quaternion));
-		camera_->rotate(quaternion);
-		camera_->setLookUpVector(glm::rotate(quaternion, camera_->lookUpVector()));
+		orbit(quaternion);
 
 		_lastTrackballPos = curTrackballPos;
 	}
