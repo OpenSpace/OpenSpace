@@ -232,7 +232,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
-		_varray[m].location[3] = 6;
+		_varray[m].location[3] = 8;
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
@@ -257,7 +257,6 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	free(tempVertexTextureArray);
 	free(tempTextureIndicesArray);
 }
-
 
 RenderableWavefrontObject::~RenderableWavefrontObject(){
     deinitialize();

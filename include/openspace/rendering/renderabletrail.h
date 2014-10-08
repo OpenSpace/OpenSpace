@@ -53,11 +53,20 @@ public:
 	void loadTexture();
 	void fullYearSweep();
 
+	// modfile reads
 	// spice
 	std::string _target;
 	std::string _observer;
 	std::string _frame;
+	// color
+	glm::vec3 _c; 
 	double _r, _g, _b;
+	// orbit relational data
+	double _tropic;
+	double _ratio;
+	double _day;
+
+
 
 	// need to write robust method for vbo id selection 
 	// (right now galactic grid has to be present) (why though?) solve later...
@@ -73,7 +82,6 @@ public:
 	unsigned int _vtotal;
 	unsigned int _stride;
 
-	glm::vec3 _c;
 	//Vertex* _varray;
 	std::vector<float> _varray;
 	int* _iarray;

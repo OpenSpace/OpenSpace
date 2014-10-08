@@ -99,8 +99,6 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	assert(_targetName != "JUPITER");
 	*/
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] -= 0.01;
-
 	//_position[3] += 1;
 	//_position[3] += 3;
 

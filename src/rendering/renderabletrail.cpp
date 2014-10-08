@@ -31,20 +31,21 @@
 
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
-#include <utility>      // std::move
-
+#include <utility>      
 namespace {
 	const std::string _loggerCat = "RenderableTrail";
+	//constants
+		const std::string keyBody                = "Body";
+		const std::string keyObserver            = "Observer";
+		const std::string keyFrame               = "Frame";
+		const std::string keyPathModule          = "ModulePath";
+		const std::string keyColor               = "RGB";
+		const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
+		const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
+		const std::string keyDayLength           = "DayLength";
 
-		const std::string keyColor = "RGB";
-		const std::string keyBody = "Body";
-		const std::string keyObserver = "Observer";
-		const std::string keyFrame = "Frame";
-		const std::string keyPathModule = "ModulePath";
 }
-
 //#define DEBUG
-
 namespace openspace{
 	RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 		: Renderable(dictionary)
@@ -56,11 +57,14 @@ namespace openspace{
 		, _iBufferID(0)
 		, _mode(GL_LINE_STRIP){
 
-		assert(dictionary.getValue(keyBody, _target));
-		assert(dictionary.getValue(keyObserver, _observer));
-		assert(dictionary.getValue(keyFrame, _frame));
-
-
+		assert(dictionary.getValue(keyBody               , _target));
+		assert(dictionary.getValue(keyObserver           , _observer));
+		assert(dictionary.getValue(keyFrame              , _frame));
+		assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
+		assert(dictionary.getValue(keyEarthOrbitRatio    , _ratio));
+		assert(dictionary.getValue(keyDayLength          , _day));//not used now, will be though.
+		// values in modfiles set from here
+		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
 		//white is default col
 	if (!dictionary.getValue(keyColor, _c)){
@@ -77,17 +81,19 @@ void RenderableTrail::fullYearSweep(){
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 
 	double et = _time;
-	// Need to pass in each planets individual year (w. local or earth time?)
-	double planetYear = 31536000;
-	int segments = 365;
-	_increment = planetYear / segments;
+	double planetYear = 31540000 * _ratio;
+	int segments = _tropic;
+	_increment   = planetYear / _tropic;
+	
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
 	_iarray = new int[_isize];
 	
-	double p = 1.0 / segments;
+	double p = 1.0 / _tropic;
 	for (int i = 0; i < segments + 1; i++){
 		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
+
+//std::cout << planetYear << " " << segments << " " << _increment << std::endl;
 	
 		//psc tmppos = glm::vec4(i, i, i, 7);
 		_varray.push_back(_pscpos[0]);
@@ -96,10 +102,10 @@ void RenderableTrail::fullYearSweep(){
 		_varray.push_back(_pscpos[3]);
 		
 #ifndef DEBUG
-		_varray.push_back(1.f - ((double)i / 365 * _r));
-		_varray.push_back(1.f - ((double)i / 365 * _g));
-		_varray.push_back(1.f - ((double)i / 365 * _b));
-		_varray.push_back(1.f - ((double)i / 365));
+		_varray.push_back(1.f - ((double)i / _tropic * _r));
+		_varray.push_back(1.f - ((double)i / _tropic * _g));
+		_varray.push_back(1.f - ((double)i / _tropic * _b));
+		_varray.push_back(1.f - ((double)i / _tropic));
 #elif
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
@@ -212,13 +218,13 @@ void RenderableTrail::render(const RenderData& data){
 	glBindVertexArray(_vaoID); 
 	glDrawArrays(_mode, 0, _vtotal);
 	glBindVertexArray(0);
-
+	/*
 	glPointSize(2.f);
 
 	glBindVertexArray(_vaoID);
 	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
-
+	*/
 	_programObject->deactivate();
 }
 

@@ -268,7 +268,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 	glm::vec2 mousePos = glm::vec2((float)x/width, (float)y/height);
 
 	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
-    //mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
+    mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
 
 	glm::vec3 curTrackballPos = mapToTrackball(mousePos);
 //	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
@@ -360,7 +360,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        distance(dist);
 		}
 		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed * pow(10,8) * dt, 0.0);
+			PowerScaledScalar dist(-speed * pow(10, 8) * dt, 0.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
