@@ -111,12 +111,13 @@ public:
     void setCameraDirection(glm::vec3 cameraDirection);
     glm::vec3 cameraDirection() const;
 
-    const glm::mat4& viewRotationMatrix() const;
+    glm::mat4 viewRotationMatrix() const;
     void compileViewRotationMatrix();
 
     void rotate(const glm::quat& rotation);
     void setRotation(glm::quat rotation);
-    const glm::quat& rotation() const;
+   // const glm::quat& rotation() const;
+	void setRotation(glm::mat4 rotation);
 
     const glm::vec3& viewDirection() const;
     
@@ -140,7 +141,7 @@ private:
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
     glm::vec2 _scaling;
-    glm::quat _viewRotation;
+   // glm::quat _viewRotation;
     glm::mat4 _viewRotationMatrix;  // compiled from the quaternion
 
     glm::vec3 _lookUp;
