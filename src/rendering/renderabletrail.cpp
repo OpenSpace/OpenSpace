@@ -77,9 +77,9 @@ namespace openspace{
 }
 void RenderableTrail::fullYearSweep(){
 	double lightTime = 0.0;
-	SpiceManager::ref().getETfromDate("2005 nov 01 00:00:00", _time);
+	SpiceManager::ref().getETfromDate("2005 nov 01 22:00:00", _time);
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
-
+	
 	double et = _time;
 	double planetYear = 31540000 * _ratio;
 	int segments = _tropic;
@@ -93,8 +93,6 @@ void RenderableTrail::fullYearSweep(){
 	for (int i = 0; i < segments + 1; i++){
 		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
 
-//std::cout << planetYear << " " << segments << " " << _increment << std::endl;
-	
 		//psc tmppos = glm::vec4(i, i, i, 7);
 		_varray.push_back(_pscpos[0]);
 		_varray.push_back(_pscpos[1]);
@@ -191,7 +189,7 @@ void RenderableTrail::render(const RenderData& data){
 
 	if (_oldTime != _time){ // only update when time actually progresses
 		_dtprogress += _delta*sgct::Engine::instance()->getDt(); // compute how far time has progressed
-		if (_dtprogress > 86400){
+		if (_dtprogress > _increment){
 			//reset progress counter
 			_dtprogress = 0;
 
@@ -232,6 +230,8 @@ void RenderableTrail::update(const UpdateData& data){
 	double lightTime;
 	_time  = data.time;
 	_delta = data.delta;
+	int newhorizons =0;
+
 
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", data.time, _pscpos, _pscvel, lightTime);
 }

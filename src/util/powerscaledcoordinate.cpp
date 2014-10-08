@@ -71,7 +71,7 @@ PowerScaledCoordinate::PowerScaledCoordinate(const PowerScaledCoordinate& rhs) {
 PowerScaledCoordinate
       PowerScaledCoordinate::CreatePowerScaledCoordinate(double d1, double d2, double d3)
 {
-    char buff[60];
+    char buff[600];
 
     // find the number with maximum number of digits
     double ad1 = abs(d1);

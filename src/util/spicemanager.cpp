@@ -89,7 +89,7 @@ int SpiceManager::loadKernel(std::string filePath) {
 	furnsh_c(filePath.c_str());
 	
 	FileSys.setCurrentDirectory(currentDirectory);
-
+	std::cout << filePath.c_str() << std::endl;
 	int failed = failed_c();
     if (failed) {
         char msg[1024];

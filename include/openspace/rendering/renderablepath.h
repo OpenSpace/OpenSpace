@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLETPATH_H__
-#define __RENDERABLETPATH_H__
+#ifndef __RenderablePath_H__
+#define __RenderablePath_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -36,56 +36,58 @@
 //#include <openspace/util/runtimedata.h>
 
 namespace openspace {
-class RenderablePath : public Renderable{
-public:
-	RenderablePath(const ghoul::Dictionary& dictionary);
-	~RenderablePath();
+	class RenderablePath : public Renderable{
+	public:
+		RenderablePath(const ghoul::Dictionary& dictionary);
+		~RenderablePath();
 
-	bool initialize() override;
-	bool deinitialize() override;
+		bool initialize() override;
+		bool deinitialize() override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
- private:
-	 properties::StringProperty _colorTexturePath; // not used now, will be later though.
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
+	private:
+		properties::StringProperty _colorTexturePath;
+		ghoul::opengl::ProgramObject* _programObject;
+		ghoul::opengl::Texture* _texture;
+		void loadTexture();
+		void fullYearSweep();
 
-	 ghoul::opengl::ProgramObject* _programObject;
-	 ghoul::opengl::Texture* _texture;
-	 void loadTexture();
+		// modfile reads
+		// spice
+		std::string _target;
+		std::string _observer;
+		std::string _frame;
+		// color
+		glm::vec3 _c;
+		double _r, _g, _b;
 
-	/* typedef struct {
-		 GLfloat location[4];
-		 GLfloat velocity[4];
-		 GLubyte padding[32];  // Pads the struct out to 64 bytes for performance increase
-	 } Vertex;
-	 */
-	 // need to write robust method for vbo id selection 
-	 // (right now galactic grid has to be present) (why though?) solve later...
-	 GLuint _vaoID = 6;
-	 GLuint _vBufferID = 7;
-	 GLuint _iBufferID = 8;
+		// need to write robust method for vbo id selection 
+		// (right now galactic grid has to be present) (why though?) solve later...
+		GLuint _vaoID;
+		GLuint _vBufferID;
+		GLuint _iBufferID;
 
-	 void nextIndex();
+		void nextIndex();
 
-	 GLenum _mode;
-	 unsigned int _isize;
-	 unsigned int _vsize;
-	 unsigned int _vtotal;
-	 unsigned int _stride;
-	
-	 //Vertex* _varray;
-	 std::vector<float> _varray;
-	 int* _iarray;
+		GLenum _mode;
+		unsigned int _isize;
+		unsigned int _vsize;
+		unsigned int _vtotal;
+		unsigned int _stride;
 
-	 bool* _updated;
+		//Vertex* _varray;
+		std::vector<float> _varray;
+		int* _iarray;
 
-	 psc _pscpos, _pscvel;
+		//used for update of trail
+		psc _pscpos, _pscvel;
+		double _increment;
+		double _time = 0;
+		double _oldTime = 0;
 
-	 std::vector<std::pair<int, double>> _intervals;
-	 double _increment;
-	 // etc...
-	 double _time = 0;
-	 double _oldTime = 0;
-};
+		int _delta = 0;
+		int _dtprogress = 0;
+	};
 }
 #endif
