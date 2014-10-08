@@ -19,14 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
 */
-#version 400 core
+#version 430
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-uniform vec4 campos;
-uniform mat4 camrot;
-uniform vec2 scaling;
-uniform vec4 objpos;
 //uniform vec4 etColor;
 uniform vec4 objectVelocity;
 
@@ -38,52 +34,18 @@ layout(location = 2) in vec2 in_point_timeindex;
 out vec4 vs_point_position;
 out vec4 vs_point_velocity;
 
-const float k = 10.0;
-const float dgr_to_rad = 0.0174532925;
-
-vec4 psc_addition(vec4 v1, vec4 v2) {
-	float ds = v2.w - v1.w;
-	if(ds >= 0) {
-		float p = pow(k,-ds);
-		return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-	} else {
-		float p = pow(k,ds);
-		return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-	}
-}
-
-vec4 psc_to_meter(vec4 v1, vec2 v2) {
-	float factor = v2.x * pow(k,v2.y + v1.w);
-	return vec4(v1.xyz * factor, 1.0);
-}
-
-vec4 psc_scaling(vec4 v1, vec2 v2) {
-	float ds = v2.y - v1.w;
-	if(ds >= 0) {
-		return vec4(v1.xyz * v2.x * pow(k,v1.w), v2.y);
-	} else {
-		return vec4(v1.xyz * v2.x * pow(k,v2.y), v1.w);
-	}
-}
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 void main()
 {
-	//vs_stp = in_point_position.xyz;
-	//vs_normal = normalize(ModelTransform*vec4(1)); // <-- not really using right now. change later.
-
-	// add life back to the thing.
-	/*
-	vec3 vel_1 = psc_to_meter(in_point_velocity, vec2(3)).xyz;
-	vec3 vel_2 = psc_to_meter(objectVelocity, vec2(3)).xyz;
-	float a = 0;
-	
-	vec3 dist = (objpos-in_point_position).xyz; 
-	
-	if( dot(dist, vel_2) > 0.f){
-		 a = 2.f*dot(vel_1,vel_2)/(length(vel_1)*length(vel_2));
-	}*/
 	vs_point_velocity = in_point_velocity;
 
+	vec4 tmp = in_point_position;
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_point_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
+/*
 	//vs_point_position = objpos;
 
 	// rotate and scale vertex with model transform and add the translation
@@ -109,4 +71,5 @@ void main()
 
 	// project the position to view space
 	gl_Position =  ViewProjection * vs_point_position_rescaled;
+	*/
 }
