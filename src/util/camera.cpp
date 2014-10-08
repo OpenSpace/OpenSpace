@@ -37,7 +37,8 @@ namespace openspace {
 Camera::Camera()
     : _cameraDirection(0.f, 0.f, 0.f)
     , _scaling(1.f, 0.f)
-    , _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
+    //, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
+	, _viewRotationMatrix(1.f)
 {
 }
 
@@ -99,36 +100,45 @@ glm::vec3 Camera::cameraDirection() const
     return _cameraDirection;
 }
 
-const glm::mat4& Camera::viewRotationMatrix() const
+glm::mat4 Camera::viewRotationMatrix() const
 {
-    return _viewRotationMatrix;
+    return glm::mat4(_viewRotationMatrix);
 }
 
 void Camera::compileViewRotationMatrix()
 {
     // convert from quaternion to rotation matrix using glm
-    _viewRotationMatrix = glm::mat4_cast(_viewRotation);
+    //_viewRotationMatrix = glm::mat4_cast(_viewRotation);
 
     // the camera matrix needs to be rotated inverse to the world
-    _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
+   // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
+	_viewDirection = (glm::inverse(_viewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
     _viewDirection = glm::normalize(_viewDirection);
 }
 
 void Camera::rotate(const glm::quat& rotation)
 {
-    _viewRotation = rotation * _viewRotation;
-    _viewRotation = glm::normalize(_viewRotation);
+	glm::mat4 tmp = glm::mat4_cast(rotation);
+	_viewRotationMatrix = _viewRotationMatrix * tmp;
+    //_viewRotation = rotation * _viewRotation;
+    //_viewRotation = glm::normalize(_viewRotation);
 }
 
 void Camera::setRotation(glm::quat rotation)
 {
-    _viewRotation = glm::normalize(std::move(rotation));
+    //_viewRotation = glm::normalize(std::move(rotation));
+	_viewRotationMatrix = glm::mat4_cast(rotation);
 }
 
-const glm::quat& Camera::rotation() const
+void Camera::setRotation(glm::mat4 rotation)
 {
-    return _viewRotation;
+	_viewRotationMatrix = std::move(rotation);
 }
+
+//const glm::quat& Camera::rotation() const
+//{
+  //  return _viewRotation;
+//}
 
 const glm::vec3& Camera::viewDirection() const
 {
