@@ -307,6 +307,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 		_lastTrackballPos = curTrackballPos;
 	}
 }
+double acc = 1;
 
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
@@ -369,7 +370,9 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
-			PowerScaledScalar dist(speed * pow(10, 8) * dt, 0.0);
+			acc += 0.001;
+			std::cout << acc << std::endl;
+			PowerScaledScalar dist(speed * pow(10, 8 * acc) * dt, 0.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_Y) {
