@@ -103,7 +103,8 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     std::string parentName;
     if (!dictionary.getValue(constants::scenegraphnode::keyParentName, parentName)) {
-        LWARNING("Could not find 'Parent' key, using 'Root'.");
+        LWARNING("Could not find '" << constants::scenegraphnode::keyParentName <<
+			"' key, using 'Root'.");
         parentName = "Root";
     }
 
