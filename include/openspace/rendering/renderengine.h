@@ -57,6 +57,8 @@ public:
     void render();
     void postDraw();
 
+	void takeScreenshot();
+
 	void serialize(std::vector<char>& dataStream, size_t& offset);
 	void deserialize(const std::vector<char>& dataStream, size_t& offset);
 	
@@ -74,6 +76,8 @@ private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
 	ABuffer* _abuffer;
+
+	bool _takeScreenshot;
 
 	void generateGlslConfig();
 };

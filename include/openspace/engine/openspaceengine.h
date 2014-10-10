@@ -36,6 +36,7 @@
 #include <openspace/engine/configurationmanager.h>
 //#include <ghoul/misc/dictionary.h>
 
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
 #include <ghoul/opencl/clprogram.h>
@@ -75,6 +76,7 @@ public:
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
+	ghoul::filesystem::CacheManager& cacheManager();
 
     // SGCT callbacks
     bool initializeGL();
@@ -103,6 +105,7 @@ private:
     InteractionHandler _interactionHandler;
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
+	ghoul::filesystem::CacheManager* _cacheManager;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 #ifdef OPENSPACE_VIDEO_EXPORT
     bool _doVideoExport;

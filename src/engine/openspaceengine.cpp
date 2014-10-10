@@ -43,6 +43,9 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
+#include <iostream>
+#include <fstream>
+
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
@@ -68,6 +71,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
+	, _cacheManager(nullptr)
 {
 }
 
@@ -76,6 +80,8 @@ OpenSpaceEngine::~OpenSpaceEngine()
 	SpiceManager::deinitialize();
     Time::deinitialize();
     DeviceIdentifier::deinit();
+	if (_cacheManager)
+		delete _cacheManager;
     FileSystem::deinitialize();
     LogManager::deinitialize();
 }
@@ -184,7 +190,23 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		LERROR("Loading of configuration file '" << configurationFilePath << "' failed");
 		return false;
 	}
-    
+
+	// make sure cache is registered, false since we don't want to override
+	FileSys.registerPathToken("${CACHE}", "${BASE_PATH}/cache", false);
+
+	// Create directories that doesn't exsist
+	auto tokens = FileSys.tokens();
+	for (auto token : tokens) {
+		if (!FileSys.directoryExists(token)) {
+			std::string p = absPath(token);
+			LDEBUG("Directory '" << p <<"' does not exsist, creating.");
+			FileSys.createDirectory(p, true);
+		}
+	}
+
+	// Create the cachemanager
+	_engine->_cacheManager = new ghoul::filesystem::CacheManager(absPath("${CACHE}"));
+
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
@@ -347,6 +369,11 @@ ScriptEngine& OpenSpaceEngine::scriptEngine()
     return _scriptEngine;
 }
 
+ghoul::filesystem::CacheManager& OpenSpaceEngine::cacheManager() {
+	assert(_cacheManager != nullptr);
+	return *_cacheManager;
+}
+
 bool OpenSpaceEngine::initializeGL()
 {
     return _renderEngine.initializeGL();
@@ -401,9 +428,12 @@ void OpenSpaceEngine::postDraw()
     glm::quat rot2 = glm::quat(euler2);
     _interactionHandler->orbit(rot);
     _interactionHandler->rotate(rot2);
-    if(_doVideoExport)
-        sgct::Engine::instance()->takeScreenshot();
+	if(_doVideoExport)
+		_renderEngine.takeScreenshot();
 #endif
+
+	_renderEngine.postDraw();
+
 #ifdef FLARE_ONLY
     _flare->postDraw();
 #endif

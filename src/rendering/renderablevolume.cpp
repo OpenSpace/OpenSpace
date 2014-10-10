@@ -148,8 +148,10 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 
         std::stringstream ss;
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
-        std::string cachepath = filepath + ss.str();
-        if( cache && FileSys.fileExists(cachepath)) {
+
+		std::string cachepath; // = filepath + ss.str();
+		OsEng.cacheManager().getCachedFile(filepath, ss.str(), cachepath, true);
+		if (cache && FileSys.fileExists(cachepath)) {
 
             FILE* file = fopen (cachepath.c_str(), "rb");
 

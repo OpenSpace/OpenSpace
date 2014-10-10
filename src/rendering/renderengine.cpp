@@ -72,6 +72,7 @@ RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
     , _abuffer(nullptr)
+	, _takeScreenshot(false)
 {
 }
 
@@ -298,6 +299,18 @@ void RenderEngine::render()
     
 }
 
+void RenderEngine::postDraw() {
+	if (_takeScreenshot) {
+		sgct::Engine::instance()->takeScreenshot();
+		_takeScreenshot = false;
+	}
+}
+
+void RenderEngine::takeScreenshot() {
+	_takeScreenshot = true;
+}
+
+
 SceneGraph* RenderEngine::sceneGraph()
 {
     // TODO custom assert (ticket #5)
@@ -499,7 +512,7 @@ void RenderEngine::generateGlslConfig() {
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
-	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
+	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
 	os << "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"

@@ -51,9 +51,6 @@ private:
 	GLuint _fragmentBuffer;
 	GLuint _fragmentTexture;
 
-
-
-
 }; 		// ABufferDynamic
 } 		// openspace
 

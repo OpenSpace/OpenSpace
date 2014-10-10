@@ -64,10 +64,10 @@ protected:
 	void generateShaderSource();
 	bool updateShader();
 
-	std::string openspaceHeaders();
-	std::string openspaceSamplerCalls();
-	std::string openspaceSamplers();
-	std::string openspaceTransferFunction();
+	void openspaceHeaders();
+	void openspaceSamplerCalls();
+	void openspaceSamplers();
+	void openspaceTransferFunction();
 
 	unsigned int _width, _height, _totalPixels;
 
@@ -75,8 +75,6 @@ private:
 	GLuint _screenQuad;
 
 	bool _validShader;
-	std::string _fragmentShaderPath;
-	ghoul::filesystem::File* _fragmentShaderFile;
 	ghoul::opengl::ProgramObject* _resolveShader;
 
 	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
@@ -84,12 +82,7 @@ private:
 	std::vector<ghoul::filesystem::File*> _samplerFiles;
 	std::vector<std::string> _samplers;
 
-	// Development functionality to update shader for changes in several files
-	std::vector<ghoul::filesystem::File*> _shaderFiles;
-
 	float _volumeStepFactor;
-
-
 
 };		// ABuffer
 }		// openspace
