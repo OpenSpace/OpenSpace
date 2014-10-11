@@ -45,11 +45,11 @@ const std::string _loggerCat = "RenderableWavefrontObject";
 }
 
 namespace openspace {
-
 RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
+	, _fovProgram(nullptr)
     , _texture(nullptr)
 {
 	std::string name;
@@ -89,14 +89,6 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
 
 }
 
-void normalize(glm::vec3 v) {
-	float magnitude = 0.0f;
-	for (int i = 0; i < 3; i++)
-		magnitude += pow(v[i], 2.0f);
-	magnitude = sqrt(magnitude);
-	for (int i = 0; i < 3; i++)
-		v[i] /= magnitude;
-}
 
 
 void RenderableWavefrontObject::loadObj(const char *filename){
@@ -232,7 +224,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
-		_varray[m].location[3] = 8;
+		_varray[m].location[3] = 2;
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
@@ -267,11 +259,15 @@ bool RenderableWavefrontObject::initialize()
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
-              &= OsEng.ref().configurationManager().getValue("pscShader", _programObject); // it will have own shader later on. 
+              &= OsEng.ref().configurationManager().getValue("pscShader", _programObject); 
 
     loadTexture();
     completeSuccess &= (_texture != nullptr);
    //completeSuccess &= _geometry->initialize(this); 
+
+	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1,2);
+	setBoundingSphere(ps);
+
 
 	GLuint errorID;
 	glGenVertexArrays(1, &_vaoID);
@@ -294,7 +290,6 @@ bool RenderableWavefrontObject::initialize()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
-
 	glBindVertexArray(0);
 
 	errorID = glGetError();
@@ -335,28 +330,30 @@ void RenderableWavefrontObject::render(const RenderData& data)
     glm::mat4 camrot    = data.camera.viewRotationMatrix();
    // PowerScaledScalar scaling = camera->scaling();
 
-
+	
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
+	glm::mat4 scaler = glm::scale(transform, glm::vec3(0, 0, -1));
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 1, 0));
-		
+	glm::mat4 rot_x = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+
+	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			transform[i][j] = _stateMatrix[i][j];
+			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	transform = transform *rot;
-
+	transform *= tmp;
+	transform *= rot_x;
+	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());
 	// setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, glm::vec4(0, 0, -1,8 ));
-
+	setPscUniforms(_programObject, &data.camera, data.position);
 	
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -373,13 +370,24 @@ void RenderableWavefrontObject::render(const RenderData& data)
     // disable shader
     _programObject->deactivate();
 
+	std::string shape, name;
+	shape.resize(32);
+	name.resize(32);
+	std::vector<glm::dvec3> bounds;
+	glm::dvec3 boresight;
+
+	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
+	glm::vec4 a(boresight, 1);
+	a = transform*a;
+	//std::cout << a[0] << " " << a[1] << " " << a[2] << std::endl;
 }
 
 void RenderableWavefrontObject::update(const UpdateData& data)
 {
+	glm::dvec3 position(0, 0, 0);
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix("GALACTIC", "IAU_MARS", data.time, _stateMatrix);
-
+	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
+	
 }
 
 void RenderableWavefrontObject::loadTexture()

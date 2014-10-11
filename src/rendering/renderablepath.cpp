@@ -76,7 +76,7 @@ namespace openspace{
 }
 void RenderablePath::fullYearSweep(){
 		double lightTime = 0.0;
-		SpiceManager::ref().getETfromDate("2006 jul 04 22:00:00", _time);
+		SpiceManager::ref().getETfromDate("2006 jan 20 19:00:00", _time);
 		// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 		double et2 = 0;
 		//SpiceManager::ref().getETfromDate("2008 apr 01 00:00:00", et2);
@@ -84,8 +84,8 @@ void RenderablePath::fullYearSweep(){
 		//SpiceManager::ref().getTargetState("NEW HORIZONS", "SUN", "J2000", "LT+S", et2, _pscpos, _pscvel, lightTime);
 
 		double et = _time;
-		int segments = 20000;
-		_increment = 6*3600;
+		int segments = 200000;
+		_increment = 86400;
 
 		_isize = (segments + 2);
 		_vsize = (segments + 2);
@@ -95,9 +95,7 @@ void RenderablePath::fullYearSweep(){
 		for (int i = 0; i < segments + 1; i++){
 			SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
 			if (_pscpos[0] != 0 && _pscpos[1] != 0 && _pscpos[2] != 0 && _pscpos[3] != 1){
-				/*std::cout << _target << " " << _observer << " " << _frame <<
-					_pscpos[0] << " " << _pscpos[1] << " " << _pscpos[2] << " " << _pscpos[3] << std::endl;
-					*/
+				_pscpos[3] += 3;
 				_varray.push_back(_pscpos[0]);
 				_varray.push_back(_pscpos[1]);
 				_varray.push_back(_pscpos[2]);
@@ -112,10 +110,16 @@ void RenderablePath::fullYearSweep(){
 				_varray.push_back(1.f);
 				_varray.push_back(1.f);
 				_varray.push_back(1.f);
-				_varray.push_back(1.f);
+				_varray.push_back(0.5f);
 #endif	
 				indx++;
 				_iarray[indx] = indx;
+			}
+			else{
+				std::string date;
+				SpiceManager::ref().getDateFromET(et, date);
+				std::cout << "STOPPED AT: " << date << std::endl;
+				break;
 			}
 			et += _increment;
 		}
@@ -188,15 +192,12 @@ void RenderablePath::fullYearSweep(){
 		//_programObject->setUniform("objectVelocity", pscvel.vec4());
 		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 		_programObject->setUniform("ModelTransform", transform);
-		_programObject->setUniform("campos", campos.vec4());
-		_programObject->setUniform("objpos", currentPosition.vec4());
-		_programObject->setUniform("camrot", camrot);
-		_programObject->setUniform("scaling", scaling.vec2());
+		setPscUniforms(_programObject, &data.camera, data.position);
 
-		glBindVertexArray(_vaoID);
+/*		glBindVertexArray(_vaoID);
 		glDrawArrays(_mode, 0, _vtotal);
 		glBindVertexArray(0);
-		
+	*/	
 		glPointSize(2.f);
 
 		glBindVertexArray(_vaoID);

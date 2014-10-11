@@ -74,6 +74,8 @@ public:
 	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
 	KernelIdentifier loadKernel(std::string filePath);
+	KernelIdentifier loadKernelExplicit(std::string filePath);
+
 
 	/**
 	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
@@ -289,6 +291,8 @@ public:
 						   psc& position, 
 						   double& lightTime) const;
 
+	void getPointingAttitude();
+
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
 	 * <code>target</code> body relative to an <code>observer</code> in a specific
@@ -371,6 +375,11 @@ public:
 									   const std::string& destinationFrame,
 									   double ephemerisTime,
 									   glm::dmat3& transformationMatrix) const;
+
+	bool getPositionPrimeMeridian(const std::string& sourceFrame,
+									const std::string& destinationFrame,
+									double ephemerisTime,
+									glm::dmat3& transformationMatrix) const;
 
 	/**
 	 * Applies the <code>transformationMatrix</code> retrieved from

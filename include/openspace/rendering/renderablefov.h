@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLETRAIL_H__
-#define __RENDERABLETRAIL_H__
+#ifndef __RenderableFov_H__
+#define __RenderableFov_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -36,10 +36,10 @@
 //#include <openspace/util/runtimedata.h>
 
 namespace openspace {
-class RenderableTrail : public Renderable{
+class RenderableFov : public Renderable{
 public:
-	RenderableTrail(const ghoul::Dictionary& dictionary);
-	~RenderableTrail();
+	RenderableFov(const ghoul::Dictionary& dictionary);
+	~RenderableFov();
 
 	bool initialize() override;
 	bool deinitialize() override;
@@ -72,8 +72,10 @@ public:
 	GLuint _vBufferID ;
 	GLuint _iBufferID;
 
-	void updateTrail();
+	void updateData();
 	void sendToGPU();
+
+	glm::dmat3 _stateMatrix;
 
 	GLenum _mode;
 	unsigned int _isize;

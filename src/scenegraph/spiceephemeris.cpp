@@ -88,18 +88,10 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	glm::dvec3 position(0,0,0);
 
 	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "LT+S", data.time, position, lightTime);
-
-	/*
-	std::cout << _targetName  << " (";
-	std::cout << position[0] << ", ";
-	std::cout << position[1] << ", ";
-	std::cout << position[2] << ")";
-	std::cout << std::endl;
-	assert(_targetName != "JUPITER");
-	*/
+	glm::dmat3 _stateMatrix;
+	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "NONE", data.time, position, lightTime);
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	//_position[3] += 1;
+	_position[3] += 3;
 	//_position[3] += 3;
 
 }

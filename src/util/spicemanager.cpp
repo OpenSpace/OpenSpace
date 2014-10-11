@@ -68,6 +68,40 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
+SpiceManager::KernelIdentifier SpiceManager::loadKernelExplicit(std::string filePath) {
+	if (filePath.empty()) {
+		LERROR("No filename provided");
+		return KernelFailed;
+	}
+
+	// I tried the *.cfg loading, didnt work. Im sorry but I just need this present right now.
+	KernelIdentifier kernelId = ++_lastAssignedKernel;
+
+	// Load the kernel
+	furnsh_c(filePath.c_str());
+
+	// Reset the current directory to the previous one
+	std::cout << filePath.c_str() << std::endl;
+	int failed = failed_c();
+	if (failed) {
+		char msg[1024];
+		getmsg_c("LONG", 1024, msg);
+		LERROR("Error loading kernel '" + filePath + "'");
+		LERROR("Spice reported: " + std::string(msg));
+		reset_c();
+		return false;
+	}
+
+	bool hasError = checkForError("Error loading kernel '" + filePath + "'");
+	if (hasError)
+		return KernelFailed;
+	else {
+		KernelInformation&& info = { filePath, std::move(kernelId) };
+		_loadedKernels.push_back(info);
+		return kernelId;
+	}
+}
+
 SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	if (filePath.empty()) {
 		LERROR("No filename provided");
@@ -80,6 +114,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	// to the directory they reside in. The directory change is not necessary for regular
 	// kernels
 	std::string&& path = absPath(std::move(filePath));
+
 	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
 	std::string&& fileDirectory = ghoul::filesystem::File(path).directoryName();
 	FileSys.setCurrentDirectory(fileDirectory);
@@ -360,6 +395,23 @@ bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 	return !hasError;
 }
 
+bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
+	const std::string& body,
+	double ephemerisTime,
+	glm::dmat3& positionMatrix) const{
+
+	int id;
+	getNaifId(body.c_str(), id);
+	tipbod_c(fromFrame.c_str(), id, ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
+
+	bool hasError = checkForError("Error retrieving position transform matrix from "
+		"frame '" + fromFrame + "' to frame '" + body +
+		"at time '" + std::to_string(ephemerisTime) + "'");
+	positionMatrix = glm::transpose(positionMatrix);
+
+	return !hasError;
+}
+
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 												 const std::string& toFrame,
 												 double ephemerisTime,
@@ -386,6 +438,7 @@ bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fo
 	else
 		return getFieldOfView(id, fovShape, frameName, boresightVector, bounds);
 }
+
 
 bool SpiceManager::getFieldOfView(int instrument,
 	                              std::string& fovShape,

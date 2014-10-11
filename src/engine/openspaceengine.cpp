@@ -257,46 +257,34 @@ bool OpenSpaceEngine::initialize()
 		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
 		return false;
 	}
+	std::cout << "leapSecondKernel : " << leapSecondKernel << std::endl;
 	SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
 	
-	//New Horizons - I need this working. It sort of does but clashes with the rest
-	/*
-	using constants::configurationmanager::keySpiceNewHorizons;
-	std::string newHorizonsKernel;
-	success = OsEng.configurationManager().getValue(keySpiceNewHorizons, newHorizonsKernel);
-	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceNewHorizons << "'");
-		return false;
-	}
-	SpiceManager::ref().loadKernel(std::move(newHorizonsKernel));
-	*/
-	// ^ whats missing!? set in constants, set in cfg file... wtf...doing it manually... 
-
-//#define NEWHORIZONS
-#ifdef NEWHORIZONS
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/de413.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/jup260.bsp")
+	
 	// metakernel loading doesnt seem to work... it should. to tired to even
 	// CK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/ck/merged_nhpc_2006_v011.bc");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/ck/merged_nhpc_2007_v006.bc");
-	// FK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/fk/nh_v200.tf");
-	// IK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/ik/nh_lorri_v100.ti");
-	// LSK already loaded
-	//PCK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/pck/pck00008.tpc");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/pck/new_horizons_413.tsc");
-	//SLCK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/sclk/new_horizons_413.tsc");
-	//SPK
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/de413.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/jup260.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/nh_nep_ura_000.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/nh_plu017.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/nh_recon_e2j_v1.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/nh_recon_j2sep07_prelimv1.bsp");
-	SpiceManager::ref().loadKernel("C:/Users/michal/Documents/openspace3/openspace-data/spice/spk/sb_2002jf56_2.bsp");
-#endif
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
+	// FK													
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
+	// IK													
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
+	// LSK already loaded									
+	//PCK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
+	//SPK												
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
+	
+
+
 
     FactoryManager::initialize();
 

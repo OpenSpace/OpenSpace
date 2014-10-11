@@ -84,6 +84,8 @@ PowerScaledCoordinate
     sprintf(buff, "%.0f", max);
     unsigned int digits = static_cast<unsigned int>(strlen(buff));
 
+	//digits += 3;
+
     // rescale and return
     double tp = 1.0 / pow(k, digits);
     return PowerScaledCoordinate(d1 * tp, d2 * tp, d3 * tp, digits);

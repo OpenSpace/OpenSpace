@@ -366,12 +366,11 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        distance(dist);
 		}
 		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed * pow(10, 8) * dt, 0.0);
+			PowerScaledScalar dist(-speed * pow(10, 11) * dt, 0.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
 			acc += 0.001;
-			std::cout << acc << std::endl;
 			PowerScaledScalar dist(speed * pow(10, 8 * acc) * dt, 0.0);
 			distance(dist);
 		}

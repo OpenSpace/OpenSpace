@@ -37,10 +37,6 @@
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry; // for now - this HAS to change!!! REMMBER MICHAL
-}
-
 class RenderableWavefrontObject : public Renderable {
 public:
 	RenderableWavefrontObject(const ghoul::Dictionary& dictionary);
@@ -69,8 +65,11 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject; // remember to add shaders!
+    ghoul::opengl::ProgramObject* _programObject; 
     ghoul::opengl::Texture* _texture;
+
+	ghoul::opengl::ProgramObject* _fovProgram;
+
 
 	GLuint _vaoID = 6;
 	GLuint _vBufferID = 7;
@@ -85,6 +84,19 @@ private:
 	glm::dmat3 _stateMatrix; // might need this
 
 	std::string _target;
+
+	///NH FOV 
+
+	GLuint _vaoFOV = 10;
+	GLuint _vboFOV = 11;
+	GLuint _iboFOV = 12;
+
+	unsigned int _isizeFOV;
+	unsigned int _vsizeFOV;
+	std::vector<float> _varrayFOV;
+	int *_iarrayFOV;
+
+
 };
 
 }  // namespace openspace
