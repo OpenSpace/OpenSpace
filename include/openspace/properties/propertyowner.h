@@ -91,8 +91,9 @@ public:
 	 * more <code>.</code>, the first part of the name will be recursively extracted and
 	 * used as a name for a sub-owner and only the last part of the identifier is
 	 * referring to a Property owned by PropertyOwner named by the second-but-last name.
-	 * \param URI The identifier of the Property that should be extracted. If the Property
-	 * cannot be found, <code>nullptr</code> is returned
+	 * \param URI The identifier of the Property that should be extracted
+	 * \return If the Property cannot be found, <code>nullptr</code> is returned,
+	 * otherwise the pointer to the Property is returned
 	 */
     Property* property(const std::string& URI) const;
 

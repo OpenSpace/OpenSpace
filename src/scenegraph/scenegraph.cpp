@@ -367,6 +367,9 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		return false;
 	}
 
+	LDEBUG("Loading common module folder '" << commonDirectory << "'");
+	loadModule(FileSys.pathByAppendingComponent(moduleDirectory, commonDirectory));
+
     Dictionary moduleDictionary;
     if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
         std::vector<std::string> keys = moduleDictionary.keys();
@@ -374,7 +377,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         for (const std::string& key : keys) {
             std::string moduleFolder;
 			if (moduleDictionary.getValue(key, moduleFolder))
-                loadModule(moduleDirectory + "/" + moduleFolder);
+                loadModule(FileSys.pathByAppendingComponent(moduleDirectory, moduleFolder));
         }
     }
 
@@ -465,7 +468,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
 void SceneGraph::loadModule(const std::string& modulePath)
 {
-    auto pos = modulePath.find_last_of("/");
+    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
     if (pos == modulePath.npos) {
         LERROR("Bad format for module path: " << modulePath);
         return;
