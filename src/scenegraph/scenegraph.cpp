@@ -223,6 +223,15 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
+	// Plane program
+	tmpProgram = ProgramObject::Build("Plane",
+		"${SHADERS}/plane_vs.glsl",
+		"${SHADERS}/plane_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
+
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);

@@ -197,7 +197,7 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
     // }
 
     int sum = 0;
-    int stop;
+    int stop = 0;
     const int sumuntil = size * truncLim;
     for(int i = 0; i < bins; ++i) {
     	sum += histogram[i];
