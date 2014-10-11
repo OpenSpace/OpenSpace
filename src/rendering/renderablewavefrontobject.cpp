@@ -265,7 +265,7 @@ bool RenderableWavefrontObject::initialize()
     completeSuccess &= (_texture != nullptr);
    //completeSuccess &= _geometry->initialize(this); 
 
-	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1,2);
+	PowerScaledScalar ps = PowerScaledScalar(1,2);
 	setBoundingSphere(ps);
 
 
