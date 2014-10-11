@@ -34,8 +34,6 @@ namespace openspace {
 class SpiceEphemeris : public Ephemeris {
 public:
     SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    ~SpiceEphemeris();
-    bool initialize();
     const psc& position() const;
 	void update(const UpdateData& data) override;
 
@@ -43,6 +41,7 @@ private:
     std::string _targetName;
     std::string _originName;
     psc _position;
+	bool _kernelsLoadedSuccessfully;
 };
     
 } // namespace openspace

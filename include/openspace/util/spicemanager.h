@@ -73,8 +73,7 @@ public:
 	 * \param filePath The path to the kernel that should be loaded
 	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
-	KernelIdentifier loadKernel(std::string filePath);
-	KernelIdentifier loadKernelExplicit(std::string filePath);
+	KernelIdentifier loadKernel(const std::string& filePath);
 
 
 	/**

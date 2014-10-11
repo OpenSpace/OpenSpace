@@ -68,43 +68,15 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
-SpiceManager::KernelIdentifier SpiceManager::loadKernelExplicit(std::string filePath) {
+SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& filePath) {
 	if (filePath.empty()) {
 		LERROR("No filename provided");
 		return KernelFailed;
 	}
 
-	// I tried the *.cfg loading, didnt work. Im sorry but I just need this present right now.
-	KernelIdentifier kernelId = ++_lastAssignedKernel;
-
-	// Load the kernel
-	furnsh_c(filePath.c_str());
-
-	// Reset the current directory to the previous one
-	std::cout << filePath.c_str() << std::endl;
-	int failed = failed_c();
-	if (failed) {
-		char msg[1024];
-		getmsg_c("LONG", 1024, msg);
-		LERROR("Error loading kernel '" + filePath + "'");
-		LERROR("Spice reported: " + std::string(msg));
-		reset_c();
-		return false;
-	}
-
-	bool hasError = checkForError("Error loading kernel '" + filePath + "'");
-	if (hasError)
-		return KernelFailed;
-	else {
-		KernelInformation&& info = { filePath, std::move(kernelId) };
-		_loadedKernels.push_back(info);
-		return kernelId;
-	}
-}
-
-SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
-	if (filePath.empty()) {
-		LERROR("No filename provided");
+	std::string&& path = absPath(filePath);
+	if (!FileSys.fileExists(path)) {
+		LERROR("Kernel file '" << path << "' does not exist");
 		return KernelFailed;
 	}
 
@@ -113,10 +85,14 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	// We need to set the current directory as meta-kernels are usually defined relative
 	// to the directory they reside in. The directory change is not necessary for regular
 	// kernels
-	std::string&& path = absPath(std::move(filePath));
 
 	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
 	std::string&& fileDirectory = ghoul::filesystem::File(path).directoryName();
+
+	if (!FileSys.directoryExists(fileDirectory)) {
+		LERROR("Could not find directory for kernel '" << path << "'");
+		return KernelFailed;
+	}
 	FileSys.setCurrentDirectory(fileDirectory);
 
 	// Load the kernel
@@ -124,15 +100,14 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	
 	// Reset the current directory to the previous one
 	FileSys.setCurrentDirectory(currentDirectory);
-	std::cout << filePath.c_str() << std::endl;
 	int failed = failed_c();
     if (failed) {
         char msg[1024];
         getmsg_c ( "LONG", 1024, msg );
-        LERROR("Error loading kernel '" + filePath + "'");
+        LERROR("Error loading kernel '" + path + "'");
         LERROR("Spice reported: " + std::string(msg));
         reset_c();
-        return false;
+        return KernelFailed;
     }
 
 	bool hasError = checkForError("Error loading kernel '" + path + "'");
@@ -421,7 +396,7 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
     
     bool hasError = checkForError("Error retrieving position transform matrix from "
                                   "frame '" + fromFrame + "' to frame '" + toFrame +
-                                  "at time '" + std::to_string(ephemerisTime) + "'");
+                                  "' at time '" + std::to_string(ephemerisTime) + "'");
     positionMatrix = glm::transpose(positionMatrix);
     
 	return !hasError;

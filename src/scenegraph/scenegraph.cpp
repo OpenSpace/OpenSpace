@@ -55,6 +55,8 @@
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
+	const std::string _defaultCommonDirectory = "common";
+	const std::string _commonModuleToken = "${COMMON_MODULE}";
 }
 
 namespace openspace {
@@ -344,6 +346,10 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
 	std::string moduleDirectory(".");
 	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
+
+	std::string commonDirectory(_defaultCommonDirectory);
+	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
+	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
 
 	// The scene path could either be an absolute or relative path to the description
 	// paths directory
