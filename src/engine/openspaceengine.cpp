@@ -237,15 +237,21 @@ bool OpenSpaceEngine::initialize()
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
     Time::initialize();
-
+	
 	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
 	bool success = OsEng.configurationManager().getValue(keySpiceTimeKernel, timeKernel);
+
 	if (!success) {
 		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(std::move(timeKernel));
+	SpiceManager::KernelIdentifier id = 
+		SpiceManager::ref().loadKernel(timeKernel);
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading time kernel '" << timeKernel << "'");
+		return false;
+	}
 
 	using constants::configurationmanager::keySpiceLeapsecondKernel;
 	std::string leapSecondKernel;
@@ -254,8 +260,38 @@ bool OpenSpaceEngine::initialize()
 		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
+	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
+		return false;
+	}
 	
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/de413.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/jup260.bsp")
+	
+	// metakernel loading doesnt seem to work... it should. to tired to even
+	// CK
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
+	// FK													
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
+	// IK													
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
+	// LSK already loaded									
+	//PCK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
+	//SPK												
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
+	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
+	
+
+
+
     FactoryManager::initialize();
 
     scriptEngine().initialize();
@@ -364,7 +400,7 @@ void OpenSpaceEngine::preSynchronization()
         _interactionHandler.update(dt);
         _interactionHandler.lockControls();
 
-		Time::ref().advanceTime(dt);
+		//Time::ref().advanceTime(dt);
     }
 #ifdef FLARE_ONLY
     _flare->preSync();

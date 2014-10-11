@@ -217,7 +217,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 
     // evaluate all the children, tail-recursive function(?)
     for (auto& child : _children) {
-        child->evaluate(camera, thisPosition);
+        child->evaluate(camera, psc());
     }
 }
 
@@ -284,7 +284,9 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
 	_boundingSphere = 0.0;
-	//_boundingSphere = 1000.0;
+	_boundingSphere = 1000.0;
+	_boundingSphere = 0.0;
+
 	
     if (_children.size() > 0) {  // node
         PowerScaledScalar maxChild;
@@ -310,7 +312,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
             _boundingSphere = renderableBS;
     }
 	LWARNING(name() << ": " << _boundingSphere);
-
+	
     return _boundingSphere;
 }
 

@@ -10,6 +10,8 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <glm/gtx/vector_angle.hpp>
 
+#include <openspace/util/time.h>
+
 // std includes
 #include <cassert>
 
@@ -154,7 +156,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 
 	// should be changed to something more dynamic =)
 	psc origin;
-	if(node_) {
+	if (node_) {
 		origin = node_->worldPosition();
 	}
 
@@ -168,7 +170,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	//camera_->rotate(rotation);
 	//camera_->setRotation(glm::mat4_cast(rotation));
 
-	glm::mat4 la = glm::lookAt(camera_->position().vec3(), node_->worldPosition().vec3(), glm::rotate(rotation, camera_->lookUpVector()));
+	glm::mat4 la = glm::lookAt(camera_->position().vec3(), origin.vec3(), glm::rotate(rotation, camera_->lookUpVector()));
 	camera_->setRotation(la);
 	//camera_->setLookUpVector();
 
@@ -305,6 +307,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 		_lastTrackballPos = curTrackballPos;
 	}
 }
+double acc = 1;
 
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
@@ -331,6 +334,9 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        glm::quat rot = glm::quat(euler);
 	        orbit(rot);
 	    }
+		if (key == SGCT_KEY_Q) {
+			Time::ref().advanceTime(dt);
+		}
 	    if (key == 262) {
 	        glm::vec3 euler(0.0, speed * dt, 0.0);
 	        glm::quat rot = glm::quat(euler);
@@ -360,11 +366,12 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        distance(dist);
 		}
 		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed * 100.0 * dt, 0.0);
+			PowerScaledScalar dist(-speed * pow(10, 11) * dt, 0.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
-			PowerScaledScalar dist(speed * 100.0 * dt, 0.0);
+			acc += 0.001;
+			PowerScaledScalar dist(speed * pow(10, 8 * acc) * dt, 0.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_Y) {

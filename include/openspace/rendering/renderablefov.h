@@ -22,25 +22,83 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __RenderableFov_H__
+#define __RenderableFov_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/stringproperty.h>
+
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+//#include <openspace/util/runtimedata.h>
 
 namespace openspace {
+class RenderableFov : public Renderable{
+public:
+	RenderableFov(const ghoul::Dictionary& dictionary);
+	~RenderableFov();
 
-struct UpdateData {
-	double time;
-	double delta;
+	bool initialize() override;
+	bool deinitialize() override;
+
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+ private:
+	properties::StringProperty _colorTexturePath; 
+	ghoul::opengl::ProgramObject* _programObject;
+	ghoul::opengl::Texture* _texture;
+	void loadTexture();
+	void fullYearSweep();
+
+	// modfile reads
+	// spice
+	std::string _target;
+	std::string _observer;
+	std::string _frame;
+	// color
+	glm::vec3 _c; 
+	double _r, _g, _b;
+	// orbit relational data
+	double _tropic;
+	double _ratio;
+	double _day;
+
+	// need to write robust method for vbo id selection 
+	// (right now galactic grid has to be present) (why though?) solve later...
+	GLuint _vaoID ;
+	GLuint _vBufferID ;
+	GLuint _iBufferID;
+
+	void updateData();
+	void sendToGPU();
+
+	glm::dmat3 _stateMatrix;
+
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	unsigned int _vtotal;
+	unsigned int _stride;
+
+	double _startTrail;
+
+	//Vertex* _varray;
+	std::vector<float> _varray;
+	int* _iarray;
+
+	bool _once = false;
+
+	//used for update of trail
+	psc _pscpos, _pscvel;
+	double _increment;
+	double _time = 0;
+	double _oldTime = 0;
+
+	int _delta  = 0;
+	int _dtprogress = 0;
 };
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-
-};
-
 }
-
-#endif // __UPDATESTRUCTURES_H__
+#endif

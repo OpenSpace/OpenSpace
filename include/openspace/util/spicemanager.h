@@ -27,12 +27,16 @@
 
 #include "SpiceUsr.h"
 
-#include <string>
+#include <openspace/util/powerscaledcoordinate.h>
+
 #include <ghoul/glm.h>
+
 #include <glm/gtc/type_ptr.hpp>
+
 #include <array>
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
@@ -69,7 +73,8 @@ public:
 	 * \param filePath The path to the kernel that should be loaded
 	 * \return The loaded kernel's unique identifier that can be used to unload the kernel
 	 */
-	KernelIdentifier loadKernel(std::string filePath);
+	KernelIdentifier loadKernel(const std::string& filePath);
+
 
 	/**
 	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
@@ -277,6 +282,15 @@ public:
 						   glm::dvec3& position, 
 						   double& lightTime) const;
 
+	bool getTargetPosition(const std::string& target,
+						   const std::string& observer,
+		                   const std::string& referenceFrame, 
+						   const std::string& aberrationCorrection,
+		                   double ephemerisTime,
+						   psc& position, 
+						   double& lightTime) const;
+
+	void getPointingAttitude();
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
@@ -312,6 +326,15 @@ public:
 		                double ephemerisTime, 
 						glm::dvec3& position, 
 						glm::dvec3& velocity,
+						double& lightTime) const;
+
+	bool getTargetState(const std::string& target, 
+						const std::string& observer,
+						const std::string& referenceFrame,
+					    const std::string& aberrationCorrection,
+		                double ephemerisTime, 
+						PowerScaledCoordinate& position, 
+						PowerScaledCoordinate& velocity,
 						double& lightTime) const;
 
 	/** 
@@ -351,6 +374,11 @@ public:
 									   const std::string& destinationFrame,
 									   double ephemerisTime,
 									   glm::dmat3& transformationMatrix) const;
+
+	bool getPositionPrimeMeridian(const std::string& sourceFrame,
+									const std::string& destinationFrame,
+									double ephemerisTime,
+									glm::dmat3& transformationMatrix) const;
 
 	/**
 	 * Applies the <code>transformationMatrix</code> retrieved from

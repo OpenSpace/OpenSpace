@@ -113,18 +113,26 @@ int main(int argc, char** argv)
 
 void mainInitFunc()
 {
-    OsEng.initialize();
-    OsEng.initializeGL();
+	bool success = OsEng.initialize();
+	if (success)
+		success = OsEng.initializeGL();
+
+	if (!success) {
+		LFATAL("Initializing OpenSpaceEngine failed");
+		std::cout << "Press any key to continue...";
+		std::cin.ignore(100);
+		exit(EXIT_FAILURE);
+	}
 }
 
 void mainPreSyncFunc()
 {
-    OsEng.preSynchronization();
+	OsEng.preSynchronization();
 }
 
 void mainPostSyncPreDrawFunc()
 {
-    OsEng.postSynchronizationPreDraw();
+	OsEng.postSynchronizationPreDraw();
 }
 
 void mainRenderFunc()

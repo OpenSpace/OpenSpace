@@ -114,10 +114,10 @@ bool RenderEngine::initializeGL()
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,10000.0f);
+    //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
+  //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
+   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -196,9 +196,11 @@ void RenderEngine::postSynchronizationPreDraw()
 	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
+	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
+	//std::cout << a.delta << std::endl;
     // update and evaluate the scene starting from the root node
-	_sceneGraph->update({Time::ref().currentTime()}); 
+	_sceneGraph->update(a);
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 }
@@ -210,6 +212,7 @@ void RenderEngine::render()
     //glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition
@@ -235,7 +238,11 @@ void RenderEngine::render()
     _abuffer->preRender();
 	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
-    _abuffer->resolve();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	_abuffer->resolve();
+	glDisable(GL_BLEND);
 
 #ifndef OPENSPACE_VIDEO_EXPORT
     // Print some useful information on the master viewport

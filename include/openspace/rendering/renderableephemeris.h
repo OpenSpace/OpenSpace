@@ -22,25 +22,70 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __RENDERABLEEPHEMERIS_H__
+#define __RENDERABLEEPHEMERIS_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/stringproperty.h>
+
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+//#include <openspace/util/runtimedata.h>
 
 namespace openspace {
+class RenderableEphemeris : public Renderable{
+public:
+	RenderableEphemeris(const ghoul::Dictionary& dictionary);
+	~RenderableEphemeris();
 
-struct UpdateData {
-	double time;
-	double delta;
+	bool initialize() override;
+	bool deinitialize() override;
+
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+ private:
+	 properties::StringProperty _colorTexturePath; // not used now, will be later though.
+
+	 ghoul::opengl::ProgramObject* _programObject;
+	 ghoul::opengl::Texture* _texture;
+	 void loadTexture();
+
+	 typedef struct {
+		 GLfloat location[4];
+		 GLfloat velocity[4];
+		 GLubyte padding[32];  // Pads the struct out to 64 bytes for performance increase
+	 } Vertex;
+
+	 GLuint _vaoID = 6;
+	 GLuint _vBufferID = 7;
+	 GLuint _iBufferID = 8;
+
+	 void nextIndex();
+
+
+	 GLenum _mode;
+	 unsigned int _isize;
+	 unsigned int _vsize;
+
+	 Vertex* _varray;
+	 int* _iarray;
+
+	 Vertex*  batchArray;
+	 bool* _updated;
+
+	 psc _pscpos, _pscvel;
+
+	 std::vector<std::pair<int, double>> _intervals;
+	 double _increment;
+	 // etc...
+	 int _index[2];
+	 int _prev[2];
+	 int _delta;
+	 double _time = 0;
+	 double _previousTime = 0;
 };
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-
-};
-
 }
-
-#endif // __UPDATESTRUCTURES_H__
+#endif

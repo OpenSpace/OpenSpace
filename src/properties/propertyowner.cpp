@@ -77,8 +77,6 @@ Property* PropertyOwner::property(const std::string& id) const
         const size_t ownerSeparator = id.find(URISeparator);
         if (ownerSeparator == std::string::npos) {
             // if we do not own the property and there is no separator, it does not exist
-            LERROR("The identifier '" << id << "' did not exist in PropertyOwner '" <<
-                   name() << "'");
             return nullptr;
         }
         else {
@@ -87,8 +85,6 @@ Property* PropertyOwner::property(const std::string& id) const
             
             PropertyOwner* owner = subOwner(ownerName);
             if (owner == nullptr) {
-                LERROR("Sub PropertyOwner '" << owner
-                       << "' did not exist for PropertyOwner '" << name() << "'");
                 return nullptr;
             }
             else {
