@@ -110,6 +110,8 @@ public:
 	}
 
 private:
+	friend class Controller;
+
     InteractionHandler(const InteractionHandler&) = delete;
     InteractionHandler& operator=(const InteractionHandler&) = delete;
 	InteractionHandler(InteractionHandler&&) = delete;
