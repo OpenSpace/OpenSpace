@@ -55,37 +55,11 @@ protected:
 
 	void rotateDelta(const glm::quat& rotation);
 
-	void distanceDelta(const PowerScaledScalar& distance) {
-		assert(_handler);
-		_handler->lockControls();
-	
-		psc relative = _handler->_camera->position();
-		const psc origin = (_handler->_focusNode) ? _handler->_focusNode->worldPosition() : psc();
+	void distanceDelta(const PowerScaledScalar& distance);
 
-		psc relative_origin_coordinate = relative - origin;
-		const glm::vec3 dir(relative_origin_coordinate.direction());
-		glm:: vec3 newdir = dir * distance[0];
-		relative_origin_coordinate = newdir;
-		relative_origin_coordinate[3] = distance[1];
-		relative = relative + relative_origin_coordinate;
+	void lookAt(const glm::quat& rotation);
 
-		relative_origin_coordinate = relative - origin;
-		newdir = relative_origin_coordinate.direction();
-
-		// update only if on the same side of the origin
-		if(glm::angle(newdir, dir) < 90.0f)
-			_handler->_camera->setPosition(relative);
-	
-		_handler->unlockControls();
-	}
-
-	void lookAt(const glm::quat& rotation) {
-		assert(_handler);
-	}
-
-	void setRotation(const glm::quat& rotation) {
-		assert(_handler);
-	}
+	void setRotation(const glm::quat& rotation);
 
 private:
 	InteractionHandler* _handler;
