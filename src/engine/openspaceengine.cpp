@@ -24,8 +24,9 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-#include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/keyboardcontroller.h>
+#include <openspace/interaction/mousecontroller.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
@@ -307,7 +308,9 @@ bool OpenSpaceEngine::initialize() {
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-    //_interactionHandler.connectDevices();
+
+	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
+	_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 
     // Run start up scripts
     ghoul::Dictionary scripts;

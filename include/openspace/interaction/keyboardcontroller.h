@@ -39,7 +39,7 @@ public:
 
 class KeyboardControllerFixed : public KeyboardController {
 public:
-	void keyPressed(KeyAction action, Keys key) = 0 {
+	void keyPressed(KeyAction action, Keys key) {
 
 	}
 };

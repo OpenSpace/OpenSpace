@@ -123,7 +123,7 @@ protected:
 	}
 };
 
-class OrbitMouseController : public MouseController {
+class TrackballMouseController : public MouseController {
 public:
 	void button(MouseAction action, MouseButton button) {
 		if (button == MouseButton::Left && action == MouseAction::Press)

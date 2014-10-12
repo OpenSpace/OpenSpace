@@ -41,63 +41,19 @@ public:
 		_handler(nullptr)
 	{}
 
-	void setHandler(InteractionHandler* handler) {
-		_handler = handler;
-	}
+	void setHandler(InteractionHandler* handler);
 
 protected:
-	SceneGraphNode* focusNode() const {
-		assert(_handler);
-		return _handler->_focusNode;
-	}
+	SceneGraphNode* focusNode() const;
 
-	Camera* camera() const {
-		assert(_handler);
-		return _handler->_camera;
-	}
+	Camera* camera() const;
 
 
-	double deltaTime() const {
-		assert(_handler);
-		return _handler->_deltaTime;
-	}
+	double deltaTime() const;
 
-	void orbitDelta(const glm::quat& rotation) {
-		assert(_handler);
-		_handler->lockControls();
-	
-		// the camera position
-		psc relative = _handler->_camera->position();
+	void orbitDelta(const glm::quat& rotation);
 
-		// should be changed to something more dynamic =)
-		psc origin;
-		if (_handler->_focusNode) {
-			origin = _handler->_focusNode->worldPosition();
-		}
-
-		psc relative_origin_coordinate = relative - origin;
-		//glm::mat4 rotation_matrix = glm::mat4_cast(glm::inverse(rotation));
-		//relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
-		relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
-		relative = relative_origin_coordinate + origin;
-
-		_handler->_camera->setPosition(relative);
-		//camera_->rotate(rotation);
-		//camera_->setRotation(glm::mat4_cast(rotation));
-
-		glm::mat4 la = glm::lookAt(_handler->_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _handler->_camera->lookUpVector()));
-		_handler->_camera->setRotation(la);
-		//camera_->setLookUpVector();
-
-		_handler->unlockControls();
-	}
-
-	void rotateDelta(const glm::quat& rotation) {
-		assert(_handler);
-		_handler->lockControls();
-		_handler->_camera->rotate(rotation);
-		_handler->unlockControls();
-	}
+	void rotateDelta(const glm::quat& rotation);
 
 	void distanceDelta(const PowerScaledScalar& distance) {
 		assert(_handler);
