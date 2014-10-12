@@ -244,7 +244,6 @@ void RenderEngine::render()
 	_abuffer->resolve();
 	glDisable(GL_BLEND);
 
-#ifndef OPENSPACE_VIDEO_EXPORT
     // Print some useful information on the master viewport
     if (sgct::Engine::instance()->isMaster()) {
 // Apple usually has retina screens
@@ -301,8 +300,6 @@ void RenderEngine::render()
               FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
 
     }
-#endif
-    
 }
 
 SceneGraph* RenderEngine::sceneGraph()

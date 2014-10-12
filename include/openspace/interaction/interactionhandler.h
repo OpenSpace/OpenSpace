@@ -1,91 +1,137 @@
-#ifndef INTERACTIONHANDLER_H
-#define INTERACTIONHANDLER_H
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-// open space includes
-#include <openspace/util/camera.h>
-#include <openspace/interaction/externalcontrol/externalcontrol.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#ifndef __INTERACTIONHANDLER_H__
+#define __INTERACTIONHANDLER_H__
 
-// std includes
-#include <vector>
-#include <thread>
+#include <openspace/interaction/keyboardcontroller.h>
+#include <openspace/interaction/mousecontroller.h>
+
 #include <mutex>
-#include <memory>
-#include <map>
-#include <functional>
 
 namespace openspace {
 
+class Camera;
+class SceneGraphNode;
+
+namespace interaction {
+
 class InteractionHandler {
 public:
-    InteractionHandler(void);
-    InteractionHandler(const InteractionHandler& src);
-    InteractionHandler& operator=(const InteractionHandler& rhs);
-	virtual ~InteractionHandler();
+    InteractionHandler()
+		: _camera(nullptr)
+		, _focusNode(nullptr)
+		, _keyboardController(nullptr)
+		, _mouseController(nullptr)
+	{
+	}
 
-	//static void init();
-	//static void deinit();
- //   static InteractionHandler& ref();
-	//static bool isInitialized();
+	~InteractionHandler() {
+		delete _keyboardController;
+		delete _mouseController;
+		for (size_t i = 0; i < _controllers.size(); ++i)
+			delete _controllers[i];
 
-	void enable();
-	void disable();
-	const bool isEnabled() const;
+	}
 
-	void connectDevices();
-	void addExternalControl(ExternalControl* controller);
+	void setKeyboardController(KeyboardController* controller) {
+		delete _keyboardController;
+		_keyboardController = controller;
+		_keyboardController->setHandler(this);
+	}
 
-	void setCamera(Camera *camera = nullptr);
-	Camera * getCamera() const;
-	const psc getOrigin() const;
-	void lockControls();
-	void unlockControls();
+	void setMouseController(MouseController* controller) {
+		delete _mouseController;
+		_mouseController = controller;
+		_mouseController->setHandler(this);
+	}
 
-	void setFocusNode(SceneGraphNode *node);
-	
-	void orbit(const glm::quat &rotation);
-	void rotate(const glm::quat &rotation);
-	void distance(const PowerScaledScalar &distance);
+	void addController(Controller* controller) {
+		_controllers.push_back(controller);
+		controller->setHandler(this);
+	}
 
-	void lookAt(const glm::quat &rotation);
-	void setRotation(const glm::quat &rotation);
+	void lockControls() {
+		_mutex.lock();
+	}
 
-	void update(const double dt);
+	void unlockControls() {
+		_mutex.unlock();
+	}
 
-	double getDt();
+	void update(double deltaTime) {
+		_deltaTime = deltaTime;
+	}
 
-    void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
+	void setFocusNode(SceneGraphNode* node) {
+		_focusNode = node;
+	}
 
-    void addKeyCallback(int key, std::function<void(void)> f);
-	
+    void keyboardCallback(int key, int action) {
+		if (_keyboardController)
+			_keyboardController->keyPressed(KeyAction(action), Keys(key));
+	}
+
+	void mouseButtonCallback(int button, int action) {
+		if (_mouseController)
+			_mouseController->button(MouseAction(action), MouseButton(button));
+	}
+    
+	void mousePositionCallback(int x, int y) {
+		if (_mouseController)
+			// TODO Remap screen coordinates to [0,1]
+			_mouseController->move(float(x), float(y));
+	}
+    
+	void mouseScrollWheelCallback(int pos) {
+		if (_mouseController)
+			_mouseController->scrollWheel(float(pos));
+	}
+
 private:
-    glm::vec3 mapToTrackball(glm::vec2 mousePos);
-    glm::vec3 mapToCamera(glm::vec3 trackballPos);
-    void trackballRotate(int x, int y);
+    InteractionHandler(const InteractionHandler&) = delete;
+    InteractionHandler& operator=(const InteractionHandler&) = delete;
+	InteractionHandler(InteractionHandler&&) = delete;
+	InteractionHandler& operator=(InteractionHandler&&) = delete;
 
-	Camera* camera_;
-	bool enabled_;
-	SceneGraphNode *node_;
-	
-	double dt_;
+	Camera* _camera;
+	SceneGraphNode* _focusNode;
+
+	double _deltaTime;
+	std::mutex _mutex;
+
+	KeyboardController* _keyboardController;
+	MouseController* _mouseController;
+	std::vector<Controller*> _controllers;
 
 
-	glm::vec3 _lastTrackballPos;
-	bool _leftMouseButtonDown, _isMouseBeingPressedAndHeld;
-
-	// used for calling when updating and deallocation
-	std::vector<ExternalControl*> controllers_;
-
-	// for locking and unlocking
-	std::mutex cameraGuard_;
-
-	std::multimap<int, std::function<void(void)> > _keyCallbacks;
-	
+ //   glm::vec3 mapToTrackball(glm::vec2 mousePos);
+ //   glm::vec3 mapToCamera(glm::vec3 trackballPos);
+ //   void trackballRotate(int x, int y);
 };
 
+} // namespace interaction
 } // namespace openspace
 
-#endif
+#endif // __INTERACTIONHANDLER_H__

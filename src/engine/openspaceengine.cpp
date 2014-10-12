@@ -307,7 +307,7 @@ bool OpenSpaceEngine::initialize() {
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-    _interactionHandler.connectDevices();
+    //_interactionHandler.connectDevices();
 
     // Run start up scripts
     ghoul::Dictionary scripts;
@@ -341,7 +341,7 @@ ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
     return _context;
 }
 
-InteractionHandler& OpenSpaceEngine::interactionHandler() {
+interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return _interactionHandler;
 }
 
