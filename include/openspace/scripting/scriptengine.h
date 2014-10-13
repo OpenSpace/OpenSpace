@@ -26,6 +26,7 @@
 #define __SCRIPTENGINE_H__
 
 #include <ghoul/lua/ghoul_lua.h>
+
 #include <set>
 
 /**
@@ -50,19 +51,24 @@ public:
     };
     
     ScriptEngine();
-    
+
     bool initialize();
     void deinitialize();
     
-    bool addLibrary(const LuaLibrary& library);
+	void initializeLuaState(lua_State* state);
+
+	void addLibrary(const LuaLibrary& library);
     bool hasLibrary(const std::string& name);
     
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
+
     
 private:
+	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
+    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
+
     bool isLibraryNameAllowed(const std::string& name);
-    void addLibraryFunctions(const LuaLibrary& library, bool replace);
     
     void addBaseLibrary();
     void remapPrintFunction();

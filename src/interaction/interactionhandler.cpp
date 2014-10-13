@@ -99,7 +99,7 @@ const Camera* const InteractionHandler::camera() const {
 void InteractionHandler::keyboardCallback(int key, int action) {
 	if (_keyboardController) {
 		auto start = ghoul::HighResClock::now();
-		_keyboardController->keyPressed(KeyAction(action), Keys(key));
+		_keyboardController->keyPressed(KeyAction(action), Key(key), KeyModifier::None);
 		auto end = ghoul::HighResClock::now();
 		LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
 	}
@@ -119,6 +119,79 @@ void InteractionHandler::mousePositionCallback(int x, int y) {
 void InteractionHandler::mouseScrollWheelCallback(int pos) {
 	if (_mouseController)
 		_mouseController->scrollWheel(float(pos));
+}
+
+void InteractionHandler::orbitDelta(const glm::quat& rotation)
+{
+	lockControls();
+
+	// the camera position
+	psc relative = _camera->position();
+
+	// should be changed to something more dynamic =)
+	psc origin;
+	if (_focusNode) {
+		origin = _focusNode->worldPosition();
+	}
+
+	psc relative_origin_coordinate = relative - origin;
+	//glm::mat4 rotation_matrix = glm::mat4_cast(glm::inverse(rotation));
+	//relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
+	relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
+	relative = relative_origin_coordinate + origin;
+
+	_camera->setPosition(relative);
+	//camera_->rotate(rotation);
+	//camera_->setRotation(glm::mat4_cast(rotation));
+
+	glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+	_camera->setRotation(la);
+	//camera_->setLookUpVector();
+
+	unlockControls();
+}
+
+void InteractionHandler::rotateDelta(const glm::quat& rotation)
+{
+	lockControls();
+	_camera->rotate(rotation);
+	unlockControls();
+}
+
+void InteractionHandler::distanceDelta(const PowerScaledScalar& distance)
+{
+	lockControls();
+
+	psc relative = _camera->position();
+	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+
+	psc relative_origin_coordinate = relative - origin;
+	const glm::vec3 dir(relative_origin_coordinate.direction());
+	glm::vec3 newdir = dir * distance[0];
+	relative_origin_coordinate = newdir;
+	relative_origin_coordinate[3] = distance[1];
+	relative = relative + relative_origin_coordinate;
+
+	relative_origin_coordinate = relative - origin;
+	newdir = relative_origin_coordinate.direction();
+
+	// update only if on the same side of the origin
+	if (glm::angle(newdir, dir) < 90.0f)
+		_camera->setPosition(relative);
+
+	unlockControls();
+}
+
+void InteractionHandler::lookAt(const glm::quat& rotation)
+{
+}
+
+void InteractionHandler::setRotation(const glm::quat& rotation)
+{
+}
+
+double InteractionHandler::deltaTime() const {
+	return _deltaTime;
 }
 
 } // namespace interaction

@@ -34,17 +34,20 @@ namespace interaction {
 
 class KeyboardController : public Controller {
 public:
-	virtual void keyPressed(KeyAction action, Keys key) = 0;
+	virtual void keyPressed(KeyAction action, Key key, KeyModifier modifier) = 0;
 };
 
 class KeyboardControllerFixed : public KeyboardController {
 public:
-	void keyPressed(KeyAction action, Keys key);
+	void keyPressed(KeyAction action, Key key, KeyModifier modifier);
 };
 
 class KeyboardControllerLua : public KeyboardController {
 public:
-	void keyPressed(KeyAction action, Keys key);
+	void keyPressed(KeyAction action, Key key, KeyModifier modifier);
+
+protected:
+	std::string keyToString(Key key, KeyModifier mod) const;
 };
 
 } // namespace interaction

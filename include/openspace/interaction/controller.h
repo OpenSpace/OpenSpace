@@ -44,24 +44,6 @@ public:
 	void setHandler(InteractionHandler* handler);
 
 protected:
-	SceneGraphNode* focusNode() const;
-
-	Camera* camera() const;
-
-
-	double deltaTime() const;
-
-	void orbitDelta(const glm::quat& rotation);
-
-	void rotateDelta(const glm::quat& rotation);
-
-	void distanceDelta(const PowerScaledScalar& distance);
-
-	void lookAt(const glm::quat& rotation);
-
-	void setRotation(const glm::quat& rotation);
-
-private:
 	InteractionHandler* _handler;
 };
 

@@ -36,7 +36,15 @@ enum class KeyAction {
 	Repeat = SGCT_REPEAT
 };
 
-enum class Keys {
+enum class KeyModifier {
+	None = 0,
+	Shift = GLFW_MOD_SHIFT,
+	Control = GLFW_MOD_CONTROL,
+	Alt = GLFW_MOD_ALT,
+	Super = GLFW_MOD_SUPER
+};
+
+enum class Key {
 	Unknown = SGCT_KEY_UNKNOWN,
 	Space = SGCT_KEY_SPACE,
 	Apostrophe = SGCT_KEY_APOSTROPHE,
@@ -157,11 +165,7 @@ enum class Keys {
 	RightAlt = SGCT_KEY_RIGHT_ALT,
 	RightSuper = SGCT_KEY_RIGHT_SUPER,
 	Menu = SGCT_KEY_MENU,
-	Last = SGCT_KEY_LAST,
-	Shift = LeftShift | RightShift,
-	Control = LeftControl | RightControl,
-	Alt = LeftAlt | RightAlt,
-	Super = LeftSuper | RightSuper
+	Last = SGCT_KEY_LAST
 };
 
 } // namespace interaction

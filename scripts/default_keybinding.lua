@@ -1,4 +1,4 @@
 return {
-	w = function() print("w") end,
-	s = function() print("s") end
+	W = function() print("w") end,
+	S = function() print("s") end
 }

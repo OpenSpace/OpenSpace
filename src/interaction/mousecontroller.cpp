@@ -24,6 +24,8 @@
 
 #include <openspace/interaction/mousecontroller.h>
 
+#include <openspace/interaction/interactionhandler.h>
+
 namespace openspace {
 namespace interaction {
 
@@ -54,8 +56,8 @@ glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
 	//	return glm::vec3((sgct::Engine::instance()->getActiveViewMatrix() * glm::vec4(trackballPos,0)));
 
 	//Get x,y,z axis vectors of current camera view
-	glm::vec3 currentViewYaxis = glm::normalize(camera()->lookUpVector());
-	psc viewDir = camera()->position() - focusNode()->worldPosition();
+	glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
+	psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();
 	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
@@ -87,7 +89,7 @@ void MouseController::trackballRotate(int x, int y) {
 	if (curTrackballPos != _lastTrackballPos) {
 		// calculate rotation angle (in radians)
 		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-		rotationAngle *= deltaTime() * 100.0f;
+		rotationAngle *= _handler->deltaTime() * 100.0f;
 
 		// Map trackballpos to camera
 		//		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
@@ -100,7 +102,7 @@ void MouseController::trackballRotate(int x, int y) {
 		glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
 
 		// Apply quaternion to camera
-		orbitDelta(quaternion);
+		_handler->orbitDelta(quaternion);
 
 		_lastTrackballPos = curTrackballPos;
 	}
@@ -128,14 +130,14 @@ void TrackballMouseController::move(float x, float y) {
 
 void TrackballMouseController::scrollWheel(int pos) {
 	const double speed = 4.75;
-	const double dt = deltaTime();
+	const double dt = _handler->deltaTime();
 	if (pos < 0) {
 		PowerScaledScalar dist(speed * dt, 0.0);
-		distanceDelta(dist);
+		_handler->distanceDelta(dist);
 	}
 	else if (pos > 0) {
 		PowerScaledScalar dist(-speed * dt, 0.0);
-		distanceDelta(dist);
+		_handler->distanceDelta(dist);
 	}
 }
 
