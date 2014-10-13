@@ -309,7 +309,8 @@ bool OpenSpaceEngine::initialize() {
     //DeviceIdentifier::init();
     //DeviceIdentifier::ref().scanDevices();
 
-	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
+	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
+	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
 	_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 
     // Run start up scripts

@@ -27,6 +27,11 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/highresclock.h>
+
 namespace openspace {
 namespace interaction {
 
@@ -143,8 +148,33 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Keys key) {
 	*/
 }
 
-void KeyboardControllerLua::keyPressed(KeyAction action, Keys key)
-{
+void KeyboardControllerLua::keyPressed(KeyAction action, Keys key) {
+	std::string _loggerCat = "KeyboardControllerLua";
+
+	lua_State* s = luaL_newstate();
+	luaL_openlibs(s);
+	
+	int status = luaL_loadfile(s, absPath("${SCRIPTS}/default_keybinding.lua").c_str());
+	if (status != LUA_OK) {
+		LERROR("Error loading script: '" << lua_tostring(s, -1) << "'");
+		return;
+	}
+
+	if (lua_pcall(s, 0, LUA_MULTRET, 0)) {
+		LERROR("Error executing script: " << lua_tostring(s, -1));
+		return;
+	}
+
+	auto start = ghoul::HighResClock::now();
+
+
+	lua_pushstring(s, "w");
+	lua_gettable(s, -2);
+	lua_pcall(s, 0, 0, 0);
+
+	auto end = ghoul::HighResClock::now();
+	LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
+
 
 }
 

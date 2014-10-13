@@ -24,6 +24,12 @@
 
 #include <openspace/interaction/interactionhandler.h>
 
+#include <ghoul/misc/highresclock.h>
+
+namespace {
+	const std::string _loggerCat = "InteractionHandler";
+}
+
 namespace openspace {
 namespace interaction {
 
@@ -91,24 +97,28 @@ const Camera* const InteractionHandler::camera() const {
 }
 
 void InteractionHandler::keyboardCallback(int key, int action) {
-	if (_keyboardController)
-			_keyboardController->keyPressed(KeyAction(action), Keys(key));
+	if (_keyboardController) {
+		auto start = ghoul::HighResClock::now();
+		_keyboardController->keyPressed(KeyAction(action), Keys(key));
+		auto end = ghoul::HighResClock::now();
+		LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
+	}
 }
 
 void InteractionHandler::mouseButtonCallback(int button, int action) {
 	if (_mouseController)
-			_mouseController->button(MouseAction(action), MouseButton(button));
+		_mouseController->button(MouseAction(action), MouseButton(button));
 }
 
 void InteractionHandler::mousePositionCallback(int x, int y) {
 	if (_mouseController)
-			// TODO Remap screen coordinates to [0,1]
-			_mouseController->move(float(x), float(y));
+		// TODO Remap screen coordinates to [0,1]
+		_mouseController->move(float(x), float(y));
 }
 
 void InteractionHandler::mouseScrollWheelCallback(int pos) {
 	if (_mouseController)
-			_mouseController->scrollWheel(float(pos));
+		_mouseController->scrollWheel(float(pos));
 }
 
 } // namespace interaction
