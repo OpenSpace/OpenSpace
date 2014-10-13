@@ -133,7 +133,8 @@ bool RenderEngine::initializeGL()
 
         // set the tilted view and the FOV
         _mainCamera->setCameraDirection(glm::vec3(viewdir[0], viewdir[1], viewdir[2]));
-        _mainCamera->setMaxFov(wPtr->getFisheyeFOV());
+		_mainCamera->setMaxFov(wPtr->getFisheyeFOV());
+		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
     } else {
         // get corner positions, calculating the forth to easily calculate center
         glm::vec3 corners[4];
@@ -203,6 +204,9 @@ void RenderEngine::postSynchronizationPreDraw()
 	_sceneGraph->update(a);
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
+
+	// clear the abuffer before rendering the scene
+	_abuffer->clear();
 }
 
 void RenderEngine::render()
@@ -234,7 +238,6 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
-    _abuffer->clear();
     _abuffer->preRender();
 	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
@@ -244,9 +247,12 @@ void RenderEngine::render()
 	_abuffer->resolve();
 	glDisable(GL_BLEND);
 
+
 #ifndef OPENSPACE_VIDEO_EXPORT
+
     // Print some useful information on the master viewport
-    if (sgct::Engine::instance()->isMaster()) {
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
 // Apple usually has retina screens
 #ifdef __APPLE__
 #define FONT_SIZE 18
