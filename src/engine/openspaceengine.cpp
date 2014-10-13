@@ -75,7 +75,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 OpenSpaceEngine::~OpenSpaceEngine() {
 	SpiceManager::deinitialize();
     Time::deinitialize();
-    DeviceIdentifier::deinit();
+    //DeviceIdentifier::deinit();
     FileSystem::deinitialize();
     LogManager::deinitialize();
 }
@@ -306,8 +306,8 @@ bool OpenSpaceEngine::initialize() {
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
     // Initialize OpenSpace input devices
-    DeviceIdentifier::init();
-    DeviceIdentifier::ref().scanDevices();
+    //DeviceIdentifier::init();
+    //DeviceIdentifier::ref().scanDevices();
 
 	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
 	_interactionHandler.setMouseController(new interaction::TrackballMouseController);

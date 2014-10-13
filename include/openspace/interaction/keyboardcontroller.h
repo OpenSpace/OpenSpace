@@ -39,16 +39,12 @@ public:
 
 class KeyboardControllerFixed : public KeyboardController {
 public:
-	void keyPressed(KeyAction action, Keys key) {
-
-	}
+	void keyPressed(KeyAction action, Keys key);
 };
 
 class KeyboardControllerLua : public KeyboardController {
 public:
-	void keyPressed(KeyAction action, Keys key) {
-
-	}
+	void keyPressed(KeyAction action, Keys key);
 };
 
 } // namespace interaction

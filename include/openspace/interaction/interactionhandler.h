@@ -39,75 +39,28 @@ namespace interaction {
 
 class InteractionHandler {
 public:
-    InteractionHandler()
-		: _camera(nullptr)
-		, _focusNode(nullptr)
-		, _keyboardController(nullptr)
-		, _mouseController(nullptr)
-	{
-	}
+    InteractionHandler();
 
-	~InteractionHandler() {
-		delete _keyboardController;
-		delete _mouseController;
-		for (size_t i = 0; i < _controllers.size(); ++i)
-			delete _controllers[i];
+	~InteractionHandler();
 
-	}
+	void setKeyboardController(KeyboardController* controller);
+	void setMouseController(MouseController* controller);
+	void addController(Controller* controller);
 
-	void setKeyboardController(KeyboardController* controller) {
-		delete _keyboardController;
-		_keyboardController = controller;
-		_keyboardController->setHandler(this);
-	}
+	void lockControls();
+	void unlockControls();
 
-	void setMouseController(MouseController* controller) {
-		delete _mouseController;
-		_mouseController = controller;
-		_mouseController->setHandler(this);
-	}
+	void update(double deltaTime);
 
-	void addController(Controller* controller) {
-		_controllers.push_back(controller);
-		controller->setHandler(this);
-	}
+	void setFocusNode(SceneGraphNode* node);
+	const SceneGraphNode* const focusNode() const;
+	void setCamera(Camera* camera);
+	const Camera* const camera() const;
 
-	void lockControls() {
-		_mutex.lock();
-	}
-
-	void unlockControls() {
-		_mutex.unlock();
-	}
-
-	void update(double deltaTime) {
-		_deltaTime = deltaTime;
-	}
-
-	void setFocusNode(SceneGraphNode* node) {
-		_focusNode = node;
-	}
-
-    void keyboardCallback(int key, int action) {
-		if (_keyboardController)
-			_keyboardController->keyPressed(KeyAction(action), Keys(key));
-	}
-
-	void mouseButtonCallback(int button, int action) {
-		if (_mouseController)
-			_mouseController->button(MouseAction(action), MouseButton(button));
-	}
-    
-	void mousePositionCallback(int x, int y) {
-		if (_mouseController)
-			// TODO Remap screen coordinates to [0,1]
-			_mouseController->move(float(x), float(y));
-	}
-    
-	void mouseScrollWheelCallback(int pos) {
-		if (_mouseController)
-			_mouseController->scrollWheel(float(pos));
-	}
+    void keyboardCallback(int key, int action);
+	void mouseButtonCallback(int button, int action);
+	void mousePositionCallback(int x, int y);
+	void mouseScrollWheelCallback(int pos);
 
 private:
 	friend class Controller;

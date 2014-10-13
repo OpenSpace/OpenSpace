@@ -49,7 +49,7 @@ enum class MouseButton {
 	Button7 = SGCT_MOUSE_BUTTON_7,
 	Button8 = SGCT_MOUSE_BUTTON_8,
 	ButtonLast = SGCT_MOUSE_BUTTON_LAST,
-}
+};
 
 } // namespace interaction
 } // namespace openspace

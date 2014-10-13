@@ -1,26 +1,119 @@
-///*****************************************************************************************
-// *                                                                                       *
-// * OpenSpace                                                                             *
-// *                                                                                       *
-// * Copyright (c) 2014                                                                    *
-// *                                                                                       *
-// * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-// * software and associated documentation files (the "Software"), to deal in the Software *
-// * without restriction, including without limitation the rights to use, copy, modify,    *
-// * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-// * permit persons to whom the Software is furnished to do so, subject to the following   *
-// * conditions:                                                                           *
-// *                                                                                       *
-// * The above copyright notice and this permission notice shall be included in all copies *
-// * or substantial portions of the Software.                                              *
-// *                                                                                       *
-// * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-// * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-// * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-// * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-// * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-// * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-// ****************************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <openspace/interaction/interactionhandler.h>
+
+namespace openspace {
+namespace interaction {
+
+InteractionHandler::InteractionHandler()
+	: _camera(nullptr)
+	, _focusNode(nullptr)
+	, _keyboardController(nullptr)
+	, _mouseController(nullptr)
+{
+}
+
+InteractionHandler::~InteractionHandler() {
+	delete _keyboardController;
+	delete _mouseController;
+	for (size_t i = 0; i < _controllers.size(); ++i)
+		delete _controllers[i];
+}
+
+void InteractionHandler::setKeyboardController(KeyboardController* controller) {
+	assert(controller);
+	delete _keyboardController;
+	_keyboardController = controller;
+	_keyboardController->setHandler(this);
+}
+
+void InteractionHandler::setMouseController(MouseController* controller) {
+	assert(controller);
+	delete _mouseController;
+	_mouseController = controller;
+	_mouseController->setHandler(this);
+}
+
+void InteractionHandler::addController(Controller* controller) {
+	assert(controller);
+	_controllers.push_back(controller);
+	controller->setHandler(this);
+}
+
+void InteractionHandler::lockControls() {
+	_mutex.lock();
+}
+
+void InteractionHandler::unlockControls() {
+	_mutex.unlock();
+}
+
+void InteractionHandler::update(double deltaTime) {
+	_deltaTime = deltaTime;
+}
+
+void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+	_focusNode = node;
+}
+
+const SceneGraphNode* const InteractionHandler::focusNode() const {
+	return _focusNode;
+}
+
+void InteractionHandler::setCamera(Camera* camera) {
+	assert(camera);
+	_camera = camera;
+}
+const Camera* const InteractionHandler::camera() const {
+	return _camera;
+}
+
+void InteractionHandler::keyboardCallback(int key, int action) {
+	if (_keyboardController)
+			_keyboardController->keyPressed(KeyAction(action), Keys(key));
+}
+
+void InteractionHandler::mouseButtonCallback(int button, int action) {
+	if (_mouseController)
+			_mouseController->button(MouseAction(action), MouseButton(button));
+}
+
+void InteractionHandler::mousePositionCallback(int x, int y) {
+	if (_mouseController)
+			// TODO Remap screen coordinates to [0,1]
+			_mouseController->move(float(x), float(y));
+}
+
+void InteractionHandler::mouseScrollWheelCallback(int pos) {
+	if (_mouseController)
+			_mouseController->scrollWheel(float(pos));
+}
+
+} // namespace interaction
+} // namespace openspace
+
 //
 //// open space includes
 //#include <ghoul/logging/logmanager.h>

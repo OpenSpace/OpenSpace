@@ -162,7 +162,7 @@ enum class Keys {
 	Control = LeftControl | RightControl,
 	Alt = LeftAlt | RightAlt,
 	Super = LeftSuper | RightSuper
-}
+};
 
 } // namespace interaction
 } // namespace openspace

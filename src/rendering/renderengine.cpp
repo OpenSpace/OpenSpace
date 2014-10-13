@@ -257,7 +257,7 @@ void RenderEngine::render()
         const glm::vec2 scaling = _mainCamera->scaling();
         const glm::vec3 viewdirection = _mainCamera->viewDirection();
         const psc position = _mainCamera->position();
-        const psc origin = OsEng.interactionHandler().getOrigin();
+		const psc origin = OsEng.interactionHandler().focusNode()->worldPosition();
         const PowerScaledScalar pssl = (position - origin).length();
 
 		/* GUI PRINT */
