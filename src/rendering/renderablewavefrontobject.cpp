@@ -224,7 +224,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
-		_varray[m].location[3] = 2;
+		_varray[m].location[3] = 7;
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
@@ -265,7 +265,7 @@ bool RenderableWavefrontObject::initialize()
     completeSuccess &= (_texture != nullptr);
    //completeSuccess &= _geometry->initialize(this); 
 
-	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1,2);
+	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1,7);
 	setBoundingSphere(ps);
 
 
@@ -336,7 +336,9 @@ void RenderableWavefrontObject::render(const RenderData& data)
 	glm::mat4 scaler = glm::scale(transform, glm::vec3(0, 0, -1));
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot_x = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+	glm::mat4 rot_x = glm::rotate(transform, 270.f, glm::vec3(1, 0, 0));
+	glm::mat4 rot_y = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
@@ -346,6 +348,7 @@ void RenderableWavefrontObject::render(const RenderData& data)
 	}
 	transform *= tmp;
 	transform *= rot_x;
+	//transform *= rot_y;
 	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());

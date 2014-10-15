@@ -174,7 +174,7 @@ bool RenderableFov::initialize(){
 		&= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 	
 	 _startTrail;
-	 SpiceManager::ref().getETfromDate("2007 feb 26 12:00:00", _startTrail);
+	 SpiceManager::ref().getETfromDate("2007 feb 26 20:00:00", _startTrail);
 
 	 fullYearSweep();
 	 sendToGPU();
@@ -234,7 +234,7 @@ void RenderableFov::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
+	//openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
 }
 
 void RenderableFov::loadTexture()
