@@ -42,6 +42,7 @@ namespace configurationmanager {
 
 namespace scenegraph {
     const std::string keyPathScene = "ScenePath";
+	const std::string keyCommonFolder = "CommonFolder";
     const std::string keyModules = "Modules";
     const std::string keyCamera = "Camera";
     const std::string keyFocusObject = "Focus";

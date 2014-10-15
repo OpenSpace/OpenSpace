@@ -22,62 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
+#ifndef RENDERABLEPLANE_H_
+#define RENDERABLEPLANE_H_
 
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
 
-namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
-}
+// ghoul includes
+#include <openspace/properties/stringproperty.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
-{
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
+	struct LinePoint;
 
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+class RenderablePlane : public Renderable {
 
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	if (kernels.size() == 0)
-		_kernelsLoadedSuccessfully = false;
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
+	enum class Origin {
+		LowerLeft, LowerRight, UpperLeft, UpperRight, Center
+	};
 
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
-	}
-}
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
-}
+public:
+	RenderablePlane(const ghoul::Dictionary& dictionary);
+	~RenderablePlane();
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
+	bool initialize();
+	bool deinitialize();
 
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "NONE", data.time, position, lightTime);
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
-}
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+
+private:
+	void loadTexture();
+
+	properties::StringProperty _texturePath;
+
+	glm::vec2 _size;
+	Origin _origin;
+
+	ghoul::opengl::ProgramObject* _shader;
+	ghoul::opengl::Texture* _texture;
+	GLuint _quad;
+};
 
 } // namespace openspace
+#endif // RENDERABLEFIELDLINES_H_

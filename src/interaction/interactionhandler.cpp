@@ -156,7 +156,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 
 	// should be changed to something more dynamic =)
 	psc origin;
-	if(node_) {
+	if (node_) {
 		origin = node_->worldPosition();
 	}
 
@@ -170,7 +170,7 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	//camera_->rotate(rotation);
 	//camera_->setRotation(glm::mat4_cast(rotation));
 
-	glm::mat4 la = glm::lookAt(camera_->position().vec3(), node_->worldPosition().vec3(), glm::rotate(rotation, camera_->lookUpVector()));
+	glm::mat4 la = glm::lookAt(camera_->position().vec3(), origin.vec3(), glm::rotate(rotation, camera_->lookUpVector()));
 	camera_->setRotation(la);
 	//camera_->setLookUpVector();
 

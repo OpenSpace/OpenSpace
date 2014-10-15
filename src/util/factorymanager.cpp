@@ -38,7 +38,7 @@
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderablevolumeexpert.h>
-#include <openspace/rendering/renderablevolumecl.h>
+#include <openspace/rendering/renderableplane.h>
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/flare/flare.h>
 
@@ -81,6 +81,8 @@ void FactoryManager::initialize()
 		"RenderableWavefrontObject");
     //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
     //      "RenderableVolumeCL");
+    _manager->factory<Renderable>()->registerClass<RenderablePlane>(
+          "RenderablePlane");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
           "RenderableVolumeGL");
     _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");
