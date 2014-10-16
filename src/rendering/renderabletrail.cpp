@@ -38,6 +38,7 @@ namespace {
 		const std::string keyBody                = "Body";
 		const std::string keyObserver            = "Observer";
 		const std::string keyFrame               = "Frame";
+		const std::string keyOrbitVariety		 = "OrbitVariety";
 		const std::string keyPathModule          = "ModulePath";
 		const std::string keyColor               = "RGB";
 		const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
@@ -65,6 +66,12 @@ namespace openspace{
 		assert(dictionary.getValue(keyDayLength          , _day));//not used now, will be though.
 		// values in modfiles set from here
 		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
+		
+		if (!dictionary.getValue(keyOrbitVariety, _orbitVariety)){
+			_orbitVariety = "heliocentric";
+		}
+		if (_target == "IO")
+			std::cout << _target << " has orbit variety : " << _orbitVariety << std::endl;
 
 		//white is default col
 	if (!dictionary.getValue(keyColor, _c)){
@@ -230,17 +237,17 @@ void RenderableTrail::render(const RenderData& data){
 
 
 	updateTrail();
-
+	/*
 	glBindVertexArray(_vaoID); 
 	glDrawArrays(_mode, 0, _vtotal);
 	glBindVertexArray(0);
-	/*
+	*/
 	glPointSize(2.f);
 
 	glBindVertexArray(_vaoID);
 	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
-	*/
+	
 	_programObject->deactivate();
 }
 
@@ -249,7 +256,7 @@ void RenderableTrail::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 
-	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time+_increment, _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time + _increment, _pscpos, _pscvel, lightTime);
 }
 
 void RenderableTrail::loadTexture()

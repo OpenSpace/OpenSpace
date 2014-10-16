@@ -58,6 +58,7 @@ public:
 	std::string _target;
 	std::string _observer;
 	std::string _frame;
+	std::string _orbitVariety;
 	// color
 	glm::vec3 _c; 
 	double _r, _g, _b;
