@@ -39,6 +39,8 @@ set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
 
+include(cotire)
+
 # Make sure a build type is set. Default is Debug.
 if(NOT CMAKE_BUILD_TYPE)
 	set( CMAKE_BUILD_TYPE Debug CACHE STRING
