@@ -22,70 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
-
-#include <openspace/scenegraph/scenegraph.h>
-
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
-#include <string>
-
-#include <openspace/abuffer/abuffer.h>
 #include <openspace/util/screenlog.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+
+#include <sgct.h> // sgct::Engine::instance()->getTime()
 
 namespace openspace {
 
-class Camera;
+ScreenLog::ScreenLog() {}
 
-class RenderEngine: public properties::PropertyOwner {
-public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
+void ScreenLog::log(ghoul::logging::LogManager::LogLevel level, const std::string& category, const std::string& message) {
+	if (level >= ghoul::logging::LogManager::LogLevel::Info)
+		_entries.emplace_back(level, sgct::Engine::instance()->getTime(), Log::getTimeString(), category, message);
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+	// Once reaching maximum size, reduce to half
+	if (_entries.size() > MaximumSize) {
+		_entries.erase(_entries.begin(), _entries.begin() + MaximumSize / 2);
+	}
+}
 
-    Camera* camera() const;
-    ABuffer* abuffer() const;
+ScreenLog::const_range ScreenLog::last(size_t n) {
+	if (_entries.size() > n) {
+		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+	} else {
+		return std::make_pair(_entries.rbegin(), _entries.rend());
+	}
+}
 
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void serialize(std::vector<char>& dataStream, size_t& offset);
-	void deserialize(const std::vector<char>& dataStream, size_t& offset);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printScreen
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-
-private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
-
-	properties::BoolProperty _showInfo;
-	properties::BoolProperty _showScreenLog;
-
-
-	void generateGlslConfig();
-};
-
-} // namespace openspace
-
-#endif // __RENDERENGINE_H__
+}

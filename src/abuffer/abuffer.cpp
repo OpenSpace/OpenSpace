@@ -190,7 +190,7 @@ bool ABuffer::updateShader() {
 		_fragmentShaderPath);
    
 	if( ! resolveShader) {
-    	LERROR("Resolve shader not updated");
+    	LWARNING("ABuffer shader not updated");
     	return false;
     }
 
@@ -207,7 +207,7 @@ bool ABuffer::updateShader() {
 		delete _resolveShader;
 
 	_resolveShader = resolveShader;
-	LDEBUG("Successfully updated shader!");
+	LINFO("Successfully updated ABuffer shader!");
 	return true;
 }
 

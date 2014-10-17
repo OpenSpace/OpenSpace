@@ -22,70 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
-
-#include <openspace/scenegraph/scenegraph.h>
-
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
-#include <string>
-
-#include <openspace/abuffer/abuffer.h>
-#include <openspace/util/screenlog.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+#include <ghoul/logging/log.h>
+#include <vector>
+#include <tuple>
+#include <utility> // pair
 
 namespace openspace {
 
-class Camera;
-
-class RenderEngine: public properties::PropertyOwner {
+class ScreenLog : public ghoul::logging::Log {
 public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
+	//typedef std::tuple<ghoul::logging::LogManager::LogLevel, std::string, std::string> LogEntry;
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+	struct LogEntry {
+		LogEntry(ghoul::logging::LogManager::LogLevel l, double t, std::string ts, std::string c, std::string m) : level(l), timeStamp(t), timeString(ts), category(c), message(m) {};
+		ghoul::logging::LogManager::LogLevel level;
+		double timeStamp;
+		std::string timeString;
+		std::string category;
+		std::string message;
+	};
 
-    Camera* camera() const;
-    ABuffer* abuffer() const;
+	typedef std::vector<LogEntry>::iterator iterator;
+	typedef std::vector<LogEntry>::const_iterator const_iterator;
+	typedef std::vector<LogEntry>::reverse_iterator reverse_iterator;
+	typedef std::vector<LogEntry>::const_reverse_iterator const_reverse_iterator;
 
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
+	typedef std::pair<reverse_iterator, reverse_iterator> range;
+	typedef std::pair<const_reverse_iterator, const_reverse_iterator> const_range;
 
-	void serialize(std::vector<char>& dataStream, size_t& offset);
-	void deserialize(const std::vector<char>& dataStream, size_t& offset);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printScreen
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+	const size_t MaximumSize = 1000;
 
+	ScreenLog();
+
+	virtual void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
+		const std::string& message);
+
+	const_range last(size_t n = 10);
 
 private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
 
-	properties::BoolProperty _showInfo;
-	properties::BoolProperty _showScreenLog;
+	std::vector<LogEntry> _entries;
 
-
-	void generateGlslConfig();
 };
-
-} // namespace openspace
-
-#endif // __RENDERENGINE_H__
+}

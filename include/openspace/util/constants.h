@@ -30,6 +30,12 @@
 namespace openspace {
 namespace constants {
 
+namespace fonts {
+	const std::string keySGCT = "SGCTFont";
+	const std::string keyMono = "UbuntuMono";
+	const std::string keyLight = "UbuntuLight";
+} // namespace fonts
+
 namespace configurationmanager {
     const std::string keyPaths = "Paths";
     const std::string keyConfigSgct = "SGCTConfig";

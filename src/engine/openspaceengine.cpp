@@ -330,6 +330,11 @@ bool OpenSpaceEngine::initialize() {
         _engine->scriptEngine().runScriptFile(absoluteScriptPath);
     }
 
+	// Load a light and a monospaced font
+	sgct_text::FontManager::instance()->setDefaultFontPath(absPath("${FONTS}/"));
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf");
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf");
+
     return true;
 }
 

@@ -30,6 +30,7 @@
 #include <openspace/util/time.h>
 
 // We need to decide where this is set
+#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include "sgct.h"
@@ -70,9 +71,13 @@ int printImage(lua_State* L) {
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
-    , _sceneGraph(nullptr)
-    , _abuffer(nullptr)
+	, _sceneGraph(nullptr)
+	, _abuffer(nullptr)
+	, _log(nullptr)
+	, _showInfo("info", "Display info", true)
+	, _showScreenLog("log", "Display screen log", true)
 {
+	setName("renderEngine");
 }
 
 RenderEngine::~RenderEngine()
@@ -178,6 +183,9 @@ bool RenderEngine::initializeGL()
 
     _abuffer->initialize();
 
+	_log = new ScreenLog();
+	ghoul::logging::LogManager::ref().addLog(_log);
+
     // successful init
     return true;
 }
@@ -253,61 +261,102 @@ void RenderEngine::render()
     // Print some useful information on the master viewport
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
-// Apple usually has retina screens
-#ifdef __APPLE__
-#define FONT_SIZE 18
-#else
-#define FONT_SIZE 10
+
+		// TODO: Adjust font_size properly when using retina screen
+		const int font_size = 8;
+		const int font_with = font_size*0.7;
+		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size);
+		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
+		
+		if (_showInfo) {
+			const sgct_text::Font* font = fontMono;
+			int x1, xSize, y1, ySize;
+			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+			int startY = ySize - 2 * font_size;
+			const glm::vec2 scaling = _mainCamera->scaling();
+			const glm::vec3 viewdirection = _mainCamera->viewDirection();
+			const psc position = _mainCamera->position();
+			const psc origin = OsEng.interactionHandler().getOrigin();
+			const PowerScaledScalar pssl = (position - origin).length();
+
+			// GUI PRINT 
+// Using a macro to shorten line length and increase readability
+#define PrintText(i, format, ...) Freetype::print(font, 10, startY - font_size * i * 2, format, __VA_ARGS__);
+			int i = 0;
+			PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+			PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
+			PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
+			PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
+			PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
+			PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
+			PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
+			PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
+			PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
+#undef PrintText
+		}
+
+		if (_showScreenLog)
+		{
+			const sgct_text::Font* font = fontLight;
+			const int max = 10;
+			const int category_length = 20;
+			const int msg_length = 120;
+			const double ttl = 10.0;
+			auto entries = _log->last(max);
+
+			const glm::vec4 white(1, 1, 1, 1);
+			const glm::vec4 red(1, 0, 0, 1);
+			const glm::vec4 yellow(1, 1, 0, 1);
+			const glm::vec4 green(0, 1, 0, 1);
+			const glm::vec4 blue(0, 0, 1, 1);
+
+			size_t nr = 1;
+			for (auto it = entries.first; it != entries.second; ++it) {
+				const ScreenLog::LogEntry* e = &(*it);
+
+				const double t = sgct::Engine::instance()->getTime();
+				double diff = t - e->timeStamp;
+
+				// Since all log entries are ordered, once one is exceeding TTL, all have
+				if (diff > ttl)
+					break;
+
+				float alpha = 1;
+				float ttf = ttl - 5.0;
+				if (diff > ttf) {
+					diff = diff - ttf;
+					float p = 0.8 - diff / ttf;
+					alpha = (p <= 0.0) ? 0.0 : pow(p, 0.3);
+				}
+
+				// Since all log entries are ordered, once one exceeds alpha, all have
+				if (alpha <= 0.0)
+					break;
+
+				std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				Freetype::print(font, 10, font_size * nr * 2, white*alpha, 
+					"%-14s %s%s",									// Format
+					e->timeString.c_str(),							// Time string
+					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
+					e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
+
+				glm::vec4 color = white;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+					color = green;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+					color = yellow;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+					color = red;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+					color = blue;
+
+				Freetype::print(font, 10 + 39 * font_with, font_size * nr * 2, color*alpha, "%s", lvl.c_str());
+				Freetype::print(font, 10 + 53 * font_with, font_size * nr * 2, white*alpha, "%s", e->message.substr(0, msg_length).c_str());
+				++nr;
+			}
+		}
 #endif
-
-
-        const glm::vec2 scaling = _mainCamera->scaling();
-        const glm::vec3 viewdirection = _mainCamera->viewDirection();
-        const psc position = _mainCamera->position();
-        const psc origin = OsEng.interactionHandler().getOrigin();
-        const PowerScaledScalar pssl = (position - origin).length();
-
-		/* GUI PRINT */
-
-		std::string&& time = Time::ref().currentTimeUTC().c_str();
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 16, "Avg. Frametime: %.10f", sgct::Engine::instance()->getAvgDt()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 14, "Drawtime: %.10f", sgct::Engine::instance()->getDrawTime()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 12, "Frametime: %.10f", sgct::Engine::instance()->getDt()
-			  );
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 10, "Origin: (%.5f, %.5f, %.5f, %.5f)", origin[0],
-              origin[1], origin[2], origin[3]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 8, "Camera position: (%.5f, %.5f, %.5f, %.5f)",
-              position[0], position[1], position[2], position[3]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 6, "Distance to origin: (%.15f, %.2f)", pssl[0],
-              pssl[1]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 4, "View direction: (%.3f, %.3f, %.3f)",
-              viewdirection[0], viewdirection[1], viewdirection[2]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
-
-    }
-#endif
+	}
     
 }
 
