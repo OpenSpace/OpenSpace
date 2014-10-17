@@ -185,15 +185,17 @@ bool RenderEngine::initializeGL()
 void RenderEngine::postSynchronizationPreDraw()
 {
 	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
-	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++)
-		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized())
-			generateGlslConfig();
-	// Move time forward.
-	//_runtimeData->advanceTimeBy(1, DAY);
-	
-	//_runtimeData->advanceTimeBy(1, HOUR);
-	//_runtimeData->advanceTimeBy(30, MINUTE);
-	//_runtimeData->advanceTimeBy(1, MILLISECOND);
+	bool updateAbuffer = false;
+	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
+		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized()) {
+			updateAbuffer = true;
+			break;
+		}
+	}
+	if (updateAbuffer) {
+		generateGlslConfig();
+		_abuffer->reinitialize();
+	}
 	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
@@ -202,13 +204,13 @@ void RenderEngine::postSynchronizationPreDraw()
 	_sceneGraph->update({Time::ref().currentTime()}); 
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
+
+	_abuffer->clear();
 }
 
 void RenderEngine::render()
 {
     // SGCT resets certain settings
-    //glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
@@ -232,7 +234,6 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
-    _abuffer->clear();
     _abuffer->preRender();
 	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
@@ -504,10 +505,8 @@ ABuffer* RenderEngine::abuffer() const {
 
 void RenderEngine::generateGlslConfig() {
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
-	int x1, xSize, y1, ySize;
-	sgct::Engine::instance()->
-		getActiveWindowPtr()->
-		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+	int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
+	int ySize = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();;
 
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to

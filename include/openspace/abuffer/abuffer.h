@@ -49,6 +49,7 @@ public:
 	ABuffer();
 	virtual ~ABuffer();
 	virtual void resolve();
+	virtual bool reinitialize();
 
 	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
 	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
@@ -58,6 +59,7 @@ public:
 
 protected:
 	virtual std::string settings() = 0;
+	virtual bool reinitializeInternal() = 0;
 
 	bool initializeABuffer();
 
@@ -72,6 +74,9 @@ protected:
 	unsigned int _width, _height, _totalPixels;
 
 private:
+
+	void updateDimensions();
+
 	GLuint _screenQuad;
 
 	bool _validShader;

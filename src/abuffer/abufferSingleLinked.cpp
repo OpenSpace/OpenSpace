@@ -59,10 +59,22 @@ bool ABufferSingleLinked::initialize() {
 	//          BUFFERS
 	// ============================
 	glGenTextures(1, &_anchorPointerTexture);
+	glGenBuffers(1, &_anchorPointerTextureInitializer);
+	glGenBuffers(1, &_atomicCounterBuffer);
+	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
+	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
+	glGenBuffers(1, &_fragmentBuffer);
+    glGenTextures(1, &_fragmentTexture);
+
+	reinitialize();
+
+	return initializeABuffer();
+}
+
+bool ABufferSingleLinked::reinitializeInternal() {
 	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _width, _height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
-	glGenBuffers(1, &_anchorPointerTextureInitializer);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
 	glBufferData(GL_PIXEL_UNPACK_BUFFER, _totalPixels * sizeof(GLuint), NULL, GL_STATIC_DRAW);
 
@@ -71,22 +83,16 @@ bool ABufferSingleLinked::initialize() {
 	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	glGenBuffers(1, &_atomicCounterBuffer);
-	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
-	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
-
-	glGenBuffers(1, &_fragmentBuffer);
 	glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
-	glBufferData(GL_TEXTURE_BUFFER, MAX_LAYERS*_totalPixels*sizeof(GLfloat)*4, NULL, GL_DYNAMIC_COPY);
+	glBufferData(GL_TEXTURE_BUFFER, MAX_LAYERS*_totalPixels*sizeof(GLfloat) * 4, NULL, GL_DYNAMIC_COPY);
 
-    glGenTextures(1, &_fragmentTexture);
-    glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-    glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+	glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 
-	return initializeABuffer();
+	return true;
 }
 
 void ABufferSingleLinked::clear() {

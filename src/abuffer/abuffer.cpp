@@ -48,11 +48,7 @@ namespace {
 namespace openspace {
 
 ABuffer::ABuffer() : _validShader(false), _resolveShader(nullptr) {
-	int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-    _width = xSize;
-    _height = ySize;
-    _totalPixels = _width * _height;
+	updateDimensions();
 }
 
 ABuffer::~ABuffer() {
@@ -71,7 +67,6 @@ bool ABuffer::initializeABuffer() {
     // ============================
 	auto shaderCallback = [this](ghoul::opengl::ProgramObject* program) {
 		// Error for visibility in log
-		LERROR(program->name() << " invalidated");
 		_validShader = false;
 	};
 
@@ -110,10 +105,17 @@ bool ABuffer::initializeABuffer() {
 	return true;
 }
 
+bool ABuffer::reinitialize() {
+
+	// set the total resolution for all viewports
+	updateDimensions();
+	return reinitializeInternal();
+}
+
 void ABuffer::resolve() {
 	if( ! _validShader) {
 		SleepEx(0, TRUE);
-		//generateShaderSource();
+		generateShaderSource();
 		updateShader();
 		_validShader = true;
 	}
@@ -184,7 +186,10 @@ bool ABuffer::updateShader() {
 		for (int i = 0; i < _transferFunctions.size(); ++i) {
 			_resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
 		}
-		LINFO("Successfully updated shader!");
+		LINFO("Successfully updated ABuffer resolve shader!");
+	}
+	else {
+		LWARNING("Couldn't update ABuffer resolve shader");
 	}
 	return s;
 }
@@ -215,7 +220,7 @@ void ABuffer::openspaceHeaders() {
 
 	std::ofstream f(absPath(generatedHeadersPath));
 	f << "#define MAX_VOLUMES " << std::to_string(_samplers.size()) << "\n"
-		<< "#define MAX_TF " << std::to_string(_transferFunctions.size()) << "\n";
+		<< "#define MAX_TF " << _transferFunctions.size() << "\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		f << "uniform sampler3D " << _volumes.at(i).first << ";\n";
 	}
@@ -246,7 +251,7 @@ void ABuffer::openspaceHeaders() {
 	}
 	f << "};\n";
 
-	f << "#define LOOP_LIMIT " + std::to_string(maxLoop) + "\n";
+	f << "#define LOOP_LIMIT " << maxLoop << "\n";
 
 	f << "float volumeStepSize[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
@@ -272,11 +277,11 @@ void ABuffer::openspaceSamplerCalls() {
 		auto found2 = _samplers.at(i).find_first_of("(", found1);
 		if (found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
-			f << "#ifndef SKIP_VOLUME_" << std::to_string(i) << "\n"
-				<< "if((currentVolumeBitmask & (1 << " << std::to_string(i) << ")) == " << std::to_string(1 << i) << ") {\n"
-				<< "    vec4 c = " << functionName << "(final_color,volume_position[" << std::to_string(i) << "]);\n"
-				<< "    blendStep(final_color, c, volumeStepSize[" << std::to_string(i) << "]);\n"
-				<< "    volume_position[" << std::to_string(i) << "] += volume_direction[" << std::to_string(i) << "]*volumeStepSize[" << std::to_string(i) << "];\n"
+			f << "#ifndef SKIP_VOLUME_" << i << "\n"
+				<< "if((currentVolumeBitmask & (1 << " << i << ")) == " << std::to_string(1 << i) << ") {\n"
+				<< "    vec4 c = " << functionName << "(final_color,volume_position[" << i << "]);\n"
+				<< "    blendStep(final_color, c, volumeStepSize[" << i << "]);\n"
+				<< "    volume_position[" << i << "] += volume_direction[" << i << "]*volumeStepSize[" << i << "];\n"
 				<< "}\n"
 				<< "#endif\n";
 		}
@@ -299,18 +304,18 @@ void ABuffer::openspaceTransferFunction() {
 		<< "float SCREEN_HEIGHTf = float(SCREEN_HEIGHT);\n"
 		<< "float SCREEN_WIDTHf = float(SCREEN_WIDTH);\n";
 	for (int i = 0; i < _transferFunctions.size(); ++i) {
-		f << "if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*" << std::to_string(i + 1)
+		f << "if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*" << i + 1
 			<< " && gl_FragCoord.y < SCREEN_HEIGHTf-showfunc_size*" << std::to_string(i) << ") {\n"
 			<< "    float normalizedIntensity = gl_FragCoord.x / (SCREEN_WIDTHf-1) ;\n"
 			<< "    vec4 tfc = texture(" << _transferFunctions.at(i).first << ", normalizedIntensity);\n"
 			<< "    final_color = tfc;\n"
-			<< "    float cmpf = SCREEN_HEIGHTf-showfunc_size*" << std::to_string(i + 1) << " + tfc.a*showfunc_size;\n"
+			<< "    float cmpf = SCREEN_HEIGHTf-showfunc_size*" << i + 1 << " + tfc.a*showfunc_size;\n"
 			<< "    if(gl_FragCoord.y > cmpf) {\n"
 			<< "        final_color = vec4(0,0,0,0);\n"
 			<< "    } else {\n"
 			<< "        final_color.a = 1.0;\n"
 			<< "    }\n"
-			<< "} else if(ceil(gl_FragCoord.y) == SCREEN_HEIGHTf - showfunc_size*" << std::to_string(i + 1) << ") {\n"
+			<< "} else if(ceil(gl_FragCoord.y) == SCREEN_HEIGHTf - showfunc_size*" << i + 1 << ") {\n"
 			<< "    const float intensity = 0.4;\n"
 			<< "    final_color = vec4(intensity,intensity,intensity,1.0);\n"
 			<< "}\n";
@@ -321,6 +326,12 @@ void ABuffer::openspaceTransferFunction() {
 void ABuffer::invalidateABuffer() {
 	LDEBUG("Shader invalidated");
 	_validShader = false;
+}
+
+void ABuffer::updateDimensions() {
+	_width = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();
+	_height = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();
+	_totalPixels = _width * _height;
 }
 
 
