@@ -81,8 +81,9 @@ public:
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
+	void postDraw();
+	void keyboardCallback(int key, int action);
+	void charCallback(unsigned int codepoint);
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
@@ -114,6 +115,14 @@ private:
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
+
+	bool _inputCommand;
+	size_t _inputPosition;
+	std::string _activeCommand;
+
+	void renderActiveCommand();
+	void handleCommandInput(int key, int action);
+	void addToCommand(std::string c);
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

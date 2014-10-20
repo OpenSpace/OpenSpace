@@ -313,7 +313,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const double speed = 2.75;
     const double dt = getDt();
-    if(action == SGCT_PRESS || action == SGCT_REPEAT) {
+	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 	    if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);

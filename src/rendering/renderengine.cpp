@@ -300,11 +300,12 @@ void RenderEngine::render()
 			const sgct_text::Font* font = fontLight;
 			const int max = 10;
 			const int category_length = 20;
-			const int msg_length = 120;
-			const double ttl = 10.0;
+			const int msg_length = 140;
+			const double ttl = 15.0;
+			const double fade = 5.0;
 			auto entries = _log->last(max);
 
-			const glm::vec4 white(1, 1, 1, 1);
+			const glm::vec4 white(0.9, 0.9, 0.9, 1);
 			const glm::vec4 red(1, 0, 0, 1);
 			const glm::vec4 yellow(1, 1, 0, 1);
 			const glm::vec4 green(0, 1, 0, 1);
@@ -322,10 +323,10 @@ void RenderEngine::render()
 					break;
 
 				float alpha = 1;
-				float ttf = ttl - 5.0;
+				float ttf = ttl - fade;
 				if (diff > ttf) {
 					diff = diff - ttf;
-					float p = 0.8 - diff / ttf;
+					float p = 0.8 - diff / fade;
 					alpha = (p <= 0.0) ? 0.0 : pow(p, 0.3);
 				}
 

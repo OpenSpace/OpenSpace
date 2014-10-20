@@ -58,6 +58,67 @@ namespace {
     struct {
         std::string configurationName;
     } commandlineArgumentPlaceholders;
+
+	// TODO: Put this functio nsomewhere appropriate
+	// get text from clipboard
+	std::string getClipboardText()
+	{
+#ifdef WIN32
+		// Try opening the clipboard
+		if (!OpenClipboard(nullptr))
+			return "";
+
+		// Get handle of clipboard object for ANSI text
+		HANDLE hData = GetClipboardData(CF_TEXT);
+		if (hData == nullptr)
+			return "";
+
+		// Lock the handle to get the actual text pointer
+		char * pszText = static_cast<char*>(GlobalLock(hData));
+		if (pszText == nullptr)
+			return "";
+
+		// Save text in a string class instance
+		std::string text(pszText);
+
+		// Release the lock
+		GlobalUnlock(hData);
+
+		// Release the clipboard
+		CloseClipboard();
+
+		text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+		return text;
+#else
+		return "";
+#endif
+	}
+
+	std::string UnicodeToUTF8(unsigned int codepoint){
+		std::string out;
+
+		if (codepoint <= 0x7f)
+			out.append(1, static_cast<char>(codepoint));
+		else if (codepoint <= 0x7ff)
+		{
+			out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		else if (codepoint <= 0xffff)
+		{
+			out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		else
+		{
+			out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		return out;
+	}
 }
 
 using namespace ghoul::cmdparser;
@@ -68,6 +129,9 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
+	, _inputCommand(false)
+	, _inputPosition(0)
+	, _activeCommand("")
 {
 }
 
@@ -331,9 +395,15 @@ bool OpenSpaceEngine::initialize() {
     }
 
 	// Load a light and a monospaced font
-	sgct_text::FontManager::instance()->setDefaultFontPath(absPath("${FONTS}/"));
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf");
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf");
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf", absPath("${FONTS}/"));
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf", absPath("${FONTS}/"));
+	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/adobe-source-code-pro/SourceCodePro-Regular.ttf"), local);
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/monaco.ttf"), local);
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/adobe-source-sans-pro/SourceSansPro-Regular.ttf"), local);
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto_Slab/RobotoSlab-Regular.ttf"), local);
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
 
     return true;
 }
@@ -383,6 +453,45 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
 void OpenSpaceEngine::render() {
     _renderEngine.render();
+
+	// If currently writing a command, render it to screen
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _inputCommand) {
+		renderActiveCommand();
+	}
+}
+
+void OpenSpaceEngine::renderActiveCommand() {
+	const int font_size = 12;
+	const int font_with = font_size*0.7;
+	const glm::vec4 red(1, 0, 0, 1);
+	const glm::vec4 green(0, 1, 0, 1);
+	const glm::vec4 white(1, 1, 1, 1);
+	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
+	Freetype::print(font, 10, 400, red, "$");
+	Freetype::print(font, 10 + font_size, 400, white, "%s", _activeCommand.c_str());
+
+	size_t n = std::count(_activeCommand.begin(), _activeCommand.begin() + _inputPosition, '\n');
+	size_t p = _activeCommand.find_last_of('\n', _inputPosition);
+	size_t linepos = _inputPosition;
+
+	if (n>0) {
+		if (p == _inputPosition) {
+			p = _activeCommand.find_last_of('\n', _inputPosition - 1);
+			if (p != std::string::npos) {
+				linepos -= p + 1;
+			}
+			else {
+				linepos = _inputPosition - 1;
+			}
+		}
+		else{
+			linepos -= p + 1;
+		}
+	}
+	char buffer[10];
+	sprintf(buffer, "%%%is", linepos + 1);
+	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, 400 - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
 }
 
 void OpenSpaceEngine::postDraw() {
@@ -390,9 +499,127 @@ void OpenSpaceEngine::postDraw() {
         _interactionHandler.unlockControls();
 }
 
+void OpenSpaceEngine::addToCommand(std::string c) {
+	size_t length = c.length();
+	_activeCommand.insert(_inputPosition, c);
+	_inputPosition += length;
+}
+
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
-    if (sgct::Engine::instance()->isMaster())
-        _interactionHandler.keyboardCallback(key, action);
+	if (sgct::Engine::instance()->isMaster()) {
+
+		if (key == SGCT_KEY_BACKSLASH && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
+			_inputCommand = !_inputCommand;
+		}
+
+		if (!_inputCommand) {
+			_interactionHandler.keyboardCallback(key, action);
+		}
+		else {
+			handleCommandInput(key, action);
+		}
+	}
+}
+
+void OpenSpaceEngine::handleCommandInput(int key, int action) {
+	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
+		const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
+			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
+		const bool mod_SHIFT = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
+			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
+
+		// Paste from clipboard
+		if (key == SGCT_KEY_V) {
+			if (mod_CONTROL) {
+				addToCommand(getClipboardText());
+			}
+		}
+
+		// Go to the previous character
+		if (key == SGCT_KEY_LEFT) {
+			if (_inputPosition > 0)
+				_inputPosition -= 1;
+		}
+
+		// Go to the next character
+		if (key == SGCT_KEY_RIGHT) {
+			if (_inputPosition < _activeCommand.length())
+				++_inputPosition;
+		}
+
+		// Go to ending of previous line
+		if (key == SGCT_KEY_UP) {
+			if (_inputPosition > 0) {
+				size_t p = _activeCommand.find_last_of('\n', _inputPosition - 1);
+				if (p != std::string::npos)
+					_inputPosition = p;
+				else
+					_inputPosition = 0;
+			}
+		}
+
+		// Go to ending of line (or end of next line)
+		if (key == SGCT_KEY_DOWN) {
+			size_t p = _activeCommand.find_first_of('\n', _inputPosition + 1);
+			if (p != std::string::npos)
+				_inputPosition = p;
+			else
+				_inputPosition = _activeCommand.size();
+		}
+
+		// Remove character before _inputPosition
+		if (key == SGCT_KEY_BACKSPACE) {
+			if (_inputPosition > 0) {
+				_activeCommand.erase(_inputPosition - 1, 1);
+				--_inputPosition;
+			}
+		}
+
+		// Remove character after _inputPosition
+		if (key == SGCT_KEY_DELETE) {
+			if (_inputPosition <= _activeCommand.size()) {
+				_activeCommand.erase(_inputPosition, 1);
+			}
+		}
+
+		// Go to the beginning of command string
+		if (key == SGCT_KEY_HOME) {
+			_inputPosition = 0;
+		}
+
+		// Go to the end of command string
+		if (key == SGCT_KEY_END) {
+			_inputPosition = _activeCommand.size();
+		}
+
+		if (key == SGCT_KEY_ENTER) {
+
+			// SHIFT+ENTER == new line
+			if (mod_SHIFT) {
+				addToCommand("\n");
+			}
+			// CTRL+ENTER == Debug print the command
+			else if (mod_CONTROL) {
+				LDEBUG("Active command from next line:\n" <<_activeCommand);
+			}
+			// ENTER == run lua script
+			else {
+				_scriptEngine.runScript(_activeCommand);
+				_activeCommand = "";
+				_inputPosition = 0;
+				_inputCommand = false;
+			}
+		}
+	}
+}
+
+void OpenSpaceEngine::charCallback(unsigned int codepoint) {
+
+	// SGCT_KEY_BACKSLASH == 92 but that corresponds to codepoint 167
+	if (_inputCommand && codepoint != 167) {
+		addToCommand(UnicodeToUTF8(codepoint));
+	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
