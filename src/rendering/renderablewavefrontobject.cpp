@@ -137,15 +137,15 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	_vsize = indicesSize;
 
 	// float arrays
-	float *tempVertexArray = (float*)malloc(vertexSize*sizeof(float));
-	float *tempVertexNormalArray = (float*)malloc(vertexNormalSize*sizeof(float));
-	float *tempVertexTextureArray = (float*)malloc(vertexTextureSize*sizeof(float));
-	_varray = (Vertex*)malloc(_vsize*sizeof(Vertex));
+	float *tempVertexArray = new float[vertexSize];// vertexSize*sizeof(float));
+	float *tempVertexNormalArray = new float[vertexNormalSize];
+	float *tempVertexTextureArray = new float[vertexTextureSize];
+	_varray = new Vertex[_vsize];
 
 	// int arrays
-	_iarray = (int*)malloc(_isize*sizeof(int));
-	int *tempNormalIndicesArray = (int*)malloc(_isize*sizeof(int));
-	int *tempTextureIndicesArray = (int*)malloc(_isize*sizeof(int));
+	_iarray = new int[_isize];
+	int *tempNormalIndicesArray = new int[_isize];
+	int *tempTextureIndicesArray = new int[_isize];
 
 	// keeping track of the array indexes
 	unsigned int i = 0;
@@ -243,11 +243,11 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		m++;
 	}
 	// free up memory
-	free(tempVertexArray);
-	free(tempVertexNormalArray);
-	free(tempNormalIndicesArray);
-	free(tempVertexTextureArray);
-	free(tempTextureIndicesArray);
+	delete [] tempVertexArray;
+	delete [] tempVertexNormalArray;
+	delete [] tempNormalIndicesArray;
+	delete [] tempVertexTextureArray;
+	delete [] tempTextureIndicesArray;
 }
 
 RenderableWavefrontObject::~RenderableWavefrontObject(){
