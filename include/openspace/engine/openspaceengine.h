@@ -118,7 +118,9 @@ private:
 
 	bool _inputCommand;
 	size_t _inputPosition;
-	std::string _activeCommand;
+	std::vector<std::string> _commandsHistory;
+	size_t _activeCommand;
+	std::vector<std::string> _commands;
 
 	void renderActiveCommand();
 	void handleCommandInput(int key, int action);

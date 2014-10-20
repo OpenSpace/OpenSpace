@@ -94,6 +94,35 @@ namespace {
 #endif
 	}
 
+	// TODO: Put this function somewhere appropriate
+	// set text to clipboard
+	bool setClipboardText(std::string text)
+	{
+#ifdef WIN32
+		char *ptrData = nullptr;
+		HANDLE hData = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, text.length() + 1);
+
+		ptrData = (char*)GlobalLock(hData);
+		memcpy(ptrData, text.c_str(), text.length() + 1);
+
+		GlobalUnlock(hData);
+
+		if (!OpenClipboard(nullptr))
+			return false;
+
+		if (!EmptyClipboard())
+			return false;
+
+		SetClipboardData(CF_TEXT, hData);
+
+		CloseClipboard();
+
+		return true;
+#else
+		return false;
+#endif
+	}
+
 	std::string UnicodeToUTF8(unsigned int codepoint){
 		std::string out;
 
@@ -131,7 +160,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
 	, _inputCommand(false)
 	, _inputPosition(0)
-	, _activeCommand("")
+	, _activeCommand(0)
+	, _commands({""})
 {
 }
 
@@ -398,11 +428,7 @@ bool OpenSpaceEngine::initialize() {
 	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf", absPath("${FONTS}/"));
 	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf", absPath("${FONTS}/"));
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/adobe-source-code-pro/SourceCodePro-Regular.ttf"), local);
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/monaco.ttf"), local);
 	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/adobe-source-sans-pro/SourceSansPro-Regular.ttf"), local);
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto_Slab/RobotoSlab-Regular.ttf"), local);
 	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
 
     return true;
@@ -462,22 +488,28 @@ void OpenSpaceEngine::render() {
 }
 
 void OpenSpaceEngine::renderActiveCommand() {
-	const int font_size = 12;
+
+	const int font_size = 10;
+	int x1, xSize, y1, ySize;
+	sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+	int startY = ySize - 2 * font_size;
+	startY = startY - font_size * 10 * 2;
+
 	const int font_with = font_size*0.7;
 	const glm::vec4 red(1, 0, 0, 1);
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
 	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
-	Freetype::print(font, 10, 400, red, "$");
-	Freetype::print(font, 10 + font_size, 400, white, "%s", _activeCommand.c_str());
+	Freetype::print(font, 10, startY, red, "$");
+	Freetype::print(font, 10 + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
 
-	size_t n = std::count(_activeCommand.begin(), _activeCommand.begin() + _inputPosition, '\n');
-	size_t p = _activeCommand.find_last_of('\n', _inputPosition);
+	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
+	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
 	size_t linepos = _inputPosition;
 
 	if (n>0) {
 		if (p == _inputPosition) {
-			p = _activeCommand.find_last_of('\n', _inputPosition - 1);
+			p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
 			if (p != std::string::npos) {
 				linepos -= p + 1;
 			}
@@ -491,7 +523,7 @@ void OpenSpaceEngine::renderActiveCommand() {
 	}
 	char buffer[10];
 	sprintf(buffer, "%%%is", linepos + 1);
-	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, 400 - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
+	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, startY - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
 }
 
 void OpenSpaceEngine::postDraw() {
@@ -501,7 +533,7 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::addToCommand(std::string c) {
 	size_t length = c.length();
-	_activeCommand.insert(_inputPosition, c);
+	_commands.at(_activeCommand).insert(_inputPosition, c);
 	_inputPosition += length;
 }
 
@@ -536,6 +568,13 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 			}
 		}
 
+		// Copy to clipboard
+		if (key == SGCT_KEY_C) {
+			if (mod_CONTROL) {
+				setClipboardText(_commands.at(_activeCommand));
+			}
+		}
+
 		// Go to the previous character
 		if (key == SGCT_KEY_LEFT) {
 			if (_inputPosition > 0)
@@ -544,42 +583,36 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 
 		// Go to the next character
 		if (key == SGCT_KEY_RIGHT) {
-			if (_inputPosition < _activeCommand.length())
+			if (_inputPosition < _commands.at(_activeCommand).length())
 				++_inputPosition;
 		}
 
-		// Go to ending of previous line
+		// Go to previous command
 		if (key == SGCT_KEY_UP) {
-			if (_inputPosition > 0) {
-				size_t p = _activeCommand.find_last_of('\n', _inputPosition - 1);
-				if (p != std::string::npos)
-					_inputPosition = p;
-				else
-					_inputPosition = 0;
-			}
+			if (_activeCommand > 0)
+				--_activeCommand;
+			_inputPosition = _commands.at(_activeCommand).length();
 		}
 
-		// Go to ending of line (or end of next line)
+		// Go to next command (the last is empty)
 		if (key == SGCT_KEY_DOWN) {
-			size_t p = _activeCommand.find_first_of('\n', _inputPosition + 1);
-			if (p != std::string::npos)
-				_inputPosition = p;
-			else
-				_inputPosition = _activeCommand.size();
+			if (_activeCommand < _commands.size()-1)
+				++_activeCommand;
+			_inputPosition = _commands.at(_activeCommand).length();
 		}
 
 		// Remove character before _inputPosition
 		if (key == SGCT_KEY_BACKSPACE) {
 			if (_inputPosition > 0) {
-				_activeCommand.erase(_inputPosition - 1, 1);
+				_commands.at(_activeCommand).erase(_inputPosition - 1, 1);
 				--_inputPosition;
 			}
 		}
 
 		// Remove character after _inputPosition
 		if (key == SGCT_KEY_DELETE) {
-			if (_inputPosition <= _activeCommand.size()) {
-				_activeCommand.erase(_inputPosition, 1);
+			if (_inputPosition <= _commands.at(_activeCommand).size()) {
+				_commands.at(_activeCommand).erase(_inputPosition, 1);
 			}
 		}
 
@@ -590,7 +623,7 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 
 		// Go to the end of command string
 		if (key == SGCT_KEY_END) {
-			_inputPosition = _activeCommand.size();
+			_inputPosition = _commands.at(_activeCommand).size();
 		}
 
 		if (key == SGCT_KEY_ENTER) {
@@ -605,10 +638,20 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 			}
 			// ENTER == run lua script
 			else {
-				_scriptEngine.runScript(_activeCommand);
-				_activeCommand = "";
-				_inputPosition = 0;
-				_inputCommand = false;
+				if (_commands.at(_activeCommand) != "") {
+
+					_scriptEngine.runScript(_commands.at(_activeCommand));
+					_commandsHistory.push_back(_commands.at(_activeCommand));
+					_commands = _commandsHistory;
+					_commands.push_back("");
+					_activeCommand = _commands.size() - 1;
+					_inputPosition = 0;
+				}
+				else {
+					_commands = _commandsHistory;
+					_commands.push_back("");
+					_inputCommand = false;
+				}
 			}
 		}
 	}

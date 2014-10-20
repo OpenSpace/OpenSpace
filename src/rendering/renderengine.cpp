@@ -263,16 +263,17 @@ void RenderEngine::render()
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
 
 		// TODO: Adjust font_size properly when using retina screen
-		const int font_size = 8;
-		const int font_with = font_size*0.7;
-		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size);
-		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
+		const int font_size_mono	= 10;
+		const int font_size_light = 8;
+		const int font_with_light = font_size_light*0.7;
+		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
+		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
 		
 		if (_showInfo) {
 			const sgct_text::Font* font = fontMono;
 			int x1, xSize, y1, ySize;
 			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-			int startY = ySize - 2 * font_size;
+			int startY = ySize - 2 * font_size_mono;
 			const glm::vec2 scaling = _mainCamera->scaling();
 			const glm::vec3 viewdirection = _mainCamera->viewDirection();
 			const psc position = _mainCamera->position();
@@ -281,7 +282,7 @@ void RenderEngine::render()
 
 			// GUI PRINT 
 // Using a macro to shorten line length and increase readability
-#define PrintText(i, format, ...) Freetype::print(font, 10, startY - font_size * i * 2, format, __VA_ARGS__);
+#define PrintText(i, format, ...) Freetype::print(font, 10, startY - font_size_mono * i * 2, format, __VA_ARGS__);
 			int i = 0;
 			PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 			PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
@@ -335,7 +336,7 @@ void RenderEngine::render()
 					break;
 
 				std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
-				Freetype::print(font, 10, font_size * nr * 2, white*alpha, 
+				Freetype::print(font, 10, font_size_light * nr * 2, white*alpha, 
 					"%-14s %s%s",									// Format
 					e->timeString.c_str(),							// Time string
 					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
@@ -351,8 +352,8 @@ void RenderEngine::render()
 				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
 					color = blue;
 
-				Freetype::print(font, 10 + 39 * font_with, font_size * nr * 2, color*alpha, "%s", lvl.c_str());
-				Freetype::print(font, 10 + 53 * font_with, font_size * nr * 2, white*alpha, "%s", e->message.substr(0, msg_length).c_str());
+				Freetype::print(font, 10 + 39 * font_with_light, font_size_light * nr * 2, color*alpha, "%s", lvl.c_str());
+				Freetype::print(font, 10 + 53 * font_with_light, font_size_light * nr * 2, white*alpha, "%s", e->message.substr(0, msg_length).c_str());
 				++nr;
 			}
 		}
