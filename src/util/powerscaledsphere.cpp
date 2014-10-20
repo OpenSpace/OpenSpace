@@ -40,7 +40,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     : _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
-	, _mode(GL_TRIANGLES)
+	, _mode(GL_LINES)
     , _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])

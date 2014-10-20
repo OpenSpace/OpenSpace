@@ -42,6 +42,8 @@
 
 namespace {
 const std::string _loggerCat = "RenderableWavefrontObject";
+	const std::string keySource      = "Rotation.Source";
+	const std::string keyDestination = "Rotation.Destination";
 }
 
 namespace openspace {
@@ -51,28 +53,25 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
     , _programObject(nullptr)
 	, _fovProgram(nullptr)
     , _texture(nullptr)
+	, _mode(GL_TRIANGLES)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
+	assert(dictionary.getValue(constants::scenegraphnode::keyName, name));
 
 	std::string path;
-	dictionary.getValue(constants::scenegraph::keyPathModule, path);
+	assert(dictionary.getValue(constants::scenegraph::keyPathModule, path));
 
 	std::string texturePath = "";
 	if (dictionary.hasKey("Textures.Color")) {
-		dictionary.getValue("Textures.Color", texturePath);
+		assert(dictionary.getValue("Textures.Color", texturePath));
 		_colorTexturePath = path + "/" + texturePath;
 	}
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderableWavefrontObject::loadTexture, this));
 
-	_mode = GL_TRIANGLES;
-
 	std::string file;
-	dictionary.getValue(constants::renderablewavefrontobject::keyObjFile, file);
-
+	assert(dictionary.getValue(constants::renderablewavefrontobject::keyObjFile, file));
 	const std::string filename = FileSys.absolutePath(file);
 
 	std::cout << "OBJECT LOADER FILENAME : " << filename << std::endl;
@@ -86,10 +85,9 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
 	}else {
 		LERROR("Did not find file..\n");
 	}
-
+	assert(dictionary.getValue(keySource      , _source));
+	assert(dictionary.getValue(keyDestination , _destination));
 }
-
-
 
 void RenderableWavefrontObject::loadObj(const char *filename){
 	// temporary 
@@ -137,7 +135,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	_vsize = indicesSize;
 
 	// float arrays
-	float *tempVertexArray = new float[vertexSize];// vertexSize*sizeof(float));
+	float *tempVertexArray = new float[vertexSize];
 	float *tempVertexNormalArray = new float[vertexNormalSize];
 	float *tempVertexTextureArray = new float[vertexTextureSize];
 	_varray = new Vertex[_vsize];
@@ -224,7 +222,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
-		_varray[m].location[3] = 7;
+		_varray[m].location[3] = 7; // I need to set this proper at some point. 
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
@@ -346,8 +344,8 @@ void RenderableWavefrontObject::render(const RenderData& data)
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	transform *= tmp;
-	transform *= rot_x;
+	//transform *= tmp;
+	//transform *= rot_x;
 	//transform *= rot_y;
 	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
@@ -378,18 +376,13 @@ void RenderableWavefrontObject::render(const RenderData& data)
 	name.resize(32);
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
-
-	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
-	glm::vec4 a(boresight, 1);
-	a = transform*a;
-	//std::cout << a[0] << " " << a[1] << " " << a[2] << std::endl;
 }
 
 void RenderableWavefrontObject::update(const UpdateData& data)
 {
 	glm::dvec3 position(0, 0, 0);
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 	
 }
 

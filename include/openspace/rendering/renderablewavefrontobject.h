@@ -83,19 +83,8 @@ private:
 
 	glm::dmat3 _stateMatrix; // might need this
 
-	std::string _target;
-
-	///NH FOV 
-
-	GLuint _vaoFOV = 10;
-	GLuint _vboFOV = 11;
-	GLuint _iboFOV = 12;
-
-	unsigned int _isizeFOV;
-	unsigned int _vsizeFOV;
-	std::vector<float> _varrayFOV;
-	int *_iarrayFOV;
-
+	std::string _source;
+	std::string _destination;
 
 };
 
