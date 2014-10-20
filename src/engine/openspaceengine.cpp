@@ -54,6 +54,35 @@ namespace {
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
     
     const std::string _sgctConfigArgumentCommand = "-config";
+
+#ifdef WIN32
+    const unsigned int CommandInputButton = SGCT_KEY_BACKSLASH;     // Button left of 1 and abobe TAB
+    const unsigned int IgnoreCodepoint = 167;                       // Correesponding codepoint
+#else
+    const unsigned int CommandInputButton = SGCT_KEY_GRAVE_ACCENT;  // Button left of 1 and abobe TAB
+    const unsigned int IgnoreCodepoint = 167;                       // Correesponding codepoint
+
+    // Dangerus as fuck
+    bool exec(const std::string& cmd, std::string& value)
+    {
+      FILE* pipe = popen(cmd.c_str(), "r");
+      if (!pipe) 
+        return false;
+
+      const int buffer_size = 1024;
+      char buffer[buffer_size];
+      value = "";
+      while(!feof(pipe))
+      {
+        if(fgets(buffer, buffer_size, pipe) != NULL)
+        {
+          value += buffer;
+        }
+      }
+      pclose(pipe);
+      return true;
+    }
+#endif
     
     struct {
         std::string configurationName;
@@ -90,7 +119,11 @@ namespace {
 		text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
 		return text;
 #else
-		return "";
+        std::string text;
+        if(exec("xclip -o -sel c -f", text))
+            return text.substr(0, text.length()-1);
+        return ""; // remove a line ending
+
 #endif
 	}
 
@@ -119,7 +152,10 @@ namespace {
 
 		return true;
 #else
-		return false;
+        std::stringstream cmd;
+        cmd << "echo \"" << text << "\" | xclip -i -sel c -f";
+        std::string buf;
+        return exec(cmd.str(), buf);
 #endif
 	}
 
@@ -522,7 +558,7 @@ void OpenSpaceEngine::renderActiveCommand() {
 		}
 	}
 	char buffer[10];
-	sprintf(buffer, "%%%is", linepos + 1);
+	sprintf(buffer, "%%%lus", linepos + 1);
 	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, startY - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
 }
 
@@ -540,7 +576,7 @@ void OpenSpaceEngine::addToCommand(std::string c) {
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
 
-		if (key == SGCT_KEY_BACKSLASH && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
+		if (key == CommandInputButton && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
 			_inputCommand = !_inputCommand;
 		}
 
@@ -634,7 +670,7 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 			}
 			// CTRL+ENTER == Debug print the command
 			else if (mod_CONTROL) {
-				LDEBUG("Active command from next line:\n" <<_activeCommand);
+				LDEBUG("Active command from next line:\n" << _commands.at(_activeCommand));
 			}
 			// ENTER == run lua script
 			else {
@@ -660,7 +696,19 @@ void OpenSpaceEngine::handleCommandInput(int key, int action) {
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
 
 	// SGCT_KEY_BACKSLASH == 92 but that corresponds to codepoint 167
-	if (_inputCommand && codepoint != 167) {
+	if (_inputCommand && codepoint != IgnoreCodepoint) {
+
+#ifndef WIN32
+        const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
+        const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
+            sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
+
+        const int codepoint_C = 99;
+        const int codepoint_V = 118;
+        if(mod_CONTROL && (codepoint == codepoint_C || codepoint == codepoint_V)) {
+            return;
+        }
+#endif
 		addToCommand(UnicodeToUTF8(codepoint));
 	}
 }
