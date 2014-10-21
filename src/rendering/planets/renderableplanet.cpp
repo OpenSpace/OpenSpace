@@ -64,8 +64,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
-        _geometry
-              = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
 	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
@@ -123,8 +122,6 @@ void RenderablePlanet::render(const RenderData& data)
     // activate shader
     _programObject->activate();
 
-    PowerScaledScalar scaling = glm::vec2(1, -6);
-
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
 	
@@ -138,8 +135,11 @@ void RenderablePlanet::render(const RenderData& data)
 	}
 	transform = transform* rot;
 	
+	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
+	glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 
     // setup the data to the shader
+//	_programObject->setUniform("camdir", camSpaceEye);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
@@ -158,11 +158,9 @@ void RenderablePlanet::render(const RenderData& data)
 
 }
 
-void RenderablePlanet::update(const UpdateData& data)
-{
+void RenderablePlanet::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix("GALACTIC", "IAU_EARTH", data.time, _stateMatrix);
-
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, "GALACTIC", data.time, _stateMatrix);
 }
 
 void RenderablePlanet::loadTexture()

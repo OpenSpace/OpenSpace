@@ -22,59 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#include <ghoul/logging/log.h>
+#include <vector>
+#include <tuple>
+#include <utility> // pair
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+namespace openspace {
 
+class ScreenLog : public ghoul::logging::Log {
+public:
+	//typedef std::tuple<ghoul::logging::LogManager::LogLevel, std::string, std::string> LogEntry;
 
-uniform float time;
-uniform sampler2D texture1;
+	struct LogEntry {
+		LogEntry(ghoul::logging::LogManager::LogLevel l, double t, std::string ts, std::string c, std::string m) : level(l), timeStamp(t), timeString(ts), category(c), message(m) {};
+		ghoul::logging::LogManager::LogLevel level;
+		double timeStamp;
+		std::string timeString;
+		std::string category;
+		std::string message;
+	};
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
+	typedef std::vector<LogEntry>::iterator iterator;
+	typedef std::vector<LogEntry>::const_iterator const_iterator;
+	typedef std::vector<LogEntry>::reverse_iterator reverse_iterator;
+	typedef std::vector<LogEntry>::const_reverse_iterator const_reverse_iterator;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+	typedef std::pair<reverse_iterator, reverse_iterator> range;
+	typedef std::pair<const_reverse_iterator, const_reverse_iterator> const_range;
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
-void main()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(texture1, vs_st);
-	
-	// directional lighting
-	vec3 origin = vec3(0.0);
-	vec4 spec = vec4(0.0);
-	
-	vec3 n = normalize(vs_normal.xyz);
-	//vec3 e = normalize(camdir);
-	vec3 l_pos = vec3(0.0); // sun.
-	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-	
-	float shine = 0.0001;
+	const size_t MaximumSize = 1000;
 
-	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	/*
-	if(intensity > 0.f){
-		// halfway vector
-		vec3 h = normalize(l_dir + e);
-		// specular factor
-		float intSpec = max(dot(h,n),0.0);
-		spec = specular * pow(intSpec, shine);
-	}
-	*/
-	diffuse = max(intensity * diffuse, ambient);
+	ScreenLog();
 
+	virtual void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
+		const std::string& message);
 
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+	const_range last(size_t n = 10);
 
-	discard;
+private:
+
+	std::vector<LogEntry> _entries;
+
+};
 }

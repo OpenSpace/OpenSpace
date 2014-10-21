@@ -33,12 +33,15 @@
 #include <string>
 
 #include <openspace/abuffer/abuffer.h>
+#include <openspace/util/screenlog.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
 
 class Camera;
 
-class RenderEngine {
+class RenderEngine: public properties::PropertyOwner {
 public:
 	RenderEngine();
 	~RenderEngine();
@@ -76,6 +79,11 @@ private:
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
 	ABuffer* _abuffer;
+	ScreenLog* _log;
+
+	properties::BoolProperty _showInfo;
+	properties::BoolProperty _showScreenLog;
+
 
 	bool _takeScreenshot;
 

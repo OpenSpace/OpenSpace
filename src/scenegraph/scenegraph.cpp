@@ -55,6 +55,8 @@
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
+	const std::string _defaultCommonDirectory = "common";
+	const std::string _commonModuleToken = "${COMMON_MODULE}";
 }
 
 namespace openspace {
@@ -175,6 +177,16 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
+	// pscstandard
+	tmpProgram = ProgramObject::Build("EphemerisProgram",
+		"${SHADERS}/ephemeris_vs.glsl",
+		"${SHADERS}/ephemeris_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
+
+
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
@@ -213,6 +225,15 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
+	// Plane program
+	tmpProgram = ProgramObject::Build("Plane",
+		"${SHADERS}/plane_vs.glsl",
+		"${SHADERS}/plane_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
+
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);
@@ -245,7 +266,6 @@ void SceneGraph::update(const UpdateData& data)
 
 		OsEng.renderEngine().abuffer()->invalidateABuffer();
 	}
-
     for (auto node : _nodes)
         node->update(data);
 }
@@ -327,6 +347,10 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	std::string moduleDirectory(".");
 	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
 
+	std::string commonDirectory(_defaultCommonDirectory);
+	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
+	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
+
 	// The scene path could either be an absolute or relative path to the description
 	// paths directory
 	std::string&& relativeCandidate = sceneDescriptionDirectory +
@@ -343,6 +367,9 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		return false;
 	}
 
+	LDEBUG("Loading common module folder '" << commonDirectory << "'");
+	loadModule(FileSys.pathByAppendingComponent(moduleDirectory, commonDirectory));
+
     Dictionary moduleDictionary;
     if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
         std::vector<std::string> keys = moduleDictionary.keys();
@@ -350,7 +377,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         for (const std::string& key : keys) {
             std::string moduleFolder;
 			if (moduleDictionary.getValue(key, moduleFolder))
-                loadModule(moduleDirectory + "/" + moduleFolder);
+                loadModule(FileSys.pathByAppendingComponent(moduleDirectory, moduleFolder));
         }
     }
 
@@ -419,12 +446,14 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
 
         // this part is full of magic!
-        glm::vec2 boundf = bound.vec2();
+		glm::vec2 boundf = bound.vec2();
         glm::vec2 scaling{1.0f, -boundf[1]};
         boundf[0] *= 5.0f;
         
         psc cameraPosition = positionNode->position();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+
+		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
 		c->setPosition(cameraPosition);
         c->setCameraDirection(glm::vec3(0, 0, -1));
@@ -439,7 +468,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
 void SceneGraph::loadModule(const std::string& modulePath)
 {
-    auto pos = modulePath.find_last_of("/");
+    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
     if (pos == modulePath.npos) {
         LERROR("Bad format for module path: " << modulePath);
         return;

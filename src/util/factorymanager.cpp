@@ -27,12 +27,18 @@
 #include <cassert>
 
 // renderables
+#include <openspace/rendering/renderablewavefrontobject.h>
 #include <openspace/rendering/stars/renderablestars.h>
+#include <openspace/rendering/renderableephemeris.h>
+#include <openspace/rendering/renderabletrail.h>
+#include <openspace/rendering/renderablepath.h>
+
+#include <openspace/rendering/renderablefov.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderablevolumeexpert.h>
-#include <openspace/rendering/renderablevolumecl.h>
+#include <openspace/rendering/renderableplane.h>
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/flare/flare.h>
 
@@ -60,10 +66,23 @@ void FactoryManager::initialize()
           "RenderablePlanet");
 	_manager->factory<Renderable>()->registerClass<RenderableStars>(
 		"RenderableStars");
+	_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
+		"RenderableEphemeris");
+	//will replace ephemeris class soon...
+	_manager->factory<Renderable>()->registerClass<RenderablePath>(
+		"RenderablePath");
+	_manager->factory<Renderable>()->registerClass<RenderableTrail>(
+		"RenderableTrail");
+	_manager->factory<Renderable>()->registerClass<RenderableFov>(
+		"RenderableFov");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
+	_manager->factory<Renderable>()->registerClass<RenderableWavefrontObject>(
+		"RenderableWavefrontObject");
     //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
     //      "RenderableVolumeCL");
+    _manager->factory<Renderable>()->registerClass<RenderablePlane>(
+          "RenderablePlane");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
           "RenderableVolumeGL");
     _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");

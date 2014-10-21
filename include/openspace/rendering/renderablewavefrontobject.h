@@ -22,25 +22,83 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __RENDERABLEWAVEFRONTOBJECT_H__
+#define __RENDERABLEWAVEFRONTOBJECT_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
+// ghoul includes
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
-struct UpdateData {
-	double time;
-	double delta;
+class RenderableWavefrontObject : public Renderable {
+public:
+	RenderableWavefrontObject(const ghoul::Dictionary& dictionary);
+	~RenderableWavefrontObject();
+
+    bool initialize() override;
+    bool deinitialize() override;
+
+	void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
+
+	typedef struct
+	{
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+	/*	GLfloat color[4];
+		GLfloat attribute[3];
+		GLfloat float_attribute;*/
+		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
+
+protected:
+    void loadTexture();
+	void loadObj(const char *filename);
+
+private:
+    properties::StringProperty _colorTexturePath;
+    ghoul::opengl::ProgramObject* _programObject; 
+    ghoul::opengl::Texture* _texture;
+
+	ghoul::opengl::ProgramObject* _fovProgram;
+
+
+	GLuint _vaoID = 6;
+	GLuint _vBufferID = 7;
+	GLuint _iBufferID = 8;
+
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	Vertex *_varray;
+	int *_iarray;
+
+	glm::dmat3 _stateMatrix; // might need this
+
+	std::string _target;
+
+	///NH FOV 
+
+	GLuint _vaoFOV = 10;
+	GLuint _vboFOV = 11;
+	GLuint _iboFOV = 12;
+
+	unsigned int _isizeFOV;
+	unsigned int _vsizeFOV;
+	std::vector<float> _varrayFOV;
+	int *_iarrayFOV;
+
+
 };
 
-struct RenderData {
-	const Camera& camera;
-	psc position;
+}  // namespace openspace
 
-};
-
-}
-
-#endif // __UPDATESTRUCTURES_H__
+#endif  // __RENDERABLEWAVEFRONTOBJECT_H__

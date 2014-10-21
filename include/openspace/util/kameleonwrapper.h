@@ -60,7 +60,7 @@ public:
 	enum class FieldlineEnd {
 		NORTH,
 		SOUTH,
-		OUT
+		FAROUT
 	};
 
 	KameleonWrapper(const std::string& filename, Model model);

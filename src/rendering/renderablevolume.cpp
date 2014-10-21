@@ -31,6 +31,7 @@
 // ghoul includes
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/cachemanager.h>
 
 #include <iostream>
 #include <iomanip>
@@ -150,7 +151,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
 
 		std::string cachepath; // = filepath + ss.str();
-		OsEng.cacheManager().getCachedFile(filepath, ss.str(), cachepath, true);
+		FileSys.cacheManager()->getCachedFile(filepath, ss.str(), cachepath, true);
 		if (cache && FileSys.fileExists(cachepath)) {
 
             FILE* file = fopen (cachepath.c_str(), "rb");

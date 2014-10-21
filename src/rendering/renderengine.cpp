@@ -30,6 +30,7 @@
 #include <openspace/util/time.h>
 
 // We need to decide where this is set
+#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include "sgct.h"
@@ -73,7 +74,11 @@ RenderEngine::RenderEngine()
     , _sceneGraph(nullptr)
     , _abuffer(nullptr)
 	, _takeScreenshot(false)
+	, _log(nullptr)
+	, _showInfo("info", "Display info", true)
+	, _showScreenLog("log", "Display screen log", true)
 {
+	setName("renderEngine");
 }
 
 RenderEngine::~RenderEngine()
@@ -115,10 +120,10 @@ bool RenderEngine::initializeGL()
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f,100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+     sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,10000.0f);
+    //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
+  //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
+   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -134,7 +139,8 @@ bool RenderEngine::initializeGL()
 
         // set the tilted view and the FOV
         _mainCamera->setCameraDirection(glm::vec3(viewdir[0], viewdir[1], viewdir[2]));
-        _mainCamera->setMaxFov(wPtr->getFisheyeFOV());
+		_mainCamera->setMaxFov(wPtr->getFisheyeFOV());
+		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
     } else {
         // get corner positions, calculating the forth to easily calculate center
         glm::vec3 corners[4];
@@ -178,6 +184,9 @@ bool RenderEngine::initializeGL()
 
     _abuffer->initialize();
 
+	_log = new ScreenLog();
+	ghoul::logging::LogManager::ref().addLog(_log);
+
     // successful init
     return true;
 }
@@ -199,12 +208,15 @@ void RenderEngine::postSynchronizationPreDraw()
 	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
+	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
+	//std::cout << a.delta << std::endl;
     // update and evaluate the scene starting from the root node
-	_sceneGraph->update({Time::ref().currentTime()}); 
+	_sceneGraph->update(a);
     _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 
+	// clear the abuffer before rendering the scene
 	_abuffer->clear();
 }
 
@@ -213,6 +225,7 @@ void RenderEngine::render()
     // SGCT resets certain settings
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
     // setup the camera for the current frame
     const glm::vec3 eyePosition
@@ -237,66 +250,116 @@ void RenderEngine::render()
     _abuffer->preRender();
 	_sceneGraph->render({*_mainCamera, psc()});
     _abuffer->postRender();
-    _abuffer->resolve();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	_abuffer->resolve();
+	glDisable(GL_BLEND);
+
 
 #ifndef OPENSPACE_VIDEO_EXPORT
+
     // Print some useful information on the master viewport
-    if (sgct::Engine::instance()->isMaster()) {
-// Apple usually has retina screens
-#ifdef __APPLE__
-#define FONT_SIZE 18
-#else
-#define FONT_SIZE 10
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
+
+		// TODO: Adjust font_size properly when using retina screen
+		const int font_size_mono	= 10;
+		const int font_size_light = 8;
+		const int font_with_light = font_size_light*0.7;
+		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
+		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
+		
+		if (_showInfo) {
+			const sgct_text::Font* font = fontMono;
+			int x1, xSize, y1, ySize;
+			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+			int startY = ySize - 2 * font_size_mono;
+			const glm::vec2 scaling = _mainCamera->scaling();
+			const glm::vec3 viewdirection = _mainCamera->viewDirection();
+			const psc position = _mainCamera->position();
+			const psc origin = OsEng.interactionHandler().getOrigin();
+			const PowerScaledScalar pssl = (position - origin).length();
+
+			// GUI PRINT 
+// Using a macro to shorten line length and increase readability
+#define PrintText(i, format, ...) Freetype::print(font, 10, startY - font_size_mono * i * 2, format, __VA_ARGS__);
+			int i = 0;
+			PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+			PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
+			PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
+			PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
+			PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
+			PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
+			PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
+			PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
+			PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
+#undef PrintText
+		}
+
+		if (_showScreenLog)
+		{
+			const sgct_text::Font* font = fontLight;
+			const int max = 10;
+			const int category_length = 20;
+			const int msg_length = 140;
+			const double ttl = 15.0;
+			const double fade = 5.0;
+			auto entries = _log->last(max);
+
+			const glm::vec4 white(0.9, 0.9, 0.9, 1);
+			const glm::vec4 red(1, 0, 0, 1);
+			const glm::vec4 yellow(1, 1, 0, 1);
+			const glm::vec4 green(0, 1, 0, 1);
+			const glm::vec4 blue(0, 0, 1, 1);
+
+			size_t nr = 1;
+			for (auto it = entries.first; it != entries.second; ++it) {
+				const ScreenLog::LogEntry* e = &(*it);
+
+				const double t = sgct::Engine::instance()->getTime();
+				double diff = t - e->timeStamp;
+
+				// Since all log entries are ordered, once one is exceeding TTL, all have
+				if (diff > ttl)
+					break;
+
+				float alpha = 1;
+				float ttf = ttl - fade;
+				if (diff > ttf) {
+					diff = diff - ttf;
+					float p = 0.8 - diff / fade;
+					alpha = (p <= 0.0) ? 0.0 : pow(p, 0.3);
+				}
+
+				// Since all log entries are ordered, once one exceeds alpha, all have
+				if (alpha <= 0.0)
+					break;
+
+				std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				Freetype::print(font, 10, font_size_light * nr * 2, white*alpha, 
+					"%-14s %s%s",									// Format
+					e->timeString.c_str(),							// Time string
+					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
+					e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
+
+				glm::vec4 color = white;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+					color = green;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+					color = yellow;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+					color = red;
+				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+					color = blue;
+
+				Freetype::print(font, 10 + 39 * font_with_light, font_size_light * nr * 2, color*alpha, "%s", lvl.c_str());
+				Freetype::print(font, 10 + 53 * font_with_light, font_size_light * nr * 2, white*alpha, "%s", e->message.substr(0, msg_length).c_str());
+				++nr;
+			}
+		}
 #endif
-
-
-        const glm::vec2 scaling = _mainCamera->scaling();
-        const glm::vec3 viewdirection = _mainCamera->viewDirection();
-        const psc position = _mainCamera->position();
-        const psc origin = OsEng.interactionHandler().getOrigin();
-        const PowerScaledScalar pssl = (position - origin).length();
-
-		/* GUI PRINT */
-
-		std::string&& time = Time::ref().currentTimeUTC().c_str();
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 18, "Date: %s", time.c_str()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 16, "Avg. Frametime: %.10f", sgct::Engine::instance()->getAvgDt()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 14, "Drawtime: %.10f", sgct::Engine::instance()->getDrawTime()
-			  );
-		Freetype::print(
-			  sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-			  FONT_SIZE, FONT_SIZE * 12, "Frametime: %.10f", sgct::Engine::instance()->getDt()
-			  );
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 10, "Origin: (%.5f, %.5f, %.5f, %.5f)", origin[0],
-              origin[1], origin[2], origin[3]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 8, "Camera position: (%.5f, %.5f, %.5f, %.5f)",
-              position[0], position[1], position[2], position[3]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 6, "Distance to origin: (%.15f, %.2f)", pssl[0],
-              pssl[1]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 4, "View direction: (%.3f, %.3f, %.3f)",
-              viewdirection[0], viewdirection[1], viewdirection[2]);
-        Freetype::print(
-              sgct_text::FontManager::instance()->getFont("SGCTFont", FONT_SIZE),
-              FONT_SIZE, FONT_SIZE * 2, "Scaling: (%.10f, %.2f)", scaling[0], scaling[1]);
-
-    }
-#endif
+	}
     
 }
 

@@ -36,7 +36,6 @@
 #include <openspace/engine/configurationmanager.h>
 //#include <ghoul/misc/dictionary.h>
 
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
 #include <ghoul/opencl/clprogram.h>
@@ -76,15 +75,15 @@ public:
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
-	ghoul::filesystem::CacheManager& cacheManager();
 
     // SGCT callbacks
     bool initializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
+	void postDraw();
+	void keyboardCallback(int key, int action);
+	void charCallback(unsigned int codepoint);
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
@@ -105,7 +104,6 @@ private:
     InteractionHandler _interactionHandler;
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
-	ghoul::filesystem::CacheManager* _cacheManager;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 #ifdef OPENSPACE_VIDEO_EXPORT
     bool _doVideoExport;
@@ -117,6 +115,16 @@ private:
     ghoul::opencl::CLContext _context;
 
     sgct::SharedVector<char> _synchronizationBuffer;
+
+	bool _inputCommand;
+	size_t _inputPosition;
+	std::vector<std::string> _commandsHistory;
+	size_t _activeCommand;
+	std::vector<std::string> _commands;
+
+	void renderActiveCommand();
+	void handleCommandInput(int key, int action);
+	void addToCommand(std::string c);
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

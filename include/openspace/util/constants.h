@@ -30,6 +30,12 @@
 namespace openspace {
 namespace constants {
 
+namespace fonts {
+	const std::string keySGCT = "SGCTFont";
+	const std::string keyMono = "UbuntuMono";
+	const std::string keyLight = "UbuntuLight";
+} // namespace fonts
+
 namespace configurationmanager {
     const std::string keyPaths = "Paths";
     const std::string keyConfigSgct = "SGCTConfig";
@@ -37,10 +43,12 @@ namespace configurationmanager {
     const std::string keyStartupScript = "StartupScripts";
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
+	const std::string keySpiceNewHorizons = "SpiceKernel.NewHorizons";
 } // namespace configurationmanager
 
 namespace scenegraph {
     const std::string keyPathScene = "ScenePath";
+	const std::string keyCommonFolder = "CommonFolder";
     const std::string keyModules = "Modules";
     const std::string keyCamera = "Camera";
     const std::string keyFocusObject = "Focus";
@@ -64,6 +72,14 @@ namespace renderableplanet {
 	const std::string keyFrame = "Frame";
 } // namespace renderableplanet
 
+namespace planetgeometry {
+	const std::string keyType = "Type";
+} // namespace planetgeometry
+
+namespace renderablewavefrontobject {
+	const std::string keyObjFile = "ObjFile";
+} // namespace renderableplanet
+
 namespace renderablestars {
 	const std::string keySpeckFile = "SpeckFile";
 	const std::string keyPathModule = "ModulePath";
@@ -78,10 +94,6 @@ namespace renderablevolumegl {
 	const std::string keyVolumeName = "VolumeName";
 	const std::string keyTransferFunctionName = "TransferFunctionName";
 } // namespace renderablevolumegl
-
-namespace planetgeometry {
-    const std::string keyType = "Type";
-} // namespace planetgeometry
 
 namespace renderablesphericalgrid {
 	const std::string gridType = "GridType";

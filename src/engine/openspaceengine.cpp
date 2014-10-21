@@ -61,6 +61,96 @@ namespace {
     struct {
         std::string configurationName;
     } commandlineArgumentPlaceholders;
+
+	// TODO: Put this functio nsomewhere appropriate
+	// get text from clipboard
+	std::string getClipboardText()
+	{
+#ifdef WIN32
+		// Try opening the clipboard
+		if (!OpenClipboard(nullptr))
+			return "";
+
+		// Get handle of clipboard object for ANSI text
+		HANDLE hData = GetClipboardData(CF_TEXT);
+		if (hData == nullptr)
+			return "";
+
+		// Lock the handle to get the actual text pointer
+		char * pszText = static_cast<char*>(GlobalLock(hData));
+		if (pszText == nullptr)
+			return "";
+
+		// Save text in a string class instance
+		std::string text(pszText);
+
+		// Release the lock
+		GlobalUnlock(hData);
+
+		// Release the clipboard
+		CloseClipboard();
+
+		text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+		return text;
+#else
+		return "";
+#endif
+	}
+
+	// TODO: Put this function somewhere appropriate
+	// set text to clipboard
+	bool setClipboardText(std::string text)
+	{
+#ifdef WIN32
+		char *ptrData = nullptr;
+		HANDLE hData = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, text.length() + 1);
+
+		ptrData = (char*)GlobalLock(hData);
+		memcpy(ptrData, text.c_str(), text.length() + 1);
+
+		GlobalUnlock(hData);
+
+		if (!OpenClipboard(nullptr))
+			return false;
+
+		if (!EmptyClipboard())
+			return false;
+
+		SetClipboardData(CF_TEXT, hData);
+
+		CloseClipboard();
+
+		return true;
+#else
+		return false;
+#endif
+	}
+
+	std::string UnicodeToUTF8(unsigned int codepoint){
+		std::string out;
+
+		if (codepoint <= 0x7f)
+			out.append(1, static_cast<char>(codepoint));
+		else if (codepoint <= 0x7ff)
+		{
+			out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		else if (codepoint <= 0xffff)
+		{
+			out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		else
+		{
+			out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+			out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+		}
+		return out;
+	}
 }
 
 using namespace ghoul::cmdparser;
@@ -71,29 +161,27 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
-	, _cacheManager(nullptr)
+	, _inputCommand(false)
+	, _inputPosition(0)
+	, _activeCommand(0)
+	, _commands({""})
 {
 }
 
-OpenSpaceEngine::~OpenSpaceEngine()
-{
+OpenSpaceEngine::~OpenSpaceEngine() {
 	SpiceManager::deinitialize();
     Time::deinitialize();
     DeviceIdentifier::deinit();
-	if (_cacheManager)
-		delete _cacheManager;
     FileSystem::deinitialize();
     LogManager::deinitialize();
 }
 
-OpenSpaceEngine& OpenSpaceEngine::ref()
-{
+OpenSpaceEngine& OpenSpaceEngine::ref() {
     assert(_engine);
     return *_engine;
 }
     
-bool OpenSpaceEngine::gatherCommandlineArguments()
-{
+bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
 
     CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
@@ -104,8 +192,7 @@ bool OpenSpaceEngine::gatherCommandlineArguments()
     return true;
 }
 
-bool OpenSpaceEngine::findConfiguration(std::string& filename)
-{
+bool OpenSpaceEngine::findConfiguration(std::string& filename) {
 	using ghoul::filesystem::Directory;
 
 	Directory directory = FileSys.currentDirectory();
@@ -205,7 +292,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// Create the cachemanager
-	_engine->_cacheManager = new ghoul::filesystem::CacheManager(absPath("${CACHE}"));
+	FileSys.createCacheManager("${CACHE}");
 
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
@@ -222,18 +309,15 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     return true;
 }
 
-void OpenSpaceEngine::destroy()
-{
+void OpenSpaceEngine::destroy() {
     delete _engine;
 }
 
-bool OpenSpaceEngine::isInitialized()
-{
+bool OpenSpaceEngine::isInitialized() {
     return _engine != nullptr;
 }
 
-bool OpenSpaceEngine::initialize()
-{
+bool OpenSpaceEngine::initialize() {
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     glClearColor(0, 0, 0, 0);
@@ -251,7 +335,7 @@ bool OpenSpaceEngine::initialize()
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
-    SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
+    //SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
     SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
@@ -259,24 +343,55 @@ bool OpenSpaceEngine::initialize()
     // initialize OpenSpace helpers
 	SpiceManager::initialize();
     Time::initialize();
-
+	
+	// Load SPICE time kernel
 	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
-	bool success = OsEng.configurationManager().getValue(keySpiceTimeKernel, timeKernel);
+	bool success = configurationManager().getValue(keySpiceTimeKernel, timeKernel);
 	if (!success) {
 		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(std::move(timeKernel));
-
-	using constants::configurationmanager::keySpiceLeapsecondKernel;
-	std::string leapSecondKernel;
-	success = OsEng.configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
-	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
+	SpiceManager::KernelIdentifier id = 
+		SpiceManager::ref().loadKernel(timeKernel);
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading time kernel '" << timeKernel << "'");
 		return false;
 	}
-	SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
+
+	// Load SPICE leap second kernel
+	using constants::configurationmanager::keySpiceLeapsecondKernel;
+	std::string leapSecondKernel;
+	success = configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	if (!success) {
+		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
+		return false;
+	}
+	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
+		return false;
+	}
+	
+	//// metakernel loading doesnt seem to work... it should. to tired to even
+	//// CK
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
+	//// FK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
+	//// IK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
+	//// LSK already loaded									
+	////PCK													
+	////SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
+	////SPK												
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
 	
     FactoryManager::initialize();
 
@@ -292,33 +407,24 @@ bool OpenSpaceEngine::initialize()
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine.setSceneGraph(sceneGraph);
 	
-
-
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
 	_renderEngine.initialize();
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
-	success = OsEng.configurationManager().getValue(
+	success = configurationManager().getValue(
 		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
-    //_renderEngine.setSceneGraph(sceneGraph);
-
-#ifdef FLARE_ONLY
-    _flare = new Flare();
-    _flare->initialize();
-#endif
-
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-    _engine->_interactionHandler.connectDevices();
+    _interactionHandler.connectDevices();
 
     // Run start up scripts
     ghoul::Dictionary scripts;
-	success = _engine->configurationManager().getValue(
+	success = configurationManager().getValue(
 		constants::configurationmanager::keyStartupScript, scripts);
     for (size_t i = 1; i <= scripts.size(); ++i) {
         std::stringstream stream;
@@ -337,41 +443,34 @@ bool OpenSpaceEngine::initialize()
         _engine->scriptEngine().runScriptFile(absoluteScriptPath);
     }
 
-#ifdef OPENSPACE_VIDEO_EXPORT
-    LINFO("OpenSpace compiled with video export; press Print Screen to start/stop recording");
-#endif
+	// Load a light and a monospaced font
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf", absPath("${FONTS}/"));
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf", absPath("${FONTS}/"));
+	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
 
     return true;
 }
 
-ConfigurationManager& OpenSpaceEngine::configurationManager()
-{
+ConfigurationManager& OpenSpaceEngine::configurationManager() {
     return _configurationManager;
 }
 
-ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
-{
+ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
     return _context;
 }
 
-InteractionHandler& OpenSpaceEngine::interactionHandler()
-{
+InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return _interactionHandler;
 }
 
-RenderEngine& OpenSpaceEngine::renderEngine()
-{
+RenderEngine& OpenSpaceEngine::renderEngine() {
     return _renderEngine;
 }
 
-ScriptEngine& OpenSpaceEngine::scriptEngine()
-{
+ScriptEngine& OpenSpaceEngine::scriptEngine() {
     return _scriptEngine;
-}
-
-ghoul::filesystem::CacheManager& OpenSpaceEngine::cacheManager() {
-	assert(_cacheManager != nullptr);
-	return *_cacheManager;
 }
 
 bool OpenSpaceEngine::initializeGL()
@@ -379,8 +478,7 @@ bool OpenSpaceEngine::initializeGL()
     return _renderEngine.initializeGL();
 }
 
-void OpenSpaceEngine::preSynchronization()
-{
+void OpenSpaceEngine::preSynchronization() {
 #ifdef WIN32
     // Sleeping for 0 milliseconds will trigger any pending asynchronous procedure calls 
     SleepEx(0, TRUE);
@@ -393,33 +491,65 @@ void OpenSpaceEngine::preSynchronization()
 
 		Time::ref().advanceTime(dt);
     }
-#ifdef FLARE_ONLY
-    _flare->preSync();
-#endif
 }
 
-void OpenSpaceEngine::postSynchronizationPreDraw()
-{
+void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine.postSynchronizationPreDraw();
-#ifdef FLARE_ONLY
-    _flare->postSyncPreDraw();
-#endif
 }
 
-void OpenSpaceEngine::render()
-{
-#ifdef FLARE_ONLY
-    _flare->render();
-#else 
+void OpenSpaceEngine::render() {
     _renderEngine.render();
-#endif
+
+	// If currently writing a command, render it to screen
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _inputCommand) {
+		renderActiveCommand();
+	}
 }
 
-void OpenSpaceEngine::postDraw()
-{
-    if (sgct::Engine::instance()->isMaster()) {
+void OpenSpaceEngine::renderActiveCommand() {
+
+	const int font_size = 10;
+	int x1, xSize, y1, ySize;
+	sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+	int startY = ySize - 2 * font_size;
+	startY = startY - font_size * 10 * 2;
+
+	const int font_with = font_size*0.7;
+	const glm::vec4 red(1, 0, 0, 1);
+	const glm::vec4 green(0, 1, 0, 1);
+	const glm::vec4 white(1, 1, 1, 1);
+	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
+	Freetype::print(font, 10, startY, red, "$");
+	Freetype::print(font, 10 + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
+
+	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
+	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
+	size_t linepos = _inputPosition;
+
+	if (n>0) {
+		if (p == _inputPosition) {
+			p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
+			if (p != std::string::npos) {
+				linepos -= p + 1;
+			}
+			else {
+				linepos = _inputPosition - 1;
+			}
+		}
+		else{
+			linepos -= p + 1;
+		}
+	}
+	char buffer[10];
+	sprintf(buffer, "%%%is", linepos + 1);
+	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, startY - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
+}
+
+void OpenSpaceEngine::postDraw() {
+    if (sgct::Engine::instance()->isMaster())
         _interactionHandler.unlockControls();
-    }
+
 #ifdef OPENSPACE_VIDEO_EXPORT
     float speed = 0.01;
     glm::vec3 euler(0.0, speed, 0.0);
@@ -431,7 +561,6 @@ void OpenSpaceEngine::postDraw()
 	if(_doVideoExport)
 		_renderEngine.takeScreenshot();
 #endif
-
 	_renderEngine.postDraw();
 
 #ifdef FLARE_ONLY
@@ -439,37 +568,150 @@ void OpenSpaceEngine::postDraw()
 #endif
 }
 
-void OpenSpaceEngine::keyboardCallback(int key, int action)
-{
-    if (sgct::Engine::instance()->isMaster()) {
-        _interactionHandler.keyboardCallback(key, action);
-    }
-#ifdef OPENSPACE_VIDEO_EXPORT
-    if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
-        _doVideoExport = !_doVideoExport;
-#endif
-#ifdef FLARE_ONLY
-    _flare->keyboard(key, action);
-#endif
+void OpenSpaceEngine::addToCommand(std::string c) {
+	size_t length = c.length();
+	_commands.at(_activeCommand).insert(_inputPosition, c);
+	_inputPosition += length;
 }
 
-void OpenSpaceEngine::mouseButtonCallback(int key, int action)
-{
-    if (sgct::Engine::instance()->isMaster()) {
+void OpenSpaceEngine::keyboardCallback(int key, int action) {
+	if (sgct::Engine::instance()->isMaster()) {
+
+		if (key == SGCT_KEY_BACKSLASH && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
+			_inputCommand = !_inputCommand;
+		}
+
+		if (!_inputCommand) {
+			_interactionHandler.keyboardCallback(key, action);
+		}
+		else {
+			handleCommandInput(key, action);
+		}
+	}
+}
+
+void OpenSpaceEngine::handleCommandInput(int key, int action) {
+	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
+		const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
+			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
+		const bool mod_SHIFT = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
+			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
+
+		// Paste from clipboard
+		if (key == SGCT_KEY_V) {
+			if (mod_CONTROL) {
+				addToCommand(getClipboardText());
+			}
+		}
+
+		// Copy to clipboard
+		if (key == SGCT_KEY_C) {
+			if (mod_CONTROL) {
+				setClipboardText(_commands.at(_activeCommand));
+			}
+		}
+
+		// Go to the previous character
+		if (key == SGCT_KEY_LEFT) {
+			if (_inputPosition > 0)
+				_inputPosition -= 1;
+		}
+
+		// Go to the next character
+		if (key == SGCT_KEY_RIGHT) {
+			if (_inputPosition < _commands.at(_activeCommand).length())
+				++_inputPosition;
+		}
+
+		// Go to previous command
+		if (key == SGCT_KEY_UP) {
+			if (_activeCommand > 0)
+				--_activeCommand;
+			_inputPosition = _commands.at(_activeCommand).length();
+		}
+
+		// Go to next command (the last is empty)
+		if (key == SGCT_KEY_DOWN) {
+			if (_activeCommand < _commands.size()-1)
+				++_activeCommand;
+			_inputPosition = _commands.at(_activeCommand).length();
+		}
+
+		// Remove character before _inputPosition
+		if (key == SGCT_KEY_BACKSPACE) {
+			if (_inputPosition > 0) {
+				_commands.at(_activeCommand).erase(_inputPosition - 1, 1);
+				--_inputPosition;
+			}
+		}
+
+		// Remove character after _inputPosition
+		if (key == SGCT_KEY_DELETE) {
+			if (_inputPosition <= _commands.at(_activeCommand).size()) {
+				_commands.at(_activeCommand).erase(_inputPosition, 1);
+			}
+		}
+
+		// Go to the beginning of command string
+		if (key == SGCT_KEY_HOME) {
+			_inputPosition = 0;
+		}
+
+		// Go to the end of command string
+		if (key == SGCT_KEY_END) {
+			_inputPosition = _commands.at(_activeCommand).size();
+		}
+
+		if (key == SGCT_KEY_ENTER) {
+
+			// SHIFT+ENTER == new line
+			if (mod_SHIFT) {
+				addToCommand("\n");
+			}
+			// CTRL+ENTER == Debug print the command
+			else if (mod_CONTROL) {
+				LDEBUG("Active command from next line:\n" <<_activeCommand);
+			}
+			// ENTER == run lua script
+			else {
+				if (_commands.at(_activeCommand) != "") {
+
+					_scriptEngine.runScript(_commands.at(_activeCommand));
+					_commandsHistory.push_back(_commands.at(_activeCommand));
+					_commands = _commandsHistory;
+					_commands.push_back("");
+					_activeCommand = _commands.size() - 1;
+					_inputPosition = 0;
+				}
+				else {
+					_commands = _commandsHistory;
+					_commands.push_back("");
+					_inputCommand = false;
+				}
+			}
+		}
+	}
+}
+
+void OpenSpaceEngine::charCallback(unsigned int codepoint) {
+
+	// SGCT_KEY_BACKSLASH == 92 but that corresponds to codepoint 167
+	if (_inputCommand && codepoint != 167) {
+		addToCommand(UnicodeToUTF8(codepoint));
+	}
+}
+
+void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
+    if (sgct::Engine::instance()->isMaster())
         _interactionHandler.mouseButtonCallback(key, action);
-    }
-#ifdef FLARE_ONLY
-    _flare->mouse(key, action);
-#endif
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y)
-{
+void OpenSpaceEngine::mousePositionCallback(int x, int y) {
     _interactionHandler.mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
-{
+void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler.mouseScrollWheelCallback(pos);
 }
 

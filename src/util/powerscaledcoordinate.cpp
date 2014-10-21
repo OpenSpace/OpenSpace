@@ -71,7 +71,7 @@ PowerScaledCoordinate::PowerScaledCoordinate(const PowerScaledCoordinate& rhs) {
 PowerScaledCoordinate
       PowerScaledCoordinate::CreatePowerScaledCoordinate(double d1, double d2, double d3)
 {
-    char buff[30];
+    char buff[600];
 
     // find the number with maximum number of digits
     double ad1 = abs(d1);
@@ -83,6 +83,8 @@ PowerScaledCoordinate
     // TODO: profile the next two lines and replace with something more efficient (ab)
     sprintf(buff, "%.0f", max);
     unsigned int digits = static_cast<unsigned int>(strlen(buff));
+
+	//digits += 3;
 
     // rescale and return
     double tp = 1.0 / pow(k, digits);

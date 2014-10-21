@@ -31,6 +31,7 @@
 
 #include <algorithm>
 
+
 namespace {
 	const std::string _loggerCat = "SpiceManager";
 }
@@ -67,9 +68,15 @@ SpiceManager& SpiceManager::ref() {
 	return *_manager;
 }
 
-SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
+SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& filePath) {
 	if (filePath.empty()) {
 		LERROR("No filename provided");
+		return KernelFailed;
+	}
+
+	std::string&& path = absPath(filePath);
+	if (!FileSys.fileExists(path)) {
+		LERROR("Kernel file '" << path << "' does not exist");
 		return KernelFailed;
 	}
 
@@ -78,9 +85,14 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	// We need to set the current directory as meta-kernels are usually defined relative
 	// to the directory they reside in. The directory change is not necessary for regular
 	// kernels
-	std::string&& path = absPath(std::move(filePath));
+
 	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
 	std::string&& fileDirectory = ghoul::filesystem::File(path).directoryName();
+
+	if (!FileSys.directoryExists(fileDirectory)) {
+		LERROR("Could not find directory for kernel '" << path << "'");
+		return KernelFailed;
+	}
 	FileSys.setCurrentDirectory(fileDirectory);
 
 	// Load the kernel
@@ -88,6 +100,15 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(std::string filePath) {
 	
 	// Reset the current directory to the previous one
 	FileSys.setCurrentDirectory(currentDirectory);
+	int failed = failed_c();
+    if (failed) {
+        char msg[1024];
+        getmsg_c ( "LONG", 1024, msg );
+        LERROR("Error loading kernel '" + path + "'");
+        LERROR("Spice reported: " + std::string(msg));
+        reset_c();
+        return KernelFailed;
+    }
 
 	bool hasError = checkForError("Error loading kernel '" + path + "'");
 	if (hasError)
@@ -268,6 +289,27 @@ bool SpiceManager::getTargetPosition(const std::string& target,
     return !hasError;
 }
 
+bool SpiceManager::getTargetPosition(const std::string& target,
+						   const std::string& observer,
+		                   const std::string& referenceFrame, 
+						   const std::string& aberrationCorrection,
+		                   double ephemerisTime,
+						   psc& position, 
+						   double& lightTime) const
+{
+	double pos[3] = { NULL, NULL, NULL };
+
+	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
+
+	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL)
+		return false;
+
+	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+
+	return true;
+}
+
 bool SpiceManager::getTargetState(const std::string& target,
 	                              const std::string& observer,
 	                              const std::string& referenceFrame,
@@ -293,6 +335,27 @@ bool SpiceManager::getTargetState(const std::string& target,
     return !hasError;
 }
 
+bool SpiceManager::getTargetState(const std::string& target,
+									 const std::string& observer,
+									 const std::string& referenceFrame,
+									 const std::string& aberrationCorrection,
+									 double ephemerisTime,
+									 PowerScaledCoordinate& position,
+									 PowerScaledCoordinate& velocity,
+									 double& lightTime) const
+{
+	double state[6];
+	std::fill_n(state, 6, NULL);
+
+	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
+
+	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+	velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+
+	return true;
+}
+
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 							const std::string& toFrame,
 							double ephemerisTime,
@@ -307,6 +370,23 @@ bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 	return !hasError;
 }
 
+bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
+	const std::string& body,
+	double ephemerisTime,
+	glm::dmat3& positionMatrix) const{
+
+	int id;
+	getNaifId(body.c_str(), id);
+	tipbod_c(fromFrame.c_str(), id, ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
+
+	bool hasError = checkForError("Error retrieving position transform matrix from "
+		"frame '" + fromFrame + "' to frame '" + body +
+		"at time '" + std::to_string(ephemerisTime) + "'");
+	positionMatrix = glm::transpose(positionMatrix);
+
+	return !hasError;
+}
+
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 												 const std::string& toFrame,
 												 double ephemerisTime,
@@ -316,7 +396,7 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
     
     bool hasError = checkForError("Error retrieving position transform matrix from "
                                   "frame '" + fromFrame + "' to frame '" + toFrame +
-                                  "at time '" + std::to_string(ephemerisTime) + "'");
+                                  "' at time '" + std::to_string(ephemerisTime) + "'");
     positionMatrix = glm::transpose(positionMatrix);
     
 	return !hasError;
@@ -333,6 +413,7 @@ bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fo
 	else
 		return getFieldOfView(id, fovShape, frameName, boresightVector, bounds);
 }
+
 
 bool SpiceManager::getFieldOfView(int instrument,
 	                              std::string& fovShape,

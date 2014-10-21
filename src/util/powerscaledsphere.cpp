@@ -77,6 +77,8 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float t1 = fj / fsegments;
             const float t2 = fi / fsegments;
 
+			double tp = 1.0 / pow(10, static_cast<GLfloat>(radius[1]));
+
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
             _varray[nr].location[2] = z;
@@ -85,6 +87,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             _varray[nr].normal[1] = normal[1];
             _varray[nr].normal[2] = normal[2];
 
+			//std::cout << _varray[nr].location[0] << " " << _varray[nr].location[1] << " " << _varray[nr].location[2] << " " << _varray[nr].location[3] << std::endl;
             _varray[nr].tex[0] = t1;
             _varray[nr].tex[1] = t2;
             ++nr;

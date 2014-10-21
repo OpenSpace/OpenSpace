@@ -57,7 +57,7 @@ int printOglError(char *file, int line){
 
 
 #define GLSPRITES
-#define GLPOINTS
+//#define GLPOINTS
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
@@ -101,21 +101,6 @@ std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num
 	return file;
 }
 
-//these two methods exist only to debug geom shaders code. 
-float log10(float x){ return log(x)/ log(10.f); }
-
-psc psc_addition(psc v1, psc v2) {
-	float k = 10.f;
-	float ds = v2[3] - v1[3];
-	if (ds >= 0) {
-		float p = pow(k, -ds);
-		return psc(v1[0]*p + v2[0], v1[1]*p + v2[1], v1[2]*p + v2[2], v2[3]);
-	}
-	else {
-		float p = pow(k, ds);
-		return psc(v1[0] + v2[0]*p, v1[1] + v2[1]*p, v1[2] + v2[2]*p, v1[3]);
-	}
-}
 
 //#define ROTATESTARS 
 
@@ -325,7 +310,6 @@ void RenderableStars::render(const RenderData& data){
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_DST_COLOR);
 
 #ifdef GLSPRITES
 	glm::mat4 modelMatrix      = data.camera.modelMatrix();
@@ -356,11 +340,11 @@ void RenderableStars::render(const RenderData& data){
 	_haloProgram->deactivate();
 
 #ifdef GLPOINTS
-	/*
+
 // ---------------------- RENDER POINTS -----------------------------
 	_pointProgram->activate();
 
-	_pointProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
+	_pointProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix);
 	_pointProgram->setUniform("ModelTransform", transform);
 	_pointProgram->setUniform("campos", campos.vec4());
 	_pointProgram->setUniform("objpos", currentPosition.vec4());
@@ -377,13 +361,10 @@ void RenderableStars::render(const RenderData& data){
 	glDisable(GL_BLEND);
 	
 	_pointProgram->deactivate();
-<<<<<<< HEAD
 	glEnable(GL_DEPTH_TEST);
 
-=======
-	*/
-//>>>>>>> develop
 #endif
+	glDisable(GL_BLEND);
 }
 
 void RenderableStars::loadTexture(){
