@@ -114,7 +114,6 @@ bool ABuffer::reinitialize() {
 
 void ABuffer::resolve() {
 	if( ! _validShader) {
-		SleepEx(0, TRUE);
 		generateShaderSource();
 		updateShader();
 		_validShader = true;

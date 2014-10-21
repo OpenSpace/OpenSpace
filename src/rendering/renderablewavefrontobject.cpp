@@ -51,6 +51,10 @@ RenderableWavefrontObject::RenderableWavefrontObject(const ghoul::Dictionary& di
     , _programObject(nullptr)
 	, _fovProgram(nullptr)
     , _texture(nullptr)
+    , _isize(0)
+    , _vsize(0)
+    , _varray(nullptr)
+    , _iarray(nullptr)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -108,6 +112,7 @@ void RenderableWavefrontObject::loadObj(const char *filename){
 	fi = fopen(filename, "r");
 	if (fi == NULL) {
 		LERROR("Null Object\n");
+
 	}
 	while (fgets(line, 150, fi) != NULL)
 	{
@@ -256,6 +261,9 @@ RenderableWavefrontObject::~RenderableWavefrontObject(){
 
 bool RenderableWavefrontObject::initialize()
 {
+	if(_isize == 0)
+		return false;
+
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
