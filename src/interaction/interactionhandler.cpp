@@ -19,6 +19,40 @@ std::string _loggerCat = "InteractionHandler";
 
 namespace openspace {
 
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * setOrigin():
+ * Set the origin of the camera
+ */
+int setOrigin(lua_State* L) {
+	using ghoul::lua::luaTypeToString;
+	const std::string _loggerCat = "LuaInteractionHandler";
+
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+	const int type = lua_type(L, -1);
+	if (type != LUA_TSTRING)
+		return luaL_error(L, "Expected string, got %i", type);
+
+	std::string s = luaL_checkstring(L, -1);
+
+	SceneGraphNode* node = sceneGraphNode(s);
+	if (!node) {
+		LWARNING("Could not find a node in scenegraph called '" << s <<"'");
+		return 0;
+	}
+
+	OsEng.interactionHandler().setOrigin(node);
+
+	return 0;
+}
+
+} // namespace luascriptfunctions
+
 InteractionHandler::InteractionHandler() {
 	// initiate pointers
 	camera_ = nullptr;
@@ -111,6 +145,11 @@ void InteractionHandler::setCamera(Camera *camera) {
 	camera_ = camera;
 }
 
+void InteractionHandler::setOrigin(SceneGraphNode* node) {
+	if (node)
+		node_ = node;
+}
+
 Camera * InteractionHandler::getCamera() const {
 	//assert(this_);
 	if (enabled_) {
@@ -177,7 +216,9 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	unlockControls();
 }
 
-void InteractionHandler::distance(const PowerScaledScalar &distance) {
+void InteractionHandler::distance(const PowerScaledScalar &dist, size_t iterations) {
+	if (iterations > 5)
+		return;
 	//assert(this_);
 	lockControls();
 	
@@ -186,19 +227,28 @@ void InteractionHandler::distance(const PowerScaledScalar &distance) {
 
 	psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
-	glm:: vec3 newdir = dir * distance[0];
+	glm::vec3 newdir = dir * dist[0];
 	relative_origin_coordinate = newdir;
-	relative_origin_coordinate[3] = distance[1];
+	relative_origin_coordinate[3] = dist[1];
 	relative = relative + relative_origin_coordinate;
 
 	relative_origin_coordinate = relative - origin;
 	newdir = relative_origin_coordinate.direction();
 
 	// update only if on the same side of the origin
-	if(glm::angle(newdir, dir) < 90.0f)
+	if (glm::angle(newdir, dir) < 90.0f) {
 		camera_->setPosition(relative);
+		unlockControls();
+
+	}
+	else {
+		unlockControls();
+		PowerScaledScalar d2 = dist;
+		d2[0] *= 0.75;
+		d2[1] *= 0.85;
+		distance(d2, iterations + 1);
+	}
 	
-	unlockControls();
 }
 
 void InteractionHandler::lookAt(const glm::quat &rotation) {
@@ -307,7 +357,6 @@ void InteractionHandler::trackballRotate(int x, int y) {
 		_lastTrackballPos = curTrackballPos;
 	}
 }
-double acc = 1;
 
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
@@ -358,28 +407,35 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        rotate(rot);
 	    }
 	    if (key == SGCT_KEY_R) {
-	        PowerScaledScalar dist(-speed * dt, 0.0);
+	        PowerScaledScalar dist(-speed * dt, 5.0);
 	        distance(dist);
 	    }
 	    if (key == SGCT_KEY_F) {
-	        PowerScaledScalar dist(speed * dt, 0.0);
+	        PowerScaledScalar dist(speed * dt, 5.0);
 	        distance(dist);
 		}
 		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed * pow(10, 11) * dt, 0.0);
+			PowerScaledScalar dist(-speed  * dt, 10.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
-			acc += 0.001;
-			PowerScaledScalar dist(speed * pow(10, 8 * acc) * dt, 0.0);
+			PowerScaledScalar dist(speed * dt, 10.0);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_Y) {
-			PowerScaledScalar dist(-speed * 100.0 * dt, 6.0);
+			PowerScaledScalar dist(-speed * dt, 11.5);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_H) {
-			PowerScaledScalar dist(speed * 100.0 * dt, 6.0);
+			PowerScaledScalar dist(speed  * dt, 11.5);
+			distance(dist);
+		}
+		if (key == SGCT_KEY_U) {
+			PowerScaledScalar dist(-speed * dt, 13.0);
+			distance(dist);
+		}
+		if (key == SGCT_KEY_J) {
+			PowerScaledScalar dist(speed  * dt, 13.0);
 			distance(dist);
 		}
 
@@ -477,6 +533,20 @@ void InteractionHandler::addKeyCallback(int key, std::function<void(void)> f) {
 	//std::map<int, std::vector<std::function<void(void)> > > _keyCallbacks;
 
 	_keyCallbacks.insert(std::make_pair(key, f));
+}
+
+scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+	return{
+		"",
+		{
+			{
+				"setOrigin",
+				&luascriptfunctions::setOrigin,
+				"setOrigin(): set the camera origin node by name"
+			}
+		}
+	};
+
 }
 
 } // namespace openspace

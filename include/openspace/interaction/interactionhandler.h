@@ -36,6 +36,8 @@ public:
 	void addExternalControl(ExternalControl* controller);
 
 	void setCamera(Camera *camera = nullptr);
+	void setOrigin(SceneGraphNode* node);
+
 	Camera * getCamera() const;
 	const psc getOrigin() const;
 	void lockControls();
@@ -45,7 +47,7 @@ public:
 	
 	void orbit(const glm::quat &rotation);
 	void rotate(const glm::quat &rotation);
-	void distance(const PowerScaledScalar &distance);
+	void distance(const PowerScaledScalar &distance, size_t iterations = 0);
 
 	void lookAt(const glm::quat &rotation);
 	void setRotation(const glm::quat &rotation);
@@ -60,6 +62,15 @@ public:
     void mouseScrollWheelCallback(int pos);
 
     void addKeyCallback(int key, std::function<void(void)> f);
+
+	/**
+	* Returns the Lua library that contains all Lua functions available to affect the
+	* interaction. The functions contained are
+	* - openspace::luascriptfunctions::printScreen
+	* \return The Lua library that contains all Lua functions available to affect the
+	* interaction
+	*/
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 	
 private:
     glm::vec3 mapToTrackball(glm::vec2 mousePos);

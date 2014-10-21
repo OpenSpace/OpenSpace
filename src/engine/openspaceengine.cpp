@@ -438,6 +438,7 @@ bool OpenSpaceEngine::initialize() {
 	scriptEngine().addLibrary(RenderEngine::luaLibrary());
 	scriptEngine().addLibrary(SceneGraph::luaLibrary());
 	scriptEngine().addLibrary(Time::luaLibrary());
+	scriptEngine().addLibrary(InteractionHandler::luaLibrary());
 
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
