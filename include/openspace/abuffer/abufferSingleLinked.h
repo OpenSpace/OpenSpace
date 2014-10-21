@@ -41,6 +41,8 @@ public:
 	virtual void postRender();
 
 	virtual std::string settings();
+protected:
+	virtual bool reinitializeInternal();
 
 private:
 

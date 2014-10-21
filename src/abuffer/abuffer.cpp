@@ -34,39 +34,29 @@
 #include <string>
 
 namespace {
-	std::string _loggerCat = "ABuffer";
 
-std::string padGeneratedString(const std::string& content) {
-	std::string _content_ = "// GENERATED CONTENT\n" + content + "\n// END GENERATED CONTENT";
-	return _content_;
-}
+	const std::string generatedSettingsPath = "${SHADERS_GENERATED}/ABufferSettings.hglsl";
+	const std::string generatedHeadersPath = "${SHADERS_GENERATED}/ABufferHeaders.hglsl";
+	const std::string generatedSamplerCallsPath = "${SHADERS_GENERATED}/ABufferSamplerCalls.hglsl";
+	const std::string generatedTransferFunctionVisualizerPath = "${SHADERS_GENERATED}/ABufferTransferFunctionVisualizer.hglsl";
+	const std::string generatedSamplersPath = "${SHADERS_GENERATED}/ABufferSamplers.hglsl";
+
+	const std::string _loggerCat = "ABuffer";
 
 }
 
 namespace openspace {
 
 ABuffer::ABuffer() : _validShader(false), _resolveShader(nullptr) {
-	int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-    _width = xSize;
-    _height = ySize;
-    _totalPixels = _width * _height;
-	const std::string fragmentShaderSourcePath = absPath("${SHADERS}/ABuffer/abufferResolveFragment.glsl");
-	_fragmentShaderFile = new ghoul::filesystem::File(fragmentShaderSourcePath, true);
-	_fragmentShaderPath = fragmentShaderSourcePath.substr(0, fragmentShaderSourcePath.length()-4) + "gglsl";
+	updateDimensions();
 }
 
 ABuffer::~ABuffer() {
-	if(_fragmentShaderFile)
-		delete _fragmentShaderFile;
 
 	if(_resolveShader)
 		delete _resolveShader;
-
+	
 	for(auto file: _samplerFiles) {
-		delete file;
-	}
-	for(auto file: _shaderFiles) {
 		delete file;
 	}
 }
@@ -75,25 +65,20 @@ bool ABuffer::initializeABuffer() {
 	// ============================
     // 			SHADERS
     // ============================
-  	auto shaderCallback = [this](const ghoul::filesystem::File& file) {
-        _validShader = false;
-    };
-    _fragmentShaderFile->setCallback(shaderCallback);
-
-    // Development functionality to update shader for changes in several files
-    auto addFunc = [this, shaderCallback](const std::string& path) {
-    	ghoul::filesystem::File* f = new ghoul::filesystem::File(path, false);
-    	f->setCallback(shaderCallback);
-    	_shaderFiles.push_back(f);
+	auto shaderCallback = [this](ghoul::opengl::ProgramObject* program) {
+		// Error for visibility in log
+		_validShader = false;
 	};
-	addFunc("${SHADERS}/ABuffer/constants.hglsl");
-	addFunc("${SHADERS}/ABuffer/abufferSort.hglsl");
-    addFunc("${SHADERS}/ABuffer/abufferAddToBuffer.hglsl");
-	addFunc("${SHADERS}/ABuffer/abufferStruct.hglsl");
-	addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
-	addFunc("${SHADERS}/PowerScaling/powerScaling_fs.hglsl");
-	addFunc("${SHADERS}/PowerScaling/powerScaling_vs.hglsl");
-	addFunc("${SHADERS}/PowerScaling/powerScalingMath.hglsl");
+
+	generateShaderSource();
+	_resolveShader = ghoul::opengl::ProgramObject::Build(
+		"ABufferResolve",
+		"${SHADERS}/ABuffer/abufferResolveVertex.glsl",
+		"${SHADERS}/ABuffer/abufferResolveFragment.glsl",
+		shaderCallback);
+
+	if (!_resolveShader)
+		return false;
 
     // ============================
     // 		GEOMETRY (quad)
@@ -120,40 +105,49 @@ bool ABuffer::initializeABuffer() {
 	return true;
 }
 
+bool ABuffer::reinitialize() {
+
+	// set the total resolution for all viewports
+	updateDimensions();
+	return reinitializeInternal();
+}
+
 void ABuffer::resolve() {
 	if( ! _validShader) {
-		_validShader = true;
+		SleepEx(0, TRUE);
 		generateShaderSource();
 		updateShader();
+		_validShader = true;
 	}
 
-	if(_resolveShader) {
-		_resolveShader->activate();
-	    int startAt = 0;
-		for(int i = 0; i < _volumes.size(); ++i) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			_volumes.at(i).second->bind();
-			startAt = i + 1;
-		}
-		for(int i = 0; i < _transferFunctions.size(); ++i) {
-			glActiveTexture(GL_TEXTURE0 + startAt + i);
-			_transferFunctions.at(i).second->bind();
-		}
+	if (!_resolveShader)
+		return;
 
-		// Decrease stepsize in volumes if right click is pressed
-		// TODO: Let the interactionhandler handle this
-		int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
-		float volumeStepFactor = (val) ? 0.2: 1.0;
-		if(volumeStepFactor != _volumeStepFactor) {
-			_volumeStepFactor = volumeStepFactor;
-			_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
-		}
-
-	    glBindVertexArray(_screenQuad);
-	    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		_resolveShader->deactivate();
+	_resolveShader->activate();
+	int startAt = 0;
+	for(int i = 0; i < _volumes.size(); ++i) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		_volumes.at(i).second->bind();
+		startAt = i + 1;
 	}
+	for(int i = 0; i < _transferFunctions.size(); ++i) {
+		glActiveTexture(GL_TEXTURE0 + startAt + i);
+		_transferFunctions.at(i).second->bind();
+	}
+
+	// Decrease stepsize in volumes if right click is pressed
+	// TODO: Let the interactionhandler handle this
+	int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
+	float volumeStepFactor = (val) ? 0.2: 1.0;
+	if(volumeStepFactor != _volumeStepFactor) {
+		_volumeStepFactor = volumeStepFactor;
+		_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
+	}
+
+	glBindVertexArray(_screenQuad);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	_resolveShader->deactivate();
 }
 
 void ABuffer::addVolume(const std::string& tag,ghoul::opengl::Texture* volume) {
@@ -182,33 +176,22 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 }
 
 bool ABuffer::updateShader() {
-
-	using ghoul::opengl::ShaderObject;
-    using ghoul::opengl::ProgramObject;
-	ProgramObject* resolveShader = ProgramObject::Build("ABuffer resolve",
-		"${SHADERS}/ABuffer/abufferResolveVertex.glsl",
-		_fragmentShaderPath);
-   
-	if( ! resolveShader) {
-    	LWARNING("ABuffer shader not updated");
-    	return false;
-    }
-
-    int startAt = 0;
-	for(int i = 0; i < _volumes.size(); ++i) {
-		resolveShader->setUniform(_volumes.at(i).first, i);
-		startAt = i + 1;
+	bool s = _resolveShader->rebuildFromFile();
+	if (s) {
+		int startAt = 0;
+		for (int i = 0; i < _volumes.size(); ++i) {
+			_resolveShader->setUniform(_volumes.at(i).first, i);
+			startAt = i + 1;
+		}
+		for (int i = 0; i < _transferFunctions.size(); ++i) {
+			_resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
+		}
+		LINFO("Successfully updated ABuffer resolve shader!");
 	}
-	for(int i = 0; i < _transferFunctions.size(); ++i) {
-		resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
+	else {
+		LWARNING("Couldn't update ABuffer resolve shader");
 	}
-
-	if(_resolveShader)
-		delete _resolveShader;
-
-	_resolveShader = resolveShader;
-	LINFO("Successfully updated ABuffer shader!");
-	return true;
+	return s;
 }
 
 void ABuffer::generateShaderSource() {
@@ -225,157 +208,130 @@ void ABuffer::generateShaderSource() {
 		_samplers.at(i) = source;
 	}
 
-	std::string line, source = "";
-	std::ifstream fragmentShaderFile(_fragmentShaderFile->path());
-	if(fragmentShaderFile.is_open()) {
-		while(std::getline(fragmentShaderFile, line)) {
-			if(line == "#pragma openspace insert HEADERS") {
-				line = padGeneratedString(openspaceHeaders());
-			} else if(line == "#pragma openspace insert SAMPLERCALLS") {
-				line = padGeneratedString(openspaceSamplerCalls());
-			} else if(line == "#pragma openspace insert SAMPLERS") {
-				line = padGeneratedString(openspaceSamplers());
-			} else if(line == "#pragma openspace insert SETTINGS") {
-				line = padGeneratedString(settings());
-			} else if(line == "#pragma openspace insert TRANSFERFUNC") {
-				line = padGeneratedString(openspaceTransferFunction());
-			}
-			source += line + "\n";
-		}
-	}
-	fragmentShaderFile.close();
-
-	std::ofstream fragmentShaderOut(_fragmentShaderPath);
-	fragmentShaderOut << source;
-	fragmentShaderOut.close();
+	LDEBUG("Generating shader includes");
+	openspaceHeaders();
+	openspaceSamplerCalls();
+	openspaceSamplers();
+	settings();
+	openspaceTransferFunction();
 }
 
-std::string ABuffer::openspaceHeaders() {
+void ABuffer::openspaceHeaders() {
 
-	std::string headers;
-	headers += "#define MAX_VOLUMES " + std::to_string(_samplers.size()) + "\n";
-	headers += "#define MAX_TF " + std::to_string(_transferFunctions.size()) + "\n";
-
-
+	std::ofstream f(absPath(generatedHeadersPath));
+	f << "#define MAX_VOLUMES " << std::to_string(_samplers.size()) << "\n"
+		<< "#define MAX_TF " << _transferFunctions.size() << "\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
-		headers += "uniform sampler3D " + _volumes.at(i).first + ";\n";
+		f << "uniform sampler3D " << _volumes.at(i).first << ";\n";
 	}
 	for (int i = 0; i < _transferFunctions.size(); ++i) {
-		headers += "uniform sampler1D " + _transferFunctions.at(i).first + ";\n";
+		f << "uniform sampler1D " << _transferFunctions.at(i).first << ";\n";
 	}
 
 	for (int i = 0; i < _samplers.size(); ++i) {
 		auto found = _samplers.at(i).find_first_of('{');
-		if(found!=std::string::npos) {
-			headers += _samplers.at(i).substr(0, found) + ";\n";
+		if (found != std::string::npos) {
+			f << _samplers.at(i).substr(0, found) << ";\n";
 		}
 	}
 
-	if(_volumes.size() < 1)
-		return headers;
+	if (_volumes.size() < 1) {
+		f.close();
+		return;
+	}
 
 	size_t maxLoop = 0;
-	headers += "const vec3 volume_dim[] = {\n";
+	f << "const vec3 volume_dim[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		glm::size3_t size = _volumes.at(i).second->dimensions();
-		for(int k = 0; k < 3; ++k)
+		for (int k = 0; k < 3; ++k)
 			maxLoop = glm::max(maxLoop, size[k]);
-		headers += "    vec3(" + std::to_string(size[0]) + ".0," + std::to_string(size[1]) + ".0," 
-			    + std::to_string(size[2]) + ".0),\n";
+		f << "    vec3(" << std::to_string(size[0]) << ".0," + std::to_string(size[1]) << ".0,"
+			<< std::to_string(size[2]) + ".0),\n";
 	}
-	headers += "};\n";
+	f << "};\n";
 
-	headers += "#define LOOP_LIMIT " + std::to_string(maxLoop) + "\n";
+	f << "#define LOOP_LIMIT " << maxLoop << "\n";
 
-	headers += "float volumeStepSize[] = {\n";
+	f << "float volumeStepSize[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		glm::size3_t size = _volumes.at(i).second->dimensions();
-		headers += "    stepSize,\n";
+		f << "    stepSize,\n";
 	}
-	headers += "};\n";
+	f << "};\n";
 
-	headers += "float volumeStepSizeOriginal[] = {\n";
+	f << "float volumeStepSizeOriginal[] = {\n";
 	for (int i = 0; i < _volumes.size(); ++i) {
 		glm::size3_t size = _volumes.at(i).second->dimensions();
-		headers += "    stepSize,\n";
+		f << "    stepSize,\n";
 	}
-	headers += "};\n";
+	f << "};\n";
 
-	return headers;
+	f.close();
 }
 
-std::string ABuffer::openspaceSamplerCalls() {
-	std::string samplercalls;
+void ABuffer::openspaceSamplerCalls() {
+	std::ofstream f(absPath(generatedSamplerCallsPath));
 	for (int i = 0; i < _samplers.size(); ++i) {
-
 		auto found1 = _samplers.at(i).find_first_not_of("vec4 ");
-		auto found2 = _samplers.at(i).find_first_of("(",found1);
-		if(found1 != std::string::npos && found2 != std::string::npos) {
+		auto found2 = _samplers.at(i).find_first_of("(", found1);
+		if (found1 != std::string::npos && found2 != std::string::npos) {
 			std::string functionName = _samplers.at(i).substr(found1, found2 - found1);
-			samplercalls += "#ifndef SKIP_VOLUME_"+std::to_string(i)+"\n";
-			samplercalls += "if((currentVolumeBitmask & (1 << " + std::to_string(i) + ")) == "+std::to_string(1 << i)+") {\n";
-			samplercalls += "    vec4 c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
-			// samplercalls += "    if(c.a < 0.1) { \n";
-			// samplercalls += "        if( volumeStepSize[" + std::to_string(i) + "] < 16.0*volumeStepSizeOriginal[" + std::to_string(i) + "]) \n";
-			// samplercalls += "            volumeStepSize[" + std::to_string(i) + "] *= 2.0; \n";
-			// samplercalls += "    } else {\n";
-			// samplercalls += "        //volume_position[" + std::to_string(i) + "] -= volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
-			// samplercalls += "        volumeStepSize[" + std::to_string(i) + "] = volumeStepSizeOriginal[" + std::to_string(i) + "]; \n";
-			// samplercalls += "        //c = " + functionName + "(final_color,volume_position[" + std::to_string(i) + "]);\n";
-			// samplercalls += "    } \n";
-			// samplercalls += "    if(c.a > EPSILON)\n";
-			samplercalls += "    blendStep(final_color, c, volumeStepSize[" + std::to_string(i) + "]);\n";
-			// samplercalls += "    blendStep(final_color, c, stepSize);\n";
-			// samplercalls += "    float aaa = volume_length[i]/myMaxSteps;\n";
-			samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
-			// float aaa = ray[v].w/myMaxSteps;
-			// 				pos[v] += vec4(ray[v].xyz*vec3(aaa),aaa);
-			// samplercalls += "    volume_position[" + std::to_string(i) + "] += volume_direction[" + std::to_string(i) + "]*volumeStepSize[" + std::to_string(i) + "];\n";
-			samplercalls += "}\n";
-			samplercalls += "#endif\n";
+			f << "#ifndef SKIP_VOLUME_" << i << "\n"
+				<< "if((currentVolumeBitmask & (1 << " << i << ")) == " << std::to_string(1 << i) << ") {\n"
+				<< "    vec4 c = " << functionName << "(final_color,volume_position[" << i << "]);\n"
+				<< "    blendStep(final_color, c, volumeStepSize[" << i << "]);\n"
+				<< "    volume_position[" << i << "] += volume_direction[" << i << "]*volumeStepSize[" << i << "];\n"
+				<< "}\n"
+				<< "#endif\n";
 		}
-
-		
 	}
-	return samplercalls;
+	f.close();
 }
 
-std::string ABuffer::openspaceSamplers() {
-	std::string samplers;
-	for (int i = 0; i < _samplers.size(); ++i) {
-		samplers += _samplers.at(i) + "\n";
+void ABuffer::openspaceSamplers() {
+
+	std::ofstream f(absPath(generatedSamplersPath));
+	for (auto sampler : _samplers) {
+		f << sampler << std::endl;
 	}
-	return samplers;
+	f.close();
 }
 
-std::string ABuffer::openspaceTransferFunction() {
-	std::string tf;
-	tf += "float showfunc_size = 20.0;\n";
-	tf += "float SCREEN_HEIGHTf = float(SCREEN_HEIGHT);\n";
-	tf += "float SCREEN_WIDTHf = float(SCREEN_WIDTH);\n";
-	for(int i = 0; i < _transferFunctions.size(); ++i) {
-		tf += 	"if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+
-				" && gl_FragCoord.y < SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i)+") {\n";
-		tf += "    float normalizedIntensity = gl_FragCoord.x / (SCREEN_WIDTHf-1) ;\n";
-		tf += "    vec4 tfc = texture("+ _transferFunctions.at(i).first +", normalizedIntensity);\n";
-		tf += "    final_color = tfc;\n";
-		tf += "    float cmpf = SCREEN_HEIGHTf-showfunc_size*"+std::to_string(i+1)+" + tfc.a*showfunc_size;\n";
-		tf += "    if(gl_FragCoord.y > cmpf) {\n";
-		tf += "        final_color = vec4(0,0,0,0);\n";
-		tf += "    } else {\n";
-		tf += "        final_color.a = 1.0;\n";
-		tf += "    }\n";
-		tf += "} else if(ceil(gl_FragCoord.y) == SCREEN_HEIGHTf - showfunc_size*"+std::to_string(i+1)+") {\n";
-		tf += "    const float intensity = 0.4;\n";
-		tf += "    final_color = vec4(intensity,intensity,intensity,1.0);\n";
-		tf += "}\n";
+void ABuffer::openspaceTransferFunction() {
+	std::ofstream f(absPath(generatedTransferFunctionVisualizerPath));
+	f	<< "float showfunc_size = 20.0;\n"
+		<< "float SCREEN_HEIGHTf = float(SCREEN_HEIGHT);\n"
+		<< "float SCREEN_WIDTHf = float(SCREEN_WIDTH);\n";
+	for (int i = 0; i < _transferFunctions.size(); ++i) {
+		f << "if( gl_FragCoord.y > SCREEN_HEIGHTf-showfunc_size*" << i + 1
+			<< " && gl_FragCoord.y < SCREEN_HEIGHTf-showfunc_size*" << std::to_string(i) << ") {\n"
+			<< "    float normalizedIntensity = gl_FragCoord.x / (SCREEN_WIDTHf-1) ;\n"
+			<< "    vec4 tfc = texture(" << _transferFunctions.at(i).first << ", normalizedIntensity);\n"
+			<< "    final_color = tfc;\n"
+			<< "    float cmpf = SCREEN_HEIGHTf-showfunc_size*" << i + 1 << " + tfc.a*showfunc_size;\n"
+			<< "    if(gl_FragCoord.y > cmpf) {\n"
+			<< "        final_color = vec4(0,0,0,0);\n"
+			<< "    } else {\n"
+			<< "        final_color.a = 1.0;\n"
+			<< "    }\n"
+			<< "} else if(ceil(gl_FragCoord.y) == SCREEN_HEIGHTf - showfunc_size*" << i + 1 << ") {\n"
+			<< "    const float intensity = 0.4;\n"
+			<< "    final_color = vec4(intensity,intensity,intensity,1.0);\n"
+			<< "}\n";
 	}
-
-	return tf;
+	f.close();
 }
 
 void ABuffer::invalidateABuffer() {
+	LDEBUG("Shader invalidated");
 	_validShader = false;
+}
+
+void ABuffer::updateDimensions() {
+	_width = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();
+	_height = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();
+	_totalPixels = _width * _height;
 }
 
 

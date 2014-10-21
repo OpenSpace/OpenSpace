@@ -60,6 +60,8 @@ public:
     void render();
     void postDraw();
 
+	void takeScreenshot();
+
 	void serialize(std::vector<char>& dataStream, size_t& offset);
 	void deserialize(const std::vector<char>& dataStream, size_t& offset);
 	
@@ -82,6 +84,8 @@ private:
 	properties::BoolProperty _showInfo;
 	properties::BoolProperty _showScreenLog;
 
+
+	bool _takeScreenshot;
 
 	void generateGlslConfig();
 };

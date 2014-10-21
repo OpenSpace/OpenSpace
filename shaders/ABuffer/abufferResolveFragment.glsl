@@ -24,10 +24,13 @@
 
 #version 430
 
+
+
 // ================================================================================
 // Settings
 // ================================================================================
-#pragma openspace insert SETTINGS
+//#pragma openspace insert SETTINGS
+#include <${SHADERS_GENERATED}/ABufferSettings.hglsl>:notrack
 
 // Select type of depth calculations
 #define 	PSCDEPTH 		1
@@ -79,7 +82,8 @@ out vec4 out_color;
 // Headers, 
 // volume and transferfunctions uniforms
 // ================================================================================
-#pragma openspace insert HEADERS
+//#pragma openspace insert HEADERS
+#include <${SHADERS_GENERATED}/ABufferHeaders.hglsl>:notrack
 
 // ================================================================================
 // The ABuffer specific includes and definitions
@@ -221,7 +225,11 @@ vec4 calculate_final_color(uint frag_count) {
 			vec4 color = vec4(0);
 			for(int k = 0; k < max_iterations && final_color.a < ALPHA_LIMIT && k < LOOP_LIMIT; ++k) {
 
-#pragma openspace insert SAMPLERCALLS
+// #pragma openspace insert SAMPLERCALLS
+#include <${SHADERS_GENERATED}/ABufferSamplerCalls.hglsl>:notrack
+
+
+
 
 
 			}
@@ -253,8 +261,12 @@ vec4 calculate_final_color(uint frag_count) {
 // Transferfunction visualizer
 // ================================================================================
 #ifdef VISUALIZE_TRANSFERFUNCTIONS
-#pragma openspace insert TRANSFERFUNC
+// #pragma openspace insert TRANSFERFUNC
+#include <${SHADERS_GENERATED}/ABufferTransferFunctionVisualizer.hglsl>:notrack
 #endif
+
+
+
 
 	// if(frag_count == 0) {
 	// 	final_color = vec4(0.5,0.5,0.5,1.0);
@@ -300,7 +312,8 @@ void main() {
 // ================================================================================
 // 	The samplers implementations
 // ================================================================================
-#pragma openspace insert SAMPLERS
+//#pragma openspace insert SAMPLERS
+#include <${SHADERS_GENERATED}/ABufferSamplers.hglsl>:notrack
 
 
 

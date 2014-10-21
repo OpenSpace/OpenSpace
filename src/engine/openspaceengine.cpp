@@ -43,6 +43,9 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
+#include <iostream>
+#include <fstream>
+
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
@@ -310,7 +313,23 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		LERROR("Loading of configuration file '" << configurationFilePath << "' failed");
 		return false;
 	}
-    
+
+	// make sure cache is registered, false since we don't want to override
+	FileSys.registerPathToken("${CACHE}", "${BASE_PATH}/cache", false);
+
+	// Create directories that doesn't exsist
+	auto tokens = FileSys.tokens();
+	for (auto token : tokens) {
+		if (!FileSys.directoryExists(token)) {
+			std::string p = absPath(token);
+			LDEBUG("Directory '" << p <<"' does not exsist, creating.");
+			FileSys.createDirectory(p, true);
+		}
+	}
+
+	// Create the cachemanager
+	FileSys.createCacheManager("${CACHE}");
+
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
@@ -490,7 +509,8 @@ ScriptEngine& OpenSpaceEngine::scriptEngine() {
     return _scriptEngine;
 }
 
-bool OpenSpaceEngine::initializeGL() {
+bool OpenSpaceEngine::initializeGL()
+{
     return _renderEngine.initializeGL();
 }
 
@@ -565,6 +585,23 @@ void OpenSpaceEngine::renderActiveCommand() {
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster())
         _interactionHandler.unlockControls();
+
+#ifdef OPENSPACE_VIDEO_EXPORT
+    float speed = 0.01;
+    glm::vec3 euler(0.0, speed, 0.0);
+    glm::quat rot = glm::quat(euler);
+    glm::vec3 euler2(0.0, -speed, 0.0);
+    glm::quat rot2 = glm::quat(euler2);
+    _interactionHandler->orbit(rot);
+    _interactionHandler->rotate(rot2);
+	if(_doVideoExport)
+		_renderEngine.takeScreenshot();
+#endif
+	_renderEngine.postDraw();
+
+#ifdef FLARE_ONLY
+    _flare->postDraw();
+#endif
 }
 
 void OpenSpaceEngine::addToCommand(std::string c) {

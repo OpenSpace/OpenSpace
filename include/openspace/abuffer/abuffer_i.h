@@ -31,6 +31,7 @@ class ABuffer_I {
 public:
 	virtual ~ABuffer_I() {};
 	virtual bool initialize() = 0;
+	virtual bool reinitialize() = 0;
 
 	virtual void clear() = 0;
 	virtual void preRender() = 0;

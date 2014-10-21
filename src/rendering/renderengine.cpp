@@ -71,8 +71,9 @@ int printImage(lua_State* L) {
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
-	, _sceneGraph(nullptr)
-	, _abuffer(nullptr)
+    , _sceneGraph(nullptr)
+    , _abuffer(nullptr)
+	, _takeScreenshot(false)
 	, _log(nullptr)
 	, _showInfo("info", "Display info", true)
 	, _showScreenLog("log", "Display screen log", true)
@@ -193,15 +194,17 @@ bool RenderEngine::initializeGL()
 void RenderEngine::postSynchronizationPreDraw()
 {
 	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
-	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++)
-		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized())
-			generateGlslConfig();
-	// Move time forward.
-	//_runtimeData->advanceTimeBy(1, DAY);
-	
-	//_runtimeData->advanceTimeBy(1, HOUR);
-	//_runtimeData->advanceTimeBy(30, MINUTE);
-	//_runtimeData->advanceTimeBy(1, MILLISECOND);
+	bool updateAbuffer = false;
+	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
+		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized()) {
+			updateAbuffer = true;
+			break;
+		}
+	}
+	if (updateAbuffer) {
+		generateGlslConfig();
+		_abuffer->reinitialize();
+	}
 	
     // converts the quaternion used to rotation matrices
     _mainCamera->compileViewRotationMatrix();
@@ -220,8 +223,6 @@ void RenderEngine::postSynchronizationPreDraw()
 void RenderEngine::render()
 {
     // SGCT resets certain settings
-    //glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
@@ -361,6 +362,18 @@ void RenderEngine::render()
 	}
     
 }
+
+void RenderEngine::postDraw() {
+	if (_takeScreenshot) {
+		sgct::Engine::instance()->takeScreenshot();
+		_takeScreenshot = false;
+	}
+}
+
+void RenderEngine::takeScreenshot() {
+	_takeScreenshot = true;
+}
+
 
 SceneGraph* RenderEngine::sceneGraph()
 {
@@ -555,15 +568,13 @@ ABuffer* RenderEngine::abuffer() const {
 
 void RenderEngine::generateGlslConfig() {
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
-	int x1, xSize, y1, ySize;
-	sgct::Engine::instance()->
-		getActiveWindowPtr()->
-		getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+	int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
+	int ySize = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();;
 
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
-	std::ofstream os(absPath("${SHADERS}/ABuffer/constants.hglsl"));
+	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
 	os << "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"

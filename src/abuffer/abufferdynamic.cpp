@@ -89,6 +89,10 @@ bool ABufferDynamic::initialize() {
 	return initializeABuffer();
 }
 
+bool ABufferDynamic::reinitializeInternal() {
+	return false;
+}
+
 void ABufferDynamic::clear() {
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
 	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);

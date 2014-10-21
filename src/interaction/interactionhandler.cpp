@@ -394,6 +394,13 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			OsEng.renderEngine().camera()->setScaling(s);
 		}
 	}
+
+	// Screenshot
+	if (action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) {
+		OsEng.renderEngine().takeScreenshot();
+	}
+
+	
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");
