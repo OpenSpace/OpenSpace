@@ -331,11 +331,13 @@ void RenderableWavefrontObject::render(const RenderData& data)
 	
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
-	glm::mat4 scaler = glm::scale(transform, glm::vec3(0, 0, -1));
+	glm::mat4 scale_n_z = glm::scale(transform, glm::vec3(1, 1, -1));
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot_x = glm::rotate(transform, 270.f, glm::vec3(1, 0, 0));
-	glm::mat4 rot_y = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+	glm::mat4 rot_x = glm::rotate(transform, 180.f, glm::vec3(1, 0, 0));
+	glm::mat4 rot_n_x = glm::rotate(transform, 90.f, glm::vec3(-1, 0, 0));
+
+	glm::mat4 rot_y = glm::rotate(transform, 90.f, glm::vec3(0, -1, 0));
 
 
 	glm::mat4 tmp = glm::mat4(1);
@@ -344,17 +346,27 @@ void RenderableWavefrontObject::render(const RenderData& data)
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	//transform *= tmp;
+	
+	transform *= tmp;
+	//transform *= scale_n_z;
 	//transform *= rot_x;
-	//transform *= rot_y;
+	//transform *= scale_n_z;
+
+
+
+	//transform *= rot_x;
 	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	glm::vec4 camSpaceEye = -(modelview*currentPosition.vec4());
 	// setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
+
+	psc tmpPos = data.position;
+	//tmpPos[1] += 0.01;// move slightly to in x
+
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject, &data.camera, tmpPos);
 	
     // Bind texture
     ghoul::opengl::TextureUnit unit;
