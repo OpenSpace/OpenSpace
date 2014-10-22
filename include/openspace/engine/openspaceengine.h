@@ -34,6 +34,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/interaction/luaconsole.h>
 //#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
@@ -92,6 +93,8 @@ public:
     void encode();
     void decode();
 
+	void setInputCommand(bool b);
+
 private:
     OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
@@ -117,14 +120,7 @@ private:
     sgct::SharedVector<char> _synchronizationBuffer;
 
 	bool _inputCommand;
-	size_t _inputPosition;
-	std::vector<std::string> _commandsHistory;
-	size_t _activeCommand;
-	std::vector<std::string> _commands;
-
-	void renderActiveCommand();
-	void handleCommandInput(int key, int action);
-	void addToCommand(std::string c);
+	LuaConsole* _console;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())
