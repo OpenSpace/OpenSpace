@@ -105,7 +105,7 @@ void RenderableFov::fullYearSweep(){
 		}
 	}
 	tmat *= tmp;
-	tmat *= rot_x;
+	//tmat *= rot_x;
 	
 	std::string shape, name;
 	shape.resize(32);
@@ -116,8 +116,8 @@ void RenderableFov::fullYearSweep(){
 	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
 	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], 1);
 
-	//psc bor = PowerScaledCoordinate::CreatePowerScaledCoordinate(boresight[0], boresight[1], boresight[2]);
-	bsight_t = tmat*bsight_t;
+	psc bor = PowerScaledCoordinate::CreatePowerScaledCoordinate(boresight[0], boresight[1], boresight[2]);
+	bsight_t = tmat*bor.vec4();
 
 	_varray.push_back(bsight_t[0]);
 	_varray.push_back(bsight_t[1]);
@@ -130,7 +130,6 @@ void RenderableFov::fullYearSweep(){
 	_varray.push_back(1.f);
 
 	_iarray[1] = 1;
-
 
 
 	_stride = 8;
@@ -203,16 +202,6 @@ void RenderableFov::render(const RenderData& data){
 	glm::mat4 camrot = data.camera.viewRotationMatrix();
 
 	glm::mat4 tmat = glm::mat4(1);
-	glm::mat4 rot_x = glm::rotate(tmat, 90.f, glm::vec3(1, 0, 0));
-
-	glm::mat4 tmp = glm::mat4(1);
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++){
-			tmp[i][j] = _stateMatrix[i][j];
-		}
-	}
-	tmat *= tmp;
-	tmat *= rot_x;
 
 	glm::mat4 transform(1);
 	// setup the data to the shader
