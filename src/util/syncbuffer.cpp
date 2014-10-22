@@ -22,70 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
-
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
-#include <string>
+#include <openspace/util/syncbuffer.h>
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ScreenLog;
+SyncBuffer::SyncBuffer(size_t n)
+	: _n(n)
+	, _encodeOffset(0)
+	, _decodeOffset(0)
+{
+	_dataStream.resize(_n);
+}
 
-class RenderEngine {
-public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
+void SyncBuffer::write() {
+	_synchronizationBuffer.setVal(_dataStream);
+	sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+	_encodeOffset = 0;
+	_decodeOffset = 0;
+}
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
-
-    Camera* camera() const;
-    ABuffer* abuffer() const;
-
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void takeScreenshot();
-
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-
-private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
-
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	void generateGlslConfig();
-};
+void SyncBuffer::read() {
+	sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+	_dataStream = std::move(_synchronizationBuffer.getVal());
+	_encodeOffset = 0;
+	_decodeOffset = 0;
+}
 
 } // namespace openspace
-
-#endif // __RENDERENGINE_H__

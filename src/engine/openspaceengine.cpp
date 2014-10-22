@@ -26,6 +26,7 @@
 
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
@@ -33,6 +34,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -74,6 +76,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
 	, _inputCommand(false)
 	, _console(nullptr)
+	, _syncBuffer(nullptr)
 {
 }
 
@@ -208,6 +211,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	FileSys.createCacheManager("${CACHE}");
 
 	_engine->_console = new LuaConsole();
+	_engine->_syncBuffer = new SyncBuffer(1024);
 
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
@@ -494,6 +498,8 @@ void OpenSpaceEngine::encode()
 //    _synchronizationBuffer.setVal(dataStream);
 //    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
 //#endif
+	_renderEngine.serialize(_syncBuffer);
+	_syncBuffer->write();
 }
 
 void OpenSpaceEngine::decode()
@@ -508,6 +514,8 @@ void OpenSpaceEngine::decode()
 //    // deserialize in the same order as done in serialization
 //    _renderEngine->deserialize(dataStream, offset);
 //#endif
+	_syncBuffer->read();
+	_renderEngine.deserialize(_syncBuffer);
 }
 
 void OpenSpaceEngine::setInputCommand(bool b) {

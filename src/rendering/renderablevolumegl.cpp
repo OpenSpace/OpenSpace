@@ -26,6 +26,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/kameleonwrapper.h>
+#include <openspace/abuffer/abuffer.h>
 
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opencl/clworksize.h>

@@ -33,6 +33,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 #include "sgct.h"
 
 #include <ghoul/filesystem/filesystem.h>
@@ -41,9 +42,12 @@
 #include <array>
 #include <fstream>
 
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
+#include <openspace/util/screenlog.h>
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
@@ -75,10 +79,9 @@ RenderEngine::RenderEngine()
     , _abuffer(nullptr)
 	, _takeScreenshot(false)
 	, _log(nullptr)
-	, _showInfo("info", "Display info", true)
-	, _showScreenLog("log", "Display screen log", true)
+	, _showInfo(true)
+	, _showScreenLog(true)
 {
-	setName("renderEngine");
 }
 
 RenderEngine::~RenderEngine()
@@ -387,7 +390,7 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
     _sceneGraph = sceneGraph;
 }
 
-void RenderEngine::serialize(std::vector<char>& dataStream, size_t& offset) {
+void RenderEngine::serialize(SyncBuffer* syncBuffer) {
     // TODO: This has to be redone properly (ab) [new class providing methods to serialize
     // variables]
 
@@ -396,6 +399,12 @@ void RenderEngine::serialize(std::vector<char>& dataStream, size_t& offset) {
     // camera->position
     // camera->viewRotationMatrix
     // camera->scaling
+
+	syncBuffer->encode(_mainCamera->scaling());
+	syncBuffer->encode(_mainCamera->position());
+	syncBuffer->encode(_mainCamera->viewRotationMatrix());
+	//syncBuffer->encode(_mainCamera->lookUpVector());
+	//syncBuffer->encode(_mainCamera->rotation());
 
 
     //const glm::vec2 scaling = _mainCamera->scaling();
@@ -476,8 +485,23 @@ void RenderEngine::serialize(std::vector<char>& dataStream, size_t& offset) {
     //dataStream[offset++] = s.representation[3];
 }
 
-void RenderEngine::deserialize(const std::vector<char>& dataStream, size_t& offset) {
+void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
     // TODO: This has to be redone properly (ab)
+	
+	glm::vec2 scaling;
+	psc position;
+	glm::mat4 viewRotation;
+	//glm::vec3 lookUpVector;
+	syncBuffer->decode(scaling);
+	syncBuffer->decode(position);
+	syncBuffer->decode(viewRotation);
+
+	_mainCamera->setScaling(scaling);
+	_mainCamera->setPosition(position);
+	_mainCamera->setViewRotationMatrix(viewRotation);
+	//_mainCamera->setLookUpVector(lookUpVector);
+	//_mainCamera->compileViewRotationMatrix();
+
 
  //   union storage {
  //       float value;

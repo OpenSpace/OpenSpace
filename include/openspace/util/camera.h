@@ -111,7 +111,8 @@ public:
     void setCameraDirection(glm::vec3 cameraDirection);
     glm::vec3 cameraDirection() const;
 
-    glm::mat4 viewRotationMatrix() const;
+	void setViewRotationMatrix(glm::mat4 m);
+	const glm::mat4& viewRotationMatrix() const;
     void compileViewRotationMatrix();
 
     void rotate(const glm::quat& rotation);
@@ -119,7 +120,7 @@ public:
    // const glm::quat& rotation() const;
 	void setRotation(glm::mat4 rotation);
 
-    const glm::vec3& viewDirection() const;
+	const glm::vec3& viewDirection() const;
     
     const float& maxFov() const;
     const float& sinMaxFov() const;
@@ -128,7 +129,7 @@ public:
     const glm::vec2& scaling() const;
 
     void setLookUpVector(glm::vec3 lookUp);
-    const glm::vec3 lookUpVector() const;
+    const glm::vec3& lookUpVector() const;
 
 private:
     float _maxFov;

@@ -22,70 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef SYNCBUFFER_H
+#define SYNCBUFFER_H
 
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
-#include <string>
+#include <vector>
+#include <sgct.h>
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ScreenLog;
-
-class RenderEngine {
+class SyncBuffer {
 public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+	SyncBuffer(size_t n);
 
-    Camera* camera() const;
-    ABuffer* abuffer() const;
+	template<typename T>
+	void encode(const T& v) {
+		const size_t size = sizeof(T);
+		assert(_encodeOffset + size < _n);
 
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
+		memcpy(_dataStream.data() + _encodeOffset, &v, size);
+		_encodeOffset += size;
+	}
 
-	void takeScreenshot();
+	template<typename T>
+	T decode() {
+		const size_t size = sizeof(T);
+		assert(_decodeOffset + size < _n);
+		T value;
+		memcpy(&value, _dataStream.data() + _decodeOffset, size);
+		_decodeOffset += size;
+		return value;
+	}
 
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
+	template<typename T>
+	void decode(T& value) {
+		const size_t size = sizeof(T);
+		assert(_decodeOffset + size < _n);
+		memcpy(&value, _dataStream.data() + _decodeOffset, size);
+		_decodeOffset += size;
+	}
+
+	void write();
+
+	void read();
 
 private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
-
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	void generateGlslConfig();
+	size_t _n;
+	size_t _encodeOffset;
+	size_t _decodeOffset;
+	std::vector<char> _dataStream;
+	sgct::SharedVector<char> _synchronizationBuffer;
 };
 
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif // SYNCBUFFER_H
