@@ -37,7 +37,6 @@
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
-#include <openspace/rendering/renderablevolumeexpert.h>
 #include <openspace/rendering/renderableplane.h>
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/flare/flare.h>
