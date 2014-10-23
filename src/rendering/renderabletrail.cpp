@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <openspace/rendering/renderabletrail.h>
+
+#include <sgct.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 

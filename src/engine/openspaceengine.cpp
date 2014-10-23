@@ -24,6 +24,10 @@
 
 #include <openspace/engine/openspaceengine.h>
 
+// sgct header has to be included before all others due to Windows header
+#define SGCT_WINDOWS_INCLUDE
+#include <sgct.h>
+
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
@@ -421,22 +425,7 @@ void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster())
         _interactionHandler.unlockControls();
 
-#ifdef OPENSPACE_VIDEO_EXPORT
-    float speed = 0.01;
-    glm::vec3 euler(0.0, speed, 0.0);
-    glm::quat rot = glm::quat(euler);
-    glm::vec3 euler2(0.0, -speed, 0.0);
-    glm::quat rot2 = glm::quat(euler2);
-    _interactionHandler->orbit(rot);
-    _interactionHandler->rotate(rot2);
-	if(_doVideoExport)
-		_renderEngine.takeScreenshot();
-#endif
 	_renderEngine.postDraw();
-
-#ifdef FLARE_ONLY
-    _flare->postDraw();
-#endif
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {

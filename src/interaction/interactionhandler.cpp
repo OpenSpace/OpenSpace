@@ -23,8 +23,11 @@
  ****************************************************************************************/
 
 // open space includes
-#include <ghoul/logging/logmanager.h>
 #include <openspace/interaction/interactionhandler.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <sgct.h>
+
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 #include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>

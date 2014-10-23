@@ -25,12 +25,6 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include <ghoul/logging/logmanager.h>
-
-// sgct header has to be included before all others due to Windows header
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
@@ -74,7 +68,6 @@ public:
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
 	void externalControlCallback(const char* receivedChars, int size, int clientId);
-
     void encode();
     void decode();
 
