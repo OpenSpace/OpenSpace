@@ -77,7 +77,11 @@ private:
     OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
 
+	void clearAllWindows();
 	bool gatherCommandlineArguments();
+	bool loadSpiceKernels();
+	void runStartupScripts();
+	void loadFonts();
 
     static OpenSpaceEngine* _engine;
 

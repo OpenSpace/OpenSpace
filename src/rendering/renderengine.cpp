@@ -93,15 +93,11 @@ bool RenderEngine::initialize()
 {
 	generateGlslConfig();
 
-    // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-
-    // if master, setup interaction
-    //if (sgct::Engine::instance()->isMaster())
-        OsEng.interactionHandler().setCamera(_mainCamera);
+	OsEng.interactionHandler().setCamera(_mainCamera);
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
     _abuffer = new ABufferSingleLinked();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
@@ -117,16 +113,13 @@ bool RenderEngine::initializeGL()
     // LDEBUG("RenderEngine::initializeGL()");
     sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
 
-    // TODO:    Fix the power scaled coordinates in such a way that these values can be
-    // set
-    //          to more realistic values
+    // TODO:    Fix the power scaled coordinates in such a way that these 
+	//			values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
      sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,10000.0f);
-    //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-  //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -181,7 +174,6 @@ bool RenderEngine::initializeGL()
                 maxFov = radsbetween;
             }
         }
-	//	std::cout << maxFov << std::endl;
         _mainCamera->setMaxFov(maxFov);
     }
 
@@ -213,10 +205,8 @@ void RenderEngine::postSynchronizationPreDraw()
     _mainCamera->compileViewRotationMatrix();
 	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
-	//std::cout << a.delta << std::endl;
     // update and evaluate the scene starting from the root node
 	_sceneGraph->update(a);
-    _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
@@ -258,9 +248,6 @@ void RenderEngine::render()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	_abuffer->resolve();
 	glDisable(GL_BLEND);
-
-
-#ifndef OPENSPACE_VIDEO_EXPORT
 
     // Print some useful information on the master viewport
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
@@ -361,9 +348,7 @@ void RenderEngine::render()
 				++nr;
 			}
 		}
-#endif
 	}
-    
 }
 
 void RenderEngine::postDraw() {
@@ -391,195 +376,21 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 }
 
 void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-    // TODO: This has to be redone properly (ab) [new class providing methods to serialize
-    // variables]
-
-    // _viewRotation
-    // _cameraDirection
-    // camera->position
-    // camera->viewRotationMatrix
-    // camera->scaling
-
 	syncBuffer->encode(_mainCamera->scaling());
 	syncBuffer->encode(_mainCamera->position());
 	syncBuffer->encode(_mainCamera->viewRotationMatrix());
-	//syncBuffer->encode(_mainCamera->lookUpVector());
-	//syncBuffer->encode(_mainCamera->rotation());
-
-
-    //const glm::vec2 scaling = _mainCamera->scaling();
-    //const psc position = _mainCamera->position();
-    ////const psc origin = OsEng.interactionHandler().getOrigin();
-    ////const pss pssl = (position - origin).length();
-    ////_mainCamera->cameraDirection()
-
-    //union storage {
-    //    float value;
-    //    std::array<char, 4> representation;
-    //} s;
-
-    //s.value = _mainCamera->cameraDirection().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->cameraDirection().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->cameraDirection().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().w;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().w;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
 }
 
 void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
-    // TODO: This has to be redone properly (ab)
-	
 	glm::vec2 scaling;
 	psc position;
 	glm::mat4 viewRotation;
-	//glm::vec3 lookUpVector;
 	syncBuffer->decode(scaling);
 	syncBuffer->decode(position);
 	syncBuffer->decode(viewRotation);
-
 	_mainCamera->setScaling(scaling);
 	_mainCamera->setPosition(position);
 	_mainCamera->setViewRotationMatrix(viewRotation);
-	//_mainCamera->setLookUpVector(lookUpVector);
-	//_mainCamera->compileViewRotationMatrix();
-
-
- //   union storage {
- //       float value;
- //       std::array<char, 4> representation;
- //   } s;
-
- //   glm::vec3 cameraDirection;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.z = s.value;
- //   _mainCamera->setCameraDirection(cameraDirection);
-
- //   glm::quat rotation;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.z = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.w = s.value;
- //   _mainCamera->setRotation(rotation);
-
- //   glm::vec4 position;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.z = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.w = s.value;
-
-	//_mainCamera->setPosition(position);
 }
 
 Camera* RenderEngine::camera() const {
@@ -620,7 +431,6 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 			}
 		}
 	};
-
 }
 
 }  // namespace openspace

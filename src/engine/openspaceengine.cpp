@@ -53,10 +53,10 @@
 #include <iostream>
 #include <fstream>
 
+using namespace openspace::scripting;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
-
-using namespace openspace::scripting;
+using namespace ghoul::cmdparser;
 
 namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
@@ -70,7 +70,6 @@ namespace {
     } commandlineArgumentPlaceholders;
 }
 
-using namespace ghoul::cmdparser;
 
 namespace openspace {
 
@@ -82,24 +81,41 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	, _console(nullptr)
 	, _syncBuffer(nullptr)
 {
+	// initialize OpenSpace helpers
+	SpiceManager::initialize();
+	Time::initialize();
+	DeviceIdentifier::init();
+	FactoryManager::initialize();
+	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
 	if (_console)
 		delete _console;
 
+	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
+	FactoryManager::deinitialize();
+	DeviceIdentifier::deinit();
+	Time::deinitialize();
 	SpiceManager::deinitialize();
-    Time::deinitialize();
-    DeviceIdentifier::deinit();
-    FileSystem::deinitialize();
-    LogManager::deinitialize();
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
     assert(_engine);
     return *_engine;
 }
-    
+   
+void OpenSpaceEngine::clearAllWindows() {
+	size_t n = sgct::Engine::instance()->getNumberOfWindows();
+	for (size_t i = 0; i < n; ++i) {
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		GLFWwindow* win = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+		glfwSwapBuffers(win);
+	}
+	
+}
+
 bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
 
@@ -135,20 +151,76 @@ bool OpenSpaceEngine::findConfiguration(std::string& filename) {
 	}
 }
 
+bool OpenSpaceEngine::loadSpiceKernels() {
+	// Load time kernel
+	using constants::configurationmanager::keySpiceTimeKernel;
+	std::string timeKernel;
+	bool success = configurationManager().getValue(keySpiceTimeKernel, timeKernel);
+	if (!success) {
+		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
+		return false;
+	}
+	SpiceManager::KernelIdentifier id =
+		SpiceManager::ref().loadKernel(timeKernel);
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading time kernel '" << timeKernel << "'");
+		return false;
+	}
+
+	// Load SPICE leap second kernel
+	using constants::configurationmanager::keySpiceLeapsecondKernel;
+	std::string leapSecondKernel;
+	success = configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	if (!success) {
+		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
+		return false;
+	}
+	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
+	if (id == SpiceManager::KernelFailed) {
+		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
+		return false;
+	}
+	return true;
+}
+
+void OpenSpaceEngine::runStartupScripts() {
+	ghoul::Dictionary scripts;
+	configurationManager().getValue(
+		constants::configurationmanager::keyStartupScript, scripts);
+	for (size_t i = 1; i <= scripts.size(); ++i) {
+		std::stringstream stream;
+		stream << i;
+		const std::string& key = stream.str();
+		const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
+		if (!hasKey) {
+			LERROR("The startup scripts have to be declared in a simple array format."
+				" Startup scripts did not contain the key '" << key << "'");
+			break;
+		}
+
+		std::string scriptPath;
+		scripts.getValue(key, scriptPath);
+		std::string&& absoluteScriptPath = absPath(scriptPath);
+		_engine->scriptEngine().runScriptFile(absoluteScriptPath);
+	}
+}
+
+void OpenSpaceEngine::loadFonts() {
+	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
+}
+
 bool OpenSpaceEngine::create(int argc, char** argv,
                              std::vector<std::string>& sgctArguments)
 {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
 
-    // initialize Ghoul logging
+    // initialize Ghoul classes
     LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
-
-    
-    // Initialize FileSystem
     ghoul::filesystem::FileSystem::initialize();
-    
     
     // Sanity check of values
     if (argc < 1) {
@@ -160,13 +232,11 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]));
     
-    
     // Query modules for commandline arguments
     const bool gatherSuccess = _engine->gatherCommandlineArguments();
     if (!gatherSuccess)
         return false;
     
-
     // Parse commandline arguments
     std::vector<std::string> remainingArguments;
     _engine->_commandlineParser.setCommandLine(argc, argv, &sgctArguments);
@@ -198,10 +268,14 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// make sure cache is registered, false since we don't want to override
-	FileSys.registerPathToken("${CACHE}", "${BASE_PATH}/cache", false);
+	auto tokens = FileSys.tokens();
+	const std::string cacheToken = "${CACHE}";
+	auto cacheIterator = std::find(tokens.begin(), tokens.end(), cacheToken);
+	if (cacheIterator != tokens.end()){
+		FileSys.registerPathToken(cacheToken, "${BASE_PATH}/cache");
+	}
 
 	// Create directories that doesn't exsist
-	auto tokens = FileSys.tokens();
 	for (auto token : tokens) {
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
@@ -212,7 +286,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// Create the cachemanager
-	FileSys.createCacheManager("${CACHE}");
+	FileSys.createCacheManager(cacheToken);
 
 	_engine->_console = new LuaConsole();
 	_engine->_syncBuffer = new SyncBuffer(1024);
@@ -233,7 +307,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    delete _engine;
+	delete _engine;
+	FileSystem::deinitialize();
+	LogManager::deinitialize();
 }
 
 bool OpenSpaceEngine::isInitialized() {
@@ -243,88 +319,35 @@ bool OpenSpaceEngine::isInitialized() {
 bool OpenSpaceEngine::initialize() {
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
-    glfwSwapBuffers(win);
+	clearAllWindows();
 
     // Detect and log OpenCL and OpenGL versions and available devices
-    ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
-    //SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
     SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
-
-    // initialize OpenSpace helpers
-	SpiceManager::initialize();
-    Time::initialize();
 	
 	// Load SPICE time kernel
-	using constants::configurationmanager::keySpiceTimeKernel;
-	std::string timeKernel;
-	bool success = configurationManager().getValue(keySpiceTimeKernel, timeKernel);
-	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
+	bool success = loadSpiceKernels();
+	if (!success)
 		return false;
-	}
-	SpiceManager::KernelIdentifier id = 
-		SpiceManager::ref().loadKernel(timeKernel);
-	if (id == SpiceManager::KernelFailed) {
-		LERROR("Error loading time kernel '" << timeKernel << "'");
-		return false;
-	}
 
-	// Load SPICE leap second kernel
-	using constants::configurationmanager::keySpiceLeapsecondKernel;
-	std::string leapSecondKernel;
-	success = configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
-	if (!success) {
-		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
-		return false;
-	}
-	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
-	if (id == SpiceManager::KernelFailed) {
-		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
-		return false;
-	}
-	
-	//// metakernel loading doesnt seem to work... it should. to tired to even
-	//// CK
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
-	//// FK													
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
-	//// IK													
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
-	//// LSK already loaded									
-	////PCK													
-	////SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
-	////SPK												
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
-	
-    FactoryManager::initialize();
-
-    scriptEngine().initialize();
+	// Initialize the script engine
+	_scriptEngine.initialize();
 
 	// Register Lua script functions
 	LDEBUG("Registering Lua libraries");
-	scriptEngine().addLibrary(RenderEngine::luaLibrary());
-	scriptEngine().addLibrary(SceneGraph::luaLibrary());
-	scriptEngine().addLibrary(Time::luaLibrary());
-	scriptEngine().addLibrary(InteractionHandler::luaLibrary());
+	_scriptEngine.addLibrary(RenderEngine::luaLibrary());
+	_scriptEngine.addLibrary(SceneGraph::luaLibrary());
+	_scriptEngine.addLibrary(Time::luaLibrary());
+	_scriptEngine.addLibrary(InteractionHandler::luaLibrary());
 
+	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine.setSceneGraph(sceneGraph);
 	
-    // initialize the RenderEngine, needs ${SCENEPATH} to be set
+    // initialize the RenderEngine
 	_renderEngine.initialize();
 	sceneGraph->initialize();
 
@@ -335,37 +358,14 @@ bool OpenSpaceEngine::initialize() {
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
     // Initialize OpenSpace input devices
-    DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
     _interactionHandler.connectDevices();
 
     // Run start up scripts
-    ghoul::Dictionary scripts;
-	success = configurationManager().getValue(
-		constants::configurationmanager::keyStartupScript, scripts);
-    for (size_t i = 1; i <= scripts.size(); ++i) {
-        std::stringstream stream;
-        stream << i;
-        const std::string& key = stream.str();
-        const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
-        if (!hasKey) {
-            LERROR("The startup scripts have to be declared in a simple array format."
-				" Startup scripts did not contain the key '" << key << "'");
-            break;
-        }
-            
-        std::string scriptPath;
-        scripts.getValue(key, scriptPath);
-        std::string&& absoluteScriptPath = absPath(scriptPath);
-        _engine->scriptEngine().runScriptFile(absoluteScriptPath);
-    }
+	runStartupScripts();
 
 	// Load a light and a monospaced font
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf", absPath("${FONTS}/"));
-	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf", absPath("${FONTS}/"));
-	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
+	loadFonts();
 
     return true;
 }
@@ -392,10 +392,7 @@ bool OpenSpaceEngine::initializeGL()
 }
 
 void OpenSpaceEngine::preSynchronization() {
-#ifdef WIN32
-    // Sleeping for 0 milliseconds will trigger any pending asynchronous procedure calls 
-    SleepEx(0, TRUE);
-#endif
+	FileSys.triggerFilesystemEvents();
     if (sgct::Engine::instance()->isMaster()) {
         const double dt = sgct::Engine::instance()->getDt();
 

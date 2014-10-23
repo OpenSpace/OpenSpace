@@ -43,7 +43,6 @@ public:
 	unsigned int commandInputButton();
 	unsigned int ignoreCodepoint();
 
-	
 private:
 	void addToCommand(std::string c);
 	std::string UnicodeToUTF8(unsigned int codepoint);
