@@ -27,7 +27,7 @@
 #include <cassert>
 
 // renderables
-#include <openspace/rendering/renderablewavefrontobject.h>
+#include <openspace/rendering/model/renderablemodel.h>
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
@@ -47,6 +47,8 @@
 #include <openspace/scenegraph/spiceephemeris.h>
 
 #include <openspace/rendering/planets/simplespheregeometry.h>
+#include <openspace/rendering/model/modelgeometry.h>
+#include <openspace/rendering/model/WavefrontGeometry.h>
 
 namespace openspace {
 
@@ -77,15 +79,16 @@ void FactoryManager::initialize()
 		"RenderableFov");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
-	_manager->factory<Renderable>()->registerClass<RenderableWavefrontObject>(
-		"RenderableWavefrontObject");
+	_manager->factory<Renderable>()->registerClass<RenderableModel>(
+		"RenderableModel");
     //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
     //      "RenderableVolumeCL");
     _manager->factory<Renderable>()->registerClass<RenderablePlane>(
-          "RenderablePlane");
+        "RenderablePlane");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
-          "RenderableVolumeGL");
-    _manager->factory<Renderable>()->registerClass<RenderableFieldlines>("RenderableFieldlines");
+        "RenderableVolumeGL");
+    _manager->factory<Renderable>()->registerClass<RenderableFieldlines>(
+		"RenderableFieldlines");
 
     // Add Ephimerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
@@ -96,6 +99,11 @@ void FactoryManager::initialize()
     _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     _manager->factory<planetgeometry::PlanetGeometry>()
           ->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+	
+	// Add ModelGeometry
+	_manager->addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
+	_manager->factory<modelgeometry::ModelGeometry>()
+		->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
 }
 
 void FactoryManager::deinitialize()

@@ -67,17 +67,22 @@ namespace renderable {
 } // namespace renderable
 
 namespace renderableplanet {
-    const std::string keyGeometry = "Geometry";
 	const std::string keyFrame = "Frame";
+	const std::string keyGeometry = "Geometry";
 } // namespace renderableplanet
 
 namespace planetgeometry {
 	const std::string keyType = "Type";
 } // namespace planetgeometry
 
-namespace renderablewavefrontobject {
+namespace renderablemodel {
+	const std::string keyGeometry = "Geometry";
+} // namespace renderablemodel
+
+namespace modelgeometry {
+	const std::string keyType = "Type";
 	const std::string keyObjFile = "ObjFile";
-} // namespace renderableplanet
+} // namespace modelgeometry
 
 namespace renderablestars {
 	const std::string keySpeckFile = "SpeckFile";

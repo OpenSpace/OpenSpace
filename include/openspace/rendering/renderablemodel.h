@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __RENDERABLEMODEL_H__
+#define __RENDERABLEMODEL_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -37,14 +37,14 @@
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
+namespace modelgeometry {
+class ModelGeometry;
 }
 
-class RenderablePlanet : public Renderable {
+class RenderableModel : public Renderable {
 public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
+	RenderableModel(const ghoul::Dictionary& dictionary);
+	~RenderableModel();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -52,20 +52,48 @@ public:
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+	typedef struct
+	{
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+	/*	GLfloat color[4];
+		GLfloat attribute[3];
+		GLfloat float_attribute;*/
+		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
+
+
+
 protected:
     void loadTexture();
+	void loadObj(const char *filename);
 
 private:
     properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject; 
     ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry;
+	modelgeometry::ModelGeometry* _geometry;
 
-	glm::dmat3 _stateMatrix;
+	float abc;
 
-	std::string _target;
+	GLuint _vaoID = 6;
+	GLuint _vBufferID = 7;
+	GLuint _iBufferID = 8;
+
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	Vertex* _varray;
+	int* _iarray;
+
+	glm::dmat3 _stateMatrix; // might need this
+
+	std::string _source;
+	std::string _destination;
+
 };
 
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANET_H__
+#endif  // __RENDERABLEMODEL_H__

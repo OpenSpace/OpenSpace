@@ -22,50 +22,53 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __WAVEFRONTOBJECT_H__
+#define __WAVEFRONTOBJECT_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/rendering/model/modelgeometry.h>
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
+class RenderableModel;
 
-class RenderablePlanet : public Renderable {
+namespace modelgeometry {
+
+class WavefrontGeometry : public ModelGeometry {
 public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
+	WavefrontGeometry(const ghoul::Dictionary& dictionary);
+	~WavefrontGeometry();
 
-    bool initialize() override;
-    bool deinitialize() override;
-
-	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    bool initialize(RenderableModel* parent) override;
+    void deinitialize() override;
+    void render() override;
+	/*
+	typedef struct
+	{
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
+    */
 
 protected:
-    void loadTexture();
-
+	//void loadObj(const char *filename);
 private:
-    properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry;
+    void createSphere();
+	/*
+	GLuint _vaoID = 6;
+	GLuint _vBufferID = 7;
+	GLuint _iBufferID = 8;
 
-	glm::dmat3 _stateMatrix;
-
-	std::string _target;
+	GLenum _mode;
+	unsigned int _isize;
+	unsigned int _vsize;
+	Vertex* _varray;
+	int* _iarray;
+    */
 };
 
+}  // namespace modelgeometry
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANET_H__
+#endif // __WAVEFRONTOBJECT_H__
