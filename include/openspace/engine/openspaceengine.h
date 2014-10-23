@@ -34,18 +34,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
-
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-
 #include <ghoul/cmdparser/commandlineparser.h>
-// #define FLARE_ONLY
-
-#include <openspace/flare/flare.h>
-
-// #define OPENSPACE_VIDEO_EXPORT
 
 namespace openspace {
 
@@ -69,7 +58,6 @@ public:
     static bool findConfiguration(std::string& filename);
 
     ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
     InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
@@ -105,14 +93,6 @@ private:
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
-#ifdef OPENSPACE_VIDEO_EXPORT
-    bool _doVideoExport;
-#endif
-#ifdef FLARE_ONLY
-    Flare* _flare;
-#endif
-    // ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
 
 	SyncBuffer* _syncBuffer;
 

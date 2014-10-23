@@ -39,7 +39,6 @@
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderableplane.h>
 #include <openspace/rendering/renderablevolumegl.h>
-#include <openspace/flare/flare.h>
 
 // positioninformation
 #include <openspace/scenegraph/staticephemeris.h>
@@ -78,8 +77,6 @@ void FactoryManager::initialize()
 		"RenderableSphericalGrid");
 	_manager->factory<Renderable>()->registerClass<RenderableWavefrontObject>(
 		"RenderableWavefrontObject");
-    //_manager->factory<Renderable>()->registerClass<RenderableVolumeCL>(
-    //      "RenderableVolumeCL");
     _manager->factory<Renderable>()->registerClass<RenderablePlane>(
           "RenderablePlane");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(

@@ -243,13 +243,6 @@ bool OpenSpaceEngine::initialize() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GLFWwindow* win = sgct::Engine::instance()->getActiveWindowPtr()->getWindowHandle();
     glfwSwapBuffers(win);
-    //int samples = sqrt(sgct::Engine::instance()->getActiveWindowPtr()->getNumberOfAASamples());
-    //LDEBUG("samples: " << samples);
-
-
-    // Register the filepaths from static function enables easy testing
-    // registerFilePaths();
-    _context.createContextFromGLContext();
 
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
@@ -377,10 +370,6 @@ ConfigurationManager& OpenSpaceEngine::configurationManager() {
     return _configurationManager;
 }
 
-ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
-    return _context;
-}
-
 InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return _interactionHandler;
 }
@@ -486,34 +475,12 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 
 void OpenSpaceEngine::encode()
 {
-//#ifdef FLARE_ONLY
-//    _flare->encode();
-//#else
-//    std::vector<char> dataStream(1024);
-//
-//    size_t offset = 0;
-//    // serialization
-//    _renderEngine->serialize(dataStream, offset);
-//
-//    _synchronizationBuffer.setVal(dataStream);
-//    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
-//#endif
 	_renderEngine.serialize(_syncBuffer);
 	_syncBuffer->write();
 }
 
 void OpenSpaceEngine::decode()
 {
-//#ifdef FLARE_ONLY
-//    _flare->decode();
-//#else
-//    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-//    std::vector<char> dataStream = std::move(_synchronizationBuffer.getVal());
-//    size_t offset = 0;
-//
-//    // deserialize in the same order as done in serialization
-//    _renderEngine->deserialize(dataStream, offset);
-//#endif
 	_syncBuffer->read();
 	_renderEngine.deserialize(_syncBuffer);
 }

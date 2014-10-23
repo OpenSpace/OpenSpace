@@ -26,6 +26,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/logging/logmanager.h>
 #include <sgct.h>
 
