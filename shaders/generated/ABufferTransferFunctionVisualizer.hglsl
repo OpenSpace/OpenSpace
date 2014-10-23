@@ -1,0 +1,3 @@
+float showfunc_size = 20.0;
+float SCREEN_HEIGHTf = float(SCREEN_HEIGHT);
+float SCREEN_WIDTHf = float(SCREEN_WIDTH);
