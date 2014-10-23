@@ -26,6 +26,7 @@
 
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
@@ -33,6 +34,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -42,6 +44,10 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
+#include <ghoul/filesystem/cachemanager.h>
+
+#include <iostream>
+#include <fstream>
 
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -68,11 +74,16 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
+	, _inputCommand(false)
+	, _console(nullptr)
+	, _syncBuffer(nullptr)
 {
 }
 
-OpenSpaceEngine::~OpenSpaceEngine()
-{
+OpenSpaceEngine::~OpenSpaceEngine() {
+	if (_console)
+		delete _console;
+
 	SpiceManager::deinitialize();
     Time::deinitialize();
     DeviceIdentifier::deinit();
@@ -80,14 +91,12 @@ OpenSpaceEngine::~OpenSpaceEngine()
     LogManager::deinitialize();
 }
 
-OpenSpaceEngine& OpenSpaceEngine::ref()
-{
+OpenSpaceEngine& OpenSpaceEngine::ref() {
     assert(_engine);
     return *_engine;
 }
     
-bool OpenSpaceEngine::gatherCommandlineArguments()
-{
+bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
 
     CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
@@ -98,8 +107,7 @@ bool OpenSpaceEngine::gatherCommandlineArguments()
     return true;
 }
 
-bool OpenSpaceEngine::findConfiguration(std::string& filename)
-{
+bool OpenSpaceEngine::findConfiguration(std::string& filename) {
 	using ghoul::filesystem::Directory;
 
 	Directory directory = FileSys.currentDirectory();
@@ -184,7 +192,27 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		LERROR("Loading of configuration file '" << configurationFilePath << "' failed");
 		return false;
 	}
-    
+
+	// make sure cache is registered, false since we don't want to override
+	FileSys.registerPathToken("${CACHE}", "${BASE_PATH}/cache", false);
+
+	// Create directories that doesn't exsist
+	auto tokens = FileSys.tokens();
+	for (auto token : tokens) {
+		if (!FileSys.directoryExists(token)) {
+			std::string p = absPath(token);
+			LDEBUG("Directory '" << p <<"' does not exsist, creating.");
+			if(FileSys.createDirectory(p, true))
+				LERROR("Directory '" << p <<"' could not be created");
+		}
+	}
+
+	// Create the cachemanager
+	FileSys.createCacheManager("${CACHE}");
+
+	_engine->_console = new LuaConsole();
+	_engine->_syncBuffer = new SyncBuffer(1024);
+
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _sgctDefaultConfigFile;
@@ -200,18 +228,15 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     return true;
 }
 
-void OpenSpaceEngine::destroy()
-{
+void OpenSpaceEngine::destroy() {
     delete _engine;
 }
 
-bool OpenSpaceEngine::isInitialized()
-{
+bool OpenSpaceEngine::isInitialized() {
     return _engine != nullptr;
 }
 
-bool OpenSpaceEngine::initialize()
-{
+bool OpenSpaceEngine::initialize() {
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     glClearColor(0, 0, 0, 0);
@@ -229,7 +254,7 @@ bool OpenSpaceEngine::initialize()
     // Detect and log OpenCL and OpenGL versions and available devices
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
-    SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
+    //SysCap.addComponent(new ghoul::systemcapabilities::OpenCLCapabilitiesComponent);
     SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
     SysCap.detectCapabilities();
     SysCap.logCapabilities();
@@ -238,10 +263,10 @@ bool OpenSpaceEngine::initialize()
 	SpiceManager::initialize();
     Time::initialize();
 	
+	// Load SPICE time kernel
 	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
-	bool success = OsEng.configurationManager().getValue(keySpiceTimeKernel, timeKernel);
-
+	bool success = configurationManager().getValue(keySpiceTimeKernel, timeKernel);
 	if (!success) {
 		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
 		return false;
@@ -253,11 +278,12 @@ bool OpenSpaceEngine::initialize()
 		return false;
 	}
 
+	// Load SPICE leap second kernel
 	using constants::configurationmanager::keySpiceLeapsecondKernel;
 	std::string leapSecondKernel;
-	success = OsEng.configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	success = configurationManager().getValue(keySpiceLeapsecondKernel, leapSecondKernel);
 	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceLeapsecondKernel << "'");
+		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
 		return false;
 	}
 	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
@@ -266,32 +292,26 @@ bool OpenSpaceEngine::initialize()
 		return false;
 	}
 	
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/de413.bsp");
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/jup260.bsp")
+	//// metakernel loading doesnt seem to work... it should. to tired to even
+	//// CK
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
+	//// FK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
+	//// IK													
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
+	//// LSK already loaded									
+	////PCK													
+	////SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
+	////SPK												
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
+	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
 	
-	// metakernel loading doesnt seem to work... it should. to tired to even
-	// CK
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2006_v011.bc");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ck/merged_nhpc_2007_v006.bc");
-	// FK													
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/fk/nh_v200.tf");
-	// IK													
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/ik/nh_lorri_v100.ti");
-	// LSK already loaded									
-	//PCK													
-	//SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/pck00008.tpc");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/pck/new_horizons_413.tsc");
-	//SPK												
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/de413.bsp");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/jup260.bsp");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_nep_ura_000.bsp");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_e2j_v1.bsp");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/nh_recon_j2sep07_prelimv1.bsp");
-	SpiceManager::ref().loadKernel("${OPENSPACE_DATA}/spice/JupiterNhKernels/spk/sb_2002jf56_2.bsp");
-	
-
-
-
     FactoryManager::initialize();
 
     scriptEngine().initialize();
@@ -301,38 +321,30 @@ bool OpenSpaceEngine::initialize()
 	scriptEngine().addLibrary(RenderEngine::luaLibrary());
 	scriptEngine().addLibrary(SceneGraph::luaLibrary());
 	scriptEngine().addLibrary(Time::luaLibrary());
+	scriptEngine().addLibrary(InteractionHandler::luaLibrary());
 
     // Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine.setSceneGraph(sceneGraph);
 	
-
-
     // initialize the RenderEngine, needs ${SCENEPATH} to be set
 	_renderEngine.initialize();
 	sceneGraph->initialize();
 
     std::string sceneDescriptionPath;
-	success = OsEng.configurationManager().getValue(
+	success = configurationManager().getValue(
 		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
 	if (success)
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
-    //_renderEngine.setSceneGraph(sceneGraph);
-
-#ifdef FLARE_ONLY
-    _flare = new Flare();
-    _flare->initialize();
-#endif
-
     // Initialize OpenSpace input devices
     DeviceIdentifier::init();
     DeviceIdentifier::ref().scanDevices();
-    _engine->_interactionHandler.connectDevices();
+    _interactionHandler.connectDevices();
 
     // Run start up scripts
     ghoul::Dictionary scripts;
-	success = _engine->configurationManager().getValue(
+	success = configurationManager().getValue(
 		constants::configurationmanager::keyStartupScript, scripts);
     for (size_t i = 1; i <= scripts.size(); ++i) {
         std::stringstream stream;
@@ -351,35 +363,33 @@ bool OpenSpaceEngine::initialize()
         _engine->scriptEngine().runScriptFile(absoluteScriptPath);
     }
 
-#ifdef OPENSPACE_VIDEO_EXPORT
-    LINFO("OpenSpace compiled with video export; press Print Screen to start/stop recording");
-#endif
+	// Load a light and a monospaced font
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, "ubuntu-font-family/UbuntuMono-R.ttf", absPath("${FONTS}/"));
+	//sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, "ubuntu-font-family/Ubuntu-L.ttf", absPath("${FONTS}/"));
+	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
+	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
 
     return true;
 }
 
-ConfigurationManager& OpenSpaceEngine::configurationManager()
-{
+ConfigurationManager& OpenSpaceEngine::configurationManager() {
     return _configurationManager;
 }
 
-ghoul::opencl::CLContext& OpenSpaceEngine::clContext()
-{
+ghoul::opencl::CLContext& OpenSpaceEngine::clContext() {
     return _context;
 }
 
-InteractionHandler& OpenSpaceEngine::interactionHandler()
-{
+InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return _interactionHandler;
 }
 
-RenderEngine& OpenSpaceEngine::renderEngine()
-{
+RenderEngine& OpenSpaceEngine::renderEngine() {
     return _renderEngine;
 }
 
-ScriptEngine& OpenSpaceEngine::scriptEngine()
-{
+ScriptEngine& OpenSpaceEngine::scriptEngine() {
     return _scriptEngine;
 }
 
@@ -388,8 +398,7 @@ bool OpenSpaceEngine::initializeGL()
     return _renderEngine.initializeGL();
 }
 
-void OpenSpaceEngine::preSynchronization()
-{
+void OpenSpaceEngine::preSynchronization() {
 #ifdef WIN32
     // Sleeping for 0 milliseconds will trigger any pending asynchronous procedure calls 
     SleepEx(0, TRUE);
@@ -400,35 +409,29 @@ void OpenSpaceEngine::preSynchronization()
         _interactionHandler.update(dt);
         _interactionHandler.lockControls();
 
-		//Time::ref().advanceTime(dt);
+		Time::ref().advanceTime(dt);
     }
-#ifdef FLARE_ONLY
-    _flare->preSync();
-#endif
 }
 
-void OpenSpaceEngine::postSynchronizationPreDraw()
-{
+void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine.postSynchronizationPreDraw();
-#ifdef FLARE_ONLY
-    _flare->postSyncPreDraw();
-#endif
 }
 
-void OpenSpaceEngine::render()
-{
-#ifdef FLARE_ONLY
-    _flare->render();
-#else 
+void OpenSpaceEngine::render() {
     _renderEngine.render();
-#endif
+
+	// If currently writing a command, render it to screen
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _inputCommand) {
+		_console->render();
+	}
 }
 
-void OpenSpaceEngine::postDraw()
-{
-    if (sgct::Engine::instance()->isMaster()) {
+
+void OpenSpaceEngine::postDraw() {
+    if (sgct::Engine::instance()->isMaster())
         _interactionHandler.unlockControls();
-    }
+
 #ifdef OPENSPACE_VIDEO_EXPORT
     float speed = 0.01;
     glm::vec3 euler(0.0, speed, 0.0);
@@ -437,45 +440,47 @@ void OpenSpaceEngine::postDraw()
     glm::quat rot2 = glm::quat(euler2);
     _interactionHandler->orbit(rot);
     _interactionHandler->rotate(rot2);
-    if(_doVideoExport)
-        sgct::Engine::instance()->takeScreenshot();
+	if(_doVideoExport)
+		_renderEngine.takeScreenshot();
 #endif
+	_renderEngine.postDraw();
+
 #ifdef FLARE_ONLY
     _flare->postDraw();
 #endif
 }
 
-void OpenSpaceEngine::keyboardCallback(int key, int action)
-{
-    if (sgct::Engine::instance()->isMaster()) {
-        _interactionHandler.keyboardCallback(key, action);
-    }
-#ifdef OPENSPACE_VIDEO_EXPORT
-    if(action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) 
-        _doVideoExport = !_doVideoExport;
-#endif
-#ifdef FLARE_ONLY
-    _flare->keyboard(key, action);
-#endif
+void OpenSpaceEngine::keyboardCallback(int key, int action) {
+	if (sgct::Engine::instance()->isMaster()) {
+		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
+			_inputCommand = !_inputCommand;
+		}
+
+		if (!_inputCommand) {
+			_interactionHandler.keyboardCallback(key, action);
+		}
+		else {
+			_console->keyboardCallback(key, action);
+		}
+	}
 }
 
-void OpenSpaceEngine::mouseButtonCallback(int key, int action)
-{
-    if (sgct::Engine::instance()->isMaster()) {
+void OpenSpaceEngine::charCallback(unsigned int codepoint) {
+	if (_inputCommand) {
+		_console->charCallback(codepoint);
+	}
+}
+
+void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
+    if (sgct::Engine::instance()->isMaster())
         _interactionHandler.mouseButtonCallback(key, action);
-    }
-#ifdef FLARE_ONLY
-    _flare->mouse(key, action);
-#endif
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y)
-{
+void OpenSpaceEngine::mousePositionCallback(int x, int y) {
     _interactionHandler.mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos)
-{
+void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
     _interactionHandler.mouseScrollWheelCallback(pos);
 }
 
@@ -493,6 +498,8 @@ void OpenSpaceEngine::encode()
 //    _synchronizationBuffer.setVal(dataStream);
 //    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
 //#endif
+	_renderEngine.serialize(_syncBuffer);
+	_syncBuffer->write();
 }
 
 void OpenSpaceEngine::decode()
@@ -507,6 +514,12 @@ void OpenSpaceEngine::decode()
 //    // deserialize in the same order as done in serialization
 //    _renderEngine->deserialize(dataStream, offset);
 //#endif
+	_syncBuffer->read();
+	_renderEngine.deserialize(_syncBuffer);
+}
+
+void OpenSpaceEngine::setInputCommand(bool b) {
+	_inputCommand = b;
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars,

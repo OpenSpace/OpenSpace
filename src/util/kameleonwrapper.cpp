@@ -467,7 +467,7 @@ std::vector<glm::vec3> KameleonWrapper::traceCartesianFieldline(
 	else if (pos.z < 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
 		end = FieldlineEnd::SOUTH;
 	else
-		end = FieldlineEnd::OUT;
+		end = FieldlineEnd::FAROUT;
 
 	return line;
 }
@@ -610,15 +610,15 @@ glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEn
 			&& 	(bEnd == FieldlineEnd::NORTH || bEnd == FieldlineEnd::SOUTH)) {
 		// closed
 		color = glm::vec4(1.0, 0.0, 0.0, 1.0);
-	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::NORTH)
-			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::NORTH)) {
+	} else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::NORTH)
+			|| (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::NORTH)) {
 		// north
 		color = glm::vec4(1.0, 1.0, 0.0, 1.0);
-	} else if ((fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::SOUTH)
-			|| (bEnd == FieldlineEnd::OUT && fEnd == FieldlineEnd::SOUTH)) {
+	} else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::SOUTH)
+			|| (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::SOUTH)) {
 		// south
 		color = glm::vec4(0.0, 1.0, 0.0, 1.0);
-	} else if (fEnd == FieldlineEnd::OUT && bEnd == FieldlineEnd::OUT) {
+	} else if (fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::FAROUT) {
 		// solar wind
 		color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	}

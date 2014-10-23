@@ -41,6 +41,8 @@ public:
 	virtual void postRender();
 
 	virtual std::string settings();
+protected:
+	virtual bool reinitializeInternal();
 
 private:
 
@@ -50,9 +52,6 @@ private:
 	GLuint _atomicCounterBuffer;
 	GLuint _fragmentBuffer;
 	GLuint _fragmentTexture;
-
-
-
 
 }; 		// ABufferDynamic
 } 		// openspace

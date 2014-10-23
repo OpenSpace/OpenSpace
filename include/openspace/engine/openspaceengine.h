@@ -29,12 +29,11 @@
 
 // sgct header has to be included before all others due to Windows header
 #define SGCT_WINDOWS_INCLUDE
-#include "sgct.h"
+#include <sgct.h>
 
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
-//#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/opencl/clcontext.h>
 #include <ghoul/opencl/clcommandqueue.h>
@@ -46,14 +45,13 @@
 
 #include <openspace/flare/flare.h>
 
-#define  ABUFFER_SINGLE_LINKED    1
-#define  ABUFFER_FIXED            2
-#define  ABUFFER_DYNAMIC          3
-#define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
-
 // #define OPENSPACE_VIDEO_EXPORT
 
 namespace openspace {
+
+// Forward declare to minimize dependencies
+class SyncBuffer;
+class LuaConsole;
 
 namespace scripting {
 	class ScriptEngine;
@@ -81,8 +79,9 @@ public:
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render();
-    void postDraw();
-    void keyboardCallback(int key, int action);
+	void postDraw();
+	void keyboardCallback(int key, int action);
+	void charCallback(unsigned int codepoint);
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
@@ -90,6 +89,8 @@ public:
 
     void encode();
     void decode();
+
+	void setInputCommand(bool b);
 
 private:
     OpenSpaceEngine(std::string programName);
@@ -113,7 +114,10 @@ private:
     // ScriptEngine* _scriptEngine;
     ghoul::opencl::CLContext _context;
 
-    sgct::SharedVector<char> _synchronizationBuffer;
+	SyncBuffer* _syncBuffer;
+
+	bool _inputCommand;
+	LuaConsole* _console;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

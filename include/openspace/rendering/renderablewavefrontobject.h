@@ -78,8 +78,8 @@ private:
 	GLenum _mode;
 	unsigned int _isize;
 	unsigned int _vsize;
-	Vertex *_varray;
-	int *_iarray;
+	Vertex* _varray;
+	int* _iarray;
 
 	glm::dmat3 _stateMatrix; // might need this
 

@@ -22,70 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#include <openspace/util/screenlog.h>
 
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
-#include <string>
+#include <sgct.h> // sgct::Engine::instance()->getTime()
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ScreenLog;
+ScreenLog::ScreenLog() {}
 
-class RenderEngine {
-public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
+void ScreenLog::log(ghoul::logging::LogManager::LogLevel level, const std::string& category, const std::string& message) {
+	if (level >= ghoul::logging::LogManager::LogLevel::Info)
+		_entries.emplace_back(level, sgct::Engine::instance()->getTime(), Log::getTimeString(), category, message);
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+	// Once reaching maximum size, reduce to half
+	if (_entries.size() > MaximumSize) {
+		_entries.erase(_entries.begin(), _entries.begin() + MaximumSize / 2);
+	}
+}
 
-    Camera* camera() const;
-    ABuffer* abuffer() const;
+ScreenLog::const_range ScreenLog::last(size_t n) {
+	if (_entries.size() > n) {
+		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+	} else {
+		return std::make_pair(_entries.rbegin(), _entries.rend());
+	}
+}
 
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void takeScreenshot();
-
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-
-private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
-
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	void generateGlslConfig();
-};
-
-} // namespace openspace
-
-#endif // __RENDERENGINE_H__
+}

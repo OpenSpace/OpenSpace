@@ -100,9 +100,13 @@ glm::vec3 Camera::cameraDirection() const
     return _cameraDirection;
 }
 
-glm::mat4 Camera::viewRotationMatrix() const
+void Camera::setViewRotationMatrix(glm::mat4 m) {
+	_viewRotationMatrix = m;
+}
+
+const glm::mat4& Camera::viewRotationMatrix() const
 {
-    return glm::mat4(_viewRotationMatrix);
+    return _viewRotationMatrix;
 }
 
 void Camera::compileViewRotationMatrix()
@@ -176,7 +180,7 @@ void Camera::setLookUpVector(glm::vec3 lookUp)
     _lookUp = std::move(lookUp);
 }
 
-const glm::vec3 Camera::lookUpVector() const
+const glm::vec3& Camera::lookUpVector() const
 {
     return _lookUp;
 }

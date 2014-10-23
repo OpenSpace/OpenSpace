@@ -97,6 +97,10 @@ bool ABufferFixed::initialize() {
 	return initializeABuffer();
 }
 
+bool ABufferFixed::reinitializeInternal() {
+	return false;
+}
+
 void ABufferFixed::clear() {
 
 	// Bind texture initializer

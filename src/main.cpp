@@ -37,6 +37,7 @@ void mainPostSyncPreDrawFunc();
 void mainRenderFunc();
 void mainPostDrawFunc();
 void mainKeyboardCallback(int key, int action);
+void mainCharCallback(unsigned int codepoint);
 void mainMouseButtonCallback(int key, int action);
 void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
@@ -77,8 +78,9 @@ int main(int argc, char** argv)
     _sgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
     _sgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
     _sgctEngine->setMousePosCallbackFunction(mainMousePosCallback);
-    _sgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
-    _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
+	_sgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
+	_sgctEngine->setExternalControlCallback(mainExternalControlCallback);
+	_sgctEngine->setCharCallbackFunction(mainCharCallback);
 
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions
@@ -175,6 +177,12 @@ void mainMouseScrollCallback(double posX, double posY)
     // TODO use float instead
     if (_sgctEngine->isMaster())
         OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
+}
+
+void mainCharCallback(unsigned int codepoint) {
+
+	if (_sgctEngine->isMaster())
+		OsEng.charCallback(codepoint);
 }
 
 void mainEncodeFun()

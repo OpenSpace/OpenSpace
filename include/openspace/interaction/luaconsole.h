@@ -22,70 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef LUACONSOLE_H
+#define LUACONSOLE_H
 
-#include <openspace/scripting/scriptengine.h>
-
-#include <memory>
 #include <string>
+#include <vector>
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ScreenLog;
-
-class RenderEngine {
+class LuaConsole {
 public:
-	RenderEngine();
-	~RenderEngine();
+	LuaConsole();
+	~LuaConsole();
+
+	void keyboardCallback(int key, int action);
+	void charCallback(unsigned int codepoint);
+
+	void render();
+
+	unsigned int commandInputButton();
+	unsigned int ignoreCodepoint();
+
 	
-	bool initialize();
-
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
-
-    Camera* camera() const;
-    ABuffer* abuffer() const;
-
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void takeScreenshot();
-
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-
 private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
+	void addToCommand(std::string c);
+	std::string UnicodeToUTF8(unsigned int codepoint);
 
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	void generateGlslConfig();
+	size_t _inputPosition;
+	std::vector<std::string> _commandsHistory;
+	size_t _activeCommand;
+	std::vector<std::string> _commands;
+	
 };
 
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif

@@ -292,6 +292,10 @@ bool RenderableStars::deinitialize(){
 
 //#define TMAT
 void RenderableStars::render(const RenderData& data){
+	if(!_haloProgram)
+		return;
+	if(!_texture)
+		return;
 	assert(_haloProgram);
 	//printOpenGLError();
 	// activate shader

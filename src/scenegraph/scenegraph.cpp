@@ -31,6 +31,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
+#include <openspace/abuffer/abuffer.h>
 
 // ghoul includes
 #include "ghoul/opengl/programobject.h"
