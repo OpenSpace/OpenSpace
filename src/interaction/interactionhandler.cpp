@@ -270,8 +270,8 @@ void InteractionHandler::distance(const PowerScaledScalar &dist, size_t iteratio
 	else {
 		unlockControls();
 		PowerScaledScalar d2 = dist;
-		d2[0] *= 0.75;
-		d2[1] *= 0.85;
+		d2[0] *= 0.75f;
+		d2[1] *= 0.85f;
 		distance(d2, iterations + 1);
 	}
 	
@@ -320,9 +320,9 @@ glm::vec3 InteractionHandler::mapToTrackball(glm::vec2 mousePos) {
 	if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS/2.0) {
 		//Spherical Region
 		out.z = RADIUS*RADIUS - (out.x*out.x + out.y*out.y);
-		out.z = out.z > 0.0 ? sqrtf(out.z) : 0.0;
+		out.z = out.z > 0.0f ? sqrtf(out.z) : 0.0f;
 	} else { //Hyperbolic Region - for smooth z values
-		out.z = (RADIUS*RADIUS)/(2.0*sqrt(out.x*out.x + out.y*out.y));
+		out.z = (RADIUS*RADIUS)/(2.0f*sqrt(out.x*out.x + out.y*out.y));
 	}
 
 	return glm::normalize(out);
@@ -346,8 +346,8 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
 
 void InteractionHandler::trackballRotate(int x, int y) {
 	// Normalize mouse coordinates to [0,1]
-	float width = sgct::Engine::instance()->getActiveXResolution();
-	float height = sgct::Engine::instance()->getActiveYResolution();
+	float width = static_cast<float>(sgct::Engine::instance()->getActiveXResolution());
+	float height = static_cast<float>(sgct::Engine::instance()->getActiveYResolution());
 	glm::vec2 mousePos = glm::vec2((float)x/width, (float)y/height);
 
 	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
@@ -365,7 +365,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 	if (curTrackballPos != _lastTrackballPos) {
 		// calculate rotation angle (in radians)
 		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-		rotationAngle *= getDt()*100.0f;
+		rotationAngle *= static_cast<float>(getDt())*100.0f;
 
         // Map trackballpos to camera
 //		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
@@ -386,8 +386,8 @@ void InteractionHandler::trackballRotate(int x, int y) {
 
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
-    const double speed = 2.75;
-    const double dt = getDt();
+    const float speed = 2.75f;
+	const float dt = static_cast<float>(getDt());
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 	    if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
@@ -433,46 +433,46 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        rotate(rot);
 	    }
 	    if (key == SGCT_KEY_R) {
-	        PowerScaledScalar dist(-speed * dt, 5.0);
+	        PowerScaledScalar dist(-speed * dt, 5.0f);
 	        distance(dist);
 	    }
 	    if (key == SGCT_KEY_F) {
-	        PowerScaledScalar dist(speed * dt, 5.0);
+	        PowerScaledScalar dist(speed * dt, 5.0f);
 	        distance(dist);
 		}
 		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed  * dt, 10.0);
+			PowerScaledScalar dist(-speed  * dt, 10.0f);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_G) {
-			PowerScaledScalar dist(speed * dt, 10.0);
+			PowerScaledScalar dist(speed * dt, 10.0f);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_Y) {
-			PowerScaledScalar dist(-speed * dt, 11.5);
+			PowerScaledScalar dist(-speed * dt, 11.5f);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_H) {
-			PowerScaledScalar dist(speed  * dt, 11.5);
+			PowerScaledScalar dist(speed  * dt, 11.5f);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_U) {
-			PowerScaledScalar dist(-speed * dt, 13.0);
+			PowerScaledScalar dist(-speed * dt, 13.0f);
 			distance(dist);
 		}
 		if (key == SGCT_KEY_J) {
-			PowerScaledScalar dist(speed  * dt, 13.0);
+			PowerScaledScalar dist(speed  * dt, 13.0f);
 			distance(dist);
 		}
 
 		if (key == SGCT_KEY_KP_SUBTRACT) {
 			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
-			s[1] -= 0.5;
+			s[1] -= 0.5f;
 			OsEng.renderEngine().camera()->setScaling(s);
 		}
 		if (key == SGCT_KEY_KP_ADD) {
 			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
-			s[1] += 0.5;
+			s[1] += 0.5f;
 			OsEng.renderEngine().camera()->setScaling(s);
 		}
 	}
@@ -544,13 +544,13 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     //if(mouseControl_ != nullptr) {
     //	mouseControl_->mouseScrollCallback(pos);
     //}
-    const double speed = 4.75;
-    const double dt = getDt();
+    const float speed = 4.75f;
+    const float dt = static_cast<float>(getDt());
     if(pos < 0) {
-	    PowerScaledScalar dist(speed * dt, 0.0);
+	    PowerScaledScalar dist(speed * dt, 0.0f);
 	    distance(dist);
     } else if(pos > 0) {
-	    PowerScaledScalar dist(-speed * dt, 0.0);
+	    PowerScaledScalar dist(-speed * dt, 0.0f);
 	    distance(dist);
     }
 }

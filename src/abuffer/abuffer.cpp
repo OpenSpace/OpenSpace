@@ -138,7 +138,7 @@ void ABuffer::resolve() {
 	// Decrease stepsize in volumes if right click is pressed
 	// TODO: Let the interactionhandler handle this
 	int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
-	float volumeStepFactor = (val) ? 0.2: 1.0;
+	float volumeStepFactor = (val) ? 0.2f: 1.0f;
 	if(volumeStepFactor != _volumeStepFactor) {
 		_volumeStepFactor = volumeStepFactor;
 		_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
@@ -172,7 +172,7 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 
 	// ID is one more than "actual" position since ID=0 is considered geometry
 	//return 1 << (_samplers.size()-1);
-	return _samplers.size();
+	return static_cast<int>(_samplers.size());
 }
 
 bool ABuffer::updateShader() {

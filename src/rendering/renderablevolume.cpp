@@ -156,10 +156,10 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 
             FILE* file = fopen (cachepath.c_str(), "rb");
 
-            int length = dimensions[0] *dimensions[1] *dimensions[2];
+            size_t length = dimensions[0] *dimensions[1] *dimensions[2];
             float* data = new float[length];
 
-            for(int i = 0; i< length; i++){
+			for (size_t i = 0; i< length; i++){
                 float f;
                 fread(&f, sizeof(float), 1, file);
                 data[i] = f;
@@ -185,7 +185,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 			float* data = kw.getUniformSampledValues(variableString, dimensions);
             if(cache) {
                 FILE* file = fopen (cachepath.c_str(), "wb");
-                int length = dimensions[0] *dimensions[1] *dimensions[2];
+				size_t length = dimensions[0] * dimensions[1] * dimensions[2];
                 fwrite(data, sizeof(float), length, file);
                 fclose(file);
             }
@@ -204,7 +204,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
                 if(cache) {
                     FILE* file = fopen (cachepath.c_str(), "wb");
-                    int length = dimensions[0] *dimensions[1] *dimensions[2];
+					size_t length = dimensions[0] * dimensions[1] * dimensions[2];
                     fwrite(data, sizeof(float), length, file);
                     fclose(file);
                 }

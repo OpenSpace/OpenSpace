@@ -255,8 +255,8 @@ void RenderEngine::render()
 
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono	= 10;
-		const int font_size_light = 8;
-		const int font_with_light = font_size_light*0.7;
+		const int font_size_light	= 8;
+		const int font_with_light	= font_size_light*0.7;
 		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
 		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
 		

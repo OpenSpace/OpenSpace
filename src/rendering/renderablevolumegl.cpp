@@ -228,7 +228,7 @@ void RenderableVolumeGL::render(const RenderData& data) {
             glBindBuffer(GL_COPY_READ_BUFFER, *transferFunction);
             _transferFunction->bind();
             glTexImage1D(   GL_TEXTURE_1D, 0, _transferFunction->internalFormat(), 
-                            _transferFunction->width(),0, _transferFunction->format(), 
+                            static_cast<GLsizei>(_transferFunction->width()),0, _transferFunction->format(), 
                             _transferFunction->dataType(), data);
             delete transferFunction;
             LDEBUG("Updated transferfunction!");
