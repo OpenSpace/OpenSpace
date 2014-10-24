@@ -37,11 +37,11 @@ namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
     : ModelGeometry()
-	/*, _mode(GL_TRIANGLES)
+	, _mode(GL_TRIANGLES)
 	, _isize(0)
 	, _vsize(0)
 	, _varray(nullptr)
-	, _iarray(nullptr)*/
+	, _iarray(nullptr)
 {
 	using constants::scenegraphnode::keyName;
 
@@ -49,7 +49,7 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
     std::string name;
     bool success = dictionary.getValue(keyName, name);
 	assert(success);
-	/*
+
 	std::string file;
 	success = dictionary.getValue(constants::modelgeometry::keyObjFile, file);
 	if (!success) {
@@ -67,10 +67,8 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	else {
 		LERROR("Did not find file..\n");
 	}
-
-    */
 }
-/*
+
 void WavefrontGeometry::loadObj(const char *filename){
 	// temporary 
 	int vertexSize = 0;
@@ -229,39 +227,19 @@ void WavefrontGeometry::loadObj(const char *filename){
 	delete[] tempVertexTextureArray;
 	delete[] tempTextureIndicesArray;
 }
-*/
+
 
 WavefrontGeometry::~WavefrontGeometry(){
 }
 
 bool WavefrontGeometry::initialize(RenderableModel* parent){
-	bool success = WavefrontGeometry::initialize(parent);
+	bool success = ModelGeometry::initialize(parent);
     createSphere();
-	/*
+	
 	if (_isize == 0) return false;
-
-	GLuint errorID;
-	if (_vaoID == 0)
-		glGenVertexArrays(1, &_vaoID);
-
-	if (_vBufferID == 0) {
-		glGenBuffers(1, &_vBufferID);
-
-		if (_vBufferID == 0) {
-			LERROR("Could not create vertex buffer");
-			return false;
-		}
-	}
-
-	if (_iBufferID == 0) {
-		glGenBuffers(1, &_iBufferID);
-
-		if (_iBufferID == 0) {
-			LERROR("Could not create index buffer");
-			return false;
-		}
-	}
-
+	glGenVertexArrays(1, &_vaoID);
+	glGenBuffers(1, &_vBufferID);
+	glGenBuffers(1, &_iBufferID);
 
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
@@ -281,39 +259,35 @@ bool WavefrontGeometry::initialize(RenderableModel* parent){
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
 	glBindVertexArray(0);
 
-	errorID = glGetError();
+	GLint errorID = glGetError();
 	if (errorID != GL_NO_ERROR) {
 		LERROR("OpenGL error: " << glewGetErrorString(errorID));
 		return false;
 	}
-    */
     return success;
 }
 
 void WavefrontGeometry::deinitialize(){
-	/*
 	delete[] _varray;
 	delete[] _iarray;
 
 	glDeleteBuffers(1, &_vBufferID);
 	glDeleteBuffers(1, &_iBufferID);
 	glDeleteVertexArrays(1, &_vaoID);
-    */
+    
 }
 
 void WavefrontGeometry::render(){
 	// render
-	/*
 	glBindVertexArray(_vaoID);  // select first VAO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
 	glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-    */
 }
 
 void WavefrontGeometry::createSphere(){
    // create the power scaled scalar
-	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1, 7); // will set proper bounding soon.
+	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1, 0); // will set proper bounding soon.
 	_parent->setBoundingSphere(ps);
 }
 

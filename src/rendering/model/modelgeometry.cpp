@@ -70,10 +70,9 @@ bool ModelGeometry::initialize(RenderableModel* parent){
     _parent = parent;
     return true;
 }
-
 	void ModelGeometry::deinitialize()
 {
 }
 
-}  // namespace planetgeometry
+}  // namespace modelgeometry
 }  // namespace openspace

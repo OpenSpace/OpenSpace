@@ -41,7 +41,7 @@ public:
     bool initialize(RenderableModel* parent) override;
     void deinitialize() override;
     void render() override;
-	/*
+	
 	typedef struct
 	{
 		GLfloat location[4];
@@ -49,13 +49,13 @@ public:
 		GLfloat normal[3];
 		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
 	} Vertex;
-    */
+    
 
 protected:
-	//void loadObj(const char *filename);
+	void loadObj(const char *filename);
 private:
     void createSphere();
-	/*
+	
 	GLuint _vaoID = 6;
 	GLuint _vBufferID = 7;
 	GLuint _iBufferID = 8;
@@ -65,7 +65,6 @@ private:
 	unsigned int _vsize;
 	Vertex* _varray;
 	int* _iarray;
-    */
 };
 
 }  // namespace modelgeometry
