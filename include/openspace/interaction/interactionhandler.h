@@ -25,20 +25,22 @@
 #ifndef INTERACTIONHANDLER_H
 #define INTERACTIONHANDLER_H
 
-// open space includes
-#include <openspace/util/camera.h>
-#include <openspace/interaction/externalcontrol/externalcontrol.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
 // std includes
 #include <vector>
-#include <thread>
 #include <mutex>
-#include <memory>
 #include <map>
 #include <functional>
 
 namespace openspace {
+
+// Forward declare to minimize dependencies
+class Camera;
+class SceneGraphNode;
+class ExternalControl;
 
 class InteractionHandler {
 public:
@@ -46,11 +48,6 @@ public:
     InteractionHandler(const InteractionHandler& src);
     InteractionHandler& operator=(const InteractionHandler& rhs);
 	virtual ~InteractionHandler();
-
-	//static void init();
-	//static void deinit();
- //   static InteractionHandler& ref();
-	//static bool isInitialized();
 
 	void enable();
 	void disable();
@@ -62,7 +59,7 @@ public:
 	void setCamera(Camera *camera = nullptr);
 	void setOrigin(SceneGraphNode* node);
 
-	Camera * getCamera() const;
+	Camera* getCamera() const;
 	const psc getOrigin() const;
 	void lockControls();
 	void unlockControls();
@@ -90,7 +87,7 @@ public:
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the
 	* interaction. The functions contained are
-	* - openspace::luascriptfunctions::printScreen
+	* - openspace::luascriptfunctions::setOrigin
 	* \return The Lua library that contains all Lua functions available to affect the
 	* interaction
 	*/
@@ -106,7 +103,6 @@ private:
 	SceneGraphNode *node_;
 	
 	double dt_;
-
 
 	glm::vec3 _lastTrackballPos;
 	bool _leftMouseButtonDown, _isMouseBeingPressedAndHeld;

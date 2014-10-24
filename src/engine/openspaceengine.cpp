@@ -24,15 +24,13 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-// sgct header has to be included before all others due to Windows header
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-
+// openspace
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
@@ -40,7 +38,9 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
+// ghoul
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
@@ -48,8 +48,12 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/cachemanager.h>
 
+// sgct
+#define SGCT_WINDOWS_INCLUDE
+#include <sgct.h>
+
+// std
 #include <iostream>
 #include <fstream>
 
@@ -271,7 +275,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	auto tokens = FileSys.tokens();
 	const std::string cacheToken = "${CACHE}";
 	auto cacheIterator = std::find(tokens.begin(), tokens.end(), cacheToken);
-	if (cacheIterator != tokens.end()){
+	if (cacheIterator == tokens.end()){
 		FileSys.registerPathToken(cacheToken, "${BASE_PATH}/cache");
 	}
 

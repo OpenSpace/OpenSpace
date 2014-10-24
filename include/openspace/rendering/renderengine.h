@@ -26,8 +26,6 @@
 #define __RENDERENGINE_H__
 
 #include <openspace/scripting/scriptengine.h>
-
-#include <memory>
 #include <string>
 
 namespace openspace {

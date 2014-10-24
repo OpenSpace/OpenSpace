@@ -24,27 +24,26 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <cassert>
-
 // renderables
 #include <openspace/rendering/renderablewavefrontobject.h>
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
 #include <openspace/rendering/renderablepath.h>
-
 #include <openspace/rendering/renderablefov.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/renderableplane.h>
 #include <openspace/rendering/renderablevolumegl.h>
+#include <openspace/rendering/planets/simplespheregeometry.h>
 
 // positioninformation
 #include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/scenegraph/spiceephemeris.h>
 
-#include <openspace/rendering/planets/simplespheregeometry.h>
+// std
+#include <cassert>
 
 namespace openspace {
 

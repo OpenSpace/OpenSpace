@@ -29,10 +29,13 @@
 #include <sgct.h>
 
 #include <openspace/interaction/deviceidentifier.h>
+#include <openspace/interaction/externalcontrol/externalcontrol.h>
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 #include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <glm/gtx/vector_angle.hpp>
 

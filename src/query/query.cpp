@@ -26,6 +26,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scenegraph/scenegraphnode.h>
 
 namespace openspace {
 
