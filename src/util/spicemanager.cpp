@@ -45,10 +45,13 @@ void SpiceManager::initialize() {
 	_manager = new SpiceManager;
 	_manager->_lastAssignedKernel = 0;
 
+	char REPORT[]="REPORT";
+	char NONE[]="NONE";
+
 	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, "REPORT");
+	erract_c("SET", 0, REPORT);
 	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, "NONE");
+	errprt_c("SET", 0, NONE);
 }
 
 void SpiceManager::deinitialize() {
@@ -57,10 +60,11 @@ void SpiceManager::deinitialize() {
 
 	delete _manager;
 	_manager = nullptr;
+	char DEFAULT[]="DEFAULT";
 
 	// Set values back to default
-	erract_c("SET", 0, "DEFAULT");
-	errprt_c("SET", 0, "DEFAULT");
+	erract_c("SET", 0, DEFAULT);
+	errprt_c("SET", 0, DEFAULT);
 }
 
 SpiceManager& SpiceManager::ref() {
@@ -297,12 +301,11 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 						   psc& position, 
 						   double& lightTime) const
 {
-	double pos[3] = { NULL, NULL, NULL };
-
-	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-
-	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL)
+	glm::dvec3 pos;
+	bool success = getTargetPosition(target, observer, referenceFrame,
+		aberrationCorrection, ephemerisTime, pos, lightTime);
+	
+	if(!success)
 		return false;
 
 	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
