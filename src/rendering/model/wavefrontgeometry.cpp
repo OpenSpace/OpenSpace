@@ -162,15 +162,15 @@ void WavefrontGeometry::loadObj(const char *filename){
 			if (sscanf(line, "f %i/%i/%i %i/%i/%i %i/%i/%i", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9)){
 				(_iarray)[m] = i1 - 1;
 				(tempTextureIndicesArray)[m] = i2 - 1;
-				(tempNormalIndicesArray)[m] = i3 - 1;
+				(tempNormalIndicesArray)[m]  = i3 - 1;
 				m++;
 				(_iarray)[m] = i4 - 1;
 				(tempTextureIndicesArray)[m] = i5 - 1;
-				(tempNormalIndicesArray)[m] = i6 - 1;
+				(tempNormalIndicesArray)[m]  = i6 - 1;
 				m++;
 				(_iarray)[m] = i7 - 1;
 				(tempTextureIndicesArray)[m] = i8 - 1;
-				(tempNormalIndicesArray)[m] = i9 - 1;
+				(tempNormalIndicesArray)[m]  = i9 - 1;
 				m++;
 			}
 		}
@@ -206,7 +206,7 @@ void WavefrontGeometry::loadObj(const char *filename){
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
-			_varray[m].normal[q] = tempVertexNormalArray[normalIndex + q];
+			_varray[m].normal[q]   = tempVertexNormalArray[normalIndex + q];
 			q++;
 		}
 
