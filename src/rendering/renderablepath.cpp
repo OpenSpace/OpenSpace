@@ -55,9 +55,12 @@ namespace openspace{
 		, _iBufferID(0)
 		, _mode(GL_LINE_STRIP){
 
-		assert(dictionary.getValue(keyBody, _target));
-		assert(dictionary.getValue(keyObserver, _observer));
-		assert(dictionary.getValue(keyFrame, _frame));
+		bool b1 = dictionary.getValue(keyBody, _target);
+		bool b2 = dictionary.getValue(keyObserver, _observer);
+		bool b3 = dictionary.getValue(keyFrame, _frame);
+		assert(b1 == true);
+		assert(b2 == true);
+		assert(b3 == true);
 		/*assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
 		assert(dictionary.getValue(keyEarthOrbitRatio, _ratio));
 		assert(dictionary.getValue(keyDayLength, _day));//not used now, will be though.

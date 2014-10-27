@@ -353,10 +353,14 @@ bool SpiceManager::getTargetState(const std::string& target,
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
 
-	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
-	velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+	bool hasError = checkForError("Error getting position for '" + 
+		target + "' with observer '" + observer + "'");
 
-	return true;
+	if (!hasError) {
+		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+		velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+	}
+	return !hasError;
 }
 
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
