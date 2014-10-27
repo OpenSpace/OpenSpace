@@ -28,6 +28,18 @@
 const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
 
+float log10( float x ) {  
+	return log(x) / log(10);   
+}
+
+vec4 psc_normalization(vec4 v) {
+	vec4 v2 = v;
+	float l = length(v.xyz);
+	v2.xyz = v.xyz / l;
+	v2.w = v.w - log10(1.0/l);
+	return v2;
+}
+
 vec4 psc_addition(vec4 v1, vec4 v2) {
 	float ds = v2.w - v1.w;
 	if(ds >= 0) {

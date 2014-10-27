@@ -31,7 +31,7 @@ cmake_minimum_required (VERSION 2.8)
 project (OpenSpace)
 
 if (WIN32)
-    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
+    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\")
 endif ()
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")

@@ -9,8 +9,6 @@ const vec2 corners[4] = {
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-float log10( float x ){  return log(x) / log(10);   }
-
 in vec4 psc_position[];
 in vec4 campos[];
 
