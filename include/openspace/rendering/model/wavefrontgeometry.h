@@ -22,55 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEWAVEFRONTOBJECT_H__
-#define __RENDERABLEWAVEFRONTOBJECT_H__
+#ifndef __WAVEFRONTOBJECT_H__
+#define __WAVEFRONTOBJECT_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/rendering/model/modelgeometry.h>
 
 namespace openspace {
 
-class RenderableWavefrontObject : public Renderable {
+class RenderableModel;
+
+namespace modelgeometry {
+
+class WavefrontGeometry : public ModelGeometry {
 public:
-	RenderableWavefrontObject(const ghoul::Dictionary& dictionary);
-	~RenderableWavefrontObject();
+	WavefrontGeometry(const ghoul::Dictionary& dictionary);
+	~WavefrontGeometry();
 
-    bool initialize() override;
-    bool deinitialize() override;
-
-	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
+    bool initialize(RenderableModel* parent) override;
+    void deinitialize() override;
+    void render() override;
+	
 	typedef struct
 	{
 		GLfloat location[4];
 		GLfloat tex[2];
 		GLfloat normal[3];
-	/*	GLfloat color[4];
-		GLfloat attribute[3];
-		GLfloat float_attribute;*/
 		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
 	} Vertex;
+    
 
 protected:
-    void loadTexture();
 	void loadObj(const char *filename);
-
 private:
-    properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject; 
-    ghoul::opengl::Texture* _texture;
-
-	ghoul::opengl::ProgramObject* _fovProgram;
-
-
+    void createSphere();
+	
 	GLuint _vaoID = 6;
 	GLuint _vBufferID = 7;
 	GLuint _iBufferID = 8;
@@ -80,25 +65,9 @@ private:
 	unsigned int _vsize;
 	Vertex* _varray;
 	int* _iarray;
-
-	glm::dmat3 _stateMatrix; // might need this
-
-	std::string _target;
-
-	///NH FOV 
-
-	GLuint _vaoFOV = 10;
-	GLuint _vboFOV = 11;
-	GLuint _iboFOV = 12;
-
-	unsigned int _isizeFOV;
-	unsigned int _vsizeFOV;
-	std::vector<float> _varrayFOV;
-	int *_iarrayFOV;
-
-
 };
 
+}  // namespace modelgeometry
 }  // namespace openspace
 
-#endif  // __RENDERABLEWAVEFRONTOBJECT_H__
+#endif // __WAVEFRONTOBJECT_H__

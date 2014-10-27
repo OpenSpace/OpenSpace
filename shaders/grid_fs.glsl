@@ -40,13 +40,13 @@ void main()
     //diffuse = vec4(depth*5,0.0, 0.0, 1.0);
     //diffuse = vec4(vs_position.w,0.0, 0.0, 1.0);
 	
-	vec4 diffuse = vec4(1,0,0,1);
-	if( floor(vs_st[0]) == -2){
+	vec4 diffuse = vec4(0.4,0.4,0.4,1);
+	/*if( floor(vs_st[0]) == -2){
 		diffuse = gridColor*2.f;
 	}else{
 		diffuse = gridColor;
-	}
-		diffuse = gridColor;
+	}*/
+	diffuse = gridColor;
 
 
 	vec4 position = vs_position;

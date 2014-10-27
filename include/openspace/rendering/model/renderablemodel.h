@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __RENDERABLEMODEL_H__
+#define __RENDERABLEMODEL_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -37,14 +37,14 @@
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
+namespace modelgeometry {
+class ModelGeometry;
 }
 
-class RenderablePlanet : public Renderable {
+class RenderableModel : public Renderable {
 public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
+	RenderableModel(const ghoul::Dictionary& dictionary);
+	~RenderableModel();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -52,20 +52,24 @@ public:
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+
 protected:
     void loadTexture();
 
 private:
     properties::StringProperty _colorTexturePath;
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject; 
     ghoul::opengl::Texture* _texture;
-    planetgeometry::PlanetGeometry* _geometry;
 
-	glm::dmat3 _stateMatrix;
+	modelgeometry::ModelGeometry* _geometry;
 
-	std::string _target;
+	glm::dmat3 _stateMatrix; 
+
+	std::string _source;
+	std::string _destination;
+
 };
 
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANET_H__
+#endif  // __RENDERABLEMODEL_H__

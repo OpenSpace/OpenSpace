@@ -70,71 +70,21 @@ namespace openspace{
 	}
 }
 void RenderableFov::fullYearSweep(){
-	double lightTime = 0.0;
-
-	double et = _startTrail;
-	double planetYear = 31540000;
-	int segments = 2;
-
-	_increment   = planetYear / 4;
 	
-	_isize = (segments);
-	_vsize = (segments);
+	int points = 8;
+	_stride = 8;
+	_isize = points;
 	_iarray = new int[_isize];
-	
 
-	SpiceManager::ref().getTargetState("NEW HORIZONS", "SUN", "GALACTIC", "LT+S", et, _pscpos, _pscvel, lightTime);
-	_pscpos[3] += 3;
-	_varray.push_back(_pscpos[0]);
-	_varray.push_back(_pscpos[1]);
-	_varray.push_back(_pscpos[2]);
-	_varray.push_back(_pscpos[3]);
-
-	_varray.push_back(1.f );
-	_varray.push_back(0.f );
-	_varray.push_back(0.f );
-	_varray.push_back(1.f );
-
-	_iarray[0] = 0;
-
-	glm::mat4 tmat = glm::mat4(1);
-	glm::mat4 rot_x = glm::rotate(tmat, 90.f, glm::vec3(1, 0, 0));
-	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", et, _stateMatrix);
-
-	glm::mat4 tmp = glm::mat4(1);
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++){
-			tmp[i][j] = _stateMatrix[i][j];
+	for (int i = 0; i < points; i++){
+		for (int j = 0; j < 4; j++){
+			_varray.push_back(0); // pos
 		}
+		for (int j = 0; j < 4; j++){
+			_varray.push_back(0); // col
+		}
+		_iarray[i] = i;
 	}
-	tmat *= tmp;
-	tmat *= rot_x;
-	
-	std::string shape, name;
-	shape.resize(32);
-	name.resize(32);
-	std::vector<glm::dvec3> bounds;
-	glm::dvec3 boresight;
-
-	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
-	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], 1);
-
-	//psc bor = PowerScaledCoordinate::CreatePowerScaledCoordinate(boresight[0], boresight[1], boresight[2]);
-	bsight_t = tmat*bsight_t;
-
-	_varray.push_back(bsight_t[0]);
-	_varray.push_back(bsight_t[1]);
-	_varray.push_back(bsight_t[2]);
-	_varray.push_back(2);
-
-	_varray.push_back(1.f);
-	_varray.push_back(0.f);
-	_varray.push_back(0.f);
-	_varray.push_back(1.f);
-
-	_iarray[1] = 1;
-
-
 
 	_stride = 8;
 	_vsize = _varray.size();
@@ -173,11 +123,10 @@ void RenderableFov::sendToGPU(){
 bool RenderableFov::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
-		completeSuccess
-		&= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
+		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 	
 	 _startTrail;
-	 SpiceManager::ref().getETfromDate("2007 feb 26 12:00:00", _startTrail);
+	 SpiceManager::ref().getETfromDate("2007 feb 26 20:00:00", _startTrail);
 
 	 fullYearSweep();
 	 sendToGPU();
@@ -201,29 +150,69 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->activate();
 
 	// fetch data
-	psc currentPosition = data.position;
-	psc campos = data.camera.position();
-	glm::mat4 camrot = data.camera.viewRotationMatrix();
-
 	glm::mat4 tmat = glm::mat4(1);
-	glm::mat4 rot_x = glm::rotate(tmat, 90.f, glm::vec3(1, 0, 0));
+
+	glm::mat4 transform(1);
 
 	glm::mat4 tmp = glm::mat4(1);
+	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	tmat *= tmp;
-	tmat *= rot_x;
+	transform = tmp*rot;
 
-	glm::mat4 transform(1);
 	// setup the data to the shader
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
-	//updateData();
+
+    //boresight vector
+	std::string shape, name;
+	shape.resize(32);
+	name.resize(32);
+	std::vector<glm::dvec3> bounds;
+	glm::dvec3 boresight;
+
+	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
+
+	float size = 4 * sizeof(float);
+	float *begin = &_varray[0];
+
+	glm::vec4 origin(0);
+	glm::vec4 col_start(1.00, 0.89, 0.00, 1);
+	glm::vec4 col_end(1.00, 0.29, 0.00, 1);
+	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], data.position[3]-3);
+
+	float sc = 2.2;
+	glm::vec4 corner1(bounds[0][0], bounds[0][1], bounds[0][2], data.position[3]-sc);
+	memcpy(begin, glm::value_ptr(origin), size);
+	memcpy(begin + 4, glm::value_ptr(col_start), size);
+	memcpy(begin + 8, glm::value_ptr(corner1), size);
+	memcpy(begin + 12, glm::value_ptr(col_end), size);
+
+	glm::vec4 corner2(bounds[1][0], bounds[1][1], bounds[1][2], data.position[3]-sc);
+	memcpy(begin + 16, glm::value_ptr(origin), size);
+	memcpy(begin + 20, glm::value_ptr(col_start), size);
+	memcpy(begin + 24, glm::value_ptr(corner2), size);
+	memcpy(begin + 28, glm::value_ptr(col_end), size);
+
+	glm::vec4 corner3(bounds[2][0], bounds[2][1], bounds[2][2], data.position[3]-sc);
+	memcpy(begin + 32, glm::value_ptr(origin), size);
+	memcpy(begin + 36, glm::value_ptr(col_start), size);
+	memcpy(begin + 40, glm::value_ptr(corner3), size);
+	memcpy(begin + 44, glm::value_ptr(col_end), size);
+
+	glm::vec4 corner4(bounds[3][0], bounds[3][1], bounds[3][2], data.position[3]-sc);
+	memcpy(begin + 48, glm::value_ptr(origin), size);
+	memcpy(begin + 52, glm::value_ptr(col_start), size);
+	memcpy(begin + 56, glm::value_ptr(corner4), size);
+	memcpy(begin + 60, glm::value_ptr(col_end), size);
+
+	updateData();
 
 	glBindVertexArray(_vaoID); 
 	glDrawArrays(_mode, 0, _vtotal);

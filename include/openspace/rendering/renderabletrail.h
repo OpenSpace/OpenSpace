@@ -58,16 +58,16 @@ public:
 	std::string _target;
 	std::string _observer;
 	std::string _frame;
+	std::string _orbitVariety;
 	// color
 	glm::vec3 _c; 
-	double _r, _g, _b;
+	float _r, _g, _b;
 	// orbit relational data
-	double _tropic;
-	double _ratio;
-	double _day;
+	float _tropic;
+	float _ratio;
+	float _day;
 
 	// need to write robust method for vbo id selection 
-	// (right now galactic grid has to be present) (why though?) solve later...
 	GLuint _vaoID ;
 	GLuint _vBufferID ;
 	GLuint _iBufferID;
@@ -88,12 +88,13 @@ public:
 	int* _iarray;
 
 	bool _once = false;
-
+	double lightTime;
 	//used for update of trail
 	psc _pscpos, _pscvel;
-	double _increment;
-	double _time = 0;
-	double _oldTime = 0;
+	float _increment;
+	float _time = 0;
+	float _oldTime = 0;
+	float _dtEt;
 
 	int _delta  = 0;
 	int _dtprogress = 0;

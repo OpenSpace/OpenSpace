@@ -80,6 +80,7 @@ namespace openspace{
 void RenderablePath::fullYearSweep(){
 		double lightTime = 0.0;
 		SpiceManager::ref().getETfromDate("2006 jan 20 19:00:00", _time);
+
 		// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 		double et2 = 0;
 		//SpiceManager::ref().getETfromDate("2008 apr 01 00:00:00", et2);

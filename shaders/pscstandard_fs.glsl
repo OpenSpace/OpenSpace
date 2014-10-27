@@ -71,7 +71,7 @@ void main()
 	}
 	*/
 	diffuse = max(intensity * diffuse, ambient);
-
+	//diffuse = vec4(1);
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);

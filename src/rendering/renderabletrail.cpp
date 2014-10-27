@@ -33,7 +33,13 @@
 
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
-#include <utility>      
+#include <utility>   
+/* TODO for this class:
+*  In order to add geometry shader (for pretty-draw),
+*  need to pack each consecutive point pair into a vec2
+*  in order to draw quad between them. 
+*/
+
 namespace {
 	const std::string _loggerCat = "RenderableTrail";
 	//constants
@@ -82,54 +88,58 @@ namespace openspace{
 		// values in modfiles set from here
 		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
-		//white is default col
+
+	//white is default col
 	if (!dictionary.getValue(keyColor, _c)){
 		_c = glm::vec3(0.0);
-	}else{
+	}else{ //to understand, ref to line 115.  
 		_r = 1 / _c[0];
 		_g = 1 / _c[1];
 		_b = 1 / _c[2];
 	}
 }
+	
+/* This algorithm estimates and precomputes the number of segments required for
+*  any planetary object in space, given a tropical orbit period and earth-to-planet 
+*  orbit ratio. In doing so, it finds the exact increment of time corresponding
+*  to a planetary year. 
+*  Therefore all planets need said constants, for other objects we need a different,
+*  and most likely heuristic measure to easily estimate a nodal time-increment.
+*  Trivial, yet - a TODO. 
+*/
 void RenderableTrail::fullYearSweep(){
 	double lightTime = 0.0;
-	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
-	
-	if (_target == "JUPITER BARYCENTER"){
-		_tropic *= 20;
-	}
-
 	double et = _startTrail;
 	double planetYear = 31540000 * _ratio;
 	int segments = _tropic;
 
-	_increment   = planetYear / _tropic;
+	_increment = planetYear / _tropic;
 	
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
 	_iarray = new int[_isize];
 	
-	double p = 1.0 / _tropic;
-	for (int i = 0; i < segments + 1; i++){
+	for (int i = 0; i < segments+2; i++){
 		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
 		_pscpos[3] += 3;
-		_varray.push_back(_pscpos[0]);
-		_varray.push_back(_pscpos[1]);
-		_varray.push_back(_pscpos[2]);
-		_varray.push_back(_pscpos[3]);
+
+		for (int k = 0; k < 4; k++)
+		_varray.push_back(_pscpos[k]);
 
 #ifndef DEBUG
-		_varray.push_back(1.f - ((double)i / _tropic * _r));
-		_varray.push_back(1.f - ((double)i / _tropic * _g));
-		_varray.push_back(1.f - ((double)i / _tropic * _b));
-		_varray.push_back(1.f - ((double)i / _tropic));
+		float p = (float)i / _tropic;
+		_varray.push_back(1.f - p * _r);
+		_varray.push_back(1.f - p * _g);
+		_varray.push_back(1.f - p * _b);
+		_varray.push_back(1.f - p);
 #else
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
 #endif
- 		_iarray[i] = i; // remove indx in this class at some point!
+ 		_iarray[i] = i;
+		if (i != 0) //very first point needs to be alllocated twice.
 		et -= _increment;
 	}
 	_stride = 8;
@@ -177,14 +187,12 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	 SpiceManager::ref().getETfromDate("2007 feb 26 12:00:00", _startTrail);
-	//SpiceManager::ref().getETfromDate("2006 aug 22 20:00:00", _startTrail);
+	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
+	_dtEt = _startTrail;
 
-
-
-	 fullYearSweep();
-	 sendToGPU();
-
+	fullYearSweep();
+	sendToGPU();
 
 	return completeSuccess;
 }
@@ -195,32 +203,60 @@ bool RenderableTrail::deinitialize(){
 	return true;
 }
 
+// Tried interpolation but then realised this still gives straight lines (latenight thing).
+// Not allowed Splines so therefore - query spice for each point (bah...) 
+// From psc paper:
+/*
+psc pscInterpolate(psc p0, psc p1, float t){
+	assert(t >= 0 && t <= 1);
+
+	float s = (1.f - t)*p0[3] + t*p1[3];
+
+	float x = ((1.f - t)*p0[0] + t*p1[0]);
+	float y = ((1.f - t)*p0[1] + t*p1[1]);
+	float z = ((1.f - t)*p0[2] + t*p1[2]);
+
+	return PowerScaledCoordinate::PowerScaledCoordinate(x,y,z,s);
+}
+*/
+
 void RenderableTrail::updateTrail(){
-	if (_oldTime != _time){ // only update when time actually progresses
-		_dtprogress += _delta*sgct::Engine::instance()->getDt(); // compute how far time has progressed
-		if (_dtprogress > _increment){
-			//reset progress counter
-			_dtprogress = 0;
+	int m = _stride;
+	float *begin = &_varray[0];
+	float *end = &_varray[_vsize - 1] + 1;
 
-			int m = 8;
-			for (int i = _vsize - 1; i + 1 - m != 0; i--){
-				_varray[i] = std::move(_varray[i - m]);
-			}
-			int n = 4;
-			while (n < _vsize - 8){
-				for (int i = 0; i < 4; i++){
-					_varray[n + i] = _varray[n + 8 + i];
-				}
-				n += 8;
-			}
-			//add last pt
-			_pscpos[3] += 3;
-			memcpy(&_varray[0], glm::value_ptr(_pscpos.vec4()), 4 * sizeof(double));
+	// update only when time progresses
+	if (_oldTime != _time){
+		// if time progressed more than N _increments 
+		while (_dtEt < _time){
+			// get intermediary points
+			psc dtPoint;
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", _dtEt, dtPoint, _pscvel, lightTime);
+			dtPoint[3] += 3;
+			
+			// overwrite the old position
+			memcpy(begin, glm::value_ptr(dtPoint.vec4()), 4 * sizeof(float));
 
+			// shift array
+			for (int k = _vsize-m; k > 0; k -= m){
+				memcpy(&_varray[k], &_varray[k - m], 4 * sizeof(float));
+			}
+			// keep track of progression
+			_dtEt += _increment;
 		}
+		//add earths current position
+		memcpy(&_varray[0], glm::value_ptr(_pscpos.vec4()), 4 * sizeof(float));
+		_varray[4] = 1.f;
+		_varray[5] = 1.f;
+		_varray[6] = 1.f;
+		_varray[7] = 1.f;
 
 	}_oldTime = _time;
 
+	// update GPU
+	// NOTE: vbo interleaved, makes possible color update more efficient - tightly packed.
+	// if NO color update : would be more efficient to have these as separate 
+	// => N/2 updates per drawcall.
 	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray[0]);
 }
@@ -231,10 +267,8 @@ void RenderableTrail::render(const RenderData& data){
 
 	// fetch data
 	psc currentPosition = data.position;
-	psc campos = data.camera.position();
-	glm::mat4 camrot = data.camera.viewRotationMatrix();
-	// PowerScaledScalar scaling = camera->scaling();
-	PowerScaledScalar scaling = glm::vec2(1, -6);
+	psc campos          = data.camera.position();
+	glm::mat4 camrot    = data.camera.viewRotationMatrix();
 
 	glm::mat4 transform = glm::mat4(1);
 
@@ -244,28 +278,28 @@ void RenderableTrail::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
-
 	updateTrail();
-
+	
 	glBindVertexArray(_vaoID); 
 	glDrawArrays(_mode, 0, _vtotal);
 	glBindVertexArray(0);
-	/*
+	
 	glPointSize(2.f);
-
+	// nodes of equal time
 	glBindVertexArray(_vaoID);
 	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
-	*/
+	
 	_programObject->deactivate();
 }
 
 void RenderableTrail::update(const UpdateData& data){
-	double lightTime;
 	_time  = data.time;
 	_delta = data.delta;
-
-	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time+_increment, _pscpos, _pscvel, lightTime);
+	
+	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
+	_pscpos[3] += 3; // KM to M
+	
 }
 
 void RenderableTrail::loadTexture()

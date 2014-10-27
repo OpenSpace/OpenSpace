@@ -22,63 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
-
+#include <openspace/rendering/model/modelgeometry.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
+const std::string _loggerCat = "ModelGeometry";
 }
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
+namespace modelgeometry {
+
+ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
-
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
-
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	if (kernels.size() == 0)
-		_kernelsLoadedSuccessfully = false;
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
-
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
+	std::string geometryType;
+	const bool success = dictionary.getValue(
+		constants::modelgeometry::keyType, geometryType);
+	if (!success) {
+        LERROR("ModelGeometry did not contain a correct value of the key '"
+			<< constants::modelgeometry::keyType << "'");
+        return nullptr;
 	}
-}
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
-}
+	ghoul::TemplateFactory<ModelGeometry>* factory
+		= FactoryManager::ref().factory<ModelGeometry>();
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
-
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "CN+S", data.time, position, lightTime);
-
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
+	ModelGeometry* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a ModelGeometry object of type '" << geometryType
+                                                                    << "'");
+        return nullptr;
+    }
+    return result;
 }
 
-} // namespace openspace
+ModelGeometry::ModelGeometry()
+    : _parent(nullptr)
+{
+	setName("ModelGeometry");
+}
+
+ModelGeometry::~ModelGeometry()
+{
+}
+
+bool ModelGeometry::initialize(RenderableModel* parent){
+    _parent = parent;
+    return true;
+}
+	void ModelGeometry::deinitialize()
+{
+}
+
+}  // namespace modelgeometry
+}  // namespace openspace

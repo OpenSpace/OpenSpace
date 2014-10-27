@@ -184,6 +184,10 @@ double Time::advanceTime(double tickTime) {
 	return _time += _deltaTimePerSecond * tickTime;
 }
 
+double Time::retreatTime(double tickTime) {
+	return _time -= _deltaTimePerSecond * tickTime;
+}
+
 void Time::setDeltaTime(double deltaT) {
 	_deltaTimePerSecond = std::move(deltaT);
 }

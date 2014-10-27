@@ -22,63 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
+#ifndef __MODELGEOMETRY_H__
+#define __MODELGEOMETRY_H__
 
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
-
-namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
-}
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/model/renderablemodel.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
-{
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
 
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+namespace modelgeometry {
 
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	if (kernels.size() == 0)
-		_kernelsLoadedSuccessfully = false;
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
+class ModelGeometry : public properties::PropertyOwner {
+public:
+	static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
-	}
-}
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
-}
+	ModelGeometry();
+	virtual ~ModelGeometry();
+    virtual bool initialize(RenderableModel* parent);
+    virtual void deinitialize();
+    virtual void render() = 0;
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
+protected:
+	RenderableModel* _parent;
+};
 
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, "GALACTIC", "CN+S", data.time, position, lightTime);
+}  // namespace modelgeometry
+}  // namespace openspace
 
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
-}
-
-} // namespace openspace
+#endif  // __MODELGEOMETRY_H__

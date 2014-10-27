@@ -135,6 +135,18 @@ public:
 	double advanceTime(double tickTime);
 
 	/**
+	* Retreats the simulation time using the deltaTime() and the <code>tickTime</code>.
+	* The deltaTime() is the number of simulation seconds that pass for each real-time
+	* second. <code>tickTime</code> is the number of real-time seconds that passed since
+	* the last call to this method. If this method is called in the render loop, the
+	* <code>tickTime</code> should be equivalent to the frame time.
+	* \param tickTime The number of real-time seconds that passed since the last call
+	* to this method
+	* \return The new time value after retreating the time
+	*/
+	double retreatTime(double tickTime);
+
+	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
 	 * current time, retrieve the current time etc. The functions contained are
 	 * - openspace::luascriptfunctions::time_setDeltaTime
