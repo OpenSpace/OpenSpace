@@ -310,6 +310,72 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	return true;
 }
 
+void SpiceManager::frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const{
+	glm::dmat3 transform;
+	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
+	transform = glm::transpose(transform);
+
+	v = transform*v;
+}
+
+bool SpiceManager::getSurfaceIntercept(const std::string& target,
+									   const std::string& observer,
+									   const std::string& fovInstrument,
+									   const std::string& referenceFrame,
+									   const std::string& method,
+									   const std::string& aberrationCorrection,
+									   double ephemerisTime,
+									   double& targetEpoch,
+									   psc& directionVector,
+									   psc& surfaceIntercept,
+									   psc& surfaceVector) const{
+	// make pretty latr
+	double dvec[3], spoint[3], et;
+	glm::dvec3 srfvec;
+	int found;
+	bool convert;
+
+	dvec[0] = directionVector[0];
+	dvec[1] = directionVector[1];
+	dvec[2] = directionVector[2];
+
+	// allow client specify non-inertial frame. 
+	std::string bodyfixed = "IAU_";
+	convert = (referenceFrame.find(bodyfixed) == std::string::npos);
+	if (convert){
+		bodyfixed += target;
+	}else{
+		bodyfixed = referenceFrame;
+	}
+
+	sincpt_c(method.c_str(), 
+		     target.c_str(), 
+			 ephemerisTime, 
+			 bodyfixed.c_str(), 
+			 aberrationCorrection.c_str(), 
+			 observer.c_str(),
+		     fovInstrument.c_str(), 
+			 dvec, 
+			 spoint, 
+			 &et, 
+			 glm::value_ptr(srfvec), 
+			 &found);
+
+	bool hasError = checkForError("Error retrieving surface intercept on target '" + target + "'" +
+								  "viewed from observer '" + observer + "' in " +
+								  "reference frame '" + bodyfixed + "' at time '" +
+								  std::to_string(ephemerisTime) + "'");
+
+	if (convert) frameConversion(srfvec, bodyfixed, referenceFrame, ephemerisTime);
+
+	if (!hasError && found){
+		directionVector  = PowerScaledCoordinate::CreatePowerScaledCoordinate(dvec[0]  , dvec[1]  , dvec[2]  );
+		surfaceIntercept = PowerScaledCoordinate::CreatePowerScaledCoordinate(spoint[0], spoint[1], spoint[2]);
+		surfaceVector    = PowerScaledCoordinate::CreatePowerScaledCoordinate(srfvec[0], srfvec[1], srfvec[2]);
+	}
+	return found;
+}
+
 bool SpiceManager::getTargetState(const std::string& target,
 	                              const std::string& observer,
 	                              const std::string& referenceFrame,

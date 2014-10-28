@@ -94,7 +94,7 @@ void RenderablePath::fullYearSweep(){
 
 		int indx = 0;
 		for (int i = 0; i < segments + 1; i++){
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, _pscpos, _pscvel, lightTime);
 			if (_pscpos[0] != 0 && _pscpos[1] != 0 && _pscpos[2] != 0 && _pscpos[3] != 1){
 				_pscpos[3] += 3;
 				_varray.push_back(_pscpos[0]);
@@ -214,7 +214,7 @@ void RenderablePath::fullYearSweep(){
 		_delta = data.delta;
 		int newhorizons = 0;
 
-		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", data.time, _pscpos, _pscvel, lightTime);
+		SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, _pscpos, _pscvel, lightTime);
 	}
 
 	void RenderablePath::loadTexture()

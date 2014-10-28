@@ -66,8 +66,6 @@ public:
 	double _ratio;
 	double _day;
 
-	// need to write robust method for vbo id selection 
-	// (right now galactic grid has to be present) (why though?) solve later...
 	GLuint _vaoID ;
 	GLuint _vBufferID ;
 	GLuint _iBufferID;
@@ -82,8 +80,6 @@ public:
 	unsigned int _vsize;
 	unsigned int _vtotal;
 	unsigned int _stride;
-
-	double _startTrail;
 
 	//Vertex* _varray;
 	std::vector<float> _varray;

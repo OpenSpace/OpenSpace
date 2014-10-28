@@ -29,7 +29,6 @@
 // renderables
 #include <openspace/rendering/model/renderablemodel.h>
 #include <openspace/rendering/stars/renderablestars.h>
-#include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
 #include <openspace/rendering/renderablepath.h>
 
@@ -68,8 +67,6 @@ void FactoryManager::initialize()
           "RenderablePlanet");
 	_manager->factory<Renderable>()->registerClass<RenderableStars>(
 		"RenderableStars");
-	_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
-		"RenderableEphemeris");
 	//will replace ephemeris class soon...
 	_manager->factory<Renderable>()->registerClass<RenderablePath>(
 		"RenderablePath");

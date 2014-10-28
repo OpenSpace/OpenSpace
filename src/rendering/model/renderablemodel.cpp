@@ -125,6 +125,8 @@ void RenderableModel::render(const RenderData& data)
  
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
+	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+	glm::mat4 scale = glm::scale(transform, glm::vec3(1, -1, 1));
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
@@ -132,7 +134,6 @@ void RenderableModel::render(const RenderData& data)
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	
 	transform *= tmp;
 	
 	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();

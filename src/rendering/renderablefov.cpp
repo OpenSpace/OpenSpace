@@ -52,19 +52,11 @@ namespace openspace{
 		, _vaoID(0)
 		, _vBufferID(0)
 		, _iBufferID(0)
-		, _mode(GL_LINE_STRIP){
+		, _mode(GL_LINES){
 
 		assert(dictionary.getValue(keyBody               , _target));
 		assert(dictionary.getValue(keyObserver           , _observer));
 		assert(dictionary.getValue(keyFrame              , _frame));
-
-	if (!dictionary.getValue(keyColor, _c)){
-		_c = glm::vec3(0.0);
-	}else{
-		_r = 1 / _c[0];
-		_g = 1 / _c[1];
-		_b = 1 / _c[2];
-	}
 }
 void RenderableFov::fullYearSweep(){
 	
@@ -122,9 +114,6 @@ bool RenderableFov::initialize(){
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 	
-	 _startTrail;
-	 SpiceManager::ref().getETfromDate("2007 feb 26 20:00:00", _startTrail);
-
 	 fullYearSweep();
 	 sendToGPU();
 
@@ -147,72 +136,91 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->activate();
 
 	// fetch data
-	glm::mat4 tmat = glm::mat4(1);
-
 	glm::mat4 transform(1);
 
 	glm::mat4 tmp = glm::mat4(1);
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+	glm::mat4 rotx = glm::rotate(transform, -90.f, glm::vec3(1, 0, 0));
+
+	glm::mat4 scale = glm::scale(transform, glm::vec3(1, -1, 1));
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	transform = tmp*rot;
 
 	// setup the data to the shader
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
+	if (_oldTime != _time){
+		//boresight vector
+		std::string shape, instrument;
+		std::vector<glm::dvec3> bounds;
+		glm::dvec3 boresight;
 
-    //boresight vector
-	std::string shape, name;
-	shape.resize(32);
-	name.resize(32);
-	std::vector<glm::dvec3> bounds;
-	glm::dvec3 boresight;
+		bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, instrument, boresight, bounds);
+		if (!found) LERROR("Could not locate instrument"); // fixlater
 
-	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
+		float size = 4 * sizeof(float);
+		float *begin = &_varray[0];
 
-	float size = 4 * sizeof(float);
-	float *begin = &_varray[0];
+		glm::vec4 origin(0);
+		glm::vec4 col_gray(0.3, 0.3, 0.3, 1);
+		glm::vec4 col_start(1.00, 0.89, 0.00, 1);
+		glm::vec4 col_end(1.00, 0.29, 0.00, 1);
+	//	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], data.position[3] - 3);
 
-	glm::vec4 origin(0);
-	glm::vec4 col_start(1.00, 0.89, 0.00, 1);
-	glm::vec4 col_end(1.00, 0.29, 0.00, 1);
-	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], data.position[3]-3);
+		float sc = 2.4;
+		int indx = 0;
+		for (int i = 0; i < 4; i++){
+			// might as well take glm. Would be nice if we had just one type to deal with here...
+			psc dir = PowerScaledCoordinate::PowerScaledCoordinate(bounds[i][0], bounds[i][1], bounds[i][2], 1);
+			psc intercept, interceptVector;
+			double targetEpoch;
+			found = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", _target, instrument,
+																	   _frame, "ELLIPSOID", "XCN+S",
+																	   _time, targetEpoch, dir, intercept, interceptVector);
+			interceptVector[3] += 3;
+			glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
 
-	float sc = 2.2;
-	glm::vec4 corner1(bounds[0][0], bounds[0][1], bounds[0][2], data.position[3]-sc);
-	memcpy(begin, glm::value_ptr(origin), size);
-	memcpy(begin + 4, glm::value_ptr(col_start), size);
-	memcpy(begin + 8, glm::value_ptr(corner1), size);
-	memcpy(begin + 12, glm::value_ptr(col_end), size);
+			corner = tmp*corner;
 
-	glm::vec4 corner2(bounds[1][0], bounds[1][1], bounds[1][2], data.position[3]-sc);
-	memcpy(begin + 16, glm::value_ptr(origin), size);
-	memcpy(begin + 20, glm::value_ptr(col_start), size);
-	memcpy(begin + 24, glm::value_ptr(corner2), size);
-	memcpy(begin + 28, glm::value_ptr(col_end), size);
-
-	glm::vec4 corner3(bounds[2][0], bounds[2][1], bounds[2][2], data.position[3]-sc);
-	memcpy(begin + 32, glm::value_ptr(origin), size);
-	memcpy(begin + 36, glm::value_ptr(col_start), size);
-	memcpy(begin + 40, glm::value_ptr(corner3), size);
-	memcpy(begin + 44, glm::value_ptr(col_end), size);
-
-	glm::vec4 corner4(bounds[3][0], bounds[3][1], bounds[3][2], data.position[3]-sc);
-	memcpy(begin + 48, glm::value_ptr(origin), size);
-	memcpy(begin + 52, glm::value_ptr(col_start), size);
-	memcpy(begin + 56, glm::value_ptr(corner4), size);
-	memcpy(begin + 60, glm::value_ptr(col_end), size);
-
-	updateData();
+			//cleanup later.
+			if (found){
+				memcpy(&_varray[indx], glm::value_ptr(origin), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(col_start), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(interceptVector.vec4()), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(col_end), size);
+				indx += 4;
+			}else{
+				memcpy(&_varray[indx], glm::value_ptr(origin), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(col_gray), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(corner), size);
+				indx += 4;
+				memcpy(&_varray[indx], glm::value_ptr(glm::vec4(0)), size);
+				indx += 4;
+			}
+		}
+		updateData();
+	}
+	_oldTime = _time;
 
 	glBindVertexArray(_vaoID); 
 	glDrawArrays(_mode, 0, _vtotal);
+	glBindVertexArray(0);
+
+
+	glPointSize(3.f);
+	glBindVertexArray(_vaoID);
+	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
 
 	_programObject->deactivate();
@@ -223,7 +231,7 @@ void RenderableFov::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_LORRI", "GALACTIC", data.time, _stateMatrix);
 }
 
 void RenderableFov::loadTexture()

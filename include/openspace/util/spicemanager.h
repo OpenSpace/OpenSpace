@@ -250,6 +250,8 @@ public:
 	bool getDateFromET(double ephemerisTime, std::string& date,
 		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
 
+	void frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const;
+
 	/**
 	 * Returns the <code>position</code> of a <code>target</code> body relative to an
 	 * <code>observer</code> in a specific <code>referenceFrame</code>, optionally
@@ -290,7 +292,37 @@ public:
 						   psc& position, 
 						   double& lightTime) const;
 
-	void getPointingAttitude();
+	/**
+	*   Given an observer and a direction vector defining a ray, compute 
+    *   the surface intercept of the ray on a target body at a specified 
+    *   epoch, optionally corrected for light time and stellar 
+    *   aberration. 
+	*   \param method     Computation method. 
+    *   \param target     Name of target body. 
+    *   \param et         Epoch in ephemeris seconds past J2000 TDB. 
+    *   \param fixref     Body-fixed, body-centered target body frame. 
+    *   \param abcorr     Aberration correction. 
+    *   \param obsrvr     Name of observing body. 
+    *   \param dref       Reference frame of ray's direction vector. 
+    *   \param dvec       Ray's direction vector. 
+    *   \param spoint     Surface intercept point on the target body. 
+    *   \param trgepc     Intercept epoch. 
+    *   \param srfvec     Vector from observer to intercept point. 
+    *   \param found      Flag indicating whether intercept was found. 
+	*   For further details, refer to
+	*   http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
+	*/
+	bool getSurfaceIntercept(const std::string& target,
+							 const std::string& observer,
+							 const std::string& fovFrame,
+							 const std::string& bodyFixedFrame,
+							 const std::string& method,
+							 const std::string& aberrationCorrection,
+							 double ephemerisTime,
+							 double& targetEpoch,
+							 psc& directionVector,
+							 psc& surfaceIntercept,
+							 psc& surfaceVector) const;
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
@@ -523,34 +555,6 @@ public:
 		                     glm::dvec3& subObserverPoint,
 		                     double& targetEphemerisTime,
 							 glm::dvec3& vectorToSurfacePoint) const;
-
-	/**
-	* Computes the rectangular coordinates of the sub-solar point on
-	* a target body at a specified epoch, optionally corrected for
-	* light time and stellar aberration.
-	*  For further details, please refer to 'subslr_c ' in SPICE Docummentation
-	*
-	* \param computationMethod          Computation method.
-	* \param target                     Name of target body.
-	* \param ephemeris                  Epoch in ephemeris seconds past J2000 TDB.
-	* \param bodyFixedFrame             Body-fixed, body-centered target body frame.
-	* \param aberrationCorrection       Aberration correction.
-	* \param observer                   Name of observing body.
-	* \param subObserverPoint           Sub-observer point on the target body.
-	* \param targetEpoch                Sub-observer point epoch.
-	* \param observerToSubObserverVec   Vector from observer to sub-observer point.
-	* \return                           Whether the function succeeded or not
-	*/
-	//bool getSubSolarPoint(std::string target,
-	//					 std::string computationMethod,
-	//	                  
-	//	                  double      ephemeris,
-	//	                  std::string bodyFixedFrame,
-	//	                  std::string aberrationCorrection,
-	//	                  
-	//					  glm::dvec3& subSolarPoint,
-	//	                  double&     targetEpoch,
-	//	                  glm::dvec3& vectorToSurfacePoint) const;
     
     /**
      * This method checks if one of the previous SPICE methods has failed. If it has, the
