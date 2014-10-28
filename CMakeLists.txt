@@ -133,3 +133,32 @@ endif ()
 add_subdirectory(src)
 
 #add_subdirectory(gui)
+
+#########################################################################################
+# File Fetch
+#########################################################################################
+option(DOWNLOAD_FILES "Download large OpenSpace data on configure" OFF)
+if(DOWNLOAD_FILES)
+    function(DownloadFile FILE_PATH FILE_URL)
+        if(NOT EXISTS "${FILE_PATH}")
+            file(DOWNLOAD ${FILE_URL} ${FILE_PATH} INACTIVITY_TIMEOUT 10 SHOW_PROGRESS)
+        endif()
+    endfunction(DownloadFile)
+
+    function(NewHorizonDownload FILE_PATH FILE_URL)
+        DownloadFile("${OPENSPACE_BASE_DIR}/openspace-data/spice/JupiterNhKernels/${FILE_PATH}"
+                     "http://naif.jpl.nasa.gov/pub/naif/pds/data/nh-j_p_ss-spice-6-v1.0/nhsp_1000/data/${FILE_URL}")
+    endfunction(NewHorizonDownload)
+
+    NewHorizonDownload("ck/merged_nhpc_2006_v011.bc" "ck/merged_nhpc_2006_v011.bc")
+    NewHorizonDownload("ck/merged_nhpc_2007_v006.bc" "ck/merged_nhpc_2007_v006.bc")
+    NewHorizonDownload("fk/nh_v200.tf" "fk/nh_v200.tf")
+    NewHorizonDownload("ik/nh_lorri_v100.ti" "ik/nh_lorri_v100.ti")
+    NewHorizonDownload("pck/new_horizons_413.tsc" "pck/new_horizons_413.tsc")
+    NewHorizonDownload("spk/de413.bsp" "spk/de413.bsp")
+    NewHorizonDownload("spk/jup260.bsp" "spk/jup260.bsp")
+    NewHorizonDownload("spk/nh_nep_ura_000.bsp" "spk/nh_nep_ura_000.bsp")
+    NewHorizonDownload("spk/nh_recon_e2j_v1.bsp" "spk/nh_recon_e2j_v1.bsp")
+    NewHorizonDownload("spk/nh_recon_j2sep07_prelimv1.bsp" "spk/nh_recon_j2sep07_prelimv1.bsp")
+    NewHorizonDownload("spk/sb_2002jf56_2.bsp" "spk/sb_2002jf56_2.bsp")
+endif(DOWNLOAD_FILES)
