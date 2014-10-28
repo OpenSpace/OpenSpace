@@ -172,7 +172,7 @@ bool RenderableTrail::initialize(){
 
 	 _startTrail;
 	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
-	SpiceManager::ref().getETfromDate("2007 feb 26 17:57:54", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 27 07:19:00", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
