@@ -287,7 +287,7 @@ void WavefrontGeometry::render(){
 
 void WavefrontGeometry::createSphere(){
    // create the power scaled scalar
-	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1, 0); // will set proper bounding soon.
+	PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
 	_parent->setBoundingSphere(ps);
 }
 
