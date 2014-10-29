@@ -83,8 +83,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
-	assert(dictionary.getValue(keySource, _source));
-	assert(dictionary.getValue(keyDestination, _destination));
+	bool b1 = dictionary.getValue(keySource, _source);
+	bool b2 = dictionary.getValue(keyDestination, _destination);
+	assert(b1 == true);
+	assert(b2 == true);
 }
 
 
