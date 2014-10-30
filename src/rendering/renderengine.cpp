@@ -210,7 +210,9 @@ void RenderEngine::postSynchronizationPreDraw()
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
+#ifndef __APPLE__
 	_abuffer->clear();
+#endif
 }
 
 void RenderEngine::render()
@@ -240,15 +242,18 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
+#ifndef __APPLE__
     _abuffer->preRender();
+#endif
 	_sceneGraph->render({*_mainCamera, psc()});
+#ifndef __APPLE__
     _abuffer->postRender();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	_abuffer->resolve();
 	glDisable(GL_BLEND);
-
+#endif
     // Print some useful information on the master viewport
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
@@ -409,14 +414,38 @@ void RenderEngine::generateGlslConfig() {
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
+
+	std::ofstream os_version(absPath("${SHADERS_GENERATED}/version.hglsl"));
+#ifdef __APPLE__
+	os_version << "#version 410\n";
+#else
+	os_version << "#version 430\n";
+#endif
+	os_version.close();
+
 	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
+
+
+
 	os << "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
+		<< "#define ABUFFER_NONE              0\n"
 		<< "#define ABUFFER_SINGLE_LINKED     1\n"
 		<< "#define ABUFFER_FIXED             2\n"
 		<< "#define ABUFFER_DYNAMIC           3\n"
 		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
+// System specific
+#ifdef WIN32
+	os << "#define WIN32\n";
+#endif
+#ifdef __APPLE__
+	os << "#define APPLE\n";
+#endif
+#ifdef __linux__
+	os << "#define linux\n";
+#endif
+
 	os.close();
 }
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#include <${SHADERS_GENERATED}/version.hglsl>:notrack
 
 uniform float time;
 uniform sampler2D texture1;

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430 core
+#include <${SHADERS_GENERATED}/version.hglsl>:notrack
 
 layout(location = 0) in vec4 vertPosition;
 

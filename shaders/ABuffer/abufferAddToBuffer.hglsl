@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/constants.hglsl>
+#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
+
+#ifndef APPLE
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
@@ -39,6 +41,8 @@ layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 	#define _SCREEN_HEIGHT_ SCREEN_HEIGHT
 #endif 
 
+#endif
+
 ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z = gl_FragCoord.z) {
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
@@ -49,7 +53,11 @@ ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z = 
 }
 
 void addToBuffer(ABufferStruct_t frag) {
-
+#if ABUFFER_IMPLEMENTATION == ABUFFER_NONE || defined(APPLE)
+	gl_FragColor = _col_(frag);
+	gl_FragDepth = _z_(frag);
+#endif
+#ifndef APPLE
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uint index = atomicCounterIncrement(atomicCounterBuffer);
 	index *= 2;
@@ -61,6 +69,7 @@ void addToBuffer(ABufferStruct_t frag) {
 
 	imageStore(fragmentTexture, int(index), p1);
 	imageStore(fragmentTexture, int(index+1), p2);
+	discard;
 #endif 
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
@@ -76,10 +85,13 @@ void addToBuffer(ABufferStruct_t frag) {
 	} else {
 		imageAtomicAdd(anchorPointerTexture, ivec2(gl_FragCoord.xy), -1);
 	}
+	discard;
 	
 #endif 
-
+#endif
 }
+
+#ifndef APPLE
 
 ABufferStruct_t loadFromBuffer(uint id) {
 
@@ -102,3 +114,5 @@ ABufferStruct_t loadFromBuffer(uint id) {
 	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w, position);
 
 }
+
+#endif

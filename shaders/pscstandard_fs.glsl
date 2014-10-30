@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#include <${SHADERS_GENERATED}/version.hglsl>:notrack
 
 uniform vec4 campos;
 uniform vec4 objpos;
