@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 400 core
-
 uniform sampler2D texBack, texFront;
 uniform sampler3D texVolume;
 uniform float stepSize;

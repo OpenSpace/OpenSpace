@@ -25,11 +25,7 @@
 #ifndef ABUFFERSTRUCT_H_HGLSL
 #define ABUFFERSTRUCT_H_HGLSL
 
-// The different kinds of implementation, set from OpenSpace
-// #define  ABUFFER_SINGLE_LINKED    1
-// #define  ABUFFER_FIXED            2
-// #define  ABUFFER_DYNAMIC          3
-// #define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
 
 //========================================================================================
 // ABufferStruct_t declaration
@@ -129,9 +125,9 @@ void _col_(inout ABufferStruct_t frag, vec4 color) {
 
 uint _type_(ABufferStruct_t frag) {
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
-	return bitextract_u(frag.id, mask_id_type, shift_id_type);
+		return bitextract_u(frag.id, mask_id_type, shift_id_type);
 #else
-	return frag.id;
+		return frag.id;
 #endif
 }
 void _type_(inout ABufferStruct_t frag, uint type) {

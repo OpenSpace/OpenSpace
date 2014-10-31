@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/version.hglsl>:notrack
-
 uniform int volumeType;
 
 in vec3 vPosition;
@@ -47,6 +45,4 @@ void main() {
 	_type_(frag, volumeType);
 	_pos_(frag, position);
 	addToBuffer(frag);
-
-	discard;
 }

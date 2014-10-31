@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/version.hglsl>:notrack
-
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
@@ -75,6 +73,4 @@ void main()
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
-
-	discard;
 }

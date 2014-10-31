@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/version.hglsl>:notrack
-
 layout(location = 0) in vec4 vertPosition;
 
 uniform mat4 modelViewProjection;

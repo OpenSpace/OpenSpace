@@ -260,8 +260,9 @@ void SceneGraph::update(const UpdateData& data)
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-
+#ifndef __APPLE__
 		OsEng.renderEngine().abuffer()->invalidateABuffer();
+#endif
 	}
     for (auto node : _nodes)
         node->update(data);

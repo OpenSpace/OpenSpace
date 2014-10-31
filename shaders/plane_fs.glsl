@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/version.hglsl>:notrack
-
 uniform float time;
 uniform sampler2D texture1;
 
@@ -52,6 +50,4 @@ void main()
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
-
-	discard;
 }

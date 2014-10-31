@@ -1,9 +1,0 @@
-#define SCREEN_WIDTH  1280
-#define SCREEN_HEIGHT 720
-#define MAX_LAYERS 32
-#define ABUFFER_NONE              0
-#define ABUFFER_SINGLE_LINKED     1
-#define ABUFFER_FIXED             2
-#define ABUFFER_DYNAMIC           3
-#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED
-#define WIN32

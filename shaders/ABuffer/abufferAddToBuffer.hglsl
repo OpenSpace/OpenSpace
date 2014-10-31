@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
-
 #ifndef APPLE
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
@@ -43,7 +41,18 @@ layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 
 #endif
 
-ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z = gl_FragCoord.z) {
+layout(location = 0) out vec4 framebuffer_output_color;
+
+ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position) {
+	ABufferStruct_t frag;
+	_col_(frag, fragColor);
+	_z_(frag, gl_FragCoord.z);
+	_type_(frag, 0);
+	_pos_(frag, position);
+	return frag;
+}
+
+ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z) {
 	ABufferStruct_t frag;
 	_col_(frag, fragColor);
 	_z_(frag, z);
@@ -54,7 +63,7 @@ ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z = 
 
 void addToBuffer(ABufferStruct_t frag) {
 #if ABUFFER_IMPLEMENTATION == ABUFFER_NONE || defined(APPLE)
-	gl_FragColor = _col_(frag);
+	framebuffer_output_color = _col_(frag);
 	gl_FragDepth = _z_(frag);
 #endif
 #ifndef APPLE

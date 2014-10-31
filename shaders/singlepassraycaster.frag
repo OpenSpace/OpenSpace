@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 400 core
-
 // Based on http://prideout.net/blog/?p=64
 
 uniform sampler3D texVolume;

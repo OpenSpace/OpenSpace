@@ -98,12 +98,14 @@ bool RenderEngine::initialize()
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 	OsEng.interactionHandler().setCamera(_mainCamera);
+#ifndef __APPLE__
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
     _abuffer = new ABufferSingleLinked();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
     _abuffer = new ABufferFixed();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
     _abuffer = new ABufferDynamic();
+#endif
 #endif
     return true;
 }
@@ -176,9 +178,9 @@ bool RenderEngine::initializeGL()
         }
         _mainCamera->setMaxFov(maxFov);
     }
-
+#ifndef __APPLE__
     _abuffer->initialize();
-
+#endif
 	_log = new ScreenLog();
 	ghoul::logging::LogManager::ref().addLog(_log);
 
@@ -198,7 +200,9 @@ void RenderEngine::postSynchronizationPreDraw()
 	}
 	if (updateAbuffer) {
 		generateGlslConfig();
+        #ifndef __APPLE__
 		_abuffer->reinitialize();
+        #endif
 	}
 	
     // converts the quaternion used to rotation matrices
@@ -414,20 +418,10 @@ void RenderEngine::generateGlslConfig() {
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
-
-	std::ofstream os_version(absPath("${SHADERS_GENERATED}/version.hglsl"));
-#ifdef __APPLE__
-	os_version << "#version 410\n";
-#else
-	os_version << "#version 430\n";
-#endif
-	os_version.close();
-
 	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
-
-
-
-	os << "#define SCREEN_WIDTH  " << xSize << "\n"
+	os  << "#ifndef CONSTANTS_HGLSL\n"
+        << "#define CONSTANTS_HGLSL\n"
+        << "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
 		<< "#define ABUFFER_NONE              0\n"
@@ -445,6 +439,7 @@ void RenderEngine::generateGlslConfig() {
 #ifdef __linux__
 	os << "#define linux\n";
 #endif
+    os << "#endif\n";
 
 	os.close();
 }

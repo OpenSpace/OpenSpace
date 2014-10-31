@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${SHADERS_GENERATED}/version.hglsl>:notrack
-
 in vec4 position;
 out vec2 texCoord;
 
