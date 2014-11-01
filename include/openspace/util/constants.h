@@ -104,6 +104,8 @@ namespace renderablesphericalgrid {
 	const std::string gridColor = "GridColor";
 	const std::string gridMatrix = "GridMatrix";
 	const std::string gridSegments = "GridSegments";
+	const std::string gridRadius = "GridRadius";
+	const std::string gridPatentsRotiation = "ParentsRotation";
 } // namespace renderablesphericalgrid
 
 namespace ephemeris {

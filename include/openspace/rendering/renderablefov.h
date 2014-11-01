@@ -50,10 +50,18 @@ public:
 	properties::StringProperty _colorTexturePath; 
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
+	
 	void loadTexture();
-	void fullYearSweep();
+	void allocateData();
+	double computeTargetLocalTime(PowerScaledScalar d);
+	psc orthogonalProjection(glm::dvec3 camvec);
+	int findIndx(unsigned int p1, unsigned int p2) const;
 
-	// modfile reads
+	void insertBetween(int p1, int p2);
+	void hasIntercept(bool tag[]);
+	
+	psc pscInterpolate(psc p0, psc p1, float t);
+
 	// spice
 	std::string _target;
 	std::string _observer;
@@ -61,31 +69,33 @@ public:
 	// color
 	glm::vec3 _c; 
 	double _r, _g, _b;
-	// orbit relational data
-	double _tropic;
-	double _ratio;
-	double _day;
 
-	GLuint _vaoID ;
-	GLuint _vBufferID ;
-	GLuint _iBufferID;
-
-	void updateData();
-	void sendToGPU();
-
-	glm::dmat3 _stateMatrix;
-
+	GLuint _vaoID1 ;
+	GLuint _vboID1 ;
+	GLuint _iboID1;
 	GLenum _mode;
 	unsigned int _isize;
 	unsigned int _vsize;
 	unsigned int _vtotal;
 	unsigned int _stride;
+	std::vector<float> _varray1;
+	int* _iarray1;
 
-	//Vertex* _varray;
-	std::vector<float> _varray;
-	int* _iarray;
+	// second vbo 
+	GLuint _vaoID2;
+	GLuint _vboID2;
+	GLuint _iboID2;
+	unsigned int _isize2;
+	unsigned int _vsize2;
+	unsigned int _vtotal2;
 
-	bool _once = false;
+	std::vector<float> _varray2;
+	int* _iarray2;
+
+	void updateData();
+	void sendToGPU();
+
+	glm::dmat3 _stateMatrix;
 
 	//used for update of trail
 	psc _pscpos, _pscvel;
@@ -94,7 +104,22 @@ public:
 	double _oldTime = 0;
 
 	int _delta  = 0;
-	int _dtprogress = 0;
 };
 }
 #endif
+
+/* // idk how we will compute the aberrated state.
+double RenderableFov::computeTargetLocalTime(PowerScaledScalar d){
+double c = 299792456.075; // m/s
+double dt = ( (d[0]*pow(10, d[1])) / c );
+double t_local = _time - dt*86400;
+
+std::string localTime;
+std::string currentTime;
+
+openspace::SpiceManager::ref().getDateFromET(t_local, localTime);
+openspace::SpiceManager::ref().getDateFromET(_time  , currentTime);
+
+std::cout << "time at jupiter : " << localTime << "\time at NH" << currentTime << std::endl;
+return t_local;
+}*/

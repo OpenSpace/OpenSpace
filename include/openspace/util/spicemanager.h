@@ -26,6 +26,7 @@
 #define __SPICEMANAGER_H__
 
 #include "SpiceUsr.h"
+#include "SpiceZpr.h"
 
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -250,7 +251,23 @@ public:
 	bool getDateFromET(double ephemerisTime, std::string& date,
 		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
 
+	/**
+	* This helper method converts a 3 dimensional vector from one reference frame to another.
+	* \param v The vector to be converted
+	* \param from The frame to be converted from
+	* \param to The frame to be converted to
+	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
+	*/
 	void frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const;
+
+	/**
+	 *  Finds the projection of one vector onto another vector.
+     *  All vectors are 3-dimensional.
+  	 *  \param v1 The vector to be projected.
+	 *  \param v2 The vector onto which v1 is to be projected.
+	 *  \return The projection of v1 onto v2.
+	 */
+	glm::dvec3 orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2);
 
 	/**
 	 * Returns the <code>position</code> of a <code>target</code> body relative to an
@@ -320,9 +337,9 @@ public:
 							 const std::string& aberrationCorrection,
 							 double ephemerisTime,
 							 double& targetEpoch,
-							 psc& directionVector,
-							 psc& surfaceIntercept,
-							 psc& surfaceVector) const;
+							 glm::dvec3& directionVector,
+							 glm::dvec3& surfaceIntercept,
+							 glm::dvec3& surfaceVector) const;
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
@@ -406,6 +423,25 @@ public:
 									   const std::string& destinationFrame,
 									   double ephemerisTime,
 									   glm::dmat3& transformationMatrix) const;
+
+	/**
+	* The following overloaded function performs similar to its default - the exception being 
+	* that it computes <code>transformationMatrix</code> with respect to local time offset 
+	* between an observer and its target. This allows for the accountance of light travel of 
+	* photons, e.g to account for instrument pointing offsets due to said phenomenon. 
+	* \param sourceFrame The name of the source reference frame
+	* \param destinationFrame The name of the destination reference frame
+	* \param ephemerisTimeFrom Recorded/observed observation time
+	* \param ephemerisTimeTo   Emission local target-time
+	* \param transformationMatrix The output containing the transformation matrix that
+	*/
+
+	bool getPositionTransformMatrix(const std::string& sourceFrame,
+									const std::string& destinationFrame,
+									double ephemerisTimeFrom,
+									double ephemerisTimeTo,
+									glm::dmat3& transformationMatrix) const;
+
 
 	bool getPositionPrimeMeridian(const std::string& sourceFrame,
 									const std::string& destinationFrame,

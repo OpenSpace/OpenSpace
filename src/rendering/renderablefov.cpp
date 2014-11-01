@@ -49,35 +49,117 @@ namespace openspace{
 		, _colorTexturePath("colorTexture", "Color Texture")
 		, _programObject(nullptr)
 		, _texture(nullptr)
-		, _vaoID(0)
-		, _vBufferID(0)
-		, _iBufferID(0)
+		, _vaoID1(0)
+		, _vboID1(0)
+		, _iboID1(0)
+		, _vaoID2(0)
+		, _vboID2(0)
+		, _iboID2(0)
 		, _mode(GL_LINES){
 
 		assert(dictionary.getValue(keyBody               , _target));
 		assert(dictionary.getValue(keyObserver           , _observer));
 		assert(dictionary.getValue(keyFrame              , _frame));
 }
-void RenderableFov::fullYearSweep(){
-	
+void RenderableFov::allocateData(){
 	int points = 8;
 	_stride = 8;
 	_isize = points;
-	_iarray = new int[_isize];
-
+	_iarray1 = new int[_isize];
 	for (int i = 0; i < points; i++){
 		for (int j = 0; j < 4; j++){
-			_varray.push_back(0); // pos
+			_varray1.push_back(0); // pos
+
 		}
 		for (int j = 0; j < 4; j++){
-			_varray.push_back(0); // col
+			_varray1.push_back(0); // col
 		}
-		_iarray[i] = i;
+		_iarray1[i] = i;
 	}
 
 	_stride = 8;
-	_vsize = _varray.size();
+	_vsize = _varray1.size();
 	_vtotal = static_cast<int>(_vsize / _stride);
+
+	// allocate second vbo data 
+	int cornerPoints = 5;
+	_isize2 = cornerPoints;
+	_iarray2 = new int[_isize2];
+	for (int i = 0; i < _isize2; i++){
+		_iarray2[i] = i;
+	}
+	_varray2.resize(40);
+	_vsize2 = 40;
+	_vtotal2 = 5;
+
+	/*
+	// TESTING INDEX ROTATION ALGORITHM
+	for (int i = 0; i < 40; i++){
+		_varray2[i] = i;
+	}
+	//    0                    1                          2                           3                           4  
+	// 0 1 2 3 | 4 5 6 7 | 8 9 10 11 | 12 13 14 15 | 16 17 18 19 | 20 21 22 23 | 24 25 26 27 | 28 29 30 31 | 32 33 34 35 | 36 37 38 39 |
+	//                     8                         16                          24                          32 
+	insertBetween(1, 2);
+	*/
+}
+
+psc RenderableFov::pscInterpolate(psc p0, psc p1, float t){
+assert(t >= 0 && t <= 1);
+
+float s = (1.f - t)*p0[3] + t*p1[3];
+
+float x = ((1.f - t)*p0[0] + t*p1[0]);
+float y = ((1.f - t)*p0[1] + t*p1[1]);
+float z = ((1.f - t)*p0[2] + t*p1[2]);
+
+return PowerScaledCoordinate::PowerScaledCoordinate(x,y,z,s);
+}
+
+
+void RenderableFov::hasIntercept(bool tag[]){
+	for (int i = 0; i < 4; i++){
+		if (tag[i] != tag[i + 1]){
+			std::cout << "intercept between pt " << i << " and " << i + 1 << std::endl;
+		}
+	}
+	std::cout << std::endl;
+}
+
+void RenderableFov::insertBetween(int p1, int p2){
+	int idx = findIndx(p1, p2);
+
+	std::rotate(_varray2.begin(), _varray2.begin() + idx, _varray2.end());
+	std::reverse(_varray2.begin(), _varray2.end());
+
+	for (int i = 0; i < 8; i++)
+		_varray2.push_back(0); // add new point
+
+	std::rotate(_varray2.begin(), _varray2.begin() + idx, _varray2.end());
+	std::reverse(_varray2.begin(), _varray2.end());
+	/*
+	int tmp = 0;
+	for (int i = 0; i < _varray2.size(); i++){
+		std::cout << _varray2[i] << " ";
+		tmp++;
+		if (tmp == 4){
+			std::cout << "| ";
+			tmp = 0;
+		}
+	}
+	std::cout << "\n";
+	*/
+}
+
+int RenderableFov::findIndx(unsigned int p1, unsigned int p2) const{
+	assert(p1 != p2 && _stride > 0);
+	int idx = (p1 > p2) ? p1*_stride : p2*_stride;
+	if (idx > _varray2.size()-_stride){
+		LERROR("Out of bounds for points " << p1 << " and " << p2 
+			   << " will return index 0");
+		return 0;
+	}
+	return idx;
 }
 
 RenderableFov::~RenderableFov(){
@@ -86,14 +168,14 @@ RenderableFov::~RenderableFov(){
 
 void RenderableFov::sendToGPU(){
 	// Initialize and upload to graphics card
-	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vBufferID);
-	glGenBuffers(1, &_iBufferID);
+	glGenVertexArrays(1, &_vaoID1);
+	glGenBuffers(1, &_vboID1);
+	glGenBuffers(1, &_iboID1);
 
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+	glBindVertexArray(_vaoID1);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID1);
 	glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
-	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray1[0]);
 
 	GLsizei st = sizeof(GLfloat) * _stride;
 
@@ -102,9 +184,27 @@ void RenderableFov::sendToGPU(){
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID1);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray1, GL_STATIC_DRAW);
+	glBindVertexArray(0);
 
+	// second vbo
+	glGenVertexArrays(1, &_vaoID2);
+	glGenBuffers(1, &_vboID2);
+	glGenBuffers(1, &_iboID2);
+
+	glBindVertexArray(_vaoID2);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
+	glBufferData(GL_ARRAY_BUFFER, _vsize2 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID2);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize2 * sizeof(int), _iarray2, GL_STATIC_DRAW);
 	glBindVertexArray(0);
 }
 
@@ -114,7 +214,7 @@ bool RenderableFov::initialize(){
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 	
-	 fullYearSweep();
+	allocateData();
 	 sendToGPU();
 
 	return completeSuccess;
@@ -127,8 +227,27 @@ bool RenderableFov::deinitialize(){
 }
 
 void RenderableFov::updateData(){
-	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID1);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray1[0]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
+}
+
+psc RenderableFov::orthogonalProjection(glm::dvec3 camvec){
+	glm::dvec3 vecToTarget;
+	double lt;
+	SpiceManager::ref().getTargetPosition("JUPITER", "NEW HORIZONS", "GALACTIC", "XCN+S", _time, vecToTarget, lt);
+	glm::dvec3 b(camvec);
+
+	//might need time-offset dependant variant
+	openspace::SpiceManager::ref().frameConversion(b, "NH_LORRI", "GALACTIC", _time);
+	glm::dvec3 p = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, b);
+
+	psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
+	projection[3] += 3;
+
+	return projection;
 }
 
 void RenderableFov::render(const RenderData& data){
@@ -139,11 +258,6 @@ void RenderableFov::render(const RenderData& data){
 	glm::mat4 transform(1);
 
 	glm::mat4 tmp = glm::mat4(1);
-	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
-	glm::mat4 rotx = glm::rotate(transform, -90.f, glm::vec3(1, 0, 0));
-
-	glm::mat4 scale = glm::scale(transform, glm::vec3(1, -1, 1));
-
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			tmp[i][j] = _stateMatrix[i][j];
@@ -165,64 +279,120 @@ void RenderableFov::render(const RenderData& data){
 		if (!found) LERROR("Could not locate instrument"); // fixlater
 
 		float size = 4 * sizeof(float);
-		float *begin = &_varray[0];
 
+		// just some colors to help with debugging
 		glm::vec4 origin(0);
 		glm::vec4 col_gray(0.3, 0.3, 0.3, 1);
 		glm::vec4 col_start(1.00, 0.89, 0.00, 1);
 		glm::vec4 col_end(1.00, 0.29, 0.00, 1);
-	//	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], data.position[3] - 3);
+		glm::vec4 col_proj(1, 1, 1, 1);
 
-		float sc = 2.4;
 		int indx = 0;
+		int indx2 = 0;
+
+		psc projectionBounds[4];
+		bool tags[5];
+		
+		/**
+		* NOTE: THIS CLASS IS UNDER DEVELOPMENT AND THEREFORE NON-OPTIMIZED
+		*/
+
 		for (int i = 0; i < 4; i++){
 			// might as well take glm. Would be nice if we had just one type to deal with here...
-			psc dir = PowerScaledCoordinate::PowerScaledCoordinate(bounds[i][0], bounds[i][1], bounds[i][2], 1);
-			psc intercept, interceptVector;
+			glm::dvec3 ip, iv;
 			double targetEpoch;
-			found = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", _target, instrument,
-																	   _frame, "ELLIPSOID", "XCN+S",
-																	   _time, targetEpoch, dir, intercept, interceptVector);
+			// need to keep it explicit to keep my mind from exploding.
+			found = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", "NEW HORIZONS", "NH_LORRI",
+				"GALACTIC", "ELLIPSOID", "NONE", _time, targetEpoch, bounds[i], ip, iv);
+
+			psc interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(iv[0], iv[1], iv[2]);
 			interceptVector[3] += 3;
 			glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
 
-			corner = tmp*corner;
+			corner = tmp*corner; // manual rotation is a must. 
 
-			//cleanup later.
-			if (found){
-				memcpy(&_varray[indx], glm::value_ptr(origin), size);
+			if (found){ 
+				// INTERCEPTIONS
+				tags[i] = true;
+
+				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(col_start), size);
+				memcpy(&_varray1[indx], glm::value_ptr(col_start), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(interceptVector.vec4()), size);
+				memcpy(&_varray1[indx], glm::value_ptr(interceptVector.vec4()), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(col_end), size);
+				memcpy(&_varray1[indx], glm::value_ptr(col_end), size);
 				indx += 4;
 			}else{
-				memcpy(&_varray[indx], glm::value_ptr(origin), size);
+				// "INFINITE" FOV
+				tags[i] = false;
+
+				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(col_gray), size);
+				memcpy(&_varray1[indx], glm::value_ptr(col_gray), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(corner), size);
+				memcpy(&_varray1[indx], glm::value_ptr(corner), size);
 				indx += 4;
-				memcpy(&_varray[indx], glm::value_ptr(glm::vec4(0)), size);
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 				indx += 4;
 			}
+
+			// COMPUTE ORTHOGONAL PROJECTION. -- have to make cosmetic changes to this later. 
+				projectionBounds[i] = orthogonalProjection(bounds[i]);
+
+			/* // failed attempt at aberrated state.
+			openspace::SpiceManager::ref().getPositionTransformMatrix("NH_LORRI", "IAU_JUPITER", _time, targetEpoch, _stateMatrix);
+			glm::vec4 corner2(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
+
+			corner2 = tmp*corner2;
+			*/
 		}
+
+		tags[4] = tags[0]; // 0 & 5 same point
+
+		hasIntercept(tags);
+
+		for (int i = 0; i < 4; i++){
+			memcpy(&_varray2[indx2], glm::value_ptr(projectionBounds[i].vec4()), size);
+			indx2 += 4;
+			memcpy(&_varray2[indx2], glm::value_ptr(col_proj), size);
+			indx2 += 4;
+		}
+			
+		//last point, finish lineloop
+		psc lastpoint = orthogonalProjection(bounds[0]);
+		memcpy(&_varray2[indx2], glm::value_ptr(lastpoint.vec4()), size);
+		indx2 += 4;
+		memcpy(&_varray2[indx2], glm::value_ptr(col_proj), size);
+		indx2 += 4;
+
+		//insert point between data
+
+		
 		updateData();
 	}
 	_oldTime = _time;
-
-	glBindVertexArray(_vaoID); 
+	
+	glBindVertexArray(_vaoID1);
 	glDrawArrays(_mode, 0, _vtotal);
 	glBindVertexArray(0);
 
-
-	glPointSize(3.f);
-	glBindVertexArray(_vaoID);
+	//render points
+	glPointSize(10.f);
+	glBindVertexArray(_vaoID1);
 	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
 
+	//second vbo
+	glBindVertexArray(_vaoID2);
+	glDrawArrays(GL_LINE_STRIP, 0, _vtotal2);
+	glBindVertexArray(0);
+	
+	glPointSize(4.f);
+	glBindVertexArray(_vaoID2);
+	glDrawArrays(GL_POINTS, 0, _vtotal2);
+	glBindVertexArray(0);
+	
 	_programObject->deactivate();
 }
 

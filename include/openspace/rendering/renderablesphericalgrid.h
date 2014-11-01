@@ -62,6 +62,11 @@ protected:
 	glm::mat4 _gridMatrix;
 	int _segments;
 
+	bool staticGrid;
+	std::string _parentsRotation;
+	glm::dmat3 _parentMatrix;
+	PowerScaledScalar _radius;
+
 	GLuint _vaoID = 3;
 	GLuint _vBufferID = 4;
 	GLuint _iBufferID = 5;
