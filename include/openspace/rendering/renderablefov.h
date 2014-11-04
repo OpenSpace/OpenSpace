@@ -61,28 +61,26 @@ public:
 	double distanceBetweenPoints(psc p1, psc p2);
 	double distanceBetweenPoints(glm::dvec3 p1, glm::dvec3 p2);
 
+	psc checkForIntercept(glm::dvec3 ray);
 
-	psc findSegmentIntercept(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
-
+	glm::dvec3 segmentBisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
 	glm::dvec3 _previousHalf;
 
 	void insertPoint(psc& p, glm::vec4& c);
-	int _nrInserted = 0;
 
-	void rebuildFOV(bool H[], std::vector<glm::dvec3> bounds);
+	void fovProjection(bool H[], std::vector<glm::dvec3> bounds);
 
 	int findIndx(unsigned int p1, unsigned int p2) const;
 	
-	void insertPoint(int index, psc point); // extend later for multiple points
-	
 	void getIntervalEndpoints(psc& p1, psc& p2, int index);
-
-	//void findSegmentSplit(bool tag[]);
 
 	psc pscInterpolate(psc p0, psc p1, float t);
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
 
+	int _nrInserted = 0;
 
+	bool _rebuild = false;
+	
 	// spice
 	std::string _target;
 	std::string _observer;
@@ -123,8 +121,9 @@ public:
 	double _increment;
 	double _time = 0;
 	double _oldTime = 0;
-
 	int _delta  = 0;
+
+
 };
 }
 #endif

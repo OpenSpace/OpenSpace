@@ -44,6 +44,15 @@ namespace {
 }
 //#define DEBUG
 namespace openspace{
+	// colors, move later
+	glm::vec4 origin(0);
+	glm::vec4 col_gray(0.3, 0.3, 0.3, 1);
+	glm::vec4 col_start(1.00, 0.89, 0.00, 1);
+	glm::vec4 col_end(1.00, 0.29, 0.00, 1);
+	glm::vec4 col_sq(1.00, 0.29, 0.00, 1);
+
+	glm::vec4 col_proj(1, 1, 1, 1);
+
 	RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 		: Renderable(dictionary)
 		, _colorTexturePath("colorTexture", "Color Texture")
@@ -90,12 +99,6 @@ void RenderableFov::allocateData(){
 	_varray2.resize(40);
 	_vsize2  = 40;
 	_vtotal2 = 5;
-
-	/*
-	//    0                    1                          2                           3                           4              (point nr)
-	// 0 1 2 3 | 4 5 6 7 | 8 9 10 11 | 12 13 14 15 | 16 17 18 19 | 20 21 22 23 | 24 25 26 27 | 28 29 30 31 | 32 33 34 35 | 36 37 38 39 |
-	//                     8                         16                          24                          32                  (point index)
-	*/
 }
 
 RenderableFov::~RenderableFov(){
@@ -149,86 +152,6 @@ void RenderableFov::sendToGPU(){
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
 	glBufferData(GL_ARRAY_BUFFER, _vsize2 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID2);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize2 * sizeof(int), _iarray2, GL_STATIC_DRAW);
-	glBindVertexArray(0);
-}
-
-
-/*
-void RenderableFov::findSegmentSplit(bool tag[]){
-	psc start, end, newPoint;
-	for (int i = 4; i > 0; i--){
-		if (tag[i] != tag[i - 1]){
-			int index = findIndx(i, i - 1);
-			getIntervalEndpoints(start, end, index);
-			newPoint = pscInterpolate(start, end, 0.5f); // point inbetween
-			insertPoint(index, newPoint);
-		}
-	}
-}
-*/
-/*
-void RenderableFov::getIntervalEndpoints(psc& p1, psc& p2, int index){
-	int secondIndex = index-_stride;
-	for (int i = 0; i < 4; i++){
-		p2[i] = _varray2[index];
-		p1[i] = _varray2[secondIndex];
-		index++;
-		secondIndex++;
-	}
-}*/
-/*
-int RenderableFov::findIndx(unsigned int p1, unsigned int p2) const{
-assert(p1 != p2 && _stride > 0);
-int idx = (p1 > p2) ? p1*_stride : p2*_stride;
-if (idx > _varray2.size()-_stride){
-LERROR("Out of bounds for points " << p1 << " and " << p2
-<< " will return index 0");
-return 0;
-}
-return idx;
-}
-*/
-
-void RenderableFov::insertPoint(int index, psc point){
-	std::rotate(_varray2.begin(), _varray2.begin() + index, _varray2.end());
-	std::reverse(_varray2.begin(), _varray2.end());
-		_varray2.push_back(1);
-		_varray2.push_back(0);
-		_varray2.push_back(0);
-		_varray2.push_back(1);
-	
-	for (int i = 0; i < 4; i++){
-		_varray2.push_back(point[3-i]);  // add new point
-	}
-	std::rotate(_varray2.begin(), _varray2.begin() + index, _varray2.end());
-	std::reverse(_varray2.begin(), _varray2.end());
-
-	_vtotal2 += 1;
-	_isize2  += 1;
-	_vsize2 = _varray2.size();
-	//update size etc;
-	for (int i = 0; i < _isize2; i++){
-		_iarray2[i] = i;
-	}
-	
-	glGenVertexArrays(1, &_vaoID2);
-	glGenBuffers(1, &_vboID2);
-	glGenBuffers(1, &_iboID2);
-
-	glBindVertexArray(_vaoID2);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
-	glBufferData(GL_ARRAY_BUFFER, _vsize2 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
-	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
-	
-	GLsizei st = sizeof(GLfloat) * _stride;
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -294,9 +217,20 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 	return glm::dvec3(x, y, z);
 }
 
-psc RenderableFov::findSegmentIntercept(glm::dvec3 p1, glm::dvec3 p2, double tolerance){
-	glm::dvec3 half = interpolate(p1, p2, 0.5f);
+psc RenderableFov::checkForIntercept(glm::dvec3 ray){
+	double targetEt;
+	glm::dvec3 ip, iv;
+	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", "NEW HORIZONS", "NH_LORRI",
+		"GALACTIC", "ELLIPSOID", "NONE", _time, targetEt, ray, ip, iv);
+	psc interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(iv[0], iv[1], iv[2]);
+	interceptVector[3] += 3;
 
+	return interceptVector;
+}
+
+
+glm::dvec3 RenderableFov::segmentBisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance){
+	glm::dvec3 half = interpolate(p1, p2, 0.5f);
 
 	//check if point is on surface
 	glm::dvec3 h(half[0], half[1], half[2]);
@@ -307,107 +241,90 @@ psc RenderableFov::findSegmentIntercept(glm::dvec3 p1, glm::dvec3 p2, double tol
 		                                         "GALACTIC", "ELLIPSOID", "NONE", _time, targetEt, half, ip, iv);
 	if (distanceBetweenPoints(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
-		return orthogonalProjection(half);
+		return half;
 	}
 	_previousHalf = half;
 	//recursive search
 	if (intercepted == false){
-		return findSegmentIntercept(p1, half, tolerance);
+		return segmentBisection(p1, half, tolerance);
 	}else{
-		return findSegmentIntercept(half, p2, tolerance);
+		return segmentBisection(half, p2, tolerance);
 	}
 }
 /*
-	[3]---------[4]/[0]
+	"yeah, sounds easy enough..." - Michal, summer 2014. =)
+	[3]---------[4]/[0] 
 	 |             |
 	 |     FOV     |
 	 |             |
 	[2]-----------[1]
-
-	CASE 1:
-	H[i]                    H[i+1]
-	[X]---------x...........[O]
-	 |        /              :
-	 |      /                :
-	 |   /                   :
-	 x /                     : 
-    /:                       :
-  /	 :                       :
-	[O].....................[O]
-
 */
-
-void RenderableFov::rebuildFOV(bool H[], std::vector<glm::dvec3> bounds){
+void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 	_nrInserted = 0;
 	_varray2.clear();// empty the array
-	int isteps = 4;
+	int isteps = 9;
+	double t;
+	double tolerance = 0.00000001;
+	psc interceptVector;
 	for (int i = 0; i < 4; i++){
-		psc current = orthogonalProjection(bounds[i]);
-		insertPoint(current, glm::vec4(1));
 		int k = (i + 1 > 3) ? 0 : i + 1;
 		psc next = orthogonalProjection(bounds[k]);
 
+		if (H[i] == false){ // CASE last
+			psc current = orthogonalProjection(bounds[i]);
+			insertPoint(current, glm::vec4(1));
+		}
 		// CASE 1
 		if (H[i] == true && H[i + 1] == false){ 
-			psc mid = findSegmentIntercept(bounds[i], bounds[k], 0.00001); // very low tolerance factor, might be precision issue
-			
-			for (int j = 1; j < isteps; j++){
-				psc interpolated = pscInterpolate(current, mid, (double)j / isteps);
-				insertPoint(interpolated, glm::vec4(1));
+			glm::dvec3 mid = segmentBisection(bounds[i], bounds[k], tolerance); // very low tolerance factor
+			for (int j = 1; j <= isteps; j++){
+				t = (j == isteps) ? ((double)j / isteps) : ((double)j / isteps) - 0.1;
+				glm::dvec3 interpolated = interpolate(bounds[i], mid, t);
+				if (j < isteps){
+					interceptVector = checkForIntercept(interpolated);
+				}else{
+				    interceptVector = orthogonalProjection(interpolated);
+				}
+				insertPoint(interceptVector, col_sq);
 			}
 		}
 		if (H[i] == false && H[i+1] == true){
-			psc mid = findSegmentIntercept(bounds[k], bounds[i], 0.0000001);
+			glm::dvec3 mid = segmentBisection(bounds[k], bounds[i], tolerance);
 
-			for (int j = 1; j < isteps; j++){
-				psc interpolated = pscInterpolate(mid, next, (double)j / isteps);
-				insertPoint(interpolated, glm::vec4(1));
+			for (int j = 1; j <= isteps; j++){
+				t = (j == 1) ? ((double)j / isteps) : ((double)j / isteps) - 0.1;
+				glm::dvec3 interpolated = interpolate(mid, bounds[k], t);
+				if (j > 1){
+					interceptVector = checkForIntercept(interpolated);
+				}else{
+					interceptVector = orthogonalProjection(interpolated);
+				}
+				insertPoint(interceptVector, col_sq);
 			}
 		}
 		// just add remaining points for now... 
 		if (H[i] == true && H[i + 1] == true){ // CASE 3
-			for (int j = 1; j < isteps; j++){
-				psc interpolated = pscInterpolate(current, next, (double)j / isteps);
-				insertPoint(interpolated, glm::vec4(1));
+			for (int j = 0; j <= isteps; j++){
+				t = (double)j / isteps;
+				glm::dvec3 interpolated = interpolate(bounds[i], bounds[k], t);
+				interceptVector = checkForIntercept(interpolated);
+				insertPoint(interceptVector, col_sq);
 			}
 		}
-
-	}
-	//last point add
-	psc last = orthogonalProjection(bounds[0]);
-	insertPoint(last, glm::vec4(1));
-
-	_vtotal2 = _nrInserted;
-	_isize2  = _nrInserted;
-	_vsize2  = _varray2.size();
-
-	//update size etc;
-	_iarray2 = new int[_isize2];
-	for (int i = 0; i < _isize2; i++){
-		_iarray2[i] = i;
 	}
 
-	//optimize later
-	glGenVertexArrays(1, &_vaoID2);
-	glGenBuffers(1, &_vboID2);
-	glGenBuffers(1, &_iboID2);
-
-	glBindVertexArray(_vaoID2);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
-	glBufferData(GL_ARRAY_BUFFER, _vsize2 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
-	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
-
-	GLsizei st = sizeof(GLfloat) * _stride;
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID2);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize2 * sizeof(int), _iarray2, GL_STATIC_DRAW);
-	glBindVertexArray(0);
-
+	if (_nrInserted == 0){
+		_rebuild = false;
+	}else{
+		_rebuild = true;
+		//update size etc;
+		_vtotal2 = _nrInserted;
+		_isize2 = _nrInserted;
+		_vsize2 = _varray2.size();
+		_iarray2 = new int[_isize2];
+		for (int i = 0; i < _isize2; i++)
+			_iarray2[i] = i;
+	}
 }
 
 
@@ -415,8 +332,31 @@ void RenderableFov::updateData(){
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID1);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * sizeof(GLfloat), &_varray1[0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
+	if (!_rebuild){
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
+	}else{
+		//optimize later
+		glGenVertexArrays(1, &_vaoID2);
+		glGenBuffers(1, &_vboID2);
+		glGenBuffers(1, &_iboID2);
+
+		glBindVertexArray(_vaoID2);
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
+		glBufferData(GL_ARRAY_BUFFER, _vsize2 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
+
+		GLsizei st = sizeof(GLfloat) * _stride;
+
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID2);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize2 * sizeof(int), _iarray2, GL_STATIC_DRAW);
+		glBindVertexArray(0);
+	}
 }
 
 psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov){
@@ -424,7 +364,6 @@ psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov){
 	double lt;
 	SpiceManager::ref().getTargetPosition("JUPITER", "NEW HORIZONS", "GALACTIC", "NONE", _time, vecToTarget, lt);
 	openspace::SpiceManager::ref().frameConversion(vecFov, "NH_LORRI", "GALACTIC", _time);
-
 	glm::dvec3 p = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, vecFov);
 
 	psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
@@ -463,23 +402,11 @@ void RenderableFov::render(const RenderData& data){
 
 		float size = 4 * sizeof(float);
 
-		// just some colors to help with debugging
-		glm::vec4 origin(0);
-		glm::vec4 col_gray(0.3, 0.3, 0.3, 1);
-		glm::vec4 col_start(1.00, 0.89, 0.00, 1);
-		glm::vec4 col_end(1.00, 0.29, 0.00, 1);
-		glm::vec4 col_proj(1, 1, 1, 1);
-
 		int indx = 0;
 		int indx2 = 0;
-
 		psc projectionBounds[4];
 		bool tags[5];
 		
-		/**
-		* NOTE: THIS CLASS IS UNDER DEVELOPMENT AND THEREFORE NON-OPTIMIZED
-		*/
-
 		for (int i = 0; i < 4; i++){
 			// might as well take glm. Would be nice if we had just one type to deal with here...
 			glm::dvec3 ip, iv;
@@ -519,29 +446,14 @@ void RenderableFov::render(const RenderData& data){
 				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 				indx += 4;
 			}
-
-			// COMPUTE ORTHOGONAL PROJECTION. -- have to make cosmetic changes to this later. 
-				//projectionBounds[i] = orthogonalProjection(bounds[i]);
-
-			/* // failed attempt at aberrated state.
-			openspace::SpiceManager::ref().getPositionTransformMatrix("NH_LORRI", "IAU_JUPITER", _time, targetEpoch, _stateMatrix);
-			glm::vec4 corner2(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
-
-			corner2 = tmp*corner2;
-			*/
 		}
 
 		tags[4] = tags[0]; // 0 & 5 same point
-
-		//findSegmentSplit(tags);
-		/*
-		// draworder r->g->b->y
-		glm::vec4 boundary_col[4] = { glm::vec4(1, 0, 0, 1), glm::vec4(0, 1, 0, 1), glm::vec4(0, 0, 1, 1), glm::vec4(1, 1, 0, 1) };
-
+#ifdef DRAW_ORTHOGONAL
 		for (int i = 0; i < 4; i++){
 			memcpy(&_varray2[indx2], glm::value_ptr(projectionBounds[i].vec4()), size);
 			indx2 += 4;
-			memcpy(&_varray2[indx2], glm::value_ptr(boundary_col[i]), size);
+			memcpy(&_varray2[indx2], glm::value_ptr(glm::vec4(1)), size);
 			indx2 += 4;
 		}
 			
@@ -549,32 +461,32 @@ void RenderableFov::render(const RenderData& data){
 		psc lastpoint = orthogonalProjection(bounds[0]);
 		memcpy(&_varray2[indx2], glm::value_ptr(lastpoint.vec4()), size);
 		indx2 += 4;
-		memcpy(&_varray2[indx2], glm::value_ptr(boundary_col[0]), size);
+		memcpy(&_varray2[indx2], glm::value_ptr(glm::vec4(1)), size);
 		indx2 += 4;
-	*/
-
-		rebuildFOV(tags, bounds);
-
+#else
+		fovProjection(tags, bounds);
+#endif
 		updateData();
 	}
 	_oldTime = _time;
-	
+	glLineWidth(1.f);
 	glBindVertexArray(_vaoID1);
 	glDrawArrays(_mode, 0, _vtotal);
 	glBindVertexArray(0);
 
 	//render points
-	glPointSize(10.f);
+	glPointSize(2.f);
 	glBindVertexArray(_vaoID1);
 	glDrawArrays(GL_POINTS, 0, _vtotal);
 	glBindVertexArray(0);
 
 	//second vbo
+	glLineWidth(3.f);
 	glBindVertexArray(_vaoID2);
-	glDrawArrays(GL_LINE_STRIP, 0, _vtotal2);
+	glDrawArrays(GL_LINE_LOOP, 0, _vtotal2);
 	glBindVertexArray(0);
 	
-	glPointSize(7.f);
+	glPointSize(5.f);
 	glBindVertexArray(_vaoID2);
 	glDrawArrays(GL_POINTS, 0, _vtotal2);
 	glBindVertexArray(0);
