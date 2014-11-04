@@ -55,12 +55,33 @@ public:
 	void allocateData();
 	double computeTargetLocalTime(PowerScaledScalar d);
 	psc orthogonalProjection(glm::dvec3 camvec);
-	int findIndx(unsigned int p1, unsigned int p2) const;
 
-	void insertBetween(int p1, int p2);
-	void hasIntercept(bool tag[]);
+	void printFovArray();
+
+	double distanceBetweenPoints(psc p1, psc p2);
+	double distanceBetweenPoints(glm::dvec3 p1, glm::dvec3 p2);
+
+
+	psc findSegmentIntercept(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
+
+	glm::dvec3 _previousHalf;
+
+	void insertPoint(psc& p, glm::vec4& c);
+	int _nrInserted = 0;
+
+	void rebuildFOV(bool H[], std::vector<glm::dvec3> bounds);
+
+	int findIndx(unsigned int p1, unsigned int p2) const;
 	
+	void insertPoint(int index, psc point); // extend later for multiple points
+	
+	void getIntervalEndpoints(psc& p1, psc& p2, int index);
+
+	//void findSegmentSplit(bool tag[]);
+
 	psc pscInterpolate(psc p0, psc p1, float t);
+	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
+
 
 	// spice
 	std::string _target;
