@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
+
 in vec4 color;
 out vec4 outputColor;
 

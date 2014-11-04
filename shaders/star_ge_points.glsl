@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
+#version __CONTEXT__
+
 layout(points) in;
 layout(points, max_vertices = 1) out; // Draw points 
 //layout(triangle_strip, max_vertices = 4) out; // Draw quads

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
+
 layout(location = 0) in vec4 vertPosition;
 
 uniform mat4 modelViewProjection;

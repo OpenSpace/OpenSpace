@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
+
 // Based on http://prideout.net/blog/?p=64
 
 layout(points) in;

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
+
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
