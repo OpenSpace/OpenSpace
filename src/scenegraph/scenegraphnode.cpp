@@ -181,9 +181,9 @@ void SceneGraphNode::update(const UpdateData& data)
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 {
-    const psc thisPosition = parentPosition + _ephemeris->position();
-    const psc camPos = camera->position();
-    const psc toCamera = thisPosition - camPos;
+    //const psc thisPosition = parentPosition + _ephemeris->position();
+    //const psc camPos = camera->position();
+    //const psc toCamera = thisPosition - camPos;
 
     // init as not visible
     _boundingSphereVisible = false;

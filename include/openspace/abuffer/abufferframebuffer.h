@@ -22,23 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFER_I_H__
-#define __ABUFFER_I_H__
+#ifndef __ABUFFERFRAMEBUFFER_H__
+#define __ABUFFERFRAMEBUFFER_H__
+
+#include <openspace/abuffer/abuffer.h>
 
 namespace openspace {
-
-class ABuffer_I {
+    
+class ABufferFramebuffer: public ABuffer {
 public:
-	virtual ~ABuffer_I() {};
-	virtual bool initialize() = 0;
-	virtual bool reinitialize() = 0;
+    
+    ABufferFramebuffer();
+    virtual ~ABufferFramebuffer();
+    virtual bool initialize();
+    
+    virtual void clear();
+    virtual void preRender();
+    virtual void postRender();
+    
+    virtual std::string settings();
+protected:
+    virtual bool reinitializeInternal();
+    
+private:
+    
+}; 		// ABufferSingleLinked
+} 		// openspace
 
-	virtual void clear() = 0;
-	virtual void preRender() = 0;
-	virtual void postRender() = 0;
-	virtual void resolve() = 0;
-
-};		// ABuffer_I
-}		// openspace
-
-#endif 	// __ABUFFER_I_H__
+#endif 	// __ABUFFERSINGLELINKED_H__

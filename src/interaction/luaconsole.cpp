@@ -314,7 +314,6 @@ void LuaConsole::render() {
 	float startY = static_cast<float>(ySize) - 2.0f * font_size;
 	startY = startY - font_size * 10.0f * 2.0f;
 
-	const float font_with = font_size*0.7f;
 	const glm::vec4 red(1, 0, 0, 1);
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);

@@ -87,7 +87,7 @@ public:
 	std::vector<float> _varray;
 	int* _iarray;
 
-	bool _once = false;
+	//bool _once = false;
 	double lightTime;
 	//used for update of trail
 	psc _pscpos, _pscvel;
@@ -97,7 +97,7 @@ public:
 	float _dtEt;
 
 	int _delta  = 0;
-	int _dtprogress = 0;
+	//int _dtprogress = 0;
 };
 }
 #endif

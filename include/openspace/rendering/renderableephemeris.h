@@ -73,7 +73,7 @@ public:
 	 Vertex* _varray;
 	 int* _iarray;
 
-	 Vertex*  batchArray;
+	 //Vertex*  batchArray;
 	 bool* _updated;
 
 	 psc _pscpos, _pscvel;

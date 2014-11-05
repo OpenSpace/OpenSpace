@@ -166,7 +166,7 @@ namespace {
     const std::string _openspaceLibraryName = "openspace";
     const std::string _luaGlobalNamespace = "_G";
     const std::string _printFunctionName = "print";
-    const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
+    //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
     
     const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 

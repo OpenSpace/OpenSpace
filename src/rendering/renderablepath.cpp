@@ -84,7 +84,6 @@ void RenderablePath::fullYearSweep(){
 	std::cout << _time << std::endl;
 
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
-	double et2 = 0;
 	//SpiceManager::ref().getETfromDate("2008 apr 01 00:00:00", et2);
 	//psc nhpos, nhvel;
 	//SpiceManager::ref().getTargetState("NEW HORIZONS", "SUN", "J2000", "LT+S", et2, _pscpos, _pscvel, lightTime);
@@ -192,7 +191,7 @@ void RenderablePath::render(const RenderData& data){
 	psc campos = data.camera.position();
 	glm::mat4 camrot = data.camera.viewRotationMatrix();
 	// PowerScaledScalar scaling = camera->scaling();
-	PowerScaledScalar scaling = glm::vec2(1, -6);
+	//PowerScaledScalar scaling = glm::vec2(1, -6);
 
 	glm::mat4 transform = glm::mat4(1);
 

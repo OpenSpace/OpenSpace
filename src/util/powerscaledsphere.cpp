@@ -77,7 +77,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float t1 = fj / fsegments;
             const float t2 = fi / fsegments;
 
-			double tp = 1.0 / pow(10, static_cast<GLfloat>(radius[1]));
+			//double tp = 1.0 / pow(10, static_cast<GLfloat>(radius[1]));
 
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;

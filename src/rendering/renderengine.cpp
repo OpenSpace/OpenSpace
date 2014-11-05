@@ -44,6 +44,7 @@
 
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/abuffer/abuffer.h>
+#include <openspace/abuffer/abufferframebuffer.h>
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
@@ -77,10 +78,10 @@ RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
     , _abuffer(nullptr)
+    , _log(nullptr)
+    , _showInfo(true)
+    , _showScreenLog(true)
 	, _takeScreenshot(false)
-	, _log(nullptr)
-	, _showInfo(true)
-	, _showScreenLog(true)
 {
 }
 
@@ -98,15 +99,17 @@ bool RenderEngine::initialize()
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 	OsEng.interactionHandler().setCamera(_mainCamera);
-#ifndef __APPLE__
-#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+    
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
+    _abuffer = new ABufferFramebuffer();
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
     _abuffer = new ABufferSingleLinked();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
     _abuffer = new ABufferFixed();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
     _abuffer = new ABufferDynamic();
 #endif
-#endif
+
     return true;
 }
 
@@ -178,9 +181,9 @@ bool RenderEngine::initializeGL()
         }
         _mainCamera->setMaxFov(maxFov);
     }
-#ifndef __APPLE__
+    
     _abuffer->initialize();
-#endif
+    
 	_log = new ScreenLog();
 	ghoul::logging::LogManager::ref().addLog(_log);
 
@@ -200,9 +203,7 @@ void RenderEngine::postSynchronizationPreDraw()
 	}
 	if (updateAbuffer) {
 		generateGlslConfig();
-        #ifndef __APPLE__
 		_abuffer->reinitialize();
-        #endif
 	}
 	
     // converts the quaternion used to rotation matrices
@@ -214,18 +215,21 @@ void RenderEngine::postSynchronizationPreDraw()
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
-#ifndef __APPLE__
 	_abuffer->clear();
-#endif
 }
 
 void RenderEngine::render()
 {
     // SGCT resets certain settings
+#ifndef __APPLE__
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
-
+#else
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+#endif
     // setup the camera for the current frame
     const glm::vec3 eyePosition
           = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
@@ -246,18 +250,15 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
-#ifndef __APPLE__
     _abuffer->preRender();
-#endif
 	_sceneGraph->render({*_mainCamera, psc()});
-#ifndef __APPLE__
     _abuffer->postRender();
-
+    
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	_abuffer->resolve();
 	glDisable(GL_BLEND);
-#endif
+    
     // Print some useful information on the master viewport
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {

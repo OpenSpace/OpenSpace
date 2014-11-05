@@ -22,81 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFER_H__
-#define __ABUFFER_H__
+#include <openspace/abuffer/abufferFramebuffer.h>
+#include <openspace/engine/openspaceengine.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 
+#include <iostream>
+#include <fstream>
 #include <string>
-#include <vector>
 
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-	namespace opengl {
-        class ProgramObject;
-		class Texture;
-	}
+namespace {
+	std::string _loggerCat = "ABufferSingleLinked";
 }
 
 namespace openspace {
 
-class ABuffer {
-public:
+ABufferFramebuffer::ABufferFramebuffer() {}
 
-	static const int MAX_LAYERS = 32;
+ABufferFramebuffer::~ABufferFramebuffer() {}
 
-	ABuffer();
-	virtual ~ABuffer();
-	virtual void resolve();
-    virtual bool initialize() = 0;
-	virtual bool reinitialize();
+bool ABufferFramebuffer::initialize() {
+	return initializeABuffer();
+}
 
-	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
-	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
-	int addSamplerfile(const std::string& filename);
+bool ABufferFramebuffer::reinitializeInternal() {
+	return true;
+}
 
-	void invalidateABuffer();
-    
-    virtual void clear() = 0;
-    virtual void preRender() = 0;
-    virtual void postRender() = 0;
+void ABufferFramebuffer::clear() {
+}
 
-protected:
-	virtual std::string settings() = 0;
-	virtual bool reinitializeInternal() = 0;
+void ABufferFramebuffer::preRender() {
+}
 
-	bool initializeABuffer();
+void ABufferFramebuffer::postRender() {
 
-	void generateShaderSource();
-	bool updateShader();
+}
 
-	void openspaceHeaders();
-	void openspaceSamplerCalls();
-	void openspaceSamplers();
-	void openspaceTransferFunction();
+std::string ABufferFramebuffer::settings() {
+	return R"()";
+}
 
-	unsigned int _width, _height, _totalPixels;
 
-private:
-
-	void updateDimensions();
-
-	GLuint _screenQuad;
-
-	bool _validShader;
-	ghoul::opengl::ProgramObject* _resolveShader;
-
-	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
-	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;
-	std::vector<ghoul::filesystem::File*> _samplerFiles;
-	std::vector<std::string> _samplers;
-
-	float _volumeStepFactor;
-
-};		// ABuffer
-}		// openspace
-
-#endif 	// __ABUFFER_H__
+} // openspace

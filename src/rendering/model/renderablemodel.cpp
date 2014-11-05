@@ -137,8 +137,8 @@ void RenderableModel::render(const RenderData& data)
 	
 	transform *= tmp;
 	
-	glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
-	glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
+	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
+	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 	// setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
 

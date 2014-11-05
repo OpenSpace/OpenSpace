@@ -186,7 +186,6 @@ bool RenderableTrail::initialize(){
 	//loadTexture();
 	completeSuccess &= (_texture != nullptr);
 
-	 _startTrail;
 	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
 	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
 	_dtEt = _startTrail;
@@ -223,7 +222,7 @@ psc pscInterpolate(psc p0, psc p1, float t){
 void RenderableTrail::updateTrail(){
 	int m = _stride;
 	float *begin = &_varray[0];
-	float *end = &_varray[_vsize - 1] + 1;
+	//float *end = &_varray[_vsize - 1] + 1;
 
 	// update only when time progresses
 	if (_oldTime != _time){

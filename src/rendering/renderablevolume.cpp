@@ -151,9 +151,23 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
 
 		std::string cachepath; // = filepath + ss.str();
-		FileSys.cacheManager()->getCachedFile(filepath, ss.str(), cachepath, true);
+        ghoul::filesystem::File ghlFile(filepath);
+		FileSys.cacheManager()->getCachedFile(ghlFile.baseName(), ss.str(), cachepath, true);
+        LERROR(cachepath);
 		if (cache && FileSys.fileExists(cachepath)) {
-
+            
+            std::ifstream file(cachepath, std::ios::binary | std::ios::in);
+            if (file.is_open()) {
+                size_t length = dimensions[0] *dimensions[1] *dimensions[2];
+                float* data = new float[length];
+                file.read(reinterpret_cast<char*>(data), sizeof(float)*length);
+                file.close();
+                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+            } else {
+                return nullptr;
+            }
+            
+            /*
             FILE* file = fopen (cachepath.c_str(), "rb");
 
             size_t length = dimensions[0] *dimensions[1] *dimensions[2];
@@ -166,7 +180,8 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
             }
 
             fclose(file);
-            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+            */
+            //return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
         }
 
 		KameleonWrapper::Model model;
@@ -184,10 +199,20 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
 			float* data = kw.getUniformSampledValues(variableString, dimensions);
             if(cache) {
+                std::ofstream file(cachepath, std::ios::binary | std::ios::out);
+                if (file.is_open()) {
+                    size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+                    file.write(reinterpret_cast<const char*>(data), sizeof(float)*length);
+                    file.close();
+                }
+                /*
                 FILE* file = fopen (cachepath.c_str(), "wb");
-				size_t length = dimensions[0] * dimensions[1] * dimensions[2];
-                fwrite(data, sizeof(float), length, file);
-                fclose(file);
+                if(file) {
+                    size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+                    fwrite(data, sizeof(float), length, file);
+                    fclose(file);
+                }
+                */
             }
         	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		} else if (hintsDictionary.hasKey("Variables")) {

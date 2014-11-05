@@ -81,9 +81,9 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
-	, _inputCommand(false)
-	, _console(nullptr)
-	, _syncBuffer(nullptr)
+    , _syncBuffer(nullptr)
+    , _inputCommand(false)
+    , _console(nullptr)
 {
 	// initialize OpenSpace helpers
 	SpiceManager::initialize();

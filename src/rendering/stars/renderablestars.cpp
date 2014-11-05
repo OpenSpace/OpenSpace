@@ -44,18 +44,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-int printOglError(char *file, int line){
-	GLenum glErr;
-	int    retCode = 0;
-	glErr = glGetError();
-	if (glErr != GL_NO_ERROR){
-		printf("glError %s\n", gluErrorString(glErr));
-		retCode = 1;
-	}
-	return retCode;
-}
-
-
 #define GLSPRITES
 //#define GLPOINTS
 

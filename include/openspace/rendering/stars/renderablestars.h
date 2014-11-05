@@ -64,7 +64,7 @@ private:
 
 	std::string _speckPath;
 
-	GLint vertsToDraw;
+	//GLint vertsToDraw;
 
 	GLuint _vboID;
 	GLuint _vaoID;

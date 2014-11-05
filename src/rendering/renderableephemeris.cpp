@@ -182,7 +182,7 @@ void RenderableEphemeris::nextIndex(){
 		int x = (_index[0] > _index[1]) ? _index[0] : _index[1];
 		if (x >= _vsize - 1 || skip + x > _vsize ) x = 1;
 
-		for (x; x < _vsize; x++){
+		for (; x < _vsize; x++){
 			double t1 = _intervals[x - 1].second;
 			double t2 = _intervals[x].second;
 
