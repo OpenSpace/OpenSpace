@@ -25,6 +25,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <openspace/util/kameleonwrapper.h>
 
+#include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>
@@ -42,48 +43,42 @@ namespace openspace {
 
 std::string _loggerCat = "KameleonWrapper";
 
-KameleonWrapper::KameleonWrapper(const std::string& filename, Model model): _type(model) {
-	switch (_type) {
-        case Model::BATSRUS:
-            _model = new ccmc::BATSRUS();
-            if(!_model) LERROR("BATSRUS:Failed to create BATSRUS model instance");
-            if (_model->open(filename) != ccmc::FileReader::OK)
-				LERROR("BATSRUS:Failed to open "+filename);
-            _interpolator = _model->createNewInterpolator();
-            if (!_interpolator) LERROR("BATSRUS:Failed to create BATSRUS interpolator");
-            break;
-        case Model::ENLIL:
-            _model = new ccmc::ENLIL();
-            if(!_model) LERROR("Failed to create ENLIL model instance");
-            if (_model->open(filename) != ccmc::FileReader::OK)
-				LERROR("Failed to open "+filename);
-            _interpolator = _model->createNewInterpolator();
-            if (!_interpolator) LERROR("Failed to create ENLIL interpolator");
-            break;
-        default:
-            LERROR("No valid model type provided!");
-	}
-
-	getGridVariables(_xCoordVar, _yCoordVar, _zCoordVar);
-	_xMin = _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
-	_xMax = _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
-	_yMin = _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
-	_yMax = _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
-	_zMin = _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
-	_zMax = _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
-
-	_lastiProgress = -1; // For progressbar
+KameleonWrapper::KameleonWrapper(const std::string& filename, Model model)
+    : _model(nullptr)
+    , _type(Model::Unknown)
+    , _interpolator(nullptr)
+    , _gridType(GridType::Unknown)
+    , _lastiProgress(-1)
+{
+    _kameleon = new ccmc::Kameleon;
+    long status = _kameleon->open(filename);
+    if(status == ccmc::FileReader::OK) {
+        _model = _kameleon->model;
+        _interpolator = _model->createNewInterpolator();
+        
+        getGridVariables(_xCoordVar, _yCoordVar, _zCoordVar);
+        _gridType = getGridType(_xCoordVar, _yCoordVar, _zCoordVar);
+        _type = getModelType();
+        
+        _xMin = _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
+        _xMax = _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat();
+        _yMin = _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat();
+        _yMax = _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
+        _zMin = _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
+        _zMax = _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
+        
+    }
 }
 
 KameleonWrapper::~KameleonWrapper() {
-	delete _model;
-	delete _interpolator;
+    _kameleon->close();
+    delete _interpolator;
+    delete _kameleon;
 }
 
 float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::size3_t outDimensions) {
 	assert(_model && _interpolator);
 	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
-    assert(_type == Model::ENLIL || _type == Model::BATSRUS);
     LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
 	int size = outDimensions.x*outDimensions.y*outDimensions.z;
@@ -118,19 +113,7 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                 
                 int index = x + y*outDimensions.x + z*outDimensions.x*outDimensions.y;
                 
-                if(_type == Model::BATSRUS) {
-                    double xPos = _xMin + stepX*x;
-                    double yPos = _yMin + stepY*y;
-                    double zPos = _zMin + stepZ*z;
-                    
-                    // get interpolated data value for (xPos, yPos, zPos)
-                    // swap yPos and zPos because model has Z as up
-                    double value = _interpolator->interpolate(var, xPos, zPos, yPos);
-                    doubleData[index] = value;
-					histogram[mapToHistogram(value)]++;
-
-                } else if (_type == Model::ENLIL) {
-                    
+                if (_gridType == GridType::Spherical) {
                     // Put r in the [0..sqrt(3)] range
                     double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
                     
@@ -169,9 +152,21 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
                         value = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
                         // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
                     }
-
+                    
                     doubleData[index] = value;
-					histogram[mapToHistogram(value)]++;
+                    histogram[mapToHistogram(value)]++;
+                    
+                } else {
+                    // Assume cartesian for fallback purpose
+                    double xPos = _xMin + stepX*x;
+                    double yPos = _yMin + stepY*y;
+                    double zPos = _zMin + stepZ*z;
+                    
+                    // get interpolated data value for (xPos, yPos, zPos)
+                    // swap yPos and zPos because model has Z as up
+                    double value = _interpolator->interpolate(var, xPos, zPos, yPos);
+                    doubleData[index] = value;
+                    histogram[mapToHistogram(value)]++;
                 }
 			}
 		}
@@ -240,7 +235,6 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
 float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar, const std::string& zVar, glm::size3_t outDimensions) {
 	assert(_model && _interpolator);
 	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
-	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Loading variables " << xVar << " " << yVar << " " << zVar << " from CDF data with a uniform sampling");
 
 	int channels = 4;
@@ -273,7 +267,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 
 				int index = x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y;
 
-				if(_type == Model::BATSRUS) {
+				if(_gridType == GridType::Cartesian) {
 					float xPos = _xMin + stepX*x;
 					float yPos = _yMin + stepY*y;
 					float zPos = _zMin + stepZ*z;
@@ -289,7 +283,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 					data[index + 2] = (zValue-varZMin)/(varZMax-varZMin); // B
 					data[index + 3] = 1.0; // GL_RGB refuses to work. Workaround by doing a GL_RGBA with hardcoded alpha
 				} else {
-					LERROR("Only BATSRUS supported for getUniformSampledVectorValues (for now)");
+					LERROR("Only cartesian grid supported for getUniformSampledVectorValues (for now)");
 					return data;
 				}
 			}
@@ -306,7 +300,6 @@ std::vector<std::vector<LinePoint> > KameleonWrapper::getClassifiedFieldLines(
 		const std::string& zVar, std::vector<glm::vec3> seedPoints,
 		float stepSize ) {
 	assert(_model && _interpolator);
-	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
 
 	std::vector<glm::vec3> fLine, bLine;
@@ -344,7 +337,6 @@ std::vector<std::vector<LinePoint> > KameleonWrapper::getFieldLines(
 		const std::string& zVar, std::vector<glm::vec3> seedPoints,
 		float stepSize, glm::vec4 color ) {
 	assert(_model && _interpolator);
-	assert(_type == Model::ENLIL || _type == Model::BATSRUS);
 	LINFO("Creating " << seedPoints.size() << " fieldlines from variables " << xVar << " " << yVar << " " << zVar);
 
 	std::vector<glm::vec3> fLine, bLine;
@@ -587,6 +579,44 @@ void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::stri
 	x = tokens.at(0);
 	y = tokens.at(1);
 	z = tokens.at(2);
+}
+
+KameleonWrapper::GridType KameleonWrapper::getGridType(const std::string& x, const std::string& y, const std::string& z) {
+    if(x == "x" && y == "y" && z == "z")
+        return GridType::Cartesian;
+    if(x == "r" && y == "theta" && z == "phi")
+        return GridType::Spherical;
+    
+    return GridType::Unknown;
+}
+
+KameleonWrapper::Model KameleonWrapper::getModelType() {
+    if(_kameleon->doesAttributeExist("model_name")) {
+        std::string modelName = (_kameleon->getGlobalAttribute("model_name")).getAttributeString();
+        if (modelName == "open_ggcm" || modelName == "ucla_ggcm")
+        {
+            return Model::OpenGGCM;
+        } else if (modelName == "batsrus")
+        {
+            return Model::BATSRUS;
+        } else if (modelName == "enlil")
+        {
+            return Model::ENLIL;
+        } else if (modelName == "mas")
+        {
+            return Model::MAS;
+        } else if (modelName == "ADAPT3D")
+        {
+            return Model::Adapt3D;
+        } else if (modelName == "swmf")
+        {
+            return Model::SWMF;
+        } else if (modelName == "LFM")
+        {
+            return Model::LFM;
+        }
+    }
+    return Model::Unknown;
 }
 
 void KameleonWrapper::progressBar(int current, int end) {

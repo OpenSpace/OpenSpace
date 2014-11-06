@@ -28,6 +28,7 @@
 #include <glm/gtx/std_based_type.hpp>
 
 namespace ccmc {
+    class Kameleon;
     class Model;
     class Interpolator;
 }
@@ -48,8 +49,14 @@ class KameleonWrapper {
 public:
 
 	enum class Model {
-		ENLIL,		// Heliosphere
-		BATSRUS		// Magnetosphere
+        OpenGGCM,
+        BATSRUS,		// Magnetosphere
+        ENLIL,		// Heliosphere
+        MAS,
+        Adapt3D,
+        SWMF,
+        LFM,
+        Unknown
 	};
 
 	enum class TraceDirection {
@@ -62,6 +69,12 @@ public:
 		SOUTH,
 		FAROUT
 	};
+    
+    enum class GridType {
+        Cartesian,
+        Spherical,
+        Unknown
+    };
 
 	KameleonWrapper(const std::string& filename, Model model);
 	~KameleonWrapper();
@@ -89,11 +102,14 @@ private:
 
 	std::vector<glm::vec3> traceLorentzTrajectory(glm::vec3 seedPoint,
 			float stepsize, float eCharge);
-
-	void getGridVariables(std::string& x, std::string& y, std::string& z);
+    
+    void getGridVariables(std::string& x, std::string& y, std::string& z);
+    GridType getGridType(const std::string& x, const std::string& y, const std::string& z);
+    Model getModelType();
 	void progressBar(int current, int end);
 	glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
+    ccmc::Kameleon* _kameleon;
 	ccmc::Model* _model;
     Model _type;
 	ccmc::Interpolator* _interpolator;
@@ -101,6 +117,7 @@ private:
 	// Model parameters
 	float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
 	std::string _xCoordVar, _yCoordVar, _zCoordVar;
+    GridType _gridType;
 
 	 // For progressbar
 	int _lastiProgress;
