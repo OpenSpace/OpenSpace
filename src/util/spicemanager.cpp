@@ -329,6 +329,50 @@ glm::dvec3 SpiceManager::orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2){
 	return projected;
 }
 
+bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
+	const std::string& target,
+	const std::string& observer,
+	const std::string& method,
+	const std::string& referenceFrame,
+	const std::string& aberrationCorrection,
+	double& targetEpoch) const{
+	
+	int visible ;
+	fovtrg_c(instrument.c_str(),
+		     target.c_str(),
+		     method.c_str(),
+		     referenceFrame.c_str(),
+		     aberrationCorrection.c_str(),
+		     observer.c_str(),
+		     &targetEpoch,
+		     &visible);
+	return visible;
+}
+
+bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
+	const std::string& target,
+	const std::string& observer,
+	const std::string& method,
+	const std::string& aberrationCorrection,
+	double& targetEpoch) const{
+
+	int visible;
+
+	std::string bodyfixed = "IAU_";
+	bodyfixed += target;
+
+	fovtrg_c(instrument.c_str(),
+		target.c_str(),
+		method.c_str(),
+		bodyfixed.c_str(),
+		aberrationCorrection.c_str(),
+		observer.c_str(),
+		&targetEpoch,
+		&visible);
+	return visible;
+}
+
+
 bool SpiceManager::getSurfaceIntercept(const std::string& target,
 									   const std::string& observer,
 									   const std::string& fovInstrument,

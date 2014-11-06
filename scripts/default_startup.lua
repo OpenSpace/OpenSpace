@@ -4,7 +4,7 @@ openspace.time.setTime("2007-02-26T17:34:49")
 
 --openspace.time.setDeltaTime(200000.0)
 --openspace.time.setDeltaTime(84600.00)
---openspace.time.setDeltaTime(3600)
-openspace.time.setDeltaTime(50.0)
+openspace.time.setDeltaTime(3600)
+--openspace.time.setDeltaTime(50.0)
 -- print(openspace.time.currentTimeUTC())
 

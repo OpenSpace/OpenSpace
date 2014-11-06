@@ -53,7 +53,6 @@ public:
 	
 	void loadTexture();
 	void allocateData();
-	double computeTargetLocalTime(PowerScaledScalar d);
 	psc orthogonalProjection(glm::dvec3 camvec);
 
 	void printFovArray();
@@ -63,28 +62,25 @@ public:
 
 	psc checkForIntercept(glm::dvec3 ray);
 
-	glm::dvec3 segmentBisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
+	glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
 	glm::dvec3 _previousHalf;
 
-	void insertPoint(psc& p, glm::vec4& c);
-
+	void insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c);
 	void fovProjection(bool H[], std::vector<glm::dvec3> bounds);
-
-	int findIndx(unsigned int p1, unsigned int p2) const;
-	
-	void getIntervalEndpoints(psc& p1, psc& p2, int index);
-
 	psc pscInterpolate(psc p0, psc p1, float t);
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
 
 	int _nrInserted = 0;
-
 	bool _rebuild = false;
-	
+	int _isteps;
+	psc _projectionBounds[4];
+
 	// spice
-	std::string _target;
+	std::string _spacecraft;
 	std::string _observer;
 	std::string _frame;
+	std::string _fovTarget;
+
 	// color
 	glm::vec3 _c; 
 	double _r, _g, _b;

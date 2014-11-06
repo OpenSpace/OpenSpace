@@ -342,6 +342,40 @@ public:
 							 glm::dvec3& surfaceVector) const;
 
 	/**
+	*  Determine if a specified ephemeris object is within the
+    *  field-of-view (FOV) of a specified instrument at a given time.
+	*  \param Name or ID code string of the instrument.
+	*  \param Name or ID code string of the target.
+	*  \param Type of shape model used for the target.
+	*  \param Body-fixed, body-centered frame for target body.
+	*  \param Aberration correction method.
+	*  \param Name or ID code string of the observer.
+	*  \param Time of the observation (seconds past J2000).
+	*  \param Visibility flag (SPICETRUE/SPICEFALSE).
+    *  For further detail, refer to 
+	*  http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
+	*/
+	bool targetWithinFieldOfView(const std::string& instrument,
+		                         const std::string& target,
+		                         const std::string& observer,
+		                         const std::string& method,
+		                         const std::string& referenceFrame,
+		                         const std::string& aberrationCorrection,
+		                         double& targetEpoch) const;
+	/**
+	* This method performs the same computation as the function its overloading 
+	* with the exception that in doing so it assumes the inertial bodyfixed frame 
+	* is that of 'IAU' type, allowing the client to omitt the 
+	* <code>referenceFrame</code> for planetary objects.   
+	*/
+	bool targetWithinFieldOfView(const std::string& instrument,
+		                         const std::string& target,
+		                         const std::string& observer,
+		                         const std::string& method,
+		                         const std::string& aberrationCorrection,
+		                         double& targetEpoch) const;
+
+	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
 	 * <code>target</code> body relative to an <code>observer</code> in a specific
 	 * <code>referenceFrame</code>, optionally corrected for light time (planetary

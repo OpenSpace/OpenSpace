@@ -36,11 +36,10 @@ namespace {
 	const std::string _loggerCat = "RenderableFov";
 	//constants
 		const std::string keyBody                = "Body";
-		const std::string keyObserver            = "Observer";
 		const std::string keyFrame               = "Frame";
 		const std::string keyPathModule          = "ModulePath";
 		const std::string keyColor               = "RGB";
-
+		const std::string keyInstrument          = "Instrument";
 }
 //#define DEBUG
 namespace openspace{
@@ -66,13 +65,13 @@ namespace openspace{
 		, _iboID2(0)
 		, _mode(GL_LINES){
 
-		assert(dictionary.getValue(keyBody               , _target));
-		assert(dictionary.getValue(keyObserver           , _observer));
-		assert(dictionary.getValue(keyFrame              , _frame));
+		assert(dictionary.getValue(keyBody  , _spacecraft));
+		assert(dictionary.getValue(keyFrame , _frame));
+
 }
 void RenderableFov::allocateData(){
 	int points = 8;
-	_stride = 8;
+	_stride = points;
 	_isize = points;
 	_iarray1 = new int[_isize];
 	for (int i = 0; i < points; i++){
@@ -99,6 +98,7 @@ void RenderableFov::allocateData(){
 	_varray2.resize(40);
 	_vsize2  = 40;
 	_vtotal2 = 5;
+	_isteps = 4;
 }
 
 RenderableFov::~RenderableFov(){
@@ -176,12 +176,12 @@ void RenderableFov::printFovArray(){
 	std::cout << "\n";
 }
 
-void RenderableFov::insertPoint(psc& p, glm::vec4& c){
+void RenderableFov::insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c){
 	for (int i = 0; i < 4; i++){
-		_varray2.push_back(p[i]);
+		arr.push_back(p[i]);
 	}
 	for (int i = 0; i < 4; i++){
-		_varray2.push_back(c[i]);
+		arr.push_back(c[i]);
 	}
 	_nrInserted++;
 }
@@ -220,25 +220,21 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 psc RenderableFov::checkForIntercept(glm::dvec3 ray){
 	double targetEt;
 	glm::dvec3 ip, iv;
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", "NEW HORIZONS", "NH_LORRI",
-		"GALACTIC", "ELLIPSOID", "NONE", _time, targetEt, ray, ip, iv);
+	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, "NEW HORIZONS", "NH_LORRI",
+		_frame, "ELLIPSOID", "NONE", _time, targetEt, ray, ip, iv);
 	psc interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(iv[0], iv[1], iv[2]);
 	interceptVector[3] += 3;
 
 	return interceptVector;
 }
 
-
-glm::dvec3 RenderableFov::segmentBisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance){
-	glm::dvec3 half = interpolate(p1, p2, 0.5f);
-
+glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance){
 	//check if point is on surface
-	glm::dvec3 h(half[0], half[1], half[2]);
 	double targetEt;
 	glm::dvec3 ip, iv;
-
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", "NEW HORIZONS", "NH_LORRI",
-		                                         "GALACTIC", "ELLIPSOID", "NONE", _time, targetEt, half, ip, iv);
+	glm::dvec3 half = interpolate(p1, p2, 0.5f);
+	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, "NEW HORIZONS", "NH_LORRI",
+													_frame, "ELLIPSOID", "NONE", _time, targetEt, half, ip, iv);
 	if (distanceBetweenPoints(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
 		return half;
@@ -246,69 +242,56 @@ glm::dvec3 RenderableFov::segmentBisection(glm::dvec3 p1, glm::dvec3 p2, double 
 	_previousHalf = half;
 	//recursive search
 	if (intercepted == false){
-		return segmentBisection(p1, half, tolerance);
+		return bisection(p1, half, tolerance);
 	}else{
-		return segmentBisection(half, p2, tolerance);
+		return bisection(half, p2, tolerance);
 	}
 }
-/*
-	"yeah, sounds easy enough..." - Michal, summer 2014. =)
-	[3]---------[4]/[0] 
-	 |             |
-	 |     FOV     |
-	 |             |
-	[2]-----------[1]
-*/
+
 void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 	_nrInserted = 0;
-	_varray2.clear();// empty the array
-	int isteps = 9;
+	_varray2.clear();
+
 	double t;
-	double tolerance = 0.00000001;
+	double tolerance = 0.00000001; // very low tolerance factor 
+	double offset = 0.1;
 	psc interceptVector;
+	glm::dvec3 mid; 
+	glm::dvec3 interpolated;
+	glm::dvec3 current;
+	glm::dvec3 next;
+
 	for (int i = 0; i < 4; i++){
 		int k = (i + 1 > 3) ? 0 : i + 1;
-		psc next = orthogonalProjection(bounds[k]);
-
-		if (H[i] == false){ // CASE last
-			psc current = orthogonalProjection(bounds[i]);
-			insertPoint(current, glm::vec4(1));
+		current = bounds[i];
+		next    = bounds[k];
+		if (H[i] == false){ 
+			insertPoint(_varray2, _projectionBounds[i], glm::vec4(1));
 		}
-		// CASE 1
 		if (H[i] == true && H[i + 1] == false){ 
-			glm::dvec3 mid = segmentBisection(bounds[i], bounds[k], tolerance); // very low tolerance factor
-			for (int j = 1; j <= isteps; j++){
-				t = (j == isteps) ? ((double)j / isteps) : ((double)j / isteps) - 0.1;
-				glm::dvec3 interpolated = interpolate(bounds[i], mid, t);
-				if (j < isteps){
-					interceptVector = checkForIntercept(interpolated);
-				}else{
-				    interceptVector = orthogonalProjection(interpolated);
-				}
-				insertPoint(interceptVector, col_sq);
+			mid = bisection(current, next, tolerance);
+			for (int j = 1; j <= _isteps; j++){
+				t = ((double)j / _isteps);
+				interpolated = interpolate(current, mid, t);
+				interceptVector = (j < _isteps) ? checkForIntercept(interpolated) : _projectionBounds[i];
+				insertPoint(_varray2, interceptVector, col_sq);
 			}
 		}
 		if (H[i] == false && H[i+1] == true){
-			glm::dvec3 mid = segmentBisection(bounds[k], bounds[i], tolerance);
-
-			for (int j = 1; j <= isteps; j++){
-				t = (j == 1) ? ((double)j / isteps) : ((double)j / isteps) - 0.1;
-				glm::dvec3 interpolated = interpolate(mid, bounds[k], t);
-				if (j > 1){
-					interceptVector = checkForIntercept(interpolated);
-				}else{
-					interceptVector = orthogonalProjection(interpolated);
-				}
-				insertPoint(interceptVector, col_sq);
+			mid = bisection(next, current, tolerance);
+			for (int j = 1; j <= _isteps; j++){
+				t = ((double)j / _isteps);
+				interpolated = interpolate(mid, next, t);
+				interceptVector = (j > 1) ? checkForIntercept(interpolated) : _projectionBounds[i];
+				insertPoint(_varray2, interceptVector, col_sq);
 			}
 		}
-		// just add remaining points for now... 
-		if (H[i] == true && H[i + 1] == true){ // CASE 3
-			for (int j = 0; j <= isteps; j++){
-				t = (double)j / isteps;
-				glm::dvec3 interpolated = interpolate(bounds[i], bounds[k], t);
+		if (H[i] == true && H[i + 1] == true){
+			for (int j = 0; j <= _isteps; j++){
+				t = ((double)j / _isteps);
+				interpolated = interpolate(current, next, t);
 				interceptVector = checkForIntercept(interpolated);
-				insertPoint(interceptVector, col_sq);
+				insertPoint(_varray2, interceptVector, col_sq);
 			}
 		}
 	}
@@ -319,8 +302,8 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 		_rebuild = true;
 		//update size etc;
 		_vtotal2 = _nrInserted;
-		_isize2 = _nrInserted;
-		_vsize2 = _varray2.size();
+		_isize2  = _nrInserted;
+		_vsize2  = _varray2.size();
 		_iarray2 = new int[_isize2];
 		for (int i = 0; i < _isize2; i++)
 			_iarray2[i] = i;
@@ -336,7 +319,6 @@ void RenderableFov::updateData(){
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID2);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize2 * sizeof(GLfloat), &_varray2[0]);
 	}else{
-		//optimize later
 		glGenVertexArrays(1, &_vaoID2);
 		glGenBuffers(1, &_vboID2);
 		glGenBuffers(1, &_iboID2);
@@ -362,8 +344,8 @@ void RenderableFov::updateData(){
 psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov){
 	glm::dvec3 vecToTarget;
 	double lt;
-	SpiceManager::ref().getTargetPosition("JUPITER", "NEW HORIZONS", "GALACTIC", "NONE", _time, vecToTarget, lt);
-	openspace::SpiceManager::ref().frameConversion(vecFov, "NH_LORRI", "GALACTIC", _time);
+	SpiceManager::ref().getTargetPosition(_fovTarget, "NEW HORIZONS", _frame, "NONE", _time, vecToTarget, lt);
+	openspace::SpiceManager::ref().frameConversion(vecFov, "NH_LORRI", _frame, _time);
 	glm::dvec3 p = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, vecFov);
 
 	psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
@@ -403,28 +385,37 @@ void RenderableFov::render(const RenderData& data){
 		float size = 4 * sizeof(float);
 
 		int indx = 0;
-		int indx2 = 0;
-		psc projectionBounds[4];
-		bool tags[5];
-		
+		bool interceptTag[5];
+		bool withinFOV;
+
+		std::string potential[5] = { "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
+		_fovTarget = "JUPITER"; //default
+		for (int i = 0; i < 5; i++){
+			withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView("NH_LORRI", potential[i], "NEW HORIZONS", "ELLIPSOID",
+																				"XCN+S", _time);
+			if (withinFOV){
+				_fovTarget = potential[i];
+				break;
+			}
+		}
+
 		for (int i = 0; i < 4; i++){
-			// might as well take glm. Would be nice if we had just one type to deal with here...
 			glm::dvec3 ip, iv;
 			double targetEpoch;
 			// need to keep it explicit to keep my mind from exploding.
-			found = openspace::SpiceManager::ref().getSurfaceIntercept("JUPITER", "NEW HORIZONS", "NH_LORRI",
-				"GALACTIC", "ELLIPSOID", "NONE", _time, targetEpoch, bounds[i], ip, iv);
+			interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, "NEW HORIZONS", "NH_LORRI",
+				                         _frame, "ELLIPSOID", "NONE", _time, targetEpoch, bounds[i], ip, iv);
+
+			if (!interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
 
 			psc interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(iv[0], iv[1], iv[2]);
 			interceptVector[3] += 3;
 			glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
+			
+			corner = tmp*corner; 
 
-			corner = tmp*corner; // manual rotation is a must. 
-
-			if (found){ 
+			if (interceptTag[i]){
 				// INTERCEPTIONS
-				tags[i] = true;
-
 				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(col_start), size);
@@ -433,10 +424,18 @@ void RenderableFov::render(const RenderData& data){
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(col_end), size);
 				indx += 4;
+			}else if (withinFOV){
+				// FOV LARGER THAN OBJECT
+				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
+				indx += 4;
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0,1,0,1)), size);
+				indx += 4;
+				memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[i].vec4()), size);
+				indx += 4;
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0, 0.7, 0, 1)), size);
+				indx += 4;
 			}else{
 				// "INFINITE" FOV
-				tags[i] = false;
-
 				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(col_gray), size);
@@ -447,28 +446,12 @@ void RenderableFov::render(const RenderData& data){
 				indx += 4;
 			}
 		}
-
-		tags[4] = tags[0]; // 0 & 5 same point
-#ifdef DRAW_ORTHOGONAL
-		for (int i = 0; i < 4; i++){
-			memcpy(&_varray2[indx2], glm::value_ptr(projectionBounds[i].vec4()), size);
-			indx2 += 4;
-			memcpy(&_varray2[indx2], glm::value_ptr(glm::vec4(1)), size);
-			indx2 += 4;
-		}
-			
-		//last point, finish lineloop
-		psc lastpoint = orthogonalProjection(bounds[0]);
-		memcpy(&_varray2[indx2], glm::value_ptr(lastpoint.vec4()), size);
-		indx2 += 4;
-		memcpy(&_varray2[indx2], glm::value_ptr(glm::vec4(1)), size);
-		indx2 += 4;
-#else
-		fovProjection(tags, bounds);
-#endif
+		interceptTag[4] = interceptTag[0]; // 0 & 5 same point
+		fovProjection(interceptTag, bounds);
 		updateData();
 	}
 	_oldTime = _time;
+
 	glLineWidth(1.f);
 	glBindVertexArray(_vaoID1);
 	glDrawArrays(_mode, 0, _vtotal);
@@ -486,7 +469,7 @@ void RenderableFov::render(const RenderData& data){
 	glDrawArrays(GL_LINE_LOOP, 0, _vtotal2);
 	glBindVertexArray(0);
 	
-	glPointSize(5.f);
+	glPointSize(1.f);
 	glBindVertexArray(_vaoID2);
 	glDrawArrays(GL_POINTS, 0, _vtotal2);
 	glBindVertexArray(0);
@@ -499,7 +482,7 @@ void RenderableFov::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_LORRI", "GALACTIC", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_LORRI", _frame, data.time, _stateMatrix);
 }
 
 void RenderableFov::loadTexture()
