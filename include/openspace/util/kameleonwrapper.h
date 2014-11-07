@@ -51,7 +51,7 @@ public:
 	enum class Model {
         OpenGGCM,
         BATSRUS,		// Magnetosphere
-        ENLIL,		// Heliosphere
+        ENLIL,			// Heliosphere
         MAS,
         Adapt3D,
         SWMF,
@@ -76,7 +76,7 @@ public:
         Unknown
     };
 
-	KameleonWrapper(const std::string& filename, Model model);
+	KameleonWrapper(const std::string& filename);
 	~KameleonWrapper();
 	float* getUniformSampledValues(const std::string& var, glm::size3_t outDimensions);
 	float* getUniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
@@ -106,7 +106,6 @@ private:
     void getGridVariables(std::string& x, std::string& y, std::string& z);
     GridType getGridType(const std::string& x, const std::string& y, const std::string& z);
     Model getModelType();
-	void progressBar(int current, int end);
 	glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
     ccmc::Kameleon* _kameleon;
@@ -118,9 +117,6 @@ private:
 	float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
 	std::string _xCoordVar, _yCoordVar, _zCoordVar;
     GridType _gridType;
-
-	 // For progressbar
-	int _lastiProgress;
 };
 
 } // namespace openspace

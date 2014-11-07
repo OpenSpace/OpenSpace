@@ -320,7 +320,7 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
         assert(false);
     }
 
-	KameleonWrapper kw(filename, model);
+	KameleonWrapper kw(filename);
 	if (lorentz) {
 		fieldlinesData = kw.getLorentzTrajectories(_seedPoints, fieldlineColor, stepSize);
 	} else {

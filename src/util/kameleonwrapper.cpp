@@ -24,6 +24,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <openspace/util/kameleonwrapper.h>
+#include <openspace/util/progressbar.h>
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
@@ -43,12 +44,11 @@ namespace openspace {
 
 std::string _loggerCat = "KameleonWrapper";
 
-KameleonWrapper::KameleonWrapper(const std::string& filename, Model model)
+KameleonWrapper::KameleonWrapper(const std::string& filename)
     : _model(nullptr)
     , _type(Model::Unknown)
     , _interpolator(nullptr)
     , _gridType(GridType::Unknown)
-    , _lastiProgress(-1)
 {
     _kameleon = new ccmc::Kameleon;
     long status = _kameleon->open(filename);
@@ -66,7 +66,6 @@ KameleonWrapper::KameleonWrapper(const std::string& filename, Model model)
         _yMax = _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat();
         _zMin = _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat();
         _zMax = _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat();
-        
     }
 }
 
@@ -105,8 +104,9 @@ float* KameleonWrapper::getUniformSampledValues(const std::string& var, glm::siz
     	return static_cast<int>(zeroToOne);
     };
     
+	ProgressBar pb(outDimensions.x);
     for (int x = 0; x < outDimensions.x; ++x) {
-    	progressBar(x, outDimensions.x);
+		pb.print(x);
         
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
@@ -259,8 +259,9 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar, c
 	LDEBUG(zVar << "Min: " << varZMin);
 	LDEBUG(zVar << "Max: " << varZMax);
 
+	ProgressBar pb(outDimensions.x);
 	for (int x = 0; x < outDimensions.x; ++x) {
-		progressBar(x, outDimensions.x);
+		pb.print(x);
 
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
@@ -390,6 +391,10 @@ std::vector<std::vector<LinePoint> > KameleonWrapper::getLorentzTrajectories(
 }
 
 glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
+	// ENLIL is centered, no need for offset
+	if (_type == Model::ENLIL)
+		return glm::vec3(0,0,0);
+
 	glm::vec3 offset;
 	offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
 	offset.y = _yMin+(std::abs(_yMin)+std::abs(_yMax))/2.0f;
@@ -617,21 +622,6 @@ KameleonWrapper::Model KameleonWrapper::getModelType() {
         }
     }
     return Model::Unknown;
-}
-
-void KameleonWrapper::progressBar(int current, int end) {
-	float progress = static_cast<float>(current) / static_cast<float>(end-1);
-	int iprogress = static_cast<int>(progress*100.0f);
-	int barWidth = 70;
-	if (iprogress != _lastiProgress) {
-		int pos = barWidth * progress;
-		int eqWidth = pos+1;
-		int spWidth = barWidth - pos + 2;
-		std::cout   << "[" << std::setfill('=') << std::setw(eqWidth)
-		<< ">" << std::setfill(' ') << std::setw(spWidth)
-		<< "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
-	}
-	_lastiProgress = iprogress;
 }
 
 glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd) {
