@@ -171,7 +171,7 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 26 17:42:00", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 jan 26 17:42:00", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
@@ -227,7 +227,7 @@ void RenderableTrail::updateTrail(){
 			// keep track of progression
 			_dtEt += _increment;
 		}
-		//add earths current position
+		//add current position
 		memcpy(&_varray[0], glm::value_ptr(_pscpos.vec4()), 4 * sizeof(float));
 		_varray[4] = 1.f;
 		_varray[5] = 1.f;

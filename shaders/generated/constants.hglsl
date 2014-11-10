@@ -1,5 +1,5 @@
-#define SCREEN_WIDTH  1935
-#define SCREEN_HEIGHT 1125
+#define SCREEN_WIDTH  1920
+#define SCREEN_HEIGHT 1080
 #define MAX_LAYERS 32
 #define ABUFFER_SINGLE_LINKED     1
 #define ABUFFER_FIXED             2

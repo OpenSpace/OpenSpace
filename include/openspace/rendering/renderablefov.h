@@ -62,6 +62,7 @@ public:
 
 	psc checkForIntercept(glm::dvec3 ray);
 
+
 	glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
 	glm::dvec3 _previousHalf;
 
@@ -69,6 +70,7 @@ public:
 	void fovProjection(bool H[], std::vector<glm::dvec3> bounds);
 	psc pscInterpolate(psc p0, psc p1, float t);
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
+	psc sphericalInterpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
 
 	int _nrInserted = 0;
 	bool _rebuild = false;
@@ -79,6 +81,10 @@ public:
 	std::string _spacecraft;
 	std::string _observer;
 	std::string _frame;
+	std::string _instrumentID;
+	std::string _method;
+	std::string _aberrationCorrection;
+
 	std::string _fovTarget;
 
 	// color
