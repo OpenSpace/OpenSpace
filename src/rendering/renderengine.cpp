@@ -220,6 +220,11 @@ void RenderEngine::postSynchronizationPreDraw()
 
 void RenderEngine::render()
 {
+	// We need the window pointer
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (w->isUsingFisheyeRendering())
+		_abuffer->clear();
+
     // SGCT resets certain settings
 #ifndef __APPLE__
     glDisable(GL_DEPTH_TEST);
@@ -260,7 +265,6 @@ void RenderEngine::render()
 	glDisable(GL_BLEND);
     
     // Print some useful information on the master viewport
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
 
 		// TODO: Adjust font_size properly when using retina screen
