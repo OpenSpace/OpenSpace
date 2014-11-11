@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
 const std::string _loggerCat = "Renderable";

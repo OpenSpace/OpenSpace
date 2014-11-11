@@ -26,13 +26,18 @@
 #define __RENDERABLEVOLUMEGL_H__
 
 #include <openspace/rendering/renderablevolume.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/io/rawvolumereader.h>
-#include <ghoul/filesystem/file.h>
+// Forward declare to minimize dependencies
+namespace ghoul {
+	namespace filesystem {
+		class File;
+	}
+	namespace opengl {
+		class ProgramObject;
+		class Texture;
+	}
+}
 
 namespace openspace {
 
@@ -65,7 +70,8 @@ private:
 
 	GLuint _boxArray;
 	ghoul::opengl::ProgramObject *_boxProgram;
-	glm::vec3 _boxScaling, _boxOffset;
+	glm::vec3 _boxScaling;
+	psc _pscOffset;
 	float _w;
 	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     

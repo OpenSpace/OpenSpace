@@ -29,8 +29,17 @@
 #include <openspace/rendering/renderable.h>
 
 // ghoul includes
-#include <ghoul/opengl/texture.h>
 #include <ghoul/io/rawvolumereader.h>
+
+// Forward declare to minimize dependencies
+namespace ghoul {
+	namespace filesystem {
+		class File;
+	}
+	namespace opengl {
+		class Texture;
+	}
+}
 
 namespace openspace {
 

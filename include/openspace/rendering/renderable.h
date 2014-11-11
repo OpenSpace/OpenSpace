@@ -30,12 +30,17 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 
 // ghoul
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
+
+// Forward declare to minimize dependencies
+namespace ghoul {
+	namespace opengl {
+		class ProgramObject;
+	}
+}
 
 namespace openspace {
 
