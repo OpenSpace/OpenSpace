@@ -69,15 +69,15 @@ void addToBuffer(ABufferStruct_t frag) {
 #ifndef APPLE
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uint index = atomicCounterIncrement(atomicCounterBuffer);
-	index *= 2;
+	//index *= 2;
     uint old_head = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), index);
     _next_(frag,old_head);
 
     uvec4 p1 = uvec4(frag.z, frag.id, frag.rg, frag.ba);
-    uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
+    //uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
 
 	imageStore(fragmentTexture, int(index), p1);
-	imageStore(fragmentTexture, int(index+1), p2);
+	//imageStore(fragmentTexture, int(index+1), p2);
 	discard;
 #endif 
 
@@ -106,7 +106,7 @@ ABufferStruct_t loadFromBuffer(uint id) {
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uvec4 u1 = imageLoad(fragmentTexture, int(id));
-	uvec4 u2 = imageLoad(fragmentTexture, int(id+1));	
+	//uvec4 u2 = imageLoad(fragmentTexture, int(id+1));	
 #endif 
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
@@ -114,13 +114,13 @@ ABufferStruct_t loadFromBuffer(uint id) {
 	uvec4 u1 = imageLoad(fragmentTexture, int(offset));
 	uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
 #endif 
-
+/*
 	vec4 position = vec4(	uintBitsToFloat(u2.x),
 						uintBitsToFloat(u2.y),
 						uintBitsToFloat(u2.z),
 						uintBitsToFloat(u2.w));
-	
-	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w, position);
+	*/
+	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w);
 
 }
 

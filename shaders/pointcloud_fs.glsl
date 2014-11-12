@@ -22,45 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERSINGLELINKED_H__
-#define __ABUFFERSINGLELINKED_H__
-
-#include <openspace/abuffer/abuffer.h>
-#include <vector>
-
-namespace openspace {
-
-class ABufferSingleLinked: public ABuffer {
-public:
-
-	ABufferSingleLinked();
-	virtual ~ABufferSingleLinked();
-	virtual bool initialize();
-
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
-
-	virtual std::string settings();
-	
-	std::vector<fragmentData> pixelData();
-
-protected:
-	virtual bool reinitializeInternal();
-
-private:
-
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
+#version __CONTEXT__
 
 
+in vec4 vs_color;
+out vec4 diffuse;
 
-
-}; 		// ABufferSingleLinked
-} 		// openspace
-
-#endif 	// __ABUFFERSINGLELINKED_H__
+void main()
+{
+	diffuse = vs_color;
+}

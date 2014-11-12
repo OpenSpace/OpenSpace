@@ -27,6 +27,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/sharedmemory.h>
 
 #include <iostream>
 #include <fstream>
@@ -34,6 +35,13 @@
 
 namespace {
 	std::string _loggerCat = "ABufferSingleLinked";
+
+	const unsigned int mask_29 = 536870911;
+	const unsigned int mask_id_next = mask_29;
+	const unsigned int shift_id_next = 0;
+	unsigned int bitextract_u(unsigned int pack, unsigned int mask, unsigned int shift) {
+		return (pack >> shift) & (mask >> shift);
+	}
 }
 
 namespace openspace {
@@ -84,7 +92,7 @@ bool ABufferSingleLinked::reinitializeInternal() {
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
-	glBufferData(GL_TEXTURE_BUFFER, MAX_LAYERS*_totalPixels*sizeof(GLfloat) * 4, NULL, GL_DYNAMIC_COPY);
+	glBufferData(GL_TEXTURE_BUFFER, MAX_LAYERS*_totalPixels*sizeof(GLuint) * 4, NULL, GL_DYNAMIC_COPY);
 
 	glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
@@ -124,5 +132,70 @@ std::string ABufferSingleLinked::settings() {
 	return R"()";
 }
 
+std::vector<ABufferSingleLinked::fragmentData> ABufferSingleLinked::pixelData() {
+	
+	unsigned int* anchorTexture = new unsigned int[_totalPixels];
+	unsigned int* fragmentBuffer = new unsigned int[_totalPixels*MAX_LAYERS*4];
+
+	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, anchorTexture);
+
+	glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
+	glGetBufferSubData(GL_TEXTURE_BUFFER, 0, _totalPixels*MAX_LAYERS * 4, fragmentBuffer);
+
+	std::vector<ABufferSingleLinked::fragmentData> d;
+
+	// iterate over every pixel
+	for (size_t x = 0; x < _width; ++x){
+		const float fx = static_cast<float>(x) / _width;
+		for (size_t y = 0; y < _height; ++y){
+			const float fy = static_cast<float>(y) / _height;
+			unsigned int current = anchorTexture[y*_width+x];
+			
+			// loop until last in list
+			while (current != 0) {
+				//LDEBUG("(" << x << ", " << y << "): " << current);
+
+				// RGBA
+				current *= 4;
+
+				glm::uvec4 fragment;
+				for (size_t j = 0; j < 4; ++j) {
+					fragment[j] = fragmentBuffer[current + j];
+				}
+
+				float z = glm::uintBitsToFloat(fragment[0]);
+				unsigned int next = bitextract_u(fragment[1], mask_id_next, shift_id_next);
+				glm::vec4 color(glm::unpackUnorm2x16(fragment[2]), glm::unpackUnorm2x16(fragment[3]));
+
+				fragmentData fd;
+				fd._position[0] = fx;
+				fd._position[1] = fy;
+				fd._position[2] = z;
+				fd._color[0] = color[0];
+				fd._color[1] = color[1];
+				fd._color[2] = color[2];
+				fd._color[3] = color[3];
+				d.emplace_back(fd);
+
+				if (next >= _totalPixels*MAX_LAYERS * 4) {
+					LWARNING("Getting index out of bounds, ignoring");
+					//LDEBUG("(" << x << ", " << y << "): fragment[1]: " << fragment[1]);
+					//LDEBUG("(" << x << ", " << y << "): next: " << next);
+					current = 0;
+				}
+				else {
+					current = next;
+				}
+			}
+			
+		}
+	}
+
+	delete[] anchorTexture;
+	delete[] fragmentBuffer;
+	
+	return d;
+}
 
 } // openspace

@@ -22,45 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERSINGLELINKED_H__
-#define __ABUFFERSINGLELINKED_H__
+#version __CONTEXT__
 
-#include <openspace/abuffer/abuffer.h>
-#include <vector>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-namespace openspace {
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec4 in_color;
 
-class ABufferSingleLinked: public ABuffer {
-public:
+out vec4 vs_color;
 
-	ABufferSingleLinked();
-	virtual ~ABufferSingleLinked();
-	virtual bool initialize();
+void main()
+{
+	// set variables
+	vs_color = in_color;
 
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
-
-	virtual std::string settings();
-	
-	std::vector<fragmentData> pixelData();
-
-protected:
-	virtual bool reinitializeInternal();
-
-private:
-
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
-
-
-
-
-}; 		// ABufferSingleLinked
-} 		// openspace
-
-#endif 	// __ABUFFERSINGLELINKED_H__
+	gl_Position =  ViewProjection*ModelTransform*vec4(in_position,1);
+}

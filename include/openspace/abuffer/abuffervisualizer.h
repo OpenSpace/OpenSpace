@@ -22,45 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERSINGLELINKED_H__
-#define __ABUFFERSINGLELINKED_H__
+#ifndef __ABUFFERVISUALIZER_H__
+#define __ABUFFERVISUALIZER_H__
 
 #include <openspace/abuffer/abuffer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+
+#include <string>
 #include <vector>
+
+namespace ghoul {
+	namespace opengl {
+        class ProgramObject;
+	}
+}
 
 namespace openspace {
 
-class ABufferSingleLinked: public ABuffer {
+class ABufferVisualizer {
 public:
 
-	ABufferSingleLinked();
-	virtual ~ABufferSingleLinked();
-	virtual bool initialize();
+	ABufferVisualizer();
+	~ABufferVisualizer();
 
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
+	void updateData(const std::vector<ABuffer::fragmentData>& data);
 
-	virtual std::string settings();
-	
-	std::vector<fragmentData> pixelData();
-
-protected:
-	virtual bool reinitializeInternal();
+	void render();
 
 private:
 
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
+	void initializeMarkers();
 
+	GLuint _pointcloud;
+	GLsizei _pointcloudSize;
+	GLuint _markers;
+	GLsizei _markersSize;
+	GLuint _imarkers;
+	GLsizei _imarkersSize;
+	ghoul::opengl::ProgramObject* _pointcloudProgram;
 
+}; // ABufferVisualizer
+}  // namespace openspace
 
-
-}; 		// ABufferSingleLinked
-} 		// openspace
-
-#endif 	// __ABUFFERSINGLELINKED_H__
+#endif // __ABUFFER_H__

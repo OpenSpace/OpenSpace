@@ -272,11 +272,14 @@ void LuaConsole::keyboardCallback(int key, int action) {
 				if (_commands.at(_activeCommand) != "") {
 
 					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
-					_commandsHistory.push_back(_commands.at(_activeCommand));
+					if (_commandsHistory.size() > 0 &&
+						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
+						_commandsHistory.push_back(_commands.at(_activeCommand));
 					_commands = _commandsHistory;
 					_commands.push_back("");
 					_activeCommand = _commands.size() - 1;
 					_inputPosition = 0;
+					OsEng.setInputCommand(false);
 				}
 				else {
 					_commands = _commandsHistory;

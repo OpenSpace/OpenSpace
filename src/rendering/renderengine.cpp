@@ -43,6 +43,7 @@
 #include <fstream>
 
 #include <openspace/scenegraph/scenegraph.h>
+#include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferframebuffer.h>
 #include <openspace/abuffer/abufferSingleLinked.h>
@@ -71,6 +72,30 @@ int printImage(lua_State* L) {
 	return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* visualizeABuffer(bool):
+* Toggler the visualization of the ABuffer
+*/
+int visualizeABuffer(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+	const int type = lua_type(L, -1);
+	if (type == LUA_TBOOLEAN) {
+		bool b = lua_toboolean(L, -1);
+		OsEng.renderEngine().toggleVisualizeABuffer(b);
+		return 0;
+	}
+	else if (type == LUA_TNUMBER){
+		lua_Number n = luaL_checknumber(L, -1);
+		OsEng.renderEngine().toggleVisualizeABuffer(static_cast<bool>(n));
+		return 0;
+	}
+	return luaL_error(L, "Expected boolean value");
+}
+
 } // namespace luascriptfunctions
 
 
@@ -82,12 +107,16 @@ RenderEngine::RenderEngine()
     , _showInfo(true)
     , _showScreenLog(true)
 	, _takeScreenshot(false)
+	, _visualizeABuffer(false)
+	, _visualizer(nullptr)
 {
 }
 
 RenderEngine::~RenderEngine()
 {
     delete _mainCamera;
+	if (_visualizer)
+		delete _visualizer;
 }
 
 bool RenderEngine::initialize()
@@ -187,6 +216,8 @@ bool RenderEngine::initializeGL()
 	_log = new ScreenLog();
 	ghoul::logging::LogManager::ref().addLog(_log);
 
+	_visualizer = new ABufferVisualizer();
+
     // successful init
     return true;
 }
@@ -255,14 +286,21 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
-    _abuffer->preRender();
-	_sceneGraph->render({*_mainCamera, psc()});
-    _abuffer->postRender();
+	if (!_visualizeABuffer) {
+		_abuffer->preRender();
+		_sceneGraph->render({ *_mainCamera, psc() });
+		_abuffer->postRender();
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		_abuffer->resolve();
+		glDisable(GL_BLEND);
+	}
+	else {
+		_visualizer->render();
+	}
     
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	_abuffer->resolve();
-	glDisable(GL_BLEND);
+#if 1
     
     // Print some useful information on the master viewport
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
@@ -363,6 +401,7 @@ void RenderEngine::render()
 			}
 		}
 	}
+#endif
 }
 
 void RenderEngine::postDraw() {
@@ -376,6 +415,18 @@ void RenderEngine::takeScreenshot() {
 	_takeScreenshot = true;
 }
 
+void RenderEngine::toggleVisualizeABuffer(bool b) {
+	_visualizeABuffer = b;
+	if (!_visualizeABuffer)
+		return;
+
+	ABufferSingleLinked* abuffer = dynamic_cast<ABufferSingleLinked*>(_abuffer);
+	if (!abuffer)
+		return;
+
+	std::vector<ABuffer::fragmentData> _d = abuffer->pixelData();
+	_visualizer->updateData(_d);
+}
 
 SceneGraph* RenderEngine::sceneGraph()
 {
@@ -457,8 +508,13 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"printImage",
 				&luascriptfunctions::printImage,
 				"printImage(): Renders the current image to a file on disk"
+			},
+			{
+				"visualizeABuffer",
+				&luascriptfunctions::visualizeABuffer,
+				"visualizeABuffer(bool): Toggles the visualization of the ABuffer"
 			}
-		}
+		},
 	};
 }
 

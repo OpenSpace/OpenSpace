@@ -46,6 +46,12 @@ namespace openspace {
 class ABuffer {
 public:
 
+	struct fragmentData {
+		GLfloat _position[3];
+		GLfloat _color[4];
+		GLfloat _padding;
+	};
+
 	static const int MAX_LAYERS = 32;
 
 	ABuffer();
