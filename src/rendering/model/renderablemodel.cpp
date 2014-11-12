@@ -78,6 +78,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	if (success)
 		_colorTexturePath = path + "/" + texturePath;
 
+	if (_geometry != nullptr)
 	addPropertySubOwner(_geometry);
 
 	addProperty(_colorTexturePath);
@@ -100,15 +101,20 @@ bool RenderableModel::initialize(){
 
     loadTexture();
     completeSuccess &= (_texture != nullptr);
+
+	if (_geometry != nullptr)
     completeSuccess &= _geometry->initialize(this); 
 
     return completeSuccess;
 }
 
 bool RenderableModel::deinitialize(){
-	_geometry->deinitialize();
-	delete _geometry;
-	_geometry = nullptr;
+
+	if (_geometry != nullptr){
+		_geometry->deinitialize();
+		delete _geometry;
+		_geometry = nullptr;
+	}
 	delete _texture;
 	_texture = nullptr;
 	return true;
@@ -150,7 +156,8 @@ void RenderableModel::render(const RenderData& data)
     unit.activate();
     _texture->bind();
     _programObject->setUniform("texture1", unit);
-
+	
+	if (_geometry != nullptr)
 	_geometry->render();
 
     // disable shader

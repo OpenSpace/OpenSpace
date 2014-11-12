@@ -60,7 +60,7 @@ void main()
 	float shine = 0.0001;
 
 	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
+	vec4 ambient = vec4(0.3,0.3,0.3,1);
 	/*
 	if(intensity > 0.f){
 		// halfway vector
@@ -70,7 +70,9 @@ void main()
 		spec = specular * pow(intSpec, shine);
 	}
 	*/
-	diffuse = max(intensity * diffuse, ambient);
+	vec4 tmpdiff = diffuse*0.6f;
+	tmpdiff[3] = 1;
+	diffuse = max(intensity * diffuse, tmpdiff);
 	//diffuse[3] = 0.6f;
 	//diffuse = vec4(1);
 

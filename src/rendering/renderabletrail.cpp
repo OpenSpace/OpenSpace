@@ -186,23 +186,6 @@ bool RenderableTrail::deinitialize(){
 	return true;
 }
 
-// Tried interpolation but then realised this still gives straight lines (latenight thing).
-// Not allowed Splines so therefore - query spice for each point (bah...) 
-// From psc paper:
-/*
-psc pscInterpolate(psc p0, psc p1, float t){
-	assert(t >= 0 && t <= 1);
-
-	float s = (1.f - t)*p0[3] + t*p1[3];
-
-	float x = ((1.f - t)*p0[0] + t*p1[0]);
-	float y = ((1.f - t)*p0[1] + t*p1[1]);
-	float z = ((1.f - t)*p0[2] + t*p1[2]);
-
-	return PowerScaledCoordinate::PowerScaledCoordinate(x,y,z,s);
-}
-*/
-
 void RenderableTrail::updateTrail(){
 	int m = _stride;
 	float *begin = &_varray[0];

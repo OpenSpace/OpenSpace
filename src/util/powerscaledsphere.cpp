@@ -53,8 +53,6 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     const float fsegments = static_cast<float>(segments);
     const float r = static_cast<float>(radius[0]);
 
-	
-
     for (int i = 0; i <= segments; i++) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int j = 0; j <= segments; j++) {

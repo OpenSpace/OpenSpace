@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/query/query.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -50,7 +51,8 @@ public:
 	properties::StringProperty _colorTexturePath; 
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
-	
+	openspace::SceneGraphNode* _targetNode;
+
 	void loadTexture();
 	void allocateData();
 	psc orthogonalProjection(glm::dvec3 camvec);
