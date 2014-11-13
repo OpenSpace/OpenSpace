@@ -128,10 +128,6 @@ void ABufferSingleLinked::postRender() {
 
 }
 
-std::string ABufferSingleLinked::settings() {
-	return R"()";
-}
-
 std::vector<ABufferSingleLinked::fragmentData> ABufferSingleLinked::pixelData() {
 	
 	unsigned int* anchorTexture = new unsigned int[_totalPixels];
@@ -167,6 +163,7 @@ std::vector<ABufferSingleLinked::fragmentData> ABufferSingleLinked::pixelData() 
 				float z = glm::uintBitsToFloat(fragment[0]);
 				unsigned int next = bitextract_u(fragment[1], mask_id_next, shift_id_next);
 				glm::vec4 color(glm::unpackUnorm2x16(fragment[2]), glm::unpackUnorm2x16(fragment[3]));
+				LDEBUG("(" << x << ", " << y << "): " << z);
 
 				fragmentData fd;
 				fd._position[0] = fx;

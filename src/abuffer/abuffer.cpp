@@ -223,7 +223,6 @@ void ABuffer::generateShaderSource() {
 	openspaceHeaders();
 	openspaceSamplerCalls();
 	openspaceSamplers();
-	settings();
 	openspaceTransferFunction();
 }
 

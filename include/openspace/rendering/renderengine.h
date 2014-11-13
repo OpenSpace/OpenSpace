@@ -26,18 +26,6 @@
 #define __RENDERENGINE_H__
 
 #include <openspace/scripting/scriptengine.h>
-#include <string>
-
-#define ABUFFER_FRAMEBUFFER 0
-#define ABUFFER_SINGLE_LINKED 1
-#define ABUFFER_FIXED 2
-#define ABUFFER_DYNAMIC 3
-
-#ifdef __APPLE__
-#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
-#else
-#define ABUFFER_IMPLEMENTATION ABUFFER_SINGLE_LINKED
-#endif
 
 namespace openspace {
 

@@ -40,8 +40,6 @@ public:
 	virtual void clear();
 	virtual void preRender();
 	virtual void postRender();
-
-	virtual std::string settings();
 	
 	std::vector<fragmentData> pixelData();
 

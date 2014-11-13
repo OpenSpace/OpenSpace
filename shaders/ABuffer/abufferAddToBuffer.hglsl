@@ -62,7 +62,7 @@ ABufferStruct_t createGeometryFragment(vec4 fragColor, vec4 position, float z) {
 }
 
 void addToBuffer(ABufferStruct_t frag) {
-#if ABUFFER_IMPLEMENTATION == ABUFFER_NONE || defined(APPLE)
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
 	framebuffer_output_color = _col_(frag);
 	gl_FragDepth = _z_(frag);
 #endif
@@ -84,13 +84,13 @@ void addToBuffer(ABufferStruct_t frag) {
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
 	uint index = imageAtomicAdd(anchorPointerTexture, ivec2(gl_FragCoord.xy), 1);
 	if(index < _MAX_LAYERS_) {
-		int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(index)*2;
+		int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(index);
 
 	    uvec4 p1 = uvec4(frag.z, frag.id, frag.rg, frag.ba);
-	    uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
+	   // uvec4 p2 = uvec4(floatBitsToUint(frag.position.x),floatBitsToUint(frag.position.y),floatBitsToUint(frag.position.z),floatBitsToUint(frag.position.w));
 
-		imageStore(fragmentTexture, int(offset  ), p1);
-		imageStore(fragmentTexture, int(offset+1), p2);
+		imageStore(fragmentTexture, int(offset), p1);
+		//imageStore(fragmentTexture, int(offset+1), p2);
 	} else {
 		imageAtomicAdd(anchorPointerTexture, ivec2(gl_FragCoord.xy), -1);
 	}
@@ -110,9 +110,9 @@ ABufferStruct_t loadFromBuffer(uint id) {
 #endif 
 
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
-	int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(id)*2;
+	int offset = (int(gl_FragCoord.y) * _SCREEN_WIDTH_ + int(gl_FragCoord.x))*_MAX_LAYERS_ + int(id);
 	uvec4 u1 = imageLoad(fragmentTexture, int(offset));
-	uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
+	//uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
 #endif 
 /*
 	vec4 position = vec4(	uintBitsToFloat(u2.x),

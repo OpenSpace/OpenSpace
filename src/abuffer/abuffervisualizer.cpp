@@ -32,7 +32,7 @@
 
 #define MARKER_POINTS
 #define MARKER_LINES
-//#define COLOR_BOX
+#define COLOR_BOX
 
 namespace {
 	const std::string _loggerCat = "ABufferVisualizer";

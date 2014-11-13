@@ -68,10 +68,11 @@ public:
     
     virtual void clear() = 0;
     virtual void preRender() = 0;
-    virtual void postRender() = 0;
+	virtual void postRender() = 0;
+
+	virtual std::vector<fragmentData> pixelData() = 0;
 
 protected:
-	virtual std::string settings() = 0;
 	virtual bool reinitializeInternal() = 0;
 
 	bool initializeABuffer();

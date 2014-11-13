@@ -24,32 +24,44 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/time.h>
-
-// We need to decide where this is set
-#include <openspace/util/constants.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/syncbuffer.h>
-#include "sgct.h"
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-
-#include <array>
-#include <fstream>
-
-#include <openspace/scenegraph/scenegraph.h>
+// Open Space
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferframebuffer.h>
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
+
+// sgct
+#include <sgct.h>
+
+// ghoul
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
+
+// std
+#include <array>
+#include <fstream>
+
+// ABuffer defines
+#define ABUFFER_FRAMEBUFFER 0
+#define ABUFFER_SINGLE_LINKED 1
+#define ABUFFER_FIXED 2
+#define ABUFFER_DYNAMIC 3
+
+#ifdef __APPLE__
+#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
+#else
+#define ABUFFER_IMPLEMENTATION ABUFFER_FIXED
+#endif
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
@@ -420,11 +432,7 @@ void RenderEngine::toggleVisualizeABuffer(bool b) {
 	if (!_visualizeABuffer)
 		return;
 
-	ABufferSingleLinked* abuffer = dynamic_cast<ABufferSingleLinked*>(_abuffer);
-	if (!abuffer)
-		return;
-
-	std::vector<ABuffer::fragmentData> _d = abuffer->pixelData();
+	std::vector<ABuffer::fragmentData> _d = _abuffer->pixelData();
 	_visualizer->updateData(_d);
 }
 
@@ -475,16 +483,16 @@ void RenderEngine::generateGlslConfig() {
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
 	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
-	os  << "#ifndef CONSTANTS_HGLSL\n"
-        << "#define CONSTANTS_HGLSL\n"
-        << "#define SCREEN_WIDTH  " << xSize << "\n"
+	os << "#ifndef CONSTANTS_HGLSL\n"
+		<< "#define CONSTANTS_HGLSL\n"
+		<< "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
-		<< "#define ABUFFER_NONE              0\n"
-		<< "#define ABUFFER_SINGLE_LINKED     1\n"
-		<< "#define ABUFFER_FIXED             2\n"
-		<< "#define ABUFFER_DYNAMIC           3\n"
-		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
+		<< "#define ABUFFER_FRAMEBUFFER       " << ABUFFER_FRAMEBUFFER << "\n"
+		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
+		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
+		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
+		<< "#define ABUFFER_IMPLEMENTATION    " << ABUFFER_IMPLEMENTATION << "\n";
 // System specific
 #ifdef WIN32
 	os << "#define WIN32\n";
