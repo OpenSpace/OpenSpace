@@ -281,7 +281,6 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 glm::dvec3& position,
 	                                 double& lightTime) const
 {
-	glm::vec3 qwert;
     spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
              aberrationCorrection.c_str(), observer.c_str(), glm::value_ptr(position),
              &lightTime);
