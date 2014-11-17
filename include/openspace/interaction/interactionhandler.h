@@ -75,14 +75,15 @@ public:
 
 	void update(const double dt);
 
-	double getDt();
+	double dt();
 
     void keyboardCallback(int key, int action);
     void mouseButtonCallback(int key, int action);
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
 
-    void addKeyCallback(int key, std::function<void(void)> f);
+	void resetKeyBindings();
+	void bindKey(int key, const std::string& lua);
 
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the
@@ -98,22 +99,23 @@ private:
     glm::vec3 mapToCamera(glm::vec3 trackballPos);
     void trackballRotate(int x, int y);
 
-	Camera* camera_;
-	bool enabled_;
-	SceneGraphNode *node_;
+	Camera* _camera;
+	bool _enabled;
+	SceneGraphNode* _node;
 	
-	double dt_;
+	double _dt;
 
 	glm::vec3 _lastTrackballPos;
 	bool _leftMouseButtonDown, _isMouseBeingPressedAndHeld;
 
 	// used for calling when updating and deallocation
-	std::vector<ExternalControl*> controllers_;
+	std::vector<ExternalControl*> _controllers;
 
 	// for locking and unlocking
-	std::mutex cameraGuard_;
+	std::mutex _cameraGuard;
 
-	std::multimap<int, std::function<void(void)> > _keyCallbacks;
+	bool _validKeyLua;
+	std::multimap<int, std::string > _keyLua;
 	
 };
 

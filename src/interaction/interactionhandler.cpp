@@ -25,26 +25,176 @@
 // open space includes
 #include <openspace/interaction/interactionhandler.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <sgct.h>
-
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/externalcontrol/externalcontrol.h>
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 #include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
 #include <openspace/query/query.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <glm/gtx/vector_angle.hpp>
-
 #include <openspace/util/time.h>
+
+// ghoul
+#include <ghoul/logging/logmanager.h>
+
+// other
+#include <sgct.h>
+#include <glm/gtx/vector_angle.hpp>
 
 // std includes
 #include <cassert>
+#include <algorithm>
 
-std::string _loggerCat = "InteractionHandler";
+namespace {
+	const std::string _loggerCat = "InteractionHandler";
+
+	int stringToKey(std::string s) {
+
+		static std::map<std::string, int> m = {
+			{ "SPACE", SGCT_KEY_SPACE },
+			{ "APOSTROPHE", SGCT_KEY_APOSTROPHE },
+			{ "COMMA", SGCT_KEY_COMMA },
+			{ "MINUS", SGCT_KEY_MINUS },
+			{ "PERIOD", SGCT_KEY_PERIOD },
+			{ "APOSTROPHE", SGCT_KEY_SLASH },
+			{ "0", SGCT_KEY_0 },
+			{ "1", SGCT_KEY_1 },
+			{ "2", SGCT_KEY_2 },
+			{ "3", SGCT_KEY_3 },
+			{ "4", SGCT_KEY_4 },
+			{ "5", SGCT_KEY_5 },
+			{ "6", SGCT_KEY_6 },
+			{ "7", SGCT_KEY_7 },
+			{ "8", SGCT_KEY_8 },
+			{ "9", SGCT_KEY_9 },
+			{ "SEMICOLON", SGCT_KEY_SEMICOLON },
+			{ "EQUAL", SGCT_KEY_EQUAL },
+			{ "A", SGCT_KEY_A },
+			{ "B", SGCT_KEY_B },
+			{ "C", SGCT_KEY_C },
+			{ "D", SGCT_KEY_D },
+			{ "E", SGCT_KEY_E },
+			{ "F", SGCT_KEY_F },
+			{ "G", SGCT_KEY_G },
+			{ "H", SGCT_KEY_H },
+			{ "I", SGCT_KEY_I },
+			{ "J", SGCT_KEY_J },
+			{ "K", SGCT_KEY_K },
+			{ "L", SGCT_KEY_L },
+			{ "M", SGCT_KEY_M },
+			{ "N", SGCT_KEY_N },
+			{ "O", SGCT_KEY_O },
+			{ "P", SGCT_KEY_P },
+			{ "Q", SGCT_KEY_Q },
+			{ "R", SGCT_KEY_R },
+			{ "S", SGCT_KEY_S },
+			{ "T", SGCT_KEY_T },
+			{ "U", SGCT_KEY_U },
+			{ "V", SGCT_KEY_V },
+			{ "W", SGCT_KEY_W },
+			{ "X", SGCT_KEY_X },
+			{ "Y", SGCT_KEY_Y },
+			{ "Z", SGCT_KEY_Z },
+			{ "LEFT_BRACKET", SGCT_KEY_LEFT_BRACKET },
+			{ "BACKSLASH", SGCT_KEY_BACKSLASH },
+			{ "RIGHT_BRACKET", SGCT_KEY_RIGHT_BRACKET },
+			{ "GRAVE_ACCENT", SGCT_KEY_GRAVE_ACCENT },
+			{ "WORLD_1", SGCT_KEY_WORLD_1 },
+			{ "WORLD_2", SGCT_KEY_WORLD_2 },
+			{ "ESC", SGCT_KEY_ESC },
+			{ "ESCAPE", SGCT_KEY_ESCAPE },
+			{ "ENTER", SGCT_KEY_ENTER },
+			{ "TAB", SGCT_KEY_TAB },
+			{ "BACKSPACE", SGCT_KEY_BACKSPACE },
+			{ "INSERT", SGCT_KEY_INSERT },
+			{ "DEL", SGCT_KEY_DEL },
+			{ "DELETE", SGCT_KEY_DELETE },
+			{ "RIGHT", SGCT_KEY_RIGHT },
+			{ "LEFT", SGCT_KEY_LEFT },
+			{ "DOWN", SGCT_KEY_DOWN },
+			{ "UP", SGCT_KEY_UP },
+			{ "PAGEUP", SGCT_KEY_PAGEUP },
+			{ "PAGEDOWN", SGCT_KEY_PAGEDOWN },
+			{ "PAGE_UP", SGCT_KEY_PAGE_UP },
+			{ "PAGE_DOWN", SGCT_KEY_PAGE_DOWN },
+			{ "HOME", SGCT_KEY_HOME },
+			{ "END", SGCT_KEY_END },
+			{ "CAPS_LOCK", SGCT_KEY_CAPS_LOCK },
+			{ "SCROLL_LOCK", SGCT_KEY_SCROLL_LOCK },
+			{ "NUM_LOCK", SGCT_KEY_NUM_LOCK },
+			{ "PRINT_SCREEN", SGCT_KEY_PRINT_SCREEN },
+			{ "PAUSE", SGCT_KEY_PAUSE },
+			{ "F1", SGCT_KEY_F1 },
+			{ "F2", SGCT_KEY_F2 },
+			{ "F3", SGCT_KEY_F3 },
+			{ "F4", SGCT_KEY_F4 },
+			{ "F5", SGCT_KEY_F5 },
+			{ "F6", SGCT_KEY_F6 },
+			{ "F7", SGCT_KEY_F7 },
+			{ "F8", SGCT_KEY_F8 },
+			{ "F9", SGCT_KEY_F9 },
+			{ "F10", SGCT_KEY_F10 },
+			{ "F11", SGCT_KEY_F11 },
+			{ "F12", SGCT_KEY_F12 },
+			{ "F13", SGCT_KEY_F13 },
+			{ "F14", SGCT_KEY_F14 },
+			{ "F15", SGCT_KEY_F15 },
+			{ "F16", SGCT_KEY_F16 },
+			{ "F17", SGCT_KEY_F17 },
+			{ "F18", SGCT_KEY_F18 },
+			{ "F19", SGCT_KEY_F19 },
+			{ "F20", SGCT_KEY_F20 },
+			{ "F21", SGCT_KEY_F21 },
+			{ "F22", SGCT_KEY_F22 },
+			{ "F23", SGCT_KEY_F23 },
+			{ "F24", SGCT_KEY_F24 },
+			{ "F25", SGCT_KEY_F25 },
+			{ "KP_0", SGCT_KEY_KP_0 },
+			{ "KP_1", SGCT_KEY_KP_1 },
+			{ "KP_2", SGCT_KEY_KP_2 },
+			{ "KP_3", SGCT_KEY_KP_3 },
+			{ "KP_4", SGCT_KEY_KP_4 },
+			{ "KP_5", SGCT_KEY_KP_5 },
+			{ "KP_6", SGCT_KEY_KP_6 },
+			{ "KP_7", SGCT_KEY_KP_7 },
+			{ "KP_8", SGCT_KEY_KP_8 },
+			{ "KP_9", SGCT_KEY_KP_9 },
+			{ "KP_DECIMAL", SGCT_KEY_KP_DECIMAL },
+			{ "KP_DIVIDE", SGCT_KEY_KP_DIVIDE },
+			{ "KP_MULTIPLY", SGCT_KEY_KP_MULTIPLY },
+			{ "KP_SUBTRACT", SGCT_KEY_KP_SUBTRACT },
+			{ "KP_ADD", SGCT_KEY_KP_ADD },
+			{ "KP_ENTER", SGCT_KEY_KP_ENTER },
+			{ "KP_EQUAL", SGCT_KEY_KP_EQUAL },
+			{ "LSHIFT", SGCT_KEY_LSHIFT },
+			{ "LEFT_SHIFT", SGCT_KEY_LEFT_SHIFT },
+			{ "LCTRL", SGCT_KEY_LCTRL },
+			{ "LEFT_CONTROL", SGCT_KEY_LEFT_CONTROL },
+			{ "LALT", SGCT_KEY_LALT },
+			{ "LEFT_ALT", SGCT_KEY_LEFT_ALT },
+			{ "LEFT_SUPER", SGCT_KEY_LEFT_SUPER },
+			{ "RSHIFT", SGCT_KEY_RSHIFT },
+			{ "RIGHT_SHIFT", SGCT_KEY_RIGHT_SHIFT },
+			{ "RCTRL", SGCT_KEY_RCTRL },
+			{ "RIGHT_CONTROL", SGCT_KEY_RIGHT_CONTROL },
+			{ "RALT", SGCT_KEY_RALT },
+			{ "RIGHT_ALT", SGCT_KEY_RIGHT_ALT },
+			{ "RIGHT_SUPER", SGCT_KEY_RIGHT_SUPER },
+			{ "MENU", SGCT_KEY_MENU }
+		};
+		// key only uppercase
+		std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+
+		// default is unknown
+		int key = SGCT_KEY_UNKNOWN;
+		auto it = m.find(s);
+		if (it != m.end())
+			key = m[s];
+		return key;
+	}
+}
 
 namespace openspace {
 
@@ -80,22 +230,104 @@ int setOrigin(lua_State* L) {
 	return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* bindKey():
+* Binds a key to Lua command
+*/
+int bindKey(lua_State* L) {
+	using ghoul::lua::luaTypeToString;
+	const std::string _loggerCat = "LuaInteractionHandler";
+
+	int nArguments = lua_gettop(L);
+	if (nArguments != 2)
+		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
+
+	std::string key = luaL_checkstring(L, -2);
+	std::string command = luaL_checkstring(L, -1);
+
+	if (command.empty())
+		return luaL_error(L, "Command string is empty");
+
+	int iKey = stringToKey(key);
+
+	if (iKey == SGCT_KEY_UNKNOWN) {
+		LERROR("Could not find key '"<< key <<"'");
+		return 0;
+	}
+
+
+	OsEng.interactionHandler().bindKey(iKey, command);
+
+	return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* clearKeys():
+* Clears all key bindings
+*/
+int clearKeys(lua_State* L) {
+	using ghoul::lua::luaTypeToString;
+	const std::string _loggerCat = "LuaInteractionHandler";
+
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.interactionHandler().resetKeyBindings();
+
+	return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* dt(bool):
+* Get current frame time
+*/
+int dt(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	lua_pushnumber(L,OsEng.interactionHandler().dt());
+	return 1;
+}
+
+/**
+* \ingroup LuaScripts
+* distance(double, double):
+* Change distance to origin
+*/
+int distance(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 2)
+		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
+	double d1 = luaL_checknumber(L, -2);
+	double d2 = luaL_checknumber(L, -1);
+	PowerScaledScalar dist(d1, d2);
+	OsEng.interactionHandler().distance(dist);
+	return 0;
+}
+
 } // namespace luascriptfunctions
 
 InteractionHandler::InteractionHandler() {
 	// initiate pointers
-	camera_ = nullptr;
-	enabled_ = true;
-	node_ = nullptr;
-	dt_ = 0.0;
+	_camera = nullptr;
+	_enabled = true;
+	_node = nullptr;
+	_dt = 0.0;
 	_lastTrackballPos = glm::vec3(0.0, 0.0, 0.5);
 	_leftMouseButtonDown = false;
 	_isMouseBeingPressedAndHeld = false;
 }
 
 InteractionHandler::~InteractionHandler() {
-	for (size_t i = 0; i < controllers_.size(); ++i) {
-		delete controllers_[i];
+	for (size_t i = 0; i < _controllers.size(); ++i) {
+		delete _controllers[i];
 	}
 }
 
@@ -121,19 +353,19 @@ InteractionHandler::~InteractionHandler() {
 
 void InteractionHandler::enable() {
 	//assert(this_);
-	enabled_ = true;
+	_enabled = true;
 }
 
 void InteractionHandler::disable() {
 	//assert(this_);
-	enabled_ = false;
+	_enabled = false;
 }
 
 const bool InteractionHandler::isEnabled() const {
 	//assert(this_);
-	if (camera_)
+	if (_camera)
 		return false;
-	return enabled_;
+	return _enabled;
 }
 
 void InteractionHandler::connectDevices() {
@@ -165,53 +397,53 @@ void InteractionHandler::connectDevices() {
 void InteractionHandler::addExternalControl(ExternalControl* controller) {
 	//assert(this_);
 	if (controller != nullptr) {
-		controllers_.push_back(controller);
+		_controllers.push_back(controller);
 	}
 }
 
 void InteractionHandler::setCamera(Camera *camera) {
 	//assert(this_);
-	camera_ = camera;
+	_camera = camera;
 }
 
 void InteractionHandler::setOrigin(SceneGraphNode* node) {
 	if (node)
-		node_ = node;
+		_node = node;
 }
 
 Camera * InteractionHandler::getCamera() const {
 	//assert(this_);
-	if (enabled_) {
-		return camera_;
+	if (_enabled) {
+		return _camera;
 	}
 	return nullptr;
 }
 
 const psc InteractionHandler::getOrigin() const {
-	if(node_)
-		return node_->worldPosition();
+	if (_node)
+		return _node->worldPosition();
 	return psc();
 }
 
 void InteractionHandler::lockControls() {
 	//assert(this_);
-	cameraGuard_.lock();
+	_cameraGuard.lock();
 }
 
 void InteractionHandler::unlockControls() {
 	//assert(this_);
-	cameraGuard_.unlock();
+	_cameraGuard.unlock();
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode *node) {
 	//assert(this_);
-	node_ = node;
+	_node = node;
 }
 
 void InteractionHandler::rotate(const glm::quat &rotation) {
 	//assert(this_);
 	lockControls();
-	camera_->rotate(rotation);
+	_camera->rotate(rotation);
 	unlockControls();
 }
 
@@ -220,12 +452,12 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	lockControls();
 	
 	// the camera position
-	psc relative = camera_->position();
+	psc relative = _camera->position();
 
 	// should be changed to something more dynamic =)
 	psc origin;
-	if (node_) {
-		origin = node_->worldPosition();
+	if (_node) {
+		origin = _node->worldPosition();
 	}
 
 	psc relative_origin_coordinate = relative - origin;
@@ -234,12 +466,12 @@ void InteractionHandler::orbit(const glm::quat &rotation) {
 	relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
 	relative = relative_origin_coordinate + origin;
 
-	camera_->setPosition(relative);
+	_camera->setPosition(relative);
 	//camera_->rotate(rotation);
 	//camera_->setRotation(glm::mat4_cast(rotation));
 
-	glm::mat4 la = glm::lookAt(camera_->position().vec3(), origin.vec3(), glm::rotate(rotation, camera_->lookUpVector()));
-	camera_->setRotation(la);
+	glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+	_camera->setRotation(la);
 	//camera_->setLookUpVector();
 
 	unlockControls();
@@ -251,8 +483,8 @@ void InteractionHandler::distance(const PowerScaledScalar &dist, size_t iteratio
 	//assert(this_);
 	lockControls();
 	
-	psc relative = camera_->position();
-	const psc origin = (node_) ? node_->worldPosition() : psc();
+	psc relative = _camera->position();
+	const psc origin = (_node) ? _node->worldPosition() : psc();
 
 	psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
@@ -266,7 +498,7 @@ void InteractionHandler::distance(const PowerScaledScalar &dist, size_t iteratio
 
 	// update only if on the same side of the origin
 	if (glm::angle(newdir, dir) < 90.0f) {
-		camera_->setPosition(relative);
+		_camera->setPosition(relative);
 		unlockControls();
 
 	}
@@ -297,21 +529,21 @@ void InteractionHandler::setRotation(const glm::quat &rotation) {
 void InteractionHandler::update(const double dt) {
 	//assert(this_);
 	// setting dt_ for use in callbacks
-	dt_ = dt;
-	if (enabled_ && camera_) {
+	_dt = dt;
+	if (_enabled && _camera) {
 		// fetch data from joysticks
 		DeviceIdentifier::ref().update();
 
 		// update all controllers
-		for (size_t i = 0; i < controllers_.size(); ++i) {
-			controllers_[i]->update();
+		for (size_t i = 0; i < _controllers.size(); ++i) {
+			_controllers[i]->update();
 		}
 	}
 }
 
-double InteractionHandler::getDt() {
+double InteractionHandler::dt() {
 	//assert(this_);
-	return dt_;
+	return _dt;
 }
 
 glm::vec3 InteractionHandler::mapToTrackball(glm::vec2 mousePos) {
@@ -335,8 +567,8 @@ glm::vec3 InteractionHandler::mapToCamera(glm::vec3 trackballPos) {
 //	return glm::vec3((sgct::Engine::instance()->getActiveViewMatrix() * glm::vec4(trackballPos,0)));
 
     //Get x,y,z axis vectors of current camera view
-	glm::vec3 currentViewYaxis = glm::normalize(camera_->lookUpVector());
-	psc viewDir = camera_->position() - node_->worldPosition();
+	glm::vec3 currentViewYaxis = glm::normalize(_camera->lookUpVector());
+	psc viewDir = _camera->position() - _node->worldPosition();
 	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
 	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
@@ -368,7 +600,7 @@ void InteractionHandler::trackballRotate(int x, int y) {
 	if (curTrackballPos != _lastTrackballPos) {
 		// calculate rotation angle (in radians)
 		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-		rotationAngle *= static_cast<float>(getDt())*100.0f;
+		rotationAngle *= static_cast<float>(dt())*100.0f;
 
         // Map trackballpos to camera
 //		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
@@ -390,8 +622,9 @@ void InteractionHandler::trackballRotate(int x, int y) {
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
     const float speed = 2.75f;
-	const float dt = static_cast<float>(getDt());
+	const float dt = static_cast<float>(_dt);
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+		
 	    if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
@@ -438,39 +671,6 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        glm::quat rot = glm::quat(euler);
 	        rotate(rot);
 	    }
-	    if (key == SGCT_KEY_R) {
-	        PowerScaledScalar dist(-speed * dt, 5.0f);
-	        distance(dist);
-	    }
-	    if (key == SGCT_KEY_F) {
-	        PowerScaledScalar dist(speed * dt, 5.0f);
-	        distance(dist);
-		}
-		if (key == SGCT_KEY_T) {
-			PowerScaledScalar dist(-speed  * dt, 10.0f);
-			distance(dist);
-		}
-		if (key == SGCT_KEY_G) {
-			PowerScaledScalar dist(speed * dt, 10.0f);
-			distance(dist);
-		}
-		if (key == SGCT_KEY_Y) {
-			PowerScaledScalar dist(-speed * dt, 11.5f);
-			distance(dist);
-		}
-		if (key == SGCT_KEY_H) {
-			PowerScaledScalar dist(speed  * dt, 11.5f);
-			distance(dist);
-		}
-		if (key == SGCT_KEY_U) {
-			PowerScaledScalar dist(-speed * dt, 13.0f);
-			distance(dist);
-		}
-		if (key == SGCT_KEY_J) {
-			PowerScaledScalar dist(speed  * dt, 13.0f);
-			distance(dist);
-		}
-
 		if (key == SGCT_KEY_KP_SUBTRACT) {
 			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] -= 0.5f;
@@ -481,48 +681,17 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			s[1] += 0.5f;
 			OsEng.renderEngine().camera()->setScaling(s);
 		}
+
+		// iterate over key bindings
+		_validKeyLua = true;
+		auto ret = _keyLua.equal_range(key);
+		for (auto it = ret.first; it != ret.second; ++it) {
+			OsEng.scriptEngine().runScript(it->second);
+			if (!_validKeyLua) {
+				break;
+			}
+		}
 	}
-
-	// Screenshot
-	if (action == SGCT_PRESS && key == SGCT_KEY_PRINT_SCREEN) {
-		OsEng.renderEngine().takeScreenshot();
-	}
-
-	
-    /*
-    if (key == '1') {
-        SceneGraphNode* node = getSceneGraphNode("sun");
-
-        setFocusNode(node);
-        getCamera()->setPosition(node->getWorldPosition() + psc(0.0, 0.0, 0.5, 10.0));
-        getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
-    }
-
-    if (key == '2') {
-        SceneGraphNode* node = getSceneGraphNode("earth");
-
-        setFocusNode(node);
-        getCamera()->setPosition(node->getWorldPosition() + psc(0.0, 0.0, 1.0, 8.0));
-        getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
-    }
-
-
-    if (key == '3') {
-        SceneGraphNode* node = getSceneGraphNode("moon");
-
-        setFocusNode(node);
-        getCamera()->setPosition(node->getWorldPosition() + psc(0.0, 0.0, 0.5, 8.0));
-        getCamera()->setCameraDirection(glm::vec3(0.0, 0.0, -1.0));
-    }
-*/
-    // std::pair <std::multimap<int,std::function<void(void)> >::iterator, std::multimap<int , std::function<void(void)> >::iterator> ret;
-    if(action == SGCT_PRESS) {
-    	auto ret = _keyCallbacks.equal_range(key);
-	    for (auto it=ret.first; it!=ret.second; ++it)
-	    	it->second();
-    }
-    
-
 }
 
 void InteractionHandler::mouseButtonCallback(int key, int action) {
@@ -551,7 +720,7 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     //	mouseControl_->mouseScrollCallback(pos);
     //}
     const float speed = 4.75f;
-    const float dt = static_cast<float>(getDt());
+	const float dt = static_cast<float>(_dt);
     if(pos < 0) {
 	    PowerScaledScalar dist(speed * dt, 0.0f);
 	    distance(dist);
@@ -561,24 +730,47 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
     }
 }
 
-void InteractionHandler::addKeyCallback(int key, std::function<void(void)> f) {
-	//std::map<int, std::vector<std::function<void(void)> > > _keyCallbacks;
 
-	_keyCallbacks.insert(std::make_pair(key, f));
+void InteractionHandler::resetKeyBindings() {
+	_keyLua.clear();
+	_validKeyLua = false;
+}
+
+void InteractionHandler::bindKey(int key, const std::string& lua) {
+	_keyLua.insert(std::make_pair(key, lua));
 }
 
 scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
-	return{
+	return {
 		"",
 		{
 			{
 				"setOrigin",
 				&luascriptfunctions::setOrigin,
 				"setOrigin(): set the camera origin node by name"
+			},
+			{
+				"clearKeys",
+				&luascriptfunctions::clearKeys,
+				"clearKeys(): Clear all key bindings"
+			},
+			{
+				"bindKey",
+				&luascriptfunctions::bindKey,
+				"bindKey(): binds a key by name to a lua string command"
+			},
+			{
+				"dt",
+				&luascriptfunctions::dt,
+				"dt(): Get current frame time"
+			},
+			{
+				"distance",
+				&luascriptfunctions::distance,
+				"distance(): Change distance to origin"
 			}
 		}
 	};
-
 }
 
 } // namespace openspace
