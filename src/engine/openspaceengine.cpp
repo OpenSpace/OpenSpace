@@ -90,7 +90,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	// initialize OpenSpace helpers
 	SpiceManager::initialize();
 	Time::initialize();
-	//DeviceIdentifier::init();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
@@ -101,13 +100,8 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
-	//DeviceIdentifier::deinit();
 	Time::deinitialize();
 	SpiceManager::deinitialize();
-    Time::deinitialize();
-    //DeviceIdentifier::deinit();
-    FileSystem::deinitialize();
-    LogManager::deinitialize();
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -370,8 +364,8 @@ bool OpenSpaceEngine::initialize() {
     //DeviceIdentifier::init();
     //DeviceIdentifier::ref().scanDevices();
 
-	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
-	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
+	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
+	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
 	_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 
     // Run start up scripts
