@@ -209,7 +209,34 @@ void ScriptEngine::deinitialize() {
 }
 
 void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
-	_registeredLibraries.insert(library);
+	// do we have a library with the same name as the incoming one
+	auto it = std::find_if(_registeredLibraries.begin(), _registeredLibraries.end(),
+		[&library](const LuaLibrary& lib) { return lib.name == library.name; });
+
+	if (it == _registeredLibraries.end())
+		// If not, we can add it
+		_registeredLibraries.insert(library);
+	else {
+		// otherwise, we merge the libraries
+
+		LuaLibrary merged = *it;
+		for (auto fun : library.functions) {
+			auto it = std::find_if(merged.functions.begin(), merged.functions.end(),
+				[&fun](const LuaLibrary::Function& function) { return fun.name == function.name; });
+			if (it != merged.functions.end()) {
+				// the function with the desired name is already present, but we don't
+				// want to overwrite it
+				LERROR("Lua function '" << fun.name << "' in library '" << library.name <<
+					"' has been defined twice");
+				return;
+			}
+			else
+				merged.functions.push_back(fun);
+		}
+
+		_registeredLibraries.erase(it);
+		_registeredLibraries.insert(merged);
+	}
 }
 
 bool ScriptEngine::runScript(const std::string& script) {
@@ -442,7 +469,8 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
         lua_settable(state, _setTableOffset);
         //ghoul::lua::logStack(_state);
 
-        _registeredLibraries.insert(library);
+        //_registeredLibraries.insert(library);
+		//_registeredLibraries.push_back(library);
     }
     return true;
 }
