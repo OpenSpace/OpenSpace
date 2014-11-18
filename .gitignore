@@ -26,3 +26,4 @@ install_manifest.txt
 html/
 latex/
 shaders/ABuffer/constants.hglsl
+*.OpenSpaceGenerated.glsl
