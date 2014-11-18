@@ -68,6 +68,7 @@ namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
     const std::string _configurationFile = "openspace.cfg";
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
+	const std::string _defaultCacheLocation = "${BASE_PATH}/cache";
     
     const std::string _sgctConfigArgumentCommand = "-config";
     
@@ -213,12 +214,7 @@ void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
 
 	ghoul::Dictionary fonts;
-	bool success = configurationManager().getValue(constants::fonts::keyFonts, fonts);
-	if (!success) {
-		LERROR("Could not find key '" << constants::fonts::keyFonts <<
-			"' in configuration file for font declaration");
-		return;
-	}
+	configurationManager().getValue(constants::configurationmanager::keyFonts, fonts);
 
 	for (auto key : fonts.keys()) {
 		std::string font;
@@ -282,19 +278,12 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	const bool configLoadSuccess = _engine->configurationManager().loadFromFile(
 																configurationFilePath);
 	if (!configLoadSuccess) {
-		LERROR("Loading of configuration file '" << configurationFilePath << "' failed");
+		LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
 		return false;
 	}
 
-	// make sure cache is registered, false since we don't want to override
-	auto tokens = FileSys.tokens();
-	const std::string cacheToken = "${CACHE}";
-	auto cacheIterator = std::find(tokens.begin(), tokens.end(), cacheToken);
-	if (cacheIterator == tokens.end()){
-		FileSys.registerPathToken(cacheToken, "${BASE_PATH}/cache");
-	}
-
 	// Create directories that doesn't exsist
+	auto tokens = FileSys.tokens();
 	for (auto token : tokens) {
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
@@ -305,7 +294,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// Create the cachemanager
-	FileSys.createCacheManager(cacheToken);
+	std::string cacheDirectory;
+	_engine->configurationManager().getValue(
+		constants::configurationmanager::keyCachePath, cacheDirectory);
+	FileSys.createCacheManager(cacheDirectory);
 
 	_engine->_console = new LuaConsole();
 	_engine->_syncBuffer = new SyncBuffer(1024);
