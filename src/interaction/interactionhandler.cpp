@@ -35,7 +35,7 @@
 //#include <openspace/scenegraph/scenegraphnode.h>
 //#include <openspace/util/camera.h>
 //#include <openspace/util/powerscaledcoordinate.h>
-//#include <openspace/util/time.h>
+#include <openspace/util/time.h>
 //
 //// ghoul
 #include <ghoul/logging/logmanager.h>
@@ -493,14 +493,14 @@ const Camera* const InteractionHandler::camera() const {
 	return _camera;
 }
 
-void InteractionHandler::keyboardCallback(int key, int action) {
-	if (_keyboardController) {
-		auto start = ghoul::HighResClock::now();
-		_keyboardController->keyPressed(KeyAction(action), Key(key), KeyModifier::None);
-		auto end = ghoul::HighResClock::now();
-		LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
-	}
-}
+//void InteractionHandler::keyboardCallback(int key, int action) {
+//	if (_keyboardController) {
+//		auto start = ghoul::HighResClock::now();
+//		_keyboardController->keyPressed(KeyAction(action), Key(key), KeyModifier::None);
+//		auto end = ghoul::HighResClock::now();
+//		LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
+//	}
+//}
 
 void InteractionHandler::mouseButtonCallback(int button, int action) {
 	if (_mouseController)
@@ -569,38 +569,44 @@ void InteractionHandler::rotateDelta(const glm::quat& rotation)
 	unlockControls();
 }
 
-void InteractionHandler::distanceDelta(const PowerScaledScalar& distance)
+void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t iterations)
 {
+	if (iterations > 5)
+		return;
+	//assert(this_);
 	lockControls();
-
+		
 	psc relative = _camera->position();
 	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
-
+	
 	psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
 	glm::vec3 newdir = dir * distance[0];
-//>>>>>>> feature/interactionhandler
+
 	relative_origin_coordinate = newdir;
 	relative_origin_coordinate[3] = distance[1];
 	relative = relative + relative_origin_coordinate;
 
 	relative_origin_coordinate = relative - origin;
+	if (relative_origin_coordinate.vec4().x == 0.f && relative_origin_coordinate.vec4().y == 0.f && relative_origin_coordinate.vec4().z == 0.f)
+		// TODO: this shouldn't be allowed to happen; a mechanism to prevent the camera to coincide with the origin is necessary (ab)
+		return;
+
 	newdir = relative_origin_coordinate.direction();
 
 	// update only if on the same side of the origin
-//<<<<<<< HEAD
-//	if (glm::angle(newdir, dir) < 90.0f) {
-//		_camera->setPosition(relative);
-//		unlockControls();
-//
-//	}
-//	else {
-//		unlockControls();
-//		PowerScaledScalar d2 = dist;
-//		d2[0] *= 0.75f;
-//		d2[1] *= 0.85f;
-//		distance(d2, iterations + 1);
-//	}
+	if (glm::angle(newdir, dir) < 90.0f) {
+		_camera->setPosition(relative);
+		unlockControls();
+
+	}
+	else {
+		unlockControls();
+		PowerScaledScalar d2 = distance;
+		d2[0] *= 0.75f;
+		d2[1] *= 0.85f;
+		distanceDelta(d2, iterations + 1);
+	}
 //	
 //}
 //
@@ -608,11 +614,11 @@ void InteractionHandler::distanceDelta(const PowerScaledScalar& distance)
 //	//assert(this_);
 //	lockControls();
 //=======
-	if (glm::angle(newdir, dir) < 90.0f)
-		_camera->setPosition(relative);
+	//if (glm::angle(newdir, dir) < 90.0f)
+		//_camera->setPosition(relative);
 //>>>>>>> feature/interactionhandler
 
-	unlockControls();
+	//unlockControls();
 }
 
 void InteractionHandler::lookAt(const glm::quat& rotation)
@@ -713,80 +719,80 @@ void InteractionHandler::lookAt(const glm::quat& rotation)
 //	}
 //}
 //
-//void InteractionHandler::keyboardCallback(int key, int action) {
-//    // TODO package in script
-//    const float speed = 2.75f;
-//	const float dt = static_cast<float>(_dt);
-//	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
-//		
-//	    if (key == SGCT_KEY_S) {
-//	        glm::vec3 euler(speed * dt, 0.0, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        orbit(rot);
-//	    }
-//	    if (key == SGCT_KEY_W) {
-//	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        orbit(rot);
-//	    }
-//	    if (key == SGCT_KEY_A) {
-//	        glm::vec3 euler(0.0, -speed * dt, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        orbit(rot);
-//	    }
-//	    if (key == SGCT_KEY_D) {
-//	        glm::vec3 euler(0.0, speed * dt, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        orbit(rot);
-//	    }
-//		if (key == SGCT_KEY_Z) {
-//			Time::ref().advanceTime(sgct::Engine::instance()->getDt());
-//		}
-//		if (key == SGCT_KEY_X) {
-//			Time::ref().retreatTime(sgct::Engine::instance()->getDt());
-//		}
-//	    if (key == 262) {
-//	        glm::vec3 euler(0.0, speed * dt, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        rotate(rot);
-//	    }
-//	    if (key == 263) {
-//	        glm::vec3 euler(0.0, -speed * dt, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        rotate(rot);
-//	    }
-//	    if (key == 264) {
-//	        glm::vec3 euler(speed * dt, 0.0, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        rotate(rot);
-//	    }
-//	    if (key == 265) {
-//	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
-//	        glm::quat rot = glm::quat(euler);
-//	        rotate(rot);
-//	    }
-//		if (key == SGCT_KEY_KP_SUBTRACT) {
-//			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
-//			s[1] -= 0.5f;
-//			OsEng.renderEngine().camera()->setScaling(s);
-//		}
-//		if (key == SGCT_KEY_KP_ADD) {
-//			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
-//			s[1] += 0.5f;
-//			OsEng.renderEngine().camera()->setScaling(s);
-//		}
-//
-//		// iterate over key bindings
-//		_validKeyLua = true;
-//		auto ret = _keyLua.equal_range(key);
-//		for (auto it = ret.first; it != ret.second; ++it) {
-//			OsEng.scriptEngine().runScript(it->second);
-//			if (!_validKeyLua) {
-//				break;
-//			}
-//		}
-//	}
-//}
+void InteractionHandler::keyboardCallback(int key, int action) {
+    // TODO package in script
+    const float speed = 2.75f;
+	const float dt = static_cast<float>(_deltaTime);
+	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+		
+	    if (key == SGCT_KEY_S) {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbitDelta(rot);
+	    }
+	    if (key == SGCT_KEY_W) {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbitDelta(rot);
+	    }
+	    if (key == SGCT_KEY_A) {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbitDelta(rot);
+	    }
+	    if (key == SGCT_KEY_D) {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        orbitDelta(rot);
+	    }
+		if (key == SGCT_KEY_Z) {
+			Time::ref().advanceTime(sgct::Engine::instance()->getDt());
+		}
+		if (key == SGCT_KEY_X) {
+			Time::ref().retreatTime(sgct::Engine::instance()->getDt());
+		}
+	    if (key == 262) {
+	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotateDelta(rot);
+	    }
+	    if (key == 263) {
+	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotateDelta(rot);
+	    }
+	    if (key == 264) {
+	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotateDelta(rot);
+	    }
+	    if (key == 265) {
+	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+	        glm::quat rot = glm::quat(euler);
+	        rotateDelta(rot);
+	    }
+		if (key == SGCT_KEY_KP_SUBTRACT) {
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			s[1] -= 0.5f;
+			OsEng.renderEngine().camera()->setScaling(s);
+		}
+		if (key == SGCT_KEY_KP_ADD) {
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			s[1] += 0.5f;
+			OsEng.renderEngine().camera()->setScaling(s);
+		}
+
+		// iterate over key bindings
+		_validKeyLua = true;
+		auto ret = _keyLua.equal_range(key);
+		for (auto it = ret.first; it != ret.second; ++it) {
+			OsEng.scriptEngine().runScript(it->second);
+			if (!_validKeyLua) {
+				break;
+			}
+		}
+	}
+}
 //
 //void InteractionHandler::mouseButtonCallback(int key, int action) {
 //    //if(mouseControl_ != nullptr) {
