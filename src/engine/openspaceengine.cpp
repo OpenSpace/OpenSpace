@@ -211,8 +211,23 @@ void OpenSpaceEngine::runStartupScripts() {
 
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyMono, absPath("${FONTS}/Droid_Sans_Mono/DroidSansMono.ttf"), local);
-	sgct_text::FontManager::instance()->addFont(constants::fonts::keyLight, absPath("${FONTS}/Roboto/Roboto-Regular.ttf"), local);
+
+	ghoul::Dictionary fonts;
+	bool success = configurationManager().getValue(constants::fonts::keyFonts, fonts);
+	if (!success) {
+		LERROR("Could not find key '" << constants::fonts::keyFonts <<
+			"' in configuration file for font declaration");
+		return;
+	}
+
+	for (auto key : fonts.keys()) {
+		std::string font;
+		fonts.getValue(key, font);
+		font = absPath(font);
+
+		LINFO("Registering font '" << font << "' with key '" << key << "'");
+		sgct_text::FontManager::instance()->addFont(key, font, local);
+	}
 }
 
 bool OpenSpaceEngine::create(int argc, char** argv,
