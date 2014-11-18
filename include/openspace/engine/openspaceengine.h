@@ -26,8 +26,10 @@
 #define __OPENSPACEENGINE_H__
 
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
+
 #include <ghoul/cmdparser/commandlineparser.h>
 
 namespace openspace {
@@ -55,6 +57,7 @@ public:
     interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
+	LuaConsole& console();
 
     // SGCT callbacks
     bool initializeGL();
@@ -70,6 +73,8 @@ public:
 	void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
+
+
 
 private:
     OpenSpaceEngine(std::string programName);
@@ -88,10 +93,10 @@ private:
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
+	LuaConsole _console;
 
 	SyncBuffer* _syncBuffer;
 
-	LuaConsole* _console;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

@@ -144,6 +144,52 @@ namespace {
 
 namespace openspace {
 
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * show():
+ * Shows the console
+ */
+int show(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().setVisible(true);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * hide():
+ * Hides the console
+ */
+int hide(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().setVisible(false);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * toggle():
+ * Toggles the console
+ */
+int toggle(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().toggleVisibility();
+	return 0;
+}
+
+}
+
 LuaConsole::LuaConsole() 
 	: _inputPosition(0)
 	, _activeCommand(0)
@@ -407,5 +453,27 @@ void LuaConsole::toggleVisibility() {
 	_isVisible = !_isVisible;
 }
 
+scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
+	return {
+		"console",
+		{
+			{
+				"show",
+				&luascriptfunctions::show,
+				"show(): Shows the console"
+			},
+			{
+				"hide",
+				&luascriptfunctions::hide,
+				"hide(): Hides the console"
+			},
+			{
+				"toggle",
+				&luascriptfunctions::toggle,
+				"toggle(): Toggles the console"
+			}
+		}
+	};
+}
 
 } // namespace openspace

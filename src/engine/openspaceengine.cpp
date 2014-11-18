@@ -26,7 +26,6 @@
 
 // openspace
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
@@ -85,7 +84,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
     , _syncBuffer(nullptr)
-    , _console(nullptr)
 {
 	// initialize OpenSpace helpers
 	SpiceManager::initialize();
@@ -95,9 +93,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
-	if (_console)
-		delete _console;
-
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
 	Time::deinitialize();
@@ -295,7 +290,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 
-	_engine->_console = new LuaConsole();
 	_engine->_syncBuffer = new SyncBuffer(1024);
 
     // Determining SGCT configuration file
@@ -345,6 +339,7 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine.addLibrary(SceneGraph::luaLibrary());
 	_scriptEngine.addLibrary(Time::luaLibrary());
 	_scriptEngine.addLibrary(interaction::InteractionHandler::luaLibrary());
+	_scriptEngine.addLibrary(LuaConsole::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine().initialize();
@@ -396,6 +391,10 @@ ScriptEngine& OpenSpaceEngine::scriptEngine() {
     return _scriptEngine;
 }
 
+LuaConsole& OpenSpaceEngine::console() {
+	return _console;
+}
+
 bool OpenSpaceEngine::initializeGL()
 {
     return _renderEngine.initializeGL();
@@ -422,8 +421,8 @@ void OpenSpaceEngine::render() {
 
 	// If currently writing a command, render it to screen
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console->isVisible()) {
-		_console->render();
+	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console.isVisible()) {
+		_console.render();
 	}
 }
 
@@ -437,21 +436,21 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
-		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
-			_console->toggleVisibility();
+		if (key == _console.commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
+			_console.toggleVisibility();
 
-		if (!_console->isVisible()) {
+		if (!_console.isVisible()) {
 			_interactionHandler.keyboardCallback(key, action);
 		}
 		else {
-			_console->keyboardCallback(key, action);
+			_console.keyboardCallback(key, action);
 		}
 	}
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
-	if (_console->isVisible()) {
-		_console->charCallback(codepoint);
+	if (_console.isVisible()) {
+		_console.charCallback(codepoint);
 	}
 }
 

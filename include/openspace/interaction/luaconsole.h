@@ -25,6 +25,8 @@
 #ifndef LUACONSOLE_H
 #define LUACONSOLE_H
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <string>
 #include <vector>
 
@@ -46,6 +48,15 @@ public:
 	bool isVisible() const;
 	void setVisible(bool visible);
 	void toggleVisibility();
+		
+	/**
+	 * Returns the Lua library that contains all Lua functions available to affect the
+	 * console. The functions contained are
+	 * \return The Lua library that contains all Lua functions available to affect the
+	 * console
+	 */
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
 
 private:
 	void addToCommand(std::string c);
