@@ -25,9 +25,11 @@
 #include <openspace/engine/openspaceengine.h>
 
 // openspace
-#include <openspace/interaction/deviceidentifier.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/keyboardcontroller.h>
+#include <openspace/interaction/mousecontroller.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scenegraph/scenegraph.h>
@@ -88,7 +90,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	// initialize OpenSpace helpers
 	SpiceManager::initialize();
 	Time::initialize();
-	DeviceIdentifier::init();
+	//DeviceIdentifier::init();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
@@ -99,9 +101,13 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
-	DeviceIdentifier::deinit();
+	//DeviceIdentifier::deinit();
 	Time::deinitialize();
 	SpiceManager::deinitialize();
+    Time::deinitialize();
+    //DeviceIdentifier::deinit();
+    FileSystem::deinitialize();
+    LogManager::deinitialize();
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -336,18 +342,17 @@ bool OpenSpaceEngine::initialize() {
 	if (!success)
 		return false;
 
-	// Initialize the script engine
-	_scriptEngine.initialize();
-
 	// Register Lua script functions
 	LDEBUG("Registering Lua libraries");
 	_scriptEngine.addLibrary(RenderEngine::luaLibrary());
 	_scriptEngine.addLibrary(SceneGraph::luaLibrary());
 	_scriptEngine.addLibrary(Time::luaLibrary());
-	_scriptEngine.addLibrary(InteractionHandler::luaLibrary());
+	_scriptEngine.addLibrary(interaction::InteractionHandler::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
-    // Load scenegraph
+	scriptEngine().initialize();
+
+	// Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine.setSceneGraph(sceneGraph);
 	
@@ -362,8 +367,12 @@ bool OpenSpaceEngine::initialize() {
 	    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
     // Initialize OpenSpace input devices
-    DeviceIdentifier::ref().scanDevices();
-    _interactionHandler.connectDevices();
+    //DeviceIdentifier::init();
+    //DeviceIdentifier::ref().scanDevices();
+
+	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
+	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
+	_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 
     // Run start up scripts
 	runStartupScripts();
@@ -378,7 +387,7 @@ ConfigurationManager& OpenSpaceEngine::configurationManager() {
     return _configurationManager;
 }
 
-InteractionHandler& OpenSpaceEngine::interactionHandler() {
+interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return _interactionHandler;
 }
 

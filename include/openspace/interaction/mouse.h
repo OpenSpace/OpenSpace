@@ -22,62 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __MOUSE_H__
+#define __MOUSE_H__
 
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <set>
-
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+#include <sgct.h>
 
 namespace openspace {
-namespace scripting {
+namespace interaction {
 
-class ScriptEngine {
-public:
-    struct LuaLibrary {
-		struct Function {
-			std::string name;
-			lua_CFunction function;
-			std::string helpText;
-		};
-        std::string name;
-		std::vector<Function> functions;
-
-		bool operator<(const LuaLibrary& rhs) const;
-    };
-    
-    ScriptEngine();
-
-    bool initialize();
-    void deinitialize();
-    
-	void initializeLuaState(lua_State* state);
-
-	void addLibrary(const LuaLibrary& library);
-    bool hasLibrary(const std::string& name);
-    
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
-
-    
-private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
-
-    bool isLibraryNameAllowed(const std::string& name);
-    
-    void addBaseLibrary();
-    void remapPrintFunction();
-    
-    lua_State* _state;
-    std::set<LuaLibrary> _registeredLibraries;
+enum class MouseAction {
+	Press = SGCT_PRESS,
+	Release = SGCT_RELEASE,
+	Repeat = SGCT_REPEAT
 };
-  
-} // namespace scripting
+
+enum class MouseButton {
+	Left = SGCT_MOUSE_BUTTON_LEFT,
+	Right = SGCT_MOUSE_BUTTON_RIGHT,
+	Middle = SGCT_MOUSE_BUTTON_MIDDLE,
+	Button1 = SGCT_MOUSE_BUTTON_1,
+	Button2 = SGCT_MOUSE_BUTTON_2,
+	Button3 = SGCT_MOUSE_BUTTON_3,
+	Button4 = SGCT_MOUSE_BUTTON_4,
+	Button5 = SGCT_MOUSE_BUTTON_5,
+	Button6 = SGCT_MOUSE_BUTTON_6,
+	Button7 = SGCT_MOUSE_BUTTON_7,
+	Button8 = SGCT_MOUSE_BUTTON_8,
+	ButtonLast = SGCT_MOUSE_BUTTON_LAST,
+};
+
+} // namespace interaction
 } // namespace openspace
 
-#endif // __SCRIPTENGINE_H__
+#endif // __MOUSE_H__

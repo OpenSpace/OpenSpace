@@ -182,23 +182,20 @@ ScriptEngine::ScriptEngine()
 }
 
 bool ScriptEngine::initialize() {
+    LDEBUG("Adding base functions");
+    addBaseLibrary();
+
     _state = luaL_newstate();
     LDEBUG("Creating Lua state");
     if (_state == nullptr) {
         LFATAL("Error creating new Lua state: Memory allocation error");
         return false;
     }
+
     LDEBUG("Open Lua libraries");
     luaL_openlibs(_state);
-    
-    LDEBUG("Add OpenSpace modules");
-    
-    LDEBUG("Create openspace base library");
-    lua_newtable(_state);
-    lua_setglobal(_state, _openspaceLibraryName.c_str());
-    
-    LDEBUG("Adding base functions");
-    addBaseLibrary();
+
+	initializeLuaState(_state);
     
     LDEBUG("Remap print function");
     remapPrintFunction();
@@ -211,42 +208,8 @@ void ScriptEngine::deinitialize() {
     _state = nullptr;
 }
 
-bool ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
-    assert(_state);
-    if (library.functions.empty()) {
-        LERROR("Lua library '" << library.name << "' does not have any functions");
-        return false;
-    }
-
-	//ghoul::lua::logStack(_state);
-    lua_getglobal(_state, _openspaceLibraryName.c_str());
-	//ghoul::lua::logStack(_state);
-    if (library.name.empty()) {
-		//ghoul::lua::logStack(_state);
-        addLibraryFunctions(library, true);
-		//ghoul::lua::logStack(_state);
-		lua_pop(_state, 1);
-		//ghoul::lua::logStack(_state);
-    }
-    else {
-        const bool allowed = isLibraryNameAllowed(library.name);
-        if (!allowed)
-            return false;
-        
-		//ghoul::lua::logStack(_state);
-		
-        lua_pushstring(_state, library.name.c_str());
-		//ghoul::lua::logStack(_state);
-        lua_newtable(_state);
-		//ghoul::lua::logStack(_state);
-        addLibraryFunctions(library, false);
-        lua_settable(_state, _setTableOffset);
-        //ghoul::lua::logStack(_state);
-
-        _registeredLibraries.insert(library);
-    }
-
-    return true;
+void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
+	_registeredLibraries.insert(library);
 }
 
 bool ScriptEngine::runScript(const std::string& script) {
@@ -350,26 +313,26 @@ bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
     return result;
 }
 
-void ScriptEngine::addLibraryFunctions(const LuaLibrary& library, bool replace)
-{
+void ScriptEngine::addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace) {
+	assert(state);
     for (LuaLibrary::Function p : library.functions) {
         if (!replace) {
 			//ghoul::lua::logStack(_state);
-            lua_getfield(_state, -1, p.name.c_str());
+            lua_getfield(state, -1, p.name.c_str());
 			//ghoul::lua::logStack(_state);
-            const bool isNil = lua_isnil(_state, -1);
+            const bool isNil = lua_isnil(state, -1);
             if (!isNil) {
                 LERROR("Function name '" << p.name << "' was already assigned");
                 return;
             }
-			lua_pop(_state, 1);
+			lua_pop(state, 1);
         }
 		//ghoul::lua::logStack(_state);
-        lua_pushstring(_state, p.name.c_str());
+        lua_pushstring(state, p.name.c_str());
 		//ghoul::lua::logStack(_state);
-        lua_pushcfunction(_state, p.function);
+        lua_pushcfunction(state, p.function);
 		//ghoul::lua::logStack(_state);
-        lua_settable(_state, _setTableOffset);
+        lua_settable(state, _setTableOffset);
 		//ghoul::lua::logStack(_state);
     }
 }
@@ -436,6 +399,54 @@ void ScriptEngine::remapPrintFunction() {
  //   lua_settable(_state, _setTableOffset);
 	//ghoul::lua::logStack(_state);
 }
-    
+
+void ScriptEngine::initializeLuaState(lua_State* state) {
+    LDEBUG("Create openspace base library");
+    lua_newtable(_state);
+    lua_setglobal(_state, _openspaceLibraryName.c_str());
+
+	LDEBUG("Add OpenSpace modules");
+	for (auto lib : _registeredLibraries)
+		registerLuaLibrary(state, lib);
+}
+
+bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& library) {
+	assert(state);
+    if (library.functions.empty()) {
+        LERROR("Lua library '" << library.name << "' does not have any functions");
+        return false;
+    }
+
+	//ghoul::lua::logStack(_state);
+    lua_getglobal(state, _openspaceLibraryName.c_str());
+	//ghoul::lua::logStack(_state);
+    if (library.name.empty()) {
+		//ghoul::lua::logStack(_state);
+        addLibraryFunctions(state, library, true);
+		//ghoul::lua::logStack(_state);
+		lua_pop(state, 1);
+		//ghoul::lua::logStack(_state);
+    }
+    else {
+        const bool allowed = isLibraryNameAllowed(library.name);
+        if (!allowed)
+            return false;
+        
+		//ghoul::lua::logStack(_state);
+		
+        lua_pushstring(state, library.name.c_str());
+		//ghoul::lua::logStack(_state);
+        lua_newtable(state);
+		//ghoul::lua::logStack(_state);
+        addLibraryFunctions(state, library, false);
+        lua_settable(state, _setTableOffset);
+        //ghoul::lua::logStack(_state);
+
+        _registeredLibraries.insert(library);
+    }
+    return true;
+}
+
+
 } // namespace scripting
 } // namespace openspace

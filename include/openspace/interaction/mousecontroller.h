@@ -22,62 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __MOUSECONTROLLER_H__
+#define __MOUSECONTROLLER_H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/interaction/controller.h>
 
-#include <set>
+#include <openspace/interaction/mouse.h>
 
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+#include <ghoul/glm.h>
 
 namespace openspace {
-namespace scripting {
+namespace interaction {
 
-class ScriptEngine {
+class MouseController : public Controller {
 public:
-    struct LuaLibrary {
-		struct Function {
-			std::string name;
-			lua_CFunction function;
-			std::string helpText;
-		};
-        std::string name;
-		std::vector<Function> functions;
+	MouseController();
 
-		bool operator<(const LuaLibrary& rhs) const;
-    };
-    
-    ScriptEngine();
+	virtual void button(MouseAction action, MouseButton button) = 0;
+	virtual void move(float x, float y) = 0;
+	virtual void scrollWheel(int pos) = 0;
 
-    bool initialize();
-    void deinitialize();
-    
-	void initializeLuaState(lua_State* state);
+protected:
+	glm::vec3 _lastTrackballPos;
+	bool _isMouseBeingPressedAndHeld;
 
-	void addLibrary(const LuaLibrary& library);
-    bool hasLibrary(const std::string& name);
-    
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
+	glm::vec3 mapToTrackball(glm::vec2 mousePos);
 
-    
-private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
+	glm::vec3 mapToCamera(glm::vec3 trackballPos);
 
-    bool isLibraryNameAllowed(const std::string& name);
-    
-    void addBaseLibrary();
-    void remapPrintFunction();
-    
-    lua_State* _state;
-    std::set<LuaLibrary> _registeredLibraries;
+	void trackballRotate(int x, int y);
 };
-  
-} // namespace scripting
+
+class TrackballMouseController : public MouseController {
+public:
+	TrackballMouseController();
+
+	void button(MouseAction action, MouseButton button);
+
+	void move(float x, float y);
+
+	void scrollWheel(int pos);
+
+protected:
+	bool _leftMouseButtonDown;
+};
+
+} // namespace interaction
 } // namespace openspace
 
-#endif // __SCRIPTENGINE_H__
+#endif // __MOUSECONTROLLER_H__

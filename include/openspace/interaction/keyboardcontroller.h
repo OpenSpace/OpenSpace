@@ -22,62 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __KEYBOARDCONTROLLER_H__
+#define __KEYBOARDCONTROLLER_H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/interaction/controller.h>
 
-#include <set>
-
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+#include <openspace/interaction/keys.h>
 
 namespace openspace {
-namespace scripting {
+namespace interaction {
 
-class ScriptEngine {
+class KeyboardController : public Controller {
 public:
-    struct LuaLibrary {
-		struct Function {
-			std::string name;
-			lua_CFunction function;
-			std::string helpText;
-		};
-        std::string name;
-		std::vector<Function> functions;
-
-		bool operator<(const LuaLibrary& rhs) const;
-    };
-    
-    ScriptEngine();
-
-    bool initialize();
-    void deinitialize();
-    
-	void initializeLuaState(lua_State* state);
-
-	void addLibrary(const LuaLibrary& library);
-    bool hasLibrary(const std::string& name);
-    
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
-
-    
-private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
-
-    bool isLibraryNameAllowed(const std::string& name);
-    
-    void addBaseLibrary();
-    void remapPrintFunction();
-    
-    lua_State* _state;
-    std::set<LuaLibrary> _registeredLibraries;
+	virtual void keyPressed(KeyAction action, Key key, KeyModifier modifier) = 0;
 };
-  
-} // namespace scripting
+
+class KeyboardControllerFixed : public KeyboardController {
+public:
+	void keyPressed(KeyAction action, Key key, KeyModifier modifier);
+};
+
+class KeyboardControllerLua : public KeyboardController {
+public:
+	void keyPressed(KeyAction action, Key key, KeyModifier modifier);
+
+protected:
+	std::string keyToString(Key key, KeyModifier mod) const;
+};
+
+} // namespace interaction
 } // namespace openspace
 
-#endif // __SCRIPTENGINE_H__
+#endif // __KEYBOARDCONTROLLER_H__

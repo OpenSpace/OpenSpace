@@ -22,62 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __CONTROLLER_H__
+#define __CONTROLLER_H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/scenegraph/scenegraphnode.h>
 
-#include <set>
-
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+#include <ghoul/glm.h>
+#include <glm/gtx/vector_angle.hpp>
 
 namespace openspace {
-namespace scripting {
+namespace interaction {
 
-class ScriptEngine {
+class InteractionHandler;
+
+class Controller {
 public:
-    struct LuaLibrary {
-		struct Function {
-			std::string name;
-			lua_CFunction function;
-			std::string helpText;
-		};
-        std::string name;
-		std::vector<Function> functions;
+	Controller() :
+		_handler(nullptr)
+	{}
 
-		bool operator<(const LuaLibrary& rhs) const;
-    };
-    
-    ScriptEngine();
+	void setHandler(InteractionHandler* handler);
 
-    bool initialize();
-    void deinitialize();
-    
-	void initializeLuaState(lua_State* state);
-
-	void addLibrary(const LuaLibrary& library);
-    bool hasLibrary(const std::string& name);
-    
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
-
-    
-private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
-
-    bool isLibraryNameAllowed(const std::string& name);
-    
-    void addBaseLibrary();
-    void remapPrintFunction();
-    
-    lua_State* _state;
-    std::set<LuaLibrary> _registeredLibraries;
+protected:
+	InteractionHandler* _handler;
 };
-  
-} // namespace scripting
+
+} // namespace interaction
 } // namespace openspace
 
-#endif // __SCRIPTENGINE_H__
+#endif // __CONTROLLER_H__

@@ -52,7 +52,7 @@ public:
     static bool findConfiguration(std::string& filename);
 
     ConfigurationManager& configurationManager();
-    InteractionHandler& interactionHandler();
+    interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
 
@@ -86,7 +86,7 @@ private:
     static OpenSpaceEngine* _engine;
 
     ConfigurationManager _configurationManager;
-    InteractionHandler _interactionHandler;
+    interaction::InteractionHandler _interactionHandler;
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
