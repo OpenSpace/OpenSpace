@@ -147,6 +147,7 @@ namespace openspace {
 LuaConsole::LuaConsole() 
 	: _inputPosition(0)
 	, _activeCommand(0)
+	, _isVisible(false)
 {
 	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
 	if (file.is_open()) {
@@ -279,12 +280,12 @@ void LuaConsole::keyboardCallback(int key, int action) {
 					_commands.push_back("");
 					_activeCommand = _commands.size() - 1;
 					_inputPosition = 0;
-					OsEng.setInputCommand(false);
+					setVisible(false);
 				}
 				else {
 					_commands = _commandsHistory;
 					_commands.push_back("");
-					OsEng.setInputCommand(false);
+					setVisible(false);
 				}
 			}
 		}
@@ -392,6 +393,18 @@ std::string LuaConsole::UnicodeToUTF8(unsigned int codepoint) {
 		out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
 	}
 	return out;
+}
+
+bool LuaConsole::isVisible() const {
+	return _isVisible;
+}
+
+void LuaConsole::setVisible(bool visible) {
+	_isVisible = visible;
+}
+
+void LuaConsole::toggleVisibility() {
+	_isVisible = !_isVisible;
 }
 
 

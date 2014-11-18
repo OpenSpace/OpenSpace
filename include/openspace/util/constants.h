@@ -38,7 +38,8 @@ namespace fonts {
 
 namespace configurationmanager {
     const std::string keyPaths = "Paths";
-	const std::string keyCachePath = "Paths.CACHE";
+	const std::string keyCache = "CACHE";
+	const std::string keyCachePath = keyPaths + "." + keyCache;
 	const std::string keyFonts = "Fonts";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";

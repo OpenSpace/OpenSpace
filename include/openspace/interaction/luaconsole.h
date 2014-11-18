@@ -43,6 +43,10 @@ public:
 	unsigned int commandInputButton();
 	unsigned int ignoreCodepoint();
 
+	bool isVisible() const;
+	void setVisible(bool visible);
+	void toggleVisibility();
+
 private:
 	void addToCommand(std::string c);
 	std::string UnicodeToUTF8(unsigned int codepoint);
@@ -52,6 +56,7 @@ private:
 	size_t _activeCommand;
 	std::vector<std::string> _commands;
 	
+	bool _isVisible;
 };
 
 } // namespace openspace

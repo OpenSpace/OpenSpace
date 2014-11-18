@@ -71,8 +71,6 @@ public:
     void encode();
     void decode();
 
-	void setInputCommand(bool b);
-
 private:
     OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
@@ -93,7 +91,6 @@ private:
 
 	SyncBuffer* _syncBuffer;
 
-	bool _inputCommand;
 	LuaConsole* _console;
 };
 

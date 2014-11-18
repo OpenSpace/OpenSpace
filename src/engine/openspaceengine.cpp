@@ -85,7 +85,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
     , _syncBuffer(nullptr)
-    , _inputCommand(false)
     , _console(nullptr)
 {
 	// initialize OpenSpace helpers
@@ -294,10 +293,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// Create the cachemanager
-	std::string cacheDirectory;
-	_engine->configurationManager().getValue(
-		constants::configurationmanager::keyCachePath, cacheDirectory);
-	FileSys.createCacheManager(cacheDirectory);
+	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 
 	_engine->_console = new LuaConsole();
 	_engine->_syncBuffer = new SyncBuffer(1024);
@@ -426,7 +422,7 @@ void OpenSpaceEngine::render() {
 
 	// If currently writing a command, render it to screen
 	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _inputCommand) {
+	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console->isVisible()) {
 		_console->render();
 	}
 }
@@ -441,11 +437,10 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
-		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT)) {
-			_inputCommand = !_inputCommand;
-		}
+		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
+			_console->toggleVisibility();
 
-		if (!_inputCommand) {
+		if (!_console->isVisible()) {
 			_interactionHandler.keyboardCallback(key, action);
 		}
 		else {
@@ -455,7 +450,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
-	if (_inputCommand) {
+	if (_console->isVisible()) {
 		_console->charCallback(codepoint);
 	}
 }
@@ -483,10 +478,6 @@ void OpenSpaceEngine::decode()
 {
 	_syncBuffer->read();
 	_renderEngine.deserialize(_syncBuffer);
-}
-
-void OpenSpaceEngine::setInputCommand(bool b) {
-	_inputCommand = b;
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
