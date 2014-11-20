@@ -129,7 +129,7 @@ source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
 include_directories(${HEADER_ROOT_DIR})
 
 # hack:
-set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
+#set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
 find_package(OpenCL REQUIRED)
