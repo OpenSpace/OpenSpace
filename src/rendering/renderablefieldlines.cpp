@@ -35,18 +35,14 @@ namespace {
 	const std::string keyFieldlines = "Fieldlines";
 	const std::string keyFilename = "File";
 	const std::string keyHints = "Hints";
-	const std::string keyShaders = "Shaders";
-	const std::string keyVertexShader = "VertexShader";
-	const std::string keyFragmentShader = "FragmentShader";
 }
 
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
-	, _VAO(0)
-	, _programUpdateOnSave(false)
-	, _update(false)
+	, _fieldlineVAO(0)
+	, _shader(nullptr)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -84,41 +80,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 		}
 	}
 
-	ghoul::Dictionary shaderDictionary;
-	success = dictionary.getValue(keyShaders, shaderDictionary);
-	if (!success) {
-		LERROR("RenderableFieldlines '" << name << "' does not contain a '" <<
-			keyShaders << "' table");
-		return;
-	}
-
-	std::string vshaderpath;
-	success = shaderDictionary.getValue(keyVertexShader, vshaderpath);
-	if (!success) {
-		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
-			keyVertexShader << "'");
-		return;
-	}
-	vshaderpath = findPath(vshaderpath);
-
-	std::string fshaderpath;
-	success = shaderDictionary.getValue(keyFragmentShader, fshaderpath);
-	if (!success) {
-		LERROR("RenderableFieldlines '" << name << "' does not have a '" <<
-			keyFragmentShader << "'");
-		return;
-	}
-	fshaderpath = findPath(fshaderpath);
-
-	_vertexSourceFile = new ghoul::filesystem::File(vshaderpath, false);
-	_fragmentSourceFile = new ghoul::filesystem::File(fshaderpath, false);
-
-
-    _fieldlinesProgram = ghoul::opengl::ProgramObject::Build("FieldlinesProgram", vshaderpath, fshaderpath);
-
-	dictionary.getValue("UpdateOnSave", _programUpdateOnSave);
-
-	setBoundingSphere(PowerScaledScalar::CreatePSS(5)); // FIXME a non-magic number perhaps
+	setBoundingSphere(PowerScaledScalar::CreatePSS(250.f*6371000.f)); // FIXME a non-magic number perhaps
 }
 
 RenderableFieldlines::~RenderableFieldlines() {
@@ -151,8 +113,8 @@ bool RenderableFieldlines::initialize() {
 
 	//	------ FIELDLINES -----------------
 	GLuint vertexPositionBuffer;
-	glGenVertexArrays(1, &_VAO); // generate array
-	glBindVertexArray(_VAO); // bind array
+	glGenVertexArrays(1, &_fieldlineVAO); // generate array
+	glBindVertexArray(_fieldlineVAO); // bind array
 	glGenBuffers(1, &vertexPositionBuffer); // generate buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
 	glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
@@ -162,10 +124,10 @@ bool RenderableFieldlines::initialize() {
 	glEnableVertexAttribArray(vertexLocation);
 	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
 
-	// Texture coordinates
-	GLuint texcoordLocation = 1;
-	glEnableVertexAttribArray(texcoordLocation);
-	glVertexAttribPointer(texcoordLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
+	// Vertex colors
+	GLuint colorLocation = 1;
+	glEnableVertexAttribArray(colorLocation);
+	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
@@ -182,26 +144,21 @@ bool RenderableFieldlines::initialize() {
 	glEnableVertexAttribArray(vertexLocation);
 	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
 
-	// Texture coordinates
-	glEnableVertexAttribArray(texcoordLocation);
-	glVertexAttribPointer(texcoordLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(3*sizeof(float)));
+	// Vertex colors
+	glEnableVertexAttribArray(colorLocation);
+	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
 
 	glPointSize(5); // size of seedpoints
+	//glEnable(GL_LINE_SMOOTH);
+	//glEnable(GL_POLYGON_SMOOTH);
+	//glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-	//	------ SETUP SHADERS -----------------
-	auto privateCallback = [this](const ghoul::filesystem::File& file) {
-		_update = true;
-	};
-	if(_programUpdateOnSave) {
-		_vertexSourceFile->setCallback(privateCallback);
-		_fragmentSourceFile->setCallback(privateCallback);
-	}
-
-	_fieldlinesProgram->compileShaderObjects();
-	_fieldlinesProgram->linkProgramObject();
+	OsEng.ref().configurationManager().getValue("FieldlineProgram", _shader);
+	assert(_shader);
 
 	return true;
 }
@@ -211,46 +168,24 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const RenderData& data) {
-	if(_update) {
-		_update = false;
-		safeShaderCompilation();
-	}
+	if (!_shader)
+		return;
 
-	glm::mat4 transform = data.camera.viewProjectionMatrix();
-	glm::mat4 camTransform = data.camera.viewRotationMatrix();
-	//psc relative = data.position - data.camera.position();
+	_shader->activate();
+	_shader->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
+	_shader->setUniform("modelTransform", glm::mat4(1.0));
+	setPscUniforms(_shader, &data.camera, data.position);
 
-	transform = transform*camTransform;
-	transform = glm::mat4(1.0);
-	transform = glm::scale(transform, glm::vec3(0.01));
-
-	// Activate shader
-	_fieldlinesProgram->activate();
-
-    _fieldlinesProgram->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
-	_fieldlinesProgram->setUniform("modelTransform", transform);
-	setPscUniforms(_fieldlinesProgram, &data.camera, data.position);
-
-	//	------ FIELDLINES -----------------
-	glBindVertexArray(_VAO);
+	//	------ DRAW FIELDLINES -----------------
+	glBindVertexArray(_fieldlineVAO);
 	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
 
-//	//	------ SEEDPOINTS -----------------
+//	//	------ DRAW SEEDPOINTS -----------------
 //	glBindVertexArray(_seedpointVAO);
 //	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
+
 	glBindVertexArray(0);
-
-	// Deactivate shader
-	_fieldlinesProgram->deactivate();
-}
-
-void RenderableFieldlines::update(const UpdateData& data) {
-}
-
-void RenderableFieldlines::safeShaderCompilation() {
-	_fieldlinesProgram->rebuildFromFile();
-	_fieldlinesProgram->compileShaderObjects();
-	_fieldlinesProgram->linkProgramObject();
+	_shader->deactivate();
 }
 
 std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {

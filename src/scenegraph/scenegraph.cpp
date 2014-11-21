@@ -231,6 +231,16 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
+	// Fieldline program
+	tmpProgram = ProgramObject::Build("Fieldline",
+		"${SHADERS}/fieldline_vs.glsl",
+		"${SHADERS}/fieldline_fs.glsl",
+		"${SHADERS}/fieldline_gs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("FieldlineProgram", tmpProgram);
+
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load shaders: " << elapsed);

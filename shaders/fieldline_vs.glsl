@@ -22,43 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEFIELDLINES_H_
-#define RENDERABLEFIELDLINES_H_
+#version __CONTEXT__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+uniform mat4 modelViewProjection;
+uniform mat4 modelTransform;
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec4 in_color;
 
-namespace openspace {
-	struct LinePoint;
+out vec4 vs_color;
+// out vec4 vs_position;
 
-class RenderableFieldlines : public Renderable {
-public:
-	RenderableFieldlines(const ghoul::Dictionary& dictionary);
-	~RenderableFieldlines();
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-	bool initialize();
-	bool deinitialize();
+void main() {		
+	vs_color = in_color;
 
-	void render(const RenderData& data) override;
+	// // calculate psc position
+	// vec4 tmp = vec4(in_position, 0);
+	// vec4 position = pscTransform(tmp, modelTransform);
+	// // vs_position = tmp;
 
-private:
-	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+	// // project the position to view space
+	// position =  modelViewProjection * position;
+	// gl_Position =  z_normalization(position);
 
-	std::vector<ghoul::Dictionary> _hintsDictionaries;
-	std::vector<std::string> _filenames;
-	std::vector<glm::vec3> _seedPoints;
-
-	ghoul::opengl::ProgramObject* _shader;
-	GLuint _fieldlineVAO, _seedpointVAO;
-
-	std::vector<GLint> _lineStart;
-	std::vector<GLsizei> _lineCount;
-};
-
-} // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+	gl_Position = vec4(in_position, 0);
+}

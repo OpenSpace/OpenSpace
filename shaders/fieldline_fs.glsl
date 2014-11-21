@@ -22,43 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEFIELDLINES_H_
-#define RENDERABLEFIELDLINES_H_
+#version __CONTEXT__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+in vec4 gs_color;
+in vec4 gs_position;
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-namespace openspace {
-	struct LinePoint;
+void main() {
+	vec4 fragColor = gs_color;
 
-class RenderableFieldlines : public Renderable {
-public:
-	RenderableFieldlines(const ghoul::Dictionary& dictionary);
-	~RenderableFieldlines();
-
-	bool initialize();
-	bool deinitialize();
-
-	void render(const RenderData& data) override;
-
-private:
-	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
-
-	std::vector<ghoul::Dictionary> _hintsDictionaries;
-	std::vector<std::string> _filenames;
-	std::vector<glm::vec3> _seedPoints;
-
-	ghoul::opengl::ProgramObject* _shader;
-	GLuint _fieldlineVAO, _seedpointVAO;
-
-	std::vector<GLint> _lineStart;
-	std::vector<GLsizei> _lineCount;
-};
-
-} // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+	float depth = pscDepth(gs_position);
+	ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
+	addToBuffer(frag);
+}

@@ -395,6 +395,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
 	glm::vec4 color;
 	FieldlineEnd forwardEnd, backEnd;
 
+	float ReToMeter = 6371000;
+
 	if (_type == Model::BATSRUS) {
 		for (glm::vec3 seedPoint : seedPoints) {
 			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
@@ -408,7 +410,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
 			// write colors
 			std::vector<LinePoint> line;
 			for (glm::vec3 position : bLine) {
-				line.push_back(LinePoint(position, color));
+				line.push_back(LinePoint(ReToMeter*position, color));
 			}
 
 			fieldLines.push_back(line);
