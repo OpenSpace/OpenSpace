@@ -24,7 +24,7 @@
 					<Pos x="-1.778" y="-1.0" z="0.0" />
 					<!-- Upper left -->
 					<Pos x="-1.778" y="1.0" z="0.0" />
-					<!-- Upper right -->
+					<!-- Upper right 1.778-->
 					<Pos x="1.778" y="1.0" z="0.0" />
 				</Viewplane>
 			</Viewport>

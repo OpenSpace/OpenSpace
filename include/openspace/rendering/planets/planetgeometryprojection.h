@@ -22,62 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#ifndef __PlanetGeometryProjection_H__
+#define __PlanetGeometryProjection_H__
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/planets/RenderablePlanetProjection.h>
+#include <ghoul/misc/dictionary.h>
 
+namespace openspace {
 
-uniform float time;
-uniform sampler2D texture1;
+namespace planetgeometryprojection {
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
+class PlanetGeometryProjection : public properties::PropertyOwner {
+public:
+    static PlanetGeometryProjection* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+	PlanetGeometryProjection();
+	virtual ~PlanetGeometryProjection();
+    virtual bool initialize(RenderablePlanetProjection* parent);
+    virtual void deinitialize();
+    virtual void render() = 0;
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
-void main()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(texture1, vs_st);
-	
-	// directional lighting
-	vec3 origin = vec3(0.0);
-	vec4 spec = vec4(0.0);
-	
-	vec3 n = normalize(vs_normal.xyz);
-	//vec3 e = normalize(camdir);
-	vec3 l_pos = vec3(0.0); // sun.
-	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-	
-	float shine = 0.0001;
+protected:
+	RenderablePlanetProjection* _parent;
+};
 
-	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	/*
-	if(intensity > 0.f){
-		// halfway vector
-		vec3 h = normalize(l_dir + e);
-		// specular factor
-		float intSpec = max(dot(h,n),0.0);
-		spec = specular * pow(intSpec, shine);
-	}
-	*/
-	vec4 tmpdiff = diffuse;
-	tmpdiff[3] = 1;
-	diffuse = max(intensity * diffuse, ambient);
-	//diffuse[3] = 0.6f;
-	//diffuse = vec4(1);
+}  // namespace planetgeometry
+}  // namespace openspace
 
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
-
-	discard;
-}
+#endif  // __PLANETGEOMETRY_H__

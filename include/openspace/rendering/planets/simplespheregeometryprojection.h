@@ -22,58 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANETPROJECTION_H__
-#define __RENDERABLEPLANETPROJECTION_H__
+#ifndef __SIMPLESPHEREGEOMETRYPROJECTION_H__
+#define __SIMPLESPHEREGEOMETRYPROJECTION_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/query/query.h>
+#include <openspace/rendering/planets/planetgeometryprojection.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/util/powerscaledsphere.h>
 
 namespace openspace {
 
+class RenderablePlanet;
+
 namespace planetgeometryprojection {
-class PlanetGeometryProjection;
-}
 
-class RenderablePlanetProjection : public Renderable {
+class SimpleSphereGeometryProjection : public PlanetGeometryProjection {
 public:
-	RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
-	~RenderablePlanetProjection();
+	SimpleSphereGeometryProjection(const ghoul::Dictionary& dictionary);
+	~SimpleSphereGeometryProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
 
-	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-protected:
-    void loadTexture();
+	bool initialize(RenderablePlanetProjection* parent) override;
+    void deinitialize() override;
+    void render() override;
 
 private:
-    properties::StringProperty _colorTexturePath;
-	properties::StringProperty _projectionTexturePath;
+    void createSphere();
 
-    ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _textureProj;
-	planetgeometryprojection::PlanetGeometryProjection* _geometry;
+    properties::Vec2Property _radius;
+    properties::IntProperty _segments;
 
-	glm::dmat3 _stateMatrix;
-	glm::dmat3 _instrumentMatrix;
-
-	double _time;
-	openspace::SceneGraphNode* _targetNode;
-
-	std::string _target;
+    PowerScaledSphere* _planet;
 };
 
+}  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANETPROJECTION_H__
+#endif // __SIMPLESPHEREGEOMETRY_H__

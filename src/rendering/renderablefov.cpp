@@ -393,26 +393,13 @@ void RenderableFov::render(const RenderData& data){
 		}
 		
 		//somehow get target in there.
-		_targetNode = sceneGraphNode(_fovTarget);
+		//_targetNode = sceneGraphNode(_fovTarget);
 		/*std::vector<PropertyOwner*> properties = _targetNode->subOwners();
 		for (auto & element : properties) {
 			std::cout << element->name() << std::endl;
 		}*/
 		//std::cout << _targetNode->renderable.hasProperty("PlanetGeometry") << std::endl;
 
-	//	if (_targetNode->renderable.hasProperty("PlanetGeometry")) std::cout << "Found property!" << std::endl;
-		glm::vec3 up = data.camera.lookUpVector();
-		glm::vec3 bsight(boresight);
-	/*	glm::vec3 e3 = glm::normalize(bsight);
-		glm::vec3 e1 = glm::normalize(glm::cross(up, e3));
-		glm::vec3 e2 = glm::cross(e1, e2);*/
-
-		glm::mat4  nhLorriViewMatrix = glm::lookAt(data.position.vec3(), bsight, up);
-		for (int i = 0; i < 4; i++){
-			for (int j = 0; j < 4; j++){
-				std::cout << nhLorriViewMatrix[i][j] << std::endl;
-			}
-		}
 
 		// for each FOV vector
 		for (int i = 0; i < 4; i++){

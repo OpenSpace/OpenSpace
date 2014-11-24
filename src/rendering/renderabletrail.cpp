@@ -102,9 +102,14 @@ void RenderableTrail::fullYearSweep(){
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
 	_iarray = new int[_isize];
-	
+
 	for (int i = 0; i < segments+2; i++){
-		SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, _pscpos, _pscvel, lightTime);
+		/*if (_target == "NEW HORIZONS"){
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _startTrail, _pscpos, _pscvel, lightTime);
+		}
+		else{*/
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, _pscpos, _pscvel, lightTime);
+		//}
 		_pscpos[3] += 3;
 
 		for (int k = 0; k < 4; k++)
@@ -171,7 +176,7 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 jan 26 17:42:00", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 28 11:48:00.000", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();

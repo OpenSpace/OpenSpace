@@ -41,7 +41,7 @@ namespace {
 namespace openspace {
 
 // needs to be set from dictionary - REMEMBER
-//const PowerScaledScalar radius = PowerScaledScalar(1.f, 20.f);
+const PowerScaledScalar radius = PowerScaledScalar(1.f, 20.f);
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
 : Renderable(dictionary)
@@ -65,9 +65,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, s);
 
 
-	glm::vec2 radius;
+	/*glm::vec2 radius;
 	dictionary.getValue(constants::renderablesphericalgrid::gridRadius, radius);
-
+	*/
 	_segments = s[0];
 
 	_isize = int(6 * _segments * _segments);
