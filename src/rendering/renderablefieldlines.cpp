@@ -29,6 +29,10 @@
 
 #include <openspace/util/constants.h>
 
+#include <ghoul/opengl/texturereader.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/texture.h>
+
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
 
@@ -43,6 +47,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _fieldlineVAO(0)
 	, _shader(nullptr)
+	, _texture(nullptr)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -149,16 +154,12 @@ bool RenderableFieldlines::initialize() {
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
-	glBindVertexArray(0); //unbind array
-
-	glPointSize(5); // size of seedpoints
-	//glEnable(GL_LINE_SMOOTH);
-	//glEnable(GL_POLYGON_SMOOTH);
-	//glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	glBindVertexArray(0); //unbind array	
 
 	OsEng.ref().configurationManager().getValue("FieldlineProgram", _shader);
 	assert(_shader);
+
+	loadTexture("C:/openspace/openspace-data/test.png");
 
 	return true;
 }
@@ -170,20 +171,29 @@ bool RenderableFieldlines::deinitialize() {
 void RenderableFieldlines::render(const RenderData& data) {
 	if (!_shader)
 		return;
-
+	
 	_shader->activate();
 	_shader->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("modelTransform", glm::mat4(1.0));
+	_shader->setUniform("cameraViewDir", data.camera.viewDirection());
 	setPscUniforms(_shader, &data.camera, data.position);
 
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
+	_texture->bind();
+	_shader->setUniform("texture1", unit);
+
 	//	------ DRAW FIELDLINES -----------------
+	glEnable(GL_POLYGON_SMOOTH);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	glBindVertexArray(_fieldlineVAO);
-	glMultiDrawArrays(GL_LINE_STRIP, &_lineStart[0], &_lineCount[0], _lineStart.size());
+	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _lineStart.size());
 
-//	//	------ DRAW SEEDPOINTS -----------------
-//	glBindVertexArray(_seedpointVAO);
-//	glMultiDrawArrays(GL_POINTS, &_lineStart[0], &_lineCount[0], _seedPoints.size());
+	////	------ DRAW SEEDPOINTS -----------------
+	//glBindVertexArray(_seedpointVAO);
+	//glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _seedPoints.size());
 
+	glDisable(GL_POLYGON_SMOOTH);
 	glBindVertexArray(0);
 	_shader->deactivate();
 }
@@ -266,6 +276,24 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 	}
 
 	return fieldlinesData;
+}
+
+// TEST
+void RenderableFieldlines::loadTexture(std::string path) {
+	if (path != "") {
+		ghoul::opengl::Texture* texture = ghoul::opengl::loadTexture(path);
+		if (texture) {
+			LDEBUG("Loaded texture from '" << path << "'");
+			texture->uploadTexture();
+
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+			if (_texture)
+				delete _texture;
+			_texture = texture;
+		}
+	}
 }
 
 } // namespace openspace

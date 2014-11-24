@@ -31,21 +31,10 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
 out vec4 vs_color;
-// out vec4 vs_position;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {		
 	vs_color = in_color;
-
-	// // calculate psc position
-	// vec4 tmp = vec4(in_position, 0);
-	// vec4 position = pscTransform(tmp, modelTransform);
-	// // vs_position = tmp;
-
-	// // project the position to view space
-	// position =  modelViewProjection * position;
-	// gl_Position =  z_normalization(position);
-
 	gl_Position = vec4(in_position, 0);
 }

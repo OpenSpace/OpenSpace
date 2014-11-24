@@ -33,6 +33,12 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/filesystem/file.h>
 
+namespace ghoul {
+	namespace opengl {
+		class Texture;
+	}
+}
+
 namespace openspace {
 	struct LinePoint;
 
@@ -58,6 +64,10 @@ private:
 
 	std::vector<GLint> _lineStart;
 	std::vector<GLsizei> _lineCount;
+
+	//TEST
+	ghoul::opengl::Texture* _texture;
+	void loadTexture(std::string path);
 };
 
 } // namespace openspace

@@ -402,6 +402,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
 			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
 			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK, backEnd);
 
+			bLine.erase(bLine.begin());
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
 
 			// classify
@@ -442,7 +443,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(
 			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
 			bLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::BACK, backEnd);
 
-			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());
+			bLine.erase(bLine.begin());
+			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());			
 
 			// write colors
 			std::vector<LinePoint> line;
