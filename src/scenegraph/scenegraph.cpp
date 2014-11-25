@@ -303,7 +303,10 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	    // deallocate the scene graph. Recursive deallocation will occur
+	for (auto node : _nodes)
+		node->deinitialize();
+
+	// deallocate the scene graph. Recursive deallocation will occur
     delete _root;
     _root = nullptr;
 
