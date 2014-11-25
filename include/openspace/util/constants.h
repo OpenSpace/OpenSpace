@@ -88,8 +88,13 @@ namespace modelgeometry {
 } // namespace modelgeometry
 
 namespace renderablestars {
-	const std::string keySpeckFile = "SpeckFile";
-	const std::string keyPathModule = "ModulePath";
+	const std::string keyDataSource = "DataSource";
+	const std::string keyTexture = "Texture";
+
+	namespace datasource {
+		const std::string keyType = "Type";
+		const std::string keyFile = "File";
+	} // namespace datasource
 } // namespace renderablestars
 
 namespace renderablevolumegl {
