@@ -51,6 +51,7 @@ out vec4 ProjTexCoord;
 
 void main()
 {
+	// Radius = 0.71492 *10^8; 
     vs_boresight = boresight;
 	// set variables
 	vs_st = in_st;

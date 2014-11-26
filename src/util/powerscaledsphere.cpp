@@ -85,7 +85,6 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             _varray[nr].normal[1] = normal[1];
             _varray[nr].normal[2] = normal[2];
 
-			//std::cout << _varray[nr].location[0] << " " << _varray[nr].location[1] << " " << _varray[nr].location[2] << " " << _varray[nr].location[3] << std::endl;
             _varray[nr].tex[0] = t1;
             _varray[nr].tex[1] = t2;
             ++nr;

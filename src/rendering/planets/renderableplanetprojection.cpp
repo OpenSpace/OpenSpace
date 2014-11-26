@@ -51,6 +51,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _colorTexturePath("colorTexture", "Color Texture")
 	, _projectionTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
+	, _writeToTextureProgramObject(nullptr)
     , _texture(nullptr)
 	, _textureProj(nullptr)
     , _geometry(nullptr)
@@ -102,6 +103,9 @@ bool RenderablePlanetProjection::initialize(){
     if (_programObject == nullptr)
         completeSuccess
               &= OsEng.ref().configurationManager().getValue("projectiveProgram", _programObject);
+	if (_writeToTextureProgramObject == nullptr)
+		completeSuccess
+		&= OsEng.ref().configurationManager().getValue("writeToTextureProgram", _writeToTextureProgramObject);
 
     loadTexture();
     completeSuccess &= (_texture != nullptr);
@@ -195,18 +199,37 @@ void RenderablePlanetProjection::render(const RenderData& data)
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _programObject->setUniform("texture1", unit);
+    _programObject->setUniform("texture1", unit); // jupiter
 
 	ghoul::opengl::TextureUnit unit2;
 	unit2.activate();
 	_textureProj->bind();
-	_programObject->setUniform("texture2", unit2);
+	_programObject->setUniform("texture2", unit2); // proj
 
     // render
     _geometry->render();
 
     // disable shader
     _programObject->deactivate();
+
+	/*
+	fbo.activate();
+	//glViewport(0, 0, 1024, 1024);
+	_writeToTextureProgramObject->activate();
+	GLfloat vertices[] = { -1, -1, 0,   // bottom left corner
+						   -1,  1, 0,   // top left corner
+						    1,  1, 0,   // top right corner
+						    1, -1, 0 }; // bottom right corner
+	 
+	GLubyte indices[] = { 0, 1, 2,      // first triangle (bottom left - top left - top right)
+		                0, 2, 3 };      // second triangle (bottom left - top right - bottom right)
+
+	glVertexPointer(3, GL_FLOAT, 0, vertices);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
+
+	_writeToTextureProgramObject->deactivate();
+	fbo.deactivate();
+	*/
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
@@ -229,8 +252,13 @@ void RenderablePlanetProjection::loadTexture()
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+			fbo.activate();
+			fbo.attachTexture(_texture, GL_COLOR_ATTACHMENT0, 0, 0);
+			fbo.deactivate();
         }
     }
+
+
 	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {

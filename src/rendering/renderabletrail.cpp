@@ -164,7 +164,6 @@ void RenderableTrail::sendToGPU(){
 	glBindVertexArray(0);
 }
 
-
 bool RenderableTrail::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
@@ -176,7 +175,7 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 28 11:48:00.000", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:38:00.000", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();

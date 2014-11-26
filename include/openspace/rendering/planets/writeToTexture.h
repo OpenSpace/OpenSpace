@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANETPROJECTION_H__
-#define __RENDERABLEPLANETPROJECTION_H__
+#ifndef __RENDERABLEPLANET_H__
+#define __RENDERABLEPLANET_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -31,23 +31,20 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/opengl/framebufferobject.h>
-
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/query/query.h>
 
 namespace openspace {
 
-namespace planetgeometryprojection {
-class PlanetGeometryProjection;
+namespace planetgeometry {
+class PlanetGeometry;
 }
 
-class RenderablePlanetProjection : public Renderable {
+class RenderablePlanet : public Renderable {
 public:
-	RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
-	~RenderablePlanetProjection();
+    RenderablePlanet(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanet();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -60,26 +57,15 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
-	properties::StringProperty _projectionTexturePath;
-
-	ghoul::opengl::FramebufferObject fbo;
-
     ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _writeToTextureProgramObject;
-
     ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _textureProj;
-	planetgeometryprojection::PlanetGeometryProjection* _geometry;
+    planetgeometry::PlanetGeometry* _geometry;
 
 	glm::dmat3 _stateMatrix;
-	glm::dmat3 _instrumentMatrix;
-
-	double _time;
-	openspace::SceneGraphNode* _targetNode;
 
 	std::string _target;
 };
 
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANETPROJECTION_H__
+#endif  // __RENDERABLEPLANET_H__

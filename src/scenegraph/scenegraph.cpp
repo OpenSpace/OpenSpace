@@ -170,6 +170,15 @@ bool SceneGraph::initialize()
 	std::chrono::time_point<clock_> beginning(clock_::now());
 
 	// pscstandard
+	tmpProgram = ProgramObject::Build("writeToTextureProgram",
+		"${SHADERS}/writeToTexture_vs.glsl",
+		"${SHADERS}/writeToTexture_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("writeToTextureProgram", tmpProgram);
+
+	// pscstandard
 	tmpProgram = ProgramObject::Build("projectiveProgram",
 		"${SHADERS}/projectiveTexture_vs.glsl",
 		"${SHADERS}/projectiveTexture_fs.glsl",
