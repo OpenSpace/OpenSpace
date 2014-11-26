@@ -46,7 +46,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _haloProgram(nullptr)
 	, _pointProgram(nullptr)
 	, _texture(nullptr)
-	, _source(nullptr)
 {
 	std::string texturePath = "";
 	if (dictionary.hasKey(constants::renderablestars::keyTexture)) {
@@ -54,25 +53,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 		_colorTexturePath = absPath(texturePath);
 	}
 
-	ghoul::TemplateFactory<DataSource> sourceFactory;
-	sourceFactory.registerClass<SpeckDataSource>("Speck");
-
-	ghoul::Dictionary sourceDictionary;
-	bool success = dictionary.getValue(constants::renderablestars::keyDataSource,
-									   sourceDictionary);
+	bool success = dictionary.getValue(constants::renderablestars::keyFile, _speckPath);
 	if (!success) {
-		LERROR("RenderableStars did not have key '" <<
-			constants::renderablestars::keyDataSource << "'");
+		LERROR("SpeckDataSource did not contain key '" <<
+			constants::renderablestars::keyFile << "'");
 		return;
 	}
-	std::string type = "";
-	success = sourceDictionary.getValue(constants::renderablestars::datasource::keyType, type);
-	if (!success) {
-		LERROR("DataSource did not have key '" << constants::renderablestars::datasource::keyType << "'");
-		return;
-	}
-
-	_source = sourceFactory.create(type, sourceDictionary);
+	_speckPath = absPath(_speckPath);
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderableStars::loadTexture, this));
@@ -118,7 +105,7 @@ void RenderableStars::generateBufferObjects(const void* data){
 	glBindVertexArray(0);
 }
 
-bool RenderableStars::initialize(){
+bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
 	// 1. StarProgram  - Generates quads with png image of halo
@@ -129,9 +116,8 @@ bool RenderableStars::initialize(){
 	if (_pointProgram == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("PointProgram", _pointProgram);
 	
-	completeSuccess &= _source->loadData();
-
-	const std::vector<float>& data = _source->data();
+	completeSuccess &= loadData();
+	const std::vector<float>& data = this->data();
 
 	v_stride = 7;                      // stride in VBO, set manually for now.
 	v_size = static_cast<int>(data.size());     // size of VBO
@@ -256,25 +242,26 @@ void RenderableStars::update(const UpdateData& data)
 	
 }
 
-
-const std::vector<float>& RenderableStars::DataSource::data() const {
+const std::vector<float>& RenderableStars::data() const {
 	return _data;
 }
 
-RenderableStars::SpeckDataSource::SpeckDataSource(const ghoul::Dictionary& dictionary)
-	: DataSource()
-	, _file("")
-{
-	bool success = dictionary.getValue(constants::renderablestars::datasource::keyFile, _file);
-	if (!success) {
-		LERROR("SpeckDataSource did not contain key '" <<
-			constants::renderablestars::datasource::keyFile << "'");
-		return;
-	}
-	_file = absPath(_file);
-}
 
-bool RenderableStars::SpeckDataSource::loadData() {
+//RenderableStars::SpeckDataSource(const ghoul::Dictionary& dictionary)
+//	: DataSource()
+//	, _file("")
+//{
+//	bool success = dictionary.getValue(constants::renderablestars::datasource::keyFile, _file);
+//	if (!success) {
+//		LERROR("SpeckDataSource did not contain key '" <<
+//			constants::renderablestars::datasource::keyFile << "'");
+//		return;
+//	}
+//	_file = absPath(_file);
+//}
+
+bool RenderableStars::loadData() {
+	std::string _file = _speckPath;
 	std::string cachedFile = "";
 	FileSys.cacheManager()->getCachedFile(_file, cachedFile, true);
 
@@ -305,7 +292,8 @@ bool RenderableStars::SpeckDataSource::loadData() {
 	return success;
 }
 
-bool RenderableStars::SpeckDataSource::readSpeckFile() {
+bool RenderableStars::readSpeckFile() {
+	std::string _file = _speckPath;
 	std::ifstream file(_file);
 	if (!file.good()) {
 		LERROR("Failed to open Speck file '" << _file << "'");
@@ -390,7 +378,7 @@ bool RenderableStars::SpeckDataSource::readSpeckFile() {
 	return true;
 }
 
-bool RenderableStars::SpeckDataSource::loadCachedFile(const std::string& file) {
+bool RenderableStars::loadCachedFile(const std::string& file) {
 	std::ifstream fileStream(file, std::ifstream::binary);
 	if (fileStream.good()) {
 		int32_t nValues = 0;
@@ -408,7 +396,7 @@ bool RenderableStars::SpeckDataSource::loadCachedFile(const std::string& file) {
 	}
 }
 
-bool RenderableStars::SpeckDataSource::saveCachedFile(const std::string& file) const {
+bool RenderableStars::saveCachedFile(const std::string& file) const {
 	std::ofstream fileStream(file, std::ofstream::binary);
 	if (fileStream.good()) {
 		int32_t nValues = static_cast<int32_t>(_data.size());

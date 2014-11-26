@@ -47,32 +47,39 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
-	class DataSource {
-	public:
-		const std::vector<float>& data() const;
+	//class DataSource {
+	//public:
+	//	const std::vector<float>& data() const;
 
-		virtual bool loadData() = 0;
+	//	virtual bool loadData() = 0;
 
-	protected:
-		std::vector<float> _data;
-	};
+	//protected:
+	//	std::vector<float> _data;
+	//};
 
-	class SpeckDataSource : public DataSource {
-	public:
-		SpeckDataSource(const ghoul::Dictionary& dictionary);
+	//class SpeckDataSource : public DataSource {
+	//public:
+	//	SpeckDataSource(const ghoul::Dictionary& dictionary);
 
-		bool loadData() override;
+	//	bool loadData() override;
 
-	private:
-		bool readSpeckFile();
-		bool loadCachedFile(const std::string& file);
-		bool saveCachedFile(const std::string& file) const;
+	//private:
+	//	bool readSpeckFile();
+	//	bool loadCachedFile(const std::string& file);
+	//	bool saveCachedFile(const std::string& file) const;
 
-		std::string _file;
-	};
+	//	std::string _file;
+	//};
 
 
 	void loadTexture();
+
+	const std::vector<float>& data() const;
+
+	bool loadData();
+	bool readSpeckFile();
+	bool loadCachedFile(const std::string& file);
+	bool saveCachedFile(const std::string& file) const;
 
 	void generateBufferObjects(const void* data);
 
@@ -85,7 +92,7 @@ private:
 
 	std::string _speckPath;
 
-	DataSource* _source;
+	std::vector<float> _data;
 
 	//GLint vertsToDraw;
 
