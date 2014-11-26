@@ -25,16 +25,22 @@
 #ifndef __RENDERABLE_H__
 #define __RENDERABLE_H__
 
+// openspace
 #include <openspace/properties/propertyowner.h>
-
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/camera.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/util/updatestructures.h>
+
+// ghoul
+#include <ghoul/misc/dictionary.h>
+
+// Forward declare to minimize dependencies
+namespace ghoul {
+	namespace opengl {
+		class ProgramObject;
+	}
+}
 
 namespace openspace {
 

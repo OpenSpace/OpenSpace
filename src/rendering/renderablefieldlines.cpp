@@ -218,7 +218,7 @@ void RenderableFieldlines::render(const RenderData& data) {
 
 	glm::mat4 transform = data.camera.viewProjectionMatrix();
 	glm::mat4 camTransform = data.camera.viewRotationMatrix();
-	psc relative = data.position - data.camera.position();
+	//psc relative = data.position - data.camera.position();
 
 	transform = transform*camTransform;
 	transform = glm::mat4(1.0);
@@ -315,9 +315,12 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 		//	------ CLASSIFICATION & COLOR -----------
 		hintsDictionary.getValue("Color", fieldlineColor);
 		hintsDictionary.getValue("Classification", classification);
-	}
+	} else {
+        // model unitialized!
+        assert(false);
+    }
 
-	KameleonWrapper kw(filename, model);
+	KameleonWrapper kw(filename);
 	if (lorentz) {
 		fieldlinesData = kw.getLorentzTrajectories(_seedPoints, fieldlineColor, stepSize);
 	} else {

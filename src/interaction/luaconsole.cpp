@@ -30,6 +30,8 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #include <sgct.h>
 
@@ -142,24 +144,73 @@ namespace {
 
 namespace openspace {
 
+namespace luascriptfunctions {
+
+/**
+ * \ingroup LuaScripts
+ * show():
+ * Shows the console
+ */
+int show(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().setVisible(true);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * hide():
+ * Hides the console
+ */
+int hide(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().setVisible(false);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * toggle():
+ * Toggles the console
+ */
+int toggle(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.console().toggleVisibility();
+	return 0;
+}
+
+}
+
 LuaConsole::LuaConsole() 
 	: _inputPosition(0)
 	, _activeCommand(0)
+	, _isVisible(false)
 {
-	FILE* file = fopen(absPath(_filename).c_str(), "rb");
-	if (file) {
+	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
+	if (file.is_open()) {
 		size_t n;
-		fread(&n, sizeof(size_t), 1, file);
+		
+		file.read(reinterpret_cast<char*>(&n), sizeof(size_t));
+
 		for (size_t i = 0; i < n; ++i) {
 			size_t length;
-			fread(&length, sizeof(size_t), 1, file);
+			file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
 			char* tmp = new char[length + 1];
-			fread(tmp, sizeof(char), length, file);
+			file.read(tmp, sizeof(char)*length);
 			tmp[length] = '\0';
 			_commandsHistory.emplace_back(tmp);
 			delete[] tmp;
 		}
-		fclose(file);
+		file.close();
 		_commands = _commandsHistory;
 	}
 	_commands.push_back("");
@@ -167,16 +218,16 @@ LuaConsole::LuaConsole()
 }
 
 LuaConsole::~LuaConsole() {
-	FILE* file = fopen(absPath(_filename).c_str(), "wb");
-	if (file) {
+	std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
+	if (file.is_open()) {
 		size_t n = _commandsHistory.size();
-		fwrite(&n, sizeof(size_t), 1, file);
+		file.write(reinterpret_cast<const char*>(&n), sizeof(size_t));
 		for (auto s : _commandsHistory) {
 			size_t length = s.length();
-			fwrite(&length, sizeof(size_t), 1, file);
-			fwrite(s.c_str(), sizeof(char), length, file);
+			file.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
+			file.write(s.c_str(), sizeof(char)*length);
 		}
-		fclose(file);
+		file.close();
 	}
 }
 
@@ -268,16 +319,19 @@ void LuaConsole::keyboardCallback(int key, int action) {
 				if (_commands.at(_activeCommand) != "") {
 
 					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
-					_commandsHistory.push_back(_commands.at(_activeCommand));
+					if (_commandsHistory.size() > 0 &&
+						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
+						_commandsHistory.push_back(_commands.at(_activeCommand));
 					_commands = _commandsHistory;
 					_commands.push_back("");
 					_activeCommand = _commands.size() - 1;
 					_inputPosition = 0;
+					setVisible(false);
 				}
 				else {
 					_commands = _commandsHistory;
 					_commands.push_back("");
-					OsEng.setInputCommand(false);
+					setVisible(false);
 				}
 			}
 		}
@@ -304,19 +358,18 @@ void LuaConsole::charCallback(unsigned int codepoint) {
 }
 
 void LuaConsole::render() {
-	const int font_size = 10;
+	const float font_size = 10.0f;
 	int x1, xSize, y1, ySize;
 	sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-	int startY = ySize - 2 * font_size;
-	startY = startY - font_size * 10 * 2;
+	float startY = static_cast<float>(ySize) - 2.0f * font_size;
+	startY = startY - font_size * 10.0f * 2.0f;
 
-	const int font_with = font_size*0.7;
 	const glm::vec4 red(1, 0, 0, 1);
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
-	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size);
-	Freetype::print(font, 10, startY, red, "$");
-	Freetype::print(font, 10 + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
+	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
+	Freetype::print(font, 10.0f, startY, red, "$");
+	Freetype::print(font, 10.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
 
 	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
 	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
@@ -336,9 +389,10 @@ void LuaConsole::render() {
 			linepos -= p + 1;
 		}
 	}
-	char buffer[10];
-	sprintf(buffer, "%%%lus", linepos + 1);
-	Freetype::print(font, 10 + static_cast<float>(font_size)*0.5, startY - (font_size)*(n + 1)*3.0 / 2.0, green, buffer, "^");
+
+	std::stringstream ss;
+	ss << "%" << linepos + 1 << "s";
+	Freetype::print(font, 10.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
 unsigned int LuaConsole::commandInputButton(){
@@ -387,5 +441,39 @@ std::string LuaConsole::UnicodeToUTF8(unsigned int codepoint) {
 	return out;
 }
 
+bool LuaConsole::isVisible() const {
+	return _isVisible;
+}
+
+void LuaConsole::setVisible(bool visible) {
+	_isVisible = visible;
+}
+
+void LuaConsole::toggleVisibility() {
+	_isVisible = !_isVisible;
+}
+
+scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
+	return {
+		"console",
+		{
+			{
+				"show",
+				&luascriptfunctions::show,
+				"show(): Shows the console"
+			},
+			{
+				"hide",
+				&luascriptfunctions::hide,
+				"hide(): Hides the console"
+			},
+			{
+				"toggle",
+				&luascriptfunctions::toggle,
+				"toggle(): Toggles the console"
+			}
+		}
+	};
+}
 
 } // namespace openspace

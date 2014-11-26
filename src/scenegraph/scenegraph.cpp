@@ -24,9 +24,9 @@
 
 // open space includes
 #include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/constants.h>
 #include <openspace/query/query.h>
@@ -34,9 +34,8 @@
 #include <openspace/abuffer/abuffer.h>
 
 // ghoul includes
-#include "ghoul/opengl/programobject.h"
 #include "ghoul/logging/logmanager.h"
-#include "ghoul/logging/consolelog.h"
+#include "ghoul/opengl/programobject.h"
 #include "ghoul/opengl/texturereader.h"
 #include "ghoul/opengl/texture.h"
 
@@ -44,14 +43,11 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/opengl/shadermanager.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include <chrono>
- //#include <unistd.h>
 
 namespace {
     const std::string _loggerCat = "SceneGraph";
@@ -282,8 +278,9 @@ void SceneGraph::update(const UpdateData& data)
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-
+#ifndef __APPLE__
 		OsEng.renderEngine().abuffer()->invalidateABuffer();
+#endif
 	}
     for (auto node : _nodes)
         node->update(data);
@@ -324,7 +321,10 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	    // deallocate the scene graph. Recursive deallocation will occur
+	for (auto node : _nodes)
+		node->deinitialize();
+
+	// deallocate the scene graph. Recursive deallocation will occur
     delete _root;
     _root = nullptr;
 
@@ -541,7 +541,6 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
 }
 
 scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
-	//scripting::ScriptEngine::LuaLibrary sceneGraphLibrary = {
 	return {
 		"",
 		{
@@ -566,7 +565,6 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 			}
 		}
 	};
-	//return std::move(sceneGraphLibrary);
 }
 
 }  // namespace openspace

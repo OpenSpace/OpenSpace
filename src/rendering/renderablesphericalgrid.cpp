@@ -81,7 +81,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 	const float fsegments = static_cast<float>(_segments);
 	const float r = static_cast<float>(radius[0]);
 
-	int nr2 = 0;
+	//int nr2 = 0;
 
 	for (int i = 0; i <= _segments; i++) {
 		// define an extra vertex around the y-axis due to texture mapping
@@ -103,7 +103,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 			if (!(x == 0.f && y == 0.f && z == 0.f))
 				normal = glm::normalize(normal);
 
-			const float t1 = fj / fsegments;
+			//const float t1 = fj / fsegments;
 			const float t2 = fi / fsegments;
 
 			// tex coord. not used, use to manip color 

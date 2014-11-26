@@ -32,6 +32,9 @@ namespace openspace {
 class ConfigurationManager : public ghoul::Dictionary {
 public:
 	bool loadFromFile(const std::string& filename);
+
+private:
+	bool checkCompleteness() const;
 };
 
 } // namespace openspace

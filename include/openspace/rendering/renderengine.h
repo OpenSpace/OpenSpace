@@ -27,9 +27,6 @@
 
 #include <openspace/scripting/scriptengine.h>
 
-#include <memory>
-#include <string>
-
 namespace openspace {
 
 // Forward declare to minimize dependencies
@@ -37,6 +34,7 @@ class Camera;
 class SyncBuffer;
 class SceneGraph;
 class ABuffer;
+class ABufferVisualizer;
 class ScreenLog;
 
 class RenderEngine {
@@ -59,6 +57,7 @@ public:
     void postDraw();
 
 	void takeScreenshot();
+	void toggleVisualizeABuffer(bool b);
 
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);
@@ -67,6 +66,7 @@ public:
 	 * Returns the Lua library that contains all Lua functions available to affect the
 	 * rendering. The functions contained are
 	 * - openspace::luascriptfunctions::printImage
+	 * - openspace::luascriptfunctions::visualizeABuffer
 	 * \return The Lua library that contains all Lua functions available to affect the
 	 * rendering
 	 */
@@ -84,6 +84,9 @@ private:
 	bool _takeScreenshot;
 
 	void generateGlslConfig();
+
+	bool _visualizeABuffer;
+	ABufferVisualizer* _visualizer;
 };
 
 } // namespace openspace

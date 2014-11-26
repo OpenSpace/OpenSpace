@@ -25,11 +25,9 @@
 #ifndef ABUFFERSTRUCT_H_HGLSL
 #define ABUFFERSTRUCT_H_HGLSL
 
-// The different kinds of implementation, set from OpenSpace
-// #define  ABUFFER_SINGLE_LINKED    1
-// #define  ABUFFER_FIXED            2
-// #define  ABUFFER_DYNAMIC          3
-// #define  ABUFFER_IMPLEMENTATION   ABUFFER_SINGLE_LINKED
+#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
+
+#define ABUFFER_INCLUDE_POSITION
 
 //========================================================================================
 // ABufferStruct_t declaration
@@ -47,7 +45,9 @@ struct ABufferStruct_t {
 	uint id;		// bits 0-28 next, bits 29-32 type
 	uint rg;		// packed red  green color
 	uint ba;		// packed blue alpha color
+#ifdef ABUFFER_INCLUDE_POSITION
 	vec4 position;	// position
+#endif
 };
 
 
@@ -108,13 +108,16 @@ void _z_(inout ABufferStruct_t frag, float z) {
 }
 
 vec4 _pos_(ABufferStruct_t frag) {
-	// return vec4(0.0,0.0,0.0,0.0);
+#ifdef ABUFFER_INCLUDE_POSITION
 	return frag.position;
-	//return unpackUnorm4x8(frag.position);
+#else
+	return vec4(0.0,0.0,0.0,0.0);
+#endif
 }
 void _pos_(inout ABufferStruct_t frag, vec4 position) {
+#ifdef ABUFFER_INCLUDE_POSITION
 	frag.position = position;
-	// frag.position = packUnorm4x8(position);
+#endif
 }
 
 vec4 _col_(ABufferStruct_t frag) {
@@ -129,9 +132,9 @@ void _col_(inout ABufferStruct_t frag, vec4 color) {
 
 uint _type_(ABufferStruct_t frag) {
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
-	return bitextract_u(frag.id, mask_id_type, shift_id_type);
+		return bitextract_u(frag.id, mask_id_type, shift_id_type);
 #else
-	return frag.id;
+		return frag.id;
 #endif
 }
 void _type_(inout ABufferStruct_t frag, uint type) {

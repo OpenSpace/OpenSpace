@@ -29,6 +29,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <list>
+
 namespace {
 	const std::string _loggerCat = "ConfigurationManager";
 
@@ -86,6 +88,10 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
         }
     }
 
+	bool complete = checkCompleteness();
+	if (!complete)
+		return false;
+
 	// Remove the Paths dictionary from the configuration manager as those paths might
 	// change later and we don't want to be forced to keep our local copy up to date
 	removeKey(keyPaths);
@@ -93,5 +99,25 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 	return true;
 }
 
+bool ConfigurationManager::checkCompleteness() const {
+	std::list<std::string> requiredTokens = {
+		constants::configurationmanager::keyPaths,
+		constants::configurationmanager::keyCachePath,
+		constants::configurationmanager::keyFonts,
+		constants::configurationmanager::keyConfigSgct
+	};
+
+	bool totalSuccess = true;
+	for (auto token : requiredTokens) {
+		bool success = hasKey(token);
+
+		if (!success)
+			LFATAL("Configuration file did not contain required key '" << token << "'");
+
+		totalSuccess &= success;
+	}
+
+	return totalSuccess;
+}
 
 }  // namespace openspace

@@ -33,10 +33,9 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+namespace openspace {
 
-namespace openspace{
-
-class RenderableStars : public Renderable{
+class RenderableStars : public Renderable {
 public: 
 	RenderableStars(const ghoul::Dictionary& dictionary);
 	~RenderableStars();
@@ -47,12 +46,41 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
-protected:
+private:
+	//class DataSource {
+	//public:
+	//	const std::vector<float>& data() const;
+
+	//	virtual bool loadData() = 0;
+
+	//protected:
+	//	std::vector<float> _data;
+	//};
+
+	//class SpeckDataSource : public DataSource {
+	//public:
+	//	SpeckDataSource(const ghoul::Dictionary& dictionary);
+
+	//	bool loadData() override;
+
+	//private:
+	//	bool readSpeckFile();
+	//	bool loadCachedFile(const std::string& file);
+	//	bool saveCachedFile(const std::string& file) const;
+
+	//	std::string _file;
+	//};
+
+
 	void loadTexture();
 
-private:
-	std::ifstream& skipToLine(std::ifstream& file, unsigned int num);
-	bool readSpeckFile(const std::string& path);
+	const std::vector<float>& data() const;
+
+	bool loadData();
+	bool readSpeckFile();
+	bool loadCachedFile(const std::string& file);
+	bool saveCachedFile(const std::string& file) const;
+
 	void generateBufferObjects(const void* data);
 
 	properties::StringProperty _colorTexturePath;
@@ -64,7 +92,9 @@ private:
 
 	std::string _speckPath;
 
-	GLint vertsToDraw;
+	std::vector<float> _data;
+
+	//GLint vertsToDraw;
 
 	GLuint _vboID;
 	GLuint _vaoID;

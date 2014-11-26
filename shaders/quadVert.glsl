@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 330
+#version __CONTEXT__
 
 layout(location = 0) in vec2 texCoordinate;
 layout(location = 2) in vec3 vertPosition;

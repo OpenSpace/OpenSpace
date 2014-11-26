@@ -32,12 +32,15 @@ namespace constants {
 
 namespace fonts {
 	const std::string keySGCT = "SGCTFont";
-	const std::string keyMono = "UbuntuMono";
-	const std::string keyLight = "UbuntuLight";
+	const std::string keyMono = "Mono";
+	const std::string keyLight = "Light";
 } // namespace fonts
 
 namespace configurationmanager {
     const std::string keyPaths = "Paths";
+	const std::string keyCache = "CACHE";
+	const std::string keyCachePath = keyPaths + "." + keyCache;
+	const std::string keyFonts = "Fonts";
     const std::string keyConfigSgct = "SGCTConfig";
     const std::string keyConfigScene = "Scene";
     const std::string keyStartupScript = "StartupScripts";
@@ -85,8 +88,8 @@ namespace modelgeometry {
 } // namespace modelgeometry
 
 namespace renderablestars {
-	const std::string keySpeckFile = "SpeckFile";
-	const std::string keyPathModule = "ModulePath";
+	const std::string keyFile = "File";
+	const std::string keyTexture = "Texture";
 } // namespace renderablestars
 
 namespace renderablevolumegl {

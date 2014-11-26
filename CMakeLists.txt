@@ -31,13 +31,19 @@ cmake_minimum_required (VERSION 2.8)
 project (OpenSpace)
 
 if (WIN32)
-    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
+    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\")
 endif ()
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+set(OPENSPACE_BINARY_DIR ${OPENSPACE_BASE_DIR}/bin/openspace)
+set(OPENSPACE_LIBRARY_DIR ${OPENSPACE_BASE_DIR}/bin/lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
+
 
 #include(cotire)
 
@@ -51,7 +57,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 if (APPLE )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 endif ()
-
 #########################################################################################
 # External Third-party software
 #########################################################################################
@@ -95,14 +100,6 @@ include_directories("${SPICE_ROOT_DIR}/include")
 add_subdirectory(${SPICE_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Spice)
 
-# OpenCL
-find_package(OpenCL)
-if(OPENCL_FOUND)
-    add_definitions(-DGHL_OPENCL)
-    include_directories(${OPENCL_INCLUDE_DIRS})
-    set(GHOUL_DEPENDENCIES ${GHOUL_DEPENDENCIES} ${OPENCL_LIBRARIES})
-endif(OPENCL_FOUND)
-
 # Kameleon
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
 if(WIN32)
@@ -133,3 +130,41 @@ endif ()
 add_subdirectory(src)
 
 #add_subdirectory(gui)
+
+#########################################################################################
+# File Fetch
+#########################################################################################
+option(DOWNLOAD_FILES "Download large OpenSpace data on configure" OFF)
+if(DOWNLOAD_FILES)
+    function(DownloadFile FILE_PATH FILE_URL)
+        set(FILE_MD5 ${ARGV2})
+        if(NOT EXISTS "${FILE_PATH}")
+            file(DOWNLOAD ${FILE_URL} ${FILE_PATH} INACTIVITY_TIMEOUT 10 SHOW_PROGRESS)
+        endif()
+        file(MD5 ${FILE_PATH} MD5_RESULT)
+        if( NOT "${FILE_MD5}" STREQUAL "" )
+            string(COMPARE EQUAL ${MD5_RESULT} ${FILE_MD5} SUCCESS)
+            if(NOT ${SUCCESS})
+                message(WARNING "${FILE_PATH} not matching MD5")
+            endif()
+        endif()
+    endfunction(DownloadFile)
+
+    function(NewHorizonDownload FILE_PATH )
+        set(MD5 "${ARGV1}")
+        DownloadFile("${OPENSPACE_BASE_DIR}/openspace-data/spice/JupiterNhKernels/${FILE_PATH}"
+                     "http://naif.jpl.nasa.gov/pub/naif/pds/data/nh-j_p_ss-spice-6-v1.0/nhsp_1000/data/${FILE_PATH}" ${MD5})
+    endfunction(NewHorizonDownload)
+
+    NewHorizonDownload("ck/merged_nhpc_2006_v011.bc")
+    NewHorizonDownload("ck/merged_nhpc_2007_v006.bc")
+    NewHorizonDownload("fk/nh_v200.tf")
+    NewHorizonDownload("ik/nh_lorri_v100.ti")
+    NewHorizonDownload("sclk/new_horizons_413.tsc" "6f7a87c21cb3e37835261ed745f34d4a")
+    NewHorizonDownload("spk/de413.bsp")
+    NewHorizonDownload("spk/jup260.bsp")
+    NewHorizonDownload("spk/nh_nep_ura_000.bsp")
+    NewHorizonDownload("spk/nh_recon_e2j_v1.bsp")
+    NewHorizonDownload("spk/nh_recon_j2sep07_prelimv1.bsp")
+    NewHorizonDownload("spk/sb_2002jf56_2.bsp")
+endif(DOWNLOAD_FILES)

@@ -57,11 +57,11 @@ PowerScaledScalar PowerScaledScalar::CreatePSS(double d1) {
 
 	// find out how many digits
 	sprintf ( buff, "%.0f", ad1);
-	unsigned int digits = static_cast<unsigned int>(strlen(buff))-1;
+	size_t digits = strlen(buff)-1;
 
 	// rescale and return
 	double tp = 1.0 / pow(k, digits);
-	return PowerScaledScalar(d1*tp, digits);
+	return PowerScaledScalar(static_cast<float>(d1*tp), static_cast<float>(digits));
 }
 
 const glm::vec2& PowerScaledScalar::vec2() const {
@@ -92,10 +92,14 @@ PowerScaledScalar & PowerScaledScalar::operator=(float rhs) {
 PowerScaledScalar & PowerScaledScalar::operator+=(const PowerScaledScalar &rhs) {
 
 	double ds = this->_data[1] - rhs._data[1];
-	if(ds >= 0) {
-		*this = PowerScaledScalar(rhs._data[0]*pow(k,-ds) + this->_data[0], this->_data[1]);
+	if(ds >= 0.0) {
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs._data[0] * pow(k, -ds) + this->_data[0]), 
+			this->_data[1]);
 	} else {
-		*this = PowerScaledScalar(rhs._data[0] + this->_data[0]*pow(k,ds), rhs._data[1]);
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs._data[0] + this->_data[0] * pow(k, ds)), 
+			rhs._data[1]);
 	}
 
 	return *this;
@@ -108,10 +112,14 @@ const PowerScaledScalar PowerScaledScalar::operator+(const PowerScaledScalar &rh
 PowerScaledScalar & PowerScaledScalar::operator-=(const PowerScaledScalar &rhs) {
 
 	double ds = this->_data[1] - rhs._data[1];
-	if(ds >= 0) {
-		*this = PowerScaledScalar(-rhs._data[0]*pow(k,-ds) + this->_data[0], this->_data[1]);
+	if(ds >= 0.0) {
+		*this = PowerScaledScalar(
+			static_cast<float>(-rhs._data[0] * pow(k, -ds) + this->_data[0]), 
+			this->_data[1]);
 	} else {
-		*this = PowerScaledScalar(-rhs._data[0] + this->_data[0]*pow(k,ds), rhs._data[1]);
+		*this = PowerScaledScalar(
+			static_cast<float>(-rhs._data[0] + this->_data[0] * pow(k, ds)), 
+			rhs._data[1]);
 	}
 
 	return *this;
@@ -123,10 +131,14 @@ const PowerScaledScalar PowerScaledScalar::operator-(const PowerScaledScalar &rh
 
 PowerScaledScalar & PowerScaledScalar::operator*=(const PowerScaledScalar &rhs) {
 	double ds = this->_data[1] - rhs._data[1];
-	if(ds >= 0) {
-		*this = PowerScaledScalar(rhs._data[0]*pow(k,-ds) * this->_data[0], this->_data[1]+this->_data[1]);
+	if(ds >= 0.0) {
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs._data[0] * pow(k, -ds) * this->_data[0]), 
+			this->_data[1] + this->_data[1]);
 	} else {
-		*this = PowerScaledScalar(rhs._data[0] * this->_data[0]*pow(k,ds), rhs._data[1]+rhs._data[1]);
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs._data[0] * this->_data[0] * pow(k, ds)), 
+			rhs._data[1] + rhs._data[1]);
 	}
 
 	return *this;
@@ -141,9 +153,12 @@ const PowerScaledScalar PowerScaledScalar::operator*(const PowerScaledScalar &rh
 PowerScaledScalar & PowerScaledScalar::operator*=(const float &rhs) {
 	double ds = this->_data[1];
 	if(ds >= 0) {
-		*this = PowerScaledScalar(rhs*pow(k,-ds) * this->_data[0],this->_data[1]+this->_data[1]);
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs*pow(k, -ds) * this->_data[0]), 
+			this->_data[1] + this->_data[1]);
 	} else {
-		*this = PowerScaledScalar(rhs * this->_data[0]*pow(k,ds), 0.0);
+		*this = PowerScaledScalar(
+			static_cast<float>(rhs * this->_data[0] * pow(k, ds)), 0.0f);
 	}
 
 	return *this;

@@ -27,7 +27,6 @@
 
 // ghoul includes
 #include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 

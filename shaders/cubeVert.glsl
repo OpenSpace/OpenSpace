@@ -21,8 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version 330
+
+#version __CONTEXT__
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;

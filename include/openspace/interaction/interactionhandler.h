@@ -22,105 +22,164 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef INTERACTIONHANDLER_H
-#define INTERACTIONHANDLER_H
+//<<<<<<< HEAD
+//#ifndef INTERACTIONHANDLER_H
+//#define INTERACTIONHANDLER_H
+//
+//#include <openspace/scripting/scriptengine.h>
+//#include <openspace/util/powerscaledcoordinate.h>
+//#include <openspace/util/powerscaledscalar.h>
+//
+//// std includes
+//#include <vector>
+//#include <mutex>
+//#include <map>
+//#include <functional>
+//
+//namespace openspace {
+//
+//// Forward declare to minimize dependencies
+//class Camera;
+//class SceneGraphNode;
+//class ExternalControl;
+//
+//class InteractionHandler {
+//public:
+//    InteractionHandler(void);
+//    InteractionHandler(const InteractionHandler& src);
+//    InteractionHandler& operator=(const InteractionHandler& rhs);
+//	virtual ~InteractionHandler();
+//
+//	void enable();
+//	void disable();
+//	const bool isEnabled() const;
+//
+//	void connectDevices();
+//	void addExternalControl(ExternalControl* controller);
+//
+//	void setCamera(Camera *camera = nullptr);
+//	void setOrigin(SceneGraphNode* node);
+//
+//	Camera* getCamera() const;
+//	const psc getOrigin() const;
+//	void lockControls();
+//	void unlockControls();
+//
+//	void setFocusNode(SceneGraphNode *node);
+//	
+//	void orbit(const glm::quat &rotation);
+//	void rotate(const glm::quat &rotation);
+//	void distance(const PowerScaledScalar &distance, size_t iterations = 0);
+//=======
+#ifndef __INTERACTIONHANDLER_H__
+#define __INTERACTIONHANDLER_H__
 
-// open space includes
-#include <openspace/util/camera.h>
-#include <openspace/interaction/externalcontrol/externalcontrol.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/interaction/keyboardcontroller.h>
+#include <openspace/interaction/mousecontroller.h>
 
-// std includes
-#include <vector>
-#include <thread>
 #include <mutex>
-#include <memory>
-#include <map>
-#include <functional>
 
 namespace openspace {
 
+class Camera;
+class SceneGraphNode;
+
+namespace interaction {
+
 class InteractionHandler {
 public:
-    InteractionHandler(void);
-    InteractionHandler(const InteractionHandler& src);
-    InteractionHandler& operator=(const InteractionHandler& rhs);
-	virtual ~InteractionHandler();
+    InteractionHandler();
 
-	//static void init();
-	//static void deinit();
- //   static InteractionHandler& ref();
-	//static bool isInitialized();
+	~InteractionHandler();
 
-	void enable();
-	void disable();
-	const bool isEnabled() const;
+	void setKeyboardController(KeyboardController* controller);
+	void setMouseController(MouseController* controller);
+	void addController(Controller* controller);
 
-	void connectDevices();
-	void addExternalControl(ExternalControl* controller);
-
-	void setCamera(Camera *camera = nullptr);
-	void setOrigin(SceneGraphNode* node);
-
-	Camera * getCamera() const;
-	const psc getOrigin() const;
 	void lockControls();
 	void unlockControls();
 
-	void setFocusNode(SceneGraphNode *node);
-	
-	void orbit(const glm::quat &rotation);
-	void rotate(const glm::quat &rotation);
-	void distance(const PowerScaledScalar &distance, size_t iterations = 0);
+	void update(double deltaTime);
 
-	void lookAt(const glm::quat &rotation);
-	void setRotation(const glm::quat &rotation);
-
-	void update(const double dt);
-
-	double getDt();
+	void setFocusNode(SceneGraphNode* node);
+	const SceneGraphNode* const focusNode() const;
+	void setCamera(Camera* camera);
+	const Camera* const camera() const;
 
     void keyboardCallback(int key, int action);
-    void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
+	void mouseButtonCallback(int button, int action);
+	void mousePositionCallback(int x, int y);
+	void mouseScrollWheelCallback(int pos);
 
-    void addKeyCallback(int key, std::function<void(void)> f);
+//<<<<<<< HEAD
+	//double dt();
+//=======
+	double deltaTime() const;
+
+	void orbitDelta(const glm::quat& rotation);
+
+	void rotateDelta(const glm::quat& rotation);
+
+	void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
+
+	void lookAt(const glm::quat& rotation);
+
+	void setRotation(const glm::quat& rotation);
+
+	void resetKeyBindings();
+	void bindKey(int key, const std::string& lua);
 
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the
 	* interaction. The functions contained are
-	* - openspace::luascriptfunctions::printScreen
+	* - openspace::luascriptfunctions::setOrigin
 	* \return The Lua library that contains all Lua functions available to affect the
 	* interaction
 	*/
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 	
 private:
-    glm::vec3 mapToTrackball(glm::vec2 mousePos);
-    glm::vec3 mapToCamera(glm::vec3 trackballPos);
-    void trackballRotate(int x, int y);
+	friend class Controller;
 
-	Camera* camera_;
-	bool enabled_;
-	SceneGraphNode *node_;
+//<<<<<<< HEAD
+//	Camera* _camera;
+//	bool _enabled;
+//	SceneGraphNode* _node;
+//	
+//	double _dt;
+//=======
+    InteractionHandler(const InteractionHandler&) = delete;
+    InteractionHandler& operator=(const InteractionHandler&) = delete;
+	InteractionHandler(InteractionHandler&&) = delete;
+	InteractionHandler& operator=(InteractionHandler&&) = delete;
+
+	Camera* _camera;
+	SceneGraphNode* _focusNode;
+
+	double _deltaTime;
+	std::mutex _mutex;
+
+//<<<<<<< HEAD
+//	// used for calling when updating and deallocation
+//	std::vector<ExternalControl*> _controllers;
+//
+//	// for locking and unlocking
+//	std::mutex _cameraGuard;
+
+	bool _validKeyLua;
+	std::multimap<int, std::string > _keyLua;
 	
-	double dt_;
+	KeyboardController* _keyboardController;
+	MouseController* _mouseController;
+	std::vector<Controller*> _controllers;
 
 
-	glm::vec3 _lastTrackballPos;
-	bool _leftMouseButtonDown, _isMouseBeingPressedAndHeld;
-
-	// used for calling when updating and deallocation
-	std::vector<ExternalControl*> controllers_;
-
-	// for locking and unlocking
-	std::mutex cameraGuard_;
-
-	std::multimap<int, std::function<void(void)> > _keyCallbacks;
-	
+ //   glm::vec3 mapToTrackball(glm::vec2 mousePos);
+ //   glm::vec3 mapToCamera(glm::vec3 trackballPos);
+ //   void trackballRotate(int x, int y);
 };
 
+} // namespace interaction
 } // namespace openspace
 
-#endif
+#endif // __INTERACTIONHANDLER_H__

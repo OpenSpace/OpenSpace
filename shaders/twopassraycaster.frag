@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 400 core
+#version __CONTEXT__
 
 uniform sampler2D texBack, texFront;
 uniform sampler3D texVolume;

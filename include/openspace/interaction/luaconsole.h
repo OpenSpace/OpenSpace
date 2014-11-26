@@ -25,6 +25,8 @@
 #ifndef LUACONSOLE_H
 #define LUACONSOLE_H
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <string>
 #include <vector>
 
@@ -43,7 +45,19 @@ public:
 	unsigned int commandInputButton();
 	unsigned int ignoreCodepoint();
 
-	
+	bool isVisible() const;
+	void setVisible(bool visible);
+	void toggleVisibility();
+		
+	/**
+	 * Returns the Lua library that contains all Lua functions available to affect the
+	 * console. The functions contained are
+	 * \return The Lua library that contains all Lua functions available to affect the
+	 * console
+	 */
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+
 private:
 	void addToCommand(std::string c);
 	std::string UnicodeToUTF8(unsigned int codepoint);
@@ -53,6 +67,7 @@ private:
 	size_t _activeCommand;
 	std::vector<std::string> _commands;
 	
+	bool _isVisible;
 };
 
 } // namespace openspace

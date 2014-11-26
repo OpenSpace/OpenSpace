@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 330
+#version __CONTEXT__
 
 uniform sampler2D quadTex;
 in vec2 texCoord;

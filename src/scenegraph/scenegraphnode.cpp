@@ -181,9 +181,9 @@ void SceneGraphNode::update(const UpdateData& data)
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
 {
-    const psc thisPosition = parentPosition + _ephemeris->position();
-    const psc camPos = camera->position();
-    const psc toCamera = thisPosition - camPos;
+    //const psc thisPosition = parentPosition + _ephemeris->position();
+    //const psc camPos = camera->position();
+    //const psc toCamera = thisPosition - camPos;
 
     // init as not visible
     _boundingSphereVisible = false;
@@ -284,9 +284,6 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
 	_boundingSphere = 0.0;
-	_boundingSphere = 1000.0;
-	_boundingSphere = 0.0;
-
 	
     if (_children.size() > 0) {  // node
         PowerScaledScalar maxChild;
@@ -296,8 +293,9 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         for (size_t i = 0; i < _children.size(); ++i) {
             // when positions is dynamic, change this part to fins the most distant
             // position
-            PowerScaledScalar child = _children.at(i)->position().length()
-                        + _children.at(i)->calculateBoundingSphere();
+            //PowerScaledScalar child = _children.at(i)->position().length()
+            //            + _children.at(i)->calculateBoundingSphere();
+			PowerScaledScalar child = _children.at(i)->calculateBoundingSphere();
             if (child > maxChild) {
                 maxChild = child;
             }
@@ -311,7 +309,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         if(renderableBS > _boundingSphere)
             _boundingSphere = renderableBS;
     }
-	LWARNING(name() << ": " << _boundingSphere);
+	LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
 	
     return _boundingSphere;
 }

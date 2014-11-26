@@ -24,30 +24,44 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/time.h>
-
-// We need to decide where this is set
-#include <openspace/util/constants.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/syncbuffer.h>
-#include "sgct.h"
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-
-#include <array>
-#include <fstream>
-
-#include <openspace/scenegraph/scenegraph.h>
+// Open Space
+#include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
+#include <openspace/abuffer/abufferframebuffer.h>
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
+
+// sgct
+#include <sgct.h>
+
+// ghoul
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
+
+// std
+#include <array>
+#include <fstream>
+
+// ABuffer defines
+#define ABUFFER_FRAMEBUFFER 0
+#define ABUFFER_SINGLE_LINKED 1
+#define ABUFFER_FIXED 2
+#define ABUFFER_DYNAMIC 3
+
+#ifdef __APPLE__
+#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
+#else
+#define ABUFFER_IMPLEMENTATION ABUFFER_SINGLE_LINKED
+#endif
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
@@ -70,6 +84,30 @@ int printImage(lua_State* L) {
 	return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* visualizeABuffer(bool):
+* Toggler the visualization of the ABuffer
+*/
+int visualizeABuffer(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+	const int type = lua_type(L, -1);
+	if (type == LUA_TBOOLEAN) {
+		bool b = lua_toboolean(L, -1);
+		OsEng.renderEngine().toggleVisualizeABuffer(b);
+		return 0;
+	}
+	else if (type == LUA_TNUMBER){
+		lua_Number n = luaL_checknumber(L, -1);
+		OsEng.renderEngine().toggleVisualizeABuffer(static_cast<bool>(n));
+		return 0;
+	}
+	return luaL_error(L, "Expected boolean value");
+}
+
 } // namespace luascriptfunctions
 
 
@@ -77,38 +115,42 @@ RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
     , _abuffer(nullptr)
+    , _log(nullptr)
+    , _showInfo(true)
+    , _showScreenLog(true)
 	, _takeScreenshot(false)
-	, _log(nullptr)
-	, _showInfo(true)
-	, _showScreenLog(true)
+	, _visualizeABuffer(false)
+	, _visualizer(nullptr)
 {
 }
 
 RenderEngine::~RenderEngine()
 {
     delete _mainCamera;
+	if (_visualizer)
+		delete _visualizer;
 }
 
 bool RenderEngine::initialize()
 {
 	generateGlslConfig();
 
-    // LDEBUG("RenderEngine::initialize()");
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-
-    // if master, setup interaction
-    //if (sgct::Engine::instance()->isMaster())
-        OsEng.interactionHandler().setCamera(_mainCamera);
-#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+	OsEng.interactionHandler().setCamera(_mainCamera);
+    
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
+    _abuffer = new ABufferFramebuffer();
+#elif ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
     _abuffer = new ABufferSingleLinked();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
     _abuffer = new ABufferFixed();
 #elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
     _abuffer = new ABufferDynamic();
 #endif
+
     return true;
 }
 
@@ -117,16 +159,13 @@ bool RenderEngine::initializeGL()
     // LDEBUG("RenderEngine::initializeGL()");
     sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
 
-    // TODO:    Fix the power scaled coordinates in such a way that these values can be
-    // set
-    //          to more realistic values
+    // TODO:    Fix the power scaled coordinates in such a way that these 
+	//			values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
      sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f,10000.0f);
-    //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 1000.00f);
-  //  sgct::Engine::instance()->setNearAndFarClippingPlanes(0.0001f, 100.0f);
-   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 200.0f);
+   // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
@@ -181,14 +220,15 @@ bool RenderEngine::initializeGL()
                 maxFov = radsbetween;
             }
         }
-	//	std::cout << maxFov << std::endl;
         _mainCamera->setMaxFov(maxFov);
     }
-
+    
     _abuffer->initialize();
-
+    
 	_log = new ScreenLog();
 	ghoul::logging::LogManager::ref().addLog(_log);
+
+	_visualizer = new ABufferVisualizer();
 
     // successful init
     return true;
@@ -213,10 +253,8 @@ void RenderEngine::postSynchronizationPreDraw()
     _mainCamera->compileViewRotationMatrix();
 	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
-	//std::cout << a.delta << std::endl;
     // update and evaluate the scene starting from the root node
 	_sceneGraph->update(a);
-    _mainCamera->setCameraDirection(glm::vec3(0, 0, -1));
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
@@ -225,11 +263,21 @@ void RenderEngine::postSynchronizationPreDraw()
 
 void RenderEngine::render()
 {
+	// We need the window pointer
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+	if (w->isUsingFisheyeRendering())
+		_abuffer->clear();
+
     // SGCT resets certain settings
+#ifndef __APPLE__
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
-
+#else
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+#endif
     // setup the camera for the current frame
     const glm::vec3 eyePosition
           = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
@@ -250,26 +298,29 @@ void RenderEngine::render()
 
 
     // render the scene starting from the root node
-    _abuffer->preRender();
-	_sceneGraph->render({*_mainCamera, psc()});
-    _abuffer->postRender();
+	if (!_visualizeABuffer) {
+		_abuffer->preRender();
+		_sceneGraph->render({ *_mainCamera, psc() });
+		_abuffer->postRender();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	_abuffer->resolve();
-	glDisable(GL_BLEND);
-
-
-#ifndef OPENSPACE_VIDEO_EXPORT
-
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		_abuffer->resolve();
+		glDisable(GL_BLEND);
+	}
+	else {
+		_visualizer->render();
+	}
+    
+#if 1
+    
     // Print some useful information on the master viewport
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
 	if (sgct::Engine::instance()->isMaster() && ! w->isUsingFisheyeRendering()) {
 
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono	= 10;
-		const int font_size_light = 8;
-		const int font_with_light = font_size_light*0.7;
+		const int font_size_light	= 8;
+		const int font_with_light	= font_size_light*0.7;
 		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
 		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
 		
@@ -281,7 +332,7 @@ void RenderEngine::render()
 			const glm::vec2 scaling = _mainCamera->scaling();
 			const glm::vec3 viewdirection = _mainCamera->viewDirection();
 			const psc position = _mainCamera->position();
-			const psc origin = OsEng.interactionHandler().getOrigin();
+			const psc origin = OsEng.interactionHandler().focusNode()->worldPosition();
 			const PowerScaledScalar pssl = (position - origin).length();
 
 			// GUI PRINT 
@@ -361,9 +412,8 @@ void RenderEngine::render()
 				++nr;
 			}
 		}
-#endif
 	}
-    
+#endif
 }
 
 void RenderEngine::postDraw() {
@@ -377,6 +427,14 @@ void RenderEngine::takeScreenshot() {
 	_takeScreenshot = true;
 }
 
+void RenderEngine::toggleVisualizeABuffer(bool b) {
+	_visualizeABuffer = b;
+	if (!_visualizeABuffer)
+		return;
+
+	std::vector<ABuffer::fragmentData> _d = _abuffer->pixelData();
+	_visualizer->updateData(_d);
+}
 
 SceneGraph* RenderEngine::sceneGraph()
 {
@@ -391,195 +449,21 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 }
 
 void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-    // TODO: This has to be redone properly (ab) [new class providing methods to serialize
-    // variables]
-
-    // _viewRotation
-    // _cameraDirection
-    // camera->position
-    // camera->viewRotationMatrix
-    // camera->scaling
-
 	syncBuffer->encode(_mainCamera->scaling());
 	syncBuffer->encode(_mainCamera->position());
 	syncBuffer->encode(_mainCamera->viewRotationMatrix());
-	//syncBuffer->encode(_mainCamera->lookUpVector());
-	//syncBuffer->encode(_mainCamera->rotation());
-
-
-    //const glm::vec2 scaling = _mainCamera->scaling();
-    //const psc position = _mainCamera->position();
-    ////const psc origin = OsEng.interactionHandler().getOrigin();
-    ////const pss pssl = (position - origin).length();
-    ////_mainCamera->cameraDirection()
-
-    //union storage {
-    //    float value;
-    //    std::array<char, 4> representation;
-    //} s;
-
-    //s.value = _mainCamera->cameraDirection().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->cameraDirection().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->cameraDirection().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->rotation().w;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().x;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().y;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().z;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
-
-    //s.value = _mainCamera->position().vec4().w;
-    //dataStream[offset++] = s.representation[0];
-    //dataStream[offset++] = s.representation[1];
-    //dataStream[offset++] = s.representation[2];
-    //dataStream[offset++] = s.representation[3];
 }
 
 void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
-    // TODO: This has to be redone properly (ab)
-	
 	glm::vec2 scaling;
 	psc position;
 	glm::mat4 viewRotation;
-	//glm::vec3 lookUpVector;
 	syncBuffer->decode(scaling);
 	syncBuffer->decode(position);
 	syncBuffer->decode(viewRotation);
-
 	_mainCamera->setScaling(scaling);
 	_mainCamera->setPosition(position);
 	_mainCamera->setViewRotationMatrix(viewRotation);
-	//_mainCamera->setLookUpVector(lookUpVector);
-	//_mainCamera->compileViewRotationMatrix();
-
-
- //   union storage {
- //       float value;
- //       std::array<char, 4> representation;
- //   } s;
-
- //   glm::vec3 cameraDirection;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   cameraDirection.z = s.value;
- //   _mainCamera->setCameraDirection(cameraDirection);
-
- //   glm::quat rotation;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.z = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   rotation.w = s.value;
- //   _mainCamera->setRotation(rotation);
-
- //   glm::vec4 position;
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.x = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.y = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.z = s.value;
-
- //   s.representation[0] = dataStream[offset++];
- //   s.representation[1] = dataStream[offset++];
- //   s.representation[2] = dataStream[offset++];
- //   s.representation[3] = dataStream[offset++];
- //   position.w = s.value;
-
-	//_mainCamera->setPosition(position);
 }
 
 Camera* RenderEngine::camera() const {
@@ -599,13 +483,28 @@ void RenderEngine::generateGlslConfig() {
 	// TODO: If the screen size changes it is enough if this file is regenerated to
 	// recompile all necessary files
 	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
-	os << "#define SCREEN_WIDTH  " << xSize << "\n"
+	os << "#ifndef CONSTANTS_HGLSL\n"
+		<< "#define CONSTANTS_HGLSL\n"
+		<< "#define SCREEN_WIDTH  " << xSize << "\n"
 		<< "#define SCREEN_HEIGHT " << ySize << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
-		<< "#define ABUFFER_SINGLE_LINKED     1\n"
-		<< "#define ABUFFER_FIXED             2\n"
-		<< "#define ABUFFER_DYNAMIC           3\n"
-		<< "#define ABUFFER_IMPLEMENTATION    ABUFFER_SINGLE_LINKED\n";
+		<< "#define ABUFFER_FRAMEBUFFER       " << ABUFFER_FRAMEBUFFER << "\n"
+		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
+		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
+		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
+		<< "#define ABUFFER_IMPLEMENTATION    " << ABUFFER_IMPLEMENTATION << "\n";
+// System specific
+#ifdef WIN32
+	os << "#define WIN32\n";
+#endif
+#ifdef __APPLE__
+	os << "#define APPLE\n";
+#endif
+#ifdef __linux__
+	os << "#define linux\n";
+#endif
+    os << "#endif\n";
+
 	os.close();
 }
 
@@ -617,10 +516,14 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"printImage",
 				&luascriptfunctions::printImage,
 				"printImage(): Renders the current image to a file on disk"
+			},
+			{
+				"visualizeABuffer",
+				&luascriptfunctions::visualizeABuffer,
+				"visualizeABuffer(bool): Toggles the visualization of the ABuffer"
 			}
-		}
+		},
 	};
-
 }
 
 }  // namespace openspace

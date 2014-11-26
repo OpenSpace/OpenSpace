@@ -26,7 +26,11 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+
 #include <sgct.h>
 
 #include <iostream>
@@ -35,11 +39,12 @@
 
 namespace {
 
-	const std::string generatedSettingsPath = "${SHADERS_GENERATED}/ABufferSettings.hglsl";
-	const std::string generatedHeadersPath = "${SHADERS_GENERATED}/ABufferHeaders.hglsl";
+	const std::string generatedSettingsPath     = "${SHADERS_GENERATED}/ABufferSettings.hglsl";
+	const std::string generatedHeadersPath      = "${SHADERS_GENERATED}/ABufferHeaders.hglsl";
 	const std::string generatedSamplerCallsPath = "${SHADERS_GENERATED}/ABufferSamplerCalls.hglsl";
-	const std::string generatedTransferFunctionVisualizerPath = "${SHADERS_GENERATED}/ABufferTransferFunctionVisualizer.hglsl";
-	const std::string generatedSamplersPath = "${SHADERS_GENERATED}/ABufferSamplers.hglsl";
+	const std::string generatedTransferFunctionVisualizerPath =
+                        "${SHADERS_GENERATED}/ABufferTransferFunctionVisualizer.hglsl";
+	const std::string generatedSamplersPath     = "${SHADERS_GENERATED}/ABufferSamplers.hglsl";
 
 	const std::string _loggerCat = "ABuffer";
 
@@ -79,7 +84,8 @@ bool ABuffer::initializeABuffer() {
 
 	if (!_resolveShader)
 		return false;
-
+    
+#ifndef __APPLE__
     // ============================
     // 		GEOMETRY (quad)
     // ============================
@@ -101,7 +107,7 @@ bool ABuffer::initializeABuffer() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
 	glEnableVertexAttribArray(0);
-
+#endif
 	return true;
 }
 
@@ -113,6 +119,7 @@ bool ABuffer::reinitialize() {
 }
 
 void ABuffer::resolve() {
+#ifndef __APPLE__
 	if( ! _validShader) {
 		generateShaderSource();
 		updateShader();
@@ -137,7 +144,7 @@ void ABuffer::resolve() {
 	// Decrease stepsize in volumes if right click is pressed
 	// TODO: Let the interactionhandler handle this
 	int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
-	float volumeStepFactor = (val) ? 0.2: 1.0;
+	float volumeStepFactor = (val) ? 0.2f: 1.0f;
 	if(volumeStepFactor != _volumeStepFactor) {
 		_volumeStepFactor = volumeStepFactor;
 		_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
@@ -146,7 +153,8 @@ void ABuffer::resolve() {
 	glBindVertexArray(_screenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	_resolveShader->deactivate();
+    _resolveShader->deactivate();
+#endif
 }
 
 void ABuffer::addVolume(const std::string& tag,ghoul::opengl::Texture* volume) {
@@ -160,7 +168,8 @@ void ABuffer::addTransferFunction(const std::string& tag,ghoul::opengl::Texture*
 int ABuffer::addSamplerfile(const std::string& filename) {
 	if( ! FileSys.fileExists(filename))
 		return -1;
-
+    
+#ifndef __APPLE__
   	auto fileCallback = [this](const ghoul::filesystem::File& file) {
         _validShader = false;
     };
@@ -171,7 +180,10 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 
 	// ID is one more than "actual" position since ID=0 is considered geometry
 	//return 1 << (_samplers.size()-1);
-	return _samplers.size();
+	return static_cast<int>(_samplers.size());
+#else
+    return 0;
+#endif
 }
 
 bool ABuffer::updateShader() {
@@ -211,7 +223,6 @@ void ABuffer::generateShaderSource() {
 	openspaceHeaders();
 	openspaceSamplerCalls();
 	openspaceSamplers();
-	settings();
 	openspaceTransferFunction();
 }
 

@@ -89,7 +89,12 @@ int main(int argc, char** argv)
 
     // try to open a window
 	LDEBUG("Initialize SGCT Engine");
-	const bool initSuccess = _sgctEngine->init(sgct::Engine::OpenGL_4_3_Core_Profile);
+#ifdef __APPLE__
+	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
+#else
+	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_3_Core_Profile;
+#endif
+	const bool initSuccess = _sgctEngine->init(rm);
     if (!initSuccess) {
 		LFATAL("Initializing failed");
         // could not open a window, deallocates and exits

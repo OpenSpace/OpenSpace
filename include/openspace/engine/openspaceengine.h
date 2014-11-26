@@ -25,27 +25,12 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include <ghoul/logging/logmanager.h>
-
-// sgct header has to be included before all others due to Windows header
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
-
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
 
-#include <ghoul/opencl/clcontext.h>
-#include <ghoul/opencl/clcommandqueue.h>
-#include <ghoul/opencl/clprogram.h>
-#include <ghoul/opencl/clkernel.h>
-
 #include <ghoul/cmdparser/commandlineparser.h>
-// #define FLARE_ONLY
-
-#include <openspace/flare/flare.h>
-
-// #define OPENSPACE_VIDEO_EXPORT
 
 namespace openspace {
 
@@ -69,10 +54,10 @@ public:
     static bool findConfiguration(std::string& filename);
 
     ConfigurationManager& configurationManager();
-    ghoul::opencl::CLContext& clContext();
-    InteractionHandler& interactionHandler();
+    interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
 	scripting::ScriptEngine& scriptEngine();
+	LuaConsole& console();
 
     // SGCT callbacks
     bool initializeGL();
@@ -86,38 +71,32 @@ public:
     void mousePositionCallback(int x, int y);
     void mouseScrollWheelCallback(int pos);
 	void externalControlCallback(const char* receivedChars, int size, int clientId);
-
     void encode();
     void decode();
 
-	void setInputCommand(bool b);
+
 
 private:
     OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
 
+	void clearAllWindows();
 	bool gatherCommandlineArguments();
+	bool loadSpiceKernels();
+	void runStartupScripts();
+	void loadFonts();
 
     static OpenSpaceEngine* _engine;
 
     ConfigurationManager _configurationManager;
-    InteractionHandler _interactionHandler;
+    interaction::InteractionHandler _interactionHandler;
     RenderEngine _renderEngine;
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
-#ifdef OPENSPACE_VIDEO_EXPORT
-    bool _doVideoExport;
-#endif
-#ifdef FLARE_ONLY
-    Flare* _flare;
-#endif
-    // ScriptEngine* _scriptEngine;
-    ghoul::opencl::CLContext _context;
+	LuaConsole _console;
 
 	SyncBuffer* _syncBuffer;
 
-	bool _inputCommand;
-	LuaConsole* _console;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

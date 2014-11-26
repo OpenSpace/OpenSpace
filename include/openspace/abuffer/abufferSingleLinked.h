@@ -26,6 +26,7 @@
 #define __ABUFFERSINGLELINKED_H__
 
 #include <openspace/abuffer/abuffer.h>
+#include <vector>
 
 namespace openspace {
 
@@ -39,8 +40,9 @@ public:
 	virtual void clear();
 	virtual void preRender();
 	virtual void postRender();
+	
+	std::vector<fragmentData> pixelData();
 
-	virtual std::string settings();
 protected:
 	virtual bool reinitializeInternal();
 

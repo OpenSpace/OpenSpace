@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#version __CONTEXT__
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;

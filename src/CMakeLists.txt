@@ -90,6 +90,12 @@ file(GLOB RENDERING_STARS_HEADER ${HEADER_ROOT_DIR}/openspace/rendering/stars/*.
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${RENDERING_STARS_HEADER})
 source_group(Rendering\\Stars FILES ${RENDERING_STARS_SOURCE} ${RENDERING_STARS_HEADER})
 
+file(GLOB RENDERING_MODEL_SOURCE ${SOURCE_ROOT_DIR}/rendering/model/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${RENDERING_MODEL_SOURCE})
+file(GLOB RENDERING_MODEL_HEADER ${HEADER_ROOT_DIR}/openspace/rendering/model/*.h)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${RENDERING_MODEL_HEADER})
+source_group(Rendering\\Model FILES ${RENDERING_MODEL_SOURCE} ${RENDERING_MODEL_HEADER})
+
 file(GLOB SCENEGRAPH_SOURCE ${SOURCE_ROOT_DIR}/scenegraph/*.cpp)
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${SCENEGRAPH_SOURCE})
 file(GLOB SCENEGRAPH_HEADER ${HEADER_ROOT_DIR}/openspace/scenegraph/*.h ${HEADER_ROOT_DIR}/openspace/scenegraph/*.inl)
@@ -123,7 +129,7 @@ source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
 include_directories(${HEADER_ROOT_DIR})
 
 # hack:
-set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
+#set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
 find_package(OpenCL REQUIRED)
@@ -133,13 +139,9 @@ include_directories(${OPENCL_INCLUDE_DIRS})
 if (APPLE)
 	add_definitions(-D__APPLE__)
 	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
-    if(NOT CMAKE_GENERATOR STREQUAL Xcode)
-        message(WARNING "You are not using Xcode, OpenSpace assumes that working directory path to top level is \"../../..\"")
-    endif(NOT CMAKE_GENERATOR STREQUAL Xcode)
 endif (APPLE)
 if (UNIX AND NOT APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 endif (UNIX AND NOT APPLE)
 
 
@@ -151,21 +153,30 @@ target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 # cotire(OpenSpace)
 
 if (WIN32)
-    if (CMAKE_CL_64)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/DevIL.dll)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILU.dll)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILUT.dll)
-    else (CMAKE_CL_64)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/DevIL.dll)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILU.dll)
-    	set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILUT.dll)
-    endif (CMAKE_CL_64)
+    if(GHOUL_USE_DEVIL)
+        if (CMAKE_CL_64)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/DevIL.dll)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILU.dll)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILUT.dll)
+        else (CMAKE_CL_64)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/DevIL.dll)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILU.dll)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILUT.dll)
+        endif (CMAKE_CL_64)
+    endif(GHOUL_USE_DEVIL)
+    if(GHOUL_USE_FREEIMAGE)
+        if (CMAKE_CL_64)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/freeimage/lib/win64/FreeImage.dll)
+        else (CMAKE_CL_64)
+            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/freeimage/lib/win32/FreeImage.dll)
+        endif (CMAKE_CL_64)
+    endif(GHOUL_USE_FREEIMAGE)
     foreach( file_i ${OPENSPACE_DLL_LIBS})
-    	add_custom_command(TARGET OpenSpace POST_BUILD        # Adds a post-build event to MyTest
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        add_custom_command(TARGET OpenSpace POST_BUILD        # Adds a post-build event to MyTest
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
         "${file_i}"      # <--this is in-file
         $<TARGET_FILE_DIR:OpenSpace>)
-	endforeach( file_i )
+    endforeach( file_i )
 endif(WIN32)
 
 add_subdirectory(tests)

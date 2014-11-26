@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/progressbar.h>
 
 // ghoul includes
 #include <ghoul/opengl/texturereader.h>
@@ -68,7 +69,6 @@ namespace {
         return f(templateNumber);
             
     }
-
 }
 
 namespace openspace {
@@ -82,7 +82,6 @@ RenderableVolume::~RenderableVolume() {
 ghoul::opengl::Texture* RenderableVolume::loadVolume(
     const std::string& filepath, 
     const ghoul::Dictionary& hintsDictionary) {
-
 
 	if( ! FileSys.fileExists(filepath)) {
 		LWARNING("Could not load volume, could not find '" << filepath << "'");
@@ -119,15 +118,6 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
                 dimensions[2] = intVal;
         }
 
-        std::string modelString = "";
-        if (hintsDictionary.hasKey("Model")) 
-            hintsDictionary.getValue("Model", modelString);
-
-        if(modelString == "") {
-            LWARNING("Model not specified.");
-            return nullptr;
-        }
-
         std::string variableCacheString = "";
         if (hintsDictionary.hasKey("Variable")) {
             hintsDictionary.getValue("Variable", variableCacheString);
@@ -148,46 +138,48 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
             hintsDictionary.getValue("Cache", cache);
 
         std::stringstream ss;
-        ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << modelString << "." << variableCacheString << ".cache";
+        ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << "." << variableCacheString << ".cache";
 
 		std::string cachepath; // = filepath + ss.str();
-		FileSys.cacheManager()->getCachedFile(filepath, ss.str(), cachepath, true);
+        ghoul::filesystem::File ghlFile(filepath);
+		FileSys.cacheManager()->getCachedFile(ghlFile.baseName(), ss.str(), cachepath, true);
 		if (cache && FileSys.fileExists(cachepath)) {
-
-            FILE* file = fopen (cachepath.c_str(), "rb");
-
-            int length = dimensions[0] *dimensions[1] *dimensions[2];
-            float* data = new float[length];
-
-            for(int i = 0; i< length; i++){
-                float f;
-                fread(&f, sizeof(float), 1, file);
-                data[i] = f;
+           
+#define VOLUME_LOAD_PROGRESSBAR
+            std::ifstream file(cachepath, std::ios::binary | std::ios::in);
+			if (file.is_open()) {
+				size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+				float* data = new float[length];
+#ifdef VOLUME_LOAD_PROGRESSBAR
+				LINFO("Loading cache: " << cachepath);
+				ProgressBar pb(dimensions[2]);
+				for (size_t i = 0; i < dimensions[2]; ++i) {
+					size_t offset = length / dimensions[2];
+					std::streamsize offsetsize = sizeof(float)*offset;
+					file.read(reinterpret_cast<char*>(data + offset * i), offsetsize);
+					pb.print(i);
+				}
+#else
+				file.read(reinterpret_cast<char*>(data), sizeof(float)*length);
+#endif
+                file.close();
+                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+            } else {
+                return nullptr;
             }
-
-            fclose(file);
-            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
         }
 
-		KameleonWrapper::Model model;
-		if (modelString == "BATSRUS") {
-			model = KameleonWrapper::Model::BATSRUS;
-		} else if (modelString == "ENLIL") {
-			model = KameleonWrapper::Model::ENLIL;
-		} else {
-			LWARNING("Hints does not specify a valid 'Model'");
-			return nullptr;
-		}
-
-		KameleonWrapper kw(filepath, model);
+		KameleonWrapper kw(filepath);
 		std::string variableString;
 		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
 			float* data = kw.getUniformSampledValues(variableString, dimensions);
             if(cache) {
-                FILE* file = fopen (cachepath.c_str(), "wb");
-                int length = dimensions[0] *dimensions[1] *dimensions[2];
-                fwrite(data, sizeof(float), length, file);
-                fclose(file);
+                std::ofstream file(cachepath, std::ios::binary | std::ios::out);
+                if (file.is_open()) {
+                    size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+                    file.write(reinterpret_cast<const char*>(data), sizeof(float)*length);
+                    file.close();
+                }
             }
         	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		} else if (hintsDictionary.hasKey("Variables")) {
@@ -204,7 +196,7 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
                 if(cache) {
                     FILE* file = fopen (cachepath.c_str(), "wb");
-                    int length = dimensions[0] *dimensions[1] *dimensions[2];
+					size_t length = dimensions[0] * dimensions[1] * dimensions[2];
                     fwrite(data, sizeof(float), length, file);
                     fclose(file);
                 }
@@ -225,27 +217,7 @@ glm::vec3 RenderableVolume::getVolumeOffset(
 		const std::string& filepath,
 		const ghoul::Dictionary& hintsDictionary) {
 
-	std::string modelString = "";
-	if (hintsDictionary.hasKey("Model"))
-		hintsDictionary.getValue("Model", modelString);
-
-	if(modelString == "") {
-		LWARNING("Model not specified.");
-		return glm::vec3(0);
-	}
-	KameleonWrapper::Model model;
-	if (modelString == "BATSRUS") {
-		model = KameleonWrapper::Model::BATSRUS;
-	} else if (modelString == "ENLIL") {
-		model = KameleonWrapper::Model::ENLIL;
-        return glm::vec3(0);
-	} else {
-		LWARNING("Hints does not specify a valid 'Model'");
-		return glm::vec3(0);
-	}
-
-	KameleonWrapper kw(filepath, model);
-
+	KameleonWrapper kw(filepath);
 	return kw.getModelBarycenterOffset();
 }
 

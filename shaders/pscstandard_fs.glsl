@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#version __CONTEXT__
 
 uniform vec4 campos;
 uniform vec4 objpos;
@@ -78,6 +78,4 @@ void main()
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
-
-	discard;
 }

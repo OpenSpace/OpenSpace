@@ -118,9 +118,9 @@ void ABufferDynamic::postRender() {
 
 }
 
-std::string ABufferDynamic::settings() {
-	return R"(#define ABUFFER_SINGLE_LINKED)";
+std::vector<ABuffer::fragmentData> ABufferDynamic::pixelData() {
+	std::vector<ABuffer::fragmentData> d;
+	return d;
 }
-
 
 } // openspace

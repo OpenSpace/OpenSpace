@@ -8,3 +8,10 @@ openspace.time.setTime("2007-02-26T17:38:00.00")
 openspace.time.setDeltaTime(10.0)
 -- print(openspace.time.currentTimeUTC())
 
+
+
+function loadKeyBindings()
+	p = openspace.absPath('${SCRIPTS}/bind_keys.lua')
+	dofile(p)
+end
+loadKeyBindings()

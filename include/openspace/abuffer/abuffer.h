@@ -25,30 +25,39 @@
 #ifndef __ABUFFER_H__
 #define __ABUFFER_H__
 
-#include <openspace/abuffer/abuffer_i.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
+#include <string>
+#include <vector>
 
 namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
 	namespace opengl {
+        class ProgramObject;
 		class Texture;
 	}
 }
 
 namespace openspace {
 
-class ABuffer: public ABuffer_I {
+class ABuffer {
 public:
+
+	struct fragmentData {
+		GLfloat _position[3];
+		GLfloat _color[4];
+		GLfloat _padding;
+	};
 
 	static const int MAX_LAYERS = 32;
 
 	ABuffer();
 	virtual ~ABuffer();
 	virtual void resolve();
+    virtual bool initialize() = 0;
 	virtual bool reinitialize();
 
 	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
@@ -56,9 +65,14 @@ public:
 	int addSamplerfile(const std::string& filename);
 
 	void invalidateABuffer();
+    
+    virtual void clear() = 0;
+    virtual void preRender() = 0;
+	virtual void postRender() = 0;
+
+	virtual std::vector<fragmentData> pixelData() = 0;
 
 protected:
-	virtual std::string settings() = 0;
 	virtual bool reinitializeInternal() = 0;
 
 	bool initializeABuffer();

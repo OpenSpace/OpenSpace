@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430 core
+#version __CONTEXT__
 
 uniform int volumeType;
 
@@ -47,6 +47,4 @@ void main() {
 	_type_(frag, volumeType);
 	_pos_(frag, position);
 	addToBuffer(frag);
-
-	discard;
 }

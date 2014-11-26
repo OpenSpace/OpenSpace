@@ -79,7 +79,7 @@ void WavefrontGeometry::loadObj(const char *filename){
 	float f1, f2, f3;
 	int i1, i2, i3, i4, i5, i6, i7, i8, i9;
 	char line[150];
-	float maxtex = 0.0;
+	//float maxtex = 0.0;
 
 	FILE *fi;
 	// START LINE COUNT
@@ -287,7 +287,7 @@ void WavefrontGeometry::render(){
 
 void WavefrontGeometry::createSphere(){
    // create the power scaled scalar
-	PowerScaledScalar ps = PowerScaledScalar::PowerScaledScalar(1, 0); // will set proper bounding soon.
+	PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
 	_parent->setBoundingSphere(ps);
 }
 

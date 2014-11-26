@@ -8,7 +8,7 @@ ext/SGCT
 
 # generated glsl files
 *.gglsl
-*.OpenSpaceGenerated.glsl
+*.GhoulGenerated.glsl
 shaders/generated/*
 
 # CMake stuff
@@ -26,3 +26,4 @@ install_manifest.txt
 html/
 latex/
 shaders/ABuffer/constants.hglsl
+*.OpenSpaceGenerated.glsl

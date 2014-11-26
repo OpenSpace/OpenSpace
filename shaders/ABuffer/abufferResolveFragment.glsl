@@ -22,15 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
-
-
+#version __CONTEXT__
 
 // ================================================================================
 // Settings
 // ================================================================================
 //#pragma openspace insert SETTINGS
-#include <${SHADERS_GENERATED}/ABufferSettings.hglsl>:notrack
+//#include <${SHADERS_GENERATED}/ABufferSettings.hglsl>:notrack
 
 // Select type of depth calculations
 #define 	PSCDEPTH 		1
