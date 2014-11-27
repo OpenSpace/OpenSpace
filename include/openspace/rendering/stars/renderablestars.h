@@ -48,7 +48,7 @@ public:
 private:
 	enum ColorOption {
 		Color = 0,
-		Velocity
+		Velocity = 1
 	};
 
 	void createDataSlice(ColorOption option);
@@ -67,24 +67,21 @@ private:
 	bool _dataIsDirty;
 
 	ghoul::opengl::ProgramObject* _haloProgram;
+	bool _programIsDirty;
 
 	ghoul::opengl::Texture* _texture;
 
 	std::string _speckPath;
 
 	std::vector<float> _slicedData;
+	
 	std::vector<float> _fullData;
-	int _nValuesPerVertex;
+	int _nValuesPerStar;
 
 	//GLint vertsToDraw;
 
 	GLuint _vboID;
 	GLuint _vaoID;
-	GLint positionAttrib;
-	GLint brightnessDataAttrib;
-	int v_size;
-	int v_stride;
-	int v_total;
 };
 
 } // namespace openspace

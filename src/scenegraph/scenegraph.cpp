@@ -193,16 +193,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-	// Star program
-	tmpProgram = ProgramObject::Build("Star",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
-
 	// Point program
 	tmpProgram = ProgramObject::Build("Point",
 		"${SHADERS}/star_vs.glsl",

@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/stars/renderablestars.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -33,6 +32,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <fstream>
+#include <stdint.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
@@ -45,9 +45,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
 	, _colorOption("colorOption", "Color Option")
 	, _haloProgram(nullptr)
+	, _programIsDirty(false)
 	, _texture(nullptr)
 	, _dataIsDirty(true)
-	, _nValuesPerVertex(0)
+	, _nValuesPerStar(0)
+	, _vaoID(0)
+	, _vboID(0)
 {
 	std::string texturePath = "";
 	if (dictionary.hasKey(constants::renderablestars::keyTexture)) {
@@ -87,13 +90,16 @@ std::ifstream& skipToLine(std::ifstream& file, unsigned int num){
 bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
-	// 1. StarProgram  - Generates quads with png image of halo
-	if (_haloProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _haloProgram);
 
+	// Star program
+	_haloProgram = ghoul::opengl::ProgramObject::Build("Star",
+		"${SHADERS}/star_vs.glsl",
+		"${SHADERS}/star_fs.glsl",
+		"${SHADERS}/star_ge.glsl",
+		[&](ghoul::opengl::ProgramObject*){ _programIsDirty = true;});
+
+	completeSuccess = (_haloProgram != nullptr);
 	completeSuccess &= loadData();
-
-	loadTexture();
 	completeSuccess &= (_texture != nullptr);
 
 	return completeSuccess;
@@ -101,7 +107,9 @@ bool RenderableStars::initialize() {
 
 bool RenderableStars::deinitialize() {
 	glDeleteBuffers(1, &_vboID);
+	_vboID = 0;
 	glDeleteVertexArrays(1, &_vaoID);
+	_vaoID = 0;
 
 	delete _texture;
 	_texture = nullptr;
@@ -130,6 +138,8 @@ void RenderableStars::render(const RenderData& data) {
 	_haloProgram->setUniform("view", viewMatrix);
 	_haloProgram->setUniform("projection", projectionMatrix);
 
+	_haloProgram->setUniform("colorOption", _colorOption.value());
+	
 	//_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
 	_haloProgram->setUniform("ModelTransform", glm::mat4(1));
 	setPscUniforms(_haloProgram, &data.camera, data.position);
@@ -141,7 +151,8 @@ void RenderableStars::render(const RenderData& data) {
 	_haloProgram->setUniform("texture1", unit);
 
 	glBindVertexArray(_vaoID);
-	glDrawArrays(GL_POINTS, 0, v_total);  
+	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
+	glDrawArrays(GL_POINTS, 0, nStars);  
 	glBindVertexArray(0);
 	_haloProgram->deactivate();
 
@@ -155,29 +166,33 @@ void RenderableStars::update(const UpdateData& data) {
 
 		createDataSlice(ColorOption(value));
 
-		v_stride = 7;                      // stride in VBO, set manually for now.
-		v_size = static_cast<int>(_slicedData.size());     // size of VBO
-		v_total = v_size / v_stride;      // total number of vertecies 
+		int size = static_cast<int>(_slicedData.size());
 
-		// generate and buffer data 
-		glGenVertexArrays(1, &_vaoID);
-		glGenBuffers(1, &_vboID);
+		if (_vaoID == 0)
+			glGenVertexArrays(1, &_vaoID);
+		if (_vboID == 0)
+			glGenBuffers(1, &_vboID);
 		glBindVertexArray(_vaoID);
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-		glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), &_slicedData[0], GL_STATIC_DRAW); // order : x, y, z, lum, appmag, absmag
+		glBufferData(GL_ARRAY_BUFFER, size*sizeof(GLfloat), &_slicedData[0], GL_STATIC_DRAW); // order : x, y, z, lum, appmag, absmag
 
-		positionAttrib       = _haloProgram->attributeLocation("in_position");
-		brightnessDataAttrib = _haloProgram->attributeLocation("in_brightness");
+		GLint positionAttrib       = _haloProgram->attributeLocation("in_position");
+		GLint brightnessDataAttrib = _haloProgram->attributeLocation("in_brightness");
 
-		GLsizei stride = sizeof(GLfloat) * v_stride;
+		const size_t nStars = _fullData.size() / _nValuesPerStar;
+		const size_t nValues = _slicedData.size() / nStars;
 
-		glBindVertexArray(_vaoID);                                                                                // vao holds ref. to vbo
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);																	  // bind vbo
-		glEnableVertexAttribArray(positionAttrib);                                                                // enable acess attribute in_position
-		glEnableVertexAttribArray(brightnessDataAttrib);                                                          // enable acess attribute in_brigthness
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);                           // psc coordinates
-		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat))); // brigthness properties 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);																		  // unbind
+		GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
+
+		glEnableVertexAttribArray(positionAttrib);
+		glEnableVertexAttribArray(brightnessDataAttrib);
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);
+		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat)));
+		if (_colorOption.value() == ColorOption::Velocity) {
+			GLint velocityAttrib = _haloProgram->attributeLocation("in_velocity");
+			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(7 * sizeof(GLfloat)));
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
 		_dataIsDirty = false;
@@ -195,6 +210,11 @@ void RenderableStars::update(const UpdateData& data) {
 			}
 		}
 		_textureIsDirty = false;
+	}
+
+	if (_programIsDirty) {
+		_haloProgram->rebuildFromFile();
+		_programIsDirty = false;
 	}
 }
 
@@ -238,7 +258,7 @@ bool RenderableStars::readSpeckFile() {
 		return false;
 	}
 
-	_nValuesPerVertex = 0;
+	_nValuesPerStar = 0;
 
 	// The beginning of the speck file has a header that either contains comments
 	// (signaled by a preceding '#') or information about the structure of the file
@@ -271,20 +291,20 @@ bool RenderableStars::readSpeckFile() {
 
 			std::string dummy;
 			str >> dummy;
-			str >> _nValuesPerVertex;
-			_nValuesPerVertex += 1; // We want the number, but the index is 0 based
+			str >> _nValuesPerStar;
+			_nValuesPerStar += 1; // We want the number, but the index is 0 based
 		}
 	}
 
-	_nValuesPerVertex += 3; // X Y Z are not counted in the Speck file indices
+	_nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
 	do {
-		std::vector<float> values(_nValuesPerVertex);
+		std::vector<float> values(_nValuesPerStar);
 
 		std::getline(file, line);
 		std::stringstream str(line);
 
-		for (int i = 0; i < _nValuesPerVertex; ++i)
+		for (int i = 0; i < _nValuesPerStar; ++i)
 			str >> values[i];
 
 		_fullData.insert(_fullData.end(), values.begin(), values.end());
@@ -298,7 +318,7 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
 	if (fileStream.good()) {
 		int32_t nValues = 0;
 		fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-		fileStream.read(reinterpret_cast<char*>(&_nValuesPerVertex), sizeof(int32_t));
+		fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
 
 		_fullData.resize(nValues);
 		fileStream.read(reinterpret_cast<char*>(&_fullData[0]), nValues * sizeof(_fullData[0]));
@@ -322,7 +342,7 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
 		}
 		fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-		int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerVertex);
+		int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerStar);
 		fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
 
 		size_t nBytes = nValues * sizeof(_fullData[0]);
@@ -339,7 +359,7 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
 
 void RenderableStars::createDataSlice(ColorOption option) {
 	_slicedData.clear();
-	for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerVertex) {
+	for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
 		psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(
 							_fullData[i + 0],
 							_fullData[i + 1],
@@ -364,7 +384,16 @@ void RenderableStars::createDataSlice(ColorOption option) {
 			_slicedData.push_back(_fullData[i + 4]); // luminance
 			_slicedData.push_back(_fullData[i + 5]); // absolute magnitude
 			break;
+
 		case ColorOption::Velocity:
+			_slicedData.push_back(_fullData[i + 3]); // colorb_v
+			_slicedData.push_back(_fullData[i + 4]); // luminance
+			_slicedData.push_back(_fullData[i + 5]); // absolute magnitude
+
+			_slicedData.push_back(_fullData[i + 12]); // vx
+			_slicedData.push_back(_fullData[i + 13]); // vy
+			_slicedData.push_back(_fullData[i + 14]); // vz
+
 			break;
 		}
 	}

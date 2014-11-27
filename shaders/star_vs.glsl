@@ -35,16 +35,20 @@ uniform sampler2D texture1;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 2) in vec3 in_brightness;
+layout(location = 3) in vec3 in_velocity;
 
 out vec3 vs_brightness;
+out vec3 vs_velocity;
 
 out vec4 psc_position;
 out vec4 cam_position;
+
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main(){ 
 	vs_brightness = in_brightness;
+	vs_velocity = in_velocity;
 	psc_position  = in_position;
 	cam_position  = campos;
 

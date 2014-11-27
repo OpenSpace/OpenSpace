@@ -40,6 +40,8 @@ layout(points) in;
 //layout(points, max_vertices = 1) out;
 layout(location = 2) in  vec3 vs_brightness[];
 layout(location = 2) out vec3 ge_brightness;
+layout(location = 3) in vec3 vs_velocity[];
+layout(location = 3) out vec3 ge_velocity;
 layout(triangle_strip, max_vertices = 4) out;
 
 out vec2 texCoord;
@@ -51,6 +53,7 @@ float spriteSize = 0.0000005f; // set here for now.
 
 void main(){
 	ge_brightness = vs_brightness[0];                           // pass on to fragment shader. 
+	ge_velocity = vs_velocity[0];
 	
 	/// --- distance modulus --- NOT OPTIMIZED YET.
  	
