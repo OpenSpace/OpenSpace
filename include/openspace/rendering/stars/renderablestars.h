@@ -25,11 +25,10 @@
 #ifndef __RENDERABLESTARS_H__
 #define __RENDERABLESTARS_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
 
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -47,34 +46,12 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
-	//class DataSource {
-	//public:
-	//	const std::vector<float>& data() const;
+	enum ColorOption {
+		Color = 0,
+		Velocity
+	};
 
-	//	virtual bool loadData() = 0;
-
-	//protected:
-	//	std::vector<float> _data;
-	//};
-
-	//class SpeckDataSource : public DataSource {
-	//public:
-	//	SpeckDataSource(const ghoul::Dictionary& dictionary);
-
-	//	bool loadData() override;
-
-	//private:
-	//	bool readSpeckFile();
-	//	bool loadCachedFile(const std::string& file);
-	//	bool saveCachedFile(const std::string& file) const;
-
-	//	std::string _file;
-	//};
-
-
-	void loadTexture();
-
-	const std::vector<float>& data() const;
+	void createDataSlice(ColorOption option);
 
 	bool loadData();
 	bool readSpeckFile();
@@ -84,15 +61,20 @@ private:
 	void generateBufferObjects(const void* data);
 
 	properties::StringProperty _colorTexturePath;
+	bool _textureIsDirty;
+
+	properties::OptionProperty _colorOption;
+	bool _dataIsDirty;
 
 	ghoul::opengl::ProgramObject* _haloProgram;
-	ghoul::opengl::ProgramObject* _pointProgram;
 
 	ghoul::opengl::Texture* _texture;
 
 	std::string _speckPath;
 
-	std::vector<float> _data;
+	std::vector<float> _slicedData;
+	std::vector<float> _fullData;
+	int _nValuesPerVertex;
 
 	//GLint vertsToDraw;
 
