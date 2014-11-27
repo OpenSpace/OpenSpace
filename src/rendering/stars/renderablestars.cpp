@@ -36,6 +36,8 @@
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
+
+	const int8_t CurrentCacheVersion = 1;
 }
 
 namespace openspace {
@@ -316,6 +318,14 @@ bool RenderableStars::readSpeckFile() {
 bool RenderableStars::loadCachedFile(const std::string& file) {
 	std::ifstream fileStream(file, std::ifstream::binary);
 	if (fileStream.good()) {
+		int8_t version = 0;
+		fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+		if (version == CurrentCacheVersion) {
+			LINFO("The format of the cached file has changed, deleted old cache");
+			FileSys.deleteFile(file);
+			return false;
+		}
+
 		int32_t nValues = 0;
 		fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
 		fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
@@ -335,6 +345,8 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
 bool RenderableStars::saveCachedFile(const std::string& file) const {
 	std::ofstream fileStream(file, std::ofstream::binary);
 	if (fileStream.good()) {
+		fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
+
 		int32_t nValues = static_cast<int32_t>(_fullData.size());
 		if (nValues == 0) {
 			LERROR("Error writing cache: No values were loaded");
