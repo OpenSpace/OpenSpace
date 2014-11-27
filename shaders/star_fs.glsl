@@ -33,12 +33,11 @@ uniform vec3 Color;
 
 uniform int colorOption;
 
+layout(location = 0) in vec4 vs_position;
+layout(location = 1) in vec3 ge_brightness;
+layout(location = 2) in vec3 ge_velocity;
+layout(location = 3) in vec2 texCoord;
 
-in vec4 vs_position;
-in vec2 texCoord;
-
-layout(location = 2) in vec3 ge_brightness;
-layout(location = 3) in vec3 ge_velocity;
 
 
 #include "ABuffer/abufferStruct.hglsl"
@@ -74,13 +73,14 @@ void main(void)
 	// Something in the color calculations need to be changed because before it was dependent
 	// on the gl blend functions since the abuffer was not involved
 
-	vec4 color;
+	vec4 color = vec4(0.0);
 	switch (colorOption) {
-		case COLOROPTION_COLOR:
+		case COLOROPTION_COLOR: 
 			color = bv2rgb(ge_brightness[0])/1.1;
 			break;
 		case COLOROPTION_VELOCITY:
-			color = vec4(ge_velocity, 1.0);
+			//color = vec4(abs(ge_velocity), 1.0); 
+			color = vec4(1.0, 0.0, 0.0, 1.0);
 			break;
 	}
 
@@ -89,6 +89,8 @@ void main(void)
 	// color.a = 1-color.a;
     framebuffer_output_color = texture(texture1, texCoord)*color;
     //framebuffer_output_color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    // framebuffer_output_color = vec4(ge_velocity, 1.0);
 
     //diffuse = vec4(1,1,0,1);
    ///diffuse = vec4(Color, 1.0);

@@ -33,19 +33,19 @@ const vec2 corners[4] = vec2[4](
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-in vec4 psc_position[];
-in vec4 cam_position[];
 
 layout(points) in;
-//layout(points, max_vertices = 1) out;
-layout(location = 2) in  vec3 vs_brightness[];
-layout(location = 2) out vec3 ge_brightness;
-layout(location = 3) in vec3 vs_velocity[];
-layout(location = 3) out vec3 ge_velocity;
 layout(triangle_strip, max_vertices = 4) out;
 
-out vec2 texCoord;
-out vec4 vs_position;
+layout(location = 0) in vec4 psc_position[];
+layout(location = 1) in vec3 vs_brightness[];
+layout(location = 2) in vec3 vs_velocity[];
+layout(location = 3) in vec4 cam_position[];
+
+layout(location = 0) out vec4 vs_position;
+layout(location = 1) out vec3 ge_brightness;
+layout(location = 2) out vec3 ge_velocity;
+layout(location = 3) out vec2 texCoord;
 
 uniform mat4 projection; // we do this after distance computation. 
 

@@ -31,6 +31,7 @@
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <array>
 #include <fstream>
 #include <stdint.h>
 
@@ -38,6 +39,26 @@ namespace {
 	const std::string _loggerCat = "RenderableStars";
 
 	const int8_t CurrentCacheVersion = 1;
+
+	struct ColorVBOLayout {
+		std::array<float, 4> position; // (x,y,z,e)
+
+		float bvColor; // B-V color value
+		float luminance;
+		float absoluteMagnitude;
+	};
+
+	struct VelocityVBOLayout {
+		std::array<float, 4> position; // (x,y,z,e)
+
+		float bvColor; // B-V color value
+		float luminance;
+		float absoluteMagnitude;
+
+		float vx; // v_x
+		float vy; // v_y
+		float vz; // v_z
+	};
 }
 
 namespace openspace {
@@ -71,7 +92,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	_colorOption.addOption({ColorOption::Color, "Color"});
 	_colorOption.addOption({ColorOption::Velocity, "Velocity"});
 	addProperty(_colorOption);
-	//_colorOption.onChange(std::bind(&RenderableStars::renderOptionUpdated, this));
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 
 	addProperty(_colorTexturePath);
@@ -150,7 +170,9 @@ void RenderableStars::render(const RenderData& data) {
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
+	_haloProgram->setIgnoreUniformLocationError(true);
 	_haloProgram->setUniform("texture1", unit);
+	_haloProgram->setIgnoreUniformLocationError(false);
 
 	glBindVertexArray(_vaoID);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
@@ -162,9 +184,17 @@ void RenderableStars::render(const RenderData& data) {
 }
 
 void RenderableStars::update(const UpdateData& data) {
+	if (_programIsDirty) {
+		_haloProgram->rebuildFromFile();
+		_dataIsDirty = true;
+
+		_programIsDirty = false;
+
+	}
+	
 	if (_dataIsDirty) {
 		const int value = _colorOption;
-		LDEBUG("Regenerating data due to changed color option '" << value << "'");
+		LDEBUG("Regenerating data");
 
 		createDataSlice(ColorOption(value));
 
@@ -176,9 +206,9 @@ void RenderableStars::update(const UpdateData& data) {
 			glGenBuffers(1, &_vboID);
 		glBindVertexArray(_vaoID);
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-		glBufferData(GL_ARRAY_BUFFER, size*sizeof(GLfloat), &_slicedData[0], GL_STATIC_DRAW); // order : x, y, z, lum, appmag, absmag
+		glBufferData(GL_ARRAY_BUFFER, size*sizeof(GLfloat), &_slicedData[0], GL_STATIC_DRAW);
 
-		GLint positionAttrib       = _haloProgram->attributeLocation("in_position");
+		GLint positionAttrib = _haloProgram->attributeLocation("in_position");
 		GLint brightnessDataAttrib = _haloProgram->attributeLocation("in_brightness");
 
 		const size_t nStars = _fullData.size() / _nValuesPerStar;
@@ -188,12 +218,25 @@ void RenderableStars::update(const UpdateData& data) {
 
 		glEnableVertexAttribArray(positionAttrib);
 		glEnableVertexAttribArray(brightnessDataAttrib);
-		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);
-		glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat)));
-		if (_colorOption.value() == ColorOption::Velocity) {
+		const int colorOption = _colorOption;
+		switch (colorOption) {
+		case ColorOption::Color:
+			glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offsetof(ColorVBOLayout, position)));
+			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor)));
+			
+			break;
+		case ColorOption::Velocity:
+			{
+			glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offsetof(VelocityVBOLayout, position)));
+			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)));
+
 			GLint velocityAttrib = _haloProgram->attributeLocation("in_velocity");
-			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(7 * sizeof(GLfloat)));
+			glVertexAttribPointer(velocityAttrib, 3, GL_FLOAT, GL_TRUE, stride, reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)));
+			
+			break;
+			}
 		}
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
@@ -212,11 +255,6 @@ void RenderableStars::update(const UpdateData& data) {
 			}
 		}
 		_textureIsDirty = false;
-	}
-
-	if (_programIsDirty) {
-		_haloProgram->rebuildFromFile();
-		_programIsDirty = false;
 	}
 }
 
@@ -320,8 +358,9 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
 	if (fileStream.good()) {
 		int8_t version = 0;
 		fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-		if (version == CurrentCacheVersion) {
+		if (version != CurrentCacheVersion) {
 			LINFO("The format of the cached file has changed, deleted old cache");
+			fileStream.close();
 			FileSys.deleteFile(file);
 			return false;
 		}
@@ -384,29 +423,52 @@ void RenderableStars::createDataSlice(ColorOption option) {
 		position[2] *= parsecsToMetersFactor[0];
 		position[3] += parsecsToMetersFactor[1];
 
-		// Push the position into the data array
-		_slicedData.push_back(position[0]);
-		_slicedData.push_back(position[1]);
-		_slicedData.push_back(position[2]);
-		_slicedData.push_back(position[3]);
-
 		switch (option) {
 		case ColorOption::Color:
-			_slicedData.push_back(_fullData[i + 3]); // colorb_v
-			_slicedData.push_back(_fullData[i + 4]); // luminance
-			_slicedData.push_back(_fullData[i + 5]); // absolute magnitude
-			break;
+			{
+				union {
+					ColorVBOLayout value;
+					std::array<float, sizeof(ColorVBOLayout)> data;
+				} layout;
 
+				layout.value.position = { {
+					position[0], position[1], position[2], position[3]
+				} };
+					
+				layout.value.bvColor = _fullData[i + 3];
+				layout.value.luminance = _fullData[i + 4];
+				layout.value.absoluteMagnitude = _fullData[i + 5];
+
+				_slicedData.insert(_slicedData.end(),
+								   layout.data.begin(),
+								   layout.data.end());
+
+				break;
+			}
 		case ColorOption::Velocity:
-			_slicedData.push_back(_fullData[i + 3]); // colorb_v
-			_slicedData.push_back(_fullData[i + 4]); // luminance
-			_slicedData.push_back(_fullData[i + 5]); // absolute magnitude
+			{
+				union {
+					VelocityVBOLayout value;
+					std::array<float, sizeof(VelocityVBOLayout)> data;
+				} layout;
 
-			_slicedData.push_back(_fullData[i + 12]); // vx
-			_slicedData.push_back(_fullData[i + 13]); // vy
-			_slicedData.push_back(_fullData[i + 14]); // vz
+				layout.value.position = { {
+						position[0], position[1], position[2], position[3]
+					} };
 
-			break;
+				layout.value.bvColor = _fullData[i + 3];
+				layout.value.luminance = _fullData[i + 4];
+				layout.value.absoluteMagnitude = _fullData[i + 5];
+
+				layout.value.vx = _fullData[i + 12];
+				layout.value.vy = _fullData[i + 13];
+				layout.value.vz = _fullData[i + 14];
+
+				_slicedData.insert(_slicedData.end(),
+								   layout.data.begin(),
+								   layout.data.end());
+				break;
+			}
 		}
 	}
 }
