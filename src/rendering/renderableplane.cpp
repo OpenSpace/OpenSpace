@@ -121,11 +121,11 @@ bool RenderablePlane::initialize() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
 	OsEng.ref().configurationManager().getValue("PlaneProgram", _shader);
-	assert(_shader);
+
+	if (!_shader)
+		return false;
 
 	loadTexture();
-
-
 
 	return true;
 }
