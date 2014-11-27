@@ -158,7 +158,7 @@ public:
 	 * <code>T</code>. If the value are different, the listeners are notified.
 	 * \param val The new value for this TemplateProperty
 	 */
-    void setValue(T val);
+    virtual void setValue(T val);
 
 	/**
 	 * Returns the currently stored value.
