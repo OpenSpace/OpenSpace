@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <openspace/rendering/renderabletrail.h>
+
+#include <sgct.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 
@@ -63,12 +65,26 @@ namespace openspace{
 		, _iBufferID(0)
 		, _mode(GL_LINE_STRIP){
 
-		assert(dictionary.getValue(keyBody               , _target));
-		assert(dictionary.getValue(keyObserver           , _observer));
-		assert(dictionary.getValue(keyFrame              , _frame));
-		assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
-		assert(dictionary.getValue(keyEarthOrbitRatio    , _ratio));
-		assert(dictionary.getValue(keyDayLength          , _day));//not used now, will be though.
+		bool b1 = dictionary.getValue(keyBody, _target);
+		bool b2 = dictionary.getValue(keyObserver, _observer);
+		bool b3 = dictionary.getValue(keyFrame, _frame);
+		bool b4 = dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
+		bool b5 = dictionary.getValue(keyEarthOrbitRatio, _ratio);
+		bool b6 = dictionary.getValue(keyDayLength, _day);
+
+		assert(b1 == true);
+		assert(b2 == true);
+		assert(b3 == true);
+		assert(b4 == true);
+		assert(b5 == true);
+		assert(b6 == true);
+
+		//assert(dictionary.getValue(keyBody               , _target));
+		//assert(dictionary.getValue(keyObserver, _observer));
+		//assert(dictionary.getValue(keyFrame              , _frame));
+		//assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
+		//assert(dictionary.getValue(keyEarthOrbitRatio    , _ratio));
+		//assert(dictionary.getValue(keyDayLength          , _day));//not used now, will be though.
 		// values in modfiles set from here
 		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
@@ -102,14 +118,9 @@ void RenderableTrail::fullYearSweep(){
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
 	_iarray = new int[_isize];
-
+	
 	for (int i = 0; i < segments+2; i++){
-		/*if (_target == "NEW HORIZONS"){
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _startTrail, _pscpos, _pscvel, lightTime);
-		}
-		else{*/
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, _pscpos, _pscvel, lightTime);
-		//}
+		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
 		_pscpos[3] += 3;
 
 		for (int k = 0; k < 4; k++)
@@ -164,6 +175,7 @@ void RenderableTrail::sendToGPU(){
 	glBindVertexArray(0);
 }
 
+
 bool RenderableTrail::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
@@ -174,8 +186,8 @@ bool RenderableTrail::initialize(){
 	//loadTexture();
 	completeSuccess &= (_texture != nullptr);
 
-	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 27 11:48:00.000", _startTrail);
+	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
@@ -190,10 +202,27 @@ bool RenderableTrail::deinitialize(){
 	return true;
 }
 
+// Tried interpolation but then realised this still gives straight lines (latenight thing).
+// Not allowed Splines so therefore - query spice for each point (bah...) 
+// From psc paper:
+/*
+psc pscInterpolate(psc p0, psc p1, float t){
+	assert(t >= 0 && t <= 1);
+
+	float s = (1.f - t)*p0[3] + t*p1[3];
+
+	float x = ((1.f - t)*p0[0] + t*p1[0]);
+	float y = ((1.f - t)*p0[1] + t*p1[1]);
+	float z = ((1.f - t)*p0[2] + t*p1[2]);
+
+	return PowerScaledCoordinate::PowerScaledCoordinate(x,y,z,s);
+}
+*/
+
 void RenderableTrail::updateTrail(){
 	int m = _stride;
 	float *begin = &_varray[0];
-	float *end = &_varray[_vsize - 1] + 1;
+	//float *end = &_varray[_vsize - 1] + 1;
 
 	// update only when time progresses
 	if (_oldTime != _time){
@@ -201,7 +230,7 @@ void RenderableTrail::updateTrail(){
 		while (_dtEt < _time){
 			// get intermediary points
 			psc dtPoint;
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _dtEt, dtPoint, _pscvel, lightTime);
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", _dtEt, dtPoint, _pscvel, lightTime);
 			dtPoint[3] += 3;
 			
 			// overwrite the old position
@@ -214,7 +243,7 @@ void RenderableTrail::updateTrail(){
 			// keep track of progression
 			_dtEt += _increment;
 		}
-		//add current position
+		//add earths current position
 		memcpy(&_varray[0], glm::value_ptr(_pscpos.vec4()), 4 * sizeof(float));
 		_varray[4] = 1.f;
 		_varray[5] = 1.f;
@@ -267,7 +296,7 @@ void RenderableTrail::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 	
-	SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
 	_pscpos[3] += 3; // KM to M
 	
 }

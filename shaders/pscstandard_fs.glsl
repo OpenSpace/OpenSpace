@@ -70,10 +70,7 @@ void main()
 		spec = specular * pow(intSpec, shine);
 	}
 	*/
-	vec4 tmpdiff = diffuse;
-	tmpdiff[3] = 1;
 	diffuse = max(intensity * diffuse, ambient);
-	//diffuse[3] = 0.6f;
 	//diffuse = vec4(1);
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);

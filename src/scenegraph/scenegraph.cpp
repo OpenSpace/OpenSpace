@@ -166,31 +166,13 @@ bool SceneGraph::initialize()
 	std::chrono::time_point<clock_> beginning(clock_::now());
 
 	// pscstandard
-	tmpProgram = ProgramObject::Build("writeToTextureProgram",
-		"${SHADERS}/writeToTexture_vs.glsl",
-		"${SHADERS}/writeToTexture_fs.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("writeToTextureProgram", tmpProgram);
-
-	// pscstandard
-	tmpProgram = ProgramObject::Build("projectiveProgram",
-		"${SHADERS}/projectiveTexture_vs.glsl",
-		"${SHADERS}/projectiveTexture_fs.glsl",
-		cb);
-    if( ! tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager().setValue("projectiveProgram", tmpProgram);
-
-	// pscstandard
 	tmpProgram = ProgramObject::Build("pscstandard",
 		"${SHADERS}/pscstandard_vs.glsl",
 		"${SHADERS}/pscstandard_fs.glsl",
 		cb);
-	if (!tmpProgram) return false;
+    if( ! tmpProgram) return false;
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
+    OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
 	// pscstandard
 	tmpProgram = ProgramObject::Build("EphemerisProgram",

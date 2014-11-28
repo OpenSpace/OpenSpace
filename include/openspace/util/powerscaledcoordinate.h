@@ -60,13 +60,6 @@ public:
 
     // returns the rescaled, "normal" coordinates
     glm::vec3 vec3() const;
-
-	// return the full psc as dvec4()
-	 glm::dvec4& dvec4() const;
-
-	// rescaled return as dvec3
-	glm::dvec3 dvec3() const;
-
     // length of the vector as a pss
     PowerScaledScalar length() const;
     glm::vec3 direction() const;
