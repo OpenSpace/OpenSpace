@@ -118,4 +118,8 @@ bool Renderable::isVisible() const {
 	return _enabled;
 }
 
+bool Renderable::isReady() const {
+	return true;
+}
+
 }  // namespace openspace

@@ -151,6 +151,10 @@ RenderableTrail::~RenderableTrail(){
 	deinitialize();
 }
 
+bool RenderableTrail::isReady() const {
+	return _programObject != nullptr;
+}
+
 void RenderableTrail::sendToGPU(){
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);

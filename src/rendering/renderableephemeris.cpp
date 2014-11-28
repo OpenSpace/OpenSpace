@@ -128,6 +128,10 @@ RenderableEphemeris::~RenderableEphemeris(){
 	deinitialize();
 }
 
+bool RenderableEphemeris::isReady() const {
+	return _programObject != nullptr;
+}
+
 bool RenderableEphemeris::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
@@ -311,5 +315,6 @@ void RenderableEphemeris::loadTexture()
 		}
 	}
 }
+
 
 }

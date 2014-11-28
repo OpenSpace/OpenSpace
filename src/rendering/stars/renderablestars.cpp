@@ -101,12 +101,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {
 }
 
-std::ifstream& skipToLine(std::ifstream& file, unsigned int num){
-	file.seekg(std::ios::beg);
-	for (size_t i = 0; i < num - 1; ++i){
-		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	return file;
+bool RenderableStars::isReady() const {
+	return (_haloProgram != nullptr) && (_fullData.size() > 0);
 }
 
 bool RenderableStars::initialize() {
@@ -115,9 +111,9 @@ bool RenderableStars::initialize() {
 
 	// Star program
 	_haloProgram = ghoul::opengl::ProgramObject::Build("Star",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
+		"${SHADERS}/modules/stars/star_vs.glsl",
+		"${SHADERS}/modules/stars/star_fs.glsl",
+		"${SHADERS}/modules/stars/star_ge.glsl",
 		[&](ghoul::opengl::ProgramObject*){ _programIsDirty = true;});
 
 	completeSuccess = (_haloProgram != nullptr);
@@ -231,6 +227,7 @@ void RenderableStars::update(const UpdateData& data) {
 			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)));
 
 			GLint velocityAttrib = _haloProgram->attributeLocation("in_velocity");
+			glEnableVertexAttribArray(velocityAttrib);
 			glVertexAttribPointer(velocityAttrib, 3, GL_FLOAT, GL_TRUE, stride, reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)));
 			
 			break;

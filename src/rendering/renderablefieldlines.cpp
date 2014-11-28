@@ -124,6 +124,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 RenderableFieldlines::~RenderableFieldlines() {
 }
 
+bool RenderableFieldlines::isReady() const {
+	return _fieldlinesProgram != nullptr;
+}
+
 bool RenderableFieldlines::initialize() {
 	assert(_filenames.size() != 0);
 	assert(_hintsDictionaries.size() != 0);

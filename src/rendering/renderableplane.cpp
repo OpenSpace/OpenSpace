@@ -90,6 +90,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 RenderablePlane::~RenderablePlane() {
 }
 
+bool RenderablePlane::isReady() const {
+	return _shader != nullptr;
+}
+
 bool RenderablePlane::initialize() {
 
 	// ============================

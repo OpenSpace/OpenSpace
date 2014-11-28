@@ -175,7 +175,7 @@ void SceneGraphNode::update(const UpdateData& data)
 {
 	if (_ephemeris)
 		_ephemeris->update(data);
-	if (_renderable)
+	if (_renderable && _renderable->isReady())
 		_renderable->update(data);
 }
 
@@ -232,7 +232,7 @@ void SceneGraphNode::render(const RenderData& data)
         return;
     }*/
 
-    if (_renderableVisible && _renderable->isVisible()) {
+    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady()) {
         // LDEBUG("Render");
 		_renderable->render(newData);
     }

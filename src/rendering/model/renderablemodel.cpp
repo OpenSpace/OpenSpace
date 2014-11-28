@@ -94,6 +94,10 @@ RenderableModel::~RenderableModel(){
     deinitialize();
 }
 
+bool RenderableModel::isReady() const {
+	return _programObject != nullptr;
+}
+
 bool RenderableModel::initialize(){
     bool completeSuccess = true;
     if (_programObject == nullptr)
@@ -176,4 +180,5 @@ void RenderableModel::loadTexture()
         }
     }
 }
+
 }  // namespace openspace

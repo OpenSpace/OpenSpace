@@ -95,6 +95,10 @@ RenderableFov::~RenderableFov(){
 	deinitialize();
 }
 
+bool RenderableFov::isReady() const {
+	return _programObject != nullptr;
+}
+
 void RenderableFov::sendToGPU(){
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);

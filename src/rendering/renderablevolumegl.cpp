@@ -167,6 +167,11 @@ RenderableVolumeGL::~RenderableVolumeGL() {
         delete _transferFunction;
 }
 
+bool RenderableVolumeGL::isReady() const {
+	// @TODO needs a proper isReady definition --abock
+	return true;
+}
+
 bool RenderableVolumeGL::initialize() {
     // TODO: fix volume an transferfunction names
     if(_filename != "") {

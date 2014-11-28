@@ -39,8 +39,10 @@ public:
 	RenderableStars(const ghoul::Dictionary& dictionary);
 	~RenderableStars();
 
-	bool initialize()   override;
+	bool initialize() override;
 	bool deinitialize() override;
+
+	bool isReady() const override;
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
@@ -77,8 +79,6 @@ private:
 	
 	std::vector<float> _fullData;
 	int _nValuesPerStar;
-
-	//GLint vertsToDraw;
 
 	GLuint _vboID;
 	GLuint _vaoID;

@@ -79,8 +79,8 @@ void main(void)
 			color = bv2rgb(ge_brightness[0])/1.1;
 			break;
 		case COLOROPTION_VELOCITY:
-			//color = vec4(abs(ge_velocity), 1.0); 
-			color = vec4(1.0, 0.0, 0.0, 1.0);
+			color = vec4(abs(ge_velocity), 0.5); 
+			//color = vec4(1.0, 0.0, 0.0, 1.0);
 			break;
 	}
 
