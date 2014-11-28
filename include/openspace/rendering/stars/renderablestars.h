@@ -37,7 +37,6 @@ namespace openspace {
 class RenderableStars : public Renderable {
 public: 
 	RenderableStars(const ghoul::Dictionary& dictionary);
-	~RenderableStars();
 
 	bool initialize() override;
 	bool deinitialize() override;
@@ -50,7 +49,8 @@ public:
 private:
 	enum ColorOption {
 		Color = 0,
-		Velocity = 1
+		Velocity = 1,
+		Speed = 2
 	};
 
 	void createDataSlice(ColorOption option);
@@ -60,28 +60,26 @@ private:
 	bool loadCachedFile(const std::string& file);
 	bool saveCachedFile(const std::string& file) const;
 
-	void generateBufferObjects(const void* data);
-
 	properties::StringProperty _colorTexturePath;
+	ghoul::opengl::Texture* _texture;
 	bool _textureIsDirty;
 
 	properties::OptionProperty _colorOption;
 	bool _dataIsDirty;
 
-	ghoul::opengl::ProgramObject* _haloProgram;
+	properties::FloatProperty _spriteSize;
+
+	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
 
-	ghoul::opengl::Texture* _texture;
-
-	std::string _speckPath;
+	std::string _speckFile;
 
 	std::vector<float> _slicedData;
-	
 	std::vector<float> _fullData;
 	int _nValuesPerStar;
 
-	GLuint _vboID;
-	GLuint _vaoID;
+	GLuint _vao;
+	GLuint _vbo;
 };
 
 } // namespace openspace

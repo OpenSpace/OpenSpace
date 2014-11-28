@@ -27,6 +27,7 @@
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
 const int COLOROPTION_VELOCITY = 1;
+const int COLOROPTION_SPEED = 2;
 
 uniform sampler2D texture1;
 uniform vec3 Color;
@@ -36,7 +37,8 @@ uniform int colorOption;
 layout(location = 0) in vec4 vs_position;
 layout(location = 1) in vec3 ge_brightness;
 layout(location = 2) in vec3 ge_velocity;
-layout(location = 3) in vec2 texCoord;
+layout(location = 3) in float ge_speed;
+layout(location = 4) in vec2 texCoord;
 
 
 
@@ -80,7 +82,10 @@ void main(void)
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 
-			//color = vec4(1.0, 0.0, 0.0, 1.0);
+			break;
+		case COLOROPTION_SPEED:
+			// @TODO Include a transfer function here ---abock
+			color = vec4(vec3(ge_speed), 0.5);
 			break;
 	}
 
