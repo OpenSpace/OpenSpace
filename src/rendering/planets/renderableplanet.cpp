@@ -128,6 +128,10 @@ void RenderablePlanet::render(const RenderData& data)
 		}
 	}
 	transform = transform* rot;
+	if (_target == "IAU_JUPITER"){ //x = 0.935126
+		transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.93513, 1));
+	}
+
 	
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;

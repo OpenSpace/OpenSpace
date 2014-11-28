@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 430
 
 uniform vec4 campos;
 uniform vec4 objpos;
@@ -31,10 +31,14 @@ uniform vec4 objpos;
 
 uniform float time;
 uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
+
+in vec4 ProjTexCoord;
+in vec3 vs_boresight;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -60,8 +64,8 @@ void main()
 	float shine = 0.0001;
 
 	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	/*
+	vec4 ambient = vec4(0.f,0.f,0.f,1);
+	/* Specular
 	if(intensity > 0.f){
 		// halfway vector
 		vec3 h = normalize(l_dir + e);
@@ -70,12 +74,25 @@ void main()
 		spec = specular * pow(intSpec, shine);
 	}
 	*/
-	vec4 tmpdiff = diffuse;
-	tmpdiff[3] = 1;
-	diffuse = max(intensity * diffuse, ambient);
-	//diffuse[3] = 0.6f;
-	//diffuse = vec4(1);
-
+	//diffuse = max(intensity * diffuse, ambient);
+	
+	// PROJECTIVE TEXTURE
+	vec4 projTexColor = textureProj(texture2, ProjTexCoord);
+	vec4 shaded = diffuse;//max(intensity * diffuse, ambient);
+		if (ProjTexCoord[0] > 0.0 || 
+			ProjTexCoord[1] > 0.0 ||
+			ProjTexCoord[0] < ProjTexCoord[2] || 
+			ProjTexCoord[1] < ProjTexCoord[2]){
+			diffuse = shaded;
+		}else if(dot(n,vs_boresight) < 0 ){
+			diffuse = projTexColor;
+		}else{
+			diffuse = shaded;
+		}
+	
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
+
+	discard;
 }
+

@@ -27,3 +27,6 @@ html/
 latex/
 shaders/ABuffer/constants.hglsl
 *.OpenSpaceGenerated.glsl
+shaders/writeToTexture_fs.glsl
+shaders/writeToTexture_vs.glsl
+src/rendering/planets/writeToTexture.cpp

@@ -22,60 +22,61 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERICALGRID_H__
-#define __RENDERABLESPHERICALGRID_H__
-
-// more or less a brutal adaptation of powerscaledsphere class
+#ifndef __RENDERABLEPLANETPROJECTION_H__
+#define __RENDERABLEPLANETPROJECTION_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/framebufferobject.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/query/query.h>
 
 namespace openspace {
-class RenderableSphericalGrid : public Renderable{
-public:
-	RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-	~RenderableSphericalGrid();
 
-	bool initialize()   override;
-	bool deinitialize() override;
+namespace planetgeometryprojection {
+class PlanetGeometryProjection;
+}
+
+class RenderablePlanetProjection : public Renderable {
+public:
+	RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
+	~RenderablePlanetProjection();
+
+    bool initialize() override;
+    bool deinitialize() override;
 
 	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-private:
+    void update(const UpdateData& data) override;
+
 protected:
-	typedef struct {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+    void loadTexture();
 
+private:
+    properties::StringProperty _colorTexturePath;
+	properties::StringProperty _projectionTexturePath;
 
-	ghoul::opengl::ProgramObject* _gridProgram;
-	std::string _gridType;
-	glm::vec4 _gridColor;
-	glm::mat4 _gridMatrix;
-	int _segments;
+    ghoul::opengl::ProgramObject* _programObject;
 
-	bool staticGrid;
-	std::string _parentsRotation;
-	glm::dmat3 _parentMatrix;
-	PowerScaledScalar _radius;
+    ghoul::opengl::Texture* _texture;
+	ghoul::opengl::Texture* _textureProj;
+	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 
-	GLuint _vaoID = 3;
-	GLuint _vBufferID = 4;
-	GLuint _iBufferID = 5;
+	glm::dmat3 _stateMatrix;
+	glm::dmat3 _instrumentMatrix;
 
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex* _varray;
-	int* _iarray;
+	double _time;
+	openspace::SceneGraphNode* _targetNode;
+
+	std::string _target;
 };
-}// namespace openspace
-#endif
+
+}  // namespace openspace
+
+#endif  // __RENDERABLEPLANETPROJECTION_H__

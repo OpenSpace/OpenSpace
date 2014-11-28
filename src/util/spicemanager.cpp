@@ -45,13 +45,10 @@ void SpiceManager::initialize() {
 	_manager = new SpiceManager;
 	_manager->_lastAssignedKernel = 0;
 
-	char REPORT[]="REPORT";
-	char NONE[]="NONE";
-
 	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, REPORT);
+	erract_c("SET", 0, "REPORT");
 	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, NONE);
+	errprt_c("SET", 0, "NONE");
 }
 
 void SpiceManager::deinitialize() {
@@ -60,11 +57,10 @@ void SpiceManager::deinitialize() {
 
 	delete _manager;
 	_manager = nullptr;
-	char DEFAULT[]="DEFAULT";
 
 	// Set values back to default
-	erract_c("SET", 0, DEFAULT);
-	errprt_c("SET", 0, DEFAULT);
+	erract_c("SET", 0, "DEFAULT");
+	errprt_c("SET", 0, "DEFAULT");
 }
 
 SpiceManager& SpiceManager::ref() {
@@ -165,15 +161,15 @@ bool SpiceManager::hasValue(const std::string& body, const std::string& item) co
 }
 
 bool SpiceManager::getNaifId(const std::string& body, int& id) const {
-	
-	SpiceInt s_id = id;
 	if (body.empty()) {
 		LERROR("No body was provided");
 		return false;
 	}
 	else {
 		SpiceBoolean success;
-		bods2c_c(body.c_str(), &s_id, &success);
+		SpiceInt sid = id;
+		bods2c_c(body.c_str(), &sid, &success);
+		id = sid;
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
@@ -183,6 +179,7 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 bool getValueInternal(const std::string& body, const std::string& value, int S,
 	double* v)
 {
+
 	if (body.empty()) {
 		LERROR("No body was provided");
 		return false;
@@ -193,8 +190,7 @@ bool getValueInternal(const std::string& body, const std::string& value, int S,
 	}
 
 	SpiceInt n;
-	SpiceInt _s = S;
-	bodvrd_c(body.c_str(), value.c_str(), _s, &n, v);
+	bodvrd_c(body.c_str(), value.c_str(), S, &n, v);
 
     bool hasError = SpiceManager::checkForError("Error getting value '" + value +
                                                 "' for body '" + body + "'");
@@ -304,16 +300,137 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 						   psc& position, 
 						   double& lightTime) const
 {
-	glm::dvec3 pos;
-	bool success = getTargetPosition(target, observer, referenceFrame,
-		aberrationCorrection, ephemerisTime, pos, lightTime);
-	
-	if(!success)
+	double pos[3] = { NULL, NULL, NULL };
+
+	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
+
+	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL)
 		return false;
 
 	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
 
 	return true;
+}
+
+// do NOT remove this method. 
+void SpiceManager::frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const{
+	glm::dmat3 transform;
+	// get rotation matrix from frame A - frame B
+	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
+	// re-express vector in new frame 
+	mxv_c((double(*)[3])glm::value_ptr(transform), glm::value_ptr(v), glm::value_ptr(v));
+}
+
+glm::dvec3 SpiceManager::orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2){
+	glm::dvec3 projected;
+	vproj_c(glm::value_ptr(v1), glm::value_ptr(v2), glm::value_ptr(projected));
+
+	return projected;
+}
+
+bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
+	const std::string& target,
+	const std::string& observer,
+	const std::string& method,
+	const std::string& referenceFrame,
+	const std::string& aberrationCorrection,
+	double& targetEpoch) const{
+	
+	int visible ;
+	fovtrg_c(instrument.c_str(),
+		     target.c_str(),
+		     method.c_str(),
+		     referenceFrame.c_str(),
+		     aberrationCorrection.c_str(),
+		     observer.c_str(),
+		     &targetEpoch,
+		     &visible);
+	return visible;
+}
+
+bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
+	const std::string& target,
+	const std::string& observer,
+	const std::string& method,
+	const std::string& aberrationCorrection,
+	double& targetEpoch) const{
+
+	int visible;
+
+	std::string bodyfixed = "IAU_";
+	bodyfixed += target;
+
+	fovtrg_c(instrument.c_str(),
+		target.c_str(),
+		method.c_str(),
+		bodyfixed.c_str(),
+		aberrationCorrection.c_str(),
+		observer.c_str(),
+		&targetEpoch,
+		&visible);
+	return visible;
+}
+
+
+bool SpiceManager::getSurfaceIntercept(const std::string& target,
+									   const std::string& observer,
+									   const std::string& fovInstrument,
+									   const std::string& referenceFrame,
+									   const std::string& method,
+									   const std::string& aberrationCorrection,
+									   double ephemerisTime,
+									   double& targetEpoch,
+									   glm::dvec3& directionVector,
+									   glm::dvec3& surfaceIntercept,
+									   glm::dvec3& surfaceVector) const{
+	// make pretty latr
+	double dvec[3], spoint[3], et;
+	glm::dvec3 srfvec;
+	int found;
+	bool convert;
+
+	dvec[0] = directionVector[0];
+	dvec[1] = directionVector[1];
+	dvec[2] = directionVector[2];
+
+	// allow client specify non-inertial frame. 
+	std::string bodyfixed = "IAU_";
+	convert = (referenceFrame.find(bodyfixed) == std::string::npos);
+	if (convert){
+		bodyfixed += target;
+	}else{
+		bodyfixed = referenceFrame;
+	}
+
+	sincpt_c(method.c_str(), 
+		     target.c_str(), 
+			 ephemerisTime, 
+			 bodyfixed.c_str(), 
+			 aberrationCorrection.c_str(), 
+			 observer.c_str(),
+		     fovInstrument.c_str(), 
+			 dvec, 
+			 spoint, 
+			 &et, 
+			 glm::value_ptr(srfvec), 
+			 &found);
+
+	bool hasError = checkForError("Error retrieving surface intercept on target '" + target + "'" +
+								  "viewed from observer '" + observer + "' in " +
+								  "reference frame '" + bodyfixed + "' at time '" +
+								  std::to_string(ephemerisTime) + "'");
+
+	if (convert) frameConversion(srfvec, bodyfixed, referenceFrame, ephemerisTime);
+
+	if (!hasError && found){
+
+
+		memcpy(glm::value_ptr(directionVector), dvec, sizeof(dvec));
+		memcpy(glm::value_ptr(surfaceIntercept), spoint, sizeof(spoint));
+		surfaceVector = srfvec;
+	}
+	return found;
 }
 
 bool SpiceManager::getTargetState(const std::string& target,
@@ -356,14 +473,10 @@ bool SpiceManager::getTargetState(const std::string& target,
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
 
-	bool hasError = checkForError("Error getting position for '" + 
-		target + "' with observer '" + observer + "'");
+	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+	velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
 
-	if (!hasError) {
-		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
-		velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
-	}
-	return !hasError;
+	return true;
 }
 
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
@@ -380,6 +493,7 @@ bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 	return !hasError;
 }
 
+// I honestly dont even think we need this, deprecatable relic from previous crunch time. 
 bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
 	const std::string& body,
 	double ephemerisTime,
@@ -411,6 +525,24 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
     
 	return !hasError;
 }
+
+
+bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
+	                                          const std::string& toFrame,
+	                                          double ephemerisTimeFrom,
+											  double ephemerisTimeTo,
+	                                          glm::dmat3& positionMatrix) const{
+
+	pxfrm2_c(fromFrame.c_str(), toFrame.c_str(), ephemerisTimeFrom, ephemerisTimeTo, (double(*)[3])glm::value_ptr(positionMatrix));
+
+	bool hasError = checkForError("Error retrieving position transform matrix from "
+		"frame '" + fromFrame + "' to frame '" + toFrame +
+		"' at time '" + std::to_string(ephemerisTimeTo) + "'");
+	positionMatrix = glm::transpose(positionMatrix);
+
+	return !hasError;
+}
+
 
 bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fovShape,
 	std::string& frameName, glm::dvec3& boresightVector,

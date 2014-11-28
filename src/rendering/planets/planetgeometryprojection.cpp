@@ -22,71 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
-
+#include <openspace/rendering/planets/PlanetGeometryProjection.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
+const std::string _loggerCat = "PlanetGeometryProjection";
 }
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
+namespace planetgeometryprojection {
+
+PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
-
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
-
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	if (kernels.size() == 0)
-		_kernelsLoadedSuccessfully = false;
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
-
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
+	std::string geometryType;
+	const bool success = dictionary.getValue(
+		constants::planetgeometry::keyType, geometryType);
+	if (!success) {
+        LERROR("PlanetGeometry did not contain a correct value of the key '"
+			<< constants::planetgeometry::keyType << "'");
+        return nullptr;
 	}
-}
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
-}
+	ghoul::TemplateFactory<PlanetGeometryProjection>* factory
+		= FactoryManager::ref().factory<PlanetGeometryProjection>();
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
-
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
-		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}
-	
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
+	PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
+                                                                    << "'");
+        return nullptr;
+    }
+    return result;
 }
 
-} // namespace openspace
+PlanetGeometryProjection::PlanetGeometryProjection()
+    : _parent(nullptr)
+{
+	setName("PlanetGeometryProjection");
+}
+
+PlanetGeometryProjection::~PlanetGeometryProjection()
+{
+}
+
+bool PlanetGeometryProjection::initialize(RenderablePlanetProjection* parent)
+{
+    _parent = parent;
+    return true;
+}
+
+void PlanetGeometryProjection::deinitialize()
+{
+}
+
+}  // namespace planetgeometry
+}  // namespace openspace

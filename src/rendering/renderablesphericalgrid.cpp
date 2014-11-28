@@ -56,9 +56,18 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 	glm::vec2 s;
 	dictionary.getValue(constants::renderablesphericalgrid::gridType   , _gridType);
 	dictionary.getValue(constants::renderablesphericalgrid::gridColor  , _gridColor);
-	dictionary.getValue(constants::renderablesphericalgrid::gridMatrix , _gridMatrix);
+
+	staticGrid = dictionary.getValue(constants::renderablesphericalgrid::gridMatrix, _gridMatrix);
+	if (!staticGrid){
+		staticGrid = dictionary.getValue(constants::renderablesphericalgrid::gridPatentsRotiation, _parentsRotation);
+	}
+	
 	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, s);
 
+
+	/*glm::vec2 radius;
+	dictionary.getValue(constants::renderablesphericalgrid::gridRadius, radius);
+	*/
 	_segments = s[0];
 
 	_isize = int(6 * _segments * _segments);
@@ -172,14 +181,22 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	assert(_gridProgram);
 	_gridProgram->activate();
 
+	glm::mat4 transform;
+	for (int i = 0; i < 3; i++){
+		for (int j = 0; j < 3; j++){
+			transform[i][j] = _parentMatrix[i][j];
+		}
+	}
+
+
 	// setup the data to the shader
 	_gridProgram->setIgnoreUniformLocationError(true);
 	_gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_gridProgram->setUniform("ModelTransform", glm::mat4(1));
+	_gridProgram->setUniform("ModelTransform", transform);
 	setPscUniforms(_gridProgram, &data.camera, data.position);
 	_gridProgram->setUniform("gridColor", _gridColor);
 
-	//glLineWidth(1.0f);
+	glLineWidth(0.5f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
@@ -193,6 +210,8 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	
 }
 void RenderableSphericalGrid::update(const UpdateData& data){
-}
 
+	openspace::SpiceManager::ref().getPositionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time, _parentMatrix);
+
+}
 }

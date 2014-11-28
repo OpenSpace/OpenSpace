@@ -22,60 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 430
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
+//texture projection matrix
 
-uniform float time;
-uniform sampler2D texture1;
+uniform mat4 ProjectorMatrix;
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
+layout(location = 0) in vec4 in_position;
+//in vec3 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+layout(location = 3) in vec3 boresight;
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out float s;
+
+out vec3 vs_boresight;
+
+out vec4 ProjTexCoord;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
 void main()
 {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(texture1, vs_st);
+	// Radius = 0.71492 *10^8; 
+    vs_boresight = boresight;
+	// set variables
+	vs_st = in_st;
+	//vs_stp = in_position.xyz;
+	vs_position = in_position;
+	vec4 tmp    = in_position;
 	
-	// directional lighting
-	vec3 origin = vec3(0.0);
-	vec4 spec = vec4(0.0);
+	// this is wrong for the normal. 
+	// The normal transform is the transposed inverse of the model transform
+	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 	
-	vec3 n = normalize(vs_normal.xyz);
-	//vec3 e = normalize(camdir);
-	vec3 l_pos = vec3(0.0); // sun.
-	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-	
-	float shine = 0.0001;
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
 
-	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	/*
-	if(intensity > 0.f){
-		// halfway vector
-		vec3 h = normalize(l_dir + e);
-		// specular factor
-		float intSpec = max(dot(h,n),0.0);
-		spec = specular * pow(intSpec, shine);
-	}
-	*/
-	vec4 tmpdiff = diffuse;
-	tmpdiff[3] = 1;
-	diffuse = max(intensity * diffuse, ambient);
-	//diffuse[3] = 0.6f;
-	//diffuse = vec4(1);
+	vec4 raw_pos = psc_to_meter(in_position, scaling);
+	ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+	position = ViewProjection * position;
+
+	gl_Position =  z_normalization(position);
 }

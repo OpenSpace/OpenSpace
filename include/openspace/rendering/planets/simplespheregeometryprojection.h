@@ -22,60 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERICALGRID_H__
-#define __RENDERABLESPHERICALGRID_H__
+#ifndef __SIMPLESPHEREGEOMETRYPROJECTION_H__
+#define __SIMPLESPHEREGEOMETRYPROJECTION_H__
 
-// more or less a brutal adaptation of powerscaledsphere class
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/rendering/planets/planetgeometryprojection.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/util/powerscaledsphere.h>
 
 namespace openspace {
-class RenderableSphericalGrid : public Renderable{
+
+class RenderablePlanet;
+
+namespace planetgeometryprojection {
+
+class SimpleSphereGeometryProjection : public PlanetGeometryProjection {
 public:
-	RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-	~RenderableSphericalGrid();
+	SimpleSphereGeometryProjection(const ghoul::Dictionary& dictionary);
+	~SimpleSphereGeometryProjection();
 
-	bool initialize()   override;
-	bool deinitialize() override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	bool initialize(RenderablePlanetProjection* parent) override;
+    void deinitialize() override;
+    void render() override;
+
 private:
-protected:
-	typedef struct {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+    void createSphere();
 
+    properties::Vec2Property _radius;
+    properties::IntProperty _segments;
 
-	ghoul::opengl::ProgramObject* _gridProgram;
-	std::string _gridType;
-	glm::vec4 _gridColor;
-	glm::mat4 _gridMatrix;
-	int _segments;
-
-	bool staticGrid;
-	std::string _parentsRotation;
-	glm::dmat3 _parentMatrix;
-	PowerScaledScalar _radius;
-
-	GLuint _vaoID = 3;
-	GLuint _vBufferID = 4;
-	GLuint _iBufferID = 5;
-
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex* _varray;
-	int* _iarray;
+    PowerScaledSphere* _planet;
 };
-}// namespace openspace
-#endif
+
+}  // namespace planetgeometry
+}  // namespace openspace
+
+#endif // __SIMPLESPHEREGEOMETRY_H__

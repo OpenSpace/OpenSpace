@@ -78,6 +78,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	if (success)
 		_colorTexturePath = path + "/" + texturePath;
 
+	if (_geometry != nullptr)
 	addPropertySubOwner(_geometry);
 
 	addProperty(_colorTexturePath);
@@ -102,15 +103,20 @@ bool RenderableModel::initialize(){
 
     loadTexture();
     completeSuccess &= (_texture != nullptr);
+
+	if (_geometry != nullptr)
     completeSuccess &= _geometry->initialize(this); 
 
     return completeSuccess;
 }
 
 bool RenderableModel::deinitialize(){
-	_geometry->deinitialize();
-	delete _geometry;
-	_geometry = nullptr;
+
+	if (_geometry != nullptr){
+		_geometry->deinitialize();
+		delete _geometry;
+		_geometry = nullptr;
+	}
 	delete _texture;
 	_texture = nullptr;
 	return true;
@@ -127,6 +133,8 @@ void RenderableModel::render(const RenderData& data)
  
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
+	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
+	glm::mat4 scale = glm::scale(transform, glm::vec3(1, -1, 1));
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
@@ -134,7 +142,6 @@ void RenderableModel::render(const RenderData& data)
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
-	
 	transform *= tmp;
 	
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
@@ -151,7 +158,8 @@ void RenderableModel::render(const RenderData& data)
     unit.activate();
     _texture->bind();
     _programObject->setUniform("texture1", unit);
-
+	
+	if (_geometry != nullptr)
 	_geometry->render();
 
     // disable shader

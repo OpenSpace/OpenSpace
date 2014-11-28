@@ -22,60 +22,50 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERICALGRID_H__
-#define __RENDERABLESPHERICALGRID_H__
-
-// more or less a brutal adaptation of powerscaledsphere class
+#ifndef __RENDERABLEPLANET_H__
+#define __RENDERABLEPLANET_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace {
-class RenderableSphericalGrid : public Renderable{
-public:
-	RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-	~RenderableSphericalGrid();
 
-	bool initialize()   override;
-	bool deinitialize() override;
+namespace planetgeometry {
+class PlanetGeometry;
+}
+
+class RenderablePlanet : public Renderable {
+public:
+    RenderablePlanet(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanet();
+
+    bool initialize() override;
+    bool deinitialize() override;
 
 	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-private:
+    void update(const UpdateData& data) override;
+
 protected:
-	typedef struct {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+    void loadTexture();
 
+private:
+    properties::StringProperty _colorTexturePath;
+    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::Texture* _texture;
+    planetgeometry::PlanetGeometry* _geometry;
 
-	ghoul::opengl::ProgramObject* _gridProgram;
-	std::string _gridType;
-	glm::vec4 _gridColor;
-	glm::mat4 _gridMatrix;
-	int _segments;
+	glm::dmat3 _stateMatrix;
 
-	bool staticGrid;
-	std::string _parentsRotation;
-	glm::dmat3 _parentMatrix;
-	PowerScaledScalar _radius;
-
-	GLuint _vaoID = 3;
-	GLuint _vBufferID = 4;
-	GLuint _iBufferID = 5;
-
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex* _varray;
-	int* _iarray;
+	std::string _target;
 };
-}// namespace openspace
-#endif
+
+}  // namespace openspace
+
+#endif  // __RENDERABLEPLANET_H__

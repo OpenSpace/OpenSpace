@@ -752,22 +752,22 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			Time::ref().retreatTime(sgct::Engine::instance()->getDt());
 		}
 	    if (key == 262) {
-	        glm::vec3 euler(0.0, speed * dt, 0.0);
+	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
 	    if (key == 263) {
-	        glm::vec3 euler(0.0, -speed * dt, 0.0);
+			glm::vec3 euler(0.0, -speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
 	    if (key == 264) {
-	        glm::vec3 euler(speed * dt, 0.0, 0.0);
+			glm::vec3 euler(speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
 	    if (key == 265) {
-	        glm::vec3 euler(-speed * dt, 0.0, 0.0);
+			glm::vec3 euler(-speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
