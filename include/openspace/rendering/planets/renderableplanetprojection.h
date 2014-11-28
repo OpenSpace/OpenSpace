@@ -62,10 +62,7 @@ private:
     properties::StringProperty _colorTexturePath;
 	properties::StringProperty _projectionTexturePath;
 
-	ghoul::opengl::FramebufferObject fbo;
-
     ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _writeToTextureProgramObject;
 
     ghoul::opengl::Texture* _texture;
 	ghoul::opengl::Texture* _textureProj;

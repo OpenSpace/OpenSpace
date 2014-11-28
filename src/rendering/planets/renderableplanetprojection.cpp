@@ -38,7 +38,8 @@
 #include <sgct.h>
 #include <iomanip> 
 
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace {
 const std::string _loggerCat = "RenderablePlanetProjection";
@@ -51,7 +52,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _colorTexturePath("colorTexture", "Color Texture")
 	, _projectionTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
-	, _writeToTextureProgramObject(nullptr)
     , _texture(nullptr)
 	, _textureProj(nullptr)
     , _geometry(nullptr)
@@ -103,9 +103,6 @@ bool RenderablePlanetProjection::initialize(){
     if (_programObject == nullptr)
         completeSuccess
               &= OsEng.ref().configurationManager().getValue("projectiveProgram", _programObject);
-	if (_writeToTextureProgramObject == nullptr)
-		completeSuccess
-		&= OsEng.ref().configurationManager().getValue("writeToTextureProgram", _writeToTextureProgramObject);
 
     loadTexture();
     completeSuccess &= (_texture != nullptr);
@@ -211,25 +208,88 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
     // disable shader
     _programObject->deactivate();
+	
+	static int callCount = 0;
+	callCount++;
 
-	/*
-	fbo.activate();
-	//glViewport(0, 0, 1024, 1024);
-	_writeToTextureProgramObject->activate();
-	GLfloat vertices[] = { -1, -1, 0,   // bottom left corner
-						   -1,  1, 0,   // top left corner
-						    1,  1, 0,   // top right corner
-						    1, -1, 0 }; // bottom right corner
-	 
-	GLubyte indices[] = { 0, 1, 2,      // first triangle (bottom left - top left - top right)
-		                0, 2, 3 };      // second triangle (bottom left - top right - bottom right)
+	if (callCount > 1000){
+		callCount = 0;
 
-	glVertexPointer(3, GL_FLOAT, 0, vertices);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
+		_textureProj->downloadTexture();
+		_texture->downloadTexture();
 
-	_writeToTextureProgramObject->deactivate();
-	fbo.deactivate();
-	*/
+		auto uvToModel = [](float u, float v, float radius[2], float fsegments)->glm::vec4{
+
+			const float fj = u * fsegments;
+			const float fi = v * fsegments;
+
+			const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+			const float phi = fj * float(M_PI) * 2.0f / fsegments;
+
+			const float x = radius[0] * sin(phi) * sin(theta);  //
+			const float y = radius[0] * cos(theta);             // up
+			const float z = radius[0] * cos(phi) * sin(theta);  //
+
+			return glm::vec4(x, y, z, radius[1]);
+		};
+
+		auto uvToIndex = [](const glm::vec2 &uv, int w, int h, int &i, int &j){
+			i = static_cast<int>(uv.x * float(w));
+			j = static_cast<int>(uv.y * float(h));
+		};
+
+		auto inRange = [](int x, int a, int b)->bool{
+			return (x >= a && x <= b);
+		};
+
+		auto pscToMeter = [](glm::vec4 v1, glm::vec2 v2)->glm::vec4{
+			float factor = v2.x * pow(10, v2.y + v1.w);
+			return glm::vec4(v1.xyz * factor, 1.0);
+		};
+
+		const float w = _texture->width();
+		const float h = _texture->height();
+		for (int i = 0; i < _texture->width(); ++i) {
+			for (int j = 0; j < _texture->height(); ++j) {
+				// "Shader code"
+
+				// Texture coordinates
+				float u = float(i) / w;
+				float v = float(j) / h;
+
+				// Psc scaling
+				glm::vec2 scaling = data.camera.scaling();
+
+				// Convert texture coordinates to model coordinates
+				float radius[2] = { 0.71492f, 8.f };
+				glm::vec4 in_position = uvToModel(u, v, radius, 200);
+
+				// Convert psc to meters
+				glm::vec4 raw_pos = pscToMeter(in_position, scaling);
+
+				// Transform model coordinates to world coordinates
+				glm::vec4 projected = m * transform  * raw_pos;
+
+				// To do : use bilinear interpolation
+				int x, y;
+				glm::vec2 uv;
+				uv.x = projected.x / projected.w;
+				uv.y = projected.y / projected.w;
+				uvToIndex(uv, _textureProj->width(), _textureProj->height(), x, y);
+
+				if (inRange(x, 0, _textureProj->width() - 1) && inRange(y, 0, _textureProj->height() - 1)){
+
+					_texture->texel<glm::detail::tvec3<glm::detail::uint8> >(i, j) = _textureProj->texel<glm::detail::tvec3<glm::detail::uint8>>(x, y);
+				}
+			}
+		}
+
+		// Upload textures
+		//_textureProj->uploadTexture();
+		_texture->uploadTexture();
+	}
+	
+
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
@@ -252,9 +312,6 @@ void RenderablePlanetProjection::loadTexture()
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-			fbo.activate();
-			fbo.attachTexture(_texture, GL_COLOR_ATTACHMENT0, 0, 0);
-			fbo.deactivate();
         }
     }
 
