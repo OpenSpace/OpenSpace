@@ -24,9 +24,6 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -34,11 +31,13 @@ uniform mat4 projection;
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec3 in_brightness;
 layout(location = 2) in vec3 in_velocity;
+layout(location = 3) in float in_speed;
 
 layout(location = 0) out vec4 psc_position;
 layout(location = 1) out vec3 vs_brightness;
 layout(location = 2) out vec3 vs_velocity;
-layout(location = 3) out vec4 cam_position;
+layout(location = 3) out float vs_speed;
+layout(location = 4) out vec4 cam_position;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -46,12 +45,14 @@ void main() {
 	psc_position  = in_position;
 	vs_brightness = in_brightness;
 	vs_velocity = in_velocity;
+	vs_speed = in_speed;
 	cam_position  = campos;
 
 	vec4 tmp = in_position;
-	vec4 position = pscTransform(tmp, ModelTransform);
+	vec4 position = pscTransform(tmp, mat4(1.0));
 	// psc_position = tmp;
-	position = view * model * position;
+	position = model * view * position;
+	// position = ViewProjection * ModelTransform * position;
 	// gl_Position =  z_normalization(position);
 	gl_Position =  position;
 }
