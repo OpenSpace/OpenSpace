@@ -46,6 +46,7 @@
 namespace openspace {
 
 std::string _loggerCat = "KameleonWrapper";
+const float RE_TO_METER = 6371000;
 
 KameleonWrapper::KameleonWrapper()
 	: _kameleon(nullptr)
@@ -395,8 +396,6 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
 	glm::vec4 color;
 	FieldlineEnd forwardEnd, backEnd;
 
-	float ReToMeter = 6371000;
-
 	if (_type == Model::BATSRUS) {
 		for (glm::vec3 seedPoint : seedPoints) {
 			fLine = traceCartesianFieldline(xVar, yVar, zVar, seedPoint, stepSize, TraceDirection::FORWARD, forwardEnd);
@@ -408,10 +407,10 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
 			// classify
 			color = classifyFieldline(forwardEnd, backEnd);
 
-			// write colors
+			// write colors and convert positions to meter
 			std::vector<LinePoint> line;
 			for (glm::vec3 position : bLine) {
-				line.push_back(LinePoint(ReToMeter*position, color));
+				line.push_back(LinePoint(RE_TO_METER*position, color));
 			}
 
 			fieldLines.push_back(line);
@@ -446,10 +445,10 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(
 			bLine.erase(bLine.begin());
 			bLine.insert(bLine.begin(), fLine.rbegin(), fLine.rend());			
 
-			// write colors
+			// write colors and convert positions to meter
 			std::vector<LinePoint> line;
 			for (glm::vec3 position : bLine) {
-				line.push_back(LinePoint(position, color));
+				line.push_back(LinePoint(RE_TO_METER*position, color));
 			}
 
 			fieldLines.push_back(line);
@@ -475,12 +474,17 @@ KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
 		plusTraj = traceLorentzTrajectory(seedPoint, stepsize, 1.0);
 		minusTraj = traceLorentzTrajectory(seedPoint, stepsize, -1.0);
 
+		//minusTraj.erase(minusTraj.begin());
+		int plusNum = plusTraj.size();
 		minusTraj.insert(minusTraj.begin(), plusTraj.rbegin(), plusTraj.rend());
 
-		// write colors
+		// write colors and convert positions to meter
 		std::vector<LinePoint> trajectory;
-		for (glm::vec3 position : minusTraj) {
-			trajectory.push_back(LinePoint(position, color));
+		for (glm::vec3 position : minusTraj) {			
+			if (trajectory.size() < plusNum) // set positive trajectory to pink
+				trajectory.push_back(LinePoint(RE_TO_METER*position, glm::vec4(1, 0, 1, 1)));
+			else // set negative trajectory to cyan
+				trajectory.push_back(LinePoint(RE_TO_METER*position, glm::vec4(0, 1, 1, 1)));
 		}
 		trajectories.push_back(trajectory);
 	}

@@ -26,12 +26,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/kameleonwrapper.h>
-
 #include <openspace/util/constants.h>
 
-#include <ghoul/opengl/texturereader.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/filesystem/file.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
@@ -47,12 +44,12 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _fieldlineVAO(0)
 	, _shader(nullptr)
-	, _texture(nullptr)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
 	assert(success);
 
+	// Read fieldlines module into dictionary
 	ghoul::Dictionary fieldlines;
 	success = dictionary.getValue(keyFieldlines, fieldlines);
 	if (!success) {
@@ -96,22 +93,19 @@ bool RenderableFieldlines::initialize() {
 	assert(_hintsDictionaries.size() != 0);
 
 	int prevEnd = 0;
-	std::vector<LinePoint> vertexData, seedPointsData;
+	std::vector<LinePoint> vertexData;
 	std::vector<std::vector<LinePoint> > fieldlinesData;
-	glm::vec4 seedPointsColor = glm::vec4(1.0, 0.5, 0.0, 1.0);
 
+	// Read data from fieldlines dictionary
 	for (int i = 0; i < _filenames.size(); ++i) {
 		fieldlinesData = getFieldlinesData(_filenames[i], _hintsDictionaries[i]);
 
+		// Arrange data for glMultiDrawArrays
 		for (int j = 0; j < fieldlinesData.size(); ++j) {
 			_lineStart.push_back(prevEnd);
 			_lineCount.push_back(fieldlinesData[j].size());
 			prevEnd = prevEnd + fieldlinesData[j].size();
 			vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
-		}
-		// Give seedpoints a color for visualizing as GL_POINTS
-		for (glm::vec3 seedPoint : _seedPoints) {
-			seedPointsData.push_back(LinePoint(seedPoint, seedPointsColor));
 		}
 	}
 	LDEBUG("Number of vertices : " << vertexData.size());
@@ -137,29 +131,8 @@ bool RenderableFieldlines::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
 
-	//	------ SEEDPOINTS -----------------
-	GLuint seedpointPositionBuffer;
-	glGenVertexArrays(1, &_seedpointVAO); // generate array
-	glBindVertexArray(_seedpointVAO); // bind array
-	glGenBuffers(1, &seedpointPositionBuffer); // generate buffer
-	glBindBuffer(GL_ARRAY_BUFFER, seedpointPositionBuffer); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, seedPointsData.size()*sizeof(LinePoint), &seedPointsData.front(), GL_STATIC_DRAW);
-
-	// Vertex positions
-	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
-
-	// Vertex colors
-	glEnableVertexAttribArray(colorLocation);
-	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
-	glBindVertexArray(0); //unbind array	
-
 	OsEng.ref().configurationManager().getValue("FieldlineProgram", _shader);
 	assert(_shader);
-
-	loadTexture("C:/openspace/openspace-data/test.png");
 
 	return true;
 }
@@ -178,35 +151,21 @@ void RenderableFieldlines::render(const RenderData& data) {
 	_shader->setUniform("cameraViewDir", data.camera.viewDirection());
 	setPscUniforms(_shader, &data.camera, data.position);
 
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
-	_texture->bind();
-	_shader->setUniform("texture1", unit);
-
 	//	------ DRAW FIELDLINES -----------------
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	glBindVertexArray(_fieldlineVAO);
 	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _lineStart.size());
 
-	////	------ DRAW SEEDPOINTS -----------------
-	//glBindVertexArray(_seedpointVAO);
-	//glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _seedPoints.size());
-
-	glDisable(GL_POLYGON_SMOOTH);
 	glBindVertexArray(0);
 	_shader->deactivate();
 }
 
 std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {
-	std::string modelString;
-	float stepSize = 0.5; // default if no stepsize is specified in hints
-	std::string xVariable, yVariable, zVariable;
+	std::string modelString, xVariable, yVariable, zVariable;
 	KameleonWrapper::Model model;
 	std::vector<std::vector<LinePoint> > fieldlinesData;
-
 	bool classification = false, lorentz = false;
 	glm::vec4 fieldlineColor = glm::vec4(1.0, 1.0, 1.0, 1.0); // default color if no color or classification is specified
+	float stepSize = 0.5; // default if no stepsize is specified in hints
 
 	if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
 		//	------ MODEL -----------------
@@ -276,24 +235,6 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 	}
 
 	return fieldlinesData;
-}
-
-// TEST
-void RenderableFieldlines::loadTexture(std::string path) {
-	if (path != "") {
-		ghoul::opengl::Texture* texture = ghoul::opengl::loadTexture(path);
-		if (texture) {
-			LDEBUG("Loaded texture from '" << path << "'");
-			texture->uploadTexture();
-
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-			if (_texture)
-				delete _texture;
-			_texture = texture;
-		}
-	}
 }
 
 } // namespace openspace

@@ -27,17 +27,9 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
-
-namespace ghoul {
-	namespace opengl {
-		class Texture;
-	}
-}
 
 namespace openspace {
 	struct LinePoint;
@@ -60,14 +52,10 @@ private:
 	std::vector<glm::vec3> _seedPoints;
 
 	ghoul::opengl::ProgramObject* _shader;
-	GLuint _fieldlineVAO, _seedpointVAO;
+	GLuint _fieldlineVAO;
 
 	std::vector<GLint> _lineStart;
 	std::vector<GLsizei> _lineCount;
-
-	//TEST
-	ghoul::opengl::Texture* _texture;
-	void loadTexture(std::string path);
 };
 
 } // namespace openspace

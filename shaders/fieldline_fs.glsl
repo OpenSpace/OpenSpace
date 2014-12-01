@@ -24,23 +24,17 @@
 
 #version __CONTEXT__
 
-uniform vec3 cameraViewDir;
-uniform sampler2D texture1;
-
 in vec4 gs_color;
 in vec4 gs_position;
 in vec3 gs_normal;
-in vec2 gs_texcoord;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-float EARTH_RADIUS = 6371000.0;
-
 void main() {
-	// vec4 fragColor = vec4(gs_texcoord.x, gs_texcoord.x , gs_texcoord.x, 1)*gs_color;
-	vec4 fragColor = texture(texture1, gs_texcoord)*gs_color;
+	float alpha = 1-length(gs_normal)*length(gs_normal);
+	vec4 fragColor = vec4(gs_color.rgb, alpha);
 
 	float depth = pscDepth(gs_position);
 	ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
