@@ -108,7 +108,7 @@ void RenderableTrail::fullYearSweep(){
 			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _startTrail, _pscpos, _pscvel, lightTime);
 		}
 		else{*/
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, _pscpos, _pscvel, lightTime);
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", et, _pscpos, _pscvel, lightTime);
 		//}
 		_pscpos[3] += 3;
 
@@ -175,7 +175,7 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 27 11:48:00.000", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:36:00.000", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
@@ -201,7 +201,7 @@ void RenderableTrail::updateTrail(){
 		while (_dtEt < _time){
 			// get intermediary points
 			psc dtPoint;
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _dtEt, dtPoint, _pscvel, lightTime);
+			SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", _dtEt, dtPoint, _pscvel, lightTime);
 			dtPoint[3] += 3;
 			
 			// overwrite the old position
@@ -267,7 +267,7 @@ void RenderableTrail::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
 	
-	SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
 	_pscpos[3] += 3; // KM to M
 	
 }

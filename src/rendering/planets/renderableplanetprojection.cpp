@@ -47,6 +47,7 @@ const std::string _loggerCat = "RenderablePlanetProjection";
 
 namespace openspace {
 
+
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
@@ -208,7 +209,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
     // disable shader
     _programObject->deactivate();
-	/*
+	
 	static int callCount = 0;
 	callCount++;
 
@@ -224,7 +225,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 			const float fi = v * fsegments;
 
 			const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
-			const float phi = fj * float(M_PI) * 2.0f / fsegments;
+			const float phi   = fj * float(M_PI) * 2.0f / fsegments;
 
 			const float x = radius[0] * sin(phi) * sin(theta);  //
 			const float y = radius[0] * cos(theta);             // up
@@ -247,10 +248,72 @@ void RenderablePlanetProjection::render(const RenderData& data)
 			return glm::vec4(v1.xyz * factor, 1.0);
 		};
 
+		typedef glm::detail::tvec3<glm::detail::uint8> rgb;
+
+		auto bilinear = [](const ghoul::opengl::Texture* dest, const ghoul::opengl::Texture* source, float x, float y, float i, float j){
+			int px = (int)x; // floor of x
+			int py = (int)y; // floor of y
+			int tx; 
+			int ty;
+			rgb p1, p2, p3, p4;
+			//original
+			rgb p0 = source->texel<rgb>(px, py);
+			// load the four neighboring pixels
+			// right
+			if (px + 1 < source->width() - 1){
+				p1 = source->texel<rgb>(px + 1, py);
+			}else{
+				p1 = rgb(0);
+			}
+			// left
+			if (px - 1 > 0){
+				p2 = source->texel<rgb>(px-1, py);
+			}else{
+				p2 = rgb(0);
+			}
+			// top
+			if (py + 1 < source->height() - 1){
+				p3 = source->texel<rgb>(px, py + 1);
+			}
+			else{
+				p3 = rgb(0);
+			}
+			// bottom
+			if (py - 1 > 0){
+				p4 = source->texel<rgb>(px, py - 1);
+			}else{
+				p4 = rgb(0);
+			}
+
+
+			// Calculate the weights for each pixel
+			float fx = x - px;
+			float fy = y - py;
+			float fx1 = 1.0f - fx;
+			float fy1 = 1.0f - fy;
+
+			int w1 = fx1 * fy1 * 256.0f;
+			int w2 = fx  * fy1 * 256.0f;
+			int w3 = fx1 * fy  * 256.0f;
+			int w4 = fx  * fy  * 256.0f;
+
+			// Calculate the weighted sum of pixels (for each color channel)
+			int outr = p1.r * w1 + p2.r * w2 + p3.r * w3 + p4.r * w4;
+			int outg = p1.g * w1 + p2.g * w2 + p3.g * w3 + p4.g * w4;
+			int outb = p1.b * w1 + p2.b * w2 + p3.b * w3 + p4.b * w4;
+			//int outa = p1.a * w1 + p2.a * w2 + p3.a * w3 + p4.a * w4;
+
+			return rgb(outr, outg, outb);
+		};
+
+
 		const float w = _texture->width();
 		const float h = _texture->height();
-		for (int i = 0; i < _texture->width(); ++i) {
-			for (int j = 0; j < _texture->height(); ++j) {
+		const float wp = _textureProj->width();
+		const float hp = _textureProj->height();
+
+		for (int i = 0; i < w; ++i) {
+			for (int j = 0; j < h; ++j) {
 				// "Shader code"
 
 				// Texture coordinates
@@ -263,6 +326,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 				// Convert texture coordinates to model coordinates
 				float radius[2] = { 0.71492f, 8.f };
 				glm::vec4 in_position = uvToModel(u, v, radius, 200);
+				bool frontfacing = glm::dot(bsight, glm::vec3((transform*in_position).xyz)) < 0;
 
 				// Convert psc to meters
 				glm::vec4 raw_pos = pscToMeter(in_position, scaling);
@@ -270,16 +334,18 @@ void RenderablePlanetProjection::render(const RenderData& data)
 				// Transform model coordinates to world coordinates
 				glm::vec4 projected = m * transform  * raw_pos;
 
+				projected.x /= projected.w;
+				projected.y /= projected.w;
+
 				// To do : use bilinear interpolation
 				int x, y;
 				glm::vec2 uv;
-				uv.x = projected.x / projected.w;
-				uv.y = projected.y / projected.w;
-				uvToIndex(uv, _textureProj->width(), _textureProj->height(), x, y);
+				uv.x = projected.x;
+				uv.y = projected.y;
+				uvToIndex(uv, wp, hp, x, y);
 
-				if (inRange(x, 0, _textureProj->width() - 1) && inRange(y, 0, _textureProj->height() - 1)){
-
-					_texture->texel<glm::detail::tvec3<glm::detail::uint8> >(i, j) = _textureProj->texel<glm::detail::tvec3<glm::detail::uint8>>(x, y);
+				if (frontfacing && inRange(x, 0, wp - 1) && inRange(y, 0, hp - 1)){
+					_texture->texel<rgb>(i, j) = bilinear(_texture, _textureProj, uv.x, uv.y, i, j);// _textureProj->texel<rgb>(x, y);
 				}
 			}
 		}
@@ -288,8 +354,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		//_textureProj->uploadTexture();
 		_texture->uploadTexture();
 	}
-	*/
-
+	
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
@@ -333,9 +398,3 @@ void RenderablePlanetProjection::loadTexture()
 }
 
 }  // namespace openspace
-/*
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
-*/

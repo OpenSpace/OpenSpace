@@ -37,8 +37,8 @@
 #include <chrono>
 
 namespace {
-	const std::string _loggerCat = "RenderableFov";
-	//constants
+	    const std::string _loggerCat              = "RenderableFov";
+	    //constants
 		const std::string keyBody                 = "Body";
 		const std::string keyFrame                = "Frame";
 		const std::string keyPathModule           = "ModulePath";
