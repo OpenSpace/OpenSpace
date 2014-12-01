@@ -22,66 +22,76 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLESTARS_H__
-#define __RENDERABLESTARS_H__
+#ifndef __OPTIONPROPERTY_H__
+#define __OPTIONPROPERTY_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalarproperty.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <vector>
 
 namespace openspace {
-
-class RenderableStars : public Renderable {
-public: 
-	RenderableStars(const ghoul::Dictionary& dictionary);
-
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-private:
-	enum ColorOption {
-		Color = 0,
-		Velocity = 1,
-		Speed = 2
+namespace properties {
+	
+/**
+ * The OptionProperty is a property that provides a number of predefined (using the 
+ * addOption method) options consisting of a <code>description</code> and a
+ * <code>value</code>. The available options can be queried using the options method.
+ * Only values representing valid options can be used to set this property, or an error
+ * will be logged
+ */
+class OptionProperty : public IntProperty {
+public:
+	/**
+	 * The struct storing a single option consisting of an integer <code>value</code> and
+	 * a <code>string</code> description.
+	 */
+	struct Option {
+		int value;
+		std::string description;
 	};
 
-	void createDataSlice(ColorOption option);
+	/**
+	 * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
+	 * to its super class.
+	 * \param identifier A unique identifier for this property
+	 * \param guiName The GUI name that should be used to represent this property
+	 */
+	OptionProperty(std::string identifier, std::string guiName);
 
-	bool loadData();
-	bool readSpeckFile();
-	bool loadCachedFile(const std::string& file);
-	bool saveCachedFile(const std::string& file) const;
+	/**
+	 * Returns the name of the class for reflection purposes.
+	 * \return The name of this class for reflection purposes
+	 */
+	std::string className() const override;
+	using IntProperty::operator=;
 
-	properties::StringProperty _colorTexturePath;
-	ghoul::opengl::Texture* _texture;
-	bool _textureIsDirty;
+	/**
+	 * Adds the passed option to the list of available options. The <code>value</code> of
+	 * the <code>option</code> must not have been registered previously, or a warning will
+	 * be logged.
+	 * \param option The option that will be added to the list of available options
+	 */
+	void addOption(Option option);
 
-	properties::OptionProperty _colorOption;
-	bool _dataIsDirty;
+	/**
+	 * Returns the list of available options.
+	 * /return The list of available options
+	 */
+	const std::vector<Option>& options() const;
 
-	properties::FloatProperty _spriteSize;
+	/**
+	 * The overritten TemplateProperty::setValue method that checks if the provided value
+	 * represents a valid Option
+	 * \param value The value of the Option that should be set
+	 */
+	void setValue(int value) override;
 
-	ghoul::opengl::ProgramObject* _program;
-	bool _programIsDirty;
-
-	std::string _speckFile;
-
-	std::vector<float> _slicedData;
-	std::vector<float> _fullData;
-	int _nValuesPerStar;
-
-	GLuint _vao;
-	GLuint _vbo;
+private:
+	/// The list of options which have been registered with this OptionProperty
+	std::vector<Option> _options;
 };
 
+} // namespace properties
 } // namespace openspace
 
-#endif  // __RENDERABLESTARS_H__
+#endif // __STRINGPROPERTY_H__

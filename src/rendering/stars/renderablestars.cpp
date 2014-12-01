@@ -22,359 +22,504 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-//standard includes 
-#include <iostream>
-#include <fstream>
-#include <limits>
-#include <vector>
-#include <iomanip>      
-#include <iterator>
-
-// openspace includes
 #include <openspace/rendering/stars/renderablestars.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
 
+#include <openspace/util/constants.h>
+
+#include <ghoul/filesystem/filesystem>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/engine/openspaceengine.h>
 
-#include <sgct.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#define GLSPRITES
-//#define GLPOINTS
+#include <array>
+#include <fstream>
+#include <stdint.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
+
+	const int8_t CurrentCacheVersion = 1;
+
+	struct ColorVBOLayout {
+		std::array<float, 4> position; // (x,y,z,e)
+
+		float bvColor; // B-V color value
+		float luminance;
+		float absoluteMagnitude;
+	};
+
+	struct VelocityVBOLayout {
+		std::array<float, 4> position; // (x,y,z,e)
+
+		float bvColor; // B-V color value
+		float luminance;
+		float absoluteMagnitude;
+
+		float vx; // v_x
+		float vy; // v_y
+		float vz; // v_z
+	};
+
+	struct SpeedVBOLayout {
+		std::array<float, 4> position; // (x,y,z,e)
+
+		float bvColor; // B-V color value
+		float luminance;
+		float absoluteMagnitude;
+
+		float speed;
+	};
 }
 
 namespace openspace {
+
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
-	, _haloProgram(nullptr)
-	, _pointProgram(nullptr)
 	, _texture(nullptr)
+	, _textureIsDirty(true)
+	, _colorOption("colorOption", "Color Option")
+	, _dataIsDirty(true)
+	, _spriteSize("spriteSize", "Sprite Size", 0.0000005f, 0.f, 1.f)
+	, _program(nullptr)
+	, _programIsDirty(false)
+	, _speckFile("")
+	, _nValuesPerStar(0)
+	, _vao(0)
+	, _vbo(0)
 {
-	std::string path;
-	dictionary.getValue(constants::renderablestars::keyPathModule, path);
-
 	std::string texturePath = "";
-	if (dictionary.hasKey("Textures.Color")) {
-		dictionary.getValue("Textures.Color", texturePath);
-		_colorTexturePath = path + "/" + texturePath;
+	if (dictionary.hasKey(constants::renderablestars::keyTexture)) {
+		dictionary.getValue(constants::renderablestars::keyTexture, texturePath);
+		_colorTexturePath = absPath(texturePath);
 	}
-	dictionary.getValue(constants::renderablestars::keySpeckFile, path);
 
-	_speckPath = FileSys.absolutePath(path);
+	bool success = dictionary.getValue(constants::renderablestars::keyFile, _speckFile);
+	if (!success) {
+		LERROR("SpeckDataSource did not contain key '" <<
+			constants::renderablestars::keyFile << "'");
+		return;
+	}
+	_speckFile = absPath(_speckFile);
+
+	_colorOption.addOption({ColorOption::Color, "Color"});
+	_colorOption.addOption({ColorOption::Velocity, "Velocity"});
+	_colorOption.addOption({ColorOption::Speed, "Speed"});
+	addProperty(_colorOption);
+	_colorOption.onChange([&]{ _dataIsDirty = true;});
+
+	addProperty(_spriteSize);
 
 	addProperty(_colorTexturePath);
-	_colorTexturePath.onChange(std::bind(&RenderableStars::loadTexture, this));
+	_colorTexturePath.onChange([&]{ _textureIsDirty = true;});
 }
 
-RenderableStars::~RenderableStars(){
-	glDeleteBuffers(1, &_vboID);
-	glDeleteVertexArrays(1, &_vaoID);
-	deinitialize();
+bool RenderableStars::isReady() const {
+	return (_program != nullptr) && (_fullData.size() > 0);
 }
 
-std::ifstream& RenderableStars::skipToLine(std::ifstream& file, unsigned int num){
-	file.seekg(std::ios::beg);
-	for (size_t i = 0; i < num - 1; ++i){
-		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	return file;
-}
-
-
-//#define ROTATESTARS 
-
-bool RenderableStars::readSpeckFile(const std::string& path){
-
-	bool readCache = false;
-
-	std::ifstream file;
-	std::string str, starDescription, datastr;
-	std::vector<std::string> strvec;
-	std::vector<float> starcluster;
-	std::vector<float> floatingPointData;
-
-    int count = 0;
-	const std::string absPath = FileSys.absolutePath(path);
-	std::string::size_type last
-		= absPath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-	if (last == std::string::npos) return false;
-	std::string cacheName = absPath.substr(last + 1, absPath.size() - absPath.rfind('.') - 1);
-	std::string basePath = absPath.substr(0, last);
-	cacheName = basePath + "\\" + cacheName + ".bin";
-
-	//if (!FileSys.fileExists(cacheName)){ 
-	if (!readCache){  // dumb boolean for now.            
-		std::ofstream cache;
-		cache.open(cacheName, std::ios::binary);
-	
-		file.open(absPath);
-		if (!file.is_open()){
-			LERROR("Failed to open spec file for : '" << path << "'");
-			return false;
-		}
-		// count metadata lines to skip.
-		do{
-			getline(file, str);
-			count++;
-		} while (str[0] != ' ');
-		// set seek pointer to first line with actual data
-		skipToLine(file, count);
-		count = 0;
-	
-		do{ 
-			getline(file, str);
-			if (file.eof()) break;
-			// split the line on pound symbol. we only want data.
-		    std::size_t mid = str.find('#');
-			if (mid != std::string::npos){
-				datastr = str.substr(0, mid);
-				std::size_t end = str.find('\n');
-				if (end == std::string::npos)
-					starDescription = str.substr(mid, end);
-			} 
-			// split data string on whitespace -> push to to vector
-			std::istringstream ss(datastr);
-			std::copy(std::istream_iterator<std::string>(ss),
-					  std::istream_iterator<std::string>(),
-					  std::back_inserter<std::vector<std::string> >(strvec));
-					  ss.clear();
-			// conv. string vector to doubles
-			floatingPointData.reserve(strvec.size());
-			transform(strvec.begin(), strvec.end(), back_inserter(floatingPointData),
-					  [](std::string const& val) {return std::stod(val); });
-			// store data concerning apparent luminocity, brigthness etc. 
-			// convert to powerscaled coordinate
-			psc powerscaled = PowerScaledCoordinate::CreatePowerScaledCoordinate(floatingPointData[0], 
-												  							     floatingPointData[1], 
-												  							     floatingPointData[2]);
-			// Convert parsecs -> meter
-			// Could convert floatingPointData instead ??
-			// (possible as 3.4 × 10^38 is max rep nr of float)
-			PowerScaledScalar parsecsToMetersFactor = glm::vec2(0.308567758, 17);
-			powerscaled[0] *= parsecsToMetersFactor[0];
-			powerscaled[1] *= parsecsToMetersFactor[0];
-			powerscaled[2] *= parsecsToMetersFactor[0];
-			powerscaled[3] += parsecsToMetersFactor[1];
-
-#ifdef ROTATESTARS
-			glm::mat4 transform = glm::mat4(1);
-
-			glm::dmat3 stateMatrix;
-			double initTime = 0; 
-			openspace::SpiceManager::ref().getPositionTransformMatrixGLM("GALACTIC", "IAU_EARTH", 0, stateMatrix);
-
-			for (int i = 0; i < 3; i++){
-				for (int j = 0; j < 3; j++){
-					transform[i][j] = stateMatrix[i][j];
-				}
-			}
-
-			glm::vec4 tmp(powerscaled[0], powerscaled[1], powerscaled[2], powerscaled[3] );
-			tmp = transform*tmp;
-
-			powerscaled[0] = tmp[0];
-			powerscaled[1] = tmp[1];
-			powerscaled[2] = tmp[2];
-			powerscaled[3] = tmp[3];
-#endif
-			// We use std::vector to store data
-			// needs no preallocation and has tightly packed arr.
-			for (int i = 0; i < 4; i++){
-				starcluster.push_back(powerscaled[i]);
-				cache << ' ' << powerscaled[i];
-			}
-			// will need more elegant solution here.
-			starcluster.push_back(floatingPointData[3]);
-			starcluster.push_back(floatingPointData[4]);
-			starcluster.push_back(floatingPointData[5]); 
-
-			strvec.clear();
-			floatingPointData.clear();
-			count++;
-		} while (file.good());
-	}else{
-		LINFO("Found cached data, loading");
-		file.open(cacheName, std::ios::binary);
-		while (file.good()){
-			if (file.eof()) break;
-			count++;
-			float cachedValue;
-			file >> cachedValue;
-			starcluster.push_back(cachedValue);
-		}
-	}
-	v_stride    = 7;                      // stride in VBO, set manually for now.
-	v_size      = static_cast<int>(starcluster.size());     // size of VBO
-	v_total     = v_size / v_stride;      // total number of vertecies 
-
-	// create vao and interleaved vbo from vectors internal array
-	generateBufferObjects(&starcluster[0]);
-	
-	return true;
-}
-
-void RenderableStars::generateBufferObjects(const void* data){
-	// generate and buffer data 
-	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vboID);
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-	glBufferData(GL_ARRAY_BUFFER, v_size*sizeof(GLfloat), data, GL_STATIC_DRAW); // order : x, y, z, lum, appmag, absmag
-
-	positionAttrib       = _haloProgram->attributeLocation( "in_position"   );
-	brightnessDataAttrib = _haloProgram->attributeLocation( "in_brightness" );
-
-	GLint postest = _pointProgram->attributeLocation("in_position");
-	GLint britest = _pointProgram->attributeLocation("in_brightness");
-
-	assert(postest == positionAttrib); // assume pointer locations same for both programs. 
-	assert(britest == brightnessDataAttrib);
-
-	GLsizei stride = sizeof(GLfloat) * v_stride;
-
-	glBindVertexArray(_vaoID);                                                                                // vao holds ref. to vbo
-	glBindBuffer(GL_ARRAY_BUFFER, _vboID);																	  // bind vbo
-	glEnableVertexAttribArray(positionAttrib);                                                                // enable acess attribute in_position
-	glEnableVertexAttribArray(brightnessDataAttrib);                                                          // enable acess attribute in_brigthness
-	glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);                           // psc coordinates
-	glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(4 * sizeof(GLfloat))); // brigthness properties 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);																		  // unbind
-	glBindVertexArray(0);
-}
-
-bool RenderableStars::initialize(){
+bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
-	// 1. StarProgram  - Generates quads with png image of halo
-	if (_haloProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("StarProgram", _haloProgram);
+	_program = ghoul::opengl::ProgramObject::Build("Star",
+		"${SHADERS}/star_vs.glsl",
+		"${SHADERS}/star_fs.glsl",
+		"${SHADERS}/star_ge.glsl",
+		[&](ghoul::opengl::ProgramObject*){ _programIsDirty = true;});
 
-	// 2. PointProgram - Generates gl_Points in geom shader.
-	if (_pointProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("PointProgram", _pointProgram);
-	
-	// Run read star-datafile routine.
-	if (!readSpeckFile(_speckPath)) 
-		LERROR("Failed to read speck file for path : '" << _speckPath << "'");
-
-	loadTexture();
+	completeSuccess = (_program != nullptr);
+	completeSuccess &= loadData();
 	completeSuccess &= (_texture != nullptr);
 
 	return completeSuccess;
 }
 
-bool RenderableStars::deinitialize(){
+bool RenderableStars::deinitialize() {
+	glDeleteBuffers(1, &_vbo);
+	_vbo = 0;
+	glDeleteVertexArrays(1, &_vao);
+	_vao = 0;
+
 	delete _texture;
 	_texture = nullptr;
+
+	delete _program;
+	_program = nullptr;
 	return true;	
 }
 
-//#define TMAT
-void RenderableStars::render(const RenderData& data){
-	if(!_haloProgram)
-		return;
-	if(!_texture)
-		return;
-	assert(_haloProgram);
-	//printOpenGLError();
-	// activate shader
-	_haloProgram->activate();
+void RenderableStars::render(const RenderData& data) {
+	_program->activate();
 
-	// fetch data
-	//scaling                   = glm::vec2(1, -22);  
+	// @Check overwriting the scaling from the camera; error as parsec->meter conversion
+	// is done twice? ---abock
 	glm::vec2 scaling = glm::vec2(1, -19);  
 
-#ifdef TMAT
-	transform = glm::rotate(transform, 
-		                    1.1f * static_cast<float>(sgct::Engine::instance()->getTime()),  
-							glm::vec3(0.0f, 1.0f, 0.0f));
-#endif
-	// disable depth test, enable additative blending
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-
-#ifdef GLSPRITES
 	glm::mat4 modelMatrix      = data.camera.modelMatrix();
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-// ---------------------- RENDER HALOS -----------------------------
-	_haloProgram->setUniform("model", modelMatrix);
-	_haloProgram->setUniform("view", viewMatrix);
-	_haloProgram->setUniform("projection", projectionMatrix);
+	_program->setUniform("model", modelMatrix);
+	_program->setUniform("view", viewMatrix);
+	_program->setUniform("projection", projectionMatrix);
 
-	//_haloProgram->setUniform("ViewProjection", camera->viewProjectionMatrix());
-	_haloProgram->setUniform("ModelTransform", glm::mat4(1));
-	setPscUniforms(_haloProgram, &data.camera, data.position);
-	_haloProgram->setUniform("scaling", scaling);
+	_program->setUniform("colorOption", _colorOption);
+	
+	setPscUniforms(_program, &data.camera, data.position);
+	_program->setUniform("scaling", scaling);
 
-	// Bind texure
+	_program->setUniform("spriteSize", _spriteSize);
+
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
-	_haloProgram->setUniform("texture1", unit);
+	_program->setIgnoreUniformLocationError(true);
+	_program->setUniform("texture1", unit);
+	_program->setIgnoreUniformLocationError(false);
 
-	// activate the VBO. 
-	glBindVertexArray(_vaoID);
-		glDrawArrays(GL_POINTS, 0, v_total);  
+	glBindVertexArray(_vao);
+	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
+	glDrawArrays(GL_POINTS, 0, nStars);  
 	glBindVertexArray(0);
-#endif
-	_haloProgram->deactivate();
-
-#ifdef GLPOINTS
-
-// ---------------------- RENDER POINTS -----------------------------
-	_pointProgram->activate();
-
-	_pointProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix);
-	_pointProgram->setUniform("ModelTransform", transform);
-	_pointProgram->setUniform("campos", campos.vec4());
-	_pointProgram->setUniform("objpos", currentPosition.vec4());
-	_pointProgram->setUniform("camrot", camrot);
-	//_pointProgram->setUniform("scaling", scaling.vec2());
-
-	glEnable(GL_PROGRAM_POINT_SIZE_EXT); // Allows shader to determine pointsize. 
-
-	//glEnable(GL_POINT_SMOOTH);         // decrepated in core profile, workaround in frag.
-	glBindVertexArray(_vaoID); 
-		glDrawArrays(GL_POINTS, 0, v_total*7);
-	glBindVertexArray(0);
-	
-	glDisable(GL_BLEND);
-	
-	_pointProgram->deactivate();
-	glEnable(GL_DEPTH_TEST);
-
-#endif
-	glDisable(GL_BLEND);
+	_program->deactivate();
 }
 
-void RenderableStars::loadTexture(){
-	delete _texture;
-	_texture = nullptr;
-	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
-		if (_texture) {
-			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-			_texture->uploadTexture();
+void RenderableStars::update(const UpdateData& data) {
+	if (_programIsDirty) {
+		_program->rebuildFromFile();
+		_dataIsDirty = true;
+		_programIsDirty = false;
+	}
+	
+	if (_dataIsDirty) {
+		const int value = _colorOption;
+		LDEBUG("Regenerating data");
+
+		createDataSlice(ColorOption(value));
+
+		int size = static_cast<int>(_slicedData.size());
+
+		if (_vao == 0) {
+			glGenVertexArrays(1, &_vao);
+			LDEBUG("Generating Vertex Array id '" << _vao << "'");
+		}
+		if (_vbo == 0) {
+			glGenBuffers(1, &_vbo);
+			LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+		}
+		glBindVertexArray(_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+		glBufferData(GL_ARRAY_BUFFER,
+			size*sizeof(GLfloat),
+			&_slicedData[0],
+			GL_STATIC_DRAW);
+
+		GLint positionAttrib = _program->attributeLocation("in_position");
+		GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+
+		const size_t nStars = _fullData.size() / _nValuesPerStar;
+		const size_t nValues = _slicedData.size() / nStars;
+
+		GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
+
+		glEnableVertexAttribArray(positionAttrib);
+		glEnableVertexAttribArray(brightnessDataAttrib);
+		const int colorOption = _colorOption;
+		switch (colorOption) {
+		case ColorOption::Color:
+			glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
+				reinterpret_cast<void*>(offsetof(ColorVBOLayout, position)));
+			glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
+				reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor)));
+			
+			break;
+		case ColorOption::Velocity:
+			{
+				glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
+					reinterpret_cast<void*>(offsetof(VelocityVBOLayout, position)));
+				glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
+					reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)));
+
+				GLint velocityAttrib = _program->attributeLocation("in_velocity");
+				glEnableVertexAttribArray(velocityAttrib);
+				glVertexAttribPointer(velocityAttrib, 3, GL_FLOAT, GL_TRUE, stride,
+					reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)));
+
+				break;
+			}
+		case ColorOption::Speed:
+			{
+				glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
+					reinterpret_cast<void*>(offsetof(SpeedVBOLayout, position)));
+				glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
+					reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor)));
+
+				GLint speedAttrib = _program->attributeLocation("in_speed");
+				glEnableVertexAttribArray(speedAttrib);
+				glVertexAttribPointer(speedAttrib, 1, GL_FLOAT, GL_TRUE, stride,
+					reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed)));
+
+			}
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
+		_dataIsDirty = false;
+	}	
+
+	if (_textureIsDirty) {
+		LDEBUG("Reloading texture");
+		delete _texture;
+		_texture = nullptr;
+		if (_colorTexturePath.value() != "") {
+			_texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
+			if (_texture) {
+				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+				_texture->uploadTexture();
+			}
+		}
+		_textureIsDirty = false;
+	}
+}
+
+bool RenderableStars::loadData() {
+	std::string _file = _speckFile;
+	std::string cachedFile = "";
+	FileSys.cacheManager()->getCachedFile(_file, cachedFile, true);
+
+	bool hasCachedFile = FileSys.fileExists(cachedFile);
+	if (hasCachedFile) {
+		LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+
+		bool success = loadCachedFile(cachedFile);
+		if (success)
+			return true;
+		else
+			FileSys.cacheManager()->removeCacheFile(_file);
+			// Intentional fall-through to the 'else' computation to generate the cache
+			// file for the next run
+	}
+	else {
+		LINFO("Cache for Speck file '" << _file << "' not found");
+	}
+	LINFO("Loading Speck file '" << _file << "'");
+
+	bool success = readSpeckFile();
+	if (!success)
+		return false;
+
+	LINFO("Saving cache");
+	success = saveCachedFile(cachedFile);
+
+	return success;
+}
+
+bool RenderableStars::readSpeckFile() {
+	std::string _file = _speckFile;
+	std::ifstream file(_file);
+	if (!file.good()) {
+		LERROR("Failed to open Speck file '" << _file << "'");
+		return false;
+	}
+
+	_nValuesPerStar = 0;
+
+	// The beginning of the speck file has a header that either contains comments
+	// (signaled by a preceding '#') or information about the structure of the file
+	// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+	std::string line = "";
+	while (true) {
+		std::ifstream::streampos position = file.tellg();
+		std::getline(file, line);
+
+		if (line[0] == '#')
+			continue;
+
+		if (line.substr(0, 7) != "datavar" &&
+			line.substr(0, 10) != "texturevar" &&
+			line.substr(0, 7) != "texture")
+		{
+			// we read a line that doesn't belong to the header, so we have to jump back
+			// before the beginning of the current line
+			file.seekg(position);
+			break;
+		}
+
+		if (line.substr(0, 7) == "datavar") {
+			// datavar lines are structured as follows:
+			// datavar # description
+			// where # is the index of the data variable; so if we repeatedly overwrite
+			// the 'nValues' variable with the latest index, we will end up with the total
+			// number of values (+3 since X Y Z are not counted in the Speck file index)
+			std::stringstream str(line);
+
+			std::string dummy;
+			str >> dummy;
+			str >> _nValuesPerStar;
+			_nValuesPerStar += 1; // We want the number, but the index is 0 based
+		}
+	}
+
+	_nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
+
+	do {
+		std::vector<float> values(_nValuesPerStar);
+
+		std::getline(file, line);
+		std::stringstream str(line);
+
+		for (int i = 0; i < _nValuesPerStar; ++i)
+			str >> values[i];
+
+		_fullData.insert(_fullData.end(), values.begin(), values.end());
+	} while (!file.eof());
+
+	return true;
+}
+
+bool RenderableStars::loadCachedFile(const std::string& file) {
+	std::ifstream fileStream(file, std::ifstream::binary);
+	if (fileStream.good()) {
+		int8_t version = 0;
+		fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+		if (version != CurrentCacheVersion) {
+			LINFO("The format of the cached file has changed, deleted old cache");
+			fileStream.close();
+			FileSys.deleteFile(file);
+			return false;
+		}
+
+		int32_t nValues = 0;
+		fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+		fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
+
+		_fullData.resize(nValues);
+		fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
+			nValues * sizeof(_fullData[0]));
+
+		bool success = fileStream.good();
+		return success;
+	}
+	else {
+		LERROR("Error opening file '" << file << "' for loading cache file");
+		return false;
+	}
+}
+
+bool RenderableStars::saveCachedFile(const std::string& file) const {
+	std::ofstream fileStream(file, std::ofstream::binary);
+	if (fileStream.good()) {
+		fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+			sizeof(int8_t));
+
+		int32_t nValues = static_cast<int32_t>(_fullData.size());
+		if (nValues == 0) {
+			LERROR("Error writing cache: No values were loaded");
+			return false;
+		}
+		fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+
+		int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerStar);
+		fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+
+		size_t nBytes = nValues * sizeof(_fullData[0]);
+		fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
+
+		bool success = fileStream.good();
+		return success;
+	}
+	else {
+		LERROR("Error opening file '" << file << "' for save cache file");
+		return false;
+	}
+}
+
+void RenderableStars::createDataSlice(ColorOption option) {
+	_slicedData.clear();
+	for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
+		psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+							_fullData[i + 0],
+							_fullData[i + 1],
+							_fullData[i + 2]
+						);
+		// Convert parsecs -> meter
+		PowerScaledScalar parsecsToMetersFactor = PowerScaledScalar(0.308567758f, 17.f);
+		position[0] *= parsecsToMetersFactor[0];
+		position[1] *= parsecsToMetersFactor[0];
+		position[2] *= parsecsToMetersFactor[0];
+		position[3] += parsecsToMetersFactor[1];
+
+		switch (option) {
+		case ColorOption::Color:
+			{
+				union {
+					ColorVBOLayout value;
+					std::array<float, sizeof(ColorVBOLayout)> data;
+				} layout;
+
+				layout.value.position = { {
+					position[0], position[1], position[2], position[3]
+				} };
+					
+				layout.value.bvColor = _fullData[i + 3];
+				layout.value.luminance = _fullData[i + 4];
+				layout.value.absoluteMagnitude = _fullData[i + 5];
+
+				_slicedData.insert(_slicedData.end(),
+								   layout.data.begin(),
+								   layout.data.end());
+
+				break;
+			}
+		case ColorOption::Velocity:
+			{
+				union {
+					VelocityVBOLayout value;
+					std::array<float, sizeof(VelocityVBOLayout)> data;
+				} layout;
+
+				layout.value.position = { {
+						position[0], position[1], position[2], position[3]
+					} };
+
+				layout.value.bvColor = _fullData[i + 3];
+				layout.value.luminance = _fullData[i + 4];
+				layout.value.absoluteMagnitude = _fullData[i + 5];
+
+				layout.value.vx = _fullData[i + 12];
+				layout.value.vy = _fullData[i + 13];
+				layout.value.vz = _fullData[i + 14];
+
+				_slicedData.insert(_slicedData.end(),
+								   layout.data.begin(),
+								   layout.data.end());
+				break;
+			}
+		case ColorOption::Speed:
+			{
+				union {
+					SpeedVBOLayout value;
+					std::array<float, sizeof(SpeedVBOLayout)> data;
+				} layout;
+
+				layout.value.position = { {
+						position[0], position[1], position[2], position[3]
+					} };
+
+				layout.value.bvColor = _fullData[i + 3];
+				layout.value.luminance = _fullData[i + 4];
+				layout.value.absoluteMagnitude = _fullData[i + 5];
+
+				layout.value.speed = _fullData[i + 15];
+
+				_slicedData.insert(_slicedData.end(),
+								   layout.data.begin(),
+								   layout.data.end());
+				break;
+			}
 		}
 	}
 }
 
-void RenderableStars::update(const UpdateData& data)
-{
-	
-}
-
-	
-}
+} // namespace openspace

@@ -37,7 +37,7 @@ enum class KeyAction {
 };
 
 enum class KeyModifier {
-	None = 0,
+	NoModifier = 0,
 	Shift = GLFW_MOD_SHIFT,
 	Control = GLFW_MOD_CONTROL,
 	Alt = GLFW_MOD_ALT,

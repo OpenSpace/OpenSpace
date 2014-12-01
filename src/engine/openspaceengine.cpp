@@ -344,6 +344,22 @@ bool OpenSpaceEngine::initialize() {
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine().initialize();
 
+	// If a LuaDocumentationFile was specified, generate it now
+	using constants::configurationmanager::keyLuaDocumentationType;
+	using constants::configurationmanager::keyLuaDocumentationFile;
+	const bool hasType = configurationManager().hasKey(keyLuaDocumentationType);
+	const bool hasFile = configurationManager().hasKey(keyLuaDocumentationFile);
+	if (hasType && hasFile) {
+		std::string luaDocumentationType;
+		configurationManager().getValue(keyLuaDocumentationType, luaDocumentationType);
+		std::string luaDocumentationFile;
+		configurationManager().getValue(keyLuaDocumentationFile, luaDocumentationFile);
+
+		luaDocumentationFile = absPath(luaDocumentationFile);
+		_scriptEngine.writeDocumentation(luaDocumentationFile, luaDocumentationType);
+	}
+
+
 	// Load scenegraph
     SceneGraph* sceneGraph = new SceneGraph;
     _renderEngine.setSceneGraph(sceneGraph);

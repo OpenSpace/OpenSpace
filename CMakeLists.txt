@@ -36,8 +36,14 @@ endif ()
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+set(OPENSPACE_BINARY_DIR ${OPENSPACE_BASE_DIR}/bin/openspace)
+set(OPENSPACE_LIBRARY_DIR ${OPENSPACE_BASE_DIR}/bin/lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
+
 
 #include(cotire)
 
@@ -51,7 +57,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 if (APPLE )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 endif ()
-
 #########################################################################################
 # External Third-party software
 #########################################################################################

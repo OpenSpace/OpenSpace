@@ -29,6 +29,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
+#include <iomanip>
 
 namespace openspace {
 
@@ -208,14 +209,21 @@ void ScriptEngine::deinitialize() {
     _state = nullptr;
 }
 
-void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
+void ScriptEngine::addLibrary(LuaLibrary library) {
+	auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
+	{
+		return lhs.name < rhs.name;
+	};
+
 	// do we have a library with the same name as the incoming one
 	auto it = std::find_if(_registeredLibraries.begin(), _registeredLibraries.end(),
 		[&library](const LuaLibrary& lib) { return lib.name == library.name; });
 
-	if (it == _registeredLibraries.end())
-		// If not, we can add it
-		_registeredLibraries.insert(library);
+	if (it == _registeredLibraries.end()) {
+		// If not, we can add it after we sorted it
+		std::sort(library.functions.begin(), library.functions.end(), sortFunc);
+		_registeredLibraries.insert(std::move(library));
+	}
 	else {
 		// otherwise, we merge the libraries
 
@@ -235,7 +243,10 @@ void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
 		}
 
 		_registeredLibraries.erase(it);
-		_registeredLibraries.insert(merged);
+
+		// Sort the merged library before inserting it
+		std::sort(merged.functions.begin(), merged.functions.end(), sortFunc);
+		_registeredLibraries.insert(std::move(merged));
 	}
 }
 
@@ -473,6 +484,55 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
 		//_registeredLibraries.push_back(library);
     }
     return true;
+}
+
+bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
+	if (type == "text") {
+		// The additional space between the longest function name and the descriptions
+		const size_t AdditionalSpace = 5;
+		LDEBUG("Writing Lua documentation of type '" << type <<
+			"' to file '" << filename << "'");
+		std::ofstream file(filename);
+		if (file.good()) {
+
+			auto concatenate = [](std::string library, std::string function) {
+				std::string total = "openspace.";
+				if (!library.empty())
+					total += std::move(library) + ".";
+				total += std::move(function);
+				return std::move(total);
+			};
+			// First iterate over all libraries and functions to find the longest
+			// combination so that can be used as the 'width' parameter for the output
+			// stream
+			size_t maxLength = 0;
+			for (auto library : _registeredLibraries) {
+				for (auto function : library.functions) {
+					std::string functionName = concatenate(library.name, function.name);
+					maxLength = std::max(maxLength, functionName.size());
+				}
+			}
+			maxLength += AdditionalSpace;
+
+			// Now write out the functions
+			for (auto library : _registeredLibraries) {
+				for (auto function : library.functions) {
+					std::string functionName = concatenate(library.name, function.name);
+					file << std::setw(maxLength) << std::left << functionName;
+					file << std::setw(0) << function.helpText << std::endl;
+				}
+			}
+			return true;
+		}
+		else {
+			LERROR("Could not open file '" << filename << "' for writing documentation");
+			return false;
+		}
+	}
+	else {
+		LERROR("Undefined type '" << type << "' for Lua documentation");
+		return false;
+	}
 }
 
 

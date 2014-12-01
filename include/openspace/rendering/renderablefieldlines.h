@@ -42,6 +42,8 @@ public:
 	bool initialize();
 	bool deinitialize();
 
+	bool isReady() const override;
+
 	void render(const RenderData& data) override;
 
 private:

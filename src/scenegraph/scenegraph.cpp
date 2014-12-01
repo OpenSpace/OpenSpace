@@ -193,26 +193,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-	// Star program
-	tmpProgram = ProgramObject::Build("Star",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
-
-	// Point program
-	tmpProgram = ProgramObject::Build("Point",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("PointProgram", tmpProgram);
-
 	// Grid program
 	tmpProgram = ProgramObject::Build("Grid",
 		"${SHADERS}/grid_vs.glsl",
@@ -313,7 +293,10 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	    // deallocate the scene graph. Recursive deallocation will occur
+	for (auto node : _nodes)
+		node->deinitialize();
+
+	// deallocate the scene graph. Recursive deallocation will occur
     delete _root;
     _root = nullptr;
 

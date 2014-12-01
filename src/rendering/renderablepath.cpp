@@ -139,6 +139,11 @@ RenderablePath::~RenderablePath(){
 	deinitialize();
 }
 
+bool RenderablePath::isReady() const {
+	return _programObject != nullptr;
+}
+
+
 bool RenderablePath::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
