@@ -89,7 +89,7 @@ RenderableFieldlines::~RenderableFieldlines() {
 }
 
 bool RenderableFieldlines::isReady() const {
-	return _fieldlinesProgram != nullptr;
+	return _shader != nullptr;
 }
 
 bool RenderableFieldlines::initialize() {
