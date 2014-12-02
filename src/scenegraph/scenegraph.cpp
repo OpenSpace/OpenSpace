@@ -135,7 +135,6 @@ int loadScene(lua_State* L) {
 
 SceneGraph::SceneGraph()
     : _focus(SceneGraphNode::RootNodeName)
-    , _position(SceneGraphNode::RootNodeName)
     , _root(nullptr)
 {
 }
@@ -231,9 +230,36 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
+	// pscColorToTexture program
+	tmpProgram = ProgramObject::Build("pscColorToTexture",
+		"${SHADERS}/pscColorToTexture_vs.glsl",
+		"${SHADERS}/pscColorToTexture_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("pscColorToTexture", tmpProgram);
+
+	// pscTextureToABuffer program
+	tmpProgram = ProgramObject::Build("pscTextureToABuffer",
+		"${SHADERS}/pscTextureToABuffer_vs.glsl",
+		"${SHADERS}/pscTextureToABuffer_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("pscTextureToABuffer", tmpProgram);
+
+	// pscColorPassthrough program
+	tmpProgram = ProgramObject::Build("pscColorPassthrough",
+		"${SHADERS}/pscColorPassthrough_vs.glsl",
+		"${SHADERS}/pscColorPassthrough_fs.glsl",
+		cb);
+	if (!tmpProgram) return false;
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("pscColorPassthrough", tmpProgram);
+
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
-    LINFO("Time to load shaders: " << elapsed);
+    LINFO("Time to load scene graph shaders: " << elapsed << " seconds");
 
 
     return true;
@@ -311,7 +337,6 @@ void SceneGraph::clearSceneGraph() {
     _allNodes.erase(_allNodes.begin(), _allNodes.end());
 
     _focus.clear();
-    _position.clear();
 }
 
 bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
@@ -384,7 +409,6 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
-        std::string position;
 
         if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
             && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus)) {
@@ -395,16 +419,6 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
             }
             else
                 LERROR("Could not find focus object '" << focus << "'");
-        }
-        if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
-            auto positionIterator = _allNodes.find(position);
-            if (positionIterator != _allNodes.end()) {
-                _position = position;
-                LDEBUG("Setting camera position to '" << _position << "'");
-            }
-            else
-                LERROR("Could not find object '" << position << "' to position camera");
         }
     }
 
@@ -426,29 +440,26 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     _root->calculateBoundingSphere();
 
     // set the camera position
+	Camera* c = OsEng.ref().renderEngine().camera();
     auto focusIterator = _allNodes.find(_focus);
-    auto positionIterator = _allNodes.find(_position);
 
-    if (focusIterator != _allNodes.end() && positionIterator != _allNodes.end()) {
-        LDEBUG("Camera position is '" << _position << "', camera focus is '" << _focus
-                                      << "'");
+    if (focusIterator != _allNodes.end()) {
+        LDEBUG("Camera focus is '" << _focus << "'");
         SceneGraphNode* focusNode = focusIterator->second;
-        SceneGraphNode* positionNode = positionIterator->second;
-        Camera* c = OsEng.ref().renderEngine().camera();
         //Camera* c = OsEng.interactionHandler().getCamera();
 
         // TODO: Make distance depend on radius
         // TODO: Set distance and camera direction in some more smart way
         // TODO: Set scaling dependent on the position and distance
         // set position for camera
-        const PowerScaledScalar bound = positionNode->calculateBoundingSphere();
+		const PowerScaledScalar bound = focusNode->calculateBoundingSphere();
 
         // this part is full of magic!
 		glm::vec2 boundf = bound.vec2();
         glm::vec2 scaling{1.0f, -boundf[1]};
         boundf[0] *= 5.0f;
         
-        psc cameraPosition = positionNode->position();
+		psc cameraPosition = focusNode->position();
         cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
 		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
@@ -460,6 +471,26 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler().setFocusNode(focusNode);
     }
+
+	glm::vec4 position;
+	if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
+		&& cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
+
+		LDEBUG("Camera position is (" 
+			<< position[0] << ", " 
+			<< position[1] << ", " 
+			<< position[2] << ", " 
+			<< position[3] << ")");
+
+		c->setPosition(position);
+	}
+
+	// the camera position
+	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
+	psc relative = fn->worldPosition() - c->position();
+
+	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+	c->setRotation(la);
 
     return true;
 }
