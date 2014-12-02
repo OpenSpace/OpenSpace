@@ -289,6 +289,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
+	_engine->_console.loadHistory();
 
 	_engine->_syncBuffer = new SyncBuffer(1024);
 

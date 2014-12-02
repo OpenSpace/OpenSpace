@@ -195,24 +195,6 @@ LuaConsole::LuaConsole()
 	, _activeCommand(0)
 	, _isVisible(false)
 {
-	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
-	if (file.is_open()) {
-		size_t n;
-		
-		file.read(reinterpret_cast<char*>(&n), sizeof(size_t));
-
-		for (size_t i = 0; i < n; ++i) {
-			size_t length;
-			file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-			char* tmp = new char[length + 1];
-			file.read(tmp, sizeof(char)*length);
-			tmp[length] = '\0';
-			_commandsHistory.emplace_back(tmp);
-			delete[] tmp;
-		}
-		file.close();
-		_commands = _commandsHistory;
-	}
 	_commands.push_back("");
 	_activeCommand = _commands.size() - 1;
 }
@@ -229,6 +211,30 @@ LuaConsole::~LuaConsole() {
 		}
 		file.close();
 	}
+}
+
+void LuaConsole::loadHistory() {
+
+	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
+	if (file.is_open()) {
+		size_t n;
+
+		file.read(reinterpret_cast<char*>(&n), sizeof(size_t));
+
+		for (size_t i = 0; i < n; ++i) {
+			size_t length;
+			file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+			char* tmp = new char[length + 1];
+			file.read(tmp, sizeof(char)*length);
+			tmp[length] = '\0';
+			_commandsHistory.emplace_back(tmp);
+			delete[] tmp;
+		}
+		file.close();
+		_commands = _commandsHistory;
+	}
+	_commands.push_back("");
+	_activeCommand = _commands.size() - 1;
 }
 
 void LuaConsole::keyboardCallback(int key, int action) {
@@ -322,6 +328,9 @@ void LuaConsole::keyboardCallback(int key, int action) {
 					if (_commandsHistory.size() > 0 &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
+					else if (_commandsHistory.size() == 0)
+						_commandsHistory.push_back(_commands.at(_activeCommand));
+
 					_commands = _commandsHistory;
 					_commands.push_back("");
 					_activeCommand = _commands.size() - 1;

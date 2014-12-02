@@ -37,6 +37,8 @@ public:
 	LuaConsole();
 	~LuaConsole();
 
+	void loadHistory();
+
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);
 
