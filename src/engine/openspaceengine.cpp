@@ -42,8 +42,7 @@
 // ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logging>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -220,13 +219,40 @@ void OpenSpaceEngine::loadFonts() {
 	}
 }
 
+void OpenSpaceEngine::createLogs() {
+	using constants::configurationmanager::keyLogs;
+	using constants::configurationmanager::keyLogType;
+
+	if (_engine->configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
+		ghoul::TemplateFactory<Log> logFactory;
+		logFactory.registerClass<ghoul::logging::HTMLLog>("HTML");
+		logFactory.registerClass<ghoul::logging::TextLog>("Text");
+
+		ghoul::Dictionary logs;
+		_engine->configurationManager().getValue(keyLogs, logs);
+
+		for (size_t i = 1; i <= logs.size(); ++i) {
+			ghoul::Dictionary logInfo;
+			logs.getValue(std::to_string(i), logInfo);
+
+			std::string type;
+			logInfo.getValue(keyLogType, type);
+
+			ghoul::logging::Log* log = logFactory.create(type, logInfo);
+			LogMgr.addLog(log);
+		}
+	}
+}
+
 bool OpenSpaceEngine::create(int argc, char** argv,
                              std::vector<std::string>& sgctArguments)
 {
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
 
-    // initialize Ghoul classes
+	// Initialize the Logmanager and add the console log as this will be used every time
+	// and we need a fall back if something goes wrong between here and when we add the
+	// logs from the configuration file
     LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
     ghoul::filesystem::FileSystem::initialize();
@@ -253,7 +279,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     if (!executeSuccess)
         return false;
     
-    
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
     if (configurationFilePath.empty()) {
@@ -276,7 +301,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		return false;
 	}
 
-	// Create directories that doesn't exsist
+	// Initialize the requested logs from the configuration file
+	_engine->createLogs();
+
+	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
 	for (auto token : tokens) {
 		if (!FileSys.directoryExists(token)) {

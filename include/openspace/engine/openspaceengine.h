@@ -85,6 +85,7 @@ private:
 	bool loadSpiceKernels();
 	void runStartupScripts();
 	void loadFonts();
+	void createLogs();
 
     static OpenSpaceEngine* _engine;
 
