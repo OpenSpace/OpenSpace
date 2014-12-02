@@ -281,6 +281,7 @@ void RenderEngine::render()
     // setup the camera for the current frame
     const glm::vec3 eyePosition
           = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+	//@CHECK  does the dome disparity disappear if this line disappears? ---abock
     const glm::mat4 view
           = glm::translate(glm::mat4(1.0),
                            eyePosition);  // make sure the eye is in the center
