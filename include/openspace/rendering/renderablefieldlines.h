@@ -27,11 +27,9 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/file.h>
 
 namespace openspace {
 	struct LinePoint;
@@ -44,8 +42,9 @@ public:
 	bool initialize();
 	bool deinitialize();
 
+	bool isReady() const override;
+
 	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
 
 private:
 	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
@@ -54,18 +53,11 @@ private:
 	std::vector<std::string> _filenames;
 	std::vector<glm::vec3> _seedPoints;
 
-	ghoul::opengl::ProgramObject *_fieldlinesProgram;
-	GLuint _VAO, _seedpointVAO;
-
-	ghoul::filesystem::File* _vertexSourceFile;
-	ghoul::filesystem::File* _fragmentSourceFile;
+	ghoul::opengl::ProgramObject* _shader;
+	GLuint _fieldlineVAO;
 
 	std::vector<GLint> _lineStart;
 	std::vector<GLsizei> _lineCount;
-
-	bool _programUpdateOnSave;
-	bool _update;
-	void safeShaderCompilation();
 };
 
 } // namespace openspace

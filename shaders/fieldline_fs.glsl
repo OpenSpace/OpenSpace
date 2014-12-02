@@ -22,51 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEPLANE_H_
-#define RENDERABLEPLANE_H_
+#version __CONTEXT__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+in vec4 gs_color;
+in vec4 gs_position;
+in vec3 gs_normal;
 
-// ghoul includes
-#include <openspace/properties/stringproperty.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-namespace openspace {
-	struct LinePoint;
+void main() {
+	float alpha = 1-length(gs_normal)*length(gs_normal);
+	vec4 fragColor = vec4(gs_color.rgb, alpha);
 
-class RenderablePlane : public Renderable {
-
-	enum class Origin {
-		LowerLeft, LowerRight, UpperLeft, UpperRight, Center
-	};
-
-public:
-	RenderablePlane(const ghoul::Dictionary& dictionary);
-	~RenderablePlane();
-
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-private:
-	void loadTexture();
-
-	properties::StringProperty _texturePath;
-
-	glm::vec2 _size;
-	Origin _origin;
-
-	ghoul::opengl::ProgramObject* _shader;
-	ghoul::opengl::Texture* _texture;
-	GLuint _quad;
-};
-
-} // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+	float depth = pscDepth(gs_position);
+	ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
+	addToBuffer(frag);
+}

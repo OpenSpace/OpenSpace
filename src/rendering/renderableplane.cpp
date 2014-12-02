@@ -90,6 +90,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 RenderablePlane::~RenderablePlane() {
 }
 
+bool RenderablePlane::isReady() const {
+	return _shader != nullptr;
+}
+
 bool RenderablePlane::initialize() {
 
 	// ============================
@@ -121,11 +125,11 @@ bool RenderablePlane::initialize() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
 	OsEng.ref().configurationManager().getValue("PlaneProgram", _shader);
-	assert(_shader);
+
+	if (!_shader)
+		return false;
 
 	loadTexture();
-
-
 
 	return true;
 }

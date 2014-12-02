@@ -24,35 +24,76 @@
 
 #version __CONTEXT__
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 modelViewProjection;
+uniform mat4 modelTransform;
+uniform vec3 cameraViewDir;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec3 in_brightness;
-layout(location = 2) in vec3 in_velocity;
-layout(location = 3) in float in_speed;
-
-layout(location = 0) out vec4 psc_position;
-layout(location = 1) out vec3 vs_brightness;
-layout(location = 2) out vec3 vs_velocity;
-layout(location = 3) out float vs_speed;
-layout(location = 4) out vec4 cam_position;
+in vec4 vs_color[];
+out vec4 gs_color;
+out vec4 gs_position;
+out vec3 gs_normal;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() { 
-	psc_position  = in_position;
-	vs_brightness = in_brightness;
-	vs_velocity = in_velocity;
-	vs_speed = in_speed;
-	cam_position  = campos;
+layout(lines_adjacency) in;
+layout(triangle_strip, max_vertices = 4) out;
 
-	vec4 tmp = in_position;
-	vec4 position = pscTransform(tmp, mat4(1.0));
-	// psc_position = tmp;
-	position = model * view * position;
-	// position = ViewProjection * ModelTransform * position;
-	// gl_Position =  z_normalization(position);
-	gl_Position =  position;
+vec4 prismoid[4];
+
+// Calculate the correct powerscaled position and depth for the ABuffer
+void ABufferEmitVertex(vec4 pos) {
+    // calculate psc position
+    vec4 tmp = pos;
+    vec4 position = pscTransform(tmp, modelTransform);
+    gs_position = tmp;
+
+    // project the position to view space
+    position =  modelViewProjection*position;
+    gl_Position = position;
+    EmitVertex();
+}
+
+// Original code from http://prideout.net/blog/?p=61
+void main() {
+    gs_color = vs_color[0];
+
+    // Get the current and adjacent vertex positions and calculate help vectors u and v
+    vec3 p0, p1, p2, p3;
+    p0 = gl_in[0].gl_Position.xyz; p1 = gl_in[1].gl_Position.xyz;
+    p2 = gl_in[2].gl_Position.xyz; p3 = gl_in[3].gl_Position.xyz;
+    vec3 n0 = normalize(p1-p0);
+    vec3 n1 = normalize(p2-p1);
+    vec3 n2 = normalize(p3-p2);
+    vec3 u = normalize(n0+n1);
+    vec3 v = normalize(n1+n2);
+
+    float EARTH_RADIUS = 6371000.0;
+    float width = 0.1*EARTH_RADIUS;
+
+    // Calculate normals for all 4 new vertices
+    vec3 normals[4];
+    normals[0] = normalize(cross(cameraViewDir,u));
+    normals[1] = -normals[0];
+    normals[3] = normalize(cross(cameraViewDir,v));
+    normals[2] = -normals[3];
+
+    // Calculate positions for the new vertices
+    prismoid[0] = vec4(p1 + normals[0]*width, 0);
+    prismoid[1] = vec4(p1 + normals[1]*width, 0);
+    prismoid[2] = vec4(p2 + normals[2]*width, 0);
+    prismoid[3] = vec4(p2 + normals[3]*width, 0);
+
+    // Send normals and verticies to fragment shader
+    gs_normal = normals[0];
+    ABufferEmitVertex(prismoid[0]);
+
+    gs_normal = normals[1];
+    ABufferEmitVertex(prismoid[1]);
+
+    gs_normal = normals[3];
+    ABufferEmitVertex(prismoid[3]);
+
+    gs_normal = normals[2];
+    ABufferEmitVertex(prismoid[2]);
+    EndPrimitive(); 
 }

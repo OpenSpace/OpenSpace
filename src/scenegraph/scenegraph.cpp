@@ -192,26 +192,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
-	// Star program
-	tmpProgram = ProgramObject::Build("Star",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("StarProgram", tmpProgram);
-
-	// Point program
-	tmpProgram = ProgramObject::Build("Point",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("PointProgram", tmpProgram);
-
 	// Grid program
 	tmpProgram = ProgramObject::Build("Grid",
 		"${SHADERS}/grid_vs.glsl",
@@ -230,32 +210,15 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
-	// pscColorToTexture program
-	tmpProgram = ProgramObject::Build("pscColorToTexture",
-		"${SHADERS}/pscColorToTexture_vs.glsl",
-		"${SHADERS}/pscColorToTexture_fs.glsl",
+	// Fieldline program
+	tmpProgram = ProgramObject::Build("Fieldline",
+		"${SHADERS}/fieldline_vs.glsl",
+		"${SHADERS}/fieldline_fs.glsl",
+		"${SHADERS}/fieldline_gs.glsl",
 		cb);
 	if (!tmpProgram) return false;
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("pscColorToTexture", tmpProgram);
-
-	// pscTextureToABuffer program
-	tmpProgram = ProgramObject::Build("pscTextureToABuffer",
-		"${SHADERS}/pscTextureToABuffer_vs.glsl",
-		"${SHADERS}/pscTextureToABuffer_fs.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("pscTextureToABuffer", tmpProgram);
-
-	// pscColorPassthrough program
-	tmpProgram = ProgramObject::Build("pscColorPassthrough",
-		"${SHADERS}/pscColorPassthrough_vs.glsl",
-		"${SHADERS}/pscColorPassthrough_fs.glsl",
-		cb);
-	if (!tmpProgram) return false;
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("pscColorPassthrough", tmpProgram);
+	OsEng.ref().configurationManager().setValue("FieldlineProgram", tmpProgram);
 
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
@@ -329,7 +292,10 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	    // deallocate the scene graph. Recursive deallocation will occur
+	for (auto node : _nodes)
+		node->deinitialize();
+
+	// deallocate the scene graph. Recursive deallocation will occur
     delete _root;
     _root = nullptr;
 

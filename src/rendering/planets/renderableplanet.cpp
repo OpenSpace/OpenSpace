@@ -82,11 +82,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
-RenderablePlanet::~RenderablePlanet(){
-    deinitialize();
-}
+RenderablePlanet::~RenderablePlanet() {}
 
-bool RenderablePlanet::initialize(){
+bool RenderablePlanet::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
@@ -99,13 +97,17 @@ bool RenderablePlanet::initialize(){
     return completeSuccess;
 }
 
-bool RenderablePlanet::deinitialize(){
+bool RenderablePlanet::deinitialize() {
     _geometry->deinitialize();
     delete _geometry;
     _geometry = nullptr;
     delete _texture;
     _texture = nullptr;
     return true;
+}
+
+bool RenderablePlanet::isReady() const {
+	return (_geometry != nullptr);
 }
 
 void RenderablePlanet::render(const RenderData& data)

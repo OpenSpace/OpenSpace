@@ -22,66 +22,52 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLESTARS_H__
-#define __RENDERABLESTARS_H__
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+namespace {
+	const std::string _loggerCat = "OptionProperty";
+}
 
 namespace openspace {
+namespace properties {
 
-class RenderableStars : public Renderable {
-public: 
-	RenderableStars(const ghoul::Dictionary& dictionary);
+OptionProperty::OptionProperty(std::string identifier, std::string guiName)
+	: IntProperty(std::move(identifier), std::move(guiName))
+{}
 
-	bool initialize() override;
-	bool deinitialize() override;
+std::string OptionProperty::className() const {
+	return "OptionProperty";
+}
 
-	bool isReady() const override;
+const std::vector<OptionProperty::Option>& OptionProperty::options() const {
+	return _options;
+}
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+void OptionProperty::addOption(Option option) {
+	for (auto o : _options) {
+		if (o.value == option.value) {
+			LWARNING("The value of option {" << o.value << " -> " << o.description <<
+				"} was already registered when trying to add option {" << option.value <<
+				" -> " << option.description << "}");
+			return;
+		}
+	}
+	_options.push_back(std::move(option));
+}
 
-private:
-	enum ColorOption {
-		Color = 0,
-		Velocity = 1,
-		Speed = 2
-	};
+void OptionProperty::setValue(int value) {
+	// Check if the passed value belongs to any option
+	for (auto o : _options) {
+		if (o.value == value) {
+			// If it does, set it by calling the superclasses setValue method
+			NumericalProperty::setValue(value);
+			return;
+		}
+	}
 
-	void createDataSlice(ColorOption option);
+	// Otherwise, log an error
+	LERROR("Could not find an option for value '" << value << "' in OptionProperty");
+}
 
-	bool loadData();
-	bool readSpeckFile();
-	bool loadCachedFile(const std::string& file);
-	bool saveCachedFile(const std::string& file) const;
-
-	properties::StringProperty _colorTexturePath;
-	ghoul::opengl::Texture* _texture;
-	bool _textureIsDirty;
-
-	properties::OptionProperty _colorOption;
-	bool _dataIsDirty;
-
-	properties::FloatProperty _spriteSize;
-
-	ghoul::opengl::ProgramObject* _program;
-	bool _programIsDirty;
-
-	std::string _speckFile;
-
-	std::vector<float> _slicedData;
-	std::vector<float> _fullData;
-	int _nValuesPerStar;
-
-	GLuint _vao;
-	GLuint _vbo;
-};
-
+} // namespace properties
 } // namespace openspace
-
-#endif  // __RENDERABLESTARS_H__

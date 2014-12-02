@@ -24,13 +24,22 @@
 
 #version __CONTEXT__
 
+// keep in sync with renderablestars.h:ColorOption enum
+const int COLOROPTION_COLOR = 0;
+const int COLOROPTION_VELOCITY = 1;
+const int COLOROPTION_SPEED = 2;
+
 uniform sampler2D texture1;
 uniform vec3 Color;
 
-in vec4 vs_position;
-in vec2 texCoord;
+uniform int colorOption;
 
-layout(location = 2) in vec3 ge_brightness;
+layout(location = 0) in vec4 vs_position;
+layout(location = 1) in vec3 ge_brightness;
+layout(location = 2) in vec3 ge_velocity;
+layout(location = 3) in float ge_speed;
+layout(location = 4) in vec2 texCoord;
+
 
 
 #include "ABuffer/abufferStruct.hglsl"
@@ -40,7 +49,7 @@ layout(location = 2) in vec3 ge_brightness;
 //---------------------------------------------------------------------------
 vec4 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
 {
-    float t; 
+    float t = 0.0; 
 	vec4 c;
 
 	// TODO CHECK: Isn't t uninitialized here?
@@ -63,16 +72,30 @@ vec4 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
 
 void main(void)
 {
-
 	// Something in the color calculations need to be changed because before it was dependent
 	// on the gl blend functions since the abuffer was not involved
-	//glDisable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE); 
-	vec4 color = bv2rgb(ge_brightness[0])/1.1;
+
+	vec4 color = vec4(0.0);
+	switch (colorOption) {
+		case COLOROPTION_COLOR: 
+			color = bv2rgb(ge_brightness[0])/1.1;
+			break;
+		case COLOROPTION_VELOCITY:
+			color = vec4(abs(ge_velocity), 0.5); 
+			break;
+		case COLOROPTION_SPEED:
+			// @TODO Include a transfer function here ---abock
+			color = vec4(vec3(ge_speed), 0.5);
+			break;
+	}
+
+
 	// color.rgb = 1/ color.rgb;
 	// color.a = 1-color.a;
     framebuffer_output_color = texture(texture1, texCoord)*color;
+    //framebuffer_output_color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    // framebuffer_output_color = vec4(ge_velocity, 1.0);
 
     //diffuse = vec4(1,1,0,1);
    ///diffuse = vec4(Color, 1.0);
@@ -80,7 +103,6 @@ void main(void)
    	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	gl_FragDepth = depth;
-	//gl_FragDepth = 10.0;
 
 	//ABufferStruct_t frag = createGeometryFragment(vec4(1,0,0,1), position, depth);
 	//ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);

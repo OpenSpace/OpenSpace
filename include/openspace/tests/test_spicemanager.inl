@@ -47,7 +47,7 @@ protected:
 #define  SRCLEN   128
 
 const int nrMetaKernels = 9;
-int which, handle, count = 0;
+SpiceInt which, handle, count = 0;
 char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
 double abs_error = 0.00001;
 
@@ -353,8 +353,8 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix){
 TEST_F(SpiceManagerTest, getFieldOfView){
 	loadMetaKernel();
 	
-	int n;
-	int cassini_ID;
+	SpiceInt n;
+	SpiceInt cassini_ID;
 	double et;
 	glm::dvec3 boresight;
 	double bounds_ref[5][3];
@@ -395,7 +395,7 @@ TEST_F(SpiceManagerTest, planetocentricToRectangular){
 	double lat = -35.0; //initial values
 	double lon = 100.0;
 	double rectangular_ref[3];
-	int naifId;
+	SpiceInt naifId;
 	SpiceBoolean foundSpice;
 
 	bodn2c_c("EARTH", &naifId, &foundSpice);

@@ -165,13 +165,15 @@ bool SpiceManager::hasValue(const std::string& body, const std::string& item) co
 }
 
 bool SpiceManager::getNaifId(const std::string& body, int& id) const {
+	
+	SpiceInt s_id = id;
 	if (body.empty()) {
 		LERROR("No body was provided");
 		return false;
 	}
 	else {
 		SpiceBoolean success;
-		bods2c_c(body.c_str(), &id, &success);
+		bods2c_c(body.c_str(), &s_id, &success);
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
@@ -190,8 +192,9 @@ bool getValueInternal(const std::string& body, const std::string& value, int S,
 		return false;
 	}
 
-	int n;
-	bodvrd_c(body.c_str(), value.c_str(), S, &n, v);
+	SpiceInt n;
+	SpiceInt _s = S;
+	bodvrd_c(body.c_str(), value.c_str(), _s, &n, v);
 
     bool hasError = SpiceManager::checkForError("Error getting value '" + value +
                                                 "' for body '" + body + "'");
@@ -232,7 +235,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 		return false;
 	}
 
-	int n;
+	SpiceInt n;
 	bodvrd_c(body.c_str(), value.c_str(), static_cast<SpiceInt>(v.size()), &n, &v[0]);
 
 	bool hasError = checkForError("Error getting value '" + value + "' for body '" + 
@@ -433,7 +436,7 @@ bool SpiceManager::getFieldOfView(int instrument,
 	static char fovShapeBuffer[bufferSize];
 	static char frameNameBuffer[bufferSize];
 
-	int nrReturned;
+	SpiceInt nrReturned;
 	double boundsArr[maxBoundsSize][3];
 
 	getfov_c(instrument,  // instrument id
