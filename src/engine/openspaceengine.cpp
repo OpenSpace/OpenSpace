@@ -341,7 +341,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
     sgctArguments.insert(sgctArguments.begin() + 1, _sgctConfigArgumentCommand);
-    sgctArguments.insert(sgctArguments.begin() + 2, sgctConfigurationPath);
+    sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
     
     return true;
 }
