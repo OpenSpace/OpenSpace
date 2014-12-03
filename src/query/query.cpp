@@ -45,7 +45,12 @@ SceneGraphNode* sceneGraphNode(const std::string& name)
     const SceneGraph* graph = sceneGraph();
     return graph->sceneGraphNode(name);
 }
-    
+
+Renderable* renderable(const std::string& name) {
+	SceneGraphNode* node = sceneGraphNode(name);
+	return node->renderable();
+}
+
 properties::Property* property(const std::string& uri)
 {
     // The URI consists of the following form at this stage:
