@@ -328,6 +328,10 @@ const Renderable* SceneGraphNode::renderable() const
     return _renderable;
 }
 
+Renderable* SceneGraphNode::renderable() {
+	return _renderable;
+}
+
 // private helper methods
 bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad,
                                          const Camera* camera)
