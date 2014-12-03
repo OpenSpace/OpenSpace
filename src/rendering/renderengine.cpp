@@ -509,12 +509,14 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 			{
 				"printImage",
 				&luascriptfunctions::printImage,
-				"printImage(): Renders the current image to a file on disk"
+				"",
+				"Renders the current image to a file on disk"
 			},
 			{
 				"visualizeABuffer",
 				&luascriptfunctions::visualizeABuffer,
-				"visualizeABuffer(bool): Toggles the visualization of the ABuffer"
+				"bool",
+				"Toggles the visualization of the ABuffer"
 			}
 		},
 	};

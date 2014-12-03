@@ -47,6 +47,7 @@ namespace openspace {
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _texturePath("texture", "Texture")
+	, _billboard("billboard", "Billboard", false)
 	, _size(glm::vec2(1,1))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
@@ -73,6 +74,12 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 		else if (origin == "Center") {
 			_origin = Origin::Center;
 		}
+	}
+
+	// Attempt to get the billboard value
+	bool billboard = false;
+	if (dictionary.getValue("Billboard", billboard)) {
+		_billboard = billboard;
 	}
 
 	std::string texturePath = "";
@@ -146,6 +153,8 @@ void RenderablePlane::render(const RenderData& data) {
 		return;
 
 	glm::mat4 transform = glm::mat4(1.0);
+	if (_billboard)
+		transform = glm::inverse(data.camera.viewRotationMatrix());
 	//transform = glm::scale(transform, glm::vec3(0.01));
 
 	// Activate shader

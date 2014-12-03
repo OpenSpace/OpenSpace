@@ -212,19 +212,22 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 			{
 				"setDeltaTime",
 				&luascriptfunctions::time_setDeltaTime,
-				"setDeltaTime(number): Sets the amount of simulation time that happens "
+				"number",
+				"Sets the amount of simulation time that happens "
 				"in one second of real time"
 			},
 			{
 				"deltaTime",
 				&luascriptfunctions::time_deltaTime,
-				"deltaTime: Returns the amount of simulated time that passes in one "
+				"",
+				"Returns the amount of simulated time that passes in one "
 				"second of real time"
 			},
 			{
 				"setTime",
 				&luascriptfunctions::time_setTime,
-				"setTime({number, string}): Sets the current simulation time to the "
+				"{number, string}",
+				"Sets the current simulation time to the "
 				"specified value. If the parameter is a number, the value is the number "
 				"of seconds past the J2000 epoch. If it is a string, it has to be a "
 				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
@@ -232,14 +235,16 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 			{
 				"currentTime",
 				&luascriptfunctions::time_currentTime,
-				"currentTime(): Returns the current time as the number of seconds since "
+				"",
+				"Returns the current time as the number of seconds since "
 				"the J2000 epoch"
 			},
 			{
 				"currentTimeUTC",
 				&luascriptfunctions::time_currentTimeUTC,
-				"currentTimeUTC: Returns the current time as an ISO 8601 date string "
-				"(YYYY-MM-DDTHH:MN:SS"
+				"",
+				"Returns the current time as an ISO 8601 date string "
+				"(YYYY-MM-DDTHH:MN:SS)"
 			}
 		}
 	};

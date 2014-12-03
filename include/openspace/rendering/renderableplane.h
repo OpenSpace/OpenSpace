@@ -59,6 +59,7 @@ private:
 	void loadTexture();
 
 	properties::StringProperty _texturePath;
+	properties::BoolProperty _billboard;
 
 	glm::vec2 _size;
 	Origin _origin;

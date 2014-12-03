@@ -508,14 +508,18 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 
 void OpenSpaceEngine::encode()
 {
-	_renderEngine.serialize(_syncBuffer);
-	_syncBuffer->write();
+	if (_syncBuffer) {
+		_renderEngine.serialize(_syncBuffer);
+		_syncBuffer->write();
+	}
 }
 
 void OpenSpaceEngine::decode()
 {
-	_syncBuffer->read();
-	_renderEngine.deserialize(_syncBuffer);
+	if (_syncBuffer) {
+		_syncBuffer->read();
+		_renderEngine.deserialize(_syncBuffer);
+	}
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
