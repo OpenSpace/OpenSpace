@@ -167,18 +167,18 @@ bool SceneGraph::initialize()
 	// pscstandard
 	tmpProgram = ProgramObject::Build("pscstandard",
 		"${SHADERS}/pscstandard_vs.glsl",
-		"${SHADERS}/pscstandard_fs.glsl",
-		cb);
+		"${SHADERS}/pscstandard_fs.glsl");
     if( ! tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
 	// pscstandard
 	tmpProgram = ProgramObject::Build("EphemerisProgram",
 		"${SHADERS}/ephemeris_vs.glsl",
-		"${SHADERS}/ephemeris_fs.glsl",
-		cb);
+		"${SHADERS}/ephemeris_fs.glsl");
 	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
 
@@ -186,27 +186,27 @@ bool SceneGraph::initialize()
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
-		"${SHADERS}/exitpoints.frag",
-		cb);
+		"${SHADERS}/exitpoints.frag");
 	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
 
 	// Grid program
 	tmpProgram = ProgramObject::Build("Grid",
 		"${SHADERS}/grid_vs.glsl",
-		"${SHADERS}/grid_fs.glsl",
-		cb);
+		"${SHADERS}/grid_fs.glsl");
 	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
 
 	// Plane program
 	tmpProgram = ProgramObject::Build("Plane",
 		"${SHADERS}/plane_vs.glsl",
-		"${SHADERS}/plane_fs.glsl",
-		cb);
+		"${SHADERS}/plane_fs.glsl");
 	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
@@ -214,9 +214,9 @@ bool SceneGraph::initialize()
 	tmpProgram = ProgramObject::Build("Fieldline",
 		"${SHADERS}/fieldline_vs.glsl",
 		"${SHADERS}/fieldline_fs.glsl",
-		"${SHADERS}/fieldline_gs.glsl",
-		cb);
+		"${SHADERS}/fieldline_gs.glsl");
 	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("FieldlineProgram", tmpProgram);
 
