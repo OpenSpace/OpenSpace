@@ -469,17 +469,20 @@ scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
 			{
 				"show",
 				&luascriptfunctions::show,
-				"show(): Shows the console"
+				"",
+				"Shows the console"
 			},
 			{
 				"hide",
 				&luascriptfunctions::hide,
-				"hide(): Hides the console"
+				"",
+				"Hides the console"
 			},
 			{
 				"toggle",
 				&luascriptfunctions::toggle,
-				"toggle(): Toggles the console"
+				"",
+				"Toggles the console"
 			}
 		}
 	};

@@ -42,6 +42,7 @@ public:
 		struct Function {
 			std::string name;
 			lua_CFunction function;
+			std::string argumentText;
 			std::string helpText;
 		};
         std::string name;

@@ -523,20 +523,23 @@ scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
 			{
 				"setPropertyValue",
 				&luascriptfunctions::property_setValue,
-				"setPropertyValue(string, *): Sets a property identified by the URI in "
+				"string, *",
+				"Sets a property identified by the URI in "
 				"the first argument. The second argument can be any type, but it has to "
 				" agree with the type that the property expects"
 			},
 			{
 				"getPropertyValue",
 				&luascriptfunctions::property_getValue,
-				"getPropertyValue(string): Returns the value the property, identified by "
+				"string",
+				"Returns the value the property, identified by "
 				"the provided URI."
 			},
 			{
 				"loadScene",
 				&luascriptfunctions::loadScene,
-				"loadScene(string): Loads the scene found at the file passed as an "
+				"string",
+				"Loads the scene found at the file passed as an "
 				"argument. If a scene is already loaded, it is unloaded first"
 			}
 		}
