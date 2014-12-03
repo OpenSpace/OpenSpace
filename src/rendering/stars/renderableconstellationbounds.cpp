@@ -25,11 +25,14 @@
 #include <openspace/rendering/stars/renderableconstallationbounds.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
+
+#include <ghoul/filesystem/filesystem.h>
 #include <SpiceUsr.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <fstream>
 #include <vector>
 
 namespace {
@@ -49,68 +52,59 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 bool RenderableConstellationBounds::initialize() {
-	struct Point{
-		float ra;
-		float dec;
-	};
-
 	_program = ghoul::opengl::ProgramObject::Build("Star",
 		"${SHADERS}/constellationbounds_vs.glsl",
 		"${SHADERS}/constellationbounds_fs.glsl");
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ this->_programIsDirty = true; });
 
 
-	std::vector<Point> points;
-
-	points.push_back({12.83333f, -53.f});
-	points.push_back({22.83333f, -55.f});
-	points.push_back({22.83333f, -84.f});
-	points.push_back({12.83333f, -84.f});
-	points.push_back({12.83333f, -53.f});
-
 	if (_vao == 0) {
 		glGenVertexArrays(1, &_vao);
 		LDEBUG("Generating Vertex Array id '" << _vao << "'");
 	}
-	if (_vbo == 0) {
-		glGenBuffers(1, &_vbo);
-		LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+	//if (_vbo == 0) {
+	//	glGenBuffers(1, &_vbo);
+	//	LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+	//}
+
+
+	loadFile();
+
+	for (ConstellationBound& bound : _bounds) {
+		glGenVertexArrays(1, &bound.vao);
+		glBindVertexArray(bound.vao);
+
+		GLuint vbo;
+		glGenBuffers(1, &vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER,
+			bound.points.size() * 4 * sizeof(float),
+			&bound.points[0],
+			GL_STATIC_DRAW
+			);
+
+		GLint positionAttrib = _program->attributeLocation("in_position");
+		glEnableVertexAttribArray(positionAttrib);
+		glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
-	auto conv = [](float& ra, float& dec) {
-		ra = ((ra * 15) / 360.f) * 2.f * M_PI;
-		dec = (dec / 360.f) * 2.f * M_PI;
-	};
+	//glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	//glBufferData(GL_ARRAY_BUFFER,
+	//	_data.size() * sizeof(float),
+	//	&_data[0],
+	//	GL_STATIC_DRAW);
 
-	//std::vector<psc> positions;
-	for (auto p : points) {
-		SpiceDouble values[3];
+	//GLint positionAttrib = _program->attributeLocation("in_position");
+	//glEnableVertexAttribArray(positionAttrib);
 
-		conv(p.ra, p.dec);
-		radrec_c(1.0, p.ra, p.dec, values);
+	//glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-		_data.push_back(values[0]);
-		_data.push_back(values[1]);
-		_data.push_back(values[2]);
-		_data.push_back(15.f);
-	}
-
-
-	glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER,
-		_data.size() * sizeof(float),
-		&_data[0],
-		GL_STATIC_DRAW);
-
-	GLint positionAttrib = _program->attributeLocation("in_position");
-	glEnableVertexAttribArray(positionAttrib);
-
-
-	glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindVertexArray(0);
 
 	return true;
 }
@@ -120,7 +114,8 @@ bool RenderableConstellationBounds::deinitialize() {
 }
 
 bool RenderableConstellationBounds::isReady() const {
-	return (_vao != 0) && (_vbo != 0);
+	//return (_vao != 0) && (_vbo != 0);
+	return true;
 }
 
 void RenderableConstellationBounds::render(const RenderData& data) {
@@ -151,10 +146,18 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 	//_program->setUniform("texture1", unit);
 	//_program->setIgnoreUniformLocationError(false);
 
-	glBindVertexArray(_vao);
+	for (auto bound : _bounds) {
+		glBindVertexArray(bound.vao);
+		glDrawArrays(GL_LINE_STRIP, 0, bound.points.size());
+	}
+
+	//glBindVertexArray(_vao);
 	//const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
 	//glDrawArrays(GL_POINTS, 0, nStars);  
-	glDrawArrays(GL_LINE_STRIP, 0, _data.size() - 1);
+	//glDrawArrays(GL_LINE_STRIP, 0, _data.size() - 1);
+
+
+
 	glBindVertexArray(0);
 	_program->deactivate();
 }
@@ -165,6 +168,53 @@ void RenderableConstellationBounds::update(const UpdateData& data) {
 		_programIsDirty = false;
 	}
 }
+
+bool RenderableConstellationBounds::loadFile() {
+	std::string fileName = absPath(_filename);
+	std::ifstream file(fileName);
+
+	ConstellationBound currentBound;
+	currentBound.constellation = "";
+	std::string line;
+	while (file.good()) {
+		std::getline(file, line);
+
+		// @CHECK: Is this the best way of doing this? ---abock
+		float ra;
+		float dec;
+		std::string constellation;
+		std::stringstream s(line);
+		s >> ra;
+		s >> dec;
+		s >> constellation;
+
+		if (constellation != currentBound.constellation) {
+			_bounds.push_back(currentBound);
+			currentBound = ConstellationBound();
+			currentBound.constellation = constellation;
+		}
+
+		ra = convertHrsToRadians(ra);
+		dec = deg2rad(dec);
+
+		SpiceDouble values[3];
+		radrec_c(1.0, ra, dec, values);
+
+		std::array<float, 4> position;
+		position[0] = values[0];
+		position[1] = values[1];
+		position[2] = values[2];
+		position[3] = 15.f;
+		currentBound.points.push_back(position);
+	}
+
+	// remove the first one
+	_bounds.erase(_bounds.begin());
+
+	return true;
+}
+
+
 
 } // namespace openspace
 

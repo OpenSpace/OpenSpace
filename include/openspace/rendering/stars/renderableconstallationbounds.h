@@ -29,6 +29,8 @@
 
 #include <ghoul/opengl/programobject.h>
 
+#include <array>
+
 namespace openspace {
 
 class RenderableConstellationBounds : public Renderable {
@@ -44,17 +46,35 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
+	struct ConstellationBound {
+		typedef std::array<float, 4> Point;
+		std::string constellation;
+		std::vector<Point> points;
+		GLuint vao;
+	};
+
+	float deg2rad(float deg) {
+		return (deg / 360.f) * 2.f * 3.1415926f;
+	}
+	float convertHrsToRadians(float rightAscension) {
+		// 360 degrees / 24h = 15 degrees/h
+		return deg2rad(rightAscension * 15);
+	}
+
+
+	bool loadFile();
+
+
 	std::string _filename;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
 
-	std::vector<float> _data;
+	std::vector<ConstellationBound> _bounds;
 
 	GLuint _vao;
 	GLuint _vbo;
 };
-
 
 } // namespace openspace
 
