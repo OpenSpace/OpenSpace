@@ -72,6 +72,7 @@ namespace {
     
     struct {
         std::string configurationName;
+		std::string sgctConfigurationName;
     } commandlineArgumentPlaceholders;
 }
 
@@ -117,10 +118,18 @@ void OpenSpaceEngine::clearAllWindows() {
 bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
 
+	commandlineArgumentPlaceholders.configurationName = "";
     CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
           &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
           "Provides the path to the OpenSpace configuration file");
     _commandlineParser.addCommand(configurationFileCommand);
+
+	commandlineArgumentPlaceholders.sgctConfigurationName = "";
+	CommandlineCommand* sgctConfigFileCommand = new SingleCommand<std::string>(
+		&commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+		"Provides the path to the SGCT configuration file, overriding the value set in"
+		"the OpenSpace configuration file");
+	_commandlineParser.addCommand(sgctConfigFileCommand);
     
     return true;
 }
@@ -284,7 +293,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
             return false;
         }
     }
-	LINFO("Configuration Path: '" << FileSys.absolutePath(configurationFilePath) << "'");
+	configurationFilePath = absPath(configurationFilePath);
+	LINFO("Configuration Path: '" << configurationFilePath << "'");
 
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
@@ -321,11 +331,17 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     _engine->configurationManager().getValue(
         constants::configurationmanager::keyConfigSgct, sgctConfigurationPath);
 
+	if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
+		LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
+			commandlineArgumentPlaceholders.sgctConfigurationName);
+		sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
+	}
+
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
     sgctArguments.insert(sgctArguments.begin() + 1, _sgctConfigArgumentCommand);
-    sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
+    sgctArguments.insert(sgctArguments.begin() + 2, sgctConfigurationPath);
     
     return true;
 }
