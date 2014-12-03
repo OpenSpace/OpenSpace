@@ -26,6 +26,7 @@
 
 // renderables
 #include <openspace/rendering/model/renderablemodel.h>
+#include <openspace/rendering/stars/renderableconstallationbounds.h>
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
@@ -62,10 +63,10 @@ void FactoryManager::initialize()
     // TODO: This has to be moved into a sort of module structure (ab)
     // Add Renderables
     _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-    _manager->factory<Renderable>()->registerClass<RenderablePlanet>(
-          "RenderablePlanet");
-	_manager->factory<Renderable>()->registerClass<RenderableStars>(
-		"RenderableStars");
+    _manager->factory<Renderable>()->registerClass<RenderablePlanet>("RenderablePlanet");
+	_manager->factory<Renderable>()->registerClass<RenderableStars>("RenderableStars");
+	_manager->factory<Renderable>()->registerClass<RenderableConstellationBounds>
+		("RenderableConstellationBounds");
 	_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
 		"RenderableEphemeris");
 	//will replace ephemeris class soon...
