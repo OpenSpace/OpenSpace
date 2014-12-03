@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 // openspace
+#include <openspace/engine/logfactory.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
@@ -39,10 +40,9 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
-// ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/logging/logging>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -221,25 +221,19 @@ void OpenSpaceEngine::loadFonts() {
 
 void OpenSpaceEngine::createLogs() {
 	using constants::configurationmanager::keyLogs;
-	using constants::configurationmanager::keyLogType;
 
-	if (_engine->configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
-		ghoul::TemplateFactory<Log> logFactory;
-		logFactory.registerClass<ghoul::logging::HTMLLog>("HTML");
-		logFactory.registerClass<ghoul::logging::TextLog>("Text");
-
+	if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
 		ghoul::Dictionary logs;
-		_engine->configurationManager().getValue(keyLogs, logs);
+		configurationManager().getValue(keyLogs, logs);
 
 		for (size_t i = 1; i <= logs.size(); ++i) {
 			ghoul::Dictionary logInfo;
 			logs.getValue(std::to_string(i), logInfo);
 
-			std::string type;
-			logInfo.getValue(keyLogType, type);
+			Log* log = LogFactory::createLog(logInfo);
 
-			ghoul::logging::Log* log = logFactory.create(type, logInfo);
-			LogMgr.addLog(log);
+			if (log)
+				LogMgr.addLog(log);
 		}
 	}
 }

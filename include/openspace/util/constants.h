@@ -49,7 +49,6 @@ namespace configurationmanager {
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 	const std::string keyLogs = "Logs";
-	const std::string keyLogType = "Type";
 } // namespace configurationmanager
 
 namespace scenegraph {
