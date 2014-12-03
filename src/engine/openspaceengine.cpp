@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 // openspace
+#include <openspace/engine/logfactory.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
@@ -39,10 +40,9 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
-// ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/logging/logging>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -72,6 +72,7 @@ namespace {
     
     struct {
         std::string configurationName;
+		std::string sgctConfigurationName;
     } commandlineArgumentPlaceholders;
 }
 
@@ -117,10 +118,18 @@ void OpenSpaceEngine::clearAllWindows() {
 bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
 
+	commandlineArgumentPlaceholders.configurationName = "";
     CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
           &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
           "Provides the path to the OpenSpace configuration file");
     _commandlineParser.addCommand(configurationFileCommand);
+
+	commandlineArgumentPlaceholders.sgctConfigurationName = "";
+	CommandlineCommand* sgctConfigFileCommand = new SingleCommand<std::string>(
+		&commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+		"Provides the path to the SGCT configuration file, overriding the value set in"
+		"the OpenSpace configuration file");
+	_commandlineParser.addCommand(sgctConfigFileCommand);
     
     return true;
 }
@@ -221,25 +230,19 @@ void OpenSpaceEngine::loadFonts() {
 
 void OpenSpaceEngine::createLogs() {
 	using constants::configurationmanager::keyLogs;
-	using constants::configurationmanager::keyLogType;
 
-	if (_engine->configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
-		ghoul::TemplateFactory<Log> logFactory;
-		logFactory.registerClass<ghoul::logging::HTMLLog>("HTML");
-		logFactory.registerClass<ghoul::logging::TextLog>("Text");
-
+	if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
 		ghoul::Dictionary logs;
-		_engine->configurationManager().getValue(keyLogs, logs);
+		configurationManager().getValue(keyLogs, logs);
 
 		for (size_t i = 1; i <= logs.size(); ++i) {
 			ghoul::Dictionary logInfo;
 			logs.getValue(std::to_string(i), logInfo);
 
-			std::string type;
-			logInfo.getValue(keyLogType, type);
+			Log* log = LogFactory::createLog(logInfo);
 
-			ghoul::logging::Log* log = logFactory.create(type, logInfo);
-			LogMgr.addLog(log);
+			if (log)
+				LogMgr.addLog(log);
 		}
 	}
 }
@@ -290,7 +293,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
             return false;
         }
     }
-	LINFO("Configuration Path: '" << FileSys.absolutePath(configurationFilePath) << "'");
+	configurationFilePath = absPath(configurationFilePath);
+	LINFO("Configuration Path: '" << configurationFilePath << "'");
 
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
@@ -327,11 +331,17 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     _engine->configurationManager().getValue(
         constants::configurationmanager::keyConfigSgct, sgctConfigurationPath);
 
+	if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
+		LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
+			commandlineArgumentPlaceholders.sgctConfigurationName);
+		sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
+	}
+
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
     sgctArguments.insert(sgctArguments.begin() + 1, _sgctConfigArgumentCommand);
-    sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
+    sgctArguments.insert(sgctArguments.begin() + 2, sgctConfigurationPath);
     
     return true;
 }
