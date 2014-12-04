@@ -326,6 +326,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     _root->setName(SceneGraphNode::RootNodeName);
     _nodes.push_back(_root);
     _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
+    _focus = SceneGraphNode::RootNodeName;
 
     Dictionary dictionary;
 	//load default.scene 
