@@ -27,15 +27,17 @@
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
-layout(location = 0) in vec4 in_position;
+uniform float exponent;
+
+layout(location = 0) in vec3 in_position;
 out vec4 vs_position;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main()
 {
-	vs_position = in_position;
-	vec4 tmp = in_position;
+	vec4 tmp = vec4(in_position, exponent);
+	vs_position = tmp;
 
 	vec4 position = pscTransform(tmp, ModelTransform);
 	vs_position = tmp;

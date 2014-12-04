@@ -26,6 +26,7 @@
 #define __RENDERABLECONSTELLATIONBOUNDS_H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -52,27 +53,22 @@ private:
 		int nVertices;
 	};
 
-	float deg2rad(float deg) {
-		return (deg / 360.f) * 2.f * 3.1415926f;
-	}
-	float convertHrsToRadians(float rightAscension) {
-		// 360 degrees / 24h = 15 degrees/h
-		return deg2rad(rightAscension * 15);
-	}
-
-
 	bool loadFile();
 
-
+	
 	std::string _filename;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
 
 	std::vector<ConstellationBound> _constellationBounds;
-	typedef std::array<float, 4> Vertex;
+	
+	typedef std::array<float, 3> Vertex;
 	std::vector<Vertex> _vertexValues;
 
+	properties::FloatProperty _distance;
+
+	std::string _originReferenceFrame;
 	glm::dmat3 _stateMatrix;
 
 	GLuint _vao;
