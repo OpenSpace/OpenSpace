@@ -43,7 +43,13 @@ void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
 void mainEncodeFun();
 void mainDecodeFun();
+
+#if 0
+// @TODO Remove the ifdef hen the next SGCT version is available ---abock
+void mainExternalControlCallback(const char * receivedChars, int size);
+#else
 void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
+#endif
 
 namespace {
 	const std::string _loggerCat = "main";
@@ -62,6 +68,19 @@ int main(int argc, char** argv)
     char** newArgv = new char*[newArgc];
     for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
+
+#if 0
+// @TODO Remove the ifdef (enabling the functions) when the next SGCT version is available
+// that enables the logging redirect ---abock
+	sgct::MessageHandler::instance()->setLogToConsole(false);
+	sgct::MessageHandler::instance()->setShowTime(false);
+	sgct::MessageHandler::instance()->setLogToCallback(true);
+	sgct::MessageHandler::instance()->setLogCallback([](const char* msg) {
+		std::string message = msg;
+		// Remove the trailing \n that is passed along
+		LINFOC("SGCT", message.substr(0, message.size()-1));
+	});
+#endif
 
 	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
@@ -152,11 +171,20 @@ void mainPostDrawFunc()
     OsEng.postDraw();
 }
 
-void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
+#if 0
+// @TODO Remove the ifdef hen the next SGCT version is available ---abock
+void mainExternalControlCallback(const char* receivedChars, int size)
 {
     if (_sgctEngine->isMaster())
+		OsEng.externalControlCallback(receivedChars, size, 0);
+}
+#else
+void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
+{
+	if (_sgctEngine->isMaster())
 		OsEng.externalControlCallback(receivedChars, size, clientId);
 }
+#endif
 
 void mainKeyboardCallback(int key, int action)
 {

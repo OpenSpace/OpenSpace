@@ -188,9 +188,17 @@ bool RenderEngine::initializeGL()
         const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
                                  / 4.0f;
 
+#if 0
+// @TODO Remove the ifdef when the next SGCT version is released that requests the
+// getUserPtr to get a name parameter ---abock
+
         // set the eye position, useful during rendering
         const glm::vec3 eyePosition
-              = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+              = sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
+#else
+		const glm::vec3 eyePosition
+			  = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+#endif
 
         // get viewdirection, stores the direction in the camera, used for culling
         const glm::vec3 viewdir = glm::normalize(eyePosition - center);
@@ -271,8 +279,15 @@ void RenderEngine::render()
     glDisable(GL_BLEND);
 #endif
     // setup the camera for the current frame
+
+#if 0
+// @TODO: Use this as soon as the new SGCT version is available ---abock
     const glm::vec3 eyePosition
-          = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+          = sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
+#else
+	const glm::vec3 eyePosition
+		  = sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+#endif
 	//@CHECK  does the dome disparity disappear if this line disappears? ---abock
     const glm::mat4 view
           = glm::translate(glm::mat4(1.0),
