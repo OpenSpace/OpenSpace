@@ -222,6 +222,10 @@ void OpenSpaceEngine::loadFonts() {
 		std::string font;
 		fonts.getValue(key, font);
 		font = absPath(font);
+        if(!FileSys.fileExists(font)) {
+            LERROR("Could not find font '" << font << "'");
+            continue;
+        }
 
 		LINFO("Registering font '" << font << "' with key '" << key << "'");
 		sgct_text::FontManager::instance()->addFont(key, font, local);
@@ -313,8 +317,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	for (auto token : tokens) {
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
-			LDEBUG("Directory '" << p <<"' does not exsist, creating.");
-			if(FileSys.createDirectory(p, true))
+			LDEBUG("Directory '" << p <<"' does not exist, creating.");
+			if(!FileSys.createDirectory(p, true))
 				LERROR("Directory '" << p <<"' could not be created");
 		}
 	}

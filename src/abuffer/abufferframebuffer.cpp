@@ -60,8 +60,8 @@ void ABufferFramebuffer::postRender() {
 
 }
 
-std::string ABufferFramebuffer::settings() {
-	return R"()";
+std::vector<ABuffer::fragmentData> ABufferFramebuffer::pixelData() {
+    return std::vector<ABuffer::fragmentData>();
 }
 
 
