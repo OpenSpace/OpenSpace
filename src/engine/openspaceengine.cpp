@@ -222,6 +222,10 @@ void OpenSpaceEngine::loadFonts() {
 		std::string font;
 		fonts.getValue(key, font);
 		font = absPath(font);
+        if(!FileSys.fileExists(font)) {
+            LERROR("Could not find font '" << font << "'");
+            continue;
+        }
 
 		LINFO("Registering font '" << font << "' with key '" << key << "'");
 		sgct_text::FontManager::instance()->addFont(key, font, local);

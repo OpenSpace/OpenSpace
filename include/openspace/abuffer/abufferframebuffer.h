@@ -40,7 +40,7 @@ public:
     virtual void preRender();
     virtual void postRender();
     
-    virtual std::string settings();
+    std::vector<fragmentData> pixelData();
 protected:
     virtual bool reinitializeInternal();
     
