@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPTIONPROPERTY_H__
-#define __OPTIONPROPERTY_H__
+#ifndef __SELECTIONPROPERTY_H__
+#define __SELECTIONPROPERTY_H__
 
 #include <openspace/properties/scalarproperty.h>
 
@@ -32,66 +32,43 @@
 namespace openspace {
 namespace properties {
 
-/**
- * The OptionProperty is a property that provides a number of predefined (using the 
- * addOption method) options consisting of a <code>description</code> and a
- * <code>value</code>. The available options can be queried using the options method.
- * Only values representing valid options can be used to set this property, or an error
- * will be logged
- */
-class OptionProperty : public IntProperty {
+//REGISTER_TEMPLATEPROPERTY_HEADER(SelectionProperty, std::vector<int>);
+
+class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
-	/**
-	 * The struct storing a single option consisting of an integer <code>value</code> and
-	 * a <code>string</code> description.
-	 */
 	struct Option {
 		int value;
 		std::string description;
 	};
 
-	/**
-	 * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
-	 * to its super class.
-	 * \param identifier A unique identifier for this property
-	 * \param guiName The GUI name that should be used to represent this property
-	 */
-	OptionProperty(std::string identifier, std::string guiName);
-
-	/**
-	 * Returns the name of the class for reflection purposes.
-	 * \return The name of this class for reflection purposes
-	 */
-	std::string className() const override;
-	using IntProperty::operator=;
-
-	/**
-	 * Adds the passed option to the list of available options. The <code>value</code> of
-	 * the <code>option</code> must not have been registered previously, or a warning will
-	 * be logged.
-	 * \param option The option that will be added to the list of available options
-	 */
+	SelectionProperty(std::string identifier, std::string guiName);
+	
 	void addOption(Option option);
-
-	/**
-	 * Returns the list of available options.
-	 * /return The list of available options
-	 */
 	const std::vector<Option>& options() const;
 
-	/**
-	 * The overritten TemplateProperty::setValue method that checks if the provided value
-	 * represents a valid Option
-	 * \param value The value of the Option that should be set
-	 */
-	void setValue(int value) override;
+	void setValue(std::vector<int> value) override;
 
 private:
 	/// The list of options which have been registered with this OptionProperty
 	std::vector<Option> _options;
+	std::vector<int> _values;
 };
+
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
+
+template <>
+template <>
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
 
 } // namespace properties
 } // namespace openspace
 
-#endif // __STRINGPROPERTY_H__
+#endif // __SELECTIONPROPERTY_H__
