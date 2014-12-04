@@ -4,4 +4,3 @@ GLSL
     filter remove_inline //.*$
     extension glsl
     3rd_gen_scale 5
-    end_of_line_continuation \\$
