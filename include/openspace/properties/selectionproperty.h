@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPTIONPROPERTY_H__
-#define __OPTIONPROPERTY_H__
+#ifndef __SELECTIONPROPERTY_H__
+#define __SELECTIONPROPERTY_H__
 
 #include <openspace/properties/scalarproperty.h>
 
@@ -32,9 +32,43 @@
 namespace openspace {
 namespace properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(SelectionProperty, std::vector<int>);
+//REGISTER_TEMPLATEPROPERTY_HEADER(SelectionProperty, std::vector<int>);
+
+class SelectionProperty : public TemplateProperty<std::vector<int>> {
+public:
+	struct Option {
+		int value;
+		std::string description;
+	};
+
+	SelectionProperty(std::string identifier, std::string guiName);
+	
+	void addOption(Option option);
+	const std::vector<Option>& options() const;
+
+	void setValue(std::vector<int> value) override;
+
+private:
+	/// The list of options which have been registered with this OptionProperty
+	std::vector<Option> _options;
+	std::vector<int> _values;
+};
+
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
+
+template <>
+template <>
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
 
 } // namespace properties
 } // namespace openspace
 
-#endif // __STRINGPROPERTY_H__
+#endif // __SELECTIONPROPERTY_H__
