@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/stars/renderableconstellationbounds.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -34,16 +33,17 @@
 #include <math.h>
 
 #include <fstream>
-#include <vector>
 
 namespace {
 	const std::string _loggerCat = "RenderableConstellationBounds";
 
 	const std::string keyFile = "File";
-	const std::string keyOriginalReferenceFrame = "OriginalReferenceFrame";
+	const std::string keyReferenceFrame = "ReferenceFrame";
+
+	const std::string defaultReferenceFrame = "J2000";
 
 	float deg2rad(float deg) {
-		return (deg / 360.f) * 2.f * 3.1415926f;
+		return static_cast<float>((deg / 360.f) * 2.f * M_PI);
 	}
 	float convertHrsToRadians(float rightAscension) {
 		// 360 degrees / 24h = 15 degrees/h
@@ -69,10 +69,9 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 			keyFile << "'");
 	}
 
-	success = dictionary.getValue(keyOriginalReferenceFrame, _originReferenceFrame);
+	success = dictionary.getValue(keyReferenceFrame, _originReferenceFrame);
 	if (!success) {
-		LERROR("RenderableConstellationBounds did not contain a key '" <<
-			keyOriginalReferenceFrame << "'");
+		_originReferenceFrame = defaultReferenceFrame;
 	}
 
 	addProperty(_distance);
@@ -148,7 +147,11 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 
 	glBindVertexArray(_vao);
 	for (auto bound : _constellationBounds)
-		glDrawArrays(GL_LINE_STRIP, bound.startIndex , bound.nVertices);
+		glDrawArrays(
+			GL_LINE_STRIP,
+			static_cast<GLsizei>(bound.startIndex),
+			static_cast<GLsizei>(bound.nVertices)
+		);
 	glBindVertexArray(0);
 	_program->deactivate();
 }
@@ -180,53 +183,71 @@ bool RenderableConstellationBounds::loadFile() {
 
 	ConstellationBound currentBound;
 	currentBound.constellation = "";
-	std::string line;
-	int lineNumber = 1;
+
+	std::string currentLine;
+	int currentLineNumber = 1;
+
+	float ra;
+	float dec;
+	std::string constellationName;
+	SpiceDouble rectangularValues[3];
+
+	// Overview of the reading algorithm:
+	// We keep an active ConstellationBound (currentBound) and update it until we read
+	// a new constellation name, at which point the currentBound is stored away, a new,
+	// empty ConstellationBound is created and set at the currentBound
 	while (file.good()) {
-		std::getline(file, line);
-		if (line.empty())
+		std::getline(file, currentLine);
+		if (currentLine.empty())
 			continue;
 
 		// @CHECK: Is this the best way of doing this? ---abock
-		float ra;
-		float dec;
-		std::string constellation;
-		std::stringstream s(line);
+		std::stringstream s(currentLine);
 		s >> ra;
 		s >> dec;
-		s >> constellation;
+		s >> constellationName;
 
 		if (!s.good()) {
 			// If this evaluates to true, the stream was not completely filled, which
 			// means that the line was incomplete, so there was an error
-			LERROR("Error reading file '" << fileName << "' at line #" << lineNumber);
+			LERROR("Error reading file '" << fileName << "' at line #" << currentLineNumber);
+			break;
 		}
 
-		if (constellation != currentBound.constellation) {
-			// @CHECK: Does this work? ---abock
+		// Did we arrive at a new constellation?
+		if (constellationName != currentBound.constellation) {
+			// Store how many vertices we read during the active time of the constellation
 			currentBound.nVertices = (_vertexValues.size() - currentBound.startIndex);
+			// Store the constellation and start a new one
 			_constellationBounds.push_back(currentBound);
 			currentBound = ConstellationBound();
-			currentBound.constellation = constellation;
+			currentBound.constellation = constellationName;
 			currentBound.startIndex = _vertexValues.size();
 		}
 
+		// The file format stores the right ascension in hours, while SPICE expects them
+		// to be in radians
 		ra = convertHrsToRadians(ra);
+
+		// Likewise, the declination is stored in degrees and needs to be converted
 		dec = deg2rad(dec);
 
-		SpiceDouble values[3];
-		radrec_c(1.0, ra, dec, values);
+		// Convert the (right ascension, declination) to rectangular coordinates)
+		// The 1.0 is the distance of the celestial sphere, we will scale that in the
+		// render function
+		radrec_c(1.0, ra, dec, rectangularValues);
 
-		std::array<float, 3> v;
-		v[0] = values[0];
-		v[1] = values[1];
-		v[2] = values[2];
-
-		_vertexValues.push_back(v);
-		++lineNumber;
+		// Add the new vertex to our list of vertices
+		_vertexValues.push_back({{
+			static_cast<float>(rectangularValues[0]),
+			static_cast<float>(rectangularValues[1]),
+			static_cast<float>(rectangularValues[2])
+		}});
+		++currentLineNumber;
 	}
 
-	// remove the first one
+	// Due to the way we read the file, the first (empty) constellation bounds will not
+	// contain any valid values. So we have to remove it
 	_constellationBounds.erase(_constellationBounds.begin());
 
 	return true;
