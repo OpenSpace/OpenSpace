@@ -26,7 +26,7 @@
 
 // renderables
 #include <openspace/rendering/model/renderablemodel.h>
-#include <openspace/rendering/stars/renderableconstallationbounds.h>
+#include <openspace/rendering/stars/renderableconstellationbounds.h>
 #include <openspace/rendering/stars/renderablestars.h>
 #include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>

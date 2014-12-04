@@ -47,10 +47,9 @@ public:
 
 private:
 	struct ConstellationBound {
-		typedef std::array<float, 4> Point;
 		std::string constellation;
-		std::vector<Point> points;
-		GLuint vao;
+		int startIndex;
+		int nVertices;
 	};
 
 	float deg2rad(float deg) {
@@ -70,7 +69,11 @@ private:
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
 
-	std::vector<ConstellationBound> _bounds;
+	std::vector<ConstellationBound> _constellationBounds;
+	typedef std::array<float, 4> Vertex;
+	std::vector<Vertex> _vertexValues;
+
+	glm::dmat3 _stateMatrix;
 
 	GLuint _vao;
 	GLuint _vbo;
