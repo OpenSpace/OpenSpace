@@ -22,76 +22,59 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPTIONPROPERTY_H__
-#define __OPTIONPROPERTY_H__
+#include <openspace/properties/optionproperty.h>
 
-#include <openspace/properties/scalarproperty.h>
-
-#include <vector>
+namespace {
+	const std::string _loggerCat = "SelectionProperty";
+}
 
 namespace openspace {
 namespace properties {
 
-/**
- * The OptionProperty is a property that provides a number of predefined (using the 
- * addOption method) options consisting of a <code>description</code> and a
- * <code>value</code>. The available options can be queried using the options method.
- * Only values representing valid options can be used to set this property, or an error
- * will be logged
- */
-class OptionProperty : public IntProperty {
-public:
-	/**
-	 * The struct storing a single option consisting of an integer <code>value</code> and
-	 * a <code>string</code> description.
-	 */
-	struct Option {
-		int value;
-		std::string description;
-	};
+REGISTER_TEMPLATEPROPERTY_SOURCE(SelectionProperty, std::vector<int>, std::vector<int>(),
+	[](lua_State* state, bool& success) -> std::vector<int> {
+		static const int KEY = -2;
+		static const int VAL = -1;
 
-	/**
-	 * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
-	 * to its super class.
-	 * \param identifier A unique identifier for this property
-	 * \param guiName The GUI name that should be used to represent this property
-	 */
-	OptionProperty(std::string identifier, std::string guiName);
+		std::vector<int> result;
 
-	/**
-	 * Returns the name of the class for reflection purposes.
-	 * \return The name of this class for reflection purposes
-	 */
-	std::string className() const override;
-	using IntProperty::operator=;
+		if (!lua_istable(state, -1)) {
+			LERROR("Parameter passed to the property is not a table");
+			success = false;
+			return result;
+		}
 
-	/**
-	 * Adds the passed option to the list of available options. The <code>value</code> of
-	 * the <code>option</code> must not have been registered previously, or a warning will
-	 * be logged.
-	 * \param option The option that will be added to the list of available options
-	 */
-	void addOption(Option option);
+		lua_pushnil(state);
+		while (lua_next(state, -2) != 0) {
+			int valueType = lua_type(state, VAL);
 
-	/**
-	 * Returns the list of available options.
-	 * /return The list of available options
-	 */
-	const std::vector<Option>& options() const;
+			if (lua_isnumber(state, VAL)) {
+				int number = static_cast<int>(lua_tonumber(state, VAL));
+				result.push_back(number);
+			}
+			else {
+				success = false;
+				return std::vector<int>();
+			}
 
-	/**
-	 * The overritten TemplateProperty::setValue method that checks if the provided value
-	 * represents a valid Option
-	 * \param value The value of the Option that should be set
-	 */
-	void setValue(int value) override;
+			lua_pop(state, 1);
+		}
 
-private:
-	/// The list of options which have been registered with this OptionProperty
-	std::vector<Option> _options;
-};
+		success = true;
+		return result;
+	},
+	[](lua_State* state, const std::vector<int>& value) -> bool {
+		//@NOTE Untested ---abock
+		lua_newtable(state);
+		for (int i = 0; i < value.size(); ++i) {
+			int v = value[i];
+			lua_pushinteger(state, v);
+			lua_setfield(state, -2, std::to_string(i).c_str());
+		}
+		return true;
+	}, LUA_TTABLE
+);
+
 
 } // namespace properties
 } // namespace openspace
-
-#endif // __STRINGPROPERTY_H__
