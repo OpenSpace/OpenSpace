@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/selectionproperty.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
 
@@ -43,12 +44,11 @@ namespace openspace {
  * Renderable configuration attributes:
  * <code>File</code> [string] (required): The file that contains the bounds and the
  * abbreviations for the different constellations
+ * <code>ConstellationFile</code> [string]: The file that contains the mapping between
+ * abbreviations and full names. If the file is omitted, the abbreviations are used as the
+ * full names.
  * <code>ReferenceFrame</code> [string]: The reference frame in which the points contained
  * in the <code>File</code> are stored in. Defaults to <code>J2000</code>
- *
- * @TODO Add a method to load (and access) a table translating from abbreviations to
- * full names ---abock
- * @TODO Make it possible to only show a subset of constellation bounds ---abock
  */
 class RenderableConstellationBounds : public Renderable {
 public:
@@ -65,21 +65,40 @@ public:
 private:
 	/// Stores the constellation bounds
 	struct ConstellationBound {
-		std::string constellation; ///< The abbreviation of the constellation
+		std::string constellationAbbreviation; ///< The abbreviation of the constellation
+		std::string constellationFullName;
+		bool isEnabled;
 		size_t startIndex; ///< The index of the first vertex describing the bounds
 		size_t nVertices; ///< The number of vertices describing the bounds
 	};
 
 	/**
-	 * Loads the file specified in <code>_filename</code> and fills the
+	 * Loads the file specified in <code>_vertexFilename</code> and fills the
 	 * <code>_constellationBounds</code> variable, as well as the
 	 * <code>_vertexValues</code> list. If this method fails, the content of either
 	 * destination is undefined.
 	 * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
 	 */
-	bool loadFile();
+	bool loadVertexFile();
 
-	std::string _filename; ///< The filename containing the constellation bounds
+	/**
+	 * Loads the file specified in <code>_constellationFilename</code> that contains the
+	 * mapping between abbreviations and full names of constellations.
+	 * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
+	 */
+	bool loadConstellationFile();
+
+	/// Fills the <code>_constellationSelection</code> property with all constellations
+	void fillSelectionProperty();
+
+	/**
+	 * Callback method that gets triggered when <code>_constellationSelection</code>
+	 * changes.
+	 */
+	void selectionPropertyHasChanged();
+
+	std::string _vertexFilename; ///< The filename containing the constellation bounds
+	std::string _constellationFilename; ///< The file containing constellation names
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
@@ -92,6 +111,9 @@ private:
 
 	/// The radius of the celestial sphere onto which the bounds are drawn
 	properties::FloatProperty _distance;
+
+	/// The property that stores all indices of constellations that should be drawn
+	properties::SelectionProperty _constellationSelection;
 
 	std::string _originReferenceFrame; ///< Reference frame in which bounds are defined
 	

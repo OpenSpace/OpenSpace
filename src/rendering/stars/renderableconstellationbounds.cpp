@@ -25,19 +25,16 @@
 #include <openspace/rendering/stars/renderableconstellationbounds.h>
 
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <SpiceUsr.h>
-
+#include <fstream>
 #define _USE_MATH_DEFINES
 #include <math.h>
-
-#include <fstream>
 
 namespace {
 	const std::string _loggerCat = "RenderableConstellationBounds";
 
-	const std::string keyFile = "File";
+	const std::string keyVertexFile = "File";
+	const std::string keyConstellationFile = "ConstellationFile";
 	const std::string keyReferenceFrame = "ReferenceFrame";
 
 	const std::string defaultReferenceFrame = "J2000";
@@ -56,18 +53,22 @@ namespace openspace {
 RenderableConstellationBounds::RenderableConstellationBounds(
 			const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
-	, _filename("")
+	, _vertexFilename("")
+	, _constellationFilename("")
 	, _programIsDirty(false)
 	, _distance("distance", "Distance to the celestial Sphere", 15.f, 0.f, 30.f)
+	, _constellationSelection("constellationSelection", "Constellation Selection")
 	, _originReferenceFrame("")
 	, _vao(0)
 	, _vbo(0)
 {
-	bool success = dictionary.getValue(keyFile, _filename);
+	bool success = dictionary.getValue(keyVertexFile, _vertexFilename);
 	if (!success) {
 		LERROR("RenderableConstellationBounds did not contain a key '" <<
-			keyFile << "'");
+			keyVertexFile << "'");
 	}
+
+	dictionary.getValue(keyConstellationFile, _constellationFilename);
 
 	success = dictionary.getValue(keyReferenceFrame, _originReferenceFrame);
 	if (!success) {
@@ -75,6 +76,10 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 	}
 
 	addProperty(_distance);
+	addProperty(_constellationSelection);
+	_constellationSelection.onChange(
+		std::bind(&RenderableConstellationBounds::selectionPropertyHasChanged, this)
+	);
 }
 
 bool RenderableConstellationBounds::initialize() {
@@ -85,6 +90,14 @@ bool RenderableConstellationBounds::initialize() {
 		return false;
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ this->_programIsDirty = true; });
 
+	bool loadSuccess = loadVertexFile();
+	if (!loadSuccess)
+		return false;
+	loadSuccess = loadConstellationFile();
+	if (!loadSuccess)
+		return false;
+
+	fillSelectionProperty();
 
 	if (_vao == 0) {
 		glGenVertexArrays(1, &_vao);
@@ -94,10 +107,6 @@ bool RenderableConstellationBounds::initialize() {
 		glGenBuffers(1, &_vbo);
 		LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
 	}
-
-	bool loadSuccess = loadFile();
-	if (!loadSuccess)
-		return false;
 
 	glBindVertexArray(_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -147,11 +156,14 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 
 	glBindVertexArray(_vao);
 	for (auto bound : _constellationBounds)
-		glDrawArrays(
-			GL_LINE_STRIP,
-			static_cast<GLsizei>(bound.startIndex),
-			static_cast<GLsizei>(bound.nVertices)
-		);
+		if (bound.isEnabled) {
+			glDrawArrays(
+				//GL_LINE_STRIP,
+				GL_LINE_LOOP,
+				static_cast<GLsizei>(bound.startIndex),
+				static_cast<GLsizei>(bound.nVertices)
+			);
+		}
 	glBindVertexArray(0);
 	_program->deactivate();
 }
@@ -170,11 +182,11 @@ void RenderableConstellationBounds::update(const UpdateData& data) {
 	);
 }
 
-bool RenderableConstellationBounds::loadFile() {
-	if (_filename.empty())
+bool RenderableConstellationBounds::loadVertexFile() {
+	if (_vertexFilename.empty())
 		return false;
 
-	std::string fileName = absPath(_filename);
+	std::string fileName = absPath(_vertexFilename);
 	std::ifstream file(fileName);
 	if (!file.good()) {
 		LERROR("Could not open file '" << fileName << "' for reading");
@@ -182,7 +194,7 @@ bool RenderableConstellationBounds::loadFile() {
 	}
 
 	ConstellationBound currentBound;
-	currentBound.constellation = "";
+	currentBound.constellationAbbreviation = "";
 
 	std::string currentLine;
 	int currentLineNumber = 1;
@@ -215,13 +227,15 @@ bool RenderableConstellationBounds::loadFile() {
 		}
 
 		// Did we arrive at a new constellation?
-		if (constellationName != currentBound.constellation) {
+		if (constellationName != currentBound.constellationAbbreviation) {
 			// Store how many vertices we read during the active time of the constellation
 			currentBound.nVertices = (_vertexValues.size() - currentBound.startIndex);
 			// Store the constellation and start a new one
 			_constellationBounds.push_back(currentBound);
 			currentBound = ConstellationBound();
-			currentBound.constellation = constellationName;
+			currentBound.isEnabled = true;
+			currentBound.constellationAbbreviation = constellationName;
+			currentBound.constellationFullName = constellationName;
 			currentBound.startIndex = _vertexValues.size();
 		}
 
@@ -250,7 +264,80 @@ bool RenderableConstellationBounds::loadFile() {
 	// contain any valid values. So we have to remove it
 	_constellationBounds.erase(_constellationBounds.begin());
 
+	// And we still have the one value that was left when we exited the loop
+	currentBound.nVertices = (_vertexValues.size() - currentBound.startIndex);
+	_constellationBounds.push_back(currentBound);
+
 	return true;
+}
+
+bool RenderableConstellationBounds::loadConstellationFile() {
+	if (_constellationFilename.empty())
+		return true;
+
+	std::string fileName = absPath(_constellationFilename);
+	std::ifstream file(fileName);
+	if (!file.good()) {
+		LERROR("Could not open file '" << fileName << "' for reading");
+		return false;
+	}
+
+	std::string line;
+	int index = 0;
+	while (file.good()) {
+ 		std::getline(file, line);
+		if (line.empty())
+			continue;
+
+		std::string abbreviation;
+		std::stringstream s(line);
+		s >> abbreviation;
+
+		auto it = std::find_if(_constellationBounds.begin(), _constellationBounds.end(),
+			[abbreviation](const ConstellationBound& bound) {
+				return bound.constellationAbbreviation == abbreviation;
+			});
+		if (it == _constellationBounds.end()) {
+			LERROR("Could not find constellation '" << abbreviation << "' in list");
+			return false;
+		}
+
+		// Update the constellations full name
+		s >> it->constellationFullName;
+
+		++index;
+	}
+
+	return true;
+}
+
+void RenderableConstellationBounds::fillSelectionProperty() {
+	// Each constellation is associated with its position in the array as this is unique
+	// and will be constant during the runtime
+	for (int i = 0 ; i < _constellationBounds.size(); ++i) {
+		const ConstellationBound& bound = _constellationBounds[i];
+		_constellationSelection.addOption( { i, bound.constellationFullName } );
+
+	}
+}
+
+void RenderableConstellationBounds::selectionPropertyHasChanged() {
+	const std::vector<int>& values = _constellationSelection;
+	// If no values are selected (the default), we want to show all constellations
+	if (values.size() == 0) {
+		for (ConstellationBound& b : _constellationBounds)
+			b.isEnabled = true;
+	}
+	else {
+		// In the worst case, this algorithm runs with 2 * nConstellations, which is
+		// acceptable as the number of constellations is < 100
+		// First disable all constellations
+		for (ConstellationBound& b : _constellationBounds)
+			b.isEnabled = false;
+		// then re-enable the ones for which we have indices
+		for (int value : values)
+			_constellationBounds[value].isEnabled = true;
+	}
 }
 
 } // namespace openspace
