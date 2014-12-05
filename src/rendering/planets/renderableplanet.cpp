@@ -27,7 +27,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometry.h>
 
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -163,7 +163,7 @@ void RenderablePlanet::loadTexture()
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();

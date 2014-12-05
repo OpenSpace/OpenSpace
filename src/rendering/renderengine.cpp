@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/renderengine.h>
 
-// Open Space
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferframebuffer.h>
@@ -40,16 +39,16 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
-// sgct
-#include <sgct.h>
-
-// ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 
-// std
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturereaderdevil.h>
+#include <ghoul/io/texture/texturereaderfreeimage.h>
+
 #include <array>
 #include <fstream>
+#include <sgct.h>
 
 // ABuffer defines
 #define ABUFFER_FRAMEBUFFER 0
@@ -132,6 +131,12 @@ bool RenderEngine::initialize()
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 	OsEng.interactionHandler().setCamera(_mainCamera);
+
+#ifdef GHOUL_USE_DEVIL
+	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderDevIL);
+#else
+	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderFreeImage);
+#endif
     
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
     _abuffer = new ABufferFramebuffer();

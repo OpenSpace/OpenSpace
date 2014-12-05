@@ -36,7 +36,7 @@
 // ghoul includes
 #include "ghoul/logging/logmanager.h"
 #include "ghoul/opengl/programobject.h"
-#include "ghoul/opengl/texturereader.h"
+#include "ghoul/io/texture/texturereader.h"
 #include "ghoul/opengl/texture.h"
 
 #include <ghoul/filesystem/filesystem.h>

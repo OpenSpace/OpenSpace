@@ -144,7 +144,7 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data) {
 	_program->activate();
 
-	glm::mat4 modelMatrix      = data.camera.modelMatrix();
+	//glm::mat4 modelMatrix      = data.camera.modelMatrix();
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 

@@ -34,7 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 
 // std

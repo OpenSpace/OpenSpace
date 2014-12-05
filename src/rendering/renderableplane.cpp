@@ -28,7 +28,7 @@
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem>
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -183,7 +183,7 @@ void RenderablePlane::loadTexture()
 	LDEBUG("loadTexture");
 	if (_texturePath.value() != "") {
 		LDEBUG("loadTexture2");
-		ghoul::opengl::Texture* texture = ghoul::opengl::loadTexture(absPath(_texturePath));
+		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
