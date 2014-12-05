@@ -73,14 +73,14 @@ namespace luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
- * printImage():
+ * takeScreenshot():
  * Save the rendering to an image file
  */
-int printImage(lua_State* L) {
+int takeScreenshot(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	sgct::Engine::instance()->takeScreenshot();
+	OsEng.renderEngine().takeScreenshot();
 	return 0;
 }
 
@@ -522,8 +522,8 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 		"",
 		{
 			{
-				"printImage",
-				&luascriptfunctions::printImage,
+				"takeScreenshot",
+				&luascriptfunctions::takeScreenshot,
 				"",
 				"Renders the current image to a file on disk"
 			},

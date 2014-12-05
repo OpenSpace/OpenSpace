@@ -69,6 +69,8 @@ private:
 	size_t _activeCommand;
 	std::vector<std::string> _commands;
 	
+	std::string _filename;
+
 	bool _isVisible;
 };
 

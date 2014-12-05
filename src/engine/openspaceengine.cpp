@@ -232,8 +232,25 @@ void OpenSpaceEngine::loadFonts() {
 	}
 }
 
-void OpenSpaceEngine::createLogs() {
+void OpenSpaceEngine::configureLogging() {
+	using constants::configurationmanager::keyLogLevel;
 	using constants::configurationmanager::keyLogs;
+
+	if (configurationManager().hasKeyAndValue<std::string>(keyLogLevel)) {
+		using constants::configurationmanager::keyLogLevel;
+		using constants::configurationmanager::keyLogImmediateFlush;
+
+		std::string logLevel;
+		configurationManager().getValue(keyLogLevel, logLevel);
+
+		bool immediateFlush = false;
+		configurationManager().getValue(keyLogImmediateFlush, immediateFlush);
+
+		LogManager::LogLevel level = LogManager::levelFromString(logLevel);
+		LogManager::deinitialize();
+		LogManager::initialize(level, immediateFlush);
+		LogMgr.addLog(new ConsoleLog);
+	}
 
 	if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
 		ghoul::Dictionary logs;
@@ -257,9 +274,11 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // TODO custom assert (ticket #5)
     assert(_engine == nullptr);
 
-	// Initialize the Logmanager and add the console log as this will be used every time
+	// Initialize the LogManager and add the console log as this will be used every time
 	// and we need a fall back if something goes wrong between here and when we add the
-	// logs from the configuration file
+	// logs from the configuration file. If the user requested as specific loglevel in the
+	// configuration file, we will deinitialize this LogManager and reinitialize it later
+	// with the correct LogLevel
     LogManager::initialize(LogManager::LogLevel::Debug, true);
     LogMgr.addLog(new ConsoleLog);
     ghoul::filesystem::FileSystem::initialize();
@@ -310,7 +329,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
 	// Initialize the requested logs from the configuration file
-	_engine->createLogs();
+	_engine->configureLogging();
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();

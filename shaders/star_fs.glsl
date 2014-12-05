@@ -26,7 +26,7 @@
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
-const int COLOROPTION_VELOCITY = 1;
+const int COLOROPTION_VELOCITY = 1; 
 const int COLOROPTION_SPEED = 2;
 
 uniform sampler2D texture1;
@@ -47,23 +47,58 @@ layout(location = 4) in vec2 texCoord;
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 //---------------------------------------------------------------------------
-vec4 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
-{
-    float t = 0.0; 
-	vec4 c;
+    // @BUG  If c is uninitialized, the flickering bug is present, if it is initialized
+    // to 0, those stars disappear completely ---abock
 
-	// TODO CHECK: Isn't t uninitialized here?
-	if (t<-0.4) t=-0.4; if (t> 2.0) t= 2.0;
-         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.r=0.61+(0.11*t)+(0.1*t*t); }
-    else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.r=0.83+(0.17*t)          ; }
-    else if ((bv>= 0.40)&&(bv<2.10)) { t=(bv-0.40)/(2.10-0.40); c.r=1.00                   ; }
-         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.g=0.70+(0.07*t)+(0.1*t*t); }
-    else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.g=0.87+(0.11*t)          ; }
-    else if ((bv>= 0.40)&&(bv<1.60)) { t=(bv-0.40)/(1.60-0.40); c.g=0.98-(0.16*t)          ; }
-    else if ((bv>= 1.60)&&(bv<2.00)) { t=(bv-1.60)/(2.00-1.60); c.g=0.82         -(0.5*t*t); }
-         if ((bv>=-0.40)&&(bv<0.40)) { t=(bv+0.40)/(0.40+0.40); c.b=1.00                   ; }
-    else if ((bv>= 0.40)&&(bv<1.50)) { t=(bv-0.40)/(1.50-0.40); c.b=1.00-(0.47*t)+(0.1*t*t); }
-    else if ((bv>= 1.50)&&(bv<1.94)) { t=(bv-1.50)/(1.94-1.50); c.b=0.63         -(0.6*t*t); }
+vec3 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
+{
+    float t = 0.0;
+    vec3 c = vec3(0.0);
+
+    bv = clamp(bv, -0.4, 2.0);
+
+    if ((bv >= -0.4) && (bv < 0.0)) {
+    	t = (bv+0.40)/(0.00+0.40);
+    	c.r = 0.61+(0.11*t)+(0.1*t*t);
+    }
+    else if ((bv >= 0.0) && (bv < 0.4)) {
+        t = (bv-0.0)/(0.4-0.0);
+        c.r = 0.83+(0.17*t);
+    }
+    else if ((bv >= 0.4) && (bv < 2.1)) {
+    	t = (bv-0.4)/(2.1-0.4);
+    	c.r = 1.00;
+    }
+    
+	if ((bv >= -0.4) && (bv < 0.0)) {
+		t = (bv+0.4)/(0.4);
+		c.g = 0.70+(0.07*t)+(0.1*t*t);
+	}
+    else if ((bv >= 0.0) && (bv < 0.4)) {
+        t = bv/0.40;
+        c.g = 0.87+(0.11*t);
+    }
+    else if ((bv >= 0.4) && (bv < 1.6)) {
+        t = (bv-0.4)/(1.6-0.4);
+        c.g = 0.98-(0.16*t);
+    }
+    else if ((bv >= 1.60) && (bv < 2.00)) {
+        t = (bv-1.6)/(2.0-1.6);
+        c.g = 0.82-(0.5*t*t); 
+    }
+
+    if ((bv >= -0.40) && (bv < 0.4)) {
+        t = (bv+0.40)/(0.4+0.4);
+        c.b=1.00;
+    }
+    else if ((bv >= 0.4) && (bv < 1.5)) {
+        t = (bv-0.4)/(1.5-0.4);
+        c.b = 1.0-(0.47*t)+(0.1*t*t);
+    }
+    else if ((bv >= 1.5) && (bv < 1.94)) {
+        t = (bv-1.5)/(1.94-1.5);
+        c.b = 0.63-(0.6*t*t);
+    }
 	
 	return c;
 }
@@ -78,7 +113,7 @@ void main(void)
 	vec4 color = vec4(0.0);
 	switch (colorOption) {
 		case COLOROPTION_COLOR: 
-			color = bv2rgb(ge_brightness[0])/1.1;
+			color = vec4(bv2rgb(ge_brightness[0]), 1.0);
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 
