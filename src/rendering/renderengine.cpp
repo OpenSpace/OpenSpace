@@ -43,8 +43,12 @@
 #include <ghoul/lua/lua_helper.h>
 
 #include <ghoul/io/texture/texturereader.h>
+#ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
+#else
 #include <ghoul/io/texture/texturereaderfreeimage.h>
+#endif // GHOUL_USE_DEVIL
+#include <ghoul/io/texture/texturereadercmap.h>
 
 #include <array>
 #include <fstream>
@@ -136,7 +140,9 @@ bool RenderEngine::initialize()
 	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderDevIL);
 #else
 	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderFreeImage);
-#endif
+#endif // GHOUL_USE_DEVIL
+
+	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderCMAP);
     
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
     _abuffer = new ABufferFramebuffer();

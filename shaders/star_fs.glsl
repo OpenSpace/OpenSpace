@@ -29,7 +29,8 @@ const int COLOROPTION_COLOR = 0;
 const int COLOROPTION_VELOCITY = 1; 
 const int COLOROPTION_SPEED = 2;
 
-uniform sampler2D texture1;
+uniform sampler2D psfTexture;
+uniform sampler1D colorTexture;
 uniform vec3 Color;
 
 uniform int colorOption;
@@ -47,73 +48,21 @@ layout(location = 4) in vec2 texCoord;
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 //---------------------------------------------------------------------------
-    // @BUG  If c is uninitialized, the flickering bug is present, if it is initialized
-    // to 0, those stars disappear completely ---abock
 
-vec3 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
-{
-    float t = 0.0;
-    vec3 c = vec3(0.0);
-
-    bv = clamp(bv, -0.4, 2.0);
-
-    if ((bv >= -0.4) && (bv < 0.0)) {
-    	t = (bv+0.40)/(0.00+0.40);
-    	c.r = 0.61+(0.11*t)+(0.1*t*t);
-    }
-    else if ((bv >= 0.0) && (bv < 0.4)) {
-        t = (bv-0.0)/(0.4-0.0);
-        c.r = 0.83+(0.17*t);
-    }
-    else if ((bv >= 0.4) && (bv < 2.1)) {
-    	t = (bv-0.4)/(2.1-0.4);
-    	c.r = 1.00;
-    }
-    
-	if ((bv >= -0.4) && (bv < 0.0)) {
-		t = (bv+0.4)/(0.4);
-		c.g = 0.70+(0.07*t)+(0.1*t*t);
-	}
-    else if ((bv >= 0.0) && (bv < 0.4)) {
-        t = bv/0.40;
-        c.g = 0.87+(0.11*t);
-    }
-    else if ((bv >= 0.4) && (bv < 1.6)) {
-        t = (bv-0.4)/(1.6-0.4);
-        c.g = 0.98-(0.16*t);
-    }
-    else if ((bv >= 1.60) && (bv < 2.00)) {
-        t = (bv-1.6)/(2.0-1.6);
-        c.g = 0.82-(0.5*t*t); 
-    }
-
-    if ((bv >= -0.40) && (bv < 0.4)) {
-        t = (bv+0.40)/(0.4+0.4);
-        c.b=1.00;
-    }
-    else if ((bv >= 0.4) && (bv < 1.5)) {
-        t = (bv-0.4)/(1.5-0.4);
-        c.b = 1.0-(0.47*t)+(0.1*t*t);
-    }
-    else if ((bv >= 1.5) && (bv < 1.94)) {
-        t = (bv-1.5)/(1.94-1.5);
-        c.b = 0.63-(0.6*t*t);
-    }
-	
-	return c;
+vec4 bv2rgb(float bv) {
+    // BV is [-0.4,2.0]
+    float t = (bv + 0.4) / (2.0 + 0.4);
+    return texture(colorTexture, t);
 }
-//---------------------------------------------------------------------------
 
-
-void main(void)
-{
+void main() {
 	// Something in the color calculations need to be changed because before it was dependent
 	// on the gl blend functions since the abuffer was not involved
 
 	vec4 color = vec4(0.0);
 	switch (colorOption) {
 		case COLOROPTION_COLOR: 
-			color = vec4(bv2rgb(ge_brightness[0]), 1.0);
+			color = bv2rgb(ge_brightness[0].x);
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 
@@ -127,8 +76,8 @@ void main(void)
 
 	// color.rgb = 1/ color.rgb;
 	// color.a = 1-color.a;
-    framebuffer_output_color = texture(texture1, texCoord)*color;
-    //framebuffer_output_color = vec4(1.0, 0.0, 0.0, 1.0);
+    framebuffer_output_color = texture(psfTexture, texCoord) * color;
+    // framebuffer_output_color = vec4(1.0, 0.0, 0.0, 1.0);
 
     // framebuffer_output_color = vec4(ge_velocity, 1.0);
 

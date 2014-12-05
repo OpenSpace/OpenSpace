@@ -60,9 +60,14 @@ private:
 	bool loadCachedFile(const std::string& file);
 	bool saveCachedFile(const std::string& file) const;
 
+	properties::StringProperty _pointSpreadFunctionTexturePath;
+	ghoul::opengl::Texture* _pointSpreadFunctionTexture;
+	bool _pointSpreadFunctionTextureIsDirty;
+
 	properties::StringProperty _colorTexturePath;
-	ghoul::opengl::Texture* _texture;
-	bool _textureIsDirty;
+	ghoul::opengl::Texture* _colorTexture;
+	bool _colorTextureIsDirty;
+
 
 	properties::OptionProperty _colorOption;
 	bool _dataIsDirty;

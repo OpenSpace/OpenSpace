@@ -75,9 +75,12 @@ namespace openspace {
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
-	, _colorTexturePath("colorTexture", "Color Texture")
-	, _texture(nullptr)
-	, _textureIsDirty(true)
+	, _pointSpreadFunctionTexturePath("psfTexture", "Point Spread Function Texture")
+	, _pointSpreadFunctionTexture(nullptr)
+	, _pointSpreadFunctionTextureIsDirty(true)
+	, _colorTexturePath("colorTexture", "ColorBV Texture")
+	, _colorTexture(nullptr)
+	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
 	, _spriteSize("spriteSize", "Sprite Size", 0.0000005f, 0.f, 1.f)
@@ -89,10 +92,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _vbo(0)
 {
 	std::string texturePath = "";
-	if (dictionary.hasKey(constants::renderablestars::keyTexture)) {
-		dictionary.getValue(constants::renderablestars::keyTexture, texturePath);
-		_colorTexturePath = absPath(texturePath);
-	}
+	dictionary.getValue(constants::renderablestars::keyTexture, texturePath);
+	_pointSpreadFunctionTexturePath = absPath(texturePath);
+
+	dictionary.getValue(constants::renderablestars::keyColorMap, texturePath);
+	_colorTexturePath = absPath(texturePath);
 
 	bool success = dictionary.getValue(constants::renderablestars::keyFile, _speckFile);
 	if (!success) {
@@ -110,8 +114,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 	addProperty(_spriteSize);
 
+	addProperty(_pointSpreadFunctionTexturePath);
+	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
+
 	addProperty(_colorTexturePath);
-	_colorTexturePath.onChange([&]{ _textureIsDirty = true;});
+	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
 }
 
 bool RenderableStars::isReady() const {
@@ -125,11 +132,14 @@ bool RenderableStars::initialize() {
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
 		"${SHADERS}/star_ge.glsl");
+	//_program = ghoul::opengl::ProgramObject::Build("Star",
+	//	"${SHADERS}/star_vs.glsl",
+	//	"${SHADERS}/star_fs.glsl");
 	if (!_program)
 		return false;
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 	completeSuccess &= loadData();
-	completeSuccess &= (_texture != nullptr);
+	completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
 
 	return completeSuccess;
 }
@@ -140,8 +150,8 @@ bool RenderableStars::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _texture;
-	_texture = nullptr;
+	delete _pointSpreadFunctionTexture;
+	_pointSpreadFunctionTexture = nullptr;
 
 	delete _program;
 	_program = nullptr;
@@ -160,6 +170,8 @@ void RenderableStars::render(const RenderData& data) {
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
 	_program->setIgnoreUniformLocationError(true);
+	//_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+	//_program->setUniform("ModelTransform", glm::mat4(1.f));
 	_program->setUniform("model", modelMatrix);
 	_program->setUniform("view", viewMatrix);
 	_program->setUniform("projection", projectionMatrix);
@@ -171,14 +183,24 @@ void RenderableStars::render(const RenderData& data) {
 
 	_program->setUniform("spriteSize", _spriteSize);
 
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
-	_texture->bind();
-	_program->setUniform("texture1", unit);
+	ghoul::opengl::TextureUnit psfUnit;
+	psfUnit.activate();
+	if (_pointSpreadFunctionTexture)
+		_pointSpreadFunctionTexture->bind();
+	_program->setUniform("psfTexture", psfUnit);
+
+	ghoul::opengl::TextureUnit colorUnit;
+	colorUnit.activate();
+	if (_colorTexture)
+		_colorTexture->bind();
+	_program->setUniform("colorTexture", colorUnit);
 
 	glBindVertexArray(_vao);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
+	//glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glDrawArrays(GL_POINTS, 0, nStars);  
+	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
 	glBindVertexArray(0);
 	_program->setIgnoreUniformLocationError(false);
 	_program->deactivate();
@@ -268,18 +290,32 @@ void RenderableStars::update(const UpdateData& data) {
 		_dataIsDirty = false;
 	}	
 
-	if (_textureIsDirty) {
-		LDEBUG("Reloading texture");
-		delete _texture;
-		_texture = nullptr;
-		if (_colorTexturePath.value() != "") {
-			_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
-			if (_texture) {
-				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-				_texture->uploadTexture();
+	if (_pointSpreadFunctionTextureIsDirty) {
+		LDEBUG("Reloading Point Spread Function texture");
+		delete _pointSpreadFunctionTexture;
+		_pointSpreadFunctionTexture = nullptr;
+		if (_pointSpreadFunctionTexturePath.value() != "") {
+			_pointSpreadFunctionTexture = ghoul::io::TextureReader::loadTexture(absPath(_pointSpreadFunctionTexturePath));
+			if (_pointSpreadFunctionTexture) {
+				LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
+				_pointSpreadFunctionTexture->uploadTexture();
 			}
 		}
-		_textureIsDirty = false;
+		_pointSpreadFunctionTextureIsDirty = false;
+	}
+
+	if (_colorTextureIsDirty) {
+		LDEBUG("Reloading Color Texture");
+		delete _colorTexture;
+		_colorTexture = nullptr;
+		if (_colorTexturePath.value() != "") {
+			_colorTexture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+			if (_colorTexture) {
+				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+				_colorTexture->uploadTexture();
+			}
+		}
+		_colorTextureIsDirty = false;
 	}
 }
 

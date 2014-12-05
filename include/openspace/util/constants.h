@@ -95,6 +95,7 @@ namespace modelgeometry {
 namespace renderablestars {
 	const std::string keyFile = "File";
 	const std::string keyTexture = "Texture";
+	const std::string keyColorMap = "ColorMap";
 } // namespace renderablestars
 
 namespace renderablevolumegl {
