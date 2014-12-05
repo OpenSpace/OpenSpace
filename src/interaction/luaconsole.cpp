@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <string>
@@ -37,7 +38,7 @@
 
 namespace {
 	const std::string _loggerCat = "LuaConsole";
-	const std::string _filename = "${TEMPORARY}/history";
+	const std::string historyFile = "ConsoleHistory";
 
 #if !defined(WIN32)
 	// Dangerus as fuck (if malicious input)
@@ -193,6 +194,7 @@ int toggle(lua_State* L) {
 LuaConsole::LuaConsole() 
 	: _inputPosition(0)
 	, _activeCommand(0)
+	, _filename("")
 	, _isVisible(false)
 {
 	_commands.push_back("");
@@ -214,6 +216,7 @@ LuaConsole::~LuaConsole() {
 }
 
 void LuaConsole::loadHistory() {
+	FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
 
 	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
 	if (file.is_open()) {
