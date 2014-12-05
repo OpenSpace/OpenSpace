@@ -130,6 +130,11 @@ source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
 include_directories(${HEADER_ROOT_DIR})
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
+include_directories(${CMAKE_SOURCE_DIR}/ext/imgui)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.h)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.cpp)
+source_group(ext\\imgui FILES ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.h ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.cpp)
+
 if (APPLE)
 	add_definitions(-D__APPLE__)
 	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")

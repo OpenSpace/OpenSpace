@@ -22,75 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef __GUI_H__
+#define __GUI_H__
 
-#include <openspace/scripting/scriptengine.h>
+#include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ABufferVisualizer;
-class ScreenLog;
-class GUI;
-
-class RenderEngine {
+class GUI {
 public:
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
+	GUI(const glm::vec2& windowSize);
+	~GUI();
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+	void initializeGL();
+	void deinitializeGL();
 
-    Camera* camera() const;
-    ABuffer* abuffer() const;
-
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void takeScreenshot();
-	void toggleVisualizeABuffer(bool b);
-
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * - openspace::luascriptfunctions::visualizeABuffer
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-
-private:
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
-	GUI* _gui;
-
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	void generateGlslConfig();
-
-	bool _visualizeABuffer;
-	ABufferVisualizer* _visualizer;
+	void render(float deltaTime, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
 };
 
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif // __GUI_H__
