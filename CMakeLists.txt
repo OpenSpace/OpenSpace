@@ -97,9 +97,9 @@ include_directories("${LUA_ROOT_DIR}/include")
 
 # Spice
 set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")
-include_directories("${SPICE_ROOT_DIR}/include")
-add_subdirectory(${SPICE_ROOT_DIR})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Spice)
+find_package(Spice REQUIRED)
+include_directories(${SPICE_INCLUDE_DIRS})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SPICE_LIBRARIES})
 
 # Kameleon
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
