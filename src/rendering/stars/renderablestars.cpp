@@ -158,6 +158,7 @@ void RenderableStars::render(const RenderData& data) {
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
+	_program->setIgnoreUniformLocationError(true);
 	_program->setUniform("model", modelMatrix);
 	_program->setUniform("view", viewMatrix);
 	_program->setUniform("projection", projectionMatrix);
@@ -172,14 +173,13 @@ void RenderableStars::render(const RenderData& data) {
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
-	_program->setIgnoreUniformLocationError(true);
 	_program->setUniform("texture1", unit);
-	_program->setIgnoreUniformLocationError(false);
 
 	glBindVertexArray(_vao);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
 	glDrawArrays(GL_POINTS, 0, nStars);  
 	glBindVertexArray(0);
+	_program->setIgnoreUniformLocationError(false);
 	_program->deactivate();
 }
 

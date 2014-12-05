@@ -26,7 +26,7 @@
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
-const int COLOROPTION_VELOCITY = 1;
+const int COLOROPTION_VELOCITY = 1; 
 const int COLOROPTION_SPEED = 2;
 
 uniform sampler2D texture1;
@@ -50,14 +50,29 @@ layout(location = 4) in vec2 texCoord;
 vec4 bv2rgb(float bv)    // RGB <0,1> <- BV <-0.4,+2.0> [-]
 {
     float t = 0.0; 
-	vec4 c;
+    // @BUG  If c is uninitialized, the flickering bug is present, if it is initialized
+    // to 0, those stars disappear completely ---abock
+	vec4 c = vec4(1.0);
 
-	// TODO CHECK: Isn't t uninitialized here?
-	if (t<-0.4) t=-0.4; if (t> 2.0) t= 2.0;
-         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.r=0.61+(0.11*t)+(0.1*t*t); }
-    else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.r=0.83+(0.17*t)          ; }
-    else if ((bv>= 0.40)&&(bv<2.10)) { t=(bv-0.40)/(2.10-0.40); c.r=1.00                   ; }
-         if ((bv>=-0.40)&&(bv<0.00)) { t=(bv+0.40)/(0.00+0.40); c.g=0.70+(0.07*t)+(0.1*t*t); }
+	if (t<-0.4)
+		t=-0.4;
+	if (t > 2.0)
+		t= 2.0;
+    if ((bv>=-0.40)&&(bv<0.00)) {
+    	t = (bv+0.40)/(0.00+0.40);
+    	c.r  =0.61+(0.11*t)+(0.1*t*t);
+    }
+    else if ((bv>= 0.00)&&(bv<0.40)) {
+    	t=(bv-0.00)/(0.40-0.00); c.r=0.83+(0.17*t);
+    }
+    else if ((bv>= 0.40)&&(bv<2.10)) {
+    	t=(bv-0.40)/(2.10-0.40);
+    	c.r=1.00;
+    }
+	if ((bv>=-0.40)&&(bv<0.00)) {
+		t=(bv+0.40)/(0.00+0.40);
+		c.g=0.70+(0.07*t)+(0.1*t*t);
+	}
     else if ((bv>= 0.00)&&(bv<0.40)) { t=(bv-0.00)/(0.40-0.00); c.g=0.87+(0.11*t)          ; }
     else if ((bv>= 0.40)&&(bv<1.60)) { t=(bv-0.40)/(1.60-0.40); c.g=0.98-(0.16*t)          ; }
     else if ((bv>= 1.60)&&(bv<2.00)) { t=(bv-1.60)/(2.00-1.60); c.g=0.82         -(0.5*t*t); }

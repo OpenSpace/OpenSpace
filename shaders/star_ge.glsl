@@ -87,7 +87,8 @@ void main() {
 	float depth  = pc[0] * pow(10, pc[1]);
 	depth       *= pow(apparent,3);
 
-	float modifiedSpriteSize = spriteSize + (depth*weight); 
+	//float modifiedSpriteSize = spriteSize + (depth*weight); 
+	float modifiedSpriteSize = 0.0005 + (depth*weight); 
 	
 	// EMIT QUAD
 	for(int i = 0; i < 4; i++){
