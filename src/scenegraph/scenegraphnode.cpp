@@ -309,7 +309,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         if(renderableBS > _boundingSphere)
             _boundingSphere = renderableBS;
     }
-	LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
+	//LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
 	
     return _boundingSphere;
 }

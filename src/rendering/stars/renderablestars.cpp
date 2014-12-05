@@ -125,7 +125,8 @@ bool RenderableStars::initialize() {
 		"${SHADERS}/star_vs.glsl",
 		"${SHADERS}/star_fs.glsl",
 		"${SHADERS}/star_ge.glsl");
-	completeSuccess = (_program != nullptr);
+	if (!_program)
+		return false;
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 	completeSuccess &= loadData();
 	completeSuccess &= (_texture != nullptr);
