@@ -25,6 +25,8 @@
 #include <openspace/engine/gui.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/texture.h>
 
 #include <imgui.h>
 #include <sgct.h>
@@ -46,6 +48,8 @@ namespace {
 	GLuint vbo_handle = 0;
 	size_t vbo_max_size = 20000;
 	GLuint vao_handle;
+
+	ghoul::opengl::Texture* _texture;
 
 
 
@@ -269,6 +273,15 @@ void GUI::endFrame()
 bool GUI::mouseButtonCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureMouse;
+	return consumeEvent;
+}
+
+bool GUI::mouseWheelCallback(int position) {
+	ImGuiIO& io = ImGui::GetIO();
+	bool consumeEvent = io.WantCaptureMouse;
+	if (consumeEvent)
+		io.MouseWheel = static_cast<float>(position);
+
 	return consumeEvent;
 }
 

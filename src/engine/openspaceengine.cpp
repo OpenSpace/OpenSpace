@@ -569,19 +569,21 @@ void OpenSpaceEngine::mousePositionCallback(int x, int y) {
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
+	bool isConsumed = _gui->mouseWheelCallback(pos);
+	if (isConsumed)
+		return;
+
     _interactionHandler.mouseScrollWheelCallback(pos);
 }
 
-void OpenSpaceEngine::encode()
-{
+void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
 		_renderEngine.serialize(_syncBuffer);
 		_syncBuffer->write();
 	}
 }
 
-void OpenSpaceEngine::decode()
-{
+void OpenSpaceEngine::decode() {
 	if (_syncBuffer) {
 		_syncBuffer->read();
 		_renderEngine.deserialize(_syncBuffer);
