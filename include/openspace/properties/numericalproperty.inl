@@ -200,5 +200,15 @@ int NumericalProperty<T>::typeLua() const {
 }
 
 
+template <typename T>
+T NumericalProperty<T>::minValue() const {
+	return _minimumValue;
+}
+
+template <typename T>
+T NumericalProperty<T>::maxValue() const {
+	return _maximumValue;
+}
+
 } // namespace properties
 } // namespace openspace
