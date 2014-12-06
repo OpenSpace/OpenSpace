@@ -1,7 +1,0 @@
-GLSL
-    filter remove_matches ^\s*//
-    filter call_regexp_common C
-    filter remove_inline //.*$
-    extension glsl
-    extension hglsl
-    3rd_gen_scale 5
