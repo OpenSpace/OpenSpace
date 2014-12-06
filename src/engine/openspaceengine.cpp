@@ -561,7 +561,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint) {
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	bool isConsumed = _gui->mouseButtonCallback(key, action);
-	if (isConsumed)
+	if (isConsumed && action != SGCT_RELEASE)
 		return;
 		
 	_interactionHandler.mouseButtonCallback(key, action);
