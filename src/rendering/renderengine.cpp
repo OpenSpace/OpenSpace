@@ -45,9 +45,10 @@
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
-#else
+#endif //GHOUL_USE_DEVIL
+#ifdef GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereaderfreeimage.h>
-#endif // GHOUL_USE_DEVIL
+#endif // GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereadercmap.h>
 
 #include <array>
@@ -139,9 +140,10 @@ bool RenderEngine::initialize()
 
 #ifdef GHOUL_USE_DEVIL
 	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderDevIL);
-#else
-	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderFreeImage);
 #endif // GHOUL_USE_DEVIL
+#ifdef GHOUL_USE_FREEIMAGE
+	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderFreeImage);
+#endif // GHOUL_USE_FREEIMAGE
 
 	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderCMAP);
     
