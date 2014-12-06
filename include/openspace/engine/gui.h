@@ -38,7 +38,12 @@ public:
 	void initializeGL();
 	void deinitializeGL();
 
-	void render(float deltaTime, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
+	bool mouseButtonCallback(int key, int action);
+	bool keyCallback(int key, int action);
+	bool charCallback(unsigned int character);
+
+	void startFrame(float deltaTime, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
+	void endFrame();
 };
 
 } // namespace openspace

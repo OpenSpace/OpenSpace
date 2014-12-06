@@ -36,7 +36,12 @@ namespace {
 	
 	GLuint fontTex = 0; 
 	GLint shader_handle = 0;
+	GLint vert_handle = 0;
+	GLint frag_handle = 0;
 	GLint texture_location = 0;
+	GLint position_location = 0;
+	GLint uv_location = 0;
+	GLint colour_location = 0;
 	GLint ortho_location = 0;
 	GLuint vbo_handle = 0;
 	size_t vbo_max_size = 20000;
@@ -158,6 +163,49 @@ GUI::~GUI() {
 }
 
 void GUI::initializeGL() {
+	    const GLchar *vertex_shader =
+        "#version 330\n"
+        "uniform mat4 ortho;\n"
+        "in vec2 Position;\n"
+        "in vec2 UV;\n"
+        "in vec4 Colour;\n"
+        "out vec2 Frag_UV;\n"
+        "out vec4 Frag_Colour;\n"
+        "void main()\n"
+        "{\n"
+        "	Frag_UV = UV;\n"
+        "	Frag_Colour = Colour;\n"
+        "	gl_Position = ortho*vec4(Position.xy,0,1);\n"
+        "}\n";
+
+    const GLchar* fragment_shader =
+        "#version 330\n"
+        "uniform sampler2D Texture;\n"
+        "in vec2 Frag_UV;\n"
+        "in vec4 Frag_Colour;\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "	FragColor = Frag_Colour * texture( Texture, Frag_UV.st);\n"
+        "}\n";
+
+    shader_handle = glCreateProgram();
+    vert_handle = glCreateShader(GL_VERTEX_SHADER);
+    frag_handle = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(vert_handle, 1, &vertex_shader, 0);
+    glShaderSource(frag_handle, 1, &fragment_shader, 0);
+    glCompileShader(vert_handle);
+    glCompileShader(frag_handle);
+    glAttachShader(shader_handle, vert_handle);
+    glAttachShader(shader_handle, frag_handle);
+    glLinkProgram(shader_handle);
+
+	texture_location = glGetUniformLocation(shader_handle, "Texture");
+    ortho_location = glGetUniformLocation(shader_handle, "ortho");
+    position_location = glGetAttribLocation(shader_handle, "Position");
+    uv_location = glGetAttribLocation(shader_handle, "UV");
+    colour_location = glGetAttribLocation(shader_handle, "Colour");
+
     glGenTextures(1, &fontTex);
     glBindTexture(GL_TEXTURE_2D, fontTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -169,6 +217,23 @@ void GUI::initializeGL() {
     void* tex_data = stbi_load_from_memory((const unsigned char*)png_data, (int)png_size, &tex_x, &tex_y, &tex_comp, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
     stbi_image_free(tex_data);
+
+    glGenBuffers(1, &vbo_handle);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
+    glBufferData(GL_ARRAY_BUFFER, vbo_max_size, NULL, GL_DYNAMIC_DRAW);
+
+    glGenVertexArrays(1, &vao_handle);
+    glBindVertexArray(vao_handle);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
+    glEnableVertexAttribArray(position_location);
+    glEnableVertexAttribArray(uv_location);
+    glEnableVertexAttribArray(colour_location);
+
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, pos));
+    glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, uv));
+    glVertexAttribPointer(colour_location, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, col));
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GUI::deinitializeGL() {
@@ -177,7 +242,7 @@ void GUI::deinitializeGL() {
     glDeleteProgram(shader_handle);
 }
 
-void GUI::render(float deltaTime,
+void GUI::startFrame(float deltaTime,
 				 const glm::vec2& mousePos,
 				 bool mouseButtonsPressed[2])
 {
@@ -188,12 +253,46 @@ void GUI::render(float deltaTime,
 	io.MouseDown[1] = mouseButtonsPressed[1];
 
 	ImGui::NewFrame();
+}
+
+void GUI::endFrame()
+{
+
 	static bool show = true;
 	//if (show) {
 		ImGui::ShowTestWindow(&show);
 	//}
 
 	ImGui::Render();
+}
+
+bool GUI::mouseButtonCallback(int key, int action) {
+	ImGuiIO& io = ImGui::GetIO();
+	bool consumeEvent = io.WantCaptureMouse;
+	return consumeEvent;
+}
+
+bool GUI::keyCallback(int key, int action) {
+	ImGuiIO& io = ImGui::GetIO();
+	bool consumeEvent = io.WantCaptureKeyboard;
+	if (consumeEvent) {
+		if (action == SGCT_PRESS)
+			io.KeysDown[key] = true;
+		if (action == SGCT_RELEASE)
+			io.KeysDown[key] = false;
+	}
+	return consumeEvent;
+}
+
+bool GUI::charCallback(unsigned int character) {
+	ImGuiIO& io = ImGui::GetIO();
+	bool consumeEvent = io.WantCaptureKeyboard;
+
+	if (consumeEvent) {
+		io.AddInputCharacter((unsigned short)character);
+	}
+
+	return consumeEvent;
 }
 
 } // namespace openspace

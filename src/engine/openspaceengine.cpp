@@ -24,7 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-// openspace
+#include <openspace/engine/gui.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -83,6 +83,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
+	, _gui(nullptr)
     , _syncBuffer(nullptr)
 {
 	// initialize OpenSpace helpers
@@ -473,9 +474,14 @@ LuaConsole& OpenSpaceEngine::console() {
 	return _console;
 }
 
-bool OpenSpaceEngine::initializeGL()
-{
-    return _renderEngine.initializeGL();
+bool OpenSpaceEngine::initializeGL() {
+    bool success = _renderEngine.initializeGL();
+	int x,y;
+	sgct::Engine::instance()->getWindowPtr(0)->getFinalFBODimensions(x, y);
+	_gui = new GUI(glm::vec2(glm::ivec2(x,y)));
+	_gui->initializeGL();
+
+	return success;
 }
 
 void OpenSpaceEngine::preSynchronization() {
@@ -492,6 +498,16 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine.postSynchronizationPreDraw();
+	
+	double posX, posY;
+	sgct::Engine::instance()->getMousePos(0, &posX, &posY);
+
+	int button0 = sgct::Engine::instance()->getMouseButton(0, 0);
+	int button1 = sgct::Engine::instance()->getMouseButton(0, 1);
+	bool buttons[2] = { button0 != 0, button1 != 0 };
+
+	double dt = std::max(sgct::Engine::instance()->getDt(), 1.0/60.0);
+	_gui->startFrame(dt, glm::vec2(posX, posY), buttons);
 }
 
 void OpenSpaceEngine::render() {
@@ -502,8 +518,8 @@ void OpenSpaceEngine::render() {
 	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console.isVisible()) {
 		_console.render();
 	}
+	_gui->endFrame();
 }
-
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster())
@@ -514,6 +530,10 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
+		bool isConsumed = _gui->keyCallback(key, action);
+		if (isConsumed)
+			return;
+
 		if (key == _console.commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
 			_console.toggleVisibility();
 
@@ -527,14 +547,21 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
+	bool isConsumed = _gui->charCallback(codepoint);
+	if (isConsumed)
+		return;
+
 	if (_console.isVisible()) {
 		_console.charCallback(codepoint);
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
-    if (sgct::Engine::instance()->isMaster())
-        _interactionHandler.mouseButtonCallback(key, action);
+	bool isConsumed = _gui->mouseButtonCallback(key, action);
+	if (isConsumed)
+		return;
+		
+	_interactionHandler.mouseButtonCallback(key, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y) {

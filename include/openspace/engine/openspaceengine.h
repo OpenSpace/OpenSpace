@@ -34,7 +34,7 @@
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
+class GUI;
 class SyncBuffer;
 class LuaConsole;
 
@@ -95,6 +95,7 @@ private:
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 	LuaConsole _console;
+	GUI* _gui;
 
 	SyncBuffer* _syncBuffer;
 

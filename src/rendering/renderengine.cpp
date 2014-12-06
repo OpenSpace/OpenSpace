@@ -30,7 +30,6 @@
 #include <openspace/abuffer/abufferSingleLinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
-#include <openspace/engine/gui.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
@@ -112,7 +111,6 @@ RenderEngine::RenderEngine()
     , _sceneGraph(nullptr)
     , _abuffer(nullptr)
     , _log(nullptr)
-	, _gui(nullptr)
     , _showInfo(true)
     , _showScreenLog(true)
 	, _takeScreenshot(false)
@@ -244,11 +242,6 @@ bool RenderEngine::initializeGL()
 
 	_visualizer = new ABufferVisualizer();
 
-	int x,y;
-	sgct::Engine::instance()->getActiveViewportSize(x, y);
-	_gui = new GUI(glm::vec2(glm::ivec2(x,y)));
-	_gui->initializeGL();
-
     // successful init
     return true;
 }
@@ -338,16 +331,6 @@ void RenderEngine::render()
 	else {
 		_visualizer->render();
 	}
-
-	double posX, posY;
-	sgct::Engine::instance()->getMousePos(0, &posX, &posY);
-
-	int button0 = sgct::Engine::instance()->getMouseButton(0, 0);
-	int button1 = sgct::Engine::instance()->getMouseButton(0, 1);
-	bool buttons[2] = { button0 != 0, button1 != 0 };
-
-	double dt = std::max(sgct::Engine::instance()->getDt(), 1.0/60.0);
-	_gui->render(dt, glm::vec2(posX, posY), buttons);
     
 #if 1
     

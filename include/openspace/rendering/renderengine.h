@@ -36,7 +36,6 @@ class SceneGraph;
 class ABuffer;
 class ABufferVisualizer;
 class ScreenLog;
-class GUI;
 
 class RenderEngine {
 public:
@@ -79,7 +78,6 @@ private:
 	SceneGraph* _sceneGraph;
 	ABuffer* _abuffer;
 	ScreenLog* _log;
-	GUI* _gui;
 
 	bool _showInfo;
 	bool _showScreenLog;
