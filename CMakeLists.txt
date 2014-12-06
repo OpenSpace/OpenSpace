@@ -68,6 +68,12 @@ include_directories("${GHOUL_ROOT_DIR}/include")
 set(BOOST_ROOT "${GHOUL_ROOT_DIR}/ext/boost")
 add_subdirectory(${GHOUL_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
+if (GHOUL_USE_FREEIMAGE)
+    add_definitions(-DGHOUL_USE_FREEIMAGE)
+endif ()
+if (GHOUL_USE_DEVIL)
+    add_definitions(-DGHOUL_USE_DEVIL)
+endif ()
 
 # Add ghoul ext
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
