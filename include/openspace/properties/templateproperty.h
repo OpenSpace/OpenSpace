@@ -52,6 +52,8 @@ namespace properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
+	typedef T ValueType;
+
 	/**
 	 * The constructor initializing the TemplateProperty with the provided
 	 * <code>identifier</code> and human-readable <code>guiName</code>. The default value
