@@ -17,7 +17,6 @@ ASP
     extension asa
     extension asp
     3rd_gen_scale 1.29
-    end_of_line_continuation \\$
 ASP.Net
     filter call_regexp_common C
     extension asax
@@ -29,13 +28,11 @@ ASP.Net
     extension sitemap
     extension webinfo
     3rd_gen_scale 1.29
-    end_of_line_continuation \\$
 ActionScript
     filter remove_matches ^\s*//
     filter call_regexp_common C
     extension as
     3rd_gen_scale 1.36
-    end_of_line_continuation \\$
 Ada
     filter remove_matches ^\s*--
     extension ada
@@ -43,7 +40,6 @@ Ada
     extension ads
     extension pad
     3rd_gen_scale 0.52
-    end_of_line_continuation \\$
 Ant
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -77,7 +73,6 @@ Assembly
     extension asm
     extension s
     3rd_gen_scale 0.25
-    end_of_line_continuation \\$
 AutoHotkey
     filter remove_matches ^\s*;
     filter remove_inline ;.*$
@@ -89,14 +84,12 @@ Bourne Again Shell
     extension bash
     script_exe bash
     3rd_gen_scale 3.81
-    end_of_line_continuation \\$
 Bourne Shell
     filter remove_matches ^\s*#
     filter remove_inline #.*$
     extension sh
     script_exe sh
     3rd_gen_scale 3.81
-    end_of_line_continuation \\$
 C
     filter remove_matches ^\s*//
     filter call_regexp_common C
@@ -105,7 +98,6 @@ C
     extension ec
     extension pgc
     3rd_gen_scale 0.77
-    end_of_line_continuation \\$
 C Shell
     filter remove_matches ^\s*#
     filter remove_inline #.*$
@@ -114,14 +106,12 @@ C Shell
     script_exe csh
     script_exe tcsh
     3rd_gen_scale 3.81
-    end_of_line_continuation \\$
 C#
     filter remove_matches ^\s*//
     filter call_regexp_common C
     filter remove_inline //.*$
     extension cs
     3rd_gen_scale 1.36
-    end_of_line_continuation \\$
 C++
     filter remove_matches ^\s*//
     filter remove_inline //.*$
@@ -133,7 +123,6 @@ C++
     extension cxx
     extension pcc
     3rd_gen_scale 1.51
-    end_of_line_continuation \\$
 C/C++ Header
     filter remove_matches ^\s*//
     filter call_regexp_common C
@@ -143,7 +132,6 @@ C/C++ Header
     extension hh
     extension hpp
     3rd_gen_scale 1.00
-    end_of_line_continuation \\$
 CCS
     filter call_regexp_common C
     extension ccs
@@ -155,7 +143,6 @@ CMake
     extension cmake
     filename CMakeLists.txt
     3rd_gen_scale 1.00
-    end_of_line_continuation \\$
 COBOL
     filter remove_cobol_comments
     extension CBL
@@ -207,7 +194,6 @@ Cython
     filter remove_inline #.*$
     extension pyx
     3rd_gen_scale 3.80
-    end_of_line_continuation \\$
 D
     filter remove_matches ^\s*//
     filter remove_between_general /+ +/
@@ -216,7 +202,6 @@ D
     extension d
     script_exe dmd
     3rd_gen_scale 1.70
-    end_of_line_continuation \\$
 DAL
     filter remove_between_general [ ]
     extension da
@@ -241,7 +226,6 @@ Dart
     filter call_regexp_common C
     extension dart
     3rd_gen_scale 2.00
-    end_of_line_continuation \\$
 ECPP
     filter remove_between_general <%doc> </%doc>
     filter remove_between_general <# #>
@@ -259,7 +243,6 @@ Expect
     filter remove_inline #.*$
     extension exp
     3rd_gen_scale 2.00
-    end_of_line_continuation \\$
 F#
     filter call_regexp_common Pascal
     filter remove_matches ^\s*//
@@ -299,7 +282,6 @@ Go
     filter call_regexp_common C
     extension go
     3rd_gen_scale 2.50
-    end_of_line_continuation \\$
 Grails
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -389,7 +371,6 @@ Java
     filter remove_inline //.*$
     extension java
     3rd_gen_scale 1.36
-    end_of_line_continuation \\$
 JavaServer Faces
     filter remove_matches ^\s*//
     filter call_regexp_common C
@@ -403,7 +384,6 @@ Javascript
     filter remove_inline //.*$
     extension js
     3rd_gen_scale 1.48
-    end_of_line_continuation \\$
 Kermit
     filter remove_matches ^\s*#
     filter remove_matches ^\s*;
@@ -411,14 +391,12 @@ Kermit
     extension ksc
     script_exe kermit
     3rd_gen_scale 2.00
-    end_of_line_continuation \\$
 Korn Shell
     filter remove_matches ^\s*#
     filter remove_inline #.*$
     extension ksh
     script_exe ksh
     3rd_gen_scale 3.81
-    end_of_line_continuation \\$
 Kotlin
     filter remove_matches ^\s*//
     filter remove_inline //.*$
@@ -431,7 +409,6 @@ LESS
     filter remove_inline //.*$
     extension less
     3rd_gen_scale 1.50
-    end_of_line_continuation \\$
 Lisp
     filter remove_matches ^\s*;
     filter remove_between_general #| |#
@@ -450,12 +427,10 @@ Lua
     extension lua
     script_exe lua
     3rd_gen_scale 4.00
-    end_of_line_continuation \\$
 MATLAB
     filter remove_matches ^\s*%
     filter remove_inline %.*$
     3rd_gen_scale 4.00
-    end_of_line_continuation \.\.\.\s*$
 MSBuild script
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -477,7 +452,6 @@ MXML
     filter call_regexp_common C
     extension mxml
     3rd_gen_scale 1.90
-    end_of_line_continuation \\$
 Maven
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -517,26 +491,22 @@ OCaml
     extension mll
     extension mly
     3rd_gen_scale 3.00
-    end_of_line_continuation \\$
 Objective C
     filter remove_matches ^\s*//
     filter call_regexp_common C
     filter remove_inline //.*$
     3rd_gen_scale 2.96
-    end_of_line_continuation \\$
 Objective C++
     filter remove_matches ^\s*//
     filter call_regexp_common C
     filter remove_inline //.*$
     extension mm
     3rd_gen_scale 2.96
-    end_of_line_continuation \\$
 Octave
     filter remove_matches ^\s*#
     filter remove_inline #.*$
     script_exe octave
     3rd_gen_scale 4.00
-    end_of_line_continuation \.\.\.\s*$
 OpenCL
     filter remove_matches ^\s*//
     filter call_regexp_common C
@@ -580,7 +550,6 @@ Patran Command Language
     extension pcl
     extension ses
     3rd_gen_scale 2.50
-    end_of_line_continuation \\$
 Perl
     filter remove_below ^__(END|DATA)__
     filter remove_matches ^\s*#
@@ -608,7 +577,6 @@ PowerShell
     filter remove_inline #.*$
     extension ps1
     3rd_gen_scale 3.00
-    end_of_line_continuation \\$
 Puppet
     filter remove_matches ^\s*#
     filter call_regexp_common C
@@ -621,7 +589,6 @@ Python
     filter remove_inline #.*$
     extension py
     3rd_gen_scale 4.20
-    end_of_line_continuation \\$
 QML
     filter remove_matches ^\s*//
     filter call_regexp_common C
@@ -633,7 +600,6 @@ R
     filter remove_inline #.*$
     extension R
     3rd_gen_scale 3.00
-    end_of_line_continuation \\$
 Racket
     filter remove_matches ^\s*;
     filter remove_inline ;.*$
@@ -673,7 +639,6 @@ Ruby
     filename rakefile
     script_exe ruby
     3rd_gen_scale 4.20
-    end_of_line_continuation \\$
 Ruby HTML
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -750,7 +715,6 @@ Swift
     filter remove_inline //.*$
     extension swift
     3rd_gen_scale 2.50
-    end_of_line_continuation \\$
 Tcl/Tk
     filter remove_matches ^\s*#
     filter remove_inline #.*$
@@ -761,7 +725,6 @@ Tcl/Tk
     script_exe tclsh
     script_exe wish
     3rd_gen_scale 4.00
-    end_of_line_continuation \\$
 Teamcenter def
     filter remove_matches ^\s*#
     3rd_gen_scale 1.00
@@ -779,7 +742,6 @@ TypeScript
     filter call_regexp_common C
     extension ts
     3rd_gen_scale 2.00
-    end_of_line_continuation \\$
 Unity-Prefab
     filter remove_matches ^\s*#
     filter remove_inline #.*$
@@ -803,14 +765,12 @@ Vala
     filter remove_inline //.*$
     extension vala
     3rd_gen_scale 1.50
-    end_of_line_continuation \\$
 Vala Header
     filter remove_matches ^\s*//
     filter call_regexp_common C
     filter remove_inline //.*$
     extension vapi
     3rd_gen_scale 1.40
-    end_of_line_continuation \\$
 Velocity Template Language
     filter remove_html_comments
     filter call_regexp_common HTML
@@ -929,18 +889,15 @@ awk
     extension awk
     script_exe awk
     3rd_gen_scale 3.81
-    end_of_line_continuation \\$
 bc
     filter remove_matches ^\s*#
     filter remove_inline #.*$
     script_exe bc
     3rd_gen_scale 1.50
-    end_of_line_continuation \\$
 lex
     filter call_regexp_common C
     extension l
     3rd_gen_scale 1.00
-    end_of_line_continuation \\$
 m4
     filter remove_matches ^dnl 
     extension ac
@@ -960,14 +917,12 @@ make
     filename makefile
     script_exe make
     3rd_gen_scale 2.50
-    end_of_line_continuation \\$
 sed
     filter remove_matches ^\s*#
     filter remove_inline #.*$
     extension sed
     script_exe sed
     3rd_gen_scale 4.00
-    end_of_line_continuation \\$
 vim script
     filter remove_matches ^\s*"
     filter remove_inline ".*$
