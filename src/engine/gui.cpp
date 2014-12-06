@@ -305,70 +305,65 @@ void GUI::registerProperty(properties::Property* prop) {
 
 }
 
-void renderBoolProperty(properties::Property* prop) {
+void renderBoolProperty(properties::Property* prop, const std::string& ownerName) {
 	properties::BoolProperty* p = static_cast<properties::BoolProperty*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
-	//std::string name = p->guiName();
+	std::string name = p->guiName();
 
 	properties::BoolProperty::ValueType value = *p;
-	ImGui::Checkbox(name.c_str(), &value);
+	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
 	p->set(value);
 }
 
-void renderOptionProperty(properties::Property* prop) {
+void renderOptionProperty(properties::Property* prop, const std::string& ownerName) {
 	properties::OptionProperty* p = static_cast<properties::OptionProperty*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
+	std::string name = p->guiName();
 
 	int value = *p;
 	std::vector<properties::OptionProperty::Option> options = p->options();
 	for (auto o : options) {
-		ImGui::RadioButton(name.c_str(), &value, o.value);
+		ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
 		ImGui::SameLine();
 		ImGui::Text(o.description.c_str());
 	}
 	p->set(value);
 }
 
-void renderIntProperty(properties::Property* prop) {
+void renderIntProperty(properties::Property* prop, const std::string& ownerName) {
 	properties::IntProperty* p = static_cast<properties::IntProperty*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
-	//std::string name = p->guiName();
+	std::string name = p->guiName();
 
 	properties::IntProperty::ValueType value = *p;
-	ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
+	ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
 	p->set(value);
 }
 
-void renderFloatProperty(properties::Property* prop) {
+void renderFloatProperty(properties::Property* prop, const std::string& ownerName) {
 	properties::FloatProperty* p = static_cast<properties::FloatProperty*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
-	//std::string name = p->guiName();
+	std::string name = p->guiName();
 
 	properties::FloatProperty::ValueType value = *p;
-	ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
+	ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
 	p->set(value);
 }
 
-void renderVec2Property(properties::Property* prop) {
+void renderVec2Property(properties::Property* prop, const std::string& ownerName) {
 	properties::Vec2Property* p = static_cast<properties::Vec2Property*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
-	//std::string name = p->guiName();
+	std::string name = p->guiName();
 
 	properties::Vec2Property::ValueType value = *p;
 
-	ImGui::SliderFloat2(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 	p->set(value);
 }
 
 
-void renderVec3Property(properties::Property* prop) {
+void renderVec3Property(properties::Property* prop, const std::string& ownerName) {
 	properties::Vec3Property* p = static_cast<properties::Vec3Property*>(prop);
-	std::string name = p->fullyQualifiedIdentifier();
-	//std::string name = p->guiName();
+	std::string name = p->guiName();
 
 	properties::Vec3Property::ValueType value = *p;
 
-	ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 	p->set(value);
 }
 
@@ -382,32 +377,32 @@ void GUI::renderGuiElements() {
 		if (ImGui::CollapsingHeader(p.first.c_str())) {
 			for (auto prop : p.second) {
 				if (_boolProperties.find(prop) != _boolProperties.end()) {
-					renderBoolProperty(prop);
+					renderBoolProperty(prop, p.first);
 					continue;
 				}
 
 				if (_intProperties.find(prop) != _intProperties.end()) {
-					renderIntProperty(prop);
+					renderIntProperty(prop, p.first);
 					continue;
 				}
 
 				if (_floatProperties.find(prop) != _floatProperties.end()) {
-					renderFloatProperty(prop);
+					renderFloatProperty(prop, p.first);
 					continue;
 				}
 
 				if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-					renderVec2Property(prop);
+					renderVec2Property(prop, p.first);
 					continue;
 				}
 
 				if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-					renderVec3Property(prop);
+					renderVec3Property(prop, p.first);
 					continue;
 				}
 
 				if (_optionProperty.find(prop) != _optionProperty.end()) {
-					renderOptionProperty(prop);
+					renderOptionProperty(prop, p.first);
 					continue;
 				}
 
