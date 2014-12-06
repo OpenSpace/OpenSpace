@@ -259,14 +259,10 @@ void GUI::startFrame(float deltaTime,
 	ImGui::NewFrame();
 }
 
-void GUI::endFrame()
-{
+void GUI::endFrame() {
 
 	static bool show = true;
-	//if (show) {
 		ImGui::ShowTestWindow(&show);
-	//}
-
 	ImGui::Render();
 }
 
