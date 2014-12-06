@@ -45,6 +45,7 @@ namespace configurationmanager {
 	const std::string keyLuaDocumentationType = "LuaDocumentationFile.Type";
 	const std::string keyLuaDocumentationFile = "LuaDocumentationFile.File";
     const std::string keyConfigScene = "Scene";
+	const std::string keyEnableGui = "EnableGUI";
     const std::string keyStartupScript = "StartupScripts";
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";

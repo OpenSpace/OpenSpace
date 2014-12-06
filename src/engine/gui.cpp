@@ -37,6 +37,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/cachemanager.h>
+
 #include <imgui.h>
 #include <sgct.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -44,6 +47,7 @@
 
 namespace {
 	const std::string _loggerCat = "GUI";
+	const std::string configurationFile = "imgui.ini";
 	
 	GLuint fontTex = 0; 
 	GLint positionLocation = 0;
@@ -132,7 +136,11 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
 namespace openspace {
 
 GUI::GUI() {
+	std::string cachedFile;
+	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
+
 	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = cachedFile.c_str();
 	io.DeltaTime = 1.f / 60.f;
 	io.PixelCenterOffset = 0.5f;
     io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
@@ -371,7 +379,21 @@ void renderVec3Property(properties::Property* prop, const std::string& ownerName
 void GUI::renderGuiElements() {
 	using namespace properties;
 
-	ImGui::Begin("Properties");
+	const ImVec2 size = ImVec2(350, 500);
+
+	ImGui::Begin("Properties", nullptr, size, 0.5f);
+
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 displaySize = io.DisplaySize;
+
+	ImVec2 position;
+	position.x = displaySize.x - (size.x + 50);
+	position.y = 50;
+	ImGui::SetWindowPos(position);
+
+
+	//ImGui::ShowUserGuide();
+	ImGui::Spacing();
 
 	for (auto p : _propertiesByOwner) {
 		if (ImGui::CollapsingHeader(p.first.c_str())) {
