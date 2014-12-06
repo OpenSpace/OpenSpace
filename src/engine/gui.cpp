@@ -24,9 +24,18 @@
 
 #include <openspace/engine/gui.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/properties/property.h>
+
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
 
 #include <imgui.h>
 #include <sgct.h>
@@ -37,24 +46,18 @@ namespace {
 	const std::string _loggerCat = "GUI";
 	
 	GLuint fontTex = 0; 
-	GLint shader_handle = 0;
-	GLint vert_handle = 0;
-	GLint frag_handle = 0;
-	GLint texture_location = 0;
-	GLint position_location = 0;
-	GLint uv_location = 0;
-	GLint colour_location = 0;
-	GLint ortho_location = 0;
-	GLuint vbo_handle = 0;
-	size_t vbo_max_size = 20000;
-	GLuint vao_handle;
+	GLint positionLocation = 0;
+	GLint uvLocation = 0;
+	GLint colorLocation = 0;
+	size_t vboMaxSize = 20000;
+	GLuint vao = 0;
+	GLuint vbo = 0;
 
-	ghoul::opengl::Texture* _texture;
+	ghoul::opengl::ProgramObject* _program;
 
 
-
-static void ImImpl_RenderDrawLists(ImDrawList** const cmd_lists, int cmd_lists_count) {
-    if (cmd_lists_count == 0)
+static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
+    if (nCommandLists == 0)
         return;
 
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled
@@ -65,33 +68,31 @@ static void ImImpl_RenderDrawLists(ImDrawList** const cmd_lists, int cmd_lists_c
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
 
-    // Setup texture
-    glActiveTexture(GL_TEXTURE0);
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
     glBindTexture(GL_TEXTURE_2D, fontTex);
 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    const float ortho_projection[4][4] =
-    {
-        { 2.0f/width,	0.0f,			0.0f,		0.0f },
-        { 0.0f,			2.0f/-height,	0.0f,		0.0f },
-        { 0.0f,			0.0f,			-1.0f,		0.0f },
-        { -1.0f,		1.0f,			0.0f,		1.0f },
-    };
-    glUseProgram(shader_handle);
-    glUniform1i(texture_location, 0);
-    glUniformMatrix4fv(ortho_location, 1, GL_FALSE, &ortho_projection[0][0]);
+	static const glm::mat4 ortho(
+		2.f/width, 0.0f,          0.0f, 0.0f,
+        0.0f,      2.0f/-height,  0.0f, 0.0f,
+        0.0f,      0.0f,         -1.0f, 0.0f,
+        -1.0f,     1.0f,          0.0f, 1.0f
+    );
+	_program->activate();
+	_program->setUniform("tex", unit.glEnum());
+	_program->setUniform("ortho", ortho);
 
     // Grow our buffer according to what we need
     size_t total_vtx_count = 0;
-    for (int n = 0; n < cmd_lists_count; n++)
-        total_vtx_count += cmd_lists[n]->vtx_buffer.size();
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
+    for (int n = 0; n < nCommandLists; n++)
+        total_vtx_count += commandLists[n]->vtx_buffer.size();
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     size_t neededBufferSize = total_vtx_count * sizeof(ImDrawVert);
-    if (neededBufferSize > vbo_max_size)
-    {
-        vbo_max_size = neededBufferSize + 5000;  // Grow buffer
+    if (neededBufferSize > vboMaxSize) {
+        vboMaxSize = neededBufferSize + 5000;  // Grow buffer
         glBufferData(GL_ARRAY_BUFFER, neededBufferSize, NULL, GL_STREAM_DRAW);
     }
 
@@ -99,34 +100,30 @@ static void ImImpl_RenderDrawLists(ImDrawList** const cmd_lists, int cmd_lists_c
     unsigned char* buffer_data = (unsigned char*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if (!buffer_data)
         return;
-    for (int n = 0; n < cmd_lists_count; n++)
-    {
-        const ImDrawList* cmd_list = cmd_lists[n];
+    for (int n = 0; n < nCommandLists; ++n) {
+        const ImDrawList* cmd_list = commandLists[n];
         memcpy(buffer_data, &cmd_list->vtx_buffer[0], cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
         buffer_data += cmd_list->vtx_buffer.size() * sizeof(ImDrawVert);
     }
     glUnmapBuffer(GL_ARRAY_BUFFER);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(vao_handle);
+    glBindVertexArray(vao);
 
     int cmd_offset = 0;
-    for (int n = 0; n < cmd_lists_count; n++)
-    {
-        const ImDrawList* cmd_list = cmd_lists[n];
+    for (int n = 0; n < nCommandLists; ++n) {
+        const ImDrawList* cmd_list = commandLists[n];
         int vtx_offset = cmd_offset;
         const ImDrawCmd* pcmd_end = cmd_list->commands.end();
-        for (const ImDrawCmd* pcmd = cmd_list->commands.begin(); pcmd != pcmd_end; pcmd++)
-        {
-            glScissor((int)pcmd->clip_rect.x, (int)(height - pcmd->clip_rect.w), (int)(pcmd->clip_rect.z - pcmd->clip_rect.x), (int)(pcmd->clip_rect.w - pcmd->clip_rect.y));
-            glDrawArrays(GL_TRIANGLES, vtx_offset, pcmd->vtx_count);
-            vtx_offset += pcmd->vtx_count;
+		for (auto pcmd : cmd_list->commands) {
+            glScissor((int)pcmd.clip_rect.x, (int)(height - pcmd.clip_rect.w), (int)(pcmd.clip_rect.z - pcmd.clip_rect.x), (int)(pcmd.clip_rect.w - pcmd.clip_rect.y));
+            glDrawArrays(GL_TRIANGLES, vtx_offset, pcmd.vtx_count);
+            vtx_offset += pcmd.vtx_count;
         }
         cmd_offset = vtx_offset;
     }
 
-    // Restore modified state
     glBindVertexArray(0);
-    glUseProgram(0);
+	_program->deactivate();
     glDisable(GL_SCISSOR_TEST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -134,9 +131,8 @@ static void ImImpl_RenderDrawLists(ImDrawList** const cmd_lists, int cmd_lists_c
 
 namespace openspace {
 
-GUI::GUI(const glm::vec2& windowSize) {
+GUI::GUI() {
 	ImGuiIO& io = ImGui::GetIO();
-	io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
 	io.DeltaTime = 1.f / 60.f;
 	io.PixelCenterOffset = 0.5f;
     io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
@@ -167,48 +163,12 @@ GUI::~GUI() {
 }
 
 void GUI::initializeGL() {
-	    const GLchar *vertex_shader =
-        "#version 330\n"
-        "uniform mat4 ortho;\n"
-        "in vec2 Position;\n"
-        "in vec2 UV;\n"
-        "in vec4 Colour;\n"
-        "out vec2 Frag_UV;\n"
-        "out vec4 Frag_Colour;\n"
-        "void main()\n"
-        "{\n"
-        "	Frag_UV = UV;\n"
-        "	Frag_Colour = Colour;\n"
-        "	gl_Position = ortho*vec4(Position.xy,0,1);\n"
-        "}\n";
-
-    const GLchar* fragment_shader =
-        "#version 330\n"
-        "uniform sampler2D Texture;\n"
-        "in vec2 Frag_UV;\n"
-        "in vec4 Frag_Colour;\n"
-        "out vec4 FragColor;\n"
-        "void main()\n"
-        "{\n"
-        "	FragColor = Frag_Colour * texture( Texture, Frag_UV.st);\n"
-        "}\n";
-
-    shader_handle = glCreateProgram();
-    vert_handle = glCreateShader(GL_VERTEX_SHADER);
-    frag_handle = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(vert_handle, 1, &vertex_shader, 0);
-    glShaderSource(frag_handle, 1, &fragment_shader, 0);
-    glCompileShader(vert_handle);
-    glCompileShader(frag_handle);
-    glAttachShader(shader_handle, vert_handle);
-    glAttachShader(shader_handle, frag_handle);
-    glLinkProgram(shader_handle);
-
-	texture_location = glGetUniformLocation(shader_handle, "Texture");
-    ortho_location = glGetUniformLocation(shader_handle, "ortho");
-    position_location = glGetAttribLocation(shader_handle, "Position");
-    uv_location = glGetAttribLocation(shader_handle, "UV");
-    colour_location = glGetAttribLocation(shader_handle, "Colour");
+	_program = ghoul::opengl::ProgramObject::Build("GUI",
+		"${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
+		
+    positionLocation = glGetAttribLocation(*_program, "in_position");
+    uvLocation = glGetAttribLocation(*_program, "in_uv");
+    colorLocation = glGetAttribLocation(*_program, "in_color");
 
     glGenTextures(1, &fontTex);
     glBindTexture(GL_TEXTURE_2D, fontTex);
@@ -222,35 +182,39 @@ void GUI::initializeGL() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
     stbi_image_free(tex_data);
 
-    glGenBuffers(1, &vbo_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
-    glBufferData(GL_ARRAY_BUFFER, vbo_max_size, NULL, GL_DYNAMIC_DRAW);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
 
-    glGenVertexArrays(1, &vao_handle);
-    glBindVertexArray(vao_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
-    glEnableVertexAttribArray(position_location);
-    glEnableVertexAttribArray(uv_location);
-    glEnableVertexAttribArray(colour_location);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glEnableVertexAttribArray(positionLocation);
+    glEnableVertexAttribArray(uvLocation);
+    glEnableVertexAttribArray(colorLocation);
 
-    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, pos));
-    glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, uv));
-    glVertexAttribPointer(colour_location, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, col));
+    glVertexAttribPointer(positionLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, pos));
+    glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, uv));
+    glVertexAttribPointer(colorLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, col));
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GUI::deinitializeGL() {
-	if (vao_handle) glDeleteVertexArrays(1, &vao_handle);
-    if (vbo_handle) glDeleteBuffers(1, &vbo_handle);
-    glDeleteProgram(shader_handle);
+	delete _program;
+	_program = nullptr;
+
+	if (vao) glDeleteVertexArrays(1, &vao);
+    if (vbo) glDeleteBuffers(1, &vbo);
 }
 
 void GUI::startFrame(float deltaTime,
+				const glm::vec2& windowSize,
 				 const glm::vec2& mousePos,
 				 bool mouseButtonsPressed[2])
 {
 	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
 	io.DeltaTime = deltaTime;
 	io.MousePos = ImVec2(mousePos.x, mousePos.y);
 	io.MouseDown[0] = mouseButtonsPressed[0];
@@ -260,9 +224,11 @@ void GUI::startFrame(float deltaTime,
 }
 
 void GUI::endFrame() {
-
 	static bool show = true;
-		ImGui::ShowTestWindow(&show);
+	//ImGui::ShowTestWindow(&show);
+
+	renderGuiElements();
+
 	ImGui::Render();
 }
 
@@ -297,11 +263,198 @@ bool GUI::charCallback(unsigned int character) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
 
-	if (consumeEvent) {
+	if (consumeEvent)
 		io.AddInputCharacter((unsigned short)character);
-	}
 
 	return consumeEvent;
+}
+
+void GUI::registerProperty(properties::Property* prop) {
+	using namespace properties;
+
+	std::string className = prop->className();
+
+	if (className == "BoolProperty")
+		_boolProperties.insert(prop);
+	else if (className == "IntProperty")
+		_intProperties.insert(prop);
+	else if (className == "FloatProperty")
+		_floatProperties.insert(prop);
+	else if (className == "StringProperty")
+		_stringProperties.insert(prop);
+	else if (className == "Vec2Property")
+		_vec2Properties.insert(prop);
+	else if (className == "Vec3Property")
+		_vec3Properties.insert(prop);
+	else if (className == "OptionProperty")
+		_optionProperty.insert(prop);
+	else {
+		LWARNING("Class name '" << className << "' not handled in GUI generation");
+		return;
+	}
+
+	std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
+	size_t pos = fullyQualifiedId.find('.');
+	std::string owner = fullyQualifiedId.substr(0, pos);
+
+	auto it =_propertiesByOwner.find(owner);
+	if (it == _propertiesByOwner.end())
+		_propertiesByOwner[owner] = { prop };
+	else
+		it->second.push_back(prop);
+
+}
+
+void renderBoolProperty(properties::Property* prop) {
+	properties::BoolProperty* p = static_cast<properties::BoolProperty*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+	//std::string name = p->guiName();
+
+	properties::BoolProperty::ValueType value = *p;
+	ImGui::Checkbox(name.c_str(), &value);
+	p->set(value);
+}
+
+void renderOptionProperty(properties::Property* prop) {
+	properties::OptionProperty* p = static_cast<properties::OptionProperty*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+
+	int value = *p;
+	std::vector<properties::OptionProperty::Option> options = p->options();
+	for (auto o : options) {
+		ImGui::RadioButton(name.c_str(), &value, o.value);
+		ImGui::SameLine();
+		ImGui::Text(o.description.c_str());
+	}
+	p->set(value);
+}
+
+void renderIntProperty(properties::Property* prop) {
+	properties::IntProperty* p = static_cast<properties::IntProperty*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+	//std::string name = p->guiName();
+
+	properties::IntProperty::ValueType value = *p;
+	ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
+	p->set(value);
+}
+
+void renderFloatProperty(properties::Property* prop) {
+	properties::FloatProperty* p = static_cast<properties::FloatProperty*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+	//std::string name = p->guiName();
+
+	properties::FloatProperty::ValueType value = *p;
+	ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
+	p->set(value);
+}
+
+void renderVec2Property(properties::Property* prop) {
+	properties::Vec2Property* p = static_cast<properties::Vec2Property*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+	//std::string name = p->guiName();
+
+	properties::Vec2Property::ValueType value = *p;
+
+	ImGui::SliderFloat2(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	p->set(value);
+}
+
+
+void renderVec3Property(properties::Property* prop) {
+	properties::Vec3Property* p = static_cast<properties::Vec3Property*>(prop);
+	std::string name = p->fullyQualifiedIdentifier();
+	//std::string name = p->guiName();
+
+	properties::Vec3Property::ValueType value = *p;
+
+	ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	p->set(value);
+}
+
+
+void GUI::renderGuiElements() {
+	using namespace properties;
+
+	ImGui::Begin("Properties");
+
+	for (auto p : _propertiesByOwner) {
+		if (ImGui::CollapsingHeader(p.first.c_str())) {
+			for (auto prop : p.second) {
+				if (_boolProperties.find(prop) != _boolProperties.end()) {
+					renderBoolProperty(prop);
+					continue;
+				}
+
+				if (_intProperties.find(prop) != _intProperties.end()) {
+					renderIntProperty(prop);
+					continue;
+				}
+
+				if (_floatProperties.find(prop) != _floatProperties.end()) {
+					renderFloatProperty(prop);
+					continue;
+				}
+
+				if (_vec2Properties.find(prop) != _vec2Properties.end()) {
+					renderVec2Property(prop);
+					continue;
+				}
+
+				if (_vec3Properties.find(prop) != _vec3Properties.end()) {
+					renderVec3Property(prop);
+					continue;
+				}
+
+				if (_optionProperty.find(prop) != _optionProperty.end()) {
+					renderOptionProperty(prop);
+					continue;
+				}
+
+			}
+		}
+	}
+
+
+	//for (auto pair : _propertiesByOwner) {
+	//	auto p = _propertiesByOwner.equal_range(pair);
+
+	//	if (ImGui::CollapsingHeader(pair->first.c_str())) {
+	//		for ()
+	//		if (_boolProperties.find(p->second) != _boolProperties.end()) {
+
+	//		}
+	//	}
+	//}
+
+	//for (auto prop : _boolProperties) {
+	//	BoolProperty* p = static_cast<BoolProperty*>(prop);
+	//	std::string name = p->fullyQualifiedIdentifier();
+
+	//	BoolProperty::ValueType value = *p;
+	//	ImGui::Checkbox(name.c_str(), &value);
+	//	p->set(value);
+
+	//}
+
+	//for (auto prop : _intProperties) {
+	//	IntProperty* p = static_cast<IntProperty*>(prop);
+	//	std::string name = p->fullyQualifiedIdentifier();
+
+	//	IntProperty::ValueType value = *p;
+	//	ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
+	//	p->set(value);
+	//}
+
+	//for (auto prop : _StringProperties) {
+	//	StringProperty* p = static_cast<StringProperty*>(prop);
+	//	std::string name = p->fullyQualifiedIdentifier();
+
+	//	//ImGui::TextUnformatted()
+	//}
+
+	ImGui::End();
+
 }
 
 } // namespace openspace

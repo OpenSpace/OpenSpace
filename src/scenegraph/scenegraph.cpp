@@ -32,6 +32,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
 #include <openspace/abuffer/abuffer.h>
+#include <openspace/engine/gui.h>
 
 // ghoul includes
 #include "ghoul/logging/logmanager.h"
@@ -458,6 +459,14 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
 	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 	c->setRotation(la);
+
+
+	for (auto node : _nodes) {
+		std::vector<properties::Property*>&& properties = node->propertiesRecursive();
+		for (auto p : properties) {
+			OsEng.gui()->registerProperty(p);
+		}
+	}
 
     return true;
 }

@@ -22,54 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
+uniform sampler2D tex;
 
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-
-namespace openspace {
-
-namespace properties {
-	class Property;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_color;
+layout(location = 0) out vec4 FragColor;
+void main() {
+   FragColor = in_color * texture(tex, in_uv.st);
 }
-
-class GUI {
-public:
-	GUI();
-	~GUI();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	void registerProperty(properties::Property* prop);
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-private:
-	void renderGuiElements();
-
-	std::set<properties::Property*> _boolProperties;
-	std::set<properties::Property*> _intProperties;
-	std::set<properties::Property*> _floatProperties;
-	std::set<properties::Property*> _vec2Properties;
-	std::set<properties::Property*> _vec3Properties;
-	std::set<properties::Property*> _stringProperties;
-	std::set<properties::Property*> _optionProperty;
-
-	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
-};
-
-} // namespace openspace
-
-#endif // __GUI_H__

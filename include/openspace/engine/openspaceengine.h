@@ -59,6 +59,8 @@ public:
 	scripting::ScriptEngine& scriptEngine();
 	LuaConsole& console();
 
+	GUI* gui() { return _gui; }
+
     // SGCT callbacks
     bool initializeGL();
     void preSynchronization();

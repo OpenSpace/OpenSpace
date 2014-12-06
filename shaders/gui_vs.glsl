@@ -22,54 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
+uniform mat4 ortho;
 
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_color;
 
-namespace openspace {
+layout(location = 1) out vec2 out_uv;
+layout(location = 2) out vec4 out_color;
 
-namespace properties {
-	class Property;
+void main() {
+    out_uv = in_uv;
+    out_color = in_color;
+    gl_Position = ortho * vec4(in_position.xy, 0.0, 1.0);
 }
-
-class GUI {
-public:
-	GUI();
-	~GUI();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	void registerProperty(properties::Property* prop);
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-private:
-	void renderGuiElements();
-
-	std::set<properties::Property*> _boolProperties;
-	std::set<properties::Property*> _intProperties;
-	std::set<properties::Property*> _floatProperties;
-	std::set<properties::Property*> _vec2Properties;
-	std::set<properties::Property*> _vec3Properties;
-	std::set<properties::Property*> _stringProperties;
-	std::set<properties::Property*> _optionProperty;
-
-	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
-};
-
-} // namespace openspace
-
-#endif // __GUI_H__

@@ -451,6 +451,8 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
+	_gui = new GUI;
+
     return true;
 }
 
@@ -476,9 +478,6 @@ LuaConsole& OpenSpaceEngine::console() {
 
 bool OpenSpaceEngine::initializeGL() {
     bool success = _renderEngine.initializeGL();
-	int x,y;
-	sgct::Engine::instance()->getWindowPtr(0)->getFinalFBODimensions(x, y);
-	_gui = new GUI(glm::vec2(glm::ivec2(x,y)));
 	_gui->initializeGL();
 
 	return success;
@@ -502,12 +501,16 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 	double posX, posY;
 	sgct::Engine::instance()->getMousePos(0, &posX, &posY);
 
+	int x,y;
+	sgct::Engine::instance()->getWindowPtr(0)->getFinalFBODimensions(x, y);
+
+
 	int button0 = sgct::Engine::instance()->getMouseButton(0, 0);
 	int button1 = sgct::Engine::instance()->getMouseButton(0, 1);
 	bool buttons[2] = { button0 != 0, button1 != 0 };
 
 	double dt = std::max(sgct::Engine::instance()->getDt(), 1.0/60.0);
-	_gui->startFrame(dt, glm::vec2(posX, posY), buttons);
+	_gui->startFrame(dt, glm::vec2(glm::ivec2(x,y)), glm::vec2(posX, posY), buttons);
 }
 
 void OpenSpaceEngine::render() {
