@@ -57,7 +57,7 @@ public:
 	void endFrame();
 
 private:
-	void renderGuiElements();
+	void renderPropertyWindow();
 
 	std::set<properties::Property*> _boolProperties;
 	std::set<properties::Property*> _intProperties;

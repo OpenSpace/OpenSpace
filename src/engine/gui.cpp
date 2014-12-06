@@ -58,7 +58,7 @@ namespace {
 	GLuint vbo = 0;
 
 	ghoul::opengl::ProgramObject* _program;
-
+	const ImVec2 size = ImVec2(350, 500);
 
 static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
     if (nCommandLists == 0)
@@ -139,8 +139,12 @@ GUI::GUI() {
 	std::string cachedFile;
 	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
 
+	char* buffer = new char[cachedFile.size() + 1];
+	strcpy(buffer, cachedFile.c_str());
+
 	ImGuiIO& io = ImGui::GetIO();
-	io.IniFilename = cachedFile.c_str();
+	io.IniFilename = buffer;
+	//io.IniSavingRate = 5.f;
 	io.DeltaTime = 1.f / 60.f;
 	io.PixelCenterOffset = 0.5f;
     io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
@@ -235,7 +239,7 @@ void GUI::endFrame() {
 	static bool show = true;
 	//ImGui::ShowTestWindow(&show);
 
-	renderGuiElements();
+	renderPropertyWindow();
 
 	ImGui::Render();
 }
@@ -376,21 +380,10 @@ void renderVec3Property(properties::Property* prop, const std::string& ownerName
 }
 
 
-void GUI::renderGuiElements() {
+void GUI::renderPropertyWindow() {
 	using namespace properties;
 
-	const ImVec2 size = ImVec2(350, 500);
-
 	ImGui::Begin("Properties", nullptr, size, 0.5f);
-
-	ImGuiIO& io = ImGui::GetIO();
-	ImVec2 displaySize = io.DisplaySize;
-
-	ImVec2 position;
-	position.x = displaySize.x - (size.x + 50);
-	position.y = 50;
-	ImGui::SetWindowPos(position);
-
 
 	//ImGui::ShowUserGuide();
 	ImGui::Spacing();
