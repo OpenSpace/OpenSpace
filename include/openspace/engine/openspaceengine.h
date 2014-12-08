@@ -29,7 +29,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
-
+#include <openspace/engine/gui.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 
 namespace openspace {
@@ -59,7 +59,7 @@ public:
 	scripting::ScriptEngine& scriptEngine();
 	LuaConsole& console();
 
-	GUI* gui() { return _gui; }
+	GUI& gui();
 
     // SGCT callbacks
     bool initializeGL();
@@ -97,7 +97,7 @@ private:
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 	LuaConsole _console;
-	GUI* _gui;
+	GUI _gui;
 
 	SyncBuffer* _syncBuffer;
 

@@ -25,6 +25,8 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/glm.h>
 
 #include <map>
@@ -43,6 +45,11 @@ public:
 	GUI();
 	~GUI();
 
+	bool isEnabled() const;
+	void setEnabled(bool enabled);
+
+	void initialize();
+
 	void initializeGL();
 	void deinitializeGL();
 
@@ -56,8 +63,13 @@ public:
 	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
 	void endFrame();
 
+
+	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
 private:
 	void renderPropertyWindow();
+
+	bool _isEnabled;
 
 	std::set<properties::Property*> _boolProperties;
 	std::set<properties::Property*> _intProperties;

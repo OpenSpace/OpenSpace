@@ -24,7 +24,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-#include <openspace/engine/gui.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -83,7 +82,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
-	, _gui(nullptr)
     , _syncBuffer(nullptr)
 {
 	// initialize OpenSpace helpers
@@ -402,6 +400,7 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine.addLibrary(Time::luaLibrary());
 	_scriptEngine.addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine.addLibrary(LuaConsole::luaLibrary());
+	_scriptEngine.addLibrary(GUI::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine().initialize();
@@ -446,12 +445,7 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
-	using constants::configurationmanager::keyEnableGui;
-	bool enableGUI = false;
-	configurationManager().getValue(keyEnableGui, enableGUI);
-	if (enableGUI) {
-		_gui = new GUI;
-	}
+	_gui.initialize();
 
     return true;
 }
@@ -476,10 +470,14 @@ LuaConsole& OpenSpaceEngine::console() {
 	return _console;
 }
 
+GUI& OpenSpaceEngine::gui() {
+	return _gui;
+}
+
 bool OpenSpaceEngine::initializeGL() {
     bool success = _renderEngine.initializeGL();
-	if (_gui)
-		_gui->initializeGL();
+	if (_gui.isEnabled())
+		_gui.initializeGL();
 
 	return success;
 }
@@ -499,7 +497,7 @@ void OpenSpaceEngine::preSynchronization() {
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine.postSynchronizationPreDraw();
 	
-	if (_gui) {
+	if (sgct::Engine::instance()->isMaster() && _gui.isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
 
@@ -511,21 +509,23 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 		bool buttons[2] = { button0 != 0, button1 != 0 };
 
 		double dt = std::max(sgct::Engine::instance()->getDt(), 1.0/60.0);
-		_gui->startFrame(dt, glm::vec2(glm::ivec2(x,y)), glm::vec2(posX, posY), buttons);
+		_gui.startFrame(dt, glm::vec2(glm::ivec2(x,y)), glm::vec2(posX, posY), buttons);
 	}
 }
 
 void OpenSpaceEngine::render() {
     _renderEngine.render();
 
-	// If currently writing a command, render it to screen
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-	if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console.isVisible()) {
-		_console.render();
-	}
+	if (sgct::Engine::instance()->isMaster()) {
+		// If currently writing a command, render it to screen
+		sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
+		if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console.isVisible()) {
+			_console.render();
+		}
 
-	if (_gui)
-		_gui->endFrame();
+		if (_gui.isEnabled())
+			_gui.endFrame();
+	}
 }
 
 void OpenSpaceEngine::postDraw() {
@@ -537,8 +537,8 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
 	if (sgct::Engine::instance()->isMaster()) {
-		if (_gui) {
-			bool isConsumed = _gui->keyCallback(key, action);
+		if (_gui.isEnabled()) {
+			bool isConsumed = _gui.keyCallback(key, action);
 			if (isConsumed)
 				return;
 		}
@@ -556,39 +556,47 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
-	if (_gui) {
-		bool isConsumed = _gui->charCallback(codepoint);
-		if (isConsumed)
-			return;
-	}
+	if (sgct::Engine::instance()->isMaster()) {
+		if (_gui.isEnabled()) {
+			bool isConsumed = _gui.charCallback(codepoint);
+			if (isConsumed)
+				return;
+		}
 
-	if (_console.isVisible()) {
-		_console.charCallback(codepoint);
+		if (_console.isVisible()) {
+			_console.charCallback(codepoint);
+		}
 	}
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
-	if (_gui) {
-		bool isConsumed = _gui->mouseButtonCallback(key, action);
-		if (isConsumed && action != SGCT_RELEASE)
-			return;
+	if (sgct::Engine::instance()->isMaster()) {
+		if (_gui.isEnabled()) {
+			bool isConsumed = _gui.mouseButtonCallback(key, action);
+			if (isConsumed && action != SGCT_RELEASE)
+				return;
+		}
+
+		_interactionHandler.mouseButtonCallback(key, action);
 	}
-		
-	_interactionHandler.mouseButtonCallback(key, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y) {
-    _interactionHandler.mousePositionCallback(x, y);
+	if (sgct::Engine::instance()->isMaster()) {
+	    _interactionHandler.mousePositionCallback(x, y);
+	}
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
-	if (_gui) {
-		bool isConsumed = _gui->mouseWheelCallback(pos);
-		if (isConsumed)
-			return;
-	}
+	if (sgct::Engine::instance()->isMaster()) {
+		if (_gui.isEnabled()) {
+			bool isConsumed = _gui.mouseWheelCallback(pos);
+			if (isConsumed)
+				return;
+		}
 
-    _interactionHandler.mouseScrollWheelCallback(pos);
+		_interactionHandler.mouseScrollWheelCallback(pos);
+	}
 }
 
 void OpenSpaceEngine::encode() {

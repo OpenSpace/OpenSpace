@@ -464,7 +464,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	for (auto node : _nodes) {
 		std::vector<properties::Property*>&& properties = node->propertiesRecursive();
 		for (auto p : properties) {
-			OsEng.gui()->registerProperty(p);
+			OsEng.gui().registerProperty(p);
 		}
 	}
 

@@ -24,6 +24,7 @@
 
 #include <openspace/engine/gui.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -135,7 +136,24 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
 
 namespace openspace {
 
-GUI::GUI() {
+GUI::GUI()
+	: _isEnabled(false)
+{
+}
+
+GUI::~GUI() {
+	ImGui::Shutdown();
+}
+
+bool GUI::isEnabled() const {
+	return _isEnabled;
+}
+
+void GUI::setEnabled(bool enabled) {
+	_isEnabled = enabled;
+}
+
+void GUI::initialize() {
 	std::string cachedFile;
 	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
 
@@ -147,31 +165,27 @@ GUI::GUI() {
 	//io.IniSavingRate = 5.f;
 	io.DeltaTime = 1.f / 60.f;
 	io.PixelCenterOffset = 0.5f;
-    io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-    io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = SGCT_KEY_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = SGCT_KEY_DOWN;
-    io.KeyMap[ImGuiKey_Home] = SGCT_KEY_HOME;
-    io.KeyMap[ImGuiKey_End] = SGCT_KEY_END;
-    io.KeyMap[ImGuiKey_Delete] = SGCT_KEY_DELETE;
-    io.KeyMap[ImGuiKey_Backspace] = SGCT_KEY_BACKSPACE;
-    io.KeyMap[ImGuiKey_Enter] = SGCT_KEY_ENTER;
-    io.KeyMap[ImGuiKey_Escape] = SGCT_KEY_ESCAPE;
-    io.KeyMap[ImGuiKey_A] = SGCT_KEY_A;
-    io.KeyMap[ImGuiKey_C] = SGCT_KEY_C;
-    io.KeyMap[ImGuiKey_V] = SGCT_KEY_V;
-    io.KeyMap[ImGuiKey_X] = SGCT_KEY_X;
-    io.KeyMap[ImGuiKey_Y] = SGCT_KEY_Y;
-    io.KeyMap[ImGuiKey_Z] = SGCT_KEY_Z;
+	io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
+	io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
+	io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
+	io.KeyMap[ImGuiKey_UpArrow] = SGCT_KEY_UP;
+	io.KeyMap[ImGuiKey_DownArrow] = SGCT_KEY_DOWN;
+	io.KeyMap[ImGuiKey_Home] = SGCT_KEY_HOME;
+	io.KeyMap[ImGuiKey_End] = SGCT_KEY_END;
+	io.KeyMap[ImGuiKey_Delete] = SGCT_KEY_DELETE;
+	io.KeyMap[ImGuiKey_Backspace] = SGCT_KEY_BACKSPACE;
+	io.KeyMap[ImGuiKey_Enter] = SGCT_KEY_ENTER;
+	io.KeyMap[ImGuiKey_Escape] = SGCT_KEY_ESCAPE;
+	io.KeyMap[ImGuiKey_A] = SGCT_KEY_A;
+	io.KeyMap[ImGuiKey_C] = SGCT_KEY_C;
+	io.KeyMap[ImGuiKey_V] = SGCT_KEY_V;
+	io.KeyMap[ImGuiKey_X] = SGCT_KEY_X;
+	io.KeyMap[ImGuiKey_Y] = SGCT_KEY_Y;
+	io.KeyMap[ImGuiKey_Z] = SGCT_KEY_Z;
 
 	io.RenderDrawListsFn = ImImpl_RenderDrawLists;
-    //io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock
-    //io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
-}
-
-GUI::~GUI() {
-	ImGui::Shutdown();
+	//io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock
+	//io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
 }
 
 void GUI::initializeGL() {
@@ -465,6 +479,78 @@ void GUI::renderPropertyWindow() {
 
 	ImGui::End();
 
+}
+
+namespace  {
+
+/**
+ * \ingroup LuaScripts
+ * show():
+ * Shows the GUI
+ */
+int show(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.gui().setEnabled(true);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * hide():
+ * Hides the console
+ */
+int hide(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.gui().setEnabled(false);
+	return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * toggle():
+ * Toggles the console
+ */
+int toggle(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 0)
+		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+	OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
+	return 0;
+}
+
+}
+
+scripting::ScriptEngine::LuaLibrary GUI::luaLibrary() {
+	return {
+		"gui",
+		{
+			{
+				"show",
+				&show,
+				"",
+				"Shows the console"
+			},
+			{
+				"hide",
+				&hide,
+				"",
+				"Hides the console"
+			},
+			{
+				"toggle",
+				&toggle,
+				"",
+				"Toggles the console"
+			}
+		}
+	};
 }
 
 } // namespace openspace
