@@ -175,7 +175,7 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 26 17:36:00.000", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:34:00.000", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
@@ -266,7 +266,7 @@ void RenderableTrail::render(const RenderData& data){
 void RenderableTrail::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
-	
+
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
 	_pscpos[3] += 3; // KM to M
 	

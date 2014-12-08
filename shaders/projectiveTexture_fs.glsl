@@ -78,14 +78,14 @@ void main()
 	
 	// PROJECTIVE TEXTURE
 	vec4 projTexColor = textureProj(texture2, ProjTexCoord);
-	vec4 shaded = diffuse;//max(intensity * diffuse, ambient);
+	vec4 shaded = max(intensity * diffuse, ambient);
 		if (ProjTexCoord[0] > 0.0 || 
 			ProjTexCoord[1] > 0.0 ||
 			ProjTexCoord[0] < ProjTexCoord[2] || 
 			ProjTexCoord[1] < ProjTexCoord[2]){
 			diffuse = shaded;
 		}else if(dot(n,vs_boresight) < 0 ){
-			diffuse = projTexColor;
+			diffuse = projTexColor*0.5f + 0.5f*shaded;
 		}else{
 			diffuse = shaded;
 		}

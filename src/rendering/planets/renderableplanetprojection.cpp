@@ -209,7 +209,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
     // disable shader
     _programObject->deactivate();
-	
+	/*
 	static int callCount = 0;
 	callCount++;
 
@@ -354,7 +354,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		//_textureProj->uploadTexture();
 		_texture->uploadTexture();
 	}
-	
+	*/
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
