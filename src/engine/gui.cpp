@@ -158,7 +158,12 @@ void GUI::initialize() {
 	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
 
 	char* buffer = new char[cachedFile.size() + 1];
+
+#ifdef WIN32
+	strcpy_s(buffer, cachedFile.size() + 1, cachedFile.c_str());
+#else
 	strcpy(buffer, cachedFile.c_str());
+#endif
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.IniFilename = buffer;
