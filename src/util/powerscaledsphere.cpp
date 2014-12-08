@@ -184,12 +184,6 @@ bool PowerScaledSphere::initialize()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-
-    errorID = glGetError();
-    if (errorID != GL_NO_ERROR) {
-        LERROR("OpenGL error: " << glewGetErrorString(errorID));
-        return false;
-    }
     return true;
 }
 

@@ -46,6 +46,7 @@ bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
 
 PropertyOwner::PropertyOwner()
     : _name("")
+	, _owner(nullptr)
 {
 }
 
@@ -58,6 +59,18 @@ PropertyOwner::~PropertyOwner()
 const std::vector<Property*>& PropertyOwner::properties() const
 {
     return _properties;
+}
+
+std::vector<Property*> PropertyOwner::propertiesRecursive() const
+{
+	std::vector<Property*> props = properties();
+
+	for (auto owner : _subOwners) {
+		std::vector<Property*> p = owner->propertiesRecursive();
+		props.insert(props.end(), p.begin(), p.end());
+	}
+
+	return std::move(props);
 }
 
 Property* PropertyOwner::property(const std::string& id) const
@@ -218,6 +231,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
 		else {
 			// Otherwise we have found the correct position to add it in
 			_subOwners.insert(it, owner);
+			owner->setPropertyOwner(this);
 		}
     }
     

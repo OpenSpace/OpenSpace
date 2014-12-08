@@ -22,7 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include "openspace/properties/property.h"
+#include <openspace/properties/property.h>
+
+#include <openspace/properties/propertyowner.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 
@@ -63,6 +65,17 @@ const std::string& Property::identifier() const {
     return _identifier;
 }
 
+std::string Property::fullyQualifiedIdentifier() const {
+	std::string identifier = _identifier;
+	PropertyOwner* currentOwner = owner();
+	while (currentOwner) {
+		std::string ownerId = currentOwner->name();
+		identifier = ownerId + "." + identifier;
+		currentOwner = currentOwner->owner();
+	}
+	return identifier;
+}
+
 boost::any Property::get() const {
     return boost::any();
 }
@@ -85,7 +98,7 @@ int Property::typeLua() const {
 	return LUA_TNONE;
 }
 
-const std::string& Property::guiName() const {
+std::string Property::guiName() const {
 	std::string result;
 	_metaData.getValue(_metaDataKeyGuiName, result);
     return std::move(result);

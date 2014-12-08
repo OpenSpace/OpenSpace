@@ -85,6 +85,12 @@ public:
     const std::vector<Property*>& properties() const;
 
 	/**
+	 * Returns a list of all Propertys directly or indirectly owned by this PropertyOwner.
+	 * \return A list of all Propertys directly or indirectly owned by this PropertyOwner
+	 */
+	std::vector<Property*> propertiesRecursive() const;
+
+	/**
 	 * Retrieves a Property identified by <code>URI</code> from this PropertyOwner. If
 	 * <code>id</code> does not contain a <code>.</code> the identifier must refer to a
 	 * Property directly owned by this PropertyOwner. If the identifier contains one or
@@ -108,6 +114,9 @@ public:
 	 */
     bool hasProperty(const std::string& URI) const;
     
+	void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
+	PropertyOwner* owner() const { return _owner; }
+
 	/**
 	 * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
 	 * has to be unique with respect to other sub-owners as well as Property's owned by
@@ -201,6 +210,8 @@ protected:
 private:
 	/// The name of this PropertyOwner
     std::string _name;
+	/// The owner of this PropertyOwner
+	PropertyOwner* _owner;
 	/// A list of all registered Property's
     std::vector<Property*> _properties;
 	/// A list of all sub-owners
