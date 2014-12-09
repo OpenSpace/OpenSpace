@@ -22,82 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __TRIGGERPROPERTY_H__
+#define __TRIGGERPROPERTY_H__
 
-#include <openspace/scripting/scriptengine.h>
-
-#include <ghoul/glm.h>
-
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-
-namespace ghoul {
-	class SharedMemory;
-}
+#include <openspace/properties/property.h>
 
 namespace openspace {
-
 namespace properties {
-	class Property;
-}
 
-class GUI {
+/**
+ * TriggerProperty that can be used to fire events into your code using the callback
+ * method #onChange.
+ */
+class TriggerProperty : public Property {
 public:
-	GUI();
-	~GUI();
+	/**
+	 * Initializes the TriggerProperty by delegating the <code>identifier</code> and
+	 * <code>guiName</code> to the Property constructor.
+	 * \param identifier The unique identifier used for this Property
+	 * \param guiName The human-readable name of this Property
+	 */
+	TriggerProperty(std::string identifier, std::string guiName);
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+	/**
+	 * Returns the class name <code>TriggerProperty</code>.
+	 * \return The class name <code>TriggerProperty</code>
+	 */
+	std::string className() const;
 
-	void initialize();
+	/**
+	 * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
+	 * that the event has been triggered.
+	 * \param state The unused Lua state 
+	 * \return Returns always <code>true</code>
+	 */
+	bool setLua(lua_State* state);
 
-	void initializeGL();
-	void deinitializeGL();
-
-	void registerProperty(properties::Property* prop);
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-private:
-	void renderMainWindow();
-
-	void renderPropertyWindow();
-	void renderPerformanceWindow();
-
-	bool _isEnabled;
-
-	bool _showPropertyWindow;
-	bool _showPerformanceWindow;
-	bool _showHelp;
-
-
-	ghoul::SharedMemory* _performanceMemory;
-	float _minMaxValues[2];
-
-	std::set<properties::Property*> _boolProperties;
-	std::set<properties::Property*> _intProperties;
-	std::set<properties::Property*> _floatProperties;
-	std::set<properties::Property*> _vec2Properties;
-	std::set<properties::Property*> _vec3Properties;
-	std::set<properties::Property*> _stringProperties;
-	std::set<properties::Property*> _optionProperty;
-	std::set<properties::Property*> _triggerProperty;
-
-	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+	/**
+	 * Silently ignores any value that is passed into this function and will trigger the
+	 * listeners regardless of the value
+	 * \param value The ignored value
+	 */
+	void set(boost::any value);
 };
 
+} // namespace properties
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __TRIGGERPROPERTY_H__

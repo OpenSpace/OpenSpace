@@ -38,6 +38,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -197,6 +198,13 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
 
 	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 	p->set(value);
+}
+
+void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+	std::string name = prop->guiName();
+	bool pressed = ImGui::Button((ownerName + "." + name).c_str());
+	if (pressed)
+		prop->set(0);
 }
 
 }
@@ -395,6 +403,8 @@ void GUI::registerProperty(properties::Property* prop) {
 		_vec3Properties.insert(prop);
 	else if (className == "OptionProperty")
 		_optionProperty.insert(prop);
+	else if (className == "TriggerProperty")
+		_triggerProperty.insert(prop);
 	else {
 		LWARNING("Class name '" << className << "' not handled in GUI generation");
 		return;
@@ -466,6 +476,11 @@ void GUI::renderPropertyWindow() {
 
 				if (_optionProperty.find(prop) != _optionProperty.end()) {
 					renderOptionProperty(prop, p.first);
+					continue;
+				}
+
+				if (_triggerProperty.find(prop) != _triggerProperty.end()) {
+					renderTriggerProperty(prop, p.first);
 					continue;
 				}
 
