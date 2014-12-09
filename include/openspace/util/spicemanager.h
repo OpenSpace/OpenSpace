@@ -111,7 +111,7 @@ public:
 
 	/**
 	 * Determines whether values exist for some <code>item</code> for any
-	 * code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
+	 * <code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
 	 * function. 
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
 	 * \param body The name of the body that should be sampled
@@ -465,8 +465,9 @@ public:
 	 * surface point on a body with the NAIF ID of <code>id</code> to rectangular
 	 * <code>coordinates</code>. For further details, refer to
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
-	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
-	 * are defined. This body needs to have a defined radius for this function to work
+	 * \param id The identifier of the body on which the <code>longitude</code> and
+	 * <code>latitude</code> are defined. This body needs to have a defined radius for
+	 * this function to work.
      * \param longitude The longitude of the point on the <code>body</code> in radians
      * \param latitude The latitude of the point on the <code>body</code> in radians
      * \param coordinates The output containing the rectangular coordinates of the point
@@ -524,34 +525,6 @@ public:
 		                     double& targetEphemerisTime,
 							 glm::dvec3& vectorToSurfacePoint) const;
 
-	/**
-	* Computes the rectangular coordinates of the sub-solar point on
-	* a target body at a specified epoch, optionally corrected for
-	* light time and stellar aberration.
-	*  For further details, please refer to 'subslr_c ' in SPICE Docummentation
-	*
-	* \param computationMethod          Computation method.
-	* \param target                     Name of target body.
-	* \param ephemeris                  Epoch in ephemeris seconds past J2000 TDB.
-	* \param bodyFixedFrame             Body-fixed, body-centered target body frame.
-	* \param aberrationCorrection       Aberration correction.
-	* \param observer                   Name of observing body.
-	* \param subObserverPoint           Sub-observer point on the target body.
-	* \param targetEpoch                Sub-observer point epoch.
-	* \param observerToSubObserverVec   Vector from observer to sub-observer point.
-	* \return                           Whether the function succeeded or not
-	*/
-	//bool getSubSolarPoint(std::string target,
-	//					 std::string computationMethod,
-	//	                  
-	//	                  double      ephemeris,
-	//	                  std::string bodyFixedFrame,
-	//	                  std::string aberrationCorrection,
-	//	                  
-	//					  glm::dvec3& subSolarPoint,
-	//	                  double&     targetEpoch,
-	//	                  glm::dvec3& vectorToSurfacePoint) const;
-    
     /**
      * This method checks if one of the previous SPICE methods has failed. If it has, the
      * <code>errorMessage</code> is used to log an error along with the original SPICE
