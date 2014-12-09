@@ -522,7 +522,7 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 			if (!library.empty())
 				total += std::move(library) + ".";
 			total += std::move(function);
-			return std::move(total);
+			return total;
 		};
 
 		// Settings
