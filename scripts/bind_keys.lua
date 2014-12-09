@@ -9,8 +9,8 @@ interaction_speed = 2.75
 
 -- Key Bindings
 openspace.bindKey("f1", "openspace.gui.toggle()")
-openspace.bindKey("f3", "openspace.setPropertyValue('Earth.renderable.enabled', true)")
-openspace.bindKey("f4", "openspace.setPropertyValue('Earth.renderable.enabled', false)")
+openspace.bindKey("f2", "openspace.setPerformanceMeasurement(true)")
+openspace.bindKey("f3", "openspace.setPerformanceMeasurement(false)")
 openspace.bindKey("f5", "loadKeyBindings()")
 
 

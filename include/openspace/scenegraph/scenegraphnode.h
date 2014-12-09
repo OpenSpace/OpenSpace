@@ -44,9 +44,14 @@ namespace openspace {
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
+	struct PerformanceRecord {
+		long long renderTime;  // time in ns
+		long long updateTimeRenderable;  // time in ns
+		long long updateTimeEphemeris;  // time in ns
+	};
+
     static std::string RootNodeName;
     
-    // constructors & destructor
     SceneGraphNode();
     ~SceneGraphNode();
 
@@ -55,12 +60,10 @@ public:
 	bool initialize();
     bool deinitialize();
 
-    // essential
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data);
 
-    // set & get
     void addNode(SceneGraphNode* child);
 
     void setParent(SceneGraphNode* parent);
@@ -70,7 +73,6 @@ public:
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
 
-    // bounding sphere
     PowerScaledScalar calculateBoundingSphere();
     PowerScaledScalar boundingSphere() const;
 
@@ -78,27 +80,26 @@ public:
 
     void print() const;
 
-    // renderable
+	const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
+
     void setRenderable(Renderable* renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
 private:
-    // essential
-    std::vector<SceneGraphNode*> _children;
+    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
+
+	std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     Ephemeris* _ephemeris;
 
-    // renderable
+	PerformanceRecord _performanceRecord;
+
     Renderable* _renderable;
     bool _renderableVisible;
 
-    // bounding sphere
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
-
-    // private helper methods
-    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 };
 
 } // namespace openspace

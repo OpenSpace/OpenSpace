@@ -34,6 +34,7 @@
 #include <ghoul/opengl/shadermanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
+#include <ghoul/misc/highresclock.h>
 
 #include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
@@ -128,6 +129,7 @@ SceneGraphNode::SceneGraphNode()
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
+	, _performanceRecord({0, 0, 0})
 {
 }
 
@@ -170,17 +172,39 @@ bool SceneGraphNode::deinitialize()
     return true;
 }
 
-// essential
-void SceneGraphNode::update(const UpdateData& data)
-{
-	if (_ephemeris)
-		_ephemeris->update(data);
-	if (_renderable && _renderable->isReady())
-		_renderable->update(data);
+void SceneGraphNode::update(const UpdateData& data) {
+	if (_ephemeris) {
+		if (data.doPerformanceMeasurement) {
+			glFinish();
+			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
+
+			_ephemeris->update(data);
+
+			glFinish();
+			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			_performanceRecord.updateTimeEphemeris = (end - start).count();
+		}
+		else
+			_ephemeris->update(data);
+	}
+
+	if (_renderable && _renderable->isReady()) {
+		if (data.doPerformanceMeasurement) {
+			glFinish();
+			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
+
+			_renderable->update(data);
+
+			glFinish();
+			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			_performanceRecord.updateTimeRenderable = (end - start).count();
+		}
+		else
+			_renderable->update(data);
+	}
 }
 
-void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
-{
+void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
     //const psc thisPosition = parentPosition + _ephemeris->position();
     //const psc camPos = camera->position();
     //const psc toCamera = thisPosition - camPos;
@@ -221,20 +245,25 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition)
     }
 }
 
-void SceneGraphNode::render(const RenderData& data)
-{
+void SceneGraphNode::render(const RenderData& data) {
     const psc thisPosition = data.position + _ephemeris->position();
 
-	RenderData newData = {data.camera, thisPosition};
+	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-    // check if camera is outside the node boundingsphere
-    /*if (!_boundingSphereVisible) {
-        return;
-    }*/
+	_performanceRecord.renderTime = 0.f;
+    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
+		if (data.doPerformanceMeasurement) {
+			glFinish();
+			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
 
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady()) {
-        // LDEBUG("Render");
-		_renderable->render(newData);
+			_renderable->render(newData);
+
+			glFinish();
+			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			_performanceRecord.renderTime = (end - start).count();
+		}
+		else
+			_renderable->render(newData);
     }
 
     // evaluate all the children, tail-recursive function(?)

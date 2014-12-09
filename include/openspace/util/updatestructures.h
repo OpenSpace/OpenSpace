@@ -33,12 +33,13 @@ namespace openspace {
 struct UpdateData {
 	double time;
 	double delta;
+	bool doPerformanceMeasurement;
 };
 
 struct RenderData {
 	const Camera& camera;
 	psc position;
-
+	bool doPerformanceMeasurement;
 };
 
 }
