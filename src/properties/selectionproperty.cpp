@@ -51,10 +51,10 @@ void SelectionProperty::addOption(Option option) {
 const std::vector<SelectionProperty::Option>& SelectionProperty::options() const {
 	return _options;
 }
-
-void SelectionProperty::setValue(std::vector<int> value) {
-	_values = std::move(value);
-}
+//
+//void SelectionProperty::setValue(std::vector<int> value) {
+//	_values = std::move(value);
+//}
 
 template <>
 std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {

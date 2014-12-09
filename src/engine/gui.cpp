@@ -38,6 +38,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -159,6 +160,29 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
 		ImGui::Text(o.description.c_str());
 	}
 	p->set(value);
+}
+
+void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+	SelectionProperty* p = static_cast<SelectionProperty*>(prop);
+	std::string name = p->guiName();
+
+	if (ImGui::CollapsingHeader((ownerName + "." + name).c_str())) {
+		const std::vector<SelectionProperty::Option>& options = p->options();
+		std::vector<int> newSelectedIndices;
+
+		std::vector<int> selectedIndices = p->value();
+
+		for (int i = 0; i < options.size(); ++i) {
+			std::string description = options[i].description;
+			bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+			ImGui::Checkbox(description.c_str(), &selected);
+
+			if (selected)
+				newSelectedIndices.push_back(i);
+		}
+
+		p->setValue(std::move(newSelectedIndices));
+	}
 }
 
 void renderIntProperty(Property* prop, const std::string& ownerName) {
@@ -405,6 +429,8 @@ void GUI::registerProperty(properties::Property* prop) {
 		_optionProperty.insert(prop);
 	else if (className == "TriggerProperty")
 		_triggerProperty.insert(prop);
+	else if (className == "SelectionProperty")
+		_selectionProperty.insert(prop);
 	else {
 		LWARNING("Class name '" << className << "' not handled in GUI generation");
 		return;
@@ -484,6 +510,10 @@ void GUI::renderPropertyWindow() {
 					continue;
 				}
 
+				if (_selectionProperty.find(prop) != _selectionProperty.end()) {
+					renderSelectionProperty(prop, p.first);
+					continue;
+				}
 			}
 		}
 	}
