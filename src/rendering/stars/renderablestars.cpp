@@ -116,7 +116,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 	addProperty(_pointSpreadFunctionTexturePath);
 	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
-
+	 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
 }
