@@ -80,7 +80,7 @@ public:
 
 private:
     OpenSpaceEngine(std::string programName);
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() = default;
 
 	void clearAllWindows();
 	bool gatherCommandlineArguments();

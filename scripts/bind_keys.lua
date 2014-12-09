@@ -8,8 +8,7 @@ end
 interaction_speed = 2.75
 
 -- Key Bindings
-openspace.bindKey("f1", "setEarthAsOrigin()")
-openspace.bindKey("f2", "openspace.setOrigin('Mercury')")
+openspace.bindKey("f1", "openspace.gui.toggle()")
 openspace.bindKey("f3", "openspace.setPropertyValue('Earth.renderable.enabled', true)")
 openspace.bindKey("f4", "openspace.setPropertyValue('Earth.renderable.enabled', false)")
 openspace.bindKey("f5", "loadKeyBindings()")
