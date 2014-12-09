@@ -106,9 +106,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	}
 	_speckFile = absPath(_speckFile);
 
-	_colorOption.addOption({ColorOption::Color, "Color"});
-	_colorOption.addOption({ColorOption::Velocity, "Velocity"});
-	_colorOption.addOption({ColorOption::Speed, "Speed"});
+	_colorOption.addOption(ColorOption::Color, "Color");
+	_colorOption.addOption(ColorOption::Velocity, "Velocity");
+	_colorOption.addOption(ColorOption::Speed, "Speed");
 	addProperty(_colorOption);
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 

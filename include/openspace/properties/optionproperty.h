@@ -71,7 +71,7 @@ public:
 	 * be logged.
 	 * \param option The option that will be added to the list of available options
 	 */
-	void addOption(Option option);
+	void addOption(int value, std::string desc);
 
 	/**
 	 * Returns the list of available options.

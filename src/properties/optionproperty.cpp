@@ -43,7 +43,11 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 	return _options;
 }
 
-void OptionProperty::addOption(Option option) {
+void OptionProperty::addOption(int value, std::string desc) {
+	Option option;
+	option.value = value;
+	option.description = desc;
+
 	for (auto o : _options) {
 		if (o.value == option.value) {
 			LWARNING("The value of option {" << o.value << " -> " << o.description <<
