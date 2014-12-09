@@ -44,7 +44,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(Option option) {
-	for (auto o : _options) {
+	for (const Option& o : _options) {
 		if (o.value == option.value) {
 			LWARNING("The value of option {" << o.value << " -> " << o.description <<
 				"} was already registered when trying to add option {" << option.value <<
@@ -57,7 +57,7 @@ void OptionProperty::addOption(Option option) {
 
 void OptionProperty::setValue(int value) {
 	// Check if the passed value belongs to any option
-	for (auto o : _options) {
+	for (const Option& o : _options) {
 		if (o.value == value) {
 			// If it does, set it by calling the superclasses setValue method
 			NumericalProperty::setValue(value);

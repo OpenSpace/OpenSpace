@@ -161,7 +161,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
-	for (auto token : tokens) {
+	for (const std::string& token : tokens) {
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
 			LDEBUG("Directory '" << p << "' does not exist, creating.");
@@ -398,7 +398,7 @@ void OpenSpaceEngine::loadFonts() {
 	ghoul::Dictionary fonts;
 	configurationManager().getValue(constants::configurationmanager::keyFonts, fonts);
 
-	for (auto key : fonts.keys()) {
+	for (const std::string& key : fonts.keys()) {
 		std::string font;
 		fonts.getValue(key, font);
 		font = absPath(font);

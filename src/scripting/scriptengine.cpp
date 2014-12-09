@@ -228,9 +228,11 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
 		// otherwise, we merge the libraries
 
 		LuaLibrary merged = *it;
-		for (auto fun : library.functions) {
+		for (const LuaLibrary::Function& fun : library.functions) {
 			auto it = std::find_if(merged.functions.begin(), merged.functions.end(),
-				[&fun](const LuaLibrary::Function& function) { return fun.name == function.name; });
+				[&fun](const LuaLibrary::Function& function) {
+					return fun.name == function.name;
+			});
 			if (it != merged.functions.end()) {
 				// the function with the desired name is already present, but we don't
 				// want to overwrite it
@@ -295,10 +297,20 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
 
 bool ScriptEngine::hasLibrary(const std::string& name)
 {
-	for (auto it = _registeredLibraries.begin(); it != _registeredLibraries.end(); ++it)
-		if (it->name == name)
-			return true;
-	return false;
+	auto it = std::find_if(
+		_registeredLibraries.begin(),
+		_registeredLibraries.end(),
+		[name](const LuaLibrary& it) { return it.name == name; }
+	);
+
+	return (it != _registeredLibraries.end());
+
+
+	//for (const LuaLibrary& it : _registeredLibraries) {
+	//	if (it.name == name)
+	//		return true;
+	//}
+	//return false;
 }
 
 bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
@@ -451,7 +463,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     lua_setglobal(_state, _openspaceLibraryName.c_str());
 
 	LDEBUG("Add OpenSpace modules");
-	for (auto lib : _registeredLibraries)
+	for (const LuaLibrary& lib : _registeredLibraries)
 		registerLuaLibrary(state, lib);
 }
 
@@ -521,8 +533,8 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 
 		file << "Available commands:\n";
 		// Now write out the functions
-		for (auto library : _registeredLibraries) {
-			for (auto function : library.functions) {
+		for (const LuaLibrary& library : _registeredLibraries) {
+			for (const LuaLibrary::Function& function : library.functions) {
 
 				std::string functionName = concatenate(library.name, function.name);
 				file << padding << functionName;
@@ -534,14 +546,15 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 		file << std::endl;
 
 		// Now write out the functions definitions
-		for (auto library : _registeredLibraries) {
-			for (auto function : library.functions) {
+		for (const LuaLibrary& library : _registeredLibraries) {
+			for (const LuaLibrary::Function& function : library.functions) {
 
 				std::string functionName = concatenate(library.name, function.name);
 				file << functionName << "(" << function.argumentText << "):" << std::endl;
 
 				std::string remainingHelptext = function.helpText;
 
+				// @CLEANUP This needs to become a bit prettier ---abock
 				while (!remainingHelptext.empty()) {
 					const auto length = remainingHelptext.length();
 					const auto paddingLength = padding.length();

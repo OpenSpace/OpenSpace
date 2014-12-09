@@ -422,7 +422,7 @@ void RenderEngine::render()
 			const glm::vec4 blue(0, 0, 1, 1);
 
 			size_t nr = 1;
-			for (auto it = entries.first; it != entries.second; ++it) {
+			for (auto& it = entries.first; it != entries.second; ++it) {
 				const ScreenLog::LogEntry* e = &(*it);
 
 				const double t = sgct::Engine::instance()->getTime();

@@ -107,10 +107,8 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
     unsigned char* buffer_data = (unsigned char*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if (!buffer_data)
         return;
-	int totalSize = 0;
     for (int n = 0; n < nCommandLists; ++n) {
         const ImDrawList* cmd_list = commandLists[n];
-		totalSize += cmd_list->vtx_buffer.size() * sizeof(ImDrawVert);
         memcpy(buffer_data, &cmd_list->vtx_buffer[0], cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
         buffer_data += cmd_list->vtx_buffer.size() * sizeof(ImDrawVert);
     }
@@ -154,7 +152,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
 
 	int value = *p;
 	std::vector<OptionProperty::Option> options = p->options();
-	for (auto o : options) {
+	for (const OptionProperty::Option& o : options) {
 		ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
 		ImGui::SameLine();
 		ImGui::Text(o.description.c_str());
@@ -438,9 +436,9 @@ void GUI::renderPropertyWindow() {
 	//ImGui::ShowUserGuide();
 	ImGui::Spacing();
 
-	for (auto p : _propertiesByOwner) {
+	for (const auto& p : _propertiesByOwner) {
 		if (ImGui::CollapsingHeader(p.first.c_str())) {
-			for (auto prop : p.second) {
+			for (properties::Property* prop : p.second) {
 				if (_boolProperties.find(prop) != _boolProperties.end()) {
 					renderBoolProperty(prop, p.first);
 					continue;

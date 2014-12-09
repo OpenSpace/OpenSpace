@@ -85,11 +85,6 @@ public:
     void render(const RenderData& data);
 
     /*
-     * Prints the SceneGraph tree. For debugging purposes
-     */
-    void printChildren() const;
-
-    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;

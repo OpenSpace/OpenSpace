@@ -78,8 +78,6 @@ public:
 
     SceneGraphNode* childNode(const std::string& name);
 
-    void print() const;
-
 	const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
 
     void setRenderable(Renderable* renderable);

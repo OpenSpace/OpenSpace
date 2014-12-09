@@ -299,11 +299,9 @@ void ABuffer::openspaceSamplerCalls() {
 }
 
 void ABuffer::openspaceSamplers() {
-
 	std::ofstream f(absPath(generatedSamplersPath));
-	for (auto sampler : _samplers) {
+	for (const std::string& sampler : _samplers)
 		f << sampler << std::endl;
-	}
 	f.close();
 }
 

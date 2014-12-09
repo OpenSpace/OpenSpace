@@ -240,9 +240,8 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
     }
 
     // evaluate all the children, tail-recursive function(?)
-    for (auto& child : _children) {
+    for (SceneGraphNode* child : _children)
         child->evaluate(camera, psc());
-    }
 }
 
 void SceneGraphNode::render(const RenderData& data) {
@@ -268,9 +267,8 @@ void SceneGraphNode::render(const RenderData& data) {
 
     // evaluate all the children, tail-recursive function(?)
 
-    for (auto& child : _children) {
+    for (SceneGraphNode* child : _children)
         child->render(newData);
-    }
 }
 
 // set & get
@@ -398,21 +396,12 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
     if (this->name() == name)
         return this;
     else
-        for (auto it : _children) {
+        for (SceneGraphNode* it : _children) {
             SceneGraphNode* tmp = it->childNode(name);
-            if (tmp != nullptr) {
+            if (tmp != nullptr)
                 return tmp;
-            }
         }
     return nullptr;
-}
-
-void SceneGraphNode::print() const
-{
-    std::cout << name() << std::endl;
-    for (auto it : _children) {
-        it->print();
-    }
 }
 
 }  // namespace openspace

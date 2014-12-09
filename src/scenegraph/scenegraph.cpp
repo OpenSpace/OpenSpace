@@ -233,9 +233,8 @@ bool SceneGraph::deinitialize()
 
 	// clean up all programs
 	_programsToUpdate.clear();
-	for (auto program : _programs) {
+	for (ghoul::opengl::ProgramObject* program : _programs)
 		delete program;
-	}
 	_programs.clear();
     return true;
 }
@@ -252,7 +251,7 @@ void SceneGraph::update(const UpdateData& data)
 		OsEng.renderEngine().abuffer()->invalidateABuffer();
 #endif
 	}
-    for (auto node : _nodes)
+    for (SceneGraphNode* node : _nodes)
         node->update(data);
 }
 
@@ -267,7 +266,7 @@ void SceneGraph::render(const RenderData& data)
 	bool emptyProgramsToUpdate = _programsToUpdate.empty();
 		
 	_programUpdateLock.lock();
-	for (auto program : _programsToUpdate) {
+	for (ghoul::opengl::ProgramObject* program : _programsToUpdate) {
 		LDEBUG("Attempting to recompile " << program->name());
 		program->rebuildFromFile();
 	}
@@ -277,9 +276,8 @@ void SceneGraph::render(const RenderData& data)
 	if (!emptyProgramsToUpdate) {
 		LDEBUG("Setting uniforms");
 		// Ignore attribute locations
-		for (auto program : _programs) {
+		for (ghoul::opengl::ProgramObject* program : _programs)
 			program->setIgnoreSubroutineUniformLocationError(true);
-		}
 	}
 
 	if (_root)
@@ -291,7 +289,7 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	for (auto node : _nodes)
+	for (SceneGraphNode* node : _nodes)
 		node->deinitialize();
 
 	// deallocate the scene graph. Recursive deallocation will occur
@@ -389,7 +387,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     }
 
     // Initialize all nodes
-    for (auto node : _nodes) {
+    for (SceneGraphNode* node : _nodes) {
 		bool success = node->initialize();
         if (success)
             LDEBUG(node->name() << " initialized successfully!");
@@ -399,7 +397,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
-	for (auto node : _nodes)
+	for (SceneGraphNode* node : _nodes)
 		node->update({ Time::ref().currentTime() });
 
     // Calculate the bounding sphere for the scenegraph
@@ -459,9 +457,9 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	c->setRotation(la);
 
 
-	for (auto node : _nodes) {
-		std::vector<properties::Property*>&& properties = node->propertiesRecursive();
-		for (auto p : properties) {
+	for (SceneGraphNode* node : _nodes) {
+		std::vector<properties::Property*> properties = node->propertiesRecursive();
+		for (properties::Property* p : properties) {
 			OsEng.gui().registerProperty(p);
 		}
 	}
@@ -504,11 +502,6 @@ void SceneGraph::loadModule(const std::string& modulePath)
 
     // Print the tree
     //printTree(_root);
-}
-
-void SceneGraph::printChildren() const
-{
-    _root->print();
 }
 
 SceneGraphNode* SceneGraph::root() const
