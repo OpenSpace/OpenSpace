@@ -34,6 +34,10 @@
 #include <string>
 #include <vector>
 
+namespace ghoul {
+	class SharedMemory;
+}
+
 namespace openspace {
 
 namespace properties {
@@ -67,9 +71,20 @@ public:
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
+	void renderMainWindow();
+
 	void renderPropertyWindow();
+	void renderPerformanceWindow();
 
 	bool _isEnabled;
+
+	bool _showPropertyWindow;
+	bool _showPerformanceWindow;
+	bool _showHelp;
+
+
+	ghoul::SharedMemory* _performanceMemory;
+	float _minMaxValues[2];
 
 	std::set<properties::Property*> _boolProperties;
 	std::set<properties::Property*> _intProperties;
@@ -78,6 +93,7 @@ private:
 	std::set<properties::Property*> _vec3Properties;
 	std::set<properties::Property*> _stringProperties;
 	std::set<properties::Property*> _optionProperty;
+	std::set<properties::Property*> _triggerProperty;
 
 	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 };

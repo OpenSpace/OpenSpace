@@ -155,7 +155,7 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 	_program->setUniform("ModelTransform", glm::mat4(glm::dmat4(_stateMatrix)));
 
 	glBindVertexArray(_vao);
-	for (auto bound : _constellationBounds)
+	for (const ConstellationBound& bound : _constellationBounds) {
 		if (bound.isEnabled) {
 			glDrawArrays(
 				//GL_LINE_STRIP,
@@ -164,6 +164,7 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 				static_cast<GLsizei>(bound.nVertices)
 			);
 		}
+	}
 	glBindVertexArray(0);
 	_program->deactivate();
 }

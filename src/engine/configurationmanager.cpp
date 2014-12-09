@@ -100,7 +100,7 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 }
 
 bool ConfigurationManager::checkCompleteness() const {
-	std::list<std::string> requiredTokens = {
+	std::vector<std::string> requiredTokens = {
 		constants::configurationmanager::keyPaths,
 		constants::configurationmanager::keyCachePath,
 		constants::configurationmanager::keyFonts,
@@ -108,7 +108,7 @@ bool ConfigurationManager::checkCompleteness() const {
 	};
 
 	bool totalSuccess = true;
-	for (auto token : requiredTokens) {
+	for (const std::string& token : requiredTokens) {
 		bool success = hasKey(token);
 
 		if (!success)

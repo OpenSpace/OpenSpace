@@ -22,26 +22,27 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
-
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
+namespace properties {
 
-struct UpdateData {
-	double time;
-	double delta;
-	bool doPerformanceMeasurement;
-};
+TriggerProperty::TriggerProperty(std::string identifier, std::string guiName)
+	: Property(std::move(identifier), std::move(guiName))
+{}
 
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
+std::string TriggerProperty::className() const {
+	return "TriggerProperty";
 }
 
-#endif // __UPDATESTRUCTURES_H__
+bool TriggerProperty::setLua(lua_State* state) {
+	notifyListener();
+	return true;
+}
+
+void TriggerProperty::set(boost::any value) {
+	notifyListener();
+}
+
+} // namespace properties
+} // namespace openspace

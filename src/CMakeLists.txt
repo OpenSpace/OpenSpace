@@ -150,33 +150,7 @@ add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENS
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
 # cotire(OpenSpace)
-
-if (WIN32)
-    if(GHOUL_USE_DEVIL)
-        if (CMAKE_CL_64)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/DevIL.dll)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILU.dll)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win64/ILUT.dll)
-        else (CMAKE_CL_64)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/DevIL.dll)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILU.dll)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/il/lib/win32/ILUT.dll)
-        endif (CMAKE_CL_64)
-    endif(GHOUL_USE_DEVIL)
-    if(GHOUL_USE_FREEIMAGE)
-        if (CMAKE_CL_64)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/freeimage/lib/win64/FreeImage.dll)
-        else (CMAKE_CL_64)
-            set(OPENSPACE_DLL_LIBS ${OPENSPACE_DLL_LIBS} ${GHOUL_ROOT_DIR}/ext/freeimage/lib/win32/FreeImage.dll)
-        endif (CMAKE_CL_64)
-    endif(GHOUL_USE_FREEIMAGE)
-    foreach( file_i ${OPENSPACE_DLL_LIBS})
-        add_custom_command(TARGET OpenSpace POST_BUILD        # Adds a post-build event to MyTest
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-        "${file_i}"      # <--this is in-file
-        $<TARGET_FILE_DIR:OpenSpace>)
-    endforeach( file_i )
-endif(WIN32)
+GhoulCopySharedLibraries(OpenSpace)
 
 add_subdirectory(tests)
 

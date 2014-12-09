@@ -40,6 +40,7 @@
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/sharedmemory.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -72,6 +73,9 @@ namespace {
 
 namespace openspace {
 
+const std::string RenderEngine::PerformanceMeasurementSharedData =
+									"OpenSpacePerformanceMeasurementSharedData";
+
 namespace luascriptfunctions {
 
 /**
@@ -103,6 +107,21 @@ int visualizeABuffer(lua_State* L) {
 	return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* visualizeABuffer(bool):
+* Toggle the visualization of the ABuffer
+*/
+int setPerformanceMeasurement(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+	bool b = lua_toboolean(L, -1) != 0;
+	OsEng.renderEngine().setPerformanceMeasurements(b);
+	return 0;
+}
+
 } // namespace luascriptfunctions
 
 
@@ -114,6 +133,8 @@ RenderEngine::RenderEngine()
     , _showInfo(true)
     , _showScreenLog(true)
 	, _takeScreenshot(false)
+	, _doPerformanceMeasurements(false)
+	, _performanceMemory(nullptr)
 	, _visualizeABuffer(false)
 	, _visualizer(nullptr)
 {
@@ -124,6 +145,10 @@ RenderEngine::~RenderEngine()
     delete _mainCamera;
 	if (_visualizer)
 		delete _visualizer;
+
+	delete _performanceMemory;
+	if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
+		ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
 bool RenderEngine::initialize()
@@ -266,7 +291,11 @@ void RenderEngine::postSynchronizationPreDraw()
 	UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
     // update and evaluate the scene starting from the root node
-	_sceneGraph->update(a);
+	_sceneGraph->update({
+		Time::ref().currentTime(),
+		Time::ref().deltaTime(),
+		_doPerformanceMeasurements
+	});
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
@@ -320,7 +349,11 @@ void RenderEngine::render()
     // render the scene starting from the root node
 	if (!_visualizeABuffer) {
 		_abuffer->preRender();
-		_sceneGraph->render({ *_mainCamera, psc() });
+		_sceneGraph->render({
+			*_mainCamera,
+			psc(),
+			_doPerformanceMeasurements
+		});
 		_abuffer->postRender();
 
 		glEnable(GL_BLEND);
@@ -389,7 +422,7 @@ void RenderEngine::render()
 			const glm::vec4 blue(0, 0, 1, 1);
 
 			size_t nr = 1;
-			for (auto it = entries.first; it != entries.second; ++it) {
+			for (auto& it = entries.first; it != entries.second; ++it) {
 				const ScreenLog::LogEntry* e = &(*it);
 
 				const double t = sgct::Engine::instance()->getTime();
@@ -411,7 +444,10 @@ void RenderEngine::render()
 				if (alpha <= 0.0)
 					break;
 
-				std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				const std::string& message = e->message.substr(0, msg_length);
+				nr += std::count(message.begin(), message.end(), '\n');
+
 				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha, 
 					"%-14s %s%s",									// Format
 					e->timeString.c_str(),							// Time string
@@ -429,7 +465,9 @@ void RenderEngine::render()
 					color = blue;
 
 				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
-				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", e->message.substr(0, msg_length).c_str());
+
+				
+				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
 				++nr;
 			}
 		}
@@ -442,6 +480,9 @@ void RenderEngine::postDraw() {
 		sgct::Engine::instance()->takeScreenshot();
 		_takeScreenshot = false;
 	}
+
+	if (_doPerformanceMeasurements)
+		storePerformanceMeasurements();
 }
 
 void RenderEngine::takeScreenshot() {
@@ -544,9 +585,100 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				&luascriptfunctions::visualizeABuffer,
 				"bool",
 				"Toggles the visualization of the ABuffer"
+			},
+			{
+				"setPerformanceMeasurement",
+				&luascriptfunctions::setPerformanceMeasurement,
+				"bool",
+				"Sets the performance measurements"
 			}
 		},
 	};
+}
+
+void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
+	_doPerformanceMeasurements = performanceMeasurements;
+}
+
+bool RenderEngine::doesPerformanceMeasurements() const {
+	return _doPerformanceMeasurements;
+}
+
+void RenderEngine::storePerformanceMeasurements() {
+	const int8_t Version = 0;
+	const int nValues = 250;
+	const int lengthName = 256;
+	const int maxValues = 50;
+
+	struct PerformanceLayout {
+		int8_t version;
+		int32_t nValuesPerEntry;
+		int32_t nEntries;
+		int32_t maxNameLength;
+		int32_t maxEntries;
+		
+		struct PerformanceLayoutEntry {
+			char name[lengthName];
+			float renderTime[nValues];
+			float updateRenderable[nValues];
+			float updateEphemeris[nValues];
+
+			int32_t currentRenderTime;
+			int32_t currentUpdateRenderable;
+			int32_t currentUpdateEphemeris;
+		};
+
+		PerformanceLayoutEntry entries[maxValues];
+	};
+
+	const int nNodes = sceneGraph()->allSceneGraphNodes().size();
+	if (!_performanceMemory) {
+
+		// Compute the total size
+		const int totalSize = sizeof(int8_t) + 4 * sizeof(int32_t) +
+							maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
+		LINFO("Create shared memory of " << totalSize << " bytes");
+
+		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
+		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
+
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+		layout->version = Version;
+		layout->nValuesPerEntry = nValues;
+		layout->nEntries = nNodes;
+		layout->maxNameLength = lengthName;
+		layout->maxEntries = maxValues;
+
+		memset(layout->entries, 0, maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
+
+		for (int i = 0; i < nNodes; ++i) {
+			SceneGraphNode* node = sceneGraph()->allSceneGraphNodes()[i];
+
+			memset(layout->entries[i].name, 0, lengthName);
+			strcpy(layout->entries[i].name, node->name().c_str());
+
+			layout->entries[i].currentRenderTime = 0;
+			layout->entries[i].currentUpdateRenderable = 0;
+			layout->entries[i].currentUpdateEphemeris = 0;
+		}
+	}
+
+	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+	_performanceMemory->acquireLock();
+	for (int i = 0; i < nNodes; ++i) {
+		SceneGraphNode* node = sceneGraph()->allSceneGraphNodes()[i];
+		SceneGraphNode::PerformanceRecord r = node->performanceRecord();
+		PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
+
+		entry.renderTime[entry.currentRenderTime] = r.renderTime / 1000.f;
+		entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
+		entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
+
+		entry.currentRenderTime = (entry.currentRenderTime + 1) % nValues;
+		entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % nValues;
+		entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % nValues;
+	}
+	_performanceMemory->releaseLock();
 }
 
 }  // namespace openspace

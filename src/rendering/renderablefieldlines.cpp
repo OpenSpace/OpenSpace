@@ -214,7 +214,7 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 		_seedPoints.clear();
 		if (hintsDictionary.hasKey("Seedpoints") && hintsDictionary.getValue("Seedpoints", seedpointsDictionary)) {
 			glm::vec3 seedPos;
-			for (auto index : seedpointsDictionary.keys()) {
+			for (const std::string& index : seedpointsDictionary.keys()) {
 				hintsDictionary.getValue("Seedpoints."+index, seedPos);
 				_seedPoints.push_back(seedPos);
 			}

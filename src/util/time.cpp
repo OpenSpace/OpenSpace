@@ -203,8 +203,9 @@ void Time::setTime(std::string time) {
 std::string Time::currentTimeUTC() const {
 	std::string date;
 	SpiceManager::ref().getDateFromET(_time, date);
-	return std::move(date);
+	return date;
 }
+
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 	scripting::ScriptEngine::LuaLibrary timeLibrary = {
 		"time",
@@ -248,7 +249,7 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 			}
 		}
 	};
-	return std::move(timeLibrary);
+	return timeLibrary;
 }
 
 } // namespace openspace

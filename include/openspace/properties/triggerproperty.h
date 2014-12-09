@@ -22,86 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef __TRIGGERPROPERTY_H__
+#define __TRIGGERPROPERTY_H__
 
-#include <openspace/scripting/scriptengine.h>
-
-namespace ghoul {
-	class SharedMemory;
-}
+#include <openspace/properties/property.h>
 
 namespace openspace {
+namespace properties {
 
-// Forward declare to minimize dependencies
-class Camera;
-class SyncBuffer;
-class SceneGraph;
-class ABuffer;
-class ABufferVisualizer;
-class ScreenLog;
-
-class RenderEngine {
+/**
+ * TriggerProperty that can be used to fire events into your code using the callback
+ * method #onChange.
+ */
+class TriggerProperty : public Property {
 public:
-	static const std::string PerformanceMeasurementSharedData;
-
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
-
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
-
-    Camera* camera() const;
-    ABuffer* abuffer() const;
-
-	// sgct wrapped functions
-    bool initializeGL();
-    void postSynchronizationPreDraw();
-    void render();
-    void postDraw();
-
-	void takeScreenshot();
-	void toggleVisualizeABuffer(bool b);
-
-	void setPerformanceMeasurements(bool performanceMeasurements);
-	bool doesPerformanceMeasurements() const;
-
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
-	
 	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * - openspace::luascriptfunctions::visualizeABuffer
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
+	 * Initializes the TriggerProperty by delegating the <code>identifier</code> and
+	 * <code>guiName</code> to the Property constructor.
+	 * \param identifier The unique identifier used for this Property
+	 * \param guiName The human-readable name of this Property
 	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+	TriggerProperty(std::string identifier, std::string guiName);
 
-private:
-	void storePerformanceMeasurements();
+	/**
+	 * Returns the class name <code>TriggerProperty</code>.
+	 * \return The class name <code>TriggerProperty</code>
+	 */
+	std::string className() const;
 
-	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
-	ABuffer* _abuffer;
-	ScreenLog* _log;
+	/**
+	 * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
+	 * that the event has been triggered.
+	 * \param state The unused Lua state 
+	 * \return Returns always <code>true</code>
+	 */
+	bool setLua(lua_State* state);
 
-	bool _showInfo;
-	bool _showScreenLog;
-	bool _takeScreenshot;
-
-	bool _doPerformanceMeasurements;
-	ghoul::SharedMemory* _performanceMemory;
-
-	void generateGlslConfig();
-
-	bool _visualizeABuffer;
-	ABufferVisualizer* _visualizer;
+	/**
+	 * Silently ignores any value that is passed into this function and will trigger the
+	 * listeners regardless of the value
+	 * \param value The ignored value
+	 */
+	void set(boost::any value);
 };
 
+} // namespace properties
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif // __TRIGGERPROPERTY_H__
