@@ -27,6 +27,10 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+namespace ghoul {
+	class SharedMemory;
+}
+
 namespace openspace {
 
 // Forward declare to minimize dependencies
@@ -59,6 +63,8 @@ public:
 	void takeScreenshot();
 	void toggleVisualizeABuffer(bool b);
 
+	void setPerformanceMeasurements(bool performanceMeasurements);
+
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);
 	
@@ -72,8 +78,9 @@ public:
 	 */
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-
 private:
+	void storePerformanceMeasurements();
+
 	Camera* _mainCamera;
 	SceneGraph* _sceneGraph;
 	ABuffer* _abuffer;
@@ -82,6 +89,9 @@ private:
 	bool _showInfo;
 	bool _showScreenLog;
 	bool _takeScreenshot;
+
+	bool _doPerformanceMeasurements;
+	ghoul::SharedMemory* _performanceMemory;
 
 	void generateGlslConfig();
 

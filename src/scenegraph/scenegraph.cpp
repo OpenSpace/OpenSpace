@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
@@ -34,7 +33,6 @@
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/gui.h>
 
-// ghoul includes
 #include "ghoul/logging/logmanager.h"
 #include "ghoul/opengl/programobject.h"
 #include "ghoul/io/texture/texturereader.h"
@@ -524,6 +522,10 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
         return nullptr;
     else
         return it->second;
+}
+
+std::vector<SceneGraphNode*> SceneGraph::allSceneGraphNodes() const {
+	return _nodes;
 }
 
 scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
