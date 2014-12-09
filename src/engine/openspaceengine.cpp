@@ -174,6 +174,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 	_engine->_console.loadHistory();
 
+	// Register the provided shader directories
+	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
+
 	_engine->_syncBuffer = new SyncBuffer(1024);
 
 	// Determining SGCT configuration file
