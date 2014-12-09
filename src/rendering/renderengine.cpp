@@ -411,7 +411,10 @@ void RenderEngine::render()
 				if (alpha <= 0.0)
 					break;
 
-				std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+				const std::string& message = e->message.substr(0, msg_length);
+				nr += std::count(message.begin(), message.end(), '\n');
+
 				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha, 
 					"%-14s %s%s",									// Format
 					e->timeString.c_str(),							// Time string
@@ -429,7 +432,9 @@ void RenderEngine::render()
 					color = blue;
 
 				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
-				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", e->message.substr(0, msg_length).c_str());
+
+				
+				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
 				++nr;
 			}
 		}
