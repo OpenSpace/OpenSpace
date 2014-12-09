@@ -216,6 +216,7 @@ GUI::GUI()
 }
 
 GUI::~GUI() {
+	delete _performanceMemory;
 	ImGui::Shutdown();
 }
 
@@ -480,7 +481,7 @@ void GUI::renderPropertyWindow() {
 void GUI::renderPerformanceWindow() {
 	// Copy and paste from renderengine.cpp::storePerformanceMeasurements method
 	const int8_t Version = 0;
-	const int nValues = 1000;
+	const int nValues = 250;
 	const int lengthName = 256;
 	const int maxValues = 50;
 
@@ -512,9 +513,8 @@ void GUI::renderPerformanceWindow() {
 		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
 		_minMaxValues[1] = std::max(_minMaxValues[0], _minMaxValues[1]);
 
-		if (!_performanceMemory) {
+		if (!_performanceMemory)
 			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
-		}
 
 		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
 

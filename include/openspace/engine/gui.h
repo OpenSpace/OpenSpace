@@ -82,6 +82,7 @@ private:
 	bool _showPerformanceWindow;
 	bool _showHelp;
 
+
 	ghoul::SharedMemory* _performanceMemory;
 	float _minMaxValues[2];
 
