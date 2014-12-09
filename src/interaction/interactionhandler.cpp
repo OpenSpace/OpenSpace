@@ -847,27 +847,32 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 			{
 				"setOrigin",
 				&luascriptfunctions::setOrigin,
-				"setOrigin(): set the camera origin node by name"
+				"string",
+				"Set the camera origin node by name"
 			},
 			{
 				"clearKeys",
 				&luascriptfunctions::clearKeys,
-				"clearKeys(): Clear all key bindings"
+				"",
+				"Clear all key bindings"
 			},
 			{
 				"bindKey",
 				&luascriptfunctions::bindKey,
-				"bindKey(): binds a key by name to a lua string command"
+				"string, string",
+				"Binds a key by name to a lua string command"
 			},
 			{
 				"dt",
 				&luascriptfunctions::dt,
-				"dt(): Get current frame time"
+				"",
+				"Get current frame time"
 			},
 			{
 				"distance",
 				&luascriptfunctions::distance,
-				"distance(): Change distance to origin"
+				"number",
+				"Change distance to origin"
 			}
 		}
 	};

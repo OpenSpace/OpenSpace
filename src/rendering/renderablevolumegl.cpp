@@ -34,7 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 
 // std
@@ -165,6 +165,11 @@ RenderableVolumeGL::~RenderableVolumeGL() {
         delete _transferFunctionFile;
     if(_transferFunction)
         delete _transferFunction;
+}
+
+bool RenderableVolumeGL::isReady() const {
+	// @TODO needs a proper isReady definition --abock
+	return true;
 }
 
 bool RenderableVolumeGL::initialize() {

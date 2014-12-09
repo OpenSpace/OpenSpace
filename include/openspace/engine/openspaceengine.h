@@ -29,12 +29,12 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
-
+#include <openspace/engine/gui.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
+class GUI;
 class SyncBuffer;
 class LuaConsole;
 
@@ -59,6 +59,8 @@ public:
 	scripting::ScriptEngine& scriptEngine();
 	LuaConsole& console();
 
+	GUI& gui();
+
     // SGCT callbacks
     bool initializeGL();
     void preSynchronization();
@@ -78,13 +80,14 @@ public:
 
 private:
     OpenSpaceEngine(std::string programName);
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() = default;
 
 	void clearAllWindows();
 	bool gatherCommandlineArguments();
 	bool loadSpiceKernels();
 	void runStartupScripts();
 	void loadFonts();
+	void configureLogging();
 
     static OpenSpaceEngine* _engine;
 
@@ -94,6 +97,7 @@ private:
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 	LuaConsole _console;
+	GUI _gui;
 
 	SyncBuffer* _syncBuffer;
 

@@ -36,10 +36,11 @@ endif ()
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(OPENSPACE_BINARY_DIR ${OPENSPACE_BASE_DIR}/bin/openspace)
 set(OPENSPACE_LIBRARY_DIR ${OPENSPACE_BASE_DIR}/bin/lib)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
@@ -67,6 +68,12 @@ include_directories("${GHOUL_ROOT_DIR}/include")
 set(BOOST_ROOT "${GHOUL_ROOT_DIR}/ext/boost")
 add_subdirectory(${GHOUL_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
+if (GHOUL_USE_FREEIMAGE)
+    add_definitions(-DGHOUL_USE_FREEIMAGE)
+endif ()
+if (GHOUL_USE_DEVIL)
+    add_definitions(-DGHOUL_USE_DEVIL)
+endif ()
 
 # Add ghoul ext
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
@@ -96,9 +103,9 @@ include_directories("${LUA_ROOT_DIR}/include")
 
 # Spice
 set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")
-include_directories("${SPICE_ROOT_DIR}/include")
-add_subdirectory(${SPICE_ROOT_DIR})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Spice)
+find_package(Spice REQUIRED)
+include_directories(${SPICE_INCLUDE_DIRS})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SPICE_LIBRARIES})
 
 # Kameleon
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)

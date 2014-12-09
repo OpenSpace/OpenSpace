@@ -175,7 +175,7 @@ void SceneGraphNode::update(const UpdateData& data)
 {
 	if (_ephemeris)
 		_ephemeris->update(data);
-	if (_renderable)
+	if (_renderable && _renderable->isReady())
 		_renderable->update(data);
 }
 
@@ -232,7 +232,7 @@ void SceneGraphNode::render(const RenderData& data)
         return;
     }*/
 
-    if (_renderableVisible && _renderable->isVisible()) {
+    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady()) {
         // LDEBUG("Render");
 		_renderable->render(newData);
     }
@@ -309,7 +309,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         if(renderableBS > _boundingSphere)
             _boundingSphere = renderableBS;
     }
-	LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
+	//LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
 	
     return _boundingSphere;
 }
@@ -326,6 +326,10 @@ void SceneGraphNode::setRenderable(Renderable* renderable) {
 const Renderable* SceneGraphNode::renderable() const
 {
     return _renderable;
+}
+
+Renderable* SceneGraphNode::renderable() {
+	return _renderable;
 }
 
 // private helper methods

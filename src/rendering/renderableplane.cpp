@@ -28,7 +28,7 @@
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem>
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -47,6 +47,7 @@ namespace openspace {
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _texturePath("texture", "Texture")
+	, _billboard("billboard", "Billboard", false)
 	, _size(glm::vec2(1,1))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
@@ -75,6 +76,12 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 		}
 	}
 
+	// Attempt to get the billboard value
+	bool billboard = false;
+	if (dictionary.getValue("Billboard", billboard)) {
+		_billboard = billboard;
+	}
+
 	std::string texturePath = "";
 	bool success = dictionary.getValue("Texture", texturePath);
 	if (success)
@@ -88,6 +95,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 }
 
 RenderablePlane::~RenderablePlane() {
+}
+
+bool RenderablePlane::isReady() const {
+	return _shader != nullptr;
 }
 
 bool RenderablePlane::initialize() {
@@ -121,11 +132,11 @@ bool RenderablePlane::initialize() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
 	OsEng.ref().configurationManager().getValue("PlaneProgram", _shader);
-	assert(_shader);
+
+	if (!_shader)
+		return false;
 
 	loadTexture();
-
-
 
 	return true;
 }
@@ -142,6 +153,8 @@ void RenderablePlane::render(const RenderData& data) {
 		return;
 
 	glm::mat4 transform = glm::mat4(1.0);
+	if (_billboard)
+		transform = glm::inverse(data.camera.viewRotationMatrix());
 	//transform = glm::scale(transform, glm::vec3(0.01));
 
 	// Activate shader
@@ -170,7 +183,7 @@ void RenderablePlane::loadTexture()
 	LDEBUG("loadTexture");
 	if (_texturePath.value() != "") {
 		LDEBUG("loadTexture2");
-		ghoul::opengl::Texture* texture = ghoul::opengl::loadTexture(absPath(_texturePath));
+		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();

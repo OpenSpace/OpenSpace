@@ -37,6 +37,8 @@ public:
 	LuaConsole();
 	~LuaConsole();
 
+	void loadHistory();
+
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);
 
@@ -67,6 +69,8 @@ private:
 	size_t _activeCommand;
 	std::vector<std::string> _commands;
 	
+	std::string _filename;
+
 	bool _isVisible;
 };
 

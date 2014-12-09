@@ -29,6 +29,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
+#include <iomanip>
 
 namespace openspace {
 
@@ -208,14 +209,21 @@ void ScriptEngine::deinitialize() {
     _state = nullptr;
 }
 
-void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
+void ScriptEngine::addLibrary(LuaLibrary library) {
+	auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
+	{
+		return lhs.name < rhs.name;
+	};
+
 	// do we have a library with the same name as the incoming one
 	auto it = std::find_if(_registeredLibraries.begin(), _registeredLibraries.end(),
 		[&library](const LuaLibrary& lib) { return lib.name == library.name; });
 
-	if (it == _registeredLibraries.end())
-		// If not, we can add it
-		_registeredLibraries.insert(library);
+	if (it == _registeredLibraries.end()) {
+		// If not, we can add it after we sorted it
+		std::sort(library.functions.begin(), library.functions.end(), sortFunc);
+		_registeredLibraries.insert(std::move(library));
+	}
 	else {
 		// otherwise, we merge the libraries
 
@@ -235,7 +243,10 @@ void ScriptEngine::addLibrary(const ScriptEngine::LuaLibrary& library) {
 		}
 
 		_registeredLibraries.erase(it);
-		_registeredLibraries.insert(merged);
+
+		// Sort the merged library before inserting it
+		std::sort(merged.functions.begin(), merged.functions.end(), sortFunc);
+		_registeredLibraries.insert(std::move(merged));
 	}
 }
 
@@ -371,43 +382,50 @@ void ScriptEngine::addBaseLibrary() {
             {
 				"printDebug",
 				&luascriptfunctions::printDebug,
-				"printDebug(*): Logs the passed value to the installed LogManager with a "
+				"*",
+				"Logs the passed value to the installed LogManager with a "
 				"LogLevel of 'Debug'"
 			},
 			{
 				"printInfo",
 				&luascriptfunctions::printInfo,
-				"printInfo(*): Logs the passed value to the installed LogManager with a "
+				"*",
+				"Logs the passed value to the installed LogManager with a "
 				" LogLevel of 'Info'"
 			},
 			{
 				"printWarning",
 				&luascriptfunctions::printWarning,
-				"printWarning(*): Logs the passed value to the installed LogManager with "
+				"*",
+				"Logs the passed value to the installed LogManager with "
 				"a LogLevel of 'Warning'"
 			},
 			{
 				"printError",
 				&luascriptfunctions::printError,
-				"printError(*): Logs the passed value to the installed LogManager with a "
+				"*",
+				"Logs the passed value to the installed LogManager with a "
 				"LogLevel of 'Error'"
 			},
 			{
 				"printFatal",
 				&luascriptfunctions::printFatal,
-				"printFatal(*): Logs the passed value to the installed LogManager with a "
+				"*",
+				"Logs the passed value to the installed LogManager with a "
 				"LogLevel of 'Fatal'"
 			},
 			{
 				"absPath",
 				&luascriptfunctions::absolutePath,
-				"absPath(string): Returns the absolute path to the passed path, resolving"
+				"string",
+				"Returns the absolute path to the passed path, resolving"
 				" path tokens as well as resolving relative paths"
 			},
 			{
 				"setPathToken",
 				&luascriptfunctions::setPathToken,
-				"setPathToken(string, string): Registers a new path token provided by the"
+				"string, string",
+				"Registers a new path token provided by the"
 				" first argument to the path provided in the second argument"
 			}
         }
@@ -473,6 +491,84 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
 		//_registeredLibraries.push_back(library);
     }
     return true;
+}
+
+bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
+	if (type == "text") {
+		// The additional space between the longest function name and the descriptions
+		const size_t AdditionalSpace = 5;
+		LDEBUG("Writing Lua documentation of type '" << type <<
+			"' to file '" << filename << "'");
+		std::ofstream file(filename);
+		if (!file.good()) {
+			LERROR("Could not open file '" << filename << "' for writing documentation");
+			return false;
+		}
+
+		auto concatenate = [](std::string library, std::string function) {
+			std::string total = "openspace.";
+			if (!library.empty())
+				total += std::move(library) + ".";
+			total += std::move(function);
+			return std::move(total);
+		};
+
+		// Settings
+		const unsigned int lineWidth = 80;
+		static const std::string whitespace = " \t";
+		static const std::string padding = "    ";
+		const bool commandListArguments = true;
+
+		file << "Available commands:\n";
+		// Now write out the functions
+		for (auto library : _registeredLibraries) {
+			for (auto function : library.functions) {
+
+				std::string functionName = concatenate(library.name, function.name);
+				file << padding << functionName;
+				if (commandListArguments)
+					file << "(" << function.argumentText << ")";
+				file << std::endl;
+			}
+		}
+		file << std::endl;
+
+		// Now write out the functions definitions
+		for (auto library : _registeredLibraries) {
+			for (auto function : library.functions) {
+
+				std::string functionName = concatenate(library.name, function.name);
+				file << functionName << "(" << function.argumentText << "):" << std::endl;
+
+				std::string remainingHelptext = function.helpText;
+
+				while (!remainingHelptext.empty()) {
+					const auto length = remainingHelptext.length();
+					const auto paddingLength = padding.length();
+					if ((length + paddingLength) > lineWidth) {
+						auto lastSpace = remainingHelptext.find_last_of(whitespace, lineWidth - 1 - paddingLength);
+						if (lastSpace == remainingHelptext.npos)
+							lastSpace = lineWidth;
+						file << padding << remainingHelptext.substr(0, lastSpace) << std::endl;
+						auto firstNotSpace = remainingHelptext.find_first_not_of(whitespace, lastSpace);
+						if (firstNotSpace == remainingHelptext.npos)
+							firstNotSpace = lastSpace;
+						remainingHelptext = remainingHelptext.substr(firstNotSpace);
+					}
+					else {
+						file << padding << remainingHelptext << std::endl;
+						remainingHelptext = "";
+					}
+				}
+				file << std::endl;
+			}
+		}
+		return true;
+	}
+	else {
+		LERROR("Undefined type '" << type << "' for Lua documentation");
+		return false;
+	}
 }
 
 

@@ -140,6 +140,10 @@ RenderableSphericalGrid::~RenderableSphericalGrid(){
 	deinitialize();
 }
 
+bool RenderableSphericalGrid::isReady() const {
+	return _gridProgram != nullptr;
+}
+
 bool RenderableSphericalGrid::deinitialize(){
 	return true;
 }

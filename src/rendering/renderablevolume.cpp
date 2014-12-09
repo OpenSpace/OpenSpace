@@ -30,7 +30,7 @@
 #include <openspace/util/progressbar.h>
 
 // ghoul includes
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 
@@ -294,7 +294,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     // check if not a txt based texture
     if ( ! hasExtension(filepath, "txt")) {
-        ghoul::opengl::Texture* t = ghoul::opengl::loadTexture(f);
+        ghoul::opengl::Texture* t = ghoul::io::TextureReader::loadTexture(f);
         t->setWrapping(wrappingmode);
         return t;
     }

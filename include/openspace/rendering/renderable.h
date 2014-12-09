@@ -55,6 +55,8 @@ public:
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
 
+	virtual bool isReady() const = 0;
+
     void setBoundingSphere(const PowerScaledScalar& boundingSphere);
     const PowerScaledScalar& getBoundingSphere();
 

@@ -42,6 +42,9 @@ public:
 	bool setLua(lua_State* state) override;
 	int typeLua() const override;
 
+	T minValue() const;
+	T maxValue() const;
+
     virtual std::string className() const override;
 
     using TemplateProperty<T>::operator=;

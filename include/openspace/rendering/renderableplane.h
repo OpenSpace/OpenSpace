@@ -47,8 +47,10 @@ public:
 	RenderablePlane(const ghoul::Dictionary& dictionary);
 	~RenderablePlane();
 
-	bool initialize();
-	bool deinitialize();
+	bool initialize() override;
+	bool deinitialize() override;
+
+	bool isReady() const override;
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
@@ -57,6 +59,7 @@ private:
 	void loadTexture();
 
 	properties::StringProperty _texturePath;
+	properties::BoolProperty _billboard;
 
 	glm::vec2 _size;
 	Origin _origin;

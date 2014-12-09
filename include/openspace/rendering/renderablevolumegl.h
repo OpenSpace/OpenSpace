@@ -46,8 +46,10 @@ public:
 	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
 	~RenderableVolumeGL();
     
-	bool initialize();
-    bool deinitialize();
+	bool initialize() override;
+    bool deinitialize() override;
+
+	bool isReady() const override;
 
 	virtual void render(const RenderData& data) override;
 	virtual void update(const UpdateData& data) override;

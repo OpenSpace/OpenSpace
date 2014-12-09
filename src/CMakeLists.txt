@@ -126,15 +126,14 @@ file(GLOB INTERFACE_HEADER ${HEADER_ROOT_DIR}/openspace/interface/*.h)
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${INTERFACE_HEADER})
 source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
 
-include_directories(${HEADER_ROOT_DIR})
 
-# hack:
-#set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${OPENSPACE_EXT_DIR}/tinythread.cpp)
+include_directories(${HEADER_ROOT_DIR})
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
-find_package(OpenCL REQUIRED)
-include_directories(${OPENCL_INCLUDE_DIRS})
-
+include_directories(${CMAKE_SOURCE_DIR}/ext/imgui)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.h)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.cpp)
+source_group(ext\\imgui FILES ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.h ${CMAKE_SOURCE_DIR}/ext/imgui/imgui.cpp)
 
 if (APPLE)
 	add_definitions(-D__APPLE__)

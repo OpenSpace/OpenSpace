@@ -25,7 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -73,8 +73,8 @@ namespace openspace{
 			_g = 1 / _c[1];
 			_b = 1 / _c[2];
 		}
-}
-void RenderablePath::fullYearSweep(){
+	}
+	void RenderablePath::fullYearSweep(){
 		double lightTime = 0.0;
 		SpiceManager::ref().getETfromDate("2006 jan 20 19:00:00", _time);
 
@@ -131,6 +131,10 @@ void RenderablePath::fullYearSweep(){
 
 	RenderablePath::~RenderablePath(){
 		deinitialize();
+	}
+
+	bool RenderablePath::isReady() const {
+		return _programObject != nullptr;
 	}
 
 	bool RenderablePath::initialize(){
@@ -195,16 +199,16 @@ void RenderablePath::fullYearSweep(){
 		_programObject->setUniform("ModelTransform", transform);
 		setPscUniforms(_programObject, &data.camera, data.position);
 
-/*		glBindVertexArray(_vaoID);
-		glDrawArrays(_mode, 0, _vtotal);
-		glBindVertexArray(0);
-	*/	
+		/*	glBindVertexArray(_vaoID);
+			glDrawArrays(_mode, 0, _vtotal);
+			glBindVertexArray(0);
+			*/
 		glPointSize(2.f);
 
 		glBindVertexArray(_vaoID);
 		glDrawArrays(GL_POINTS, 0, _vtotal);
 		glBindVertexArray(0);
-		
+
 		_programObject->deactivate();
 	}
 
@@ -217,17 +221,17 @@ void RenderablePath::fullYearSweep(){
 		SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, _pscpos, _pscvel, lightTime);
 	}
 
+
 	void RenderablePath::loadTexture()
 	{
 		delete _texture;
 		_texture = nullptr;
 		if (_colorTexturePath.value() != "") {
-			_texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
+			_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
 			if (_texture) {
 				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 				_texture->uploadTexture();
 			}
 		}
 	}
-
 }

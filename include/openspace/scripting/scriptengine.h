@@ -42,6 +42,7 @@ public:
 		struct Function {
 			std::string name;
 			lua_CFunction function;
+			std::string argumentText;
 			std::string helpText;
 		};
         std::string name;
@@ -57,12 +58,13 @@ public:
     
 	void initializeLuaState(lua_State* state);
 
-	void addLibrary(const LuaLibrary& library);
+	void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
     
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
 
+	bool writeDocumentation(const std::string& filename, const std::string& type) const;
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);

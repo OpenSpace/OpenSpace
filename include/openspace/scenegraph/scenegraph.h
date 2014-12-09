@@ -112,7 +112,7 @@ public:
 private:
 	bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
 
-    std::string _focus, _position;
+    std::string _focus;
 
     // actual scenegraph
     SceneGraphNode* _root;

@@ -44,6 +44,8 @@ namespace openspace {
 		bool initialize() override;
 		bool deinitialize() override;
 
+		bool isReady() const override;
+
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 	private:

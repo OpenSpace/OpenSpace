@@ -27,7 +27,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
-#include <ghoul/opengl/texturereader.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -46,8 +46,6 @@ const std::string _loggerCat = "RenderablePlanetProjection";
 }
 
 namespace openspace {
-
-
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
@@ -123,6 +121,10 @@ bool RenderablePlanetProjection::deinitialize(){
 	delete _textureProj;
 	_textureProj = nullptr;
     return true;
+}
+
+bool RenderablePlanetProjection::isReady() const {
+	return (_geometry != nullptr);
 }
 
 void RenderablePlanetProjection::render(const RenderData& data)
@@ -370,7 +372,7 @@ void RenderablePlanetProjection::loadTexture()
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::opengl::loadTexture(absPath(_colorTexturePath));
+		_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
@@ -384,7 +386,7 @@ void RenderablePlanetProjection::loadTexture()
 	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureProj = ghoul::opengl::loadTexture(absPath(_projectionTexturePath));
+		_textureProj = ghoul::io::TextureReader::loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
 			LDEBUG("Loaded texture from '" << absPath(_projectionTexturePath) << "'");
 			_textureProj->uploadTexture();

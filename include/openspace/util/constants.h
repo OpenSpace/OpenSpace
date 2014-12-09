@@ -42,10 +42,16 @@ namespace configurationmanager {
 	const std::string keyCachePath = keyPaths + "." + keyCache;
 	const std::string keyFonts = "Fonts";
     const std::string keyConfigSgct = "SGCTConfig";
+	const std::string keyLuaDocumentationType = "LuaDocumentationFile.Type";
+	const std::string keyLuaDocumentationFile = "LuaDocumentationFile.File";
     const std::string keyConfigScene = "Scene";
+	const std::string keyEnableGui = "EnableGUI";
     const std::string keyStartupScript = "StartupScripts";
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
+	const std::string keyLogLevel = "Logging.LogLevel";
+	const std::string keyLogImmediateFlush = "Logging.ImmediateFlush";
+	const std::string keyLogs = "Logging.Logs";
 } // namespace configurationmanager
 
 namespace scenegraph {
@@ -90,6 +96,7 @@ namespace modelgeometry {
 namespace renderablestars {
 	const std::string keyFile = "File";
 	const std::string keyTexture = "Texture";
+	const std::string keyColorMap = "ColorMap";
 } // namespace renderablestars
 
 namespace renderablevolumegl {

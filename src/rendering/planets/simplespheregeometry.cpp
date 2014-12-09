@@ -44,7 +44,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     : PlanetGeometry()
     , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
               glm::vec2(10.f, 20.f))
-    , _segments("segments", "Segments", 20, 1, 1000)
+    , _segments("segments", "Segments", 20, 1, 50)
     , _planet(nullptr)
 {
 	using constants::scenegraphnode::keyName;

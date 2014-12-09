@@ -79,11 +79,10 @@ bool ABuffer::initializeABuffer() {
 	_resolveShader = ghoul::opengl::ProgramObject::Build(
 		"ABufferResolve",
 		"${SHADERS}/ABuffer/abufferResolveVertex.glsl",
-		"${SHADERS}/ABuffer/abufferResolveFragment.glsl",
-		shaderCallback);
-
+		"${SHADERS}/ABuffer/abufferResolveFragment.glsl");
 	if (!_resolveShader)
 		return false;
+	_resolveShader->setProgramObjectCallback(shaderCallback);
     
 #ifndef __APPLE__
     // ============================

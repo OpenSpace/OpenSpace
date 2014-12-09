@@ -52,6 +52,8 @@ namespace properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
+	typedef T ValueType;
+
 	/**
 	 * The constructor initializing the TemplateProperty with the provided
 	 * <code>identifier</code> and human-readable <code>guiName</code>. The default value
@@ -158,7 +160,7 @@ public:
 	 * <code>T</code>. If the value are different, the listeners are notified.
 	 * \param val The new value for this TemplateProperty
 	 */
-    void setValue(T val);
+    virtual void setValue(T val);
 
 	/**
 	 * Returns the currently stored value.

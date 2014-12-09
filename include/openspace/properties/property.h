@@ -167,6 +167,15 @@ public:
 	 * \return The unique identifier of this Property
 	 */
     const std::string& identifier() const;
+	
+	/**
+	 * Returns the fully qualified name for this Property that uniquely identifies this
+	 * Property within OpenSpace. It consists of the <code>identifier</code> preceded by
+	 * all levels of PropertyOwner%s separated with <code>.</code>; for example:
+	 * <code>owner1.owner2.identifier</code>.
+	 * \return The fully qualified identifier for this Property
+	 */
+	std::string fullyQualifiedIdentifier() const;
 
 	/**
 	 * Returns the PropertyOwner of this Property or <code>nullptr</code>, if it does not
@@ -189,7 +198,7 @@ public:
 	 * key.
 	 * \return The human-readable GUI name for this Property
 	 */
-	const std::string& guiName() const;
+	std::string guiName() const;
 
 	/**
 	 * Sets the identifier of the group that this Property belongs to. Property groups can
