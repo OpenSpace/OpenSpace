@@ -65,7 +65,7 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const
 {
 	std::vector<Property*> props = properties();
 
-	for (auto owner : _subOwners) {
+	for (const PropertyOwner* owner : _subOwners) {
 		std::vector<Property*> p = owner->propertiesRecursive();
 		props.insert(props.end(), p.begin(), p.end());
 	}

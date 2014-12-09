@@ -37,7 +37,7 @@ SelectionProperty::SelectionProperty(std::string identifier, std::string guiName
 
 void SelectionProperty::addOption(Option option) {
 	// @COPY-N-PASTE from optionproperty.cpp, possible refactoring? ---abock
-	for (auto o : _options) {
+	for (const Option& o : _options) {
 		if (o.value == option.value) {
 			LWARNING("The value of option {" << o.value << " -> " << o.description <<
 				"} was already registered when trying to add option {" << option.value <<

@@ -81,7 +81,7 @@ public:
 	/**
 	 * Sets the current time to the specified value in seconds past the J2000 epoch. This
 	 * value can be negative to represent dates before the epoch.
-	 * \param The number of seconds after the J2000 epoch
+	 * \param value The number of seconds after the J2000 epoch
 	 */
 	void setTime(double value);
 

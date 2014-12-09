@@ -315,7 +315,7 @@ std::string KeyboardControllerLua::keyToString(Key key, KeyModifier mod) const {
 		default:
 			assert(false);
 	}
-	return std::move(result);
+	return result;
 }
 
 } // namespace interaction

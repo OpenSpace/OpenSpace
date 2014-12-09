@@ -206,7 +206,7 @@ LuaConsole::~LuaConsole() {
 	if (file.is_open()) {
 		size_t n = _commandsHistory.size();
 		file.write(reinterpret_cast<const char*>(&n), sizeof(size_t));
-		for (auto s : _commandsHistory) {
+		for (const std::string& s : _commandsHistory) {
 			size_t length = s.length();
 			file.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
 			file.write(s.c_str(), sizeof(char)*length);

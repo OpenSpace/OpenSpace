@@ -35,7 +35,6 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
 
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -44,6 +43,8 @@ namespace openspace {
 
 class SceneGraphNode;
 
+// Notifications:
+// SceneGraphFinishedLoading
 class SceneGraph {
 public:
     // constructors & destructor
@@ -84,11 +85,6 @@ public:
     void render(const RenderData& data);
 
     /*
-     * Prints the SceneGraph tree. For debugging purposes
-     */
-    void printChildren() const;
-
-    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;
@@ -98,6 +94,8 @@ public:
      * name does not exist
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
+
+	std::vector<SceneGraphNode*> allSceneGraphNodes() const;
 
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
