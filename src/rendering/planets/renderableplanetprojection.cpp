@@ -253,40 +253,20 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		typedef glm::detail::tvec3<glm::detail::uint8> rgb;
 
 		auto bilinear = [](const ghoul::opengl::Texture* dest, const ghoul::opengl::Texture* source, float x, float y, float i, float j){
-			int px = (int)x; // floor of x
-			int py = (int)y; // floor of y
-			int tx; 
-			int ty;
+			x = (x * float(source->width()));
+			y = (y * float(source->height()));
+			
+			int px = static_cast<int>(x); // floor of x
+			int py = static_cast<int>(y); // floor of y
+
 			rgb p1, p2, p3, p4;
 			//original
 			rgb p0 = source->texel<rgb>(px, py);
 			// load the four neighboring pixels
-			// right
-			if (px + 1 < source->width() - 1){
-				p1 = source->texel<rgb>(px + 1, py);
-			}else{
-				p1 = rgb(0);
-			}
-			// left
-			if (px - 1 > 0){
-				p2 = source->texel<rgb>(px-1, py);
-			}else{
-				p2 = rgb(0);
-			}
-			// top
-			if (py + 1 < source->height() - 1){
-				p3 = source->texel<rgb>(px, py + 1);
-			}
-			else{
-				p3 = rgb(0);
-			}
-			// bottom
-			if (py - 1 > 0){
-				p4 = source->texel<rgb>(px, py - 1);
-			}else{
-				p4 = rgb(0);
-			}
-
+			p1 = (px + 1 < source->width()  - 1) ? source->texel<rgb>(px + 1, py) : dest->texel<rgb>(i + 1, j);	// right
+			p2 = (px - 1 > 0)                    ? source->texel<rgb>(px - 1, py) : dest->texel<rgb>(i - 1, j);	// left
+			p3 = (py + 1 < source->height() - 1) ? source->texel<rgb>(px, py + 1) : dest->texel<rgb>(i, j + 1);	// top
+			p4 = (py - 1 > 0)                    ? source->texel<rgb>(px, py - 1) : dest->texel<rgb>(i, j - 1);	// bottom
 
 			// Calculate the weights for each pixel
 			float fx = x - px;
@@ -294,10 +274,10 @@ void RenderablePlanetProjection::render(const RenderData& data)
 			float fx1 = 1.0f - fx;
 			float fy1 = 1.0f - fy;
 
-			int w1 = fx1 * fy1 * 256.0f;
-			int w2 = fx  * fy1 * 256.0f;
-			int w3 = fx1 * fy  * 256.0f;
-			int w4 = fx  * fy  * 256.0f;
+			float w1 = fx1 * fy1 ;//* 256.0f;
+			float w2 = fx  * fy1 ;//* 256.0f;
+			float w3 = fx1 * fy  ;//* 256.0f;
+			float w4 = fx  * fy  ;//* 256.0f;
 
 			// Calculate the weighted sum of pixels (for each color channel)
 			int outr = p1.r * w1 + p2.r * w2 + p3.r * w3 + p4.r * w4;
@@ -317,7 +297,6 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		for (int i = 0; i < w; ++i) {
 			for (int j = 0; j < h; ++j) {
 				// "Shader code"
-
 				// Texture coordinates
 				float u = float(i) / w;
 				float v = float(j) / h;
@@ -347,7 +326,10 @@ void RenderablePlanetProjection::render(const RenderData& data)
 				uvToIndex(uv, wp, hp, x, y);
 
 				if (frontfacing && inRange(x, 0, wp - 1) && inRange(y, 0, hp - 1)){
+					if (x < (wp*0.5f))
 					_texture->texel<rgb>(i, j) = bilinear(_texture, _textureProj, uv.x, uv.y, i, j);// _textureProj->texel<rgb>(x, y);
+					else
+					_texture->texel<rgb>(i, j) = _textureProj->texel<rgb>(x, y);
 				}
 			}
 		}
@@ -356,7 +338,6 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		//_textureProj->uploadTexture();
 		_texture->uploadTexture();
 	}
-	
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
