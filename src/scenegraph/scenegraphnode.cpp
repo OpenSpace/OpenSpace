@@ -250,7 +250,8 @@ void SceneGraphNode::render(const RenderData& data) {
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady()) {
+	_performanceRecord.renderTime = 0.f;
+    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
 			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();

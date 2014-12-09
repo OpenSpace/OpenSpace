@@ -43,6 +43,8 @@ class ScreenLog;
 
 class RenderEngine {
 public:
+	static const std::string PerformanceMeasurementSharedData;
+
 	RenderEngine();
 	~RenderEngine();
 	
@@ -64,6 +66,7 @@ public:
 	void toggleVisualizeABuffer(bool b);
 
 	void setPerformanceMeasurements(bool performanceMeasurements);
+	bool doesPerformanceMeasurements() const;
 
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);

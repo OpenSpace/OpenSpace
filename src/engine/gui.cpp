@@ -32,6 +32,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/misc/sharedmemory.h>
 
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/vectorproperty.h>
@@ -95,7 +96,8 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
     for (int n = 0; n < nCommandLists; n++)
         total_vtx_count += commandLists[n]->vtx_buffer.size();
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    size_t neededBufferSize = total_vtx_count * sizeof(ImDrawVert);
+	// @BUGFIX @HACK  The imgui crashes on complex scenes without the * 2 ---abock
+    size_t neededBufferSize = total_vtx_count * sizeof(ImDrawVert) * 2;
     if (neededBufferSize > vboMaxSize) {
         vboMaxSize = neededBufferSize + 5000;  // Grow buffer
         glBufferData(GL_ARRAY_BUFFER, neededBufferSize, NULL, GL_STREAM_DRAW);
@@ -105,8 +107,10 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
     unsigned char* buffer_data = (unsigned char*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if (!buffer_data)
         return;
+	int totalSize = 0;
     for (int n = 0; n < nCommandLists; ++n) {
         const ImDrawList* cmd_list = commandLists[n];
+		totalSize += cmd_list->vtx_buffer.size() * sizeof(ImDrawVert);
         memcpy(buffer_data, &cmd_list->vtx_buffer[0], cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
         buffer_data += cmd_list->vtx_buffer.size() * sizeof(ImDrawVert);
     }
@@ -132,13 +136,83 @@ static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommand
     glDisable(GL_SCISSOR_TEST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+using namespace openspace::properties;
+
+void renderBoolProperty(Property* prop, const std::string& ownerName) {
+	BoolProperty* p = static_cast<BoolProperty*>(prop);
+	std::string name = p->guiName();
+
+	BoolProperty::ValueType value = *p;
+	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+	p->set(value);
+}
+
+void renderOptionProperty(Property* prop, const std::string& ownerName) {
+	OptionProperty* p = static_cast<OptionProperty*>(prop);
+	std::string name = p->guiName();
+
+	int value = *p;
+	std::vector<OptionProperty::Option> options = p->options();
+	for (auto o : options) {
+		ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
+		ImGui::SameLine();
+		ImGui::Text(o.description.c_str());
+	}
+	p->set(value);
+}
+
+void renderIntProperty(Property* prop, const std::string& ownerName) {
+	IntProperty* p = static_cast<IntProperty*>(prop);
+	std::string name = p->guiName();
+
+	IntProperty::ValueType value = *p;
+	ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+	p->set(value);
+}
+
+void renderFloatProperty(Property* prop, const std::string& ownerName) {
+	FloatProperty* p = static_cast<FloatProperty*>(prop);
+	std::string name = p->guiName();
+
+	FloatProperty::ValueType value = *p;
+	ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+	p->set(value);
+}
+
+void renderVec2Property(Property* prop, const std::string& ownerName) {
+	Vec2Property* p = static_cast<Vec2Property*>(prop);
+	std::string name = p->guiName();
+
+	Vec2Property::ValueType value = *p;
+
+	ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	p->set(value);
+}
+
+
+void renderVec3Property(Property* prop, const std::string& ownerName) {
+	Vec3Property* p = static_cast<Vec3Property*>(prop);
+	std::string name = p->guiName();
+
+	Vec3Property::ValueType value = *p;
+
+	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	p->set(value);
+}
+
 }
 
 namespace openspace {
 
 GUI::GUI()
 	: _isEnabled(false)
+	, _showPropertyWindow(false)
+	, _showHelp(false)
+	, _performanceMemory(nullptr)
 {
+	_minMaxValues[0] = 100.f;
+	_minMaxValues[1] = 1000.f;
 }
 
 GUI::~GUI() {
@@ -257,8 +331,11 @@ void GUI::startFrame(float deltaTime,
 void GUI::endFrame() {
 	static bool show = true;
 	//ImGui::ShowTestWindow(&show);
-
-	renderPropertyWindow();
+	renderMainWindow();
+	if (_showPropertyWindow)
+		renderPropertyWindow();
+	if (_showPerformanceWindow)
+		renderPerformanceWindow();
 
 	ImGui::Render();
 }
@@ -336,73 +413,26 @@ void GUI::registerProperty(properties::Property* prop) {
 
 }
 
-void renderBoolProperty(properties::Property* prop, const std::string& ownerName) {
-	properties::BoolProperty* p = static_cast<properties::BoolProperty*>(prop);
-	std::string name = p->guiName();
+void GUI::renderMainWindow() {
+	ImGui::Begin("OpenSpace GUI", nullptr);
 
-	properties::BoolProperty::ValueType value = *p;
-	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
-	p->set(value);
-}
+	ImGui::Checkbox("Properties", &_showPropertyWindow);
+	ImGui::Checkbox("Performance", &_showPerformanceWindow);
+	ImGui::Checkbox("Help", &_showHelp);
 
-void renderOptionProperty(properties::Property* prop, const std::string& ownerName) {
-	properties::OptionProperty* p = static_cast<properties::OptionProperty*>(prop);
-	std::string name = p->guiName();
-
-	int value = *p;
-	std::vector<properties::OptionProperty::Option> options = p->options();
-	for (auto o : options) {
-		ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
-		ImGui::SameLine();
-		ImGui::Text(o.description.c_str());
+	if (_showHelp) {
+		ImGui::Separator();
+		ImGui::ShowUserGuide();
+		ImGui::ShowTestWindow();
 	}
-	p->set(value);
+
+	ImGui::End();
 }
-
-void renderIntProperty(properties::Property* prop, const std::string& ownerName) {
-	properties::IntProperty* p = static_cast<properties::IntProperty*>(prop);
-	std::string name = p->guiName();
-
-	properties::IntProperty::ValueType value = *p;
-	ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-	p->set(value);
-}
-
-void renderFloatProperty(properties::Property* prop, const std::string& ownerName) {
-	properties::FloatProperty* p = static_cast<properties::FloatProperty*>(prop);
-	std::string name = p->guiName();
-
-	properties::FloatProperty::ValueType value = *p;
-	ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-	p->set(value);
-}
-
-void renderVec2Property(properties::Property* prop, const std::string& ownerName) {
-	properties::Vec2Property* p = static_cast<properties::Vec2Property*>(prop);
-	std::string name = p->guiName();
-
-	properties::Vec2Property::ValueType value = *p;
-
-	ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-	p->set(value);
-}
-
-
-void renderVec3Property(properties::Property* prop, const std::string& ownerName) {
-	properties::Vec3Property* p = static_cast<properties::Vec3Property*>(prop);
-	std::string name = p->guiName();
-
-	properties::Vec3Property::ValueType value = *p;
-
-	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-	p->set(value);
-}
-
 
 void GUI::renderPropertyWindow() {
 	using namespace properties;
 
-	ImGui::Begin("Properties", nullptr, size, 0.5f);
+	ImGui::Begin("Properties", &_showPropertyWindow, size, 0.5f);
 
 	//ImGui::ShowUserGuide();
 	ImGui::Spacing();
@@ -444,46 +474,71 @@ void GUI::renderPropertyWindow() {
 		}
 	}
 
+	ImGui::End();
+}
 
-	//for (auto pair : _propertiesByOwner) {
-	//	auto p = _propertiesByOwner.equal_range(pair);
+void GUI::renderPerformanceWindow() {
+	// Copy and paste from renderengine.cpp::storePerformanceMeasurements method
+	const int8_t Version = 0;
+	const int nValues = 1000;
+	const int lengthName = 256;
+	const int maxValues = 50;
 
-	//	if (ImGui::CollapsingHeader(pair->first.c_str())) {
-	//		for ()
-	//		if (_boolProperties.find(p->second) != _boolProperties.end()) {
+	struct PerformanceLayout {
+		int8_t version;
+		int32_t nValuesPerEntry;
+		int32_t nEntries;
+		int32_t maxNameLength;
+		int32_t maxEntries;
 
-	//		}
-	//	}
-	//}
+		struct PerformanceLayoutEntry {
+			char name[lengthName];
+			float renderTime[nValues];
+			float updateRenderable[nValues];
+			float updateEphemeris[nValues];
 
-	//for (auto prop : _boolProperties) {
-	//	BoolProperty* p = static_cast<BoolProperty*>(prop);
-	//	std::string name = p->fullyQualifiedIdentifier();
+			int32_t currentRenderTime;
+			int32_t currentUpdateRenderable;
+			int32_t currentUpdateEphemeris;
+		};
 
-	//	BoolProperty::ValueType value = *p;
-	//	ImGui::Checkbox(name.c_str(), &value);
-	//	p->set(value);
+		PerformanceLayoutEntry entries[maxValues];
+	};
 
-	//}
+	ImGui::Begin("Performance", &_showPerformanceWindow);
+	if (OsEng.renderEngine().doesPerformanceMeasurements() &&
+			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
+	{
+		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
+		_minMaxValues[1] = std::max(_minMaxValues[0], _minMaxValues[1]);
 
-	//for (auto prop : _intProperties) {
-	//	IntProperty* p = static_cast<IntProperty*>(prop);
-	//	std::string name = p->fullyQualifiedIdentifier();
+		if (!_performanceMemory) {
+			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
+		}
 
-	//	IntProperty::ValueType value = *p;
-	//	ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
-	//	p->set(value);
-	//}
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
 
-	//for (auto prop : _StringProperties) {
-	//	StringProperty* p = static_cast<StringProperty*>(prop);
-	//	std::string name = p->fullyQualifiedIdentifier();
+		for (int i = 0; i < layout->nEntries; ++i) {
+			const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
 
-	//	//ImGui::TextUnformatted()
-	//}
+			if (ImGui::CollapsingHeader(entry.name)) {
+				std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
+				ImGui::PlotLines("UpdateEphemeris", &entry.updateEphemeris[0], layout->nValuesPerEntry, 0, updateEphemerisTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+
+				std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
+				ImGui::PlotLines("UpdateRender", &entry.updateRenderable[0], layout->nValuesPerEntry, 0, updateRenderableTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+				
+				std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
+				ImGui::PlotLines("RenderTime", &entry.renderTime[0], layout->nValuesPerEntry, 0, renderTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+			}
+		}
+	}
+	else {
+		ImGui::TextWrapped("Performance monitoring is disabled. Enable with "
+						   "'openspace.setPerformanceMeasurement(true)'");
+	}
 
 	ImGui::End();
-
 }
 
 namespace  {

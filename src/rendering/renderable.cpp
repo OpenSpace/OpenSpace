@@ -122,4 +122,8 @@ bool Renderable::isReady() const {
 	return true;
 }
 
+bool Renderable::isEnabled() const {
+	return _enabled;
+}
+
 }  // namespace openspace

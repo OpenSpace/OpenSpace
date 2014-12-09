@@ -69,12 +69,12 @@
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
-
-	const std::string PerformanceMeasurementSharedData =
-											"OpenSpacePerformanceMeasurementSharedData";
 }
 
 namespace openspace {
+
+const std::string RenderEngine::PerformanceMeasurementSharedData =
+									"OpenSpacePerformanceMeasurementSharedData";
 
 namespace luascriptfunctions {
 
@@ -595,12 +595,18 @@ void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
 	_doPerformanceMeasurements = performanceMeasurements;
 }
 
+bool RenderEngine::doesPerformanceMeasurements() const {
+	return _doPerformanceMeasurements;
+}
+
 void RenderEngine::storePerformanceMeasurements() {
+	const int8_t Version = 0;
 	const int nValues = 1000;
 	const int lengthName = 256;
 	const int maxValues = 50;
 
 	struct PerformanceLayout {
+		int8_t version;
 		int32_t nValuesPerEntry;
 		int32_t nEntries;
 		int32_t maxNameLength;
@@ -608,9 +614,9 @@ void RenderEngine::storePerformanceMeasurements() {
 		
 		struct PerformanceLayoutEntry {
 			char name[lengthName];
-			int64_t renderTime[nValues];
-			int64_t updateRenderable[nValues];
-			int64_t updateEphemeris[nValues];
+			float renderTime[nValues];
+			float updateRenderable[nValues];
+			float updateEphemeris[nValues];
 
 			int32_t currentRenderTime;
 			int32_t currentUpdateRenderable;
@@ -624,14 +630,15 @@ void RenderEngine::storePerformanceMeasurements() {
 	if (!_performanceMemory) {
 
 		// Compute the total size
-		const int totalSize = 4 * sizeof(int32_t) +
+		const int totalSize = sizeof(int8_t) + 4 * sizeof(int32_t) +
 							maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
-		LINFO("Create shared memory of size '" << totalSize << "' bytes");
+		LINFO("Create shared memory of " << totalSize << " bytes");
 
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
 		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
 		layout->nEntries = nNodes;
 		layout->maxNameLength = lengthName;
@@ -658,9 +665,9 @@ void RenderEngine::storePerformanceMeasurements() {
 		SceneGraphNode::PerformanceRecord r = node->performanceRecord();
 		PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
 
-		entry.renderTime[entry.currentRenderTime] = r.renderTime;
-		entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris;
-		entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable;
+		entry.renderTime[entry.currentRenderTime] = r.renderTime / 1000.f;
+		entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
+		entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
 
 		entry.currentRenderTime = (entry.currentRenderTime + 1) % nValues;
 		entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % nValues;
