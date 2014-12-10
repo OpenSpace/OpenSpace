@@ -122,6 +122,19 @@ private:
 	std::mutex _programUpdateLock;
 	std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
 	std::vector<ghoul::opengl::ProgramObject*> _programs;
+
+    typedef std::map<std::string, ghoul::Dictionary> NodeMap;
+    typedef std::multimap<std::string, std::string> DependencyMap;
+
+    struct LoadMaps {
+        NodeMap nodes;
+        DependencyMap dependencies;
+    };
+
+    void loadModules(const std::string& directory, const ghoul::Dictionary& dictionary);
+    void loadModule(LoadMaps& m,const std::string& modulePath);
+    void loadNodes(const std::string parentName, const LoadMaps& m);
+    void loadNode(const ghoul::Dictionary& dictionary);
 };
 
 } // namespace openspace
