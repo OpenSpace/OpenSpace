@@ -90,6 +90,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
 
+OpenSpaceEngine::~OpenSpaceEngine() {
+	if(_syncBuffer)
+		delete _syncBuffer;
+	_syncBuffer = nullptr;
+}
+
 OpenSpaceEngine& OpenSpaceEngine::ref() {
     assert(_engine);
     return *_engine;
@@ -201,6 +207,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();

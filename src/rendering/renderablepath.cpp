@@ -233,7 +233,7 @@ void RenderablePath::loadTexture()
 	delete _texture;
 	_texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
 		if (_texture) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
