@@ -125,15 +125,17 @@ private:
 
     typedef std::map<std::string, ghoul::Dictionary> NodeMap;
     typedef std::multimap<std::string, std::string> DependencyMap;
+    typedef std::vector<std::string> LoadedList;
 
     struct LoadMaps {
         NodeMap nodes;
         DependencyMap dependencies;
+        LoadedList loadedNodes;
     };
 
     void loadModules(const std::string& directory, const ghoul::Dictionary& dictionary);
     void loadModule(LoadMaps& m,const std::string& modulePath);
-    void loadNodes(const std::string parentName, const LoadMaps& m);
+    void loadNodes(const std::string& parentName, LoadMaps& m);
     void loadNode(const ghoul::Dictionary& dictionary);
 };
 

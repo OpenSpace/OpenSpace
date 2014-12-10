@@ -484,6 +484,18 @@ void SceneGraph::loadModules(
 
     // Load and construct scenegraphnodes from LoadMaps struct
     loadNodes(SceneGraphNode::RootNodeName, m);
+
+    // Remove loaded nodes from dependency list
+    for(const auto& name: m.loadedNodes) {
+    	m.dependencies.erase(name);
+    }
+
+    // Check to see what dependencies are not resolved.
+    for(auto& node: m.dependencies) {
+    	LWARNING(
+    		"'" << node.second << "'' not loaded, parent '" 
+    		<< node.first << "' not defined!");
+    }
 }
 
 void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath) {
@@ -521,13 +533,14 @@ void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath) {
     }
 }
 
-void SceneGraph::loadNodes(const std::string parentName, const LoadMaps& m) {	
+void SceneGraph::loadNodes(const std::string& parentName, LoadMaps& m) {
 	auto eqRange = m.dependencies.equal_range(parentName);
 	for (auto it = eqRange.first; it != eqRange.second; ++it) {
 		auto node = m.nodes.find((*it).second);
 		loadNode(node->second);
 		loadNodes((*it).second, m);
 	}
+	m.loadedNodes.emplace_back(parentName);
 }
 
 void SceneGraph::loadNode(const ghoul::Dictionary& dictionary) {
