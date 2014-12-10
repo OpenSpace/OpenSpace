@@ -52,7 +52,12 @@ namespace {
 
 namespace openspace {
 
-ABuffer::ABuffer() : _validShader(false), _resolveShader(nullptr) {
+ABuffer::ABuffer()
+	: _validShader(false)
+	, _resolveShader(nullptr)
+	, _volumeStepFactor(0.0f)
+{
+
 	updateDimensions();
 }
 

@@ -40,7 +40,6 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     : _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
-	, _mode(GL_TRIANGLES)
     , _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
@@ -191,7 +190,7 @@ void PowerScaledSphere::render()
 {
     glBindVertexArray(_vaoID);  // select first VAO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

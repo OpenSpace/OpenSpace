@@ -136,6 +136,15 @@ bool RenderableSphericalGrid::isReady() const {
 }
 
 bool RenderableSphericalGrid::deinitialize(){
+	glDeleteVertexArrays(1,&_vaoID);
+	_vaoID = 0;
+
+	glDeleteBuffers(1,&_vBufferID);
+	_vBufferID = 0;
+
+	glDeleteBuffers(1,&_iBufferID);
+	_iBufferID = 0;
+
 	return true;
 }
 
@@ -173,7 +182,6 @@ bool RenderableSphericalGrid::initialize(){
 }
 
 void RenderableSphericalGrid::render(const RenderData& data){
-	assert(_gridProgram);
 	_gridProgram->activate();
 
 	// setup the data to the shader
@@ -194,8 +202,8 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	glBindVertexArray(0);
 
 	_gridProgram->deactivate();
-	
 }
+
 void RenderableSphericalGrid::update(const UpdateData& data){
 }
 

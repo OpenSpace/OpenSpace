@@ -32,8 +32,12 @@
 #include <openspace/util/updatestructures.h>
 
 // ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
 

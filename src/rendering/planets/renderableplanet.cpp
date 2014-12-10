@@ -25,16 +25,18 @@
 // open space includes
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/util/constants.h>
-#include <openspace/rendering/planets/planetgeometry.h>
-
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/filesystem.h>
-
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-
+#include <openspace/rendering/planets/planetgeometry.h>
 #include <openspace/engine/openspaceengine.h>
+
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
+
 #include <sgct.h>
 
 namespace {
@@ -52,11 +54,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
+	ghoul_assert(success,
+            "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
 
     std::string path;
     success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-	assert(success);
+    ghoul_assert(success,
+            "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(
@@ -87,34 +91,37 @@ RenderablePlanet::~RenderablePlanet() {}
 bool RenderablePlanet::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr)
-        completeSuccess
-              &= OsEng.ref().configurationManager().getValue("pscShader", _programObject);
+        OsEng.ref().configurationManager().getValue("pscShader", _programObject);
 
     loadTexture();
-    completeSuccess &= (_texture != nullptr);
-    completeSuccess &= _geometry->initialize(this);
+    _geometry->initialize(this);
 
-    return completeSuccess;
+    return isReady();
 }
 
 bool RenderablePlanet::deinitialize() {
-    _geometry->deinitialize();
-    delete _geometry;
+    if(_geometry) {
+        _geometry->deinitialize();
+        delete _geometry;
+    }
+    if(_texture)
+        delete _texture;
+
     _geometry = nullptr;
-    delete _texture;
     _texture = nullptr;
     return true;
 }
 
 bool RenderablePlanet::isReady() const {
-	return (_geometry != nullptr);
+    bool ready = true;
+    ready &= (_programObject != nullptr);
+    ready &= (_texture != nullptr);
+    ready &= (_geometry != nullptr);
+	return ready;
 }
 
 void RenderablePlanet::render(const RenderData& data)
 {
-	if (!_programObject) return;
-	if (!_texture) return;
-
     // activate shader
     _programObject->activate();
 

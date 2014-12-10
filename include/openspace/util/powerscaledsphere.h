@@ -56,7 +56,6 @@ private:
     GLuint _vBufferID;
     GLuint _iBufferID;
 
-    GLenum _mode;
     unsigned int _isize;
     unsigned int _vsize;
     Vertex* _varray;
