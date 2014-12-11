@@ -22,10 +22,15 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+// openspace
 #include <openspace/rendering/stars/renderableconstellationbounds.h>
-
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
+
+// ghoul
 #include <ghoul/filesystem/filesystem.h>
+
+// std
 #include <fstream>
 #define _USE_MATH_DEFINES
 #include <math.h>

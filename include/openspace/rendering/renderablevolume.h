@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEVOLUME_H
-#define RENDERABLEVOLUME_H
+#ifndef __RENDERABLEVOLUME_H__
+#define __RENDERABLEVOLUME_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>

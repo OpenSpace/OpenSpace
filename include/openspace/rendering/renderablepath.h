@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
@@ -49,9 +50,7 @@ namespace openspace {
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 	private:
-		properties::StringProperty _colorTexturePath;
 		ghoul::opengl::ProgramObject* _programObject;
-		ghoul::opengl::Texture* _texture;
 		void loadTexture();
 		void fullYearSweep();
 
@@ -72,7 +71,6 @@ namespace openspace {
 
 		void nextIndex();
 
-		GLenum _mode;
 		unsigned int _isize;
 		unsigned int _vsize;
 		unsigned int _vtotal;
@@ -80,7 +78,7 @@ namespace openspace {
 
 		//Vertex* _varray;
 		std::vector<float> _varray;
-		int* _iarray;
+		std::vector<int> _iarray;
 
 		//used for update of trail
 		psc _pscpos, _pscvel;

@@ -37,7 +37,6 @@ namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
     : ModelGeometry()
-	, _mode(GL_TRIANGLES)
 	, _isize(0)
 	, _vsize(0)
 	, _varray(nullptr)
@@ -268,8 +267,10 @@ bool WavefrontGeometry::initialize(RenderableModel* parent){
 }
 
 void WavefrontGeometry::deinitialize(){
-	delete[] _varray;
-	delete[] _iarray;
+	if (_varray)
+		delete[] _varray;
+	if (_iarray)
+		delete[] _iarray;
 
 	glDeleteBuffers(1, &_vBufferID);
 	glDeleteBuffers(1, &_iBufferID);
@@ -281,7 +282,7 @@ void WavefrontGeometry::render(){
 	// render
 	glBindVertexArray(_vaoID);  // select first VAO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

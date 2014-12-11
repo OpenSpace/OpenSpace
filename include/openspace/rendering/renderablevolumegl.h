@@ -70,12 +70,12 @@ private:
 	ghoul::opengl::Texture* _volume;
 	ghoul::opengl::Texture* _transferFunction;
 
-	GLuint _boxArray;
+	GLuint _boxArray; 
+	GLuint _vertexPositionBuffer;
 	ghoul::opengl::ProgramObject *_boxProgram;
 	glm::vec3 _boxScaling;
 	psc _pscOffset;
 	float _w;
-	GLint _MVPLocation, _modelTransformLocation, _typeLocation;
     
     bool _updateTransferfunction;
     int _id;

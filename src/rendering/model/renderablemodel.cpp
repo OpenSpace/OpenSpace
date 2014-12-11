@@ -95,7 +95,10 @@ RenderableModel::~RenderableModel(){
 }
 
 bool RenderableModel::isReady() const {
-	return _programObject != nullptr;
+	bool ready = true;
+	ready &= (_programObject != nullptr);
+	ready &= (_texture != nullptr);
+	return ready;
 }
 
 bool RenderableModel::initialize(){
@@ -112,23 +115,23 @@ bool RenderableModel::initialize(){
 }
 
 bool RenderableModel::deinitialize(){
-	_geometry->deinitialize();
-	delete _geometry;
+	if (_geometry) {
+		_geometry->deinitialize();
+		delete _geometry;
+	}
+	if (_texture)
+		delete _texture;
+
 	_geometry = nullptr;
-	delete _texture;
 	_texture = nullptr;
 	return true;
 }
 
 void RenderableModel::render(const RenderData& data)
 {
-	if (!_programObject) return;
-	if (!_texture) return;
-
     // activate shader
     _programObject->activate();
 
- 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
 

@@ -26,7 +26,10 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
 
+// ghoul
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
@@ -107,7 +110,11 @@ std::string Renderable::findPath(const std::string& path) {
     return "";
 }
 
-void Renderable::setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const psc& position) {
+void Renderable::setPscUniforms(
+	ghoul::opengl::ProgramObject* program, 
+	const Camera* camera,
+	const PowerScaledCoordinate& position) 
+{
 	program->setUniform("campos", camera->position().vec4());
 	program->setUniform("objpos", position.vec4());
 	program->setUniform("camrot", camera->viewRotationMatrix());

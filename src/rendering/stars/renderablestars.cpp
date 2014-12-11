@@ -25,6 +25,7 @@
 #include <openspace/rendering/stars/renderablestars.h>
 
 #include <openspace/util/constants.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>

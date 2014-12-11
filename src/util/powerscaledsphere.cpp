@@ -130,8 +130,13 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 
 PowerScaledSphere::~PowerScaledSphere()
 {
-    delete[] _varray;
-    delete[] _iarray;
+	if (_varray)
+	    delete[] _varray;
+	if (_iarray)
+	    delete[] _iarray;
+
+	_varray = 0;
+	_iarray = 0;
 
     glDeleteBuffers(1, &_vBufferID);
     glDeleteBuffers(1, &_iBufferID);

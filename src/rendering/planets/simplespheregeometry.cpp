@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/planets/simplespheregeometry.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/powerscaledsphere.h>
 
 namespace {
     const std::string _loggerCat = "SimpleSphereGeometry";
@@ -93,7 +94,8 @@ bool SimpleSphereGeometry::initialize(RenderablePlanet* parent)
 
 void SimpleSphereGeometry::deinitialize()
 {
-    delete _planet;
+	if (_planet)
+	    delete _planet;
     _planet = nullptr;
 }
 

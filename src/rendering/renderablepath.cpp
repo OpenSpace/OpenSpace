@@ -45,37 +45,35 @@ namespace {
 }
 #define DEBUG
 namespace openspace{
-	RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
-		: Renderable(dictionary)
-		, _colorTexturePath("colorTexture", "Color Texture")
-		, _programObject(nullptr)
-		, _texture(nullptr)
-		, _vaoID(0)
-		, _vBufferID(0)
-		, _iBufferID(0)
-		, _mode(GL_LINE_STRIP){
+RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
+	: Renderable(dictionary)
+	, _programObject(nullptr)
+	, _vaoID(0)
+	, _vBufferID(0)
+	, _iBufferID(0)
+{
 
-		bool b1 = dictionary.getValue(keyBody, _target);
-		bool b2 = dictionary.getValue(keyObserver, _observer);
-		bool b3 = dictionary.getValue(keyFrame, _frame);
-		assert(b1 == true);
-		assert(b2 == true);
-		assert(b3 == true);
-		/*assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
-		assert(dictionary.getValue(keyEarthOrbitRatio, _ratio));
-		assert(dictionary.getValue(keyDayLength, _day));//not used now, will be though.
-		// values in modfiles set from here*/
-		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
+	bool b1 = dictionary.getValue(keyBody, _target);
+	bool b2 = dictionary.getValue(keyObserver, _observer);
+	bool b3 = dictionary.getValue(keyFrame, _frame);
+	assert(b1 == true);
+	assert(b2 == true);
+	assert(b3 == true);
+	/*assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
+	assert(dictionary.getValue(keyEarthOrbitRatio, _ratio));
+	assert(dictionary.getValue(keyDayLength, _day));//not used now, will be though.
+	// values in modfiles set from here*/
+	// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
-		//white is default col
-		if (!dictionary.getValue(keyColor, _c)){
-			_c = glm::vec3(0.0);
-		}
-		else{
-			_r = 1 / _c[0];
-			_g = 1 / _c[1];
-			_b = 1 / _c[2];
-		}
+	//white is default col
+	if (!dictionary.getValue(keyColor, _c)){
+		_c = glm::vec3(0.0);
+	}
+	else{
+		_r = 1 / _c[0];
+		_g = 1 / _c[1];
+		_b = 1 / _c[2];
+	}
 }
 void RenderablePath::fullYearSweep(){
 	double lightTime = 0.0;
@@ -94,7 +92,7 @@ void RenderablePath::fullYearSweep(){
 
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
-	_iarray = new int[_isize];
+	_iarray.clear();
 
 	int indx = 0;
 	for (int i = 0; i < segments + 1; i++){
@@ -120,7 +118,7 @@ void RenderablePath::fullYearSweep(){
 			_varray.push_back(0.5f);
 #endif	
 			indx++;
-			_iarray[indx] = indx;
+			_iarray.push_back(indx);
 		}
 		else{
 			std::string date;
@@ -150,10 +148,6 @@ bool RenderablePath::initialize(){
 		completeSuccess
 		&= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 
-	//TEXTURES DISABLED FOR NOW
-	//loadTexture();
-	completeSuccess &= (_texture != nullptr);
-
 	fullYearSweep();
 
 	// Initialize and upload to graphics card
@@ -174,7 +168,7 @@ bool RenderablePath::initialize(){
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 
@@ -182,13 +176,10 @@ bool RenderablePath::initialize(){
 }
 
 bool RenderablePath::deinitialize(){
-	delete _texture;
-	_texture = nullptr;
 	return true;
 }
 
 void RenderablePath::render(const RenderData& data){
-	assert(_programObject);
 	_programObject->activate();
 
 	// fetch data
@@ -207,7 +198,7 @@ void RenderablePath::render(const RenderData& data){
 	setPscUniforms(_programObject, &data.camera, data.position);
 
 /*	glBindVertexArray(_vaoID);
-	glDrawArrays(_mode, 0, _vtotal);
+	glDrawArrays(GL_LINE_STRIP, 0, _vtotal);
 	glBindVertexArray(0);
 */	
 	glPointSize(2.f);
@@ -228,17 +219,5 @@ void RenderablePath::update(const UpdateData& data){
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", data.time, _pscpos, _pscvel, lightTime);
 }
 
-void RenderablePath::loadTexture()
-{
-	delete _texture;
-	_texture = nullptr;
-	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
-		if (_texture) {
-			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-			_texture->uploadTexture();
-		}
-	}
-}
 
 }

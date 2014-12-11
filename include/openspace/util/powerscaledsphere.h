@@ -30,7 +30,6 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
 
-
 namespace openspace {
 
 class PowerScaledSphere {

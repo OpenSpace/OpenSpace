@@ -27,6 +27,7 @@
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/spicemanager.h>

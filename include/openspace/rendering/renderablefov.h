@@ -27,13 +27,8 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-//#include <openspace/util/runtimedata.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
 class RenderableFov : public Renderable{

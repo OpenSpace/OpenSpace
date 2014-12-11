@@ -27,8 +27,8 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 // ghoul includes
 #include <ghoul/opengl/programobject.h>
