@@ -91,6 +91,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
+	_gui.deinitializeGL();
 	if(_syncBuffer)
 		delete _syncBuffer;
 	_syncBuffer = nullptr;

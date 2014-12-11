@@ -121,6 +121,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
 }
 
+RenderableStars::~RenderableStars() {
+	deinitialize();
+}
+
 bool RenderableStars::isReady() const {
 	return (_program != nullptr) && (_fullData.size() > 0);
 }
@@ -150,7 +154,8 @@ bool RenderableStars::deinitialize() {
 	delete _pointSpreadFunctionTexture;
 	_pointSpreadFunctionTexture = nullptr;
 
-	delete _program;
+	if(_program)
+ 		delete _program;
 	_program = nullptr;
 	return true;	
 }

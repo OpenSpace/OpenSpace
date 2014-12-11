@@ -142,6 +142,14 @@ RenderEngine::RenderEngine()
 
 RenderEngine::~RenderEngine()
 {
+	if(_abuffer)
+		delete _abuffer;
+	_abuffer = nullptr;
+
+	if(_sceneGraph)
+		delete _sceneGraph;
+	_sceneGraph = nullptr;
+
     delete _mainCamera;
 	if (_visualizer)
 		delete _visualizer;

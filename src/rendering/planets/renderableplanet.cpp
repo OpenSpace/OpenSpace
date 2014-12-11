@@ -86,10 +86,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 }
 
-RenderablePlanet::~RenderablePlanet() {}
+RenderablePlanet::~RenderablePlanet() {
+    deinitialize();
+}
 
 bool RenderablePlanet::initialize() {
-    bool completeSuccess = true;
     if (_programObject == nullptr)
         OsEng.ref().configurationManager().getValue("pscShader", _programObject);
 

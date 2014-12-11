@@ -117,7 +117,8 @@ void RenderableTrail::fullYearSweep(){
 	
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
-	_iarray = new int[_isize];
+	_iarray.clear();
+	//_iarray = new int[_isize];
 	
 	for (int i = 0; i < segments+2; i++){
 		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
@@ -138,7 +139,8 @@ void RenderableTrail::fullYearSweep(){
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
 #endif
- 		_iarray[i] = i;
+ 		//_iarray[i] = i;
+		_iarray.push_back(i);
 		if (i != 0) //very first point needs to be alllocated twice.
 		et -= _increment;
 	}
@@ -174,7 +176,7 @@ void RenderableTrail::sendToGPU(){
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }

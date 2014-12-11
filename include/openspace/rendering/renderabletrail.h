@@ -87,7 +87,7 @@ public:
 
 	//Vertex* _varray;
 	std::vector<float> _varray;
-	int* _iarray;
+	std::vector<int> _iarray;
 
 	//bool _once = false;
 	double lightTime;

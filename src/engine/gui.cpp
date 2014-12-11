@@ -337,7 +337,8 @@ void GUI::initializeGL() {
 }
 
 void GUI::deinitializeGL() {
-	delete _program;
+	if(_program)
+		delete _program;
 	_program = nullptr;
 
 	if (vao) glDeleteVertexArrays(1, &vao);

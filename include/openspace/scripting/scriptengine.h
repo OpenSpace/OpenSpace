@@ -50,8 +50,9 @@ public:
 
 		bool operator<(const LuaLibrary& rhs) const;
     };
-    
+
     ScriptEngine();
+    ~ScriptEngine();
 
     bool initialize();
     void deinitialize();
