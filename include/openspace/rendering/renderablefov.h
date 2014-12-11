@@ -22,13 +22,14 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RenderableFov_H__
-#define __RenderableFov_H__
+#ifndef __RENDERABLEFOV_H__
+#define __RENDERABLEFOV_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 class RenderableFov : public Renderable{
@@ -74,7 +75,6 @@ public:
 
 	glm::dmat3 _stateMatrix;
 
-	GLenum _mode;
 	unsigned int _isize;
 	unsigned int _vsize;
 	unsigned int _vtotal;
@@ -84,7 +84,7 @@ public:
 
 	//Vertex* _varray;
 	std::vector<float> _varray;
-	int* _iarray;
+	std::vector<int> _iarray;
 
 	bool _once = false;
 

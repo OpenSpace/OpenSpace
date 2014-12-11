@@ -26,41 +26,41 @@
 #include <openspace/util/constants.h>
 
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
-#include <utility>      
+#include <utility>
+
 namespace {
 	const std::string _loggerCat = "RenderableFov";
 	//constants
-		const std::string keyBody                = "Body";
-		const std::string keyObserver            = "Observer";
-		const std::string keyFrame               = "Frame";
-		const std::string keyPathModule          = "ModulePath";
-		const std::string keyColor               = "RGB";
-
+	const std::string keyBody                = "Body";
+	const std::string keyObserver            = "Observer";
+	const std::string keyFrame               = "Frame";
+	const std::string keyPathModule          = "ModulePath";
+	const std::string keyColor               = "RGB";
 }
+
 //#define DEBUG
 namespace openspace{
-	RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
-		: Renderable(dictionary)
-		, _colorTexturePath("colorTexture", "Color Texture")
-		, _programObject(nullptr)
-		, _texture(nullptr)
-		, _vaoID(0)
-		, _vBufferID(0)
-		, _iBufferID(0)
-		, _mode(GL_LINE_STRIP){
+RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
+	: Renderable(dictionary)
+	, _colorTexturePath("colorTexture", "Color Texture")
+	, _programObject(nullptr)
+	, _texture(nullptr)
+	, _vaoID(0)
+	, _vBufferID(0)
+	, _iBufferID(0)
+{
 
-		bool b1 = dictionary.getValue(keyBody, _target);
-		bool b2 = dictionary.getValue(keyObserver, _observer);
-		bool b3 = dictionary.getValue(keyFrame, _frame);
-		assert(b1 == true);
-		assert(b2 == true);
-		assert(b3 == true);
+	bool b1 = dictionary.getValue(keyBody, _target);
+	bool b2 = dictionary.getValue(keyObserver, _observer);
+	bool b3 = dictionary.getValue(keyFrame, _frame);
+	assert(b1 == true);
+	assert(b2 == true);
+	assert(b3 == true);
 
 	if (!dictionary.getValue(keyColor, _c)){
 		_c = glm::vec3(0.0);
@@ -75,7 +75,7 @@ void RenderableFov::fullYearSweep(){
 	int points = 8;
 	_stride = 8;
 	_isize = points;
-	_iarray = new int[_isize];
+	_iarray.clear();
 
 	for (int i = 0; i < points; i++){
 		for (int j = 0; j < 4; j++){
@@ -84,7 +84,7 @@ void RenderableFov::fullYearSweep(){
 		for (int j = 0; j < 4; j++){
 			_varray.push_back(0); // col
 		}
-		_iarray[i] = i;
+		_iarray.push_back(i);
 	}
 
 	_stride = 8;
@@ -119,7 +119,7 @@ void RenderableFov::sendToGPU(){
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
@@ -140,8 +140,14 @@ bool RenderableFov::initialize(){
 }
 
 bool RenderableFov::deinitialize(){
-	delete _texture;
+	if (_texture)
+		delete _texture;
 	_texture = nullptr;
+
+	glDeleteVertexArrays(1, &_vaoID);
+	glDeleteBuffers(1, &_vBufferID);
+	glDeleteBuffers(1, &_iBufferID);
+
 	return true;
 }
 
@@ -151,7 +157,6 @@ void RenderableFov::updateData(){
 }
 
 void RenderableFov::render(const RenderData& data){
-	assert(_programObject);
 	_programObject->activate();
 
 	// fetch data
@@ -220,7 +225,7 @@ void RenderableFov::render(const RenderData& data){
 	updateData();
 
 	glBindVertexArray(_vaoID); 
-	glDrawArrays(_mode, 0, _vtotal);
+	glDrawArrays(GL_LINE_STRIP, 0, _vtotal);
 	glBindVertexArray(0);
 
 	_programObject->deactivate();
