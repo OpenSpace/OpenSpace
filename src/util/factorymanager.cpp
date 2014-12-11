@@ -28,7 +28,6 @@
 #include <openspace/rendering/model/renderablemodel.h>
 #include <openspace/rendering/stars/renderableconstellationbounds.h>
 #include <openspace/rendering/stars/renderablestars.h>
-#include <openspace/rendering/renderableephemeris.h>
 #include <openspace/rendering/renderabletrail.h>
 #include <openspace/rendering/renderablepath.h>
 #include <openspace/rendering/renderablefov.h>
@@ -67,8 +66,6 @@ void FactoryManager::initialize()
 	_manager->factory<Renderable>()->registerClass<RenderableStars>("RenderableStars");
 	_manager->factory<Renderable>()->registerClass<RenderableConstellationBounds>
 		("RenderableConstellationBounds");
-	_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
-		"RenderableEphemeris");
 	//will replace ephemeris class soon...
 	_manager->factory<Renderable>()->registerClass<RenderablePath>(
 		"RenderablePath");
