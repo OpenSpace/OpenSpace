@@ -110,7 +110,11 @@ std::string Property::guiName() const {
 }
 
 std::string Property::description() const {
-	return "";
+	return
+		TypeKey       + " = " + className()  + ",\n" +
+		IdentifierKey + " = " + identifier() + ",\n" +
+		NameKey       + " = " + guiName()    + ",\n" +
+		generateMetaDataDescription();
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
