@@ -28,3 +28,4 @@ latex/
 shaders/ABuffer/constants.hglsl
 *.OpenSpaceGenerated.glsl
 LuaScripting.txt
+log.html

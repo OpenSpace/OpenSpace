@@ -65,6 +65,8 @@ public:
 	void takeScreenshot();
 	void toggleVisualizeABuffer(bool b);
 
+	void toggleInfoText(bool b);
+
 	void setPerformanceMeasurements(bool performanceMeasurements);
 	bool doesPerformanceMeasurements() const;
 
