@@ -225,7 +225,7 @@ bool OpenSpaceEngine::initialize() {
 	clearAllWindows();
 
 	// Detect and log OpenCL and OpenGL versions and available devices
-	SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
+	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
 	SysCap.logCapabilities();
