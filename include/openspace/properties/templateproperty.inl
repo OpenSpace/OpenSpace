@@ -126,6 +126,11 @@ std::string TemplateProperty<T>::className() const {
     return PropertyDelegate<TemplateProperty<T>>::className();
 }
 
+//template <typename T>
+//std::string TemplateProperty<T>::description() {
+//	return
+//}
+
 template <typename T>
 TemplateProperty<T>::operator T() {
     return _value;
