@@ -78,6 +78,11 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 #endif
     // get path if available
 	bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
+#ifndef NDEBUG
+	ghoul_assert(success,
+		"Scenegraphnode need to specify '" << constants::scenegraph::keyPathModule
+		<< "' because renderables is going to use this for debugging!");
+#endif
 	if (success)
 		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 

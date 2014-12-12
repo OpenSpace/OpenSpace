@@ -47,7 +47,6 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	// The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(keyName, name);
-	assert(success);
 
 	std::string file;
 	success = dictionary.getValue(constants::modelgeometry::keyObjFile, file);
@@ -114,9 +113,9 @@ void WavefrontGeometry::loadObj(const char *filename){
 	_vsize = indicesSize;
 
 	// float arrays
-	float *tempVertexArray = new float[vertexSize];
-	float *tempVertexNormalArray = new float[vertexNormalSize];
-	float *tempVertexTextureArray = new float[vertexTextureSize];
+	float* tempVertexArray = new float[vertexSize];
+	float* tempVertexNormalArray = new float[vertexNormalSize];
+	float* tempVertexTextureArray = new float[vertexTextureSize];
 	_varray = new Vertex[_vsize];
 
 	// int arrays
