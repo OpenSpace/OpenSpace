@@ -128,6 +128,13 @@ public:
 	int typeLua() const override;
 
 	/**
+	 * Returns the description for this TemplateProperty as a Lua script that returns a
+	 * table on execution
+	 * \return The description for this TemplateProperty
+	 */
+	//virtual std::string description() override;
+
+	/**
 	 * This operator allows the TemplateProperty to be used almost transparently as if it
 	 * was of the type <code>T</code>. It makes assignments such as
 	 * <code>T v = property;</code> possible by allowing implicit casts (even though,

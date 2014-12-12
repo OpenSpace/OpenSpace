@@ -110,11 +110,7 @@ std::string Property::guiName() const {
 }
 
 std::string Property::description() const {
-	return
-		TypeKey       + " = " + className()  + ",\n" +
-		IdentifierKey + " = " + identifier() + ",\n" +
-		NameKey       + " = " + guiName()    + ",\n" +
-		generateMetaDataDescription();
+	return "return {" + generateBaseDescription() + "}";
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
@@ -162,6 +158,15 @@ void Property::notifyListener() {
 		_onChangeCallback();
 }
 
+std::string Property::generateBaseDescription() const {
+	return
+		TypeKey + " = \"" + className() + "\", " +
+		IdentifierKey + " = \"" + identifier() + "\", " +
+		NameKey + " = \"" + guiName() + "\", " +
+		generateMetaDataDescription() + ", " + 
+		generateAdditionalDescription();
+}
+
 std::string Property::generateMetaDataDescription() const {
 	bool isVisible, isReadOnly;
 	_metaData.getValue(_metaDataKeyVisible, isVisible);
@@ -169,10 +174,13 @@ std::string Property::generateMetaDataDescription() const {
 
 	return
 		MetaDataKey + " = {" +
-			_metaDataKeyGroup +   " = '" + groupIdentifier() + "',\n" +
-			_metaDataKeyVisible + " = '" + (isVisible  ? "true" : "false") + "',\n" +
-			_metaDataKeyReadOnly +" = ;" + (isReadOnly ? "true" : "false") + "'\n" +
-		"},";
+			_metaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
+			_metaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
+			_metaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+}
+
+std::string Property::generateAdditionalDescription() const {
+	return "";
 }
 
 } // namespace properties
