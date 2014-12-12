@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/framebufferobject.h>
@@ -60,9 +61,17 @@ public:
 protected:
     void loadTexture();
 
+	GLuint genComputeProg();
+	GLuint _computeShader;
+	void updateTex();
+
 private:
+
+	void imageProject();
+
     properties::StringProperty _colorTexturePath;
 	properties::StringProperty _projectionTexturePath;
+	properties::TriggerProperty _imageTrigger;
 
     ghoul::opengl::ProgramObject* _programObject;
 
@@ -72,11 +81,17 @@ private:
 
 	glm::dmat3 _stateMatrix;
 	glm::dmat3 _instrumentMatrix;
+	glm::mat4 _projectorMatrix;
+	glm::vec3 _boresight;
+	glm::vec2 _camScaling;
+	glm::mat4 _transform;
+
 
 	double _time;
 	openspace::SceneGraphNode* _targetNode;
 
 	std::string _target;
+
 };
 
 }  // namespace openspace

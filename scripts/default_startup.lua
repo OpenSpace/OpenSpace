@@ -1,5 +1,5 @@
 --openspace.setPropertyValue('Earth.renderable.colorTexture', '${OPENSPACE_DATA}/modules/mars/textures/mars.png')
-openspace.time.setTime("2007-02-26T17:43:02")
+openspace.time.setTime("2007-02-25T14:03:57")
 --openspace.time.setTime("2006-08-22T20:00:00")
 
 --openspace.time.setDeltaTime(200000.0)

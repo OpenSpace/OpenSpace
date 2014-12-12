@@ -46,10 +46,31 @@ const std::string _loggerCat = "RenderablePlanetProjection";
 }
 
 namespace openspace {
+
+#define printOpenGLError() printOglError(__FILE__, __LINE__)
+
+	int printOglError(char *file, int line)
+	{
+
+		GLenum glErr;
+		int    retCode = 0;
+
+		glErr = glGetError();
+		if (glErr != GL_NO_ERROR)
+		{
+			printf("glError in file %s @ line %d: %s\n",
+				file, line, gluErrorString(glErr));
+			retCode = 1;
+		}
+		return retCode;
+	}
+
+
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
 	, _projectionTexturePath("colorTexture", "Color Texture")
+	, _imageTrigger("imageTrigger", "Image Trigger")
     , _programObject(nullptr)
     , _texture(nullptr)
 	, _textureProj(nullptr)
@@ -87,6 +108,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	}
 	addPropertySubOwner(_geometry);
 
+	addProperty(_imageTrigger);
+	_imageTrigger.onChange(std::bind(&RenderablePlanetProjection::imageProject, this));
+
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 	addProperty(_projectionTexturePath);
@@ -97,7 +121,11 @@ RenderablePlanetProjection::~RenderablePlanetProjection(){
     deinitialize();
 }
 
+
+
 bool RenderablePlanetProjection::initialize(){
+	_computeShader = genComputeProg();
+
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
@@ -126,37 +154,111 @@ bool RenderablePlanetProjection::deinitialize(){
 bool RenderablePlanetProjection::isReady() const {
 	return (_geometry != nullptr);
 }
+GLuint RenderablePlanetProjection::genComputeProg() {
+	// Creating the compute shader, and the program object containing the shader
+	GLuint progHandle = glCreateProgram();
+	GLuint cs = glCreateShader(GL_COMPUTE_SHADER);
+
+	// In order to write to a texture, we have to introduce it as image2D.
+	// local_size_x/y/z layout variables define the work group size.
+	// gl_GlobalInvocationID is a uvec3 variable giving the global ID of the thread,
+	// gl_LocalInvocationID is the local index within the work group, and
+	// gl_WorkGroupID is the work group's index
+	const char *csSrc[] = {
+		"#version 440\n",
+	    "writeonly uniform image2D destTex;\
+	     layout (local_size_x = 16, local_size_y = 16) in;\
+		 void main() {\
+		       ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);\
+			   imageStore(destTex, storePos, vec4(1.0,0.0,0.0,1.0));\
+		}"
+	};
+
+	glShaderSource(cs, 2, csSrc, NULL);
+	glCompileShader(cs);
+	int rvalue;
+	glGetShaderiv(cs, GL_COMPILE_STATUS, &rvalue);
+	if (!rvalue) {
+		fprintf(stderr, "Error in compiling the compute shader\n");
+		GLchar log[10240];
+		GLsizei length;
+		glGetShaderInfoLog(cs, 10239, &length, log);
+		fprintf(stderr, "Compiler log:\n%s\n", log);
+		exit(40);
+	}
+	else{
+		printf(" CS COMPILE SUCCESS");
+	}
+	glAttachShader(progHandle, cs);
+
+	glLinkProgram(progHandle);
+	glGetProgramiv(progHandle, GL_LINK_STATUS, &rvalue);
+	if (!rvalue) {
+		fprintf(stderr, "Error in linking compute shader program\n");
+		GLchar log[10240];
+		GLsizei length;
+		glGetProgramInfoLog(progHandle, 10239, &length, log);
+		fprintf(stderr, "Linker log:\n%s\n", log);
+		exit(41);
+	}
+	else{
+		printf(" CS LINK SUCCESS");
+	}
+
+	return progHandle;
+}
+void RenderablePlanetProjection::updateTex(){ 
+
+	glUseProgram(_computeShader);
+	const GLint location = glGetUniformLocation(_computeShader, "destTex"); // 
+	if (location == -1){
+		printf("Could not locate uniform location for texture in CS");
+	}
+
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
+	//_texture->bind();
+	glUniform1i(location, unit); 
+	GLint format = _texture->internalFormat();
+	glBindImageTexture(unit, *_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+
+	glDispatchCompute(_texture->width() / 16, _texture->height() / 16, 1); 
+	glUseProgram(0);
+	printOpenGLError();
+
+}
 
 void RenderablePlanetProjection::render(const RenderData& data)
 {
 	if (!_programObject) return;
 	if (!_textureProj) return;
 
+
     // activate shader
     _programObject->activate();
 
     // scale the planet to appropriate size since the planet is a unit sphere
-    glm::mat4 transform = glm::mat4(1);
+	_transform = glm::mat4(1);
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+	glm::mat4 rot = glm::rotate(_transform, 90.f, glm::vec3(1, 0, 0));
 		
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			transform[i][j] = _stateMatrix[i][j];
+			_transform[i][j] = _stateMatrix[i][j];
 		}
 	}
-	transform = transform* rot;
+	_transform = _transform* rot;
 	if (_target == "IAU_JUPITER"){ // tmp scale of jupiterx = 0.935126
-		transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
+		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
 	}
 
 	// PROJECTIVE TEXTURING----------------------------------------------------------
 	// get fov
 	std::string shape, instrument;
 	std::vector<glm::dvec3> bounds;
-	glm::dvec3 boresight;
-	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, instrument, boresight, bounds);
+	glm::dvec3 bs;
+	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, instrument, bs, bounds);
 	if (!found) LERROR("Could not locate instrument");
 
 	psc position;
@@ -167,11 +269,11 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
 	//get up-vecto
 	//rotate boresight into correct alignment
-	glm::vec3 bsight(_instrumentMatrix*boresight); // lookat must be vec3 
+	_boresight = _instrumentMatrix*bs;
 	glm::vec3 uptmp(_instrumentMatrix*glm::dvec3(data.camera.lookUpVector()));
 
 	//create view matrix
-	glm::vec3 e3 = glm::normalize(bsight);
+	glm::vec3 e3 = glm::normalize(_boresight);
 	glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
 	glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
 	
@@ -185,14 +287,16 @@ void RenderablePlanetProjection::render(const RenderData& data)
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0   , 0   , 0,
 												  0   , 0.5f, 0   , 0,
 												  0   , 0   , 0.5f, 0,
-		                                          0.5f, 0.5f, 0.5f, 1 );
+						                          0.5f, 0.5f, 0.5f, 1 );
 
-	glm::mat4 m = projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
+	_camScaling = data.camera.scaling();
+
+	_projectorMatrix = projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
     // setup the data to the shader
-	_programObject->setUniform("ProjectorMatrix", m);
+	_programObject->setUniform("ProjectorMatrix", _projectorMatrix);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	_programObject->setAttribute("boresight", bsight);
+	_programObject->setUniform("ModelTransform", _transform);
+	_programObject->setAttribute("boresight", _boresight);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
     // Bind texture
@@ -211,13 +315,11 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
     // disable shader
     _programObject->deactivate();
-	
-	static int callCount = 0;
-	callCount++;
 
-	if (callCount > 1000){
-		callCount = 0;
+	updateTex();
+}
 
+void RenderablePlanetProjection::imageProject(){
 		_textureProj->downloadTexture();
 		_texture->downloadTexture();
 
@@ -227,7 +329,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 			const float fi = v * fsegments;
 
 			const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
-			const float phi   = fj * float(M_PI) * 2.0f / fsegments;
+			const float phi = fj * float(M_PI) * 2.0f / fsegments;
 
 			const float x = radius[0] * sin(phi) * sin(theta);  //
 			const float y = radius[0] * cos(theta);             // up
@@ -252,40 +354,45 @@ void RenderablePlanetProjection::render(const RenderData& data)
 
 		typedef glm::detail::tvec3<glm::detail::uint8> rgb;
 
-		auto bilinear = [](const ghoul::opengl::Texture* dest, const ghoul::opengl::Texture* source, float x, float y, float i, float j){
-			x = (x * float(source->width()));
-			y = (y * float(source->height()));
+		auto bilinear = [inRange](const ghoul::opengl::Texture* dest, const ghoul::opengl::Texture* source, 
+			                      float x, float y, float i, float j)->rgb{
+			x = (x * float(source->width())); 
+			y = (y * float(source->height())); 
+
+			int px = static_cast<int>(std::floor(x)); // floor of x
+			int py = static_cast<int>(std::floor(y)); // floor of y
 			
-			int px = static_cast<int>(x); // floor of x
-			int py = static_cast<int>(y); // floor of y
-
-			rgb p1, p2, p3, p4;
+			rgb p0, p1, p2, p3;
 			//original
-			rgb p0 = source->texel<rgb>(px, py);
-			// load the four neighboring pixels
-			p1 = (px + 1 < source->width()  - 1) ? source->texel<rgb>(px + 1, py) : dest->texel<rgb>(i + 1, j);	// right
-			p2 = (px - 1 > 0)                    ? source->texel<rgb>(px - 1, py) : dest->texel<rgb>(i - 1, j);	// left
-			p3 = (py + 1 < source->height() - 1) ? source->texel<rgb>(px, py + 1) : dest->texel<rgb>(i, j + 1);	// top
-			p4 = (py - 1 > 0)                    ? source->texel<rgb>(px, py - 1) : dest->texel<rgb>(i, j - 1);	// bottom
+			int of = 0;
+		
+			bool x0 = inRange(px,     1, source->width() - 1);
+			bool y0 = inRange(py,     1, source->height() - 1);
+			bool x1 = inRange(px + 1, 1, source->width() - 1);
+			bool y1 = inRange(py + 1, 1, source->height() - 1);
 
-			// Calculate the weights for each pixel
-			float fx = x - px;
-			float fy = y - py;
-			float fx1 = 1.0f - fx;
-			float fy1 = 1.0f - fy;
+			p0 = x0 && y0 ? source->texel<rgb>(px + 0, py + 0) : dest->texel<rgb>(i + 0, j + 0);
+			p1 = x1 && y0 ? source->texel<rgb>(px + 1, py + 0) : dest->texel<rgb>(i + 1, j + 0);
+			p2 = x0 && y1 ? source->texel<rgb>(px + 0, py + 1) : dest->texel<rgb>(i + 0, j + 1);
+			p3 = x1 && y1 ? source->texel<rgb>(px + 1, py + 1) : dest->texel<rgb>(i + 1, j + 1);
+			
 
-			float w1 = fx1 * fy1 ;//* 256.0f;
-			float w2 = fx  * fy1 ;//* 256.0f;
-			float w3 = fx1 * fy  ;//* 256.0f;
-			float w4 = fx  * fy  ;//* 256.0f;
+			glm::vec3 p0f = (glm::vec3)p0; 
+			glm::vec3 p1f = (glm::vec3)p1;
+			glm::vec3 p2f = (glm::vec3)p2;
+			glm::vec3 p3f = (glm::vec3)p3;
 
-			// Calculate the weighted sum of pixels (for each color channel)
-			int outr = p1.r * w1 + p2.r * w2 + p3.r * w3 + p4.r * w4;
-			int outg = p1.g * w1 + p2.g * w2 + p3.g * w3 + p4.g * w4;
-			int outb = p1.b * w1 + p2.b * w2 + p3.b * w3 + p4.b * w4;
-			//int outa = p1.a * w1 + p2.a * w2 + p3.a * w3 + p4.a * w4;
+			float a = x - float(px);
+			float b = y - float(py); 
+			if (a < 0) a = -a; 
+			if (b < 0) b = -b;
 
-			return rgb(outr, outg, outb);
+			glm::vec3 v1 = p0f*(1-a) + a*p1f;
+			glm::vec3 v2 = p2f*(1-a) + a*p3f;
+
+			glm::vec3 v = v1*(1-b) + b*v2;
+
+			return rgb(v[0], v[1], v[2]);
 		};
 
 
@@ -302,18 +409,16 @@ void RenderablePlanetProjection::render(const RenderData& data)
 				float v = float(j) / h;
 
 				// Psc scaling
-				glm::vec2 scaling = data.camera.scaling();
-
 				// Convert texture coordinates to model coordinates
 				float radius[2] = { 0.71492f, 8.f };
 				glm::vec4 in_position = uvToModel(u, v, radius, 200);
-				bool frontfacing = glm::dot(bsight, glm::vec3((transform*in_position).xyz)) < 0;
+				bool frontfacing = glm::dot(_boresight, glm::vec3((_transform*in_position).xyz)) < 0;
 
 				// Convert psc to meters
-				glm::vec4 raw_pos = pscToMeter(in_position, scaling);
+				glm::vec4 raw_pos = pscToMeter(in_position, _camScaling);
 
 				// Transform model coordinates to world coordinates
-				glm::vec4 projected = m * transform  * raw_pos;
+				glm::vec4 projected = _projectorMatrix * _transform  * raw_pos;
 
 				projected.x /= projected.w;
 				projected.y /= projected.w;
@@ -326,10 +431,14 @@ void RenderablePlanetProjection::render(const RenderData& data)
 				uvToIndex(uv, wp, hp, x, y);
 
 				if (frontfacing && inRange(x, 0, wp - 1) && inRange(y, 0, hp - 1)){
-					if (x < (wp*0.5f))
-					_texture->texel<rgb>(i, j) = bilinear(_texture, _textureProj, uv.x, uv.y, i, j);// _textureProj->texel<rgb>(x, y);
-					else
-					_texture->texel<rgb>(i, j) = _textureProj->texel<rgb>(x, y);
+					rgb final(0);
+
+					if (x <= (wp*0.5f)){ // bilinear vs nonbilinear comparison
+						final = bilinear(_texture, _textureProj, uv.x, uv.y, i, j);// _textureProj->texel<rgb>(x, y);
+					}else{
+						final = _textureProj->texel<rgb>(x, y);
+					}
+					_texture->texel<rgb>(i, j) = final;
 				}
 			}
 		}
@@ -337,7 +446,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 		// Upload textures
 		//_textureProj->uploadTexture();
 		_texture->uploadTexture();
-	}
+
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
@@ -359,7 +468,7 @@ void RenderablePlanetProjection::loadTexture()
 			_texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
         }
     }
 

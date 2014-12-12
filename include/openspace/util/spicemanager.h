@@ -26,6 +26,7 @@
 #define __SPICEMANAGER_H__
 
 #include "SpiceUsr.h"
+#include "SpiceZpr.h"
 
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -111,7 +112,7 @@ public:
 
 	/**
 	 * Determines whether values exist for some <code>item</code> for any
-	 * <code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
+	 * code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
 	 * function. 
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
 	 * \param body The name of the body that should be sampled
@@ -251,6 +252,24 @@ public:
 		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
 
 	/**
+	* This helper method converts a 3 dimensional vector from one reference frame to another.
+	* \param v The vector to be converted
+	* \param from The frame to be converted from
+	* \param to The frame to be converted to
+	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
+	*/
+	void frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const;
+
+	/**
+	 *  Finds the projection of one vector onto another vector.
+     *  All vectors are 3-dimensional.
+  	 *  \param v1 The vector to be projected.
+	 *  \param v2 The vector onto which v1 is to be projected.
+	 *  \return The projection of v1 onto v2.
+	 */
+	glm::dvec3 orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2);
+
+	/**
 	 * Returns the <code>position</code> of a <code>target</code> body relative to an
 	 * <code>observer</code> in a specific <code>referenceFrame</code>, optionally
 	 * corrected for light time (planetary aberration) and stellar aberration
@@ -290,7 +309,71 @@ public:
 						   psc& position, 
 						   double& lightTime) const;
 
-	void getPointingAttitude();
+	/**
+	*   Given an observer and a direction vector defining a ray, compute 
+    *   the surface intercept of the ray on a target body at a specified 
+    *   epoch, optionally corrected for light time and stellar 
+    *   aberration. 
+	*   \param method     Computation method. 
+    *   \param target     Name of target body. 
+    *   \param et         Epoch in ephemeris seconds past J2000 TDB. 
+    *   \param fixref     Body-fixed, body-centered target body frame. 
+    *   \param abcorr     Aberration correction. 
+    *   \param obsrvr     Name of observing body. 
+    *   \param dref       Reference frame of ray's direction vector. 
+    *   \param dvec       Ray's direction vector. 
+    *   \param spoint     Surface intercept point on the target body. 
+    *   \param trgepc     Intercept epoch. 
+    *   \param srfvec     Vector from observer to intercept point. 
+    *   \param found      Flag indicating whether intercept was found. 
+	*   For further details, refer to
+	*   http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
+	*/
+	bool getSurfaceIntercept(const std::string& target,
+							 const std::string& observer,
+							 const std::string& fovFrame,
+							 const std::string& bodyFixedFrame,
+							 const std::string& method,
+							 const std::string& aberrationCorrection,
+							 double ephemerisTime,
+							 double& targetEpoch,
+							 glm::dvec3& directionVector,
+							 glm::dvec3& surfaceIntercept,
+							 glm::dvec3& surfaceVector) const;
+
+	/**
+	*  Determine if a specified ephemeris object is within the
+    *  field-of-view (FOV) of a specified instrument at a given time.
+	*  \param Name or ID code string of the instrument.
+	*  \param Name or ID code string of the target.
+	*  \param Type of shape model used for the target.
+	*  \param Body-fixed, body-centered frame for target body.
+	*  \param Aberration correction method.
+	*  \param Name or ID code string of the observer.
+	*  \param Time of the observation (seconds past J2000).
+	*  \param Visibility flag (SPICETRUE/SPICEFALSE).
+    *  For further detail, refer to 
+	*  http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
+	*/
+	bool targetWithinFieldOfView(const std::string& instrument,
+		                         const std::string& target,
+		                         const std::string& observer,
+		                         const std::string& method,
+		                         const std::string& referenceFrame,
+		                         const std::string& aberrationCorrection,
+		                         double& targetEpoch) const;
+	/**
+	* This method performs the same computation as the function its overloading 
+	* with the exception that in doing so it assumes the inertial bodyfixed frame 
+	* is that of 'IAU' type, allowing the client to omitt the 
+	* <code>referenceFrame</code> for planetary objects.   
+	*/
+	bool targetWithinFieldOfView(const std::string& instrument,
+		                         const std::string& target,
+		                         const std::string& observer,
+		                         const std::string& method,
+		                         const std::string& aberrationCorrection,
+		                         double& targetEpoch) const;
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
@@ -374,6 +457,25 @@ public:
 									   const std::string& destinationFrame,
 									   double ephemerisTime,
 									   glm::dmat3& transformationMatrix) const;
+
+	/**
+	* The following overloaded function performs similar to its default - the exception being 
+	* that it computes <code>transformationMatrix</code> with respect to local time offset 
+	* between an observer and its target. This allows for the accountance of light travel of 
+	* photons, e.g to account for instrument pointing offsets due to said phenomenon. 
+	* \param sourceFrame The name of the source reference frame
+	* \param destinationFrame The name of the destination reference frame
+	* \param ephemerisTimeFrom Recorded/observed observation time
+	* \param ephemerisTimeTo   Emission local target-time
+	* \param transformationMatrix The output containing the transformation matrix that
+	*/
+
+	bool getPositionTransformMatrix(const std::string& sourceFrame,
+									const std::string& destinationFrame,
+									double ephemerisTimeFrom,
+									double ephemerisTimeTo,
+									glm::dmat3& transformationMatrix) const;
+
 
 	bool getPositionPrimeMeridian(const std::string& sourceFrame,
 									const std::string& destinationFrame,
@@ -465,9 +567,8 @@ public:
 	 * surface point on a body with the NAIF ID of <code>id</code> to rectangular
 	 * <code>coordinates</code>. For further details, refer to
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
-	 * \param id The identifier of the body on which the <code>longitude</code> and
-	 * <code>latitude</code> are defined. This body needs to have a defined radius for
-	 * this function to work.
+	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
+	 * are defined. This body needs to have a defined radius for this function to work
      * \param longitude The longitude of the point on the <code>body</code> in radians
      * \param latitude The latitude of the point on the <code>body</code> in radians
      * \param coordinates The output containing the rectangular coordinates of the point
@@ -524,7 +625,7 @@ public:
 		                     glm::dvec3& subObserverPoint,
 		                     double& targetEphemerisTime,
 							 glm::dvec3& vectorToSurfacePoint) const;
-
+    
     /**
      * This method checks if one of the previous SPICE methods has failed. If it has, the
      * <code>errorMessage</code> is used to log an error along with the original SPICE

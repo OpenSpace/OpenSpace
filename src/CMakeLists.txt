@@ -150,7 +150,7 @@ add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENS
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
 # cotire(OpenSpace)
-GhoulCopySharedLibraries(OpenSpace)
+#GhoulCopySharedLibraries(OpenSpace)
 
 add_subdirectory(tests)
 

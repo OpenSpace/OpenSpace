@@ -161,12 +161,12 @@ bool SceneGraph::initialize()
 	// Start Timing for building SceneGraph shaders
 	typedef std::chrono::high_resolution_clock clock_;
 	typedef std::chrono::duration<double, std::ratio<1> > second_;
-	std::chrono::time_point<clock_> beginning(clock_::now());
+	std::chrono::time_point<clock_> beginning(clock_::now()); 
 
 	// pscstandard
-	tmpProgram = ProgramObject::Build("projectiveProgram",
+	tmpProgram = ProgramObject::Build("projectiveProgram", 
 		"${SHADERS}/projectiveTexture_vs.glsl",
-		"${SHADERS}/projectiveTexture_fs.glsl");
+		"${SHADERS}/projectiveTexture_fs.glsl"); 
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
