@@ -32,6 +32,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/assert.h>
 
 namespace {
 const std::string _loggerCat = "Renderable";
@@ -69,9 +70,14 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 	: _enabled("enabled", "Is Enabled", true)
 {
     setName("renderable");
-
+#ifndef NDEBUG
+	std::string name;
+	ghoul_assert(dictionary.getValue(constants::scenegraphnode::keyName, name),
+		"Scenegraphnode need to specify '" << constants::scenegraphnode::keyName 
+		<< "' because renderables is going to use this for debugging!");
+#endif
     // get path if available
-	const bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
+	bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
 	if (success)
 		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 

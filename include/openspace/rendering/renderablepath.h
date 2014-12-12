@@ -52,7 +52,7 @@ namespace openspace {
 	private:
 		ghoul::opengl::ProgramObject* _programObject;
 		void loadTexture();
-		void fullYearSweep();
+		bool fullYearSweep();
 
 		// modfile reads
 		// spice

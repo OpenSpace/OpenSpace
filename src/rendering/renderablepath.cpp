@@ -53,19 +53,19 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 	, _iBufferID(0)
 {
 
-	bool b1 = dictionary.getValue(keyBody, _target);
-	bool b2 = dictionary.getValue(keyObserver, _observer);
-	bool b3 = dictionary.getValue(keyFrame, _frame);
-	assert(b1 == true);
-	assert(b2 == true);
-	assert(b3 == true);
-	/*assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
-	assert(dictionary.getValue(keyEarthOrbitRatio, _ratio));
-	assert(dictionary.getValue(keyDayLength, _day));//not used now, will be though.
-	// values in modfiles set from here*/
+	dictionary.getValue(keyBody, _target);
+	dictionary.getValue(keyObserver, _observer);
+	dictionary.getValue(keyFrame, _frame);
+
+	// not used now, will be though.
+	// dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
+	// dictionary.getValue(keyEarthOrbitRatio, _ratio);
+	// dictionary.getValue(keyDayLength, _day);
+
+	// values in modfiles set from here
 	// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
-	//white is default col
+	// white is default col
 	if (!dictionary.getValue(keyColor, _c)){
 		_c = glm::vec3(0.0);
 	}
@@ -75,7 +75,7 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 		_b = 1 / _c[2];
 	}
 }
-void RenderablePath::fullYearSweep(){
+bool RenderablePath::fullYearSweep(){
 	double lightTime = 0.0;
 	SpiceManager::ref().getETfromDate("2006 jan 20 19:00:00", _time);
 
@@ -98,7 +98,14 @@ void RenderablePath::fullYearSweep(){
 	for (int i = 0; i < segments + 1; i++){
 		std::cout << i << std::endl;
 		bool gotData = SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "LT+S", et, _pscpos, lightTime);
-		assert(gotData);
+
+#ifndef NDEBUG
+		if (!gotData) {
+			LERROR("Could not fetch data from spice!");
+			return false;
+		}
+#endif
+
 		if (_pscpos[0] != 0 && _pscpos[1] != 0 && _pscpos[2] != 0 && _pscpos[3] != 1){
 			_pscpos[3] += 3;
 			_varray.push_back(_pscpos[0]);
@@ -131,6 +138,7 @@ void RenderablePath::fullYearSweep(){
 	_stride = 8;
 	_vsize = _varray.size();
 	_vtotal = static_cast<int>(_vsize / _stride);
+	return true;
 }
 
 RenderablePath::~RenderablePath(){
@@ -138,17 +146,32 @@ RenderablePath::~RenderablePath(){
 }
 
 bool RenderablePath::isReady() const {
-	return _programObject != nullptr;
+	bool ready = true;
+	ready &= (_programObject != nullptr);
+	return ready;
 }
 
 
 bool RenderablePath::initialize(){
+
+	if (_target.empty() || _observer.empty() || _frame.empty()) {
+		LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");
+		LERROR(keyBody << ": " << _target);
+		LERROR(keyObserver << ": " << _observer);
+		LERROR(keyFrame << ": " << _frame);
+		return false;
+	}
+	// Does checking if can fetch spice data (debug mode only)
+	if (!fullYearSweep()) 
+		return false;
+
+	// If the programobject is fetched after the string checking, then 
+	// the isReady function will properly reflect the state of this object
+	// -- jonasstrandstedt
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess
 		&= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
-
-	fullYearSweep();
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);
@@ -176,6 +199,9 @@ bool RenderablePath::initialize(){
 }
 
 bool RenderablePath::deinitialize(){
+	glDeleteVertexArrays(1, &_vaoID);
+	glDeleteBuffers(1, &_vBufferID);
+	glDeleteBuffers(1, &_iBufferID);
 	return true;
 }
 
@@ -211,6 +237,10 @@ void RenderablePath::render(const RenderData& data){
 }
 
 void RenderablePath::update(const UpdateData& data){
+#ifndef NDEBUG
+	if (_target.empty() || _observer.empty() || _frame.empty())
+		return;
+#endif
 	double lightTime;
 
 	_time = data.time;

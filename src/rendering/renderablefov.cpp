@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 #include <openspace/rendering/renderablefov.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
@@ -54,13 +54,10 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 	, _vBufferID(0)
 	, _iBufferID(0)
 {
-
-	bool b1 = dictionary.getValue(keyBody, _target);
-	bool b2 = dictionary.getValue(keyObserver, _observer);
-	bool b3 = dictionary.getValue(keyFrame, _frame);
-	assert(b1 == true);
-	assert(b2 == true);
-	assert(b3 == true);
+	// @TODO Uncomment when used again, do not depend on assert in constructor --jonasstrandstedt
+	//dictionary.getValue(keyBody, _target);
+	//dictionary.getValue(keyObserver, _observer);
+	//dictionary.getValue(keyFrame, _frame);
 
 	if (!dictionary.getValue(keyColor, _c)){
 		_c = glm::vec3(0.0);
@@ -97,7 +94,10 @@ RenderableFov::~RenderableFov(){
 }
 
 bool RenderableFov::isReady() const {
-	return _programObject != nullptr;
+	bool ready = true;
+	ready &= (_programObject != nullptr);
+
+	return ready;
 }
 
 void RenderableFov::sendToGPU(){
@@ -130,7 +130,6 @@ bool RenderableFov::initialize(){
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
 	
-	 _startTrail;
 	 SpiceManager::ref().getETfromDate("2007 feb 26 20:00:00", _startTrail);
 
 	 fullYearSweep();
@@ -232,6 +231,7 @@ void RenderableFov::render(const RenderData& data){
 }
 
 void RenderableFov::update(const UpdateData& data){
+
 	double lightTime;
 	_time  = data.time;
 	_delta = data.delta;

@@ -48,12 +48,11 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	, _shader(nullptr)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
+	dictionary.getValue(constants::scenegraphnode::keyName, name);
 
 	// Read fieldlines module into dictionary
 	ghoul::Dictionary fieldlines;
-	success = dictionary.getValue(keyFieldlines, fieldlines);
+	bool success = dictionary.getValue(keyFieldlines, fieldlines);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' did not contain a '" <<
 			keyFieldlines << "' key");

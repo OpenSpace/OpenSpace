@@ -55,6 +55,8 @@ public:
 	void loadTexture();
 	void fullYearSweep();
 
+	bool _successfullDictionaryFetch;
+
 	// modfile reads
 	// spice
 	std::string _target;
