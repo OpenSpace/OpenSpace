@@ -90,7 +90,6 @@ void RenderableFov::fullYearSweep(){
 }
 
 RenderableFov::~RenderableFov(){
-	deinitialize();
 }
 
 bool RenderableFov::isReady() const {

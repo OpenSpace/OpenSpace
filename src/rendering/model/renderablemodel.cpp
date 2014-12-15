@@ -86,7 +86,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
 RenderableModel::~RenderableModel(){
-    deinitialize();
 }
 
 bool RenderableModel::isReady() const {

@@ -87,7 +87,6 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 }
 
 RenderableFieldlines::~RenderableFieldlines() {
-	deinitialize();
 }
 
 bool RenderableFieldlines::isReady() const {

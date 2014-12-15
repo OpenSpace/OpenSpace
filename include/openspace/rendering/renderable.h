@@ -75,7 +75,7 @@ protected:
 
 private:
 	properties::BoolProperty _enabled;
-
+	
     PowerScaledScalar boundingSphere_;
     std::string _relativePath;
 };

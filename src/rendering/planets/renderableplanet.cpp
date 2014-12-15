@@ -84,10 +84,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
 	addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+	std::string s = _colorTexturePath.description();
+	ghoul::Dictionary d;
+	ghoul::lua::loadDictionaryFromString(s, d);
+
 }
 
 RenderablePlanet::~RenderablePlanet() {
-    deinitialize();
 }
 
 bool RenderablePlanet::initialize() {

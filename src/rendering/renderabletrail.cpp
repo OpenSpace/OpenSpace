@@ -139,7 +139,6 @@ void RenderableTrail::fullYearSweep(){
 }
 
 RenderableTrail::~RenderableTrail(){
-	deinitialize();
 }
 
 bool RenderableTrail::isReady() const {
