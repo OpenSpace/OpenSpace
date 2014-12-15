@@ -57,15 +57,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _geometry(nullptr)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
-
 	std::string path;
-	success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-	assert(success);
+	dictionary.getValue(constants::scenegraphnode::keyName, name);
+	dictionary.getValue(constants::scenegraph::keyPathModule, path);
 
 	ghoul::Dictionary geometryDictionary;
-	success = dictionary.getValue(
+	bool success = dictionary.getValue(
 		constants::renderablemodel::keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
@@ -78,16 +75,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	if (success)
 		_colorTexturePath = path + "/" + texturePath;
 
-	if (_geometry != nullptr)
 	addPropertySubOwner(_geometry);
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
-	bool b1 = dictionary.getValue(keySource, _source);
-	bool b2 = dictionary.getValue(keyDestination, _destination);
-	assert(b1 == true);
-	assert(b2 == true);
+	dictionary.getValue(keySource, _source);
+	dictionary.getValue(keyDestination, _destination);
 }
 
 
@@ -96,7 +90,10 @@ RenderableModel::~RenderableModel(){
 }
 
 bool RenderableModel::isReady() const {
-	return _programObject != nullptr;
+	bool ready = true;
+	ready &= (_programObject != nullptr);
+	ready &= (_texture != nullptr);
+	return ready;
 }
 
 bool RenderableModel::initialize(){
@@ -106,39 +103,35 @@ bool RenderableModel::initialize(){
               &= OsEng.ref().configurationManager().getValue("pscShader", _programObject); 
 
     loadTexture();
-    completeSuccess &= (_texture != nullptr);
 
-	if (_geometry != nullptr)
+    completeSuccess &= (_texture != nullptr);
     completeSuccess &= _geometry->initialize(this); 
+	completeSuccess &= !_source.empty();
+	completeSuccess &= !_destination.empty();
 
     return completeSuccess;
 }
 
 bool RenderableModel::deinitialize(){
-
-	if (_geometry != nullptr){
+	if (_geometry) {
 		_geometry->deinitialize();
 		delete _geometry;
-		_geometry = nullptr;
 	}
-	delete _texture;
+	if (_texture)
+		delete _texture;
+
+	_geometry = nullptr;
 	_texture = nullptr;
 	return true;
 }
 
 void RenderableModel::render(const RenderData& data)
 {
-	if (!_programObject) return;
-	if (!_texture) return;
-
     // activate shader
     _programObject->activate();
 
- 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
-	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, 1, 0));
-	glm::mat4 scale = glm::scale(transform, glm::vec3(1, -1, 1));
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
@@ -146,6 +139,7 @@ void RenderableModel::render(const RenderData& data)
 			tmp[i][j] = _stateMatrix[i][j];
 		}
 	}
+	
 	transform *= tmp;
 	
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
@@ -162,8 +156,7 @@ void RenderableModel::render(const RenderData& data)
     unit.activate();
     _texture->bind();
     _programObject->setUniform("texture1", unit);
-	
-	if (_geometry != nullptr)
+
 	_geometry->render();
 
     // disable shader
@@ -171,6 +164,10 @@ void RenderableModel::render(const RenderData& data)
 }
 
 void RenderableModel::update(const UpdateData& data){
+#ifndef NDEBUG
+	if (_source.empty() || _destination.empty())
+		return;
+#endif
 	// set spice-orientation in accordance to timestamp
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 	
@@ -181,7 +178,7 @@ void RenderableModel::loadTexture()
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();

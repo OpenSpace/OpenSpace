@@ -112,6 +112,22 @@ int visualizeABuffer(lua_State* L) {
 * visualizeABuffer(bool):
 * Toggle the visualization of the ABuffer
 */
+int showRenderInformation(lua_State* L) {
+	int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+	const int type = lua_type(L, -1);
+	bool b = lua_toboolean(L, -1) != 0;
+	OsEng.renderEngine().toggleInfoText(b);
+	return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* visualizeABuffer(bool):
+* Toggle the visualization of the ABuffer
+*/
 int setPerformanceMeasurement(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 1)
@@ -142,6 +158,14 @@ RenderEngine::RenderEngine()
 
 RenderEngine::~RenderEngine()
 {
+	if(_abuffer)
+		delete _abuffer;
+	_abuffer = nullptr;
+
+	if(_sceneGraph)
+		delete _sceneGraph;
+	_sceneGraph = nullptr;
+
     delete _mainCamera;
 	if (_visualizer)
 		delete _visualizer;
@@ -162,13 +186,13 @@ bool RenderEngine::initialize()
 	OsEng.interactionHandler().setCamera(_mainCamera);
 
 #ifdef GHOUL_USE_DEVIL
-	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderDevIL);
+	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderFreeImage);
+	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
 #endif // GHOUL_USE_FREEIMAGE
 
-	ghoul::io::TextureReader::addReader(new ghoul::io::impl::TextureReaderCMAP);
+	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
     
 #if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
     _abuffer = new ABufferFramebuffer();
@@ -498,6 +522,11 @@ void RenderEngine::toggleVisualizeABuffer(bool b) {
 	_visualizer->updateData(_d);
 }
 
+
+void RenderEngine::toggleInfoText(bool b) {
+	_showInfo = b;
+}
+
 SceneGraph* RenderEngine::sceneGraph()
 {
     // TODO custom assert (ticket #5)
@@ -585,6 +614,12 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				&luascriptfunctions::visualizeABuffer,
 				"bool",
 				"Toggles the visualization of the ABuffer"
+			},
+			{
+				"showRenderInformation",
+				&luascriptfunctions::showRenderInformation,
+				"bool",
+				"Toggles the showing of render information on-screen text"
 			},
 			{
 				"setPerformanceMeasurement",

@@ -47,17 +47,11 @@ protected:
 	virtual bool reinitializeInternal();
 
 private:
-
-	GLuint *_data;
 	GLuint _anchorPointerTexture;
 	GLuint _anchorPointerTextureInitializer;
 	GLuint _atomicCounterBuffer;
 	GLuint _fragmentBuffer;
 	GLuint _fragmentTexture;
-
-
-
-
 }; 		// ABufferSingleLinked
 } 		// openspace
 

@@ -26,7 +26,7 @@
 #########################################################################################
 # General Settings
 #########################################################################################
-
+ 
 cmake_minimum_required (VERSION 2.8) 
 project (OpenSpace)
 
@@ -46,7 +46,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
 
 
-#include(cotire)
+include(cotire)
 
 # Make sure a build type is set. Default is Debug.
 if(NOT CMAKE_BUILD_TYPE)

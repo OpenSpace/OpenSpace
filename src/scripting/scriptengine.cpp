@@ -182,6 +182,10 @@ ScriptEngine::ScriptEngine()
 {
 }
 
+ScriptEngine::~ScriptEngine() {
+	deinitialize();
+}
+
 bool ScriptEngine::initialize() {
     LDEBUG("Adding base functions");
     addBaseLibrary();

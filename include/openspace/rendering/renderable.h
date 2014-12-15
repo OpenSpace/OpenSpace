@@ -28,21 +28,24 @@
 // openspace
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/updatestructures.h>
-
-// ghoul
-#include <ghoul/misc/dictionary.h>
 
 // Forward declare to minimize dependencies
 namespace ghoul {
 	namespace opengl {
 		class ProgramObject;
+		class Texture;
 	}
+	class Dictionary;
 }
 
 namespace openspace {
+
+// Forward declare to minimize dependencies
+struct RenderData;
+struct UpdateData;
+class Camera;
+class PowerScaledCoordinate;
 
 class Renderable : public properties::PropertyOwner {
 public:
@@ -68,7 +71,7 @@ public:
 
 protected:
     std::string findPath(const std::string& path);
-	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const psc& position);
+	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 
 private:
 	properties::BoolProperty _enabled;

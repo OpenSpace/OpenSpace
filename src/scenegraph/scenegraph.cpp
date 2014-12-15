@@ -299,9 +299,6 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 }
 
 void SceneGraph::clearSceneGraph() {
-	for (SceneGraphNode* node : _nodes)
-		node->deinitialize();
-
 	// deallocate the scene graph. Recursive deallocation will occur
     delete _root;
     _root = nullptr;
@@ -344,10 +341,6 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	std::string moduleDirectory(".");
 	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
 
-	std::string commonDirectory(_defaultCommonDirectory);
-	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
-	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
-
 	// The scene path could either be an absolute or relative path to the description
 	// paths directory
 	std::string&& relativeCandidate = sceneDescriptionDirectory +
@@ -364,19 +357,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		return false;
 	}
 
-	LDEBUG("Loading common module folder '" << commonDirectory << "'");
-	loadModule(FileSys.pathByAppendingComponent(moduleDirectory, commonDirectory));
-
-    Dictionary moduleDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
-        std::vector<std::string> keys = moduleDictionary.keys();
-        std::sort(keys.begin(), keys.end());
-        for (const std::string& key : keys) {
-            std::string moduleFolder;
-			if (moduleDictionary.getValue(key, moduleFolder))
-                loadModule(FileSys.pathByAppendingComponent(moduleDirectory, moduleFolder));
-        }
-    }
+	// Load the modules/scenegraph nodes
+	loadModules(moduleDirectory, dictionary);
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     Dictionary cameraDictionary;
@@ -475,6 +457,105 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	}
 
     return true;
+}
+
+void SceneGraph::loadModules(
+	const std::string& directory, 
+	const ghoul::Dictionary& dictionary) 
+{
+	// Struct containing dependencies and nodes
+	LoadMaps m;
+
+	// Get the common directory
+	std::string commonDirectory(_defaultCommonDirectory);
+	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
+	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
+
+	LDEBUG("Loading common module folder '" << commonDirectory << "'");
+
+	// Load common modules into LoadMaps struct
+	loadModule(m,FileSys.pathByAppendingComponent(directory, commonDirectory));
+
+	// Load the rest of the modules into LoadMaps struct
+    ghoul::Dictionary moduleDictionary;
+    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
+        std::vector<std::string> keys = moduleDictionary.keys();
+        std::sort(keys.begin(), keys.end());
+        for (const std::string& key : keys) {
+            std::string moduleFolder;
+			if (moduleDictionary.getValue(key, moduleFolder)) {
+                loadModule(m,FileSys.pathByAppendingComponent(directory, moduleFolder));
+			}
+        }
+    }
+
+    // Load and construct scenegraphnodes from LoadMaps struct
+    loadNodes(SceneGraphNode::RootNodeName, m);
+
+    // Remove loaded nodes from dependency list
+    for(const auto& name: m.loadedNodes) {
+    	m.dependencies.erase(name);
+    }
+
+    // Check to see what dependencies are not resolved.
+    for(auto& node: m.dependencies) {
+    	LWARNING(
+    		"'" << node.second << "'' not loaded, parent '" 
+    		<< node.first << "' not defined!");
+    }
+}
+
+void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath) {
+	auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
+    if (pos == modulePath.npos) {
+        LERROR("Bad format for module path: " << modulePath);
+        return;
+    }
+
+    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
+    LDEBUG("Loading nodes from: " << fullModule);
+
+    ghoul::Dictionary moduleDictionary;
+    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
+    std::vector<std::string> keys = moduleDictionary.keys();
+    for (const std::string& key : keys) {
+        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
+                                         << fullModule << "'");
+            continue;
+        }
+        
+        ghoul::Dictionary element;
+        std::string nodeName;
+        std::string parentName;
+
+        moduleDictionary.getValue(key, element);
+		element.setValue(constants::scenegraph::keyPathModule, modulePath);
+
+		element.getValue(constants::scenegraphnode::keyName, nodeName);
+		element.getValue(constants::scenegraphnode::keyParentName, parentName);
+
+		m.nodes[nodeName] = element;
+		m.dependencies.emplace(parentName,nodeName);
+    }
+}
+
+void SceneGraph::loadNodes(const std::string& parentName, LoadMaps& m) {
+	auto eqRange = m.dependencies.equal_range(parentName);
+	for (auto it = eqRange.first; it != eqRange.second; ++it) {
+		auto node = m.nodes.find((*it).second);
+		loadNode(node->second);
+		loadNodes((*it).second, m);
+	}
+	m.loadedNodes.emplace_back(parentName);
+}
+
+void SceneGraph::loadNode(const ghoul::Dictionary& dictionary) {
+    SceneGraphNode* node = SceneGraphNode::createFromDictionary(dictionary);
+    if(node) {
+    	_allNodes.emplace(node->name(), node);
+    	_nodes.push_back(node);
+    }
 }
 
 void SceneGraph::loadModule(const std::string& modulePath)

@@ -55,6 +55,7 @@ private:
 
 	ghoul::opengl::ProgramObject* _shader;
 	GLuint _fieldlineVAO;
+	GLuint _vertexPositionBuffer;
 
 	std::vector<GLint> _lineStart;
 	std::vector<GLsizei> _lineCount;

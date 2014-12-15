@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <openspace/rendering/renderabletrail.h>
+
+#include <sgct.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 
@@ -53,24 +55,27 @@ namespace {
 }
 //#define DEBUG
 namespace openspace{
-	RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
-		: Renderable(dictionary)
-		, _colorTexturePath("colorTexture", "Color Texture")
-		, _programObject(nullptr)
-		, _texture(nullptr)
-		, _vaoID(0)
-		, _vBufferID(0)
-		, _iBufferID(0)
-		, _mode(GL_LINE_STRIP){
+RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
+	: Renderable(dictionary)
+	, _colorTexturePath("colorTexture", "Color Texture")
+	, _programObject(nullptr)
+	, _texture(nullptr)
+	, _vaoID(0)
+	, _vBufferID(0)
+	, _iBufferID(0)
+	, _mode(GL_LINE_STRIP)
+{
 
-		assert(dictionary.getValue(keyBody               , _target));
-		assert(dictionary.getValue(keyObserver           , _observer));
-		assert(dictionary.getValue(keyFrame              , _frame));
-		assert(dictionary.getValue(keyTropicalOrbitPeriod, _tropic));
-		assert(dictionary.getValue(keyEarthOrbitRatio    , _ratio));
-		assert(dictionary.getValue(keyDayLength          , _day));//not used now, will be though.
-		// values in modfiles set from here
-		// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
+	_successfullDictionaryFetch = true;
+	_successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
+	_successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
+	_successfullDictionaryFetch &= dictionary.getValue(keyFrame, _frame);
+	_successfullDictionaryFetch &= dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
+	_successfullDictionaryFetch &= dictionary.getValue(keyEarthOrbitRatio, _ratio);
+	_successfullDictionaryFetch &= dictionary.getValue(keyDayLength, _day);
+
+	// values in modfiles set from here
+	// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 
 
 	//white is default col
@@ -101,15 +106,11 @@ void RenderableTrail::fullYearSweep(){
 	
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
-	_iarray = new int[_isize];
-
+	_iarray.clear();
+	//_iarray = new int[_isize];
+	
 	for (int i = 0; i < segments+2; i++){
-		/*if (_target == "NEW HORIZONS"){
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", _startTrail, _pscpos, _pscvel, lightTime);
-		}
-		else{*/
-			SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", et, _pscpos, _pscvel, lightTime);
-		//}
+		SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", et, _pscpos, _pscvel, lightTime);
 		_pscpos[3] += 3;
 
 		for (int k = 0; k < 4; k++)
@@ -127,7 +128,8 @@ void RenderableTrail::fullYearSweep(){
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );
 #endif
- 		_iarray[i] = i;
+ 		//_iarray[i] = i;
+		_iarray.push_back(i);
 		if (i != 0) //very first point needs to be alllocated twice.
 		et -= _increment;
 	}
@@ -141,7 +143,9 @@ RenderableTrail::~RenderableTrail(){
 }
 
 bool RenderableTrail::isReady() const {
-	return _programObject != nullptr;
+	bool ready = true;
+	ready &= (_programObject != nullptr);
+	return ready;
 }
 
 void RenderableTrail::sendToGPU(){
@@ -163,12 +167,25 @@ void RenderableTrail::sendToGPU(){
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
 
+
 bool RenderableTrail::initialize(){
+
+	if (!_successfullDictionaryFetch) {
+		LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");
+		LERROR(keyBody << ": " << _target);
+		LERROR(keyObserver << ": " << _observer);
+		LERROR(keyFrame << ": " << _frame);
+		LERROR(keyTropicalOrbitPeriod << ": " << _tropic);
+		LERROR(keyEarthOrbitRatio << ": " << _ratio);
+		LERROR(keyDayLength << ": " << _day);
+		return false;
+	}
+
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess
@@ -178,8 +195,8 @@ bool RenderableTrail::initialize(){
 	//loadTexture();
 	completeSuccess &= (_texture != nullptr);
 
-	 _startTrail;
-	SpiceManager::ref().getETfromDate("2007 feb 25 14:03:57.000", _startTrail);
+	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
+	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();
@@ -189,15 +206,41 @@ bool RenderableTrail::initialize(){
 }
 
 bool RenderableTrail::deinitialize(){
-	delete _texture;
+	if (_texture)
+		delete _texture;
 	_texture = nullptr;
+
+	glDeleteVertexArrays(1, &_vaoID);
+	glDeleteBuffers(1, &_vBufferID);
+	glDeleteBuffers(1, &_iBufferID);
 	return true;
 }
 
+// Tried interpolation but then realised this still gives straight lines (latenight thing).
+// Not allowed Splines so therefore - query spice for each point (bah...) 
+// From psc paper:
+/*
+psc pscInterpolate(psc p0, psc p1, float t){
+	assert(t >= 0 && t <= 1);
+
+	float s = (1.f - t)*p0[3] + t*p1[3];
+
+	float x = ((1.f - t)*p0[0] + t*p1[0]);
+	float y = ((1.f - t)*p0[1] + t*p1[1]);
+	float z = ((1.f - t)*p0[2] + t*p1[2]);
+
+	return PowerScaledCoordinate::PowerScaledCoordinate(x,y,z,s);
+}
+*/
+
 void RenderableTrail::updateTrail(){
+#ifndef NDEBUG
+	if (!_successfullDictionaryFetch)
+		return;
+#endif
 	int m = _stride;
 	float *begin = &_varray[0];
-	float *end = &_varray[_vsize - 1] + 1;
+	//float *end = &_varray[_vsize - 1] + 1;
 
 	// update only when time progresses
 	if (_oldTime != _time){
@@ -218,7 +261,7 @@ void RenderableTrail::updateTrail(){
 			// keep track of progression
 			_dtEt += _increment;
 		}
-		//add current position
+		//add earths current position
 		memcpy(&_varray[0], glm::value_ptr(_pscpos.vec4()), 4 * sizeof(float));
 		_varray[4] = 1.f;
 		_varray[5] = 1.f;
@@ -236,7 +279,6 @@ void RenderableTrail::updateTrail(){
 }
 
 void RenderableTrail::render(const RenderData& data){
-	assert(_programObject);
 	_programObject->activate();
 
 	// fetch data
@@ -270,7 +312,7 @@ void RenderableTrail::render(const RenderData& data){
 void RenderableTrail::update(const UpdateData& data){
 	_time  = data.time;
 	_delta = data.delta;
-
+	
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
 	_pscpos[3] += 3; // KM to M
 	
@@ -281,7 +323,7 @@ void RenderableTrail::loadTexture()
 	delete _texture;
 	_texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
 		if (_texture) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();

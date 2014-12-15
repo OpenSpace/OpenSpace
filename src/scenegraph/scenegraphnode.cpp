@@ -153,9 +153,11 @@ bool SceneGraphNode::deinitialize()
 {
     LDEBUG("Deinitialize: " << name());
 
-    delete _renderable;
+    if(_renderable)
+        delete _renderable;
     _renderable = nullptr;
-    delete _ephemeris;
+    if(_ephemeris)
+        delete _ephemeris;
     _ephemeris = nullptr;
 
     // deallocate the child nodes and delete them, iterate c++11 style

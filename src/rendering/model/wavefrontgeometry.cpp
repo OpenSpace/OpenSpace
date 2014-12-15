@@ -37,7 +37,6 @@ namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
     : ModelGeometry()
-	, _mode(GL_TRIANGLES)
 	, _isize(0)
 	, _vsize(0)
 	, _varray(nullptr)
@@ -48,7 +47,6 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	// The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(keyName, name);
-	assert(success);
 
 	std::string file;
 	success = dictionary.getValue(constants::modelgeometry::keyObjFile, file);
@@ -115,9 +113,9 @@ void WavefrontGeometry::loadObj(const char *filename){
 	_vsize = indicesSize;
 
 	// float arrays
-	float *tempVertexArray = new float[vertexSize];
-	float *tempVertexNormalArray = new float[vertexNormalSize];
-	float *tempVertexTextureArray = new float[vertexTextureSize];
+	float* tempVertexArray = new float[vertexSize];
+	float* tempVertexNormalArray = new float[vertexNormalSize];
+	float* tempVertexTextureArray = new float[vertexTextureSize];
 	_varray = new Vertex[_vsize];
 
 	// int arrays
@@ -268,8 +266,10 @@ bool WavefrontGeometry::initialize(RenderableModel* parent){
 }
 
 void WavefrontGeometry::deinitialize(){
-	delete[] _varray;
-	delete[] _iarray;
+	if (_varray)
+		delete[] _varray;
+	if (_iarray)
+		delete[] _iarray;
 
 	glDeleteBuffers(1, &_vBufferID);
 	glDeleteBuffers(1, &_iBufferID);
@@ -281,7 +281,7 @@ void WavefrontGeometry::render(){
 	// render
 	glBindVertexArray(_vaoID);  // select first VAO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

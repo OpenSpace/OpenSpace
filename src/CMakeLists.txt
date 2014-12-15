@@ -149,8 +149,10 @@ include_directories("${HEADER_ROOT_DIR}")
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
-# cotire(OpenSpace)
-#GhoulCopySharedLibraries(OpenSpace)
+if (NOT UNIX)
+    cotire(OpenSpace)
+endif ()
+GhoulCopySharedLibraries(OpenSpace)
 
 add_subdirectory(tests)
 

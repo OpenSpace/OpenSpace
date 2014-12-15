@@ -50,6 +50,8 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	: RenderableVolume(dictionary)
 	, _transferFunctionName("")
 	, _volumeName("")
+	, _boxArray(0)
+	, _vertexPositionBuffer(0)
 	, _boxScaling(1.0, 1.0, 1.0)
 	, _w(0.f)
 	, _updateTransferfunction(false)
@@ -159,21 +161,18 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 
 RenderableVolumeGL::~RenderableVolumeGL() {
     deinitialize();
-    if(_volume)
-        delete _volume;
-    if(_transferFunctionFile)
-        delete _transferFunctionFile;
-    if(_transferFunction)
-        delete _transferFunction;
 }
 
 bool RenderableVolumeGL::isReady() const {
-	// @TODO needs a proper isReady definition --abock
-	return true;
+	bool ready = true;
+	ready &= (_boxProgram != nullptr);
+	ready &= (_volume != nullptr);
+	ready &= (_transferFunction != nullptr);
+	return ready; 
 }
 
 bool RenderableVolumeGL::initialize() {
-    // TODO: fix volume an transferfunction names
+	// @TODO fix volume and transferfunction names --jonasstrandstedt
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);
         _volume->uploadTexture();
@@ -195,9 +194,6 @@ bool RenderableVolumeGL::initialize() {
     _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
 
     OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
-    _MVPLocation = _boxProgram->uniformLocation("modelViewProjection");
-    _modelTransformLocation = _boxProgram->uniformLocation("modelTransform");
-    _typeLocation = _boxProgram->uniformLocation("volumeType");
 
     // ============================
     //      GEOMETRY (box)
@@ -247,20 +243,33 @@ bool RenderableVolumeGL::initialize() {
          size, -size, -size,  _w,
          size, -size,  size,  _w,
     };
-    GLuint vertexPositionBuffer;
+
     glGenVertexArrays(1, &_boxArray); // generate array
     glBindVertexArray(_boxArray); // bind array
-    glGenBuffers(1, &vertexPositionBuffer); // generate buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
+	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
     
-    return true;
+    return isReady();
 }
 
 bool RenderableVolumeGL::deinitialize() {
-    return true;
+	if (_volume)
+		delete _volume;
+	if (_transferFunctionFile)
+		delete _transferFunctionFile;
+	if (_transferFunction)
+		delete _transferFunction;
+	_volume = nullptr;
+	_transferFunctionFile = nullptr;
+	_transferFunction = nullptr;
+
+	glDeleteVertexArrays(1, &_boxArray);
+	glGenBuffers(1, &_vertexPositionBuffer);
+    
+	return true;
 }
 
 void RenderableVolumeGL::render(const RenderData& data) {
@@ -287,7 +296,7 @@ void RenderableVolumeGL::render(const RenderData& data) {
 	currentPosition += _pscOffset; // Move box to model barycenter
 
     _boxProgram->activate();
-	_boxProgram->setUniform(_typeLocation, _id);
+	_boxProgram->setUniform("volumeType", _id);
 	_boxProgram->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_boxProgram->setUniform("modelTransform", transform);
 	setPscUniforms(_boxProgram, &data.camera, currentPosition);

@@ -46,7 +46,7 @@ public:
 	void addOption(Option option);
 	const std::vector<Option>& options() const;
 
-	void setValue(std::vector<int> value) override;
+	//void setValue(std::vector<int> value) override;
 
 private:
 	/// The list of options which have been registered with this OptionProperty

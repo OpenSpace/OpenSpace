@@ -90,6 +90,13 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
 
+OpenSpaceEngine::~OpenSpaceEngine() {
+	_gui.deinitializeGL();
+	if(_syncBuffer)
+		delete _syncBuffer;
+	_syncBuffer = nullptr;
+}
+
 OpenSpaceEngine& OpenSpaceEngine::ref() {
     assert(_engine);
     return *_engine;
@@ -174,6 +181,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 	_engine->_console.loadHistory();
 
+	// Register the provided shader directories
+	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
+
 	_engine->_syncBuffer = new SyncBuffer(1024);
 
 	// Determining SGCT configuration file
@@ -198,6 +208,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
@@ -214,7 +225,7 @@ bool OpenSpaceEngine::initialize() {
 	clearAllWindows();
 
 	// Detect and log OpenCL and OpenGL versions and available devices
-	SysCap.addComponent(new ghoul::systemcapabilities::CPUCapabilitiesComponent);
+	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
 	SysCap.logCapabilities();

@@ -48,12 +48,6 @@
 // std
 #include <cassert>
 
-#include <openspace/rendering/planets/renderableplanetprojection.h>
-#include <openspace/rendering/planets/simplespheregeometryprojection.h>
-#include <openspace/rendering/planets/planetgeometryprojection.h>
-
-
-
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
@@ -68,20 +62,10 @@ void FactoryManager::initialize()
     // TODO: This has to be moved into a sort of module structure (ab)
     // Add Renderables
     _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-
-	//TODELETE
-	_manager->factory<Renderable>()->registerClass<RenderablePlanetProjection>(
-		"RenderablePlanetProjection");
-    _manager->factory<Renderable>()->registerClass<RenderablePlanet>(
-          "RenderablePlanet");
-	_manager->factory<Renderable>()->registerClass<RenderableStars>(
-		"RenderableStars");
     _manager->factory<Renderable>()->registerClass<RenderablePlanet>("RenderablePlanet");
 	_manager->factory<Renderable>()->registerClass<RenderableStars>("RenderableStars");
 	_manager->factory<Renderable>()->registerClass<RenderableConstellationBounds>
 		("RenderableConstellationBounds");
-	/*_manager->factory<Renderable>()->registerClass<RenderableEphemeris>(
-		"RenderableEphemeris");*/
 	//will replace ephemeris class soon...
 	_manager->factory<Renderable>()->registerClass<RenderablePath>(
 		"RenderablePath");
@@ -109,12 +93,6 @@ void FactoryManager::initialize()
     _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     _manager->factory<planetgeometry::PlanetGeometry>()
           ->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
-
-	// Add PlanetGeometryProjection
-	_manager->addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
-	_manager->factory<planetgeometryprojection::PlanetGeometryProjection>()
-		->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
-
 	
 	// Add ModelGeometry
 	_manager->addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);

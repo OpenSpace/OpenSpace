@@ -30,7 +30,6 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
 
-
 namespace openspace {
 
 class PowerScaledSphere {
@@ -56,7 +55,6 @@ private:
     GLuint _vBufferID;
     GLuint _iBufferID;
 
-    GLenum _mode;
     unsigned int _isize;
     unsigned int _vsize;
     Vertex* _varray;

@@ -34,7 +34,7 @@ namespace properties {
 namespace {
 	const std::string _loggerCat = "Property";
 	const std::string _metaDataKeyGuiName = "guiName";
-    const std::string _metaDataKeyGroup = "group";
+    const std::string _metaDataKeyGroup = "Group";
     const std::string _metaDataKeyVisible = "isVisible";
     const std::string _metaDataKeyReadOnly = "isReadOnly";
 
@@ -45,7 +45,11 @@ const std::string Property::ViewOptions::Color = "color";
 const std::string Property::ViewOptions::LightPosition = "lightPosition";
 const std::string Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
 const std::string Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
- 
+
+const std::string Property::IdentifierKey = "Identifier";
+const std::string Property::NameKey = "Name";
+const std::string Property::TypeKey = "Type";
+const std::string Property::MetaDataKey = "MetaData";
 
 Property::Property(std::string identifier, std::string guiName)
     : _identifier(std::move(identifier))
@@ -105,6 +109,10 @@ std::string Property::guiName() const {
     return std::move(result);
 }
 
+std::string Property::description() const {
+	return "return {" + generateBaseDescription() + "}";
+}
+
 void Property::setGroupIdentifier(std::string groupId) {
     _metaData.setValue(_metaDataKeyGroup, std::move(groupId));
 }
@@ -133,7 +141,6 @@ const ghoul::Dictionary& Property::metaData() const {
 
 void Property::onChange(std::function<void()> callback) {
     _onChangeCallback = std::move(callback);
-
 }
 
 PropertyOwner* Property::owner() const
@@ -149,6 +156,31 @@ void Property::setPropertyOwner(PropertyOwner* owner)
 void Property::notifyListener() {
 	if (_onChangeCallback)
 		_onChangeCallback();
+}
+
+std::string Property::generateBaseDescription() const {
+	return
+		TypeKey + " = \"" + className() + "\", " +
+		IdentifierKey + " = \"" + identifier() + "\", " +
+		NameKey + " = \"" + guiName() + "\", " +
+		generateMetaDataDescription() + ", " + 
+		generateAdditionalDescription();
+}
+
+std::string Property::generateMetaDataDescription() const {
+	bool isVisible, isReadOnly;
+	_metaData.getValue(_metaDataKeyVisible, isVisible);
+	_metaData.getValue(_metaDataKeyReadOnly, isReadOnly);
+
+	return
+		MetaDataKey + " = {" +
+			_metaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
+			_metaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
+			_metaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+}
+
+std::string Property::generateAdditionalDescription() const {
+	return "";
 }
 
 } // namespace properties

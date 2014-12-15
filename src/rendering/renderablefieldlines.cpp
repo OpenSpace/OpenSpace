@@ -29,6 +29,7 @@
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/file.h>
+#include <ghoul/misc/assert.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
@@ -43,15 +44,15 @@ namespace openspace {
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
 	, _fieldlineVAO(0)
+	, _vertexPositionBuffer(0)
 	, _shader(nullptr)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
+	dictionary.getValue(constants::scenegraphnode::keyName, name);
 
 	// Read fieldlines module into dictionary
 	ghoul::Dictionary fieldlines;
-	success = dictionary.getValue(keyFieldlines, fieldlines);
+	bool success = dictionary.getValue(keyFieldlines, fieldlines);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' did not contain a '" <<
 			keyFieldlines << "' key");
@@ -86,6 +87,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 }
 
 RenderableFieldlines::~RenderableFieldlines() {
+	deinitialize();
 }
 
 bool RenderableFieldlines::isReady() const {
@@ -93,8 +95,14 @@ bool RenderableFieldlines::isReady() const {
 }
 
 bool RenderableFieldlines::initialize() {
-	assert(_filenames.size() != 0);
-	assert(_hintsDictionaries.size() != 0);
+	if(_filenames.size() == 0) {
+		LWARNING("No proper filenames provided, cannot initialize!");
+		return false;
+	}
+
+	ghoul_assert(_hintsDictionaries.size() != _filenames.size(),
+			"The dictionary sizes should match, "
+			<< _hintsDictionaries.size() << " != " << _filenames.size());
 
 	int prevEnd = 0;
 	std::vector<LinePoint> vertexData;
@@ -115,11 +123,10 @@ bool RenderableFieldlines::initialize() {
 	LDEBUG("Number of vertices : " << vertexData.size());
 
 	//	------ FIELDLINES -----------------
-	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_fieldlineVAO); // generate array
 	glBindVertexArray(_fieldlineVAO); // bind array
-	glGenBuffers(1, &vertexPositionBuffer); // generate buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
+	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
 	glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
 
 	// Vertex positions
@@ -136,18 +143,19 @@ bool RenderableFieldlines::initialize() {
 	glBindVertexArray(0); //unbind array
 
 	OsEng.ref().configurationManager().getValue("FieldlineProgram", _shader);
-	assert(_shader);
 
-	return true;
+	return isReady();
 }
 
 bool RenderableFieldlines::deinitialize() {
+	glDeleteVertexArrays(1, &_fieldlineVAO);
+	_fieldlineVAO = 0;
+	glDeleteBuffers(1, &_vertexPositionBuffer);
+	_vertexPositionBuffer = 0;
 	return true;
 }
 
 void RenderableFieldlines::render(const RenderData& data) {
-	if (!_shader)
-		return;
 	
 	_shader->activate();
 	_shader->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
@@ -158,8 +166,8 @@ void RenderableFieldlines::render(const RenderData& data) {
 	//	------ DRAW FIELDLINES -----------------
 	glBindVertexArray(_fieldlineVAO);
 	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _lineStart.size());
-
 	glBindVertexArray(0);
+
 	_shader->deactivate();
 }
 

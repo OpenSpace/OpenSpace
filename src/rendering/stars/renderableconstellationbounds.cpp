@@ -22,10 +22,15 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+// openspace
 #include <openspace/rendering/stars/renderableconstellationbounds.h>
-
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
+
+// ghoul
 #include <ghoul/filesystem/filesystem.h>
+
+// std
 #include <fstream>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -82,10 +87,14 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 	);
 }
 
+RenderableConstellationBounds::~RenderableConstellationBounds() {
+	deinitialize();
+}
+
 bool RenderableConstellationBounds::initialize() {
 	_program = ghoul::opengl::ProgramObject::Build("ConstellationBounds",
-		"${SHADERS}/constellationbounds_vs.glsl",
-		"${SHADERS}/constellationbounds_fs.glsl");
+		"${SHADERS}/modules/constellationbounds/constellationbounds_vs.glsl",
+		"${SHADERS}/modules/constellationbounds/constellationbounds_fs.glsl");
 	if (!_program)
 		return false;
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ this->_programIsDirty = true; });
@@ -138,7 +147,7 @@ bool RenderableConstellationBounds::deinitialize() {
 }
 
 bool RenderableConstellationBounds::isReady() const {
-	return (_vao != 0) && (_vbo != 0);
+	return (_vao != 0) && (_vbo != 0) && (_program != nullptr);
 }
 
 void RenderableConstellationBounds::render(const RenderData& data) {

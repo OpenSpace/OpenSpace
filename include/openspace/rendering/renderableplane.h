@@ -67,6 +67,7 @@ private:
 	ghoul::opengl::ProgramObject* _shader;
 	ghoul::opengl::Texture* _texture;
 	GLuint _quad;
+	GLuint _vertexPositionBuffer;
 };
 
 } // namespace openspace

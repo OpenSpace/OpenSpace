@@ -53,6 +53,7 @@ namespace openspace {
 class RenderableConstellationBounds : public Renderable {
 public:
 	RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
+	~RenderableConstellationBounds();
 
 	bool initialize() override;
 	bool deinitialize() override;

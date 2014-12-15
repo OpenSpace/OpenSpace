@@ -26,6 +26,7 @@
 
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
+#include <ghoul/filesystem/filesystem.h>
 
 namespace {
 	const std::string _loggerCat = "LogFactory";
@@ -59,6 +60,7 @@ ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) 
 			<< keyFilename << "'");
 		return nullptr;
 	}
+	filename = absPath(filename);
 
 	bool append = true;
 	dictionary.getValue(keyAppend, append);

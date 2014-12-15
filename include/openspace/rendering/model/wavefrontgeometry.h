@@ -47,6 +47,7 @@ public:
 		GLfloat location[4];
 		GLfloat tex[2];
 		GLfloat normal[3];
+		GLfloat padding[7];
 		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
 	} Vertex;
     
@@ -60,7 +61,6 @@ private:
 	GLuint _vBufferID = 7;
 	GLuint _iBufferID = 8;
 
-	GLenum _mode;
 	unsigned int _isize;
 	unsigned int _vsize;
 	Vertex* _varray;

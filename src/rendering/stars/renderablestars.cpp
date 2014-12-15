@@ -25,6 +25,7 @@
 #include <openspace/rendering/stars/renderablestars.h>
 
 #include <openspace/util/constants.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
@@ -121,6 +122,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
 }
 
+RenderableStars::~RenderableStars() {
+	deinitialize();
+}
+
 bool RenderableStars::isReady() const {
 	return (_program != nullptr) && (_fullData.size() > 0);
 }
@@ -129,12 +134,9 @@ bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
 	_program = ghoul::opengl::ProgramObject::Build("Star",
-		"${SHADERS}/star_vs.glsl",
-		"${SHADERS}/star_fs.glsl",
-		"${SHADERS}/star_ge.glsl");
-	//_program = ghoul::opengl::ProgramObject::Build("Star",
-	//	"${SHADERS}/star_vs.glsl",
-	//	"${SHADERS}/star_fs.glsl");
+		"${SHADERS}/modules/stars/star_vs.glsl",
+		"${SHADERS}/modules/stars/star_fs.glsl",
+		"${SHADERS}/modules/stars/star_ge.glsl");
 	if (!_program)
 		return false;
 	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
@@ -153,7 +155,8 @@ bool RenderableStars::deinitialize() {
 	delete _pointSpreadFunctionTexture;
 	_pointSpreadFunctionTexture = nullptr;
 
-	delete _program;
+	if(_program)
+ 		delete _program;
 	_program = nullptr;
 	return true;	
 }
@@ -295,7 +298,7 @@ void RenderableStars::update(const UpdateData& data) {
 		delete _pointSpreadFunctionTexture;
 		_pointSpreadFunctionTexture = nullptr;
 		if (_pointSpreadFunctionTexturePath.value() != "") {
-			_pointSpreadFunctionTexture = ghoul::io::TextureReader::loadTexture(absPath(_pointSpreadFunctionTexturePath));
+			_pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath));
 			if (_pointSpreadFunctionTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
 				_pointSpreadFunctionTexture->uploadTexture();
@@ -309,7 +312,7 @@ void RenderableStars::update(const UpdateData& data) {
 		delete _colorTexture;
 		_colorTexture = nullptr;
 		if (_colorTexturePath.value() != "") {
-			_colorTexture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+			_colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
 			if (_colorTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 				_colorTexture->uploadTexture();

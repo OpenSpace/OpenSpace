@@ -46,15 +46,15 @@ namespace {
 
 namespace openspace {
 
-ABufferSingleLinked::ABufferSingleLinked(): _data(0), _anchorPointerTexture(0), 
-	_anchorPointerTextureInitializer(0), _atomicCounterBuffer(0), _fragmentBuffer(0), 
-	_fragmentTexture(0) 
+ABufferSingleLinked::ABufferSingleLinked()
+	: _anchorPointerTexture(0)
+	, _anchorPointerTextureInitializer(0)
+	, _atomicCounterBuffer(0)
+	, _fragmentBuffer(0)
+	, _fragmentTexture(0) 
 {}
 
 ABufferSingleLinked::~ABufferSingleLinked() {
-	if(_data != 0)
-		delete _data;
-
 	glDeleteTextures(1,&_anchorPointerTexture);
 	glDeleteTextures(1,&_fragmentTexture);
 	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
@@ -86,7 +86,7 @@ bool ABufferSingleLinked::reinitializeInternal() {
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
 	glBufferData(GL_PIXEL_UNPACK_BUFFER, _totalPixels * sizeof(GLuint), NULL, GL_STATIC_DRAW);
 
-	_data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+	GLuint*  _data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 	memset(_data, 0x00, _totalPixels * sizeof(GLuint));
 	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

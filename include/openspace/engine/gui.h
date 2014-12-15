@@ -93,6 +93,7 @@ private:
 	std::set<properties::Property*> _vec3Properties;
 	std::set<properties::Property*> _stringProperties;
 	std::set<properties::Property*> _optionProperty;
+	std::set<properties::Property*> _selectionProperty;
 	std::set<properties::Property*> _triggerProperty;
 
 	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;

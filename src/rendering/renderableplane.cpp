@@ -53,6 +53,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _quad(0)
+	, _vertexPositionBuffer(0)
 {
 
 	dictionary.getValue("Size", _size);
@@ -87,7 +88,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	if (success)
 		_texturePath = findPath(texturePath);
 
-
 	addProperty(_texturePath);
 	_texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
 
@@ -95,10 +95,16 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 }
 
 RenderablePlane::~RenderablePlane() {
+	deinitialize();
 }
 
 bool RenderablePlane::isReady() const {
-	return _shader != nullptr;
+	bool ready = true;
+	if (!_shader)
+		ready &= false;
+	if(!_texture)
+		ready &= false;
+	return ready;
 }
 
 bool RenderablePlane::initialize() {
@@ -108,8 +114,6 @@ bool RenderablePlane::initialize() {
 	// ============================
 	const GLfloat size		= _size[0];
 	const GLfloat w = _size[1];
-	LDEBUG("size:" << size);
-	LDEBUG("w:" << w);
 	const GLfloat vertex_data[] = { // square of two triangles (sigh)
 		//	  x      y     z     w     s     t
 		-size, -size, 0.0f, w, 0,1,
@@ -120,11 +124,10 @@ bool RenderablePlane::initialize() {
 		size, size, 0.0f, w, 1, 0,
 	};
 
-	GLuint vertexPositionBuffer;
 	glGenVertexArrays(1, &_quad); // generate array
 	glBindVertexArray(_quad); // bind array
-	glGenBuffers(1, &vertexPositionBuffer); // generate buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBuffer); // bind buffer
+	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
@@ -133,24 +136,22 @@ bool RenderablePlane::initialize() {
 
 	OsEng.ref().configurationManager().getValue("PlaneProgram", _shader);
 
-	if (!_shader)
-		return false;
-
 	loadTexture();
 
-	return true;
+	return isReady();
 }
 
 bool RenderablePlane::deinitialize() {
+	glDeleteVertexArrays(1, &_quad);
+	_quad = 0;
+	glDeleteBuffers(1, &_vertexPositionBuffer);
+	_vertexPositionBuffer = 0;
+	if(_texture)
+		delete _texture;
 	return true;
 }
 
 void RenderablePlane::render(const RenderData& data) {
-
-	if (!_shader)
-		return;
-	if (!_texture)
-		return;
 
 	glm::mat4 transform = glm::mat4(1.0);
 	if (_billboard)
@@ -183,7 +184,7 @@ void RenderablePlane::loadTexture()
 	LDEBUG("loadTexture");
 	if (_texturePath.value() != "") {
 		LDEBUG("loadTexture2");
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::loadTexture(absPath(_texturePath));
+		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
