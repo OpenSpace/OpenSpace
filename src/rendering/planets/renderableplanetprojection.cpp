@@ -217,10 +217,10 @@ void RenderablePlanetProjection::updateTex(){
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
-	//_texture->bind();
-	glUniform1i(location, unit); 
-	GLint format = _texture->internalFormat();
-	glBindImageTexture(unit, *_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+	_texture->bind();
+	//glUniform1i(location, unit); 
+	//GLint format = _texture->internalFormat();
+	//glBindImageTexture(unit, *_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 
 	glDispatchCompute(_texture->width() / 16, _texture->height() / 16, 1); 
 	glUseProgram(0);
@@ -314,9 +314,10 @@ void RenderablePlanetProjection::render(const RenderData& data)
     _geometry->render();
 
     // disable shader
+	//updateTex();
+
     _programObject->deactivate();
 
-	updateTex();
 }
 
 void RenderablePlanetProjection::imageProject(){
@@ -395,7 +396,6 @@ void RenderablePlanetProjection::imageProject(){
 			return rgb(v[0], v[1], v[2]);
 		};
 
-
 		const float w = _texture->width();
 		const float h = _texture->height();
 		const float wp = _textureProj->width();
@@ -462,7 +462,7 @@ void RenderablePlanetProjection::loadTexture()
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::loadTexture(absPath(_colorTexturePath));
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
@@ -476,7 +476,7 @@ void RenderablePlanetProjection::loadTexture()
 	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::loadTexture(absPath(_projectionTexturePath));
+		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
 			LDEBUG("Loaded texture from '" << absPath(_projectionTexturePath) << "'");
 			_textureProj->uploadTexture();
