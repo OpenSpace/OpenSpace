@@ -130,6 +130,8 @@ PowerScaledSphere::~PowerScaledSphere()
 	    delete[] _varray;
 	if (_iarray)
 	    delete[] _iarray;
+
+	_vbo.deinitialize();
 }
 
 bool PowerScaledSphere::initialize()
