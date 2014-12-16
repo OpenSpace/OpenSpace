@@ -89,8 +89,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 	addProperty(_enabled);
 }
 
-Renderable::~Renderable()
-{
+Renderable::~Renderable() {
 }
 
 void Renderable::setBoundingSphere(const PowerScaledScalar& boundingSphere)

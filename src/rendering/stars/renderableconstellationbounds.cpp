@@ -88,7 +88,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 RenderableConstellationBounds::~RenderableConstellationBounds() {
-	deinitialize();
 }
 
 bool RenderableConstellationBounds::initialize() {

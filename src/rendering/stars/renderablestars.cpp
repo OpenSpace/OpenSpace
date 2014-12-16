@@ -123,7 +123,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 }
 
 RenderableStars::~RenderableStars() {
-	deinitialize();
 }
 
 bool RenderableStars::isReady() const {

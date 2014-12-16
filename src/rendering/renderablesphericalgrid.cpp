@@ -128,8 +128,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 }
 
 RenderableSphericalGrid::~RenderableSphericalGrid(){
-	deinitialize();
-
 	// Delete not done in deinitialize because new is done in constructor
 	delete[] _varray;
 	delete[] _iarray;

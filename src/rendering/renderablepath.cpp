@@ -142,7 +142,6 @@ bool RenderablePath::fullYearSweep(){
 }
 
 RenderablePath::~RenderablePath(){
-	deinitialize();
 }
 
 bool RenderablePath::isReady() const {

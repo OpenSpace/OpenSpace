@@ -160,7 +160,6 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 }
 
 RenderableVolumeGL::~RenderableVolumeGL() {
-    deinitialize();
 }
 
 bool RenderableVolumeGL::isReady() const {

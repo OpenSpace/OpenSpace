@@ -140,10 +140,10 @@ SceneGraphNode::~SceneGraphNode()
 
 bool SceneGraphNode::initialize()
 {
-    if (_renderable != nullptr)
+    if (_renderable)
         _renderable->initialize();
 
-    if (_ephemeris != nullptr)
+    if (_ephemeris)
         _ephemeris->initialize();
 
     return true;
@@ -153,16 +153,21 @@ bool SceneGraphNode::deinitialize()
 {
     LDEBUG("Deinitialize: " << name());
 
-    if(_renderable)
+    if (_renderable) {
+		_renderable->deinitialize();
         delete _renderable;
-    _renderable = nullptr;
-    if(_ephemeris)
-        delete _ephemeris;
-    _ephemeris = nullptr;
+		_renderable = nullptr;
+	}
 
-    // deallocate the child nodes and delete them, iterate c++11 style
-    for (SceneGraphNode* child : _children)
-        delete child;
+    if (_ephemeris) {
+        delete _ephemeris;
+		_ephemeris = nullptr;
+	}
+
+    for (SceneGraphNode* child : _children) {
+		child->deinitialize();
+		delete child;
+	}
     _children.clear();
 
     // reset variables
