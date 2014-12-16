@@ -114,8 +114,8 @@ bool RenderableFieldlines::initialize() {
 		// Arrange data for glMultiDrawArrays
 		for (int j = 0; j < fieldlinesData.size(); ++j) {
 			_lineStart.push_back(prevEnd);
-			_lineCount.push_back(fieldlinesData[j].size());
-			prevEnd = prevEnd + fieldlinesData[j].size();
+			_lineCount.push_back(static_cast<int>(fieldlinesData[j].size()));
+			prevEnd = prevEnd + static_cast<int>(fieldlinesData[j].size());
 			vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
 		}
 	}
@@ -164,7 +164,7 @@ void RenderableFieldlines::render(const RenderData& data) {
 
 	//	------ DRAW FIELDLINES -----------------
 	glBindVertexArray(_fieldlineVAO);
-	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], _lineStart.size());
+	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], static_cast<GLsizei>(_lineStart.size()));
 	glBindVertexArray(0);
 
 	_shader->deactivate();

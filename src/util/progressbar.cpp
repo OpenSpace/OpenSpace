@@ -47,7 +47,7 @@ void ProgressBar::print(int current) {
 	float progress = static_cast<float>(current) / static_cast<float>(_end - 1);
 	int iprogress = static_cast<int>(progress*100.0f);
 	if (iprogress != _previous) {
-		int pos = _width * progress;
+		int pos = static_cast<int>(static_cast<float>(_width)* progress);
 		int eqWidth = pos + 1;
 		int spWidth = _width - pos + 2;
 		_stream << "[" << std::setfill('=') << std::setw(eqWidth)

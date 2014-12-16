@@ -85,7 +85,7 @@ void RenderableFov::fullYearSweep(){
 	}
 
 	_stride = 8;
-	_vsize = _varray.size();
+	_vsize = static_cast<unsigned int>(_varray.size());
 	_vtotal = static_cast<int>(_vsize / _stride);
 }
 
@@ -167,7 +167,7 @@ void RenderableFov::render(const RenderData& data){
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			tmp[i][j] = _stateMatrix[i][j];
+			tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
 	transform = tmp*rot;
@@ -187,7 +187,7 @@ void RenderableFov::render(const RenderData& data){
 
 	bool found = openspace::SpiceManager::ref().getFieldOfView("NH_LORRI", shape, name, boresight, bounds);
 
-	float size = 4 * sizeof(float);
+	size_t size = 4 * sizeof(float);
 	float *begin = &_varray[0];
 
 	glm::vec4 origin(0);
@@ -195,7 +195,7 @@ void RenderableFov::render(const RenderData& data){
 	glm::vec4 col_end(1.00, 0.29, 0.00, 1);
 	glm::vec4 bsight_t(boresight[0], boresight[1], boresight[2], data.position[3]-3);
 
-	float sc = 2.2;
+	float sc = 2.2f;
 	glm::vec4 corner1(bounds[0][0], bounds[0][1], bounds[0][2], data.position[3]-sc);
 	memcpy(begin, glm::value_ptr(origin), size);
 	memcpy(begin + 4, glm::value_ptr(col_start), size);
@@ -231,9 +231,8 @@ void RenderableFov::render(const RenderData& data){
 
 void RenderableFov::update(const UpdateData& data){
 
-	double lightTime;
 	_time  = data.time;
-	_delta = data.delta;
+	_delta = static_cast<int>(data.delta);
 
 	openspace::SpiceManager::ref().getPositionTransformMatrix("NH_SPACECRAFT", "GALACTIC", data.time, _stateMatrix);
 }

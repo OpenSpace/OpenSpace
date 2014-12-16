@@ -59,7 +59,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 	dictionary.getValue(constants::renderablesphericalgrid::gridMatrix , _gridMatrix);
 	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, s);
 
-	_segments = s[0];
+	_segments = static_cast<int>(s[0]);
 
 	_isize = int(6 * _segments * _segments);
 	_vsize = int((_segments + 1) * (_segments + 1));

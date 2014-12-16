@@ -136,7 +136,7 @@ bool RenderablePath::fullYearSweep(){
 		et += _increment;
 	}
 	_stride = 8;
-	_vsize = _varray.size();
+	_vsize = static_cast<unsigned int>(_varray.size());
 	_vtotal = static_cast<int>(_vsize / _stride);
 	return true;
 }
@@ -243,7 +243,7 @@ void RenderablePath::update(const UpdateData& data){
 	double lightTime;
 
 	_time = data.time;
-	_delta = data.delta;
+	_delta = static_cast<int>(data.delta);
 
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", data.time, _pscpos, _pscvel, lightTime);
 }

@@ -256,7 +256,7 @@ void SceneGraphNode::render(const RenderData& data) {
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-	_performanceRecord.renderTime = 0.f;
+	_performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
