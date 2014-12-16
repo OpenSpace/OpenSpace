@@ -230,7 +230,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 		LERROR("No value was provided");
 		return false;
 	}
-	if (v.size() == 0) {
+	if (v.empty()) {
 		LERROR("Array for values has to be preallocaed");
 		return false;
 	}

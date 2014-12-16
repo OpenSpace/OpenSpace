@@ -330,7 +330,6 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     std::string line;
     while (std::getline(in, line)) {
         
-        float intensity = 1.0f;
         glm::vec4 rgba = glm::vec4(0.0f);
         // tokenize the line
         std::istringstream iss(line);
@@ -346,6 +345,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             } else if(key == "upper" && tokenSize == 2) {
                 upper = stringToNumber<float>(tokens.at(1),upperLowerValidator);
             } else if(key == "mappingkey" && tokenSize == 6) {
+				float intensity = 1.0f;
                 intensity = stringToNumber<float>(tokens.at(1), intensityValidator);
                 for(int i = 0; i < 4; ++i)
                     rgba[i] = stringToNumber<float>(tokens.at(i+2));

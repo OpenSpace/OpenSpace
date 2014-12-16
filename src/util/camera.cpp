@@ -35,7 +35,15 @@ namespace openspace {
 
     
 Camera::Camera()
-    : _cameraDirection(0.f, 0.f, 0.f)
+	: _maxFov(0.f)
+	, _sinMaxFov(0.f)
+	, _position()
+	, _viewProjectionMatrix()
+	, _modelMatrix()
+	, _viewMatrix()
+	, _projectionMatrix()
+	, _viewDirection()
+    , _cameraDirection(0.f, 0.f, 0.f)
     , _scaling(1.f, 0.f)
     //, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
 	, _viewRotationMatrix(1.f)

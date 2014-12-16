@@ -94,7 +94,7 @@ bool RenderableFieldlines::isReady() const {
 }
 
 bool RenderableFieldlines::initialize() {
-	if(_filenames.size() == 0) {
+	if(_filenames.empty()) {
 		LWARNING("No proper filenames provided, cannot initialize!");
 		return false;
 	}
@@ -192,11 +192,12 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 
 		//	------ VARIBLES / LORENTZ -----------------
 		if (hintsDictionary.hasKey("Variables")) {
-			bool xVar, yVar, zVar;
+			bool xVar;
 			xVar = hintsDictionary.getValue("Variables.1", xVariable);
 			if (xVar && xVariable == "Lorentz") {
 				lorentz = true;
 			} else {
+				bool yVar, zVar;
 
 				yVar = hintsDictionary.getValue("Variables.2", yVariable);
 				zVar = hintsDictionary.getValue("Variables.3", zVariable);

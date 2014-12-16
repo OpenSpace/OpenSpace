@@ -126,7 +126,7 @@ RenderableStars::~RenderableStars() {
 }
 
 bool RenderableStars::isReady() const {
-	return (_program != nullptr) && (_fullData.size() > 0);
+	return (_program != nullptr) && (!_fullData.empty());
 }
 
 bool RenderableStars::initialize() {

@@ -32,6 +32,10 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/highresclock.h>
 
+namespace {
+	const std::string _loggerCat = "KeyboardController";
+}
+
 namespace openspace {
 namespace interaction {
 
@@ -149,8 +153,6 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 }
 
 void KeyboardControllerLua::keyPressed(KeyAction action, Key key, KeyModifier modifier) {
-	std::string _loggerCat = "KeyboardControllerLua";
-
 	lua_State* s = luaL_newstate();
 	luaL_openlibs(s);
 	

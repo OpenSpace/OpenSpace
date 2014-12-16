@@ -72,7 +72,7 @@ private:
 
 	GLuint _boxArray; 
 	GLuint _vertexPositionBuffer;
-	ghoul::opengl::ProgramObject *_boxProgram;
+	ghoul::opengl::ProgramObject* _boxProgram;
 	glm::vec3 _boxScaling;
 	psc _pscOffset;
 	float _w;
