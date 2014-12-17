@@ -50,6 +50,11 @@ public:
     using TemplateProperty<T>::operator=;
 
 protected:
+	static const std::string MinimumValueKey;
+	static const std::string MaximumValueKey;
+
+	std::string generateAdditionalDescription() const;
+
     T _minimumValue;
     T _maximumValue;
 };

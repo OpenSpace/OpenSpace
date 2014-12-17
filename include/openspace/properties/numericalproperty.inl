@@ -142,6 +142,13 @@ namespace properties {
         return PropertyDelegate<TemplateProperty<TYPE>>::typeLua();                      \
     }
 
+
+template <typename T>
+const std::string NumericalProperty<T>::MinimumValueKey = "MinimumValue";
+
+template <typename T>
+const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValueKey";
+
 // Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
 // a single constructor    
@@ -199,7 +206,6 @@ int NumericalProperty<T>::typeLua() const {
 	return PropertyDelegate<NumericalProperty<T>>::typeLua();
 }
 
-
 template <typename T>
 T NumericalProperty<T>::minValue() const {
 	return _minimumValue;
@@ -208,6 +214,14 @@ T NumericalProperty<T>::minValue() const {
 template <typename T>
 T NumericalProperty<T>::maxValue() const {
 	return _maximumValue;
+}
+
+template <typename T>
+std::string NumericalProperty<T>::generateAdditionalDescription() const {
+	std::string result;
+	result += MinimumValueKey + " = " + std::to_string(_minimumValue) + ",";
+	result += MaximumValueKey + " = " + std::to_string(_maximumValue);
+	return result;
 }
 
 } // namespace properties
