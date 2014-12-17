@@ -32,8 +32,6 @@
 namespace openspace {
 namespace properties {
 
-//REGISTER_TEMPLATEPROPERTY_HEADER(SelectionProperty, std::vector<int>);
-
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
 	struct Option {
@@ -46,9 +44,10 @@ public:
 	void addOption(Option option);
 	const std::vector<Option>& options() const;
 
-	//void setValue(std::vector<int> value) override;
-
 private:
+	static const std::string OptionsKey;
+	std::string generateAdditionalDescription() const;
+
 	/// The list of options which have been registered with this OptionProperty
 	std::vector<Option> _options;
 	std::vector<int> _values;
