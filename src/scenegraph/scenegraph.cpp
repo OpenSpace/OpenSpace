@@ -31,7 +31,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
 #include <openspace/abuffer/abuffer.h>
-#include <openspace/engine/gui.h>
+#include <openspace/gui/gui.h>
 
 #include "ghoul/logging/logmanager.h"
 #include "ghoul/opengl/programobject.h"
