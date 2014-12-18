@@ -35,8 +35,10 @@ class NumericalProperty : public TemplateProperty<T> {
 public:
     NumericalProperty(std::string identifier, std::string guiName);
     NumericalProperty(std::string identifier, std::string guiName, T value);
+	NumericalProperty(std::string identifier, std::string guiName, T value,
+		T minimumValue, T maximumValue);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue);
+        T minimumValue, T maximumValue, T steppingValue);
 
 	bool getLua(lua_State* state) const override;
 	bool setLua(lua_State* state) override;
@@ -52,11 +54,13 @@ public:
 protected:
 	static const std::string MinimumValueKey;
 	static const std::string MaximumValueKey;
+	static const std::string SteppingValueKey;
 
 	std::string generateAdditionalDescription() const;
 
     T _minimumValue;
     T _maximumValue;
+	T _stepping;
 };
 
 } // namespace properties

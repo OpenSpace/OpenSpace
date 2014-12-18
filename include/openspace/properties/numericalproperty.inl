@@ -42,6 +42,9 @@ namespace properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>();         \
+	template <>																		     \
+	template <>																			 \
+	TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>();		 \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue(lua_State* state,        \
@@ -71,43 +74,43 @@ namespace properties {
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className()                    \
     {                                                                                    \
         return #CLASS_NAME;                                                              \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     std::string PropertyDelegate<NumericalProperty<TYPE>>::className()                   \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::className();                    \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>()                 \
     {                                                                                    \
         return DEFAULT_VALUE;                                                            \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>()          \
     {                                                                                    \
         return DEFAULT_MIN_VALUE;                                                        \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>()          \
     {                                                                                    \
         return DEFAULT_MAX_VALUE;                                                        \
-    \
-}                                                                                 \
+	}                                                                                    \
+	template <>																		     \
+	template <>																			 \
+	TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>()		 \
+	{ 																					 \
+		return DEFAULT_STEPPING;														 \
+	}																					 \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State * state, \
                                                                       bool& success)     \
     {                                                                                    \
         return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(                  \
@@ -115,8 +118,7 @@ namespace properties {
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(state,       \
                                                                             success);    \
-    \
-}                                                                                 \
+	}                                                                                    \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,   \
@@ -147,7 +149,10 @@ template <typename T>
 const std::string NumericalProperty<T>::MinimumValueKey = "MinimumValue";
 
 template <typename T>
-const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValueKey";
+const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValue";
+
+template <typename T>
+const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 
 // Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
@@ -155,29 +160,45 @@ const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValueKey";
         
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName)
-    : NumericalProperty<T>(std::move(identifier), std::move(guiName),
-    PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>())
+    : NumericalProperty<T>(
+		std::move(identifier), std::move(guiName),
+		PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
+		PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
+		PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
+		PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+	)
 {}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier,
                                         std::string guiName, T value)
-    : NumericalProperty<T>(std::move(identifier), std::move(guiName), std::move(value),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
-    PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>())
+    : NumericalProperty<T>(
+		std::move(identifier), std::move(guiName), std::move(value),
+		PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
+		PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
+		PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+	)
+{}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName,
+										T value, T minimumValue, T maximumValue)
+	: NumericalProperty<T>(
+		std::move(identifier) , std::move(guiName), std::move(value),
+		std::move(minimumValue), std::move(maximumValue),
+		PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+	)
 {}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier,
                                         std::string guiName, T value,
-                                        T minimumValue, T maximumValue)
+                                        T minimumValue, T maximumValue, T steppingValue)
     : TemplateProperty<T>(std::move(identifier), std::move(guiName), std::move(value))
     , _minimumValue(std::move(minimumValue))
     , _maximumValue(std::move(maximumValue))
+	, _stepping(std::move(steppingValue))
 {}
-
 
 template <typename T>
 std::string NumericalProperty<T>::className() const {
@@ -219,8 +240,9 @@ T NumericalProperty<T>::maxValue() const {
 template <typename T>
 std::string NumericalProperty<T>::generateAdditionalDescription() const {
 	std::string result;
-	result += MinimumValueKey + " = " + std::to_string(_minimumValue) + ",";
-	result += MaximumValueKey + " = " + std::to_string(_maximumValue);
+	result += MinimumValueKey  + " = " + std::to_string(_minimumValue) + ",";
+	result += MaximumValueKey  + " = " + std::to_string(_maximumValue) + ",";
+	result += SteppingValueKey + " = " + std::to_string(_stepping);
 	return result;
 }
 

@@ -81,10 +81,8 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Mat2Property, glm::mat2x2, glm::mat2x2(0),
 									numeric_limits<float>::max()
 								  ),
                                   glm::mat2x2(
-									0.01f,
-									0.01f,
-									0.01f,
-									0.01f,
+									0.01f, 0.01f,
+									0.01f, 0.01f
 								  ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::mat2x2),
                                   DEFAULT_TO_LUA_LAMBDA(glm::mat2x2), LUA_TTABLE);
