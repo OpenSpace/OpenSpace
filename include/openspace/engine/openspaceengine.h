@@ -34,7 +34,6 @@
 
 namespace openspace {
 
-class GUI;
 class SyncBuffer;
 class LuaConsole;
 
@@ -59,7 +58,7 @@ public:
 	scripting::ScriptEngine& scriptEngine();
 	LuaConsole& console();
 
-	GUI& gui();
+	gui::GUI& gui();
 
     // SGCT callbacks
     bool initializeGL();
@@ -97,7 +96,7 @@ private:
 	scripting::ScriptEngine _scriptEngine;
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 	LuaConsole _console;
-	GUI _gui;
+	gui::GUI _gui;
 
 	SyncBuffer* _syncBuffer;
 

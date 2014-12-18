@@ -22,52 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
 #include <openspace/gui/guicomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
 namespace gui {
 
-class GUI {
-public:
-	GUI();
+bool GuiComponent::isEnabled() const {
+	return _isEnabled;
+}
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+void GuiComponent::setEnabled(bool enabled) {
+	_isEnabled = enabled;
+}
 
-	void initialize();
-	void deinitialize();
+void GuiComponent::initialize() {}
 
-	void initializeGL();
-	void deinitializeGL();
+void GuiComponent::initializeGL() {}
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+void GuiComponent::deinitialize() {}
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-
-	bool _isEnabled;
-
-	bool _showHelp;
-};
+void GuiComponent::deinitializeGL() {}
 
 } // namespace gui
 } // namespace openspace
-
-#endif // __GUI_H__

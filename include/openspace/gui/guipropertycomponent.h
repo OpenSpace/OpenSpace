@@ -22,52 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUIPROPERTYCOMPONENT_H__
+#define __GUIPROPERTYCOMPONENT_H__
 
 #include <openspace/gui/guicomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+
+#include <map>
+#include <set>
+#include <vector>
 
 namespace openspace {
+
+namespace properties {
+	class Property;
+}
+
 namespace gui {
 
-class GUI {
+class GuiPropertyComponent : public GuiComponent {
 public:
-	GUI();
+	void registerProperty(properties::Property* prop);
+	void render();
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+protected:
+	std::set<properties::Property*> _boolProperties;
+	std::set<properties::Property*> _intProperties;
+	std::set<properties::Property*> _floatProperties;
+	std::set<properties::Property*> _vec2Properties;
+	std::set<properties::Property*> _vec3Properties;
+	std::set<properties::Property*> _stringProperties;
+	std::set<properties::Property*> _optionProperty;
+	std::set<properties::Property*> _selectionProperty;
+	std::set<properties::Property*> _triggerProperty;
 
-	void initialize();
-	void deinitialize();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-
-	bool _isEnabled;
-
-	bool _showHelp;
+	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUIPROPERTYCOMPONENT_H__

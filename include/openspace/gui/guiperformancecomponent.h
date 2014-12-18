@@ -22,52 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUIPERFORMANCECOMPONENT_H__
+#define __GUIPERFORMANCECOMPONENT_H__
 
 #include <openspace/gui/guicomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+
+namespace ghoul {
+	class SharedMemory;
+}
 
 namespace openspace {
 namespace gui {
 
-class GUI {
+class GuiPerformanceComponent : public GuiComponent {
 public:
-	GUI();
-
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
-
 	void initialize();
-	void deinitialize();
 
-	void initializeGL();
-	void deinitializeGL();
+	void render();
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-
-	bool _isEnabled;
-
-	bool _showHelp;
+protected:
+	ghoul::SharedMemory* _performanceMemory;
+	float _minMaxValues[2];
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUIPERFORMANCECOMPONENT_H__

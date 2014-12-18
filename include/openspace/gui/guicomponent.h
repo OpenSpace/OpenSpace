@@ -22,52 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
-#include <openspace/gui/guicomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#ifndef __GUICOMPONENT_H__
+#define __GUICOMPONENT_H__
 
 namespace openspace {
 namespace gui {
 
-class GUI {
+/**
+ * The base class for a GUI component that can be rendered to the screen.
+ */
+class GuiComponent {
 public:
-	GUI();
-
+	/**
+	 * Returns if this component is enabled, that is, if it is currently active and
+	 * visible on the screen.
+	 * \return <code>true</code> if this component is enabled, <code>false</code>
+	 * otherwise
+	 */
 	bool isEnabled() const;
+
+	/**
+	 * Sets if this component is enabled, that is, if it is currently active and visible
+	 * on the screen.
+	 * \param enabled The new enabled status of this component
+	 */
 	void setEnabled(bool enabled);
 
-	void initialize();
-	void deinitialize();
+	/// Initializes the component with everything that does not require an OpenGL context
+	virtual void initialize();
+	/// Initializes the component with everything that requires an OpenGL context
+	virtual void initializeGL();
 
-	void initializeGL();
-	void deinitializeGL();
+	/// Deinitializes the component with things that do not require an OpenGL context
+	virtual void deinitialize();
+	
+	/// Deinitializes the component with things that require an OpenGL context
+	virtual void deinitializeGL();
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+	/// Renders the individual subcomponents to the screen
+	virtual void render() = 0;
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-
+protected:
+	/// <code>true</code> if this component is enabled and visible on the screen
 	bool _isEnabled;
-
-	bool _showHelp;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUICOMPONENT_H__

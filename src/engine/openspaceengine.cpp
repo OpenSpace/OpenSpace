@@ -242,7 +242,7 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine.addLibrary(Time::luaLibrary());
 	_scriptEngine.addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine.addLibrary(LuaConsole::luaLibrary());
-	_scriptEngine.addLibrary(GUI::luaLibrary());
+	_scriptEngine.addLibrary(gui::GUI::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine().initialize();
@@ -479,7 +479,7 @@ LuaConsole& OpenSpaceEngine::console() {
 	return _console;
 }
 
-GUI& OpenSpaceEngine::gui() {
+gui::GUI& OpenSpaceEngine::gui() {
 	return _gui;
 }
 
