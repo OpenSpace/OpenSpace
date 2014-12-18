@@ -24,6 +24,7 @@
 
 #ifndef __RENDERABLEPLANETPROJECTION_H__
 #define __RENDERABLEPLANETPROJECTION_H__
+#include <ghoul/opengl/textureunit.h>
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -66,7 +67,6 @@ protected:
 	void updateTex();
 
 private:
-
 	void imageProject();
 
     properties::StringProperty _colorTexturePath;
@@ -81,17 +81,18 @@ private:
 
 	glm::dmat3 _stateMatrix;
 	glm::dmat3 _instrumentMatrix;
-	glm::mat4 _projectorMatrix;
-	glm::vec3 _boresight;
-	glm::vec2 _camScaling;
-	glm::mat4 _transform;
-
+	glm::mat4  _projectorMatrix;
+	glm::vec3  _boresight;
+	glm::vec2  _camScaling;
+	glm::mat4  _transform;
 
 	double _time;
 	openspace::SceneGraphNode* _targetNode;
 
 	std::string _target;
 
+	// FBO stuff
+	GLuint _fboID;
 };
 
 }  // namespace openspace

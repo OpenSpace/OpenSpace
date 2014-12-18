@@ -28,7 +28,7 @@
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/textureunit.h>
+//#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/time.h>
@@ -137,6 +137,18 @@ bool RenderablePlanetProjection::initialize(){
 
     completeSuccess &= _geometry->initialize(this);
 
+	// setup FBO
+	glGenFramebuffers(1, &_fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
+	// check FBO status
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		completeSuccess &= false;
+
+	// switch back to window-system-provided framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     return completeSuccess;
 }
 
@@ -166,11 +178,11 @@ GLuint RenderablePlanetProjection::genComputeProg() {
 	// gl_WorkGroupID is the work group's index
 	const char *csSrc[] = {
 		"#version 440\n",
-	    "writeonly uniform image2D destTex;\
+		"layout (binding = 0, rgba32f) uniform image2D destTex;\
 	     layout (local_size_x = 16, local_size_y = 16) in;\
 		 void main() {\
 		       ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);\
-			   imageStore(destTex, storePos, vec4(1.0,0.0,0.0,1.0));\
+			   imageStore(destTex, storePos, vec4(1.0,0,0,1.0));\
 		}"
 	};
 
@@ -210,22 +222,25 @@ GLuint RenderablePlanetProjection::genComputeProg() {
 void RenderablePlanetProjection::updateTex(){ 
 
 	glUseProgram(_computeShader);
+
 	const GLint location = glGetUniformLocation(_computeShader, "destTex"); // 
 	if (location == -1){
 		printf("Could not locate uniform location for texture in CS");
 	}
 
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
+	//ghoul::opengl::TextureUnit unit;
+	//unit.activate();
 	_texture->bind();
-	//glUniform1i(location, unit); 
 	//GLint format = _texture->internalFormat();
-	//glBindImageTexture(unit, *_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+	//GLint format = _texture->format();
+	//glUniform1i(location, 0); 
+	glBindImageTexture(0, *_texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	glDispatchCompute(_texture->width() / 16, _texture->height() / 16, 1); 
-	glUseProgram(0);
-	printOpenGLError();
 
+	glUseProgram(0);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	printOpenGLError();
 }
 
 void RenderablePlanetProjection::render(const RenderData& data)
@@ -233,6 +248,11 @@ void RenderablePlanetProjection::render(const RenderData& data)
 	if (!_programObject) return;
 	if (!_textureProj) return;
 
+	//updateTex();
+	
+	// keep handle to the current bound FBO
+	GLint defaultFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     // activate shader
     _programObject->activate();
@@ -314,15 +334,13 @@ void RenderablePlanetProjection::render(const RenderData& data)
     _geometry->render();
 
     // disable shader
-	//updateTex();
-
     _programObject->deactivate();
-
+	
 }
 
 void RenderablePlanetProjection::imageProject(){
-		_textureProj->downloadTexture();
-		_texture->downloadTexture();
+		//_textureProj->downloadTexture();
+		//_texture->downloadTexture();
 
 		auto uvToModel = [](float u, float v, float radius[2], float fsegments)->glm::vec4{
 
@@ -444,8 +462,8 @@ void RenderablePlanetProjection::imageProject(){
 		}
 
 		// Upload textures
-		//_textureProj->uploadTexture();
-		_texture->uploadTexture();
+		_textureProj->uploadTexture();
+		//_texture->uploadTexture();
 
 }
 
@@ -466,7 +484,6 @@ void RenderablePlanetProjection::loadTexture()
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
-
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
         }
