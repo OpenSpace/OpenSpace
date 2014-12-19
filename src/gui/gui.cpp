@@ -1,4 +1,3 @@
-GUI
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -180,6 +179,7 @@ void GUI::initialize() {
 
 	_property.initialize();
 	_performance.initialize();
+	_help.initialize();
 }
 
 void GUI::initializeGL() {
@@ -221,6 +221,7 @@ void GUI::initializeGL() {
 
 	_property.initializeGL();
 	_performance.initializeGL();
+	_help.initializeGL();
 }
 
 void GUI::deinitializeGL() {
@@ -233,6 +234,7 @@ void GUI::deinitializeGL() {
 
 	_property.deinitializeGL();
 	_performance.deinitializeGL();
+	_help.deinitializeGL();
 }
 
 void GUI::startFrame(float deltaTime,
@@ -252,13 +254,14 @@ void GUI::startFrame(float deltaTime,
 
 void GUI::endFrame() {
 	static bool show = true;
-	//ImGui::ShowTestWindow(&show);
 	renderMainWindow();
 
 	if (_property.isEnabled())
 		_property.render();
 	if (_performance.isEnabled())
 		_performance.render();
+	if (_help.isEnabled())
+		_help.render();
 
 	ImGui::Render();
 }
@@ -303,21 +306,9 @@ bool GUI::charCallback(unsigned int character) {
 void GUI::renderMainWindow() {
 	ImGui::Begin("OpenSpace GUI", nullptr);
 
-	bool showPropertyWindow = _property.isEnabled();
-	ImGui::Checkbox("Properties", &showPropertyWindow);
-	_property.setEnabled(showPropertyWindow);
-
-	bool showPerformanceWindow = _performance.isEnabled();
-	ImGui::Checkbox("Performance", &showPerformanceWindow);
-	_performance.setEnabled(showPerformanceWindow);
-
-	ImGui::Checkbox("Help", &_showHelp);
-
-	if (_showHelp) {
-		ImGui::Separator();
-		ImGui::ShowUserGuide();
-		ImGui::ShowTestWindow();
-	}
+	ImGui::Checkbox("Properties", &_property._isEnabled);
+	ImGui::Checkbox("Performance", &_performance._isEnabled);
+	ImGui::Checkbox("Help", &_help._isEnabled);
 
 	ImGui::End();
 }

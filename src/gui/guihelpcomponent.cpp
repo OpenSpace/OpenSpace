@@ -22,53 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
 #include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+
+#include "imgui.h"
+
+namespace {
+	const ImVec2 size = ImVec2(350, 500);
+}
 
 namespace openspace {
 namespace gui {
 
-class GUI {
-public:
-	GUI();
+void GuiHelpComponent::render() {
+	ImGui::Begin("Help", &_isEnabled, size, 0.5f);
+	ImGui::ShowUserGuide();
+	ImGui::End();
+}
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
-
-	void initialize();
-	void deinitialize();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
-
-	bool _isEnabled;
-
-	bool _showHelp;
-};
-
-} // namespace gui
-} // namespace openspace
-
-#endif // __GUI_H__
+} // gui
+} // openspace

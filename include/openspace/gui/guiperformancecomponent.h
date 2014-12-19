@@ -37,11 +37,12 @@ namespace gui {
 class GuiPerformanceComponent : public GuiComponent {
 public:
 	void initialize();
+	void deinitialize();
 
 	void render();
 
 protected:
-	ghoul::SharedMemory* _performanceMemory;
+	ghoul::SharedMemory* _performanceMemory = nullptr;
 	float _minMaxValues[2];
 };
 

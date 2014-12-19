@@ -37,6 +37,13 @@ namespace openspace {
 namespace gui {
 
 void GuiPerformanceComponent::initialize() {
+	_minMaxValues[0] = 100.f;
+	_minMaxValues[1] = 250.f;
+}
+
+void GuiPerformanceComponent::deinitialize() {
+	delete _performanceMemory;
+	_performanceMemory = nullptr;
 }
 
 void GuiPerformanceComponent::render() {
@@ -76,6 +83,7 @@ void GuiPerformanceComponent::render() {
 
 		if (!_performanceMemory)
 			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
+
 
 		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
 

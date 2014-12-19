@@ -22,53 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUIHELPCOMPONENT_H__
+#define __GUIHELPCOMPONENT_H__
 
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/gui/guicomponent.h>
 
 namespace openspace {
 namespace gui {
 
-class GUI {
+class GuiHelpComponent : public GuiComponent {
 public:
-	GUI();
-
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
-
-	void initialize();
-	void deinitialize();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
-
-	bool _isEnabled;
-
-	bool _showHelp;
+	void render();
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUIHELPCOMPONENT_H__
