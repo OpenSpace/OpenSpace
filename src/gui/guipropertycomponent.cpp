@@ -24,213 +24,314 @@
 
 #include <openspace/gui/guipropertycomponent.h>
 
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/triggerproperty.h>
-
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
 #include "imgui.h"
 
 namespace {
 	const std::string _loggerCat = "GuiPropertyComponent";
 	const ImVec2 size = ImVec2(350, 500);
 
-	using namespace openspace::properties;
+	//using namespace openspace::properties;
 
-	void renderBoolProperty(Property* prop, const std::string& ownerName) {
-		BoolProperty* p = static_cast<BoolProperty*>(prop);
-		std::string name = p->guiName();
+	//void renderBoolProperty(Property* prop, const std::string& ownerName) {
+	//	BoolProperty* p = static_cast<BoolProperty*>(prop);
+	//	std::string name = p->guiName();
 
-		BoolProperty::ValueType value = *p;
-		ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
-		p->set(value);
-	}
+	//	BoolProperty::ValueType value = *p;
+	//	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+	//	p->set(value);
+	//}
 
-	void renderOptionProperty(Property* prop, const std::string& ownerName) {
-		OptionProperty* p = static_cast<OptionProperty*>(prop);
-		std::string name = p->guiName();
+	//void renderOptionProperty(Property* prop, const std::string& ownerName) {
+	//	OptionProperty* p = static_cast<OptionProperty*>(prop);
+	//	std::string name = p->guiName();
 
-		int value = *p;
-		std::vector<OptionProperty::Option> options = p->options();
-		for (const OptionProperty::Option& o : options) {
-			ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
-			ImGui::SameLine();
-			ImGui::Text(o.description.c_str());
-		}
-		p->set(value);
-	}
+	//	int value = *p;
+	//	std::vector<OptionProperty::Option> options = p->options();
+	//	for (const OptionProperty::Option& o : options) {
+	//		ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
+	//		ImGui::SameLine();
+	//		ImGui::Text(o.description.c_str());
+	//	}
+	//	p->set(value);
+	//}
 
-	void renderSelectionProperty(Property* prop, const std::string& ownerName) {
-		SelectionProperty* p = static_cast<SelectionProperty*>(prop);
-		std::string name = p->guiName();
+	//void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+	//	SelectionProperty* p = static_cast<SelectionProperty*>(prop);
+	//	std::string name = p->guiName();
 
-		if (ImGui::CollapsingHeader((ownerName + "." + name).c_str())) {
-			const std::vector<SelectionProperty::Option>& options = p->options();
-			std::vector<int> newSelectedIndices;
+	//	if (ImGui::CollapsingHeader((ownerName + "." + name).c_str())) {
+	//		const std::vector<SelectionProperty::Option>& options = p->options();
+	//		std::vector<int> newSelectedIndices;
 
-			std::vector<int> selectedIndices = p->value();
+	//		std::vector<int> selectedIndices = p->value();
 
-			for (int i = 0; i < options.size(); ++i) {
-				std::string description = options[i].description;
-				bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
-				ImGui::Checkbox(description.c_str(), &selected);
+	//		for (int i = 0; i < options.size(); ++i) {
+	//			std::string description = options[i].description;
+	//			bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+	//			ImGui::Checkbox(description.c_str(), &selected);
 
-				if (selected)
-					newSelectedIndices.push_back(i);
-			}
+	//			if (selected)
+	//				newSelectedIndices.push_back(i);
+	//		}
 
-			p->setValue(std::move(newSelectedIndices));
-		}
-	}
+	//		p->setValue(std::move(newSelectedIndices));
+	//	}
+	//}
 
-	void renderIntProperty(Property* prop, const std::string& ownerName) {
-		IntProperty* p = static_cast<IntProperty*>(prop);
-		std::string name = p->guiName();
+	//void renderIntProperty(Property* prop, const std::string& ownerName) {
+	//	IntProperty* p = static_cast<IntProperty*>(prop);
+	//	std::string name = p->guiName();
 
-		IntProperty::ValueType value = *p;
-		ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-		p->set(value);
-	}
+	//	IntProperty::ValueType value = *p;
+	//	ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+	//	p->set(value);
+	//}
 
-	void renderFloatProperty(Property* prop, const std::string& ownerName) {
-		FloatProperty* p = static_cast<FloatProperty*>(prop);
-		std::string name = p->guiName();
+	//void renderFloatProperty(Property* prop, const std::string& ownerName) {
+	//	FloatProperty* p = static_cast<FloatProperty*>(prop);
+	//	std::string name = p->guiName();
 
-		FloatProperty::ValueType value = *p;
-		ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-		p->set(value);
-	}
+	//	FloatProperty::ValueType value = *p;
+	//	ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+	//	p->set(value);
+	//}
 
-	void renderVec2Property(Property* prop, const std::string& ownerName) {
-		Vec2Property* p = static_cast<Vec2Property*>(prop);
-		std::string name = p->guiName();
+	//void renderVec2Property(Property* prop, const std::string& ownerName) {
+	//	Vec2Property* p = static_cast<Vec2Property*>(prop);
+	//	std::string name = p->guiName();
 
-		Vec2Property::ValueType value = *p;
+	//	Vec2Property::ValueType value = *p;
 
-		ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-		p->set(value);
-	}
+	//	ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	//	p->set(value);
+	//}
 
 
-	void renderVec3Property(Property* prop, const std::string& ownerName) {
-		Vec3Property* p = static_cast<Vec3Property*>(prop);
-		std::string name = p->guiName();
+	//void renderVec3Property(Property* prop, const std::string& ownerName) {
+	//	Vec3Property* p = static_cast<Vec3Property*>(prop);
+	//	std::string name = p->guiName();
 
-		Vec3Property::ValueType value = *p;
+	//	Vec3Property::ValueType value = *p;
 
-		ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-		p->set(value);
-	}
+	//	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	//	p->set(value);
+	//}
 
-	void renderTriggerProperty(Property* prop, const std::string& ownerName) {
-		std::string name = prop->guiName();
-		bool pressed = ImGui::Button((ownerName + "." + name).c_str());
-		if (pressed)
-			prop->set(0);
-	}
+	//void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+	//	std::string name = prop->guiName();
+	//	bool pressed = ImGui::Button((ownerName + "." + name).c_str());
+	//	if (pressed)
+	//		prop->set(0);
+	//}
 
 }
 
 namespace openspace {
 namespace gui {
 
-void GuiPropertyComponent::registerProperty(properties::Property* prop) {
-	using namespace properties;
+//void GuiPropertyComponent::registerProperty(properties::Property* prop) {
+	//registerProperty(prop->description());
+	//using namespace properties;
 
-	std::string className = prop->className();
+	//std::string className = prop->className();
 
-	if (className == "BoolProperty")
-		_boolProperties.insert(prop);
-	else if (className == "IntProperty")
-		_intProperties.insert(prop);
-	else if (className == "FloatProperty")
-		_floatProperties.insert(prop);
-	else if (className == "StringProperty")
-		_stringProperties.insert(prop);
-	else if (className == "Vec2Property")
-		_vec2Properties.insert(prop);
-	else if (className == "Vec3Property")
-		_vec3Properties.insert(prop);
-	else if (className == "OptionProperty")
-		_optionProperty.insert(prop);
-	else if (className == "TriggerProperty")
-		_triggerProperty.insert(prop);
-	else if (className == "SelectionProperty")
-		_selectionProperty.insert(prop);
-	else {
-		LWARNING("Class name '" << className << "' not handled in GUI generation");
-		return;
+	//if (className == "BoolProperty")
+	//	_boolProperties.insert(prop);
+	//else if (className == "IntProperty")
+	//	_intProperties.insert(prop);
+	//else if (className == "FloatProperty")
+	//	_floatProperties.insert(prop);
+	//else if (className == "StringProperty")
+	//	_stringProperties.insert(prop);
+	//else if (className == "Vec2Property")
+	//	_vec2Properties.insert(prop);
+	//else if (className == "Vec3Property")
+	//	_vec3Properties.insert(prop);
+	//else if (className == "OptionProperty")
+	//	_optionProperty.insert(prop);
+	//else if (className == "TriggerProperty")
+	//	_triggerProperty.insert(prop);
+	//else if (className == "SelectionProperty")
+	//	_selectionProperty.insert(prop);
+	//else {
+	//	LWARNING("Class name '" << className << "' not handled in GUI generation");
+	//	return;
+	//}
+
+	//std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
+	//size_t pos = fullyQualifiedId.find('.');
+	//std::string owner = fullyQualifiedId.substr(0, pos);
+
+	//auto it = _propertiesByOwner.find(owner);
+	//if (it == _propertiesByOwner.end())
+	//	_propertiesByOwner[owner] = { prop };
+	//else
+	//	it->second.push_back(prop);
+
+//}
+
+void GuiPropertyComponent::registerProperty(const std::string& propertyDescription) {
+	ghoul::Dictionary dictionary;
+	ghoul::lua::loadDictionaryFromString(propertyDescription, dictionary);
+
+	handleProperty(dictionary);
+}
+
+void GuiPropertyComponent::handleProperty(const ghoul::Dictionary& dictionary) {
+	static const std::string TypeKey = "Type";
+	static const std::string IdentifierKey = "Identifier";
+	static const std::string NameKey = "Name";
+	static const std::string GroupKey = "MetaData.Group";
+
+	ghoul_assert(
+		dictionary.hasKeyAndValue<std::string>(TypeKey), "Missing Type key"
+	);
+	ghoul_assert(
+		dictionary.hasKeyAndValue<std::string>(IdentifierKey), "Missing Identifier key"
+	);
+	ghoul_assert(
+		dictionary.hasKeyAndValue<std::string>(NameKey), "Missing Name key"
+	);
+	ghoul_assert(
+		dictionary.hasKeyAndValue<std::string>(GroupKey), "Missing Group key"
+	);
+
+	std::string typeString = dictionary.value<std::string>(TypeKey);
+	std::string identifier = dictionary.value<std::string>(IdentifierKey);
+	std::string name = dictionary.value<std::string>(NameKey);
+	std::string group = dictionary.value<std::string>(GroupKey);
+
+	PropertyType type = toPropertyType(typeString);
+	
+	size_t pos = identifier.find('.');
+	std::string owner = identifier.substr(0, pos);
+
+	PropertyInfo info = { type, identifier, name, group };
+
+	auto it = std::find_if(_properties.begin(), _properties.end(),
+		[owner](const Property& prop) {
+			return prop.owner == owner;
+	});
+	if (it == _properties.end()) {
+		Property p;
+		p.owner = owner;
+		p.properties = {info};
+		_properties.push_back(p);
 	}
-
-	std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
-	size_t pos = fullyQualifiedId.find('.');
-	std::string owner = fullyQualifiedId.substr(0, pos);
-
-	auto it = _propertiesByOwner.find(owner);
-	if (it == _propertiesByOwner.end())
-		_propertiesByOwner[owner] = { prop };
 	else
-		it->second.push_back(prop);
-
+		it->properties.push_back(std::move(info));
 }
 
 void GuiPropertyComponent::render() {
-	using namespace openspace::properties;
-
 	ImGui::Begin("Properties", &_isEnabled, size, 0.5f);
 
-	//ImGui::ShowUserGuide();
-	ImGui::Spacing();
-
-	for (const auto& p : _propertiesByOwner) {
-		if (ImGui::CollapsingHeader(p.first.c_str())) {
-			for (properties::Property* prop : p.second) {
-				if (_boolProperties.find(prop) != _boolProperties.end()) {
-					renderBoolProperty(prop, p.first);
-					continue;
-				}
-
-				if (_intProperties.find(prop) != _intProperties.end()) {
-					renderIntProperty(prop, p.first);
-					continue;
-				}
-
-				if (_floatProperties.find(prop) != _floatProperties.end()) {
-					renderFloatProperty(prop, p.first);
-					continue;
-				}
-
-				if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-					renderVec2Property(prop, p.first);
-					continue;
-				}
-
-				if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-					renderVec3Property(prop, p.first);
-					continue;
-				}
-
-				if (_optionProperty.find(prop) != _optionProperty.end()) {
-					renderOptionProperty(prop, p.first);
-					continue;
-				}
-
-				if (_triggerProperty.find(prop) != _triggerProperty.end()) {
-					renderTriggerProperty(prop, p.first);
-					continue;
-				}
-
-				if (_selectionProperty.find(prop) != _selectionProperty.end()) {
-					renderSelectionProperty(prop, p.first);
-					continue;
-				}
+	for (const Property& prop : _properties) {
+		if (ImGui::CollapsingHeader(prop.owner.c_str())) {
+			for (const PropertyInfo& info : prop.properties) {
+				renderProperty(info);
 			}
 		}
-	}
+ 	}
+
+
+
+	//for (const auto& p : _propertiesByOwner) {
+	//	if (ImGui::CollapsingHeader(p.first.c_str())) {
+	//		for (properties::Property* prop : p.second) {
+	//			if (_boolProperties.find(prop) != _boolProperties.end()) {
+	//				renderBoolProperty(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_intProperties.find(prop) != _intProperties.end()) {
+	//				renderIntProperty(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_floatProperties.find(prop) != _floatProperties.end()) {
+	//				renderFloatProperty(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_vec2Properties.find(prop) != _vec2Properties.end()) {
+	//				renderVec2Property(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_vec3Properties.find(prop) != _vec3Properties.end()) {
+	//				renderVec3Property(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_optionProperty.find(prop) != _optionProperty.end()) {
+	//				renderOptionProperty(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_triggerProperty.find(prop) != _triggerProperty.end()) {
+	//				renderTriggerProperty(prop, p.first);
+	//				continue;
+	//			}
+
+	//			if (_selectionProperty.find(prop) != _selectionProperty.end()) {
+	//				renderSelectionProperty(prop, p.first);
+	//				continue;
+	//			}
+	//		}
+	//	}
+	//}
 
 	ImGui::End();
+}
+
+GuiPropertyComponent::PropertyType GuiPropertyComponent::toPropertyType(
+	const std::string& name) const
+{
+	if (name == "BoolProperty")
+		return PropertyType::BoolProperty;
+	if (name == "IntProperty")
+		return PropertyType::IntProperty;
+	if (name == "FloatProperty")
+		return PropertyType::FloatProperty;
+	if (name == "Vec2Property")
+		return PropertyType::Vec2Property;
+	if (name == "Vec3Property")
+		return PropertyType::Vec3Property;
+	if (name == "StringProperty")
+		return PropertyType::StringProperty;
+	if (name == "OptionProperty")
+		return PropertyType::OptionProperty;
+	if (name == "SelectionProperty")
+		return PropertyType::SelectionProperty;
+	if (name == "TriggerProperty")
+		return PropertyType::TriggerProperty;
+
+	LWARNING("Unsupported property type '" << name << "'");
+	return PropertyType::InvalidPropertyType;
+}
+
+void GuiPropertyComponent::renderProperty(const PropertyInfo& info) const {
+	switch (info.type) {
+		case PropertyType::BoolProperty:
+		{
+			//	BoolProperty* p = static_cast<BoolProperty*>(prop);
+			//	std::string name = p->guiName();
+
+			//	BoolProperty::ValueType value = *p;
+			//	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+			//	p->set(value);
+
+
+			
+
+			break;
+		}
+		default:
+			ghoul_assert(false, "Missing case statement");
+		}
+
 }
 
 } // gui

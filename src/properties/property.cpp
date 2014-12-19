@@ -162,7 +162,7 @@ void Property::notifyListener() {
 std::string Property::generateBaseDescription() const {
 	return
 		TypeKey + " = \"" + className() + "\", " +
-		IdentifierKey + " = \"" + identifier() + "\", " +
+		IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
 		NameKey + " = \"" + guiName() + "\", " +
 		generateMetaDataDescription() + ", " + 
 		generateAdditionalDescription();

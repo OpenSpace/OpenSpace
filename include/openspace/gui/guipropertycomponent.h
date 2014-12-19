@@ -27,35 +27,53 @@
 
 #include <openspace/gui/guicomponent.h>
 
-#include <map>
-#include <set>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 #include <vector>
 
 namespace openspace {
-
-namespace properties {
-	class Property;
-}
-
 namespace gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-	void registerProperty(properties::Property* prop);
+	void registerProperty(const std::string& propertyDescription);
 	void render();
 
 protected:
-	std::set<properties::Property*> _boolProperties;
-	std::set<properties::Property*> _intProperties;
-	std::set<properties::Property*> _floatProperties;
-	std::set<properties::Property*> _vec2Properties;
-	std::set<properties::Property*> _vec3Properties;
-	std::set<properties::Property*> _stringProperties;
-	std::set<properties::Property*> _optionProperty;
-	std::set<properties::Property*> _selectionProperty;
-	std::set<properties::Property*> _triggerProperty;
+	enum class PropertyType {
+		BoolProperty = 0,
+		IntProperty,
+		FloatProperty,
+		Vec2Property,
+		Vec3Property,
+		StringProperty,
+		OptionProperty,
+		SelectionProperty,
+		TriggerProperty,
+		InvalidPropertyType
+	};
 
-	std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+	struct PropertyInfo {
+		PropertyType type;
+		std::string identifier;
+		std::string name;
+		std::string group;
+	};
+	typedef std::string PropertyOwner;
+
+	struct Property {
+		PropertyOwner owner;
+		std::vector<PropertyInfo> properties;
+	};
+
+	void handleProperty(const ghoul::Dictionary& value);
+
+	PropertyType toPropertyType(const std::string& name) const;
+
+	void renderProperty(const PropertyInfo& info) const;
+
+
+	std::vector<Property> _properties;
 };
 
 } // namespace gui
