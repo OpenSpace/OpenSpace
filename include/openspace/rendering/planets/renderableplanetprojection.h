@@ -74,6 +74,8 @@ private:
 	properties::TriggerProperty _imageTrigger;
 
     ghoul::opengl::ProgramObject* _programObject;
+	ghoul::opengl::ProgramObject* _fboProgramObject;
+
 
     ghoul::opengl::Texture* _texture;
 	ghoul::opengl::Texture* _textureProj;
@@ -93,6 +95,9 @@ private:
 
 	// FBO stuff
 	GLuint _fboID;
+	GLuint _quad;
+	GLuint _vertexPositionBuffer;
+
 };
 
 }  // namespace openspace

@@ -112,7 +112,7 @@ bool RenderablePlane::initialize() {
 	// ============================
 	// 		GEOMETRY (quad)
 	// ============================
-	const GLfloat size		= _size[0];
+	const GLfloat size = _size[0];
 	const GLfloat w = _size[1];
 	const GLfloat vertex_data[] = { // square of two triangles (sigh)
 		//	  x      y     z     w     s     t

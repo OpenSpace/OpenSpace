@@ -163,7 +163,16 @@ bool SceneGraph::initialize()
 	typedef std::chrono::duration<double, std::ratio<1> > second_;
 	std::chrono::time_point<clock_> beginning(clock_::now()); 
 
-	// pscstandard
+	// fboPassthrough program
+	tmpProgram = ProgramObject::Build("fboPassProgram",
+		"${SHADERS}/fboPass_vs.glsl",
+		"${SHADERS}/fboPass_fs.glsl");
+	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager().setValue("fboPassProgram", tmpProgram);
+
+	// projection program
 	tmpProgram = ProgramObject::Build("projectiveProgram", 
 		"${SHADERS}/projectiveTexture_vs.glsl",
 		"${SHADERS}/projectiveTexture_fs.glsl"); 

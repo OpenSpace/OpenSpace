@@ -72,6 +72,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _projectionTexturePath("colorTexture", "Color Texture")
 	, _imageTrigger("imageTrigger", "Image Trigger")
     , _programObject(nullptr)
+	, _fboProgramObject(nullptr)
     , _texture(nullptr)
 	, _textureProj(nullptr)
     , _geometry(nullptr)
@@ -131,6 +132,10 @@ bool RenderablePlanetProjection::initialize(){
         completeSuccess
               &= OsEng.ref().configurationManager().getValue("projectiveProgram", _programObject);
 
+	if (_fboProgramObject == nullptr)
+		completeSuccess
+			  &= OsEng.ref().configurationManager().getValue("fboPassProgram", _fboProgramObject);
+
     loadTexture();
     completeSuccess &= (_texture != nullptr);
 	completeSuccess &= (_textureProj != nullptr);
@@ -148,6 +153,29 @@ bool RenderablePlanetProjection::initialize(){
 
 	// switch back to window-system-provided framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+	// SCREEN-QUAD 
+	const GLfloat size = 1.0f;
+	const GLfloat w = 1.0f;
+	const GLfloat vertex_data[] = { 
+	//	  x      y     z     w     s     t
+		-size, -size, 0.0f,  w,    0,    1,
+	 	 size,  size, 0.0f,  w,    1,    0,
+		-size,  size, 0.0f,  w,    0,    0,
+		-size, -size, 0.0f,  w,    0,    1,
+		 size, -size, 0.0f,  w,    1,    1,
+		 size,  size, 0.0f,  w,    1,    0,
+	};
+
+	glGenVertexArrays(1, &_quad); // generate array
+	glBindVertexArray(_quad); // bind array
+	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
     return completeSuccess;
 }
@@ -243,16 +271,43 @@ void RenderablePlanetProjection::updateTex(){
 	printOpenGLError();
 }
 
+#define RENDER_TO_TEXTURE
 void RenderablePlanetProjection::render(const RenderData& data)
 {
 	if (!_programObject) return;
 	if (!_textureProj) return;
 
 	//updateTex();
-	
 	// keep handle to the current bound FBO
 	GLint defaultFBO;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+#ifdef RENDER_TO_TEXTURE
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+
+	glEnable(GL_BLEND);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
+	glViewport(0, 0, 1024, 1024);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	_fboProgramObject->activate();
+
+		ghoul::opengl::TextureUnit unitFbo;
+		unitFbo.activate();
+		_textureProj->bind();
+		_fboProgramObject->setUniform("texture1", unitFbo);
+
+		glBindVertexArray(_quad);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	_fboProgramObject->deactivate();
+	
+	glDisable(GL_BLEND);
+
+	//bind back to default
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+	glViewport(0, 0, 1920, 1080);
+#endif 
 
     // activate shader
     _programObject->activate();
