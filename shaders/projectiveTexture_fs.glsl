@@ -84,7 +84,7 @@ void main()
 			ProjTexCoord[0] < ProjTexCoord[2] || 
 			ProjTexCoord[1] < ProjTexCoord[2]){
 			diffuse = shaded;
-		}else if(dot(n,vs_boresight) < 0 ){
+		}else if(dot(n,vs_boresight) < 0 ){// frontfacing
 			diffuse = projTexColor*0.5f + 0.5f*shaded;
 		}else{
 			diffuse = shaded;

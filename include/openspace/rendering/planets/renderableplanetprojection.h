@@ -97,7 +97,6 @@ private:
 	GLuint _fboID;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
-
 };
 
 }  // namespace openspace

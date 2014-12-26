@@ -25,19 +25,59 @@
 #version 430
 
 uniform sampler2D texture1;
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform vec2 _scaling;
+
 in vec4 vs_position;
+in vec3 vs_boresight;
 
 out vec4 color;
 
+#define M_PI 3.14159265358979323846
+
+vec4 uvToModel( float u, float v, vec2 radius, float segments){
+	const float fj = u * segments;
+	const float fi = v * segments;
+
+	const float theta = fi * float(M_PI) / segments;  // 0 -> PI
+	const float phi   = fj * float(M_PI) * 2.0f / segments;
+
+	const float x = radius[0] * sin(phi) * sin(theta);  //
+	const float y = radius[0] * cos(theta);             // up
+	const float z = radius[0] * cos(phi) * sin(theta);  //
+
+	return vec4(x, y, z, radius[1]);
+}
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+bool inRange(float x, float a, float b){
+	return (x >= a && x <= b);
+} 
 
 void main() {
   vec2 uv = vec2(0.5,0.5)*vs_position.xy+vec2(0.5,0.5);
-  if(uv.x > 0.5 && uv.x < 0.6){
-    color = texture(texture1, uv);
-	//color.a = 1.f;
-	color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5);
-	// output = color*color.a + source*(1-color.a)
+  
+  vec2 radius = vec2(0.71492f, 8.f);
+  vec4 in_pos = uvToModel(uv.x, uv.y, radius, 200);
+  
+  vec4 raw_pos = psc_to_meter(in_pos, _scaling);
+  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
+  
+  projected.x /= projected.w;
+  projected.y /= projected.w;
+  	
+  vec4 normal = normalize(ModelTransform * vec4(in_pos.xyz,0));
+
+  //"in range"
+  if(inRange(projected.x, 0, 1) &&  
+     inRange(projected.y, 0, 1) &&
+	 dot(normal.xyz,vs_boresight) < 0 ){
+	 color = texture(texture1, projected.xy);
+	 color.a  = 1.0f;
   }else{
-	color = vec4(1,0,0,0);
-  }  
+  	 color = vec4(1,0,0,0);
+  }
+  // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
 }

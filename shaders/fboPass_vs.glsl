@@ -23,12 +23,19 @@
  ****************************************************************************************/
 
 #version 430
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform vec2 _scaling;
 
 layout(location = 0) in vec4 in_position;
+layout(location = 2) in vec3 boresight;
 
 out vec4 vs_position;
+out vec3 vs_boresight;
+
 
 void main() {
 	vs_position = in_position;
+	vs_boresight = boresight;
 	gl_Position = vec4(in_position.xy, 0.0, 1.0);
 }

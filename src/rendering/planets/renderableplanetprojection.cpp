@@ -278,39 +278,7 @@ void RenderablePlanetProjection::render(const RenderData& data)
 	if (!_textureProj) return;
 
 	//updateTex();
-	// keep handle to the current bound FBO
-	GLint defaultFBO;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-#ifdef RENDER_TO_TEXTURE
-	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
-	glEnable(GL_BLEND);
-	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
-	glViewport(0, 0, 1024, 1024);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	_fboProgramObject->activate();
-
-		ghoul::opengl::TextureUnit unitFbo;
-		unitFbo.activate();
-		_textureProj->bind();
-		_fboProgramObject->setUniform("texture1", unitFbo);
-
-		glBindVertexArray(_quad);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	_fboProgramObject->deactivate();
-	
-	glDisable(GL_BLEND);
-
-	//bind back to default
-	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-	glViewport(0, 0, 1920, 1080);
-#endif 
-
     // activate shader
-    _programObject->activate();
 
     // scale the planet to appropriate size since the planet is a unit sphere
 	_transform = glm::mat4(1);
@@ -367,6 +335,44 @@ void RenderablePlanetProjection::render(const RenderData& data)
 	_camScaling = data.camera.scaling();
 
 	_projectorMatrix = projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
+
+	// keep handle to the current bound FBO
+	GLint defaultFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+#ifdef RENDER_TO_TEXTURE
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+
+	glEnable(GL_BLEND);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
+	glViewport(0, 0, _texture->width(), _texture->height());
+	_fboProgramObject->activate();
+
+	ghoul::opengl::TextureUnit unitFbo;
+	unitFbo.activate();
+	_textureProj->bind();
+	_fboProgramObject->setUniform("texture1", unitFbo);
+	_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
+	_fboProgramObject->setUniform("ModelTransform", _transform);
+	_fboProgramObject->setUniform("_scaling", data.camera.scaling());
+	_fboProgramObject->setAttribute("boresight", _boresight);
+
+
+	glBindVertexArray(_quad);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	_fboProgramObject->deactivate();
+
+	glDisable(GL_BLEND);
+
+	//bind back to default
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+	glViewport(0, 0, 1920, 1080);
+#endif 
+
+	// Main renderpass
+	_programObject->activate();
     // setup the data to the shader
 	_programObject->setUniform("ProjectorMatrix", _projectorMatrix);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -540,7 +546,7 @@ void RenderablePlanetProjection::loadTexture()
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
 
