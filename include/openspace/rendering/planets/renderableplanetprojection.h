@@ -61,13 +61,11 @@ public:
 
 protected:
     void loadTexture();
-
-	GLuint genComputeProg();
-	GLuint _computeShader;
-	void updateTex();
+	bool auxiliaryRendertarget();
+	glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
 
 private:
-	void imageProject();
+	void imageProjectGPU();
 
     properties::StringProperty _colorTexturePath;
 	properties::StringProperty _projectionTexturePath;
@@ -76,20 +74,31 @@ private:
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
 
-
     ghoul::opengl::Texture* _texture;
 	ghoul::opengl::Texture* _textureProj;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
+	
+	glm::vec2  _camScaling;
+	glm::vec3  _lookUp;
+	glm::mat4  _transform;
+	glm::mat4  _projectorMatrix;
+
+	// spice
+	std::string _instrumentID;
+	std::string _projectorID;
+	std::string _projecteeID;
+	std::string _aberration;
+	float _fovy;
+	float _aspectRatio;
+	float _nearPlane;
+	float _farPlane;
 
 	glm::dmat3 _stateMatrix;
 	glm::dmat3 _instrumentMatrix;
-	glm::mat4  _projectorMatrix;
 	glm::vec3  _boresight;
-	glm::vec2  _camScaling;
-	glm::mat4  _transform;
 
 	double _time;
-	openspace::SceneGraphNode* _targetNode;
+	double lightTime;
 
 	std::string _target;
 
@@ -98,7 +107,6 @@ private:
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 };
-
 }  // namespace openspace
 
 #endif  // __RENDERABLEPLANETPROJECTION_H__

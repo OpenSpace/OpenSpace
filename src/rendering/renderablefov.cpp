@@ -37,17 +37,15 @@
 #include <chrono>
 
 namespace {
-	    const std::string _loggerCat              = "RenderableFov";
-	    //constants
-		const std::string keyBody                 = "Body";
-		const std::string keyFrame                = "Frame";
-		const std::string keyPathModule           = "ModulePath";
-		const std::string keyColor                = "RGB";
-		const std::string keyInstrument           = "Instrument.Name";
-		const std::string keyInstrumentMethod     = "Instrument.Method";
-		const std::string keyInstrumentAberration = "Instrument.Aberration";
-
-
+	const std::string _loggerCat              = "RenderableFov";
+	//constants
+	const std::string keyBody                 = "Body";
+	const std::string keyFrame                = "Frame";
+	const std::string keyPathModule           = "ModulePath";
+	const std::string keyColor                = "RGB";
+	const std::string keyInstrument           = "Instrument.Name";
+	const std::string keyInstrumentMethod     = "Instrument.Method";
+	const std::string keyInstrumentAberration = "Instrument.Aberration";
 }
 //#define DEBUG
 namespace openspace{
@@ -67,11 +65,17 @@ namespace openspace{
 		, _texture(nullptr)
 		, _mode(GL_LINES){
 
-		assert(dictionary.getValue(keyBody                 , _spacecraft));
-		assert(dictionary.getValue(keyFrame                , _frame));
-		assert(dictionary.getValue(keyInstrument           , _instrumentID));
-		assert(dictionary.getValue(keyInstrumentMethod     , _method));
-		assert(dictionary.getValue(keyInstrumentAberration , _aberrationCorrection));
+		bool b1 = dictionary.getValue(keyBody                 , _spacecraft);
+		bool b2 = dictionary.getValue(keyFrame                , _frame);
+		bool b3 = dictionary.getValue(keyInstrument           , _instrumentID);
+		bool b4 = dictionary.getValue(keyInstrumentMethod     , _method);
+		bool b5 = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+
+		assert(b1 == true);
+		assert(b2 == true);
+		assert(b3 == true);
+		assert(b4 == true);
+		assert(b5 == true);
 }
 void RenderableFov::allocateData(){ 
 	int points = 8;

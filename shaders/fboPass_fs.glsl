@@ -28,6 +28,8 @@ uniform sampler2D texture1;
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
+uniform vec2 radius;
+flat in uint vs_segments;
 
 in vec4 vs_position;
 in vec3 vs_boresight;
@@ -59,23 +61,23 @@ bool inRange(float x, float a, float b){
 void main() {
   vec2 uv = vec2(0.5,0.5)*vs_position.xy+vec2(0.5,0.5);
   
-  vec2 radius = vec2(0.71492f, 8.f);
-  vec4 in_pos = uvToModel(uv.x, uv.y, radius, 200);
+ // vec2 radius_expl = vec2(0.71492f, 8.f);
+  vec4 vertex = uvToModel(uv.x, uv.y, radius, vs_segments);
   
-  vec4 raw_pos = psc_to_meter(in_pos, _scaling);
+  vec4 raw_pos = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
   
   projected.x /= projected.w;
   projected.y /= projected.w;
   	
-  vec4 normal = normalize(ModelTransform * vec4(in_pos.xyz,0));
+  vec4 normal = normalize(ModelTransform * vec4(vertex.xyz,0));
 
   //"in range"
   if(inRange(projected.x, 0, 1) &&  
-     inRange(projected.y, 0, 1) &&
-	 dot(normal.xyz,vs_boresight) < 0 ){
+     inRange(projected.y, 0, 1)	&&
+	 dot(normal.xyz,vs_boresight) < -0.09 ){
 	 color = texture(texture1, projected.xy);
-	 color.a  = 1.0f;
+	// color.a  = 1.0f;
   }else{
   	 color = vec4(1,0,0,0);
   }
