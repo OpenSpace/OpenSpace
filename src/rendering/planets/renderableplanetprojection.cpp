@@ -177,9 +177,9 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 		 size,  size, 0.0f, w, 1, 0,
 	};
 
-	glGenVertexArrays(1, &_quad); // generate array
-	glBindVertexArray(_quad); // bind array
-	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+	glGenVertexArrays(1, &_quad);                         // generate array
+	glBindVertexArray(_quad);                             // bind array
+	glGenBuffers(1, &_vertexPositionBuffer);              // generate buffer
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
@@ -213,7 +213,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
 
 	static int counter = 0;
-	if (counter > 1){ // every something frame for now..
+	if (counter > 50){ // every something frame for now..
 		counter = 0;
 		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 		// set blend eq

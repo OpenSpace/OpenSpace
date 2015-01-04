@@ -66,18 +66,17 @@ void main() {
   
   vec4 raw_pos = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
-  
+    
   projected.x /= projected.w;
   projected.y /= projected.w;
-  	
-  vec4 normal = normalize(ModelTransform * vec4(vertex.xyz,0));
+  
+  vec3 normal = normalize(ModelTransform * vec4(vertex.xyz,0)).xyz;
 
   //"in range"
-  if(inRange(projected.x, 0, 1) &&  
-     inRange(projected.y, 0, 1)	&&
-	 dot(normal.xyz,vs_boresight) < -0.09 ){
-	 color = texture(texture1, projected.xy);
-	// color.a  = 1.0f;
+  if((inRange(projected.x, 0, 1) &&  
+      inRange(projected.y, 0, 1)) &&
+	  dot(normal, vs_boresight) < 0){
+		color = texture(texture1, projected.xy);
   }else{
   	 color = vec4(1,0,0,0);
   }
