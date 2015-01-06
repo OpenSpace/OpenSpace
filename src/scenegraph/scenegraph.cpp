@@ -441,6 +441,13 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 	c->setRotation(la);
 
+	glm::vec3 viewOffset;
+	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)
+		&& cameraDictionary.getValue(constants::scenegraph::keyViewOffset, viewOffset)) {
+	    glm::quat rot = glm::quat(viewOffset);
+	    c->rotate(rot);
+	}
+
 
 	for (SceneGraphNode* node : _nodes) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
