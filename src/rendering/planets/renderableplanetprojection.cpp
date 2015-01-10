@@ -37,9 +37,11 @@
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 #include <iomanip> 
+#include <string>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+
 
 namespace {
 	const std::string _loggerCat = "RenderablePlanetProjection";
@@ -54,14 +56,18 @@ namespace {
 
 	const std::string _mainFrame = "GALACTIC";
 }
-
 namespace openspace {
-
+#ifdef WIN32
+	const char pathSeparator = '\\';
+#else
+	const char pathSeparator = '/';
+#endif
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-	, _colorTexturePath("colorTexture", "Color Texture")
-	, _projectionTexturePath("colorTexture", "Color Texture")
+	, _colorTexturePath("planetTexture", "RGB Texture")
+	, _projectionTexturePath("projectionTexture", "RGB Texture")
 	, _imageTrigger("imageTrigger", "Image Trigger")
+	, _sequencer(nullptr)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
     , _texture(nullptr)
@@ -69,13 +75,13 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _geometry(nullptr)
 {
 	bool b1 = dictionary.getValue(keyInstrument      , _instrumentID);
-	bool b2 = dictionary.getValue( keyProjObserver   , _projectorID  );
-	bool b3 = dictionary.getValue( keyProjTarget     , _projecteeID  );
-	bool b4 = dictionary.getValue( keyProjAberration , _aberration   );
-	bool b5 = dictionary.getValue(keyInstrumentFovy  , _fovy);
-	bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio);
-	bool b7 = dictionary.getValue(keyInstrumentNear  , _nearPlane);
-	bool b8 = dictionary.getValue(keyInstrumentFar   , _farPlane);
+	bool b2 = dictionary.getValue(keyProjObserver    , _projectorID );
+	bool b3 = dictionary.getValue(keyProjTarget      , _projecteeID );
+	bool b4 = dictionary.getValue(keyProjAberration  , _aberration  );
+	bool b5 = dictionary.getValue(keyInstrumentFovy  , _fovy        );
+	bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio );
+	bool b7 = dictionary.getValue(keyInstrumentNear  , _nearPlane   );
+	bool b8 = dictionary.getValue(keyInstrumentFar   , _farPlane    );
 
 	assert(b1 == true);
 	assert(b2 == true);
@@ -124,7 +130,11 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 	addProperty(_projectionTexturePath);
-	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
+
+	std::string sPath = "C:/Users/michal/JupSequenceContrastCorrected";
+
+	_sequencer->loadSequence(sPath);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -142,6 +152,7 @@ bool RenderablePlanetProjection::initialize(){
 			  &= OsEng.ref().configurationManager().getValue("fboPassProgram", _fboProgramObject);
 
     loadTexture();
+	loadProjectionTexture();
     completeSuccess &= (_texture != nullptr);
 	completeSuccess &= (_textureProj != nullptr);
 
@@ -182,10 +193,11 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	glGenBuffers(1, &_vertexPositionBuffer);              // generate buffer
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+
 
 	return completeSuccess;
 }
@@ -212,14 +224,25 @@ void RenderablePlanetProjection::imageProjectGPU(){
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
 
-	static int counter = 0;
-	if (counter > 50){ // every something frame for now..
-		counter = 0;
+	bool newImg = false;
+	std::string tmpProj = "C:/Users/michal/openspace/openspace-data/scene/jupiterprojection/textures/lor_0034817584_0x630_sci_1.fit.jpg";
+
+	boost::any s = _projectionTexturePath.get();
+	std::string *str;
+	str = boost::any_cast<std::string>(&s);
+
+	std::string newPath = tmpProj;
+	newImg = _sequencer->getImagePath(_time, newPath);
+
+	if (str[0] != newPath){ // every something frame for now..
+		_projectionTexturePath = newPath;
+		//counter = 0;
 		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 		// set blend eq
 		glEnable(GL_BLEND);
 		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
+
 		glViewport(0, 0, _texture->width(), _texture->height());
 		_fboProgramObject->activate();
 
@@ -251,6 +274,28 @@ void RenderablePlanetProjection::imageProjectGPU(){
 			LERROR("Geometry object needs to provide segment count");
 		}
 
+		/*
+		if (_geometry->hasProperty("vaoID") && 
+			_geometry->hasProperty("vboID") &&
+			_geometry->hasProperty("iboID") ){
+
+			//int* vaoID, vboID, iboID;
+			boost::any id1 = _geometry->property("vaoID")->get();
+			boost::any id2 = _geometry->property("vboID")->get();
+			boost::any id3 = _geometry->property("iboID")->get();
+			if (GLuint vaoID = ((GLuint*)boost::any_cast<int>(&id1))[0]){
+				if (GLuint vboID = ((GLuint*)boost::any_cast<int>(&id2))[0]){
+					if (GLuint iboID = ((GLuint*)boost::any_cast<int>(&id3))[0]){
+					
+						glBindVertexArray(vaoID);  // select first VAO
+						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+						glDrawElements(GL_TRIANGLES, 240000, GL_UNSIGNED_INT, 0);
+						glBindVertexArray(0);
+					}
+				}
+			}
+		}
+		*/
 		glBindVertexArray(_quad);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		_fboProgramObject->deactivate();
@@ -261,7 +306,8 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		glViewport(m_viewport[0], m_viewport[1],
 			       m_viewport[2], m_viewport[3]);
 	}
-	counter++;
+
+	//counter++;
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
@@ -323,11 +369,12 @@ void RenderablePlanetProjection::render(const RenderData& data){
 #ifdef SEQUENCING
 	imageProjectGPU();
 #endif 
+
 	// Main renderpass
 	_programObject->activate();
     // setup the data to the shader
 	_programObject->setUniform("ProjectorMatrix", _projectorMatrix);
-	_programObject->setUniform("ViewProjection" , data.camera.viewProjectionMatrix());
+	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setAttribute("boresight"    , _boresight);
 	setPscUniforms(_programObject, &data.camera, data.position);
@@ -353,19 +400,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, data.time, _instrumentMatrix);
 }
 
-void RenderablePlanetProjection::loadTexture(){
-    delete _texture;
-    _texture = nullptr;
-    if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
-        if (_texture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-			_texture->uploadTexture();
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-    }
-
+void RenderablePlanetProjection::loadProjectionTexture(){
 	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
@@ -380,6 +415,20 @@ void RenderablePlanetProjection::loadTexture(){
 
 		}
 	}
+}
+
+void RenderablePlanetProjection::loadTexture(){
+    delete _texture;
+    _texture = nullptr;
+    if (_colorTexturePath.value() != "") {
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        if (_texture) {
+            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+			_texture->uploadTexture();
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        }
+    }
 }
 
 }  // namespace openspace

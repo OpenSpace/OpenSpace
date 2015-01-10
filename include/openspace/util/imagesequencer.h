@@ -22,39 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __SIMPLESPHEREGEOMETRY_H__
-#define __SIMPLESPHEREGEOMETRY_H__
+#ifndef __IMAGESEQUENCER_H__
+#define __IMAGESEQUENCER_H__
 
-#include <openspace/rendering/planets/planetgeometry.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/scalarproperty.h>
+// open space includes
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
+#include <map>
+#include <vector>
 
 namespace openspace {
 
-class RenderablePlanet;
-class PowerScaledSphere;
-
-namespace planetgeometry {
-
-class SimpleSphereGeometry : public PlanetGeometry {
+class ImageSequencer {
 public:
-    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry();
+    // initializers
+	ImageSequencer(const std::string dir);
+	~ImageSequencer();
 
+	bool loadSequence(const std::string dir);
 
-    bool initialize(RenderablePlanet* parent) override;
-    void deinitialize() override;
-    void render() override;
-	PowerScaledSphere* _planet;
+	void testStartTimeMap();
 
-private:
-    void createSphere();
+    bool initialize();
 
-    properties::Vec2Property _radius;
-    properties::IntProperty _segments;
+public:
+
+	void createImage(double t1, double t2, std::string path = "dummypath");
+	bool getImagePath(double _currentTime, std::string& path);
+	bool getImagePath(std::string _currentTime, std::string& path);
+
 };
 
-}  // namespace planetgeometry
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __SIMPLESPHEREGEOMETRY_H__
+#endif // __IMAGESEQUENCER_H__

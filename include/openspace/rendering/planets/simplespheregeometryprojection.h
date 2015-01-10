@@ -52,6 +52,11 @@ private:
     properties::Vec2Property _radius;
     properties::IntProperty _segments;
 
+
+	properties::IntProperty _vaoID;
+	properties::IntProperty _vBufferID;
+	properties::IntProperty _iBufferID;
+
     PowerScaledSphere* _planet;
 };
 

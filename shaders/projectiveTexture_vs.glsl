@@ -46,11 +46,8 @@ out float s;
 out vec3 vs_boresight;
 
 out vec4 ProjTexCoord;
-
 #include "PowerScaling/powerScaling_vs.hglsl"
-
-void main()
-{
+void main(){
 	// Radius = 0.71492 *10^8; 
     vs_boresight = boresight;
 	// set variables

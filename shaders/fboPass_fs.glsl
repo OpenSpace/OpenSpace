@@ -61,24 +61,27 @@ bool inRange(float x, float a, float b){
 void main() {
   vec2 uv = vec2(0.5,0.5)*vs_position.xy+vec2(0.5,0.5);
   
- // vec2 radius_expl = vec2(0.71492f, 8.f);
   vec4 vertex = uvToModel(uv.x, uv.y, radius, vs_segments);
   
-  vec4 raw_pos = psc_to_meter(vertex, _scaling);
+  vec4 raw_pos   = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
-    
+	
   projected.x /= projected.w;
   projected.y /= projected.w;
   
-  vec3 normal = normalize(ModelTransform * vec4(vertex.xyz,0)).xyz;
-
-  //"in range"
+  vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
+  
+  vec3 v_b = normalize(vs_boresight);
+  
+  //color = 500*vec4(dot(v_b, normal),0,0,1);
+  // perspecitve division something with normals
   if((inRange(projected.x, 0, 1) &&  
       inRange(projected.y, 0, 1)) &&
-	  dot(normal, vs_boresight) < 0){
+	  dot(v_b, normal) < 0 ) {
 		color = texture(texture1, projected.xy);
   }else{
-  	 color = vec4(1,0,0,0);
+    //color = 500*vec4(dot(v_b, normal),0,0,1);
+ 	 color = vec4(1,1,1,0);
   }
   // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
 }

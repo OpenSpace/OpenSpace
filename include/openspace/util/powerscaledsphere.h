@@ -43,7 +43,8 @@ public:
 
     void render();
 
-private:
+
+//private:
     typedef struct {
         GLfloat location[4];
         GLfloat tex[2];
@@ -51,9 +52,9 @@ private:
         GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     } Vertex;
 
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
+	GLuint _vaoID;
+	GLuint _vBufferID;
+	GLuint _iBufferID;
 
     unsigned int _isize;
     unsigned int _vsize;

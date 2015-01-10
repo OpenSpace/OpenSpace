@@ -104,8 +104,7 @@ void SimpleSphereGeometry::render()
     _planet->render();
 }
 
-void SimpleSphereGeometry::createSphere()
-{
+void SimpleSphereGeometry::createSphere(){
     //create the power scaled scalar
 
     PowerScaledScalar planetSize(_radius);

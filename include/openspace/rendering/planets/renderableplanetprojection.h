@@ -28,6 +28,7 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
+#include <openspace/util/imagesequencer.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -60,12 +61,16 @@ public:
     void update(const UpdateData& data) override;
 
 protected:
+
     void loadTexture();
+	void loadProjectionTexture();
 	bool auxiliaryRendertarget();
 	glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
 
 private:
 	void imageProjectGPU();
+
+	ImageSequencer* _sequencer;
 
     properties::StringProperty _colorTexturePath;
 	properties::StringProperty _projectionTexturePath;
@@ -101,6 +106,8 @@ private:
 	double lightTime;
 
 	std::string _target;
+
+	std::string _oldPath  = "";
 
 	// FBO stuff
 	GLuint _fboID;

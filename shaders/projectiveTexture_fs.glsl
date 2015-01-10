@@ -59,7 +59,8 @@ void main()
 	//vec3 e = normalize(camdir);
 	vec3 l_pos = vec3(0.0); // sun.
 	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
+	float terminatorBright = 0.8;
+	float intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
 	
 	float shine = 0.0001;
 
@@ -78,7 +79,7 @@ void main()
 	
 	// PROJECTIVE TEXTURE
 	vec4 projTexColor = textureProj(texture2, ProjTexCoord);
-	vec4 shaded = diffuse;//max(intensity * diffuse, ambient);
+	vec4 shaded = max(intensity * diffuse, ambient);
 		if (ProjTexCoord[0] > 0.0 || 
 			ProjTexCoord[1] > 0.0 ||
 			ProjTexCoord[0] < ProjTexCoord[2] || 

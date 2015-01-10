@@ -45,6 +45,9 @@ SimpleSphereGeometryProjection::SimpleSphereGeometryProjection(const ghoul::Dict
     , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
               glm::vec2(10.f, 20.f))
     , _segments("segments", "Segments", 20, 1, 1000)
+	, _vaoID("vaoID", "Vao", 1, 1, 1)
+	, _vBufferID("vboID", "Vbo", 1, 1, 1)
+	, _iBufferID("iboID", "Ibo", 1, 1, 1)
     , _planet(nullptr)
 {
 	using constants::scenegraphnode::keyName;
@@ -88,6 +91,14 @@ bool SimpleSphereGeometryProjection::initialize(RenderablePlanetProjection* pare
 {
 	bool success = PlanetGeometryProjection::initialize(parent);
     createSphere();
+
+	//need to have this accessible in planetgeometryprojection for now  -- Michal
+	_vaoID = static_cast<int>(_planet->_vaoID);
+	_vBufferID = static_cast<int>(_planet->_vBufferID);
+	_iBufferID = static_cast<int>(_planet->_iBufferID);
+	addProperty(_vaoID);
+	addProperty(_vBufferID);
+	addProperty(_iBufferID);
     return success;
 }
 
