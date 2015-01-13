@@ -61,7 +61,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dictionary)
 	, _colorTexturePath("planetTexture", "RGB Texture")
 	, _projectionTexturePath("projectionTexture", "RGB Texture")
-	, _imageTrigger("imageTrigger", "Image Trigger")
+	, _imageTrigger("clearProjections", "Clear Projections")
 	, _sequencer(nullptr)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
@@ -95,7 +95,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
 	assert(success);
 
-	_defaultProjImage = path + "/textures/3.jpg";
+	_defaultProjImage = path + "/textures/defaultProj.png";
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(
@@ -122,14 +122,15 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addPropertySubOwner(_geometry);
 
 	addProperty(_imageTrigger);
-	_imageTrigger.onChange(std::bind(&RenderablePlanetProjection::imageProjectGPU, this));
+	_imageTrigger.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 	addProperty(_projectionTexturePath);
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
-	std::string sPath = "C:/Users/michal/JupSequenceCrosshair";
+	//std::string sPath = "C:/Users/michal/JupSequenceCrosshair";
+	std::string sPath = "F:/JupiterFullSequence/data1/20070114_003110";
 
 	_sequencer->loadSequence(sPath);
 }
@@ -221,7 +222,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
 
-	if (true){ // every something frame for now..
+	if (_capture){ // every something frame for now..
 		//counter = 0;
 		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 		// set blend eq
@@ -359,7 +360,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	_time = data.time;
 
 	_next    = _defaultProjImage;
-	//_capture = _sequencer->getImagePath(_time, _next);
+	_capture = _sequencer->getImagePath(_time, _next);
 	_projectionTexturePath = _next;
 
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, _mainFrame, _time, _stateMatrix);
