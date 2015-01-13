@@ -32,7 +32,7 @@ uniform vec2 radius;
 flat in uint vs_segments;
 
 in vec4 vs_position;
-in vec3 vs_boresight;
+uniform vec3 boresight;
 
 out vec4 color;
 
@@ -71,7 +71,7 @@ void main() {
   
   vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
   
-  vec3 v_b = normalize(vs_boresight);
+  vec3 v_b = normalize(boresight);
   
   //color = 500*vec4(dot(v_b, normal),0,0,1);
   // perspecitve division something with normals

@@ -42,6 +42,7 @@ struct ImageParams{
 	double startTime;
 	double stopTime;
 	std::string path;
+	bool projected;
 };
 std::vector<ImageParams> _timeStamps;
 
@@ -64,6 +65,7 @@ void ImageSequencer::createImage(double t1, double t2, std::string path){
 	image.startTime = t1;
 	image.stopTime  = t2;
 	image.path      = path;
+	image.projected = false;
 	
 	_timeStamps.push_back(image);
 	// sort
@@ -80,8 +82,8 @@ bool ImageSequencer::getImagePath(std::string _currentTime, std::string& path){
 	bool success = getImagePath(currentEt, path);
 	return success;
 }
-
-bool ImageSequencer::getImagePath(double _currentTime, std::string& path){
+#define OPEN_INTERVAL
+bool ImageSequencer::getImagePath(double& _currentTime, std::string& path){
 	auto cmp = [](const ImageParams &a, const ImageParams &b)->bool{
 		return a.startTime < b.startTime;
 	};
@@ -98,19 +100,22 @@ bool ImageSequencer::getImagePath(double _currentTime, std::string& path){
 		return end;
 	};
 
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _currentTime, 0, "" }, cmp);
-	//do this if check against [start, stop] intervals
-	/*
-	if (it == _timeStamps.end() || it->stopTime < _currentTime){
+	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _currentTime, 0, "", false }, cmp);
+	//check [start, stop] 
+#ifndef OPEN_INTERVAL
+	if (it == _timeStamps.end() || it->stopTime < _currentTime || it->projected){
 		return false;
 	}
-	*/
-	//do this if check against [start,) intervals
-	if (it == _timeStamps.end()){
+#else
+	//check [start,) 
+	if (it == _timeStamps.end() || it->projected){
 		return false;
 	}
+#endif
 
+	it->projected = true;
 	path = it->path;
+	_currentTime = it->startTime;
 	return true;
 }
 
@@ -118,7 +123,6 @@ bool ImageSequencer::loadSequence(const std::string dir){
 	ghoul::filesystem::Directory sequenceDir(dir, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	int count = 0;
-	std::cout.precision(15);
 
 	for (auto path : sequencePaths){
 		if (size_t position = path.find_last_of(".") + 1){
@@ -155,7 +159,6 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							path.replace(path.begin() + position, path.end(), ext);
 							std::vector<std::string>::const_iterator it = std::find(sequencePaths.begin(), sequencePaths.end(), path);
 							if ( it != sequencePaths.end()){
-							//	std::cout << "Creating image with time: " << timestamps[0] << "\ne_t: " << timestamps[1] << "\npath: " << path << std::endl;
 								createImage(timestamps[0], timestamps[1], path);
 							}
 						}
@@ -164,23 +167,6 @@ bool ImageSequencer::loadSequence(const std::string dir){
 			}
 		}
 	}
-	// testing _timeStamps
-	/*double currentEt = 0;
-	std::string currentTime = "2007-02-26T17:43:26.362";
-
-	openspace::SpiceManager::ref().getETfromDate(currentTime, currentEt);
-
-	std::cout << "\n Searching for  s_t: " << currentEt << std::endl;
-
-	std::string storedpath = "";
-	currentEt -= 1;
-
-	for (int i = 0; i < 10000; i++){
-		bool success = getImagePath(currentEt, storedpath);
-		currentEt += ((float)i)/10000.f;
-
-		if (success) std::cout << "FOUND AT : "<< currentEt << " PATH "<<  storedpath << std::endl;
-	}*/
 	return true;
 }
 

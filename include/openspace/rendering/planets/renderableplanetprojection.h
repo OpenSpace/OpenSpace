@@ -72,8 +72,8 @@ private:
 
 	ImageSequencer* _sequencer;
 
-    properties::StringProperty _colorTexturePath;
-	properties::StringProperty _projectionTexturePath;
+    properties::StringProperty  _colorTexturePath;
+	properties::StringProperty  _projectionTexturePath;
 	properties::TriggerProperty _imageTrigger;
 
     ghoul::opengl::ProgramObject* _programObject;
@@ -106,8 +106,9 @@ private:
 	double lightTime;
 
 	std::string _target;
-
-	std::string _oldPath  = "";
+	std::string _defaultProjImage;
+	std::string _next;
+	bool _capture;
 
 	// FBO stuff
 	GLuint _fboID;

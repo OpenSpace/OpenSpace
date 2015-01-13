@@ -28,19 +28,17 @@ uniform mat4 ModelTransform;
 uniform vec2 _scaling;
 
 layout(location = 3) in vec4 in_position;
-layout(location = 4) in vec3 boresight;
+uniform vec3 boresight;
 layout(location = 5) in int segments;
 uniform vec2 radius;
 
 out vec4 vs_position;
-out vec3 vs_boresight;
 flat out uint vs_segments;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
 	vs_position  = in_position;
-	vs_boresight = boresight;
 	vs_segments  = segments;
 	gl_Position  = vec4(in_position.xy, 0.0, 1.0);
 

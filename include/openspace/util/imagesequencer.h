@@ -49,7 +49,7 @@ public:
 public:
 
 	void createImage(double t1, double t2, std::string path = "dummypath");
-	bool getImagePath(double _currentTime, std::string& path);
+	bool getImagePath(double& _currentTime, std::string& path);
 	bool getImagePath(std::string _currentTime, std::string& path);
 
 };

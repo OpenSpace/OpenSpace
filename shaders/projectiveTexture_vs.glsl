@@ -36,20 +36,18 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-layout(location = 3) in vec3 boresight;
+uniform vec3 boresight;
 
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out float s;
 
-out vec3 vs_boresight;
 
 out vec4 ProjTexCoord;
 #include "PowerScaling/powerScaling_vs.hglsl"
 void main(){
 	// Radius = 0.71492 *10^8; 
-    vs_boresight = boresight;
 	// set variables
 	vs_st = in_st;
 	//vs_stp = in_position.xyz;

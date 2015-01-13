@@ -38,7 +38,7 @@ in vec4 vs_normal;
 in vec4 vs_position;
 
 in vec4 ProjTexCoord;
-in vec3 vs_boresight;
+uniform vec3 boresight;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -85,8 +85,9 @@ void main()
 			ProjTexCoord[0] < ProjTexCoord[2] || 
 			ProjTexCoord[1] < ProjTexCoord[2]){
 			diffuse = shaded;
-		}else if(dot(n,vs_boresight) < 0 ){// frontfacing
-			diffuse = projTexColor*0.5f + 0.5f*shaded;
+		}else if(dot(n,boresight) < 0 &&
+		         (projTexColor.w != 0)){// frontfacing
+			diffuse = projTexColor;//*0.5f + 0.5f*shaded;
 		}else{
 			diffuse = shaded;
 		}
