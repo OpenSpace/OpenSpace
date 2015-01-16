@@ -66,11 +66,10 @@ protected:
 	void loadProjectionTexture();
 	bool auxiliaryRendertarget();
 	glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
+	void attitudeParameters(double time);
 
 private:
 	void imageProjectGPU();
-
-	ImageSequencer* _sequencer;
 
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
@@ -84,7 +83,7 @@ private:
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
 	glm::vec2  _camScaling;
-	glm::vec3  _lookUp;
+	glm::vec3  _up;
 	glm::mat4  _transform;
 	glm::mat4  _projectorMatrix;
 
@@ -102,7 +101,7 @@ private:
 	glm::dmat3 _instrumentMatrix;
 	glm::vec3  _boresight;
 
-	double _time;
+	double _time[2];
 	double lightTime;
 
 	std::string _target;

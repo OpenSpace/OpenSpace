@@ -417,7 +417,9 @@ void RenderEngine::render()
 #define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
 
 			int i = 0;
+
 			PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+			PrintText(i++, "DateD: %f", Time::ref().currentTime());
 			PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 			PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 			PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());

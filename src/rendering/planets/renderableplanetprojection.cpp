@@ -62,7 +62,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _colorTexturePath("planetTexture", "RGB Texture")
 	, _projectionTexturePath("projectionTexture", "RGB Texture")
 	, _imageTrigger("clearProjections", "Clear Projections")
-	, _sequencer(nullptr)
+	//, _sequencer(nullptr)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
     , _texture(nullptr)
@@ -130,9 +130,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
 	//std::string sPath = "C:/Users/michal/JupSequenceCrosshair";
-	std::string sPath = "F:/JupiterFullSequence/data1/20070114_003110";
+	std::string sPath = "F:/JupiterFullSequence";
 
-	_sequencer->loadSequence(sPath);
+	openspace::ImageSequencer::ref().loadSequence(sPath);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -204,7 +204,7 @@ bool RenderablePlanetProjection::deinitialize(){
     _geometry->deinitialize();
     delete _geometry;
     _geometry = nullptr;
-    delete _texture;
+    delete _texture; 
     _texture = nullptr;
 	delete _textureProj;
 	_textureProj = nullptr;
@@ -221,8 +221,6 @@ void RenderablePlanetProjection::imageProjectGPU(){
 
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
-
-	if (_capture){ // every something frame for now..
 		//counter = 0;
 		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 		// set blend eq
@@ -240,10 +238,10 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
 		_fboProgramObject->setUniform("ModelTransform" , _transform);
 		_fboProgramObject->setUniform("_scaling"       , _camScaling);
-		_fboProgramObject->setUniform("boresight"    , _boresight);
+		_fboProgramObject->setUniform("boresight"      , _boresight);
 
 		//TODO - needs target switching.
-		if (_geometry->hasProperty("radius")){
+		if (_geometry->hasProperty("radius")){ 
 			boost::any r = _geometry->property("radius")->get();
 			if (glm::vec2* radius = boost::any_cast<glm::vec2>(&r)){
 				_fboProgramObject->setUniform("radius", radius[0]);
@@ -270,7 +268,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 		glViewport(m_viewport[0], m_viewport[1],
 			       m_viewport[2], m_viewport[3]);
-	}
+	
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
@@ -296,13 +294,12 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 	return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
 }
 
-#define SEQUENCING
-void RenderablePlanetProjection::render(const RenderData& data){
-	if (!_programObject) return;
-	if (!_textureProj) return;
+void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, _mainFrame, time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
+
 	_transform = glm::mat4(1);
-	
 	//90 deg rotation w.r.t spice req. 
 	glm::mat4 rot = glm::rotate(_transform, 90.f, glm::vec3(1, 0, 0));
 	for (int i = 0; i < 3; i++){
@@ -321,17 +318,31 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	if (!found) LERROR("Could not locate instrument");
 
 	psc position;
-	SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, _time, position, lightTime);
+	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
+	if (!found) LERROR("Could not locate target position");
 	position[3] += 3;
 	glm::vec3 cpos = position.vec3();
 
-	_projectorMatrix = computeProjectorMatrix(cpos, bs, data.camera.lookUpVector());
+	_projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
+}
+
+#define GPU_PROJ
+void RenderablePlanetProjection::render(const RenderData& data){
+	if (!_programObject) return;
+	if (!_textureProj) return;
 
 	_camScaling = data.camera.scaling();
+	_up = data.camera.lookUpVector();
 
-#ifdef SEQUENCING
-	imageProjectGPU();
+#ifdef GPU_PROJ
+	if (_capture){
+		attitudeParameters(_time[0]);
+		imageProjectGPU();
+	}
 #endif
+	attitudeParameters(_time[1]);
+
+
 	// Main renderpass
 	_programObject->activate();
     // setup the data to the shader
@@ -357,14 +368,30 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 void RenderablePlanetProjection::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	_time = data.time;
+	_time[0] = data.time;
+	_time[1] = _time[0];
+	_capture = false;
+	
+	bool _withinFOV;
+	std::string potential[5] = { "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
+	std::string p2[5] = { "JUPITER BARYCENTER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
 
-	_next    = _defaultProjImage;
-	_capture = _sequencer->getImagePath(_time, _next);
-	_projectionTexturePath = _next;
-
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, _mainFrame, _time, _stateMatrix);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, _time, _instrumentMatrix);
+	std::string _fovTarget = "";
+	for (int i = 0; i < 5; i++){
+		_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0]);
+		if (_withinFOV){
+			_fovTarget = p2[i];
+			break;
+		}
+	}
+	if (_projecteeID  == _fovTarget){
+		std::cout << _fovTarget << " " << _projecteeID << std::endl;
+		_next = _defaultProjImage;
+		_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
+		if (_next != _defaultProjImage)
+			std::cout << _next << std::endl;
+		_projectionTexturePath = _next;
+	}
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){
@@ -373,14 +400,12 @@ void RenderablePlanetProjection::loadProjectionTexture(){
 	if (_colorTexturePath.value() != "") {
 		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
-			//LDEBUG("Loaded texture from '" << absPath(_projectionTexturePath) << "'");
 			_textureProj->uploadTexture();
-
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 		}
 	}
+	//_sequencer->sequenceReset();
 }
 
 void RenderablePlanetProjection::loadTexture(){
@@ -389,12 +414,9 @@ void RenderablePlanetProjection::loadTexture(){
     if (_colorTexturePath.value() != "") {
 		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
-          //  LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
 }
-
 }  // namespace openspace

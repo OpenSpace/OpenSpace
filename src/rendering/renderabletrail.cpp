@@ -22,6 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <openspace/rendering/renderabletrail.h>
+#include <openspace/util/time.h>
 
 #include <sgct.h>
 #include <openspace/engine/openspaceengine.h>
@@ -196,7 +197,8 @@ bool RenderableTrail::initialize(){
 	completeSuccess &= (_texture != nullptr);
 
 	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
-	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
+	_startTrail = Time::ref().currentTime();
+	//SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
 	_dtEt = _startTrail;
 
 	fullYearSweep();

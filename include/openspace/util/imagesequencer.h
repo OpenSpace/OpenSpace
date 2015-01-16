@@ -36,22 +36,23 @@ namespace openspace {
 
 class ImageSequencer {
 public:
-    // initializers
-	ImageSequencer(const std::string dir);
-	~ImageSequencer();
-
+	static ImageSequencer& ref();
 	bool loadSequence(const std::string dir);
 
 	void testStartTimeMap();
 
-    bool initialize();
+	static void initialize();
+	static void deinitialize();
+	bool sequenceReset();
 
 public:
 
 	void createImage(double t1, double t2, std::string path = "dummypath");
 	bool getImagePath(double& _currentTime, std::string& path);
 	bool getImagePath(std::string _currentTime, std::string& path);
+	//double _previousTime; // not sure if i wanna use this yet.
 
+	static ImageSequencer* _sequencer;
 };
 
 } // namespace openspace

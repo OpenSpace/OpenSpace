@@ -38,6 +38,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/imagesequencer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -85,6 +86,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
+	ImageSequencer::initialize();
 	Time::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
@@ -497,7 +499,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler.update(dt);
         _interactionHandler.lockControls();
 
-		//Time::ref().advanceTime(dt);
+		Time::ref().advanceTime(dt);
     }
 }
 

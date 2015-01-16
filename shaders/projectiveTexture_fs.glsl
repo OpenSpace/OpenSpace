@@ -64,7 +64,7 @@ void main()
 	
 	float shine = 0.0001;
 
-	vec4 specular = vec4(0.5);
+	vec4 specular = vec4(0.1);
 	vec4 ambient = vec4(0.f,0.f,0.f,1);
 	/* Specular
 	if(intensity > 0.f){

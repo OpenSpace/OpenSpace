@@ -73,14 +73,11 @@ void main() {
   
   vec3 v_b = normalize(boresight);
   
-  //color = 500*vec4(dot(v_b, normal),0,0,1);
-  // perspecitve division something with normals
   if((inRange(projected.x, 0, 1) &&  
       inRange(projected.y, 0, 1)) &&
 	  dot(v_b, normal) < 0 ) {
 		color = texture(texture1, projected.xy);
   }else{
-    //color = 500*vec4(dot(v_b, normal),0,0,1);
  	 color = vec4(1,1,1,0);
   }
   // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending

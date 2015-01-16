@@ -38,6 +38,8 @@ const std::string _loggerCat = "ImageSequencer";
 
 namespace openspace {
 
+ImageSequencer* ImageSequencer::_sequencer = nullptr;
+
 struct ImageParams{
 	double startTime;
 	double stopTime;
@@ -46,17 +48,17 @@ struct ImageParams{
 };
 std::vector<ImageParams> _timeStamps;
 
-
-ImageSequencer::ImageSequencer(const std::string root){
-   
+ImageSequencer& ImageSequencer::ref() {
+	assert(_sequencer != nullptr);
+	return *_sequencer;
 }
-
-ImageSequencer::~ImageSequencer(){
-
+void ImageSequencer::initialize(){
+	assert(_sequencer == nullptr);
+	_sequencer = new ImageSequencer;
 }
-
-bool ImageSequencer::initialize(){
-    return true;
+void ImageSequencer::deinitialize(){
+	delete _sequencer;
+	_sequencer = nullptr;
 }
 
 void ImageSequencer::createImage(double t1, double t2, std::string path){
@@ -82,7 +84,7 @@ bool ImageSequencer::getImagePath(std::string _currentTime, std::string& path){
 	bool success = getImagePath(currentEt, path);
 	return success;
 }
-#define OPEN_INTERVAL
+#define OPEN_INTERVAL // assign boolean value...
 bool ImageSequencer::getImagePath(double& _currentTime, std::string& path){
 	auto cmp = [](const ImageParams &a, const ImageParams &b)->bool{
 		return a.startTime < b.startTime;
@@ -112,10 +114,16 @@ bool ImageSequencer::getImagePath(double& _currentTime, std::string& path){
 		return false;
 	}
 #endif
-
 	it->projected = true;
 	path = it->path;
 	_currentTime = it->startTime;
+	return true;
+}
+
+bool ImageSequencer::sequenceReset(){
+	for (auto image : _timeStamps){
+		image.projected = false;
+	}
 	return true;
 }
 
@@ -148,8 +156,8 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							if (pos != std::string::npos){
 								std::string time = line.substr(line.find("=") + 2);
 								time.erase(std::remove(time.begin(), time.end(), ' '), time.end());
-								if (i == 0) std::cout << "Creating image with startTime: " << time;
-								if (i == 1) std::cout << " ---> " << time << std::endl;
+								//if (i == 0) std::cout << "Creating image with startTime: " << time;
+								//if (i == 1) std::cout << " ---> " << time << std::endl;
 								openspace::SpiceManager::ref().getETfromDate(time, timestamps[i]);
 							}
 						}
