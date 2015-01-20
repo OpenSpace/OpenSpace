@@ -95,16 +95,31 @@ bool RenderableFieldlines::isReady() const {
 }
 
 bool RenderableFieldlines::initialize() {
-	int prevEnd = 0;
-	std::vector<LinePoint> vertexData;
-	std::vector<std::vector<LinePoint> > fieldlinesData;
+	if (_vectorFieldInformation.empty() || _seedPointInformation.empty())
+		return false;
 
-	// Read data from fieldlines dictionary
-	fieldlinesData = getFieldlinesData();
+	_program = ghoul::opengl::ProgramObject::Build(
+		"Fieldline",
+		"${SHADERS}/modules/fieldlines/fieldline_vs.glsl",
+		"${SHADERS}/modules/fieldlines/fieldline_fs.glsl",
+		"${SHADERS}/modules/fieldlines/fieldline_gs.glsl"
+	);
+	if (!_program)
+		return false;
+
+	_program->setProgramObjectCallback(
+		[&](ghoul::opengl::ProgramObject*) {
+			this->_programIsDirty = true;
+		}
+	);
+
+	std::vector<std::vector<LinePoint>> fieldlinesData = getFieldlinesData();
 
 	if (fieldlinesData.empty())
 		return false;
 
+	int prevEnd = 0;
+	std::vector<LinePoint> vertexData;
 	// Arrange data for glMultiDrawArrays
 	for (int j = 0; j < fieldlinesData.size(); ++j) {
 		_lineStart.push_back(prevEnd);
@@ -131,23 +146,8 @@ bool RenderableFieldlines::initialize() {
 	glEnableVertexAttribArray(colorLocation);
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
-	glBindVertexArray(0); //unbind array
-
-	_program = ghoul::opengl::ProgramObject::Build(
-		"Fieldline",
-		"${SHADERS}/modules/fieldlines/fieldline_vs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_fs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_gs.glsl"
-	);
-	if (!_program)
-		return false;
-
-	_program->setProgramObjectCallback(
-		[&](ghoul::opengl::ProgramObject*) {
-			this->_programIsDirty = true;
-		}
-	);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	return true;
 }
@@ -161,16 +161,19 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const RenderData& data) {
-	
 	_program->activate();
 	_program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_program->setUniform("modelTransform", glm::mat4(1.0));
 	_program->setUniform("cameraViewDir", data.camera.viewDirection());
 	setPscUniforms(_program, &data.camera, data.position);
 
-	//	------ DRAW FIELDLINES -----------------
 	glBindVertexArray(_fieldlineVAO);
-	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], static_cast<GLsizei>(_lineStart.size()));
+	glMultiDrawArrays(
+		GL_LINE_STRIP_ADJACENCY,
+		&_lineStart[0],
+		&_lineCount[0],
+		static_cast<GLsizei>(_lineStart.size())
+	);
 	glBindVertexArray(0);
 
 	_program->deactivate();
