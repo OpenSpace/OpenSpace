@@ -32,6 +32,8 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/assert.h>
 
+#include <fstream>
+
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
 
