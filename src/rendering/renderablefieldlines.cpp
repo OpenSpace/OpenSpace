@@ -28,6 +28,7 @@
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/assert.h>
 
@@ -99,7 +100,7 @@ bool RenderableFieldlines::initialize() {
 		return false;
 	}
 
-	ghoul_assert(_hintsDictionaries.size() != _filenames.size(),
+	ghoul_assert(_hintsDictionaries.size() == _filenames.size(),
 			"The dictionary sizes should match, "
 			<< _hintsDictionaries.size() << " != " << _filenames.size());
 
@@ -218,15 +219,42 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 		}
 
 		//	------ SEEDPOINTS ---------------
-		ghoul::Dictionary seedpointsDictionary;
 		_seedPoints.clear();
-		if (hintsDictionary.hasKey("Seedpoints") && hintsDictionary.getValue("Seedpoints", seedpointsDictionary)) {
-			glm::vec3 seedPos;
-			for (const std::string& index : seedpointsDictionary.keys()) {
-				hintsDictionary.getValue("Seedpoints."+index, seedPos);
-				_seedPoints.push_back(seedPos);
+		if (hintsDictionary.hasKey("Seedpoints")) {
+			if (hintsDictionary.hasKeyAndValue<ghoul::Dictionary>("Seedpoints")) {
+				LINFO("Loading provided list of seed points");
+				ghoul::Dictionary seedpointsDictionary;
+				hintsDictionary.getValue("Seedpoints", seedpointsDictionary);
+				glm::vec3 seedPos;
+				for (const std::string& index : seedpointsDictionary.keys()) {
+					hintsDictionary.getValue("Seedpoints." + index, seedPos);
+					_seedPoints.push_back(seedPos);
+				}
+			}
+			else if (hintsDictionary.hasKeyAndValue<std::string>("Seedpoints")) {
+				std::string seedPointsFile;
+				hintsDictionary.getValue("Seedpoints", seedPointsFile);
+				seedPointsFile = absPath(seedPointsFile);
+				LINFO("Reading seed points from file '" << seedPointsFile << "'");
+
+				std::ifstream seedFile(seedPointsFile);
+				if (!seedFile.good())
+					LERROR("Could not open seed points file '" << seedPointsFile << "'");
+				else {
+					std::string line;
+					glm::vec3 point;
+					while (std::getline(seedFile, line)) {
+						std::stringstream s(line);
+						s >> point.x;
+						s >> point.y;
+						s >> point.z;
+						_seedPoints.push_back(std::move(point));
+					}
+				}
 			}
 		}
+		else
+			LERROR("Fieldlines did not provide seed points");
 
 		//	------ CLASSIFICATION & COLOR -----------
 		hintsDictionary.getValue("Color", fieldlineColor);
