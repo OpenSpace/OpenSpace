@@ -37,90 +37,80 @@
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
 
-	const std::string keyFieldlines = "Fieldlines";
-	const std::string keyFilename = "File";
-	const std::string keyHints = "Hints";
+	const std::string keyVectorField = "VectorField";
+	const std::string keyVectorFieldType = "Type";
+	const std::string keyVectorFieldFile = "File";
+
+	const std::string keySeedPoints = "SeedPoints";
+	const std::string keySeedPointsStepSize = "Stepsize";
+	const std::string keySeedPointsClassification = "Classification";
+	const std::string keySeedPointsSource = "Seedpoints";
+
+	const int SeedPointSourceFile = 0;
 }
 
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
+	, _seedPointSource("source", "Seedpoint Source")
+	, _seedPointSourceFile("sourceFile", "Seedpoint File")
 	, _fieldlineVAO(0)
 	, _vertexPositionBuffer(0)
-	, _shader(nullptr)
+	, _program(nullptr)
+	, _programIsDirty(false)
 {
+	ghoul_assert(
+		dictionary.hasKeyAndValue<std::string>(constants::scenegraphnode::keyName),
+		"Renderable does not have a name"
+	);
+
 	std::string name;
 	dictionary.getValue(constants::scenegraphnode::keyName, name);
 
-	// Read fieldlines module into dictionary
-	ghoul::Dictionary fieldlines;
-	bool success = dictionary.getValue(keyFieldlines, fieldlines);
+	bool success = dictionary.getValue(keyVectorField, _vectorFieldInformation);
 	if (!success) {
-		LERROR("RenderableFieldlines '" << name << "' did not contain a '" <<
-			keyFieldlines << "' key");
-		return;
-	}
-	for (const std::string& key : fieldlines.keys()) {
-		ghoul::Dictionary fieldline;
-		success = fieldlines.getValue(key, fieldline);
-
-		if (!success) {
-			LERROR("Key '" << key << "' in '" << keyFieldlines <<
-				"' of the RenderableFieldlines '" << name <<
-				"' does not have a table as value");
-			continue;
-		}
-
-		std::string fileName;
-		fieldline.getValue(keyFilename, fileName);
-		fileName = findPath(fileName);
-		if (fileName.empty())
-			LERROR("File not found!");
-		else {
-			ghoul::Dictionary hintsDictionary;
-			fieldline.getValue(keyHints, hintsDictionary);
-
-			_filenames.push_back(fileName);
-			_hintsDictionaries.push_back(hintsDictionary);
-		}
+		LERROR("RenderableFieldlines '" << name << "' does not contain a key for '" <<
+			keyVectorField << "'");
 	}
 
-	setBoundingSphere(PowerScaledScalar::CreatePSS(250.f*6371000.f)); // FIXME a non-magic number perhaps
-}
+	success = dictionary.getValue(keySeedPoints, _seedPointInformation);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' does not contain a key for '" <<
+			keySeedPoints << "'");
+	}
 
-RenderableFieldlines::~RenderableFieldlines() {
+	// @TODO a non-magic number perhaps ---abock
+	setBoundingSphere(PowerScaledScalar::CreatePSS(250.f*6371000.f));
+
+	_seedPointSource.addOption(SeedPointSourceFile, "File");
+	addProperty(_seedPointSource);
+
+	//_seedPointSourceFile = 
+	addProperty(_seedPointSourceFile);
 }
 
 bool RenderableFieldlines::isReady() const {
-	return _shader != nullptr;
+	return _program != nullptr;
 }
 
 bool RenderableFieldlines::initialize() {
-	if(_filenames.empty()) {
-		LWARNING("No proper filenames provided, cannot initialize!");
-		return false;
-	}
-
-	ghoul_assert(_hintsDictionaries.size() == _filenames.size(),
-			"The dictionary sizes should match, "
-			<< _hintsDictionaries.size() << " != " << _filenames.size());
-
 	int prevEnd = 0;
 	std::vector<LinePoint> vertexData;
 	std::vector<std::vector<LinePoint> > fieldlinesData;
 
 	// Read data from fieldlines dictionary
-	for (int i = 0; i < _filenames.size(); ++i) {
-		fieldlinesData = getFieldlinesData(_filenames[i], _hintsDictionaries[i]);
+	fieldlinesData = getFieldlinesData();
 
-		// Arrange data for glMultiDrawArrays
-		for (int j = 0; j < fieldlinesData.size(); ++j) {
-			_lineStart.push_back(prevEnd);
-			_lineCount.push_back(static_cast<int>(fieldlinesData[j].size()));
-			prevEnd = prevEnd + static_cast<int>(fieldlinesData[j].size());
-			vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
-		}
+	if (fieldlinesData.empty())
+		return false;
+
+	// Arrange data for glMultiDrawArrays
+	for (int j = 0; j < fieldlinesData.size(); ++j) {
+		_lineStart.push_back(prevEnd);
+		_lineCount.push_back(static_cast<int>(fieldlinesData[j].size()));
+		prevEnd = prevEnd + static_cast<int>(fieldlinesData[j].size());
+		vertexData.insert( vertexData.end(), fieldlinesData[j].begin(), fieldlinesData[j].end());
 	}
 	LDEBUG("Number of vertices : " << vertexData.size());
 
@@ -144,9 +134,22 @@ bool RenderableFieldlines::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind buffer
 	glBindVertexArray(0); //unbind array
 
-	OsEng.ref().configurationManager().getValue("FieldlineProgram", _shader);
+	_program = ghoul::opengl::ProgramObject::Build(
+		"Fieldline",
+		"${SHADERS}/modules/fieldlines/fieldline_vs.glsl",
+		"${SHADERS}/modules/fieldlines/fieldline_fs.glsl",
+		"${SHADERS}/modules/fieldlines/fieldline_gs.glsl"
+	);
+	if (!_program)
+		return false;
 
-	return isReady();
+	_program->setProgramObjectCallback(
+		[&](ghoul::opengl::ProgramObject*) {
+			this->_programIsDirty = true;
+		}
+	);
+
+	return true;
 }
 
 bool RenderableFieldlines::deinitialize() {
@@ -159,21 +162,33 @@ bool RenderableFieldlines::deinitialize() {
 
 void RenderableFieldlines::render(const RenderData& data) {
 	
-	_shader->activate();
-	_shader->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
-	_shader->setUniform("modelTransform", glm::mat4(1.0));
-	_shader->setUniform("cameraViewDir", data.camera.viewDirection());
-	setPscUniforms(_shader, &data.camera, data.position);
+	_program->activate();
+	_program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
+	_program->setUniform("modelTransform", glm::mat4(1.0));
+	_program->setUniform("cameraViewDir", data.camera.viewDirection());
+	setPscUniforms(_program, &data.camera, data.position);
 
 	//	------ DRAW FIELDLINES -----------------
 	glBindVertexArray(_fieldlineVAO);
 	glMultiDrawArrays(GL_LINE_STRIP_ADJACENCY, &_lineStart[0], &_lineCount[0], static_cast<GLsizei>(_lineStart.size()));
 	glBindVertexArray(0);
 
-	_shader->deactivate();
+	_program->deactivate();
 }
 
-std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary) {
+void RenderableFieldlines::update(const UpdateData&) {
+	if (_programIsDirty) {
+		_program->rebuildFromFile();
+		_programIsDirty = true;
+	}
+}
+
+std::vector<std::vector<LinePoint>> RenderableFieldlines::getFieldlinesData() {
+	ghoul::Dictionary hintsDictionary = _vectorFieldInformation;
+	std::string filename;
+	_vectorFieldInformation.getValue("File", filename);
+	filename = absPath(filename);
+	
 	std::string modelString, xVariable, yVariable, zVariable;
 	KameleonWrapper::Model model;
 	std::vector<std::vector<LinePoint> > fieldlinesData;
@@ -216,26 +231,26 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 		}
 
 		//	------ STEPSIZE -----------------
-		if (!hintsDictionary.hasKey("Stepsize") || !hintsDictionary.getValue("Stepsize", stepSize)) {
+		if (!_seedPointInformation.hasKey("Stepsize") || !_seedPointInformation.getValue("Stepsize", stepSize)) {
 			LDEBUG("No stepsize set for fieldlines. Setting to default value (" << stepSize << ")");
 		}
 
 		//	------ SEEDPOINTS ---------------
 		_seedPoints.clear();
-		if (hintsDictionary.hasKey("Seedpoints")) {
-			if (hintsDictionary.hasKeyAndValue<ghoul::Dictionary>("Seedpoints")) {
+		if (_seedPointInformation.hasKey("Seedpoints")) {
+			if (_seedPointInformation.hasKeyAndValue<ghoul::Dictionary>("Seedpoints")) {
 				LINFO("Loading provided list of seed points");
 				ghoul::Dictionary seedpointsDictionary;
-				hintsDictionary.getValue("Seedpoints", seedpointsDictionary);
+				_seedPointInformation.getValue("Seedpoints", seedpointsDictionary);
 				glm::vec3 seedPos;
 				for (const std::string& index : seedpointsDictionary.keys()) {
-					hintsDictionary.getValue("Seedpoints." + index, seedPos);
+					_seedPointInformation.getValue("Seedpoints." + index, seedPos);
 					_seedPoints.push_back(seedPos);
 				}
 			}
-			else if (hintsDictionary.hasKeyAndValue<std::string>("Seedpoints")) {
+			else if (_seedPointInformation.hasKeyAndValue<std::string>("Seedpoints")) {
 				std::string seedPointsFile;
-				hintsDictionary.getValue("Seedpoints", seedPointsFile);
+				_seedPointInformation.getValue("Seedpoints", seedPointsFile);
 				seedPointsFile = absPath(seedPointsFile);
 				LINFO("Reading seed points from file '" << seedPointsFile << "'");
 
@@ -259,8 +274,8 @@ std::vector<std::vector<LinePoint> > RenderableFieldlines::getFieldlinesData(std
 			LERROR("Fieldlines did not provide seed points");
 
 		//	------ CLASSIFICATION & COLOR -----------
-		hintsDictionary.getValue("Color", fieldlineColor);
-		hintsDictionary.getValue("Classification", classification);
+		_seedPointInformation.getValue("Color", fieldlineColor);
+		_seedPointInformation.getValue("Classification", classification);
 	} else {
         // model unitialized!
         assert(false);
