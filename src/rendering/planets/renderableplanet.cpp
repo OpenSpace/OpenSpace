@@ -87,7 +87,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 }
 
 RenderablePlanet::~RenderablePlanet() {
-    deinitialize();
 }
 
 bool RenderablePlanet::initialize() {
@@ -134,7 +133,7 @@ void RenderablePlanet::render(const RenderData& data)
 		
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			transform[i][j] = _stateMatrix[i][j];
+			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
 	transform = transform* rot;

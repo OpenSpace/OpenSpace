@@ -31,7 +31,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/time.h>
 #include <openspace/abuffer/abuffer.h>
-#include <openspace/engine/gui.h>
+#include <openspace/gui/gui.h>
 
 #include "ghoul/logging/logmanager.h"
 #include "ghoul/opengl/programobject.h"
@@ -209,16 +209,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
-	// Fieldline program
-	tmpProgram = ProgramObject::Build("Fieldline",
-		"${SHADERS}/fieldline_vs.glsl",
-		"${SHADERS}/fieldline_fs.glsl",
-		"${SHADERS}/fieldline_gs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("FieldlineProgram", tmpProgram);
-
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
     LINFO("Time to load scene graph shaders: " << elapsed << " seconds");
@@ -290,8 +280,11 @@ void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePa
 
 void SceneGraph::clearSceneGraph() {
 	// deallocate the scene graph. Recursive deallocation will occur
-    delete _root;
-    _root = nullptr;
+	if (_root) {
+		_root->deinitialize();
+		delete _root;
+		_root = nullptr;
+	}
 
     _nodes.erase(_nodes.begin(), _nodes.end());
     _allNodes.erase(_allNodes.begin(), _allNodes.end());
@@ -437,6 +430,13 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
 	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 	c->setRotation(la);
+
+	glm::vec3 viewOffset;
+	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)
+		&& cameraDictionary.getValue(constants::scenegraph::keyViewOffset, viewOffset)) {
+	    glm::quat rot = glm::quat(viewOffset);
+	    c->rotate(rot);
+	}
 
 
 	for (SceneGraphNode* node : _nodes) {

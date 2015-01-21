@@ -37,10 +37,7 @@ const std::string _loggerCat = "PowerScaledSphere";
 namespace openspace {
 
 PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segments)
-    : _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _isize(6 * segments * segments)
+    :  _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
@@ -53,7 +50,6 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     const float r = static_cast<float>(radius[0]);
 
 	
-
     for (int i = 0; i <= segments; i++) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int j = 0; j <= segments; j++) {
@@ -135,68 +131,32 @@ PowerScaledSphere::~PowerScaledSphere()
 	if (_iarray)
 	    delete[] _iarray;
 
-	_varray = 0;
-	_iarray = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    glDeleteBuffers(1, &_iBufferID);
-    glDeleteVertexArrays(1, &_vaoID);
+	_vbo.deinitialize();
 }
 
 bool PowerScaledSphere::initialize()
 {
-    // Initialize and upload to graphics card
-    GLuint errorID;
-    if (_vaoID == 0)
-        glGenVertexArrays(1, &_vaoID);
 
-    if (_vBufferID == 0) {
-        glGenBuffers(1, &_vBufferID);
+	std::vector<Vertex> varray(_vsize);
+	std::vector<int> iarray(_isize);
+	for (size_t i = 0; i < _vsize; ++i) {
+		varray.at(i) = _varray[i];
+	}
+	for (size_t i = 0; i < _isize; ++i) {
+		iarray.at(i) = _iarray[i];
+	}
 
-        if (_vBufferID == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
+	_vbo.initialize(varray, iarray);
+	_vbo.vertexAttribPointer(0, 4, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, location));
+	_vbo.vertexAttribPointer(1, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, tex));
+	_vbo.vertexAttribPointer(2, 3, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, normal));
 
-    if (_iBufferID == 0) {
-        glGenBuffers(1, &_iBufferID);
-
-        if (_iBufferID == 0) {
-            LERROR("Could not create index buffer");
-            return false;
-        }
-    }
-
-    // First VAO setup
-    glBindVertexArray(_vaoID);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
     return true;
 }
 
 void PowerScaledSphere::render()
 {
-    glBindVertexArray(_vaoID);  // select first VAO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+	_vbo.render();
 }
 
 }  // namespace openspace

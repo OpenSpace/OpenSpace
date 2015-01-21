@@ -32,13 +32,17 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/highresclock.h>
 
+namespace {
+	const std::string _loggerCat = "KeyboardController";
+}
+
 namespace openspace {
 namespace interaction {
 
 void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier modifier) {
 	// TODO package in script
-	const double speed = 2.75;
-	const double dt = _handler->deltaTime();
+	const float speed = 2.75;
+	const float dt = static_cast<float>( _handler->deltaTime());
 	if(action == KeyAction::Press|| action == KeyAction::Repeat) {
 		if (key == Key::S) {
 		    glm::vec3 euler(speed * dt, 0.0, 0.0);
@@ -92,7 +96,7 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 		    _handler->distanceDelta(dist);
 		}
 		if (key == Key::T) {
-			PowerScaledScalar dist(-speed * pow(10, 11) * dt, 0.0);
+			PowerScaledScalar dist(-speed * pow(10.0f, 11.0f) * dt, 0.0f);
 			_handler->distanceDelta(dist);
 		}
 		//if (key == Keys::G) {
@@ -101,11 +105,11 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 		//	distanceDelta(dist);
 		//}
 		if (key == Key::Y) {
-			PowerScaledScalar dist(-speed * 100.0 * dt, 6.0);
+			PowerScaledScalar dist(-speed * 100.0f * dt, 6.0f);
 			_handler->distanceDelta(dist);
 		}
 		if (key == Key::H) {
-			PowerScaledScalar dist(speed * 100.0 * dt, 6.0);
+			PowerScaledScalar dist(speed * 100.0f * dt, 6.0f);
 			_handler->distanceDelta(dist);
 		}
 	
@@ -149,8 +153,6 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 }
 
 void KeyboardControllerLua::keyPressed(KeyAction action, Key key, KeyModifier modifier) {
-	std::string _loggerCat = "KeyboardControllerLua";
-
 	lua_State* s = luaL_newstate();
 	luaL_openlibs(s);
 	

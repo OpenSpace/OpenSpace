@@ -30,6 +30,8 @@ namespace {
 
 namespace openspace {
 namespace properties {
+	
+const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName)
 	: IntProperty(std::move(identifier), std::move(guiName))
@@ -71,6 +73,21 @@ void OptionProperty::setValue(int value) {
 
 	// Otherwise, log an error
 	LERROR("Could not find an option for value '" << value << "' in OptionProperty");
+}
+
+std::string OptionProperty::generateAdditionalDescription() const {
+	// @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
+	std::string result;
+	result += OptionsKey + " = {";
+	for (size_t i = 0; i < _options.size(); ++i) {
+		const Option& o = _options[i];
+		result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+		if (i != _options.size() - 1)
+			result += ",";
+	}
+
+	result += "}";
+	return result;
 }
 
 } // namespace properties

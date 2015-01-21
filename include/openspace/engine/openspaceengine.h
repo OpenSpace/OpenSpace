@@ -29,7 +29,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/configurationmanager.h>
-#include <openspace/engine/gui.h>
+#include <openspace/gui/gui.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 
 namespace openspace {

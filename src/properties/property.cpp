@@ -52,7 +52,8 @@ const std::string Property::TypeKey = "Type";
 const std::string Property::MetaDataKey = "MetaData";
 
 Property::Property(std::string identifier, std::string guiName)
-    : _identifier(std::move(identifier))
+	: _owner(nullptr)
+    , _identifier(std::move(identifier))
 {
 	if (_identifier.empty())
 		LWARNING("Property identifier is empty");

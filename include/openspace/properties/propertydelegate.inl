@@ -56,6 +56,13 @@ U PropertyDelegate<T>::defaultMaximumValue() {
 
 template <typename T>
 template <typename U>
+U PropertyDelegate<T>::defaultSteppingValue() {
+	static_assert(sizeof(T) == 0,
+		"Unimplemented PropertyDelegate::defaultSteppingValue specialization");
+}
+
+template <typename T>
+template <typename U>
 U PropertyDelegate<T>::fromLuaValue(lua_State* state, bool& success) {
 	static_assert(sizeof(T) == 0,
 		"Unimplemented PropertyDelegate::fromLuaValue specialization");

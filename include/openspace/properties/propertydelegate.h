@@ -93,6 +93,19 @@ public:
     static U defaultMaximumValue();
 
 	/**
+	 * The method returns the default stepping value for the class <code>T</code> used in
+	 * GUI elements. The default implementation will lead to a compile-time error if the
+	 * class method is not specialized. This method is not used in TemplateProperty, but
+	 * only NumericalProperty, so the TemplateProperty does not require this method to be
+	 * specialized.
+	 * \return The default stepping that the class <code>T</code> should use
+	 * \tparam U The type by which the class T is specialized. If
+	 * <code>T = NumericalProperty<int></code>, then <code>U = int</code>
+	 */
+	template <typename U>
+	static U defaultSteppingValue();
+
+	/**
 	 * This method converts the top value from the Lua stack into a value of type
 	 * <code>U</code> and reports the <code>success</code> back to the caller. The default
 	 * implementation will lead to a compile-time error if the class method is not

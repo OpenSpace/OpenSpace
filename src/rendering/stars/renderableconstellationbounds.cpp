@@ -88,7 +88,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 RenderableConstellationBounds::~RenderableConstellationBounds() {
-	deinitialize();
 }
 
 bool RenderableConstellationBounds::initialize() {
@@ -327,7 +326,6 @@ void RenderableConstellationBounds::fillSelectionProperty() {
 	for (int i = 0 ; i < _constellationBounds.size(); ++i) {
 		const ConstellationBound& bound = _constellationBounds[i];
 		_constellationSelection.addOption( { i, bound.constellationFullName } );
-
 	}
 }
 

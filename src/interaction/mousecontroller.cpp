@@ -43,10 +43,10 @@ glm::vec3 MouseController::mapToTrackball(glm::vec2 mousePos) {
 	if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS / 2.0) {
 		//Spherical Region
 		out.z = RADIUS*RADIUS - (out.x*out.x + out.y*out.y);
-		out.z = out.z > 0.0 ? sqrtf(out.z) : 0.0;
+		out.z = out.z > 0.0f ? sqrtf(out.z) : 0.0f;
 	}
 	else { //Hyperbolic Region - for smooth z values
-		out.z = (RADIUS*RADIUS) / (2.0*sqrt(out.x*out.x + out.y*out.y));
+		out.z = (RADIUS*RADIUS) / (2.0f*sqrt(out.x*out.x + out.y*out.y));
 	}
 
 	return glm::normalize(out);
@@ -70,8 +70,8 @@ glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
 
 void MouseController::trackballRotate(int x, int y) {
 	// Normalize mouse coordinates to [0,1]
-	float width = sgct::Engine::instance()->getActiveXResolution();
-	float height = sgct::Engine::instance()->getActiveYResolution();
+	float width = static_cast<float>(sgct::Engine::instance()->getActiveXResolution());
+	float height = static_cast<float>(sgct::Engine::instance()->getActiveYResolution());
 	glm::vec2 mousePos = glm::vec2((float)x / width, (float)y / height);
 
 	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
@@ -89,7 +89,7 @@ void MouseController::trackballRotate(int x, int y) {
 	if (curTrackballPos != _lastTrackballPos) {
 		// calculate rotation angle (in radians)
 		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-		rotationAngle *= _handler->deltaTime() * 100.0f;
+		rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
 
 		// Map trackballpos to camera
 		//		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
@@ -125,18 +125,18 @@ void TrackballMouseController::button(MouseAction action, MouseButton button) {
 
 void TrackballMouseController::move(float x, float y) {
 	if (_leftMouseButtonDown)
-			trackballRotate(x, y);
+		trackballRotate(static_cast<int>(x), static_cast<int>(y));
 }
 
 void TrackballMouseController::scrollWheel(int pos) {
-	const double speed = 4.75;
-	const double dt = _handler->deltaTime();
+	const float speed = 4.75f;
+	const float dt = static_cast<float>(_handler->deltaTime());
 	if (pos < 0) {
-		PowerScaledScalar dist(speed * dt, 0.0);
+		PowerScaledScalar dist(speed * dt, 0.0f);
 		_handler->distanceDelta(dist);
 	}
 	else if (pos > 0) {
-		PowerScaledScalar dist(-speed * dt, 0.0);
+		PowerScaledScalar dist(-speed * dt, 0.0f);
 		_handler->distanceDelta(dist);
 	}
 }

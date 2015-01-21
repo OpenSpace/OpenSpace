@@ -53,6 +53,21 @@ KameleonWrapper::KameleonWrapper()
 	, _model(nullptr)
 	, _type(Model::Unknown)
 	, _interpolator(nullptr)
+	, _xMin(0.f)
+	, _xMax(0.f)
+	, _yMin(0.f)
+	, _yMax(0.f)
+	, _zMin(0.f)
+	, _zMax(0.f)
+	, _xValidMin(0.f)
+	, _xValidMax(0.f)
+	, _yValidMin(0.f)
+	, _yValidMax(0.f)
+	, _zValidMin(0.f)
+	, _zValidMax(0.f)
+	, _xCoordVar("")
+	, _yCoordVar("")
+	, _zCoordVar("")
 	, _gridType(GridType::Unknown)
 {}
 
@@ -61,6 +76,21 @@ KameleonWrapper::KameleonWrapper(const std::string& filename)
 	, _model(nullptr)
     , _type(Model::Unknown)
     , _interpolator(nullptr)
+	, _xMin(0.f)
+	, _xMax(0.f)
+	, _yMin(0.f)
+	, _yMax(0.f)
+	, _zMin(0.f)
+	, _zMax(0.f)
+	, _xValidMin(0.f)
+	, _xValidMax(0.f)
+	, _yValidMin(0.f)
+	, _yValidMax(0.f)
+	, _zValidMin(0.f)
+	, _zValidMax(0.f)
+	, _xCoordVar("")
+	, _yCoordVar("")
+	, _zCoordVar("")
     , _gridType(GridType::Unknown)
 {
 	open(filename);
@@ -152,7 +182,7 @@ float* KameleonWrapper::getUniformSampledValues(
 	assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
     LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
-	int size = outDimensions.x*outDimensions.y*outDimensions.z;
+	unsigned int size = static_cast<unsigned int>(outDimensions.x*outDimensions.y*outDimensions.z);
 	float* data = new float[size];
 	double* doubleData = new double[size];
 
@@ -168,7 +198,7 @@ float* KameleonWrapper::getUniformSampledValues(
 
     // HISTOGRAM
     const int bins = 200;
-    const float truncLim = 0.9;
+    const float truncLim = 0.9f;
     std::vector<int> histogram (bins,0);
     auto mapToHistogram = [varMin, varMax, bins](double val) {
     	double zeroToOne = (val-varMin)/(varMax-varMin);
@@ -178,14 +208,14 @@ float* KameleonWrapper::getUniformSampledValues(
 		return glm::clamp(izerotoone, 0, bins-1);
     };
     
-	ProgressBar pb(outDimensions.x);
+	ProgressBar pb(static_cast<int>(outDimensions.x));
     for (int x = 0; x < outDimensions.x; ++x) {
 		pb.print(x);
         
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
                 
-                int index = x + y*outDimensions.x + z*outDimensions.x*outDimensions.y;
+				unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x + z*outDimensions.x*outDimensions.y);
                 
                 if (_gridType == GridType::Spherical) {
                     // Put r in the [0..sqrt(3)] range
@@ -223,7 +253,11 @@ float* KameleonWrapper::getUniformSampledValues(
                         // Convert from [0, 2pi] rad to [0, 360] degrees
                         phiPh = phiPh*180.f/M_PI;
                         // Sample
-                        value = _interpolator->interpolate(var, rPh, thetaPh, phiPh);
+                        value = _interpolator->interpolate(
+							var, 
+							static_cast<float>(rPh), 
+							static_cast<float>(thetaPh), 
+							static_cast<float>(phiPh));
                         // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
                     }
                     
@@ -246,7 +280,11 @@ float* KameleonWrapper::getUniformSampledValues(
                     
                     // get interpolated data value for (xPos, yPos, zPos)
                     // swap yPos and zPos because model has Z as up
-                    double value = _interpolator->interpolate(var, xPos, zPos, yPos);
+					double value = _interpolator->interpolate(
+						var,
+						static_cast<float>(xPos),
+						static_cast<float>(zPos),
+						static_cast<float>(yPos));
                     doubleData[index] = value;
                     histogram[mapToHistogram(value)]++;
                 }
@@ -275,7 +313,7 @@ float* KameleonWrapper::getUniformSampledValues(
 
     int sum = 0;
     int stop = 0;
-    const int sumuntil = size * truncLim;
+    const int sumuntil = static_cast<int>(static_cast<float>(size) * truncLim);
     for(int i = 0; i < bins; ++i) {
     	sum += histogram[i];
     	if(sum > sumuntil) {
@@ -292,7 +330,7 @@ float* KameleonWrapper::getUniformSampledValues(
 	varMax = varMin + dist;
     //LDEBUG(var << "Min: " << varMin);
     //LDEBUG(var << "Max: " << varMax);
-    for(int i = 0; i < size; ++i) {
+    for(size_t i = 0; i < size; ++i) {
     	double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
 
     	data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
@@ -325,7 +363,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(
 	LINFO("Loading variables " << xVar << " " << yVar << " " << zVar << " from CDF data with a uniform sampling");
 
 	int channels = 4;
-	int size = channels*outDimensions.x*outDimensions.y*outDimensions.z;
+	unsigned int size = static_cast<unsigned int>(channels*outDimensions.x*outDimensions.y*outDimensions.z);
 	float* data = new float[size];
 
 	float varXMin =  _model->getVariableAttribute(xVar, "actual_min").getAttributeFloat();
@@ -346,14 +384,14 @@ float* KameleonWrapper::getUniformSampledVectorValues(
 	//LDEBUG(zVar << "Min: " << varZMin);
 	//LDEBUG(zVar << "Max: " << varZMax);
 
-	ProgressBar pb(outDimensions.x);
+	ProgressBar pb(static_cast<int>(outDimensions.x));
 	for (int x = 0; x < outDimensions.x; ++x) {
 		pb.print(x);
 
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
 
-				int index = x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y;
+				unsigned int index = static_cast<unsigned int>(x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y);
 
 				if(_gridType == GridType::Cartesian) {
 					float xPos = _xMin + stepX*x;
@@ -475,7 +513,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
 		minusTraj = traceLorentzTrajectory(seedPoint, stepsize, -1.0);
 
 		//minusTraj.erase(minusTraj.begin());
-		int plusNum = plusTraj.size();
+		size_t plusNum = plusTraj.size();
 		minusTraj.insert(minusTraj.begin(), plusTraj.rbegin(), plusTraj.rend());
 
 		// write colors and convert positions to meter
@@ -581,21 +619,21 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 		k1.z = _interpolator->interpolate(zID, pos.x, pos.y, pos.z);
 		k1 = (float)direction*glm::normalize(k1);
 		stepX=stepX*stepSize, stepY=stepY*stepSize, stepZ=stepZ*stepSize;
-		k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
-		k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
-		k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0)*k1.x, pos.y+(stepY/2.0)*k1.y, pos.z+(stepZ/2.0)*k1.z);
+		k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
+		k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
+		k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
 		k2 = (float)direction*glm::normalize(k2);
-		k3.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
-		k3.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
-		k3.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0)*k2.x, pos.y+(stepY/2.0)*k2.y, pos.z+(stepZ/2.0)*k2.z);
+		k3.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0f)*k2.x, pos.y+(stepY/2.0f)*k2.y, pos.z+(stepZ/2.0f)*k2.z);
+		k3.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0f)*k2.x, pos.y+(stepY/2.0f)*k2.y, pos.z+(stepZ/2.0f)*k2.z);
+		k3.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0f)*k2.x, pos.y+(stepY/2.0f)*k2.y, pos.z+(stepZ/2.0f)*k2.z);
 		k3 = (float)direction*glm::normalize(k3);
 		k4.x = _interpolator->interpolate(xID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
 		k4.y = _interpolator->interpolate(yID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
 		k4.z = _interpolator->interpolate(zID, pos.x+stepX*k3.x, pos.y+stepY*k3.y, pos.z+stepZ*k3.z);
 		k4 = (float)direction*glm::normalize(k4);
-		pos.x = pos.x + (stepX/6.0)*(k1.x + 2.0*k2.x + 2.0*k3.x + k4.x);
-		pos.y = pos.y + (stepY/6.0)*(k1.y + 2.0*k2.y + 2.0*k3.y + k4.y);
-		pos.z = pos.z + (stepZ/6.0)*(k1.z + 2.0*k2.z + 2.0*k3.z + k4.z);
+		pos.x = pos.x + (stepX/6.0f)*(k1.x + 2.0f*k2.x + 2.0f*k3.x + k4.x);
+		pos.y = pos.y + (stepY/6.0f)*(k1.y + 2.0f*k2.y + 2.0f*k3.y + k4.y);
+		pos.z = pos.z + (stepZ/6.0f)*(k1.z + 2.0f*k2.z + 2.0f*k3.z + k4.z);
 
 		++numSteps;
 		if (numSteps > maxSteps) {
@@ -692,13 +730,13 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 		k4 = eCharge*(E + glm::cross(tmpV, B));
 		k4 = glm::normalize(k4);
 
-		pos.x = pos.x + stepX*v0.x + (stepX*stepX/6.0)*(k1.x + k2.x + k3.x);
-		pos.y = pos.y + stepY*v0.y + (stepY*stepY/6.0)*(k1.y + k2.y + k3.y);
-		pos.z = pos.z + stepZ*v0.z + (stepZ*stepZ/6.0)*(k1.z + k2.z + k3.z);
+		pos.x = pos.x + stepX*v0.x + (stepX*stepX/6.0f)*(k1.x + k2.x + k3.x);
+		pos.y = pos.y + stepY*v0.y + (stepY*stepY/6.0f)*(k1.y + k2.y + k3.y);
+		pos.z = pos.z + stepZ*v0.z + (stepZ*stepZ/6.0f)*(k1.z + k2.z + k3.z);
 
-		v0.x = v0.x + (stepX/6.0)*(k1.x + 2.0*k2.x + 2.0*k3.x + k4.z);
-		v0.y = v0.y + (stepY/6.0)*(k1.y + 2.0*k2.y + 2.0*k3.y + k4.y);
-		v0.z = v0.z + (stepZ/6.0)*(k1.z + 2.0*k2.z + 2.0*k3.z + k4.z);
+		v0.x = v0.x + (stepX/6.0f)*(k1.x + 2.0f*k2.x + 2.0f*k3.x + k4.z);
+		v0.y = v0.y + (stepY/6.0f)*(k1.y + 2.0f*k2.y + 2.0f*k3.y + k4.y);
+		v0.z = v0.z + (stepZ/6.0f)*(k1.z + 2.0f*k2.z + 2.0f*k3.z + k4.z);
 
 		++numSteps;
 		if (numSteps > maxSteps) {

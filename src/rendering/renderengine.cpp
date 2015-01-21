@@ -666,7 +666,7 @@ void RenderEngine::storePerformanceMeasurements() {
 		PerformanceLayoutEntry entries[maxValues];
 	};
 
-	const int nNodes = sceneGraph()->allSceneGraphNodes().size();
+	const int nNodes = static_cast<int>(sceneGraph()->allSceneGraphNodes().size());
 	if (!_performanceMemory) {
 
 		// Compute the total size

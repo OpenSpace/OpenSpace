@@ -31,12 +31,14 @@ namespace {
 namespace openspace {
 namespace properties {
 
+const std::string SelectionProperty::OptionsKey = "Options";
+
 SelectionProperty::SelectionProperty(std::string identifier, std::string guiName)
 	: TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>())
 {}
 
 void SelectionProperty::addOption(Option option) {
-	// @COPY-N-PASTE from optionproperty.cpp, possible refactoring? ---abock
+	// @REFACTOR from optionproperty.cpp, possible refactoring? ---abock
 	for (const Option& o : _options) {
 		if (o.value == option.value) {
 			LWARNING("The value of option {" << o.value << " -> " << o.description <<
@@ -51,10 +53,6 @@ void SelectionProperty::addOption(Option option) {
 const std::vector<SelectionProperty::Option>& SelectionProperty::options() const {
 	return _options;
 }
-//
-//void SelectionProperty::setValue(std::vector<int> value) {
-//	_values = std::move(value);
-//}
 
 template <>
 std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {
@@ -113,49 +111,19 @@ int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
 	return LUA_TTABLE;
 }
 
-//REGISTER_TEMPLATEPROPERTY_SOURCE(SelectionProperty, std::vector<int>, std::vector<int>(),
-//	[](lua_State* state, bool& success) -> std::vector<int> {
-//		static const int KEY = -2;
-//		static const int VAL = -1;
-//
-//		std::vector<int> result;
-//
-//		if (!lua_istable(state, -1)) {
-//			LERROR("Parameter passed to the property is not a table");
-//			success = false;
-//			return result;
-//		}
-//
-//		lua_pushnil(state);
-//		while (lua_next(state, -2) != 0) {
-//			int valueType = lua_type(state, VAL);
-//
-//			if (lua_isnumber(state, VAL)) {
-//				int number = static_cast<int>(lua_tonumber(state, VAL));
-//				result.push_back(number);
-//			}
-//			else {
-//				success = false;
-//				return std::vector<int>();
-//			}
-//
-//			lua_pop(state, 1);
-//		}
-//
-//		success = true;
-//		return result;
-//	},
-//	[](lua_State* state, const std::vector<int>& value) -> bool {
-//		//@NOTE Untested ---abock
-//		lua_newtable(state);
-//		for (int i = 0; i < value.size(); ++i) {
-//			int v = value[i];
-//			lua_pushinteger(state, v);
-//			lua_setfield(state, -2, std::to_string(i).c_str());
-//		}
-//		return true;
-//	}, LUA_TTABLE
-//);
+std::string SelectionProperty::generateAdditionalDescription() const {
+	std::string result;
+	result += OptionsKey + " = {";
+	for (size_t i = 0; i < _options.size(); ++i) {
+		const Option& o = _options[i];
+		result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+		if (i != _options.size() - 1)
+			result += ",";
+	}
+
+	result += "}";
+	return result;
+}
 
 } // namespace properties
 } // namespace openspace

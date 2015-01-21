@@ -140,10 +140,10 @@ SceneGraphNode::~SceneGraphNode()
 
 bool SceneGraphNode::initialize()
 {
-    if (_renderable != nullptr)
+    if (_renderable)
         _renderable->initialize();
 
-    if (_ephemeris != nullptr)
+    if (_ephemeris)
         _ephemeris->initialize();
 
     return true;
@@ -153,16 +153,21 @@ bool SceneGraphNode::deinitialize()
 {
     LDEBUG("Deinitialize: " << name());
 
-    if(_renderable)
+    if (_renderable) {
+		_renderable->deinitialize();
         delete _renderable;
-    _renderable = nullptr;
-    if(_ephemeris)
-        delete _ephemeris;
-    _ephemeris = nullptr;
+		_renderable = nullptr;
+	}
 
-    // deallocate the child nodes and delete them, iterate c++11 style
-    for (SceneGraphNode* child : _children)
-        delete child;
+    if (_ephemeris) {
+        delete _ephemeris;
+		_ephemeris = nullptr;
+	}
+
+    for (SceneGraphNode* child : _children) {
+		child->deinitialize();
+		delete child;
+	}
     _children.clear();
 
     // reset variables
@@ -251,7 +256,7 @@ void SceneGraphNode::render(const RenderData& data) {
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-	_performanceRecord.renderTime = 0.f;
+	_performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
@@ -314,7 +319,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
 	_boundingSphere = 0.0;
 	
-    if (_children.size() > 0) {  // node
+    if (!_children.empty()) {  // node
         PowerScaledScalar maxChild;
 
         // loop though all children and find the one furthest away/with the largest
@@ -362,7 +367,7 @@ Renderable* SceneGraphNode::renderable() {
 }
 
 // private helper methods
-bool SceneGraphNode::sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad,
+bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,
                                          const Camera* camera)
 {
     // direction the camera is looking at in power scale

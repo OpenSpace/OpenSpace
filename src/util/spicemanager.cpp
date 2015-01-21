@@ -118,8 +118,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 	if (hasError)
 		return KernelFailed;
 	else {
-		KernelInformation&& info = { path, std::move(kernelId) };
-		_loadedKernels.push_back(info);
+		_loadedKernels.push_back({ path, std::move(kernelId) });
 		return kernelId;
 	}
 }
@@ -230,7 +229,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 		LERROR("No value was provided");
 		return false;
 	}
-	if (v.size() == 0) {
+	if (v.empty()) {
 		LERROR("Array for values has to be preallocaed");
 		return false;
 	}

@@ -99,8 +99,8 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 void RenderableTrail::fullYearSweep(){
 	double lightTime = 0.0;
 	double et = _startTrail;
-	double planetYear = 31540000 * _ratio;
-	int segments = _tropic;
+	float planetYear = 31540000.0f * _ratio;
+	int segments = static_cast<int>(_tropic);
 
 	_increment = planetYear / _tropic;
 	
@@ -134,12 +134,11 @@ void RenderableTrail::fullYearSweep(){
 		et -= _increment;
 	}
 	_stride = 8;
-	_vsize = _varray.size();
+	_vsize = static_cast<unsigned int>(_varray.size());
 	_vtotal = static_cast<int>(_vsize / _stride);
 }
 
 RenderableTrail::~RenderableTrail(){
-	deinitialize();
 }
 
 bool RenderableTrail::isReady() const {
@@ -197,7 +196,7 @@ bool RenderableTrail::initialize(){
 
 	// SpiceManager::ref().getETfromDate("2006 Aug 22 17:00:00", _startTrail);
 	SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
-	_dtEt = _startTrail;
+	_dtEt = static_cast<float>(_startTrail);
 
 	fullYearSweep();
 	sendToGPU();
@@ -310,8 +309,8 @@ void RenderableTrail::render(const RenderData& data){
 }
 
 void RenderableTrail::update(const UpdateData& data){
-	_time  = data.time;
-	_delta = data.delta;
+	_time = static_cast<float>(data.time);
+	_delta = static_cast<int>(data.delta);
 	
 	SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, _pscpos, _pscvel, lightTime);
 	_pscpos[3] += 3; // KM to M
