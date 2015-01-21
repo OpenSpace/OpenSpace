@@ -91,6 +91,7 @@ private:
 	std::set<properties::Property*> _floatProperties;
 	std::set<properties::Property*> _vec2Properties;
 	std::set<properties::Property*> _vec3Properties;
+	std::set<properties::Property*> _vec4Properties;
 	std::set<properties::Property*> _stringProperties;
 	std::set<properties::Property*> _optionProperty;
 	std::set<properties::Property*> _selectionProperty;
