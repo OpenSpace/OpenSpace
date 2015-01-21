@@ -202,7 +202,8 @@ bool ImageSequencer::loadSequence(const std::string dir){
 			}
 		}
 	}
-	_nextCapture = nextCaptureTime(Time::ref().currentTime()); // this is not really working 100%
+	//_nextCapture = nextCaptureTime(Time::ref().currentTime()); // this is not really working 100%
+	//_intervalLength = _timeStamps[1].startTime;
 	return !sequencePaths.empty();
 }
 
