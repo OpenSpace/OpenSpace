@@ -37,24 +37,45 @@
 namespace {
 	const std::string _loggerCat = "RenderableFieldlines";
 
+	const float defaultFieldlineStepSize = 0.5f;;
+	const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+
 	const std::string keyVectorField = "VectorField";
 	const std::string keyVectorFieldType = "Type";
 	const std::string keyVectorFieldFile = "File";
 
+	const std::string keyFieldlines = "Fieldlines";
+	const std::string keyFieldlinesStepSize = "Stepsize";
+	const std::string keyFieldlinesClassification = "Classification";
+	const std::string keyFieldlinesColor = "Color";
+
 	const std::string keySeedPoints = "SeedPoints";
-	const std::string keySeedPointsStepSize = "Stepsize";
-	const std::string keySeedPointsClassification = "Classification";
-	const std::string keySeedPointsSource = "Seedpoints";
+	const std::string keySeedPointsType = "Type";
+	const std::string keySeedPointsFile = "File";
+	const std::string keySeedPointsTable = "SeedPoints";
+
+	const std::string seedPointsSourceFile = "File";
+	const std::string seedPointsSourceTable = "Table";
 
 	const int SeedPointSourceFile = 0;
+	const int SeedPointSourceTable = 1;
 }
 
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
-	, _seedPointSource("source", "Seedpoint Source")
-	, _seedPointSourceFile("sourceFile", "Seedpoint File")
+	, _stepSize("stepSize", "Fieldline Step Size", defaultFieldlineStepSize, 0.f, 10.f)
+	, _classification("classification", "Fieldline Classification", true)
+	, _fieldlineColor(
+		"fieldlineColor",
+		"Fieldline Color",
+		defaultFieldlineColor,
+		glm::vec4(0.f),
+		glm::vec4(1.f)
+	  )
+	, _seedPointSource("source", "SeedPoint Source")
+	, _seedPointSourceFile("sourceFile", "SeedPoint File")
 	, _fieldlineVAO(0)
 	, _vertexPositionBuffer(0)
 	, _program(nullptr)
@@ -68,13 +89,19 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	std::string name;
 	dictionary.getValue(constants::scenegraphnode::keyName, name);
 
-	bool success = dictionary.getValue(keyVectorField, _vectorFieldInformation);
+	bool success = dictionary.getValue(keyVectorField, _vectorFieldInfo);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' does not contain a key for '" <<
 			keyVectorField << "'");
 	}
 
-	success = dictionary.getValue(keySeedPoints, _seedPointInformation);
+	success = dictionary.getValue(keyFieldlines, _fieldlineInfo);
+	if (!success) {
+		LERROR("RenderableFieldlines '" << name << "' does not contain a key for '" <<
+			keyFieldlines << "'");
+	}
+
+	success = dictionary.getValue(keySeedPoints, _seedPointsInfo);
 	if (!success) {
 		LERROR("RenderableFieldlines '" << name << "' does not contain a key for '" <<
 			keySeedPoints << "'");
@@ -83,11 +110,60 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	// @TODO a non-magic number perhaps ---abock
 	setBoundingSphere(PowerScaledScalar::CreatePSS(250.f*6371000.f));
 
+	initializeDefaultPropertyValues();
+
+	// @TODO hook up onChange methods ---abock
+	// @TODO hook up visibility changes ---abock
+
+
+	addProperty(_stepSize);
+	addProperty(_classification);
+	_fieldlineColor.setViewOption(properties::Property::ViewOptions::Color);
+	addProperty(_fieldlineColor);
+
 	_seedPointSource.addOption(SeedPointSourceFile, "File");
+	_seedPointSource.addOption(SeedPointSourceTable, "Lua Table");
 	addProperty(_seedPointSource);
 
-	//_seedPointSourceFile = 
 	addProperty(_seedPointSourceFile);
+}
+
+void RenderableFieldlines::initializeDefaultPropertyValues() {
+	bool success;
+	
+	// Step size
+	float stepSize;
+	success = _fieldlineInfo.getValue(keyFieldlinesStepSize, stepSize);
+	if (success)
+		_stepSize = stepSize;
+
+	// Classification
+	bool classification;
+	success = _fieldlineInfo.getValue(keyFieldlinesClassification, classification);
+	if (success)
+		_classification = classification;
+
+	// Fieldline Color
+	glm::vec4 color;
+	success = _fieldlineInfo.getValue(keyFieldlinesColor, color);
+	if (success)
+		_fieldlineColor = color;
+
+	// Seedpoints Type
+	std::string sourceType;
+	success = _seedPointsInfo.getValue(keySeedPointsType, sourceType);
+	if (success) {
+		if (sourceType == seedPointsSourceFile) {
+			_seedPointSource = SeedPointSourceFile;
+
+			std::string seedPointSourceFile;
+			success = _seedPointsInfo.getValue(keySeedPointsFile, seedPointSourceFile);
+			if (success)
+				_seedPointSourceFile = absPath(seedPointSourceFile);
+		}
+		else if (sourceType == seedPointsSourceTable)
+			_seedPointSource = SeedPointSourceTable;
+	}
 }
 
 bool RenderableFieldlines::isReady() const {
@@ -95,8 +171,12 @@ bool RenderableFieldlines::isReady() const {
 }
 
 bool RenderableFieldlines::initialize() {
-	if (_vectorFieldInformation.empty() || _seedPointInformation.empty())
+	if (_vectorFieldInfo.empty() ||
+		_fieldlineInfo.empty() ||
+		_seedPointsInfo.empty())
+	{
 		return false;
+	}
 
 	_program = ghoul::opengl::ProgramObject::Build(
 		"Fieldline",
@@ -187,17 +267,15 @@ void RenderableFieldlines::update(const UpdateData&) {
 }
 
 std::vector<std::vector<LinePoint>> RenderableFieldlines::getFieldlinesData() {
-	ghoul::Dictionary hintsDictionary = _vectorFieldInformation;
+	ghoul::Dictionary hintsDictionary = _vectorFieldInfo;
 	std::string filename;
-	_vectorFieldInformation.getValue("File", filename);
+	_vectorFieldInfo.getValue("File", filename);
 	filename = absPath(filename);
 	
 	std::string modelString, xVariable, yVariable, zVariable;
 	KameleonWrapper::Model model;
 	std::vector<std::vector<LinePoint> > fieldlinesData;
 	bool classification = false, lorentz = false;
-	glm::vec4 fieldlineColor = glm::vec4(1.0, 1.0, 1.0, 1.0); // default color if no color or classification is specified
-	float stepSize = 0.5; // default if no stepsize is specified in hints
 
 	if (hintsDictionary.hasKey("Model") && hintsDictionary.getValue("Model", modelString)) {
 		//	------ MODEL -----------------
@@ -233,68 +311,63 @@ std::vector<std::vector<LinePoint>> RenderableFieldlines::getFieldlinesData() {
 			return fieldlinesData;
 		}
 
-		//	------ STEPSIZE -----------------
-		if (!_seedPointInformation.hasKey("Stepsize") || !_seedPointInformation.getValue("Stepsize", stepSize)) {
-			LDEBUG("No stepsize set for fieldlines. Setting to default value (" << stepSize << ")");
-		}
-
 		//	------ SEEDPOINTS ---------------
 		_seedPoints.clear();
-		if (_seedPointInformation.hasKey("Seedpoints")) {
-			if (_seedPointInformation.hasKeyAndValue<ghoul::Dictionary>("Seedpoints")) {
-				LINFO("Loading provided list of seed points");
-				ghoul::Dictionary seedpointsDictionary;
-				_seedPointInformation.getValue("Seedpoints", seedpointsDictionary);
-				glm::vec3 seedPos;
-				for (const std::string& index : seedpointsDictionary.keys()) {
-					_seedPointInformation.getValue("Seedpoints." + index, seedPos);
-					_seedPoints.push_back(seedPos);
-				}
-			}
-			else if (_seedPointInformation.hasKeyAndValue<std::string>("Seedpoints")) {
-				std::string seedPointsFile;
-				_seedPointInformation.getValue("Seedpoints", seedPointsFile);
-				seedPointsFile = absPath(seedPointsFile);
-				LINFO("Reading seed points from file '" << seedPointsFile << "'");
-
-				std::ifstream seedFile(seedPointsFile);
-				if (!seedFile.good())
-					LERROR("Could not open seed points file '" << seedPointsFile << "'");
-				else {
-					std::string line;
-					glm::vec3 point;
-					while (std::getline(seedFile, line)) {
-						std::stringstream s(line);
-						s >> point.x;
-						s >> point.y;
-						s >> point.z;
-						_seedPoints.push_back(std::move(point));
-					}
-				}
-			}
+		switch (_seedPointSource) {
+			case SeedPointSourceFile:
+				loadSeedPointsFromFile();
+				break;
+			case SeedPointSourceTable:
+				loadSeedPointsFromTable();
+				break;
+			default:
+				ghoul_assert(false, "Missing case label");
 		}
-		else
-			LERROR("Fieldlines did not provide seed points");
-
-		//	------ CLASSIFICATION & COLOR -----------
-		_seedPointInformation.getValue("Color", fieldlineColor);
-		_seedPointInformation.getValue("Classification", classification);
-	} else {
-        // model unitialized!
-        assert(false);
-    }
+	} else
+		ghoul_assert(false, "Missing model");
 
 	KameleonWrapper kw(filename);
 	if (lorentz) {
-		fieldlinesData = kw.getLorentzTrajectories(_seedPoints, fieldlineColor, stepSize);
+		fieldlinesData = kw.getLorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
 	} else {
-		if (classification)
-			fieldlinesData = kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, stepSize);
+		if (_classification)
+			fieldlinesData = kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize);
 		else
-			fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints, stepSize, fieldlineColor);
+			fieldlinesData = kw.getFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize, _fieldlineColor);
 	}
 
 	return fieldlinesData;
+}
+
+void RenderableFieldlines::loadSeedPointsFromFile() {
+	LINFO("Reading seed points from file '" << _seedPointSourceFile.value() << "'");
+
+	std::ifstream seedFile(_seedPointSourceFile);
+	if (!seedFile.good())
+		LERROR("Could not open seed points file '" << _seedPointSourceFile.value() << "'");
+	else {
+		std::string line;
+		glm::vec3 point;
+		while (std::getline(seedFile, line)) {
+			std::stringstream s(line);
+			s >> point.x;
+			s >> point.y;
+			s >> point.z;
+			_seedPoints.push_back(std::move(point));
+		}
+	}
+}
+
+void RenderableFieldlines::loadSeedPointsFromTable() {
+	// @TODO needs testing ---abock
+	LINFO("Loading provided list of seed points");
+	ghoul::Dictionary seedpointsDictionary;
+	_seedPointsInfo.getValue(keySeedPointsTable, seedpointsDictionary);
+	glm::vec3 seedPos;
+	for (const std::string& index : seedpointsDictionary.keys()) {
+		_fieldlineInfo.getValue(keySeedPointsTable + "." + index, seedPos);
+		_seedPoints.push_back(seedPos);
+	}
 }
 
 } // namespace openspace

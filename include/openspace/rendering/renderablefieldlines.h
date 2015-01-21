@@ -29,6 +29,8 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -55,17 +57,24 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
+	void initializeDefaultPropertyValues();
 	//std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
 	std::vector<std::vector<LinePoint>> getFieldlinesData();
+	void loadSeedPointsFromFile();
+	void loadSeedPointsFromTable();
 
+	properties::FloatProperty _stepSize;
+	properties::BoolProperty _classification;
+	properties::Vec4Property _fieldlineColor;
 	properties::OptionProperty _seedPointSource;
 	properties::StringProperty _seedPointSourceFile;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
 
-	ghoul::Dictionary _vectorFieldInformation;
-	ghoul::Dictionary _seedPointInformation;
+	ghoul::Dictionary _vectorFieldInfo;
+	ghoul::Dictionary _fieldlineInfo;
+	ghoul::Dictionary _seedPointsInfo;
 
 	std::vector<glm::vec3> _seedPoints;
 
