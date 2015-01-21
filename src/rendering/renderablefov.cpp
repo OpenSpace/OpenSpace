@@ -25,6 +25,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 
+#include <openspace/util/imagesequencer.h>
+
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -50,13 +52,12 @@ namespace {
 //#define DEBUG
 namespace openspace{
 	// colors, move later
-	glm::vec4 origin(0);
-	glm::vec4 col_gray(0.3, 0.3, 0.3, 1);
-	glm::vec4 col_start(1.00, 0.89, 0.00, 1);
-	glm::vec4 col_end(1.00, 0.29, 0.00, 1);
-	glm::vec4 col_sq(1.00, 0.29, 0.00, 1);
-
-	glm::vec4 col_proj(1, 1, 1, 1);
+	glm::vec4 col_sq;
+	glm::vec4 c_project;
+	glm::vec4 col_end;
+	glm::vec4 blue;
+	glm::vec4 col_gray;
+	glm::vec4 col_start;
 
 	RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 		: Renderable(dictionary)
@@ -186,10 +187,6 @@ void RenderableFov::insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c){
 		arr.push_back(c[i]);
 	}
 	_nrInserted++;
-}
-double RenderableFov::distanceBetweenPoints(psc p1, psc p2){
-	PowerScaledScalar dist = (p1 - p2).length();
-	return dist[0] * pow(10, dist[1]);
 }
 
 psc RenderableFov::pscInterpolate(psc p0, psc p1, float t){
@@ -356,6 +353,31 @@ void RenderableFov::updateData(){
 		glBindVertexArray(0);
 	}
 }
+void RenderableFov::computeColors(){
+	double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
+	double diff = (t2 - _time);
+	double t = 0.0;
+	if (diff <= 7.0) t = 1.f - diff / 7.0;
+
+	c_project = glm::vec4(0.0, 1.0, 0.00,1);
+	col_end   = glm::vec4(1.00, 0.29, 0.00, 1);
+	blue      = glm::vec4(0, 0.5, 0.7, 1);
+	col_gray  = glm::vec4(0.3, 0.3, 0.3, 1);
+	col_start = glm::vec4(1.00, 0.89, 0.00, 1);
+	col_sq    = glm::vec4(1.00, 0.29, 0.00, 1);
+
+	col_end.x = c_project.x*t + col_end.x*(1 - t);
+	col_end.y = c_project.y*t + col_end.y*(1 - t);
+	col_end.z = c_project.z*t + col_end.z*(1 - t);
+
+	blue.x = c_project.x*t + blue.x*(1 - t);
+	blue.y = c_project.y*t + blue.y*(1 - t);
+	blue.z = c_project.z*t + blue.z*(1 - t);
+
+	col_sq.x = c_project.x*t + col_sq.x*(1 - t);
+	col_sq.y = c_project.y*t + col_sq.y*(1 - t);
+	col_sq.z = c_project.z*t + col_sq.z*(1 - t);
+}
 
 void RenderableFov::render(const RenderData& data){
 	assert(_programObject);
@@ -402,18 +424,21 @@ void RenderableFov::render(const RenderData& data){
 			}
 		}
 		
-		//somehow get target in there.
-		//_targetNode = sceneGraphNode(_fovTarget);
-		/*std::vector<PropertyOwner*> properties = _targetNode->subOwners();
-		for (auto & element : properties) {
-			std::cout << element->name() << std::endl;
-		}*/
-		//std::cout << _targetNode->renderable.hasProperty("PlanetGeometry") << std::endl;
+		computeColors();
+		double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
+		double diff = (t2 - _time);
+		double t = 0.0;
+		if (diff <= 30.0) t = 1.f - diff / 30.0;
 
-
+		double targetEpoch;
+	/*	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+			_frame, _method, _aberrationCorrection,
+			_time, targetEpoch, boresight, ipoint, ivec);
+		psc bsvec = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
+		bsvec[3] += 3;
+		*/
 		// for each FOV vector
 		for (int i = 0; i < 4; i++){
-			double targetEpoch;
 			// compute surface intercept
 			_interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 				                                                                  _frame, _method, _aberrationCorrection, 
@@ -421,13 +446,13 @@ void RenderableFov::render(const RenderData& data){
 			// if not found, use the orthogonal projected point
 			if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
 	
-
 			// VBO1 : draw vectors representing outer points of FOV. 
 			if (_interceptTag[i]){
 				_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 				_interceptVector[3] += 3;
+				//_interceptVector = pscInterpolate(_interceptVector, bsvec, t);
 				// INTERCEPTIONS
-				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(col_start), size);
 				indx += 4;
@@ -437,20 +462,20 @@ void RenderableFov::render(const RenderData& data){
 				indx += 4;
 			}
 			else if (_withinFOV){
-				// FOV LARGER THAN OBJECT
-				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
+				// FOV OUTSIDE OBJECT
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0,0,1,1)), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[i].vec4()), size);
 				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0, 0.5, 0.7, 1)), size);
+				memcpy(&_varray1[indx], glm::value_ptr(blue), size);
 				indx += 4;
 			}else{
 				glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
 				corner = tmp*corner;
 				// "INFINITE" FOV
-				memcpy(&_varray1[indx], glm::value_ptr(origin), size);
+				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 				indx += 4;
 				memcpy(&_varray1[indx], glm::value_ptr(col_gray), size);
 				indx += 4;
@@ -495,7 +520,6 @@ void RenderableFov::render(const RenderData& data){
 void RenderableFov::update(const UpdateData& data){
 	double lightTime;
 	_time  = data.time;
-	_delta = data.delta;
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time, _stateMatrix);
 }
 

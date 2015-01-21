@@ -53,6 +53,7 @@ namespace {
 	const std::string keyInstrumentAspect  = "Instrument.Aspect";
 	const std::string keyInstrumentNear    = "Instrument.Near";
 	const std::string keyInstrumentFar     = "Instrument.Far";
+	const std::string keySequenceDir       = "Projection.Sequence";
 
 	const std::string _mainFrame = "GALACTIC";
 }
@@ -129,10 +130,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_projectionTexturePath);
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
-	//std::string sPath = "C:/Users/michal/JupSequenceCrosshair";
 	std::string sPath = "F:/JupiterFullSequence";
-
-	openspace::ImageSequencer::ref().loadSequence(sPath);
+	bool found = dictionary.getValue(keySequenceDir, _sequenceDir);
+	if (found){
+		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
+		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
+	}
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -336,7 +339,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 #ifdef GPU_PROJ
 	if (_capture){
-		attitudeParameters(_time[0]);
+		attitudeParameters(_time[1]);
 		imageProjectGPU();
 	}
 #endif
@@ -373,8 +376,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	_capture = false;
 	
 	bool _withinFOV;
+	/* -- TEMPORARY TARGETING SOLUTION -- FML */
 	std::string potential[5] = { "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
-	std::string p2[5] = { "JUPITER BARYCENTER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
+	std::string p2[5] = { "JUPITER BARYCENTER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" }; // "Barycenter" term messes it all up.. SPICE ambiguities!
 
 	std::string _fovTarget = "";
 	for (int i = 0; i < 5; i++){
@@ -385,11 +389,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		}
 	}
 	if (_projecteeID  == _fovTarget){
-		std::cout << _fovTarget << " " << _projecteeID << std::endl;
 		_next = _defaultProjImage;
+		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime())
 		_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
-		if (_next != _defaultProjImage)
-			std::cout << _next << std::endl;
 		_projectionTexturePath = _next;
 	}
 }

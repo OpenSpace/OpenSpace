@@ -69,7 +69,8 @@ public:
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
 	glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
 
-	double distanceBetweenPoints(psc p1, psc p2);
+	void computeColors();
+
 	// instance variables
 	int _nrInserted = 0;
 	int _isteps;
@@ -114,7 +115,10 @@ public:
 	// time
 	double _time = 0;
 	double _oldTime = 0;
-	int _delta  = 0;
+
+	// capturetime
+	double _timeInterval;
+	double _nextCaptureTime;
 };
 }
 #endif

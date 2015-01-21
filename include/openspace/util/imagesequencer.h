@@ -45,14 +45,20 @@ public:
 	static void deinitialize();
 	bool sequenceReset();
 
-public:
-
-	void createImage(double t1, double t2, std::string path = "dummypath");
-	bool getImagePath(double& _currentTime, std::string& path);
-	bool getImagePath(std::string _currentTime, std::string& path);
-	//double _previousTime; // not sure if i wanna use this yet.
+	bool getImagePath(double& _currentTime, std::string& path, bool closedInterval = false);
+	bool getImagePath(std::string _currentTime, std::string& path, bool closedInterval = false);
+	double getNextCaptureTime();
+	double getIntervalLength(){ return _intervalLength; };
 
 	static ImageSequencer* _sequencer;
+
+private:
+	double nextCaptureTime(double _time);
+
+	void createImage(double t1, double t2, std::string path = "dummypath");
+	
+	double _nextCapture;
+	double _intervalLength;
 };
 
 } // namespace openspace
