@@ -57,11 +57,17 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
+	typedef std::vector<LinePoint> Line;
+
 	void initializeDefaultPropertyValues();
 	//std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
-	std::vector<std::vector<LinePoint>> getFieldlinesData();
+	std::vector<Line> getFieldlinesData();
+	void loadSeedPoints();
 	void loadSeedPointsFromFile();
 	void loadSeedPointsFromTable();
+
+	std::vector<Line> generateFieldlines();
+	std::vector<Line> generateFieldlinesVolumeKameleon();
 
 	properties::FloatProperty _stepSize;
 	properties::BoolProperty _classification;
@@ -75,6 +81,9 @@ private:
 	ghoul::Dictionary _vectorFieldInfo;
 	ghoul::Dictionary _fieldlineInfo;
 	ghoul::Dictionary _seedPointsInfo;
+
+	bool _seedPointsAreDirty;
+	bool _fieldLinesAreDirty;
 
 	std::vector<glm::vec3> _seedPoints;
 
