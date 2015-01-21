@@ -164,7 +164,6 @@ bool SpiceManager::hasValue(const std::string& body, const std::string& item) co
 }
 
 bool SpiceManager::getNaifId(const std::string& body, int& id) const {
-	
 	SpiceInt s_id = id;
 	if (body.empty()) {
 		LERROR("No body was provided");
@@ -173,6 +172,7 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 	else {
 		SpiceBoolean success;
 		bods2c_c(body.c_str(), &s_id, &success);
+		id = s_id;
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
