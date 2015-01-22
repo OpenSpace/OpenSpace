@@ -328,10 +328,10 @@ void LuaConsole::keyboardCallback(int key, int action) {
 				if (_commands.at(_activeCommand) != "") {
 
 					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
-					if (_commandsHistory.size() > 0 &&
+					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
-					else if (_commandsHistory.size() == 0)
+					else if (_commandsHistory.empty())
 						_commandsHistory.push_back(_commands.at(_activeCommand));
 
 					_commands = _commandsHistory;

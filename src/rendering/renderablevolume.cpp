@@ -152,12 +152,12 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 				float* data = new float[length];
 #ifdef VOLUME_LOAD_PROGRESSBAR
 				LINFO("Loading cache: " << cachepath);
-				ProgressBar pb(dimensions[2]);
+				ProgressBar pb(static_cast<int>(dimensions[2]));
 				for (size_t i = 0; i < dimensions[2]; ++i) {
 					size_t offset = length / dimensions[2];
 					std::streamsize offsetsize = sizeof(float)*offset;
 					file.read(reinterpret_cast<char*>(data + offset * i), offsetsize);
-					pb.print(i);
+					pb.print(static_cast<int>(i));
 				}
 #else
 				file.read(reinterpret_cast<char*>(data), sizeof(float)*length);
@@ -195,10 +195,11 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
 
 				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
                 if(cache) {
-                    FILE* file = fopen (cachepath.c_str(), "wb");
+                    //FILE* file = fopen (cachepath.c_str(), "wb");
+					std::ofstream file(cachepath, std::ios::in | std::ios::binary);
 					size_t length = dimensions[0] * dimensions[1] * dimensions[2];
-                    fwrite(data, sizeof(float), length, file);
-                    fclose(file);
+					file.write(reinterpret_cast<char*>(data), sizeof(float)*length);
+                    file.close();
                 }
 
 				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
@@ -329,7 +330,6 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     std::string line;
     while (std::getline(in, line)) {
         
-        float intensity = 1.0f;
         glm::vec4 rgba = glm::vec4(0.0f);
         // tokenize the line
         std::istringstream iss(line);
@@ -345,6 +345,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
             } else if(key == "upper" && tokenSize == 2) {
                 upper = stringToNumber<float>(tokens.at(1),upperLowerValidator);
             } else if(key == "mappingkey" && tokenSize == 6) {
+				float intensity = 1.0f;
                 intensity = stringToNumber<float>(tokens.at(1), intensityValidator);
                 for(int i = 0; i < 4; ++i)
                     rgba[i] = stringToNumber<float>(tokens.at(i+2));

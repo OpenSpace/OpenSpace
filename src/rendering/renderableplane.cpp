@@ -95,7 +95,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 }
 
 RenderablePlane::~RenderablePlane() {
-	deinitialize();
 }
 
 bool RenderablePlane::isReady() const {

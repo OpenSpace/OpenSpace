@@ -518,7 +518,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 		bool buttons[2] = { button0 != 0, button1 != 0 };
 
 		double dt = std::max(sgct::Engine::instance()->getDt(), 1.0/60.0);
-		_gui.startFrame(dt, glm::vec2(glm::ivec2(x,y)), glm::vec2(posX, posY), buttons);
+		_gui.startFrame(static_cast<float>(dt), glm::vec2(glm::ivec2(x,y)), glm::vec2(posX, posY), buttons);
 	}
 }
 

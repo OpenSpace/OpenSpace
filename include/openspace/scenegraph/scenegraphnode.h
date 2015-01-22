@@ -85,7 +85,7 @@ public:
     Renderable* renderable();
 
 private:
-    bool sphereInsideFrustum(const psc s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
+    bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
 	std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;

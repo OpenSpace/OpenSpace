@@ -204,13 +204,12 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 }
 
 bool RenderablePlanetProjection::deinitialize(){
-    _geometry->deinitialize();
-    delete _geometry;
-    _geometry = nullptr;
     delete _texture; 
     _texture = nullptr;
 	delete _textureProj;
 	_textureProj = nullptr;
+	delete _geometry;
+	_geometry = nullptr;
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {

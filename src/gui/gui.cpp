@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/gui.h>
+#include <openspace/gui/gui.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
@@ -213,7 +213,6 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
 	p->set(value);
 }
 
-
 void renderVec3Property(Property* prop, const std::string& ownerName) {
 	Vec3Property* p = static_cast<Vec3Property*>(prop);
 	std::string name = p->guiName();
@@ -221,6 +220,16 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
 	Vec3Property::ValueType value = *p;
 
 	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+	p->set(value);
+}
+
+void renderVec4Property(Property* prop, const std::string& ownerName) {
+	Vec4Property* p = static_cast<Vec4Property*>(prop);
+	std::string name = p->guiName();
+
+	Vec4Property::ValueType value = *p;
+
+	ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 	p->set(value);
 }
 
@@ -238,6 +247,7 @@ namespace openspace {
 GUI::GUI()
 	: _isEnabled(false)
 	, _showPropertyWindow(false)
+	, _showPerformanceWindow(false)
 	, _showHelp(false)
 	, _performanceMemory(nullptr)
 {
@@ -301,6 +311,10 @@ void GUI::initialize() {
 void GUI::initializeGL() {
 	_program = ghoul::opengl::ProgramObject::Build("GUI",
 		"${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
+	if (!_program) {
+		LERROR("Could not load program object for GUI");
+		return;
+	}
 		
     positionLocation = glGetAttribLocation(*_program, "in_position");
     uvLocation = glGetAttribLocation(*_program, "in_uv");
@@ -426,6 +440,8 @@ void GUI::registerProperty(properties::Property* prop) {
 		_vec2Properties.insert(prop);
 	else if (className == "Vec3Property")
 		_vec3Properties.insert(prop);
+	else if (className == "Vec4Property")
+		_vec4Properties.insert(prop);
 	else if (className == "OptionProperty")
 		_optionProperty.insert(prop);
 	else if (className == "TriggerProperty")
@@ -498,6 +514,11 @@ void GUI::renderPropertyWindow() {
 
 				if (_vec3Properties.find(prop) != _vec3Properties.end()) {
 					renderVec3Property(prop, p.first);
+					continue;
+				}
+
+				if (_vec4Properties.find(prop) != _vec4Properties.end()) {
+					renderVec4Property(prop, p.first);
 					continue;
 				}
 

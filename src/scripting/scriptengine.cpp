@@ -512,7 +512,6 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
 bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
 	if (type == "text") {
 		// The additional space between the longest function name and the descriptions
-		const size_t AdditionalSpace = 5;
 		LDEBUG("Writing Lua documentation of type '" << type <<
 			"' to file '" << filename << "'");
 		std::ofstream file(filename);

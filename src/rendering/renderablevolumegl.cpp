@@ -52,6 +52,9 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	, _volumeName("")
 	, _boxArray(0)
 	, _vertexPositionBuffer(0)
+	, _volume(nullptr)
+	, _transferFunction(nullptr)
+	, _boxProgram(nullptr)
 	, _boxScaling(1.0, 1.0, 1.0)
 	, _w(0.f)
 	, _updateTransferfunction(false)
@@ -126,9 +129,9 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 		_boxScaling = kw.getModelScale();
 		if (std::get<0>(t) == "R" && std::get<1>(t) == "R" && std::get<2>(t) == "R") {
 			// Earth radius
-			_boxScaling.x *= 6.371;
-			_boxScaling.y *= 6.371;
-			_boxScaling.z *= 6.371;
+			_boxScaling.x *= 6.371f;
+			_boxScaling.y *= 6.371f;
+			_boxScaling.z *= 6.371f;
 			_w = 6;
 		}
 		else if (std::get<0>(t) == "m" && std::get<1>(t) == "radian" && std::get<2>(t) == "radian") {
@@ -143,9 +146,9 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	_pscOffset = kw.getModelBarycenterOffset();
 	if (std::get<0>(t) == "R" && std::get<1>(t) == "R" && std::get<2>(t) == "R") {
 		// Earth radius
-		_pscOffset[0] *= 6.371;
-		_pscOffset[1] *= 6.371;
-		_pscOffset[2] *= 6.371;
+		_pscOffset[0] *= 6.371f;
+		_pscOffset[1] *= 6.371f;
+		_pscOffset[2] *= 6.371f;
 		_pscOffset[3] = 6;
 	}
 	else {
@@ -160,7 +163,6 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 }
 
 RenderableVolumeGL::~RenderableVolumeGL() {
-    deinitialize();
 }
 
 bool RenderableVolumeGL::isReady() const {

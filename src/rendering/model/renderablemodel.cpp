@@ -86,7 +86,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
 RenderableModel::~RenderableModel(){
-    deinitialize();
 }
 
 bool RenderableModel::isReady() const {
@@ -136,7 +135,7 @@ void RenderableModel::render(const RenderData& data)
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			tmp[i][j] = _stateMatrix[i][j];
+			tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
 	

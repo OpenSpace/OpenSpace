@@ -61,6 +61,7 @@ namespace scenegraph {
     const std::string keyCamera = "Camera";
     const std::string keyFocusObject = "Focus";
     const std::string keyPositionObject = "Position";
+    const std::string keyViewOffset = "Offset";
     const std::string keyPathModule = "ModulePath";
 }  // namespace scenegraph
 

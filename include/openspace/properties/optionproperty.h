@@ -87,6 +87,9 @@ public:
 	void setValue(int value) override;
 
 private:
+	static const std::string OptionsKey;
+	std::string generateAdditionalDescription() const;
+
 	/// The list of options which have been registered with this OptionProperty
 	std::vector<Option> _options;
 };
