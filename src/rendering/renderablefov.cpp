@@ -144,7 +144,7 @@ void RenderableFov::sendToGPU(){
 
 	glBindVertexArray(_vaoID[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID[0]);
-	glBufferData(GL_ARRAY_BUFFER, _vsize[0] * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
+	glBufferData(GL_ARRAY_BUFFER, _vsize[0] * sizeof(GLfloat), NULL, GL_STATIC_DRAW); // orphaning the buffer, sending NULL data.
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize[0] * sizeof(GLfloat), &_varray1[0]);
 
 	GLsizei st = sizeof(GLfloat) * _stride[0];
@@ -165,7 +165,7 @@ void RenderableFov::sendToGPU(){
 
 	glBindVertexArray(_vaoID[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID[1]);
-	glBufferData(GL_ARRAY_BUFFER, _vsize[1] * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
+	glBufferData(GL_ARRAY_BUFFER, _vsize[1] * sizeof(GLfloat), NULL, GL_STATIC_DRAW); // orphaning the buffer, sending NULL data.
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize[1] * sizeof(GLfloat), &_varray2[0]);
 
 	glEnableVertexAttribArray(0);
@@ -338,7 +338,7 @@ void RenderableFov::updateData(){
 	}else{
 		glBindVertexArray(_vaoID[1]);
 		glBindBuffer(GL_ARRAY_BUFFER, _vboID[1]);
-		glBufferData(GL_ARRAY_BUFFER, _vsize[1] * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
+		glBufferData(GL_ARRAY_BUFFER, _vsize[1] * sizeof(GLfloat), NULL, GL_STATIC_DRAW); // orphaning the buffer, sending NULL data.
 		glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize[1] * sizeof(GLfloat), &_varray2[0]);
 
 		GLsizei st = sizeof(GLfloat) * _stride[0];
@@ -435,12 +435,6 @@ void RenderableFov::render(const RenderData& data){
 		if (diff <= 30.0) t = 1.f - diff / 30.0;
 
 		double targetEpoch;
-	/*	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-			_frame, _method, _aberrationCorrection,
-			_time, targetEpoch, boresight, ipoint, ivec);
-		psc bsvec = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-		bsvec[3] += 3;
-		*/
 		// for each FOV vector
 		for (int i = 0; i < 4; i++){
 			// compute surface intercept
