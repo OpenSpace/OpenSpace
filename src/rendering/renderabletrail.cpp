@@ -122,7 +122,7 @@ void RenderableTrail::fullYearSweep(){
 		_varray.push_back(1.f - p * _r);
 		_varray.push_back(1.f - p * _g);
 		_varray.push_back(1.f - p * _b);
-		_varray.push_back(1.f - p);
+		_varray.push_back(1.f - p*2.f);
 #else
 		_varray.push_back(1.f );
 		_varray.push_back(1.f );

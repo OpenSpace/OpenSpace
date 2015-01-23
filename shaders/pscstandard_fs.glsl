@@ -28,6 +28,9 @@ uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
 
+uniform vec3 sun_pos;
+
+uniform int shadows;
 
 uniform float time;
 uniform sampler2D texture1;
@@ -53,9 +56,9 @@ void main()
 	
 	vec3 n = normalize(vs_normal.xyz);
 	//vec3 e = normalize(camdir);
-	vec3 l_pos = vec3(0.0); // sun.
+	vec3 l_pos = sun_pos; // sun.
 	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
+	float intensity = min(max(5*dot(n,l_dir), 0.3), 1);
 	
 	float shine = 0.0001;
 
@@ -72,6 +75,7 @@ void main()
 	*/
 	vec4 tmpdiff = diffuse;
 	tmpdiff[3] = 1;
+	if(shadows == 1)
 	diffuse = max(intensity * diffuse, ambient);
 	//diffuse[3] = 0.6f;
 	//diffuse = vec4(1);

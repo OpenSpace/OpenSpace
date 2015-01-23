@@ -41,6 +41,8 @@
 
 namespace {
 const std::string _loggerCat = "RenderablePlanet";
+
+const std::string keyBody = "Body";
 }
 
 namespace openspace {
@@ -71,7 +73,10 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
+	dictionary.getValue(constants::renderableplanet::keyFrame, _frame);
+
+	bool b1 = dictionary.getValue(keyBody, _target);
+	assert(b1 == true);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -137,7 +142,7 @@ void RenderablePlanet::render(const RenderData& data)
 		}
 	}
 	transform = transform* rot;
-	if (_target == "IAU_JUPITER"){ //x = 0.935126
+	if (_frame == "IAU_JUPITER"){ //x = 0.935126
 		transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.93513, 1));
 	}
 
@@ -145,8 +150,15 @@ void RenderablePlanet::render(const RenderData& data)
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 
+	psc sun_pos;
+	double  lt;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, sun_pos, lt);
+
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
+	int shadows = (_target == "SUN") ? 0 : 1;
+	_programObject->setUniform("shadows", shadows);
+	_programObject->setUniform("sun_pos", sun_pos.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
@@ -166,7 +178,8 @@ void RenderablePlanet::render(const RenderData& data)
 
 void RenderablePlanet::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, "GALACTIC", data.time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, "GALACTIC", data.time, _stateMatrix);
+	_time = data.time;
 }
 
 void RenderablePlanet::loadTexture()
