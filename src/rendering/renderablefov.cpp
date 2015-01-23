@@ -359,6 +359,8 @@ void RenderableFov::computeColors(){
 	double t = 0.0;
 	if (diff <= 7.0) t = 1.f - diff / 7.0;
 
+	if (diff < 0) t = 0.0;
+
 	c_project = glm::vec4(0.0, 1.0, 0.00,1);
 	col_end   = glm::vec4(1.00, 0.29, 0.00, 1);
 	blue      = glm::vec4(0, 0.5, 0.7, 1);
@@ -412,9 +414,11 @@ void RenderableFov::render(const RenderData& data){
 
 		// set target based on visibility to specific instrument,
 		// from here on the _fovTarget is the target for all spice functions.
-		std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
+		//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
+		std::string potential[2] = { "Pluto", "Charon" };
+
 		_fovTarget = potential[0]; //default
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 2; i++){
 			_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], 
 																				_spacecraft, _method,
 																				_aberrationCorrection, _time);

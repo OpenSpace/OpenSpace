@@ -1,5 +1,5 @@
 --openspace.setPropertyValue('Earth.renderable.colorTexture', '${OPENSPACE_DATA}/modules/mars/textures/mars.png')
-openspace.time.setTime("2015-07-14T09:19:00.557") -- pluto
+openspace.time.setTime("2015-07-14T09:13:00.557") -- pluto
 
 --openspace.time.setDeltaTime(200000.0)
 --openspace.time.setDeltaTime(5000.00)
