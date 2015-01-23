@@ -49,6 +49,8 @@ layout(location = 2) out vec3 ge_velocity;
 layout(location = 3) out float ge_speed;
 layout(location = 4) out vec2 texCoord;
 
+// layout(location = 5) out vec4 p;
+
 uniform mat4 projection; // we do this after distance computation. 
 
 uniform float spriteSize;
@@ -72,23 +74,31 @@ void main() {
 	z = result[2];
 	w = result[3];
 
+	// p = vec4(vec3(length(vec3(x,y,z)),w);
+	float l = length(vec3(x,y,z));
+	// p = vec4(vec3(l), w);
+
 	vec2 pc = vec2(length(result.xyz), result[3]);
 
 	// @Check conversion is also done in the cpp file ---abock	 
 	pc[0] *= 0.324077929f;                                          // convert meters -> parsecs
 	pc[1] += -18.0f;
 	
-	float pc_psc   = pc[0] * pow(10, pc[1]);                       // psc scale out
-	float apparent = -(M - 5.0f * (1.f - log10(pc_psc)));          // get APPARENT magnitude. 
+	float distLog = log10(pc[0]) + pc[1];
+	float apparent = (M - 5.f * (1.f - distLog));
+
+	// p = vec4(vec3(apparent), 1.0);
      
 	vec4 P = gl_in[0].gl_Position;
 	 
+	 // check everything below this ---abock
 	float weight = 0.00001f; 										    // otherwise this takes over.
 	float depth  = pc[0] * pow(10, pc[1]);
+	// depth *= abs(apparent);
 	depth       *= pow(apparent,3);
 
 	//float modifiedSpriteSize = spriteSize + (depth*weight); 
-	float modifiedSpriteSize = 0.0005 + (depth*weight); 
+	float modifiedSpriteSize = (depth*weight); 
 	
 	// EMIT QUAD
 	for(int i = 0; i < 4; i++){
@@ -97,7 +107,8 @@ void main() {
 		vs_position = p1;
 		gl_Position = projection * p1;  
 		// gl_Position = z_normalization(projection * p1);
-		texCoord    = corners[i];                           
+		texCoord    = corners[i];      
+		// p =       psc_position[0];               
 	  EmitVertex();
 	}
 	EndPrimitive();

@@ -50,9 +50,10 @@ void main() {
 
 	vec4 tmp = in_position;
 	vec4 position = pscTransform(tmp, mat4(1.0));
+	// vec4 position = pscTransform(tmp, model);
 	// psc_position = tmp;
-	position = model * view * position;
+	position = view * position;
 	// position = ViewProjection * ModelTransform * position;
 	// gl_Position =  z_normalization(position);
-	gl_Position =  position;
+	gl_Position = position;
 }

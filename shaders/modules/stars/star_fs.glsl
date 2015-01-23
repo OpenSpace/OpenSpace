@@ -41,7 +41,7 @@ layout(location = 2) in vec3 ge_velocity;
 layout(location = 3) in float ge_speed;
 layout(location = 4) in vec2 texCoord;
 
-
+// layout(location = 5) in vec4 p;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -74,15 +74,13 @@ void main() {
 	}
 
 
-	// color.rgb = 1/ color.rgb;
-	// color.a = 1-color.a;
     framebuffer_output_color = texture(psfTexture, texCoord) * color;
-    // framebuffer_output_color = vec4(1.0, 0.0, 0.0, 1.0);
 
-    // framebuffer_output_color = vec4(ge_velocity, 1.0);
+    // framebuffer_output_color = vec4(vs_position.rgb, 1.0);
 
-    //diffuse = vec4(1,1,0,1);
-   ///diffuse = vec4(Color, 1.0);
+    // framebuffer_output_color = p;
+    // framebuffer_output_color = vec4(vec3(ge_brightness.z), 1.0);
+    // framebuffer_output_color = vec4(vec3(abs(ge_brightness.z)), 1.0);
 
    	vec4 position = vs_position;
 	float depth = pscDepth(position);
