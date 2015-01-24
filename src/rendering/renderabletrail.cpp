@@ -68,12 +68,12 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 {
 
 	_successfullDictionaryFetch = true;
-	_successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
-	_successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
-	_successfullDictionaryFetch &= dictionary.getValue(keyFrame, _frame);
+	_successfullDictionaryFetch &= dictionary.getValue(keyBody               , _target);
+	_successfullDictionaryFetch &= dictionary.getValue(keyObserver           , _observer);
+	_successfullDictionaryFetch &= dictionary.getValue(keyFrame              , _frame);
 	_successfullDictionaryFetch &= dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
-	_successfullDictionaryFetch &= dictionary.getValue(keyEarthOrbitRatio, _ratio);
-	_successfullDictionaryFetch &= dictionary.getValue(keyDayLength, _day);
+	_successfullDictionaryFetch &= dictionary.getValue(keyEarthOrbitRatio    , _ratio);
+	_successfullDictionaryFetch &= dictionary.getValue(keyDayLength          , _day);
 
 	// values in modfiles set from here
 	// http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
