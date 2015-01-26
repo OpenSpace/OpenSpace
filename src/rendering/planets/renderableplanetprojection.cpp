@@ -278,7 +278,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 	_boresight = _instrumentMatrix*aim;
 	glm::vec3 uptmp(_instrumentMatrix*glm::dvec3(up));
 
-	//create view matrix
+	// create view matrix
 	glm::vec3 e3 = glm::normalize(_boresight);
 	glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
 	glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
@@ -286,9 +286,9 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 										 e1.y, e2.y, e3.y, 0.f,
 										 e1.z, e2.z, e3.z, 0.f,
 										 -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
-	//create perspective projection matrix
+	// create perspective projection matrix
 	glm::mat4 projProjectionMatrix = glm::perspective(_fovy, _aspectRatio, _nearPlane, _farPlane);
-	//bias matrix
+	// bias matrix
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
 		                                          0, 0.5f, 0, 0,
 		                                          0, 0, 0.5f, 0,
@@ -310,16 +310,16 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 		}
 	}
 	_transform = _transform* rot;
-	if (_target == "IAU_JUPITER"){ // tmp scale of jupiterx = 0.935126
+/*	if (_target == "IAU_JUPITER"){ // tmp scale of jupiterx = 0.935126
 		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
-	}
+	}*/
 	std::string shape, instrument;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
 	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, bs, bounds);
 	if (!found) LERROR("Could not locate instrument");
 
-	psc position;
+	psc position;                                //observer      target
 	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
 	if (!found) LERROR("Could not locate target position");
 	position[3] += 3;
@@ -376,23 +376,26 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	
 	bool _withinFOV;
 	/* -- TEMPORARY TARGETING SOLUTION -- FML */
-	std::string potential[5] = { "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" };
-	std::string p2[5] = { "JUPITER BARYCENTER", "IO", "EUROPA", "GANYMEDE", "CALLISTO" }; // "Barycenter" term messes it all up.. SPICE ambiguities!
+	std::string potential[2] = { "PLUTO", "CHARON" };
+	std::string p2[2] = { "PLUTO BARYCENTER", "CHARON" }; // "Barycenter" term messes it all up.. SPICE ambiguities!
 
 	std::string _fovTarget = "";
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < 2; i++){
 		_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0]);
 		if (_withinFOV){
 			_fovTarget = p2[i];
 			break;
 		}
 	}
+	_capture = true;
+	/*
 	if (_projecteeID  == _fovTarget){
 		_next = _defaultProjImage;
-		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime())
-		_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
+		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime()){
+			_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
+		}
 		_projectionTexturePath = _next;
-	}
+	}*/
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){

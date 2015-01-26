@@ -171,11 +171,6 @@ bool ImageSequencer::loadSequence(const std::string dir){
 					bool found = false;
 					do {
 						std::getline(file, line);
-						auto p = line.find("IO");
-						bool print = false;
-						if (p != std::string::npos){
-							print = true;
-						}
 						for (int i = 0; i < 2; i++){
 							auto pos = line.find(specsOfInterest[i]);
 							if (pos != std::string::npos){
@@ -192,10 +187,10 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							if ( it != sequencePaths.end()){
 								createImage(timestamps[0], timestamps[1], path);
 							}
+							std::string timestr;
+							openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
 
-							if (print){
-								std::cout << "Found europa at time " << timestamps[0] << " " << path << std::endl;
-							}
+							std::cout << "Found at time " << timestr << " " << path << std::endl;
 						}
 					} while (!file.eof() && found == false);
 				}
