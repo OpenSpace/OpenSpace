@@ -98,7 +98,6 @@ double ImageSequencer::nextCaptureTime(double _time){
 
 	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", false }, cmp);
 
-	std::cout << _nextCapture << std::endl;
 	if (_time < _nextCapture) return _nextCapture;
 	return it->startTime;
 }
@@ -150,6 +149,84 @@ bool ImageSequencer::sequenceReset(){
 	return true;
 }
 
+bool replace(std::string& str, const std::string& from, const std::string& to) {
+	size_t start_pos = str.find(from);
+	if (start_pos == std::string::npos)
+		return false;
+	str.replace(start_pos, from.length(), to);
+	return true;
+}
+
+bool ImageSequencer::parsePlaybook(const std::string dir, std::string year){
+	ghoul::filesystem::Directory playbookDir(dir, true);
+	std::vector<std::string> dirlist = playbookDir.read(true, false);
+	for (auto path : dirlist){
+		if (size_t position = path.find_last_of(".") + 1){
+			if (position != std::string::npos){
+				ghoul::filesystem::File currentFile(path);
+				std::string extension = currentFile.fileExtension();
+				
+				if (extension == "csv"){ // comma separated playbook
+					std::ifstream file(currentFile.path());
+					if (!file.good()) LERROR("Failed to open csv file '" << currentFile.path() << "'");
+
+					std::string timestr = "";
+					double shutter = 0.01;
+					double et;
+					do{
+						std::getline(file, timestr);
+						auto pos = timestr.find("LORRI image started");
+						if (pos != std::string::npos){
+							timestr = timestr.substr(timestr.find_first_of(",")+1);
+							timestr = timestr.substr(0, timestr.find_first_of(","));
+
+							replace(timestr, " ", "::");
+							timestr = year + " " + timestr;
+							
+							openspace::SpiceManager::ref().getETfromDate(timestr, et);
+							std::string defaultImagePath = dir + "/placeholder.png";
+							createImage(et, et + shutter, defaultImagePath);
+						}
+					} while (!file.eof());
+				} 
+				
+				/*
+				if (extension == "txt"){// Hong Kang. pre-parsed playbook
+					std::ifstream file(currentFile.path());
+					if (!file.good()) LERROR("Failed to open csv file '" << currentFile.path() << "'");
+					std::cout << "HERE" << std::endl;
+					std::string timestr = "";
+					double shutter = 0.01;
+					double et;
+					do{
+						std::getline(file, timestr);
+						auto pos = timestr.find("LORRI Image Started");
+						if (pos != std::string::npos){
+							timestr = timestr.substr(24, 9);
+							std::string::size_type sz;     // alias of size_t
+
+							double sclk = std::stod(timestr, &sz);
+							//et = 2453755.256337 + (et / 86399.9998693);
+
+							openspace::SpiceManager::ref().spacecraftClockToET("NEW HORIZONS", sclk, et);
+
+							std::string str;
+							openspace::SpiceManager::ref().getDateFromET(et, str);
+							std::cout << str << std::endl;
+
+							std::string defaultImagePath = dir + "/placeholder.png";
+							std::cout << defaultImagePath << std::endl;
+							createImage(et, et + shutter, defaultImagePath);
+						}
+					} while (!file.eof());
+				}
+				*/
+			}
+		}
+	}
+	return true; // add check
+}
+
 bool ImageSequencer::loadSequence(const std::string dir){	
 	ghoul::filesystem::Directory sequenceDir(dir, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
@@ -189,7 +266,6 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							}
 							std::string timestr;
 							openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
-
 							std::cout << "Found at time " << timestr << " " << path << std::endl;
 						}
 					} while (!file.eof() && found == false);

@@ -17,7 +17,7 @@ openspace.bindKey("T", "openspace.distance(-interaction_speed * openspace.dt(), 
 openspace.bindKey("G", "openspace.distance(interaction_speed * openspace.dt(), 6.0)")
 openspace.bindKey("Y", "openspace.distance(-interaction_speed * openspace.dt(), 10.0)")
 openspace.bindKey("H", "openspace.distance(interaction_speed * openspace.dt(), 10.0)")
-openspace.bindKey("U", "openspace.distance(-interaction_speed * openspace.dt(), 13.0)")
-openspace.bindKey("J", "openspace.distance(interaction_speed * openspace.dt(), 13.0)")
+openspace.bindKey("U", "openspace.distance(-interaction_speed * openspace.dt(), 10.0)")
+openspace.bindKey("J", "openspace.distance(interaction_speed * openspace.dt(), 10.0)")
 
 openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")

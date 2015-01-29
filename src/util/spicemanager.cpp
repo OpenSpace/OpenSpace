@@ -239,6 +239,13 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	return !hasError;
 }
 
+bool SpiceManager::spacecraftClockToET(const std::string craftIdCode, double& craftTicks, double& et){
+	int craftID;
+	getNaifId(craftIdCode, craftID);
+	sct2e_c(craftID, craftTicks, &et);
+	return true;
+}
+
 bool SpiceManager::getETfromDate(const std::string& timeString,
                                  double& ephemerisTime) const
 {

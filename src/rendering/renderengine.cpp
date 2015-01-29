@@ -438,15 +438,19 @@ void RenderEngine::render()
 			int g = ((t) * 20) + 1;
 			for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
 			for (int i = 0; i < 21 - g; i++) progress.append(" ");
+
+			std::string str = "";
+			openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
 		
 			progress.append("|");
 			if (remaining > 0){
-				glm::vec4 w(1);
 				glm::vec4 g1(0, t, 0, 1);
 				glm::vec4 g2(1-t);
 				PrintColorText(i++, "Next projection in     | %.0f seconds", 10, g1+g2, remaining);
 				PrintColorText(i++, "%s %.1f %%", 10, g1 + g2, progress.c_str(), t * 100);
 			}
+			glm::vec4 w(1);
+			PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str());
 
 #undef PrintText
 		}

@@ -39,6 +39,7 @@ in vec4 vs_position;
 
 in vec4 ProjTexCoord;
 uniform vec3 boresight;
+uniform vec3 sun_pos;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -57,7 +58,7 @@ void main()
 	
 	vec3 n = normalize(vs_normal.xyz);
 	//vec3 e = normalize(camdir);
-	vec3 l_pos = vec3(0.0); // sun.
+	vec3 l_pos = sun_pos; // sun.
 	vec3 l_dir = normalize(l_pos-objpos.xyz);
 	float terminatorBright = 0.4;
 	float intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);

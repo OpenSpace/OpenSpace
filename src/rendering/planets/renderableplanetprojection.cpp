@@ -130,12 +130,21 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_projectionTexturePath);
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
-	std::string sPath = "F:/JupiterFullSequence";
 	bool found = dictionary.getValue(keySequenceDir, _sequenceDir);
 	if (found){
+		/*
 		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
 		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
+		*/
+		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook");
 	}
+
+	std::string str = "2015 191::22:04:21";
+	double ettest;
+	openspace::SpiceManager::ref().getETfromDate(str, ettest);
+	openspace::SpiceManager::ref().getDateFromET(ettest, str);
+	std::cout <<"THIS : " <<  str << std::endl;
+
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -310,7 +319,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 		}
 	}
 	_transform = _transform* rot;
-/*	if (_target == "IAU_JUPITER"){ // tmp scale of jupiterx = 0.935126
+/*	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
 		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
 	}*/
 	std::string shape, instrument;
@@ -338,16 +347,20 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 #ifdef GPU_PROJ
 	if (_capture){
-		attitudeParameters(_time[1]);
+		attitudeParameters(_time[0]);
 		imageProjectGPU();
 	}
 #endif
 	attitudeParameters(_time[1]);
 
+	psc sun_pos;
+	double  lt;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time[1], sun_pos, lt);
 
 	// Main renderpass
 	_programObject->activate();
     // setup the data to the shader
+	_programObject->setUniform("sun_pos", sun_pos.vec3());
 	_programObject->setUniform("ProjectorMatrix", _projectorMatrix);
 	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
@@ -373,29 +386,26 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	_time[0] = data.time;
 	_time[1] = _time[0];
 	_capture = false;
-	
+
 	bool _withinFOV;
-	/* -- TEMPORARY TARGETING SOLUTION -- FML */
-	std::string potential[2] = { "PLUTO", "CHARON" };
-	std::string p2[2] = { "PLUTO BARYCENTER", "CHARON" }; // "Barycenter" term messes it all up.. SPICE ambiguities!
+	/* -- TEMPORARY TARGETING SOLUTION -- */
+	std::string potential[2] = { "PLUTO", "CHARON" }; // only possible to target these two for now. 
 
 	std::string _fovTarget = "";
 	for (int i = 0; i < 2; i++){
 		_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0]);
 		if (_withinFOV){
-			_fovTarget = p2[i];
+			_fovTarget = potential[i];
 			break;
 		}
 	}
-	_capture = true;
-	/*
 	if (_projecteeID  == _fovTarget){
 		_next = _defaultProjImage;
 		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime()){
 			_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
 		}
 		_projectionTexturePath = _next;
-	}*/
+	}
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){

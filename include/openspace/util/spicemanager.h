@@ -218,6 +218,9 @@ public:
 	bool getValue(const std::string& body, const std::string& value,
 		std::vector<double>& v) const;
 
+
+	bool spacecraftClockToET(const std::string craftIdCode, double& craftTicks, double& et);
+
 	/**
 	 * Converts the <code>timeString</code> representing a date to a double precision
      * value representing the <code>ephemerisTime</code>; that is the number of TDB

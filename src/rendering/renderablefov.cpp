@@ -107,7 +107,7 @@ void RenderableFov::allocateData(){
 	_varray2.resize(40);
 	_vsize[1] = 40;
 	_vtotal[1] = 5;
-	_isteps = 5;
+	_isteps = 10;
 }
 
 RenderableFov::~RenderableFov(){
@@ -470,7 +470,7 @@ void RenderableFov::render(const RenderData& data){
 				memcpy(&_varray1[indx], glm::value_ptr(blue), size);
 				indx += 4;
 			}else{
-				glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]);
+				glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]+1);
 				corner = tmp*corner;
 				// "INFINITE" FOV
 				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
