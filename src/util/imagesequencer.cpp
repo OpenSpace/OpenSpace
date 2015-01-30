@@ -157,7 +157,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 	return true;
 }
 
-bool ImageSequencer::parsePlaybook(const std::string dir, std::string year){
+bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& type, std::string year){
 	ghoul::filesystem::Directory playbookDir(dir, true);
 	std::vector<std::string> dirlist = playbookDir.read(true, false);
 	for (auto path : dirlist){
@@ -165,8 +165,9 @@ bool ImageSequencer::parsePlaybook(const std::string dir, std::string year){
 			if (position != std::string::npos){
 				ghoul::filesystem::File currentFile(path);
 				std::string extension = currentFile.fileExtension();
-				
-				if (extension == "csv"){ // comma separated playbook
+
+				if (extension == type && extension == "csv"){ // comma separated playbook
+					std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
 					std::ifstream file(currentFile.path());
 					if (!file.good()) LERROR("Failed to open csv file '" << currentFile.path() << "'");
 
@@ -190,14 +191,16 @@ bool ImageSequencer::parsePlaybook(const std::string dir, std::string year){
 					} while (!file.eof());
 				} 
 				
-				/*
-				if (extension == "txt"){// Hong Kang. pre-parsed playbook
+				if (extension == type && extension == "txt"){// Hong Kang. pre-parsed playbook
+					std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;
 					std::ifstream file(currentFile.path());
-					if (!file.good()) LERROR("Failed to open csv file '" << currentFile.path() << "'");
-					std::cout << "HERE" << std::endl;
+					if (!file.good()) LERROR("Failed to open txt file '" << currentFile.path() << "'");
+
 					std::string timestr = "";
 					double shutter = 0.01;
 					double et;
+					
+					double metRef = 299180517;
 					do{
 						std::getline(file, timestr);
 						auto pos = timestr.find("LORRI Image Started");
@@ -205,22 +208,28 @@ bool ImageSequencer::parsePlaybook(const std::string dir, std::string year){
 							timestr = timestr.substr(24, 9);
 							std::string::size_type sz;     // alias of size_t
 
-							double sclk = std::stod(timestr, &sz);
-							//et = 2453755.256337 + (et / 86399.9998693);
+							double met = std::stod(timestr, &sz);
+							double diff;
+							openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
 
-							openspace::SpiceManager::ref().spacecraftClockToET("NEW HORIZONS", sclk, et);
-
+							diff = abs(met - metRef);
+							if (met > metRef){
+								et += diff;
+							}
+							else if (met < metRef){
+								et -= diff;
+							}
+							/*
 							std::string str;
 							openspace::SpiceManager::ref().getDateFromET(et, str);
 							std::cout << str << std::endl;
-
+							*/
 							std::string defaultImagePath = dir + "/placeholder.png";
-							std::cout << defaultImagePath << std::endl;
 							createImage(et, et + shutter, defaultImagePath);
 						}
 					} while (!file.eof());
 				}
-				*/
+				
 			}
 		}
 	}
@@ -273,6 +282,8 @@ bool ImageSequencer::loadSequence(const std::string dir){
 			}
 		}
 	}
+	// NEED TO FIX THIS LATER ON
+
 	//_nextCapture = nextCaptureTime(Time::ref().currentTime()); // this is not really working 100%
 	//_intervalLength = _timeStamps[1].startTime;
 	return !sequencePaths.empty();

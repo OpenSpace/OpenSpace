@@ -39,7 +39,7 @@ public:
 	static ImageSequencer& ref();
 	bool loadSequence(const std::string dir);
 
-	bool parsePlaybook(const std::string dir, std::string year = "2015");
+	bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
 
 	void testStartTimeMap();
 

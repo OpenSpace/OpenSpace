@@ -136,15 +136,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
 		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
 		*/
-		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook");
+		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
 	}
-
-	std::string str = "2015 191::22:04:21";
-	double ettest;
-	openspace::SpiceManager::ref().getETfromDate(str, ettest);
-	openspace::SpiceManager::ref().getDateFromET(ettest, str);
-	std::cout <<"THIS : " <<  str << std::endl;
-
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
