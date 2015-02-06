@@ -64,6 +64,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 	, _vBufferID(0)
 	, _iBufferID(0)
 	, _mode(GL_LINE_STRIP)
+	, _oldTime(std::numeric_limits<float>::max())
 {
 
 	_successfullDictionaryFetch = true;
@@ -106,7 +107,7 @@ void RenderableTrail::fullYearSweep(){
 	
 	_isize = (segments + 2);
 	_vsize = (segments + 2);
-	_iarray.clear();
+	//_iarray.clear();
 	//_iarray = new int[_isize];
 	
 	for (int i = 0; i < segments+2; i++){
@@ -129,8 +130,8 @@ void RenderableTrail::fullYearSweep(){
 		_varray.push_back(1.f );
 #endif
  		//_iarray[i] = i;
-		_iarray.push_back(i);
-		if (i != 0) //very first point needs to be alllocated twice.
+		//_iarray.push_back(i);
+		//if (i != 0) //very first point needs to be alllocated twice.
 		et -= _increment;
 	}
 	_stride = 8;
@@ -151,7 +152,7 @@ void RenderableTrail::sendToGPU(){
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);
 	glGenBuffers(1, &_vBufferID);
-	glGenBuffers(1, &_iBufferID);
+	//glGenBuffers(1, &_iBufferID);
 
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
@@ -165,12 +166,11 @@ void RenderableTrail::sendToGPU(){
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
+	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);*/
 
 	glBindVertexArray(0);
 }
-
 
 bool RenderableTrail::initialize(){
 
@@ -240,9 +240,12 @@ void RenderableTrail::updateTrail(){
 	int m = _stride;
 	float *begin = &_varray[0];
 	//float *end = &_varray[_vsize - 1] + 1;
-
+	
+	//fix so that updatetrail is not run on the first update pass even though no time has passed.
+	//also != operator is iffy for floating point values, _oldTime is now std::numeric_limits<float>::max()
+	if (_oldTime < _time){
 	// update only when time progresses
-	if (_oldTime != _time){
+	//if (_oldTime != _time){
 		// if time progressed more than N _increments 
 		while (_dtEt < _time){
 			// get intermediary points
@@ -306,6 +309,7 @@ void RenderableTrail::render(const RenderData& data){
 	glBindVertexArray(0);
 	
 	_programObject->deactivate();
+
 }
 
 void RenderableTrail::update(const UpdateData& data){
