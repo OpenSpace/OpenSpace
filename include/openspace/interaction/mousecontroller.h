@@ -41,6 +41,7 @@ public:
 	virtual void button(MouseAction action, MouseButton button) = 0;
 	virtual void move(float x, float y) = 0;
 	virtual void scrollWheel(int pos) = 0;
+	virtual void update(const double& dt) = 0;
 
 protected:
 	glm::vec3 _lastTrackballPos;
@@ -63,8 +64,37 @@ public:
 
 	void scrollWheel(int pos);
 
+	void update(const double& dt);
+
 protected:
 	bool _leftMouseButtonDown;
+	glm::vec3 _previousTrackballPos;
+};
+
+class OrbitalMouseController : public MouseController {
+public:
+	OrbitalMouseController();
+
+	void button(MouseAction action, MouseButton button);
+
+	void move(float x, float y);
+
+	void scrollWheel(int pos);
+
+	void update(const double& dt);
+
+protected:
+	bool _leftMouseButtonDown;
+	bool _rightMouseButtonDown;
+	bool _middleMouseButtonDown;
+	glm::vec2 _previousCursorPos[3];
+	glm::vec2 _currentCursorPos;
+	glm::vec2 _currentCursorDiff[3];
+	float _rotationSpeed;
+	float _navigationSpeed;
+
+private:
+	enum MouseButtons{ ButtonLeft = 0, ButtonRight, ButtonMiddle };
 };
 
 } // namespace interaction
