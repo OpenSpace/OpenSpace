@@ -199,9 +199,7 @@ void RenderableStars::render(const RenderData& data) {
 
 	glBindVertexArray(_vao);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
-	//glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glDrawArrays(GL_POINTS, 0, nStars);  
-	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_POINTS, 0, nStars);
 
 	glBindVertexArray(0);
 	_program->setIgnoreUniformLocationError(false);

@@ -80,10 +80,8 @@ void main() {
 
 	// p = vec4(vec3(apparent), 1.0);
      
-	vec4 P = gl_in[0].gl_Position;
-	 
 	 // check everything below this ---abock
-	float weight = 0.00001f; 										    // otherwise this takes over.
+	float weight = 0.000005f; 										    // otherwise this takes over.
 	double depth  = pc[0] * pow(10, pc[1]);
 	depth       *= pow(apparent,3);
 
@@ -92,10 +90,10 @@ void main() {
 	
 	// EMIT QUAD
 	for(int i = 0; i < 4; i++){
-		vec4 p1     = P;                 
+		vec4 p1     = gl_in[0].gl_Position;                 
 		p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
 		vs_position = p1;
-		gl_Position = projection * p1;  
+		gl_Position = projection * p1;
 		// gl_Position = z_normalization(projection * p1);
 		texCoord    = corners[i];      
 		// p =       psc_position[0];               
