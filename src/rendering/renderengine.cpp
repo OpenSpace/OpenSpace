@@ -540,21 +540,25 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 }
 
 void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-	syncBuffer->encode(_mainCamera->scaling());
-	syncBuffer->encode(_mainCamera->position());
-	syncBuffer->encode(_mainCamera->viewRotationMatrix());
+	if (_mainCamera){
+		syncBuffer->encode(_mainCamera->scaling());
+		syncBuffer->encode(_mainCamera->position());
+		syncBuffer->encode(_mainCamera->viewRotationMatrix());
+	}
 }
 
 void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
-	glm::vec2 scaling;
-	psc position;
-	glm::mat4 viewRotation;
-	syncBuffer->decode(scaling);
-	syncBuffer->decode(position);
-	syncBuffer->decode(viewRotation);
-	_mainCamera->setScaling(scaling);
-	_mainCamera->setPosition(position);
-	_mainCamera->setViewRotationMatrix(viewRotation);
+	if (_mainCamera){
+		glm::vec2 scaling;
+		psc position;
+		glm::mat4 viewRotation;
+		syncBuffer->decode(scaling);
+		syncBuffer->decode(position);
+		syncBuffer->decode(viewRotation);
+		_mainCamera->setScaling(scaling);
+		_mainCamera->setPosition(position);
+		_mainCamera->setViewRotationMatrix(viewRotation);
+	}
 }
 
 Camera* RenderEngine::camera() const {

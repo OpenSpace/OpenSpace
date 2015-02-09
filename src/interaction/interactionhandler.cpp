@@ -475,6 +475,7 @@ void InteractionHandler::unlockControls() {
 //=======
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
+	_mouseController->update(deltaTime);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -516,6 +517,56 @@ void InteractionHandler::mousePositionCallback(int x, int y) {
 void InteractionHandler::mouseScrollWheelCallback(int pos) {
 	if (_mouseController)
 		_mouseController->scrollWheel(pos);
+}
+
+void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz){
+
+	lockControls();
+	
+	// should be changed to something more dynamic =)
+	psc origin;
+	if (_focusNode) {
+		origin = _focusNode->worldPosition();
+	}
+
+	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
+	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
+
+	glm::mat4 transform;
+	transform = glm::rotate(dx, cameraUp) * transform;
+	transform = glm::rotate(dy, cameraRight) * transform;
+	transform = glm::rotate(dz, _camera->viewDirection()) * transform;
+
+	// the camera position
+	psc relative = _camera->position();
+	psc relative_origin_coordinate = relative - origin;
+	relative_origin_coordinate = glm::inverse(transform) * relative_origin_coordinate.vec4();
+	relative = relative_origin_coordinate + origin;
+
+	_camera->setPosition(relative);
+	_camera->rotate(glm::quat_cast(transform));
+
+	unlockControls();
+}
+
+void InteractionHandler::distance(const float &d){
+
+	lockControls();
+
+	psc relative = _camera->position();
+	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+	psc relative_origin_coordinate = relative - origin;
+	// addition 100% of bounds (fix later to something node specific?)
+	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+
+	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+	//don't fly into objects
+	if ((target - origin).length() < bounds){
+		target = relative;
+	}
+	_camera->setPosition(target);
+	
+	unlockControls();
 }
 
 void InteractionHandler::orbitDelta(const glm::quat& rotation)
@@ -881,6 +932,7 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 //=======
 void InteractionHandler::setRotation(const glm::quat& rotation)
 {
+	_camera->setRotation(rotation);
 }
 
 double InteractionHandler::deltaTime() const {

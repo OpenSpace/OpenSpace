@@ -279,7 +279,8 @@ bool OpenSpaceEngine::initialize() {
 
 	_interactionHandler.setKeyboardController(new interaction::KeyboardControllerFixed);
 	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
-	_interactionHandler.setMouseController(new interaction::TrackballMouseController);
+	//_interactionHandler.setMouseController(new interaction::TrackballMouseController);
+	_interactionHandler.setMouseController(new interaction::OrbitalMouseController);
 
 	// Run start up scripts
 	runStartupScripts();

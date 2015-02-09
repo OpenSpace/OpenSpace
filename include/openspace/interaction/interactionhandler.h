@@ -118,6 +118,10 @@ public:
 
 	void orbitDelta(const glm::quat& rotation);
 
+	void orbit(const float &dx, const float &dy, const float &dz);
+
+	void distance(const float &d);
+
 	void rotateDelta(const glm::quat& rotation);
 
 	void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
