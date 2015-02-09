@@ -25,6 +25,8 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
+#include <mutex>
+
 // open space includes
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -88,6 +90,8 @@ namespace openspace {
 //    mutable bool _viewMatrixIsDirty;
 //};
 
+	class SyncBuffer;
+
 class Camera {
 public:
     Camera();
@@ -121,8 +125,8 @@ public:
 	void setRotation(glm::mat4 rotation);
 
 	const glm::vec3& viewDirection() const;
-    
-    const float& maxFov() const;
+
+	const float& maxFov() const;
     const float& sinMaxFov() const;
     void setMaxFov(float fov);
     void setScaling(glm::vec2 scaling);
@@ -130,6 +134,10 @@ public:
 
     void setLookUpVector(glm::vec3 lookUp);
     const glm::vec3& lookUpVector() const;
+
+	void postSynchronizationPreDraw();
+	void serialize(SyncBuffer* syncBuffer);
+	void deserialize(SyncBuffer* syncBuffer);
 
 private:
     float _maxFov;
@@ -146,6 +154,12 @@ private:
     glm::mat4 _viewRotationMatrix;  // compiled from the quaternion
 
     glm::vec3 _lookUp;
+
+	//cluster variables
+	glm::vec2 _sharedScaling;
+	psc _sharedPosition;
+	glm::mat4 _sharedViewRotationMatrix;
+	std::mutex _syncMutex;
 };
 
 } // namespace openspace

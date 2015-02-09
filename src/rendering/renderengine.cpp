@@ -297,6 +297,10 @@ bool RenderEngine::initializeGL()
 
 void RenderEngine::postSynchronizationPreDraw()
 {
+	if (_mainCamera){
+		_mainCamera->postSynchronizationPreDraw();
+	}
+
 	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
 	bool updateAbuffer = false;
 	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
@@ -541,23 +545,13 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 
 void RenderEngine::serialize(SyncBuffer* syncBuffer) {
 	if (_mainCamera){
-		syncBuffer->encode(_mainCamera->scaling());
-		syncBuffer->encode(_mainCamera->position());
-		syncBuffer->encode(_mainCamera->viewRotationMatrix());
+		_mainCamera->serialize(syncBuffer);
 	}
 }
 
 void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
 	if (_mainCamera){
-		glm::vec2 scaling;
-		psc position;
-		glm::mat4 viewRotation;
-		syncBuffer->decode(scaling);
-		syncBuffer->decode(position);
-		syncBuffer->decode(viewRotation);
-		_mainCamera->setScaling(scaling);
-		_mainCamera->setPosition(position);
-		_mainCamera->setViewRotationMatrix(viewRotation);
+		_mainCamera->deserialize(syncBuffer);
 	}
 }
 

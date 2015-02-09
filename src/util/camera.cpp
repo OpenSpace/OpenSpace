@@ -24,6 +24,7 @@
 
 // open space includes
 #include <openspace/util/camera.h>
+#include <openspace/util/syncbuffer.h>
 
 // sgct includes
 #include "sgct.h"
@@ -47,6 +48,9 @@ Camera::Camera()
     , _scaling(1.f, 0.f)
     //, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
 	, _viewRotationMatrix(1.f)
+	, _sharedPosition()
+	, _sharedScaling(1.f, 0.f)
+	, _sharedViewRotationMatrix(1.f)
 {
 }
 
@@ -192,6 +196,34 @@ const glm::vec3& Camera::lookUpVector() const
 {
     return _lookUp;
 }
+
+void Camera::serialize(SyncBuffer* syncBuffer){
+	_syncMutex.lock();
+	_sharedViewRotationMatrix = _viewRotationMatrix;
+	_sharedPosition = _position;
+	_sharedScaling = _scaling;
+	syncBuffer->encode(_sharedViewRotationMatrix);
+	syncBuffer->encode(_sharedPosition);
+	syncBuffer->encode(_sharedScaling);
+	_syncMutex.unlock();
+}
+
+void Camera::deserialize(SyncBuffer* syncBuffer){	
+	_syncMutex.lock();
+	syncBuffer->decode(_sharedViewRotationMatrix);
+	syncBuffer->decode(_sharedPosition);
+	syncBuffer->decode(_sharedScaling);
+	_syncMutex.unlock();
+}
+
+void Camera::postSynchronizationPreDraw(){
+	_syncMutex.lock();
+	_viewRotationMatrix = _sharedViewRotationMatrix;
+	_position = _sharedPosition;
+	_scaling = _sharedScaling;
+	_syncMutex.unlock();
+}
+
 
 //
 //Camera::Camera()
