@@ -82,7 +82,8 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
-    , _syncBuffer(nullptr)
+	, _syncBuffer(nullptr)
+	, _dt(0.0)
 {
 	SpiceManager::initialize();
 	Time::initialize();
@@ -493,12 +494,12 @@ bool OpenSpaceEngine::initializeGL() {
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (sgct::Engine::instance()->isMaster()) {
-        const double dt = sgct::Engine::instance()->getDt();
-
-        _interactionHandler.update(dt);
+		_dt = (_dt + sgct::Engine::instance()->getDt()) * 0.5;
+        
+        _interactionHandler.update(_dt);
         _interactionHandler.lockControls();
 
-		//Time::ref().advanceTime(dt);
+		Time::ref().advanceTime(_dt);
     }
 }
 
@@ -610,6 +611,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
 		_renderEngine.serialize(_syncBuffer);
+		
 		_syncBuffer->write();
 	}
 }
