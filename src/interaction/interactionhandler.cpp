@@ -533,9 +533,9 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
 	glm::mat4 transform;
-	transform = glm::rotate(dx, cameraUp) * transform;
-	transform = glm::rotate(dy, cameraRight) * transform;
-	transform = glm::rotate(dz, _camera->viewDirection()) * transform;
+	transform = glm::rotate(dx * 10, cameraUp) * transform;
+	transform = glm::rotate(dy * 10, cameraRight) * transform;
+	transform = glm::rotate(dz * 10, _camera->viewDirection()) * transform;
 
 	// the camera position
 	psc relative = _camera->position();
