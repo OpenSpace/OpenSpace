@@ -60,28 +60,19 @@ void main() {
 	ge_velocity = vs_velocity[0];
 	ge_speed = vs_speed[0];
 	
-	/// --- distance modulus --- NOT OPTIMIZED YET.
- 	
-//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+	//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
 	float M  = vs_brightness[0].z; // if NOT running test-target.
 	vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
 	vec4 pos = psc_position[0];                                    // get OK star position
 	
 	vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
-	float x, y, z, w;
-	x = result[0];
-	y = result[1];
-	z = result[2];
-	w = result[3];
+	vec2 pc = vec2(
+		length(result.xyz),
+		result.w
+	);
 
-	// p = vec4(vec3(length(vec3(x,y,z)),w);
-	float l = length(vec3(x,y,z));
-	// p = vec4(vec3(l), w);
-
-	vec2 pc = vec2(length(result.xyz), result[3]);
-
-	// @Check conversion is also done in the cpp file ---abock	 
-	pc[0] *= 0.324077929f;                                          // convert meters -> parsecs
+	// convert meters into parsecs
+	pc[0] *= 0.324077929f;
 	pc[1] += -18.0f;
 	
 	float distLog = log10(pc[0]) + pc[1];
@@ -93,17 +84,16 @@ void main() {
 	 
 	 // check everything below this ---abock
 	float weight = 0.00001f; 										    // otherwise this takes over.
-	float depth  = pc[0] * pow(10, pc[1]);
-	// depth *= abs(apparent);
+	double depth  = pc[0] * pow(10, pc[1]);
 	depth       *= pow(apparent,3);
 
-	//float modifiedSpriteSize = spriteSize + (depth*weight); 
-	float modifiedSpriteSize = (depth*weight); 
+	double modifiedSpriteSize = spriteSize + (depth*weight); 
+	// float modifiedSpriteSize = (depth*weight); 
 	
 	// EMIT QUAD
 	for(int i = 0; i < 4; i++){
 		vec4 p1     = P;                 
-		p1.xy      += modifiedSpriteSize *(corners[i] - vec2(0.5)); 
+		p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
 		vs_position = p1;
 		gl_Position = projection * p1;  
 		// gl_Position = z_normalization(projection * p1);
