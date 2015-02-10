@@ -519,7 +519,7 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
 		_mouseController->scrollWheel(pos);
 }
 
-void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz){
+void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz, const float &dist){
 
 	lockControls();
 	
@@ -541,33 +541,40 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	psc relative = _camera->position();
 	psc relative_origin_coordinate = relative - origin;
 	relative_origin_coordinate = glm::inverse(transform) * relative_origin_coordinate.vec4();
-	relative = relative_origin_coordinate + origin;
+	relative = origin + relative_origin_coordinate; //relative_origin_coordinate + origin;
 
-	_camera->setPosition(relative);
-	_camera->rotate(glm::quat_cast(transform));
-
-	unlockControls();
-}
-
-void InteractionHandler::distance(const float &d){
-
-	lockControls();
-
-	psc relative = _camera->position();
-	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
-	psc relative_origin_coordinate = relative - origin;
-	// addition 100% of bounds (fix later to something node specific?)
 	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
 
-	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+	psc target = relative + relative_origin_coordinate * dist;// *fmaxf(bounds, (1.f - d));
 	//don't fly into objects
 	if ((target - origin).length() < bounds){
 		target = relative;
 	}
 	_camera->setPosition(target);
-	
+	_camera->rotate(glm::quat_cast(transform));
+
 	unlockControls();
 }
+
+//void InteractionHandler::distance(const float &d){
+//
+//	lockControls();
+//
+//	psc relative = _camera->position();
+//	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+//	psc relative_origin_coordinate = relative - origin;
+//	// addition 100% of bounds (fix later to something node specific?)
+//	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+//
+//	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+//	//don't fly into objects
+//	if ((target - origin).length() < bounds){
+//		target = relative;
+//	}
+//	_camera->setPosition(target);
+//	
+//	unlockControls();
+//}
 
 void InteractionHandler::orbitDelta(const glm::quat& rotation)
 {

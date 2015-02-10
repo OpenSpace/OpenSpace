@@ -38,19 +38,22 @@ namespace openspace {
 Camera::Camera()
 	: _maxFov(0.f)
 	, _sinMaxFov(0.f)
-	, _position()
+	, _localPosition()
 	, _viewProjectionMatrix()
 	, _modelMatrix()
 	, _viewMatrix()
 	, _projectionMatrix()
 	, _viewDirection()
     , _cameraDirection(0.f, 0.f, 0.f)
-    , _scaling(1.f, 0.f)
+	, _localScaling(1.f, 0.f)
     //, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
-	, _viewRotationMatrix(1.f)
+	, _localViewRotationMatrix(1.f)
 	, _sharedPosition()
 	, _sharedScaling(1.f, 0.f)
 	, _sharedViewRotationMatrix(1.f)
+	, _syncedPosition()
+	, _syncedScaling(1.f, 0.f)
+	, _syncedViewRotationMatrix(1.f)
 {
 }
 
@@ -60,12 +63,12 @@ Camera::~Camera()
 
 void Camera::setPosition(psc pos)
 {
-    _position = std::move(pos);
+	_localPosition = std::move(pos);
 }
 
 const psc& Camera::position() const
 {
-    return _position;
+	return _syncedPosition;
 }
 
 void Camera::setModelMatrix(glm::mat4 modelMatrix){
@@ -113,12 +116,12 @@ glm::vec3 Camera::cameraDirection() const
 }
 
 void Camera::setViewRotationMatrix(glm::mat4 m) {
-	_viewRotationMatrix = m;
+	_localViewRotationMatrix = m;
 }
 
 const glm::mat4& Camera::viewRotationMatrix() const
 {
-    return _viewRotationMatrix;
+	return _syncedViewRotationMatrix;
 }
 
 void Camera::compileViewRotationMatrix()
@@ -128,14 +131,14 @@ void Camera::compileViewRotationMatrix()
 
     // the camera matrix needs to be rotated inverse to the world
    // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
-	_viewDirection = (glm::inverse(_viewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
+	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
     _viewDirection = glm::normalize(_viewDirection);
 }
 
 void Camera::rotate(const glm::quat& rotation)
 {
 	glm::mat4 tmp = glm::mat4_cast(rotation);
-	_viewRotationMatrix = _viewRotationMatrix * tmp;
+	_localViewRotationMatrix = _localViewRotationMatrix * tmp;
     //_viewRotation = rotation * _viewRotation;
     //_viewRotation = glm::normalize(_viewRotation);
 }
@@ -143,12 +146,12 @@ void Camera::rotate(const glm::quat& rotation)
 void Camera::setRotation(glm::quat rotation)
 {
     //_viewRotation = glm::normalize(std::move(rotation));
-	_viewRotationMatrix = glm::mat4_cast(rotation);
+	_localViewRotationMatrix = glm::mat4_cast(rotation);
 }
 
 void Camera::setRotation(glm::mat4 rotation)
 {
-	_viewRotationMatrix = std::move(rotation);
+	_localViewRotationMatrix = std::move(rotation);
 }
 
 //const glm::quat& Camera::rotation() const
@@ -179,12 +182,12 @@ void Camera::setMaxFov(float fov)
 
 void Camera::setScaling(glm::vec2 scaling)
 {
-    _scaling = std::move(scaling);
+	_localScaling = std::move(scaling);
 }
 
 const glm::vec2& Camera::scaling() const
 {
-    return _scaling;
+	return _syncedScaling;
 }
 
 void Camera::setLookUpVector(glm::vec3 lookUp)
@@ -199,31 +202,43 @@ const glm::vec3& Camera::lookUpVector() const
 
 void Camera::serialize(SyncBuffer* syncBuffer){
 	_syncMutex.lock();
-	_sharedViewRotationMatrix = _viewRotationMatrix;
-	_sharedPosition = _position;
-	_sharedScaling = _scaling;
+
 	syncBuffer->encode(_sharedViewRotationMatrix);
 	syncBuffer->encode(_sharedPosition);
 	syncBuffer->encode(_sharedScaling);
+
 	_syncMutex.unlock();
 }
 
 void Camera::deserialize(SyncBuffer* syncBuffer){	
 	_syncMutex.lock();
+
 	syncBuffer->decode(_sharedViewRotationMatrix);
 	syncBuffer->decode(_sharedPosition);
 	syncBuffer->decode(_sharedScaling);
+
 	_syncMutex.unlock();
 }
 
 void Camera::postSynchronizationPreDraw(){
 	_syncMutex.lock();
-	_viewRotationMatrix = _sharedViewRotationMatrix;
-	_position = _sharedPosition;
-	_scaling = _sharedScaling;
+
+	_syncedViewRotationMatrix = _sharedViewRotationMatrix;
+	_syncedPosition = _sharedPosition;
+	_syncedScaling = _sharedScaling;
+
 	_syncMutex.unlock();
 }
 
+void Camera::preSynchronization(){
+	_syncMutex.lock();
+
+	_sharedViewRotationMatrix = _localViewRotationMatrix;
+	_sharedPosition = _localPosition;
+	_sharedScaling = _localScaling;
+
+	_syncMutex.unlock();
+}
 
 //
 //Camera::Camera()
