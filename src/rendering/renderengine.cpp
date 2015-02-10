@@ -295,6 +295,12 @@ bool RenderEngine::initializeGL()
     return true;
 }
 
+void RenderEngine::preSynchronization(){
+	if (_mainCamera){
+		_mainCamera->preSynchronization();
+	}
+}
+
 void RenderEngine::postSynchronizationPreDraw()
 {
 	if (_mainCamera){
