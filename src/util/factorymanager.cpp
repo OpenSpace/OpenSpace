@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderabletrail.h>
 #include <openspace/rendering/renderablepath.h>
 #include <openspace/rendering/renderablefov.h>
+#include <openspace/rendering/renderablesphere.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
 #include <openspace/rendering/planets/renderableplanet.h>
@@ -73,6 +74,8 @@ void FactoryManager::initialize()
 		"RenderableTrail");
 	_manager->factory<Renderable>()->registerClass<RenderableFov>(
 		"RenderableFov");
+    _manager->factory<Renderable>()->registerClass<RenderableSphere>(
+        "RenderableSphere");
 	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
 		"RenderableSphericalGrid");
 	_manager->factory<Renderable>()->registerClass<RenderableModel>(
