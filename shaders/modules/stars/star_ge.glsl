@@ -26,9 +26,9 @@
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
-	vec2(0.0, 0.0), 
-	vec2(1.0, 1.0), 
-	vec2(1.0, 0.0) 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
 );
 
 #include "PowerScaling/powerScalingMath.hglsl"
@@ -57,49 +57,47 @@ uniform float spriteBaseSize;
 uniform float spriteResponseSize;
 
 void main() {
-	ge_brightness = vs_brightness[0];
-	ge_velocity = vs_velocity[0];
-	ge_speed = vs_speed[0];
-	
-	//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
-	float M  = vs_brightness[0].z; // if NOT running test-target.
-	vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
-	vec4 pos = psc_position[0];                                    // get OK star position
-	
-	vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
-	vec2 pc = vec2(
-		length(result.xyz),
-		result.w
-	);
+    ge_brightness = vs_brightness[0];
+    ge_velocity = vs_velocity[0];
+    ge_speed = vs_speed[0];
+    
+    //  float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+    float M  = vs_brightness[0].z; // if NOT running test-target.
+    vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
+    vec4 pos = psc_position[0];                                    // get OK star position
+    
+    vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
+    vec2 pc = vec2(
+        length(result.xyz),
+        result.w
+    );
 
-	// convert meters into parsecs
-	pc[0] *= 0.324077929f;
-	pc[1] += -18.0f;
-	
-	float distLog = log10(pc[0]) + pc[1];
-	float apparent = (M - 5.f * (1.f - distLog));
+    // convert meters into parsecs
+    pc[0] *= 0.324077929f;
+    pc[1] += -18.0f;
+    
+    float distLog = log10(pc[0]) + pc[1];
+    float apparent = (M - 5.f * (1.f - distLog));
 
-	// p = vec4(vec3(apparent), 1.0);
+    // p = vec4(vec3(apparent), 1.0);
      
-	 // check everything below this ---abock
-	float weight = 0.000025f; 										    // otherwise this takes over.
-	double depth  = pc[0] * pow(10, pc[1]);
-	depth       *= pow(apparent,3);
+     // check everything below this ---abock
+    float weight = 0.000025f;                                           // otherwise this takes over.
+    double depth  = pc[0] * pow(10, pc[1]);
+    depth       *= pow(apparent,3);
 
-	double modifiedSpriteSize = (spriteBaseSize * 0.0005f) + (depth*weight); 
-	modifiedSpriteSize *= spriteResponseSize;
-	// float modifiedSpriteSize = (depth*weight); 
-	
-	// EMIT QUAD
-	for(int i = 0; i < 4; i++){
-		vec4 p1     = gl_in[0].gl_Position;                 
-		p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
-		vs_position = p1;
-		gl_Position = projection * p1;
-		// gl_Position = z_normalization(projection * p1);
-		texCoord    = corners[i];      
-		// p =       psc_position[0];               
-	  EmitVertex();
-	}
-	EndPrimitive();
+    double modifiedSpriteSize = (spriteBaseSize * 0.0005f) + (depth*weight); 
+    modifiedSpriteSize *= spriteResponseSize;
+    
+    for(int i = 0; i < 4; i++){
+        vec4 p1     = gl_in[0].gl_Position;                 
+        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vs_position = p1;
+        gl_Position = projection * p1;
+        // gl_Position = z_normalization(projection * p1);
+        texCoord    = corners[i];      
+        // p =       psc_position[0];               
+      EmitVertex();
+    }
+    EndPrimitive();
 }
