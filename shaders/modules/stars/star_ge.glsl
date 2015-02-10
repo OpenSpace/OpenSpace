@@ -53,7 +53,8 @@ layout(location = 4) out vec2 texCoord;
 
 uniform mat4 projection; // we do this after distance computation. 
 
-uniform float spriteSize;
+uniform float spriteBaseSize;
+uniform float spriteResponseSize;
 
 void main() {
 	ge_brightness = vs_brightness[0];
@@ -81,11 +82,12 @@ void main() {
 	// p = vec4(vec3(apparent), 1.0);
      
 	 // check everything below this ---abock
-	float weight = 0.000005f; 										    // otherwise this takes over.
+	float weight = 0.000025f; 										    // otherwise this takes over.
 	double depth  = pc[0] * pow(10, pc[1]);
 	depth       *= pow(apparent,3);
 
-	double modifiedSpriteSize = spriteSize + (depth*weight); 
+	double modifiedSpriteSize = (spriteBaseSize * 0.0005f) + (depth*weight); 
+	modifiedSpriteSize *= spriteResponseSize;
 	// float modifiedSpriteSize = (depth*weight); 
 	
 	// EMIT QUAD

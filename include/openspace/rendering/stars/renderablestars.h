@@ -73,7 +73,8 @@ private:
 	properties::OptionProperty _colorOption;
 	bool _dataIsDirty;
 
-	properties::FloatProperty _spriteSize;
+	properties::FloatProperty _spriteBaseSize;
+	properties::FloatProperty _spriteResponseSize;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;
