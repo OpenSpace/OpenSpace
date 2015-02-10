@@ -55,12 +55,14 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
+    //, _lineFade("lineFade", "Line Fade", 5.f, 0.f, 5.f)
     , _programObject(nullptr)
     , _programIsDirty(true)
     , _vaoID(0)
     , _vBufferID(0)
     , _oldTime(std::numeric_limits<float>::max())
     , _successfullDictionaryFetch(true)
+    , _needsSweep(true)
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
@@ -103,12 +105,6 @@ bool RenderableTrail::initialize() {
         return false;
     _programObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
-    SpiceManager::ref().getETfromDate("2007 feb 26 17:30:00", _startTrail);
-    _dtEt = static_cast<float>(_startTrail);
-
-    fullYearSweep();
-    sendToGPU();
-
     return completeSuccess;
 }
 
@@ -119,7 +115,7 @@ bool RenderableTrail::deinitialize() {
 }
 
 bool RenderableTrail::isReady() const {
-    return (_programObject != nullptr);
+    return (_programObject != nullptr) && _successfullDictionaryFetch;
 }
 
 void RenderableTrail::render(const RenderData& data) {
@@ -147,50 +143,54 @@ void RenderableTrail::render(const RenderData& data) {
 }
 
 void RenderableTrail::update(const UpdateData& data) {
+    // needsSweep also needs to be done when the time has been changed abruptly ---abock
+    if (_needsSweep) {
+        fullYearSweep(data.time);
+        sendToGPU();
+        _needsSweep = false;
+        return;
+    }
+
     if (_programIsDirty) {
         _programObject->rebuildFromFile();
         _programIsDirty = false;
     }
-
     double lightTime = 0.0;
     psc pscPos, pscVel;
+
+    // Points in the vertex array should always have a fixed distance. For this reason we
+    // keep the first entry in the array floating and always pointing to the current date
+    // As soon as the time difference between the current time and the last time is bigger
+    // than the fixed distance, we need to create a new fixed point
+    double deltaTime = abs(data.time - _oldTime);
+    int nValues = floor(deltaTime / _increment);
+
+    // Update the floating current time
     SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, pscPos, pscVel, lightTime);
     pscPos[3] += 3; // KM to M
+    _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
-    TrailVBOLayout* begin = &_vertexArray[0];
+    if (nValues != 0) {
+        // If we have new values to create, we do that here. nValues should always be
+        // close to 1
 
-    //fix so that updatetrail is not run on the first update pass even though no time has passed.
-    //also != operator is iffy for floating point values, _oldTime is now std::numeric_limits<float>::max()
-    if (_oldTime < data.time){
-        // update only when time progresses
-        //if (_oldTime != _time){
-        // if time progressed more than N _increments 
-        while (_dtEt < data.time){
-            // get intermediary points
-            //psc dtPoint;
-            //double lightTime;
-            SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", _dtEt, pscPos, pscVel, lightTime);
+        // But you never know
+        nValues = std::min(nValues, int(_vertexArray.size()));
+        //LINFO(nValues);
+        std::vector<TrailVBOLayout> tmp = _vertexArray;
+
+        for (int i = nValues; i > 0; --i) {
+            double et = _oldTime + i * _increment;
+            SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", et, pscPos, pscVel, lightTime);
             pscPos[3] += 3;
-
-            // overwrite the old position
-            memcpy(begin, glm::value_ptr(pscPos.vec4()), 4 * sizeof(float));
-
-            // shift array
-            for (int k = _vertexArray.size() - 1; k > 0; k--){
-                memcpy(&_vertexArray[k], &_vertexArray[k - 1], 4 * sizeof(float));
-            }
-            // keep track of progression
-            _dtEt += _increment;
+            _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
-        //add earths current position
-        memcpy(&_vertexArray[0], glm::value_ptr(pscPos.vec4()), 4 * sizeof(float));
-    }
-    _oldTime = data.time;
 
-    // update GPU
-    // NOTE: vbo interleaved, makes possible color update more efficient - tightly packed.
-    // if NO color update : would be more efficient to have these as separate 
-    // => N/2 updates per drawcall.
+        for (size_t i = 0; i < tmp.size() - (nValues + 1); ++i)
+            _vertexArray[nValues + 1 + i] = tmp[i + 1];
+        _oldTime += nValues * _increment;
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() * sizeof(TrailVBOLayout), &_vertexArray[0]);
 }
@@ -203,24 +203,25 @@ void RenderableTrail::update(const UpdateData& data) {
 *  and most likely heuristic measure to easily estimate a nodal time-increment.
 *  Trivial, yet - a TODO. 
 */
-void RenderableTrail::fullYearSweep() {
+void RenderableTrail::fullYearSweep(double time) {
     const int SecondsPerEarthYear = 31540000;
 
     double lightTime = 0.0;
-    double et = _startTrail;
     float planetYear = SecondsPerEarthYear * _ratio;
     int segments = static_cast<int>(_tropic);
 
     _increment = planetYear / _tropic;
     
+    _oldTime = time;
+
     psc pscPos, pscVel;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++){
-        SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", et, pscPos, pscVel, lightTime);
+        SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", time, pscPos, pscVel, lightTime);
         pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};
-        et -= _increment;
+        time -= _increment;
     }
 
 }

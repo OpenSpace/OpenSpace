@@ -55,7 +55,7 @@ private:
         float x, y, z, e;
     };
 
-    void fullYearSweep();
+    void fullYearSweep(double time);
     void sendToGPU();
 
     properties::Vec3Property _lineColor;
@@ -77,7 +77,7 @@ private:
     GLuint _vaoID;
     GLuint _vBufferID;
 
-    double _startTrail;
+    bool _needsSweep;
 
     std::vector<TrailVBOLayout> _vertexArray;
 
