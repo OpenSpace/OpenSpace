@@ -172,16 +172,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
-	// pscstandard
-	tmpProgram = ProgramObject::Build("EphemerisProgram",
-		"${SHADERS}/ephemeris_vs.glsl",
-		"${SHADERS}/ephemeris_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
-
-
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",

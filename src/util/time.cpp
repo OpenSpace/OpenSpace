@@ -198,6 +198,8 @@ double Time::deltaTime() const {
 
 void Time::setTime(std::string time) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
+    // Add callback to OpenSpaceEngine that signals that the next update phase
+    // needs total invalidation ---abock
 }
 
 std::string Time::currentTimeUTC() const {
