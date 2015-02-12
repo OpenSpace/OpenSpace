@@ -24,33 +24,21 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
 in vec4 vs_point_position;
 in vec4 vs_point_velocity;
+in float fade;
 
-
-//out vec4 diffuse;
+uniform vec3 color;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-void main()
-{
+void main() {
+    vec4 position = vs_point_position;
+    float depth = pscDepth(position);
 
-	vec4 position = vs_point_position;
-	float depth = pscDepth(position);
-	
-	// set the depth
-	//gl_FragDepth = depth;
-
-	//float l = length(vs_point_velocity);
-	
-	vec4 diffuse = vs_point_velocity;
-
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
-	
+    vec4 c = vec4(color, fade);
+    ABufferStruct_t frag = createGeometryFragment(c, position, depth);
+    addToBuffer(frag);
 }

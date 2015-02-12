@@ -73,23 +73,18 @@ void main() {
 			break;
 	}
 
-
-    framebuffer_output_color = texture(psfTexture, texCoord) * color;
-
-    // framebuffer_output_color = vec4(vs_position.rgb, 1.0);
-
-    // framebuffer_output_color = p;
-    // framebuffer_output_color = vec4(vec3(ge_brightness.z), 1.0);
-    // framebuffer_output_color = vec4(vec3(abs(ge_brightness.z)), 1.0);
+	vec4 fullColor = texture(psfTexture, texCoord) * color;
+	// This check can be removed once we get a better star psf texture ---abock
+	if (fullColor.a <= 0.1)
+		discard;
 
    	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	gl_FragDepth = depth;
+   	// This has to be fixed when the scale graph is in place ---abock
+	float depth = pscDepth(position) + 1000;
+	// float depth = 10000.0;
+	// gl_FragDepth = depth;
 
-	//ABufferStruct_t frag = createGeometryFragment(vec4(1,0,0,1), position, depth);
-	//ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	//addToBuffer(frag);
-
-	//discard;
-    
+	ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
+	addToBuffer(frag);
+	// discard;
 }

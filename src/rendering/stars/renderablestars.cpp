@@ -84,7 +84,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-	, _spriteSize("spriteSize", "Sprite Size", 0.0000005f, 0.f, 1.f)
+	, _spriteBaseSize("spriteBaseSize", "Sprite Base Size", 0.1f, 0.f, 10.f)
+	, _spriteResponseSize("spriteResponseSize", "Sprite Response Size", 1.f, 0.f, 10.f)
 	, _program(nullptr)
 	, _programIsDirty(false)
 	, _speckFile("")
@@ -113,7 +114,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	addProperty(_colorOption);
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 
-	addProperty(_spriteSize);
+	addProperty(_spriteBaseSize);
+	addProperty(_spriteResponseSize);
 
 	addProperty(_pointSpreadFunctionTexturePath);
 	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
@@ -183,7 +185,8 @@ void RenderableStars::render(const RenderData& data) {
 	setPscUniforms(_program, &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
 
-	_program->setUniform("spriteSize", _spriteSize);
+	_program->setUniform("spriteBaseSize", _spriteBaseSize);
+	_program->setUniform("spriteResponseSize", _spriteResponseSize);
 
 	ghoul::opengl::TextureUnit psfUnit;
 	psfUnit.activate();
@@ -199,9 +202,7 @@ void RenderableStars::render(const RenderData& data) {
 
 	glBindVertexArray(_vao);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
-	//glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glDrawArrays(GL_POINTS, 0, nStars);  
-	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_POINTS, 0, nStars);
 
 	glBindVertexArray(0);
 	_program->setIgnoreUniformLocationError(false);
