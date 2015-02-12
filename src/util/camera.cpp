@@ -43,10 +43,10 @@ Camera::Camera()
 	, _modelMatrix()
 	, _viewMatrix()
 	, _projectionMatrix()
-	, _viewDirection()
+	, _viewDirection(0,0,-1)
     , _cameraDirection(0.f, 0.f, 0.f)
 	, _localScaling(1.f, 0.f)
-    //, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
+	//, _viewRotation(glm::quat(glm::vec3(0.f, 0.f, 0.f)))
 	, _localViewRotationMatrix(1.f)
 	, _sharedPosition()
 	, _sharedScaling(1.f, 0.f)
@@ -54,6 +54,7 @@ Camera::Camera()
 	, _syncedPosition()
 	, _syncedScaling(1.f, 0.f)
 	, _syncedViewRotationMatrix(1.f)
+	, _focusPosition()
 {
 }
 
@@ -64,11 +65,15 @@ Camera::~Camera()
 void Camera::setPosition(psc pos)
 {
 	_localPosition = std::move(pos);
+	_syncedPosition = _localPosition;
 }
 
 const psc& Camera::position() const
 {
 	return _syncedPosition;
+	///* FIXA HÄR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (litet compileringsfel på slutet också så jag inte ska glömma!)*/ hej här är ett kompileringsfel!
+	
+	//return _localPosition;
 }
 
 void Camera::setModelMatrix(glm::mat4 modelMatrix){
@@ -158,6 +163,15 @@ void Camera::setRotation(glm::mat4 rotation)
 //{
   //  return _viewRotation;
 //}
+
+void Camera::setFocusPosition(psc pos){
+	_focusPosition = pos;
+}
+
+const psc& Camera::focusPosition() const{
+	return _focusPosition;
+}
+
 
 const glm::vec3& Camera::viewDirection() const
 {

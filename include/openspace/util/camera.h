@@ -115,6 +115,9 @@ public:
     void setCameraDirection(glm::vec3 cameraDirection);
     glm::vec3 cameraDirection() const;
 
+	void setFocusPosition(psc pos);
+	const psc& focusPosition() const;
+
 	void setViewRotationMatrix(glm::mat4 m);
 	const glm::mat4& viewRotationMatrix() const;
     void compileViewRotationMatrix();
@@ -149,6 +152,7 @@ private:
 	glm::mat4 _projectionMatrix;
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
+	psc _focusPosition;
     // glm::quat _viewRotation;
     
     glm::vec3 _lookUp;

@@ -28,6 +28,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
@@ -144,8 +145,13 @@ int time_currentTimeUTC(lua_State* L) {
 
 Time* Time::_instance = nullptr;
 
-Time::Time() 
+Time::Time()
 	: _time(-1.0)
+	, _dt(1.0)
+	, _sharedTime(-1.0)
+	, _sharedDt(1.0)
+	, _syncedTime(-1.0)
+	, _syncedDt(1.0)
 	, _deltaTimePerSecond(1.0)
 {
 }
@@ -177,23 +183,23 @@ void Time::setTime(double value) {
 
 double Time::currentTime() const {
 	assert(_instance);
-	return _time;
+	return _syncedTime;
 }
 
 double Time::advanceTime(double tickTime) {
-	return _time += _deltaTimePerSecond * tickTime;
+	return _time += _dt * tickTime;
 }
 
 double Time::retreatTime(double tickTime) {
-	return _time -= _deltaTimePerSecond * tickTime;
+	return _time -= _dt * tickTime;
 }
 
 void Time::setDeltaTime(double deltaT) {
-	_deltaTimePerSecond = std::move(deltaT);
+	_dt = std::move(deltaT);
 }
 
 double Time::deltaTime() const {
-	return _deltaTimePerSecond;
+	return _syncedDt;
 }
 
 void Time::setTime(std::string time) {
@@ -202,8 +208,44 @@ void Time::setTime(std::string time) {
 
 std::string Time::currentTimeUTC() const {
 	std::string date;
-	SpiceManager::ref().getDateFromET(_time, date);
+	SpiceManager::ref().getDateFromET(_syncedTime, date);
 	return date;
+}
+
+void Time::serialize(SyncBuffer* syncBuffer){
+	_syncMutex.lock();
+
+	syncBuffer->encode(_sharedTime);
+	syncBuffer->encode(_sharedDt);
+
+	_syncMutex.unlock();
+}
+
+void Time::deserialize(SyncBuffer* syncBuffer){
+	_syncMutex.lock();
+
+	syncBuffer->decode(_sharedTime);
+	syncBuffer->decode(_sharedDt);
+
+	_syncMutex.unlock();
+}
+
+void Time::postSynchronizationPreDraw(){
+	_syncMutex.lock();
+
+	_syncedTime = _sharedTime;
+	_syncedDt = _sharedDt;
+
+	_syncMutex.unlock();	
+}
+
+void Time::preSynchronization(){
+	_syncMutex.lock();
+
+	_sharedTime = _time;
+	_sharedDt = _dt;
+
+	_syncMutex.unlock();
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {

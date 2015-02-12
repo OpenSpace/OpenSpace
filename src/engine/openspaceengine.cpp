@@ -501,13 +501,19 @@ void OpenSpaceEngine::preSynchronization() {
 
 		Time::ref().advanceTime(_dt);
 
+		Time::ref().preSynchronization();
+
 		_renderEngine.preSynchronization();
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+	//time must be called first
+	Time::ref().postSynchronizationPreDraw();
+
     _renderEngine.postSynchronizationPreDraw();
 	
+
 	if (sgct::Engine::instance()->isMaster() && _gui.isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
@@ -613,7 +619,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
 		_renderEngine.serialize(_syncBuffer);
-		
+		Time::ref().serialize(_syncBuffer);
 		_syncBuffer->write();
 	}
 }
@@ -622,6 +628,7 @@ void OpenSpaceEngine::decode() {
 	if (_syncBuffer) {
 		_syncBuffer->read();
 		_renderEngine.deserialize(_syncBuffer);
+		Time::ref().deserialize(_syncBuffer);
 	}
 }
 

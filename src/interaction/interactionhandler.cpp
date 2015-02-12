@@ -480,6 +480,7 @@ void InteractionHandler::update(double deltaTime) {
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 	_focusNode = node;
+	_camera->setFocusPosition(node->worldPosition());
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -523,12 +524,6 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 
 	lockControls();
 	
-	// should be changed to something more dynamic =)
-	psc origin;
-	if (_focusNode) {
-		origin = _focusNode->worldPosition();
-	}
-
 	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
@@ -536,6 +531,13 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	transform = glm::rotate(dx, cameraUp) * transform;
 	transform = glm::rotate(dy, cameraRight) * transform;
 	transform = glm::rotate(dz, _camera->viewDirection()) * transform;
+
+	// should be changed to something more dynamic =)
+	psc origin;
+	if (_focusNode) {
+		origin = _focusNode->worldPosition();
+	}
+	_camera->setFocusPosition(origin);
 
 	// the camera position
 	psc relative = _camera->position();

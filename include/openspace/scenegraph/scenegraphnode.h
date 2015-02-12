@@ -63,6 +63,7 @@ public:
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data);
+	void updateCamera(Camera* camera) const;
 
     void addNode(SceneGraphNode* child);
 

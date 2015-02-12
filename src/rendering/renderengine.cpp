@@ -334,6 +334,11 @@ void RenderEngine::postSynchronizationPreDraw()
 
 	// clear the abuffer before rendering the scene
 	_abuffer->clear();
+	
+	if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
+		node->updateCamera(_mainCamera);
+	}
+	
 }
 
 void RenderEngine::render()
