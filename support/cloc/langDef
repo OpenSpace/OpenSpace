@@ -431,15 +431,6 @@ MATLAB
     filter remove_matches ^\s*%
     filter remove_inline %.*$
     3rd_gen_scale 4.00
-MSBuild script
-    filter remove_html_comments
-    filter call_regexp_common HTML
-    extension csproj
-    extension vbproj
-    extension vcproj
-    extension wdproj
-    extension wixproj
-    3rd_gen_scale 1.90
 MUMPS
     filter remove_matches ^\s*;
     extension mps
