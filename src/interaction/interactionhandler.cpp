@@ -479,8 +479,28 @@ void InteractionHandler::update(double deltaTime) {
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+	
+	if (_focusNode == node){
+		return;
+	}
+
 	_focusNode = node;
+
+	//orient the camera to the new node
+	psc focusPos = node->worldPosition();
+	psc camToFocus = focusPos - _camera->position();
+	glm::vec3 viewDir = glm::normalize(camToFocus.vec3());
+	glm::vec3 cameraView = glm::normalize(_camera->viewDirection());
+	glm::vec3 rotAxis = glm::normalize(glm::cross(viewDir, cameraView));
+	float angle = glm::angle(viewDir, cameraView);
+	glm::quat q = glm::angleAxis(angle, rotAxis);
+
+	psc camPos = _camera->position();
+	//set new focus position
 	_camera->setFocusPosition(node->worldPosition());
+	//rotate view to target new focus
+	_camera->rotate(q);
+
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
