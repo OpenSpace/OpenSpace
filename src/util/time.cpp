@@ -150,9 +150,9 @@ Time::Time()
 	, _dt(1.0)
 	, _sharedTime(-1.0)
 	, _sharedDt(1.0)
-	, _syncedTime(-1.0)
-	, _syncedDt(1.0)
 	, _deltaTimePerSecond(1.0)
+	, _timeJumped(false)
+	, _sharedTimeJumped(false)
 {
 }
 
@@ -179,11 +179,12 @@ bool Time::isInitialized() {
 
 void Time::setTime(double value) {
 	_time = std::move(value);
+	_timeJumped = true;
 }
 
 double Time::currentTime() const {
 	assert(_instance);
-	return _syncedTime;
+	return _time;
 }
 
 double Time::advanceTime(double tickTime) {
@@ -199,18 +200,19 @@ void Time::setDeltaTime(double deltaT) {
 }
 
 double Time::deltaTime() const {
-	return _syncedDt;
+	return _dt;
 }
 
 void Time::setTime(std::string time) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
+	_timeJumped = true;
     // Add callback to OpenSpaceEngine that signals that the next update phase
     // needs total invalidation ---abock
 }
 
 std::string Time::currentTimeUTC() const {
 	std::string date;
-	SpiceManager::ref().getDateFromET(_syncedTime, date);
+	SpiceManager::ref().getDateFromET(_time, date);
 	return date;
 }
 
@@ -219,6 +221,7 @@ void Time::serialize(SyncBuffer* syncBuffer){
 
 	syncBuffer->encode(_sharedTime);
 	syncBuffer->encode(_sharedDt);
+	syncBuffer->encode(_sharedTimeJumped);
 
 	_syncMutex.unlock();
 }
@@ -228,6 +231,7 @@ void Time::deserialize(SyncBuffer* syncBuffer){
 
 	syncBuffer->decode(_sharedTime);
 	syncBuffer->decode(_sharedDt);
+	syncBuffer->decode(_sharedTimeJumped);
 
 	_syncMutex.unlock();
 }
@@ -235,8 +239,9 @@ void Time::deserialize(SyncBuffer* syncBuffer){
 void Time::postSynchronizationPreDraw(){
 	_syncMutex.lock();
 
-	_syncedTime = _sharedTime;
-	_syncedDt = _sharedDt;
+	_time = _sharedTime;
+	_dt = _sharedDt;
+	_timeJumped = _sharedTimeJumped;
 
 	_syncMutex.unlock();	
 }
@@ -246,8 +251,17 @@ void Time::preSynchronization(){
 
 	_sharedTime = _time;
 	_sharedDt = _dt;
+	_sharedTimeJumped = _timeJumped;
 
 	_syncMutex.unlock();
+}
+
+bool Time::timeJumped(){
+	return _timeJumped;
+}
+
+void Time::setTimeJumped(bool jumped){
+	_timeJumped = jumped;
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {

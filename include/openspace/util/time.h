@@ -158,6 +158,10 @@ public:
 
 	void preSynchronization();
 
+	bool timeJumped();
+
+	void setTimeJumped(bool jumped);
+
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
 	 * current time, retrieve the current time etc. The functions contained are
@@ -187,15 +191,14 @@ private:
 	//local copies 
 	double _time; ///< The time stored as the number of seconds past the J2000 epoch
 	double _dt;
+	bool _timeJumped;
 
 	//shared copies
 	double _sharedTime;
 	double _sharedDt;
+	bool _sharedTimeJumped;
 	
-	//synched copies
-	double _syncedTime;
-	double _syncedDt;
-
+	
 	std::mutex _syncMutex;
 };
 

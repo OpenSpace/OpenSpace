@@ -51,9 +51,6 @@ Camera::Camera()
 	, _sharedPosition()
 	, _sharedScaling(1.f, 0.f)
 	, _sharedViewRotationMatrix(1.f)
-	, _syncedPosition()
-	, _syncedScaling(1.f, 0.f)
-	, _syncedViewRotationMatrix(1.f)
 	, _focusPosition()
 {
 }
@@ -65,15 +62,11 @@ Camera::~Camera()
 void Camera::setPosition(psc pos)
 {
 	_localPosition = std::move(pos);
-	_syncedPosition = _localPosition;
 }
 
 const psc& Camera::position() const
 {
-	return _syncedPosition;
-	///* FIXA HÄR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (litet compileringsfel på slutet också så jag inte ska glömma!)*/ hej här är ett kompileringsfel!
-	
-	//return _localPosition;
+	return _localPosition;
 }
 
 void Camera::setModelMatrix(glm::mat4 modelMatrix){
@@ -126,7 +119,7 @@ void Camera::setViewRotationMatrix(glm::mat4 m) {
 
 const glm::mat4& Camera::viewRotationMatrix() const
 {
-	return _syncedViewRotationMatrix;
+	return _localViewRotationMatrix;
 }
 
 void Camera::compileViewRotationMatrix()
@@ -201,7 +194,7 @@ void Camera::setScaling(glm::vec2 scaling)
 
 const glm::vec2& Camera::scaling() const
 {
-	return _syncedScaling;
+	return _localScaling;
 }
 
 void Camera::setLookUpVector(glm::vec3 lookUp)
@@ -237,9 +230,9 @@ void Camera::deserialize(SyncBuffer* syncBuffer){
 void Camera::postSynchronizationPreDraw(){
 	_syncMutex.lock();
 
-	_syncedViewRotationMatrix = _sharedViewRotationMatrix;
-	_syncedPosition = _sharedPosition;
-	_syncedScaling = _sharedScaling;
+	_localViewRotationMatrix = _sharedViewRotationMatrix;
+	_localPosition = _sharedPosition;
+	_localScaling = _sharedScaling;
 
 	_syncMutex.unlock();
 }
