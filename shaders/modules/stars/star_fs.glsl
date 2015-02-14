@@ -41,8 +41,6 @@ layout(location = 2) in vec3 ge_velocity;
 layout(location = 3) in float ge_speed;
 layout(location = 4) in vec2 texCoord;
 
-// layout(location = 5) in vec4 p;
-
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -62,7 +60,7 @@ void main() {
 	vec4 color = vec4(0.0);
 	switch (colorOption) {
 		case COLOROPTION_COLOR: 
-			color = bv2rgb(ge_brightness[0].x);
+			color = bv2rgb(ge_brightness.x);
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 

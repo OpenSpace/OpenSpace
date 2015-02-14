@@ -63,7 +63,11 @@ void main() {
     
     //  float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
     float M  = vs_brightness[0].z; // if NOT running test-target.
-    vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
+
+    // We are using a fixed position until the scalegraph is implemented ---abock
+    // vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
+    vec4 cam = vec4(0.0);
+    
     vec4 pos = psc_position[0];                                    // get OK star position
     
     vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
@@ -74,7 +78,7 @@ void main() {
 
     // convert meters into parsecs
     pc[0] *= 0.324077929f;
-    pc[1] += -18.0f;
+    pc[1] -= 18.0f;
     
     float distLog = log10(pc[0]) + pc[1];
     float apparent = (M - 5.f * (1.f - distLog));
@@ -88,7 +92,7 @@ void main() {
 
     double modifiedSpriteSize = (spriteBaseSize * 0.0005f) + (depth*weight); 
     modifiedSpriteSize *= spriteResponseSize;
-    
+
     for(int i = 0; i < 4; i++){
         vec4 p1     = gl_in[0].gl_Position;                 
         p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
