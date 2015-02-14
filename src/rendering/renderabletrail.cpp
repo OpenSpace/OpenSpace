@@ -166,7 +166,9 @@ void RenderableTrail::update(const UpdateData& data) {
     int nValues = floor(deltaTime / _increment);
 
     // Update the floating current time
-    SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, pscPos, pscVel, lightTime);
+    // Is 'CN+S' correct? It has to be chosen to be the same as in SpiceEphemeris, but
+    // unsure if it is correct ---abock
+    SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, pscPos, pscVel, lightTime);
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
@@ -181,7 +183,7 @@ void RenderableTrail::update(const UpdateData& data) {
 
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
-            SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", et, pscPos, pscVel, lightTime);
+            SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, pscPos, pscVel, lightTime);
             pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
@@ -217,7 +219,7 @@ void RenderableTrail::fullYearSweep(double time) {
     psc pscPos, pscVel;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++){
-        SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", time, pscPos, pscVel, lightTime);
+        SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", time, pscPos, pscVel, lightTime);
         pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};

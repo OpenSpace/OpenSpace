@@ -497,7 +497,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler.update(dt);
         _interactionHandler.lockControls();
 
-		//Time::ref().advanceTime(dt);
+		Time::ref().advanceTime(dt);
     }
 }
 
