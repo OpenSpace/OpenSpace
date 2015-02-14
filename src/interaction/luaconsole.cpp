@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/clipboard.h>
 
 #include <string>
 #include <iostream>
@@ -63,84 +64,7 @@ namespace {
 	}
 #endif
 
-	// TODO: Put this functio nsomewhere appropriate
-	// get text from clipboard
-	std::string getClipboardText() {
-#if defined(WIN32)
-	// Try opening the clipboard
-	if (!OpenClipboard(nullptr))
-		return "";
 
-	// Get handle of clipboard object for ANSI text
-	HANDLE hData = GetClipboardData(CF_TEXT);
-	if (hData == nullptr)
-		return "";
-
-	// Lock the handle to get the actual text pointer
-	char * pszText = static_cast<char*>(GlobalLock(hData));
-	if (pszText == nullptr)
-		return "";
-
-	// Save text in a string class instance
-	std::string text(pszText);
-
-	// Release the lock
-	GlobalUnlock(hData);
-
-	// Release the clipboard
-	CloseClipboard();
-
-	text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
-	return text;
-#elif defined(__APPLE__)
-	std::string text;
-	if (exec("pbpaste", text))
-		return text.substr(0, text.length() - 1);
-	return ""; // remove a line ending
-#else
-	std::string text;
-	if (exec("xclip -o -sel c -f", text))
-		return text.substr(0, text.length() - 1);
-	return ""; // remove a line ending
-#endif
-}
-
-	// TODO: Put this function somewhere appropriate
-	// set text to clipboard
-	bool setClipboardText(std::string text)
-	{
-#if defined(WIN32)
-		char *ptrData = nullptr;
-		HANDLE hData = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, text.length() + 1);
-
-		ptrData = (char*)GlobalLock(hData);
-		memcpy(ptrData, text.c_str(), text.length() + 1);
-
-		GlobalUnlock(hData);
-
-		if (!OpenClipboard(nullptr))
-			return false;
-
-		if (!EmptyClipboard())
-			return false;
-
-		SetClipboardData(CF_TEXT, hData);
-
-		CloseClipboard();
-
-		return true;
-#elif defined(__APPLE__)
-		std::stringstream cmd;
-		cmd << "echo \"" << text << "\" | pbcopy";
-		std::string buf;
-		return exec(cmd.str(), buf);
-#else
-		std::stringstream cmd;
-		cmd << "echo \"" << text << "\" | xclip -i -sel c -f";
-		std::string buf;
-		return exec(cmd.str(), buf);
-#endif
-	}
 }
 
 namespace openspace {
@@ -251,14 +175,14 @@ void LuaConsole::keyboardCallback(int key, int action) {
 		// Paste from clipboard
 		if (key == SGCT_KEY_V) {
 			if (mod_CONTROL) {
-				addToCommand(getClipboardText());
+				addToCommand(ghoul::clipboardText());
 			}
 		}
 
 		// Copy to clipboard
 		if (key == SGCT_KEY_C) {
 			if (mod_CONTROL) {
-				setClipboardText(_commands.at(_activeCommand));
+				ghoul::setClipboardText(_commands.at(_activeCommand));
 			}
 		}
 
