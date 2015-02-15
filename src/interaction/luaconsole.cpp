@@ -40,31 +40,6 @@
 namespace {
 	const std::string _loggerCat = "LuaConsole";
 	const std::string historyFile = "ConsoleHistory";
-
-#if !defined(WIN32)
-	// Dangerus as fuck (if malicious input)
-	bool exec(const std::string& cmd, std::string& value)
-	{
-		FILE* pipe = popen(cmd.c_str(), "r");
-		if (!pipe)
-			return false;
-
-		const int buffer_size = 1024;
-		char buffer[buffer_size];
-		value = "";
-		while (!feof(pipe))
-		{
-			if (fgets(buffer, buffer_size, pipe) != NULL)
-			{
-				value += buffer;
-			}
-		}
-		pclose(pipe);
-		return true;
-	}
-#endif
-
-
 }
 
 namespace openspace {
@@ -126,77 +101,74 @@ LuaConsole::LuaConsole()
 }
 
 LuaConsole::~LuaConsole() {
-	std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
-	if (file.is_open()) {
-		size_t n = _commandsHistory.size();
-		file.write(reinterpret_cast<const char*>(&n), sizeof(size_t));
-		for (const std::string& s : _commandsHistory) {
-			size_t length = s.length();
-			file.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-			file.write(s.c_str(), sizeof(char)*length);
-		}
-		file.close();
-	}
+
 }
 
-void LuaConsole::loadHistory() {
-	FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
 
-	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
-	if (file.is_open()) {
-		size_t n;
+void LuaConsole::initialize() {
+    FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
 
-		file.read(reinterpret_cast<char*>(&n), sizeof(size_t));
+    std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
+    if (file.good()) {
+        int64_t nCommands;
+        file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-		for (size_t i = 0; i < n; ++i) {
-			size_t length;
-			file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-			char* tmp = new char[length + 1];
-			file.read(tmp, sizeof(char)*length);
-			tmp[length] = '\0';
-			_commandsHistory.emplace_back(tmp);
-			delete[] tmp;
-		}
-		file.close();
-		_commands = _commandsHistory;
-	}
-	_commands.push_back("");
-	_activeCommand = _commands.size() - 1;
+        for (size_t i = 0; i < nCommands; ++i) {
+            int64_t length;
+            file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
+            char* tmp = new char[length + 1];
+            file.read(tmp, sizeof(char)*length);
+            tmp[length] = '\0';
+            _commandsHistory.emplace_back(tmp);
+            delete[] tmp;
+        }
+        file.close();
+        _commands = _commandsHistory;
+    }
+    else
+        LERROR("Could not open file '" << absPath(_filename) << "' for reading history");
+    _commands.push_back("");
+    _activeCommand = _commands.size() - 1;
+
+}
+
+void LuaConsole::deinitialize() {
+    std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
+    if (file.good()) {
+        int64_t nCommands = _commandsHistory.size();
+        file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
+        for (const std::string& s : _commandsHistory) {
+            int64_t length = s.length();
+            file.write(reinterpret_cast<const char*>(&length), sizeof(int64_t));
+            file.write(s.c_str(), length);
+        }
+        file.close();
+    }
 }
 
 void LuaConsole::keyboardCallback(int key, int action) {
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
-		const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
+		const bool modifierControl = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
-		const bool mod_SHIFT = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
+		const bool modifierShift = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
 
 		// Paste from clipboard
-		if (key == SGCT_KEY_V) {
-			if (mod_CONTROL) {
-				addToCommand(ghoul::clipboardText());
-			}
-		}
+		if (modifierControl && (key == SGCT_KEY_V))
+			addToCommand(ghoul::clipboardText());
 
 		// Copy to clipboard
-		if (key == SGCT_KEY_C) {
-			if (mod_CONTROL) {
-				ghoul::setClipboardText(_commands.at(_activeCommand));
-			}
-		}
+		if (modifierControl && (key == SGCT_KEY_C))
+			ghoul::setClipboardText(_commands.at(_activeCommand));
 
 		// Go to the previous character
-		if (key == SGCT_KEY_LEFT) {
-			if (_inputPosition > 0)
-				_inputPosition -= 1;
-		}
+		if ((key == SGCT_KEY_LEFT) && (_inputPosition > 0))
+			--_inputPosition;
 
 		// Go to the next character
-		if (key == SGCT_KEY_RIGHT) {
-			if (_inputPosition < _commands.at(_activeCommand).length())
-				++_inputPosition;
-		}
+		if ((key == SGCT_KEY_RIGHT) && _inputPosition < _commands.at(_activeCommand).length())
+			++_inputPosition;
 
 		// Go to previous command
 		if (key == SGCT_KEY_UP) {
@@ -221,36 +193,28 @@ void LuaConsole::keyboardCallback(int key, int action) {
 		}
 
 		// Remove character after _inputPosition
-		if (key == SGCT_KEY_DELETE) {
-			if (_inputPosition <= _commands.at(_activeCommand).size()) {
-				_commands.at(_activeCommand).erase(_inputPosition, 1);
-			}
-		}
+		if ((key == SGCT_KEY_DELETE) && (_inputPosition <= _commands.at(_activeCommand).size()))
+			_commands.at(_activeCommand).erase(_inputPosition, 1);
 
 		// Go to the beginning of command string
-		if (key == SGCT_KEY_HOME) {
+		if (key == SGCT_KEY_HOME)
 			_inputPosition = 0;
-		}
 
 		// Go to the end of command string
-		if (key == SGCT_KEY_END) {
+		if (key == SGCT_KEY_END)
 			_inputPosition = _commands.at(_activeCommand).size();
-		}
 
 		if (key == SGCT_KEY_ENTER) {
-
 			// SHIFT+ENTER == new line
-			if (mod_SHIFT) {
+			if (modifierShift)
 				addToCommand("\n");
-			}
 			// CTRL+ENTER == Debug print the command
-			else if (mod_CONTROL) {
+			else if (modifierControl) {
 				LDEBUG("Active command from next line:\n" << _commands.at(_activeCommand));
 			}
 			// ENTER == run lua script
 			else {
 				if (_commands.at(_activeCommand) != "") {
-
 					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
 					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
@@ -258,24 +222,19 @@ void LuaConsole::keyboardCallback(int key, int action) {
 					else if (_commandsHistory.empty())
 						_commandsHistory.push_back(_commands.at(_activeCommand));
 
-					_commands = _commandsHistory;
-					_commands.push_back("");
 					_activeCommand = _commands.size() - 1;
 					_inputPosition = 0;
-					setVisible(false);
 				}
-				else {
-					_commands = _commandsHistory;
-					_commands.push_back("");
-					setVisible(false);
-				}
+                _commands = _commandsHistory;
+                _commands.push_back("");
+                setVisible(false);
 			}
 		}
 	}
 }
 
 void LuaConsole::charCallback(unsigned int codepoint) {
-	if (codepoint == ignoreCodepoint())
+	if (codepoint == commandInputButton())
 		return;
 
 #ifndef WIN32
@@ -331,18 +290,10 @@ void LuaConsole::render() {
 	Freetype::print(font, 10.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
-unsigned int LuaConsole::commandInputButton(){
-	// Button left of 1 and abobe TAB
-#ifdef WIN32
-	return SGCT_KEY_BACKSLASH;
-#else
+unsigned int LuaConsole::commandInputButton() {
+	// Button left of 1 and above TAB
+    // How to deal with different keyboard languages? ---abock
 	return SGCT_KEY_GRAVE_ACCENT;
-#endif
-}
-
-unsigned int LuaConsole::ignoreCodepoint() {
-	// Correesponding codepoint for commandInputButton()
-	return 167;
 }
 
 void LuaConsole::addToCommand(std::string c) {
@@ -414,5 +365,6 @@ scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
 		}
 	};
 }
+
 
 } // namespace openspace
