@@ -28,7 +28,6 @@
 #include <sgct.h>
 
 namespace openspace {
-namespace interaction {
 
 enum class KeyAction {
 	Press = SGCT_PRESS,
@@ -168,7 +167,6 @@ enum class Key {
 	Last = SGCT_KEY_LAST
 };
 
-} // namespace interaction
 } // namespace openspace
 
 #endif // __KEYS_H__
