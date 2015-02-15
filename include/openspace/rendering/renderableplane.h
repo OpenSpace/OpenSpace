@@ -65,6 +65,7 @@ private:
 	Origin _origin;
 
 	ghoul::opengl::ProgramObject* _shader;
+    bool _programIsDirty;
 	ghoul::opengl::Texture* _texture;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
