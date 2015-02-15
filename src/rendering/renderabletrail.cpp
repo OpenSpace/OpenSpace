@@ -177,7 +177,7 @@ void RenderableTrail::update(const UpdateData& data) {
         // close to 1
 
         // But you never know
-        nValues = std::min(nValues, int(_vertexArray.size()));
+        nValues = std::min(nValues, int(_vertexArray.size() - 1));
         //LINFO(nValues);
         std::vector<TrailVBOLayout> tmp = _vertexArray;
 
