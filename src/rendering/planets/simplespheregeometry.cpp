@@ -46,7 +46,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
               glm::vec2(10.f, 20.f))
     , _segments("segments", "Segments", 20, 1, 50)
-    , _planet(nullptr)
+    , _sphere(nullptr)
 {
 	using constants::scenegraphnode::keyName;
 	using constants::simplespheregeometry::keyRadius;
@@ -94,14 +94,14 @@ bool SimpleSphereGeometry::initialize(RenderablePlanet* parent)
 
 void SimpleSphereGeometry::deinitialize()
 {
-	if (_planet)
-	    delete _planet;
-    _planet = nullptr;
+	if (_sphere)
+	    delete _sphere;
+    _sphere = nullptr;
 }
 
 void SimpleSphereGeometry::render()
 {
-    _planet->render();
+    _sphere->render();
 }
 
 void SimpleSphereGeometry::createSphere()
@@ -111,11 +111,11 @@ void SimpleSphereGeometry::createSphere()
     PowerScaledScalar planetSize(_radius);
     _parent->setBoundingSphere(planetSize);
 
-    if(_planet)
-        delete _planet;
+    if(_sphere)
+        delete _sphere;
 
-    _planet = new PowerScaledSphere(planetSize, _segments);
-    _planet->initialize();
+    _sphere = new PowerScaledSphere(planetSize, _segments);
+    _sphere->initialize();
 }
 
 }  // namespace planetgeometry

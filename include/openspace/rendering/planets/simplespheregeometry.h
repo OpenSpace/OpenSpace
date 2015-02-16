@@ -52,7 +52,7 @@ private:
     properties::Vec2Property _radius;
     properties::IntProperty _segments;
 
-    PowerScaledSphere* _planet;
+    PowerScaledSphere* _sphere;
 };
 
 }  // namespace planetgeometry
