@@ -76,11 +76,6 @@ namespace renderable {
     const std::string keyType = "Type";
 } // namespace renderable
 
-namespace renderableplanet {
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-} // namespace renderableplanet
-
 namespace planetgeometry {
 	const std::string keyType = "Type";
 } // namespace planetgeometry

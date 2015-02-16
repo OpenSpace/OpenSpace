@@ -27,7 +27,7 @@
 
 #include <openspace/interaction/controller.h>
 
-#include <openspace/interaction/keys.h>
+#include <openspace/util/keys.h>
 
 namespace openspace {
 namespace interaction {

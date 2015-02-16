@@ -41,8 +41,6 @@ layout(location = 2) in vec3 ge_velocity;
 layout(location = 3) in float ge_speed;
 layout(location = 4) in vec2 texCoord;
 
-// layout(location = 5) in vec4 p;
-
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -62,7 +60,7 @@ void main() {
 	vec4 color = vec4(0.0);
 	switch (colorOption) {
 		case COLOROPTION_COLOR: 
-			color = bv2rgb(ge_brightness[0].x);
+			color = bv2rgb(ge_brightness.x);
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 
@@ -73,10 +71,27 @@ void main() {
 			break;
 	}
 
-	vec4 fullColor = texture(psfTexture, texCoord) * color;
-	// This check can be removed once we get a better star psf texture ---abock
-	if (fullColor.a <= 0.1)
+	// These can be removed once we get a better star psf texture ---abock
+	vec4 textureColor = texture(psfTexture, texCoord);
+	textureColor.a = (textureColor.a - 0.25) / (0.85);
+
+	vec4 fullColor =  textureColor * color;
+	if (fullColor.a <= 0.125)
 		discard;
+
+	float M = ge_brightness.z;
+	// if (M > 10)
+	// 	discard;
+	float targetM = 6.0;
+	float maxM = 12.0;
+	if (M > targetM) {
+		float alpha = (M - targetM) / (maxM - targetM);
+		fullColor.a *= alpha;
+
+	}
+
+	// if (ge_brightness.z > 7.0)
+		// discard;
 
    	vec4 position = vs_position;
    	// This has to be fixed when the scale graph is in place ---abock
