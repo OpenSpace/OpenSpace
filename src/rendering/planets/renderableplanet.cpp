@@ -40,7 +40,11 @@
 #include <sgct.h>
 
 namespace {
-const std::string _loggerCat = "RenderablePlanet";
+    const std::string _loggerCat = "RenderablePlanet";
+
+    const std::string keyFrame = "Frame";
+    const std::string keyGeometry = "Geometry";
+    const std::string keyShading = "PerformShading";
 }
 
 namespace openspace {
@@ -51,6 +55,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
+    , _performShading("performShading", "Perform Shading", true)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -63,15 +68,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
     ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(
-		constants::renderableplanet::keyGeometry, geometryDictionary);
+    success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
+	dictionary.getValue(keyFrame, _target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -84,6 +88,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
 	addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    if (dictionary.hasKeyAndValue<bool>(keyShading)) {
+        bool shading;
+        dictionary.getValue(keyShading, shading);
+        _performShading = shading;
+    }
+
+    addProperty(_performShading);
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -147,6 +159,8 @@ void RenderablePlanet::render(const RenderData& data)
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
+    _programObject->setUniform("_performShading", _performShading);
+
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();

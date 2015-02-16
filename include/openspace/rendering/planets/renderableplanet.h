@@ -65,6 +65,7 @@ private:
     ghoul::opengl::ProgramObject* _programObject;
     ghoul::opengl::Texture* _texture;
     planetgeometry::PlanetGeometry* _geometry;
+    properties::BoolProperty _performShading;
 
 	glm::dmat3 _stateMatrix;
 
