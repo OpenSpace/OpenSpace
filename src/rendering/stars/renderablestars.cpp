@@ -499,7 +499,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
 
         float distLy = _fullData[i + 6];
         float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
-        float distance = 18.f - normalizedDist / 2.f ;
+        float distance = 18.f - normalizedDist / 1.f ;
 
 
         psc position = psc(glm::vec4(p, distance));

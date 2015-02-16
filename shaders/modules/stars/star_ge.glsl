@@ -68,7 +68,7 @@ void main() {
     float M  = vs_brightness[0].z;
 
     M = clamp(M, 1.0, 5.0);
-    float modifiedSpriteSize = exp((-18 - M) * 0.871) * 200000 ;
+    float modifiedSpriteSize = exp((-5 - M) * 0.871);
 
     for(int i = 0; i < 4; i++){
         vec4 p1     = gl_in[0].gl_Position;

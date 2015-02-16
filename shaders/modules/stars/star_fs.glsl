@@ -73,7 +73,7 @@ void main() {
 
 	// These can be removed once we get a better star psf texture ---abock
 	vec4 textureColor = texture(psfTexture, texCoord);
-	textureColor.a = (textureColor.a - 0.25) / (0.75);
+	textureColor.a = (textureColor.a - 0.25) / (0.85);
 
 	vec4 fullColor =  textureColor * color;
 	if (fullColor.a <= 0.125)
