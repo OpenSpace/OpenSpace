@@ -67,7 +67,7 @@ void main() {
 
     float M  = vs_brightness[0].z;
 
-    M = clamp(M, 1.0, 5.0);
+    M = clamp(M, 1.0, 4.0);
     float modifiedSpriteSize = exp((-5 - M) * 0.871);
 
     for(int i = 0; i < 4; i++){
