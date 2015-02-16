@@ -209,8 +209,10 @@ bool ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
-    lua_close(_state);
-    _state = nullptr;
+    if (_state) {
+        lua_close(_state);
+        _state = nullptr;
+    }
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {

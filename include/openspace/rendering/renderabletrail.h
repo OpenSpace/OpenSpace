@@ -29,6 +29,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul {
 namespace opengl {
     class ProgramObject;

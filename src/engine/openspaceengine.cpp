@@ -82,8 +82,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	: _commandlineParser(programName, true)
-	, _syncBuffer(nullptr)
-	, _dt(0.0)
+    , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
 	Time::initialize();
@@ -180,7 +179,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
-	_engine->_console.loadHistory();
+	_engine->_console.initialize();
 
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
@@ -209,7 +208,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-
+    _engine->_console.deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
@@ -494,26 +493,18 @@ bool OpenSpaceEngine::initializeGL() {
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (sgct::Engine::instance()->isMaster()) {
-		_dt = (_dt + sgct::Engine::instance()->getDt()) * 0.5;
-        
-        _interactionHandler.update(_dt);
-        //_interactionHandler.lockControls();
+        const double dt = sgct::Engine::instance()->getDt();
 
-		Time::ref().advanceTime(_dt);
+        _interactionHandler.update(dt);
+        _interactionHandler.lockControls();
 
-		Time::ref().preSynchronization();
-
-		_renderEngine.preSynchronization();
+		Time::ref().advanceTime(dt);
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-	//time must be called first
-	Time::ref().postSynchronizationPreDraw();
-
     _renderEngine.postSynchronizationPreDraw();
 	
-
 	if (sgct::Engine::instance()->isMaster() && _gui.isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
@@ -546,8 +537,8 @@ void OpenSpaceEngine::render() {
 }
 
 void OpenSpaceEngine::postDraw() {
-//    if (sgct::Engine::instance()->isMaster())
-  //      _interactionHandler.unlockControls();
+    if (sgct::Engine::instance()->isMaster())
+        _interactionHandler.unlockControls();
 
 	_renderEngine.postDraw();
 }
@@ -619,7 +610,6 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
 		_renderEngine.serialize(_syncBuffer);
-		Time::ref().serialize(_syncBuffer);
 		_syncBuffer->write();
 	}
 }
@@ -628,7 +618,6 @@ void OpenSpaceEngine::decode() {
 	if (_syncBuffer) {
 		_syncBuffer->read();
 		_renderEngine.deserialize(_syncBuffer);
-		Time::ref().deserialize(_syncBuffer);
 	}
 }
 

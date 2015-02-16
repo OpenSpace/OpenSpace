@@ -37,31 +37,25 @@ public:
 	LuaConsole();
 	~LuaConsole();
 
-	void loadHistory();
+    void initialize();
+    void deinitialize();
 
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);
 
 	void render();
 
-	unsigned int commandInputButton();
-	unsigned int ignoreCodepoint();
+    unsigned int commandInputButton();
 
 	bool isVisible() const;
 	void setVisible(bool visible);
 	void toggleVisibility();
 		
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * console. The functions contained are
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * console
-	 */
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 
 private:
-	void addToCommand(std::string c);
+    void addToCommand(std::string c);
 	std::string UnicodeToUTF8(unsigned int codepoint);
 
 	size_t _inputPosition;
