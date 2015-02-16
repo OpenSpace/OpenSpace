@@ -22,54 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERE_H__
-#define __RENDERABLESPHERE_H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace openspace {
+out vec2 vs_st;
+out vec4 vs_position;
+out float s;
 
-class PowerScaledSphere;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-class RenderableSphere : public Renderable {
-public:
-	RenderableSphere(const ghoul::Dictionary& dictionary);
-	~RenderableSphere();
+void main()
+{
+	vec4 tmp = in_position;
 
-	bool initialize() override;
-	bool deinitialize() override;
+	mat4 mt = ModelTransform;
 
-	bool isReady() const override;
+	mt = mat4(0, -1, 0, 0,
+			  1, 0, 0, 0,
+			  0, 0, -1, 0,
+			  0, 0, 0, 1) * mt;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	vec4 position = pscTransform(tmp, mt);
 
-private:
-	void loadTexture();
-
-	properties::StringProperty _texturePath;
-    properties::OptionProperty _orientation;
-
-    properties::Vec2Property _size;
-    properties::IntProperty _segments;
-
-    properties::FloatProperty _transparency;
-
-	ghoul::opengl::ProgramObject* _shader;
-	ghoul::opengl::Texture* _texture;
-
-    PowerScaledSphere* _sphere;
-
-    bool _programIsDirty;
-    bool _sphereIsDirty;
-};
-
-} // namespace openspace
-#endif // __RENDERABLESPHERE_H__
+	vs_position = in_position;
+	vs_st = in_st;
+	
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
+}

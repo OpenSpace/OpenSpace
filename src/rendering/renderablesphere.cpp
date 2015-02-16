@@ -42,8 +42,8 @@ namespace {
     const std::string keyOrientation = "Orientation";
 
     enum Orientation {
-        Outside = 0,
-        Inside
+        Outside = 1,
+        Inside = 2
     };
 }
 
@@ -55,6 +55,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _orientation("orientation", "Orientation")
     , _size("size", "Size", glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _segments("segments", "Segments", 8, 4, 100)
+    , _transparency("transparency", "Transparency", 1.f, 0.f, 1.f)
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _sphere(nullptr)
@@ -105,6 +106,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_segments);
     _segments.onChange([this](){ _sphereIsDirty = true; });
 
+    addProperty(_transparency);
+
 	addProperty(_texturePath);
 	_texturePath.onChange(std::bind(&RenderableSphere::loadTexture, this));
 }
@@ -121,9 +124,9 @@ bool RenderableSphere::initialize() {
     _sphere->initialize();
 
     // pscstandard
-    _shader = ghoul::opengl::ProgramObject::Build("pscstandard",
-        "${SHADERS}/plane_vs.glsl",
-        "${SHADERS}/plane_fs.glsl");
+    _shader = ghoul::opengl::ProgramObject::Build("Sphere",
+        "${SHADERS}/modules/sphere/sphere_vs.glsl",
+        "${SHADERS}/modules/sphere/sphere_fs.glsl");
     if (!_shader)
         return false;
     _shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
@@ -143,12 +146,18 @@ void RenderableSphere::render(const RenderData& data) {
 
 	glm::mat4 transform = glm::mat4(1.0);
 
+    transform = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+
+
     // Activate shader
 	_shader->activate();
+    _shader->setIgnoreUniformLocationError(true);
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
 	setPscUniforms(_shader, &data.camera, data.position);
+
+    _shader->setUniform("alpha", _transparency);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -157,6 +166,7 @@ void RenderableSphere::render(const RenderData& data) {
 
     _sphere->render();
 
+    _shader->setIgnoreUniformLocationError(false);
 	_shader->deactivate();
 }
 
