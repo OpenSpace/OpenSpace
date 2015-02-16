@@ -40,6 +40,8 @@
 namespace {
 	const std::string _loggerCat = "LuaConsole";
 	const std::string historyFile = "ConsoleHistory";
+
+    const int NoAutoComplete = -1;
 }
 
 namespace openspace {
@@ -94,6 +96,7 @@ LuaConsole::LuaConsole()
 	: _inputPosition(0)
 	, _activeCommand(0)
 	, _filename("")
+    , _autoCompleteInfo({NoAutoComplete, false, ""})
 	, _isVisible(false)
 {
 	_commands.push_back("");
@@ -129,7 +132,6 @@ void LuaConsole::initialize() {
         LERROR("Could not open file '" << absPath(_filename) << "' for reading history");
     _commands.push_back("");
     _activeCommand = _commands.size() - 1;
-
 }
 
 void LuaConsole::deinitialize() {
@@ -221,15 +223,67 @@ void LuaConsole::keyboardCallback(int key, int action) {
 						_commandsHistory.push_back(_commands.at(_activeCommand));
 					else if (_commandsHistory.empty())
 						_commandsHistory.push_back(_commands.at(_activeCommand));
-
-					_activeCommand = _commands.size() - 1;
-					_inputPosition = 0;
 				}
                 _commands = _commandsHistory;
                 _commands.push_back("");
+                _activeCommand = _commands.size() - 1;
+                _inputPosition = 0;
                 setVisible(false);
 			}
 		}
+
+        if (key == SGCT_KEY_TAB) {
+            // We get a list of all the available commands and initially find the first
+            // command that starts with how much we typed sofar. We store the index so
+            // that in subsequent "tab" presses, we will discard previous commands. This
+            // implements the 'hop-over' behavior. As soon as another key is pressed,
+            // everything is set back to normal
+
+            // If the shift key is pressed, we decrement the current index so that we will
+            // find the value before the one that was previously found
+            if (_autoCompleteInfo.lastAutoCompleteIndex != NoAutoComplete && modifierShift)
+                _autoCompleteInfo.lastAutoCompleteIndex -= 2;
+            std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
+            std::sort(allCommands.begin(), allCommands.end());
+
+            std::string currentCommand = _commands.at(_activeCommand);
+            
+            // Check if it is the first time the tab has been pressed. If so, we need to
+            // store the already entered command so that we can later start the search
+            // from there. We will overwrite the 'currentCommand' thus making the storage
+            // necessary
+            if (!_autoCompleteInfo.hasInitialAutoCompleteValue) {
+                _autoCompleteInfo.initalAutoCompleteValue = currentCommand;
+                _autoCompleteInfo.hasInitialAutoCompleteValue = true;
+            }
+
+            for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
+                const std::string& command = allCommands[i];
+
+                // Check if the command has enough length (we don't want crashes here)
+                // Then check if the iterator-command's start is equal to what we want
+                // then check if we need to skip the first found values as the user has
+                // pressed TAB repeatedly
+                if (command.length() >= _autoCompleteInfo.initalAutoCompleteValue.length() &&
+                    (command.substr(0, _autoCompleteInfo.initalAutoCompleteValue.length()) == _autoCompleteInfo.initalAutoCompleteValue) &&
+                    (i > _autoCompleteInfo.lastAutoCompleteIndex))
+                {
+                    // We found our index, so store it
+                    _autoCompleteInfo.lastAutoCompleteIndex = i;
+                    // Set the found command as active command
+                    _commands.at(_activeCommand) = command + "();";
+                    // Set the cursor position to be between the brackets
+                    _inputPosition = _commands.at(_activeCommand).size() - 2;
+                    break;
+                }
+            }
+        }
+        else {
+            // If any other key is pressed, we want to remove our previous findings
+            // The special case for Shift is necessary as we want to allow Shift+TAB
+            if (!modifierShift)
+                _autoCompleteInfo = { NoAutoComplete, false, ""};
+        }
 	}
 }
 
