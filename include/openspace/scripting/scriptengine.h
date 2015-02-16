@@ -66,6 +66,8 @@ public:
     bool runScriptFile(const std::string& filename);
 
 	bool writeDocumentation(const std::string& filename, const std::string& type) const;
+
+    std::vector<std::string> allLuaFunctions() const;
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
