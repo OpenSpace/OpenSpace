@@ -55,9 +55,15 @@ if(NOT CMAKE_BUILD_TYPE)
 	   FORCE )
 endif(NOT CMAKE_BUILD_TYPE)
 
-if (APPLE )
+if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 endif ()
+
+if (MSVC)
+    # Enable multicore compilation
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif ()
+
 #########################################################################################
 # External Third-party software
 #########################################################################################
