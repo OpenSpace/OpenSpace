@@ -493,18 +493,23 @@ bool OpenSpaceEngine::initializeGL() {
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (sgct::Engine::instance()->isMaster()) {
-        const double dt = sgct::Engine::instance()->getDt();
-
-        _interactionHandler.update(dt);
-        //_interactionHandler.lockControls();
+        //const double dt = sgct::Engine::instance()->getDt();
+		const double dt = sgct::Engine::instance()->getAvgDt();
 
 		Time::ref().advanceTime(dt);
+		Time::ref().preSynchronization();
+		
+        _interactionHandler.update(dt);
+        //_interactionHandler.lockControls();		
 
+		_scriptEngine.preSynchronization();			
 		_renderEngine.preSynchronization();
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+	Time::ref().postSynchronizationPreDraw();
+	_scriptEngine.postSynchronizationPreDraw();	
     _renderEngine.postSynchronizationPreDraw();
 	
 	if (sgct::Engine::instance()->isMaster() && _gui.isEnabled()) {
@@ -611,7 +616,10 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 
 void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
+		_scriptEngine.serialize(_syncBuffer);
+		Time::ref().serialize(_syncBuffer);
 		_renderEngine.serialize(_syncBuffer);
+		
 		_syncBuffer->write();
 	}
 }
@@ -619,7 +627,11 @@ void OpenSpaceEngine::encode() {
 void OpenSpaceEngine::decode() {
 	if (_syncBuffer) {
 		_syncBuffer->read();
+
+		_scriptEngine.deserialize(_syncBuffer);
+		Time::ref().deserialize(_syncBuffer);
 		_renderEngine.deserialize(_syncBuffer);
+		
 	}
 }
 
@@ -636,7 +648,8 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 		{
 			std::string script = std::string(receivedChars + 1);
 			LINFO("Received Lua Script: '" << script << "'");
-			_scriptEngine.runScript(script);
+			//_scriptEngine.runScript(script);
+			_scriptEngine.queueScript(script);
 		}
 	}
 }
