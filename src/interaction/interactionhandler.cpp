@@ -479,7 +479,28 @@ void InteractionHandler::update(double deltaTime) {
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+	
+	if (_focusNode == node){
+		return;
+	}
+
 	_focusNode = node;
+
+	//orient the camera to the new node
+	psc focusPos = node->worldPosition();
+	psc camToFocus = focusPos - _camera->position();
+	glm::vec3 viewDir = glm::normalize(camToFocus.vec3());
+	glm::vec3 cameraView = glm::normalize(_camera->viewDirection());
+	glm::vec3 rotAxis = glm::normalize(glm::cross(viewDir, cameraView));
+	float angle = glm::angle(viewDir, cameraView);
+	glm::quat q = glm::angleAxis(angle, rotAxis);
+
+	psc camPos = _camera->position();
+	//set new focus position
+	_camera->setFocusPosition(node->worldPosition());
+	//rotate view to target new focus
+	_camera->rotate(q);
+
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -519,55 +540,63 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
 		_mouseController->scrollWheel(pos);
 }
 
-void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz){
+void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz, const float &dist){
 
 	lockControls();
 	
+	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
+	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
+
+	glm::mat4 transform;
+	transform = glm::rotate(dx * 10, cameraUp) * transform;
+	transform = glm::rotate(dy * 10, cameraRight) * transform;
+	transform = glm::rotate(dz * 10, _camera->viewDirection()) * transform;
+
 	// should be changed to something more dynamic =)
 	psc origin;
 	if (_focusNode) {
 		origin = _focusNode->worldPosition();
 	}
-
-	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
-	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
-
-	glm::mat4 transform;
-	transform = glm::rotate(dx, cameraUp) * transform;
-	transform = glm::rotate(dy, cameraRight) * transform;
-	transform = glm::rotate(dz, _camera->viewDirection()) * transform;
+	_camera->setFocusPosition(origin);
 
 	// the camera position
 	psc relative = _camera->position();
 	psc relative_origin_coordinate = relative - origin;
 	relative_origin_coordinate = glm::inverse(transform) * relative_origin_coordinate.vec4();
-	relative = relative_origin_coordinate + origin;
+	relative = origin + relative_origin_coordinate; //relative_origin_coordinate + origin;
 
-	_camera->setPosition(relative);
-	_camera->rotate(glm::quat_cast(transform));
-
-	unlockControls();
-}
-
-void InteractionHandler::distance(const float &d){
-
-	lockControls();
-
-	psc relative = _camera->position();
-	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
-	psc relative_origin_coordinate = relative - origin;
-	// addition 100% of bounds (fix later to something node specific?)
 	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
 
-	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+	psc target = relative + relative_origin_coordinate * dist;// *fmaxf(bounds, (1.f - d));
 	//don't fly into objects
 	if ((target - origin).length() < bounds){
 		target = relative;
 	}
 	_camera->setPosition(target);
-	
+	_camera->rotate(glm::quat_cast(transform));
+
 	unlockControls();
 }
+
+//void InteractionHandler::distance(const float &d){
+//
+//	lockControls();
+//
+//	psc relative = _camera->position();
+//	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+//	psc relative_origin_coordinate = relative - origin;
+//	// addition 100% of bounds (fix later to something node specific?)
+//	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+//
+//	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+//	//don't fly into objects
+//	if ((target - origin).length() < bounds){
+//		target = relative;
+//	}
+//	_camera->setPosition(target);
+//	
+//	unlockControls();
+//}
 
 void InteractionHandler::orbitDelta(const glm::quat& rotation)
 {

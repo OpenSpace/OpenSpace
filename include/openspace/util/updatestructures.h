@@ -30,6 +30,10 @@
 
 namespace openspace {
 
+struct InitializeData {
+
+};
+
 struct UpdateData {
 	double time;
 	double delta;

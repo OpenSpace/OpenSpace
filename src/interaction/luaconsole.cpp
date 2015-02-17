@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/clipboard.h>
 
 #include <string>
 #include <iostream>
@@ -40,107 +41,7 @@ namespace {
 	const std::string _loggerCat = "LuaConsole";
 	const std::string historyFile = "ConsoleHistory";
 
-#if !defined(WIN32)
-	// Dangerus as fuck (if malicious input)
-	bool exec(const std::string& cmd, std::string& value)
-	{
-		FILE* pipe = popen(cmd.c_str(), "r");
-		if (!pipe)
-			return false;
-
-		const int buffer_size = 1024;
-		char buffer[buffer_size];
-		value = "";
-		while (!feof(pipe))
-		{
-			if (fgets(buffer, buffer_size, pipe) != NULL)
-			{
-				value += buffer;
-			}
-		}
-		pclose(pipe);
-		return true;
-	}
-#endif
-
-	// TODO: Put this functio nsomewhere appropriate
-	// get text from clipboard
-	std::string getClipboardText() {
-#if defined(WIN32)
-	// Try opening the clipboard
-	if (!OpenClipboard(nullptr))
-		return "";
-
-	// Get handle of clipboard object for ANSI text
-	HANDLE hData = GetClipboardData(CF_TEXT);
-	if (hData == nullptr)
-		return "";
-
-	// Lock the handle to get the actual text pointer
-	char * pszText = static_cast<char*>(GlobalLock(hData));
-	if (pszText == nullptr)
-		return "";
-
-	// Save text in a string class instance
-	std::string text(pszText);
-
-	// Release the lock
-	GlobalUnlock(hData);
-
-	// Release the clipboard
-	CloseClipboard();
-
-	text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
-	return text;
-#elif defined(__APPLE__)
-	std::string text;
-	if (exec("pbpaste", text))
-		return text.substr(0, text.length() - 1);
-	return ""; // remove a line ending
-#else
-	std::string text;
-	if (exec("xclip -o -sel c -f", text))
-		return text.substr(0, text.length() - 1);
-	return ""; // remove a line ending
-#endif
-}
-
-	// TODO: Put this function somewhere appropriate
-	// set text to clipboard
-	bool setClipboardText(std::string text)
-	{
-#if defined(WIN32)
-		char *ptrData = nullptr;
-		HANDLE hData = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, text.length() + 1);
-
-		ptrData = (char*)GlobalLock(hData);
-		memcpy(ptrData, text.c_str(), text.length() + 1);
-
-		GlobalUnlock(hData);
-
-		if (!OpenClipboard(nullptr))
-			return false;
-
-		if (!EmptyClipboard())
-			return false;
-
-		SetClipboardData(CF_TEXT, hData);
-
-		CloseClipboard();
-
-		return true;
-#elif defined(__APPLE__)
-		std::stringstream cmd;
-		cmd << "echo \"" << text << "\" | pbcopy";
-		std::string buf;
-		return exec(cmd.str(), buf);
-#else
-		std::stringstream cmd;
-		cmd << "echo \"" << text << "\" | xclip -i -sel c -f";
-		std::string buf;
-		return exec(cmd.str(), buf);
-#endif
-	}
+    const int NoAutoComplete = -1;
 }
 
 namespace openspace {
@@ -195,6 +96,7 @@ LuaConsole::LuaConsole()
 	: _inputPosition(0)
 	, _activeCommand(0)
 	, _filename("")
+    , _autoCompleteInfo({NoAutoComplete, false, ""})
 	, _isVisible(false)
 {
 	_commands.push_back("");
@@ -202,77 +104,73 @@ LuaConsole::LuaConsole()
 }
 
 LuaConsole::~LuaConsole() {
-	std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
-	if (file.is_open()) {
-		size_t n = _commandsHistory.size();
-		file.write(reinterpret_cast<const char*>(&n), sizeof(size_t));
-		for (const std::string& s : _commandsHistory) {
-			size_t length = s.length();
-			file.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-			file.write(s.c_str(), sizeof(char)*length);
-		}
-		file.close();
-	}
+
 }
 
-void LuaConsole::loadHistory() {
-	FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
 
-	std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
-	if (file.is_open()) {
-		size_t n;
+void LuaConsole::initialize() {
+    FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
 
-		file.read(reinterpret_cast<char*>(&n), sizeof(size_t));
+    std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
+    if (file.good()) {
+        int64_t nCommands;
+        file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-		for (size_t i = 0; i < n; ++i) {
-			size_t length;
-			file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-			char* tmp = new char[length + 1];
-			file.read(tmp, sizeof(char)*length);
-			tmp[length] = '\0';
-			_commandsHistory.emplace_back(tmp);
-			delete[] tmp;
-		}
-		file.close();
-		_commands = _commandsHistory;
-	}
-	_commands.push_back("");
-	_activeCommand = _commands.size() - 1;
+        for (size_t i = 0; i < nCommands; ++i) {
+            int64_t length;
+            file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
+            char* tmp = new char[length + 1];
+            file.read(tmp, sizeof(char)*length);
+            tmp[length] = '\0';
+            _commandsHistory.emplace_back(tmp);
+            delete[] tmp;
+        }
+        file.close();
+        _commands = _commandsHistory;
+    }
+    else
+        LERROR("Could not open file '" << absPath(_filename) << "' for reading history");
+    _commands.push_back("");
+    _activeCommand = _commands.size() - 1;
+}
+
+void LuaConsole::deinitialize() {
+    std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
+    if (file.good()) {
+        int64_t nCommands = _commandsHistory.size();
+        file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
+        for (const std::string& s : _commandsHistory) {
+            int64_t length = s.length();
+            file.write(reinterpret_cast<const char*>(&length), sizeof(int64_t));
+            file.write(s.c_str(), length);
+        }
+        file.close();
+    }
 }
 
 void LuaConsole::keyboardCallback(int key, int action) {
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
-		const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
+		const bool modifierControl = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
-		const bool mod_SHIFT = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
+		const bool modifierShift = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
 
 		// Paste from clipboard
-		if (key == SGCT_KEY_V) {
-			if (mod_CONTROL) {
-				addToCommand(getClipboardText());
-			}
-		}
+		if (modifierControl && (key == SGCT_KEY_V))
+			addToCommand(ghoul::clipboardText());
 
 		// Copy to clipboard
-		if (key == SGCT_KEY_C) {
-			if (mod_CONTROL) {
-				setClipboardText(_commands.at(_activeCommand));
-			}
-		}
+		if (modifierControl && (key == SGCT_KEY_C))
+			ghoul::setClipboardText(_commands.at(_activeCommand));
 
 		// Go to the previous character
-		if (key == SGCT_KEY_LEFT) {
-			if (_inputPosition > 0)
-				_inputPosition -= 1;
-		}
+		if ((key == SGCT_KEY_LEFT) && (_inputPosition > 0))
+			--_inputPosition;
 
 		// Go to the next character
-		if (key == SGCT_KEY_RIGHT) {
-			if (_inputPosition < _commands.at(_activeCommand).length())
-				++_inputPosition;
-		}
+		if ((key == SGCT_KEY_RIGHT) && _inputPosition < _commands.at(_activeCommand).length())
+			++_inputPosition;
 
 		// Go to previous command
 		if (key == SGCT_KEY_UP) {
@@ -297,61 +195,100 @@ void LuaConsole::keyboardCallback(int key, int action) {
 		}
 
 		// Remove character after _inputPosition
-		if (key == SGCT_KEY_DELETE) {
-			if (_inputPosition <= _commands.at(_activeCommand).size()) {
-				_commands.at(_activeCommand).erase(_inputPosition, 1);
-			}
-		}
+		if ((key == SGCT_KEY_DELETE) && (_inputPosition <= _commands.at(_activeCommand).size()))
+			_commands.at(_activeCommand).erase(_inputPosition, 1);
 
 		// Go to the beginning of command string
-		if (key == SGCT_KEY_HOME) {
+		if (key == SGCT_KEY_HOME)
 			_inputPosition = 0;
-		}
 
 		// Go to the end of command string
-		if (key == SGCT_KEY_END) {
+		if (key == SGCT_KEY_END)
 			_inputPosition = _commands.at(_activeCommand).size();
-		}
 
 		if (key == SGCT_KEY_ENTER) {
-
 			// SHIFT+ENTER == new line
-			if (mod_SHIFT) {
+			if (modifierShift)
 				addToCommand("\n");
-			}
 			// CTRL+ENTER == Debug print the command
-			else if (mod_CONTROL) {
+			else if (modifierControl) {
 				LDEBUG("Active command from next line:\n" << _commands.at(_activeCommand));
 			}
 			// ENTER == run lua script
 			else {
 				if (_commands.at(_activeCommand) != "") {
-
 					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
 					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
 					else if (_commandsHistory.empty())
 						_commandsHistory.push_back(_commands.at(_activeCommand));
-
-					_commands = _commandsHistory;
-					_commands.push_back("");
-					_activeCommand = _commands.size() - 1;
-					_inputPosition = 0;
-					setVisible(false);
 				}
-				else {
-					_commands = _commandsHistory;
-					_commands.push_back("");
-					setVisible(false);
-				}
+                _commands = _commandsHistory;
+                _commands.push_back("");
+                _activeCommand = _commands.size() - 1;
+                _inputPosition = 0;
+                setVisible(false);
 			}
 		}
+
+        if (key == SGCT_KEY_TAB) {
+            // We get a list of all the available commands and initially find the first
+            // command that starts with how much we typed sofar. We store the index so
+            // that in subsequent "tab" presses, we will discard previous commands. This
+            // implements the 'hop-over' behavior. As soon as another key is pressed,
+            // everything is set back to normal
+
+            // If the shift key is pressed, we decrement the current index so that we will
+            // find the value before the one that was previously found
+            if (_autoCompleteInfo.lastAutoCompleteIndex != NoAutoComplete && modifierShift)
+                _autoCompleteInfo.lastAutoCompleteIndex -= 2;
+            std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
+            std::sort(allCommands.begin(), allCommands.end());
+
+            std::string currentCommand = _commands.at(_activeCommand);
+            
+            // Check if it is the first time the tab has been pressed. If so, we need to
+            // store the already entered command so that we can later start the search
+            // from there. We will overwrite the 'currentCommand' thus making the storage
+            // necessary
+            if (!_autoCompleteInfo.hasInitialAutoCompleteValue) {
+                _autoCompleteInfo.initalAutoCompleteValue = currentCommand;
+                _autoCompleteInfo.hasInitialAutoCompleteValue = true;
+            }
+
+            for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
+                const std::string& command = allCommands[i];
+
+                // Check if the command has enough length (we don't want crashes here)
+                // Then check if the iterator-command's start is equal to what we want
+                // then check if we need to skip the first found values as the user has
+                // pressed TAB repeatedly
+                if (command.length() >= _autoCompleteInfo.initalAutoCompleteValue.length() &&
+                    (command.substr(0, _autoCompleteInfo.initalAutoCompleteValue.length()) == _autoCompleteInfo.initalAutoCompleteValue) &&
+                    (i > _autoCompleteInfo.lastAutoCompleteIndex))
+                {
+                    // We found our index, so store it
+                    _autoCompleteInfo.lastAutoCompleteIndex = i;
+                    // Set the found command as active command
+                    _commands.at(_activeCommand) = command + "();";
+                    // Set the cursor position to be between the brackets
+                    _inputPosition = _commands.at(_activeCommand).size() - 2;
+                    break;
+                }
+            }
+        }
+        else {
+            // If any other key is pressed, we want to remove our previous findings
+            // The special case for Shift is necessary as we want to allow Shift+TAB
+            if (!modifierShift)
+                _autoCompleteInfo = { NoAutoComplete, false, ""};
+        }
 	}
 }
 
 void LuaConsole::charCallback(unsigned int codepoint) {
-	if (codepoint == ignoreCodepoint())
+	if (codepoint == commandInputButton())
 		return;
 
 #ifndef WIN32
@@ -407,18 +344,10 @@ void LuaConsole::render() {
 	Freetype::print(font, 10.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
-unsigned int LuaConsole::commandInputButton(){
-	// Button left of 1 and abobe TAB
-#ifdef WIN32
-	return SGCT_KEY_BACKSLASH;
-#else
+unsigned int LuaConsole::commandInputButton() {
+	// Button left of 1 and above TAB
+    // How to deal with different keyboard languages? ---abock
 	return SGCT_KEY_GRAVE_ACCENT;
-#endif
-}
-
-unsigned int LuaConsole::ignoreCodepoint() {
-	// Correesponding codepoint for commandInputButton()
-	return 167;
 }
 
 void LuaConsole::addToCommand(std::string c) {
@@ -490,5 +419,6 @@ scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
 		}
 	};
 }
+
 
 } // namespace openspace

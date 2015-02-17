@@ -25,83 +25,69 @@
 #ifndef __RENDERABLETRAIL_H__
 #define __RENDERABLETRAIL_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/properties/vectorproperty.h>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-//#include <openspace/util/runtimedata.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul {
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+}
+}
 
 namespace openspace {
-class RenderableTrail : public Renderable{
+
+class RenderableTrail : public Renderable {
 public:
-	RenderableTrail(const ghoul::Dictionary& dictionary);
-	~RenderableTrail();
+    RenderableTrail(const ghoul::Dictionary& dictionary);
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
- private:
-	properties::StringProperty _colorTexturePath; 
-	ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::Texture* _texture;
-	void loadTexture();
-	void fullYearSweep();
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
-	bool _successfullDictionaryFetch;
+private:
+    struct TrailVBOLayout {
+        float x, y, z, e;
+    };
 
-	// modfile reads
-	// spice
-	std::string _target;
-	std::string _observer;
-	std::string _frame;
-	std::string _orbitVariety;
-	// color
-	glm::vec3 _c; 
-	float _r, _g, _b;
-	// orbit relational data
-	float _tropic;
-	float _ratio;
-	float _day;
+    void fullYearSweep(double time);
+    void sendToGPU();
 
-	// need to write robust method for vbo id selection 
-	GLuint _vaoID ;
-	GLuint _vBufferID ;
-	GLuint _iBufferID;
+    properties::Vec3Property _lineColor;
+    properties::FloatProperty _lineFade;
 
-	void updateTrail();
-	void sendToGPU();
+    ghoul::opengl::ProgramObject* _programObject;
+    bool _programIsDirty;
 
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	unsigned int _vtotal;
-	unsigned int _stride;
+    bool _successfullDictionaryFetch;
 
-	double _startTrail;
+    std::string _target;
+    std::string _observer;
+    std::string _frame;
 
-	//Vertex* _varray;
-	std::vector<float> _varray;
-	std::vector<int> _iarray;
+    float _tropic;
+    float _ratio;
+    float _day;
 
-	//bool _once = false;
-	double lightTime;
-	//used for update of trail
-	psc _pscpos, _pscvel;
-	float _increment;
-	float _time = 0;
-	float _oldTime = 0;
-	float _dtEt;
+    GLuint _vaoID;
+    GLuint _vBufferID;
 
-	int _delta  = 0;
-	//int _dtprogress = 0;
+    bool _needsSweep;
+
+    std::vector<TrailVBOLayout> _vertexArray;
+
+    float _increment;
+    float _oldTime = 0;
+    float _dtEt;
 };
-}
-#endif
+
+} // namespace openspace
+
+#endif // __RENDERABLETRAIL_H__

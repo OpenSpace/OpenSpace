@@ -172,16 +172,6 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
 
-	// pscstandard
-	tmpProgram = ProgramObject::Build("EphemerisProgram",
-		"${SHADERS}/ephemeris_vs.glsl",
-		"${SHADERS}/ephemeris_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
-
-
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
@@ -199,15 +189,6 @@ bool SceneGraph::initialize()
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
-
-	// Plane program
-	tmpProgram = ProgramObject::Build("Plane",
-		"${SHADERS}/plane_vs.glsl",
-		"${SHADERS}/plane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
 
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
@@ -382,6 +363,10 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	Camera* c = OsEng.ref().renderEngine().camera();
     auto focusIterator = _allNodes.find(_focus);
 
+	glm::vec2 cameraScaling(1);
+	psc cameraPosition(0,0,1,0);
+	glm::vec3 cameraDirection = glm::vec3(0, 0, -1);
+
     if (focusIterator != _allNodes.end()) {
         LDEBUG("Camera focus is '" << _focus << "'");
         SceneGraphNode* focusNode = focusIterator->second;
@@ -395,17 +380,24 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
         // this part is full of magic!
 		glm::vec2 boundf = bound.vec2();
-        glm::vec2 scaling{1.0f, -boundf[1]};
+        //glm::vec2 scaling{1.0f, -boundf[1]};
+		cameraScaling = glm::vec2(1.f, -boundf[1]);
         boundf[0] *= 5.0f;
         
-		psc cameraPosition = focusNode->position();
-        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+		//psc cameraPosition = focusNode->position();
+        //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
-		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
+		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
-		c->setPosition(cameraPosition);
-        c->setCameraDirection(glm::vec3(0, 0, -1));
-        c->setScaling(scaling);
+		cameraPosition = focusNode->position();
+		cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+		
+		//why this line? (JK)
+		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+
+		//c->setPosition(cameraPosition);
+       // c->setCameraDirection(glm::vec3(0, 0, -1));
+      //  c->setScaling(scaling);
 
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler().setFocusNode(focusNode);
@@ -421,15 +413,20 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 			<< position[2] << ", " 
 			<< position[3] << ")");
 
-		c->setPosition(position);
+		cameraPosition = psc(position);
+		//c->setPosition(position);
 	}
 
 	// the camera position
 	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
-	psc relative = fn->worldPosition() - c->position();
+	//psc relative = fn->worldPosition() - c->position();
+	psc relative = fn->worldPosition() - cameraPosition;
 
-	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+
 	c->setRotation(la);
+	c->setPosition(cameraPosition);
+	c->setScaling(cameraScaling);
 
 	glm::vec3 viewOffset;
 	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)

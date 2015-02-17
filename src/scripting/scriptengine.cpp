@@ -209,8 +209,10 @@ bool ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
-    lua_close(_state);
-    _state = nullptr;
+    if (_state) {
+        lua_close(_state);
+        _state = nullptr;
+    }
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
@@ -507,6 +509,22 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
 		//_registeredLibraries.push_back(library);
     }
     return true;
+}
+
+std::vector<std::string> ScriptEngine::allLuaFunctions() const {
+    std::vector<std::string> result;
+
+    for (const LuaLibrary& library : _registeredLibraries) {
+        for (const LuaLibrary::Function& function : library.functions) {
+            std::string total = "openspace.";
+            if (!library.name.empty())
+                total += library.name + ".";
+            total += function.name;
+            result.push_back(std::move(total));
+        }
+    }
+
+    return result;
 }
 
 bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {

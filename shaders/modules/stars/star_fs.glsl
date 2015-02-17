@@ -41,8 +41,6 @@ layout(location = 2) in vec3 ge_velocity;
 layout(location = 3) in float ge_speed;
 layout(location = 4) in vec2 texCoord;
 
-// layout(location = 5) in vec4 p;
-
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -62,7 +60,7 @@ void main() {
 	vec4 color = vec4(0.0);
 	switch (colorOption) {
 		case COLOROPTION_COLOR: 
-			color = bv2rgb(ge_brightness[0].x);
+			color = bv2rgb(ge_brightness.x);
 			break;
 		case COLOROPTION_VELOCITY:
 			color = vec4(abs(ge_velocity), 0.5); 
@@ -73,23 +71,35 @@ void main() {
 			break;
 	}
 
+	// These can be removed once we get a better star psf texture ---abock
+	vec4 textureColor = texture(psfTexture, texCoord);
+	textureColor.a = (textureColor.a - 0.25) / (0.85);
 
-    framebuffer_output_color = texture(psfTexture, texCoord) * color;
+	vec4 fullColor =  textureColor * color;
+	if (fullColor.a <= 0.125)
+		discard;
 
-    // framebuffer_output_color = vec4(vs_position.rgb, 1.0);
+	float M = ge_brightness.z;
+	// if (M > 10)
+	// 	discard;
+	float targetM = 6.0;
+	float maxM = 12.0;
+	if (M > targetM) {
+		float alpha = (M - targetM) / (maxM - targetM);
+		fullColor.a *= alpha;
 
-    // framebuffer_output_color = p;
-    // framebuffer_output_color = vec4(vec3(ge_brightness.z), 1.0);
-    // framebuffer_output_color = vec4(vec3(abs(ge_brightness.z)), 1.0);
+	}
+
+	// if (ge_brightness.z > 7.0)
+		// discard;
 
    	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	gl_FragDepth = depth;
+   	// This has to be fixed when the scale graph is in place ---abock
+	float depth = pscDepth(position) + 1000;
+	// float depth = 10000.0;
+	// gl_FragDepth = depth;
 
-	//ABufferStruct_t frag = createGeometryFragment(vec4(1,0,0,1), position, depth);
-	//ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	//addToBuffer(frag);
-
-	//discard;
-    
+	ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
+	addToBuffer(frag);
+	// discard;
 }

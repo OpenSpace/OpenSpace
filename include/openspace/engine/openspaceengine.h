@@ -98,6 +98,7 @@ private:
 	ghoul::cmdparser::CommandlineParser _commandlineParser;
 	LuaConsole _console;
 	GUI _gui;
+	double _dt;
 
 	SyncBuffer* _syncBuffer;
 

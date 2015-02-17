@@ -179,7 +179,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
-	_engine->_console.loadHistory();
+	_engine->_console.initialize();
 
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
@@ -208,7 +208,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-
+    _engine->_console.deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
@@ -496,9 +496,11 @@ void OpenSpaceEngine::preSynchronization() {
         const double dt = sgct::Engine::instance()->getDt();
 
         _interactionHandler.update(dt);
-        _interactionHandler.lockControls();
+        //_interactionHandler.lockControls();
 
-		//Time::ref().advanceTime(dt);
+		Time::ref().advanceTime(dt);
+
+		_renderEngine.preSynchronization();
     }
 }
 
@@ -538,7 +540,7 @@ void OpenSpaceEngine::render() {
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster())
-        _interactionHandler.unlockControls();
+        //_interactionHandler.unlockControls();
 
 	_renderEngine.postDraw();
 }

@@ -59,6 +59,7 @@ public:
 	// sgct wrapped functions
     bool initializeGL();
     void postSynchronizationPreDraw();
+	void preSynchronization();
     void render();
     void postDraw();
 

@@ -51,6 +51,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	, _size(glm::vec2(1,1))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
+    , _programIsDirty(false)
 	, _texture(nullptr)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
@@ -133,7 +134,13 @@ bool RenderablePlane::initialize() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-	OsEng.ref().configurationManager().getValue("PlaneProgram", _shader);
+    // Plane program
+    _shader = ghoul::opengl::ProgramObject::Build("Plane",
+        "${SHADERS}/modules/plane/plane_vs.glsl",
+        "${SHADERS}/modules/plane/plane_fs.glsl");
+    if (!_shader)
+        return false;
+    _shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
 	loadTexture();
 
@@ -147,6 +154,7 @@ bool RenderablePlane::deinitialize() {
 	_vertexPositionBuffer = 0;
 	if(_texture)
 		delete _texture;
+    delete _shader;
 	return true;
 }
 
@@ -176,10 +184,13 @@ void RenderablePlane::render(const RenderData& data) {
 }
 
 void RenderablePlane::update(const UpdateData& data) {
+    if (_programIsDirty) {
+        _shader->rebuildFromFile();
+        _programIsDirty = false;
+    }
 }
 
-void RenderablePlane::loadTexture()
-{
+void RenderablePlane::loadTexture() {
 	LDEBUG("loadTexture");
 	if (_texturePath.value() != "") {
 		LDEBUG("loadTexture2");
