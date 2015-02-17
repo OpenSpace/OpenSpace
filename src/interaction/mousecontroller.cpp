@@ -223,13 +223,13 @@ void OrbitalMouseController::scrollWheel(int pos) {
 
 void OrbitalMouseController::update(const double& dt){
 	
-	if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
+	//if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
 		_handler->orbit(
 			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, 
 			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed,
 			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed,
 			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
-	}
+	//}
 	
 //	if (_leftMouseButtonDown){
 //		_handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);

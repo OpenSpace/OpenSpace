@@ -26,6 +26,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
@@ -603,6 +604,45 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 		LERROR("Undefined type '" << type << "' for Lua documentation");
 		return false;
 	}
+}
+
+void ScriptEngine::serialize(SyncBuffer* syncBuffer){
+	syncBuffer->encode(_currentSyncedScript);
+}
+
+void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
+	syncBuffer->decode(_currentSyncedScript);
+}
+
+void ScriptEngine::postSynchronizationPreDraw(){
+	
+}
+
+void ScriptEngine::preSynchronization(){
+	if (!_currentSyncedScript.empty()){
+		runScript(_currentSyncedScript);
+		_currentSyncedScript.clear();
+	}
+
+	_mutex.lock();
+	
+	if (!_queuedScripts.empty()){
+		_currentSyncedScript = _queuedScripts.back();
+		_queuedScripts.pop_back();
+	}
+	
+	_mutex.unlock();
+}
+
+void ScriptEngine::queueScript(const std::string &script){
+	if (script.empty())
+		return;
+
+	_mutex.lock();
+
+	_queuedScripts.insert(_queuedScripts.begin(), script);
+
+	_mutex.unlock();
 }
 
 

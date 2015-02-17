@@ -51,6 +51,9 @@ Camera::Camera()
 	, _sharedPosition()
 	, _sharedScaling(1.f, 0.f)
 	, _sharedViewRotationMatrix(1.f)
+	, _syncedPosition()
+	, _syncedScaling(1.f, 0.f)
+	, _syncedViewRotationMatrix(1.f)
 	, _focusPosition()
 {
 }
@@ -66,6 +69,11 @@ void Camera::setPosition(psc pos)
 
 const psc& Camera::position() const
 {
+	//return _localPosition;
+	return _syncedPosition;
+}
+
+const psc& Camera::unsynchedPosition() const{
 	return _localPosition;
 }
 
@@ -119,7 +127,8 @@ void Camera::setViewRotationMatrix(glm::mat4 m) {
 
 const glm::mat4& Camera::viewRotationMatrix() const
 {
-	return _localViewRotationMatrix;
+	//return _localViewRotationMatrix;
+	return _syncedViewRotationMatrix;
 }
 
 void Camera::compileViewRotationMatrix()
@@ -129,6 +138,7 @@ void Camera::compileViewRotationMatrix()
 
     // the camera matrix needs to be rotated inverse to the world
    // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
+	//_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
 	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
     _viewDirection = glm::normalize(_viewDirection);
 }
@@ -194,7 +204,8 @@ void Camera::setScaling(glm::vec2 scaling)
 
 const glm::vec2& Camera::scaling() const
 {
-	return _localScaling;
+	//return _localScaling;
+	return _syncedScaling;
 }
 
 void Camera::setLookUpVector(glm::vec3 lookUp)
@@ -230,9 +241,9 @@ void Camera::deserialize(SyncBuffer* syncBuffer){
 void Camera::postSynchronizationPreDraw(){
 	_syncMutex.lock();
 
-	_localViewRotationMatrix = _sharedViewRotationMatrix;
-	_localPosition = _sharedPosition;
-	_localScaling = _sharedScaling;
+	_syncedViewRotationMatrix = _sharedViewRotationMatrix;
+	_syncedPosition = _sharedPosition;
+	_syncedScaling = _sharedScaling;
 
 	_syncMutex.unlock();
 }
