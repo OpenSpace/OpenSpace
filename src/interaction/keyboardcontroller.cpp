@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,9 @@
 
 #include <openspace/interaction/keyboardcontroller.h>
 
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -114,14 +116,14 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 		}
 	
 		if (key == Key::KeypadSubtract) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] -= 0.5;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 		if (key == Key::KeypadAdd) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] += 0.5;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 	}
 	/*

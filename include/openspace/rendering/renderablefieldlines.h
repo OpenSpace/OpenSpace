@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,14 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEFIELDLINES_H_
-#define RENDERABLEFIELDLINES_H_
+#ifndef __RENDERABLEFIELDLINES_H__
+#define __RENDERABLEFIELDLINES_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/vectorproperty.h>
+
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul {
+namespace opengl {
+	class ProgramObject;
+}
+}
 
 namespace openspace {
 	struct LinePoint;
@@ -37,23 +47,46 @@ namespace openspace {
 class RenderableFieldlines : public Renderable {
 public:
 	RenderableFieldlines(const ghoul::Dictionary& dictionary);
-	~RenderableFieldlines();
 
-	bool initialize();
-	bool deinitialize();
+	bool initialize() override;
+	bool deinitialize() override;
 
 	bool isReady() const override;
 
 	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 
 private:
-	std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+	typedef std::vector<LinePoint> Line;
 
-	std::vector<ghoul::Dictionary> _hintsDictionaries;
-	std::vector<std::string> _filenames;
+	void initializeDefaultPropertyValues();
+	//std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+	std::vector<Line> getFieldlinesData();
+	void loadSeedPoints();
+	void loadSeedPointsFromFile();
+	void loadSeedPointsFromTable();
+
+	std::vector<Line> generateFieldlines();
+	std::vector<Line> generateFieldlinesVolumeKameleon();
+
+	properties::FloatProperty _stepSize;
+	properties::BoolProperty _classification;
+	properties::Vec4Property _fieldlineColor;
+	properties::OptionProperty _seedPointSource;
+	properties::StringProperty _seedPointSourceFile;
+
+	ghoul::opengl::ProgramObject* _program;
+	bool _programIsDirty;
+
+	ghoul::Dictionary _vectorFieldInfo;
+	ghoul::Dictionary _fieldlineInfo;
+	ghoul::Dictionary _seedPointsInfo;
+
+	bool _seedPointsAreDirty;
+	bool _fieldLinesAreDirty;
+
 	std::vector<glm::vec3> _seedPoints;
 
-	ghoul::opengl::ProgramObject* _shader;
 	GLuint _fieldlineVAO;
 	GLuint _vertexPositionBuffer;
 
@@ -62,4 +95,5 @@ private:
 };
 
 } // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+
+#endif // __RENDERABLEFIELDLINES_H__

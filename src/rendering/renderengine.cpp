@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/constants.h>
@@ -87,7 +88,7 @@ int takeScreenshot(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.renderEngine().takeScreenshot();
+	OsEng.renderEngine()->takeScreenshot();
 	return 0;
 }
 
@@ -103,7 +104,7 @@ int visualizeABuffer(lua_State* L) {
 
 	const int type = lua_type(L, -1);
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().toggleVisualizeABuffer(b);
+	OsEng.renderEngine()->toggleVisualizeABuffer(b);
 	return 0;
 }
 
@@ -119,7 +120,7 @@ int showRenderInformation(lua_State* L) {
 
 	const int type = lua_type(L, -1);
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().toggleInfoText(b);
+	OsEng.renderEngine()->toggleInfoText(b);
 	return 0;
 }
 
@@ -134,7 +135,7 @@ int setPerformanceMeasurement(lua_State* L) {
 		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().setPerformanceMeasurements(b);
+	OsEng.renderEngine()->setPerformanceMeasurements(b);
 	return 0;
 }
 
@@ -183,7 +184,7 @@ bool RenderEngine::initialize()
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
     _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-	OsEng.interactionHandler().setCamera(_mainCamera);
+	OsEng.interactionHandler()->setCamera(_mainCamera);
 
 #ifdef GHOUL_USE_DEVIL
 	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
@@ -295,8 +296,18 @@ bool RenderEngine::initializeGL()
     return true;
 }
 
+void RenderEngine::preSynchronization(){
+	if (_mainCamera){
+		_mainCamera->preSynchronization();
+	}
+}
+
 void RenderEngine::postSynchronizationPreDraw()
 {
+	if (_mainCamera){
+		_mainCamera->postSynchronizationPreDraw();
+	}
+
 	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
 	bool updateAbuffer = false;
 	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
@@ -324,6 +335,13 @@ void RenderEngine::postSynchronizationPreDraw()
 
 	// clear the abuffer before rendering the scene
 	_abuffer->clear();
+	
+	//Allow focus node to update camera (enables camera-following)
+	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
+	if (const SceneGraphNode* node = OsEng.ref().interactionHandler()->focusNode()){
+		node->updateCamera(_mainCamera);
+	}
+	
 }
 
 void RenderEngine::render()
@@ -409,7 +427,7 @@ void RenderEngine::render()
 			const glm::vec2 scaling = _mainCamera->scaling();
 			const glm::vec3 viewdirection = _mainCamera->viewDirection();
 			const psc position = _mainCamera->position();
-			const psc origin = OsEng.interactionHandler().focusNode()->worldPosition();
+			const psc origin = OsEng.interactionHandler()->focusNode()->worldPosition();
 			const PowerScaledScalar pssl = (position - origin).length();
 
 			// GUI PRINT 
@@ -540,21 +558,15 @@ void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
 }
 
 void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-	syncBuffer->encode(_mainCamera->scaling());
-	syncBuffer->encode(_mainCamera->position());
-	syncBuffer->encode(_mainCamera->viewRotationMatrix());
+	if (_mainCamera){
+		_mainCamera->serialize(syncBuffer);
+	}
 }
 
 void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
-	glm::vec2 scaling;
-	psc position;
-	glm::mat4 viewRotation;
-	syncBuffer->decode(scaling);
-	syncBuffer->decode(position);
-	syncBuffer->decode(viewRotation);
-	_mainCamera->setScaling(scaling);
-	_mainCamera->setPosition(position);
-	_mainCamera->setViewRotationMatrix(viewRotation);
+	if (_mainCamera){
+		_mainCamera->deserialize(syncBuffer);
+	}
 }
 
 Camera* RenderEngine::camera() const {

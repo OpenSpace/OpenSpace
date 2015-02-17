@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -409,6 +409,25 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
                 return tmp;
         }
     return nullptr;
+}
+
+void SceneGraphNode::updateCamera(Camera* camera) const{
+
+	psc origin = worldPosition();
+	int i = 0;
+	// the camera position
+	
+	psc relative = camera->position();
+	psc focus = camera->focusPosition();
+	psc relative_focus = relative - focus;
+
+	psc target = origin + relative_focus;
+	
+	camera->setPosition(target);
+	camera->setFocusPosition(origin);
+
+	//printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
+	
 }
 
 }  // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,28 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/luaconsole.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/gui/gui.h>
-#include <ghoul/cmdparser/commandlineparser.h>
+
+#include <string>
+#include <vector>
+
+namespace ghoul {
+namespace cmdparser {
+    class CommandlineParser;
+}
+}
 
 namespace openspace {
 
-class SyncBuffer;
+class ConfigurationManager;
 class LuaConsole;
+class GUI;
+class RenderEngine;
+class SyncBuffer;
 
+namespace interaction {
+    class InteractionHandler;
+}
 namespace scripting {
 	class ScriptEngine;
 }
@@ -52,13 +62,14 @@ public:
 
     static bool findConfiguration(std::string& filename);
 
-    ConfigurationManager& configurationManager();
-    interaction::InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
-	scripting::ScriptEngine& scriptEngine();
-	LuaConsole& console();
+    // Guaranteed to return a valid pointer
+    ConfigurationManager* configurationManager();
+    interaction::InteractionHandler* interactionHandler();
+    RenderEngine* renderEngine();
+	scripting::ScriptEngine* scriptEngine();
+	LuaConsole* console();
 
-	gui::GUI& gui();
+	gui::GUI* gui();
 
     // SGCT callbacks
     bool initializeGL();
@@ -90,13 +101,14 @@ private:
 
     static OpenSpaceEngine* _engine;
 
-    ConfigurationManager _configurationManager;
-    interaction::InteractionHandler _interactionHandler;
-    RenderEngine _renderEngine;
-	scripting::ScriptEngine _scriptEngine;
-	ghoul::cmdparser::CommandlineParser _commandlineParser;
-	LuaConsole _console;
-	gui::GUI _gui;
+    ConfigurationManager* _configurationManager;
+    interaction::InteractionHandler* _interactionHandler;
+    RenderEngine* _renderEngine;
+	scripting::ScriptEngine* _scriptEngine;
+	ghoul::cmdparser::CommandlineParser* _commandlineParser;
+	LuaConsole* _console;
+    gui::GUI* _gui;
+	double _dt;
 
 	SyncBuffer* _syncBuffer;
 

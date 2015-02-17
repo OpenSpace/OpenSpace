@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,57 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __RENDERABLESPHERE_H__
+#define __RENDERABLESPHERE_H__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-//uniform vec4 etColor;
-uniform vec4 objectVelocity;
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
 
-layout(location = 0) in vec4 in_point_position;
-layout(location = 1) in vec4 in_point_velocity;
-layout(location = 2) in vec2 in_point_timeindex;
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
+namespace openspace {
 
-out vec4 vs_point_position;
-out vec4 vs_point_velocity;
+class PowerScaledSphere;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+class RenderableSphere : public Renderable {
+public:
+	RenderableSphere(const ghoul::Dictionary& dictionary);
+	~RenderableSphere();
 
-void main()
-{
-	vs_point_velocity = in_point_velocity;
+	bool initialize() override;
+	bool deinitialize() override;
 
-	vec4 tmp = in_point_position;
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_point_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
-/*
-	//vs_point_position = objpos;
+	bool isReady() const override;
 
-	// rotate and scale vertex with model transform and add the translation
-	vec3 local_vertex_pos = mat3(ModelTransform) * in_point_position.xyz;
-	//vec4 lvp = ModelTransform * in_point_position;
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 
-	// PSC addition; local vertex position and the object power scaled world position
-	vs_point_position = psc_addition(vec4(local_vertex_pos,in_point_position.w),objpos);
-	//vs_point_position = psc_addition(lvp,objpos);
-	
-	// PSC addition; rotated and viewscaled vertex and the cmaeras negative position
-	vs_point_position = psc_addition(vs_point_position,vec4(-campos.xyz,campos.w));
-	
-	// rotate the camera
-	local_vertex_pos =  mat3(camrot) * vs_point_position.xyz;
-	vs_point_position = vec4(local_vertex_pos, vs_point_position.w);
-	//vs_point_position =  camrot* vs_point_position;
+private:
+	void loadTexture();
 
-	// project using the rescaled coordinates,
-	//vec4 vs_point_position_rescaled = psc_scaling(vs_point_position, scaling);
-	vec4 vs_point_position_rescaled = psc_to_meter(vs_point_position, scaling);
-	//vs_point_position = vs_point_position_rescaled;
+	properties::StringProperty _texturePath;
+    properties::OptionProperty _orientation;
 
-	// project the position to view space
-	gl_Position =  ViewProjection * vs_point_position_rescaled;
-	*/
-}
+    properties::Vec2Property _size;
+    properties::IntProperty _segments;
+
+    properties::FloatProperty _transparency;
+
+	ghoul::opengl::ProgramObject* _shader;
+	ghoul::opengl::Texture* _texture;
+
+    PowerScaledSphere* _sphere;
+
+    bool _programIsDirty;
+    bool _sphereIsDirty;
+};
+
+} // namespace openspace
+#endif // __RENDERABLESPHERE_H__

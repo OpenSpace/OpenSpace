@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -139,6 +139,107 @@ void TrackballMouseController::scrollWheel(int pos) {
 		PowerScaledScalar dist(-speed * dt, 0.0f);
 		_handler->distanceDelta(dist);
 	}
+}
+
+void TrackballMouseController::update(const double& dt){
+
+}
+
+
+OrbitalMouseController::OrbitalMouseController()
+: MouseController()
+, _leftMouseButtonDown(false)
+, _rightMouseButtonDown(false)
+, _middleMouseButtonDown(false)
+, _currentCursorPos(0)
+, _rotationSpeed(10.f)
+, _navigationSpeed(3.f)
+{
+	for (int n = 0; n < 3; ++n){
+		_previousCursorPos[n] = glm::vec2(0);
+	}
+}
+
+void OrbitalMouseController::button(MouseAction action, MouseButton button) {
+	if (button == MouseButton::Left){
+		if (action == MouseAction::Press){
+			_leftMouseButtonDown = true;
+			double mouseX, mouseY;
+			sgct::Engine::instance()->getMousePos(sgct::Engine::instance()->getActiveWindowPtr()->getId(), &mouseX, &mouseY);
+			_previousCursorPos[MouseButtons::ButtonLeft] = glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		}
+		else if (action == MouseAction::Release) {
+			_leftMouseButtonDown = false;
+			_currentCursorDiff[MouseButtons::ButtonLeft] = glm::vec2(0);
+		}
+	}
+	else if (button == MouseButton::Right){
+		if (action == MouseAction::Press){
+			_rightMouseButtonDown = true;
+			double mouseX, mouseY;
+			sgct::Engine::instance()->getMousePos(sgct::Engine::instance()->getActiveWindowPtr()->getId(), &mouseX, &mouseY);
+			_previousCursorPos[MouseButtons::ButtonRight] = glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		}
+		else if (action == MouseAction::Release) {
+			_rightMouseButtonDown = false;
+			_currentCursorDiff[MouseButtons::ButtonRight] = glm::vec2(0);
+		}
+	}
+	else if (button == MouseButton::Middle){
+		if (action == MouseAction::Press){
+			_middleMouseButtonDown = true;
+			double mouseX, mouseY;
+			sgct::Engine::instance()->getMousePos(sgct::Engine::instance()->getActiveWindowPtr()->getId(), &mouseX, &mouseY);
+			_previousCursorPos[MouseButtons::ButtonMiddle] = glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		}
+		else if (action == MouseAction::Release) {
+			_middleMouseButtonDown = false;
+			_currentCursorDiff[MouseButtons::ButtonMiddle] = glm::vec2(0);
+		}
+	}
+
+}
+
+void OrbitalMouseController::move(float x, float y) {
+	int winID = sgct::Engine::instance()->getActiveWindowPtr()->getId();
+	double mouseX, mouseY;
+	sgct::Engine::instance()->getMousePos(winID, &mouseX, &mouseY);
+	_currentCursorPos = glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+
+	if (_leftMouseButtonDown){		
+		_currentCursorDiff[MouseButtons::ButtonLeft] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonLeft]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
+	}
+	if (_rightMouseButtonDown){
+		_currentCursorDiff[MouseButtons::ButtonRight] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonRight]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
+	}
+	if (_middleMouseButtonDown){
+		_currentCursorDiff[MouseButtons::ButtonMiddle] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonMiddle]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
+	}
+}
+
+void OrbitalMouseController::scrollWheel(int pos) {
+
+}
+
+void OrbitalMouseController::update(const double& dt){
+	
+	if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
+		_handler->orbit(
+			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, 
+			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed,
+			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed,
+			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
+	}
+	
+//	if (_leftMouseButtonDown){
+//		_handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);
+//	}	
+//	if (_middleMouseButtonDown){
+//		_handler->orbit(0.f, 0.f, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed);
+//	}
+//	if (_rightMouseButtonDown){
+//		_handler->distance(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
+//	}
 }
 
 } // namespace interaction

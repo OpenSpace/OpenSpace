@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2015                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <openspace/rendering/planets/simplespheregeometry.h>
 #include <openspace/util/constants.h>
@@ -46,7 +46,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
               glm::vec2(10.f, 20.f))
     , _segments("segments", "Segments", 20, 1, 50)
-    , _planet(nullptr)
+    , _sphere(nullptr)
 {
 	using constants::scenegraphnode::keyName;
 	using constants::simplespheregeometry::keyRadius;
@@ -94,14 +94,14 @@ bool SimpleSphereGeometry::initialize(RenderablePlanet* parent)
 
 void SimpleSphereGeometry::deinitialize()
 {
-	if (_planet)
-	    delete _planet;
-    _planet = nullptr;
+	if (_sphere)
+	    delete _sphere;
+    _sphere = nullptr;
 }
 
 void SimpleSphereGeometry::render()
 {
-    _planet->render();
+    _sphere->render();
 }
 
 void SimpleSphereGeometry::createSphere()
@@ -111,11 +111,11 @@ void SimpleSphereGeometry::createSphere()
     PowerScaledScalar planetSize(_radius);
     _parent->setBoundingSphere(planetSize);
 
-    if(_planet)
-        delete _planet;
+    if(_sphere)
+        delete _sphere;
 
-    _planet = new PowerScaledSphere(planetSize, _segments);
-    _planet->initialize();
+    _sphere = new PowerScaledSphere(planetSize, _segments);
+    _sphere->initialize();
 }
 
 }  // namespace planetgeometry

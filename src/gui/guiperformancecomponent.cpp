@@ -75,7 +75,7 @@ void GuiPerformanceComponent::render() {
 	};
 
 	ImGui::Begin("Performance", &_isEnabled);
-	if (OsEng.renderEngine().doesPerformanceMeasurements() &&
+	if (OsEng.renderEngine()->doesPerformanceMeasurements() &&
 			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
 	{
 		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);

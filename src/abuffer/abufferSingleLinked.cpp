@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/sharedmemory.h>
 
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -60,8 +60,10 @@ if (APPLE)
 endif ()
 
 if (MSVC)
+    # Enable multicore compilation
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif ()
+
 #########################################################################################
 # External Third-party software
 #########################################################################################

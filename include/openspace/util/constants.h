@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,6 +61,7 @@ namespace scenegraph {
     const std::string keyCamera = "Camera";
     const std::string keyFocusObject = "Focus";
     const std::string keyPositionObject = "Position";
+    const std::string keyViewOffset = "Offset";
     const std::string keyPathModule = "ModulePath";
 }  // namespace scenegraph
 
@@ -74,11 +75,6 @@ namespace scenegraphnode {
 namespace renderable {
     const std::string keyType = "Type";
 } // namespace renderable
-
-namespace renderableplanet {
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-} // namespace renderableplanet
 
 namespace planetgeometry {
 	const std::string keyType = "Type";

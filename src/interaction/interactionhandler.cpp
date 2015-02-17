@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,35 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//<<<<<<< HEAD
-//// open space includes
 #include <openspace/interaction/interactionhandler.h>
 //
 #include <openspace/engine/openspaceengine.h>
-//#include <openspace/interaction/deviceidentifier.h>
-//#include <openspace/interaction/externalcontrol/externalcontrol.h>
-//#include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
-//#include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
-#include <openspace/query/query.h>
-//#include <openspace/scenegraph/scenegraphnode.h>
-//#include <openspace/util/camera.h>
-//#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/time.h>
-//
-//// ghoul
-#include <ghoul/logging/logmanager.h>
-//
-//// other
-//#include <sgct.h>
-//#include <glm/gtx/vector_angle.hpp>
-//
-//// std includes
-//#include <cassert>
-//#include <algorithm>
-//
-
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/time.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/highresclock.h>
 
 namespace {
@@ -231,7 +211,7 @@ int setOrigin(lua_State* L) {
 		return 0;
 	}
 
-	OsEng.interactionHandler().setFocusNode(node);
+	OsEng.interactionHandler()->setFocusNode(node);
 
 	return 0;
 }
@@ -264,7 +244,7 @@ int bindKey(lua_State* L) {
 	}
 
 
-	OsEng.interactionHandler().bindKey(iKey, command);
+	OsEng.interactionHandler()->bindKey(iKey, command);
 
 	return 0;
 }
@@ -282,7 +262,7 @@ int clearKeys(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.interactionHandler().resetKeyBindings();
+	OsEng.interactionHandler()->resetKeyBindings();
 
 	return 0;
 }
@@ -297,7 +277,7 @@ int dt(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
+	lua_pushnumber(L,OsEng.interactionHandler()->deltaTime());
 	return 1;
 }
 
@@ -314,7 +294,7 @@ int distance(lua_State* L) {
 	double d1 = luaL_checknumber(L, -2);
 	double d2 = luaL_checknumber(L, -1);
 	PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
-	OsEng.interactionHandler().distanceDelta(dist);
+	OsEng.interactionHandler()->distanceDelta(dist);
 	return 0;
 }
 
@@ -475,10 +455,32 @@ void InteractionHandler::unlockControls() {
 //=======
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
+	_mouseController->update(deltaTime);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+	
+	if (_focusNode == node){
+		return;
+	}
+
 	_focusNode = node;
+
+	//orient the camera to the new node
+	psc focusPos = node->worldPosition();
+	psc camToFocus = focusPos - _camera->position();
+	glm::vec3 viewDir = glm::normalize(camToFocus.vec3());
+	glm::vec3 cameraView = glm::normalize(_camera->viewDirection());
+	glm::vec3 rotAxis = glm::normalize(glm::cross(viewDir, cameraView));
+	float angle = glm::angle(viewDir, cameraView);
+	glm::quat q = glm::angleAxis(angle, rotAxis);
+
+	psc camPos = _camera->position();
+	//set new focus position
+	_camera->setFocusPosition(node->worldPosition());
+	//rotate view to target new focus
+	_camera->rotate(q);
+
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -517,6 +519,64 @@ void InteractionHandler::mouseScrollWheelCallback(int pos) {
 	if (_mouseController)
 		_mouseController->scrollWheel(pos);
 }
+
+void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz, const float &dist){
+
+	lockControls();
+	
+	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
+	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
+
+	glm::mat4 transform;
+	transform = glm::rotate(dx * 10, cameraUp) * transform;
+	transform = glm::rotate(dy * 10, cameraRight) * transform;
+	transform = glm::rotate(dz * 10, _camera->viewDirection()) * transform;
+
+	// should be changed to something more dynamic =)
+	psc origin;
+	if (_focusNode) {
+		origin = _focusNode->worldPosition();
+	}
+	_camera->setFocusPosition(origin);
+
+	// the camera position
+	psc relative = _camera->position();
+	psc relative_origin_coordinate = relative - origin;
+	relative_origin_coordinate = glm::inverse(transform) * relative_origin_coordinate.vec4();
+	relative = origin + relative_origin_coordinate; //relative_origin_coordinate + origin;
+
+	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+
+	psc target = relative + relative_origin_coordinate * dist;// *fmaxf(bounds, (1.f - d));
+	//don't fly into objects
+	if ((target - origin).length() < bounds){
+		target = relative;
+	}
+	_camera->setPosition(target);
+	_camera->rotate(glm::quat_cast(transform));
+
+	unlockControls();
+}
+
+//void InteractionHandler::distance(const float &d){
+//
+//	lockControls();
+//
+//	psc relative = _camera->position();
+//	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+//	psc relative_origin_coordinate = relative - origin;
+//	// addition 100% of bounds (fix later to something node specific?)
+//	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+//
+//	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+//	//don't fly into objects
+//	if ((target - origin).length() < bounds){
+//		target = relative;
+//	}
+//	_camera->setPosition(target);
+//	
+//	unlockControls();
+//}
 
 void InteractionHandler::orbitDelta(const glm::quat& rotation)
 {
@@ -772,21 +832,21 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        rotateDelta(rot);
 	    }
 		if (key == SGCT_KEY_KP_SUBTRACT) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] -= 0.5f;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 		if (key == SGCT_KEY_KP_ADD) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] += 0.5f;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 
 		// iterate over key bindings
 		_validKeyLua = true;
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
-			OsEng.scriptEngine().runScript(it->second);
+			OsEng.scriptEngine()->runScript(it->second);
 			if (!_validKeyLua) {
 				break;
 			}
@@ -881,6 +941,7 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 //=======
 void InteractionHandler::setRotation(const glm::quat& rotation)
 {
+	_camera->setRotation(rotation);
 }
 
 double InteractionHandler::deltaTime() const {

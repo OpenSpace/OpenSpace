@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,6 +66,8 @@ public:
     bool runScriptFile(const std::string& filename);
 
 	bool writeDocumentation(const std::string& filename, const std::string& type) const;
+
+    std::vector<std::string> allLuaFunctions() const;
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);

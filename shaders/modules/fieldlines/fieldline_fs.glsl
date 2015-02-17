@@ -24,33 +24,26 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+in vec4 gs_color;
+in vec4 gs_position;
+in vec3 gs_normal;
 
-in vec4 vs_point_position;
-in vec4 vs_point_velocity;
-
-
-//out vec4 diffuse;
+uniform bool classification;
+uniform vec4 fieldLineColor;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-void main()
-{
+void main() {
+	float alpha = 1-length(gs_normal)*length(gs_normal);
+	vec4 fragColor;
+	if (classification)
+		fragColor = vec4(gs_color.rgb, alpha);
+	else
+		fragColor = vec4(fieldLineColor.rgb, fieldLineColor.a * alpha);
 
-	vec4 position = vs_point_position;
-	float depth = pscDepth(position);
-	
-	// set the depth
-	//gl_FragDepth = depth;
-
-	//float l = length(vs_point_velocity);
-	
-	vec4 diffuse = vs_point_velocity;
-
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	float depth = pscDepth(gs_position);
+	ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
 	addToBuffer(frag);
-	
 }

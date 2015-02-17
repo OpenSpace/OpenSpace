@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/scripting/scriptengine.h>
 #include <string>
+#include <mutex>
 
 namespace openspace {
 
@@ -49,6 +50,9 @@ namespace openspace {
  * advanceTime(double) method is called each frame, the <code>tickTime</code> has to be
  * equal to the frame time.
  */
+
+	class SyncBuffer;
+
 class Time {
 public:
 	/**
@@ -146,6 +150,18 @@ public:
 	*/
 	double retreatTime(double tickTime);
 
+	void serialize(SyncBuffer* syncBuffer);
+
+	void deserialize(SyncBuffer* syncBuffer);
+
+	void postSynchronizationPreDraw();
+
+	void preSynchronization();
+
+	bool timeJumped();
+
+	void setTimeJumped(bool jumped);
+
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
 	 * current time, retrieve the current time etc. The functions contained are
@@ -166,9 +182,24 @@ private:
     Time& operator=(const Time& rhs) = delete;
 
 	static Time* _instance; ///< The singleton instance
-	double _time; ///< The time stored as the number of seconds past the J2000 epoch
+	
 
 	double _deltaTimePerSecond; ///< The delta time that is used to advance the time
+	
+	//sync variables
+	
+	//local copies 
+	double _time; ///< The time stored as the number of seconds past the J2000 epoch
+	double _dt;
+	bool _timeJumped;
+
+	//shared copies
+	double _sharedTime;
+	double _sharedDt;
+	bool _sharedTimeJumped;
+	
+	
+	std::mutex _syncMutex;
 };
 
 } // namespace openspace

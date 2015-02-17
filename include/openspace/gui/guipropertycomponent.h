@@ -32,11 +32,17 @@
 #include <vector>
 
 namespace openspace {
+
+namespace properties {
+    class Property;
+}
+
 namespace gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-	void registerProperty(const std::string& propertyDescription);
+	//void registerProperty(const std::string& propertyDescription);
+    void registerProperty(properties::Property* prop);
 	void render();
 
 protected:
@@ -72,8 +78,19 @@ protected:
 
 	void renderProperty(const PropertyInfo& info) const;
 
+    std::set<properties::Property*> _boolProperties;
+    std::set<properties::Property*> _intProperties;
+    std::set<properties::Property*> _floatProperties;
+    std::set<properties::Property*> _vec2Properties;
+    std::set<properties::Property*> _vec3Properties;
+    std::set<properties::Property*> _vec4Properties;
+    std::set<properties::Property*> _stringProperties;
+    std::set<properties::Property*> _optionProperty;
+    std::set<properties::Property*> _selectionProperty;
+    std::set<properties::Property*> _triggerProperty;
+    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 
-	std::vector<Property> _properties;
+	//std::vector<Property> _properties;
 };
 
 } // namespace gui
