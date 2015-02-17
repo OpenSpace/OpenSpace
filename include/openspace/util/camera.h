@@ -25,6 +25,8 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
+#include <mutex>
+
 // open space includes
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -88,6 +90,8 @@ namespace openspace {
 //    mutable bool _viewMatrixIsDirty;
 //};
 
+	class SyncBuffer;
+
 class Camera {
 public:
     Camera();
@@ -111,6 +115,9 @@ public:
     void setCameraDirection(glm::vec3 cameraDirection);
     glm::vec3 cameraDirection() const;
 
+	void setFocusPosition(psc pos);
+	const psc& focusPosition() const;
+
 	void setViewRotationMatrix(glm::mat4 m);
 	const glm::mat4& viewRotationMatrix() const;
     void compileViewRotationMatrix();
@@ -121,8 +128,8 @@ public:
 	void setRotation(glm::mat4 rotation);
 
 	const glm::vec3& viewDirection() const;
-    
-    const float& maxFov() const;
+
+	const float& maxFov() const;
     const float& sinMaxFov() const;
     void setMaxFov(float fov);
     void setScaling(glm::vec2 scaling);
@@ -131,21 +138,38 @@ public:
     void setLookUpVector(glm::vec3 lookUp);
     const glm::vec3& lookUpVector() const;
 
+	void postSynchronizationPreDraw();
+	void preSynchronization();
+	void serialize(SyncBuffer* syncBuffer);
+	void deserialize(SyncBuffer* syncBuffer);
+
 private:
     float _maxFov;
     float _sinMaxFov;
-    psc _position;
     glm::mat4 _viewProjectionMatrix;
 	glm::mat4 _modelMatrix;
 	glm::mat4 _viewMatrix;
 	glm::mat4 _projectionMatrix;
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
-    glm::vec2 _scaling;
-   // glm::quat _viewRotation;
-    glm::mat4 _viewRotationMatrix;  // compiled from the quaternion
-
+	psc _focusPosition;
+    // glm::quat _viewRotation;
+    
     glm::vec3 _lookUp;
+
+	//cluster variables
+	std::mutex _syncMutex;
+
+	//local variables
+	glm::mat4 _localViewRotationMatrix;
+	glm::vec2 _localScaling;
+	psc _localPosition;
+
+	//shared copies of local variables
+	glm::vec2 _sharedScaling;
+	psc _sharedPosition;
+	glm::mat4 _sharedViewRotationMatrix;
+	
 };
 
 } // namespace openspace

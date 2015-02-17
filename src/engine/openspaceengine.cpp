@@ -496,9 +496,11 @@ void OpenSpaceEngine::preSynchronization() {
         const double dt = sgct::Engine::instance()->getDt();
 
         _interactionHandler.update(dt);
-        _interactionHandler.lockControls();
+        //_interactionHandler.lockControls();
 
 		Time::ref().advanceTime(dt);
+
+		_renderEngine.preSynchronization();
     }
 }
 
@@ -538,7 +540,7 @@ void OpenSpaceEngine::render() {
 
 void OpenSpaceEngine::postDraw() {
     if (sgct::Engine::instance()->isMaster())
-        _interactionHandler.unlockControls();
+        //_interactionHandler.unlockControls();
 
 	_renderEngine.postDraw();
 }
