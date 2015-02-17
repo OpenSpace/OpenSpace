@@ -66,9 +66,9 @@ private:
 	std::string _filename;
 
     struct {
-        int lastAutoCompleteIndex;
-        bool hasInitialAutoCompleteValue;
-        std::string initalAutoCompleteValue;
+        int lastIndex;
+        bool hasInitialValue;
+        std::string initialValue;
     } _autoCompleteInfo;
 
 	bool _isVisible;

@@ -242,8 +242,8 @@ void LuaConsole::keyboardCallback(int key, int action) {
 
             // If the shift key is pressed, we decrement the current index so that we will
             // find the value before the one that was previously found
-            if (_autoCompleteInfo.lastAutoCompleteIndex != NoAutoComplete && modifierShift)
-                _autoCompleteInfo.lastAutoCompleteIndex -= 2;
+            if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift)
+                _autoCompleteInfo.lastIndex -= 2;
             std::vector<std::string> allCommands = OsEng.scriptEngine()->allLuaFunctions();
             std::sort(allCommands.begin(), allCommands.end());
 
@@ -253,9 +253,9 @@ void LuaConsole::keyboardCallback(int key, int action) {
             // store the already entered command so that we can later start the search
             // from there. We will overwrite the 'currentCommand' thus making the storage
             // necessary
-            if (!_autoCompleteInfo.hasInitialAutoCompleteValue) {
-                _autoCompleteInfo.initalAutoCompleteValue = currentCommand;
-                _autoCompleteInfo.hasInitialAutoCompleteValue = true;
+            if (!_autoCompleteInfo.hasInitialValue) {
+                _autoCompleteInfo.initialValue = currentCommand;
+                _autoCompleteInfo.hasInitialValue = true;
             }
 
             for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
@@ -265,16 +265,37 @@ void LuaConsole::keyboardCallback(int key, int action) {
                 // Then check if the iterator-command's start is equal to what we want
                 // then check if we need to skip the first found values as the user has
                 // pressed TAB repeatedly
-                if (command.length() >= _autoCompleteInfo.initalAutoCompleteValue.length() &&
-                    (command.substr(0, _autoCompleteInfo.initalAutoCompleteValue.length()) == _autoCompleteInfo.initalAutoCompleteValue) &&
-                    (i > _autoCompleteInfo.lastAutoCompleteIndex))
+                size_t fullLength = _autoCompleteInfo.initialValue.length();
+                if (command.length() >= fullLength &&
+                    (command.substr(0, fullLength) == _autoCompleteInfo.initialValue) &&
+                    (i > _autoCompleteInfo.lastIndex))
                 {
                     // We found our index, so store it
-                    _autoCompleteInfo.lastAutoCompleteIndex = i;
-                    // Set the found command as active command
-                    _commands.at(_activeCommand) = command + "();";
-                    // Set the cursor position to be between the brackets
-                    _inputPosition = _commands.at(_activeCommand).size() - 2;
+                    _autoCompleteInfo.lastIndex = i;
+
+                    // We only want to auto-complete until the next separator "."
+                    size_t pos = command.find('.', fullLength);
+                    if (pos == std::string::npos) {
+                        // If we don't find a separator, we autocomplete until the end
+                        // Set the found command as active command
+                        _commands.at(_activeCommand) = command + "();";
+                        // Set the cursor position to be between the brackets
+                        _inputPosition = _commands.at(_activeCommand).size() - 2;
+                    }
+                    else {
+                        // If we find a separator, we autocomplete until and including the
+                        // separator unless the autocompletion would be the same that we
+                        // already have (the case if there are multiple commands in the
+                        // same group
+                        std::string subCommand = command.substr(0, pos + 1);
+                        if (subCommand == _commands.at(_activeCommand))
+                            continue;
+                        else {
+                            _commands.at(_activeCommand) = command.substr(0, pos + 1);
+                            _inputPosition = _commands.at(_activeCommand).length();
+                        }
+                    }
+
                     break;
                 }
             }
