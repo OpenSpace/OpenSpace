@@ -62,8 +62,14 @@ private:
 	std::vector<std::string> _commandsHistory;
 	size_t _activeCommand;
 	std::vector<std::string> _commands;
-	
+
 	std::string _filename;
+
+    struct {
+        int lastAutoCompleteIndex;
+        bool hasInitialAutoCompleteValue;
+        std::string initalAutoCompleteValue;
+    } _autoCompleteInfo;
 
 	bool _isVisible;
 };

@@ -511,6 +511,22 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
     return true;
 }
 
+std::vector<std::string> ScriptEngine::allLuaFunctions() const {
+    std::vector<std::string> result;
+
+    for (const LuaLibrary& library : _registeredLibraries) {
+        for (const LuaLibrary::Function& function : library.functions) {
+            std::string total = "openspace.";
+            if (!library.name.empty())
+                total += library.name + ".";
+            total += function.name;
+            result.push_back(std::move(total));
+        }
+    }
+
+    return result;
+}
+
 bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
 	if (type == "text") {
 		// The additional space between the longest function name and the descriptions
