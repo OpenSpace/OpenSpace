@@ -24,8 +24,14 @@
 
 #include <openspace/gui/gui.h>
 
+// This needs to be included first due to Windows.h / winsock2.h complications
+#define SGCT_WINDOWS_INCLUDE
+#include <sgct.h>
+
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -45,7 +51,6 @@
 #include <ghoul/filesystem/cachemanager.h>
 
 #include <imgui.h>
-#include <sgct.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -572,7 +577,7 @@ void GUI::renderPerformanceWindow() {
 	};
 
 	ImGui::Begin("Performance", &_showPerformanceWindow);
-	if (OsEng.renderEngine().doesPerformanceMeasurements() &&
+	if (OsEng.renderEngine()->doesPerformanceMeasurements() &&
 			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
 	{
 		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
@@ -618,7 +623,7 @@ int show(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui().setEnabled(true);
+	OsEng.gui()->setEnabled(true);
 	return 0;
 }
 
@@ -632,7 +637,7 @@ int hide(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui().setEnabled(false);
+	OsEng.gui()->setEnabled(false);
 	return 0;
 }
 
@@ -646,7 +651,7 @@ int toggle(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
+	OsEng.gui()->setEnabled(!OsEng.gui()->isEnabled());
 	return 0;
 }
 

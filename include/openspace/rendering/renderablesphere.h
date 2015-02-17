@@ -22,58 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#ifndef __RENDERABLESPHERE_H__
+#define __RENDERABLESPHERE_H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
+
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
-namespace {
-    const std::string _loggerCat = "Query";
-}
+class PowerScaledSphere;
 
-SceneGraph* sceneGraph()
-{
-    return OsEng.renderEngine()->sceneGraph();
-}
+class RenderableSphere : public Renderable {
+public:
+	RenderableSphere(const ghoul::Dictionary& dictionary);
+	~RenderableSphere();
 
-SceneGraphNode* sceneGraphNode(const std::string& name)
-{
-    const SceneGraph* graph = sceneGraph();
-    return graph->sceneGraphNode(name);
-}
+	bool initialize() override;
+	bool deinitialize() override;
 
-Renderable* renderable(const std::string& name) {
-	SceneGraphNode* node = sceneGraphNode(name);
-	return node->renderable();
-}
+	bool isReady() const override;
 
-properties::Property* property(const std::string& uri)
-{
-    // The URI consists of the following form at this stage:
-    // <node name>.{<property owner>.}^(0..n)<property id>
-    
-    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-    if (nodeNameSeparator == std::string::npos) {
-        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
-               << "' separator must be present.");
-        return nullptr;
-    }
-    const std::string nodeName = uri.substr(0, nodeNameSeparator);
-    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
-    
-    SceneGraphNode* node = sceneGraphNode(nodeName);
-    if (!node) {
-        LERROR("Node '" << nodeName << "' did not exist");
-        return nullptr;
-    }
-    
-    properties::Property* property = node->property(remainingUri);
-    return property;
-}
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 
-}  // namespace
+private:
+	void loadTexture();
+
+	properties::StringProperty _texturePath;
+    properties::OptionProperty _orientation;
+
+    properties::Vec2Property _size;
+    properties::IntProperty _segments;
+
+    properties::FloatProperty _transparency;
+
+	ghoul::opengl::ProgramObject* _shader;
+	ghoul::opengl::Texture* _texture;
+
+    PowerScaledSphere* _sphere;
+
+    bool _programIsDirty;
+    bool _sphereIsDirty;
+};
+
+} // namespace openspace
+#endif // __RENDERABLESPHERE_H__

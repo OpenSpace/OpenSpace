@@ -22,35 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//<<<<<<< HEAD
-//// open space includes
 #include <openspace/interaction/interactionhandler.h>
 //
 #include <openspace/engine/openspaceengine.h>
-//#include <openspace/interaction/deviceidentifier.h>
-//#include <openspace/interaction/externalcontrol/externalcontrol.h>
-//#include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
-//#include <openspace/interaction/externalcontrol/joystickexternalcontrol.h>
-#include <openspace/query/query.h>
-//#include <openspace/scenegraph/scenegraphnode.h>
-//#include <openspace/util/camera.h>
-//#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/time.h>
-//
-//// ghoul
-#include <ghoul/logging/logmanager.h>
-//
-//// other
-//#include <sgct.h>
-//#include <glm/gtx/vector_angle.hpp>
-//
-//// std includes
-//#include <cassert>
-//#include <algorithm>
-//
-
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/time.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/highresclock.h>
 
 namespace {
@@ -231,7 +211,7 @@ int setOrigin(lua_State* L) {
 		return 0;
 	}
 
-	OsEng.interactionHandler().setFocusNode(node);
+	OsEng.interactionHandler()->setFocusNode(node);
 
 	return 0;
 }
@@ -264,7 +244,7 @@ int bindKey(lua_State* L) {
 	}
 
 
-	OsEng.interactionHandler().bindKey(iKey, command);
+	OsEng.interactionHandler()->bindKey(iKey, command);
 
 	return 0;
 }
@@ -282,7 +262,7 @@ int clearKeys(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.interactionHandler().resetKeyBindings();
+	OsEng.interactionHandler()->resetKeyBindings();
 
 	return 0;
 }
@@ -297,7 +277,7 @@ int dt(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
+	lua_pushnumber(L,OsEng.interactionHandler()->deltaTime());
 	return 1;
 }
 
@@ -314,7 +294,7 @@ int distance(lua_State* L) {
 	double d1 = luaL_checknumber(L, -2);
 	double d2 = luaL_checknumber(L, -1);
 	PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
-	OsEng.interactionHandler().distanceDelta(dist);
+	OsEng.interactionHandler()->distanceDelta(dist);
 	return 0;
 }
 
@@ -861,20 +841,21 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	        rotateDelta(rot);
 	    }
 		if (key == SGCT_KEY_KP_SUBTRACT) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] -= 0.5f;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 		if (key == SGCT_KEY_KP_ADD) {
-			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] += 0.5f;
-			OsEng.renderEngine().camera()->setScaling(s);
+			OsEng.renderEngine()->camera()->setScaling(s);
 		}
 
 		// iterate over key bindings
 		_validKeyLua = true;
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
+			OsEng.scriptEngine()->runScript(it->second);
 			//OsEng.scriptEngine().runScript(it->second);
 			OsEng.scriptEngine().queueScript(it->second);
 			if (!_validKeyLua) {

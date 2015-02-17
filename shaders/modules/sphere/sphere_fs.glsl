@@ -22,58 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#version __CONTEXT__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+uniform float time;
+uniform sampler2D texture1;
+uniform float alpha;
 
-namespace openspace {
+in vec2 vs_st;
+in vec4 vs_position;
 
-namespace {
-    const std::string _loggerCat = "Query";
-}
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-SceneGraph* sceneGraph()
+void main()
 {
-    return OsEng.renderEngine()->sceneGraph();
-}
+    vec4 position = vs_position;
+    // This has to be fixed with the ScaleGraph in place (precision deficiency in depth buffer) ---abock
+    // float depth = pscDepth(position);
+    float depth = 1000.0;
+    vec4 diffuse;
+    // if(gl_FrontFacing)
+        diffuse = texture(texture1, vs_st);
+    // else
+        // diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
 
-SceneGraphNode* sceneGraphNode(const std::string& name)
-{
-    const SceneGraph* graph = sceneGraph();
-    return graph->sceneGraphNode(name);
-}
+    diffuse.a *= alpha;
 
-Renderable* renderable(const std::string& name) {
-	SceneGraphNode* node = sceneGraphNode(name);
-	return node->renderable();
-}
+    //vec4 diffuse = vec4(1,vs_st,1);
+    //vec4 diffuse = vec4(1,0,0,1);
+    // if(position.w > 9.0) {
+    //  diffuse = vec4(1,0,0,1);
+    // }
 
-properties::Property* property(const std::string& uri)
-{
-    // The URI consists of the following form at this stage:
-    // <node name>.{<property owner>.}^(0..n)<property id>
-    
-    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-    if (nodeNameSeparator == std::string::npos) {
-        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
-               << "' separator must be present.");
-        return nullptr;
-    }
-    const std::string nodeName = uri.substr(0, nodeNameSeparator);
-    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
-    
-    SceneGraphNode* node = sceneGraphNode(nodeName);
-    if (!node) {
-        LERROR("Node '" << nodeName << "' did not exist");
-        return nullptr;
-    }
-    
-    properties::Property* property = node->property(remainingUri);
-    return property;
-}
 
-}  // namespace
+    // #if 0
+    // diffuse = vec4(vs_position.xyz / 10, 1.0);
+    // #else
+    // // if (abs(vs_st.r - 0.75) <= 0.01 && abs(vs_st.g - 0.5) <= 0.01)
+    // if (abs(vs_st.g - 0.5) <= 0.01)
+    //     diffuse = vec4(vec2(vs_st), 0.0, 1.0);
+    // else
+    //     diffuse = vec4(0.0);
+    // #endif
+
+    // diffuse = vec4(1.0, 0.0, 0.0, 1.0);
+
+    ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+    addToBuffer(frag);
+
+}

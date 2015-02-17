@@ -21,17 +21,21 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+
 #include <openspace/rendering/renderablepath.h>
+
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <openspace/util/spicemanager.h>
 #include <iomanip>
 #include <utility>      
+
 namespace {
 	const std::string _loggerCat = "RenderablePath";
 	//constants
@@ -170,7 +174,7 @@ bool RenderablePath::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess
-		&= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
+		&= OsEng.ref().configurationManager()->getValue("EphemerisProgram", _programObject);
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);

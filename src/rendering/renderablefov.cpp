@@ -21,15 +21,18 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <openspace/rendering/renderablefov.h>
+
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <openspace/util/spicemanager.h>
 #include <iomanip>
 #include <utility>
 
@@ -127,7 +130,7 @@ void RenderableFov::sendToGPU(){
 bool RenderableFov::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
+		completeSuccess &= OsEng.ref().configurationManager()->getValue("EphemerisProgram", _programObject);
 	
 	 SpiceManager::ref().getETfromDate("2007 feb 26 20:00:00", _startTrail);
 

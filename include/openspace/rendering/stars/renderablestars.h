@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -69,12 +70,13 @@ private:
 	ghoul::opengl::Texture* _colorTexture;
 	bool _colorTextureIsDirty;
 
-
 	properties::OptionProperty _colorOption;
 	bool _dataIsDirty;
 
-	properties::FloatProperty _spriteBaseSize;
-	properties::FloatProperty _spriteResponseSize;
+    properties::Vec2Property _magnitudeClamp;
+    properties::FloatProperty _exponentialOffset;
+    properties::FloatProperty _exponentialDampening;
+    properties::FloatProperty _scaleFactor;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;

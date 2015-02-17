@@ -51,8 +51,11 @@ layout(location = 4) out vec2 texCoord;
 
 uniform mat4 projection;
 
-uniform float spriteBaseSize;
-uniform float spriteResponseSize;
+uniform vec2 magnitudeClamp;
+uniform float exponentialOffset;
+uniform float exponentialDampening;
+uniform float scaleFactor;
+
 
 // As soon as the scalegraph is in place, replace this by a dynamic calculation
 // of apparent magnitude in relation to the camera position ---abock
@@ -67,8 +70,10 @@ void main() {
 
     float M  = vs_brightness[0].z;
 
-    M = clamp(M, 1.0, 4.0);
-    float modifiedSpriteSize = exp((-5 - M) * 0.871);
+    // M = clamp(M, 1.0, 4.0);
+    M = clamp(M, magnitudeClamp[0], magnitudeClamp[1]);
+    // float modifiedSpriteSize = exp((-5 - M) * 0.871);
+    float modifiedSpriteSize = exp((-exponentialOffset - M) * exponentialDampening) * scaleFactor;
 
     for(int i = 0; i < 4; i++){
         vec4 p1     = gl_in[0].gl_Position;

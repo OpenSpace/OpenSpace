@@ -22,58 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#version __CONTEXT__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-namespace openspace {
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace {
-    const std::string _loggerCat = "Query";
-}
+out vec2 vs_st;
+out vec4 vs_position;
+out float s;
 
-SceneGraph* sceneGraph()
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main()
 {
-    return OsEng.renderEngine()->sceneGraph();
-}
+	vec4 tmp = in_position;
 
-SceneGraphNode* sceneGraphNode(const std::string& name)
-{
-    const SceneGraph* graph = sceneGraph();
-    return graph->sceneGraphNode(name);
-}
+	mat4 mt = ModelTransform;
 
-Renderable* renderable(const std::string& name) {
-	SceneGraphNode* node = sceneGraphNode(name);
-	return node->renderable();
-}
+	mt = mat4(0, -1, 0, 0,
+			  1, 0, 0, 0,
+			  0, 0, -1, 0,
+			  0, 0, 0, 1) * mt;
 
-properties::Property* property(const std::string& uri)
-{
-    // The URI consists of the following form at this stage:
-    // <node name>.{<property owner>.}^(0..n)<property id>
-    
-    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-    if (nodeNameSeparator == std::string::npos) {
-        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
-               << "' separator must be present.");
-        return nullptr;
-    }
-    const std::string nodeName = uri.substr(0, nodeNameSeparator);
-    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
-    
-    SceneGraphNode* node = sceneGraphNode(nodeName);
-    if (!node) {
-        LERROR("Node '" << nodeName << "' did not exist");
-        return nullptr;
-    }
-    
-    properties::Property* property = node->property(remainingUri);
-    return property;
-}
+	vec4 position = pscTransform(tmp, mt);
 
-}  // namespace
+	vs_position = in_position;
+	vs_st = in_st;
+	
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
+}
