@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/sharedmemory.h>
 
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <string>
