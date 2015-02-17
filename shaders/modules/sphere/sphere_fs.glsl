@@ -42,8 +42,13 @@ void main()
     // float depth = pscDepth(position);
     float depth = 1000.0;
     vec4 diffuse;
+
+    vec2 texCoord = vs_st;
+    texCoord.s = 1 - texCoord.s;
+    texCoord.t = 1 - texCoord.y;
+
     // if(gl_FrontFacing)
-        diffuse = texture(texture1, vs_st);
+        diffuse = texture(texture1, texCoord);
     // else
         // diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
 

@@ -73,17 +73,18 @@ void main() {
 
 	// These can be removed once we get a better star psf texture ---abock
 	vec4 textureColor = texture(psfTexture, texCoord);
-	textureColor.a = (textureColor.a - 0.25) / (0.85);
+	// textureColor.a = (textureColor.a - 0.25) / (0.85);
 
-	vec4 fullColor =  textureColor * color;
-	if (fullColor.a <= 0.125)
-		discard;
+	vec4 fullColor = vec4(color.rgb, textureColor.a);
+	// vec4 fullColor =  textureColor * color;
+	// if (fullColor.a <= 0.125)
+	// 	discard;
 
 	float M = ge_brightness.z;
 	// if (M > 10)
 	// 	discard;
-	float targetM = 6.0;
-	float maxM = 12.0;
+	float targetM = 6;
+	float maxM = 14.0;
 	if (M > targetM) {
 		float alpha = (M - targetM) / (maxM - targetM);
 		fullColor.a *= alpha;
