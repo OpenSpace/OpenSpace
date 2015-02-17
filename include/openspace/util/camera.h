@@ -99,6 +99,8 @@ public:
 
     void setPosition(psc pos);
     const psc& position() const;
+	
+	const psc& unsynchedPosition() const;
 
 	void setModelMatrix(glm::mat4 modelMatrix);
 	const glm::mat4& modelMatrix() const;

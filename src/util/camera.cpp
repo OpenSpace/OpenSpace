@@ -73,6 +73,10 @@ const psc& Camera::position() const
 	return _syncedPosition;
 }
 
+const psc& Camera::unsynchedPosition() const{
+	return _localPosition;
+}
+
 void Camera::setModelMatrix(glm::mat4 modelMatrix){
 	_modelMatrix = std::move(modelMatrix);
 }
