@@ -335,6 +335,8 @@ void RenderEngine::postSynchronizationPreDraw()
 	// clear the abuffer before rendering the scene
 	_abuffer->clear();
 	
+	//Allow focus node to update camera (enables camera-following)
+	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
 	if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
 		node->updateCamera(_mainCamera);
 	}
