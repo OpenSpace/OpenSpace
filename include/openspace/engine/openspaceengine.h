@@ -25,6 +25,8 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
+#include <openspace/gui/gui.h>
+
 #include <string>
 #include <vector>
 
@@ -67,7 +69,7 @@ public:
 	scripting::ScriptEngine* scriptEngine();
 	LuaConsole* console();
 
-	GUI* gui();
+	gui::GUI* gui();
 
     // SGCT callbacks
     bool initializeGL();
@@ -105,7 +107,7 @@ private:
 	scripting::ScriptEngine* _scriptEngine;
 	ghoul::cmdparser::CommandlineParser* _commandlineParser;
 	LuaConsole* _console;
-	GUI* _gui;
+    gui::GUI* _gui;
 	double _dt;
 
 	SyncBuffer* _syncBuffer;

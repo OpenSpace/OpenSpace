@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,70 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUIPROPERTYCOMPONENT_H__
+#define __GUIPROPERTYCOMPONENT_H__
 
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/gui/guicomponent.h>
+
+#include <ghoul/misc/dictionary.h>
+#include <string>
+#include <vector>
+#include <set>
 
 namespace openspace {
+
+namespace properties {
+    class Property;
+}
+
 namespace gui {
 
-class GUI {
+class GuiPropertyComponent : public GuiComponent {
 public:
-	GUI();
-    ~GUI();
+	//void registerProperty(const std::string& propertyDescription);
+    void registerProperty(properties::Property* prop);
+	void render();
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+protected:
+	enum class PropertyType {
+		BoolProperty = 0,
+		IntProperty,
+		FloatProperty,
+		Vec2Property,
+		Vec3Property,
+		StringProperty,
+		OptionProperty,
+		SelectionProperty,
+		TriggerProperty,
+		InvalidPropertyType
+	};
 
-	void initialize();
-	void deinitialize();
+	struct PropertyInfo {
+		PropertyType type;
+		std::string identifier;
+		std::string name;
+		std::string group;
+	};
+	typedef std::string PropertyOwner;
 
-	void initializeGL();
-	void deinitializeGL();
+	struct Property {
+		PropertyOwner owner;
+		std::vector<PropertyInfo> properties;
+	};
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+	void handleProperty(const ghoul::Dictionary& value);
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
+	PropertyType toPropertyType(const std::string& name) const;
 
-	void renderMainWindow();
+	void renderProperty(const PropertyInfo& info) const;
 
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
+    std::set<properties::Property*> _boolProperties;
+    std::set<properties::Property*> _intProperties;
+    std::set<properties::Property*> _floatProperties;
+    std::set<properties::Property*> _vec2Properties;
+    std::set<properties::Property*> _vec3Properties;
+    std::set<properties::Property*> _vec4Properties;
+    std::set<properties::Property*> _stringProperties;
+    std::set<properties::Property*> _optionProperty;
+    std::set<properties::Property*> _selectionProperty;
+    std::set<properties::Property*> _triggerProperty;
+    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
-
-	bool _isEnabled;
-
-	bool _showHelp;
-
-	//ghoul::SharedMemory* _performanceMemory;
-	//float _minMaxValues[2];
-
-	//std::set<properties::Property*> _boolProperties;
-	//std::set<properties::Property*> _intProperties;
-	//std::set<properties::Property*> _floatProperties;
-	//std::set<properties::Property*> _vec2Properties;
-	//std::set<properties::Property*> _vec3Properties;
-	//std::set<properties::Property*> _vec4Properties;
-	//std::set<properties::Property*> _stringProperties;
-	//std::set<properties::Property*> _optionProperty;
-	//std::set<properties::Property*> _selectionProperty;
-	//std::set<properties::Property*> _triggerProperty;
-
-	//std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+	//std::vector<Property> _properties;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUIPROPERTYCOMPONENT_H__

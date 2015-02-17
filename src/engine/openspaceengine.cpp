@@ -90,7 +90,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _scriptEngine(new scripting::ScriptEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
-    , _gui(new GUI)
+    , _gui(new gui::GUI)
     , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
@@ -100,7 +100,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
-	_gui->deinitializeGL();
+    _gui->deinitializeGL();
 
     delete _configurationManager;
     delete _interactionHandler;
@@ -260,7 +260,7 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine->addLibrary(Time::luaLibrary());
 	_scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine->addLibrary(LuaConsole::luaLibrary());
-	_scriptEngine->addLibrary(GUI::luaLibrary());
+	_scriptEngine->addLibrary(gui::GUI::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine()->initialize();
@@ -503,7 +503,7 @@ LuaConsole* OpenSpaceEngine::console() {
 	return _console;
 }
 
-GUI* OpenSpaceEngine::gui() {
+gui::GUI* OpenSpaceEngine::gui() {
     ghoul_assert(_gui != nullptr, "GUI is nullptr");
 	return _gui;
 }

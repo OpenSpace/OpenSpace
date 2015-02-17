@@ -44,6 +44,18 @@ public:
 		_encodeOffset += size;
 	}
 
+	template<>
+	void encode(const std::string& s) {
+		const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
+		assert(_encodeOffset + size < _n);
+
+		int32_t length = s.length();
+		memcpy(_dataStream.data() + _encodeOffset, reinterpret_cast<const char*>(&length), sizeof(int32_t));
+		_encodeOffset += sizeof(int32_t);
+		memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
+		_encodeOffset += length;
+	}
+
 	template<typename T>
 	T decode() {
 		const size_t size = sizeof(T);
@@ -54,6 +66,19 @@ public:
 		return value;
 	}
 
+	template<>
+	std::string decode() {
+		int32_t length;
+		memcpy(reinterpret_cast<char*>(&length), _dataStream.data() + _decodeOffset, sizeof(int32_t));
+		char* tmp = new char[length + 1];
+		_decodeOffset += sizeof(int32_t);
+		memcpy(tmp, _dataStream.data() + _decodeOffset, length);
+		_decodeOffset += length;
+		tmp[length] = '\0';
+		std::string ret(tmp);
+		delete[] tmp;
+		return ret;
+	}
 
 	template<typename T>
 	void decode(T& value) {
@@ -61,6 +86,11 @@ public:
 		assert(_decodeOffset + size < _n);
 		memcpy(&value, _dataStream.data() + _decodeOffset, size);
 		_decodeOffset += size;
+	}
+
+	template<>
+	void decode(std::string &s) {
+		s = decode<std::string>();
 	}
 
 	void write();

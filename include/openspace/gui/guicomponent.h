@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,70 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#ifndef __GUICOMPONENT_H__
+#define __GUICOMPONENT_H__
 
 namespace openspace {
 namespace gui {
 
-class GUI {
-public:
-	GUI();
-    ~GUI();
+class GUI;
 
+/**
+ * The base class for a GUI component that can be rendered to the screen.
+ */
+class GuiComponent {
+public:
+	friend class GUI;
+
+	/**
+	 * Returns if this component is enabled, that is, if it is currently active and
+	 * visible on the screen.
+	 * \return <code>true</code> if this component is enabled, <code>false</code>
+	 * otherwise
+	 */
 	bool isEnabled() const;
+
+	/**
+	 * Sets if this component is enabled, that is, if it is currently active and visible
+	 * on the screen.
+	 * \param enabled The new enabled status of this component
+	 */
 	void setEnabled(bool enabled);
 
-	void initialize();
-	void deinitialize();
+	/// Initializes the component with everything that does not require an OpenGL context
+	virtual void initialize();
+	/// Initializes the component with everything that requires an OpenGL context
+	virtual void initializeGL();
 
-	void initializeGL();
-	void deinitializeGL();
+	/// Deinitializes the component with things that do not require an OpenGL context
+	virtual void deinitialize();
+	
+	/// Deinitializes the component with things that require an OpenGL context
+	virtual void deinitializeGL();
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+	/// Renders the individual subcomponents to the screen
+	virtual void render() = 0;
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
-
-	bool _isEnabled;
-
-	bool _showHelp;
-
-	//ghoul::SharedMemory* _performanceMemory;
-	//float _minMaxValues[2];
-
-	//std::set<properties::Property*> _boolProperties;
-	//std::set<properties::Property*> _intProperties;
-	//std::set<properties::Property*> _floatProperties;
-	//std::set<properties::Property*> _vec2Properties;
-	//std::set<properties::Property*> _vec3Properties;
-	//std::set<properties::Property*> _vec4Properties;
-	//std::set<properties::Property*> _stringProperties;
-	//std::set<properties::Property*> _optionProperty;
-	//std::set<properties::Property*> _selectionProperty;
-	//std::set<properties::Property*> _triggerProperty;
-
-	//std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+protected:
+	/// <code>true</code> if this component is enabled and visible on the screen
+	bool _isEnabled = false;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUICOMPONENT_H__

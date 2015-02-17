@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,70 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUIPERFORMANCECOMPONENT_H__
+#define __GUIPERFORMANCECOMPONENT_H__
 
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/gui/guicomponent.h>
+
+namespace ghoul {
+	class SharedMemory;
+}
 
 namespace openspace {
 namespace gui {
 
-class GUI {
+class GuiPerformanceComponent : public GuiComponent {
 public:
-	GUI();
-    ~GUI();
-
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
-
 	void initialize();
 	void deinitialize();
 
-	void initializeGL();
-	void deinitializeGL();
+	void render();
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
-
-	bool _isEnabled;
-
-	bool _showHelp;
-
-	//ghoul::SharedMemory* _performanceMemory;
-	//float _minMaxValues[2];
-
-	//std::set<properties::Property*> _boolProperties;
-	//std::set<properties::Property*> _intProperties;
-	//std::set<properties::Property*> _floatProperties;
-	//std::set<properties::Property*> _vec2Properties;
-	//std::set<properties::Property*> _vec3Properties;
-	//std::set<properties::Property*> _vec4Properties;
-	//std::set<properties::Property*> _stringProperties;
-	//std::set<properties::Property*> _optionProperty;
-	//std::set<properties::Property*> _selectionProperty;
-	//std::set<properties::Property*> _triggerProperty;
-
-	//std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+protected:
+	ghoul::SharedMemory* _performanceMemory = nullptr;
+	float _minMaxValues[2];
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUIPERFORMANCECOMPONENT_H__

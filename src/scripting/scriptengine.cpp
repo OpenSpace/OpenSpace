@@ -184,7 +184,7 @@ ScriptEngine::ScriptEngine()
 }
 
 ScriptEngine::~ScriptEngine() {
-	deinitialize();
+	//deinitialize();
 }
 
 bool ScriptEngine::initialize() {
@@ -615,15 +615,14 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 }
 
 void ScriptEngine::postSynchronizationPreDraw(){
-	
-}
-
-void ScriptEngine::preSynchronization(){
 	if (!_currentSyncedScript.empty()){
 		runScript(_currentSyncedScript);
 		_currentSyncedScript.clear();
 	}
+}
 
+void ScriptEngine::preSynchronization(){
+	
 	_mutex.lock();
 	
 	if (!_queuedScripts.empty()){
