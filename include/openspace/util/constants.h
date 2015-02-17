@@ -47,6 +47,7 @@ namespace configurationmanager {
     const std::string keyConfigScene = "Scene";
 	const std::string keyEnableGui = "EnableGUI";
     const std::string keyStartupScript = "StartupScripts";
+    const std::string keySettingsScript = "SettingsScripts";
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 	const std::string keyLogLevel = "Logging.LogLevel";

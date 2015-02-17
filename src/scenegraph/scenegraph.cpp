@@ -446,6 +446,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		}
 	}
 
+    OsEng.runSettingsScripts();
+
     return true;
 }
 

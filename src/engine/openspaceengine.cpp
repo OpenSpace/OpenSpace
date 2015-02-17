@@ -400,27 +400,40 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 	return true;
 }
 
+void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
+    for (size_t i = 1; i <= scripts.size(); ++i) {
+        std::stringstream stream;
+        stream << i;
+        const std::string& key = stream.str();
+        const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
+        if (!hasKey) {
+            LERROR("The startup scripts have to be declared in a simple array format."
+                " Startup scripts did not contain the key '" << key << "'");
+            break;
+        }
+
+        std::string scriptPath;
+        scripts.getValue(key, scriptPath);
+        std::string&& absoluteScriptPath = absPath(scriptPath);
+        _engine->scriptEngine()->runScriptFile(absoluteScriptPath);
+    }
+}
+
+
 void OpenSpaceEngine::runStartupScripts() {
 	ghoul::Dictionary scripts;
 	configurationManager()->getValue(
 		constants::configurationmanager::keyStartupScript, scripts);
-	for (size_t i = 1; i <= scripts.size(); ++i) {
-		std::stringstream stream;
-		stream << i;
-		const std::string& key = stream.str();
-		const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
-		if (!hasKey) {
-			LERROR("The startup scripts have to be declared in a simple array format."
-				" Startup scripts did not contain the key '" << key << "'");
-			break;
-		}
-
-		std::string scriptPath;
-		scripts.getValue(key, scriptPath);
-		std::string&& absoluteScriptPath = absPath(scriptPath);
-		_engine->scriptEngine()->runScriptFile(absoluteScriptPath);
-	}
+    runScripts(scripts);
 }
+
+void OpenSpaceEngine::runSettingsScripts() {
+    ghoul::Dictionary scripts;
+    configurationManager()->getValue(
+        constants::configurationmanager::keySettingsScript, scripts);
+    runScripts(scripts);
+}
+
 
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;

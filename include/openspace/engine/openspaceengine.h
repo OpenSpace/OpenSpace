@@ -86,7 +86,7 @@ public:
     void encode();
     void decode();
 
-
+    void runSettingsScripts();
 
 private:
     OpenSpaceEngine(std::string programName);
@@ -95,8 +95,9 @@ private:
 	void clearAllWindows();
 	bool gatherCommandlineArguments();
 	bool loadSpiceKernels();
-	void runStartupScripts();
 	void loadFonts();
+    void runScripts(const ghoul::Dictionary& scripts);
+    void runStartupScripts();
 	void configureLogging();
 
     static OpenSpaceEngine* _engine;
@@ -111,7 +112,6 @@ private:
 	double _dt;
 
 	SyncBuffer* _syncBuffer;
-
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())
