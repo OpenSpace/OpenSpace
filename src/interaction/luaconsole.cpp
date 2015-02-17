@@ -217,9 +217,8 @@ void LuaConsole::keyboardCallback(int key, int action) {
 			// ENTER == run lua script
 			else {
 				if (_commands.at(_activeCommand) != "") {
-					OsEng.scriptEngine()->runScript(_commands.at(_activeCommand));
-					//OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
-					OsEng.scriptEngine().queueScript(_commands.at(_activeCommand));
+					//OsEng.scriptEngine()->runScript(_commands.at(_activeCommand));
+					OsEng.scriptEngine()->queueScript(_commands.at(_activeCommand));
 					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));

@@ -536,8 +536,12 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	//get "old" focus position 
 	psc focus = _camera->focusPosition();
 	
-	// get camera position
-	psc relative = _camera->position();
+	//// get camera position 
+	//psc relative = _camera->position();
+
+	// get camera position (UNSYNCHRONIZED)
+	psc relative = _camera->unsynchedPosition();
+
 	//get relative vector
 	psc relative_focus_coordinate = relative - focus;
 	//rotate relative vector
@@ -855,9 +859,8 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 		_validKeyLua = true;
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
-			OsEng.scriptEngine()->runScript(it->second);
-			//OsEng.scriptEngine().runScript(it->second);
-			OsEng.scriptEngine().queueScript(it->second);
+			//OsEng.scriptEngine()->runScript(it->second);
+			OsEng.scriptEngine()->queueScript(it->second);
 			if (!_validKeyLua) {
 				break;
 			}

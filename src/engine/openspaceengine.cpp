@@ -520,23 +520,21 @@ void OpenSpaceEngine::preSynchronization() {
         //const double dt = sgct::Engine::instance()->getDt();
 		const double dt = sgct::Engine::instance()->getAvgDt();
 
-        _interactionHandler->update(dt);
 		Time::ref().advanceTime(dt);
 		Time::ref().preSynchronization();
 		
-        _interactionHandler.update(dt);
+        _interactionHandler->update(dt);
         //_interactionHandler.lockControls();		
 
-		_scriptEngine.preSynchronization();			
+		_scriptEngine->preSynchronization();			
 		_renderEngine->preSynchronization();
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    _renderEngine->postSynchronizationPreDraw();
 	Time::ref().postSynchronizationPreDraw();
-	_scriptEngine.postSynchronizationPreDraw();	
-    _renderEngine.postSynchronizationPreDraw();
+	_scriptEngine->postSynchronizationPreDraw();	
+    _renderEngine->postSynchronizationPreDraw();
 	
 	if (sgct::Engine::instance()->isMaster() && _gui->isEnabled()) {
 		double posX, posY;
@@ -642,10 +640,9 @@ void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
 
 void OpenSpaceEngine::encode() {
 	if (_syncBuffer) {
-		_renderEngine->serialize(_syncBuffer);
-		_scriptEngine.serialize(_syncBuffer);
 		Time::ref().serialize(_syncBuffer);
-		_renderEngine.serialize(_syncBuffer);
+		_scriptEngine->serialize(_syncBuffer);
+		_renderEngine->serialize(_syncBuffer);		
 		
 		_syncBuffer->write();
 	}
@@ -654,11 +651,10 @@ void OpenSpaceEngine::encode() {
 void OpenSpaceEngine::decode() {
 	if (_syncBuffer) {
 		_syncBuffer->read();
-		_renderEngine->deserialize(_syncBuffer);
 
-		_scriptEngine.deserialize(_syncBuffer);
 		Time::ref().deserialize(_syncBuffer);
-		_renderEngine.deserialize(_syncBuffer);
+		_scriptEngine->deserialize(_syncBuffer);
+		_renderEngine->deserialize(_syncBuffer);
 		
 	}
 }
@@ -676,9 +672,8 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 		{
 			std::string script = std::string(receivedChars + 1);
 			LINFO("Received Lua Script: '" << script << "'");
-			_scriptEngine->runScript(script);
-			//_scriptEngine.runScript(script);
-			_scriptEngine.queueScript(script);
+			//_scriptEngine->runScript(script);
+			_scriptEngine->queueScript(script);
 		}
 	}
 }
