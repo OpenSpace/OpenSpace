@@ -24,6 +24,9 @@
 
 #include <openspace/gui/guipropertycomponent.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/scriptengine.h>
+
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
@@ -39,13 +42,21 @@ namespace {
 
 	using namespace openspace::properties;
 
+    void executeScript(const std::string& id, const std::string& value) {
+        std::string script =
+            "openspace.setPropertyValue('" + id + "', " + value + ");";
+        OsEng.scriptEngine()->queueScript(script);
+    }
+
     void renderBoolProperty(Property* prop, const std::string& ownerName) {
         BoolProperty* p = static_cast<BoolProperty*>(prop);
         std::string name = p->guiName();
 
         BoolProperty::ValueType value = *p;
         ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
-        p->set(value);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), value ? "true": "false");
     }
 
     void renderOptionProperty(Property* prop, const std::string& ownerName) {
@@ -59,7 +70,8 @@ namespace {
             ImGui::SameLine();
             ImGui::Text(o.description.c_str());
         }
-        p->set(value);
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
     }
 
     void renderSelectionProperty(Property* prop, const std::string& ownerName) {
@@ -81,7 +93,13 @@ namespace {
                     newSelectedIndices.push_back(i);
             }
 
-            p->setValue(std::move(newSelectedIndices));
+            if (newSelectedIndices != p->value()) {
+                std::string parameters = "{";
+                for (int i : newSelectedIndices)
+                    parameters += std::to_string(i) + ",";
+                parameters += "}";
+                executeScript(p->fullyQualifiedIdentifier(), parameters);
+            }
         }
     }
 
@@ -91,7 +109,9 @@ namespace {
 
         IntProperty::ValueType value = *p;
         ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-        p->set(value);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
     }
 
     void renderFloatProperty(Property* prop, const std::string& ownerName) {
@@ -100,7 +120,10 @@ namespace {
 
         FloatProperty::ValueType value = *p;
         ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-        p->set(value);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+
     }
 
     void renderVec2Property(Property* prop, const std::string& ownerName) {
@@ -110,7 +133,11 @@ namespace {
         Vec2Property::ValueType value = *p;
 
         ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+
         p->set(value);
+        //if (value != p->value())
+        //    executeScript(p->fullyQualifiedIdentifier(),
+        //    "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
     }
 
     void renderVec3Property(Property* prop, const std::string& ownerName) {
@@ -121,6 +148,12 @@ namespace {
 
         ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
         p->set(value);
+
+        //if (value != p->value())
+        //    executeScript(p->fullyQualifiedIdentifier(),
+        //    "{" + std::to_string(value.x) + "," + 
+        //          std::to_string(value.y) + "," +
+        //          std::to_string(value.z) + "}");
     }
 
     void renderVec4Property(Property* prop, const std::string& ownerName) {
@@ -130,14 +163,22 @@ namespace {
         Vec4Property::ValueType value = *p;
 
         ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+
         p->set(value);
+
+        //if (value != p->value())
+        //    executeScript(p->fullyQualifiedIdentifier(),
+        //    "{" + std::to_string(value.x) + "," +
+        //          std::to_string(value.y) + "," +
+        //          std::to_string(value.z) + "," +
+        //          std::to_string(value.w) + "}");
     }
 
     void renderTriggerProperty(Property* prop, const std::string& ownerName) {
         std::string name = prop->guiName();
         bool pressed = ImGui::Button((ownerName + "." + name).c_str());
         if (pressed)
-            prop->set(0);
+            executeScript(prop->fullyQualifiedIdentifier(), "0");
     }
 
 	//void renderBoolProperty(Property* prop, const std::string& ownerName) {
