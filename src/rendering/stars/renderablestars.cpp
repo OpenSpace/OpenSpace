@@ -84,8 +84,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-	, _spriteBaseSize("spriteBaseSize", "Sprite Base Size", 0.1f, 0.f, 10.f)
-	, _spriteResponseSize("spriteResponseSize", "Sprite Response Size", 1.f, 0.f, 10.f)
+    , _magnitudeClamp(
+        "magnitudeClamp",
+        "Magnitude Clamping",
+        glm::vec2(1.f, 4.f),
+        glm::vec2(-15.f),
+        glm::vec2(15.f)
+      )
+    , _exponentialOffset("exponentialOffset", "Exponential Offset", 5.f, 0.f, 10.f)
+    , _exponentialDampening("exponentialDampening", "Exponential Dampening", 0.871f, 0.f, 1.f)
+    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
 	, _program(nullptr)
 	, _programIsDirty(false)
 	, _speckFile("")
@@ -114,14 +122,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	addProperty(_colorOption);
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 
-	addProperty(_spriteBaseSize);
-	addProperty(_spriteResponseSize);
-
 	addProperty(_pointSpreadFunctionTexturePath);
 	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
+
+    addProperty(_magnitudeClamp);
+    addProperty(_exponentialOffset);
+    addProperty(_exponentialDampening);
+    addProperty(_scaleFactor);
 }
 
 RenderableStars::~RenderableStars() {
@@ -181,12 +191,13 @@ void RenderableStars::render(const RenderData& data) {
 	_program->setUniform("projection", projectionMatrix);
 
 	_program->setUniform("colorOption", _colorOption);
+    _program->setUniform("magnitudeClamp", _magnitudeClamp);
+    _program->setUniform("exponentialOffset", _exponentialOffset);
+    _program->setUniform("exponentialDampening", _exponentialDampening);
+    _program->setUniform("scaleFactor", _scaleFactor);
 	
 	setPscUniforms(_program, &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
-
-	_program->setUniform("spriteBaseSize", _spriteBaseSize);
-	_program->setUniform("spriteResponseSize", _spriteResponseSize);
 
 	ghoul::opengl::TextureUnit psfUnit;
 	psfUnit.activate();
