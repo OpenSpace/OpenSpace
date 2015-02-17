@@ -306,7 +306,7 @@ void RenderEngine::postSynchronizationPreDraw()
 	if (_mainCamera){
 		_mainCamera->postSynchronizationPreDraw();
 	}
-
+	
 	sgct_core::SGCTNode * thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
 	bool updateAbuffer = false;
 	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
@@ -330,6 +330,7 @@ void RenderEngine::postSynchronizationPreDraw()
 		Time::ref().deltaTime(),
 		_doPerformanceMeasurements
 	});
+
     _sceneGraph->evaluate(_mainCamera);
 
 	// clear the abuffer before rendering the scene
@@ -337,9 +338,9 @@ void RenderEngine::postSynchronizationPreDraw()
 	
 	//Allow focus node to update camera (enables camera-following)
 	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
-	if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
+	/*if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
 		node->updateCamera(_mainCamera);
-	}
+	}*/
 	
 }
 

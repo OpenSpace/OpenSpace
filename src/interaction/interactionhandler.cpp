@@ -552,26 +552,35 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	transform = glm::rotate(dy * 10, cameraRight) * transform;
 	transform = glm::rotate(dz * 10, _camera->viewDirection()) * transform;
 
-	// should be changed to something more dynamic =)
+	
+	//get "old" focus position 
+	psc focus = _camera->focusPosition();
+	
+	// get camera position
+	psc relative = _camera->position();
+	//get relative vector
+	psc relative_focus_coordinate = relative - focus;
+	//rotate relative vector
+	relative_focus_coordinate = glm::inverse(transform) * relative_focus_coordinate.vec4();
+	
+	//get new new position of focus node
 	psc origin;
 	if (_focusNode) {
 		origin = _focusNode->worldPosition();
 	}
-	_camera->setFocusPosition(origin);
 
-	// the camera position
-	psc relative = _camera->position();
-	psc relative_origin_coordinate = relative - origin;
-	relative_origin_coordinate = glm::inverse(transform) * relative_origin_coordinate.vec4();
-	relative = origin + relative_origin_coordinate; //relative_origin_coordinate + origin;
+	//new camera position
+	relative = origin + relative_focus_coordinate; 	
 
 	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
 
-	psc target = relative + relative_origin_coordinate * dist;// *fmaxf(bounds, (1.f - d));
+	psc target = relative + relative_focus_coordinate * dist;
 	//don't fly into objects
 	if ((target - origin).length() < bounds){
 		target = relative;
 	}
+
+	_camera->setFocusPosition(origin);
 	_camera->setPosition(target);
 	_camera->rotate(glm::quat_cast(transform));
 
@@ -866,7 +875,8 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 		_validKeyLua = true;
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
-			OsEng.scriptEngine().runScript(it->second);
+			//OsEng.scriptEngine().runScript(it->second);
+			OsEng.scriptEngine().queueScript(it->second);
 			if (!_validKeyLua) {
 				break;
 			}
