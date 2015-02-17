@@ -34,6 +34,8 @@
  */
 
 namespace openspace {
+	class SyncBuffer;
+
 namespace scripting {
 
 class ScriptEngine {
@@ -67,6 +69,16 @@ public:
 
 	bool writeDocumentation(const std::string& filename, const std::string& type) const;
 
+	void serialize(SyncBuffer* syncBuffer);
+
+	void deserialize(SyncBuffer* syncBuffer);
+
+	void postSynchronizationPreDraw();
+
+	void preSynchronization();
+
+	void queueScript(const std::string &script);
+
     std::vector<std::string> allLuaFunctions() const;
     
 private:
@@ -80,6 +92,11 @@ private:
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
+
+	//sync variables
+	std::mutex _mutex;
+	std::vector<std::string> _queuedScripts;
+	std::string _currentSyncedScript;
 };
   
 } // namespace scripting
