@@ -79,7 +79,7 @@ public:
 	}
 
     void decode(std::string& s) {
-        s = decode<std::string>();
+        s = decode();
     }
 
 	template <typename T>
