@@ -25,15 +25,16 @@
 #ifndef __RENDERABLE_H__
 #define __RENDERABLE_H__
 
-// openspace
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledscalar.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
 
 // Forward declare to minimize dependencies
 namespace ghoul {
 	namespace opengl {
-		class ProgramObject;
 		class Texture;
 	}
 	class Dictionary;

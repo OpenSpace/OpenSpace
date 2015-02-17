@@ -58,7 +58,7 @@ int show(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().setVisible(true);
+	OsEng.console()->setVisible(true);
 	return 0;
 }
 
@@ -72,7 +72,7 @@ int hide(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().setVisible(false);
+	OsEng.console()->setVisible(false);
 	return 0;
 }
 
@@ -86,7 +86,7 @@ int toggle(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().toggleVisibility();
+	OsEng.console()->toggleVisibility();
 	return 0;
 }
 
@@ -116,7 +116,7 @@ void LuaConsole::initialize() {
         int64_t nCommands;
         file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-        for (size_t i = 0; i < nCommands; ++i) {
+        for (int64_t i = 0; i < nCommands; ++i) {
             int64_t length;
             file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
             char* tmp = new char[length + 1];
@@ -217,7 +217,7 @@ void LuaConsole::keyboardCallback(int key, int action) {
 			// ENTER == run lua script
 			else {
 				if (_commands.at(_activeCommand) != "") {
-					OsEng.scriptEngine().runScript(_commands.at(_activeCommand));
+					OsEng.scriptEngine()->runScript(_commands.at(_activeCommand));
 					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
@@ -243,7 +243,7 @@ void LuaConsole::keyboardCallback(int key, int action) {
             // find the value before the one that was previously found
             if (_autoCompleteInfo.lastAutoCompleteIndex != NoAutoComplete && modifierShift)
                 _autoCompleteInfo.lastAutoCompleteIndex -= 2;
-            std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
+            std::vector<std::string> allCommands = OsEng.scriptEngine()->allLuaFunctions();
             std::sort(allCommands.begin(), allCommands.end());
 
             std::string currentCommand = _commands.at(_activeCommand);

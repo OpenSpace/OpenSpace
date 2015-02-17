@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scenegraph/scenegraph.h>
 #include <openspace/scenegraph/scenegraphnode.h>
@@ -37,7 +38,7 @@ namespace {
 
 SceneGraph* sceneGraph()
 {
-    return OsEng.renderEngine().sceneGraph();
+    return OsEng.renderEngine()->sceneGraph();
 }
 
 SceneGraphNode* sceneGraphNode(const std::string& name)

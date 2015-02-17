@@ -29,7 +29,7 @@
 #include <openspace/rendering/model/renderablemodel.h>
 #include <openspace/util/constants.h>
 #include <openspace/rendering/model/modelgeometry.h>
-
+#include <openspace/engine/configurationmanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
@@ -99,7 +99,7 @@ bool RenderableModel::initialize(){
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
-              &= OsEng.ref().configurationManager().getValue("pscShader", _programObject); 
+              &= OsEng.ref().configurationManager()->getValue("pscShader", _programObject); 
 
     loadTexture();
 
