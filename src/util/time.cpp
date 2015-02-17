@@ -148,10 +148,13 @@ Time* Time::_instance = nullptr;
 Time::Time()
 	: _time(-1.0)
 	, _dt(1.0)
+	, _timeJumped(false)
+	, _syncedTime(-1.0)
+	, _syncedDt(1.0)
+	, _syncedTimeJumped(false)
+	, _deltaTimePerSecond(1.0)
 	, _sharedTime(-1.0)
 	, _sharedDt(1.0)
-	, _deltaTimePerSecond(1.0)
-	, _timeJumped(false)
 	, _sharedTimeJumped(false)
 {
 }
@@ -184,7 +187,8 @@ void Time::setTime(double value) {
 
 double Time::currentTime() const {
 	assert(_instance);
-	return _time;
+	//return _time;
+	return _syncedTime;
 }
 
 double Time::advanceTime(double tickTime) {
@@ -200,7 +204,8 @@ void Time::setDeltaTime(double deltaT) {
 }
 
 double Time::deltaTime() const {
-	return _dt;
+	//return _dt;
+	return _syncedDt;
 }
 
 void Time::setTime(std::string time) {
@@ -212,7 +217,8 @@ void Time::setTime(std::string time) {
 
 std::string Time::currentTimeUTC() const {
 	std::string date;
-	SpiceManager::ref().getDateFromET(_time, date);
+	//SpiceManager::ref().getDateFromET(_time, date);
+	SpiceManager::ref().getDateFromET(_syncedTime, date);
 	return date;
 }
 
@@ -239,9 +245,9 @@ void Time::deserialize(SyncBuffer* syncBuffer){
 void Time::postSynchronizationPreDraw(){
 	_syncMutex.lock();
 
-	_time = _sharedTime;
-	_dt = _sharedDt;
-	_timeJumped = _sharedTimeJumped;
+	_syncedTime = _sharedTime;
+	_syncedDt = _sharedDt;
+	_syncedTimeJumped = _sharedTimeJumped;
 
 	_syncMutex.unlock();	
 }
@@ -257,7 +263,8 @@ void Time::preSynchronization(){
 }
 
 bool Time::timeJumped(){
-	return _timeJumped;
+	//return _timeJumped;
+	return _syncedTimeJumped;
 }
 
 void Time::setTimeJumped(bool jumped){

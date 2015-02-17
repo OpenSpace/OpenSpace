@@ -169,6 +169,11 @@ private:
 	glm::vec2 _sharedScaling;
 	psc _sharedPosition;
 	glm::mat4 _sharedViewRotationMatrix;
+
+	//synced copies of local variables
+	glm::vec2 _syncedScaling;
+	psc _syncedPosition;
+	glm::mat4 _syncedViewRotationMatrix;
 	
 };
 

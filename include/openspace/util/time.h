@@ -197,6 +197,11 @@ private:
 	double _sharedTime;
 	double _sharedDt;
 	bool _sharedTimeJumped;
+
+	//synced copies
+	double _syncedTime;
+	double _syncedDt;
+	bool _syncedTimeJumped;
 	
 	
 	std::mutex _syncMutex;
