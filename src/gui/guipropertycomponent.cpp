@@ -134,10 +134,9 @@ namespace {
 
         ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 
-        p->set(value);
-        //if (value != p->value())
-        //    executeScript(p->fullyQualifiedIdentifier(),
-        //    "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
     }
 
     void renderVec3Property(Property* prop, const std::string& ownerName) {
@@ -147,13 +146,12 @@ namespace {
         Vec3Property::ValueType value = *p;
 
         ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-        p->set(value);
 
-        //if (value != p->value())
-        //    executeScript(p->fullyQualifiedIdentifier(),
-        //    "{" + std::to_string(value.x) + "," + 
-        //          std::to_string(value.y) + "," +
-        //          std::to_string(value.z) + "}");
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+                  std::to_string(value.y) + "," +
+                  std::to_string(value.z) + "}");
     }
 
     void renderVec4Property(Property* prop, const std::string& ownerName) {
@@ -164,14 +162,12 @@ namespace {
 
         ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 
-        p->set(value);
-
-        //if (value != p->value())
-        //    executeScript(p->fullyQualifiedIdentifier(),
-        //    "{" + std::to_string(value.x) + "," +
-        //          std::to_string(value.y) + "," +
-        //          std::to_string(value.z) + "," +
-        //          std::to_string(value.w) + "}");
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+                  std::to_string(value.y) + "," +
+                  std::to_string(value.z) + "," +
+                  std::to_string(value.w) + "}");
     }
 
     void renderTriggerProperty(Property* prop, const std::string& ownerName) {
