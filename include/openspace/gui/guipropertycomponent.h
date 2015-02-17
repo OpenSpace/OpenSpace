@@ -30,6 +30,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace openspace {
 

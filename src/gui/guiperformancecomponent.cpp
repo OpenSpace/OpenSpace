@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <imgui.h>
+#include <algorithm>
 
 namespace {
 	const std::string _loggerCat = "GuiPerformanceComponent";
@@ -79,7 +80,8 @@ void GuiPerformanceComponent::render() {
 			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
 	{
 		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
-		_minMaxValues[1] = std::max(_minMaxValues[0], _minMaxValues[1]);
+		_minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
+		
 
 		if (!_performanceMemory)
 			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
