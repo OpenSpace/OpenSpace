@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,25 +23,27 @@
  ****************************************************************************************/
 
 #include <openspace/scenegraph/scenegraph.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+
+#include <openspace/abuffer/abuffer.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/gui/gui.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/constants.h>
-#include <openspace/query/query.h>
 #include <openspace/util/time.h>
-#include <openspace/abuffer/abuffer.h>
-#include <openspace/gui/gui.h>
-
-#include "ghoul/logging/logmanager.h"
-#include "ghoul/opengl/programobject.h"
-#include "ghoul/io/texture/texturereader.h"
-#include "ghoul/opengl/texture.h"
 
 #include <ghoul/filesystem/filesystem.h>
+#include "ghoul/io/texture/texturereader.h"
 #include <ghoul/misc/dictionary.h>
+#include "ghoul/logging/logmanager.h"
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include "ghoul/opengl/programobject.h"
+#include "ghoul/opengl/texture.h"
 
 #include <iostream>
 #include <fstream>
@@ -125,7 +127,7 @@ int loadScene(lua_State* L) {
 
 	std::string sceneFile = luaL_checkstring(L, -1);
 
-	OsEng.renderEngine().sceneGraph()->scheduleLoadSceneFile(sceneFile);
+	OsEng.renderEngine()->sceneGraph()->scheduleLoadSceneFile(sceneFile);
 
 	return 0;
 }
@@ -189,17 +191,7 @@ bool SceneGraph::initialize()
 	tmpProgram->setProgramObjectCallback(cb);
 
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("pscShader", tmpProgram);
-
-	// pscstandard
-	tmpProgram = ProgramObject::Build("EphemerisProgram",
-		"${SHADERS}/ephemeris_vs.glsl",
-		"${SHADERS}/ephemeris_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("EphemerisProgram", tmpProgram);
-
+    OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
 
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
@@ -208,7 +200,7 @@ bool SceneGraph::initialize()
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager().setValue("RaycastProgram", tmpProgram);
+    OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
 
 	// Grid program
 	tmpProgram = ProgramObject::Build("Grid",
@@ -217,16 +209,7 @@ bool SceneGraph::initialize()
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("GridProgram", tmpProgram);
-
-	// Plane program
-	tmpProgram = ProgramObject::Build("Plane",
-		"${SHADERS}/plane_vs.glsl",
-		"${SHADERS}/plane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("PlaneProgram", tmpProgram);
+	OsEng.ref().configurationManager()->setValue("GridProgram", tmpProgram);
 
 	// Done building shaders
     double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
@@ -251,13 +234,13 @@ bool SceneGraph::deinitialize()
 void SceneGraph::update(const UpdateData& data)
 {
 	if (!_sceneGraphToLoad.empty()) {
-		OsEng.renderEngine().sceneGraph()->clearSceneGraph();
+		OsEng.renderEngine()->sceneGraph()->clearSceneGraph();
 		bool success = loadSceneInternal(_sceneGraphToLoad);
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
 #ifndef __APPLE__
-		OsEng.renderEngine().abuffer()->invalidateABuffer();
+		OsEng.renderEngine()->abuffer()->invalidateABuffer();
 #endif
 	}
     for (SceneGraphNode* node : _nodes)
@@ -398,8 +381,12 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
     _root->calculateBoundingSphere();
 
     // set the camera position
-	Camera* c = OsEng.ref().renderEngine().camera();
+	Camera* c = OsEng.ref().renderEngine()->camera();
     auto focusIterator = _allNodes.find(_focus);
+
+	glm::vec2 cameraScaling(1);
+	psc cameraPosition(0,0,1,0);
+	glm::vec3 cameraDirection = glm::vec3(0, 0, -1);
 
     if (focusIterator != _allNodes.end()) {
         LDEBUG("Camera focus is '" << _focus << "'");
@@ -414,20 +401,27 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
         // this part is full of magic!
 		glm::vec2 boundf = bound.vec2();
-        glm::vec2 scaling{1.0f, -boundf[1]};
+        //glm::vec2 scaling{1.0f, -boundf[1]};
+		cameraScaling = glm::vec2(1.f, -boundf[1]);
         boundf[0] *= 5.0f;
         
-		psc cameraPosition = focusNode->position();
-        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+		//psc cameraPosition = focusNode->position();
+        //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
-		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
+		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
-		c->setPosition(cameraPosition);
-        c->setCameraDirection(glm::vec3(0, 0, -1));
-        c->setScaling(scaling);
+		cameraPosition = focusNode->position();
+		cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+		
+		//why this line? (JK)
+		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+
+		//c->setPosition(cameraPosition);
+       // c->setCameraDirection(glm::vec3(0, 0, -1));
+      //  c->setScaling(scaling);
 
         // Set the focus node for the interactionhandler
-        OsEng.interactionHandler().setFocusNode(focusNode);
+        OsEng.interactionHandler()->setFocusNode(focusNode);
     }
 
 	glm::vec4 position;
@@ -440,15 +434,20 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 			<< position[2] << ", " 
 			<< position[3] << ")");
 
-		c->setPosition(position);
+		cameraPosition = psc(position);
+		//c->setPosition(position);
 	}
 
 	// the camera position
-	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
-	psc relative = fn->worldPosition() - c->position();
+	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
+	//psc relative = fn->worldPosition() - c->position();
+	psc relative = fn->worldPosition() - cameraPosition;
 
-	glm::mat4 la = glm::lookAt(c->position().vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+
 	c->setRotation(la);
+	c->setPosition(cameraPosition);
+	c->setScaling(cameraScaling);
 
 	glm::vec3 viewOffset;
 	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)
@@ -461,9 +460,12 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	for (SceneGraphNode* node : _nodes) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
-			OsEng.gui().registerProperty(p);
+            OsEng.gui()->_property.registerProperty(p);
+			//OsEng.gui()->_property.registerProperty(p->description());
 		}
 	}
+
+    OsEng.runSettingsScripts();
 
     return true;
 }

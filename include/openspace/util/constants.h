@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,7 @@ namespace configurationmanager {
     const std::string keyConfigScene = "Scene";
 	const std::string keyEnableGui = "EnableGUI";
     const std::string keyStartupScript = "StartupScripts";
+    const std::string keySettingsScript = "SettingsScripts";
 	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
 	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 	const std::string keyLogLevel = "Logging.LogLevel";
@@ -75,11 +76,6 @@ namespace scenegraphnode {
 namespace renderable {
     const std::string keyType = "Type";
 } // namespace renderable
-
-namespace renderableplanet {
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-} // namespace renderableplanet
 
 namespace planetgeometry {
 	const std::string keyType = "Type";

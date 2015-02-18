@@ -26,9 +26,9 @@
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
-	vec2(0.0, 0.0), 
-	vec2(1.0, 1.0), 
-	vec2(1.0, 0.0) 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
 );
 
 #include "PowerScaling/powerScalingMath.hglsl"
@@ -49,56 +49,126 @@ layout(location = 2) out vec3 ge_velocity;
 layout(location = 3) out float ge_speed;
 layout(location = 4) out vec2 texCoord;
 
-uniform mat4 projection; // we do this after distance computation. 
+uniform mat4 projection;
 
-uniform float spriteSize;
+uniform vec2 magnitudeClamp;
+uniform float exponentialOffset;
+uniform float exponentialDampening;
+uniform float scaleFactor;
 
+
+// As soon as the scalegraph is in place, replace this by a dynamic calculation
+// of apparent magnitude in relation to the camera position ---abock
 void main() {
-	ge_brightness = vs_brightness[0];
-	ge_velocity = vs_velocity[0];
-	ge_speed = vs_speed[0];
-	
-	/// --- distance modulus --- NOT OPTIMIZED YET.
- 	
-//	float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
-	float M  = vs_brightness[0].z; // if NOT running test-target.
-	vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
-	vec4 pos = psc_position[0];                                    // get OK star position
-	
-	vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
-	float x, y, z, w;
-	x = result[0];
-	y = result[1];
-	z = result[2];
-	w = result[3];
+    // Skip the Sun
+    if (psc_position[0].x == 0.0 && psc_position[0].y == 0.0 && psc_position[0].z == 0.0) {
+        return;
+    }
+    ge_brightness = vs_brightness[0];
+    ge_velocity = vs_velocity[0];
+    ge_speed = vs_speed[0];
 
-	vec2 pc = vec2(length(result.xyz), result[3]);
+    float M  = vs_brightness[0].z;
 
-	// @Check conversion is also done in the cpp file ---abock	 
-	pc[0] *= 0.324077929f;                                          // convert meters -> parsecs
-	pc[1] += -18.0f;
-	
-	float pc_psc   = pc[0] * pow(10, pc[1]);                       // psc scale out
-	float apparent = -(M - 5.0f * (1.f - log10(pc_psc)));          // get APPARENT magnitude. 
-     
-	vec4 P = gl_in[0].gl_Position;
-	 
-	float weight = 0.00001f; 										    // otherwise this takes over.
-	float depth  = pc[0] * pow(10, pc[1]);
-	depth       *= pow(apparent,3);
+    // M = clamp(M, 1.0, 4.0);
+    M = clamp(M, magnitudeClamp[0], magnitudeClamp[1]);
+    // float modifiedSpriteSize = exp((-5 - M) * 0.871);
+    float modifiedSpriteSize = exp((-exponentialOffset - M) * exponentialDampening) * scaleFactor;
 
-	//float modifiedSpriteSize = spriteSize + (depth*weight); 
-	float modifiedSpriteSize = 0.0005 + (depth*weight); 
-	
-	// EMIT QUAD
-	for(int i = 0; i < 4; i++){
-		vec4 p1     = P;                 
-		p1.xy      += modifiedSpriteSize *(corners[i] - vec2(0.5)); 
-		vs_position = p1;
-		gl_Position = projection * p1;  
-		// gl_Position = z_normalization(projection * p1);
-		texCoord    = corners[i];                           
-	  EmitVertex();
-	}
-	EndPrimitive();
+    for(int i = 0; i < 4; i++){
+        vec4 p1     = gl_in[0].gl_Position;
+        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vs_position = p1;
+        gl_Position = projection * p1;
+        // gl_Position = z_normalization(projection * p1);
+        texCoord    = corners[i];
+      EmitVertex();
+    }
+    EndPrimitive();
 }
+
+// Old method, still in the code for reference ---abock
+#if 0
+void main() {
+    ge_brightness = vs_brightness[0];
+    ge_velocity = vs_velocity[0];
+    ge_speed = vs_speed[0];
+    
+    //  float M  = vs_brightness[0][0];                                 // get ABSOLUTE magnitude (x param)
+    float M  = vs_brightness[0].z; // if NOT running test-target.
+
+    // We are using a fixed position until the scalegraph is implemented ---abock
+    // vec4 cam = vec4(-cam_position[0].xyz, cam_position[0].w);                  // get negative camera position   
+    // vec4 cam = vec4(0.0);
+    
+    vec4 pos = psc_position[0];                                    // get OK star position
+    
+    // vec4 result = psc_addition(pos, cam);                          // compute vec from camera to position
+    vec4 result = pos;
+    vec2 pc = vec2(
+        length(result.xyz),
+        result.w
+    );
+
+    // convert meters into parsecs
+    // pc[0] *= 0.324077929f;
+    // pc[1] -= 18.0f;
+    
+    float distLog = log10(pc[0]) + pc[1];
+    float apparent = (M - 5.f * (1.f - distLog));
+
+    // p = vec4(vec3(apparent), 1.0);
+     
+     // check everything below this ---abock
+    float weight = 0.000025f;                                           // otherwise this takes over.
+    double depth  = pc[0] * pow(10, pc[1]);
+    depth       *= pow(apparent,3);
+
+    double modifiedSpriteSize = (spriteBaseSize * 0.0005f) + (depth*weight); 
+    modifiedSpriteSize *= spriteResponseSize;
+
+    // // modifiedSpriteSize = min(modifiedSpriteSize, -0.0025f);
+    // {
+    //     vec4 p = gl_in[0].gl_Position;
+    //     p.xy += vec2(modifiedSpriteSize * (corners[1] - vec2(0.5)));
+    //     p = projection * p;
+
+    //     vec4 q = gl_in[0].gl_Position;
+    //     q.xy += vec2(modifiedSpriteSize * (corners[2] - vec2(0.5)));
+    //     q = projection * q;
+
+    //     if (length(p.xyz-q.xyz) < 0.025)
+    //         return;
+
+    //     // if (sin(dot(p,q)) < 0.1)
+    //     //     return;
+
+    // }
+
+    // if (depth < -0.00000001)
+        // return;
+
+    // float distLy = vs_brightness[0].w;
+    // float distParsec = distLy * 0.306594845;
+    // if (distParsec > 200 && -apparent > 1.0)
+    //     return;
+
+
+    for(int i = 0; i < 4; i++){
+        vec4 p1     = gl_in[0].gl_Position;
+        // vec4 p1 = psc_position[0];
+        p1.w = 1.0;
+        // p1.w = 1.0;
+        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vs_position = p1;
+        gl_Position = projection * p1;
+        // gl_Position = p1;
+        // if (modifiedSpriteSize > -0.001f)
+            // texCoord = vec2(0.5);
+    // else
+            texCoord    = corners[i];
+      EmitVertex();
+    }
+    EndPrimitive();
+}
+#endif

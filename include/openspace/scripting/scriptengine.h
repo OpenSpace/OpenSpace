@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,8 @@
  */
 
 namespace openspace {
+	class SyncBuffer;
+
 namespace scripting {
 
 class ScriptEngine {
@@ -66,6 +68,18 @@ public:
     bool runScriptFile(const std::string& filename);
 
 	bool writeDocumentation(const std::string& filename, const std::string& type) const;
+
+	void serialize(SyncBuffer* syncBuffer);
+
+	void deserialize(SyncBuffer* syncBuffer);
+
+	void postSynchronizationPreDraw();
+
+	void preSynchronization();
+
+	void queueScript(const std::string &script);
+
+    std::vector<std::string> allLuaFunctions() const;
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
@@ -78,6 +92,11 @@ private:
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
+
+	//sync variables
+	std::mutex _mutex;
+	std::vector<std::string> _queuedScripts;
+	std::string _currentSyncedScript;
 };
   
 } // namespace scripting

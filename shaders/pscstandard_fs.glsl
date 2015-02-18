@@ -28,7 +28,7 @@ uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
 
-uniform vec3 sun_pos;
+uniform bool _performShading = true;
 
 uniform int shadows;
 
@@ -49,37 +49,39 @@ void main()
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
-	
-	// directional lighting
-	vec3 origin = vec3(0.0);
-	vec4 spec = vec4(0.0);
-	
-	vec3 n = normalize(vs_normal.xyz);
-	//vec3 e = normalize(camdir);
-	vec3 l_pos = sun_pos; // sun.
-	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = min(max(5*dot(n,l_dir), 0.3), 1);
-	
-	float shine = 0.0001;
 
-	vec4 specular = vec4(0.5);
-	vec4 ambient = vec4(0.0,0.0,0.0,1);
-	/*
-	if(intensity > 0.f){
-		// halfway vector
-		vec3 h = normalize(l_dir + e);
-		// specular factor
-		float intSpec = max(dot(h,n),0.0);
-		spec = specular * pow(intSpec, shine);
+	if (_performShading) {
+		// directional lighting
+		vec3 origin = vec3(0.0);
+		vec4 spec = vec4(0.0);
+		
+		vec3 n = normalize(vs_normal.xyz);
+		//vec3 e = normalize(camdir);
+		vec3 l_pos = vec3(0.0); // sun.
+		vec3 l_dir = normalize(l_pos-objpos.xyz);
+		float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
+		
+		float shine = 0.0001;
+
+		vec4 specular = vec4(0.5);
+		vec4 ambient = vec4(0.0,0.0,0.0,1);
+		/*
+		if(intensity > 0.f){
+			// halfway vector
+			vec3 h = normalize(l_dir + e);
+			// specular factor
+			float intSpec = max(dot(h,n),0.0);
+			spec = specular * pow(intSpec, shine);
+		}
+		*/
+		diffuse = max(intensity * diffuse, ambient);
+		//diffuse = vec4(1);
+
+		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+		addToBuffer(frag);
 	}
-	*/
-	vec4 tmpdiff = diffuse;
-	tmpdiff[3] = 1;
-	if(shadows == 1)
-	diffuse = max(intensity * diffuse, ambient);
-	//diffuse[3] = 0.6f;
-	//diffuse = vec4(1);
-
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+	else {
+		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+		addToBuffer(frag);	
+	}
 }

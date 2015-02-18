@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,9 @@
 #include <openspace/rendering/renderablevolumegl.h>
 
 #include <openspace/abuffer/abuffer.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
@@ -178,13 +180,13 @@ bool RenderableVolumeGL::initialize() {
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);
         _volume->uploadTexture();
-        OsEng.renderEngine().abuffer()->addVolume(_volumeName, _volume);
+        OsEng.renderEngine()->abuffer()->addVolume(_volumeName, _volume);
     }
 
     if(_transferFunctionPath != "") {
         _transferFunction = loadTransferFunction(_transferFunctionPath);
         _transferFunction->uploadTexture();
-        OsEng.renderEngine().abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
+        OsEng.renderEngine()->abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
 
         auto textureCallback = [this](const ghoul::filesystem::File& file) {
             _updateTransferfunction = true;
@@ -193,9 +195,9 @@ bool RenderableVolumeGL::initialize() {
     }
 
     // add the sampler and get the ID
-    _id = OsEng.renderEngine().abuffer()->addSamplerfile(_samplerFilename);
+    _id = OsEng.renderEngine()->abuffer()->addSamplerfile(_samplerFilename);
 
-    OsEng.configurationManager().getValue("RaycastProgram", _boxProgram);
+    OsEng.configurationManager()->getValue("RaycastProgram", _boxProgram);
 
     // ============================
     //      GEOMETRY (box)

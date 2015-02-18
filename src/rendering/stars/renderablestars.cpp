@@ -84,7 +84,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-	, _spriteSize("spriteSize", "Sprite Size", 0.0000005f, 0.f, 1.f)
+    , _magnitudeClamp(
+        "magnitudeClamp",
+        "Magnitude Clamping",
+        glm::vec2(1.f, 4.f),
+        glm::vec2(-15.f),
+        glm::vec2(15.f)
+      )
+    , _exponentialOffset("exponentialOffset", "Exponential Offset", 5.f, 0.f, 10.f)
+    , _exponentialDampening("exponentialDampening", "Exponential Dampening", 0.871f, 0.f, 1.f)
+    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
 	, _program(nullptr)
 	, _programIsDirty(false)
 	, _speckFile("")
@@ -113,13 +122,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	addProperty(_colorOption);
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 
-	addProperty(_spriteSize);
-
 	addProperty(_pointSpreadFunctionTexturePath);
 	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
 	 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
+
+    addProperty(_magnitudeClamp);
+    addProperty(_exponentialOffset);
+    addProperty(_exponentialDampening);
+    addProperty(_scaleFactor);
 }
 
 RenderableStars::~RenderableStars() {
@@ -179,11 +191,13 @@ void RenderableStars::render(const RenderData& data) {
 	_program->setUniform("projection", projectionMatrix);
 
 	_program->setUniform("colorOption", _colorOption);
+    _program->setUniform("magnitudeClamp", _magnitudeClamp);
+    _program->setUniform("exponentialOffset", _exponentialOffset);
+    _program->setUniform("exponentialDampening", _exponentialDampening);
+    _program->setUniform("scaleFactor", _scaleFactor);
 	
 	setPscUniforms(_program, &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
-
-	_program->setUniform("spriteSize", _spriteSize);
 
 	ghoul::opengl::TextureUnit psfUnit;
 	psfUnit.activate();
@@ -199,9 +213,7 @@ void RenderableStars::render(const RenderData& data) {
 
 	glBindVertexArray(_vao);
 	const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
-	//glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glDrawArrays(GL_POINTS, 0, nStars);  
-	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_POINTS, 0, nStars);
 
 	glBindVertexArray(0);
 	_program->setIgnoreUniformLocationError(false);
@@ -475,18 +487,40 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
 
 void RenderableStars::createDataSlice(ColorOption option) {
 	_slicedData.clear();
+
+    // This is only temporary until the scalegraph is in place ---abock
+    float minDistance = std::numeric_limits<float>::max();
+    float maxDistance = -std::numeric_limits<float>::max();
+
+    for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
+        float distLy = _fullData[i + 6];
+        //if (distLy < 20.f) {
+            minDistance = std::min(minDistance, distLy);
+            maxDistance = std::max(maxDistance, distLy);
+        //}
+    }
+
 	for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
-		psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-							_fullData[i + 0],
-							_fullData[i + 1],
-							_fullData[i + 2]
-						);
+        // This is only temporary until the scalegraph is in place. It places all stars
+        // on a sphere with a small variation in the distance to account for blending
+        // issues ---abock
+        glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+        if (p != glm::vec3(0.f))
+            p = glm::normalize(p);
+
+        float distLy = _fullData[i + 6];
+        float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
+        float distance = 18.f - normalizedDist / 1.f ;
+
+
+        psc position = psc(glm::vec4(p, distance));
+
 		// Convert parsecs -> meter
-		PowerScaledScalar parsecsToMetersFactor = PowerScaledScalar(0.308567758f, 17.f);
-		position[0] *= parsecsToMetersFactor[0];
-		position[1] *= parsecsToMetersFactor[0];
-		position[2] *= parsecsToMetersFactor[0];
-		position[3] += parsecsToMetersFactor[1];
+		//PowerScaledScalar parsecsToMetersFactor = PowerScaledScalar(0.308567758f, 17.f);
+		//position[0] *= parsecsToMetersFactor[0];
+		//position[1] *= parsecsToMetersFactor[0];
+		//position[2] *= parsecsToMetersFactor[0];
+		//position[3] += parsecsToMetersFactor[1];
 
 		switch (option) {
 		case ColorOption::Color:
@@ -502,7 +536,8 @@ void RenderableStars::createDataSlice(ColorOption option) {
 					
 				layout.value.bvColor = _fullData[i + 3];
 				layout.value.luminance = _fullData[i + 4];
-				layout.value.absoluteMagnitude = _fullData[i + 5];
+                //layout.value.absoluteMagnitude = _fullData[i + 5];
+                layout.value.absoluteMagnitude = _fullData[i + 6];
 
 				_slicedData.insert(_slicedData.end(),
 								   layout.data.begin(),

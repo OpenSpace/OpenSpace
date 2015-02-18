@@ -34,8 +34,7 @@ out vec4 vs_position;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main()
-{
+void main() {
 	vec4 tmp = vec4(in_position, exponent);
 	vs_position = tmp;
 

@@ -1,46 +1,52 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2015                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 // open space includes
 #include <openspace/rendering/planets/renderableplanet.h>
+
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/planets/planetgeometry.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/planets/planetgeometry.h>
-#include <openspace/engine/openspaceengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 
 #include <sgct.h>
 
 namespace {
-const std::string _loggerCat = "RenderablePlanet";
+    const std::string _loggerCat = "RenderablePlanet";
+
+    const std::string keyFrame = "Frame";
+    const std::string keyGeometry = "Geometry";
+    const std::string keyShading = "PerformShading";
 
 const std::string keyBody = "Body";
 }
@@ -53,6 +59,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
+    , _performShading("performShading", "Perform Shading", true)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -65,15 +72,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
     ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(
-		constants::renderableplanet::keyGeometry, geometryDictionary);
+    success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(constants::renderableplanet::keyFrame, _frame);
+	dictionary.getValue(keyFrame, _target);
 
 	bool b1 = dictionary.getValue(keyBody, _target);
 	assert(b1 == true);
@@ -89,6 +95,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
 	addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    if (dictionary.hasKeyAndValue<bool>(keyShading)) {
+        bool shading;
+        dictionary.getValue(keyShading, shading);
+        _performShading = shading;
+    }
+
+    addProperty(_performShading);
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -96,7 +110,7 @@ RenderablePlanet::~RenderablePlanet() {
 
 bool RenderablePlanet::initialize() {
     if (_programObject == nullptr)
-        OsEng.ref().configurationManager().getValue("pscShader", _programObject);
+        OsEng.ref().configurationManager()->getValue("pscShader", _programObject);
 
     loadTexture();
     _geometry->initialize(this);
@@ -163,6 +177,8 @@ void RenderablePlanet::render(const RenderData& data)
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
+    _programObject->setUniform("_performShading", _performShading);
+
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();

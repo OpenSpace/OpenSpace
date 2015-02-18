@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
@@ -144,9 +145,17 @@ int time_currentTimeUTC(lua_State* L) {
 
 Time* Time::_instance = nullptr;
 
-Time::Time() 
+Time::Time()
 	: _time(-1.0)
+	, _dt(1.0)
+	, _timeJumped(false)
+	, _syncedTime(-1.0)
+	, _syncedDt(1.0)
+	, _syncedTimeJumped(false)
 	, _deltaTimePerSecond(1.0)
+	, _sharedTime(-1.0)
+	, _sharedDt(1.0)
+	, _sharedTimeJumped(false)
 {
 }
 
@@ -173,37 +182,93 @@ bool Time::isInitialized() {
 
 void Time::setTime(double value) {
 	_time = std::move(value);
+	_timeJumped = true;
 }
 
 double Time::currentTime() const {
 	assert(_instance);
-	return _time;
+	//return _time;
+	return _syncedTime;
 }
 
 double Time::advanceTime(double tickTime) {
-	return _time += _deltaTimePerSecond * tickTime;
+	return _time += _dt * tickTime;
 }
 
 double Time::retreatTime(double tickTime) {
-	return _time -= _deltaTimePerSecond * tickTime;
+	return _time -= _dt * tickTime;
 }
 
 void Time::setDeltaTime(double deltaT) {
-	_deltaTimePerSecond = std::move(deltaT);
+	_dt = std::move(deltaT);
 }
 
 double Time::deltaTime() const {
-	return _deltaTimePerSecond;
+	//return _dt;
+	return _syncedDt;
 }
 
 void Time::setTime(std::string time) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
+	_timeJumped = true;
+    // Add callback to OpenSpaceEngine that signals that the next update phase
+    // needs total invalidation ---abock
 }
 
 std::string Time::currentTimeUTC() const {
 	std::string date;
-	SpiceManager::ref().getDateFromET(_time, date);
+	//SpiceManager::ref().getDateFromET(_time, date);
+	SpiceManager::ref().getDateFromET(_syncedTime, date);
 	return date;
+}
+
+void Time::serialize(SyncBuffer* syncBuffer){
+	_syncMutex.lock();
+
+	syncBuffer->encode(_sharedTime);
+	syncBuffer->encode(_sharedDt);
+	syncBuffer->encode(_sharedTimeJumped);
+
+	_syncMutex.unlock();
+}
+
+void Time::deserialize(SyncBuffer* syncBuffer){
+	_syncMutex.lock();
+
+	syncBuffer->decode(_sharedTime);
+	syncBuffer->decode(_sharedDt);
+	syncBuffer->decode(_sharedTimeJumped);
+
+	_syncMutex.unlock();
+}
+
+void Time::postSynchronizationPreDraw(){
+	_syncMutex.lock();
+
+	_syncedTime = _sharedTime;
+	_syncedDt = _sharedDt;
+	_syncedTimeJumped = _sharedTimeJumped;
+
+	_syncMutex.unlock();	
+}
+
+void Time::preSynchronization(){
+	_syncMutex.lock();
+
+	_sharedTime = _time;
+	_sharedDt = _dt;
+	_sharedTimeJumped = _timeJumped;
+
+	_syncMutex.unlock();
+}
+
+bool Time::timeJumped(){
+	//return _timeJumped;
+	return _syncedTimeJumped;
+}
+
+void Time::setTimeJumped(bool jumped){
+	_timeJumped = jumped;
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {

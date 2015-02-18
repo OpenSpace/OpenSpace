@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <sgct.h>
 
 namespace openspace {
-namespace interaction {
 
 enum class KeyAction {
 	Press = SGCT_PRESS,
@@ -168,7 +167,6 @@ enum class Key {
 	Last = SGCT_KEY_LAST
 };
 
-} // namespace interaction
 } // namespace openspace
 
 #endif // __KEYS_H__

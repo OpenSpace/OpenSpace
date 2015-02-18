@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
@@ -183,7 +184,7 @@ ScriptEngine::ScriptEngine()
 }
 
 ScriptEngine::~ScriptEngine() {
-	deinitialize();
+	//deinitialize();
 }
 
 bool ScriptEngine::initialize() {
@@ -209,8 +210,10 @@ bool ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
-    lua_close(_state);
-    _state = nullptr;
+    if (_state) {
+        lua_close(_state);
+        _state = nullptr;
+    }
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
@@ -509,6 +512,22 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
     return true;
 }
 
+std::vector<std::string> ScriptEngine::allLuaFunctions() const {
+    std::vector<std::string> result;
+
+    for (const LuaLibrary& library : _registeredLibraries) {
+        for (const LuaLibrary::Function& function : library.functions) {
+            std::string total = "openspace.";
+            if (!library.name.empty())
+                total += library.name + ".";
+            total += function.name;
+            result.push_back(std::move(total));
+        }
+    }
+
+    return result;
+}
+
 bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
 	if (type == "text") {
 		// The additional space between the longest function name and the descriptions
@@ -585,6 +604,44 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 		LERROR("Undefined type '" << type << "' for Lua documentation");
 		return false;
 	}
+}
+
+void ScriptEngine::serialize(SyncBuffer* syncBuffer){
+	syncBuffer->encode(_currentSyncedScript);
+}
+
+void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
+	syncBuffer->decode(_currentSyncedScript);
+}
+
+void ScriptEngine::postSynchronizationPreDraw(){
+	if (!_currentSyncedScript.empty()){
+		runScript(_currentSyncedScript);
+		_currentSyncedScript.clear();
+	}
+}
+
+void ScriptEngine::preSynchronization(){
+	
+	_mutex.lock();
+	
+	if (!_queuedScripts.empty()){
+		_currentSyncedScript = _queuedScripts.back();
+		_queuedScripts.pop_back();
+	}
+	
+	_mutex.unlock();
+}
+
+void ScriptEngine::queueScript(const std::string &script){
+	if (script.empty())
+		return;
+
+	_mutex.lock();
+
+	_queuedScripts.insert(_queuedScripts.begin(), script);
+
+	_mutex.unlock();
 }
 
 

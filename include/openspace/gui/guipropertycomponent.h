@@ -22,35 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __GUIPROPERTYCOMPONENT_H__
+#define __GUIPROPERTYCOMPONENT_H__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+#include <openspace/gui/guicomponent.h>
 
-in vec4 vs_point_position;
-in vec4 vs_point_velocity;
+#include <ghoul/misc/dictionary.h>
+#include <string>
+#include <vector>
+#include <set>
 
+namespace openspace {
 
-//out vec4 diffuse;
-
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
-
-void main()
-{
-
-	vec4 position = vs_point_position;
-	float depth = pscDepth(position);
-	
-	// set the depth
-	//gl_FragDepth = depth;
-
-	//float l = length(vs_point_velocity);
-	
-	vec4 diffuse = vs_point_velocity;
-
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
-	
+namespace properties {
+    class Property;
 }
+
+namespace gui {
+
+class GuiPropertyComponent : public GuiComponent {
+public:
+	//void registerProperty(const std::string& propertyDescription);
+    void registerProperty(properties::Property* prop);
+	void render();
+
+protected:
+	enum class PropertyType {
+		BoolProperty = 0,
+		IntProperty,
+		FloatProperty,
+		Vec2Property,
+		Vec3Property,
+		StringProperty,
+		OptionProperty,
+		SelectionProperty,
+		TriggerProperty,
+		InvalidPropertyType
+	};
+
+	struct PropertyInfo {
+		PropertyType type;
+		std::string identifier;
+		std::string name;
+		std::string group;
+	};
+	typedef std::string PropertyOwner;
+
+	struct Property {
+		PropertyOwner owner;
+		std::vector<PropertyInfo> properties;
+	};
+
+	void handleProperty(const ghoul::Dictionary& value);
+
+	PropertyType toPropertyType(const std::string& name) const;
+
+	void renderProperty(const PropertyInfo& info) const;
+
+    std::set<properties::Property*> _boolProperties;
+    std::set<properties::Property*> _intProperties;
+    std::set<properties::Property*> _floatProperties;
+    std::set<properties::Property*> _vec2Properties;
+    std::set<properties::Property*> _vec3Properties;
+    std::set<properties::Property*> _vec4Properties;
+    std::set<properties::Property*> _stringProperties;
+    std::set<properties::Property*> _optionProperty;
+    std::set<properties::Property*> _selectionProperty;
+    std::set<properties::Property*> _triggerProperty;
+    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+
+	//std::vector<Property> _properties;
+};
+
+} // namespace gui
+} // namespace openspace
+
+#endif // __GUIPROPERTYCOMPONENT_H__
