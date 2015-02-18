@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <sgct.h>
+#include <stdint.h>
 
 namespace openspace {
 
