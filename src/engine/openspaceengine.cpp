@@ -567,8 +567,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 	}
 }
 
-void OpenSpaceEngine::render() {
-    _renderEngine->render();
+void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
+    _renderEngine->render(projectionMatrix, viewMatrix);
 
 	if (sgct::Engine::instance()->isMaster()) {
 		// If currently writing a command, render it to screen
@@ -576,7 +576,7 @@ void OpenSpaceEngine::render() {
 		if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console->isVisible()) {
 			_console->render();
 		}
-
+		
 		if (_gui->isEnabled())
 			_gui->endFrame();
 	}

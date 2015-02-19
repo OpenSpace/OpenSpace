@@ -60,7 +60,7 @@ public:
     bool initializeGL();
     void postSynchronizationPreDraw();
 	void preSynchronization();
-    void render();
+	void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
     void postDraw();
 
 	void takeScreenshot();
