@@ -84,6 +84,9 @@ public:
 	 */
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
+    // This is a temporary method to change the origin of the coordinate system ---abock
+    void changeViewPoint(std::string origin);
+
 private:
 	void storePerformanceMeasurements();
 

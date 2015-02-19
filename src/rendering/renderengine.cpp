@@ -57,6 +57,10 @@
 #include <fstream>
 #include <sgct.h>
 
+// These are temporary ---abock
+#include <openspace/scenegraph/spiceephemeris.h>
+#include <openspace/scenegraph/staticephemeris.h>
+
 // ABuffer defines
 #define ABUFFER_FRAMEBUFFER 0
 #define ABUFFER_SINGLE_LINKED 1
@@ -79,6 +83,22 @@ namespace openspace {
 		"OpenSpacePerformanceMeasurementSharedData";
 
 	namespace luascriptfunctions {
+
+        int changeToPlutoViewPoint(lua_State* L) {
+            int nArguments = lua_gettop(L);
+            if (nArguments != 0)
+                return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+            OsEng.renderEngine()->changeViewPoint("Pluto");
+            return 0;
+        }
+
+        int changeToSunViewPoint(lua_State* L) {
+            int nArguments = lua_gettop(L);
+            if (nArguments != 0)
+                return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+            OsEng.renderEngine()->changeViewPoint("Sun");
+            return 0;
+        }
 
 		/**
 		 * \ingroup LuaScripts
@@ -663,7 +683,20 @@ namespace openspace {
 						&luascriptfunctions::setPerformanceMeasurement,
 						"bool",
 						"Sets the performance measurements"
-					}
+					},
+                    // These are temporary ---abock
+                    {
+                        "changeViewPointToPluto",
+                        &luascriptfunctions::changeToPlutoViewPoint,
+                        "",
+                        ""
+                    },
+                    {
+                        "changeViewPointToSun",
+                        &luascriptfunctions::changeToSunViewPoint,
+                        "",
+                        ""
+                    }
 				},
 			};
 		}
@@ -752,5 +785,44 @@ namespace openspace {
 			}
 			_performanceMemory->releaseLock();
 		}
+
+// This method is temporary and will be removed once the scalegraph is in effect ---abock
+void RenderEngine::changeViewPoint(std::string origin) {
+    SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
+    SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
+
+    if (origin == "Pluto") {
+        ghoul::Dictionary solarDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body") , std::string("PLUTO BARYCENTER") },
+            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Observer") , std::string("SUN") },
+            { std::string("Kernels") , ghoul::Dictionary() }
+        };
+        ghoul::Dictionary t;
+        t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
+        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+        return;
+    }
+    if (origin == "Sun") {
+        ghoul::Dictionary plutoDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("PLUTO BARYCENTER") },
+            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Observer"), std::string("SUN") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        
+        solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
+        plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+
+        return;
+    }
+    ghoul_assert(false, "??");
+
+}
 
 }// namespace openspace

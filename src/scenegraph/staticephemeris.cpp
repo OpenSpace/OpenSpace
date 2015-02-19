@@ -31,7 +31,7 @@ namespace openspace {
 using namespace constants::staticephemeris;
     
 StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.1f, 0.f, 0.f, 0.f)
+    : _position(0.f, 0.f, 0.f, 0.f)
 {
     const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
     if (hasPosition) {
