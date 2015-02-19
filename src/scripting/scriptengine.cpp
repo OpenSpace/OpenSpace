@@ -612,13 +612,21 @@ void ScriptEngine::serialize(SyncBuffer* syncBuffer){
 
 void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 	syncBuffer->decode(_currentSyncedScript);
+
+	if (!_currentSyncedScript.empty()){
+		_mutex.lock();
+		_receivedScripts.push_back(_currentSyncedScript);
+		_mutex.unlock();
+	}
 }
 
 void ScriptEngine::postSynchronizationPreDraw(){
-	if (!_currentSyncedScript.empty()){
-		runScript(_currentSyncedScript);
-		_currentSyncedScript.clear();
+	_mutex.lock();
+	if (!_receivedScripts.empty()){
+		runScript(_receivedScripts.back());
+		_receivedScripts.pop_back();
 	}
+	_mutex.unlock();
 }
 
 void ScriptEngine::preSynchronization(){
@@ -628,6 +636,9 @@ void ScriptEngine::preSynchronization(){
 	if (!_queuedScripts.empty()){
 		_currentSyncedScript = _queuedScripts.back();
 		_queuedScripts.pop_back();
+		
+		//Not really a received script but the master also needs to run the script...
+		_receivedScripts.push_back(_currentSyncedScript);
 	}
 	
 	_mutex.unlock();
