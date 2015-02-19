@@ -39,7 +39,8 @@ public:
 	static ImageSequencer& ref();
 	bool loadSequence(const std::string dir);
 
-	bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
+    bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
+    bool parsePlaybookFile(const std::string& fileName, std::string year = "2015");
 
 	void testStartTimeMap();
 
@@ -61,6 +62,8 @@ private:
 	
 	double _nextCapture;
 	double _intervalLength;
+
+    std::string _defaultCaptureImage;
 };
 
 } // namespace openspace

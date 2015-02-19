@@ -88,7 +88,7 @@ private:
 	glm::mat4  _projectorMatrix;
 
 	// spice
-	std::string _sequenceDir;
+	std::string _sequenceFile;
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;

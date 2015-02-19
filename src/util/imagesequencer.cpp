@@ -28,10 +28,13 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
+#include <ghoul/filesystem/cachemanager.h>
 
 #include <openspace/util/spicemanager.h>
 #include <fstream>
 #include <iterator>
+#include <iomanip>
+#include <limits>
 
 namespace {
 const std::string _loggerCat = "ImageSequencer";
@@ -61,7 +64,10 @@ ImageSequencer& ImageSequencer::ref() {
 void ImageSequencer::initialize(){
 	assert(_sequencer == nullptr);
 	_sequencer = new ImageSequencer;
+
+    _sequencer->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png");
 }
+
 void ImageSequencer::deinitialize(){
 	delete _sequencer;
 	_sequencer = nullptr;
@@ -78,8 +84,8 @@ void ImageSequencer::createImage(double t1, double t2, std::string path){
 	_timeStamps.push_back(image);
 	// sort
 
-	std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 }
+
 double ImageSequencer::getNextCaptureTime(){
 	return _nextCapture;
 }
@@ -158,79 +164,126 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 }
 
 bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& type, std::string year){
-	//ghoul::filesystem::Directory playbookDir(dir, true);
-	//std::vector<std::string> dirlist = playbookDir.read(true, false);
-	//for (auto path : dirlist){
-	std::string path = dir;
-		if (size_t position = path.find_last_of(".") + 1){
-			if (position != std::string::npos){
-				ghoul::filesystem::File currentFile(path);
-				std::string extension = currentFile.fileExtension();
-				
-				if (extension == type && extension == "csv"){ // comma separated playbook
-					std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
-					std::ifstream file(currentFile.path());
-					if (!file.good()) LERROR("Failed to open csv file '" << currentFile.path() << "'");
-
-					std::string timestr = "";
-					double shutter = 0.01;
-					double et;
-					do{
-						std::getline(file, timestr);
-						auto pos = timestr.find("LORRI image started");
-						if (pos != std::string::npos){
-							timestr = timestr.substr(timestr.find_first_of(",")+1);
-							timestr = timestr.substr(0, timestr.find_first_of(","));
-
-							replace(timestr, " ", "::");
-							timestr = year + " " + timestr;
-							
-							openspace::SpiceManager::ref().getETfromDate(timestr, et);
-							std::string defaultImagePath = absPath("${OPENSPACE_DATA}/placeholder.png");
-							createImage(et, et + shutter, defaultImagePath);
-						}
-					} while (!file.eof());
-				} 
-				/*
-				if (extension == type && extension == "txt"){// Hong Kang. pre-parsed playbook
-					std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;
-					std::ifstream file(currentFile.path());
-					if (!file.good()) LERROR("Failed to open txt file '" << currentFile.path() << "'");
-
-					std::string timestr = "";
-					double shutter = 0.01;
-					double et;
-					
-					double metRef = 299180517;
-					do{
-						std::getline(file, timestr);
-						auto pos = timestr.find("LORRI Image Started");
-						if (pos != std::string::npos){
-							timestr = timestr.substr(24, 9);
-							std::string::size_type sz;     // alias of size_t
-
-							double met = std::stod(timestr, &sz);
-							double diff;
-							openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
-
-							diff = abs(met - metRef);
-							if (met > metRef){
-								et += diff;
-							}
-							else if (met < metRef){
-								et -= diff;
-							}
-				
-							std::string defaultImagePath = absPath("${OPENSPACE_DATA}/placeholder.png");
-							createImage(et, et + shutter, defaultImagePath);
-						}
-					} while (!file.eof());
-				}
-				*/
-			}
-		}
-	//}
+	ghoul::filesystem::Directory playbookDir(dir, true);
+	std::vector<std::string> dirlist = playbookDir.read(true, false);
+	for (auto path : dirlist) {
+        bool success = parsePlaybookFile(path, year);
+        if (!success)
+            return false;
+    }
 	return true; // add check
+}
+
+bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string year) {
+	if (size_t position = fileName.find_last_of(".") + 1){
+		if (position != std::string::npos){
+			std::string extension = ghoul::filesystem::File(fileName).fileExtension();
+
+			if (extension == "csv"){ // comma separated playbook
+				std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
+
+                std::string cachedFile = "";
+                FileSys.cacheManager()->getCachedFile(fileName, cachedFile, true);
+
+                bool hasCachedFile = FileSys.fileExists(cachedFile);
+                if (hasCachedFile) {
+                    std::ifstream file(cachedFile);
+                    if (!file.good())
+                        LERROR("Error loading cached playbook '" << cachedFile << "'");
+                    else {
+                        do {
+                            std::string line;
+                            std::getline(file, line);
+
+                            std::stringstream s(line);
+
+                            double start, end;
+                            std::string path;
+
+                            s >> start;
+                            s >> end;
+
+                            std::getline(s, path);
+                            createImage(start, end, _defaultCaptureImage);
+                        } while (!file.eof());
+                    }                
+                } else {
+                    std::ifstream file(fileName);
+                    if (!file.good()) LERROR("Failed to open csv file '" << fileName << "'");
+
+                    std::string timestr = "";
+                    double shutter = 0.01;
+                    double et;
+                    do{
+                        std::getline(file, timestr);
+                        auto pos = timestr.find("LORRI image started");
+                        if (pos != std::string::npos){
+                            timestr = timestr.substr(timestr.find_first_of(",") + 1);
+                            timestr = timestr.substr(0, timestr.find_first_of(","));
+
+                            replace(timestr, " ", "::");
+                            timestr = year + " " + timestr;
+
+                            openspace::SpiceManager::ref().getETfromDate(timestr, et);
+                            createImage(et, et + shutter, _defaultCaptureImage);
+                        }
+                    } while (!file.eof());
+
+                    std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
+
+                    std::ofstream cachedFileStream(cachedFile);
+                    cachedFileStream << std::setprecision(64);
+                    if (cachedFileStream.good()) {
+                        for (const ImageParams& i : _timeStamps)
+                            cachedFileStream << i.startTime << "\t" << i.stopTime << "\t" << i.path << std::endl;
+                    }
+
+                }
+			} 
+
+				
+			if (extension == "txt"){// Hong Kang. pre-parsed playbook
+				std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;
+				std::ifstream file(fileName);
+				if (!file.good()) LERROR("Failed to open txt file '" << fileName << "'");
+
+				std::string timestr = "";
+				double shutter = 0.01;
+				double et;
+					
+				double metRef = 299180517;
+				do{
+					std::getline(file, timestr);
+					auto pos = timestr.find("LORRI Image Started");
+					if (pos != std::string::npos){
+						timestr = timestr.substr(24, 9);
+						std::string::size_type sz;     // alias of size_t
+
+						double met = std::stod(timestr, &sz);
+						double diff;
+						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
+
+						diff = abs(met - metRef);
+						if (met > metRef){
+							et += diff;
+						}
+						else if (met < metRef){
+							et -= diff;
+						}
+						/*
+						std::string str;
+						openspace::SpiceManager::ref().getDateFromET(et, str);
+						std::cout << str << std::endl;
+						*/
+						createImage(et, et + shutter, _defaultCaptureImage);
+					}
+				} while (!file.eof());
+                std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
+			}
+				
+		}
+	}
+    return true;
 }
 
 bool ImageSequencer::loadSequence(const std::string dir){	
@@ -269,6 +322,7 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							std::vector<std::string>::const_iterator it = std::find(sequencePaths.begin(), sequencePaths.end(), path);
 							if ( it != sequencePaths.end()){
 								createImage(timestamps[0], timestamps[1], path);
+                                std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 							}
 							std::string timestr;
 							openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
