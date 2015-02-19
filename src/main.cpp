@@ -221,5 +221,5 @@ void mainDecodeFun()
 void mainLogCallback(const char* msg){
 	std::string message = msg;
 	// Remove the trailing \n that is passed along
-	LINFOC("SGCT", message.substr(0, message.size() - 1));
+	LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
 }
