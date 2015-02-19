@@ -33,6 +33,8 @@
 #include <openspace/util/spicemanager.h>
 #include <fstream>
 #include <iterator>
+#include <iomanip>
+#include <limits>
 
 namespace {
 const std::string _loggerCat = "ImageSequencer";
