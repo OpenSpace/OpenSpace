@@ -441,15 +441,15 @@ namespace openspace {
 
 					int i = 0;
 
-					PrintText(i++, "Date: %s", 20, Time::ref().currentTimeUTC().c_str());
-					PrintText(i++, "Avg. Frametime: %.5f", 10, sgct::Engine::instance()->getAvgDt());
-					PrintText(i++, "Drawtime:       %.5f", 10, sgct::Engine::instance()->getDrawTime());
-					PrintText(i++, "Frametime:      %.5f", 10, sgct::Engine::instance()->getDt());
-					PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", 10, origin[0], origin[1], origin[2], origin[3]);
-					PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", 10, position[0], position[1], position[2], position[3]);
-					PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", 10, viewdirection[0], viewdirection[1], viewdirection[2]);
-					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", 10, pssl[0], pssl[1]);
-					PrintText(i++, "Scaling:        (% .5f, % .5f)", 10, scaling[0], scaling[1]);
+					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
+					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
+					PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
+					PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
+					PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
+					PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
+					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
+					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - Time::ref().currentTime();
 					double t = 0.0;
