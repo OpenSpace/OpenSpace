@@ -58,7 +58,7 @@ public:
 
 	void loadTexture();
 	void allocateData();
-	void insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c);
+	void insertPoint(std::vector<float>& arr, psc p, glm::vec4 c);
 	void fovProjection(bool H[], std::vector<glm::dvec3> bounds);
 
 	psc orthogonalProjection(glm::dvec3 camvec);
