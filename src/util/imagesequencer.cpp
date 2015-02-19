@@ -166,7 +166,7 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 			if (position != std::string::npos){
 				ghoul::filesystem::File currentFile(path);
 				std::string extension = currentFile.fileExtension();
-
+				
 				if (extension == type && extension == "csv"){ // comma separated playbook
 					std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
 					std::ifstream file(currentFile.path());
@@ -191,7 +191,7 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 						}
 					} while (!file.eof());
 				} 
-				
+				/*
 				if (extension == type && extension == "txt"){// Hong Kang. pre-parsed playbook
 					std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;
 					std::ifstream file(currentFile.path());
@@ -220,17 +220,13 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 							else if (met < metRef){
 								et -= diff;
 							}
-							/*
-							std::string str;
-							openspace::SpiceManager::ref().getDateFromET(et, str);
-							std::cout << str << std::endl;
-							*/
+				
 							std::string defaultImagePath = absPath("${OPENSPACE_DATA}/placeholder.png");
 							createImage(et, et + shutter, defaultImagePath);
 						}
 					} while (!file.eof());
 				}
-				
+				*/
 			}
 		}
 	//}
