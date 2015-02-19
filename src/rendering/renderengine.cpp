@@ -386,7 +386,7 @@ namespace openspace {
 			_mainCamera->setProjectionMatrix(
 				projectionMatrix);
 
-			//Is this really necessary to store?
+			//Is this really necessary to store? @JK
 			_mainCamera->setViewProjectionMatrix(projectionMatrix * viewMatrix);
 
 			// render the scene starting from the root node

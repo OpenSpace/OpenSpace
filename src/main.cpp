@@ -162,10 +162,18 @@ void mainPostSyncPreDrawFunc()
 
 void mainRenderFunc()
 {
+	//not the most efficient, but for clarity @JK
 	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getUserPtr()->getPos());
+	glm::mat4 sceneMatrix = _sgctEngine->getModelMatrix();
 	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
+
+	//dont shift nav-direction on master, makes it very tricky to navigate @JK
+	if (!_sgctEngine->isMaster()){
+		viewMatrix = viewMatrix * sceneMatrix;
+	}
+
 	glm::mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
-    OsEng.render(projectionMatrix, viewMatrix);
+	OsEng.render(projectionMatrix, viewMatrix);
 }
 
 void mainPostDrawFunc()
