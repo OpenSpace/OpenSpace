@@ -238,6 +238,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 
                 }
 			} 
+
 				
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
 				std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;

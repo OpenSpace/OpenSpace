@@ -347,7 +347,7 @@ namespace openspace {
 
 	}
 
-		void RenderEngine::render()
+	void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix)
 		{
 			// We need the window pointer
 			sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
@@ -375,21 +375,19 @@ namespace openspace {
 				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
 #endif
 			//@CHECK  does the dome disparity disappear if this line disappears? ---abock
-			const glm::mat4 view
-				= glm::translate(glm::mat4(1.0),
-				eyePosition);  // make sure the eye is in the center
-			_mainCamera->setViewProjectionMatrix(
-				sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * view);
-
-			_mainCamera->setModelMatrix(
-				sgct::Engine::instance()->getModelMatrix());
+			//const glm::mat4 view
+			//	= glm::translate(glm::mat4(1.0),
+			//	eyePosition);  // make sure the eye is in the center
+			//
 
 			_mainCamera->setViewMatrix(
-				sgct::Engine::instance()->getActiveViewMatrix()* view);
+				viewMatrix );
 
 			_mainCamera->setProjectionMatrix(
-				sgct::Engine::instance()->getActiveProjectionMatrix());
+				projectionMatrix);
 
+			//Is this really necessary to store?
+			_mainCamera->setViewProjectionMatrix(projectionMatrix * viewMatrix);
 
 			// render the scene starting from the root node
 			if (!_visualizeABuffer) {
