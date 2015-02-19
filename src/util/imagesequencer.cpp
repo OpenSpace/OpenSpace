@@ -158,9 +158,10 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 }
 
 bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& type, std::string year){
-	ghoul::filesystem::Directory playbookDir(dir, true);
-	std::vector<std::string> dirlist = playbookDir.read(true, false);
-	for (auto path : dirlist){
+	//ghoul::filesystem::Directory playbookDir(dir, true);
+	//std::vector<std::string> dirlist = playbookDir.read(true, false);
+	//for (auto path : dirlist){
+	std::string path = dir;
 		if (size_t position = path.find_last_of(".") + 1){
 			if (position != std::string::npos){
 				ghoul::filesystem::File currentFile(path);
@@ -185,7 +186,7 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 							timestr = year + " " + timestr;
 							
 							openspace::SpiceManager::ref().getETfromDate(timestr, et);
-							std::string defaultImagePath = dir + "/placeholder.png";
+							std::string defaultImagePath = absPath("${OPENSPACE_DATA}/placeholder.png");
 							createImage(et, et + shutter, defaultImagePath);
 						}
 					} while (!file.eof());
@@ -224,7 +225,7 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 							openspace::SpiceManager::ref().getDateFromET(et, str);
 							std::cout << str << std::endl;
 							*/
-							std::string defaultImagePath = dir + "/placeholder.png";
+							std::string defaultImagePath = absPath("${OPENSPACE_DATA}/placeholder.png");
 							createImage(et, et + shutter, defaultImagePath);
 						}
 					} while (!file.eof());
@@ -232,7 +233,7 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 				
 			}
 		}
-	}
+	//}
 	return true; // add check
 }
 

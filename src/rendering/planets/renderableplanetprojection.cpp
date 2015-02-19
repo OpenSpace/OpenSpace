@@ -37,6 +37,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 #include <sgct.h>
 #include <iomanip> 
 #include <string>
@@ -56,7 +57,6 @@ namespace {
 	const std::string keyInstrumentNear    = "Instrument.Near";
 	const std::string keyInstrumentFar     = "Instrument.Far";
 	const std::string keySequenceDir       = "Projection.Sequence";
-
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
 	const std::string keyShading = "PerformShading";
@@ -144,8 +144,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
 		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
 		*/
-		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
+		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
 		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/joaki56/Desktop/ProjectionsOfInterest/playbook", "txt");
+		openspace::ImageSequencer::ref().parsePlaybook(absPath("${OPENSPACE_DATA}/playbook.csv"), "csv");
 	
 	}
 }
