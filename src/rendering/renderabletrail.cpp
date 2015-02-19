@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/renderabletrail.h>
+#include <openspace/util/time.h>
 
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
@@ -112,6 +113,7 @@ bool RenderableTrail::deinitialize() {
     glDeleteVertexArrays(1, &_vaoID);
     glDeleteBuffers(1, &_vBufferID);
     return true;
+	deinitialize();
 }
 
 bool RenderableTrail::isReady() const {

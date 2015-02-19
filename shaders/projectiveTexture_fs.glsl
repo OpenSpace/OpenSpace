@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,80 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#version 430
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
-
-namespace openspace {
-
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
-
-    bool initialize();
-
-    void render();
+uniform vec4 campos;
+uniform vec4 objpos;
+//uniform vec3 camdir; // add this for specular
 
 
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+uniform float time;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+in vec2 vs_st;
+in vec4 vs_normal;
+in vec4 vs_position;
 
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
+in vec4 ProjTexCoord;
+uniform vec3 boresight;
+uniform vec3 sun_pos;
 
-} // namespace openspace
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#endif // __POWERSCALEDSPHERE_H__
+//#include "PowerScaling/powerScaling_vs.hglsl"
+void main()
+{
+	vec4 position = vs_position;
+	float depth = pscDepth(position);
+	vec4 diffuse = texture(texture1, vs_st);
+	
+	// directional lighting
+	vec3 origin = vec3(0.0);
+	vec4 spec = vec4(0.0);
+	
+	vec3 n = normalize(vs_normal.xyz);
+	//vec3 e = normalize(camdir);
+	vec3 l_pos = sun_pos; // sun.
+	vec3 l_dir = normalize(l_pos-objpos.xyz);
+	float terminatorBright = 0.4;
+	float intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
+	
+	float shine = 0.0001;
+
+	vec4 specular = vec4(0.1);
+	vec4 ambient = vec4(0.f,0.f,0.f,1);
+	/* Specular
+	if(intensity > 0.f){
+		// halfway vector
+		vec3 h = normalize(l_dir + e);
+		// specular factor
+		float intSpec = max(dot(h,n),0.0);
+		spec = specular * pow(intSpec, shine);
+	}
+	*/
+	//diffuse = max(intensity * diffuse, ambient);
+	
+	// PROJECTIVE TEXTURE
+	vec4 projTexColor = textureProj(texture2, ProjTexCoord);
+	vec4 shaded = max(intensity * diffuse, ambient);
+		if (ProjTexCoord[0] > 0.0 || 
+			ProjTexCoord[1] > 0.0 ||
+			ProjTexCoord[0] < ProjTexCoord[2] || 
+			ProjTexCoord[1] < ProjTexCoord[2]){
+			diffuse = shaded;
+		}else if(dot(n,boresight) < 0 &&
+		         (projTexColor.w != 0)){// frontfacing
+			diffuse = projTexColor;//*0.5f + 0.5f*shaded;
+		}else{
+			diffuse = shaded;
+		}
+	
+	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	addToBuffer(frag);
+
+	discard;
+}
+

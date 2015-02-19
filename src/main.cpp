@@ -42,13 +42,8 @@ void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
 void mainEncodeFun();
 void mainDecodeFun();
-
-#if 0
-// @TODO Remove the ifdef hen the next SGCT version is available ---abock
 void mainExternalControlCallback(const char * receivedChars, int size);
-#else
-void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
-#endif
+void mainLogCallback(const char* msg);
 
 namespace {
 	const std::string _loggerCat = "main";
@@ -68,18 +63,11 @@ int main(int argc, char** argv)
     for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
 
-#if 0
-// @TODO Remove the ifdef (enabling the functions) when the next SGCT version is available
-// that enables the logging redirect ---abock
 	sgct::MessageHandler::instance()->setLogToConsole(false);
 	sgct::MessageHandler::instance()->setShowTime(false);
 	sgct::MessageHandler::instance()->setLogToCallback(true);
-	sgct::MessageHandler::instance()->setLogCallback([](const char* msg) {
-		std::string message = msg;
-		// Remove the trailing \n that is passed along
-		LINFOC("SGCT", message.substr(0, message.size()-1));
-	});
-#endif
+	sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
+
 
 	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
@@ -162,7 +150,19 @@ void mainPostSyncPreDrawFunc()
 
 void mainRenderFunc()
 {
-    OsEng.render();
+	//not the most efficient, but for clarity @JK
+	
+	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
+	glm::mat4 sceneMatrix = _sgctEngine->getModelMatrix();
+	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
+
+	//dont shift nav-direction on master, makes it very tricky to navigate @JK
+	if (!_sgctEngine->isMaster()){
+		viewMatrix = viewMatrix * sceneMatrix;
+	}
+
+	glm::mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
+	OsEng.render(projectionMatrix, viewMatrix);
 }
 
 void mainPostDrawFunc()
@@ -170,20 +170,11 @@ void mainPostDrawFunc()
     OsEng.postDraw();
 }
 
-#if 0
-// @TODO Remove the ifdef hen the next SGCT version is available ---abock
 void mainExternalControlCallback(const char* receivedChars, int size)
 {
     if (_sgctEngine->isMaster())
 		OsEng.externalControlCallback(receivedChars, size, 0);
 }
-#else
-void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
-{
-	if (_sgctEngine->isMaster())
-		OsEng.externalControlCallback(receivedChars, size, clientId);
-}
-#endif
 
 void mainKeyboardCallback(int key, int action)
 {
@@ -225,4 +216,10 @@ void mainEncodeFun()
 void mainDecodeFun()
 {
     OsEng.decode();
+}
+
+void mainLogCallback(const char* msg){
+	std::string message = msg;
+	// Remove the trailing \n that is passed along
+	LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
 }

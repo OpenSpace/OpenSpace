@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#version 430
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform vec2 _scaling;
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+layout(location = 3) in vec4 in_position;
+uniform vec3 boresight;
+layout(location = 5) in int segments;
+uniform vec2 radius;
 
-namespace openspace {
+out vec4 vs_position;
+flat out uint vs_segments;
 
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-    bool initialize();
+void main() {
+	vs_position  = in_position;
+	vs_segments  = segments;
+	gl_Position  = vec4(in_position.xy, 0.0, 1.0);
 
-    void render();
-
-
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
-
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
-
-} // namespace openspace
-
-#endif // __POWERSCALEDSPHERE_H__
+}

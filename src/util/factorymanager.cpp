@@ -46,6 +46,12 @@
 #include <openspace/scenegraph/staticephemeris.h>
 #include <openspace/scenegraph/spiceephemeris.h>
 
+// projection
+#include <openspace/rendering/planets/renderableplanetprojection.h>
+#include <openspace/rendering/planets/SimpleSphereGeometryProjection.h>
+#include <openspace/rendering/planets/PlanetGeometryProjection.h>
+
+
 // std
 #include <cassert>
 
@@ -64,6 +70,7 @@ void FactoryManager::initialize()
     // Add Renderables
     _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
     _manager->factory<Renderable>()->registerClass<RenderablePlanet>("RenderablePlanet");
+	_manager->factory<Renderable>()->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
 	_manager->factory<Renderable>()->registerClass<RenderableStars>("RenderableStars");
 	_manager->factory<Renderable>()->registerClass<RenderableConstellationBounds>
 		("RenderableConstellationBounds");
@@ -96,6 +103,11 @@ void FactoryManager::initialize()
     _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     _manager->factory<planetgeometry::PlanetGeometry>()
           ->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+	
+	// Add PlanetGeometryProjection
+	_manager->addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
+	_manager->factory<planetgeometryprojection::PlanetGeometryProjection>()
+		->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
 	
 	// Add ModelGeometry
 	_manager->addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);

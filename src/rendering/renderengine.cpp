@@ -39,6 +39,7 @@
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/imagesequencer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/sharedmemory.h>
@@ -251,18 +252,19 @@ namespace openspace {
 			const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
 				/ 4.0f;
 
-#if 0
-			// @TODO Remove the ifdef when the next SGCT version is released that requests the
-			// getUserPtr to get a name parameter ---abock
-
-			// set the eye position, useful during rendering
-			const glm::vec3 eyePosition
-				= sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
-#else
-			const glm::vec3 eyePosition
-				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
-#endif
-
+			
+//#if 0
+//			// @TODO Remove the ifdef when the next SGCT version is released that requests the
+//			// getUserPtr to get a name parameter ---abock
+//
+//			// set the eye position, useful during rendering
+//			const glm::vec3 eyePosition
+//				= sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
+//#else
+//			const glm::vec3 eyePosition
+//				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
+//#endif
+			const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
 			// get viewdirection, stores the direction in the camera, used for culling
 			const glm::vec3 viewdir = glm::normalize(eyePosition - center);
 			_mainCamera->setCameraDirection(-viewdir);
@@ -346,7 +348,7 @@ namespace openspace {
 
 	}
 
-		void RenderEngine::render()
+	void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix)
 		{
 			// We need the window pointer
 			sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
@@ -365,30 +367,12 @@ namespace openspace {
 #endif
 			// setup the camera for the current frame
 
-#if 0
-			// @TODO: Use this as soon as the new SGCT version is available ---abock
-			const glm::vec3 eyePosition
-				= sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
-#else
-			const glm::vec3 eyePosition
-				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
-#endif
-			//@CHECK  does the dome disparity disappear if this line disappears? ---abock
-			const glm::mat4 view
-				= glm::translate(glm::mat4(1.0),
-				eyePosition);  // make sure the eye is in the center
-			_mainCamera->setViewProjectionMatrix(
-				sgct::Engine::instance()->getActiveModelViewProjectionMatrix() * view);
-
-			_mainCamera->setModelMatrix(
-				sgct::Engine::instance()->getModelMatrix());
-
 			_mainCamera->setViewMatrix(
-				sgct::Engine::instance()->getActiveViewMatrix()* view);
-
+				viewMatrix );
 			_mainCamera->setProjectionMatrix(
-				sgct::Engine::instance()->getActiveProjectionMatrix());
-
+				projectionMatrix);
+			//Is this really necessary to store? @JK
+			_mainCamera->setViewProjectionMatrix(projectionMatrix * viewMatrix);
 
 			// render the scene starting from the root node
 			if (!_visualizeABuffer) {
@@ -435,8 +419,11 @@ namespace openspace {
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
 #define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
+#define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
+
 
 					int i = 0;
+
 					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
@@ -446,6 +433,27 @@ namespace openspace {
 					PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
+
+					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - Time::ref().currentTime();
+					double t = 0.0;
+					t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
+					std::string progress = "|";
+					int g = ((t)* 20) + 1;
+					for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
+					for (int i = 0; i < 21 - g; i++) progress.append(" ");
+
+					std::string str = "";
+					openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
+
+					progress.append("|");
+					if (remaining > 0){
+						glm::vec4 g1(0, t, 0, 1);
+						glm::vec4 g2(1 - t);
+						PrintColorText(i++, "Next projection in     | %.0f seconds", 10, g1 + g2, remaining);
+						PrintColorText(i++, "%s %.1f %%", 10, g1 + g2, progress.c_str(), t * 100);
+					}
+					glm::vec4 w(1);
+					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str()); 
 #undef PrintText
 				}
 

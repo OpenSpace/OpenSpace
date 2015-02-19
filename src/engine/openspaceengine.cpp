@@ -44,6 +44,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/imagesequencer.h>
 
 
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -194,6 +195,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 				LERROR("Directory '" << p << "' could not be created");
 		}
 	}
+
+    ImageSequencer::initialize();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
@@ -565,8 +568,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 	}
 }
 
-void OpenSpaceEngine::render() {
-    _renderEngine->render();
+void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
+    _renderEngine->render(projectionMatrix, viewMatrix);
 
 	if (sgct::Engine::instance()->isMaster()) {
 		// If currently writing a command, render it to screen
@@ -574,7 +577,7 @@ void OpenSpaceEngine::render() {
 		if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console->isVisible()) {
 			_console->render();
 		}
-
+		
 		if (_gui->isEnabled())
 			_gui->endFrame();
 	}

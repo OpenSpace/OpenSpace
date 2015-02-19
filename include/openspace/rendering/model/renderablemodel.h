@@ -69,7 +69,6 @@ private:
 
 	std::string _source;
 	std::string _destination;
-
 };
 
 }  // namespace openspace

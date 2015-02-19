@@ -75,7 +75,7 @@ public:
     bool initializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void render();
+	void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
 	void postDraw();
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);

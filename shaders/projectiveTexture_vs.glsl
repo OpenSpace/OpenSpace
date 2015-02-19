@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#version 430
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-namespace openspace {
+//texture projection matrix
 
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
+uniform mat4 ProjectorMatrix;
 
-    bool initialize();
+layout(location = 0) in vec4 in_position;
+//in vec3 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
 
-    void render();
+uniform vec3 boresight;
+
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out float s;
 
 
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+out vec4 ProjTexCoord;
+#include "PowerScaling/powerScaling_vs.hglsl"
+void main(){
+	// Radius = 0.71492 *10^8; 
+	// set variables
+	vs_st = in_st;
+	//vs_stp = in_position.xyz;
+	vs_position = in_position;
+	vec4 tmp    = in_position;
+	
+	// this is wrong for the normal. 
+	// The normal transform is the transposed inverse of the model transform
+	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+	
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+	vec4 raw_pos = psc_to_meter(in_position, scaling);
+	ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
+	position = ViewProjection * position;
 
-} // namespace openspace
-
-#endif // __POWERSCALEDSPHERE_H__
+	gl_Position =  z_normalization(position);
+}

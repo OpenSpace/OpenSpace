@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#ifndef __PlanetGeometryProjection_H__
+#define __PlanetGeometryProjection_H__
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/planets/RenderablePlanetProjection.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class PowerScaledSphere {
+namespace planetgeometryprojection {
+
+class PlanetGeometryProjection : public properties::PropertyOwner {
 public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
+    static PlanetGeometryProjection* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    bool initialize();
+	PlanetGeometryProjection();
+	virtual ~PlanetGeometryProjection();
+    virtual bool initialize(RenderablePlanetProjection* parent);
+    virtual void deinitialize();
+    virtual void render() = 0;
 
-    void render();
-
-
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
-
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+protected:
+	RenderablePlanetProjection* _parent;
 };
 
-} // namespace openspace
+}  // namespace planetgeometry
+}  // namespace openspace
 
-#endif // __POWERSCALEDSPHERE_H__
+#endif  // __PLANETGEOMETRY_H__

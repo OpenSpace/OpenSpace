@@ -96,6 +96,7 @@ private:
 	//sync variables
 	std::mutex _mutex;
 	std::vector<std::string> _queuedScripts;
+	std::vector<std::string> _receivedScripts;
 	std::string _currentSyncedScript;
 };
 

@@ -30,6 +30,8 @@ uniform vec4 objpos;
 
 uniform bool _performShading = true;
 
+uniform int shadows;
+
 uniform float time;
 uniform sampler2D texture1;
 

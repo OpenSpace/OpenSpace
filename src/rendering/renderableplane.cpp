@@ -112,7 +112,7 @@ bool RenderablePlane::initialize() {
 	// ============================
 	// 		GEOMETRY (quad)
 	// ============================
-	const GLfloat size		= _size[0];
+	const GLfloat size = _size[0];
 	const GLfloat w = _size[1];
 	const GLfloat vertex_data[] = { // square of two triangles (sigh)
 		//	  x      y     z     w     s     t
@@ -159,11 +159,9 @@ bool RenderablePlane::deinitialize() {
 }
 
 void RenderablePlane::render(const RenderData& data) {
-
 	glm::mat4 transform = glm::mat4(1.0);
 	if (_billboard)
 		transform = glm::inverse(data.camera.viewRotationMatrix());
-	//transform = glm::scale(transform, glm::vec3(0.01));
 
 	// Activate shader
 	_shader->activate();

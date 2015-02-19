@@ -184,7 +184,6 @@ bool SceneGraph::initialize()
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
-
 	// projection program
 	tmpProgram = ProgramObject::Build("projectiveProgram", 
 		"${SHADERS}/projectiveTexture_vs.glsl",

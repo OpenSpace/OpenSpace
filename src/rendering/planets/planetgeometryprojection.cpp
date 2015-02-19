@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#include <openspace/rendering/planets/PlanetGeometryProjection.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/factorymanager.h>
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+namespace {
+const std::string _loggerCat = "PlanetGeometryProjection";
+}
 
 namespace openspace {
+namespace planetgeometryprojection {
 
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
+PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+	std::string geometryType;
+	const bool success = dictionary.getValue(
+		constants::planetgeometry::keyType, geometryType);
+	if (!success) {
+        LERROR("PlanetGeometry did not contain a correct value of the key '"
+			<< constants::planetgeometry::keyType << "'");
+        return nullptr;
+	}
+	ghoul::TemplateFactory<PlanetGeometryProjection>* factory
+		= FactoryManager::ref().factory<PlanetGeometryProjection>();
 
-    bool initialize();
+	PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
+                                                                    << "'");
+        return nullptr;
+    }
+    return result;
+}
 
-    void render();
+PlanetGeometryProjection::PlanetGeometryProjection()
+    : _parent(nullptr)
+{
+	setName("PlanetGeometryProjection");
+}
 
+PlanetGeometryProjection::~PlanetGeometryProjection()
+{
+}
 
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+bool PlanetGeometryProjection::initialize(RenderablePlanetProjection* parent)
+{
+    _parent = parent;
+    return true;
+}
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+void PlanetGeometryProjection::deinitialize()
+{
+}
 
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
-
-} // namespace openspace
-
-#endif // __POWERSCALEDSPHERE_H__
+}  // namespace planetgeometry
+}  // namespace openspace

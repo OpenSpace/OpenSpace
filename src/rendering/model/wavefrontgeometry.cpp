@@ -201,7 +201,7 @@ void WavefrontGeometry::loadObj(const char *filename){
 		vertexIndex = _iarray[m] * 3;
 		_iarray[m] = m;
 
-		_varray[m].location[3] = 7; // I need to set this proper at some point. 
+		_varray[m].location[3] = 6; // I need to set this proper at some point. 
 		int q = 0;
 		while (q < 3){
 			_varray[m].location[q] = tempVertexArray[vertexIndex + q];

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,46 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#version __CONTEXT__
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-namespace openspace {
-
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
-
-    bool initialize();
-
-    void render();
+in vec4 vs_point_position;
+in vec4 vs_point_velocity;
 
 
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+//out vec4 diffuse;
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
+void main()
+{
 
-} // namespace openspace
+	vec4 position = vs_point_position;
+	float depth = pscDepth(position);
+	
+	// set the depth
+	//gl_FragDepth = depth;
 
-#endif // __POWERSCALEDSPHERE_H__
+	//float l = length(vs_point_velocity);
+	
+	vec4 diffuse = vs_point_velocity;
+
+	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	addToBuffer(frag);
+	
+}
