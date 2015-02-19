@@ -170,9 +170,6 @@ void RenderablePlanet::render(const RenderData& data)
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
-	/*int shadows = (_target == "SUN") ? 0 : 1;
-	_programObject->setUniform("shadows", shadows);
-	_programObject->setUniform("sun_pos", sun_pos.vec3());*/
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);

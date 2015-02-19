@@ -27,6 +27,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
+#include <openspace/engine/configurationmanager.h>
+
 #include <ghoul/io/texture/texturereader.h>
 //#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -142,8 +144,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
 		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
 		*/
-		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
-		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/joaki56/Desktop/ProjectionsOfInterest/playbook", "txt");
+		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
+		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/joaki56/Desktop/ProjectionsOfInterest/playbook", "txt");
 	
 	}
 }
@@ -160,7 +162,7 @@ bool RenderablePlanetProjection::initialize(){
 
 	if (_fboProgramObject == nullptr)
 		completeSuccess
-			  &= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
+		&= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
 
     loadTexture();
 	loadProjectionTexture();

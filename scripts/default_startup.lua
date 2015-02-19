@@ -1,6 +1,6 @@
 --openspace.setPropertyValue('Earth.renderable.colorTexture', '${OPENSPACE_DATA}/modules/mars/textures/mars.png')
 
---openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
+openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
 -- NH takes series of images from visible to dark side (across terminator)
 -- Sequence lasts ~10 mins, (recommended dt = 10)
 
