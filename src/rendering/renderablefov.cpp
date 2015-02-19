@@ -122,7 +122,7 @@ RenderableFov::~RenderableFov(){
 bool RenderableFov::initialize(){
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager().getValue("EphemerisProgram", _programObject);
+		completeSuccess &= OsEng.ref().configurationManager()->getValue("FovProgram", _programObject);
 
 	allocateData();
 	sendToGPU();

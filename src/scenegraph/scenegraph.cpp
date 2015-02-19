@@ -172,7 +172,7 @@ bool SceneGraph::initialize()
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("fboPassProgram", tmpProgram);
+	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
 
 	// projection program
 	tmpProgram = ProgramObject::Build("projectiveProgram", 
@@ -181,7 +181,7 @@ bool SceneGraph::initialize()
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager().setValue("projectiveProgram", tmpProgram);
+	OsEng.ref().configurationManager()->setValue("projectiveProgram", tmpProgram);
 	
 	// pscstandard
 	tmpProgram = ProgramObject::Build("pscstandard",
@@ -192,6 +192,15 @@ bool SceneGraph::initialize()
 
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
+
+	// pscstandard
+	tmpProgram = ProgramObject::Build("FovProgram",
+		"${SHADERS}/fov_vs.glsl",
+		"${SHADERS}/fov_fs.glsl");
+	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager()->setValue("FovProgram", tmpProgram);
 
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",

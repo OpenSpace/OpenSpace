@@ -27,6 +27,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
+#include <openspace/engine/configurationmanager.h>
+
 #include <ghoul/io/texture/texturereader.h>
 //#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -54,6 +56,12 @@ namespace {
 	const std::string keyInstrumentNear    = "Instrument.Near";
 	const std::string keyInstrumentFar     = "Instrument.Far";
 	const std::string keySequenceDir       = "Projection.Sequence";
+
+	const std::string keyFrame = "Frame";
+	const std::string keyGeometry = "Geometry";
+	const std::string keyShading = "PerformShading";
+
+	const std::string keyBody = "Body";
 
 	const std::string _mainFrame = "GALACTIC";
 }
@@ -100,14 +108,14 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(
-		constants::renderableplanet::keyGeometry, geometryDictionary);
+		keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
         geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(constants::renderableplanet::keyFrame, _target);
+	dictionary.getValue(keyFrame, _target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -136,8 +144,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		bool loaded = openspace::ImageSequencer::ref().loadSequence(_sequenceDir);
 		if (!loaded) LDEBUG(name + " did not load sequence " + _sequenceDir + " check mod file path");
 		*/
-		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
-		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/joaki56/Desktop/ProjectionsOfInterest/playbook", "txt");
+		openspace::ImageSequencer::ref().parsePlaybook("C:/Users/michal/playbook", "txt");
+		//openspace::ImageSequencer::ref().parsePlaybook("C:/Users/joaki56/Desktop/ProjectionsOfInterest/playbook", "txt");
 	
 	}
 }
@@ -150,11 +158,11 @@ bool RenderablePlanetProjection::initialize(){
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
-              &= OsEng.ref().configurationManager().getValue("projectiveProgram", _programObject);
+              &= OsEng.ref().configurationManager()->getValue("projectiveProgram", _programObject);
 
 	if (_fboProgramObject == nullptr)
 		completeSuccess
-			  &= OsEng.ref().configurationManager().getValue("fboPassProgram", _fboProgramObject);
+		&= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
 
     loadTexture();
 	loadProjectionTexture();
