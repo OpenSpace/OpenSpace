@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scenegraph/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/script_helper.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 
@@ -69,24 +70,29 @@ namespace luascriptfunctions {
  * with the type the denoted Property expects
  */
 int property_setValue(lua_State* L) {
-	using ghoul::lua::luaTypeToString;
+    static const std::string _loggerCat = "property_setValue";
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
 
 	int nArguments = lua_gettop(L);
-	if (nArguments != 2)
-		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
 
 	std::string uri = luaL_checkstring(L, -2);
 	const int type = lua_type(L, -1);
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop)
-		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
+	if (!prop) {
+        LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
+        return 0;
+    }
 
-	if (type != prop->typeLua())
-		return luaL_error(L, "Property '%s' does not accept input of type '%s'. \
-							  Requested type: '%s'", uri.c_str(),
-							  luaTypeToString(type).c_str(),
-							  luaTypeToString(prop->typeLua()).c_str());
+
+	if (type != prop->typeLua()) {
+        LERROR(errorLocation(L) << "Property '" << uri <<
+            "' does not accept input of type '" << luaTypeToString(type) <<
+            "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
+        return 0;
+    }
 	else
 		prop->setLua(L);
 
@@ -100,15 +106,19 @@ int property_setValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int property_getValue(lua_State* L) {
+    static const std::string _loggerCat = "property_getValue";
+    using ghoul::lua::errorLocation;
+
 	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
 
 	std::string uri = luaL_checkstring(L, -1);
 
 	openspace::properties::Property* prop = property(uri);
-	if (!prop)
-		return luaL_error(L, "Property with URL '%s' could not be found", uri.c_str());
+	if (!prop) {
+        LERROR(errorLocation(L) << "Property with URL '" << uri << "' was not found");
+        return 0;
+    }
 	else
 		prop->getLua(L);
 	return 1;
@@ -121,9 +131,10 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
+    static const std::string _loggerCat = "loadScene";
+
 	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
 
 	std::string sceneFile = luaL_checkstring(L, -1);
 
@@ -173,7 +184,6 @@ bool SceneGraph::initialize()
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
-
 	// projection program
 	tmpProgram = ProgramObject::Build("projectiveProgram", 
 		"${SHADERS}/projectiveTexture_vs.glsl",
