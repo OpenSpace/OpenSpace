@@ -95,7 +95,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
-	ImageSequencer::initialize();
 	Time::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
@@ -196,6 +195,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 				LERROR("Directory '" << p << "' could not be created");
 		}
 	}
+
+    ImageSequencer::initialize();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
