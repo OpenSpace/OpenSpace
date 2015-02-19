@@ -435,7 +435,7 @@ namespace openspace {
 
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
-#define PrintText(i, format, size, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
+#define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
 #define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
 
 					int i = 0;
