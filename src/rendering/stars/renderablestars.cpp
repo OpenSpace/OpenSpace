@@ -179,7 +179,7 @@ void RenderableStars::render(const RenderData& data) {
 	// is done twice? ---abock
 	glm::vec2 scaling = glm::vec2(1, -19);  
 
-	glm::mat4 modelMatrix      = data.camera.modelMatrix();
+	glm::mat4 modelMatrix = glm::mat4(1.0);
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 

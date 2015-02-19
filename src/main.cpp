@@ -162,8 +162,8 @@ void mainPostSyncPreDrawFunc()
 
 void mainRenderFunc()
 {
-	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), -_sgctEngine->getUserPtr()->getPos());
-	glm::mat4 viewMatrix = _sgctEngine->getActiveModelViewMatrix() * userMatrix;
+	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getUserPtr()->getPos());
+	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
 	glm::mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
     OsEng.render(projectionMatrix, viewMatrix);
 }
