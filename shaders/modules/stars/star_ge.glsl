@@ -32,7 +32,7 @@ const vec2 corners[4] = vec2[4](
 );
 
 #include "PowerScaling/powerScalingMath.hglsl"
-
+#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
@@ -48,6 +48,7 @@ layout(location = 1) out vec3 ge_brightness;
 layout(location = 2) out vec3 ge_velocity;
 layout(location = 3) out float ge_speed;
 layout(location = 4) out vec2 texCoord;
+layout(location = 5) out float size;
 
 uniform mat4 projection;
 
@@ -55,44 +56,6 @@ uniform vec2 magnitudeClamp;
 uniform float exponentialOffset;
 uniform float exponentialDampening;
 uniform float scaleFactor;
-
-#if 0
-void main() {
-    // Skip the Sun
-    if (psc_position[0].x == 0.0 && psc_position[0].y == 0.0 && psc_position[0].z == 0.0) {
-        return;
-    }
-    ge_brightness = vs_brightness[0];
-    ge_velocity = vs_velocity[0];
-    ge_speed = vs_speed[0];
-
-    const float magnitudeMin = -magnitudeClamp[0];
-    const float magnitudeMax = -magnitudeClamp[1];
-
-    float M = clamp(vs_brightness[0].z, magnitudeMin, magnitudeMax);
-
-    // float expM = exp(-M);
-
-    // float norm = (expM - exp(magnitudeMin)) / (exp(magnitudeMax) - exp(magnitudeMin));
-    float norm = (-M - magnitudeMin) / (magnitudeMax - magnitudeMin);
-    float modifiedSpriteSize = norm * scaleFactor * 0.01;
-
-
-
-    // float modifiedSpriteSize = exp((-exponentialOffset - M) * exponentialDampening) * scaleFactor;
-
-    for(int i = 0; i < 4; i++){
-        vec4 p1     = gl_in[0].gl_Position;
-        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
-        vs_position = p1;
-        gl_Position = projection * p1;
-        // gl_Position = z_normalization(projection * p1);
-        texCoord    = corners[i];
-      EmitVertex();
-    }
-    EndPrimitive();
-}
-#endif
 
 // As soon as the scalegraph is in place, replace this by a dynamic calculation
 // of apparent magnitude in relation to the camera position ---abock
@@ -117,12 +80,52 @@ void main() {
         vec4 p1     = gl_in[0].gl_Position;
         p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
         projPos[i] = projection * p1;
-        // projPos[i].xyz /= projPos[i].w;
     }
 
-    float f = 0.015;
-    if (length((projPos[1].xy / projPos[1].w) - (projPos[2].xy / projPos[2].w)) < f)
+    vec2 screenSize =vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1) / 2) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1) / 2) * screenSize;
+    vec2 d = abs(ll - ur);
+
+
+    // d *= screenSize;
+
+    // ll *= screenSize;
+    // if (ll.y > 600)
+        // return;
+    if (length(d) < 7.5)
         return;
+    // float size = max(SCREEN_HEIGHT, SCREEN_WIDTH);
+
+    // vec2 screenSize = vec2(SCREEN_HEIGHT, SCREEN_WIDTH);
+    // d.x *= SCREEN_WIDTH;
+    // d.y *= SCREEN_HEIGHT;
+    // d *= screenSize;
+
+    // if (length(d * size) < 1)
+        // return;
+    
+
+    // float distance = length(ll - ur);
+
+    // vec2 llNDC = ((projPos[1].xy / projPos[1].w) + 1) / 2;
+    // vec2 urNDC = ((projPos[2].xy / projPos[2].w) + 1) / 2;
+    // float distanceNDC = length(llNDC - urNDC);
+
+    // if (distance < 0.02)
+        // return;
+
+    // vec2 llPixel = llNDC * screenSize;
+    // vec2 urPixel = urNDC * screenSize;
+    // float distancePixel = length(llPixel - urPixel);
+
+    // if (distancePixel < 5)
+        // return;
+
+
+    // float f = 0.015;
+    // if (length((projPos[1].xy / projPos[1].w) - (projPos[2].xy / projPos[2].w)) < f)
+    //     return;
 
 
     for(int i = 0; i < 4; i++){
@@ -131,8 +134,9 @@ void main() {
         vs_position = p1;
         gl_Position = projPos[i];
         // gl_Position = projection * p1;
-        // gl_Position = z_normalization(projection * p1);
+        // gl_Position = z_normalization(projPos[i]);
         texCoord    = corners[i];
+        size = length(d);
       EmitVertex();
     }
     EndPrimitive();
