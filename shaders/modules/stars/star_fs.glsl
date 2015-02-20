@@ -76,9 +76,12 @@ void main() {
     vec4 textureColor = texture(psfTexture, texCoord);
     // textureColor.a = sqrt(textureColor.a);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    if (billboardSize < 7.5) {
-        discard;
-    }
+
+    const float minPixelSize = 15;
+
+    float normSize = (billboardSize - 1.0) / (minPixelSize - 1.0);
+    normSize = pow(normSize, 3);
+    fullColor *= clamp(normSize, 0.0, 1.0);
 
     vec4 position = vs_position;
     // This has to be fixed when the scale graph is in place ---abock
