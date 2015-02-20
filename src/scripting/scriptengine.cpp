@@ -627,7 +627,7 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 
 void ScriptEngine::postSynchronizationPreDraw(){
 	_mutex.lock();
-	if (!_receivedScripts.empty()){
+	while(!_receivedScripts.empty()){
 		runScript(_receivedScripts.back());
 		_receivedScripts.pop_back();
 	}
