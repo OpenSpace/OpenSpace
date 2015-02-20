@@ -219,7 +219,7 @@ namespace openspace {
 
 		// set the close clip plane and the far clip plane to extreme values while in
 		// development
-		sgct::Engine::instance()->setNearAndFarClippingPlanes(0.01f, 10000.0f);
+		sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
 		// sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
 		// calculating the maximum field of view for the camera, used to
