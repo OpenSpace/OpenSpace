@@ -40,10 +40,13 @@ layout(location = 1) in vec3 ge_brightness;
 layout(location = 2) in vec3 ge_velocity;
 layout(location = 3) in float ge_speed;
 layout(location = 4) in vec2 texCoord;
+layout(location = 5) in float size;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+
+uniform vec2 magnitudeClamp;
 
 //---------------------------------------------------------------------------
 
@@ -76,30 +79,41 @@ void main() {
 	// textureColor.a = (textureColor.a - 0.25) / (0.85);
 
 	vec4 fullColor = vec4(color.rgb, textureColor.a);
+
+	// if (size < 7.5) {
+		// fullColor.a *= ((size - 2) / 6.5);
+		// discard;
+	// }
+
+
+	// if (size < 5)
+		// discard;
+	// fullColor.a *= min(size, 1.0);
 	// vec4 fullColor =  textureColor * color;
 	// if (fullColor.a <= 0.125)
 	// 	discard;
 
-	float M = ge_brightness.z;
-	// if (M > 10)
-	// 	discard;
-	float targetM = 6;
-	float maxM = 14.0;
-	if (M > targetM) {
-		float alpha = (M - targetM) / (maxM - targetM);
-		fullColor.a *= alpha;
+	// float M = ge_brightness.z;
+	// // if (M > 10)
+	// // 	discard;
+	// float targetM = 7;
+	// float maxM = magnitudeClamp.x;
+	// if (M > targetM) {
+	// 	float alpha = (M - targetM) / (maxM - targetM);
+	// 	fullColor.a *= alpha;
 
-	}
+	// }
 
 	// if (ge_brightness.z > 7.0)
 		// discard;
 
    	vec4 position = vs_position;
    	// This has to be fixed when the scale graph is in place ---abock
-	float depth = pscDepth(position) + 1000;
+	float depth = pscDepth(position) + 1;
 	// float depth = 10000.0;
 	// gl_FragDepth = depth;
 
+// fullColor = vec4(1.0);
 	ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
 	addToBuffer(frag);
 	// discard;
