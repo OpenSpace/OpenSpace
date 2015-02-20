@@ -86,9 +86,9 @@ protected:
     std::set<properties::Property*> _vec3Properties;
     std::set<properties::Property*> _vec4Properties;
     std::set<properties::Property*> _stringProperties;
-    std::set<properties::Property*> _optionProperty;
-    std::set<properties::Property*> _selectionProperty;
-    std::set<properties::Property*> _triggerProperty;
+    std::set<properties::Property*> _optionProperties;
+    std::set<properties::Property*> _selectionProperties;
+    std::set<properties::Property*> _triggerProperties;
     std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 
 	//std::vector<Property> _properties;
