@@ -45,6 +45,8 @@ layout(location = 4) in vec2 texCoord;
 #include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
+uniform vec2 magnitudeClamp;
+
 //---------------------------------------------------------------------------
 
 vec4 bv2rgb(float bv) {
@@ -80,23 +82,23 @@ void main() {
 	// if (fullColor.a <= 0.125)
 	// 	discard;
 
-	float M = ge_brightness.z;
-	// if (M > 10)
-	// 	discard;
-	float targetM = 6;
-	float maxM = 14.0;
-	if (M > targetM) {
-		float alpha = (M - targetM) / (maxM - targetM);
-		fullColor.a *= alpha;
+	// float M = ge_brightness.z;
+	// // if (M > 10)
+	// // 	discard;
+	// float targetM = 7;
+	// float maxM = magnitudeClamp.x;
+	// if (M > targetM) {
+	// 	float alpha = (M - targetM) / (maxM - targetM);
+	// 	fullColor.a *= alpha;
 
-	}
+	// }
 
 	// if (ge_brightness.z > 7.0)
 		// discard;
 
    	vec4 position = vs_position;
    	// This has to be fixed when the scale graph is in place ---abock
-	float depth = pscDepth(position) + 1000;
+	float depth = pscDepth(position) + 1;
 	// float depth = 10000.0;
 	// gl_FragDepth = depth;
 

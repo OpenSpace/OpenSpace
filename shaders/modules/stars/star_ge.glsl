@@ -56,6 +56,43 @@ uniform float exponentialOffset;
 uniform float exponentialDampening;
 uniform float scaleFactor;
 
+#if 0
+void main() {
+    // Skip the Sun
+    if (psc_position[0].x == 0.0 && psc_position[0].y == 0.0 && psc_position[0].z == 0.0) {
+        return;
+    }
+    ge_brightness = vs_brightness[0];
+    ge_velocity = vs_velocity[0];
+    ge_speed = vs_speed[0];
+
+    const float magnitudeMin = -magnitudeClamp[0];
+    const float magnitudeMax = -magnitudeClamp[1];
+
+    float M = clamp(vs_brightness[0].z, magnitudeMin, magnitudeMax);
+
+    // float expM = exp(-M);
+
+    // float norm = (expM - exp(magnitudeMin)) / (exp(magnitudeMax) - exp(magnitudeMin));
+    float norm = (-M - magnitudeMin) / (magnitudeMax - magnitudeMin);
+    float modifiedSpriteSize = norm * scaleFactor * 0.01;
+
+
+
+    // float modifiedSpriteSize = exp((-exponentialOffset - M) * exponentialDampening) * scaleFactor;
+
+    for(int i = 0; i < 4; i++){
+        vec4 p1     = gl_in[0].gl_Position;
+        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vs_position = p1;
+        gl_Position = projection * p1;
+        // gl_Position = z_normalization(projection * p1);
+        texCoord    = corners[i];
+      EmitVertex();
+    }
+    EndPrimitive();
+}
+#endif
 
 // As soon as the scalegraph is in place, replace this by a dynamic calculation
 // of apparent magnitude in relation to the camera position ---abock
@@ -71,15 +108,29 @@ void main() {
     float M  = vs_brightness[0].z;
 
     // M = clamp(M, 1.0, 4.0);
-    M = clamp(M, magnitudeClamp[0], magnitudeClamp[1]);
+    // M = clamp(M, magnitudeClamp[0], magnitudeClamp[1]);
     // float modifiedSpriteSize = exp((-5 - M) * 0.871);
     float modifiedSpriteSize = exp((-exponentialOffset - M) * exponentialDampening) * scaleFactor;
 
-    for(int i = 0; i < 4; i++){
+    vec4 projPos[4];
+    for (int i = 0; i < 4; ++i) {
         vec4 p1     = gl_in[0].gl_Position;
         p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        projPos[i] = projection * p1;
+        // projPos[i].xyz /= projPos[i].w;
+    }
+
+    float f = 0.015;
+    if (length((projPos[1].xy / projPos[1].w) - (projPos[2].xy / projPos[2].w)) < f)
+        return;
+
+
+    for(int i = 0; i < 4; i++){
+        vec4 p1     = gl_in[0].gl_Position;
+        // p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
         vs_position = p1;
-        gl_Position = projection * p1;
+        gl_Position = projPos[i];
+        // gl_Position = projection * p1;
         // gl_Position = z_normalization(projection * p1);
         texCoord    = corners[i];
       EmitVertex();
