@@ -76,7 +76,7 @@ void main() {
     vec4 textureColor = texture(psfTexture, texCoord);
     // textureColor.a = sqrt(textureColor.a);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    if (billboardSize < 7.5) {
+    if (billboardSize < 3.25) {
         discard;
     }
 

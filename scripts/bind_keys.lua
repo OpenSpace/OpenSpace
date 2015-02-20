@@ -11,7 +11,8 @@ openspace.bindKey("f5", "loadKeyBindings()")
 
 openspace.bindKey("f9", "openspace.changeViewPointToPluto(); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
 openspace.bindKey("f10", "openspace.changeViewPointToSun(); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
-
+openspace.bindKey("f11", "openspace.fadeOut(2);")
+openspace.bindKey("f12", "openspace.fadeIn(2);")
 
 openspace.bindKey("T", "openspace.distance(-interaction_speed * openspace.dt(), 6.0)")
 openspace.bindKey("G", "openspace.distance(interaction_speed * openspace.dt(), 6.0)")
