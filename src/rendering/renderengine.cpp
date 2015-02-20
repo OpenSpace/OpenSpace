@@ -416,7 +416,7 @@ namespace openspace {
 #if 1
 
 			// Print some useful information on the master viewport
-			if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering()) {
+			if (OsEng.ref().isMaster() && !w->isUsingFisheyeRendering()) {
 
 				// TODO: Adjust font_size properly when using retina screen
 				const int font_size_mono = 10;

@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -109,6 +110,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+	//is this node the master?	(must be set after call to _sgctEngine->init())
+	OsEng.ref().setMaster(_sgctEngine->isMaster());
+
     // Main loop
 	LDEBUG("Starting rendering loop");
     _sgctEngine->render();
@@ -155,9 +159,9 @@ void mainRenderFunc()
 	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
 	glm::mat4 sceneMatrix = _sgctEngine->getModelMatrix();
 	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
-
+	
 	//dont shift nav-direction on master, makes it very tricky to navigate @JK
-	if (!_sgctEngine->isMaster()){
+	if (!OsEng.ref().isMaster()){
 		viewMatrix = viewMatrix * sceneMatrix;
 	}
 
@@ -172,39 +176,39 @@ void mainPostDrawFunc()
 
 void mainExternalControlCallback(const char* receivedChars, int size)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
 		OsEng.externalControlCallback(receivedChars, size, 0);
 }
 
 void mainKeyboardCallback(int key, int action)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.keyboardCallback(key, action);
 }
 
 void mainMouseButtonCallback(int key, int action)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mouseButtonCallback(key, action);
 }
 
 void mainMousePosCallback(double x, double y)
 {
     // TODO use float instead
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
 }
 
 void mainMouseScrollCallback(double posX, double posY)
 {
     // TODO use float instead
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
 }
 
 void mainCharCallback(unsigned int codepoint) {
 
-	if (_sgctEngine->isMaster())
+	if (OsEng.ref().isMaster())
 		OsEng.charCallback(codepoint);
 }
 
