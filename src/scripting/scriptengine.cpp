@@ -271,8 +271,8 @@ bool ScriptEngine::runScript(const std::string& script) {
         return false;
     }
     
-    LDEBUG("Executing script");
-	LINFO(script);
+    //LDEBUG("Executing script");
+	//LINFO(script);
     if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
         LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
