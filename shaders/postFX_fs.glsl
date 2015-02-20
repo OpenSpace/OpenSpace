@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,33 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/staticephemeris.h>
+#version 430
 
-#include <openspace/util/constants.h>
+in vec2 UV;
+out vec4 Color;
 
-namespace openspace {
+uniform sampler2D Tex;
+uniform float Opacity;
 
-using namespace constants::staticephemeris;
-    
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.f, 0.f, 0.f, 0.f)
+void main()
 {
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
-    if (hasPosition) {
-        glm::vec4 tmp;
-        dictionary.getValue(keyPosition, tmp);
-        _position = tmp;
-    }
+	Color = texture(Tex, UV) * Opacity;
 }
-
-StaticEphemeris::~StaticEphemeris() {}
-
-const psc& StaticEphemeris::position() const {
-    return _position;
-}
-
-void StaticEphemeris::update(const UpdateData&) {
-
-}
-
-} // namespace openspace

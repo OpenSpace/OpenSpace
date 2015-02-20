@@ -184,7 +184,7 @@ void RenderableFov::sendToGPU(){
 }
 // various helper methods
 
-void RenderableFov::insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c){
+void RenderableFov::insertPoint(std::vector<float>& arr, psc p, glm::vec4 c){
 	for (int i = 0; i < 4; i++){
 		arr.push_back(p[i]);
 	}
@@ -197,10 +197,10 @@ void RenderableFov::insertPoint(std::vector<float>& arr, psc& p, glm::vec4& c){
 psc RenderableFov::pscInterpolate(psc p0, psc p1, float t){
 	assert(t >= 0 && t <= 1);
 	float t2 = (1.f - t);
-	return PowerScaledCoordinate::PowerScaledCoordinate(t2*p0[0] + t*p1[0],
-														t2*p0[1] + t*p1[1],	
-														t2*p0[2] + t*p1[2], 
-														t2*p0[3] + t*p1[3]);
+	return PowerScaledCoordinate(t2*p0[0] + t*p1[0],
+								 t2*p0[1] + t*p1[1],	
+								 t2*p0[2] + t*p1[2], 
+								 t2*p0[3] + t*p1[3]);
 }
 glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 	assert(t >= 0 && t <= 1);
@@ -278,13 +278,14 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 	glm::dvec3 interpolated;
 	glm::dvec3 current;
 	glm::dvec3 next;
+	glm::vec4 tmp(1);
 	
 	for (int i = 0; i < 4; i++){
 		int k = (i + 1 > 3) ? 0 : i + 1;
 		current = bounds[i];
 		next    = bounds[k];
 		if (H[i] == false){ // If point is non-interceptive, project it. 
-			insertPoint(_varray2, orthogonalProjection(current), glm::vec4(1));
+			insertPoint(_varray2, orthogonalProjection(current), tmp);
 		}
 		if (H[i] == true && H[i + 1] == false){ // current point is interceptive, next is not
 			// find outer most point for interpolation

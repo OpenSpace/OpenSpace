@@ -57,6 +57,10 @@
 #include <fstream>
 #include <sgct.h>
 
+// These are temporary ---abock
+#include <openspace/scenegraph/spiceephemeris.h>
+#include <openspace/scenegraph/staticephemeris.h>
+
 // ABuffer defines
 #define ABUFFER_FRAMEBUFFER 0
 #define ABUFFER_SINGLE_LINKED 1
@@ -79,6 +83,22 @@ namespace openspace {
 		"OpenSpacePerformanceMeasurementSharedData";
 
 	namespace luascriptfunctions {
+
+        int changeToPlutoViewPoint(lua_State* L) {
+            int nArguments = lua_gettop(L);
+            if (nArguments != 0)
+                return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+            OsEng.renderEngine()->changeViewPoint("Pluto");
+            return 0;
+        }
+
+        int changeToSunViewPoint(lua_State* L) {
+            int nArguments = lua_gettop(L);
+            if (nArguments != 0)
+                return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+            OsEng.renderEngine()->changeViewPoint("Sun");
+            return 0;
+        }
 
 		/**
 		 * \ingroup LuaScripts
@@ -140,6 +160,37 @@ namespace openspace {
 			return 0;
 		}
 
+		/**
+		* \ingroup LuaScripts
+		* fadeIn(float):
+		* start a global fadein over (float) seconds
+		*/
+		int fadeIn(lua_State* L) {
+			int nArguments = lua_gettop(L);
+			if (nArguments != 1)
+				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+			double t = luaL_checknumber(L, -1);
+			
+			OsEng.renderEngine()->startFading(1, t);
+			return 0;
+		}
+		/**
+		* \ingroup LuaScripts
+		* fadeIn(float):
+		* start a global fadeout over (float) seconds
+		*/
+		int fadeOut(lua_State* L) {
+			int nArguments = lua_gettop(L);
+			if (nArguments != 1)
+				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+			double t = luaL_checknumber(L, -1);
+
+			OsEng.renderEngine()->startFading(-1, t);
+			return 0;
+		}
+
 	} // namespace luascriptfunctions
 
 
@@ -155,6 +206,11 @@ namespace openspace {
 		, _performanceMemory(nullptr)
 		, _visualizeABuffer(false)
 		, _visualizer(nullptr)
+		, _globalOpactity(1.f)
+		, _fadeDuration(2.f)
+		, _currentFadeTime(0.f)
+		, _fadeDirection(0)
+
 	{
 	}
 
@@ -307,6 +363,24 @@ namespace openspace {
 
 	void RenderEngine::postSynchronizationPreDraw()
 	{
+		//temporary fade funtionality
+		if (_fadeDirection != 0){
+			if (_currentFadeTime > _fadeDuration){
+				_fadeDirection = 0;
+				_globalOpactity = fminf(1.f, fmaxf(0.f, _globalOpactity));
+			} 
+			else{
+
+				if (_fadeDirection < 0){
+					_globalOpactity = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
+				}
+				else{
+					_globalOpactity = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
+				}
+				_currentFadeTime += static_cast<float>(sgct::Engine::instance()->getAvgDt());
+			}
+		}
+
 		if (_mainCamera){
 			_mainCamera->postSynchronizationPreDraw();
 		}
@@ -396,7 +470,7 @@ namespace openspace {
 #if 1
 
 			// Print some useful information on the master viewport
-			if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering()) {
+			if (OsEng.ref().isMaster() && !w->isUsingFisheyeRendering()) {
 
 				// TODO: Adjust font_size properly when using retina screen
 				const int font_size_mono = 10;
@@ -587,6 +661,20 @@ namespace openspace {
 			return _abuffer;
 		}
 
+		float RenderEngine::globalOpacity(){
+			return _globalOpactity;
+		}
+
+		void RenderEngine::setGlobalOpacity(float opacity){
+			_globalOpactity = opacity;
+		}
+
+		void RenderEngine::startFading(int direction, float fadeDuration){
+			_fadeDirection = direction;
+			_fadeDuration = fadeDuration;
+			_currentFadeTime = 0.f;
+		}
+
 		void RenderEngine::generateGlslConfig() {
 			LDEBUG("Generating GLSLS config, expect shader recompilation");
 			int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
@@ -648,7 +736,34 @@ namespace openspace {
 						&luascriptfunctions::setPerformanceMeasurement,
 						"bool",
 						"Sets the performance measurements"
-					}
+					},
+                    // These are temporary ---abock
+                    {
+                        "changeViewPointToPluto",
+                        &luascriptfunctions::changeToPlutoViewPoint,
+                        "",
+                        ""
+                    },
+                    {
+                        "changeViewPointToSun",
+                        &luascriptfunctions::changeToSunViewPoint,
+                        "",
+                        ""
+                    },
+					//also temporary @JK
+				{
+					"fadeIn",
+					&luascriptfunctions::fadeIn,
+					"number",
+					""
+				},
+				//also temporary @JK
+				{
+					"fadeOut",
+					&luascriptfunctions::fadeOut,
+					"number",
+					""
+				},
 				},
 			};
 		}
@@ -737,5 +852,44 @@ namespace openspace {
 			}
 			_performanceMemory->releaseLock();
 		}
+
+// This method is temporary and will be removed once the scalegraph is in effect ---abock
+void RenderEngine::changeViewPoint(std::string origin) {
+    SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
+    SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
+
+    if (origin == "Pluto") {
+        ghoul::Dictionary solarDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body") , std::string("PLUTO BARYCENTER") },
+            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Observer") , std::string("SUN") },
+            { std::string("Kernels") , ghoul::Dictionary() }
+        };
+        ghoul::Dictionary t;
+        t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
+        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+        return;
+    }
+    if (origin == "Sun") {
+        ghoul::Dictionary plutoDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("PLUTO BARYCENTER") },
+            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Observer"), std::string("SUN") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        
+        solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
+        plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+
+        return;
+    }
+    ghoul_assert(false, "??");
+
+}
 
 }// namespace openspace

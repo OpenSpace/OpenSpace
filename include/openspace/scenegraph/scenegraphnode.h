@@ -85,6 +85,12 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
+    // @TODO Remove once the scalegraph is in effect ---abock
+    void setEphemeris(Ephemeris* eph) {
+        delete _ephemeris;
+        _ephemeris = eph;
+    }
+
 private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
