@@ -175,6 +175,7 @@ namespace openspace {
 		, _performanceMemory(nullptr)
 		, _visualizeABuffer(false)
 		, _visualizer(nullptr)
+		, _globalOpactity(1.f)
 	{
 	}
 
@@ -605,6 +606,14 @@ namespace openspace {
 
 		ABuffer* RenderEngine::abuffer() const {
 			return _abuffer;
+		}
+
+		float RenderEngine::globalOpacity(){
+			return _globalOpactity;
+		}
+
+		void RenderEngine::setGlobalOpacity(float opacity){
+			_globalOpactity = opacity;
 		}
 
 		void RenderEngine::generateGlslConfig() {

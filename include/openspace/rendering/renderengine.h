@@ -73,6 +73,9 @@ public:
 
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);
+
+	float globalOpacity();
+	void setGlobalOpacity(float opacity);
 	
 	/**
 	 * Returns the Lua library that contains all Lua functions available to affect the
@@ -103,6 +106,8 @@ private:
 	ghoul::SharedMemory* _performanceMemory;
 
 	void generateGlslConfig();
+
+	float _globalOpactity;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;
