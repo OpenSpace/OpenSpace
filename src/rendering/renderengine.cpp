@@ -160,6 +160,37 @@ namespace openspace {
 			return 0;
 		}
 
+		/**
+		* \ingroup LuaScripts
+		* fadeIn(float):
+		* start a global fadein over (float) seconds
+		*/
+		int fadeIn(lua_State* L) {
+			int nArguments = lua_gettop(L);
+			if (nArguments != 1)
+				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+			double t = luaL_checknumber(L, -1);
+			
+			OsEng.renderEngine()->startFading(1, t);
+			return 0;
+		}
+		/**
+		* \ingroup LuaScripts
+		* fadeIn(float):
+		* start a global fadeout over (float) seconds
+		*/
+		int fadeOut(lua_State* L) {
+			int nArguments = lua_gettop(L);
+			if (nArguments != 1)
+				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+			double t = luaL_checknumber(L, -1);
+
+			OsEng.renderEngine()->startFading(-1, t);
+			return 0;
+		}
+
 	} // namespace luascriptfunctions
 
 
@@ -176,6 +207,10 @@ namespace openspace {
 		, _visualizeABuffer(false)
 		, _visualizer(nullptr)
 		, _globalOpactity(1.f)
+		, _fadeDuration(2.f)
+		, _currentFadeTime(0.f)
+		, _fadeDirection(0)
+
 	{
 	}
 
@@ -328,6 +363,24 @@ namespace openspace {
 
 	void RenderEngine::postSynchronizationPreDraw()
 	{
+		//temporary fade funtionality
+		if (_fadeDirection != 0){
+			if (_currentFadeTime > _fadeDuration){
+				_fadeDirection = 0;
+				_globalOpactity = fminf(1.f, fmaxf(0.f, _globalOpactity));
+			} 
+			else{
+
+				if (_fadeDirection < 0){
+					_globalOpactity = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
+				}
+				else{
+					_globalOpactity = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
+				}
+				_currentFadeTime += static_cast<float>(sgct::Engine::instance()->getAvgDt());
+			}
+		}
+
 		if (_mainCamera){
 			_mainCamera->postSynchronizationPreDraw();
 		}
@@ -616,6 +669,12 @@ namespace openspace {
 			_globalOpactity = opacity;
 		}
 
+		void RenderEngine::startFading(int direction, float fadeDuration){
+			_fadeDirection = direction;
+			_fadeDuration = fadeDuration;
+			_currentFadeTime = 0.f;
+		}
+
 		void RenderEngine::generateGlslConfig() {
 			LDEBUG("Generating GLSLS config, expect shader recompilation");
 			int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
@@ -690,7 +749,21 @@ namespace openspace {
                         &luascriptfunctions::changeToSunViewPoint,
                         "",
                         ""
-                    }
+                    },
+					//also temporary @JK
+				{
+					"fadeIn",
+					&luascriptfunctions::fadeIn,
+					"number",
+					""
+				},
+				//also temporary @JK
+				{
+					"fadeOut",
+					&luascriptfunctions::fadeOut,
+					"number",
+					""
+				},
 				},
 			};
 		}

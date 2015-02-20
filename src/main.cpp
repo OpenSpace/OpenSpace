@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -240,7 +239,12 @@ void mainLogCallback(const char* msg){
 
 void postFXPass(){
 	glUniform1i(_postFXTexLoc, 0);
-	glUniform1f(_postFXOpacityLoc, OsEng.ref().renderEngine()->globalOpacity());
+	if (OsEng.isMaster()){
+		glUniform1f(_postFXOpacityLoc, 1.f);
+	}
+	else{
+		glUniform1f(_postFXOpacityLoc, OsEng.ref().renderEngine()->globalOpacity());
+	}
 }
 
 void setupPostFX(){
