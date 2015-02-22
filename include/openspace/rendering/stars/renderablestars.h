@@ -73,9 +73,6 @@ private:
 	properties::OptionProperty _colorOption;
 	bool _dataIsDirty;
 
-    properties::Vec2Property _magnitudeClamp;
-    properties::FloatProperty _exponentialOffset;
-    properties::FloatProperty _exponentialDampening;
     properties::FloatProperty _scaleFactor;
 
 	ghoul::opengl::ProgramObject* _program;
