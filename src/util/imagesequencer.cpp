@@ -178,7 +178,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 	if (size_t position = fileName.find_last_of(".") + 1){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(fileName).fileExtension();
-
+			/*
 			if (extension == "csv"){ // comma separated playbook
 				std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
 
@@ -240,7 +240,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 
                 }
 			} 
-
+			*/
 				
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
 				std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;

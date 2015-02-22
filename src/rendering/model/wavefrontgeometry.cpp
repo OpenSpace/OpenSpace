@@ -29,6 +29,7 @@
 
 #include <fstream>
 
+
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
 }
@@ -42,6 +43,7 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	, _vsize(0)
 	, _varray(nullptr)
 	, _iarray(nullptr)
+	, _tarray(nullptr)
 {
 	using constants::scenegraphnode::keyName;
 
@@ -70,161 +72,102 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 
 void WavefrontGeometry::loadObj(const char *filename){
 	// temporary 
-	int vertexSize = 0;
-	int vertexNormalSize = 0;
-	int vertexTextureSize = 0;
-	int indicesSize = 0;
+	const char *mtl_basepat = filename;
 
-	float f1, f2, f3;
-	int i1, i2, i3, i4, i5, i6, i7, i8, i9;
-	char line[150];
-	//float maxtex = 0.0;
+	std::string err = tinyobj::LoadObj(shapes, materials, filename, mtl_basepat);
+	
+	_isize = shapes[0].mesh.indices.size();
+	_vsize = shapes[0].mesh.indices.size(); // shapes[0].mesh.positions.size() + shapes[0].mesh.positions.size() / 3;
+	_tsize = shapes[0].mesh.texcoords.size();
 
-	FILE *fi;
-	// START LINE COUNT
-	fi = fopen(filename, "r");
-	if (fi == NULL) {
-		LERROR("Null Object\n");
-
-	}
-	while (fgets(line, 150, fi) != NULL)
-	{
-		if (sscanf(line, "v %f%f%f", &f1, &f2, &f3)) {
-			vertexSize += 4;
-		}
-		if (sscanf(line, "vn %f%f%f", &f1, &f2, &f3)) {
-			vertexNormalSize += 3;
-		}
-		if (sscanf(line, "vt %f%f%f", &f1, &f2, &f3)) {
-			vertexTextureSize += 3;
-		}
-		if (vertexTextureSize > 0) {
-			if (sscanf(line, "f %i/%i/%i %i/%i/%i %i/%i/%i", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9)) {
-				indicesSize += 3;
-			}
-		}
-		else {
-			if (sscanf(line, "f %i//%i %i//%i %i//%i", &i1, &i2, &i3, &i4, &i5, &i6)) {
-				indicesSize += 3;
-			}
-		}
-	}
-	// allocate memory for all arrays
-	_isize = indicesSize;
-	_vsize = indicesSize;
-
-	// float arrays
-	float* tempVertexArray = new float[vertexSize];
-	float* tempVertexNormalArray = new float[vertexNormalSize];
-	float* tempVertexTextureArray = new float[vertexTextureSize];
 	_varray = new Vertex[_vsize];
-
-	// int arrays
 	_iarray = new int[_isize];
-	int *tempNormalIndicesArray = new int[_isize];
-	int *tempTextureIndicesArray = new int[_isize];
 
-	// keeping track of the array indexes
-	unsigned int i = 0;
-	unsigned int n = 0;
-	unsigned int m = 0;
-	unsigned int w = 0;
+	//copy indices
+	for (int f = 0; f < shapes[0].mesh.indices.size(); f++) {
+		_iarray[f] = shapes[0].mesh.indices[f];
+	}
 
-	// Go back to beginning of file
-	fseek(fi, 0, SEEK_SET);
-	while (fgets(line, 150, fi) != NULL){
-		if (sscanf(line, "v %f%f%f", &f1, &f2, &f3)){
-			(tempVertexArray)[i] = f1;
-			i++;
-			(tempVertexArray)[i] = f2;
-			i++;
-			(tempVertexArray)[i] = f3;
-			i++;
-		}
-		if (sscanf(line, "vn %f%f%f", &f1, &f2, &f3)){
-			(tempVertexNormalArray)[n] = f1;
-			n++;
-			(tempVertexNormalArray)[n] = f2;
-			n++;
-			(tempVertexNormalArray)[n] = f3;
-			n++;
-		}
-		if (sscanf(line, "vt %f%f%f", &f1, &f2, &f3)){
-			(tempVertexTextureArray)[w] = f1;
-			w++;
-			(tempVertexTextureArray)[w] = f2;
-			w++;
-			(tempVertexTextureArray)[w] = f3;
-			w++;
-		}
-		if (vertexTextureSize > 0){
-			if (sscanf(line, "f %i/%i/%i %i/%i/%i %i/%i/%i", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9)){
-				(_iarray)[m] = i1 - 1;
-				(tempTextureIndicesArray)[m] = i2 - 1;
-				(tempNormalIndicesArray)[m]  = i3 - 1;
-				m++;
-				(_iarray)[m] = i4 - 1;
-				(tempTextureIndicesArray)[m] = i5 - 1;
-				(tempNormalIndicesArray)[m]  = i6 - 1;
-				m++;
-				(_iarray)[m] = i7 - 1;
-				(tempTextureIndicesArray)[m] = i8 - 1;
-				(tempNormalIndicesArray)[m]  = i9 - 1;
-				m++;
-			}
-		}
-		else{
-			if (sscanf(line, "f %i//%i %i//%i %i//%i", &i1, &i2, &i3, &i4, &i5, &i6)){
-				(_iarray)[m] = i1 - 1;
-				(tempNormalIndicesArray)[m] = i2 - 1;
-				m++;
-				(_iarray)[m] = i3 - 1;
-				(tempNormalIndicesArray)[m] = i4 - 1;
-				m++;
-				(_iarray)[m] = i5 - 1;
-				(tempNormalIndicesArray)[m] = i6 - 1;
-				m++;
+	//shapes[0].mesh.texcoords.resize(2 * _isize);
+	int p = 0;
+	for (auto v : shapes[0].mesh.indices) {
+		_varray[p].location[0] = shapes[0].mesh.positions[3 * v + 0];
+		_varray[p].location[1] = shapes[0].mesh.positions[3 * v + 1];
+		_varray[p].location[2] = shapes[0].mesh.positions[3 * v + 2];
+		_varray[p].location[3] = 5;
+				
+		_varray[p].normal[0]   = shapes[0].mesh.normals[3 * v + 0];
+		_varray[p].normal[1]   = shapes[0].mesh.normals[3 * v + 1];
+		_varray[p].normal[2]   = shapes[0].mesh.normals[3 * v + 2];
+
+		p++;
+	}
+	p = 0;
+
+	//TEXCOORDS NOT MAPPING PROPERLY? WHY?
+	/*
+	if (shapes[0].mesh.texcoords.size() > 0) {
+		for (size_t k = 0; k < shapes[0].mesh.indices.size() / 3; k++) {
+			for (int j = 0; j < 3; j++) {
+				int idx = shapes[0].mesh.indices[3 * k + j];
+
+				_varray[p].tex[0] = shapes[0].mesh.texcoords[2 * idx + 0];
+				_varray[p].tex[1] = shapes[0].mesh.texcoords[2 * idx + 1];
+
+				std::cout << shapes[0].mesh.texcoords[2 * idx + 0] << " "
+					<< shapes[0].mesh.texcoords[2 * idx + 1] << std::endl;
+
+				p++;
 			}
 		}
 	}
-	fclose(fi);
+	*/
 
-	// end of file read
-	// creating the vertex array
-	i = 0; n = 0; m = 0;
-	int normalIndex = 0;
-	int textureIndex = 0;
-	int vertexIndex = 0;
-	while (m < _vsize){
-		normalIndex = tempNormalIndicesArray[m] * 3;
-		textureIndex = tempTextureIndicesArray[m] * 3;
-		vertexIndex = _iarray[m] * 3;
-		_iarray[m] = m;
+	//testing with one triangle - works. 
+	/*
+	_varray[0].location[0] = 0;
+	_varray[0].location[1] = 0;
+	_varray[0].location[2] = 0;
+	_varray[0].location[3] = 5;
 
-		_varray[m].location[3] = 6; // I need to set this proper at some point. 
-		int q = 0;
-		while (q < 3){
-			_varray[m].location[q] = tempVertexArray[vertexIndex + q];
-			_varray[m].normal[q]   = tempVertexNormalArray[normalIndex + q];
-			q++;
-		}
+	_varray[0].normal[0] = 1;
+	_varray[0].normal[1] = 1;
+	_varray[0].normal[2] = 1;
 
-		if (vertexTextureSize > 0){
-			_varray[m].tex[0] = tempVertexTextureArray[textureIndex];
-			_varray[m].tex[1] = tempVertexTextureArray[textureIndex + 1];
-		}
-		else{
-			_varray[m].tex[0] = 1.0;
-			_varray[m].tex[1] = 1.0;
-		}
-		m++;
-	}
-	// free up memory
-	delete[] tempVertexArray;
-	delete[] tempVertexNormalArray;
-	delete[] tempNormalIndicesArray;
-	delete[] tempVertexTextureArray;
-	delete[] tempTextureIndicesArray;
+	_varray[0].tex[0] = 0;
+	_varray[0].tex[1] = 0;
+
+	_varray[1].location[0] = 1;
+	_varray[1].location[1] = 0;
+	_varray[1].location[2] = 0;
+	_varray[1].location[3] = 5;
+
+	_varray[1].normal[0] = 1;
+	_varray[1].normal[1] = 1;
+	_varray[1].normal[2] = 1;
+
+	_varray[1].tex[0] = 1;
+	_varray[1].tex[1] = 0;
+
+	_varray[2].location[0] = 0;
+	_varray[2].location[1] = 1;
+	_varray[2].location[2] = 0;
+	_varray[2].location[3] = 5;
+
+	_varray[2].normal[0] = 1;
+	_varray[2].normal[1] = 1;
+	_varray[2].normal[2] = 1;
+
+	_varray[2].tex[0] = 0;
+	_varray[2].tex[1] = 1;
+
+	_vsize = 3;
+	_isize = 3;
+
+	_iarray[0] = 0;
+	_iarray[1] = 1;
+	_iarray[2] = 2;
+	*/
 }
 
 
@@ -250,7 +193,7 @@ bool WavefrontGeometry::initialize(RenderableModel* parent){
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
+		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))); 
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
 

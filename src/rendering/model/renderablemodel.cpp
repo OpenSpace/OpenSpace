@@ -55,6 +55,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
 	, _geometry(nullptr)
+	, _performShading("performShading", "Perform Shading", true)
 {
 	std::string name;
 	std::string path;
@@ -150,6 +151,9 @@ void RenderableModel::render(const RenderData& data)
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
+	_programObject->setUniform("_performShading", _performShading);
+
+
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();

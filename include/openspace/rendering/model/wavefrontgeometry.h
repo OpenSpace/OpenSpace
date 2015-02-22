@@ -26,6 +26,7 @@
 #define __WAVEFRONTOBJECT_H__
 
 #include <openspace/rendering/model/modelgeometry.h>
+#include <openspace/util/tiny_obj_loader.h>
 
 namespace openspace {
 
@@ -51,15 +52,20 @@ public:
 		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
 	} Vertex;
     
-
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
 protected:
 	void loadObj(const char *filename);
 private:
     void createSphere();
 	
-	GLuint _vaoID = 6;
-	GLuint _vBufferID = 7;
-	GLuint _iBufferID = 8;
+	GLuint _vaoID;
+	GLuint _vBufferID;
+	GLuint _iBufferID;
+
+	GLuint _tBufferID;
+	unsigned int _tsize;
+	float* _tarray;
 
 	unsigned int _isize;
 	unsigned int _vsize;

@@ -69,6 +69,8 @@ private:
 
 	std::string _source;
 	std::string _destination;
+
+	properties::BoolProperty _performShading;
 };
 
 }  // namespace openspace
