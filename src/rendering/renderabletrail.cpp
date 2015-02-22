@@ -170,7 +170,7 @@ void RenderableTrail::update(const UpdateData& data) {
     // Update the floating current time
     // Is 'CN+S' correct? It has to be chosen to be the same as in SpiceEphemeris, but
     // unsure if it is correct ---abock
-    SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", data.time, pscPos, pscVel, lightTime);
+    SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, pscPos, pscVel, lightTime);
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 

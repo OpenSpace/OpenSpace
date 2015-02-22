@@ -59,7 +59,8 @@ public:
 
     static bool isInitialized();
     bool initialize();
-
+	bool isMaster();
+	void setMaster(bool master);
     static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
@@ -110,6 +111,7 @@ private:
 	LuaConsole* _console;
     gui::GUI* _gui;
 	double _dt;
+	bool _isMaster;
 
 	SyncBuffer* _syncBuffer;
 };

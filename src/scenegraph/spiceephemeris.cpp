@@ -52,8 +52,6 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
 
 	ghoul::Dictionary kernels;
 	dictionary.getValue(keyKernels, kernels);
-	if (kernels.size() == 0)
-		_kernelsLoadedSuccessfully = false;
 	for (size_t i = 1; i <= kernels.size(); ++i) {
 		std::string kernel;
 		bool success = kernels.getValue(std::to_string(i), kernel);

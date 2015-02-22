@@ -23,8 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
-
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logging>
+#include <openspace/rendering/renderengine.h>
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;
@@ -42,13 +43,14 @@ void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
 void mainEncodeFun();
 void mainDecodeFun();
-
-#if 0
-// @TODO Remove the ifdef hen the next SGCT version is available ---abock
 void mainExternalControlCallback(const char * receivedChars, int size);
-#else
-void mainExternalControlCallback(const char * receivedChars, int size, int clientId);
-#endif
+void mainLogCallback(const char* msg);
+
+//temporary post-FX functions, TODO make a more permanent solution to this @JK
+void postFXPass();
+void setupPostFX();
+GLint _postFXTexLoc;
+GLint _postFXOpacityLoc;
 
 namespace {
 	const std::string _loggerCat = "main";
@@ -68,18 +70,11 @@ int main(int argc, char** argv)
     for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
 
-#if 0
-// @TODO Remove the ifdef (enabling the functions) when the next SGCT version is available
-// that enables the logging redirect ---abock
 	sgct::MessageHandler::instance()->setLogToConsole(false);
 	sgct::MessageHandler::instance()->setShowTime(false);
 	sgct::MessageHandler::instance()->setLogToCallback(true);
-	sgct::MessageHandler::instance()->setLogCallback([](const char* msg) {
-		std::string message = msg;
-		// Remove the trailing \n that is passed along
-		LINFOC("SGCT", message.substr(0, message.size()-1));
-	});
-#endif
+	sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
+
 
 	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
@@ -121,6 +116,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+	//is this node the master?	(must be set after call to _sgctEngine->init())
+	OsEng.ref().setMaster(_sgctEngine->isMaster());
+
     // Main loop
 	LDEBUG("Starting rendering loop");
     _sgctEngine->render();
@@ -148,6 +146,9 @@ void mainInitFunc()
 		std::cin.ignore(100);
 		exit(EXIT_FAILURE);
 	}
+
+	//temporary post-FX solution, TODO add a more permanent solution @JK
+	setupPostFX();
 }
 
 void mainPreSyncFunc()
@@ -163,12 +164,13 @@ void mainPostSyncPreDrawFunc()
 void mainRenderFunc()
 {
 	//not the most efficient, but for clarity @JK
-	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getUserPtr()->getPos());
+	
+	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
 	glm::mat4 sceneMatrix = _sgctEngine->getModelMatrix();
 	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
-
+	
 	//dont shift nav-direction on master, makes it very tricky to navigate @JK
-	if (!_sgctEngine->isMaster()){
+	if (!OsEng.ref().isMaster()){
 		viewMatrix = viewMatrix * sceneMatrix;
 	}
 
@@ -181,50 +183,41 @@ void mainPostDrawFunc()
     OsEng.postDraw();
 }
 
-#if 0
-// @TODO Remove the ifdef hen the next SGCT version is available ---abock
 void mainExternalControlCallback(const char* receivedChars, int size)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
 		OsEng.externalControlCallback(receivedChars, size, 0);
 }
-#else
-void mainExternalControlCallback(const char* receivedChars, int size, int clientId)
-{
-	if (_sgctEngine->isMaster())
-		OsEng.externalControlCallback(receivedChars, size, clientId);
-}
-#endif
 
 void mainKeyboardCallback(int key, int action)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.keyboardCallback(key, action);
 }
 
 void mainMouseButtonCallback(int key, int action)
 {
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mouseButtonCallback(key, action);
 }
 
 void mainMousePosCallback(double x, double y)
 {
     // TODO use float instead
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
 }
 
 void mainMouseScrollCallback(double posX, double posY)
 {
     // TODO use float instead
-    if (_sgctEngine->isMaster())
+    if (OsEng.ref().isMaster())
         OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
 }
 
 void mainCharCallback(unsigned int codepoint) {
 
-	if (_sgctEngine->isMaster())
+	if (OsEng.ref().isMaster())
 		OsEng.charCallback(codepoint);
 }
 
@@ -236,4 +229,33 @@ void mainEncodeFun()
 void mainDecodeFun()
 {
     OsEng.decode();
+}
+
+void mainLogCallback(const char* msg){
+	std::string message = msg;
+	// Remove the trailing \n that is passed along
+	LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
+}
+
+void postFXPass(){
+	glUniform1i(_postFXTexLoc, 0);
+	if (OsEng.isMaster()){
+		glUniform1f(_postFXOpacityLoc, 1.f);
+	}
+	else{
+		glUniform1f(_postFXOpacityLoc, OsEng.ref().renderEngine()->globalOpacity());
+	}
+}
+
+void setupPostFX(){
+	sgct::PostFX fx[1];
+	sgct::ShaderProgram *shader;
+	fx[0].init("OpacityControl", absPath("${SHADERS}/postFX_vs.glsl"), absPath("${SHADERS}/postFX_fs.glsl"));
+	fx[0].setUpdateUniformsFunction(postFXPass);
+	shader = fx[0].getShaderProgram();
+	shader->bind();
+	_postFXTexLoc = shader->getUniformLocation("Tex");
+	_postFXOpacityLoc = shader->getUniformLocation("Opacity");
+	shader->unbind();
+	_sgctEngine->addPostFX(fx[0]);
 }

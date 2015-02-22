@@ -260,8 +260,11 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
 }
 
 bool ScriptEngine::runScript(const std::string& script) {
-    if (script.empty())
-        return false;
+	if (script.empty()){
+		LWARNING("Script was empty");
+		return false;
+	}
+        
     int status = luaL_loadstring(_state, script.c_str());
     if (status != LUA_OK) {
         LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
@@ -269,6 +272,7 @@ bool ScriptEngine::runScript(const std::string& script) {
     }
     
     //LDEBUG("Executing script");
+	//LINFO(script);
     if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
         LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
@@ -608,6 +612,7 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 
 void ScriptEngine::serialize(SyncBuffer* syncBuffer){
 	syncBuffer->encode(_currentSyncedScript);
+	_currentSyncedScript.clear();
 }
 
 void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
@@ -622,7 +627,7 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 
 void ScriptEngine::postSynchronizationPreDraw(){
 	_mutex.lock();
-	if (!_receivedScripts.empty()){
+	while(!_receivedScripts.empty()){
 		runScript(_receivedScripts.back());
 		_receivedScripts.pop_back();
 	}

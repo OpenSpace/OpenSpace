@@ -39,6 +39,9 @@
 namespace {
 	const std::string _loggerCat = "RenderableStars";
 
+    ghoul::filesystem::File* _psfTextureFile;
+    ghoul::filesystem::File* _colorTextureFile;
+
 	const int8_t CurrentCacheVersion = 1;
 
 	struct ColorVBOLayout {
@@ -91,7 +94,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-15.f),
         glm::vec2(15.f)
       )
-    , _exponentialOffset("exponentialOffset", "Exponential Offset", 5.f, 0.f, 10.f)
+    , _exponentialOffset("exponentialOffset", "Exponential Offset", 5.f, 0.f, 50.f)
     , _exponentialDampening("exponentialDampening", "Exponential Dampening", 0.871f, 0.f, 1.f)
     , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
 	, _program(nullptr)
@@ -101,12 +104,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _vao(0)
 	, _vbo(0)
 {
+    using ghoul::filesystem::File;
+
 	std::string texturePath = "";
 	dictionary.getValue(constants::renderablestars::keyTexture, texturePath);
 	_pointSpreadFunctionTexturePath = absPath(texturePath);
+    _psfTextureFile = new File(_pointSpreadFunctionTexturePath);
 
 	dictionary.getValue(constants::renderablestars::keyColorMap, texturePath);
 	_colorTexturePath = absPath(texturePath);
+    _colorTextureFile = new File(_colorTexturePath);
 
 	bool success = dictionary.getValue(constants::renderablestars::keyFile, _speckFile);
 	if (!success) {
@@ -123,10 +130,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	_colorOption.onChange([&]{ _dataIsDirty = true;});
 
 	addProperty(_pointSpreadFunctionTexturePath);
-	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true;});
-	 
+	_pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true; });
+    _psfTextureFile->setCallback([&](const File&) { _pointSpreadFunctionTextureIsDirty = true; });
+
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
 
     addProperty(_magnitudeClamp);
     addProperty(_exponentialOffset);
@@ -135,6 +144,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 }
 
 RenderableStars::~RenderableStars() {
+    delete _psfTextureFile;
+    delete _colorTextureFile;
 }
 
 bool RenderableStars::isReady() const {
@@ -314,6 +325,10 @@ void RenderableStars::update(const UpdateData& data) {
 				LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
 				_pointSpreadFunctionTexture->uploadTexture();
 			}
+
+            delete _psfTextureFile;
+            _psfTextureFile = new ghoul::filesystem::File(_pointSpreadFunctionTexturePath);
+            _psfTextureFile->setCallback([&](const ghoul::filesystem::File&) { _pointSpreadFunctionTextureIsDirty = true; });
 		}
 		_pointSpreadFunctionTextureIsDirty = false;
 	}
@@ -328,6 +343,10 @@ void RenderableStars::update(const UpdateData& data) {
 				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 				_colorTexture->uploadTexture();
 			}
+
+            delete _colorTextureFile;
+            _colorTextureFile = new ghoul::filesystem::File(_colorTexturePath);
+            _colorTextureFile->setCallback([&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; });
 		}
 		_colorTextureIsDirty = false;
 	}
@@ -501,23 +520,24 @@ void RenderableStars::createDataSlice(ColorOption option) {
     }
 
 	for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
+        glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+
         // This is only temporary until the scalegraph is in place. It places all stars
         // on a sphere with a small variation in the distance to account for blending
         // issues ---abock
-        glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-        if (p != glm::vec3(0.f))
-            p = glm::normalize(p);
+        //if (p != glm::vec3(0.f))
+        //    p = glm::normalize(p);
 
-        float distLy = _fullData[i + 6];
-        float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
-        float distance = 18.f - normalizedDist / 1.f ;
+        //float distLy = _fullData[i + 6];
+        //float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
+        //float distance = 18.f - normalizedDist / 1.f ;
 
 
-        psc position = psc(glm::vec4(p, distance));
+        //psc position = psc(glm::vec4(p, distance));
 
-		// Convert parsecs -> meter
-		//PowerScaledScalar parsecsToMetersFactor = PowerScaledScalar(0.308567758f, 17.f);
-		//position[0] *= parsecsToMetersFactor[0];
+        // Convert parsecs -> meter
+        psc position = psc(glm::vec4(p * 0.308567756f, 17));
+
 		//position[1] *= parsecsToMetersFactor[0];
 		//position[2] *= parsecsToMetersFactor[0];
 		//position[3] += parsecsToMetersFactor[1];
@@ -536,8 +556,8 @@ void RenderableStars::createDataSlice(ColorOption option) {
 					
 				layout.value.bvColor = _fullData[i + 3];
 				layout.value.luminance = _fullData[i + 4];
-                //layout.value.absoluteMagnitude = _fullData[i + 5];
-                layout.value.absoluteMagnitude = _fullData[i + 6];
+                layout.value.absoluteMagnitude = _fullData[i + 5];
+                //layout.value.absoluteMagnitude = _fullData[i + 6];
 
 				_slicedData.insert(_slicedData.end(),
 								   layout.data.begin(),

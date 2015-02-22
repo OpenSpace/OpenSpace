@@ -93,6 +93,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _console(new LuaConsole)
     , _gui(new gui::GUI)
     , _syncBuffer(nullptr)
+	, _isMaster(false)
 {
 	SpiceManager::initialize();
 	Time::initialize();
@@ -530,9 +531,17 @@ bool OpenSpaceEngine::initializeGL() {
 	return success;
 }
 
+bool OpenSpaceEngine::isMaster(){
+	return _isMaster;
+}
+
+void OpenSpaceEngine::setMaster(bool master){
+	_isMaster = master;
+}
+
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
-    if (sgct::Engine::instance()->isMaster()) {
+    if (_isMaster) {
         //const double dt = sgct::Engine::instance()->getDt();
 		const double dt = sgct::Engine::instance()->getAvgDt();
 
@@ -552,7 +561,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();
 	
-	if (sgct::Engine::instance()->isMaster() && _gui->isEnabled()) {
+	if (_isMaster && _gui->isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
 
@@ -571,10 +580,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
     _renderEngine->render(projectionMatrix, viewMatrix);
 
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 		// If currently writing a command, render it to screen
 		sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-		if (sgct::Engine::instance()->isMaster() && !w->isUsingFisheyeRendering() && _console->isVisible()) {
+		if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
 			_console->render();
 		}
 		
@@ -584,14 +593,14 @@ void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 
 }
 
 void OpenSpaceEngine::postDraw() {
-    if (sgct::Engine::instance()->isMaster())
+	if (_isMaster)
         //_interactionHandler.unlockControls();
 
 	_renderEngine->postDraw();
 }
 
 void OpenSpaceEngine::keyboardCallback(int key, int action) {
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->keyCallback(key, action);
 			if (isConsumed)
@@ -611,7 +620,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint) {
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->charCallback(codepoint);
 			if (isConsumed)
@@ -625,7 +634,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint) {
 }
 
 void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->mouseButtonCallback(key, action);
 			if (isConsumed && action != SGCT_RELEASE)
@@ -637,13 +646,13 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 }
 
 void OpenSpaceEngine::mousePositionCallback(int x, int y) {
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 	    _interactionHandler->mousePositionCallback(x, y);
 	}
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
-	if (sgct::Engine::instance()->isMaster()) {
+	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->mouseWheelCallback(pos);
 			if (isConsumed)

@@ -30,8 +30,10 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 #include "imgui.h"
@@ -101,6 +103,20 @@ namespace {
                 executeScript(p->fullyQualifiedIdentifier(), parameters);
             }
         }
+    }
+
+    void renderStringProperty(Property* prop, const std::string& ownerName) {
+        StringProperty* p = static_cast<StringProperty*>(prop);
+        std::string name = p->guiName();
+
+        static const int bufferSize = 256;
+        static char buffer[bufferSize];
+        strcpy(buffer, p->value().c_str());
+        ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
+        std::string newValue(buffer);
+
+        if (newValue != p->value() && FileSys.fileExists(newValue))
+            executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
     }
 
     void renderIntProperty(Property* prop, const std::string& ownerName) {
@@ -336,11 +352,11 @@ void GuiPropertyComponent::registerProperty(properties::Property* prop) {
     else if (className == "Vec4Property")
         _vec4Properties.insert(prop);
     else if (className == "OptionProperty")
-        _optionProperty.insert(prop);
+        _optionProperties.insert(prop);
     else if (className == "TriggerProperty")
-        _triggerProperty.insert(prop);
+        _triggerProperties.insert(prop);
     else if (className == "SelectionProperty")
-        _selectionProperty.insert(prop);
+        _selectionProperties.insert(prop);
     else {
         LWARNING("Class name '" << className << "' not handled in GUI generation");
         return;
@@ -447,18 +463,23 @@ void GuiPropertyComponent::render() {
                     continue;
                 }
 
-                if (_optionProperty.find(prop) != _optionProperty.end()) {
+                if (_optionProperties.find(prop) != _optionProperties.end()) {
                     renderOptionProperty(prop, p.first);
                     continue;
                 }
 
-                if (_triggerProperty.find(prop) != _triggerProperty.end()) {
+                if (_triggerProperties.find(prop) != _triggerProperties.end()) {
                     renderTriggerProperty(prop, p.first);
                     continue;
                 }
 
-                if (_selectionProperty.find(prop) != _selectionProperty.end()) {
+                if (_selectionProperties.find(prop) != _selectionProperties.end()) {
                     renderSelectionProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_stringProperties.find(prop) != _stringProperties.end()) {
+                    renderStringProperty(prop, p.first);
                     continue;
                 }
             }

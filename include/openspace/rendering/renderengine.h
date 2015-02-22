@@ -73,6 +73,9 @@ public:
 
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);
+
+	float globalOpacity();
+	void setGlobalOpacity(float opacity);
 	
 	/**
 	 * Returns the Lua library that contains all Lua functions available to affect the
@@ -83,6 +86,12 @@ public:
 	 * rendering
 	 */
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+    // This is a temporary method to change the origin of the coordinate system ---abock
+    void changeViewPoint(std::string origin);
+
+	//temporaray fade functionality
+	void startFading(int direction, float fadeDuration);
 
 private:
 	void storePerformanceMeasurements();
@@ -100,6 +109,11 @@ private:
 	ghoul::SharedMemory* _performanceMemory;
 
 	void generateGlslConfig();
+
+	float _globalOpactity;
+	float _fadeDuration;
+	float _currentFadeTime;
+	int _fadeDirection;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;
