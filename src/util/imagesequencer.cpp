@@ -303,10 +303,10 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 						else if (met < metRef){
 							et -= diff;
 						}
-						std::string d;
+					/*	std::string d;
 						SpiceManager::ref().getDateFromET(et, d);
 						std::cout << d << std::endl;
-
+						*/
 						createImage(et, et + shutter, "NH_RALPH_LEISA", _defaultCaptureImage);
 					}
 				} while (!file.eof());
