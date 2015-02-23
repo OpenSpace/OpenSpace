@@ -38,6 +38,7 @@ public:
     PowerScaledSphere(const PowerScaledScalar& radius, 
 		int segments = 8);
     ~PowerScaledSphere();
+    PowerScaledSphere(const PowerScaledSphere& cpy);
 
     bool initialize();
 

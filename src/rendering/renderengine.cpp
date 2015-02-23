@@ -124,6 +124,8 @@ namespace openspace {
 				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 			const int type = lua_type(L, -1);
+            if (type != LUA_TBOOLEAN)
+                return luaL_error(L, "Expected argument of type 'bool'");
 			bool b = lua_toboolean(L, -1) != 0;
 			OsEng.renderEngine()->toggleVisualizeABuffer(b);
 			return 0;
@@ -140,6 +142,8 @@ namespace openspace {
 				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 			const int type = lua_type(L, -1);
+            if (type != LUA_TBOOLEAN)
+                return luaL_error(L, "Expected argument of type 'bool'");
 			bool b = lua_toboolean(L, -1) != 0;
 			OsEng.renderEngine()->toggleInfoText(b);
 			return 0;
@@ -508,8 +512,7 @@ namespace openspace {
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - Time::ref().currentTime();
-					double t = 0.0;
-					t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
+					double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
 					std::string progress = "|";
 					int g = ((t)* 20) + 1;
 					for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");

@@ -46,9 +46,9 @@ void SpiceManager::initialize() {
 	_manager->_lastAssignedKernel = 0;
 
 	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, "REPORT");
+	erract_c("SET", 0, static_cast<char*>("REPORT"));
 	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, "NONE");
+	errprt_c("SET", 0, static_cast<char*>("NONE"));
 }
 
 void SpiceManager::deinitialize() {
@@ -59,8 +59,8 @@ void SpiceManager::deinitialize() {
 	_manager = nullptr;
 
 	// Set values back to default
-	erract_c("SET", 0, "DEFAULT");
-	errprt_c("SET", 0, "DEFAULT");
+	erract_c("SET", 0, static_cast<char*>("DEFAULT"));
+	errprt_c("SET", 0, static_cast<char*>("DEFAULT"));
 }
 
 SpiceManager& SpiceManager::ref() {
@@ -307,12 +307,12 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 						   psc& position, 
 						   double& lightTime) const
 {
-	double pos[3] = { NULL, NULL, NULL };
+	double pos[3] = { 0.0, 0.0, 0.0};
 
 	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
 
-	if (pos[0] == NULL || pos[1] == NULL || pos[2] == NULL)
+	if (pos[0] == 0.0 || pos[1] == 0.0|| pos[2] == 0.0)
 		return false;
 
 	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
@@ -507,7 +507,7 @@ bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
 	glm::dmat3& positionMatrix) const{
 
 	int id;
-	getNaifId(body.c_str(), id);
+	getNaifId(body, id);
 	tipbod_c(fromFrame.c_str(), id, ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
 
 	bool hasError = checkForError("Error retrieving position transform matrix from "
@@ -690,10 +690,10 @@ void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
 }
 
 bool SpiceManager::checkForError(std::string errorMessage) {
-	static char msg[1024];
 
 	int failed = failed_c();
     if (failed) {
+        static char msg[1024];
 		if (!errorMessage.empty()) {
 			getmsg_c("LONG", 1024, msg);
 			LERROR(errorMessage);

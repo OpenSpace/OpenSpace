@@ -125,8 +125,22 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     }
 }
 
-PowerScaledSphere::~PowerScaledSphere()
+PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy) 
+    : _vaoID(cpy._vaoID)
+    , _vBufferID(cpy._vBufferID)
+    , _iBufferID(cpy._iBufferID)
+    , _isize(cpy._isize)
+    , _vsize(cpy._vsize)
+    , _varray(new Vertex[_vsize])
+    , _iarray(new int[_isize])
 {
+    // @TODO This needs to be tested ---abock
+
+    std::memcpy(_varray, cpy._varray, _vsize * sizeof(Vertex));
+    std::memcpy(_iarray, cpy._iarray, _isize * sizeof(int));
+}
+
+PowerScaledSphere::~PowerScaledSphere() {
 	if (_varray)
 	    delete[] _varray;
 	if (_iarray)
@@ -140,10 +154,8 @@ PowerScaledSphere::~PowerScaledSphere()
     glDeleteVertexArrays(1, &_vaoID);
 }
 
-bool PowerScaledSphere::initialize()
-{
+bool PowerScaledSphere::initialize() {
     // Initialize and upload to graphics card
-    GLuint errorID;
     if (_vaoID == 0)
         glGenVertexArrays(1, &_vaoID);
 
@@ -188,8 +200,7 @@ bool PowerScaledSphere::initialize()
     return true;
 }
 
-void PowerScaledSphere::render()
-{
+void PowerScaledSphere::render() {
     glBindVertexArray(_vaoID);  // select first VAO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
