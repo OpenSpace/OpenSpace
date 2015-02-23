@@ -71,6 +71,7 @@ endif ()
 # Ghoul
 set(GHOUL_ROOT_DIR "${OPENSPACE_EXT_DIR}/ghoul")
 include_directories("${GHOUL_ROOT_DIR}/include")
+include_directories("${GHOUL_ROOT_DIR}/ext/tinyobjloader")
 set(BOOST_ROOT "${GHOUL_ROOT_DIR}/ext/boost")
 add_subdirectory(${GHOUL_ROOT_DIR})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)

@@ -26,7 +26,7 @@
 #define __WAVEFRONTOBJECT_H__
 
 #include <openspace/rendering/model/modelgeometry.h>
-#include <openspace/util/tiny_obj_loader.h>
+#include <tiny_obj_loader.h>
 
 namespace openspace {
 
