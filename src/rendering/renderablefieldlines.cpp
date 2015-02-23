@@ -385,10 +385,10 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
 	}
 	fileName = absPath(fileName);
 
-	KameleonWrapper::Model modelType;
-	if (model == vectorFieldKameleonModelBATSRUS)
-		modelType = KameleonWrapper::Model::BATSRUS;
-	else {
+	//KameleonWrapper::Model modelType;
+	if (model != vectorFieldKameleonModelBATSRUS) {
+        //modelType = KameleonWrapper::Model::BATSRUS;
+	//else {
 		LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" << 
 			model << "' not supported");
 		return {};

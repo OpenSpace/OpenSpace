@@ -217,7 +217,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
     //const psc toCamera = thisPosition - camPos;
 
     // init as not visible
-    _boundingSphereVisible = false;
+    //_boundingSphereVisible = false;
     _renderableVisible = false;
 
 #ifndef OPENSPACE_VIDEO_EXPORT
@@ -414,7 +414,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 void SceneGraphNode::updateCamera(Camera* camera) const{
 
 	psc origin = worldPosition();
-	int i = 0;
+	//int i = 0;
 	// the camera position
 	
 	psc relative = camera->position();

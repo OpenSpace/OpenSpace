@@ -400,7 +400,6 @@ namespace openspace {
 
 		// converts the quaternion used to rotation matrices
 		_mainCamera->compileViewRotationMatrix();
-		UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
 		// update and evaluate the scene starting from the root node
 		_sceneGraph->update({
@@ -484,11 +483,11 @@ namespace openspace {
 					int x1, xSize, y1, ySize;
 					sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 					int startY = ySize - 2 * font_size_mono;
-					const glm::vec2 scaling = _mainCamera->scaling();
-					const glm::vec3 viewdirection = _mainCamera->viewDirection();
-					const psc position = _mainCamera->position();
-					const psc origin = OsEng.interactionHandler()->focusNode()->worldPosition();
-					const PowerScaledScalar pssl = (position - origin).length();
+					const glm::vec2& scaling = _mainCamera->scaling();
+					const glm::vec3& viewdirection = _mainCamera->viewDirection();
+					const psc& position = _mainCamera->position();
+					const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
+					const PowerScaledScalar& pssl = (position - origin).length();
 
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
