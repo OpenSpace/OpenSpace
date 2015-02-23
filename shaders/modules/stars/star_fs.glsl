@@ -77,7 +77,7 @@ void main() {
     // textureColor.a = sqrt(textureColor.a);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
 
-    const float minPixelSize = 15;
+    const float minPixelSize = 25;
 
     float normSize = (billboardSize - 1.0) / (minPixelSize - 1.0);
     normSize = pow(normSize, 3);

@@ -96,7 +96,7 @@ Property* PropertyOwner::property(const std::string& id) const
             const std::string ownerName = id.substr(0, ownerSeparator);
             const std::string propertyName = id.substr(ownerSeparator + 1);
             
-            PropertyOwner* owner = subOwner(ownerName);
+            PropertyOwner* owner = propertySubOwner(ownerName);
             if (owner == nullptr) {
                 return nullptr;
             }
@@ -114,11 +114,11 @@ bool PropertyOwner::hasProperty(const std::string& id) const {
     return property(id) != nullptr;
 }
     
-const std::vector<PropertyOwner*>& PropertyOwner::subOwners() const {
+const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
-PropertyOwner* PropertyOwner::subOwner(const std::string& name) const {
+PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
     assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
     
 	// As the _subOwners list is sorted, getting the lower bound is sufficient
@@ -134,8 +134,8 @@ PropertyOwner* PropertyOwner::subOwner(const std::string& name) const {
         return *it;
 }
     
-bool PropertyOwner::hasSubOwner(const std::string& name) const {
-    return subOwner(name) != nullptr;
+bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
+    return propertySubOwner(name) != nullptr;
 }
 
 void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name)
@@ -179,7 +179,7 @@ void PropertyOwner::addProperty(Property* prop)
         return;
     } else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
-		const bool hasOwner = hasSubOwner(prop->identifier());
+		const bool hasOwner = hasPropertySubOwner(prop->identifier());
 		if (hasOwner) {
 			LERROR("Property identifier '" << prop->identifier() << "' already names a"
 				<< "registed PropertyOwner");

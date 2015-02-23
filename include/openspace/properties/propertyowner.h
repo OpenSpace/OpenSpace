@@ -123,7 +123,7 @@ public:
 	 * this PropertyOwner.
 	 * \return A list of all sub-owners this PropertyOwner has
 	 */
-    const std::vector<PropertyOwner*>& subOwners() const;
+    const std::vector<PropertyOwner*>& propertySubOwners() const;
 
 	/**
 	 * This method returns the direct sub-owner of this PropertyOwner with the provided
@@ -134,7 +134,7 @@ public:
 	 * \param name The name of the sub-owner that should be returned
 	 * \return The PropertyOwner with the given <code>name</code>, or <code>nullptr</code>
 	 */
-    PropertyOwner* subOwner(const std::string& name) const;
+    PropertyOwner* propertySubOwner(const std::string& name) const;
 
 	/**
 	 * Returns <code>true</code> if this PropertyOwner owns a sub-owner with the provided
@@ -143,7 +143,7 @@ public:
 	 * \return <code>true</code> if this PropertyOwner owns a sub-owner with the provided
 	 * <code>name</code>; returns <code>false</code> otherwise
 	 */
-    bool hasSubOwner(const std::string& name) const;
+    bool hasPropertySubOwner(const std::string& name) const;
 
 	/**
 	 * This method converts a provided <code>groupID</code>, used by the Propertys, into a

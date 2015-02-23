@@ -67,22 +67,6 @@ public:
 	bool _isEnabled;
 
 	bool _showHelp;
-
-	//ghoul::SharedMemory* _performanceMemory;
-	//float _minMaxValues[2];
-
-	//std::set<properties::Property*> _boolProperties;
-	//std::set<properties::Property*> _intProperties;
-	//std::set<properties::Property*> _floatProperties;
-	//std::set<properties::Property*> _vec2Properties;
-	//std::set<properties::Property*> _vec3Properties;
-	//std::set<properties::Property*> _vec4Properties;
-	//std::set<properties::Property*> _stringProperties;
-	//std::set<properties::Property*> _optionProperty;
-	//std::set<properties::Property*> _selectionProperty;
-	//std::set<properties::Property*> _triggerProperty;
-
-	//std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 };
 
 } // namespace gui

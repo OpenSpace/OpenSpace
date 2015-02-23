@@ -480,9 +480,24 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
             OsEng.gui()->_property.registerProperty(p);
-			//OsEng.gui()->_property.registerProperty(p->description());
 		}
 	}
+
+    // If a LuaDocumentationFile was specified, generate it now
+    using constants::configurationmanager::keyPropertyDocumentationType;
+    using constants::configurationmanager::keyPropertyDocumentationFile;
+    const bool hasType = OsEng.configurationManager()->hasKey(keyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager()->hasKey(keyPropertyDocumentationFile);
+    if (hasType && hasFile) {
+        std::string propertyDocumentationType;
+        OsEng.configurationManager()->getValue(keyPropertyDocumentationType, propertyDocumentationType);
+        std::string propertyDocumentationFile;
+        OsEng.configurationManager()->getValue(keyPropertyDocumentationFile, propertyDocumentationFile);
+
+        propertyDocumentationFile = absPath(propertyDocumentationFile);
+        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
+    }
+
 
     OsEng.runSettingsScripts();
 
@@ -640,6 +655,33 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
 
 std::vector<SceneGraphNode*> SceneGraph::allSceneGraphNodes() const {
 	return _nodes;
+}
+
+void SceneGraph::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+    if (type == "text") {
+        LDEBUG("Writing documentation for properties");
+        std::ofstream file(filename);
+        if (!file.good()) {
+            LERROR("Could not open file '" << filename << "' for writing property documentation");
+            return;
+        }
+
+        using properties::Property;
+        for (SceneGraphNode* node : _nodes) {
+            std::vector<Property*> properties = node->propertiesRecursive();
+            if (!properties.empty()) {
+                file << node->name() << std::endl;
+
+                for (Property* p : properties) {
+                    file << p->fullyQualifiedIdentifier() << ":   " << p->guiName() << std::endl;
+                }
+
+                file << std::endl;
+            }
+        }
+    }
+    else
+        LERROR("Undefined type '" << type << "' for Property documentation");
 }
 
 scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {

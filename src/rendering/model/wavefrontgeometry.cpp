@@ -74,8 +74,19 @@ void WavefrontGeometry::loadObj(const char *filename){
 	// temporary 
 	const char *mtl_basepat = filename;
 
-	std::string err = tinyobj::LoadObj(shapes, materials, filename, NULL);
-	
+	std::string err = tinyobj::LoadObj(shapes, materials, filename, mtl_basepat);
+
+    LINFO("Loaded Mesh");
+    LINFO("Number of Shapes: " << shapes.size());
+    LINFO("Number of Materials: " << materials.size());
+    for (int i = 0; i < shapes.size(); ++i) {
+        LINFO("Shape #" << i << ": " <<
+            "Indices   (" << shapes[i].mesh.indices.size() << ") " <<
+            "Positions (" << shapes[i].mesh.positions.size() << ") " <<
+            "Texture   (" << shapes[i].mesh.texcoords.size() << ") " <<
+            "Normals   (" << shapes[i].mesh.normals.size() << ")");
+    }
+
 	_isize = shapes[0].mesh.indices.size();
 	_vsize = shapes[0].mesh.indices.size(); // shapes[0].mesh.positions.size() + shapes[0].mesh.positions.size() / 3;
 	_tsize = shapes[0].mesh.texcoords.size();
@@ -88,7 +99,7 @@ void WavefrontGeometry::loadObj(const char *filename){
 		_iarray[f] = shapes[0].mesh.indices[f];
 	}
 
-	shapes[0].mesh.texcoords.resize(2 * _isize);
+	//shapes[0].mesh.texcoords.resize(2 * _isize);
 	int p = 0;
 	for (auto v : shapes[0].mesh.indices) {
 		_varray[p].location[0] = shapes[0].mesh.positions[3 * v + 0];
@@ -100,13 +111,32 @@ void WavefrontGeometry::loadObj(const char *filename){
 		_varray[p].normal[1]   = shapes[0].mesh.normals[3 * v + 1];
 		_varray[p].normal[2]   = shapes[0].mesh.normals[3 * v + 2];
 
-
-		_varray[p].tex[0] = shapes[0].mesh.texcoords[2 * v + 0];
-		_varray[p].tex[1] = shapes[0].mesh.texcoords[2 * v + 1];
+        // Only set the texture coordinates if they don't fall out of the value range
+        _varray[p].tex[0] = (2 * v + 0) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 0] : 0.f;
+        _varray[p].tex[1] = (2 * v + 1) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 1] : 0.f;
 
 		p++;
 	}
 	p = 0;
+
+    //if (shapes[0].mesh.texcoords.size() > 0) {
+    //    for (int k = 0; k < shapes[0].mesh.texcoords.size(); ++k) {
+
+    //    }
+    //}
+	//
+	//if (shapes[0].mesh.texcoords.size() > 0) {
+	//	for (size_t k = 0; k < shapes[0].mesh.indices.size() / 3; k++) {
+	//		for (int j = 0; j < 3; j++) {
+	//			int idx = shapes[0].mesh.indices[3 * k + j];
+
+	//			_varray[p].tex[0] = shapes[0].mesh.texcoords[2 * idx + 0];
+	//			_varray[p].tex[1] = shapes[0].mesh.texcoords[2 * idx + 1];
+	//			p++;
+	//		}
+	//	}
+	//}
+	
 
 	//testing with one triangle - works. 
 	/*

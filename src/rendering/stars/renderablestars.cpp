@@ -87,16 +87,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-    , _magnitudeClamp(
-        "magnitudeClamp",
-        "Magnitude Clamping",
-        glm::vec2(1.f, 4.f),
-        glm::vec2(-15.f),
-        glm::vec2(15.f)
-      )
-    , _exponentialOffset("exponentialOffset", "Exponential Offset", 5.f, 0.f, 50.f)
-    , _exponentialDampening("exponentialDampening", "Exponential Dampening", 0.871f, 0.f, 1.f)
-    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
+    , _scaleFactor("scaleFactor", "Scale Factor", 5.f, 0.f, 10.f)
 	, _program(nullptr)
 	, _programIsDirty(false)
 	, _speckFile("")
@@ -137,9 +128,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	_colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
     _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
 
-    addProperty(_magnitudeClamp);
-    addProperty(_exponentialOffset);
-    addProperty(_exponentialDampening);
     addProperty(_scaleFactor);
 }
 
@@ -202,9 +190,6 @@ void RenderableStars::render(const RenderData& data) {
 	_program->setUniform("projection", projectionMatrix);
 
 	_program->setUniform("colorOption", _colorOption);
-    _program->setUniform("magnitudeClamp", _magnitudeClamp);
-    _program->setUniform("exponentialOffset", _exponentialOffset);
-    _program->setUniform("exponentialDampening", _exponentialDampening);
     _program->setUniform("scaleFactor", _scaleFactor);
 	
 	setPscUniforms(_program, &data.camera, data.position);
@@ -557,9 +542,14 @@ void RenderableStars::createDataSlice(ColorOption option) {
 				layout.value.bvColor = _fullData[i + 3];
 				layout.value.luminance = _fullData[i + 4];
                 layout.value.absoluteMagnitude = _fullData[i + 5];
-                //layout.value.absoluteMagnitude = _fullData[i + 6];
 
-				_slicedData.insert(_slicedData.end(),
+#ifdef USING_STELLAR_TEST_GRID
+                layout.value.bvColor = _fullData[i + 3];
+                layout.value.luminance = _fullData[i + 3];
+                layout.value.absoluteMagnitude = _fullData[i + 3];
+#endif
+
+                _slicedData.insert(_slicedData.end(),
 								   layout.data.begin(),
 								   layout.data.end());
 

@@ -52,9 +52,6 @@ layout(location = 5) out float billboardSize;
 
 uniform mat4 projection;
 
-uniform vec2 magnitudeClamp;
-uniform float exponentialOffset;
-uniform float exponentialDampening;
 uniform float scaleFactor;
 
 void main() {
@@ -63,7 +60,8 @@ void main() {
     ge_speed = vs_speed[0];
 
     float absoluteMagnitude = vs_brightness[0].z;
-    float modifiedSpriteSize = exp((-exponentialOffset - absoluteMagnitude) * exponentialDampening) * scaleFactor;
+    // float modifiedSpriteSize = exp((-exponentialOffset - absoluteMagnitude) * exponentialDampening) * scaleFactor * 50;
+    float modifiedSpriteSize = exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
 
     vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
@@ -81,7 +79,7 @@ void main() {
     // The billboard is smaller than one pixel, we can discard it
     vec2 distance = abs(ll - ur);
     float sizeInPixels = length(distance);
-    if (sizeInPixels < 1)
+    if (sizeInPixels < 5)
         return;
 
     for(int i = 0; i < 4; i++){

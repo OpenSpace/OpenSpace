@@ -172,7 +172,8 @@ void RenderableModel::update(const UpdateData& data){
 		return;
 #endif
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
+    if (!_source.empty())
+	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 	
 }
 

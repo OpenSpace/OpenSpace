@@ -66,6 +66,7 @@ void ImageSequencer::initialize(){
 	assert(_sequencer == nullptr);
 	_sequencer = new ImageSequencer;
 
+    _sequencer->_nextCapture = 0.0;
     _sequencer->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png");
 }
 
