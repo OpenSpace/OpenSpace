@@ -151,7 +151,7 @@ void RenderableModel::render(const RenderData& data)
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
-	_programObject->setUniform("_performShading", _performShading);
+	_programObject->setUniform("_performShading", false);
 
 
     // Bind texture
