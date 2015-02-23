@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <openspace/rendering/planets/SimpleSphereGeometryProjection.h>
+#include <openspace/rendering/planets/simplespheregeometryprojection.h>
 #include <openspace/util/constants.h>
 
 namespace {
