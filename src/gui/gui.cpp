@@ -467,6 +467,16 @@ void GUI::renderMainWindow() {
 	ImGui::Checkbox("Properties", &_property._isEnabled);
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
+
+    // These are temporary until the scalegraph is in effect ---abock
+    bool toSun = ImGui::Button("Coordinate System to Sun");
+    bool toPluto = ImGui::Button("Coorinate System to Pluto");
+
+    if (toSun)
+        OsEng.scriptEngine()->queueScript("openspace.changeViewPointToSun();");
+    if (toPluto)
+        OsEng.scriptEngine()->queueScript("openspace.changeViewPointToPluto();");
+
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
 	ImGui::End();
