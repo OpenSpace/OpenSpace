@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/planets/RenderablePlanetProjection.h>
+#include <openspace/rendering/planets/renderableplanetprojection.h>
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
