@@ -466,6 +466,7 @@ void GUI::renderMainWindow() {
 
 	ImGui::Checkbox("Properties", &_property._isEnabled);
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
+    _origin.render();
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
 	ImGui::End();
