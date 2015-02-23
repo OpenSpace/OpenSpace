@@ -33,9 +33,6 @@
 
 namespace {
 	const std::string _loggerCat = "GuiOriginComponent";
-	const ImVec2 size = ImVec2(350, 500);
-
-        //OsEng.scriptEngine()->queueScript(script);
 }
 
 namespace openspace {

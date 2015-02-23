@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/gui/guiorigincomponent.h>
 #include <openspace/gui/guitimecomponent.h>
-#include <openspace/scripting/scriptengine.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/time.h>
+
+#include <ghoul/misc/assert.h>
+#include "imgui.h"
+
+namespace {
+	const std::string _loggerCat = "GuiTimeComponent";
+}
 
 namespace openspace {
 namespace gui {
 
-class GUI {
-public:
-	GUI();
-    ~GUI();
+void GuiTimeComponent::render() {
+    float deltaTime = Time::ref().deltaTime();
+    
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
+    if (changed)
+        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
 
-	void initialize();
-	void deinitialize();
 
-	void initializeGL();
-	void deinitializeGL();
+    //char dateBuffer[512] = {};
+    //ImGui::InputText("Date", dateBuffer, 512);
+    //bool pressed = ImGui::Button("Set Date");
+    //if (pressed)
+    //    OsEng.scriptEngine()->queueScript("openspace.time.setTime('" + std::string(dateBuffer) + "')");
 
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+    //const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
+    //std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
+    //std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
+    //auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
+    //ghoul_assert(it != nodes.end(), "Focus node not found");
 
-	void renderMainWindow();
+    //std::string nodeNames = "";
+    //for (SceneGraphNode* n : nodes) 
+    //    nodeNames += n->name() + '\0';
 
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-//protected:
-    GuiHelpComponent _help;
-    GuiOriginComponent _origin;
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-    GuiTimeComponent _time;
+    //int position = it - nodes.begin();
 
-	bool _isEnabled;
+    //bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
 
-	bool _showHelp;
-};
+    //if (result) {
+    //    LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //    OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //}
 
-} // namespace gui
-} // namespace openspace
+}
 
-#endif // __GUI_H__
+} // gui
+} // openspace

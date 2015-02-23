@@ -467,6 +467,7 @@ void GUI::renderMainWindow() {
 	ImGui::Checkbox("Properties", &_property._isEnabled);
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
+    _time.render();
 
     // These are temporary until the scalegraph is in effect ---abock
     bool toSun = ImGui::Button("Coordinate System to Sun");

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __GUITIMECOMPONENT_H__
+#define __GUITIMECOMPONENT_H__
 
-#include <openspace/gui/guihelpcomponent.h>
-#include <openspace/gui/guiperformancecomponent.h>
-#include <openspace/gui/guipropertycomponent.h>
-#include <openspace/gui/guiorigincomponent.h>
-#include <openspace/gui/guitimecomponent.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/gui/guicomponent.h>
 
 namespace openspace {
+
 namespace gui {
 
-class GUI {
+class GuiTimeComponent : public GuiComponent {
 public:
-	GUI();
-    ~GUI();
-
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
-
-	void initialize();
-	void deinitialize();
-
-	void initializeGL();
-	void deinitializeGL();
-
-	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
-
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
-	void endFrame();
-
-	void renderMainWindow();
-
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
-
-//protected:
-    GuiHelpComponent _help;
-    GuiOriginComponent _origin;
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
-    GuiTimeComponent _time;
-
-	bool _isEnabled;
-
-	bool _showHelp;
+    void render() override;
 };
+
+//
+//class GuiPropertyComponent : public GuiComponent {
+//public:
+//	//void registerProperty(const std::string& propertyDescription);
+//    void registerProperty(properties::Property* prop);
+//	void render();
+//
+//protected:
+//	enum class PropertyType {
+//		BoolProperty = 0,
+//		IntProperty,
+//		FloatProperty,
+//		Vec2Property,
+//		Vec3Property,
+//		StringProperty,
+//		OptionProperty,
+//		SelectionProperty,
+//		TriggerProperty,
+//		InvalidPropertyType
+//	};
+//
+//	struct PropertyInfo {
+//		PropertyType type;
+//		std::string identifier;
+//		std::string name;
+//		std::string group;
+//	};
+//	typedef std::string PropertyOwner;
+//
+//	struct Property {
+//		PropertyOwner owner;
+//		std::vector<PropertyInfo> properties;
+//	};
+//
+//	void handleProperty(const ghoul::Dictionary& value);
+//
+//	PropertyType toPropertyType(const std::string& name) const;
+//
+//	void renderProperty(const PropertyInfo& info) const;
+//
+//    std::set<properties::Property*> _boolProperties;
+//    std::set<properties::Property*> _intProperties;
+//    std::set<properties::Property*> _floatProperties;
+//    std::set<properties::Property*> _vec2Properties;
+//    std::set<properties::Property*> _vec3Properties;
+//    std::set<properties::Property*> _vec4Properties;
+//    std::set<properties::Property*> _stringProperties;
+//    std::set<properties::Property*> _optionProperties;
+//    std::set<properties::Property*> _selectionProperties;
+//    std::set<properties::Property*> _triggerProperties;
+//    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+//
+//	//std::vector<Property> _properties;
+//};
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __GUITIMECOMPONENT_H__
