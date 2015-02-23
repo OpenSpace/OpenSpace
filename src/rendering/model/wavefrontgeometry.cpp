@@ -96,7 +96,7 @@ void WavefrontGeometry::loadObj(const char *filename){
 
 	//copy indices
 	for (int f = 0; f < shapes[0].mesh.indices.size(); f++) {
-		_iarray[f] = shapes[0].mesh.indices[f];
+		_iarray[f] = f;// shapes[0].mesh.indices[f];
 	}
 
 	//shapes[0].mesh.texcoords.resize(2 * _isize);

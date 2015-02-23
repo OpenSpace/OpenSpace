@@ -153,7 +153,6 @@ void RenderableModel::render(const RenderData& data)
 	
 	_programObject->setUniform("_performShading", false);
 
-
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();
