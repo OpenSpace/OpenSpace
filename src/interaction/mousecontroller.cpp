@@ -24,6 +24,8 @@
 
 #include <openspace/interaction/mousecontroller.h>
 
+#include <openspace/engine/openspaceengine.h>
+
 #include <openspace/interaction/interactionhandler.h>
 
 namespace openspace {
@@ -147,13 +149,13 @@ void TrackballMouseController::update(const double& dt){
 
 
 OrbitalMouseController::OrbitalMouseController()
-: MouseController()
-, _leftMouseButtonDown(false)
-, _rightMouseButtonDown(false)
-, _middleMouseButtonDown(false)
-, _currentCursorPos(0)
-, _rotationSpeed(10.f)
-, _navigationSpeed(3.f)
+    : MouseController()
+    , _leftMouseButtonDown(false)
+    , _rightMouseButtonDown(false)
+    , _middleMouseButtonDown(false)
+    , _currentCursorPos(0)
+    , _rotationSpeed(10.f)
+    , _navigationSpeed(3.f)
 {
 	for (int n = 0; n < 3; ++n){
 		_previousCursorPos[n] = glm::vec2(0);
@@ -222,12 +224,15 @@ void OrbitalMouseController::scrollWheel(int pos) {
 }
 
 void OrbitalMouseController::update(const double& dt){
+    const float interactionSpeed = OsEng.interactionHandler()->interactionSensitivity();
+    const bool rotationInvert = OsEng.interactionHandler()->invertRotation();
+    const bool rollInvert = OsEng.interactionHandler()->invertRoll();
 	
 	//if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
 		_handler->orbit(
-			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, 
-			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed,
-			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed,
+			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * interactionSpeed * (rotationInvert ? -1.f : 1.f), 
+			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * interactionSpeed * (rotationInvert ? -1.f : 1.f),
+			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
 			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
 	//}
 	

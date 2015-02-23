@@ -298,6 +298,84 @@ int distance(lua_State* L) {
 	return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * setInteractionSensitivity(double):
+ * Changes the global interaction sensitivity to the passed value
+ */
+int setInteractionSensitivity(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double sensitivity = luaL_checknumber(L, -1);
+    OsEng.interactionHandler()->setInteractionSensitivity(sensitivity);
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * interactionSensitivity():
+ * Returns the current, global interaction sensitivity
+ */
+int interactionSensitivity(lua_State* L) {
+    float sensitivity = OsEng.interactionHandler()->interactionSensitivity();
+    lua_pushnumber(L, sensitivity);
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * setInvertRoll(bool):
+ * Determines if the roll movement is inverted
+ */
+int setInvertRoll(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    bool invert = lua_toboolean(L, -1);
+    OsEng.interactionHandler()->setInvertRoll(invert);
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * invertRoll():
+ * Returns the current setting for inversion of roll movement
+ */
+int invertRoll(lua_State* L) {
+    bool invert = OsEng.interactionHandler()->invertRoll();
+    lua_pushboolean(L, invert);
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * setInvertRotation(bool):
+ * Determines if the rotation movement is inverted
+ */
+int setInvertRotation(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    bool invert = lua_toboolean(L, -1);
+    OsEng.interactionHandler()->setInvertRotation(invert);
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * invertRotation():
+ * Returns the current setting for inversion of rotation movement
+ */
+int invertRotation(lua_State* L) {
+    bool invert = OsEng.interactionHandler()->invertRotation();
+    lua_pushboolean(L, invert);
+    return 1;
+}
+
 } // namespace luascriptfunctions
 
 //InteractionHandler::InteractionHandler() {
@@ -360,6 +438,9 @@ namespace interaction {
 InteractionHandler::InteractionHandler()
 	: _camera(nullptr)
 	, _focusNode(nullptr)
+    , _controllerSensitivity(10.f)
+    , _invertRoll(false)
+    , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
 {
@@ -528,9 +609,9 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
 	glm::mat4 transform;
-	transform = glm::rotate(dx * 10, cameraUp) * transform;
-	transform = glm::rotate(dy * 10, cameraRight) * transform;
-	transform = glm::rotate(dz * 10, _camera->viewDirection()) * transform;
+	transform = glm::rotate(dx * 10.f, cameraUp) * transform;
+	transform = glm::rotate(dy * 10.f, cameraRight) * transform;
+	transform = glm::rotate(dz * 10.f, _camera->viewDirection()) * transform;
 
 	
 	//get "old" focus position 
@@ -794,7 +875,7 @@ void InteractionHandler::lookAt(const glm::quat& rotation)
 //
 void InteractionHandler::keyboardCallback(int key, int action) {
     // TODO package in script
-    const float speed = 2.75f;
+    const float speed = _controllerSensitivity;
 	const float dt = static_cast<float>(_deltaTime);
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 		
@@ -947,7 +1028,44 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 				&luascriptfunctions::distance,
 				"number",
 				"Change distance to origin"
-			}
+			},
+            {
+                "setInteractionSensitivity",
+                &luascriptfunctions::setInteractionSensitivity,
+                "number",
+                "Sets the global interaction sensitivity"
+            },
+            {
+                "interactionSensitivity",
+                &luascriptfunctions::interactionSensitivity,
+                "",
+                "Gets the current global interaction sensitivity"
+            },
+            {
+                "setInvertRoll",
+                &luascriptfunctions::setInvertRoll,
+                "bool",
+                "Sets the setting if roll movements are inverted"
+            },
+            {
+                "invertRoll",
+                &luascriptfunctions::invertRoll,
+                "",
+                "Returns the status of roll movement inversion"
+            },
+            {
+                "setInvertRotation",
+                &luascriptfunctions::setInvertRotation,
+                "bool",
+                "Sets the setting if rotation movements are inverted"
+            },
+            {
+                "invertRotation",
+                &luascriptfunctions::invertRotation,
+                "",
+                "Returns the status of rotation movement inversion"
+            }
+            
 		}
 	};
 }
@@ -960,6 +1078,30 @@ void InteractionHandler::setRotation(const glm::quat& rotation)
 
 double InteractionHandler::deltaTime() const {
 	return _deltaTime;
+}
+
+void InteractionHandler::setInteractionSensitivity(float sensitivity) {
+    _controllerSensitivity = sensitivity;
+}
+
+float InteractionHandler::interactionSensitivity() const {
+    return _controllerSensitivity;
+}
+
+void InteractionHandler::setInvertRoll(bool invert) {
+    _invertRoll = invert;
+}
+
+bool InteractionHandler::invertRoll() const {
+    return _invertRoll;
+}
+
+void InteractionHandler::setInvertRotation(bool invert) {
+    _invertRotation = invert;
+}
+
+bool InteractionHandler::invertRotation() const {
+    return _invertRotation;
 }
 
 } // namespace interaction
