@@ -48,6 +48,7 @@ struct ImageParams{
 	double startTime;
 	double stopTime;
 	std::string path;
+	std::string activeInstrument;
 	bool projected;
 };
 
@@ -74,12 +75,13 @@ void ImageSequencer::deinitialize(){
 	_sequencer = nullptr;
 }
 
-void ImageSequencer::createImage(double t1, double t2, std::string path){
+void ImageSequencer::createImage(double t1, double t2, std::string instrument, std::string path){
 	// insert
 	ImageParams image;
 	image.startTime = t1;
 	image.stopTime  = t2;
 	image.path      = path;
+	image.activeInstrument = instrument;
 	image.projected = false;
 	
 	_timeStamps.push_back(image);
@@ -103,20 +105,14 @@ double ImageSequencer::nextCaptureTime(double _time){
 		return end;
 	};
 
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", false }, cmp);
+	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", "",  false }, cmp);
 
 	if (_time < _nextCapture) return _nextCapture;
 	return it->startTime;
 }
 
-bool ImageSequencer::getImagePath(std::string _currentTime, std::string& path, bool closedInterval){
-	double currentEt = 0;
-	openspace::SpiceManager::ref().getETfromDate(_currentTime, currentEt);
-	bool success = getImagePath(currentEt, path, closedInterval);
-	return success;
-}
 
-bool ImageSequencer::getImagePath(double& _currentTime, std::string& path, bool closedInterval){
+bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool closedInterval){
 	auto binary_find = [](std::vector<ImageParams>::iterator begin,
 						std::vector<ImageParams>::iterator end,
 						const ImageParams &val,
@@ -129,22 +125,23 @@ bool ImageSequencer::getImagePath(double& _currentTime, std::string& path, bool 
 		return end;
 	};
 
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _currentTime, 0, "", false }, cmp);
+	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { currentTime, 0, "", "", false }, cmp);
 	//check [start, stop] 
-	if (closedInterval && (it == _timeStamps.end() || it->stopTime < _currentTime || it->projected)){
+	if (closedInterval && (it == _timeStamps.end() || it->stopTime < currentTime || it->projected)){
 		return false;
 	}else if (!closedInterval && (it == _timeStamps.end() || it->projected)){
 		return false;
 	}
-	double upcoming = nextCaptureTime(_currentTime);
+	double upcoming = nextCaptureTime(currentTime);
 	if (_nextCapture != upcoming){
 		_nextCapture = upcoming;
-		_intervalLength = upcoming - _currentTime;
+		_intervalLength = upcoming - currentTime;
 	}
 
 	it->projected = true;
 	path = it->path;
-	_currentTime = it->startTime;
+	currentTime = it->startTime;
+	_activeInstrument = it->activeInstrument;
 
 	return true;
 }
@@ -271,12 +268,46 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 						else if (met < metRef){
 							et -= diff;
 						}
-						/*
-						std::string str;
-						openspace::SpiceManager::ref().getDateFromET(et, str);
-						std::cout << str << std::endl;
+						createImage(et, et + shutter, "NH_LORRI", _defaultCaptureImage);
+					}	
+				    pos = timestr.find("MVIC");
+					if (pos != std::string::npos){
+						timestr = timestr.substr(24, 9);
+						std::string::size_type sz;     // alias of size_t
+						double met = std::stod(timestr, &sz);
+						double diff;
+						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
+
+						diff = abs(met - metRef);
+						if (met > metRef){
+							et += diff;
+						}
+						else if (met < metRef){
+							et -= diff;
+						}
+	
+						createImage(et, et + shutter, "MVIC", _defaultCaptureImage);
+					}
+					pos = timestr.find("RALPH_LEISA");
+					if (pos != std::string::npos){
+						timestr = timestr.substr(24, 9);
+						std::string::size_type sz;     // alias of size_t
+						double met = std::stod(timestr, &sz);
+						double diff;
+						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
+
+						diff = abs(met - metRef);
+						if (met > metRef){
+							et += diff;
+						}
+						else if (met < metRef){
+							et -= diff;
+						}
+					/*	std::string d;
+						SpiceManager::ref().getDateFromET(et, d);
+						std::cout << d << std::endl;
 						*/
-						createImage(et, et + shutter, _defaultCaptureImage);
+						createImage(et, et + shutter, "NH_RALPH_LEISA", _defaultCaptureImage);
 					}
 				} while (!file.eof());
                 std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
@@ -322,7 +353,7 @@ bool ImageSequencer::loadSequence(const std::string dir){
 							path.replace(path.begin() + position, path.end(), ext);
 							std::vector<std::string>::const_iterator it = std::find(sequencePaths.begin(), sequencePaths.end(), path);
 							if ( it != sequencePaths.end()){
-								createImage(timestamps[0], timestamps[1], path);
+								createImage(timestamps[0], timestamps[1], "NH_LORRI", path); /// fix active instrument!
                                 std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 							}
 							std::string timestr;

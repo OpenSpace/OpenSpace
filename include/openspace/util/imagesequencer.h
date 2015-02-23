@@ -49,21 +49,23 @@ public:
 	bool sequenceReset();
 
 	bool getImagePath(double& _currentTime, std::string& path, bool closedInterval = false);
-	bool getImagePath(std::string _currentTime, std::string& path, bool closedInterval = false);
 	double getNextCaptureTime();
 	double getIntervalLength(){ return _intervalLength; };
+	std::string& getActiveInstrument(){ return _activeInstrument; };
+
 
 	static ImageSequencer* _sequencer;
 
 private:
 	double nextCaptureTime(double _time);
 
-	void createImage(double t1, double t2, std::string path = "dummypath");
+	void createImage(double t1, double t2, std::string instrument, std::string path = "dummypath");
 	
 	double _nextCapture;
 	double _intervalLength;
 
     std::string _defaultCaptureImage;
+	std::string _activeInstrument;
 };
 
 } // namespace openspace

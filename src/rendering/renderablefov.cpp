@@ -405,119 +405,138 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
-	// update only when time progresses.
-	if (_oldTime != _time){
-		std::string shape, instrument;
-		std::vector<glm::dvec3> bounds;
-		glm::dvec3 boresight;
-		
-		// fetch data for specific instrument (shape, boresight, bounds etc)
-		bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
-		if (!found) LERROR("Could not locate instrument"); // fixlater
+	std::string instrument = ImageSequencer::ref().getActiveInstrument();
 
-		float size = 4 * sizeof(float);
-		int indx = 0;
+	bool drawFOV = false;
 
-		// set target based on visibility to specific instrument,
-		// from here on the _fovTarget is the target for all spice functions.
-		//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
-		std::string potential[2] = { "Pluto", "Charon" };
-
-		_fovTarget = potential[0]; //default
-		for (int i = 0; i < 2; i++){
-			_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], 
-																				_spacecraft, _method,
-																				_aberrationCorrection, _time);
-			if (_withinFOV){
-				_fovTarget = potential[i];
-				break;
-			}
+	//_instrumentID = instrument;
+	if (instrument == "MVIC"){
+		if (_instrumentID == "NH_RALPH_MVIC_PAN1" ||
+			_instrumentID == "NH_RALPH_MVIC_PAN2" ||
+			_instrumentID == "NH_RALPH_MVIC_RED" ||
+			_instrumentID == "NH_RALPH_MVIC_BLUE" ||
+			_instrumentID == "NH_RALPH_MVIC_FT"){
+			drawFOV = true;
 		}
-		
-		computeColors();
-		double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
-		double diff = (t2 - _time);
-		double t = 0.0;
-		if (diff <= 30.0) t = 1.f - diff / 30.0;
-
-		double targetEpoch;
-		// for each FOV vector
-		for (int i = 0; i < 4; i++){
-			// compute surface intercept
-			_interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-				                                                                  _frame, _method, _aberrationCorrection, 
-																				  _time, targetEpoch, bounds[i], ipoint, ivec);
-			// if not found, use the orthogonal projected point
-			if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
-	
-			// VBO1 : draw vectors representing outer points of FOV. 
-			if (_interceptTag[i]){
-				_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-				_interceptVector[3] += 3;
-				//_interceptVector = pscInterpolate(_interceptVector, bsvec, t);
-				// INTERCEPTIONS
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(col_start), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(_interceptVector.vec4()), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(col_end), size);
-				indx += 4;
-			}
-			else if (_withinFOV){
-				// FOV OUTSIDE OBJECT
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0,0,1,1)), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[i].vec4()), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(blue), size);
-				indx += 4;
-			}else{
-				glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3]+1);
-				corner = tmp*corner;
-				// "INFINITE" FOV
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(col_gray), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(corner), size);
-				indx += 4;
-				memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
-				indx += 4;
-			}
-		}
-		_interceptTag[4] = _interceptTag[0]; // 0 & 5 same point
-		// Draw surface square! 
-		fovProjection(_interceptTag, bounds);
-		updateData();
 	}
-	_oldTime = _time;
-	
-	glLineWidth(1.f);
-	glBindVertexArray(_vaoID[0]);
-	glDrawArrays(_mode, 0, _vtotal[0]);
-	glBindVertexArray(0);
+	else if (instrument == _instrumentID){
+		drawFOV = true;
+	}
+	if (drawFOV){
+		// update only when time progresses.
+		if (_oldTime != _time){
+			std::string shape, instrument;
+			std::vector<glm::dvec3> bounds;
+			glm::dvec3 boresight;
 
-	//render points
-	glPointSize(2.f);
-	glBindVertexArray(_vaoID[0]);
-	glDrawArrays(GL_POINTS, 0, _vtotal[0]);
-	glBindVertexArray(0);
-	
-	//second vbo
-	glLineWidth(2.f);
-	glBindVertexArray(_vaoID[1]);
-	glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
-	glBindVertexArray(0);
-	
-	/*glPointSize(5.f);
-	glBindVertexArray(_vaoID2);
-	glDrawArrays(GL_POINTS, 0, _vtotal2);
-	glBindVertexArray(0);
-	*/
+			// fetch data for specific instrument (shape, boresight, bounds etc)
+			bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
+			if (!found) LERROR("Could not locate instrument");
+
+			float size = 4 * sizeof(float);
+			int indx = 0;
+
+			// set target based on visibility to specific instrument,
+			// from here on the _fovTarget is the target for all spice functions.
+			//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
+			std::string potential[2] = { "Pluto", "Charon" };
+
+			_fovTarget = potential[0]; //default
+			for (int i = 0; i < 2; i++){
+				_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i],
+					_spacecraft, _method,
+					_aberrationCorrection, _time);
+				if (_withinFOV){
+					_fovTarget = potential[i];
+					break;
+				}
+			}
+
+			computeColors();
+			double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
+			double diff = (t2 - _time);
+			double t = 0.0;
+			if (diff <= 30.0) t = 1.f - diff / 30.0;
+
+			double targetEpoch;
+			// for each FOV vector
+			for (int i = 0; i < 4; i++){
+				// compute surface intercept
+				_interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+					_frame, _method, _aberrationCorrection,
+					_time, targetEpoch, bounds[i], ipoint, ivec);
+				// if not found, use the orthogonal projected point
+				if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
+
+				// VBO1 : draw vectors representing outer points of FOV. 
+				if (_interceptTag[i]){
+					_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
+					_interceptVector[3] += 3;
+					//_interceptVector = pscInterpolate(_interceptVector, bsvec, t);
+					// INTERCEPTIONS
+					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(col_start), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(_interceptVector.vec4()), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(col_end), size);
+					indx += 4;
+				}
+				else if (_withinFOV){
+					// FOV OUTSIDE OBJECT
+					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0, 0, 1, 1)), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[i].vec4()), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(blue), size);
+					indx += 4;
+				}
+				else{
+					glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3] + 1);
+					corner = tmp*corner;
+					// "INFINITE" FOV
+					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(col_gray), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(corner), size);
+					indx += 4;
+					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
+					indx += 4;
+				}
+			}
+			_interceptTag[4] = _interceptTag[0]; // 0 & 5 same point
+			fovProjection(_interceptTag, bounds);
+			updateData();
+		}
+		_oldTime = _time;
+
+		glLineWidth(1.f);
+		glBindVertexArray(_vaoID[0]);
+		glDrawArrays(_mode, 0, _vtotal[0]);
+		glBindVertexArray(0);
+
+		//render points
+		glPointSize(2.f);
+		glBindVertexArray(_vaoID[0]);
+		glDrawArrays(GL_POINTS, 0, _vtotal[0]);
+		glBindVertexArray(0);
+
+		//second vbo
+		glLineWidth(2.f);
+		glBindVertexArray(_vaoID[1]);
+		glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
+		glBindVertexArray(0);
+
+		/*glPointSize(5.f);
+		glBindVertexArray(_vaoID2);
+		glDrawArrays(GL_POINTS, 0, _vtotal2);
+		glBindVertexArray(0);
+		*/
+	}
 	_programObject->deactivate();
 }
 
