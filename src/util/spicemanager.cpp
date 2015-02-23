@@ -239,7 +239,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 	return !hasError;
 }
 
-bool SpiceManager::spacecraftClockToET(const std::string craftIdCode, double& craftTicks, double& et){
+bool SpiceManager::spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et){
 	int craftID;
 	getNaifId(craftIdCode, craftID);
 	sct2e_c(craftID, craftTicks, &et);
@@ -321,7 +321,7 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 }
 
 // do NOT remove this method. 
-void SpiceManager::frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const{
+void SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const{
 	glm::dmat3 transform;
 	// get rotation matrix from frame A - frame B
 	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));

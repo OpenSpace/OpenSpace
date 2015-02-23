@@ -92,6 +92,7 @@ public:
 private:
     OpenSpaceEngine(std::string programName);
     ~OpenSpaceEngine();
+    OpenSpaceEngine(const OpenSpaceEngine& rhs) = delete;
 
 	void clearAllWindows();
 	bool gatherCommandlineArguments();

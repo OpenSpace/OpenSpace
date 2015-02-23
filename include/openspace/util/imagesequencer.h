@@ -36,8 +36,10 @@ namespace openspace {
 
 class ImageSequencer {
 public:
+    ImageSequencer();
+
 	static ImageSequencer& ref();
-	bool loadSequence(const std::string dir);
+	bool loadSequence(const std::string& dir);
 
     bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
     bool parsePlaybookFile(const std::string& fileName, std::string year = "2015");

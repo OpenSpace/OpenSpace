@@ -219,7 +219,7 @@ public:
 		std::vector<double>& v) const;
 
 
-	bool spacecraftClockToET(const std::string craftIdCode, double& craftTicks, double& et);
+	bool spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et);
 
 	/**
 	 * Converts the <code>timeString</code> representing a date to a double precision
@@ -261,7 +261,7 @@ public:
 	* \param to The frame to be converted to
 	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
 	*/
-	void frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const;
+	void frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
 
 	/**
 	 *  Finds the projection of one vector onto another vector.

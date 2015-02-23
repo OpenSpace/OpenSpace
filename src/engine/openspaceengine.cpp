@@ -155,7 +155,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		return false;
 
 	// Parse commandline arguments
-	std::vector<std::string> remainingArguments;
 	_engine->_commandlineParser->setCommandLine(argc, argv, &sgctArguments);
 	const bool executeSuccess = _engine->_commandlineParser->execute();
 	if (!executeSuccess)

@@ -58,24 +58,27 @@ auto cmp = [](const ImageParams &a, const ImageParams &b)->bool{
 
 std::vector<ImageParams> _timeStamps;
 
+ImageSequencer::ImageSequencer() 
+    : _nextCapture(0.0)
+    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+{}
+
+
 ImageSequencer& ImageSequencer::ref() {
 	assert(_sequencer != nullptr);
 	return *_sequencer;
 }
-void ImageSequencer::initialize(){
+void ImageSequencer::initialize() {
 	assert(_sequencer == nullptr);
 	_sequencer = new ImageSequencer;
-
-    _sequencer->_nextCapture = 0.0;
-    _sequencer->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png");
 }
 
-void ImageSequencer::deinitialize(){
+void ImageSequencer::deinitialize() {
 	delete _sequencer;
 	_sequencer = nullptr;
 }
 
-void ImageSequencer::createImage(double t1, double t2, std::string instrument, std::string path){
+void ImageSequencer::createImage(double t1, double t2, std::string instrument, std::string path) {
 	// insert
 	ImageParams image;
 	image.startTime = t1;
@@ -318,7 +321,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
     return true;
 }
 
-bool ImageSequencer::loadSequence(const std::string dir){	
+bool ImageSequencer::loadSequence(const std::string& dir) {	
 	ghoul::filesystem::Directory sequenceDir(dir, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	for (auto path : sequencePaths){

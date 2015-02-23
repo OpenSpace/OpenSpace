@@ -192,7 +192,7 @@ const std::type_info& TemplateProperty<T>::type() const {
 template <typename T>
 bool TemplateProperty<T>::setLua(lua_State* state)
 {
-	bool success;
+	bool success = false;
 	T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
 		set(boost::any(thisValue));

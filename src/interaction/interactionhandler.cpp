@@ -193,7 +193,7 @@ namespace luascriptfunctions {
  */
 int setOrigin(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "LuaInteractionHandler";
+	const std::string _loggerCat = "lua.setOrigin";
 
 	int nArguments = lua_gettop(L);
 	if (nArguments != 1)
@@ -223,7 +223,7 @@ int setOrigin(lua_State* L) {
 */
 int bindKey(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "LuaInteractionHandler";
+	const std::string _loggerCat = "lua.bindKey";
 
 	int nArguments = lua_gettop(L);
 	if (nArguments != 2)
@@ -256,7 +256,7 @@ int bindKey(lua_State* L) {
 */
 int clearKeys(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "LuaInteractionHandler";
+	const std::string _loggerCat = "lua.clearKeys";
 
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
@@ -438,6 +438,8 @@ namespace interaction {
 InteractionHandler::InteractionHandler()
 	: _camera(nullptr)
 	, _focusNode(nullptr)
+    , _deltaTime(0.0)
+    , _validKeyLua(false)
     , _controllerSensitivity(10.f)
     , _invertRoll(false)
     , _invertRotation(false)
