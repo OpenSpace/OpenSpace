@@ -260,8 +260,9 @@ public:
 	* \param from The frame to be converted from
 	* \param to The frame to be converted to
 	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
+    * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
 	*/
-	void frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
+	bool frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
 
 	/**
 	 *  Finds the projection of one vector onto another vector.
@@ -354,7 +355,8 @@ public:
 	*  \param method Type of shape model used for the target.
 	*  \param referenceFrame Body-fixed, body-centered frame for target body.
 	*  \param targetEpoch Time of the observation (seconds past J2000).
-	*  \return Visibility flag (SPICETRUE/SPICEFALSE).
+	*  \param isVisible <code>true</code> if the target is visible
+    *  \return The success of the function
     *  For further detail, refer to 
 	*  http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
 	*/
@@ -364,7 +366,9 @@ public:
 		                         const std::string& method,
 		                         const std::string& referenceFrame,
 		                         const std::string& aberrationCorrection,
-		                         double& targetEpoch) const;
+		                         double& targetEpoch,
+                                 bool& isVisible
+                                 ) const;
 	/**
 	* This method performs the same computation as the function its overloading 
 	* with the exception that in doing so it assumes the inertial bodyfixed frame 
@@ -376,7 +380,9 @@ public:
 		                         const std::string& observer,
 		                         const std::string& method,
 		                         const std::string& aberrationCorrection,
-		                         double& targetEpoch) const;
+		                         double& targetEpoch,
+                                 bool& isVisible
+                                 ) const;
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a

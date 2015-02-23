@@ -95,6 +95,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 	}
 	FileSys.setCurrentDirectory(fileDirectory);
 
+    LINFO("Loading SPICE kernel '" << path << "'");
 	// Load the kernel
 	furnsh_c(path.c_str());
 	
@@ -126,6 +127,7 @@ void SpiceManager::unloadKernel(KernelIdentifier kernelId) {
 
 	if (it != _loadedKernels.end()) {
 		// No need to check for errors as we do not allow empty path names
+        LINFO("Unloading SPICE kernel '" << it->path << "'");
 		unload_c(it->path.c_str());
 		_loadedKernels.erase(it);
 	}
@@ -142,6 +144,7 @@ void SpiceManager::unloadKernel(const std::string& filePath) {
 		[&path](const KernelInformation& info) { return info.path == path; });
 
 	if (it != _loadedKernels.end()) {
+        LINFO("Unloading SPICE kernel '" << path << "'");
 		unload_c(path.c_str());
 		_loadedKernels.erase(it);
 	}
@@ -243,7 +246,8 @@ bool SpiceManager::spacecraftClockToET(const std::string& craftIdCode, double& c
 	int craftID;
 	getNaifId(craftIdCode, craftID);
 	sct2e_c(craftID, craftTicks, &et);
-	return true;
+    bool hasError = checkForError("Error transforming spacecraft clock of '" + craftIdCode + "' at time " + std::to_string(craftTicks));
+	return !hasError;
 }
 
 bool SpiceManager::getETfromDate(const std::string& timeString,
@@ -321,18 +325,22 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 }
 
 // do NOT remove this method. 
-void SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const{
+bool SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const{
 	glm::dmat3 transform;
 	// get rotation matrix from frame A - frame B
 	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
+    bool hasError = checkForError("Error converting from frame '" + from +
+        "' to frame '" + to + "' at time " + std::to_string(ephemerisTime));
+    if (hasError)
+        return false;
 	// re-express vector in new frame 
 	mxv_c((double(*)[3])glm::value_ptr(transform), glm::value_ptr(v), glm::value_ptr(v));
+    return true;
 }
 
 glm::dvec3 SpiceManager::orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2){
 	glm::dvec3 projected;
 	vproj_c(glm::value_ptr(v1), glm::value_ptr(v2), glm::value_ptr(projected));
-
 	return projected;
 }
 
@@ -342,9 +350,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 	const std::string& method,
 	const std::string& referenceFrame,
 	const std::string& aberrationCorrection,
-	double& targetEpoch) const{
+	double& targetEpoch,
+    bool& isVisible
+    ) const
+{
 	
-	int visible ;
+	int visible;
 	fovtrg_c(instrument.c_str(),
 		     target.c_str(),
 		     method.c_str(),
@@ -353,7 +364,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		     observer.c_str(),
 		     &targetEpoch,
 		     &visible);
-	return visible;
+    isVisible = (visible == SPICETRUE);
+    
+    bool hasError = checkForError("Checking if target '" + target +
+        "' is in view of instrument '" + instrument + "' failed");
+
+	return !hasError;
 }
 
 bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
@@ -361,7 +377,9 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 	const std::string& observer,
 	const std::string& method,
 	const std::string& aberrationCorrection,
-	double& targetEpoch) const{
+	double& targetEpoch,
+    bool& isVisible
+    ) const{
 
 	int visible;
 
@@ -376,7 +394,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		observer.c_str(),
 		&targetEpoch,
 		&visible);
-	return visible;
+    isVisible = (visible == SPICETRUE);
+
+    bool hasError = checkForError("Checking if target '" + target +
+                "' is in view of instrument '" + instrument + "' failed");
+
+	return !hasError;
 }
 
 
@@ -512,7 +535,7 @@ bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
 
 	bool hasError = checkForError("Error retrieving position transform matrix from "
 		"frame '" + fromFrame + "' to frame '" + body +
-		"at time '" + std::to_string(ephemerisTime) + "'");
+		"at time '" + std::to_string(ephemerisTime) + "' for prime meridian");
 	positionMatrix = glm::transpose(positionMatrix);
 
 	return !hasError;
@@ -544,7 +567,8 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 
 	bool hasError = checkForError("Error retrieving position transform matrix from "
 		"frame '" + fromFrame + "' to frame '" + toFrame +
-		"' at time '" + std::to_string(ephemerisTimeTo) + "'");
+		"' from time '" + std::to_string(ephemerisTimeFrom) + " to time '"
+        + std::to_string(ephemerisTimeTo) + "'");
 	positionMatrix = glm::transpose(positionMatrix);
 
 	return !hasError;
