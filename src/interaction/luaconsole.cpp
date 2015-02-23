@@ -128,8 +128,6 @@ void LuaConsole::initialize() {
         file.close();
         _commands = _commandsHistory;
     }
-    else
-        LERROR("Could not open file '" << absPath(_filename) << "' for reading history");
     _commands.push_back("");
     _activeCommand = _commands.size() - 1;
 }
