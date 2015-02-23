@@ -106,7 +106,7 @@ glm::vec3 PowerScaledCoordinate::vec3() const
                      _vec[2] * pow(k, _vec[3]));
 }
 
-glm::dvec4& PowerScaledCoordinate::dvec4() const
+glm::dvec4 PowerScaledCoordinate::dvec4() const
 {
 	//return _vec;
 	return glm::dvec4(_vec);
