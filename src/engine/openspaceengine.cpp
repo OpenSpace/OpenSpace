@@ -27,6 +27,7 @@
 // sgct
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
+#include <openspace/version.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
@@ -154,7 +155,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		return false;
 
 	// Parse commandline arguments
-	std::vector<std::string> remainingArguments;
 	_engine->_commandlineParser->setCommandLine(argc, argv, &sgctArguments);
 	const bool executeSuccess = _engine->_commandlineParser->execute();
 	if (!executeSuccess)
@@ -185,6 +185,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 	// Initialize the requested logs from the configuration file
 	_engine->configureLogging();
+
+    LINFOC("OpenSpace Version", OPENSPACE_VERSION_MAJOR << "." <<
+        OPENSPACE_VERSION_MINOR << "." <<
+        OPENSPACE_VERSION_BUILD << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();

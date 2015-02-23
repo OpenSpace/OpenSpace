@@ -26,7 +26,7 @@
 #define __PlanetGeometryProjection_H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/planets/RenderablePlanetProjection.h>
+#include <openspace/rendering/planets/renderableplanetprojection.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {

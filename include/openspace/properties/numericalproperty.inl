@@ -208,7 +208,7 @@ std::string NumericalProperty<T>::className() const {
 template <typename T>
 bool NumericalProperty<T>::setLua(lua_State* state)
 {
-	bool success;
+	bool success = false;
 	T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
 		TemplateProperty<T>::setValue(value);

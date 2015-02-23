@@ -50,6 +50,7 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	// The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(keyName, name);
+    ghoul_assert(success, "Name tag was not present");
 
 	std::string file;
 	success = dictionary.getValue(constants::modelgeometry::keyObjFile, file);
@@ -59,22 +60,23 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	}
 	const std::string filename = FileSys.absolutePath(file);
 
-	std::ifstream ifile(filename.c_str());
-	if (ifile){
-		LDEBUG("Found file..\n");
-		ifile.close();
-		loadObj(filename.c_str());
-	}
-	else {
-		LERROR("Did not find file..\n");
-	}
+    if (FileSys.fileExists(filename))
+        loadObj(filename.c_str());
+    else
+        LERROR("Could not load OBJ file '" << filename << "': File not found");
 }
 
 void WavefrontGeometry::loadObj(const char *filename){
 	// temporary 
 	const char *mtl_basepat = filename;
 
+    LINFO("Loading OBJ file '" << filename << "'");
 	std::string err = tinyobj::LoadObj(shapes, materials, filename, mtl_basepat);
+
+    if (!err.empty()) {
+        LERROR(err);
+        return;
+    }
 
     LINFO("Loaded Mesh");
     LINFO("Number of Shapes: " << shapes.size());

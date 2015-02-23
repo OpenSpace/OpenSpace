@@ -28,6 +28,8 @@
 #include <openspace/gui/guihelpcomponent.h>
 #include <openspace/gui/guiperformancecomponent.h>
 #include <openspace/gui/guipropertycomponent.h>
+#include <openspace/gui/guiorigincomponent.h>
+#include <openspace/gui/guitimecomponent.h>
 #include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
@@ -60,9 +62,11 @@ public:
 	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 //protected:
+    GuiHelpComponent _help;
+    GuiOriginComponent _origin;
 	GuiPerformanceComponent _performance;
 	GuiPropertyComponent _property;
-	GuiHelpComponent _help;
+    GuiTimeComponent _time;
 
 	bool _isEnabled;
 

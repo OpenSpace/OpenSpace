@@ -420,7 +420,7 @@ TEST_F(SpiceManagerTest, getSubObserverPoint){
 	double targetEt;
 	double subObserverPoint_ref[3];
 	double vectorToSurfacePoint_ref[3];
-	static SpiceChar * method[2] = { "Intercept:  ellipsoid", "Near point: ellipsoid" };
+	static SpiceChar* method[2] = { static_cast<char*>("Intercept:  ellipsoid"), static_cast<char*>("Near point: ellipsoid") };
 
 	str2et_c("2004 jun 11 19:32:00", &et);
 

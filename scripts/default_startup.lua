@@ -1,4 +1,7 @@
---openspace.setPropertyValue('Earth.renderable.colorTexture', '${OPENSPACE_DATA}/modules/mars/textures/mars.png')
+openspace.setInvertRoll(true);
+
+-- openspace.time.setTime("2007 FEB 27 16:30:00")
+-- openspace.time.setDeltaTime(50);
 
 openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
 -- NH takes series of images from visible to dark side (across terminator)

@@ -124,6 +124,8 @@ namespace openspace {
 				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 			const int type = lua_type(L, -1);
+            if (type != LUA_TBOOLEAN)
+                return luaL_error(L, "Expected argument of type 'bool'");
 			bool b = lua_toboolean(L, -1) != 0;
 			OsEng.renderEngine()->toggleVisualizeABuffer(b);
 			return 0;
@@ -140,6 +142,8 @@ namespace openspace {
 				return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 			const int type = lua_type(L, -1);
+            if (type != LUA_TBOOLEAN)
+                return luaL_error(L, "Expected argument of type 'bool'");
 			bool b = lua_toboolean(L, -1) != 0;
 			OsEng.renderEngine()->toggleInfoText(b);
 			return 0;
@@ -400,7 +404,6 @@ namespace openspace {
 
 		// converts the quaternion used to rotation matrices
 		_mainCamera->compileViewRotationMatrix();
-		UpdateData a = { Time::ref().currentTime(), Time::ref().deltaTime() };
 
 		// update and evaluate the scene starting from the root node
 		_sceneGraph->update({
@@ -484,11 +487,11 @@ namespace openspace {
 					int x1, xSize, y1, ySize;
 					sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 					int startY = ySize - 2 * font_size_mono;
-					const glm::vec2 scaling = _mainCamera->scaling();
-					const glm::vec3 viewdirection = _mainCamera->viewDirection();
-					const psc position = _mainCamera->position();
-					const psc origin = OsEng.interactionHandler()->focusNode()->worldPosition();
-					const PowerScaledScalar pssl = (position - origin).length();
+					const glm::vec2& scaling = _mainCamera->scaling();
+					const glm::vec3& viewdirection = _mainCamera->viewDirection();
+					const psc& position = _mainCamera->position();
+					const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
+					const PowerScaledScalar& pssl = (position - origin).length();
 
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
@@ -509,8 +512,7 @@ namespace openspace {
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - Time::ref().currentTime();
-					double t = 0.0;
-					t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
+					double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
 					std::string progress = "|";
 					int g = ((t)* 20) + 1;
 					for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");

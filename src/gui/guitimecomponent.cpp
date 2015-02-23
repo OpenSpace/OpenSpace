@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#include <openspace/gui/guitimecomponent.h>
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/time.h>
+
+#include <ghoul/misc/assert.h>
+#include "imgui.h"
+
+namespace {
+	const std::string _loggerCat = "GuiTimeComponent";
+}
 
 namespace openspace {
+namespace gui {
 
-class PowerScaledSphere {
-public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
-    PowerScaledSphere(const PowerScaledSphere& cpy);
+void GuiTimeComponent::render() {
+    float deltaTime = Time::ref().deltaTime();
+    
 
-    bool initialize();
-
-    void render();
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
+    if (changed)
+        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
 
 
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+    //char dateBuffer[512] = {};
+    //ImGui::InputText("Date", dateBuffer, 512);
+    //bool pressed = ImGui::Button("Set Date");
+    //if (pressed)
+    //    OsEng.scriptEngine()->queueScript("openspace.time.setTime('" + std::string(dateBuffer) + "')");
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+    //const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
 
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
+    //std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
+    //std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
+    //auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
+    //ghoul_assert(it != nodes.end(), "Focus node not found");
 
-} // namespace openspace
+    //std::string nodeNames = "";
+    //for (SceneGraphNode* n : nodes) 
+    //    nodeNames += n->name() + '\0';
 
-#endif // __POWERSCALEDSPHERE_H__
+
+    //int position = it - nodes.begin();
+
+    //bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
+
+    //if (result) {
+    //    LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //    OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //}
+
+}
+
+} // gui
+} // openspace

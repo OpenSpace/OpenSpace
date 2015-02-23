@@ -85,7 +85,6 @@ private:
 
     float _increment;
     float _oldTime = 0;
-    float _dtEt;
 };
 
 } // namespace openspace

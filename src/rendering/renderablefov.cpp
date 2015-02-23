@@ -443,10 +443,10 @@ void RenderableFov::render(const RenderData& data){
 
 			_fovTarget = potential[0]; //default
 			for (int i = 0; i < 2; i++){
-				_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i],
+				bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i],
 					_spacecraft, _method,
-					_aberrationCorrection, _time);
-				if (_withinFOV){
+					_aberrationCorrection, _time, _withinFOV);
+				if (success && _withinFOV){
 					_fovTarget = potential[i];
 					break;
 				}

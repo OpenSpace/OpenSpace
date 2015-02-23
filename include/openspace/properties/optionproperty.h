@@ -69,7 +69,8 @@ public:
 	 * Adds the passed option to the list of available options. The <code>value</code> of
 	 * the <code>option</code> must not have been registered previously, or a warning will
 	 * be logged.
-	 * \param option The option that will be added to the list of available options
+	 * \param value The option that will be added to the list of available options
+     * \param desc The description of the value that will be added
 	 */
 	void addOption(int value, std::string desc);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#ifndef __GUITIMECOMPONENT_H__
+#define __GUITIMECOMPONENT_H__
 
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+#include <openspace/gui/guicomponent.h>
 
 namespace openspace {
 
-class PowerScaledSphere {
+namespace gui {
+
+class GuiTimeComponent : public GuiComponent {
 public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-    ~PowerScaledSphere();
-    PowerScaledSphere(const PowerScaledSphere& cpy);
-
-    bool initialize();
-
-    void render();
-
-
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
-
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+    void render() override;
 };
 
+//
+//class GuiPropertyComponent : public GuiComponent {
+//public:
+//	//void registerProperty(const std::string& propertyDescription);
+//    void registerProperty(properties::Property* prop);
+//	void render();
+//
+//protected:
+//	enum class PropertyType {
+//		BoolProperty = 0,
+//		IntProperty,
+//		FloatProperty,
+//		Vec2Property,
+//		Vec3Property,
+//		StringProperty,
+//		OptionProperty,
+//		SelectionProperty,
+//		TriggerProperty,
+//		InvalidPropertyType
+//	};
+//
+//	struct PropertyInfo {
+//		PropertyType type;
+//		std::string identifier;
+//		std::string name;
+//		std::string group;
+//	};
+//	typedef std::string PropertyOwner;
+//
+//	struct Property {
+//		PropertyOwner owner;
+//		std::vector<PropertyInfo> properties;
+//	};
+//
+//	void handleProperty(const ghoul::Dictionary& value);
+//
+//	PropertyType toPropertyType(const std::string& name) const;
+//
+//	void renderProperty(const PropertyInfo& info) const;
+//
+//    std::set<properties::Property*> _boolProperties;
+//    std::set<properties::Property*> _intProperties;
+//    std::set<properties::Property*> _floatProperties;
+//    std::set<properties::Property*> _vec2Properties;
+//    std::set<properties::Property*> _vec3Properties;
+//    std::set<properties::Property*> _vec4Properties;
+//    std::set<properties::Property*> _stringProperties;
+//    std::set<properties::Property*> _optionProperties;
+//    std::set<properties::Property*> _selectionProperties;
+//    std::set<properties::Property*> _triggerProperties;
+//    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+//
+//	//std::vector<Property> _properties;
+//};
+
+} // namespace gui
 } // namespace openspace
 
-#endif // __POWERSCALEDSPHERE_H__
+#endif // __GUITIMECOMPONENT_H__

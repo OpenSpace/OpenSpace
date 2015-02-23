@@ -112,7 +112,7 @@ public:
 
 	/**
 	 * Determines whether values exist for some <code>item</code> for any
-	 * code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
+	 * <code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
 	 * function. 
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
 	 * \param body The name of the body that should be sampled
@@ -219,7 +219,7 @@ public:
 		std::vector<double>& v) const;
 
 
-	bool spacecraftClockToET(const std::string craftIdCode, double& craftTicks, double& et);
+	bool spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et);
 
 	/**
 	 * Converts the <code>timeString</code> representing a date to a double precision
@@ -260,8 +260,9 @@ public:
 	* \param from The frame to be converted from
 	* \param to The frame to be converted to
 	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
+    * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
 	*/
-	void frameConversion(glm::dvec3& v, const std::string from, const std::string to, double ephemerisTime) const;
+	bool frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
 
 	/**
 	 *  Finds the projection of one vector onto another vector.
@@ -317,18 +318,18 @@ public:
     *   the surface intercept of the ray on a target body at a specified 
     *   epoch, optionally corrected for light time and stellar 
     *   aberration. 
-	*   \param method     Computation method. 
-    *   \param target     Name of target body. 
-    *   \param et         Epoch in ephemeris seconds past J2000 TDB. 
-    *   \param fixref     Body-fixed, body-centered target body frame. 
-    *   \param abcorr     Aberration correction. 
-    *   \param obsrvr     Name of observing body. 
-    *   \param dref       Reference frame of ray's direction vector. 
-    *   \param dvec       Ray's direction vector. 
-    *   \param spoint     Surface intercept point on the target body. 
-    *   \param trgepc     Intercept epoch. 
-    *   \param srfvec     Vector from observer to intercept point. 
-    *   \param found      Flag indicating whether intercept was found. 
+    *   \param target Name of target body.
+    *   \param observer Name of observing body.
+    *   \param fovFrame Reference frame of ray's direction vector.
+    *   \param bodyFixedFrame Body-fixed, body-centered target body frame.
+	*   \param method Computation method. 
+    *   \param aberrationCorrection Aberration correction.
+    *   \param ephemerisTime Epoch in ephemeris seconds past J2000 TDB. 
+    *   \param targetEpoch Intercept epoch.
+    *   \param directionVector Ray's direction vector. 
+    *   \param surfaceIntercept Surface intercept point on the target body. 
+    *   \param surfaceVector Vector from observer to intercept point. 
+    *   \return Flag indicating whether intercept was found. 
 	*   For further details, refer to
 	*   http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
 	*/
@@ -347,14 +348,15 @@ public:
 	/**
 	*  Determine if a specified ephemeris object is within the
     *  field-of-view (FOV) of a specified instrument at a given time.
-	*  \param Name or ID code string of the instrument.
-	*  \param Name or ID code string of the target.
-	*  \param Type of shape model used for the target.
-	*  \param Body-fixed, body-centered frame for target body.
-	*  \param Aberration correction method.
-	*  \param Name or ID code string of the observer.
-	*  \param Time of the observation (seconds past J2000).
-	*  \param Visibility flag (SPICETRUE/SPICEFALSE).
+	*  \param instrument Name or ID code string of the instrument.
+	*  \param target Name or ID code string of the target.
+    *  \param observer Name or ID code string of the observer.
+    *  \param aberrationCorrection Aberration correction method.
+	*  \param method Type of shape model used for the target.
+	*  \param referenceFrame Body-fixed, body-centered frame for target body.
+	*  \param targetEpoch Time of the observation (seconds past J2000).
+	*  \param isVisible <code>true</code> if the target is visible
+    *  \return The success of the function
     *  For further detail, refer to 
 	*  http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
 	*/
@@ -364,7 +366,9 @@ public:
 		                         const std::string& method,
 		                         const std::string& referenceFrame,
 		                         const std::string& aberrationCorrection,
-		                         double& targetEpoch) const;
+		                         double& targetEpoch,
+                                 bool& isVisible
+                                 ) const;
 	/**
 	* This method performs the same computation as the function its overloading 
 	* with the exception that in doing so it assumes the inertial bodyfixed frame 
@@ -376,7 +380,9 @@ public:
 		                         const std::string& observer,
 		                         const std::string& method,
 		                         const std::string& aberrationCorrection,
-		                         double& targetEpoch) const;
+		                         double& targetEpoch,
+                                 bool& isVisible
+                                 ) const;
 
 	/**
 	 * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
@@ -570,7 +576,7 @@ public:
 	 * surface point on a body with the NAIF ID of <code>id</code> to rectangular
 	 * <code>coordinates</code>. For further details, refer to
 	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
-	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
+	 * \param id The body on which the <code>longitude</code> and <code>latitude</code>
 	 * are defined. This body needs to have a defined radius for this function to work
      * \param longitude The longitude of the point on the <code>body</code> in radians
      * \param latitude The latitude of the point on the <code>body</code> in radians

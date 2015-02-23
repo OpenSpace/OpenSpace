@@ -48,8 +48,8 @@
 
 // projection
 #include <openspace/rendering/planets/renderableplanetprojection.h>
-#include <openspace/rendering/planets/SimpleSphereGeometryProjection.h>
-#include <openspace/rendering/planets/PlanetGeometryProjection.h>
+#include <openspace/rendering/planets/simplespheregeometryprojection.h>
+#include <openspace/rendering/planets/planetgeometryprojection.h>
 
 
 // std

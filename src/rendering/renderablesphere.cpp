@@ -120,6 +120,7 @@ bool RenderableSphere::isReady() const {
 }
 
 bool RenderableSphere::initialize() {
+    delete _sphere;
     _sphere = new PowerScaledSphere(_size.value(), _segments);
     _sphere->initialize();
 

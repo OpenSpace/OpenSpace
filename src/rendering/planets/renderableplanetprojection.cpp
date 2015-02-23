@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/planets/RenderablePlanetProjection.h>
+#include <openspace/rendering/planets/renderableplanetprojection.h>
 #include <openspace/util/constants.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
@@ -392,8 +392,8 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 
 	std::string _fovTarget = "";
 	for (int i = 0; i < 2; i++){
-		_withinFOV = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0]);
-		if (_withinFOV){
+		bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0], _withinFOV);
+		if (success && _withinFOV){
 			_fovTarget = potential[i];
 			break;
 		}

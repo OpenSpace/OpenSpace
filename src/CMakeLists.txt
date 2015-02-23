@@ -28,6 +28,8 @@
 set(SOURCE_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(HEADER_ROOT_DIR ${CMAKE_SOURCE_DIR}/include)
 
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${HEADER_ROOT_DIR}/openspace/version.h)
+
 file(GLOB CONFIGURATION_SOURCE ${SOURCE_ROOT_DIR}/configuration/*.cpp)
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${CONFIGURATION_SOURCE})
 file(GLOB CONFIGURATION_HEADER ${HEADER_ROOT_DIR}/openspace/configuration/*.h)
@@ -126,13 +128,6 @@ file(GLOB FLARE_HEADER ${HEADER_ROOT_DIR}/openspace/flare/*.h)
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${FLARE_HEADER})
 source_group(Flare FILES ${FLARE_SOURCE} ${FLARE_HEADER})
 
-file(GLOB INTERFACE_SOURCE ${SOURCE_ROOT_DIR}/interface/*.cpp)
-set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${INTERFACE_SOURCE})
-file(GLOB INTERFACE_HEADER ${HEADER_ROOT_DIR}/openspace/interface/*.h)
-set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${INTERFACE_HEADER})
-source_group(Interface FILES ${INTERFACE_SOURCE} ${INTERFACE_HEADER})
-
-
 include_directories(${HEADER_ROOT_DIR})
 include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 
@@ -155,9 +150,9 @@ include_directories("${HEADER_ROOT_DIR}")
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
-if (NOT UNIX)
-    cotire(OpenSpace)
-endif ()
+#if (NOT UNIX)
+    #cotire(OpenSpace)
+#endif ()
 GhoulCopySharedLibraries(OpenSpace)
 
 add_subdirectory(tests)

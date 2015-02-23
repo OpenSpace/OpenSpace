@@ -43,9 +43,9 @@ namespace interaction {
 
 void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier modifier) {
 	// TODO package in script
-	const float speed = 2.75;
 	const float dt = static_cast<float>( _handler->deltaTime());
 	if(action == KeyAction::Press|| action == KeyAction::Repeat) {
+        const float speed = 2.75;
 		if (key == Key::S) {
 		    glm::vec3 euler(speed * dt, 0.0, 0.0);
 		    glm::quat rot = glm::quat(euler);
