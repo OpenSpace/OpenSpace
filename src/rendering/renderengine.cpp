@@ -149,6 +149,23 @@ namespace openspace {
 			return 0;
 		}
 
+        /**
+         * \ingroup LuaScripts
+         * showSGCTRenderStatistics(bool):
+         * Set the rendering of the SGCTRenderStatistics
+         */
+        int showSGCTRenderStatistics(lua_State* L) {
+            int nArguments = lua_gettop(L);
+            if (nArguments != 1)
+                return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+            const int type = lua_type(L, -1);
+            if (type != LUA_TBOOLEAN)
+                return luaL_error(L, "Expected argument of type 'bool'");
+            bool b = lua_toboolean(L, -1) != 0;
+            OsEng.renderEngine()->setSGCTRenderStatistics(b);
+        }
+
 		/**
 		* \ingroup LuaScripts
 		* visualizeABuffer(bool):
@@ -214,7 +231,7 @@ namespace openspace {
 		, _fadeDuration(2.f)
 		, _currentFadeTime(0.f)
 		, _fadeDirection(0)
-
+        , _sgctRenderStatisticsVisible(false)
 	{
 	}
 
@@ -367,6 +384,7 @@ namespace openspace {
 
 	void RenderEngine::postSynchronizationPreDraw()
 	{
+        sgct::Engine::instance()->setStatsGraphVisibility(_sgctRenderStatisticsVisible);
 		//temporary fade funtionality
 		if (_fadeDirection != 0){
 			if (_currentFadeTime > _fadeDuration){
@@ -736,6 +754,12 @@ namespace openspace {
 						"bool",
 						"Toggles the showing of render information on-screen text"
 					},
+                    {
+                        "showSGCTRenderStatistics",
+                        &luascriptfunctions::showSGCTRenderStatistics,
+                        "bool",
+                        "Toggles the visibility of the SGCT rendering information"
+                    },
 					{
 						"setPerformanceMeasurement",
 						&luascriptfunctions::setPerformanceMeasurement,
@@ -895,6 +919,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
     }
     ghoul_assert(false, "This function is being misused");
 
+}
+
+void RenderEngine::setSGCTRenderStatistics(bool visible) {
+    _sgctRenderStatisticsVisible = visible;
 }
 
 }// namespace openspace
