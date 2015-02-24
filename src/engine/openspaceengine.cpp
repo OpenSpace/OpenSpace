@@ -186,8 +186,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	// Initialize the requested logs from the configuration file
 	_engine->configureLogging();
 
-    LINFOC("OpenSpace Version", OPENSPACE_VERSION_MAJOR << "." <<
+    LINFOC("OpenSpace Version", 
+        OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
+        OPENSPACE_VERSION_REVISION << "." <<
         OPENSPACE_VERSION_BUILD << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
