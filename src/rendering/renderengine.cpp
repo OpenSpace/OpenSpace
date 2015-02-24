@@ -427,9 +427,11 @@ namespace openspace {
 		// update and evaluate the scene starting from the root node
 		_sceneGraph->update({
 			Time::ref().currentTime(),
+            //Time::ref().timeJumped(),
 			Time::ref().deltaTime(),
 			_doPerformanceMeasurements
 		});
+
 
 		_sceneGraph->evaluate(_mainCamera);
 
@@ -629,6 +631,7 @@ namespace openspace {
 		}
 
 		void RenderEngine::postDraw() {
+            //Time::ref().setTimeJumped(false);
 			if (_takeScreenshot) {
 				sgct::Engine::instance()->takeScreenshot();
 				_takeScreenshot = false;

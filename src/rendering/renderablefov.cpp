@@ -52,6 +52,7 @@ namespace {
 	const std::string keyInstrument           = "Instrument.Name";
 	const std::string keyInstrumentMethod     = "Instrument.Method";
 	const std::string keyInstrumentAberration = "Instrument.Aberration";
+    const std::string keyPotentialTargets     = "PotentialTargets";
 }
 //#define DEBUG
 namespace openspace{
@@ -70,18 +71,33 @@ namespace openspace{
 		, _texture(nullptr)
 		, _mode(GL_LINES){
 
-		bool b1 = dictionary.getValue(keyBody                 , _spacecraft);
-		bool b2 = dictionary.getValue(keyFrame                , _frame);
-		bool b3 = dictionary.getValue(keyInstrument           , _instrumentID);
-		bool b4 = dictionary.getValue(keyInstrumentMethod     , _method);
-		bool b5 = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+		bool success = dictionary.getValue(keyBody            , _spacecraft);
+        ghoul_assert(success, "");
 
-		assert(b1 == true);
-		assert(b2 == true);
-		assert(b3 == true);
-		assert(b4 == true);
-		assert(b5 == true);
+        success = dictionary.getValue(keyFrame                , _frame);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrument           , _instrumentID);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrumentMethod     , _method);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+        ghoul_assert(success, "");
+
+        ghoul::Dictionary potentialTargets;
+        success = dictionary.getValue(keyPotentialTargets, potentialTargets);
+        ghoul_assert(success, "");
+
+        _potentialTargets.resize(potentialTargets.size());
+        for (int i = 0; i < potentialTargets.size(); ++i) {
+            std::string target;
+            potentialTargets.getValue(std::to_string(i + 1), target);
+            _potentialTargets[i] = target;
+        }
 }
+
 void RenderableFov::allocateData(){ 
 	int points = 8;
 	_stride[0] = points;
@@ -433,23 +449,30 @@ void RenderableFov::render(const RenderData& data){
 
 			// fetch data for specific instrument (shape, boresight, bounds etc)
 			bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
-			if (!found) LERROR("Could not locate instrument");
-
+			if (!found) {
+                LERROR("Could not locate instrument");
+                return;
+            }
 			float size = 4 * sizeof(float);
 			int indx = 0;
 
 			// set target based on visibility to specific instrument,
 			// from here on the _fovTarget is the target for all spice functions.
 			//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
-			std::string potential[2] = { "Pluto", "Charon" };
+			//std::string potential[2] = { "Pluto", "Charon" };
 
-			_fovTarget = potential[0]; //default
-			for (int i = 0; i < 2; i++){
-				bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i],
-					_spacecraft, _method,
-					_aberrationCorrection, _time, _withinFOV);
+			_fovTarget = _potentialTargets[0]; //default
+			for (int i = 0; i < _potentialTargets.size(); i++){
+				bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+                    _instrumentID,
+                    _potentialTargets[i],
+					_spacecraft,
+                    _method,
+					_aberrationCorrection,
+                    _time,
+                    _withinFOV);
 				if (success && _withinFOV){
-					_fovTarget = potential[i];
+					_fovTarget = _potentialTargets[i];
 					break;
 				}
 			}

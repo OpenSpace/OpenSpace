@@ -145,7 +145,10 @@ void RenderableTrail::render(const RenderData& data) {
 }
 
 void RenderableTrail::update(const UpdateData& data) {
-    // needsSweep also needs to be done when the time has been changed abruptly ---abock
+    //if (data.isTimeJump)
+        //_needsSweep = true;
+        //return;
+
     if (_needsSweep) {
         fullYearSweep(data.time);
         sendToGPU();

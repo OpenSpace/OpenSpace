@@ -36,6 +36,7 @@ struct InitializeData {
 
 struct UpdateData {
 	double time;
+    //bool isTimeJump;
 	double delta;
 	bool doPerformanceMeasurement;
 };

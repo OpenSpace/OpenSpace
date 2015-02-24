@@ -88,11 +88,11 @@ private:
 	glm::mat4  _projectorMatrix;
 
 	// spice
-	std::string _sequenceFile;
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
 	std::string _aberration;
+    std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
 	float _fovy;
 	float _aspectRatio;
 	float _nearPlane;

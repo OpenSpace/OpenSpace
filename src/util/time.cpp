@@ -239,6 +239,9 @@ void Time::deserialize(SyncBuffer* syncBuffer){
 	syncBuffer->decode(_sharedDt);
 	syncBuffer->decode(_sharedTimeJumped);
 
+    //if (_sharedTimeJumped)
+    //    _jockeHasToFixThisLater = true;
+
 	_syncMutex.unlock();
 }
 
@@ -248,6 +251,11 @@ void Time::postSynchronizationPreDraw(){
 	_syncedTime = _sharedTime;
 	_syncedDt = _sharedDt;
 	_syncedTimeJumped = _sharedTimeJumped;
+
+    //if (_jockeHasToFixThisLater) {
+    //    _syncedTimeJumped = true;
+    //    _jockeHasToFixThisLater = false;
+    //}
 
 	_syncMutex.unlock();	
 }
