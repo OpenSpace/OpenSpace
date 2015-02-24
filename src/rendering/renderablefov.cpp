@@ -526,10 +526,12 @@ void RenderableFov::render(const RenderData& data){
 		glBindVertexArray(0);
 
 		//second vbo
-		glLineWidth(2.f);
-		glBindVertexArray(_vaoID[1]);
-		glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
-		glBindVertexArray(0);
+		if (_withinFOV){
+			glLineWidth(2.f);
+			glBindVertexArray(_vaoID[1]);
+			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
+			glBindVertexArray(0);
+		}
 
 		/*glPointSize(5.f);
 		glBindVertexArray(_vaoID2);
