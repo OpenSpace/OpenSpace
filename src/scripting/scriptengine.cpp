@@ -470,8 +470,8 @@ void ScriptEngine::remapPrintFunction() {
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
-    lua_newtable(_state);
-    lua_setglobal(_state, _openspaceLibraryName.c_str());
+    lua_newtable(state);
+    lua_setglobal(state, _openspaceLibraryName.c_str());
 
 	LDEBUG("Add OpenSpace modules");
 	for (const LuaLibrary& lib : _registeredLibraries)
