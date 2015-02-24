@@ -714,4 +714,12 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 	}
 }
 
+void OpenSpaceEngine::enableBarrier() {
+    sgct::SGCTWindow::setBarrier(true);
+}
+
+void OpenSpaceEngine::disableBarrier() {
+    sgct::SGCTWindow::setBarrier(false);
+}
+
 }  // namespace openspace

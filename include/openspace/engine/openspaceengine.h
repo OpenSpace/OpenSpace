@@ -87,6 +87,9 @@ public:
     void encode();
     void decode();
 
+    void enableBarrier();
+    void disableBarrier();
+
     void runSettingsScripts();
 
 private:
