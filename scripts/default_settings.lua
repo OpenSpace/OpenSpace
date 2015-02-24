@@ -1,3 +1,7 @@
+--[[  OpenSpace settings script ]]--
+-- This Lua script get executed once at the start of the application and is used to
+-- set settings in the loaded scene graph
+
 openspace.printInfo("Setting default values");
 openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false);
 

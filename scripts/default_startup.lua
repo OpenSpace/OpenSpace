@@ -1,6 +1,17 @@
-openspace.setInvertRoll(true);
+--[[  OpenSpace startup script ]]--
+-- This Lua script get executed once at the start of the application
 
-openspace.time.setTime("2007 FEB 27 16:41:00")
+--openspace.setInvertRotation(true)                     -- Uncomment this if you want to invert the rotation
+openspace.setInvertRoll(true);
+--openspace.setInteractionSensitivity(10)               -- This is the default value for the sensitivity (the higher, the more sensitive)
+
+openspace.time.setTime("2007 FEB 27 16:40:00")          -- This is the start time for a Jupiter run of New Horizons
+
+
+openspace.time.setDeltaTime(10)                         -- How many seconds pass per second of realtime, changeable in the GUI
+
+dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))() -- Load the default keybindings
+
 -- openspace.time.setDeltaTime(50);
 
 -- openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
@@ -29,13 +40,4 @@ openspace.time.setTime("2007 FEB 27 16:41:00")
 -- until audience tires (enough to fill 10-15 mins if run at dt = 100)
 
 
-openspace.time.setDeltaTime(10)
 -- print(openspace.time.currentTimeUTC())
-
-
-
-function loadKeyBindings()
-	p = openspace.absPath('${SCRIPTS}/bind_keys.lua')
-	dofile(p)
-end
-loadKeyBindings()
