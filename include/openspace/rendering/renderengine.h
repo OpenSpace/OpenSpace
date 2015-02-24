@@ -76,6 +76,8 @@ public:
 
 	float globalOpacity();
 	void setGlobalOpacity(float opacity);
+
+    void setSGCTRenderStatistics(bool visible);
 	
 	/**
 	 * Returns the Lua library that contains all Lua functions available to affect the
@@ -114,6 +116,7 @@ private:
 	float _fadeDuration;
 	float _currentFadeTime;
 	int _fadeDirection;
+    bool _sgctRenderStatisticsVisible;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;
