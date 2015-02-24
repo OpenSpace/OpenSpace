@@ -210,9 +210,10 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 // This method is the current bottleneck.
 psc RenderableFov::checkForIntercept(glm::dvec3 ray){
 	double targetEt;
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+	bool intercepted = false;
+    openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 																	      _frame, _method, _aberrationCorrection, 
-																		  _time, targetEt, ray, ipoint, ivec);
+																		  _time, targetEt, ray, ipoint, ivec, intercepted);
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 	_interceptVector[3] += 3;
 
@@ -236,16 +237,17 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double toleran
 	//check if point is on surface
 	double targetEt;
 	glm::dvec3 half = interpolate(p1, p2, 0.5f);
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+	bool intercepted = false;
+    openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 													                      _frame, _method, _aberrationCorrection, 
-																		  _time, targetEt, half, ipoint, ivec);
+																		  _time, targetEt, half, ipoint, ivec, intercepted);
 	if (glm::distance(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
 		return half;
 	}
 	_previousHalf = half;
 	//recursive search
-	if (intercepted == false){
+	if (!intercepted){
 		return bisection(p1, half, tolerance);
 	}else{
 		return bisection(half, p2, tolerance);
@@ -458,9 +460,9 @@ void RenderableFov::render(const RenderData& data){
 			// for each FOV vector
 			for (int i = 0; i < 4; i++){
 				// compute surface intercept
-				_interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+				openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 					_frame, _method, _aberrationCorrection,
-					_time, targetEpoch, bounds[i], ipoint, ivec);
+					_time, targetEpoch, bounds[i], ipoint, ivec, _interceptTag[i]);
 				// if not found, use the orthogonal projected point
 				if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
 

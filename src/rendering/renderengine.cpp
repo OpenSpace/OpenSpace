@@ -893,7 +893,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
         return;
     }
-    ghoul_assert(false, "??");
+    ghoul_assert(false, "This function is being misused");
 
 }
 

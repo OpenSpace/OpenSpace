@@ -80,8 +80,6 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 		return KernelFailed;
 	}
 
-	KernelIdentifier kernelId = ++_lastAssignedKernel;
-
 	// We need to set the current directory as meta-kernels are usually defined relative
 	// to the directory they reside in. The directory change is not necessary for regular
 	// kernels
@@ -93,6 +91,22 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 		LERROR("Could not find directory for kernel '" << path << "'");
 		return KernelFailed;
 	}
+
+    auto it = std::find_if(
+        _loadedKernels.begin(),
+        _loadedKernels.end(),
+        [path](const KernelInformation& info) { return info.path == path; });
+
+    if (it != _loadedKernels.end())
+    {
+        it->refCount++;
+        LDEBUG("Kernel '" << path << "' was already loaded. "
+            "New reference count: " << it->refCount);
+        return it->id;
+    }
+
+    KernelIdentifier kernelId = ++_lastAssignedKernel;
+
 	FileSys.setCurrentDirectory(fileDirectory);
 
     LINFO("Loading SPICE kernel '" << path << "'");
@@ -115,7 +129,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 	if (hasError)
 		return KernelFailed;
 	else {
-		KernelInformation&& info = { path, std::move(kernelId) };
+		KernelInformation&& info = { path, std::move(kernelId), 1 };
 		_loadedKernels.push_back(info);
 		return kernelId;
 	}
@@ -126,10 +140,18 @@ void SpiceManager::unloadKernel(KernelIdentifier kernelId) {
 		[&kernelId](const KernelInformation& info) { return info.id == kernelId ; });
 
 	if (it != _loadedKernels.end()) {
-		// No need to check for errors as we do not allow empty path names
-        LINFO("Unloading SPICE kernel '" << it->path << "'");
-		unload_c(it->path.c_str());
-		_loadedKernels.erase(it);
+        // If there is only one part interested in the kernel, we can unload it
+        if (it->refCount == 1) {
+		    // No need to check for errors as we do not allow empty path names
+            LINFO("Unloading SPICE kernel '" << it->path << "'");
+		    unload_c(it->path.c_str());
+		    _loadedKernels.erase(it);
+        }
+        else {
+            // Otherwise, we hold on to it, but reduce the reference counter by 1
+            it->refCount--;
+            LDEBUG("Reducing reference counter. New reference count: " << it->refCount);
+        }
 	}
 }
 
@@ -144,9 +166,17 @@ void SpiceManager::unloadKernel(const std::string& filePath) {
 		[&path](const KernelInformation& info) { return info.path == path; });
 
 	if (it != _loadedKernels.end()) {
-        LINFO("Unloading SPICE kernel '" << path << "'");
-		unload_c(path.c_str());
-		_loadedKernels.erase(it);
+        // If there is only one part interested in the kernel, we can unload it
+        if (it->refCount == 1) {
+            LINFO("Unloading SPICE kernel '" << path << "'");
+            unload_c(path.c_str());
+            _loadedKernels.erase(it);
+        }
+        else {
+            // Otherwise, we hold on to it, but reduce the reference counter by 1
+            it->refCount--;
+            LDEBUG("Reducing reference counter. New reference count: " << it->refCount);
+        }
 	}
 }
 
@@ -413,7 +443,10 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 									   double& targetEpoch,
 									   glm::dvec3& directionVector,
 									   glm::dvec3& surfaceIntercept,
-									   glm::dvec3& surfaceVector) const{
+									   glm::dvec3& surfaceVector,
+                                       bool& isVisible
+                                       ) const
+{
 	// make pretty latr
 	double dvec[3], spoint[3], et;
 	glm::dvec3 srfvec;
@@ -446,21 +479,25 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 			 glm::value_ptr(srfvec), 
 			 &found);
 
+    isVisible = (found == SPICETRUE);
+
 	bool hasError = checkForError("Error retrieving surface intercept on target '" + target + "'" +
 								  "viewed from observer '" + observer + "' in " +
 								  "reference frame '" + bodyfixed + "' at time '" +
 								  std::to_string(ephemerisTime) + "'");
 
-	if (convert) frameConversion(srfvec, bodyfixed, referenceFrame, ephemerisTime);
+    if (hasError)
+        return false;
 
-	if (!hasError && found){
+	if (convert)
+        frameConversion(srfvec, bodyfixed, referenceFrame, ephemerisTime);
 
-
+	if (found){
 		memcpy(glm::value_ptr(directionVector), dvec, sizeof(dvec));
 		memcpy(glm::value_ptr(surfaceIntercept), spoint, sizeof(spoint));
 		surfaceVector = srfvec;
 	}
-	return found;
+	return true;
 }
 
 bool SpiceManager::getTargetState(const std::string& target,
