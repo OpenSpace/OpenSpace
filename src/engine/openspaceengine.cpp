@@ -290,6 +290,11 @@ bool OpenSpaceEngine::initialize() {
 		_scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
 	}
 
+    bool disableMasterRendering = false;
+    configurationManager()->getValue(
+        constants::configurationmanager::keyDisableMasterRendering, disableMasterRendering);
+    _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
+
 
 	// Load scenegraph
 	SceneGraph* sceneGraph = new SceneGraph;

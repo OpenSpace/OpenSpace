@@ -78,6 +78,8 @@ public:
 	void setGlobalOpacity(float opacity);
 
     void setSGCTRenderStatistics(bool visible);
+
+    void setDisableRenderingOnMaster(bool enabled);
 	
 	/**
 	 * Returns the Lua library that contains all Lua functions available to affect the
@@ -120,6 +122,8 @@ private:
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;
+
+    bool _disableMasterRendering = false;
 };
 
 } // namespace openspace
