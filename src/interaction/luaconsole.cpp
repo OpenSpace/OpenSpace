@@ -331,14 +331,14 @@ void LuaConsole::render() {
 	int x1, xSize, y1, ySize;
 	sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 	float startY = static_cast<float>(ySize) - 2.0f * font_size;
-	startY = startY - font_size * 10.0f * 2.0f;
+	startY = startY - font_size * 15.0f * 2.0f;
 
 	const glm::vec4 red(1, 0, 0, 1);
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
 	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
-	Freetype::print(font, 10.0f, startY, red, "$");
-	Freetype::print(font, 10.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
+	Freetype::print(font, 15.0f, startY, red, "$");
+	Freetype::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
 
 	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
 	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
@@ -361,7 +361,7 @@ void LuaConsole::render() {
 
 	std::stringstream ss;
 	ss << "%" << linepos + 1 << "s";
-	Freetype::print(font, 10.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
+	Freetype::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
 unsigned int LuaConsole::commandInputButton() {
