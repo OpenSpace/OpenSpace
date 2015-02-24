@@ -472,11 +472,14 @@ void GUI::renderMainWindow() {
     // These are temporary until the scalegraph is in effect ---abock
     bool toSun = ImGui::Button("Coordinate System to Sun");
     bool toPluto = ImGui::Button("Coordinate System to Pluto");
+    bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
 
     if (toSun)
-        OsEng.scriptEngine()->queueScript("openspace.changeViewPointToSun();");
+        OsEng.scriptEngine()->queueScript("openspace.changeCoordinateSystem('Sun');");
     if (toPluto)
-        OsEng.scriptEngine()->queueScript("openspace.changeViewPointToPluto();");
+        OsEng.scriptEngine()->queueScript("openspace.changeCoordinateSystem('Pluto');");
+    if (toJupiter)
+        OsEng.scriptEngine()->queueScript("openspace.changeCoordinateSystem('Jupiter');");
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
 

@@ -9,8 +9,8 @@ openspace.bindKey("f3", "openspace.setPerformanceMeasurement(false)")
 openspace.bindKey("f4", "openspace.takeScreenshot()")
 openspace.bindKey("f5", "loadKeyBindings()")
 
-openspace.bindKey("f9", "openspace.changeViewPointToPluto(); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
-openspace.bindKey("f10", "openspace.changeViewPointToSun(); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
+openspace.bindKey("f9", "openspace.changeCoordinateSystem('Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
+openspace.bindKey("f10", "openspace.changeCoordinateSystem('Sun'); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
 openspace.bindKey("f11", "openspace.fadeOut(2);")
 openspace.bindKey("f12", "openspace.fadeIn(2);")
 
