@@ -110,6 +110,8 @@ double ImageSequencer::nextCaptureTime(double _time){
 
 	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", "",  false }, cmp);
 
+	_activeInstrument = it->activeInstrument;
+
 	if (_time < _nextCapture) return _nextCapture;
 	return it->startTime;
 }
@@ -144,7 +146,7 @@ bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool 
 	it->projected = true;
 	path = it->path;
 	currentTime = it->startTime;
-	_activeInstrument = it->activeInstrument;
+	
 
 	return true;
 }
@@ -244,7 +246,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 			*/
 				
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
-				std::cout << "USING PREPARSED PLAYBOOK V9H" << std::endl;
+                LINFO("Using Preparsed Playbook V9H");
 				std::ifstream file(fileName);
 				if (!file.good()) LERROR("Failed to open txt file '" << fileName << "'");
 
@@ -306,10 +308,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 						else if (met < metRef){
 							et -= diff;
 						}
-					/*	std::string d;
-						SpiceManager::ref().getDateFromET(et, d);
-						std::cout << d << std::endl;
-						*/
+						
 						createImage(et, et + shutter, "NH_RALPH_LEISA", _defaultCaptureImage);
 					}
 				} while (!file.eof());
@@ -354,14 +353,14 @@ bool ImageSequencer::loadSequence(const std::string& dir) {
 							found = true;
 							std::string ext = "jpg";
 							path.replace(path.begin() + position, path.end(), ext);
-							std::vector<std::string>::const_iterator it = std::find(sequencePaths.begin(), sequencePaths.end(), path);
-							if ( it != sequencePaths.end()){
+                            bool fileExists = FileSys.fileExists(path);
+							if (fileExists) {
 								createImage(timestamps[0], timestamps[1], "NH_LORRI", path); /// fix active instrument!
                                 std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 							}
-							std::string timestr;
-							openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
-							std::cout << "Found at time " << timestr << " " << path << std::endl;
+							//std::string timestr;
+							//openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
+							//std::cout << "Found at time " << timestr << " " << path << std::endl;
 						}
 					} while (!file.eof() && found == false);
 				}
@@ -372,7 +371,7 @@ bool ImageSequencer::loadSequence(const std::string& dir) {
 
 	//_nextCapture = nextCaptureTime(Time::ref().currentTime()); // this is not really working 100%
 	//_intervalLength = _timeStamps[1].startTime;
-	return !sequencePaths.empty();
+	return !_timeStamps.empty();
 }
 
 

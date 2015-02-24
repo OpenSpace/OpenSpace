@@ -329,7 +329,8 @@ public:
     *   \param directionVector Ray's direction vector. 
     *   \param surfaceIntercept Surface intercept point on the target body. 
     *   \param surfaceVector Vector from observer to intercept point. 
-    *   \return Flag indicating whether intercept was found. 
+    *   \param isVisible Flag indicating whether intercept was found. 
+    *   \return <code>true</code> if not error occurred, <code>false</code> otherwise
 	*   For further details, refer to
 	*   http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
 	*/
@@ -343,7 +344,9 @@ public:
 							 double& targetEpoch,
 							 glm::dvec3& directionVector,
 							 glm::dvec3& surfaceIntercept,
-							 glm::dvec3& surfaceVector) const;
+							 glm::dvec3& surfaceVector,
+                             bool& isVisible
+                             ) const;
 
 	/**
 	*  Determine if a specified ephemeris object is within the
@@ -647,8 +650,9 @@ public:
 
 private:
 	struct KernelInformation {
-		std::string path;
-		KernelIdentifier id;
+		std::string path; /// The path from which the kernel was loaded
+		KernelIdentifier id; /// A unique identifier for each kernel
+        int refCount; /// How many parts loaded this kernel and are interested in it
 	};
 
 	SpiceManager() = default;
@@ -656,7 +660,10 @@ private:
 	SpiceManager& operator=(const SpiceManager& r) = delete;
 	SpiceManager(SpiceManager&& r) = delete;
 
+    /// A list of all loaded kernels
 	std::vector<KernelInformation> _loadedKernels;
+
+    /// The last assigned kernel-id, used to determine the next free kernel id
 	KernelIdentifier _lastAssignedKernel;
 
 	static SpiceManager* _manager;

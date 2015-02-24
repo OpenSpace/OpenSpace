@@ -88,6 +88,7 @@ public:
 	std::string _method;
 	std::string _aberrationCorrection;
 	std::string _fovTarget;
+    std::vector<std::string> _potentialTargets;
 
 	glm::dvec3 ipoint, ivec;
 	glm::dvec3 _previousHalf;

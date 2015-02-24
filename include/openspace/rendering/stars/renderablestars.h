@@ -74,6 +74,7 @@ private:
 	bool _dataIsDirty;
 
     properties::FloatProperty _scaleFactor;
+    properties::FloatProperty _minBillboardSize;
 
 	ghoul::opengl::ProgramObject* _program;
 	bool _programIsDirty;

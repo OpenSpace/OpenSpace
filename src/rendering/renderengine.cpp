@@ -427,9 +427,11 @@ namespace openspace {
 		// update and evaluate the scene starting from the root node
 		_sceneGraph->update({
 			Time::ref().currentTime(),
+            Time::ref().timeJumped(),
 			Time::ref().deltaTime(),
 			_doPerformanceMeasurements
 		});
+
 
 		_sceneGraph->evaluate(_mainCamera);
 
@@ -551,7 +553,10 @@ namespace openspace {
 						PrintColorText(i++, "%s %.1f %%", 10, g1 + g2, progress.c_str(), t * 100);
 					}
 					glm::vec4 w(1);
-					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str()); 
+					glm::vec4 b(0.3, 0.6, 1, 1);
+					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str());
+					std::string active = openspace::ImageSequencer::ref().getActiveInstrument();
+					PrintColorText(i++, "Active Instrument : %s", 10, b, active.c_str());
 #undef PrintText
 				}
 
@@ -626,6 +631,8 @@ namespace openspace {
 		}
 
 		void RenderEngine::postDraw() {
+            if (Time::ref().timeJumped())
+                Time::ref().setTimeJumped(false);
 			if (_takeScreenshot) {
 				sgct::Engine::instance()->takeScreenshot();
 				_takeScreenshot = false;
@@ -810,7 +817,7 @@ namespace openspace {
 			const int8_t Version = 0;
 			const int nValues = 250;
 			const int lengthName = 256;
-			const int maxValues = 50;
+			const int maxValues = 256;
 
 			struct PerformanceLayout {
 				int8_t version;
@@ -887,20 +894,37 @@ namespace openspace {
 void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
     SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
+    SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
+
+    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr) {
+        LERROR("WTF");
+        return;
+    }
 
     if (origin == "Pluto") {
         ghoul::Dictionary solarDictionary =
         {
             { std::string("Type"), std::string("Spice") },
-            { std::string("Body") , std::string("PLUTO BARYCENTER") },
+            { std::string("Body") , std::string("SUN") },
             { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer") , std::string("SUN") },
+            { std::string("Observer") , std::string("PLUTO BARYCENTER") },
             { std::string("Kernels") , ghoul::Dictionary() }
         };
-        ghoul::Dictionary t;
-        t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
+        //ghoul::Dictionary t;
+        //t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
         solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
         plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+
+        ghoul::Dictionary newHorizonsDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("NEW HORIZONS") },
+            { std::string("Reference"), std::string("GALACTIC") },
+            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
         return;
     }
     if (origin == "Sun") {
@@ -916,10 +940,27 @@ void RenderEngine::changeViewPoint(std::string origin) {
         solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
         plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
 
+        ghoul::Dictionary newHorizonsDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("NEW HORIZONS") },
+            { std::string("Reference"), std::string("GALACTIC") },
+            { std::string("Observer"), std::string("SUN") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
         return;
     }
-    ghoul_assert(false, "??");
+    ghoul_assert(false, "This function is being misused");
 
+}
+
+void RenderEngine::setSGCTRenderStatistics(bool visible) {
+    _sgctRenderStatisticsVisible = visible;
+}
+
+void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
+    _disableMasterRendering = enabled;
 }
 
 void RenderEngine::setSGCTRenderStatistics(bool visible) {

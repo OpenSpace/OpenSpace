@@ -186,8 +186,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	// Initialize the requested logs from the configuration file
 	_engine->configureLogging();
 
-    LINFOC("OpenSpace Version", OPENSPACE_VERSION_MAJOR << "." <<
+    LINFOC("OpenSpace Version", 
+        OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
+        OPENSPACE_VERSION_REVISION << "." <<
         OPENSPACE_VERSION_BUILD << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
@@ -567,10 +569,13 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
 	Time::ref().postSynchronizationPreDraw();
+    bool d = Time::ref().timeJumped();
+
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();
 	
-	if (_isMaster && _gui->isEnabled()) {
+
+    if (_isMaster && _gui->isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
 
@@ -710,6 +715,14 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 			_scriptEngine->queueScript(script);
 		}
 	}
+}
+
+void OpenSpaceEngine::enableBarrier() {
+    sgct::SGCTWindow::setBarrier(true);
+}
+
+void OpenSpaceEngine::disableBarrier() {
+    sgct::SGCTWindow::setBarrier(false);
 }
 
 }  // namespace openspace

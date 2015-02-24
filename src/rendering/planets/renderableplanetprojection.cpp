@@ -57,6 +57,8 @@ namespace {
 	const std::string keyInstrumentNear    = "Instrument.Near";
 	const std::string keyInstrumentFar     = "Instrument.Far";
 	const std::string keySequenceDir       = "Projection.Sequence";
+    const std::string keySequenceType      = "Projection.SequenceType";
+    const std::string keyPotentialTargets     = "PotentialTargets";
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
 	const std::string keyShading = "PerformShading";
@@ -64,8 +66,13 @@ namespace {
 	const std::string keyBody = "Body";
 
 	const std::string _mainFrame = "GALACTIC";
+
+    const std::string sequenceTypeImage = "image-sequence";
+    const std::string sequenceTypePlaybook = "playbook";
 }
+
 namespace openspace {
+
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("planetTexture", "RGB Texture")
@@ -78,31 +85,13 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _textureProj(nullptr)
     , _geometry(nullptr)
 {
-	bool b1 = dictionary.getValue(keyInstrument      , _instrumentID);
-	bool b2 = dictionary.getValue(keyProjObserver    , _projectorID );
-	bool b3 = dictionary.getValue(keyProjTarget      , _projecteeID );
-	bool b4 = dictionary.getValue(keyProjAberration  , _aberration  );
-	bool b5 = dictionary.getValue(keyInstrumentFovy  , _fovy        );
-	bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio );
-	bool b7 = dictionary.getValue(keyInstrumentNear  , _nearPlane   );
-	bool b8 = dictionary.getValue(keyInstrumentFar   , _farPlane    );
-
-	assert(b1 == true);
-	assert(b2 == true);
-	assert(b3 == true);
-	assert(b4 == true);
-	assert(b5 == true);
-	assert(b6 == true);
-	assert(b7 == true);
-	assert(b8 == true);
-
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-	assert(success);
+	ghoul_assert(success, "");
 
     std::string path;
     success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-	assert(success);
+	ghoul_assert(success, "");
 
 	_defaultProjImage = path + "/textures/defaultProj.png";
 
@@ -116,6 +105,38 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	}
 
 	dictionary.getValue(keyFrame, _target);
+
+
+    bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
+    bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
+    bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
+    bool b4 = dictionary.getValue(keyProjAberration, _aberration);
+    bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);
+    bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio);
+    bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
+    bool b8 = dictionary.getValue(keyInstrumentFar, _farPlane);
+
+    ghoul_assert(b1, "");
+    ghoul_assert(b2, "");
+    ghoul_assert(b3, "");
+    ghoul_assert(b4, "");
+    ghoul_assert(b5, "");
+    ghoul_assert(b6, "");
+    ghoul_assert(b7, "");
+    ghoul_assert(b8, "");
+
+    // @TODO copy-n-paste from renderablefov ---abock
+    ghoul::Dictionary potentialTargets;
+    success = dictionary.getValue(keyPotentialTargets, potentialTargets);
+    ghoul_assert(success, "");
+
+    _potentialTargets.resize(potentialTargets.size());
+    for (int i = 0; i < potentialTargets.size(); ++i) {
+        std::string target;
+        potentialTargets.getValue(std::to_string(i + 1), target);
+        _potentialTargets[i] = target;
+    }
+
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -138,12 +159,27 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_projectionTexturePath);
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
-	bool found = dictionary.getValue(keySequenceDir, _sequenceFile);
-    _sequenceFile = path + ghoul::filesystem::FileSystem::PathSeparator + _sequenceFile;
-	if (found)
-		openspace::ImageSequencer::ref().parsePlaybookFile(_sequenceFile);
-    else
-        LERROR("Sequence description file was not specified in module description");
+    std::string sequenceSource;
+	bool found = dictionary.getValue(keySequenceDir, sequenceSource);
+    if (found) {
+        //LERROR("RenderablePlanetProjection '" << name << "' did not contain a sequence source");
+        sequenceSource = absPath(sequenceSource);
+        //sequenceSource = path + ghoul::filesystem::FileSystem::PathSeparator + sequenceSource;
+
+        std::string sequenceType;
+        found = dictionary.getValue(keySequenceType, sequenceType);
+        if (found) {
+            if (sequenceType == sequenceTypeImage) {
+                openspace::ImageSequencer::ref().loadSequence(sequenceSource);
+            }
+            else if (sequenceType == sequenceTypePlaybook) {
+                openspace::ImageSequencer::ref().parsePlaybookFile(sequenceSource);
+            }
+            else {
+                LERROR("RenderablePlanetProjection '" << name << "' had unknown sequence type '" << sequenceType << "'");
+            }
+        }
+    }
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -325,11 +361,15 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
 	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, bs, bounds);
-	if (!found) LERROR("Could not locate instrument");
+	//if (!found) LERROR("Could not locate instrument");
+    if (!found)
+        return ;
 
 	psc position;                                //observer      target
 	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
-	if (!found) LERROR("Could not locate target position");
+	//if (!found) LERROR("Could not locate target position");
+    if (!found)
+        return;
 	position[3] += 3;
 	glm::vec3 cpos = position.vec3();
 
@@ -388,20 +428,27 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 
 	bool _withinFOV;
 	/* -- TEMPORARY TARGETING SOLUTION -- */
-	std::string potential[2] = { "PLUTO", "CHARON" }; // only possible to target these two for now. 
+	//std::string potential2[2] = { "PLUTO", "CHARON" }; // only possible to target these two for now. 
 
 	std::string _fovTarget = "";
-	for (int i = 0; i < 2; i++){
-		bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i], _projectorID, "ELLIPSOID", _aberration, _time[0], _withinFOV);
+	for (int i = 0; i < _potentialTargets.size(); i++){
+		bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+            _instrumentID,
+            _potentialTargets[i],
+            _projectorID,
+            "ELLIPSOID",
+            _aberration,
+            _time[0],
+            _withinFOV);
 		if (success && _withinFOV){
-			_fovTarget = potential[i];
+			_fovTarget = _potentialTargets[i];
 			break;
 		}
 	}
 	if (_projecteeID  == _fovTarget){
 		_next = _defaultProjImage;
 		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime()){
-			_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
+			_capture  = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
 		}
 		_projectionTexturePath = _next;
 	}

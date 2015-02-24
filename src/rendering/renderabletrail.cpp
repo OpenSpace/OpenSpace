@@ -56,6 +56,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
+    , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     //, _lineFade("lineFade", "Line Fade", 5.f, 0.f, 5.f)
     , _programObject(nullptr)
     , _programIsDirty(true)
@@ -84,6 +85,8 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_lineColor);
 
     addProperty(_lineFade);
+
+    addProperty(_lineWidth);
 }
 
 bool RenderableTrail::initialize() {
@@ -137,15 +140,21 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
 
+    glLineWidth(_lineWidth);
+
     glBindVertexArray(_vaoID);
     glDrawArrays(GL_LINE_STRIP, 0, _vertexArray.size());
     glBindVertexArray(0);
+
+    glLineWidth(1.f);
 
     _programObject->deactivate();
 }
 
 void RenderableTrail::update(const UpdateData& data) {
-    // needsSweep also needs to be done when the time has been changed abruptly ---abock
+    if (data.isTimeJump)
+        _needsSweep = true;
+
     if (_needsSweep) {
         fullYearSweep(data.time);
         sendToGPU();

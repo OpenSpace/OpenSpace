@@ -158,7 +158,7 @@ public:
 
 	void preSynchronization();
 
-	bool timeJumped();
+	bool timeJumped() const;
 
 	void setTimeJumped(bool jumped);
 
@@ -192,6 +192,7 @@ private:
 	double _time; ///< The time stored as the number of seconds past the J2000 epoch
 	double _dt;
 	bool _timeJumped;
+    bool _jockeHasToFixThisLater;
 
 	//shared copies
 	double _sharedTime;

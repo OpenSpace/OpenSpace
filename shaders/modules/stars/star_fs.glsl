@@ -31,6 +31,7 @@ const int COLOROPTION_SPEED = 2;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
+uniform float minBillboardSize;
 
 uniform int colorOption;
 
@@ -76,11 +77,11 @@ void main() {
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
 
-    const float minPixelSize = 25;
-
-    float normSize = (billboardSize - 1.0) / (minPixelSize - 1.0);
-    normSize = pow(normSize, 3);
-    fullColor *= clamp(normSize, 0.0, 1.0);
+    if (minBillboardSize != 1.0) {
+        float normSize = (billboardSize - 1.0) / (minBillboardSize - 1.0);
+        normSize = pow(normSize, 3);
+        fullColor *= clamp(normSize, 0.0, 1.0);
+    }
 
     vec4 position = vs_position;
     // This has to be fixed when the scale graph is in place ---abock

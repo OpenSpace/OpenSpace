@@ -62,6 +62,7 @@ private:
 
     properties::Vec3Property _lineColor;
     properties::FloatProperty _lineFade;
+    properties::FloatProperty _lineWidth;
 
     ghoul::opengl::ProgramObject* _programObject;
     bool _programIsDirty;

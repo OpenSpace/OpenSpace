@@ -329,6 +329,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
         return false;
     }
 
+    OsEng.disableBarrier();
+
     // initialize the root node
     _root = new SceneGraphNode();
     _root->setName(SceneGraphNode::RootNodeName);
@@ -358,6 +360,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	else {
 		LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
 			"path '" << moduleDirectory << "' that did not exist");
+        OsEng.enableBarrier();
 		return false;
 	}
 
@@ -500,6 +503,8 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 
 
     OsEng.runSettingsScripts();
+
+    OsEng.enableBarrier();
 
     return true;
 }

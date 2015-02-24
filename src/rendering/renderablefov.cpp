@@ -52,6 +52,7 @@ namespace {
 	const std::string keyInstrument           = "Instrument.Name";
 	const std::string keyInstrumentMethod     = "Instrument.Method";
 	const std::string keyInstrumentAberration = "Instrument.Aberration";
+    const std::string keyPotentialTargets     = "PotentialTargets";
 }
 //#define DEBUG
 namespace openspace{
@@ -70,18 +71,33 @@ namespace openspace{
 		, _texture(nullptr)
 		, _mode(GL_LINES){
 
-		bool b1 = dictionary.getValue(keyBody                 , _spacecraft);
-		bool b2 = dictionary.getValue(keyFrame                , _frame);
-		bool b3 = dictionary.getValue(keyInstrument           , _instrumentID);
-		bool b4 = dictionary.getValue(keyInstrumentMethod     , _method);
-		bool b5 = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+		bool success = dictionary.getValue(keyBody            , _spacecraft);
+        ghoul_assert(success, "");
 
-		assert(b1 == true);
-		assert(b2 == true);
-		assert(b3 == true);
-		assert(b4 == true);
-		assert(b5 == true);
+        success = dictionary.getValue(keyFrame                , _frame);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrument           , _instrumentID);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrumentMethod     , _method);
+        ghoul_assert(success, "");
+
+		success = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+        ghoul_assert(success, "");
+
+        ghoul::Dictionary potentialTargets;
+        success = dictionary.getValue(keyPotentialTargets, potentialTargets);
+        ghoul_assert(success, "");
+
+        _potentialTargets.resize(potentialTargets.size());
+        for (int i = 0; i < potentialTargets.size(); ++i) {
+            std::string target;
+            potentialTargets.getValue(std::to_string(i + 1), target);
+            _potentialTargets[i] = target;
+        }
 }
+
 void RenderableFov::allocateData(){ 
 	int points = 8;
 	_stride[0] = points;
@@ -210,9 +226,10 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 // This method is the current bottleneck.
 psc RenderableFov::checkForIntercept(glm::dvec3 ray){
 	double targetEt;
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+	bool intercepted = false;
+    openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 																	      _frame, _method, _aberrationCorrection, 
-																		  _time, targetEt, ray, ipoint, ivec);
+																		  _time, targetEt, ray, ipoint, ivec, intercepted);
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 	_interceptVector[3] += 3;
 
@@ -236,16 +253,17 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double toleran
 	//check if point is on surface
 	double targetEt;
 	glm::dvec3 half = interpolate(p1, p2, 0.5f);
-	bool intercepted = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+	bool intercepted = false;
+    openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 													                      _frame, _method, _aberrationCorrection, 
-																		  _time, targetEt, half, ipoint, ivec);
+																		  _time, targetEt, half, ipoint, ivec, intercepted);
 	if (glm::distance(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
 		return half;
 	}
 	_previousHalf = half;
 	//recursive search
-	if (intercepted == false){
+	if (!intercepted){
 		return bisection(p1, half, tolerance);
 	}else{
 		return bisection(half, p2, tolerance);
@@ -413,7 +431,7 @@ void RenderableFov::render(const RenderData& data){
 	if (instrument == "MVIC"){
 		if (_instrumentID == "NH_RALPH_MVIC_PAN1" ||
 			_instrumentID == "NH_RALPH_MVIC_PAN2" ||
-			_instrumentID == "NH_RALPH_MVIC_RED" ||
+			_instrumentID == "NH_RALPH_MVIC_RED"  ||
 			_instrumentID == "NH_RALPH_MVIC_BLUE" ||
 			_instrumentID == "NH_RALPH_MVIC_FT"){
 			drawFOV = true;
@@ -431,40 +449,43 @@ void RenderableFov::render(const RenderData& data){
 
 			// fetch data for specific instrument (shape, boresight, bounds etc)
 			bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
-			if (!found) LERROR("Could not locate instrument");
-
+			if (!found) {
+                LERROR("Could not locate instrument");
+                return;
+            }
 			float size = 4 * sizeof(float);
 			int indx = 0;
 
 			// set target based on visibility to specific instrument,
 			// from here on the _fovTarget is the target for all spice functions.
 			//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
-			std::string potential[2] = { "Pluto", "Charon" };
+			//std::string potential[2] = { "Pluto", "Charon" };
 
-			_fovTarget = potential[0]; //default
-			for (int i = 0; i < 2; i++){
-				bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(_instrumentID, potential[i],
-					_spacecraft, _method,
-					_aberrationCorrection, _time, _withinFOV);
+			_fovTarget = _potentialTargets[0]; //default
+			for (int i = 0; i < _potentialTargets.size(); i++){
+				bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+                    _instrumentID,
+                    _potentialTargets[i],
+					_spacecraft,
+                    _method,
+					_aberrationCorrection,
+                    _time,
+                    _withinFOV);
 				if (success && _withinFOV){
-					_fovTarget = potential[i];
+					_fovTarget = _potentialTargets[i];
 					break;
 				}
 			}
 
 			computeColors();
-			double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
-			double diff = (t2 - _time);
-			double t = 0.0;
-			if (diff <= 30.0) t = 1.f - diff / 30.0;
 
 			double targetEpoch;
 			// for each FOV vector
 			for (int i = 0; i < 4; i++){
 				// compute surface intercept
-				_interceptTag[i] = openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
+				openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 					_frame, _method, _aberrationCorrection,
-					_time, targetEpoch, bounds[i], ipoint, ivec);
+					_time, targetEpoch, bounds[i], ipoint, ivec, _interceptTag[i]);
 				// if not found, use the orthogonal projected point
 				if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
 
@@ -526,10 +547,12 @@ void RenderableFov::render(const RenderData& data){
 		glBindVertexArray(0);
 
 		//second vbo
-		glLineWidth(2.f);
-		glBindVertexArray(_vaoID[1]);
-		glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
-		glBindVertexArray(0);
+		if (_withinFOV){
+			glLineWidth(1.f);
+			glBindVertexArray(_vaoID[1]);
+			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
+			glBindVertexArray(0);
+		}
 
 		/*glPointSize(5.f);
 		glBindVertexArray(_vaoID2);
