@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 #ifdef __APPLE__
 	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
 #else
-	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_3_Core_Profile;
+	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_2_Core_Profile;
 #endif
 	const bool initSuccess = _sgctEngine->init(rm);
     if (!initSuccess) {
