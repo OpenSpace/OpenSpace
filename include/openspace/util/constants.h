@@ -55,6 +55,7 @@ namespace configurationmanager {
 	const std::string keyLogLevel = "Logging.LogLevel";
 	const std::string keyLogImmediateFlush = "Logging.ImmediateFlush";
 	const std::string keyLogs = "Logging.Logs";
+    const std::string keyDisableMasterRendering = "DisableRenderingOnMaster";
 } // namespace configurationmanager
 
 namespace scenegraph {

@@ -470,24 +470,27 @@ namespace openspace {
 			//Is this really necessary to store? @JK
 			_mainCamera->setViewProjectionMatrix(projectionMatrix * viewMatrix);
 
-			// render the scene starting from the root node
-			if (!_visualizeABuffer) {
-				_abuffer->preRender();
-				_sceneGraph->render({
-					*_mainCamera,
-					psc(),
-					_doPerformanceMeasurements
-				});
-				_abuffer->postRender();
+            // We only want to skip the rendering if we are the master and we want to
+            // disable the rendering for the master
+            if (!(OsEng.isMaster() && _disableMasterRendering)) {
+                if (!_visualizeABuffer) {
+                    _abuffer->preRender();
+                    _sceneGraph->render({
+                        *_mainCamera,
+                        psc(),
+                        _doPerformanceMeasurements
+                    });
+                    _abuffer->postRender();
 
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				_abuffer->resolve();
-				glDisable(GL_BLEND);
-			}
-			else {
-				_visualizer->render();
-			}
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    _abuffer->resolve();
+                    glDisable(GL_BLEND);
+                }
+                else {
+                    _visualizer->render();
+                }
+            }
 
 #if 1
 
@@ -921,6 +924,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
 void RenderEngine::setSGCTRenderStatistics(bool visible) {
     _sgctRenderStatisticsVisible = visible;
+}
+
+void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
+    _disableMasterRendering = enabled;
 }
 
 }// namespace openspace
