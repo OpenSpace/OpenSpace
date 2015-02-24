@@ -529,7 +529,10 @@ namespace openspace {
 						PrintColorText(i++, "%s %.1f %%", 10, g1 + g2, progress.c_str(), t * 100);
 					}
 					glm::vec4 w(1);
-					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str()); 
+					glm::vec4 b(0.3, 0.6, 1, 1);
+					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str());
+					std::string active = openspace::ImageSequencer::ref().getActiveInstrument();
+					PrintColorText(i++, "Active Instrument : %s", 10, b, active.c_str());
 #undef PrintText
 				}
 

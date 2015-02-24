@@ -28,6 +28,8 @@ uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
 
+uniform vec3 sun_pos;
+
 uniform bool _performShading = true;
 
 uniform int shadows;
@@ -57,7 +59,7 @@ void main()
 		
 		vec3 n = normalize(vs_normal.xyz);
 		//vec3 e = normalize(camdir);
-		vec3 l_pos = vec3(0.0); // sun.
+		vec3 l_pos = vec3(sun_pos); // sun.
 		vec3 l_dir = normalize(l_pos-objpos.xyz);
 		float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
 		

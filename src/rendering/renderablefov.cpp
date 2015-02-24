@@ -413,7 +413,7 @@ void RenderableFov::render(const RenderData& data){
 	if (instrument == "MVIC"){
 		if (_instrumentID == "NH_RALPH_MVIC_PAN1" ||
 			_instrumentID == "NH_RALPH_MVIC_PAN2" ||
-			_instrumentID == "NH_RALPH_MVIC_RED" ||
+			_instrumentID == "NH_RALPH_MVIC_RED"  ||
 			_instrumentID == "NH_RALPH_MVIC_BLUE" ||
 			_instrumentID == "NH_RALPH_MVIC_FT"){
 			drawFOV = true;
@@ -453,10 +453,6 @@ void RenderableFov::render(const RenderData& data){
 			}
 
 			computeColors();
-			double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
-			double diff = (t2 - _time);
-			double t = 0.0;
-			if (diff <= 30.0) t = 1.f - diff / 30.0;
 
 			double targetEpoch;
 			// for each FOV vector
@@ -527,7 +523,7 @@ void RenderableFov::render(const RenderData& data){
 
 		//second vbo
 		if (_withinFOV){
-			glLineWidth(2.f);
+			glLineWidth(1.f);
 			glBindVertexArray(_vaoID[1]);
 			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
 			glBindVertexArray(0);

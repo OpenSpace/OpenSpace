@@ -147,11 +147,16 @@ void RenderableModel::render(const RenderData& data)
 	// setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
 
+	psc sun_pos;
+	double  lt;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", _time, sun_pos, lt);
+
+	_programObject->setUniform("sun_pos", sun_pos.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
-	_programObject->setUniform("_performShading", false);
+	_programObject->setUniform("_performShading", true);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -173,6 +178,8 @@ void RenderableModel::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty())
 	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
+
+	_time = data.time;
 	
 }
 

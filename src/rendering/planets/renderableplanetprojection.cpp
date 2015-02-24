@@ -401,7 +401,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	if (_projecteeID  == _fovTarget){
 		_next = _defaultProjImage;
 		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime()){
-			_capture = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
+			_capture  = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
 		}
 		_projectionTexturePath = _next;
 	}

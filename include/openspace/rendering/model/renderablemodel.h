@@ -70,6 +70,8 @@ private:
 	std::string _source;
 	std::string _destination;
 
+	double _time;
+
 	properties::BoolProperty _performShading;
 };
 

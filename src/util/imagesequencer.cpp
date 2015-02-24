@@ -110,6 +110,8 @@ double ImageSequencer::nextCaptureTime(double _time){
 
 	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", "",  false }, cmp);
 
+	_activeInstrument = it->activeInstrument;
+
 	if (_time < _nextCapture) return _nextCapture;
 	return it->startTime;
 }
@@ -144,7 +146,7 @@ bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool 
 	it->projected = true;
 	path = it->path;
 	currentTime = it->startTime;
-	_activeInstrument = it->activeInstrument;
+	
 
 	return true;
 }
@@ -306,10 +308,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 						else if (met < metRef){
 							et -= diff;
 						}
-					/*	std::string d;
-						SpiceManager::ref().getDateFromET(et, d);
-						std::cout << d << std::endl;
-						*/
+						
 						createImage(et, et + shutter, "NH_RALPH_LEISA", _defaultCaptureImage);
 					}
 				} while (!file.eof());
