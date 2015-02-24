@@ -55,6 +55,9 @@ uniform mat4 projection;
 uniform float scaleFactor;
 
 void main() {
+    if ((psc_position[0].x == 0.0) && (psc_position[0].y == 0.0) && (psc_position[0].z == 0.0))
+        return;
+
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
     ge_speed = vs_speed[0];
