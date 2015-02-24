@@ -867,9 +867,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
         ghoul::Dictionary solarDictionary =
         {
             { std::string("Type"), std::string("Spice") },
-            { std::string("Body") , std::string("PLUTO BARYCENTER") },
+            { std::string("Body") , std::string("SUN") },
             { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer") , std::string("SUN") },
+            { std::string("Observer") , std::string("PLUTO BARYCENTER") },
             { std::string("Kernels") , ghoul::Dictionary() }
         };
         ghoul::Dictionary t;
