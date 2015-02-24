@@ -164,6 +164,7 @@ namespace openspace {
                 return luaL_error(L, "Expected argument of type 'bool'");
             bool b = lua_toboolean(L, -1) != 0;
             OsEng.renderEngine()->setSGCTRenderStatistics(b);
+            return 0;
         }
 
 		/**
