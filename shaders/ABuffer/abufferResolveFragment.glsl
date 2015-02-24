@@ -128,11 +128,14 @@ vec3 CartesianToSpherical(vec3 _cartesian) {
 }
 
 vec4 blend(vec4 src, vec4 dst) {
+	#if 0
 	vec4 o;
 	o.a = src.a + dst.a * (1.0f - src.a);
 	o.rgb = (src.rgb*src.a + dst.rgb*dst.a* (1.0f - src.a));
 	return o;
-	//return mix(src, dst, dst.a*(1.0f - src.a));
+	#else
+	return mix(src, dst, dst.a*(1.0f - src.a));
+	#endif
 }
 
 void blendStep(inout vec4 dst, in vec4 src, in float stepSize) {

@@ -74,7 +74,6 @@ void main() {
     }
 
     vec4 textureColor = texture(psfTexture, texCoord);
-    // textureColor.a = sqrt(textureColor.a);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
 
     const float minPixelSize = 25;
@@ -88,10 +87,6 @@ void main() {
     float depth = pscDepth(position) + 1;
     // float depth = 10000.0;
     // gl_FragDepth = depth;
-
-    // Ease the workload on the abuffer a bit
-    if (textureColor.a < 0.1)
-        discard;
 
     ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
     addToBuffer(frag);
