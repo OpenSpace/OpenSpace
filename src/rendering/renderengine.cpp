@@ -427,7 +427,7 @@ namespace openspace {
 		// update and evaluate the scene starting from the root node
 		_sceneGraph->update({
 			Time::ref().currentTime(),
-            //Time::ref().timeJumped(),
+            Time::ref().timeJumped(),
 			Time::ref().deltaTime(),
 			_doPerformanceMeasurements
 		});
@@ -631,7 +631,8 @@ namespace openspace {
 		}
 
 		void RenderEngine::postDraw() {
-            //Time::ref().setTimeJumped(false);
+            if (Time::ref().timeJumped())
+                Time::ref().setTimeJumped(false);
 			if (_takeScreenshot) {
 				sgct::Engine::instance()->takeScreenshot();
 				_takeScreenshot = false;
@@ -893,6 +894,12 @@ namespace openspace {
 void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
     SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
+    SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
+
+    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr) {
+        LERROR("WTF");
+        return;
+    }
 
     if (origin == "Pluto") {
         ghoul::Dictionary solarDictionary =
@@ -903,10 +910,21 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Observer") , std::string("PLUTO BARYCENTER") },
             { std::string("Kernels") , ghoul::Dictionary() }
         };
-        ghoul::Dictionary t;
-        t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
+        //ghoul::Dictionary t;
+        //t.setValue("Position", glm::vec4(1.f, 0.f, 0.f, 12.f));
         solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
         plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+
+        ghoul::Dictionary newHorizonsDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("NEW HORIZONS") },
+            { std::string("Reference"), std::string("GALACTIC") },
+            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
         return;
     }
     if (origin == "Sun") {
@@ -922,6 +940,15 @@ void RenderEngine::changeViewPoint(std::string origin) {
         solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
         plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
 
+        ghoul::Dictionary newHorizonsDictionary =
+        {
+            { std::string("Type"), std::string("Spice") },
+            { std::string("Body"), std::string("NEW HORIZONS") },
+            { std::string("Reference"), std::string("GALACTIC") },
+            { std::string("Observer"), std::string("SUN") },
+            { std::string("Kernels"), ghoul::Dictionary() }
+        };
+        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
         return;
     }
     ghoul_assert(false, "This function is being misused");

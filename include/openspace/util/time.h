@@ -158,7 +158,7 @@ public:
 
 	void preSynchronization();
 
-	bool timeJumped();
+	bool timeJumped() const;
 
 	void setTimeJumped(bool jumped);
 

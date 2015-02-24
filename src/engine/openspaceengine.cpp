@@ -569,10 +569,13 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
 	Time::ref().postSynchronizationPreDraw();
+    bool d = Time::ref().timeJumped();
+
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();
 	
-	if (_isMaster && _gui->isEnabled()) {
+
+    if (_isMaster && _gui->isEnabled()) {
 		double posX, posY;
 		sgct::Engine::instance()->getMousePos(0, &posX, &posY);
 
