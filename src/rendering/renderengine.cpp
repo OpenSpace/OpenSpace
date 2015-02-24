@@ -1000,12 +1000,4 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
-void RenderEngine::setSGCTRenderStatistics(bool visible) {
-    _sgctRenderStatisticsVisible = visible;
-}
-
-void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
-    _disableMasterRendering = enabled;
-}
-
 }// namespace openspace
