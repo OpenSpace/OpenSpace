@@ -516,10 +516,12 @@ void SceneGraph::loadModules(
 	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
 	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
 
-	LDEBUG("Loading common module folder '" << commonDirectory << "'");
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OsEng.scriptEngine()->initializeLuaState(state);
 
+	LDEBUG("Loading common module folder '" << commonDirectory << "'");
 	// Load common modules into LoadMaps struct
-	loadModule(m,FileSys.pathByAppendingComponent(directory, commonDirectory));
+	loadModule(m, FileSys.pathByAppendingComponent(directory, commonDirectory), state);
 
 	// Load the rest of the modules into LoadMaps struct
     ghoul::Dictionary moduleDictionary;
@@ -529,7 +531,7 @@ void SceneGraph::loadModules(
         for (const std::string& key : keys) {
             std::string moduleFolder;
 			if (moduleDictionary.getValue(key, moduleFolder)) {
-                loadModule(m,FileSys.pathByAppendingComponent(directory, moduleFolder));
+                loadModule(m, FileSys.pathByAppendingComponent(directory, moduleFolder), state);
 			}
         }
     }
@@ -550,7 +552,7 @@ void SceneGraph::loadModules(
     }
 }
 
-void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath) {
+void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
 	auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
     if (pos == modulePath.npos) {
         LERROR("Bad format for module path: " << modulePath);
@@ -561,7 +563,7 @@ void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath) {
     LDEBUG("Loading nodes from: " << fullModule);
 
     ghoul::Dictionary moduleDictionary;
-    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
+    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary, state);
     std::vector<std::string> keys = moduleDictionary.keys();
     for (const std::string& key : keys) {
         if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {

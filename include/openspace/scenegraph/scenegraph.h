@@ -136,7 +136,7 @@ private:
     };
 
     void loadModules(const std::string& directory, const ghoul::Dictionary& dictionary);
-    void loadModule(LoadMaps& m,const std::string& modulePath);
+    void loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state);
     void loadNodes(const std::string& parentName, LoadMaps& m);
     void loadNode(const ghoul::Dictionary& dictionary);
 };
