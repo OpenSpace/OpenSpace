@@ -25,13 +25,16 @@
 #include <openspace/rendering/model/wavefrontgeometry.h>
 
 #include <openspace/util/constants.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include "ghoul/logging/logmanager.h"
 
 #include <fstream>
 
-
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
+
+    const int8_t CurrentCacheVersion = 1;
 }
 
 namespace openspace {
@@ -61,65 +64,43 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	const std::string filename = FileSys.absolutePath(file);
 
     if (FileSys.fileExists(filename))
-        loadObj(filename.c_str());
+        loadObj(filename);
     else
         LERROR("Could not load OBJ file '" << filename << "': File not found");
 }
 
-void WavefrontGeometry::loadObj(const char *filename){
-	// temporary 
-	const char *mtl_basepat = filename;
+bool WavefrontGeometry::loadObj(const std::string& filename){
+    std::string cachedFile = "";
+    FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
 
+    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    if (hasCachedFile) {
+        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
+
+        bool success = loadCachedFile(cachedFile);
+        if (success)
+            return true;
+        else
+            FileSys.cacheManager()->removeCacheFile(filename);
+        // Intentional fall-through to the 'else' computation to generate the cache
+        // file for the next run
+    }
+    else {
+        LINFO("Cache for Model'" << filename << "' not found");
+    }
     LINFO("Loading OBJ file '" << filename << "'");
-	std::string err = tinyobj::LoadObj(shapes, materials, filename, mtl_basepat);
 
-    if (!err.empty()) {
-        LERROR(err);
-        return;
-    }
+    bool success = loadModel(filename);
+    if (!success)
+        return false;
 
-    LINFO("Loaded Mesh");
-    LINFO("Number of Shapes: " << shapes.size());
-    LINFO("Number of Materials: " << materials.size());
-    for (int i = 0; i < shapes.size(); ++i) {
-        LINFO("Shape #" << i << ": " <<
-            "Indices   (" << shapes[i].mesh.indices.size() << ") " <<
-            "Positions (" << shapes[i].mesh.positions.size() << ") " <<
-            "Texture   (" << shapes[i].mesh.texcoords.size() << ") " <<
-            "Normals   (" << shapes[i].mesh.normals.size() << ")");
-    }
+    LINFO("Saving cache");
+    success = saveCachedFile(cachedFile);
 
-	_isize = shapes[0].mesh.indices.size();
-	_vsize = shapes[0].mesh.indices.size(); // shapes[0].mesh.positions.size() + shapes[0].mesh.positions.size() / 3;
-	_tsize = shapes[0].mesh.texcoords.size();
+    return success;
 
-	_varray = new Vertex[_vsize];
-	_iarray = new int[_isize];
 
-	//copy indices
-	for (int f = 0; f < shapes[0].mesh.indices.size(); f++) {
-		_iarray[f] = f;// shapes[0].mesh.indices[f];
-	}
 
-	//shapes[0].mesh.texcoords.resize(2 * _isize);
-	int p = 0;
-	for (auto v : shapes[0].mesh.indices) {
-		_varray[p].location[0] = shapes[0].mesh.positions[3 * v + 0];
-		_varray[p].location[1] = shapes[0].mesh.positions[3 * v + 1];
-		_varray[p].location[2] = shapes[0].mesh.positions[3 * v + 2];
-		_varray[p].location[3] = 5;
-				
-		_varray[p].normal[0]   = shapes[0].mesh.normals[3 * v + 0];
-		_varray[p].normal[1]   = shapes[0].mesh.normals[3 * v + 1];
-		_varray[p].normal[2]   = shapes[0].mesh.normals[3 * v + 2];
-
-        // Only set the texture coordinates if they don't fall out of the value range
-        _varray[p].tex[0] = (2 * v + 0) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 0] : 0.f;
-        _varray[p].tex[1] = (2 * v + 1) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 1] : 0.f;
-
-		p++;
-	}
-	p = 0;
 
     //if (shapes[0].mesh.texcoords.size() > 0) {
     //    for (int k = 0; k < shapes[0].mesh.texcoords.size(); ++k) {
@@ -250,6 +231,118 @@ void WavefrontGeometry::createSphere(){
    // create the power scaled scalar
 	PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
 	_parent->setBoundingSphere(ps);
+}
+
+bool WavefrontGeometry::loadModel(const std::string& filename) {
+    std::string err = tinyobj::LoadObj(shapes, materials, filename.c_str(), filename.c_str());
+
+    if (!err.empty()) {
+        LERROR(err);
+        return false;
+    }
+
+    LINFO("Loaded Mesh");
+    LINFO("Number of Shapes: " << shapes.size());
+    LINFO("Number of Materials: " << materials.size());
+    for (int i = 0; i < shapes.size(); ++i) {
+        LINFO("Shape #" << i << ": " <<
+            "Indices   (" << shapes[i].mesh.indices.size() << ") " <<
+            "Positions (" << shapes[i].mesh.positions.size() << ") " <<
+            "Texture   (" << shapes[i].mesh.texcoords.size() << ") " <<
+            "Normals   (" << shapes[i].mesh.normals.size() << ")");
+    }
+
+    _isize = shapes[0].mesh.indices.size();
+    _vsize = shapes[0].mesh.indices.size(); // shapes[0].mesh.positions.size() + shapes[0].mesh.positions.size() / 3;
+    _tsize = shapes[0].mesh.texcoords.size();
+
+    _varray = new Vertex[_vsize];
+    _iarray = new int[_isize];
+
+    //copy indices
+    for (int f = 0; f < shapes[0].mesh.indices.size(); f++) {
+        _iarray[f] = f;// shapes[0].mesh.indices[f];
+    }
+
+    //shapes[0].mesh.texcoords.resize(2 * _isize);
+    int p = 0;
+    for (auto v : shapes[0].mesh.indices) {
+        _varray[p].location[0] = shapes[0].mesh.positions[3 * v + 0];
+        _varray[p].location[1] = shapes[0].mesh.positions[3 * v + 1];
+        _varray[p].location[2] = shapes[0].mesh.positions[3 * v + 2];
+        _varray[p].location[3] = 5;
+
+        _varray[p].normal[0] = shapes[0].mesh.normals[3 * v + 0];
+        _varray[p].normal[1] = shapes[0].mesh.normals[3 * v + 1];
+        _varray[p].normal[2] = shapes[0].mesh.normals[3 * v + 2];
+
+        // Only set the texture coordinates if they don't fall out of the value range
+        _varray[p].tex[0] = (2 * v + 0) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 0] : 0.f;
+        _varray[p].tex[1] = (2 * v + 1) < shapes[0].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * v + 1] : 0.f;
+
+        p++;
+    }
+    p = 0;
+
+    return true;
+}
+
+bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
+    std::ofstream fileStream(filename, std::ofstream::binary);
+    if (fileStream.good()) {
+        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t));
+
+        int64_t vSize = _vsize;
+        fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
+        int64_t iSize = _isize;
+        fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
+        int64_t tSize = _tsize;
+        fileStream.write(reinterpret_cast<const char*>(&tSize), sizeof(int64_t));
+
+        fileStream.write(reinterpret_cast<const char*>(_varray), sizeof(Vertex) * _vsize);
+        fileStream.write(reinterpret_cast<const char*>(_iarray), sizeof(int) * _isize);
+
+        return fileStream.good();
+    }
+    else {
+        LERROR("Error opening file '" << filename << "' for save cache file");
+        return false;
+    }
+}
+
+bool WavefrontGeometry::loadCachedFile(const std::string& filename) {
+    std::ifstream fileStream(filename, std::ifstream::binary);
+    if (fileStream.good()) {
+        int8_t version = 0;
+        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+        if (version != CurrentCacheVersion) {
+            LINFO("The format of the cached file has changed, deleting old cache");
+            fileStream.close();
+            FileSys.deleteFile(filename);
+            return false;
+        }
+
+        int64_t vSize, iSize, tSize;
+        fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
+        fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
+        fileStream.read(reinterpret_cast<char*>(&tSize), sizeof(int64_t));
+        _vsize = vSize;
+        _isize = iSize;
+        _tsize = tSize;
+
+        _varray = new Vertex[vSize];
+        _iarray = new int[iSize];
+
+        fileStream.read(reinterpret_cast<char*>(_varray), sizeof(Vertex) * vSize);
+        fileStream.read(reinterpret_cast<char*>(_iarray), sizeof(int) * iSize);
+
+        return fileStream.good();
+    }
+    else {
+        LERROR("Error opening file '" << filename << "' for loading cache file");
+        return false;
+    }
 }
 
 }  // namespace modelgeometry
