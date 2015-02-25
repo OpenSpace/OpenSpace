@@ -157,18 +157,22 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
         LWARNING("Loading models with more than one shape is currently untested");
     }
 
-    _shapeCounts.resize(shapes.size());
-    for (int i = 0; i < shapes.size(); ++i)
-        _shapeCounts[i] = shapes[i].mesh.indices.size();
-    int totalSize = std::accumulate(_shapeCounts.begin(), _shapeCounts.end(), 0);
+    int totalSizeIndex = 0;
+    int totalSizeVertex = 0;
+    for (int i = 0; i < shapes.size(); ++i) {
+        totalSizeIndex += shapes[i].mesh.indices.size();
+        totalSizeVertex += shapes[i].mesh.positions.size();
+    }
 
-    _vertices.resize(totalSize);
-    _indices.resize(totalSize);
+    _vertices.resize(totalSizeVertex);
+    _indices.resize(totalSizeIndex);
 
     // We add all shapes of the model into the same vertex array, one after the other
     // The _shapeCounts array stores for each shape, how many vertices that shape has
     int p = 0;
     for (int i = 0; i < shapes.size(); ++i) {
+        //for (int j = 0; j < shapes[i].mesh.positions.size(); ++j) {
+
         for (int index : shapes[i].mesh.indices) {
             _vertices[index + p].location[0] = shapes[i].mesh.positions[3 * index + 0];
             _vertices[index + p].location[1] = shapes[i].mesh.positions[3 * index + 1];
@@ -188,13 +192,14 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             shapes[i].mesh.indices.end(),
             _indices.begin() + p
             );
-        p += _shapeCounts[i];
+        p += shapes[i].mesh.indices.size();
     }
 
     return true;
 }
 
 bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
+    return true;
     std::ofstream fileStream(filename, std::ofstream::binary);
     if (fileStream.good()) {
         fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
@@ -204,6 +209,7 @@ bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
         fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
 
         fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * vSize);
 
         return fileStream.good();
     }
@@ -230,6 +236,7 @@ bool WavefrontGeometry::loadCachedFile(const std::string& filename) {
         fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
         
         _vertices.resize(vSize);
+        _indices.resize(vSize);
 
         fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
 

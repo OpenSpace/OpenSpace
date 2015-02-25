@@ -58,12 +58,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _performShading("performShading", "Perform Shading", true)
 {
 	std::string name;
+    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+    ghoul_assert(success, "Name was not passed to RenderableModel");
 	std::string path;
-	dictionary.getValue(constants::scenegraphnode::keyName, name);
-	dictionary.getValue(constants::scenegraph::keyPathModule, path);
+	success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+    ghoul_assert(success, "Module path was not passed to RenderableModel");
 
 	ghoul::Dictionary geometryDictionary;
-	bool success = dictionary.getValue(
+	success = dictionary.getValue(
 		constants::renderablemodel::keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
@@ -87,10 +89,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     setBoundingSphere(pss(1.f, 9.f));
 }
 
-
-RenderableModel::~RenderableModel(){
-}
-
 bool RenderableModel::isReady() const {
 	bool ready = true;
 	ready &= (_programObject != nullptr);
@@ -98,7 +96,7 @@ bool RenderableModel::isReady() const {
 	return ready;
 }
 
-bool RenderableModel::initialize(){
+bool RenderableModel::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
@@ -114,7 +112,7 @@ bool RenderableModel::initialize(){
     return completeSuccess;
 }
 
-bool RenderableModel::deinitialize(){
+bool RenderableModel::deinitialize() {
 	if (_geometry) {
 		_geometry->deinitialize();
 		delete _geometry;
@@ -127,12 +125,9 @@ bool RenderableModel::deinitialize(){
 	return true;
 }
 
-void RenderableModel::render(const RenderData& data)
-{
-    // activate shader
+void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
 
-    // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
 
 	glm::mat4 tmp = glm::mat4(1);
@@ -144,16 +139,7 @@ void RenderableModel::render(const RenderData& data)
 	
 	transform *= tmp;
 	
-	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
-	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
-	// setup the data to the shader
-//	_programObject->setUniform("camdir", camSpaceEye);
-
-	psc sun_pos;
-	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", _time, sun_pos, lt);
-
-	_programObject->setUniform("sun_pos", sun_pos.vec3());
+	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
@@ -172,21 +158,16 @@ void RenderableModel::render(const RenderData& data)
     _programObject->deactivate();
 }
 
-void RenderableModel::update(const UpdateData& data){
-#ifndef NDEBUG
-	if (_source.empty() || _destination.empty())
-		return;
-#endif
+void RenderableModel::update(const UpdateData& data) {
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty())
 	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 
-	_time = data.time;
-	
+    double  lt;
+    openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", data.time, _sunPosition, lt);
 }
 
-void RenderableModel::loadTexture()
-{
+void RenderableModel::loadTexture() {
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {

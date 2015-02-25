@@ -25,13 +25,11 @@
 #ifndef __RENDERABLEMODEL_H__
 #define __RENDERABLEMODEL_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -44,7 +42,6 @@ class ModelGeometry;
 class RenderableModel : public Renderable {
 public:
 	RenderableModel(const ghoul::Dictionary& dictionary);
-	~RenderableModel();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -70,7 +67,8 @@ private:
 	std::string _source;
 	std::string _destination;
 
-	double _time;
+
+    psc _sunPosition;
 
 	properties::BoolProperty _performShading;
 };

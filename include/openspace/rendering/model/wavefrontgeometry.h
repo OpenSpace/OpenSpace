@@ -59,8 +59,6 @@ private:
 
     std::vector<Vertex> _vertices;
     std::vector<int> _indices;
-
-    std::vector<int> _shapeCounts;
 };
 
 }  // namespace modelgeometry
