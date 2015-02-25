@@ -26,7 +26,6 @@
 #define __WAVEFRONTOBJECT_H__
 
 #include <openspace/rendering/model/modelgeometry.h>
-#include <tiny_obj_loader.h>
 
 namespace openspace {
 
@@ -37,44 +36,31 @@ namespace modelgeometry {
 class WavefrontGeometry : public ModelGeometry {
 public:
 	WavefrontGeometry(const ghoul::Dictionary& dictionary);
-	~WavefrontGeometry();
 
     bool initialize(RenderableModel* parent) override;
     void deinitialize() override;
     void render() override;
 	
-	typedef struct
-	{
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-		GLfloat padding[7];
-		//GLubyte padding[4]; // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
-    
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-protected:
+private:
+    struct Vertex {
+        GLfloat location[4];
+        GLfloat tex[2];
+        GLfloat normal[3];
+    };
+
 	bool loadObj(const std::string& filename);
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
     bool loadModel(const std::string& filename);
 
-private:
-    void createSphere();
-	
 	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+	GLuint _vbo;
+    GLuint _ibo;
 
-	GLuint _tBufferID;
-	unsigned int _tsize;
-	float* _tarray;
+    std::vector<Vertex> _vertices;
+    std::vector<int> _indices;
 
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex* _varray;
-	int* _iarray;
+    std::vector<int> _shapeCounts;
 };
 
 }  // namespace modelgeometry

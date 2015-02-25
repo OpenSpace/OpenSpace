@@ -88,11 +88,6 @@ namespace renderablemodel {
 	const std::string keyGeometry = "Geometry";
 } // namespace renderablemodel
 
-namespace modelgeometry {
-	const std::string keyType = "Type";
-	const std::string keyObjFile = "ObjFile";
-} // namespace modelgeometry
-
 namespace renderablestars {
 	const std::string keyFile = "File";
 	const std::string keyTexture = "Texture";

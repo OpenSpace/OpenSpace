@@ -28,7 +28,9 @@
 #include <openspace/util/factorymanager.h>
 
 namespace {
-const std::string _loggerCat = "ModelGeometry";
+    const std::string _loggerCat = "ModelGeometry";
+
+    const std::string keyType = "Type";
 }
 
 namespace openspace {
@@ -38,10 +40,10 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 {
 	std::string geometryType;
 	const bool success = dictionary.getValue(
-		constants::modelgeometry::keyType, geometryType);
+		keyType, geometryType);
 	if (!success) {
         LERROR("ModelGeometry did not contain a correct value of the key '"
-			<< constants::modelgeometry::keyType << "'");
+			<< keyType << "'");
         return nullptr;
 	}
 	ghoul::TemplateFactory<ModelGeometry>* factory
