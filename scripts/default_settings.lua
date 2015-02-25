@@ -10,4 +10,4 @@ openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
 openspace.printInfo("Done setting default values")
 
-openspace.fadeIn(2)
+--openspace.fadeIn(2)
