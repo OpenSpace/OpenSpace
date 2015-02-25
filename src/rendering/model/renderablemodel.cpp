@@ -83,6 +83,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 	dictionary.getValue(keySource, _source);
 	dictionary.getValue(keyDestination, _destination);
+
+    setBoundingSphere(pss(1.f, 9.f));
 }
 
 
