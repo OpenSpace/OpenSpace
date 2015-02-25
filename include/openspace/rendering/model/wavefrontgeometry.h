@@ -55,7 +55,11 @@ public:
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 protected:
-	void loadObj(const char *filename);
+	bool loadObj(const std::string& filename);
+    bool loadCachedFile(const std::string& filename);
+    bool saveCachedFile(const std::string& filename);
+    bool loadModel(const std::string& filename);
+
 private:
     void createSphere();
 	

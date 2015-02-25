@@ -436,7 +436,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 		cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 		
 		//why this line? (JK)
-		cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
 
 		//c->setPosition(cameraPosition);
        // c->setCameraDirection(glm::vec3(0, 0, -1));

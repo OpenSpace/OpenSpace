@@ -1,24 +1,24 @@
+--[[  OpenSpace keybinding script ]]--
+-- This script sets the default keybindings and is executed at startup
+
 openspace.clearKeys()
-
-interaction_speed = 2.75
-
--- Key Bindings
-openspace.bindKey("f1", "openspace.gui.toggle()")
-openspace.bindKey("f2", "openspace.setPerformanceMeasurement(true)")
-openspace.bindKey("f3", "openspace.setPerformanceMeasurement(false)")
-openspace.bindKey("f4", "openspace.takeScreenshot()")
-openspace.bindKey("f5", "loadKeyBindings()")
-
-openspace.bindKey("f9", "openspace.changeViewPointToPluto(); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
-openspace.bindKey("f10", "openspace.changeViewPointToSun(); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
-openspace.bindKey("f11", "openspace.fadeOut(2);")
-openspace.bindKey("f12", "openspace.fadeIn(2);")
-
-openspace.bindKey("T", "openspace.distance(-interaction_speed * openspace.dt(), 6.0)")
-openspace.bindKey("G", "openspace.distance(interaction_speed * openspace.dt(), 6.0)")
-openspace.bindKey("Y", "openspace.distance(-interaction_speed * openspace.dt(), 10.0)")
-openspace.bindKey("H", "openspace.distance(interaction_speed * openspace.dt(), 10.0)")
-openspace.bindKey("U", "openspace.distance(-interaction_speed * openspace.dt(), 10.0)")
-openspace.bindKey("J", "openspace.distance(interaction_speed * openspace.dt(), 10.0)")
-
+openspace.bindKey("F1", "openspace.gui.toggle()")
+openspace.bindKey("F2", "openspace.setPerformanceMeasurement(true)")
+openspace.bindKey("F3", "openspace.setPerformanceMeasurement(false)")
+openspace.bindKey("F5", "openspace.changeCoordinateSystem('Sun'); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
+openspace.bindKey("F6", "openspace.changeCoordinateSystem('Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter-in-center');");
+openspace.bindKey("F7", "openspace.changeCoordinateSystem('Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
+openspace.bindKey("F11", "openspace.fadeOut(2)")
+openspace.bindKey("F12", "openspace.fadeIn(2)")
 openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
+
+-- Bookmarks for the New Horizons encounter
+openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
+openspace.bindKey("2", "openspace.time.setTime('2015-07-14T10:50:00.00'); openspace.time.setDeltaTime(10)")
+openspace.bindKey("3", "openspace.time.setTime('2015-07-14T11:22:00.00'); openspace.time.setDeltaTime(1)")
+openspace.bindKey("4", "openspace.time.setTime('2015-07-14T11:36:40.00'); openspace.time.setDeltaTime(1)")
+openspace.bindKey("5", "openspace.time.setTime('2015-07-14T11:48:43.00'); openspace.time.setDeltaTime(1)")
+openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); openspace.time.setDeltaTime(1)")
+openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
+
+openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

@@ -74,8 +74,8 @@ public:
 	void serialize(SyncBuffer* syncBuffer);
 	void deserialize(SyncBuffer* syncBuffer);
 
-	float globalOpacity();
-	void setGlobalOpacity(float opacity);
+	float globalBlackOutFactor();
+	void setGlobalBlackOutFactor(float factor);
 
     void setSGCTRenderStatistics(bool visible);
 
@@ -114,7 +114,7 @@ private:
 
 	void generateGlslConfig();
 
-	float _globalOpactity;
+	float _globalBlackOutFactor;
 	float _fadeDuration;
 	float _currentFadeTime;
 	int _fadeDirection;

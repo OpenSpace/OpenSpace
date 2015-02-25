@@ -50,8 +50,9 @@ public:
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
+
  private:
-	properties::StringProperty _colorTexturePath; 
+    properties::FloatProperty _lineWidth;
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
 	openspace::SceneGraphNode* _targetNode;
