@@ -38,7 +38,7 @@ namespace {
 
     const std::string keyObjFile = "ObjFile";
 
-    const int8_t CurrentCacheVersion = 2;
+    const int8_t CurrentCacheVersion = 3;
 }
 
 namespace openspace {
@@ -162,31 +162,43 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
     for (int i = 0; i < shapes.size(); ++i) {
         totalSizeIndex += shapes[i].mesh.indices.size();
         totalSizeVertex += shapes[i].mesh.positions.size();
+
+        if (shapes[i].mesh.positions.size() != shapes[i].mesh.normals.size())
+            LERROR(
+                "#positions (" << shapes[i].mesh.positions.size() << ")"
+                " != #normals (" << shapes[i].mesh.normals.size()
+            );
     }
 
     _vertices.resize(totalSizeVertex);
+    std::memset(_vertices.data(), 0, _vertices.size() * sizeof(Vertex));
     _indices.resize(totalSizeIndex);
+    std::memset(_indices.data(), 0, _indices.size() * sizeof(int));
 
     // We add all shapes of the model into the same vertex array, one after the other
     // The _shapeCounts array stores for each shape, how many vertices that shape has
+    int currentPosition = 0;
+    int currentIndices = 0;
     int p = 0;
     for (int i = 0; i < shapes.size(); ++i) {
-        //for (int j = 0; j < shapes[i].mesh.positions.size(); ++j) {
+        for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {
+            _vertices[j + currentPosition].location[0] = shapes[i].mesh.positions[3 * j + 0];
+            _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
+            _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
+            _vertices[j + currentPosition].location[3] = 5;
 
-        for (int index : shapes[i].mesh.indices) {
-            _vertices[index + p].location[0] = shapes[i].mesh.positions[3 * index + 0];
-            _vertices[index + p].location[1] = shapes[i].mesh.positions[3 * index + 1];
-            _vertices[index + p].location[2] = shapes[i].mesh.positions[3 * index + 2];
-            _vertices[index + p].location[3] = 5;
+            _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];
+            _vertices[j + currentPosition].normal[1] = shapes[i].mesh.normals[3 * j + 1];
+            _vertices[j + currentPosition].normal[2] = shapes[i].mesh.normals[3 * j + 2];
 
-            _vertices[index + p].normal[0] = shapes[i].mesh.normals[3 * index + 0];
-            _vertices[index + p].normal[1] = shapes[i].mesh.normals[3 * index + 1];
-            _vertices[index + p].normal[2] = shapes[i].mesh.normals[3 * index + 2];
+            if (2 * j + 1 < shapes[i].mesh.texcoords.size()) {
+                _vertices[j + currentPosition].tex[0] = shapes[0].mesh.texcoords[2 * j + 0];
+                _vertices[j + currentPosition].tex[1] = shapes[0].mesh.texcoords[2 * j + 1];
+            }
 
-            // Only set the texture coordinates if they don't fall out of the value range
-            _vertices[index + p].tex[0] = (2 * index + 0) < shapes[i].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * index + 0] : 0.f;
-            _vertices[index + p].tex[1] = (2 * index + 1) < shapes[i].mesh.texcoords.size() ? shapes[0].mesh.texcoords[2 * index + 1] : 0.f;
         }
+        currentPosition += shapes[i].mesh.positions.size() / 3;
+
         std::copy(
             shapes[i].mesh.indices.begin(),
             shapes[i].mesh.indices.end(),
@@ -199,7 +211,6 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
 }
 
 bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
-    return true;
     std::ofstream fileStream(filename, std::ofstream::binary);
     if (fileStream.good()) {
         fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
@@ -207,9 +218,11 @@ bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
 
         int64_t vSize = _vertices.size();
         fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
+        int64_t iSize = _indices.size();
+        fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
 
         fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
-        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * vSize);
+        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
 
         return fileStream.good();
     }
@@ -236,9 +249,10 @@ bool WavefrontGeometry::loadCachedFile(const std::string& filename) {
         fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
         
         _vertices.resize(vSize);
-        _indices.resize(vSize);
+        _indices.resize(iSize);
 
         fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
 
         return fileStream.good();
     }
