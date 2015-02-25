@@ -10,7 +10,7 @@ openspace.time.setTime("2007 FEB 27 16:40:00")          -- This is the start tim
 
 openspace.time.setDeltaTime(10)                         -- How many seconds pass per second of realtime, changeable in the GUI
 
-dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))() -- Load the default keybindings
+dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keybindings
 
 -- openspace.time.setDeltaTime(50);
 
