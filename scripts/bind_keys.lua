@@ -12,6 +12,8 @@ openspace.bindKey("F11", "openspace.fadeOut(2)")
 openspace.bindKey("F12", "openspace.fadeIn(2)")
 openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
 
+openspace.bindKey("SPACE", "openspace.time.togglePause()")
+
 -- Bookmarks for the New Horizons encounter
 openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
 openspace.bindKey("2", "openspace.time.setTime('2015-07-14T10:50:00.00'); openspace.time.setDeltaTime(10)")

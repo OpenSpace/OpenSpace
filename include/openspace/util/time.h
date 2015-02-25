@@ -126,6 +126,24 @@ public:
 	 */
 	double deltaTime() const;
 
+    /**
+     * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> = 
+     * <code>true</code>) and restoring it when the function is called with a parameter of
+     * <code>false</code>.
+     * \param If <code>true</code>, the simulation time stops; if <code>false</code>, the
+     * simulation time continues at the previous rate
+     */
+    void setPause(bool pause);
+
+    /**
+     * Toggles the pause function, i.e. setting the deltaTime to 0 and restoring it when
+     * the function is called a second time. It returns the pause state (<code>true</code>
+     * if the time is now paused, <code>false</code> otherwise)
+     * \return The new pause state (<code>true</code> if the time is now paused,
+     * <code>false</code> otherwise)
+     */
+    bool togglePause();
+
 	/**
 	 * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.
 	 * The deltaTime() is the number of simulation seconds that pass for each real-time
@@ -137,18 +155,6 @@ public:
 	 * \return The new time value after advancing the time
 	 */
 	double advanceTime(double tickTime);
-
-	/**
-	* Retreats the simulation time using the deltaTime() and the <code>tickTime</code>.
-	* The deltaTime() is the number of simulation seconds that pass for each real-time
-	* second. <code>tickTime</code> is the number of real-time seconds that passed since
-	* the last call to this method. If this method is called in the render loop, the
-	* <code>tickTime</code> should be equivalent to the frame time.
-	* \param tickTime The number of real-time seconds that passed since the last call
-	* to this method
-	* \return The new time value after retreating the time
-	*/
-	double retreatTime(double tickTime);
 
 	void serialize(SyncBuffer* syncBuffer);
 
@@ -192,6 +198,7 @@ private:
 	double _time; ///< The time stored as the number of seconds past the J2000 epoch
 	double _dt;
 	bool _timeJumped;
+    bool _timePaused;
     bool _jockeHasToFixThisLater;
 
 	//shared copies
