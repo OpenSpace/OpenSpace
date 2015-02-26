@@ -172,9 +172,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
             if (sequenceType == sequenceTypeImage) {
                 openspace::ImageSequencer::ref().loadSequence(sequenceSource);
             }
-          /*  else if (sequenceType == sequenceTypePlaybook) {
+            else if (sequenceType == sequenceTypePlaybook) {
                 openspace::ImageSequencer::ref().parsePlaybookFile(sequenceSource);
-            }*/
+            }
             else {
                 LERROR("RenderablePlanetProjection '" << name << "' had unknown sequence type '" << sequenceType << "'");
             }

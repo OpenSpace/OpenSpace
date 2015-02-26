@@ -130,9 +130,11 @@ std::string ImageSequencer::findActiveInstrument(double time){
 	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { time, 0, "", "", false }, cmp);
 	
 	if ((it == _timeStamps.end())){
-		return "Not found, incufficient playbook-data";
+		_activeInstrument = "Not found, incufficient playbook-data";
+	}else{
+		_activeInstrument = std::prev(it)->activeInstrument;
 	}
-	_activeInstrument = std::prev(it)->activeInstrument;
+	
 
 	return _activeInstrument;
 }
