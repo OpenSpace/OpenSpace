@@ -884,7 +884,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
     SceneGraphNode* jupiterBarycenterNode = sceneGraph()->sceneGraphNode("JupiterBarycenter");
 
-    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr) {
+    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
         LERROR("WTF");
         return;
     }

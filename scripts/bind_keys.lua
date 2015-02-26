@@ -23,4 +23,7 @@ openspace.bindKey("5", "openspace.time.setTime('2015-07-14T11:48:43.00'); opensp
 openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); openspace.time.setDeltaTime(1)")
 openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
 
+openspace.bindKey("q", "local b = openspace.getPropertyValue('SunMarker.renderable.enabled'); openspace.setPropertyValue('SunMarker.renderable.enabled', not b)")
+openspace.bindKey("e", "local b = openspace.getPropertyValue('EarthMarker.renderable.enabled'); openspace.setPropertyValue('EarthMarker.renderable.enabled', not b)")
+
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")
