@@ -987,6 +987,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+        return;
     }
 
     ghoul_assert(false, "This function is being misused");

@@ -29,12 +29,12 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
 	const std::string _loggerCat = "RenderablePlane";
-
-    ghoul::filesystem::File* _colorTextureFile;
 
 	const std::string keyFieldlines = "Fieldlines";
 	const std::string keyFilename = "File";
@@ -92,13 +92,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	bool success = dictionary.getValue("Texture", texturePath);
 	if (success) {
 		_texturePath = findPath(texturePath);
-        _colorTextureFile = new ghoul::filesystem::File(_texturePath);
+        _textureFile = new ghoul::filesystem::File(_texturePath);
     }
 
     addProperty(_billboard);
 	addProperty(_texturePath);
     _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
-    _colorTextureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+    _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 
     addProperty(_size);
     //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
@@ -108,7 +108,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 }
 
 RenderablePlane::~RenderablePlane() {
-    delete _colorTextureFile;
+    delete _textureFile;
 }
 
 bool RenderablePlane::isReady() const {
@@ -202,9 +202,9 @@ void RenderablePlane::loadTexture() {
 				delete _texture;
 			_texture = texture;
 
-            delete _colorTextureFile;
-            _colorTextureFile = new ghoul::filesystem::File(_texturePath);
-            _colorTextureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+            delete _textureFile;
+            _textureFile = new ghoul::filesystem::File(_texturePath);
+            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 		}
 	}
 }

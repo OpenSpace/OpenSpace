@@ -30,8 +30,16 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+
+namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
 	struct LinePoint;
@@ -70,6 +78,7 @@ private:
     bool _programIsDirty;
     bool _textureIsDirty;
 	ghoul::opengl::Texture* _texture;
+    ghoul::filesystem::File* _textureFile;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 };
