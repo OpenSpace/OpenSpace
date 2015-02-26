@@ -172,9 +172,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
             if (sequenceType == sequenceTypeImage) {
                 openspace::ImageSequencer::ref().loadSequence(sequenceSource);
             }
-            else if (sequenceType == sequenceTypePlaybook) {
+          /*  else if (sequenceType == sequenceTypePlaybook) {
                 openspace::ImageSequencer::ref().parsePlaybookFile(sequenceSource);
-            }
+            }*/
             else {
                 LERROR("RenderablePlanetProjection '" << name << "' had unknown sequence type '" << sequenceType << "'");
             }
@@ -354,9 +354,9 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 		}
 	}
 	_transform = _transform* rot;
-/*	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
+	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
 		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
-	}*/
+	}
 	std::string shape, instrument;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
@@ -427,8 +427,6 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	_capture = false;
 
 	bool _withinFOV;
-	/* -- TEMPORARY TARGETING SOLUTION -- */
-	//std::string potential2[2] = { "PLUTO", "CHARON" }; // only possible to target these two for now. 
 
 	std::string _fovTarget = "";
 	for (int i = 0; i < _potentialTargets.size(); i++){
