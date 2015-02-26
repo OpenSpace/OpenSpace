@@ -3,6 +3,7 @@
 -- set settings in the loaded scene graph
 
 openspace.printInfo("Setting default values")
+openspace.setPropertyValue("Sun.renderable.enabled", false)
 openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
 openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.75)
