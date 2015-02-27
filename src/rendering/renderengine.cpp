@@ -228,6 +228,11 @@ namespace openspace {
 		, _fadeDirection(0)
         , _sgctRenderStatisticsVisible(false)
 	{
+        _onScreenInformation = {
+            glm::vec2(0.f),
+            12.f,
+            -1
+        };
 	}
 
 	RenderEngine::~RenderEngine()
@@ -489,6 +494,65 @@ namespace openspace {
             }
 
 #if 1
+#define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
+#define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
+
+            LINFO("Window id " << sgct::Engine::instance()->getWindowPtr(0)->getId());
+            if (_onScreenInformation._node != -1) {
+                int thisId = sgct::Engine::instance()->getWindowPtr(0)->getId();
+
+                if (thisId == _onScreenInformation._node) {
+                    const int font_size_mono = _onScreenInformation._size;
+                    int x1, xSize, y1, ySize;
+                    const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
+                    sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+                    int startY = ySize - 2 * font_size_mono;
+
+                    double currentTime = Time::ref().currentTime();
+                    ImageSequencer::ref().findActiveInstrument(currentTime);
+
+                    double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
+                    double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
+                    std::string progress = "|";
+                    int g = ((t)* 20) + 1;
+                    for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
+                    for (int i = 0; i < 21 - g; i++) progress.append(" ");
+
+                    std::string str = "";
+                    openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
+
+                    progress.append("|");
+                    if (remaining > 0){
+                        glm::vec4 g1(0, t, 0, 1);
+                        glm::vec4 g2(1 - t);
+                        Freetype::print(font,
+                            _onScreenInformation._position.x * xSize,
+                            _onScreenInformation._position.y * ySize,
+                            g1 + g2,
+                            "Next projection in     | %.0f seconds",
+                            remaining
+                        );
+                        Freetype::print(font,
+                            _onScreenInformation._position.x * xSize,
+                            _onScreenInformation._position.y * ySize - font_size_mono * 2,
+                            g1 + g2,
+                            "%s %.1f %%",
+                            progress.c_str(), t * 100
+                        );
+
+                    }
+
+                    std::string active = ImageSequencer::ref().getActiveInstrument();
+                    Freetype::print(font,
+                        _onScreenInformation._position.x * xSize,
+                        _onScreenInformation._position.y * ySize - font_size_mono * 2 * 2,
+                        glm::vec4(0.3, 0.6, 1, 1),
+                        "Active Instrument : %s",
+                        active.c_str()
+                    );
+
+                }
+            }
 
 			// Print some useful information on the master viewport
 			if (OsEng.ref().isMaster() && !w->isUsingFisheyeRendering()) {
@@ -513,8 +577,6 @@ namespace openspace {
 
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
-#define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
-#define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
 
 
 					int i = 0;
