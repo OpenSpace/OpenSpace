@@ -324,17 +324,16 @@ bool ScriptEngine::hasLibrary(const std::string& name)
 	//return false;
 }
 
-bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
-{
+bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
-    lua_getglobal(_state, _openspaceLibraryName.c_str());
-    const bool hasOpenSpaceLibrary = lua_istable(_state, -1);
+    lua_getglobal(state, _openspaceLibraryName.c_str());
+    const bool hasOpenSpaceLibrary = lua_istable(state, -1);
     if (!hasOpenSpaceLibrary) {
         LFATAL("OpenSpace library was not created in initialize method");
         return false;
     }
-    lua_getfield(_state, -1, name.c_str());
-    const int type = lua_type(_state, -1);
+    lua_getfield(state, -1, name.c_str());
+    const int type = lua_type(state, -1);
     switch (type) {
         case LUA_TNONE:
         case LUA_TNIL:
@@ -370,7 +369,7 @@ bool ScriptEngine::isLibraryNameAllowed(const std::string& name)
             break;
     }
 
-    lua_pop(_state, 2);
+    lua_pop(state, 2);
     return result;
 }
 
@@ -496,7 +495,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
 		//ghoul::lua::logStack(_state);
     }
     else {
-        const bool allowed = isLibraryNameAllowed(library.name);
+        const bool allowed = isLibraryNameAllowed(state, library.name);
         if (!allowed)
             return false;
         

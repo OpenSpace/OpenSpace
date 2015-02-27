@@ -148,7 +148,7 @@ namespace {
 
         Vec2Property::ValueType value = *p;
 
-        ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+        ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(),

@@ -85,7 +85,7 @@ private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
 
-    bool isLibraryNameAllowed(const std::string& name);
+    bool isLibraryNameAllowed(lua_State* state, const std::string& name);
     
     void addBaseLibrary();
     void remapPrintFunction();

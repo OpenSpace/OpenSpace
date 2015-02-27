@@ -25,14 +25,21 @@
 #ifndef RENDERABLEPLANE_H_
 #define RENDERABLEPLANE_H_
 
-// open space includes
 #include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
 
-// ghoul includes
-#include <openspace/properties/stringproperty.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
 	struct LinePoint;
@@ -57,16 +64,21 @@ public:
 
 private:
 	void loadTexture();
+    void createPlane();
 
 	properties::StringProperty _texturePath;
 	properties::BoolProperty _billboard;
+    properties::Vec2Property _size;
 
-	glm::vec2 _size;
 	Origin _origin;
+
+    bool _planeIsDirty;
 
 	ghoul::opengl::ProgramObject* _shader;
     bool _programIsDirty;
+    bool _textureIsDirty;
 	ghoul::opengl::Texture* _texture;
+    ghoul::filesystem::File* _textureFile;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 };

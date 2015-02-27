@@ -222,7 +222,7 @@ namespace openspace {
 		, _performanceMemory(nullptr)
 		, _visualizeABuffer(false)
 		, _visualizer(nullptr)
-		, _globalOpactity(1.f)
+		, _globalBlackOutFactor(0.f)
 		, _fadeDuration(2.f)
 		, _currentFadeTime(0.f)
 		, _fadeDirection(0)
@@ -384,15 +384,15 @@ namespace openspace {
 		if (_fadeDirection != 0){
 			if (_currentFadeTime > _fadeDuration){
 				_fadeDirection = 0;
-				_globalOpactity = fminf(1.f, fmaxf(0.f, _globalOpactity));
+				_globalBlackOutFactor = fminf(1.f, fmaxf(0.f, _globalBlackOutFactor));
 			} 
 			else{
 
 				if (_fadeDirection < 0){
-					_globalOpactity = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
+					_globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
 				}
 				else{
-					_globalOpactity = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
+					_globalBlackOutFactor = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
 				}
 				_currentFadeTime += static_cast<float>(sgct::Engine::instance()->getAvgDt());
 			}
@@ -690,12 +690,12 @@ namespace openspace {
 			return _abuffer;
 		}
 
-		float RenderEngine::globalOpacity(){
-			return _globalOpactity;
+		float RenderEngine::globalBlackOutFactor(){
+			return _globalBlackOutFactor;
 		}
 
-		void RenderEngine::setGlobalOpacity(float opacity){
-			_globalOpactity = opacity;
+		void RenderEngine::setGlobalBlackOutFactor(float opacity){
+			_globalBlackOutFactor = opacity;
 		}
 
 		void RenderEngine::startFading(int direction, float fadeDuration){
@@ -888,7 +888,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
     SceneGraphNode* jupiterBarycenterNode = sceneGraph()->sceneGraphNode("JupiterBarycenter");
 
-    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr) {
+    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
         LERROR("WTF");
         return;
     }
@@ -991,6 +991,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+        return;
     }
 
     ghoul_assert(false, "This function is being misused");

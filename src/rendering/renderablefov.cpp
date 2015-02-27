@@ -64,26 +64,26 @@ namespace openspace{
 	glm::vec4 col_gray;
 	glm::vec4 col_start;
 
-	RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
-		: Renderable(dictionary)
-		, _colorTexturePath("colorTexture", "Color Texture")
-		, _programObject(nullptr)
-		, _texture(nullptr)
-		, _mode(GL_LINES){
+    RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary)
+        , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+        , _programObject(nullptr)
+        , _texture(nullptr)
+        , _mode(GL_LINES){
 
-		bool success = dictionary.getValue(keyBody            , _spacecraft);
+        bool success = dictionary.getValue(keyBody, _spacecraft);
         ghoul_assert(success, "");
 
-        success = dictionary.getValue(keyFrame                , _frame);
+        success = dictionary.getValue(keyFrame, _frame);
         ghoul_assert(success, "");
 
-		success = dictionary.getValue(keyInstrument           , _instrumentID);
+        success = dictionary.getValue(keyInstrument, _instrumentID);
         ghoul_assert(success, "");
 
-		success = dictionary.getValue(keyInstrumentMethod     , _method);
+        success = dictionary.getValue(keyInstrumentMethod, _method);
         ghoul_assert(success, "");
 
-		success = dictionary.getValue(keyInstrumentAberration , _aberrationCorrection);
+        success = dictionary.getValue(keyInstrumentAberration, _aberrationCorrection);
         ghoul_assert(success, "");
 
         ghoul::Dictionary potentialTargets;
@@ -96,6 +96,8 @@ namespace openspace{
             potentialTargets.getValue(std::to_string(i + 1), target);
             _potentialTargets[i] = target;
         }
+
+        addProperty(_lineWidth);
 }
 
 void RenderableFov::allocateData(){ 
@@ -148,8 +150,6 @@ bool RenderableFov::initialize(){
 }
 
 bool RenderableFov::deinitialize(){
-	delete _texture;
-	_texture = nullptr;
 	return true;
 }
 
@@ -529,7 +529,7 @@ void RenderableFov::render(const RenderData& data){
 		}
 		_oldTime = _time;
 
-		glLineWidth(1.f);
+		glLineWidth(_lineWidth);
 		glBindVertexArray(_vaoID[0]);
 		glDrawArrays(_mode, 0, _vtotal[0]);
 		glBindVertexArray(0);
@@ -547,6 +547,7 @@ void RenderableFov::render(const RenderData& data){
 			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
 			glBindVertexArray(0);
 		}
+        glLineWidth(1.f);
 
 		/*glPointSize(5.f);
 		glBindVertexArray(_vaoID2);
@@ -561,19 +562,6 @@ void RenderableFov::update(const UpdateData& data){
 	double lightTime;
 	_time  = data.time;
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time, _stateMatrix);
-}
-
-void RenderableFov::loadTexture()
-{
-	delete _texture;
-	_texture = nullptr;
-	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
-		if (_texture) {
-			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-			_texture->uploadTexture();
-		}
-	}
 }
 
 }
