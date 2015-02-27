@@ -137,7 +137,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _potentialTargets[i] = target;
     }
 
-
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
@@ -286,7 +285,6 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		_fboProgramObject->setUniform("_scaling"       , _camScaling);
 		_fboProgramObject->setUniform("boresight"      , _boresight);
 
-		//TODO - needs target switching.
 		if (_geometry->hasProperty("radius")){ 
 			boost::any r = _geometry->property("radius")->get();
 			if (glm::vec2* radius = boost::any_cast<glm::vec2>(&r)){
@@ -295,7 +293,6 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		}else{
 			LERROR("Geometry object needs to provide radius");
 		}
-		// pass nr of segments
 		if (_geometry->hasProperty("segments")){
 			boost::any s = _geometry->property("segments")->get();
 			if (int* segments = boost::any_cast<int>(&s)){
@@ -316,7 +313,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 			       m_viewport[2], m_viewport[3]);
 	
 }
-
+#include <math.h>
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
 	//rotate boresight into correct alignment
 	_boresight = _instrumentMatrix*aim;
@@ -354,9 +351,9 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 		}
 	}
 	_transform = _transform* rot;
-/*	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
+	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
 		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
-	}*/
+	}
 	std::string shape, instrument;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
@@ -368,9 +365,9 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	psc position;                                //observer      target
 	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
 	//if (!found) LERROR("Could not locate target position");
-    if (!found)
-        return;
-	position[3] += 3;
+   
+	//change to KM and add psc camera scaling. 
+	position[3] += (3 + _camScaling[1]);
 	glm::vec3 cpos = position.vec3();
 
 	_projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
@@ -381,6 +378,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	if (!_programObject) return;
 	if (!_textureProj) return;
 
+	
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
@@ -427,8 +425,6 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	_capture = false;
 
 	bool _withinFOV;
-	/* -- TEMPORARY TARGETING SOLUTION -- */
-	//std::string potential2[2] = { "PLUTO", "CHARON" }; // only possible to target these two for now. 
 
 	std::string _fovTarget = "";
 	for (int i = 0; i < _potentialTargets.size(); i++){

@@ -573,12 +573,15 @@ namespace openspace {
 					const psc& position = _mainCamera->position();
 					const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
 					const PowerScaledScalar& pssl = (position - origin).length();
+					
+					// Next 2 lines neccesary for instrument switching to work. 
+					double currentTime = Time::ref().currentTime();
+					ImageSequencer::ref().findActiveInstrument(currentTime);
 
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
 
-
-					int i = 0;
+                    int i = 0;
 
 					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
@@ -590,7 +593,7 @@ namespace openspace {
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
-					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - Time::ref().currentTime();
+					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
 					double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
 					std::string progress = "|";
 					int g = ((t)* 20) + 1;
@@ -610,7 +613,8 @@ namespace openspace {
 					glm::vec4 w(1);
 					glm::vec4 b(0.3, 0.6, 1, 1);
 					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str());
-					std::string active = openspace::ImageSequencer::ref().getActiveInstrument();
+
+					std::string active = ImageSequencer::ref().getActiveInstrument();
 					PrintColorText(i++, "Active Instrument : %s", 10, b, active.c_str());
 #undef PrintText
 				}

@@ -89,7 +89,6 @@ void ImageSequencer::createImage(double t1, double t2, std::string instrument, s
 	
 	_timeStamps.push_back(image);
 	// sort
-
 }
 
 double ImageSequencer::getNextCaptureTime(){
@@ -110,12 +109,35 @@ double ImageSequencer::nextCaptureTime(double _time){
 
 	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", "",  false }, cmp);
 
-	_activeInstrument = it->activeInstrument;
+	if (it == _timeStamps.end() || _time < _nextCapture) return _nextCapture;
 
-	if (_time < _nextCapture) return _nextCapture;
 	return it->startTime;
 }
 
+std::string ImageSequencer::findActiveInstrument(double time){
+	auto binary_find = [](std::vector<ImageParams>::iterator begin,
+		std::vector<ImageParams>::iterator end,
+		const ImageParams &val,
+		bool(*cmp)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
+		// Finds the lower bound in at most log(last - first) + 1 comparisons
+		std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, cmp);
+		if (it != begin){
+			return it;
+		}
+		return end;
+	};
+
+	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { time, 0, "", "", false }, cmp);
+	
+	if ((it == _timeStamps.end())){
+		_activeInstrument = "Not found, incufficient playbook-data";
+	}else{
+		_activeInstrument = std::prev(it)->activeInstrument;
+	}
+	
+
+	return _activeInstrument;
+}
 
 bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool closedInterval){
 	auto binary_find = [](std::vector<ImageParams>::iterator begin,
@@ -147,7 +169,6 @@ bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool 
 	path = it->path;
 	currentTime = it->startTime;
 	
-
 	return true;
 }
 
@@ -177,12 +198,31 @@ bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& ty
 	return true; // add check
 }
 
+double ImageSequencer::getMissionElapsedTime(std::string timestr){
+	std::string::size_type sz;     // alias of size_t
+	double met = std::stod(timestr, &sz);
+	double diff;
+	double et;
+	//met ref time.
+	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
+
+	diff = abs(met - _metRef);
+	if (met > _metRef){
+		et += diff;
+	}
+	else if (met < _metRef){
+		et -= diff;
+	}
+
+	return et;
+}
+
 bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string year) {
 	if (size_t position = fileName.find_last_of(".") + 1){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(fileName).fileExtension();
-			/*
-			if (extension == "csv"){ // comma separated playbook
+#ifdef BACKUP_PLAYBOOK // Comma separated playbook in case we dont recieve updates from kang.
+			if (extension == "csv"){ // comma separated playbook 
 				std::cout << "USING COMMA SEPARATED TIMELINE V9F" << std::endl;
 
                 std::string cachedFile = "";
@@ -243,8 +283,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 
                 }
 			} 
-			*/
-				
+#endif
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
                 LINFO("Using Preparsed Playbook V9H");
 				std::ifstream file(fileName);
@@ -253,63 +292,21 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 				std::string timestr = "";
 				double shutter = 0.01;
 				double et;
-					
-				double metRef = 299180517;
+				
+				//@TODO: change similar to renderableFOV
+				std::string instruments[3] = { "LORRI", "RALPH_LEISA", "MVIC" };
+				std::string id[3] = { "NH_LORRI", "NH_RALPH_LEISA", "MVIC" };
+				int isize = sizeof(instruments) / sizeof(instruments[0]);
+				
 				do{
 					std::getline(file, timestr);
-					auto pos = timestr.find("LORRI Image Started");
-					if (pos != std::string::npos){
-						timestr = timestr.substr(24, 9);
-						std::string::size_type sz;     // alias of size_t
-
-						double met = std::stod(timestr, &sz);
-						double diff;
-						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
-
-						diff = abs(met - metRef);
-						if (met > metRef){
-							et += diff;
+					for (int i = 0; i < isize; i++){
+						auto pos = timestr.find(instruments[i]);
+						if (pos != std::string::npos){
+							timestr = timestr.substr(24, 9);
+							et = getMissionElapsedTime(timestr);
+							createImage(et, et + shutter, id[i], _defaultCaptureImage);
 						}
-						else if (met < metRef){
-							et -= diff;
-						}
-						createImage(et, et + shutter, "NH_LORRI", _defaultCaptureImage);
-					}	
-				    pos = timestr.find("MVIC");
-					if (pos != std::string::npos){
-						timestr = timestr.substr(24, 9);
-						std::string::size_type sz;     // alias of size_t
-						double met = std::stod(timestr, &sz);
-						double diff;
-						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
-
-						diff = abs(met - metRef);
-						if (met > metRef){
-							et += diff;
-						}
-						else if (met < metRef){
-							et -= diff;
-						}
-	
-						createImage(et, et + shutter, "MVIC", _defaultCaptureImage);
-					}
-					pos = timestr.find("RALPH_LEISA");
-					if (pos != std::string::npos){
-						timestr = timestr.substr(24, 9);
-						std::string::size_type sz;     // alias of size_t
-						double met = std::stod(timestr, &sz);
-						double diff;
-						openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
-
-						diff = abs(met - metRef);
-						if (met > metRef){
-							et += diff;
-						}
-						else if (met < metRef){
-							et -= diff;
-						}
-						
-						createImage(et, et + shutter, "NH_RALPH_LEISA", _defaultCaptureImage);
 					}
 				} while (!file.eof());
                 std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
@@ -358,21 +355,13 @@ bool ImageSequencer::loadSequence(const std::string& dir) {
 								createImage(timestamps[0], timestamps[1], "NH_LORRI", path); /// fix active instrument!
                                 std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 							}
-							//std::string timestr;
-							//openspace::SpiceManager::ref().getDateFromET(timestamps[0], timestr);
-							//std::cout << "Found at time " << timestr << " " << path << std::endl;
 						}
 					} while (!file.eof() && found == false);
 				}
 			}
 		}
 	}
-	// NEED TO FIX THIS LATER ON
-
-	//_nextCapture = nextCaptureTime(Time::ref().currentTime()); // this is not really working 100%
-	//_intervalLength = _timeStamps[1].startTime;
 	return !_timeStamps.empty();
 }
-
 
 }  // namespace openspace

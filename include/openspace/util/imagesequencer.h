@@ -54,17 +54,23 @@ public:
 	double getNextCaptureTime();
 	double getIntervalLength(){ return _intervalLength; };
 	std::string& getActiveInstrument(){ return _activeInstrument; };
+	std::string findActiveInstrument(double time);
+
 
 
 	static ImageSequencer* _sequencer;
 
 private:
+	double getMissionElapsedTime(std::string timestr);
+
 	double nextCaptureTime(double _time);
 
 	void createImage(double t1, double t2, std::string instrument, std::string path = "dummypath");
 	
 	double _nextCapture;
 	double _intervalLength;
+	double _metRef = 299180517;
+
 
     std::string _defaultCaptureImage;
 	std::string _activeInstrument;
