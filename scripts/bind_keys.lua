@@ -12,6 +12,8 @@ openspace.bindKey("F11", "openspace.fadeOut(2)")
 openspace.bindKey("F12", "openspace.fadeIn(2)")
 openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
 
+openspace.bindKey("SPACE", "openspace.time.togglePause()")
+
 -- Bookmarks for the New Horizons encounter
 openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
 openspace.bindKey("2", "openspace.time.setTime('2015-07-14T10:50:00.00'); openspace.time.setDeltaTime(10)")
@@ -20,5 +22,8 @@ openspace.bindKey("4", "openspace.time.setTime('2015-07-14T11:36:40.00'); opensp
 openspace.bindKey("5", "openspace.time.setTime('2015-07-14T11:48:43.00'); openspace.time.setDeltaTime(1)")
 openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); openspace.time.setDeltaTime(1)")
 openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
+
+openspace.bindKey("q", "local b = openspace.getPropertyValue('SunMarker.renderable.enabled'); openspace.setPropertyValue('SunMarker.renderable.enabled', not b)")
+openspace.bindKey("e", "local b = openspace.getPropertyValue('EarthMarker.renderable.enabled'); openspace.setPropertyValue('EarthMarker.renderable.enabled', not b)")
 
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

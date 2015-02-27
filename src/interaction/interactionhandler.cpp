@@ -905,7 +905,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 			Time::ref().advanceTime(sgct::Engine::instance()->getDt());
 		}
 		if (key == SGCT_KEY_X) {
-			Time::ref().retreatTime(sgct::Engine::instance()->getDt());
+			Time::ref().advanceTime(-sgct::Engine::instance()->getDt());
 		}
 	    if (key == 262) {
 	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);

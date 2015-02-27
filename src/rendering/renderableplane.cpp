@@ -29,6 +29,8 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -48,16 +50,18 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _texturePath("texture", "Texture")
 	, _billboard("billboard", "Billboard", false)
-	, _size(glm::vec2(1,1))
+	, _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
     , _programIsDirty(false)
 	, _texture(nullptr)
+    , _textureIsDirty(false)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 {
-
-	dictionary.getValue("Size", _size);
+    glm::vec2 size;
+	dictionary.getValue("Size", size);
+    _size = size;
 
 	std::string origin;
 	if (dictionary.getValue("Origin", origin)) {
@@ -86,16 +90,25 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
 	std::string texturePath = "";
 	bool success = dictionary.getValue("Texture", texturePath);
-	if (success)
+	if (success) {
 		_texturePath = findPath(texturePath);
+        _textureFile = new ghoul::filesystem::File(_texturePath);
+    }
 
+    addProperty(_billboard);
 	addProperty(_texturePath);
-	_texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
+    _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
+    _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 
-	setBoundingSphere(_size);
+    addProperty(_size);
+    //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
+    _size.onChange([this](){ _planeIsDirty = true; });
+
+	setBoundingSphere(_size.value());
 }
 
 RenderablePlane::~RenderablePlane() {
+    delete _textureFile;
 }
 
 bool RenderablePlane::isReady() const {
@@ -108,31 +121,9 @@ bool RenderablePlane::isReady() const {
 }
 
 bool RenderablePlane::initialize() {
-
-	// ============================
-	// 		GEOMETRY (quad)
-	// ============================
-	const GLfloat size = _size[0];
-	const GLfloat w = _size[1];
-	const GLfloat vertex_data[] = { // square of two triangles (sigh)
-		//	  x      y     z     w     s     t
-		-size, -size, 0.0f, w, 0,1,
-		size, size, 0.0f, w, 1, 0,
-		-size, size, 0.0f, w, 0, 0,
-		-size, -size, 0.0f, w, 0, 1,
-		size, -size, 0.0f, w, 1, 1,
-		size, size, 0.0f, w, 1, 0,
-	};
-
-	glGenVertexArrays(1, &_quad); // generate array
-	glBindVertexArray(_quad); // bind array
-	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    createPlane();
 
     // Plane program
     _shader = ghoul::opengl::ProgramObject::Build("Plane",
@@ -152,8 +143,7 @@ bool RenderablePlane::deinitialize() {
 	_quad = 0;
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
-	if(_texture)
-		delete _texture;
+	delete _texture;
     delete _shader;
 	return true;
 }
@@ -186,6 +176,14 @@ void RenderablePlane::update(const UpdateData& data) {
         _shader->rebuildFromFile();
         _programIsDirty = false;
     }
+
+    if (_planeIsDirty)
+        createPlane();
+
+    if (_textureIsDirty) {
+        loadTexture();
+        _textureIsDirty = false;
+    }
 }
 
 void RenderablePlane::loadTexture() {
@@ -203,8 +201,37 @@ void RenderablePlane::loadTexture() {
 			if (_texture)
 				delete _texture;
 			_texture = texture;
+
+            delete _textureFile;
+            _textureFile = new ghoul::filesystem::File(_texturePath);
+            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 		}
 	}
+}
+
+void RenderablePlane::createPlane() {
+    // ============================
+    // 		GEOMETRY (quad)
+    // ============================
+    const GLfloat size = _size.value()[0];
+    const GLfloat w = _size.value()[1];
+    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+        //	  x      y     z     w     s     t
+        -size, -size, 0.0f, w, 0, 1,
+        size, size, 0.0f, w, 1, 0,
+        -size, size, 0.0f, w, 0, 0,
+        -size, -size, 0.0f, w, 0, 1,
+        size, -size, 0.0f, w, 1, 1,
+        size, size, 0.0f, w, 1, 0,
+    };
+
+    glBindVertexArray(_quad); // bind array
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 }
 
 } // namespace openspace

@@ -82,6 +82,32 @@ int time_deltaTime(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
+ * togglePause():
+ * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
+ */
+int time_togglePause(lua_State* L) {
+    openspace::Time::ref().togglePause();
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * togglePause():
+ * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
+ */
+int time_setPause(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    bool pause = lua_toboolean(L, -1);
+    openspace::Time::ref().setPause(pause);
+    return 0;
+}
+
+
+/**
+ * \ingroup LuaScripts
  * setTime({number, string}):
  * Sets the simulation time to the passed value. If the parameter is a number, it is
  * interpreted as the number of seconds past the J2000 epoch and the
@@ -149,6 +175,7 @@ Time::Time()
 	: _time(-1.0)
 	, _dt(1.0)
 	, _timeJumped(false)
+    , _timePaused(false)
 	, _syncedTime(-1.0)
 	, _syncedDt(1.0)
 	, _syncedTimeJumped(false)
@@ -192,11 +219,10 @@ double Time::currentTime() const {
 }
 
 double Time::advanceTime(double tickTime) {
-	return _time += _dt * tickTime;
-}
-
-double Time::retreatTime(double tickTime) {
-	return _time -= _dt * tickTime;
+    if (_timePaused)
+        return _time;
+    else
+	    return _time += _dt * tickTime;
 }
 
 void Time::setDeltaTime(double deltaT) {
@@ -208,11 +234,18 @@ double Time::deltaTime() const {
 	return _syncedDt;
 }
 
+void Time::setPause(bool pause) {
+    _timePaused = pause;
+}
+
+bool Time::togglePause() {
+    _timePaused = !_timePaused;
+    return _timePaused;
+}
+
 void Time::setTime(std::string time) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
 	_timeJumped = true;
-    // Add callback to OpenSpaceEngine that signals that the next update phase
-    // needs total invalidation ---abock
 }
 
 std::string Time::currentTimeUTC() const {
@@ -298,6 +331,19 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 				"Returns the amount of simulated time that passes in one "
 				"second of real time"
 			},
+            {
+                "setPause",
+                &luascriptfunctions::time_setPause,
+                "bool",
+                "Pauses the simulation time or restores the delta time"
+            },
+            {
+                "togglePause",
+                &luascriptfunctions::time_togglePause,
+                "",
+                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
+                " and restoring it afterwards"
+            },
 			{
 				"setTime",
 				&luascriptfunctions::time_setTime,

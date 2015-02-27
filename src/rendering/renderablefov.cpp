@@ -423,11 +423,12 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
+    ImageSequencer::ref().findActiveInstrument(_time);
+
 	std::string instrument = ImageSequencer::ref().getActiveInstrument();
 
 	bool drawFOV = false;
 
-	//_instrumentID = instrument;
 	if (instrument == "MVIC"){
 		if (_instrumentID == "NH_RALPH_MVIC_PAN1" ||
 			_instrumentID == "NH_RALPH_MVIC_PAN2" ||
@@ -455,11 +456,6 @@ void RenderableFov::render(const RenderData& data){
             }
 			float size = 4 * sizeof(float);
 			int indx = 0;
-
-			// set target based on visibility to specific instrument,
-			// from here on the _fovTarget is the target for all spice functions.
-			//std::string potential[5] = { "Jupiter", "Io", "Europa", "Ganymede", "Callisto" };
-			//std::string potential[2] = { "Pluto", "Charon" };
 
 			_fovTarget = _potentialTargets[0]; //default
 			for (int i = 0; i < _potentialTargets.size(); i++){

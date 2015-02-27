@@ -75,11 +75,11 @@ ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) 
 
 	if (type == valueHtmlLog) {
 		return new ghoul::logging::HTMLLog(
-			filename, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
 	}
 	else if (type == valueTextLog) {
 		return new ghoul::logging::TextLog(
-			filename, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
 	}
 	else {
 		LERROR("Log with type '" << type << "' did not name a valid log");

@@ -189,8 +189,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     LINFOC("OpenSpace Version", 
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_REVISION << "." <<
-        OPENSPACE_VERSION_BUILD << " (" << OPENSPACE_VERSION_STRING << ")");
+        OPENSPACE_VERSION_REVISION << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
