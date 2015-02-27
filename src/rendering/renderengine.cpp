@@ -497,9 +497,8 @@ namespace openspace {
 #define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
 #define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
 
-            LINFO("Window id " << sgct::Engine::instance()->getWindowPtr(0)->getId());
             if (_onScreenInformation._node != -1) {
-                int thisId = sgct::Engine::instance()->getWindowPtr(0)->getId();
+                int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
 
                 if (thisId == _onScreenInformation._node) {
                     const int font_size_mono = _onScreenInformation._size;
@@ -736,12 +735,23 @@ namespace openspace {
 			if (_mainCamera){
 				_mainCamera->serialize(syncBuffer);
 			}
+
+
+            syncBuffer->encode(_onScreenInformation._node);
+            syncBuffer->encode(_onScreenInformation._position.x);
+            syncBuffer->encode(_onScreenInformation._position.y);
+            syncBuffer->encode(_onScreenInformation._size);
 		}
 
 		void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
 			if (_mainCamera){
 				_mainCamera->deserialize(syncBuffer);
 			}
+            syncBuffer->decode(_onScreenInformation._node);
+            syncBuffer->decode(_onScreenInformation._position.x);
+            syncBuffer->decode(_onScreenInformation._position.y);
+            syncBuffer->decode(_onScreenInformation._size);
+
 		}
 
 		Camera* RenderEngine::camera() const {
