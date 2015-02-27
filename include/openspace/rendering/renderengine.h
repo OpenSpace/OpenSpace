@@ -27,6 +27,9 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/stringproperty.h>
+
 namespace ghoul {
 	class SharedMemory;
 }
@@ -96,6 +99,13 @@ public:
 
 	//temporaray fade functionality
 	void startFading(int direction, float fadeDuration);
+
+    // This is temporary until a proper screenspace solution is found ---abock
+    struct {
+        glm::vec2 _position;
+        float _size;
+        int _node;
+    } _onScreenInformation;
 
 private:
 	void storePerformanceMeasurements();

@@ -25,6 +25,7 @@
 #include <openspace/gui/guipropertycomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/properties/scalarproperty.h>
@@ -426,8 +427,23 @@ void GuiPropertyComponent::handleProperty(const ghoul::Dictionary& dictionary) {
 void GuiPropertyComponent::render() {
 	ImGui::Begin("Properties", &_isEnabled, size, 0.5f);
 
+    if (ImGui::CollapsingHeader("OnScreen GUI")) {
+        glm::vec2& pos = OsEng.renderEngine()->_onScreenInformation._position;
+        Vec2Property::ValueType value = pos;
+        ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
+        pos = value;
+     
+        float& size = OsEng.renderEngine()->_onScreenInformation._size;
+        float fValue = size;
+        ImGui::SliderFloat("Size", &fValue, 0.f, 36.f);
+        size = fValue;
 
-    //ImGui::ShowUserGuide();
+        int& node = OsEng.renderEngine()->_onScreenInformation._node;
+        int iValue = node;
+        ImGui::SliderInt("Node#", &iValue, 0, 30);
+        node = iValue;
+    }
+
     ImGui::Spacing();
 
     for (const auto& p : _propertiesByOwner) {
