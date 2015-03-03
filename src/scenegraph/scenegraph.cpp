@@ -567,6 +567,9 @@ void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath, lua_State
     std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
     LDEBUG("Loading nodes from: " << fullModule);
 
+    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+    FileSys.setCurrentDirectory(modulePath);
+
     ghoul::Dictionary moduleDictionary;
     ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary, state);
     std::vector<std::string> keys = moduleDictionary.keys();
@@ -590,6 +593,8 @@ void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath, lua_State
 		m.nodes[nodeName] = element;
 		m.dependencies.emplace(parentName,nodeName);
     }
+
+    FileSys.setCurrentDirectory(oldDirectory);
 }
 
 void SceneGraph::loadNodes(const std::string& parentName, LoadMaps& m) {
@@ -621,6 +626,9 @@ void SceneGraph::loadModule(const std::string& modulePath)
     std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
     LDEBUG("Loading modules from: " << fullModule);
 
+    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+    FileSys.setCurrentDirectory(modulePath);
+
     ghoul::Dictionary moduleDictionary;
     ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
     std::vector<std::string> keys = moduleDictionary.keys();
@@ -642,6 +650,8 @@ void SceneGraph::loadModule(const std::string& modulePath)
         _allNodes.emplace(node->name(), node);
         _nodes.push_back(node);
     }
+
+    FileSys.setCurrentDirectory(oldDirectory);
 
     // Print the tree
     //printTree(_root);

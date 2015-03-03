@@ -66,16 +66,16 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	ghoul_assert(success,
             "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
 
-    std::string path;
-    success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-    ghoul_assert(success,
-            "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
+    //std::string path;
+    //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+    //ghoul_assert(success,
+    //        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
-        geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
+        //geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
 
@@ -88,8 +88,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // as the requirements are fixed (ab)
     std::string texturePath = "";
 	success = dictionary.getValue("Textures.Color", texturePath);
-	if (success)
-        _colorTexturePath = path + "/" + texturePath;
+    _colorTexturePath = absPath(texturePath);
+	//if (success)
+        //_colorTexturePath = path + "/" + texturePath;
 
 	addPropertySubOwner(_geometry);
 
@@ -195,14 +196,13 @@ void RenderablePlanet::update(const UpdateData& data){
 	_time = data.time;
 }
 
-void RenderablePlanet::loadTexture()
-{
+void RenderablePlanet::loadTexture() {
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
         if (_texture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+            LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
 			_texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
