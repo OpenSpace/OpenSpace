@@ -163,6 +163,11 @@ void openspace::properties::TemplateProperty<T>::setValue(T val)
 	}
 }
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
+    os << obj.value();
+    return os;
+}
 
 template <typename T>
 boost::any TemplateProperty<T>::get() const {
