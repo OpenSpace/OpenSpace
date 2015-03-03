@@ -56,11 +56,15 @@ namespace {
 	const std::string _loggerCat = "main";
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
-    const bool success = openspace::OpenSpaceEngine::create(argc, argv, sgctArguments);
+    std::string openGlVersion = "";
+    const bool success = openspace::OpenSpaceEngine::create(
+        argc, argv,
+        sgctArguments,
+        openGlVersion
+    );
     if (!success)
         return EXIT_FAILURE;
 
@@ -105,7 +109,17 @@ int main(int argc, char** argv)
 #ifdef __APPLE__
 	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
 #else
-	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_3_Core_Profile;
+    std::map<std::string, sgct::Engine::RunMode> versionMapping = {
+        { "4.2", sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
+        { "4.3", sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
+        { "4.4", sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
+        { "4.5", sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
+    };
+    if (versionMapping.find(openGlVersion) == versionMapping.end()) {
+        LFATAL("Requested OpenGL version " << openGlVersion << " not supported");
+        return EXIT_FAILURE;
+    }
+    sgct::Engine::RunMode rm = versionMapping[openGlVersion];
 #endif
 	const bool initSuccess = _sgctEngine->init(rm);
     if (!initSuccess) {
