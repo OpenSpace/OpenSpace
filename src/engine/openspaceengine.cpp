@@ -24,7 +24,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-// sgct
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 #include <openspace/version.h>
@@ -73,10 +72,13 @@ namespace {
 	const std::string _defaultCacheLocation = "${BASE_PATH}/cache";
     
     const std::string _sgctConfigArgumentCommand = "-config";
+
+    const std::string DefaultOpenGlVersion = "4.3";
     
     struct {
         std::string configurationName;
 		std::string sgctConfigurationName;
+        std::string openGlVersion;
     } commandlineArgumentPlaceholders;
 }
 
@@ -123,8 +125,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-bool OpenSpaceEngine::create(int argc, char** argv,
-							 std::vector<std::string>& sgctArguments)
+bool OpenSpaceEngine::create(
+    int argc, char** argv,
+    std::vector<std::string>& sgctArguments,
+    std::string& openGlVersion)
 {
 	assert(_engine == nullptr);
 
@@ -224,6 +228,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 			commandlineArgumentPlaceholders.sgctConfigurationName);
 		sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
 	}
+
+    openGlVersion = commandlineArgumentPlaceholders.openGlVersion;
+    LINFO("Using OpenGL version " << openGlVersion);
 
 	// Prepend the outgoing sgctArguments with the program name
 	// as well as the configuration file that sgct is supposed to use
@@ -354,7 +361,14 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
 		"Provides the path to the SGCT configuration file, overriding the value set in"
 		"the OpenSpace configuration file");
 	_commandlineParser->addCommand(sgctConfigFileCommand);
-    
+
+    commandlineArgumentPlaceholders.openGlVersion = DefaultOpenGlVersion;
+    CommandlineCommand* openGlVersionCommand = new SingleCommand<std::string>(
+        &commandlineArgumentPlaceholders.openGlVersion,
+        "-ogl", "-o",
+        "Sets the OpenGL version that is to be used; valid values are '4.2' and '4.3'");
+    _commandlineParser->addCommand(openGlVersionCommand);
+
     return true;
 }
 

@@ -520,20 +520,27 @@ namespace openspace {
                     std::string str = "";
                     openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
 
+                    Freetype::print(font,
+                            _onScreenInformation._position.x * xSize,
+                            _onScreenInformation._position.y * ySize,
+                            "Date: %s",
+                            Time::ref().currentTimeUTC().c_str()
+                    );
+
                     progress.append("|");
                     if (remaining > 0){
                         glm::vec4 g1(0, t, 0, 1);
                         glm::vec4 g2(1 - t);
                         Freetype::print(font,
                             _onScreenInformation._position.x * xSize,
-                            _onScreenInformation._position.y * ySize,
+                            _onScreenInformation._position.y * ySize - font_size_mono * 2,
                             g1 + g2,
                             "Next projection in     | %.0f seconds",
                             remaining
                         );
                         Freetype::print(font,
                             _onScreenInformation._position.x * xSize,
-                            _onScreenInformation._position.y * ySize - font_size_mono * 2,
+                            _onScreenInformation._position.y * ySize - font_size_mono * 2 * 2,
                             g1 + g2,
                             "%s %.1f %%",
                             progress.c_str(), t * 100
@@ -544,7 +551,7 @@ namespace openspace {
                     std::string active = ImageSequencer::ref().getActiveInstrument();
                     Freetype::print(font,
                         _onScreenInformation._position.x * xSize,
-                        _onScreenInformation._position.y * ySize - font_size_mono * 2 * 2,
+                        _onScreenInformation._position.y * ySize - font_size_mono * 3 * 2,
                         glm::vec4(0.3, 0.6, 1, 1),
                         "Active Instrument : %s",
                         active.c_str()
