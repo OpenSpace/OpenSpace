@@ -45,6 +45,7 @@ namespace {
 const std::string _loggerCat = "RenderableModel";
 	const std::string keySource      = "Rotation.Source";
 	const std::string keyDestination = "Rotation.Destination";
+	const std::string keyBody = "Body";
 }
 
 namespace openspace {
@@ -85,8 +86,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 	dictionary.getValue(keySource, _source);
 	dictionary.getValue(keyDestination, _destination);
+	dictionary.getValue(keyBody, _target);
 
     setBoundingSphere(pss(1.f, 9.f));
+	addProperty(_performShading);
 }
 
 bool RenderableModel::isReady() const {
@@ -144,7 +147,7 @@ void RenderableModel::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
-	_programObject->setUniform("_performShading", true);
+	_programObject->setUniform("_performShading", _performShading);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -164,7 +167,7 @@ void RenderableModel::update(const UpdateData& data) {
 	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 
     double  lt;
-    openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", data.time, _sunPosition, lt);
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", data.time, _sunPosition, lt);
 }
 
 void RenderableModel::loadTexture() {

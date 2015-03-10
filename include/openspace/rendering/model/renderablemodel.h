@@ -66,6 +66,7 @@ private:
 
 	std::string _source;
 	std::string _destination;
+	std::string _target;
 
 
     psc _sunPosition;
