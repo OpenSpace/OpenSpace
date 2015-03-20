@@ -84,6 +84,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _texture(nullptr)
 	, _textureProj(nullptr)
     , _geometry(nullptr)
+	, _rotation("rotation", "Rotation", 0, 0, 360)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -149,7 +150,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		_projectionTexturePath = path + "/" + texturePath;
 	}
 	addPropertySubOwner(_geometry);
-
+	addProperty(_rotation);
 	addProperty(_imageTrigger);
 	_imageTrigger.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 
@@ -287,8 +288,8 @@ void RenderablePlanetProjection::imageProjectGPU(){
 
 		if (_geometry->hasProperty("radius")){ 
 			boost::any r = _geometry->property("radius")->get();
-			if (glm::vec2* radius = boost::any_cast<glm::vec2>(&r)){
-				_fboProgramObject->setUniform("radius", radius[0]);
+			if (glm::vec4* radius = boost::any_cast<glm::vec4>(&r)){
+				_fboProgramObject->setUniform("radius", radius);
 			}
 		}else{
 			LERROR("Geometry object needs to provide radius");
@@ -345,15 +346,16 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
 	glm::mat4 rot = glm::rotate(_transform, 90.f, glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(_transform, 90.f, glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			_transform[i][j] = _stateMatrix[i][j];
+			_transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
-	_transform = _transform* rot;
-	if (_target == "IAU_JUPITER"){ // tmp solution scale of jupiterX = 0.935126
-		_transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.935126, 1));
-	}
+	_transform = _transform * rot * roty * rotProp;
+
 	std::string shape, instrument;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;

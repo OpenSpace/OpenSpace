@@ -766,6 +766,30 @@ bool SpiceManager::checkForError(std::string errorMessage) {
 	return false;
 }
 
+bool SpiceManager::getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c) {
+
+	SpiceDouble radii[3];
+	SpiceInt n;
+	int id;
+
+	getNaifId(planetName, id);
+	if (bodfnd_c(id, "RADII")) {
+		bodvrd_c(planetName.c_str(), "RADII", 3, &n, radii);
+		a = radii[0];
+		b = radii[1];
+		c = radii[2];
+	}
+	else {
+		LWARNING("Could not find SPICE data for the shape of " + planetName + ", using modfile value");
+		a = 1.f;
+		b = 1.f;
+		c = 1.f;
+	}
+
+	bool hasError = checkForError("Error retrieving planet radii of " + planetName);
+	return !hasError;
+}
+
 //bool SpiceManager::getSubSolarPoint(std::string computationMethod,
 //	                                std::string target,
 //	                                double      ephemeris,

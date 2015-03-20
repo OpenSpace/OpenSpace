@@ -648,6 +648,19 @@ public:
      */
     static bool checkForError(std::string errorMessage);
 
+	/**
+	* This method uses the SPICE kernels to get the radii of bodies defined as a
+	* triaxial ellipsoid. The benefit of this is to be able to create more accurate
+	* planet shapes, which is desirable when projecting images with SPICE intersection
+	* methods
+	* \param planetName - the name of the body, should be recognizable by SPICE
+	* \param a - equatorial radius 1
+	* \param b - equatorial radius 2 
+	* \param c - polar radius
+	* \return  <code>true</code> if SPICE reports no errors
+	*/
+	bool getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c);
+
 private:
 	struct KernelInformation {
 		std::string path; /// The path from which the kernel was loaded

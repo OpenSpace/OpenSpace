@@ -43,8 +43,8 @@ namespace planetgeometry {
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     : PlanetGeometry()
-    , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
-              glm::vec2(10.f, 20.f))
+	, _realRadius("radius", "Radius", glm::vec4(1.f, 1.f, 1.f, 0.f), glm::vec4(-10.f, -10.f, -10.f, -20.f),
+				glm::vec4(10.f, 10.f, 10.f, 20.f))
     , _segments("segments", "Segments", 20, 1, 50)
     , _sphere(nullptr)
 {
@@ -53,30 +53,37 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
 	using constants::simplespheregeometry::keySegments;
 
 	// The name is passed down from the SceneGraphNode
-    std::string name;
-    bool success = dictionary.getValue(keyName, name);
+    bool success = dictionary.getValue(keyName, _name);
 	assert(success);
-
-    glm::vec2 radius;
-    success = dictionary.getValue(keyRadius, radius);
+	
+	glm::vec4 radius;
+	success = dictionary.getValue(keyRadius, _modRadius);
 	if (!success) {
-        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
+		LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
                                            << keyRadius << "'");
 	}
-	else
-		_radius = radius;
+	else {
+		radius[0] = _modRadius[0];
+		radius[1] = _modRadius[0];
+		radius[2] = _modRadius[0];
+		radius[3] = _modRadius[1];
+		_realRadius = radius; // In case the kernels does not supply a real
+	}
 
     double segments;
     success = dictionary.getValue(keySegments, segments);
 	if (!success) {
-        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
+		LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
                                            << keySegments << "'");
 	}
 	else
 		_segments = static_cast<int>(segments);
 
-    addProperty(_radius);
-    _radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
+	// The shader need the radii values but they are not changeable runtime
+	// TODO: Possibly add a scaling property @AA
+    addProperty(_realRadius);
+	// Changing the radius/scaling should affect the shader but not the geometry? @AA
+    //_radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
     addProperty(_segments);
     _segments.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
 }
@@ -107,13 +114,13 @@ void SimpleSphereGeometry::render()
 void SimpleSphereGeometry::createSphere(){
     //create the power scaled scalar
 
-    PowerScaledScalar planetSize(_radius);
+    PowerScaledScalar planetSize(_modRadius);
     _parent->setBoundingSphere(planetSize);
 
     if(_sphere)
         delete _sphere;
-
-    _sphere = new PowerScaledSphere(planetSize, _segments);
+	//_sphere = new PowerScaledSphere(planetSize, _segments);
+	_sphere = new PowerScaledSphere(_realRadius, _segments, _name);
     _sphere->initialize();
 }
 

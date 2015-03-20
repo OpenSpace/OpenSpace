@@ -66,6 +66,7 @@ private:
     ghoul::opengl::Texture* _texture;
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
+	properties::IntProperty _rotation;
 
 	glm::dmat3 _stateMatrix;
 
