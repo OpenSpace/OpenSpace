@@ -102,8 +102,14 @@ private:
 	glm::dmat3 _instrumentMatrix;
 	glm::vec3  _boresight;
 
-	double _time[2];
+	double _time;
+	double _previousTime;
+	double _previousCapture;
 	double lightTime;
+
+	std::vector<std::pair<double, std::string>> _imageTimes;
+	int _sequenceID;
+
 
 	std::string _target;
 	std::string _defaultProjImage;

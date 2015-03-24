@@ -423,7 +423,7 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 
-    ImageSequencer::ref().findActiveInstrument(_time);
+   // ImageSequencer::ref().findActiveInstrument(_time);
 
 	std::string instrument = ImageSequencer::ref().getActiveInstrument();
 

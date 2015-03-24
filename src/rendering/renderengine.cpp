@@ -430,8 +430,7 @@ namespace openspace {
 			Time::ref().deltaTime(),
 			_doPerformanceMeasurements
 		});
-
-
+		ImageSequencer::ref().update(Time::ref().currentTime());
 		_sceneGraph->evaluate(_mainCamera);
 
 		// clear the abuffer before rendering the scene
@@ -508,7 +507,7 @@ namespace openspace {
                     int startY = ySize - 2 * font_size_mono;
 
                     double currentTime = Time::ref().currentTime();
-                    ImageSequencer::ref().findActiveInstrument(currentTime);
+                    ImageSequencer::ref().getActiveInstrument();
 
                     double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
                     double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
@@ -583,8 +582,6 @@ namespace openspace {
 					
 					// Next 2 lines neccesary for instrument switching to work. 
 					double currentTime = Time::ref().currentTime();
-					ImageSequencer::ref().findActiveInstrument(currentTime);
-
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
 

@@ -203,7 +203,17 @@ bool SceneGraph::initialize()
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
 
-	// pscstandard
+	// NH shader
+	tmpProgram = ProgramObject::Build("NHProgram",
+		"${SHADERS}/nh_vs.glsl",
+		"${SHADERS}/nh_fs.glsl");
+	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
+
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager()->setValue("NewHorizonsShader", tmpProgram);
+
+	// fovProgram
 	tmpProgram = ProgramObject::Build("FovProgram",
 		"${SHADERS}/fov_vs.glsl",
 		"${SHADERS}/fov_fs.glsl");
@@ -398,6 +408,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
 	// TODO need to check this; unnecessary? (ab)
 	for (SceneGraphNode* node : _nodes)
 		node->update({ Time::ref().currentTime() });
+
 
     // Calculate the bounding sphere for the scenegraph
     _root->calculateBoundingSphere();

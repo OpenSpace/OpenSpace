@@ -66,10 +66,10 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	ghoul_assert(success,
             "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
 
-    //std::string path;
-    //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-    //ghoul_assert(success,
-    //        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
+	std::string path;
+	success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+	ghoul_assert(success,
+	        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
@@ -89,8 +89,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     std::string texturePath = "";
 	success = dictionary.getValue("Textures.Color", texturePath);
     _colorTexturePath = absPath(texturePath);
-	//if (success)
-        //_colorTexturePath = path + "/" + texturePath;
+	if (success)
+       _colorTexturePath = path + "/" + texturePath;
 
 	addPropertySubOwner(_geometry);
 
@@ -200,9 +200,9 @@ void RenderablePlanet::loadTexture() {
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
-        if (_texture) {
-            LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+		if (_texture) {
+			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear

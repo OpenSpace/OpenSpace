@@ -35,6 +35,7 @@
 
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
+	const std::string keyEnabled = "StartsEnabled";
 
     const std::string keyObjFile = "ObjFile";
 
@@ -69,6 +70,7 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 
 bool WavefrontGeometry::loadObj(const std::string& filename){
     std::string cachedFile = "";
+	
     FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
@@ -86,6 +88,7 @@ bool WavefrontGeometry::loadObj(const std::string& filename){
     else {
         LINFO("Cache for Model'" << filename << "' not found");
     }
+	
     LINFO("Loading OBJ file '" << filename << "'");
     bool success = loadModel(filename);
     if (!success)
@@ -186,7 +189,7 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
             _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
             _vertices[j + currentPosition].location[3] = 5;
-
+			
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];
             _vertices[j + currentPosition].normal[1] = shapes[i].mesh.normals[3 * j + 1];
             _vertices[j + currentPosition].normal[2] = shapes[i].mesh.normals[3 * j + 2];
@@ -195,7 +198,7 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
                 _vertices[j + currentPosition].tex[0] = shapes[0].mesh.texcoords[2 * j + 0];
                 _vertices[j + currentPosition].tex[1] = shapes[0].mesh.texcoords[2 * j + 1];
             }
-
+			
         }
         currentPosition += shapes[i].mesh.positions.size() / 3;
 
@@ -206,7 +209,40 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             );
         p += shapes[i].mesh.indices.size();
     }
+	/*
+	std::cout << _vertices.size() << " " << shapes[0].mesh.texcoords.size() << std::endl;
+	
+	const size_t face_count = shapes[0].mesh.indices.size() / 3;
 
+	for (size_t f = 0; f < face_count; f++)
+	{
+		int vertex_index_list[3];
+		vertex_index_list[0] = shapes[0].mesh.indices[f * 3 + 0];
+		vertex_index_list[1] = shapes[0].mesh.indices[f * 3 + 1];
+		vertex_index_list[2] = shapes[0].mesh.indices[f * 3 + 2];
+
+		const int face[] = {
+			vertex_index_list[0],
+			vertex_index_list[1],
+			vertex_index_list[2]
+		};
+
+		if (!shapes[0].mesh.texcoords.empty()) 
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				const int vi = face[k];
+				if (vi*2+1 < shapes[0].mesh.texcoords.size()){
+
+				_vertices[vi].tex[0] = shapes[0].mesh.texcoords[2 * vi + 0];
+				_vertices[vi].tex[1] = shapes[0].mesh.texcoords[2 * vi + 1];
+				}
+
+			}
+		}
+	}
+	*/
+	
     return true;
 }
 

@@ -84,6 +84,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _texture(nullptr)
 	, _textureProj(nullptr)
     , _geometry(nullptr)
+	, _sequenceID(-1)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -106,13 +107,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 	dictionary.getValue(keyFrame, _target);
 
-
-    bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
-    bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
-    bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
-    bool b4 = dictionary.getValue(keyProjAberration, _aberration);
-    bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);
-    bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio);
+    bool b1 = dictionary.getValue(keyInstrument, _instrumentID); // NH_LORRRI
+    bool b2 = dictionary.getValue(keyProjObserver, _projectorID); // NH_SPACECRAFT
+    bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);   // PLUTO
+    bool b4 = dictionary.getValue(keyProjAberration, _aberration); // NONE
+    bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);        // deg
+    bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); // ....
     bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
     bool b8 = dictionary.getValue(keyInstrumentFar, _farPlane);
 
@@ -136,6 +136,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         potentialTargets.getValue(std::to_string(i + 1), target);
         _potentialTargets[i] = target;
     }
+
+	ImageSequencer::ref().registerTargets(_potentialTargets);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -169,16 +171,33 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         found = dictionary.getValue(keySequenceType, sequenceType);
         if (found) {
             if (sequenceType == sequenceTypeImage) {
-                openspace::ImageSequencer::ref().loadSequence(sequenceSource);
+				openspace::ImageSequencer::ref().loadSequence(sequenceSource, _sequenceID);
             }
             else if (sequenceType == sequenceTypePlaybook) {
-                openspace::ImageSequencer::ref().parsePlaybookFile(sequenceSource);
+                openspace::ImageSequencer::ref().parsePlaybookFile(sequenceSource, _sequenceID);
             }
             else {
                 LERROR("RenderablePlanetProjection '" << name << "' had unknown sequence type '" << sequenceType << "'");
             }
         }
+		ImageSequencer::ref().addSequenceObserver(_sequenceID, "NEW HORIZONS", { "NH_LORRI",
+																				 "NH_RALPH_LEISA",
+																				 "NH_RALPH_MVIC_PAN1",
+																				 "NH_RALPH_MVIC_PAN2",
+																				 "NH_RALPH_MVIC_RED",
+																				 "NH_RALPH_MVIC_BLUE",
+																				 "NH_RALPH_MVIC_FT" });
     }
+
+	//ImageSequencer::ref().augumentSequencesWithTargets(_sequenceID);
+
+	//@TODO planet should broadcast _sequenceID to moons (get-scenegraphnode thing)
+	if (_projecteeID == "CHARON"){
+		_sequenceID = 0;
+	}
+	if (_projecteeID == "IO" || _projecteeID == "EUROPA" || _projecteeID == "CALLISTO" || _projecteeID == "GANYMEDE"){
+		_sequenceID = 1;
+	}
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection(){
@@ -378,21 +397,26 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	if (!_programObject) return;
 	if (!_textureProj) return;
 
-	
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
 #ifdef GPU_PROJ
 	if (_capture){
-		attitudeParameters(_time[0]);
-		imageProjectGPU();
+		for (auto imgSubset : _imageTimes){
+			attitudeParameters(imgSubset.first);
+			_projectionTexturePath = imgSubset.second;
+			imageProjectGPU(); //fbopass
+		}
+		_capture = false;
 	}
 #endif
-	attitudeParameters(_time[1]);
+	attitudeParameters(_time);
+	_projectionTexturePath = _defaultProjImage;
+	_imageTimes.clear();
 
 	psc sun_pos;
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time[1], sun_pos, lt);
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, sun_pos, lt);
 
 	// Main renderpass
 	_programObject->activate();
@@ -420,33 +444,40 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 void RenderablePlanetProjection::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	_time[0] = data.time;
-	_time[1] = _time[0];
+	_time = data.time;
 	_capture = false;
 
-	bool _withinFOV;
+	//happens only once
+	//ImageSequencer::ref().augumentSequencesWithTargets(_sequenceID);
 
-	std::string _fovTarget = "";
-	for (int i = 0; i < _potentialTargets.size(); i++){
-		bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
-            _instrumentID,
-            _potentialTargets[i],
-            _projectorID,
-            "ELLIPSOID",
-            _aberration,
-            _time[0],
-            _withinFOV);
-		if (success && _withinFOV){
-			_fovTarget = _potentialTargets[i];
-			break;
+	openspace::ImageSequencer::ref().findActiveInstrument(_time, _sequenceID);
+	openspace::ImageSequencer::ref().nextCaptureTime(_time, _sequenceID);
+
+	bool _withinFOV;
+	if (_sequenceID != -1){
+		std::string _fovTarget = "";
+		for (int i = 0; i < _potentialTargets.size(); i++){
+			bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+				_instrumentID,
+				_potentialTargets[i],
+				_projectorID,
+				"ELLIPSOID",
+				_aberration,
+				_time,
+				_withinFOV);
+			if (success && _withinFOV){
+				_fovTarget = _potentialTargets[i];
+				break;
+			}
 		}
-	}
-	if (_projecteeID  == _fovTarget){
-		_next = _defaultProjImage;
-		if (_time[0] >= openspace::ImageSequencer::ref().getNextCaptureTime()){
-			_capture  = openspace::ImageSequencer::ref().getImagePath(_time[0], _next);
-		}
-		_projectionTexturePath = _next;
+
+		//if (_projecteeID == _fovTarget){
+		if (_time >= openspace::ImageSequencer::ref().getNextCaptureTime()){
+				openspace::ImageSequencer::ref().getImagePath(_imageTimes, _sequenceID, _projecteeID, _withinFOV);
+			
+				_capture = true;
+			}
+		//}
 	}
 }
 
@@ -456,7 +487,7 @@ void RenderablePlanetProjection::loadProjectionTexture(){
 	if (_colorTexturePath.value() != "") {
 		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
-			_textureProj->uploadTexture();
+			_textureProj->uploadTexture(); 
 			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 		}

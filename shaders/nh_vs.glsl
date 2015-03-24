@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,64 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEMODEL_H__
-#define __RENDERABLEMODEL_H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
+layout(location = 0) in vec4 in_position;
+//in vec3 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out float s;
 
-namespace openspace {
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace modelgeometry {
-class ModelGeometry;
+void main()
+{
+	// set variables
+	vs_st = in_st;
+	//vs_stp = in_position.xyz;
+	vs_position = in_position;
+	vec4 tmp = in_position;
+
+	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+	
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
 }
-
-class RenderableModel : public Renderable {
-public:
-	RenderableModel(const ghoul::Dictionary& dictionary);
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-
-protected:
-    void loadTexture();
-
-private:
-    properties::StringProperty _colorTexturePath;
-	properties::StringProperty _bumpTexturePath;
-
-    ghoul::opengl::ProgramObject* _programObject; 
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _bumpMap;
-
-
-	modelgeometry::ModelGeometry* _geometry;
-
-	glm::dmat3 _stateMatrix; 
-
-	std::string _source;
-	std::string _destination;
-
-    psc _sunPosition;
-
-	properties::BoolProperty _performShading;
-	properties::BoolProperty _performFade;
-
-	properties::FloatProperty _fading;
-
-};
-
-}  // namespace openspace
-
-#endif  // __RENDERABLEMODEL_H__
