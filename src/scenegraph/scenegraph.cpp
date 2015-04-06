@@ -151,13 +151,11 @@ SceneGraph::SceneGraph()
 {
 }
 
-SceneGraph::~SceneGraph()
-{
+SceneGraph::~SceneGraph() {
     deinitialize();
 }
 
-bool SceneGraph::initialize()
-{
+bool SceneGraph::initialize() {
     LDEBUG("Initializing SceneGraph");
    
     using ghoul::opengl::ShaderObject;
@@ -238,8 +236,7 @@ bool SceneGraph::initialize()
     return true;
 }
 
-bool SceneGraph::deinitialize()
-{
+bool SceneGraph::deinitialize() {
 	clearSceneGraph();
 
 	// clean up all programs
@@ -250,8 +247,7 @@ bool SceneGraph::deinitialize()
     return true;
 }
 
-void SceneGraph::update(const UpdateData& data)
-{
+void SceneGraph::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
 		OsEng.renderEngine()->sceneGraph()->clearSceneGraph();
 		bool success = loadSceneInternal(_sceneGraphToLoad);
@@ -266,14 +262,12 @@ void SceneGraph::update(const UpdateData& data)
         node->update(data);
 }
 
-void SceneGraph::evaluate(Camera* camera)
-{
+void SceneGraph::evaluate(Camera* camera) {
 	if (_root)
 		_root->evaluate(camera);
 }
 
-void SceneGraph::render(const RenderData& data)
-{
+void SceneGraph::render(const RenderData& data) {
 	bool emptyProgramsToUpdate = _programsToUpdate.empty();
 		
 	_programUpdateLock.lock();
@@ -313,8 +307,7 @@ void SceneGraph::clearSceneGraph() {
     _focus.clear();
 }
 
-bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath)
-{
+bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     using ghoul::Dictionary;
     using ghoul::lua::loadDictionaryFromFile;
 
@@ -615,50 +608,48 @@ void SceneGraph::loadNode(const ghoul::Dictionary& dictionary) {
     }
 }
 
-void SceneGraph::loadModule(const std::string& modulePath)
-{
-    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-    if (pos == modulePath.npos) {
-        LERROR("Bad format for module path: " << modulePath);
-        return;
-    }
+//void SceneGraph::loadModule(const std::string& modulePath) {
+//    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
+//    if (pos == modulePath.npos) {
+//        LERROR("Bad format for module path: " << modulePath);
+//        return;
+//    }
+//
+//    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
+//    LDEBUG("Loading modules from: " << fullModule);
+//
+//    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+//    FileSys.setCurrentDirectory(modulePath);
+//
+//    ghoul::Dictionary moduleDictionary;
+//    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
+//    std::vector<std::string> keys = moduleDictionary.keys();
+//    for (const std::string& key : keys) {
+//        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+//            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
+//                                         << fullModule << "'");
+//            continue;
+//        }
+//        
+//        ghoul::Dictionary element;
+//        moduleDictionary.getValue(key, element);
+//
+//        element.setValue(constants::scenegraph::keyPathModule, modulePath);
+//
+//		//each element in this new dictionary becomes a scenegraph node. 
+//        SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
+//
+//        _allNodes.emplace(node->name(), node);
+//        _nodes.push_back(node);
+//    }
+//
+//    FileSys.setCurrentDirectory(oldDirectory);
+//
+//    // Print the tree
+//    //printTree(_root);
+//}
 
-    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
-    LDEBUG("Loading modules from: " << fullModule);
-
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-    FileSys.setCurrentDirectory(modulePath);
-
-    ghoul::Dictionary moduleDictionary;
-    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
-    std::vector<std::string> keys = moduleDictionary.keys();
-    for (const std::string& key : keys) {
-        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
-            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
-                                         << fullModule << "'");
-            continue;
-        }
-        
-        ghoul::Dictionary element;
-        moduleDictionary.getValue(key, element);
-
-        element.setValue(constants::scenegraph::keyPathModule, modulePath);
-
-		//each element in this new dictionary becomes a scenegraph node. 
-        SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
-
-        _allNodes.emplace(node->name(), node);
-        _nodes.push_back(node);
-    }
-
-    FileSys.setCurrentDirectory(oldDirectory);
-
-    // Print the tree
-    //printTree(_root);
-}
-
-SceneGraphNode* SceneGraph::root() const
-{
+SceneGraphNode* SceneGraph::root() const {
     return _root;
 }
     
