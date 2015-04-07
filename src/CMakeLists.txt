@@ -150,10 +150,25 @@ include_directories("${HEADER_ROOT_DIR}")
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+if (OPENSPACE_HAVE_TESTS)
+    add_definitions(-DOPENSPACE_HAVE_TESTS)
+
+    set(OPENSPACE_TEST_DIR ${OPENSPACE_BASE_DIR}/tests)
+    
+    include_directories("${GHOUL_ROOT_DIR}/ext/gtest/include")
+    include_directories("${GHOUL_ROOT_DIR}/include")
+    include_directories("${OPENSPACE_TEST_DIR}")
+    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
+    
+    source_group(Tests FILES ${OPENSPACE_TEST_FILES})
+    
+    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES} ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+    target_link_libraries(OpenSpaceTest gtest ${DEPENDENT_LIBS})
+
+endif (OPENSPACE_HAVE_TESTS)
+
 #if (NOT UNIX)
     #cotire(OpenSpace)
 #endif ()
 GhoulCopySharedLibraries(OpenSpace)
-
-add_subdirectory(tests)
-

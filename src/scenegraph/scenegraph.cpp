@@ -36,6 +36,7 @@
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
+#include <openspace/scenegraph/scenegraphloader.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include "ghoul/io/texture/texturereader.h"
@@ -324,12 +325,14 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath) 
 
     OsEng.disableBarrier();
 
-    // initialize the root node
     _root = new SceneGraphNode();
     _root->setName(SceneGraphNode::RootNodeName);
     _nodes.push_back(_root);
     _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
     _focus = SceneGraphNode::RootNodeName;
+
+    bool success = SceneGraphLoader::load(sceneDescriptionFilePath, _nodes);
+
 
     Dictionary dictionary;
 	//load default.scene 

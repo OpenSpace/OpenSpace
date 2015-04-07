@@ -24,7 +24,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include "gtest/gtest.h"
-#include "openspace/util/spicemanager.h"
+#include <openspace/util/spicemanager.h>
 
 class SpiceManagerTest : public testing::Test{
 protected:

@@ -28,11 +28,13 @@ if (OPENSPACE_HAVE_TESTS)
     
     include_directories("${GHOUL_ROOT_DIR}/ext/gtest/include")
     include_directories("${GHOUL_ROOT_DIR}/include")
-    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${HEADER_ROOT_DIR}/openspace/tests/*.inl)
+    include_directories("${OPENSPACE_BASE_DIR}/tests")
+    include_directories("${OPENSPACE_BASE_DIR}/include")
+    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
     
-    source_group(OpenSpaceSource FILES ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
+    source_group(Tests FILES ${OPENSPACE_TEST_FILES})
     
-    add_executable(OpenSpaceTest ${SOURCE_ROOT_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES} ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES} ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
     target_link_libraries(OpenSpaceTest gtest ${DEPENDENT_LIBS})
 
 endif (OPENSPACE_HAVE_TESTS)
