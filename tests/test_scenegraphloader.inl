@@ -27,6 +27,8 @@
 #include <openspace/scenegraph/scenegraphloader.h>
 #include <openspace/scenegraph/scenegraphnode.h>
 
+#include <fstream>
+
 class SceneGraphLoaderTest : public testing::Test {};
 
 TEST_F(SceneGraphLoaderTest, NonExistingFileTest) {
@@ -104,6 +106,24 @@ TEST_F(SceneGraphLoaderTest, Test00Location) {
 
     std::vector<openspace::SceneGraphNode*> nodes;
     bool success = openspace::SceneGraphLoader::load(file, nodes);
+
+    ASSERT_TRUE(success) << "Successful loading";
+    EXPECT_TRUE(nodes.empty()) << "No scenegraph nodes loaded";
+}
+
+TEST_F(SceneGraphLoaderTest, AbsoluteScenePath) {
+    const std::string scenePath = absPath("${TEMPORARY}/tmp.scene");
+    std::ofstream scene(scenePath.c_str());
+
+    scene << "return {" << std::endl <<
+        " ScenePath = \"" << absPath("${TESTDIR}/SceneGraphLoaderTest/scene-folder") <<
+        "\"," << std::endl <<
+        " CommonFolder = \"\"," << std::endl <<
+        " Modules = {}}" << std::endl;
+    scene.close();
+
+    std::vector<openspace::SceneGraphNode*> nodes;
+    bool success = openspace::SceneGraphLoader::load(scenePath, nodes);
 
     ASSERT_TRUE(success) << "Successful loading";
     EXPECT_TRUE(nodes.empty()) << "No scenegraph nodes loaded";
