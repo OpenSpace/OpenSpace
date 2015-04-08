@@ -24,24 +24,192 @@
 
 #include <openspace/scenegraph/scenegraphloader.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/util/constants.h>
+
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
     const std::string _loggerCat = "SceneGraphLoader";
+    const std::string _moduleExtension = ".mod";
+    const std::string _commonModuleToken = "${COMMON_MODULE}";
 }
 
 namespace openspace {
 
 bool SceneGraphLoader::load(const std::string& sceneDescription, std::vector<SceneGraphNode*>& nodes)
 {
-    LINFO("Loading SceneGraph from file '" << absPath(sceneDescription) << "'");
+    nodes.clear();
+    std::string absSceneFile = absPath(sceneDescription);
 
-    // Check if file exists
+    // See if scene file exists
+    if (!FileSys.fileExists(absSceneFile, true)) {
+        LERROR("Could not load scene file '" << absSceneFile << "'. " <<
+            "File not found");
+        return false;
+    }
+    LINFO("Loading SceneGraph from file '" << absSceneFile << "'");
+
+    // Load dictionary
+    ghoul::Dictionary sceneDictionary;
+    bool success = ghoul::lua::loadDictionaryFromFile(absSceneFile, sceneDictionary);
+    if (!success)
+        return false;
+
+    std::string sceneDescriptionDirectory =
+    ghoul::filesystem::File(absSceneFile, true).directoryName();
+    std::string sceneDirectory(".");
+    sceneDictionary.getValue(constants::scenegraph::keyPathScene, sceneDirectory);
+
+    // The scene path could either be an absolute or relative path to the description
+    // paths directory
+    std::string relativeCandidate = sceneDescriptionDirectory +
+        ghoul::filesystem::FileSystem::PathSeparator + sceneDirectory;
+    std::string absoluteCandidate = absPath(sceneDirectory);
+
+    if (FileSys.directoryExists(relativeCandidate))
+        sceneDirectory = relativeCandidate;
+    else if (FileSys.directoryExists(absoluteCandidate))
+        sceneDirectory = absoluteCandidate;
+    else {
+        LERROR("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
+            "path '" << sceneDirectory << "' that did not exist");
+        return false;
+    }
+
+    struct SceneGraphNodeInformation {
+        std::string parent;
+        std::string module;
+        std::string modulePath;
+        ghoul::Dictionary dictionary;
+    };
+    std::map<std::string, SceneGraphNodeInformation> nodeInformation;
+
+    using constants::scenegraph::keyModules;
+    ghoul::Dictionary moduleDictionary;
+    success = sceneDictionary.getValue(keyModules, moduleDictionary);
+    if (!success)
+        // There are no modules that are loaded
+        return true;
+
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OsEng.scriptEngine()->initializeLuaState(state);
+
+    std::vector<std::string> keys = moduleDictionary.keys();
+
+    // Get the common directory
+    using constants::scenegraph::keyCommonFolder;
+    bool commonFolderSpecified = sceneDictionary.hasKey(keyCommonFolder);
+    bool commonFolderCorrectType = sceneDictionary.hasKeyAndValue<std::string>(keyCommonFolder);
+
+    if (commonFolderSpecified) {
+        if (commonFolderCorrectType) {
+            std::string commonFolder = sceneDictionary.value<std::string>(keyCommonFolder);
+            if (!FileSys.directoryExists(commonFolder))
+                LERROR("Specified common folder '" << commonFolder << "' did not exist");
+            else {
+                if (!commonFolder.empty()) {
+                    FileSys.registerPathToken(_commonModuleToken, commonFolder);
+                    keys.push_back(commonFolder);
+                }
+            }
+        }
+        else
+            LERROR("Specification for 'common' folder has invalid type");
+    }
+
+
+    std::sort(keys.begin(), keys.end());
+    for (const std::string& key : keys) {
+        std::string moduleName = moduleDictionary.value<std::string>(key);
+        std::string modulePath = FileSys.pathByAppendingComponent(sceneDirectory, moduleName);
+
+        if (!FileSys.directoryExists(modulePath)) {
+            LERROR("Could not load module '" << moduleName << "'. Directory did not exist");
+            continue;
+        }
+
+        std::string moduleFile = FileSys.pathByAppendingComponent(
+            modulePath,
+            moduleName + _moduleExtension
+        );
+
+        if (!FileSys.fileExists(moduleFile)) {
+            LERROR("Could not load module file '" << moduleFile << "'. File did not exist");
+            continue;
+        }
+
+        ghoul::Dictionary moduleDictionary;
+        bool s = ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+        if (!s)
+            continue;
+
+        std::vector<std::string> keys = moduleDictionary.keys();
+        for (const std::string& key : keys) {
+            if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+                LERROR("SceneGraphNode '" << key << "' is not a table in module '"
+                                             << moduleFile << "'");
+                continue;
+            }
+
+            ghoul::Dictionary element;
+            std::string nodeName;
+            std::string parentName;
+
+            moduleDictionary.getValue(key, element);
+            element.setValue(constants::scenegraph::keyPathModule, modulePath);
+
+            element.getValue(constants::scenegraphnode::keyName, nodeName);
+            element.getValue(constants::scenegraphnode::keyParentName, parentName);
+
+            nodeInformation[nodeName] = {
+                parentName,
+                moduleName,
+                modulePath,
+                element
+            };
+        }
+    }
+
+    // Check map for circular dependencies
+
+    // Checks if n1 is dependent on n2
+    std::function<bool(const std::string&, const std::string&)> nodeDependency;
+    nodeDependency = [nodeInformation, nodeDependency](const std::string& n1, const std::string& n2) {
+        const SceneGraphNodeInformation& n1Info = nodeInformation[n1];
+        const std::string& parentName = n1Info.parent;
+
+        if (parentName == SceneGraphNode::RootNodeName)
+            return false;
+        if (parentName == n2)
+            return true;
+        return nodeDependency(parentName, n2);
+    }
+
+
+    // Add Root node to the list of nodes
+    SceneGraphNode* root = new SceneGraphNode();
+    root->setName(SceneGraphNode::RootNodeName);
+    nodes.push_back(root);
+
+
+
+
+    auto dependentNodes = [nodeInformation](const std::string& name) {
+
+    };
+
+
+
     // Check ScenePath variable (absolute/relative path)
     // Convert Modules dictionary into vector
-    // Determine dependencies between modules
+    // Determine dependencies between modules (-> store in map)
+    // Check map for circular dependencies
+    // Traverse map from Root by determining it's direct dependencies
     // Rearrange vector based on dependencies
     // Create scenegraph nodes in order checking if dependencies have been fulfilled
 

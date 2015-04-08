@@ -121,7 +121,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
-    assert(_engine);
+    ghoul_assert(_engine, "OpenSpaceEngine not created");
     return *_engine;
 }
 
@@ -130,7 +130,7 @@ bool OpenSpaceEngine::create(
     std::vector<std::string>& sgctArguments,
     std::string& openGlVersion)
 {
-	assert(_engine == nullptr);
+    ghoul_assert(!_engine, "OpenSpaceEngine was already created");
 
 	// Initialize the LogManager and add the console log as this will be used every time
 	// and we need a fall back if something goes wrong between here and when we add the

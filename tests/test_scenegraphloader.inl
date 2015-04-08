@@ -279,6 +279,31 @@ TEST_F(SceneGraphLoaderTest, Test05Location) {
     EXPECT_TRUE(found) << "Correct node loaded";
 }
 
+TEST_F(SceneGraphLoaderTest, Test06) {
+    const std::string file = absPath("${TESTDIR}/SceneGraphLoaderTest/test06.scene");
+
+    std::vector<openspace::SceneGraphNode*> nodes;
+    bool success = openspace::SceneGraphLoader::load(file, nodes);
+
+    ASSERT_FALSE(success) << "Successful loading";
+    ASSERT_TRUE(nodes.empty()) << "Correct number of nodes";
+}
+
+TEST_F(SceneGraphLoaderTest, Test06Location) {
+    const std::string file = absPath("${TESTDIR}/SceneGraphLoaderTest/test06-location.scene");
+
+    std::vector<openspace::SceneGraphNode*> nodes;
+    bool success = openspace::SceneGraphLoader::load(file, nodes);
+
+    ASSERT_TRUE(success) << "Successful loading";
+    ASSERT_TRUE(nodes.size() == 4) << "Correct number of nodes";
+    bool found = false;
+    for (openspace::SceneGraphNode* n : nodes)
+        if (n->name() == "MultipleDependencies")
+            found = true;
+
+    EXPECT_TRUE(found) << "No scenegraph nodes loaded";
+}
 
 //
 //
