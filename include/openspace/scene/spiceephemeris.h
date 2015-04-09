@@ -22,33 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/staticephemeris.h>
+#ifndef __SPICEEPHEMERIS_H__
+#define __SPICEEPHEMERIS_H__
 
-#include <openspace/util/constants.h>
+#include <openspace/scene/ephemeris.h>
+
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
-
-using namespace constants::staticephemeris;
     
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.f, 0.f, 0.f, 0.f)
-{
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
-    if (hasPosition) {
-        glm::vec4 tmp;
-        dictionary.getValue(keyPosition, tmp);
-        _position = tmp;
-    }
-}
+class SpiceEphemeris : public Ephemeris {
+public:
+    SpiceEphemeris(const ghoul::Dictionary& dictionary);
+    const psc& position() const;
+	void update(const UpdateData& data) override;
 
-StaticEphemeris::~StaticEphemeris() {}
-
-const psc& StaticEphemeris::position() const {
-    return _position;
-}
-
-void StaticEphemeris::update(const UpdateData&) {
-
-}
-
+private:
+    std::string _targetName;
+    std::string _originName;
+    psc _position;
+	bool _kernelsLoadedSuccessfully;
+};
+    
 } // namespace openspace
+
+#endif // __SPICEEPHEMERIS_H__

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 // open space includes
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/constants.h>
 
@@ -36,7 +36,7 @@
 #include <ghoul/opengl/shaderobject.h>
 #include <ghoul/misc/highresclock.h>
 
-#include <openspace/scenegraph/staticephemeris.h>
+#include <openspace/scene/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 

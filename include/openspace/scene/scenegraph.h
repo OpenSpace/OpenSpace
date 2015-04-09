@@ -21,29 +21,54 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#ifndef __SCENEGRAPH_H__
+#define __SCENEGRAPH_H__
 
-#ifndef __SPICEEPHEMERIS_H__
-#define __SPICEEPHEMERIS_H__
+#include <ghoul/misc/dictionary.h>
 
-#include <openspace/scenegraph/ephemeris.h>
-
-#include <openspace/util/powerscaledcoordinate.h>
+#include <unordered_map>
+#include <vector>
 
 namespace openspace {
-    
-class SpiceEphemeris : public Ephemeris {
+
+class SceneGraphNode;
+
+class SceneGraph {
 public:
-    SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    const psc& position() const;
-	void update(const UpdateData& data) override;
+    SceneGraph() = default;
+
+    void clear();
+    bool loadFromFile(const std::string& sceneDescription);
+
+    // Returns if addition was successful
+    bool addSceneGraphNode(SceneGraphNode* node);
+    bool removeSceneGraphNode(SceneGraphNode* node); 
+
+    // topological sort
+    std::vector<SceneGraphNode*> linearList();
 
 private:
-    std::string _targetName;
-    std::string _originName;
-    psc _position;
-	bool _kernelsLoadedSuccessfully;
+    //struct SceneGraphNodeStub {
+    //    std::string parent;
+    //    std::string module;
+    //    std::string modulePath;
+    //    ghoul::Dictionary dictionary;
+    //};
+
+    //struct SceneGraphNodeInternal {
+        //SceneGraphNode* node = nullptr;
+        //SceneGraphNodeStub* stub = nullptr;
+        //std::vector<SceneGraphNodeInternal*> dependingNode;
+    //};
+
+    //bool createSceneGraphNodeFromStub(SceneGraphNodeInternal* node);
+
+    std::vector<SceneGraphNode*> _nodes;
+    // Edges are in reverse order of dependency
+    std::unordered_multimap<std::string, std::string> _edges;
 };
-    
+
 } // namespace openspace
 
-#endif // __SPICEEPHEMERIS_H__
+#endif __SCENEGRAPH_H__

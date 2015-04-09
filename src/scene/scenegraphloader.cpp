@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/scenegraphloader.h>
+#include <openspace/scene/scenegraphloader.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -230,7 +230,7 @@ bool SceneGraphLoader::load(const std::string& sceneDescription, std::vector<Sce
 //#include <openspace/interaction/interactionhandler.h>
 //#include <openspace/query/query.h>
 //#include <openspace/rendering/renderengine.h>
-//#include <openspace/scenegraph/scenegraphnode.h>
+//#include <openspace/scene/scenegraphnode.h>
 //#include <openspace/scripting/scriptengine.h>
 //#include <openspace/scripting/script_helper.h>
 //#include <openspace/util/constants.h>

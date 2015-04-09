@@ -37,7 +37,7 @@
 #include <openspace/interaction/mousecontroller.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/Scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
@@ -272,7 +272,7 @@ bool OpenSpaceEngine::initialize() {
 	// Register Lua script functions
 	LDEBUG("Registering Lua libraries");
 	_scriptEngine->addLibrary(RenderEngine::luaLibrary());
-	_scriptEngine->addLibrary(SceneGraph::luaLibrary());
+	_scriptEngine->addLibrary(Scene::luaLibrary());
 	_scriptEngine->addLibrary(Time::luaLibrary());
 	_scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine->addLibrary(LuaConsole::luaLibrary());
@@ -303,7 +303,7 @@ bool OpenSpaceEngine::initialize() {
 
 
 	// Load scenegraph
-	SceneGraph* sceneGraph = new SceneGraph;
+	Scene* sceneGraph = new Scene;
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine

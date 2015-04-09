@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/Scene.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
@@ -40,7 +40,7 @@ protected:
     void reset() {
     }
 
-    openspace::SceneGraph* scenegraph;
+    openspace::Scene* scenegraph;
 };
 
 

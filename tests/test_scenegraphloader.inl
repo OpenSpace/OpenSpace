@@ -24,8 +24,8 @@
 
 #include "gtest/gtest.h"
 
-#include <openspace/scenegraph/scenegraphloader.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphloader.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <fstream>
 

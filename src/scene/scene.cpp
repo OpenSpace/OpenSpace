@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/scene.h>
 
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>
@@ -31,12 +31,12 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
-#include <openspace/scenegraph/scenegraphloader.h>
+#include <openspace/scene/scenegraphloader.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include "ghoul/io/texture/texturereader.h"
@@ -146,17 +146,17 @@ int loadScene(lua_State* L) {
 
 } // namespace luascriptfunctions
 
-SceneGraph::SceneGraph()
+Scene::Scene()
     : _focus(SceneGraphNode::RootNodeName)
     , _root(nullptr)
 {
 }
 
-SceneGraph::~SceneGraph() {
+Scene::~Scene() {
     deinitialize();
 }
 
-bool SceneGraph::initialize() {
+bool Scene::initialize() {
     LDEBUG("Initializing SceneGraph");
    
     using ghoul::opengl::ShaderObject;
@@ -237,7 +237,7 @@ bool SceneGraph::initialize() {
     return true;
 }
 
-bool SceneGraph::deinitialize() {
+bool Scene::deinitialize() {
 	clearSceneGraph();
 
 	// clean up all programs
@@ -248,7 +248,7 @@ bool SceneGraph::deinitialize() {
     return true;
 }
 
-void SceneGraph::update(const UpdateData& data) {
+void Scene::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
 		OsEng.renderEngine()->sceneGraph()->clearSceneGraph();
 		bool success = loadSceneInternal(_sceneGraphToLoad);
@@ -263,12 +263,12 @@ void SceneGraph::update(const UpdateData& data) {
         node->update(data);
 }
 
-void SceneGraph::evaluate(Camera* camera) {
+void Scene::evaluate(Camera* camera) {
 	if (_root)
 		_root->evaluate(camera);
 }
 
-void SceneGraph::render(const RenderData& data) {
+void Scene::render(const RenderData& data) {
 	bool emptyProgramsToUpdate = _programsToUpdate.empty();
 		
 	_programUpdateLock.lock();
@@ -290,11 +290,11 @@ void SceneGraph::render(const RenderData& data) {
 		_root->render(data);
 }
 
-void SceneGraph::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
+void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
 	_sceneGraphToLoad = sceneDescriptionFilePath;
 }
 
-void SceneGraph::clearSceneGraph() {
+void Scene::clearSceneGraph() {
 	// deallocate the scene graph. Recursive deallocation will occur
 	if (_root) {
 		_root->deinitialize();
@@ -308,7 +308,7 @@ void SceneGraph::clearSceneGraph() {
     _focus.clear();
 }
 
-bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
+bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     using ghoul::Dictionary;
     using ghoul::lua::loadDictionaryFromFile;
 
@@ -505,7 +505,7 @@ bool SceneGraph::loadSceneInternal(const std::string& sceneDescriptionFilePath) 
     return true;
 }
 
-void SceneGraph::loadModules(
+void Scene::loadModules(
 	const std::string& directory, 
 	const ghoul::Dictionary& dictionary) 
 {
@@ -553,7 +553,7 @@ void SceneGraph::loadModules(
     }
 }
 
-void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
+void Scene::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
 	auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
     if (pos == modulePath.npos) {
         LERROR("Bad format for module path: " << modulePath);
@@ -593,7 +593,7 @@ void SceneGraph::loadModule(LoadMaps& m,const std::string& modulePath, lua_State
     FileSys.setCurrentDirectory(oldDirectory);
 }
 
-void SceneGraph::loadNodes(const std::string& parentName, LoadMaps& m) {
+void Scene::loadNodes(const std::string& parentName, LoadMaps& m) {
 	auto eqRange = m.dependencies.equal_range(parentName);
 	for (auto it = eqRange.first; it != eqRange.second; ++it) {
 		auto node = m.nodes.find((*it).second);
@@ -603,7 +603,7 @@ void SceneGraph::loadNodes(const std::string& parentName, LoadMaps& m) {
 	m.loadedNodes.emplace_back(parentName);
 }
 
-void SceneGraph::loadNode(const ghoul::Dictionary& dictionary) {
+void Scene::loadNode(const ghoul::Dictionary& dictionary) {
     SceneGraphNode* node = SceneGraphNode::createFromDictionary(dictionary);
     if(node) {
     	_allNodes.emplace(node->name(), node);
@@ -652,11 +652,11 @@ void SceneGraph::loadNode(const ghoul::Dictionary& dictionary) {
 //    //printTree(_root);
 //}
 
-SceneGraphNode* SceneGraph::root() const {
+SceneGraphNode* Scene::root() const {
     return _root;
 }
     
-SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
+SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
     auto it = _allNodes.find(name);
     if (it == _allNodes.end())
         return nullptr;
@@ -664,11 +664,11 @@ SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
         return it->second;
 }
 
-std::vector<SceneGraphNode*> SceneGraph::allSceneGraphNodes() const {
+std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() const {
 	return _nodes;
 }
 
-void SceneGraph::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
     if (type == "text") {
         LDEBUG("Writing documentation for properties");
         std::ofstream file(filename);
@@ -695,7 +695,7 @@ void SceneGraph::writePropertyDocumentation(const std::string& filename, const s
         LERROR("Undefined type '" << type << "' for Property documentation");
 }
 
-scripting::ScriptEngine::LuaLibrary SceneGraph::luaLibrary() {
+scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
 	return {
 		"",
 		{

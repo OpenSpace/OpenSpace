@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <ghoul/misc/assert.h>
 #include "imgui.h"

@@ -32,7 +32,7 @@
 #include <openspace/abuffer/abufferdynamic.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/Scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
@@ -58,8 +58,8 @@
 #include <sgct.h>
 
 // These are temporary ---abock
-#include <openspace/scenegraph/spiceephemeris.h>
-#include <openspace/scenegraph/staticephemeris.h>
+#include <openspace/scene/spiceephemeris.h>
+#include <openspace/scene/staticephemeris.h>
 
 // ABuffer defines
 #define ABUFFER_FRAMEBUFFER 0
@@ -726,14 +726,14 @@ namespace openspace {
 			_showInfo = b;
 		}
 
-		SceneGraph* RenderEngine::sceneGraph()
+		Scene* RenderEngine::sceneGraph()
 		{
 			// TODO custom assert (ticket #5)
 			assert(_sceneGraph);
 			return _sceneGraph;
 		}
 
-		void RenderEngine::setSceneGraph(SceneGraph* sceneGraph)
+		void RenderEngine::setSceneGraph(Scene* sceneGraph)
 		{
 			_sceneGraph = sceneGraph;
 		}

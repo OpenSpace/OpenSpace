@@ -27,10 +27,10 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/ephemeris.h>
+#include <openspace/scene/ephemeris.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/Scene.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 

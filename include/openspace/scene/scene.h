@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENEGRAPH_H__
-#define __SCENEGRAPH_H__
+#ifndef __SCENE_H__
+#define __SCENE_H__
 
 // std includes
 #include <vector>
@@ -45,11 +45,11 @@ class SceneGraphNode;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class SceneGraph {
+class Scene {
 public:
     // constructors & destructor
-    SceneGraph();
-    ~SceneGraph();
+    Scene();
+    ~Scene();
 
     /**
      * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
@@ -143,4 +143,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENEGRAPH_H__
+#endif // __SCENE_H__

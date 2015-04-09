@@ -39,7 +39,7 @@ namespace openspace {
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
-class SceneGraph;
+class Scene;
 class ABuffer;
 class ABufferVisualizer;
 class ScreenLog;
@@ -53,8 +53,8 @@ public:
 	
 	bool initialize();
 
-    void setSceneGraph(SceneGraph* sceneGraph);
-    SceneGraph* sceneGraph();
+    void setSceneGraph(Scene* sceneGraph);
+    Scene* sceneGraph();
 
     Camera* camera() const;
     ABuffer* abuffer() const;
@@ -111,7 +111,7 @@ private:
 	void storePerformanceMeasurements();
 
 	Camera* _mainCamera;
-	SceneGraph* _sceneGraph;
+	Scene* _sceneGraph;
 	ABuffer* _abuffer;
 	ScreenLog* _log;
 

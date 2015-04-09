@@ -43,8 +43,8 @@
 #include <openspace/rendering/model/wavefrontgeometry.h>
 
 // positioninformation
-#include <openspace/scenegraph/staticephemeris.h>
-#include <openspace/scenegraph/spiceephemeris.h>
+#include <openspace/scene/staticephemeris.h>
+#include <openspace/scene/spiceephemeris.h>
 
 // projection
 #include <openspace/rendering/planets/renderableplanetprojection.h>

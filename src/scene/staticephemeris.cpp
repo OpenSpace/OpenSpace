@@ -22,52 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/ephemeris.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
+#include <openspace/scene/staticephemeris.h>
 
-namespace {
-const std::string _loggerCat = "Ephemeris";
-}
+#include <openspace/util/constants.h>
 
 namespace openspace {
 
-Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
+using namespace constants::staticephemeris;
+    
+StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
+    : _position(0.f, 0.f, 0.f, 0.f)
 {
-    if (!dictionary.hasValue<std::string>(constants::ephemeris::keyType)) {
-        LERROR("Ephemeris did not have key '" << constants::ephemeris::keyType << "'");
-        return nullptr;
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
+    if (hasPosition) {
+        glm::vec4 tmp;
+        dictionary.getValue(keyPosition, tmp);
+        _position = tmp;
     }
-
-    std::string ephemerisType;
-    dictionary.getValue(constants::ephemeris::keyType, ephemerisType);
-    ghoul::TemplateFactory<Ephemeris>* factory
-          = FactoryManager::ref().factory<Ephemeris>();
-    Ephemeris* result = factory->create(ephemerisType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed creating Ephemeris object of type '" << ephemerisType << "'");
-        return nullptr;
-    }
-
-    return result;
 }
 
-Ephemeris::Ephemeris()
-{
+StaticEphemeris::~StaticEphemeris() {}
+
+const psc& StaticEphemeris::position() const {
+    return _position;
 }
-    
-Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary)
-{
+
+void StaticEphemeris::update(const UpdateData&) {
+
 }
-    
-Ephemeris::~Ephemeris()
-{
-}
-    
-bool Ephemeris::initialize() {
-    return true;
-}
-    
-void Ephemeris::update(const UpdateData& data) {}
 
 } // namespace openspace
