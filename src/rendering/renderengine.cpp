@@ -24,6 +24,10 @@
 
 #include <openspace/rendering/renderengine.h>
 
+#include <openspace/util/imagesequencer.h>
+#include <openspace/util/imagesequencer2.h>
+
+
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferframebuffer.h>
@@ -39,7 +43,6 @@
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/sharedmemory.h>
@@ -507,7 +510,6 @@ namespace openspace {
                     int startY = ySize - 2 * font_size_mono;
 
                     double currentTime = Time::ref().currentTime();
-                    ImageSequencer::ref().getActiveInstrument();
 
                     double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
                     double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
@@ -546,9 +548,14 @@ namespace openspace {
                         );
 
                     }
+					std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
 
-                    std::string active = ImageSequencer::ref().getActiveInstrument();
-                    Freetype::print(font,
+					std::string active ="";
+					for (int i = 0; i < instrVec.size(); i++){
+						active.append(instrVec[i]);
+						active.append(" ");
+					}
+					Freetype::print(font,
                         _onScreenInformation._position.x * xSize,
                         _onScreenInformation._position.y * ySize - font_size_mono * 3 * 2,
                         glm::vec4(0.3, 0.6, 1, 1),
@@ -597,6 +604,7 @@ namespace openspace {
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
+
 					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
 					double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
 					std::string progress = "|";
@@ -616,10 +624,58 @@ namespace openspace {
 					}
 					glm::vec4 w(1);
 					glm::vec4 b(0.3, 0.6, 1, 1);
-					PrintColorText(i++, "Ucoming : %s", 10, w, str.c_str());
+					glm::vec4 b2(0.5, 1, 0.5, 1);
+					PrintColorText(i++, "Ucoming capture : %s", 10, w, str.c_str());
 
-					std::string active = ImageSequencer::ref().getActiveInstrument();
-					PrintColorText(i++, "Active Instrument : %s", 10, b, active.c_str());
+
+					if (Time::ref().deltaTime() > 10){
+						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
+						std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+
+						int timeleft = nextTarget.first - currentTime;
+
+						int hour   = timeleft / 3600;
+						int second = timeleft % 3600;
+						int minute = second / 60;
+					        second = second % 60;
+
+						std::string hh, mm, ss, coundtown;
+
+						if (hour   < 10) hh.append("0");
+						if (minute < 10) mm.append("0");
+						if (second < 10) ss.append("0");
+
+						hh.append(std::to_string(hour));
+						mm.append(std::to_string(minute));
+						ss.append(std::to_string(second));
+							
+						PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
+
+						std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+						std::string space;
+						glm::vec4 color;
+						int isize = incidentTargets.second.size(); 
+							for (int p = 0; p < isize; p++){
+								double t = (double)(p + 1) / (double)(isize+1);
+								t = (p > isize / 2) ? 1-t : t;
+								t += 0.3;
+								color = (p == isize / 2) ? glm::vec4(0, 1, 0, 1) : glm::vec4(t, t, t, 1);
+								PrintColorText(i, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
+							for (int k = 0; k < 10; k++){ space += " "; }
+						}
+						i++;
+
+
+					}
+
+					std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
+
+					std::string active = "";
+					for (int i = 0; i < instrVec.size(); i++){
+						active.append(instrVec[i]);
+						active.append("\n");
+					}
+					PrintColorText(i++, "Active Instrument : %5s", 10, b, active.c_str());
 #undef PrintText
 				}
 

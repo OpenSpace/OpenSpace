@@ -52,12 +52,15 @@ struct ImageParams{
 	bool projected;
 };
 
-bool imageComparer (const ImageParams &a, const ImageParams &b){
-		return a.startTime < b.startTime;
-};
+
 
 std::vector<std::vector<ImageParams>> _timeStamps;
 void createImage(std::vector<ImageParams>& vec, double t1, std::string instrument, std::string target, std::string path = "dummypath");
+
+auto imageComparer = [](const ImageParams &a, const ImageParams &b)->bool{
+	return a.startTime < b.startTime;
+};
+
 
 std::vector<ImageParams>::iterator binary_find(std::vector<ImageParams>::iterator begin,
 	std::vector<ImageParams>::iterator end,
@@ -153,7 +156,6 @@ double ImageSequencer::nextCaptureTime(double time, int sequenceID){
 
 std::string ImageSequencer::findActiveInstrument(double time, int sequenceID){
 	auto it = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { time, "", "", "",false }, imageComparer);
-	
 	if ((it == _timeStamps[sequenceID].end())){
 		_activeInstrument = "Not found, incufficient playbook-data";
 	}else{
@@ -163,7 +165,7 @@ std::string ImageSequencer::findActiveInstrument(double time, int sequenceID){
 	return _activeInstrument;
 }
 
-void ImageSequencer::augumentSequencesWithTargets(int sequenceID){
+void ImageSequencer::augumentSequenceWithTargets(int sequenceID){
 	if (!_targetsAdded){
 		// if there is an registered observer for this sequence 
 		if (_observers.count(sequenceID) > 0) {
@@ -210,17 +212,17 @@ void ImageSequencer::augumentSequencesWithTargets(int sequenceID){
 }
 
 bool ImageSequencer::getImagePath(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee, bool withinFOV){
-		if (withinFOV && !Time::ref().timeJumped()){
+		/*if (withinFOV && !Time::ref().timeJumped()){
 			getSingleImage(_imageTimes, sequenceID, projectee);
-		}else{
+		}else{*/
 			getMultipleImages(_imageTimes, sequenceID, projectee);
-		}
+		//}
 	return true;
 }
 
 bool ImageSequencer::getMultipleImages(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee){
 	double previousTime;
-	std::map<std::string, double>::iterator it = _projectableTargets.find(projectee);
+	std::map<std::string, double>::iterator it = _projectableTargets.find(projectee); 
 	if (it != _projectableTargets.end()){
 		previousTime = it->second;
 		it->second = _currentTime;

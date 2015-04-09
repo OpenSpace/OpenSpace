@@ -45,6 +45,8 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/imagesequencer.h>
+#include <openspace/util/imagesequencer2.h> // testing
+
 
 
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -101,6 +103,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 	SpiceManager::initialize();
 	Time::initialize();
 	ImageSequencer::initialize();
+	ImageSequencer2::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }

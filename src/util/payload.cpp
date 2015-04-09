@@ -22,70 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
-
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/util/payload.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
+const std::string _loggerCat = "Payload";
 }
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
+
+Payload* Payload::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
 {
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
+	ghoul::TemplateFactory<Payload>* factory
+		= FactoryManager::ref().factory<Payload>();
+	Payload* result = factory->create(type, dictionary);
 
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+    if (result == nullptr) {
+        LERROR("Failed creating Payload object of type '" << type << "'");
+        return nullptr;
+    }
+    return result;
+}
 
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
-
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
-	}
+Payload::Payload()
+{
 }
     
-const psc& SpiceEphemeris::position() const {
-    return _position;
+Payload::Payload(const ghoul::Dictionary& dictionary)
+{
 }
-
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
-
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
-		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}
-	
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
+    
+Payload::~Payload()
+{
 }
-
+    
 } // namespace openspace

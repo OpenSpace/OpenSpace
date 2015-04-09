@@ -29,6 +29,12 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/imagesequencer.h>
+#include <openspace/util/imagesequencer2.h>
+
+#include <openspace/util/sequenceparser.h>
+#include <openspace/util/hongkangparser.h>
+#include <openspace/util/payload.h>
+
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -71,6 +77,8 @@ protected:
 private:
 	void imageProjectGPU();
 
+	std::map<std::string, Payload*> _fileTranslation;
+
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
 	properties::TriggerProperty _imageTrigger;
@@ -87,12 +95,19 @@ private:
 	glm::mat4  _transform;
 	glm::mat4  _projectorMatrix;
 
+	//sequenceloading
+	std::string _sequenceSource;
+	std::string _sequenceType;
+	bool _foundSequence;
+
 	// spice
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
 	std::string _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
+
+
 	float _fovy;
 	float _aspectRatio;
 	float _nearPlane;
@@ -109,7 +124,6 @@ private:
 
 	std::vector<std::pair<double, std::string>> _imageTimes;
 	int _sequenceID;
-
 
 	std::string _target;
 	std::string _defaultProjImage;

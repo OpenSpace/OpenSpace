@@ -22,70 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
+#ifndef __PAYLOAD_H__
+#define __PAYLOAD_H__
 
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
-
-namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
-}
+#include <ghoul/misc/dictionary.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
-{
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
 
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+class Payload {
+public:
+    static Payload* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type);
 
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
+    Payload(const ghoul::Dictionary& dictionary);
+    virtual ~Payload();
+	virtual std::string getType() = 0;
+	virtual std::vector<std::string> getSpiceIDs() = 0;
+protected:
+    Payload();
+};
 
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
-	}
-}
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
-}
+}  // namespace openspace
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
-
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
-		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}
-	
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
-}
-
-} // namespace openspace
+#endif // __PAYLOAD_H__

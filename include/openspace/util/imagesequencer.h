@@ -99,11 +99,10 @@ public:
 	*/
 	bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
 	bool parsePlaybookFile(const std::string& fileName, int& sequenceID, std::string year = "2015");
-
 	/*
 	* These three methods augment the playbook
 	*/
-	void augumentSequencesWithTargets(int sequenceID);
+	void augumentSequenceWithTargets(int sequenceID);
 	void addSequenceObserver(int sequenceID, std::string name, std::vector<std::string> payload);
 	void registerTargets(std::vector<std::string>& potential);
 

@@ -22,70 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/spiceephemeris.h>
-
-#include <openspace/util/constants.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/util/scannerinstrument.h>
 
 namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
+    const std::string _loggerCat = "ScannerInstrument";
 }
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
-    
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
-	, _kernelsLoadedSuccessfully(true)
+   
+ScannerInstrument::ScannerInstrument(const ghoul::Dictionary& dictionary) : _type("SCANNER")
 {
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
-
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
-
-	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
-
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
+	std::string value;
+	for (int k = 0; k < dictionary.size(); k++){
+		dictionary.getValue(std::to_string(k + 1), value);
+		_spiceIDs.push_back(value);
 	}
 }
-    
-const psc& SpiceEphemeris::position() const {
-    return _position;
+std::string ScannerInstrument::getType(){
+	return _type;
 }
 
-void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
-
-	glm::dvec3 position(0,0,0);
-	double lightTime = 0.0;
-
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
-		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}
-	
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
+std::vector<std::string> ScannerInstrument::getSpiceIDs(){
+	return _spiceIDs;
 }
 
 } // namespace openspace
