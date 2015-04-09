@@ -306,7 +306,6 @@ TEST_F(SpiceManagerTest, getStateTransformMatrix){
 	}
 	mxvg_c(referenceMatrix, state, 6, 6, state_t);
 
-	openspace::SpiceManager::ref().applyTransformationMatrix(position, velocity, stateMatrix);
 
 	for (int i = 0; i < 3; i++){
 		EXPECT_DOUBLE_EQ(position[i], state_t[i])     << "Position vector differs from its reference";
@@ -388,92 +387,3 @@ TEST_F(SpiceManagerTest, getFieldOfView){
 	}
 	unload_c(META.c_str());
 }
-// Try to convert planetocentric coordinates to rectangular
-TEST_F(SpiceManagerTest, planetocentricToRectangular){
-	loadPCKKernel();
-
-	double lat = -35.0; //initial values
-	double lon = 100.0;
-	double rectangular_ref[3];
-	SpiceInt naifId;
-	SpiceBoolean foundSpice;
-
-	bodn2c_c("EARTH", &naifId, &foundSpice);
-	ASSERT_TRUE(foundSpice == SPICETRUE);
-	srfrec_c(naifId, lon*rpd_c(), lat*rpd_c(), rectangular_ref);
-
-	glm::dvec3 rectangular;
-	bool found = openspace::SpiceManager::ref().geographicToRectangular("EARTH", lon, lat, rectangular);
-	ASSERT_TRUE(found);
-	
-	for (int i = 0; i < 3; i++){
-		EXPECT_EQ(rectangular[i], rectangular_ref[i]) << "Rectangular coordinates differ from expected output";
-	}
-	unload_c(PCK.c_str());
-}
-// Try getting sub-observer point
-TEST_F(SpiceManagerTest, getSubObserverPoint){
-	loadMetaKernel();
-
-	double et;
-	double targetEt_ref;
-	double targetEt;
-	double subObserverPoint_ref[3];
-	double vectorToSurfacePoint_ref[3];
-	static SpiceChar* method[2] = { static_cast<char*>("Intercept:  ellipsoid"), static_cast<char*>("Near point: ellipsoid") };
-
-	str2et_c("2004 jun 11 19:32:00", &et);
-
-	glm::dvec3 subObserverPoint;
-	glm::dvec3 vectorToSurfacePoint;
-
-	for (int i = 0; i < 2; i++){
-		subpnt_c(method[i], "phoebe", et, "iau_phoebe", 
-			"lt+s", "earth", subObserverPoint_ref, &targetEt_ref, vectorToSurfacePoint_ref);
-
-		bool found = openspace::SpiceManager::ref().getSubObserverPoint(
-			"phoebe", "earth", method[i], "iau_phoebe", "lt+s", et, subObserverPoint, 
-			targetEt, vectorToSurfacePoint);
-		ASSERT_TRUE(found);
-		EXPECT_EQ(targetEt_ref, targetEt);
-		for (int i = 0; i < 3; i++){
-			EXPECT_EQ(subObserverPoint_ref[i], subObserverPoint[i]) 
-				      << "Sub-observer vector differs from its reference";
-			EXPECT_EQ(vectorToSurfacePoint_ref[i], vectorToSurfacePoint[i]) 
-				      << "Observer to surface point vector differs from its reference";
-		}
-	}
-	unload_c(META.c_str());
-}
-// Try getting sub-solar point
-//TEST_F(SpiceManagerTest, getSubSolarPoint){
-//	loadMetaKernel();
-//
-//	double et, targetEt_ref, targetEt;
-//	double subSolarPoint_ref[3];
-//	double vectorToSurfacePoint_ref[3];
-//	static SpiceChar * method[2] = { "Intercept:  ellipsoid", "Near point: ellipsoid" };
-//
-//	str2et_c("2004 jun 11 19:32:00", &et);
-//
-//	glm::dvec3 subSolarPoint;
-//	glm::dvec3 vectorToSurfacePoint;
-//
-//	for (int i = 0; i < 2; i++){
-//		subslr_c(method[i], "phoebe", et, "iau_phoebe", 
-//			"lt+s", "earth", subSolarPoint_ref, &targetEt_ref, vectorToSurfacePoint_ref);
-//
-//		bool found = openspace::SpiceManager::ref().getSubSolarPoint(method[i], "phoebe", et, "iau_phoebe",
-//			                                                    "lt+s", "earth", subSolarPoint,
-//			                                                    targetEt, vectorToSurfacePoint);
-//		ASSERT_TRUE(found);
-//		EXPECT_EQ(targetEt_ref, targetEt);
-//		for (int i = 0; i < 3; i++){
-//			EXPECT_EQ(subSolarPoint_ref[i], subSolarPoint[i])
-//			     	 << "Sub-solar vector differs from its reference";
-//			EXPECT_EQ(vectorToSurfacePoint_ref[i], vectorToSurfacePoint[i])
-//				     << "Observer to surface point vector differs from its reference";
-//		}
-//	}
-//	unload_c(META.c_str());
-//}

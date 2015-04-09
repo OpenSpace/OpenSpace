@@ -61,6 +61,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
 	, _rotation("rotation", "Rotation", 0, 0, 360)
+	, _alpha(1.f)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -172,6 +173,7 @@ void RenderablePlanet::render(const RenderData& data)
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
+	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
