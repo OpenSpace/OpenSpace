@@ -151,7 +151,7 @@ void ABuffer::resolve() {
 	float volumeStepFactor = (val) ? 0.2f: 1.0f;
 	if(volumeStepFactor != _volumeStepFactor) {
 		_volumeStepFactor = volumeStepFactor;
-		_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
+	//	_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
 	}
 
 	glBindVertexArray(_screenQuad);

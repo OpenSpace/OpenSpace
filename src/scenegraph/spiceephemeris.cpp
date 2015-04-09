@@ -76,12 +76,12 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
 		"GALACTIC", "NONE", data.time, position, lightTime);
 
-	if (_targetName == "NEW HORIZONS"){
+	/*if (_targetName == "NEW HORIZONS"){
 		// In order to properly draw the viewfrustrum, the craft might have to be
 		// positioned using the X-variations of aberration methods (ongoing investigation).
 		SpiceManager::ref().getTargetPosition(_targetName, _originName,
 			"GALACTIC", "NONE", data.time, position, lightTime);
-	}
+	}*/
 	
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	_position[3] += 3;

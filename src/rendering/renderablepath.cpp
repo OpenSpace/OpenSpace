@@ -83,7 +83,7 @@ bool RenderablePath::fullYearSweep(){
 	double lightTime = 0.0;
 	SpiceManager::ref().getETfromDate("2006 jan 20 19:00:00", _time);
 
-	std::cout << _time << std::endl;
+	//std::cout << _time << std::endl;
 
 	// -------------------------------------- ^ this has to be simulation start-time, not passed in here though --
 	//SpiceManager::ref().getETfromDate("2008 apr 01 00:00:00", et2);
@@ -100,7 +100,7 @@ bool RenderablePath::fullYearSweep(){
 
 	int indx = 0;
 	for (int i = 0; i < segments + 1; i++){
-		std::cout << i << std::endl;
+		//std::cout << i << std::endl;
 		bool gotData = SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "LT+S", et, _pscpos, lightTime);
 
 #ifndef NDEBUG
@@ -249,7 +249,7 @@ void RenderablePath::update(const UpdateData& data){
 	_time = data.time;
 	_delta = static_cast<int>(data.delta);
 
-	SpiceManager::ref().getTargetState(_target, _observer, _frame, "LT+S", data.time, _pscpos, _pscvel, lightTime);
+	SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, _pscpos, lightTime);
 }
 
 

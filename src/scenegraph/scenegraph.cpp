@@ -37,6 +37,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <ghoul/filesystem/filesystem.h>
 #include "ghoul/io/texture/texturereader.h"
 #include <ghoul/misc/dictionary.h>
@@ -654,11 +656,11 @@ SceneGraphNode* SceneGraph::root() const {
 }
     
 SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
-    auto it = _allNodes.find(name);
-    if (it == _allNodes.end())
-        return nullptr;
-    else
-        return it->second;
+	for (auto it : _allNodes){
+		if (boost::iequals(name, it.first))
+			return it.second;
+	}
+	return nullptr;
 }
 
 std::vector<SceneGraphNode*> SceneGraph::allSceneGraphNodes() const {

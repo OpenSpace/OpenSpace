@@ -62,6 +62,7 @@ private:
 
 	modelgeometry::ModelGeometry* _geometry;
 
+	float _alpha;
 	glm::dmat3 _stateMatrix; 
 
 	std::string _source;
