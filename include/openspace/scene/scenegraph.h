@@ -49,24 +49,15 @@ public:
     std::vector<SceneGraphNode*> linearList();
 
 private:
-    //struct SceneGraphNodeStub {
-    //    std::string parent;
-    //    std::string module;
-    //    std::string modulePath;
-    //    ghoul::Dictionary dictionary;
-    //};
-
-    //struct SceneGraphNodeInternal {
-        //SceneGraphNode* node = nullptr;
-        //SceneGraphNodeStub* stub = nullptr;
-        //std::vector<SceneGraphNodeInternal*> dependingNode;
-    //};
-
-    //bool createSceneGraphNodeFromStub(SceneGraphNodeInternal* node);
+    bool nodeIsDependentOnRoot(const std::string& nodeName);
+    bool topologicalSort();
 
     std::vector<SceneGraphNode*> _nodes;
+    // child -> parent
+    std::unordered_multimap<std::string, std::string> _forwardEdges;
     // Edges are in reverse order of dependency
-    std::unordered_multimap<std::string, std::string> _edges;
+    // parent -> child
+    std::unordered_multimap<std::string, std::string> _backwardEdges;
 };
 
 } // namespace openspace

@@ -173,24 +173,63 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
 
             FileSys.setCurrentDirectory(modulePath);
             SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
+            if (node == nullptr) {
+                LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
+                clear();
+                return false;
+            }
             _nodes.push_back(node);
 
-            _edges.emplace(parentName, nodeName);
+            _forwardEdges.emplace(nodeName, parentName);
+            _backwardEdges.emplace(parentName, nodeName);
         }
     }
     FileSys.setCurrentDirectory(oldDirectory);
 
+    for (SceneGraphNode* node : _nodes) {
+        if (!nodeIsDependentOnRoot(node->name())) {
+            LERROR("Node '" << node->name() << "' has no direct connection to Root.");
+            //clear();
+            return false;
+        }
+    }
 
 
-    //// Load all nodes
-    //for (SceneGraphNodeInternal* node : _nodes)
-        //createSceneGraphNodeFromStub(node);
-
+    return true;
 }
 
-//bool SceneGraph::createSceneGraphNodeFromStub(SceneGraphNodeInternal* node) {
-//
-//}
+bool SceneGraph::nodeIsDependentOnRoot(const std::string& nodeName) {
+    if (nodeName == SceneGraphNode::RootNodeName)
+        return true;
+    else {
+        auto range = _forwardEdges.equal_range(nodeName);
+        for (auto it = range.first; it != range.second; ++it) {
+            bool dep = nodeIsDependentOnRoot(it->second);
+            if (dep)
+                return true;
+        }
+        return false;
+    }
+}
+
+bool SceneGraph::topologicalSort() {
+    if (_nodes.empty())
+        return true;
+
+    std::string name;
+    auto findByName = [&name](const SceneGraphNode * const node) {
+        return node->name() == name;
+    };
+    name = SceneGraphNode::RootNodeName;
+        
+    auto it = std::find_if(_nodes.begin(), _nodes.end(), findByName);
+    ghoul_assert(it != _node.end(), "Could not find Root node");
+    
+    SceneGraphNode* root = *it;
+
+
+    
+}
 
 bool SceneGraph::addSceneGraphNode(SceneGraphNode* node) {
     return true;
@@ -202,7 +241,7 @@ bool SceneGraph::removeSceneGraphNode(SceneGraphNode* node) {
 }
 
 std::vector<SceneGraphNode*> SceneGraph::linearList() {
-
+    return _nodes;
 }
 
 } // namespace openspace
