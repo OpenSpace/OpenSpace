@@ -85,7 +85,7 @@ public:
 	* \param filePath The path to the kernel that should be examined
 	* \return true if the operation was successful
 	*/
-	bool SpiceManager::findCkCoverage(std::string& path);
+	bool findCkCoverage(std::string& path);
 
 	/**
 	* Function to find and store the intervals covered by a spk file, this is done
@@ -95,7 +95,7 @@ public:
 	* \param filePath The path to the kernel that should be examined
 	* \return true if the operation was successful
 	*/
-	bool SpiceManager::findSpkCoverage(std::string& path);
+	bool findSpkCoverage(std::string& path);
 	
 	/**
 	 * \return true if SPK kernels have been loaded to cover <code>target</code>
