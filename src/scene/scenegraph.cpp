@@ -32,6 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 
+#include <stack>
 
 namespace {
     const std::string _loggerCat = "SceneGraph";
@@ -42,10 +43,17 @@ namespace {
 
 namespace openspace {
 
+SceneGraph::SceneGraph() {
+
+
+}
+
 void SceneGraph::clear() {
     // Untested ---abock
-    for (SceneGraphNode* n : _nodes)
+    for (SceneGraphNodeInternal* n : _nodes) {
+        delete n->node;
         delete n;
+    }
 
     _nodes.clear();
 }
@@ -123,6 +131,9 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             LERROR("Specification for 'common' folder has invalid type");
     }
 
+    std::map<std::string, std::vector<std::string>> dependencies;
+    std::map<std::string, std::string> parents;
+
     std::sort(keys.begin(), keys.end());
     ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
     for (const std::string& key : keys) {
@@ -149,9 +160,11 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         if (!s)
             continue;
 
-        SceneGraphNode* root = new SceneGraphNode;
-        root->setName(SceneGraphNode::RootNodeName);
-        _nodes.push_back(root);
+        _rootNode = new SceneGraphNode;
+        _rootNode->setName(SceneGraphNode::RootNodeName);
+        SceneGraphNodeInternal* internalRoot = new SceneGraphNodeInternal;
+        internalRoot->node = _rootNode;
+        _nodes.push_back(internalRoot);
 
         std::vector<std::string> keys = moduleDictionary.keys();
         for (const std::string& key : keys) {
@@ -178,33 +191,60 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 clear();
                 return false;
             }
-            _nodes.push_back(node);
 
-            _forwardEdges.emplace(nodeName, parentName);
-            _backwardEdges.emplace(parentName, nodeName);
+            dependencies[nodeName].push_back(parentName);
+            parents[nodeName] = parentName;
+            // Also include loaded dependencies
+
+            SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
+            internalNode->node = node;
+            _nodes.push_back(internalNode);
         }
     }
     FileSys.setCurrentDirectory(oldDirectory);
 
-    for (SceneGraphNode* node : _nodes) {
-        if (!nodeIsDependentOnRoot(node->name())) {
-            LERROR("Node '" << node->name() << "' has no direct connection to Root.");
+    for (SceneGraphNodeInternal* node : _nodes) {
+        if (node->node == rootNode())
+            continue;
+        std::string parent = parents[node->node->name()];
+        SceneGraphNode* parentNode = sceneGraphNode(parent);
+        if (parentNode)
+
+        node->node->setParent(parentNode);
+    }
+
+    // Setup dependencies
+    for (SceneGraphNodeInternal* node : _nodes) {
+        std::vector<std::string> nodeDependencies = dependencies[node->node->name()];
+
+        for (const std::string& dep : nodeDependencies) {
+            SceneGraphNodeInternal* n = nodeByName(dep);
+            if (n == nullptr) {
+                LERROR("Dependent node '" << dep << "' was not loaded for '" <<node->node->name() << "'");
+                continue;
+            }
+            node->outgoingEdges.push_back(n);
+            n->incomingEdges.push_back(n);
+        }
+    }
+
+    for (SceneGraphNodeInternal* node : _nodes) {
+        if (!nodeIsDependentOnRoot(node)) {
+            LERROR("Node '" << node->node->name() << "' has no direct connection to Root.");
             //clear();
             return false;
         }
     }
 
-
     return true;
 }
 
-bool SceneGraph::nodeIsDependentOnRoot(const std::string& nodeName) {
-    if (nodeName == SceneGraphNode::RootNodeName)
+bool SceneGraph::nodeIsDependentOnRoot(SceneGraphNodeInternal* node) {
+    if (node->node->name() == SceneGraphNode::RootNodeName)
         return true;
     else {
-        auto range = _forwardEdges.equal_range(nodeName);
-        for (auto it = range.first; it != range.second; ++it) {
-            bool dep = nodeIsDependentOnRoot(it->second);
+        for (SceneGraphNodeInternal* n : node->outgoingEdges) {
+            bool dep = nodeIsDependentOnRoot(n);
             if (dep)
                 return true;
         }
@@ -216,19 +256,33 @@ bool SceneGraph::topologicalSort() {
     if (_nodes.empty())
         return true;
 
-    std::string name;
-    auto findByName = [&name](const SceneGraphNode * const node) {
-        return node->name() == name;
-    };
-    name = SceneGraphNode::RootNodeName;
-        
-    auto it = std::find_if(_nodes.begin(), _nodes.end(), findByName);
-    ghoul_assert(it != _node.end(), "Could not find Root node");
-    
-    SceneGraphNode* root = *it;
+    // Only the Root node can have an in-degree of 0
+    SceneGraphNodeInternal* root = nodeByName(SceneGraphNode::RootNodeName);
+    ghoul_assert(root != nullptr, "Could not find Root node");
 
+    std::stack<SceneGraphNodeInternal*> zeroInDegreeNodes;
+    zeroInDegreeNodes.push(root);
 
+    std::unordered_map<SceneGraphNodeInternal*, size_t> inDegrees;
+    for (SceneGraphNodeInternal* node : _nodes)
+        inDegrees[node] = node->incomingEdges.size();
     
+    _topologicalSortedNodes.clear();
+    _topologicalSortedNodes.reserve(_nodes.size());
+    while (!zeroInDegreeNodes.empty()) {
+        SceneGraphNodeInternal* node = zeroInDegreeNodes.top();
+
+        _topologicalSortedNodes.push_back(node->node);
+
+        for (SceneGraphNodeInternal* n : node->outgoingEdges) {
+            inDegrees[n] -= 1;
+            if (inDegrees[n] == 0)
+                zeroInDegreeNodes.push(n);
+        }
+
+        zeroInDegreeNodes.pop();
+    }
+    return true;    
 }
 
 bool SceneGraph::addSceneGraphNode(SceneGraphNode* node) {
@@ -240,8 +294,41 @@ bool SceneGraph::removeSceneGraphNode(SceneGraphNode* node) {
     return true;
 }
 
-std::vector<SceneGraphNode*> SceneGraph::linearList() {
-    return _nodes;
+SceneGraph::SceneGraphNodeInternal* SceneGraph::nodeByName(const std::string& name) {
+    auto it = std::find_if(
+        _nodes.begin(),
+        _nodes.end(),
+        [name](SceneGraphNodeInternal* node) {
+            return node->node->name() == name;
+        }
+    );
+
+    if (it == _nodes.end())
+        return nullptr;
+    else
+        return *it;
+}
+
+const std::vector<SceneGraphNode*>& SceneGraph::linearList() {
+    return _topologicalSortedNodes;
+}
+
+SceneGraphNode* SceneGraph::rootNode() const {
+    return _rootNode;
+}
+
+SceneGraphNode* SceneGraph::sceneGraphNode(const std::string& name) const {
+    auto it = std::find_if(
+        _nodes.begin(),
+        _nodes.end(),
+        [name](SceneGraphNodeInternal* node) {
+            return node->node->name() == name;
+        }
+    );
+    if (it != _nodes.end())
+        return (*it)->node;
+    else
+        return nullptr;
 }
 
 } // namespace openspace

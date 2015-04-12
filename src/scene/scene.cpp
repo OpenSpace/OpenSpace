@@ -36,7 +36,6 @@
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
-#include <openspace/scene/scenegraphloader.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include "ghoul/io/texture/texturereader.h"
@@ -148,7 +147,6 @@ int loadScene(lua_State* L) {
 
 Scene::Scene()
     : _focus(SceneGraphNode::RootNodeName)
-    , _root(nullptr)
 {
 }
 
@@ -259,13 +257,14 @@ void Scene::update(const UpdateData& data) {
 		OsEng.renderEngine()->abuffer()->invalidateABuffer();
 #endif
 	}
-    for (SceneGraphNode* node : _nodes)
+    for (SceneGraphNode* node : _graph.linearList())
         node->update(data);
 }
 
 void Scene::evaluate(Camera* camera) {
-	if (_root)
-		_root->evaluate(camera);
+    for (SceneGraphNode* node : _graph.linearList())
+        node->evaluate(camera);
+	//_root->evaluate(camera);
 }
 
 void Scene::render(const RenderData& data) {
@@ -286,8 +285,10 @@ void Scene::render(const RenderData& data) {
 			program->setIgnoreSubroutineUniformLocationError(true);
 	}
 
-	if (_root)
-		_root->render(data);
+    for (SceneGraphNode* node : _graph.linearList())
+        node->render(data);
+	//if (_root)
+	//	_root->render(data);
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
@@ -296,83 +297,94 @@ void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
 
 void Scene::clearSceneGraph() {
 	// deallocate the scene graph. Recursive deallocation will occur
-	if (_root) {
-		_root->deinitialize();
-		delete _root;
-		_root = nullptr;
-	}
+    _graph.clear();
+	//if (_root) {
+	//	_root->deinitialize();
+	//	delete _root;
+	//	_root = nullptr;
+	//}
 
-    _nodes.erase(_nodes.begin(), _nodes.end());
-    _allNodes.erase(_allNodes.begin(), _allNodes.end());
+ //   _nodes.erase(_nodes.begin(), _nodes.end());
+ //   _allNodes.erase(_allNodes.begin(), _allNodes.end());
 
     _focus.clear();
 }
 
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
-    using ghoul::Dictionary;
-    using ghoul::lua::loadDictionaryFromFile;
+ //   using ghoul::Dictionary;
+ //   using ghoul::lua::loadDictionaryFromFile;
 
-	if (!FileSys.fileExists(sceneDescriptionFilePath)) {
-		LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
-		return false;
-	}
+	//if (!FileSys.fileExists(sceneDescriptionFilePath)) {
+	//	LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
+	//	return false;
+	//}
 
-    LDEBUG("Loading scenegraph nodes");
-    if (_root != nullptr) {
-        LFATAL("Scenegraph already loaded");
-        return false;
-    }
+ //   LDEBUG("Loading scenegraph nodes");
+ //   if (_root != nullptr) {
+ //       LFATAL("Scenegraph already loaded");
+ //       return false;
+ //   }
 
-    OsEng.disableBarrier();
+ //   OsEng.disableBarrier();
 
-    _root = new SceneGraphNode();
-    _root->setName(SceneGraphNode::RootNodeName);
-    _nodes.push_back(_root);
-    _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
-    _focus = SceneGraphNode::RootNodeName;
+ //   _root = new SceneGraphNode();
+ //   _root->setName(SceneGraphNode::RootNodeName);
+ //   _nodes.push_back(_root);
+ //   _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
+ //   _focus = SceneGraphNode::RootNodeName;
 
-    bool success = SceneGraphLoader::load(sceneDescriptionFilePath, _nodes);
+ //   bool success = SceneGraphLoader::load(sceneDescriptionFilePath, _nodes);
 
 
-    Dictionary dictionary;
-	//load default.scene 
-    loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
+    ghoul::Dictionary dictionary;
+	////load default.scene 
+    ghoul::lua::loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
 
-	std::string&& sceneDescriptionDirectory =
-		ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
-	std::string moduleDirectory(".");
-	dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
+	//std::string&& sceneDescriptionDirectory =
+	//	ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
+	//std::string moduleDirectory(".");
+	//dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
 
-	// The scene path could either be an absolute or relative path to the description
-	// paths directory
-	std::string&& relativeCandidate = sceneDescriptionDirectory +
-		ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
-	std::string&& absoluteCandidate = absPath(moduleDirectory);
+	//// The scene path could either be an absolute or relative path to the description
+	//// paths directory
+	//std::string&& relativeCandidate = sceneDescriptionDirectory +
+	//	ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
+	//std::string&& absoluteCandidate = absPath(moduleDirectory);
 
-	if (FileSys.directoryExists(relativeCandidate))
-		moduleDirectory = relativeCandidate;
-	else if (FileSys.directoryExists(absoluteCandidate))
-		moduleDirectory = absoluteCandidate;
-	else {
-		LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
-			"path '" << moduleDirectory << "' that did not exist");
-        OsEng.enableBarrier();
-		return false;
-	}
+	//if (FileSys.directoryExists(relativeCandidate))
+	//	moduleDirectory = relativeCandidate;
+	//else if (FileSys.directoryExists(absoluteCandidate))
+	//	moduleDirectory = absoluteCandidate;
+	//else {
+	//	LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
+	//		"path '" << moduleDirectory << "' that did not exist");
+ //       OsEng.enableBarrier();
+	//	return false;
+	//}
 
-	// Load the modules/scenegraph nodes
-	loadModules(moduleDirectory, dictionary);
+	//// Load the modules/scenegraph nodes
+	//loadModules(moduleDirectory, dictionary);
+
+    _graph.loadFromFile(sceneDescriptionFilePath);
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
-    Dictionary cameraDictionary;
+    ghoul::Dictionary cameraDictionary;
     if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
 
         if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus)) {
-            auto focusIterator = _allNodes.find(focus);
-            if (focusIterator != _allNodes.end()) {
+            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus))
+        {
+            auto focusIterator = std::find_if(
+                _graph.linearList().begin(),
+                _graph.linearList().end(),
+                [focus](SceneGraphNode* node) {
+                    return node->name() == focus;
+                }
+            );
+
+            if (focusIterator != _graph.linearList().end()) {
                 _focus = focus;
                 LDEBUG("Setting camera focus to '" << _focus << "'");
             }
@@ -382,7 +394,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
     // Initialize all nodes
-    for (SceneGraphNode* node : _nodes) {
+    for (SceneGraphNode* node : _graph.linearList()) {
 		bool success = node->initialize();
         if (success)
             LDEBUG(node->name() << " initialized successfully!");
@@ -392,23 +404,36 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
-	for (SceneGraphNode* node : _nodes)
+	for (SceneGraphNode* node : _graph.linearList()) {
 		node->update({ Time::ref().currentTime() });
+    }
+
+    for (auto it = _graph.linearList().rbegin(); it != _graph.linearList().rend(); ++it)
+        (*it)->calculateBoundingSphere();
+
 
     // Calculate the bounding sphere for the scenegraph
-    _root->calculateBoundingSphere();
+    //_root->calculateBoundingSphere();
 
     // set the camera position
 	Camera* c = OsEng.ref().renderEngine()->camera();
-    auto focusIterator = _allNodes.find(_focus);
+    //auto focusIterator = _allNodes.find(_focus);
+    auto focusIterator = std::find_if(
+                _graph.linearList().begin(),
+                _graph.linearList().end(),
+                [&](SceneGraphNode* node) {
+        return node->name() == _focus;
+    }
+    );
 
 	glm::vec2 cameraScaling(1);
 	psc cameraPosition(0,0,1,0);
 	glm::vec3 cameraDirection = glm::vec3(0, 0, -1);
 
-    if (focusIterator != _allNodes.end()) {
+    //if (_focus->)
+    if (focusIterator != _graph.linearList().end()) {
         LDEBUG("Camera focus is '" << _focus << "'");
-        SceneGraphNode* focusNode = focusIterator->second;
+        SceneGraphNode* focusNode = *focusIterator;
         //Camera* c = OsEng.interactionHandler().getCamera();
 
         // TODO: Make distance depend on radius
@@ -475,7 +500,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	}
 
 
-	for (SceneGraphNode* node : _nodes) {
+	for (SceneGraphNode* node : _graph.linearList()) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
             OsEng.gui()->_property.registerProperty(p);
@@ -505,111 +530,111 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     return true;
 }
 
-void Scene::loadModules(
-	const std::string& directory, 
-	const ghoul::Dictionary& dictionary) 
-{
-	// Struct containing dependencies and nodes
-	LoadMaps m;
+//void Scene::loadModules(
+//	const std::string& directory, 
+//	const ghoul::Dictionary& dictionary) 
+//{
+//	// Struct containing dependencies and nodes
+//	LoadMaps m;
+//
+//	// Get the common directory
+//	std::string commonDirectory(_defaultCommonDirectory);
+//	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
+//	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
+//
+//    lua_State* state = ghoul::lua::createNewLuaState();
+//    OsEng.scriptEngine()->initializeLuaState(state);
+//
+//	LDEBUG("Loading common module folder '" << commonDirectory << "'");
+//	// Load common modules into LoadMaps struct
+//	loadModule(m, FileSys.pathByAppendingComponent(directory, commonDirectory), state);
+//
+//	// Load the rest of the modules into LoadMaps struct
+//    ghoul::Dictionary moduleDictionary;
+//    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
+//        std::vector<std::string> keys = moduleDictionary.keys();
+//        std::sort(keys.begin(), keys.end());
+//        for (const std::string& key : keys) {
+//            std::string moduleFolder;
+//			if (moduleDictionary.getValue(key, moduleFolder)) {
+//                loadModule(m, FileSys.pathByAppendingComponent(directory, moduleFolder), state);
+//			}
+//        }
+//    }
+//
+//    // Load and construct scenegraphnodes from LoadMaps struct
+//    loadNodes(SceneGraphNode::RootNodeName, m);
+//
+//    // Remove loaded nodes from dependency list
+//    for(const auto& name: m.loadedNodes) {
+//    	m.dependencies.erase(name);
+//    }
+//
+//    // Check to see what dependencies are not resolved.
+//    for(auto& node: m.dependencies) {
+//    	LWARNING(
+//    		"'" << node.second << "'' not loaded, parent '" 
+//    		<< node.first << "' not defined!");
+//    }
+//}
 
-	// Get the common directory
-	std::string commonDirectory(_defaultCommonDirectory);
-	dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
-	FileSys.registerPathToken(_commonModuleToken, commonDirectory);
+//void Scene::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
+//	auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
+//    if (pos == modulePath.npos) {
+//        LERROR("Bad format for module path: " << modulePath);
+//        return;
+//    }
+//
+//    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
+//    LDEBUG("Loading nodes from: " << fullModule);
+//
+//    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+//    FileSys.setCurrentDirectory(modulePath);
+//
+//    ghoul::Dictionary moduleDictionary;
+//    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary, state);
+//    std::vector<std::string> keys = moduleDictionary.keys();
+//    for (const std::string& key : keys) {
+//        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+//            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
+//                                         << fullModule << "'");
+//            continue;
+//        }
+//        
+//        ghoul::Dictionary element;
+//        std::string nodeName;
+//        std::string parentName;
+//
+//        moduleDictionary.getValue(key, element);
+//		element.setValue(constants::scenegraph::keyPathModule, modulePath);
+//
+//		element.getValue(constants::scenegraphnode::keyName, nodeName);
+//		element.getValue(constants::scenegraphnode::keyParentName, parentName);
+//
+//		m.nodes[nodeName] = element;
+//		m.dependencies.emplace(parentName,nodeName);
+//    }
+//
+//    FileSys.setCurrentDirectory(oldDirectory);
+//}
 
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OsEng.scriptEngine()->initializeLuaState(state);
-
-	LDEBUG("Loading common module folder '" << commonDirectory << "'");
-	// Load common modules into LoadMaps struct
-	loadModule(m, FileSys.pathByAppendingComponent(directory, commonDirectory), state);
-
-	// Load the rest of the modules into LoadMaps struct
-    ghoul::Dictionary moduleDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
-        std::vector<std::string> keys = moduleDictionary.keys();
-        std::sort(keys.begin(), keys.end());
-        for (const std::string& key : keys) {
-            std::string moduleFolder;
-			if (moduleDictionary.getValue(key, moduleFolder)) {
-                loadModule(m, FileSys.pathByAppendingComponent(directory, moduleFolder), state);
-			}
-        }
-    }
-
-    // Load and construct scenegraphnodes from LoadMaps struct
-    loadNodes(SceneGraphNode::RootNodeName, m);
-
-    // Remove loaded nodes from dependency list
-    for(const auto& name: m.loadedNodes) {
-    	m.dependencies.erase(name);
-    }
-
-    // Check to see what dependencies are not resolved.
-    for(auto& node: m.dependencies) {
-    	LWARNING(
-    		"'" << node.second << "'' not loaded, parent '" 
-    		<< node.first << "' not defined!");
-    }
-}
-
-void Scene::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
-	auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-    if (pos == modulePath.npos) {
-        LERROR("Bad format for module path: " << modulePath);
-        return;
-    }
-
-    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
-    LDEBUG("Loading nodes from: " << fullModule);
-
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-    FileSys.setCurrentDirectory(modulePath);
-
-    ghoul::Dictionary moduleDictionary;
-    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary, state);
-    std::vector<std::string> keys = moduleDictionary.keys();
-    for (const std::string& key : keys) {
-        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
-            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
-                                         << fullModule << "'");
-            continue;
-        }
-        
-        ghoul::Dictionary element;
-        std::string nodeName;
-        std::string parentName;
-
-        moduleDictionary.getValue(key, element);
-		element.setValue(constants::scenegraph::keyPathModule, modulePath);
-
-		element.getValue(constants::scenegraphnode::keyName, nodeName);
-		element.getValue(constants::scenegraphnode::keyParentName, parentName);
-
-		m.nodes[nodeName] = element;
-		m.dependencies.emplace(parentName,nodeName);
-    }
-
-    FileSys.setCurrentDirectory(oldDirectory);
-}
-
-void Scene::loadNodes(const std::string& parentName, LoadMaps& m) {
-	auto eqRange = m.dependencies.equal_range(parentName);
-	for (auto it = eqRange.first; it != eqRange.second; ++it) {
-		auto node = m.nodes.find((*it).second);
-		loadNode(node->second);
-		loadNodes((*it).second, m);
-	}
-	m.loadedNodes.emplace_back(parentName);
-}
-
-void Scene::loadNode(const ghoul::Dictionary& dictionary) {
-    SceneGraphNode* node = SceneGraphNode::createFromDictionary(dictionary);
-    if(node) {
-    	_allNodes.emplace(node->name(), node);
-    	_nodes.push_back(node);
-    }
-}
+//void Scene::loadNodes(const std::string& parentName, LoadMaps& m) {
+//	auto eqRange = m.dependencies.equal_range(parentName);
+//	for (auto it = eqRange.first; it != eqRange.second; ++it) {
+//		auto node = m.nodes.find((*it).second);
+//		loadNode(node->second);
+//		loadNodes((*it).second, m);
+//	}
+//	m.loadedNodes.emplace_back(parentName);
+//}
+//
+//void Scene::loadNode(const ghoul::Dictionary& dictionary) {
+//    SceneGraphNode* node = SceneGraphNode::createFromDictionary(dictionary);
+//    if(node) {
+//    	_allNodes.emplace(node->name(), node);
+//    	_nodes.push_back(node);
+//    }
+//}
 
 //void SceneGraph::loadModule(const std::string& modulePath) {
 //    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
@@ -653,19 +678,15 @@ void Scene::loadNode(const ghoul::Dictionary& dictionary) {
 //}
 
 SceneGraphNode* Scene::root() const {
-    return _root;
+    return _graph.rootNode();
 }
     
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
-    auto it = _allNodes.find(name);
-    if (it == _allNodes.end())
-        return nullptr;
-    else
-        return it->second;
+    return _graph.sceneGraphNode(name);
 }
 
-std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() const {
-	return _nodes;
+std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() {
+	return _graph.linearList();
 }
 
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
@@ -678,7 +699,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         }
 
         using properties::Property;
-        for (SceneGraphNode* node : _nodes) {
+        for (SceneGraphNode* node : _graph.linearList()) {
             std::vector<Property*> properties = node->propertiesRecursive();
             if (!properties.empty()) {
                 file << node->name() << std::endl;

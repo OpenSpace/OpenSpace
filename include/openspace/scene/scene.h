@@ -34,6 +34,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scenegraph.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
@@ -95,7 +96,7 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-	std::vector<SceneGraphNode*> allSceneGraphNodes() const;
+	std::vector<SceneGraphNode*> allSceneGraphNodes();
 
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
@@ -115,9 +116,10 @@ private:
     std::string _focus;
 
     // actual scenegraph
-    SceneGraphNode* _root;
-    std::vector<SceneGraphNode*> _nodes;
-    std::map<std::string, SceneGraphNode*> _allNodes;
+    SceneGraph _graph;
+    //SceneGraphNode* _root;
+    //std::vector<SceneGraphNode*> _nodes;
+    //std::map<std::string, SceneGraphNode*> _allNodes;
 
 	std::string _sceneGraphToLoad;
 

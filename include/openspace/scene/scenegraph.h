@@ -36,7 +36,7 @@ class SceneGraphNode;
 
 class SceneGraph {
 public:
-    SceneGraph() = default;
+    SceneGraph();
 
     void clear();
     bool loadFromFile(const std::string& sceneDescription);
@@ -46,18 +46,34 @@ public:
     bool removeSceneGraphNode(SceneGraphNode* node); 
 
     // topological sort
-    std::vector<SceneGraphNode*> linearList();
+    const std::vector<SceneGraphNode*>& linearList();
+
+    SceneGraphNode* rootNode() const;
+    SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
 private:
-    bool nodeIsDependentOnRoot(const std::string& nodeName);
+    struct SceneGraphNodeInternal {
+        SceneGraphNode* node;
+        // From nodes that are dependent on this one
+        std::vector<SceneGraphNodeInternal*> incomingEdges;
+        // To nodes that this node depends on
+        std::vector<SceneGraphNodeInternal*> outgoingEdges;
+    };
+
+    bool nodeIsDependentOnRoot(SceneGraphNodeInternal* node);
     bool topologicalSort();
 
-    std::vector<SceneGraphNode*> _nodes;
+    SceneGraphNodeInternal* nodeByName(const std::string& name);
+
+    SceneGraphNode* _rootNode;
+    std::vector<SceneGraphNodeInternal*> _nodes;
+    std::vector<SceneGraphNode*> _topologicalSortedNodes;
+
     // child -> parent
-    std::unordered_multimap<std::string, std::string> _forwardEdges;
+    //std::unordered_multimap<std::string, std::string> _forwardEdges;
     // Edges are in reverse order of dependency
     // parent -> child
-    std::unordered_multimap<std::string, std::string> _backwardEdges;
+    //std::unordered_multimap<std::string, std::string> _backwardEdges;
 };
 
 } // namespace openspace

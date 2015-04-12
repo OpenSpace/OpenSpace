@@ -109,14 +109,14 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         parentName = "Root";
     }
 
-    SceneGraphNode* parentNode = sceneGraphNode(parentName);
-    if (parentNode == nullptr) {
-        LFATAL("Could not find parent named '"
-               << parentName << "' for '" << result->name() << "'."
-               << " Check module definition order. Skipping module.");
-    }
+    //SceneGraphNode* parentNode = sceneGraphNode(parentName);
+    //if (parentNode == nullptr) {
+    //    LFATAL("Could not find parent named '"
+    //           << parentName << "' for '" << result->name() << "'."
+    //           << " Check module definition order. Skipping module.");
+    //}
 
-    parentNode->addNode(result);
+    //parentNode->addNode(result);
 
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
@@ -247,8 +247,8 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
     }
 
     // evaluate all the children, tail-recursive function(?)
-    for (SceneGraphNode* child : _children)
-        child->evaluate(camera, psc());
+    //for (SceneGraphNode* child : _children)
+    //    child->evaluate(camera, psc());
 }
 
 void SceneGraphNode::render(const RenderData& data) {
@@ -274,8 +274,8 @@ void SceneGraphNode::render(const RenderData& data) {
 
     // evaluate all the children, tail-recursive function(?)
 
-    for (SceneGraphNode* child : _children)
-        child->render(newData);
+    //for (SceneGraphNode* child : _children)
+    //    child->render(newData);
 }
 
 // set & get
