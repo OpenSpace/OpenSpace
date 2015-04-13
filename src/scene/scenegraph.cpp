@@ -32,6 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 
+#include <fstream>
 #include <stack>
 
 namespace {
@@ -201,6 +202,24 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             parents[nodeName] = parentName;
             // Also include loaded dependencies
 
+            using constants::scenegraphnode::keyDependencies;
+            if (element.hasKey(keyDependencies)) {
+                if (element.hasValue<ghoul::Dictionary>(keyDependencies)) {
+                    ghoul::Dictionary nodeDependencies;
+                    element.getValue(constants::scenegraphnode::keyDependencies, nodeDependencies);
+
+                    std::vector<std::string> keys = nodeDependencies.keys();
+                    for (const std::string& key : keys) {
+                        std::string value = nodeDependencies.value<std::string>(key);
+                        dependencies[nodeName].push_back(value);
+                    }
+                }
+                else {
+                    LERROR("Dependencies did not have the corrent type");
+                }
+            }
+
+
             SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
             internalNode->node = node;
             _nodes.push_back(internalNode);
@@ -248,6 +267,13 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         LERROR("Topological sort failed");
         return false;
     }
+
+    std::ofstream f("D:/graph.txt");
+
+    for (SceneGraphNode* node : _topologicalSortedNodes) {
+        f << node->name() << std::endl;
+    }
+    
 
     return true;
 }
