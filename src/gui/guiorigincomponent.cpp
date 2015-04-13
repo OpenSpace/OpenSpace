@@ -41,7 +41,7 @@ namespace gui {
 void GuiOriginComponent::render() {
     const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
 
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
     std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
     auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
     ghoul_assert(it != nodes.end(), "Focus node not found");

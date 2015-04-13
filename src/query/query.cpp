@@ -38,7 +38,7 @@ namespace {
 
 Scene* sceneGraph()
 {
-    return OsEng.renderEngine()->sceneGraph();
+    return OsEng.renderEngine()->scene();
 }
 
 SceneGraphNode* sceneGraphNode(const std::string& name)

@@ -54,7 +54,7 @@ public:
 	bool initialize();
 
     void setSceneGraph(Scene* sceneGraph);
-    Scene* sceneGraph();
+    Scene* scene();
 
     Camera* camera() const;
     ABuffer* abuffer() const;

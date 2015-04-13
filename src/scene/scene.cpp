@@ -138,7 +138,7 @@ int loadScene(lua_State* L) {
 
 	std::string sceneFile = luaL_checkstring(L, -1);
 
-	OsEng.renderEngine()->sceneGraph()->scheduleLoadSceneFile(sceneFile);
+	OsEng.renderEngine()->scene()->scheduleLoadSceneFile(sceneFile);
 
 	return 0;
 }
@@ -248,7 +248,7 @@ bool Scene::deinitialize() {
 
 void Scene::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
-		OsEng.renderEngine()->sceneGraph()->clearSceneGraph();
+		OsEng.renderEngine()->scene()->clearSceneGraph();
 		bool success = loadSceneInternal(_sceneGraphToLoad);
 		_sceneGraphToLoad = "";
 		if (!success)
@@ -466,6 +466,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         // Set the focus node for the interactionhandler
         OsEng.interactionHandler()->setFocusNode(focusNode);
     }
+    else
+        OsEng.interactionHandler()->setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
 	if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)

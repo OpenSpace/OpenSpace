@@ -726,7 +726,7 @@ namespace openspace {
 			_showInfo = b;
 		}
 
-		Scene* RenderEngine::sceneGraph()
+		Scene* RenderEngine::scene()
 		{
 			// TODO custom assert (ticket #5)
 			assert(_sceneGraph);
@@ -910,7 +910,7 @@ namespace openspace {
 				PerformanceLayoutEntry entries[maxValues];
 			};
 
-			const int nNodes = static_cast<int>(sceneGraph()->allSceneGraphNodes().size());
+			const int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
 			if (!_performanceMemory) {
 
 				// Compute the total size
@@ -931,7 +931,7 @@ namespace openspace {
 				memset(layout->entries, 0, maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
 
 				for (int i = 0; i < nNodes; ++i) {
-					SceneGraphNode* node = sceneGraph()->allSceneGraphNodes()[i];
+					SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 
 					memset(layout->entries[i].name, 0, lengthName);
 					strcpy(layout->entries[i].name, node->name().c_str());
@@ -945,7 +945,7 @@ namespace openspace {
 			PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
 			_performanceMemory->acquireLock();
 			for (int i = 0; i < nNodes; ++i) {
-				SceneGraphNode* node = sceneGraph()->allSceneGraphNodes()[i];
+				SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 				SceneGraphNode::PerformanceRecord r = node->performanceRecord();
 				PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
 
@@ -962,10 +962,10 @@ namespace openspace {
 
 // This method is temporary and will be removed once the scalegraph is in effect ---abock
 void RenderEngine::changeViewPoint(std::string origin) {
-    SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
-    SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
-    SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
-    SceneGraphNode* jupiterBarycenterNode = sceneGraph()->sceneGraphNode("JupiterBarycenter");
+    SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");
+    SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
+    SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
+    SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
 
     if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
         LERROR("WTF");

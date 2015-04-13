@@ -108,8 +108,6 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     lua_State* state = ghoul::lua::createNewLuaState();
     OsEng.scriptEngine()->initializeLuaState(state);
 
-    std::vector<std::string> keys = moduleDictionary.keys();
-
     // Get the common directory
     using constants::scenegraph::keyCommonFolder;
     bool commonFolderSpecified = sceneDictionary.hasKey(keyCommonFolder);
@@ -118,12 +116,17 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     if (commonFolderSpecified) {
         if (commonFolderCorrectType) {
             std::string commonFolder = sceneDictionary.value<std::string>(keyCommonFolder);
-            if (!FileSys.directoryExists(commonFolder))
-                LERROR("Specified common folder '" << commonFolder << "' did not exist");
+            std::string fullCommonFolder = FileSys.pathByAppendingComponent(
+                sceneDirectory,
+                commonFolder
+            );
+            if (!FileSys.directoryExists(fullCommonFolder))
+                LERROR("Specified common folder '" << fullCommonFolder << "' did not exist");
             else {
                 if (!commonFolder.empty()) {
                     FileSys.registerPathToken(_commonModuleToken, commonFolder);
-                    keys.push_back(commonFolder);
+                    size_t nKeys = moduleDictionary.size();
+                    moduleDictionary.setValue(std::to_string(nKeys + 1), commonFolder);
                 }
             }
         }
@@ -131,8 +134,16 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             LERROR("Specification for 'common' folder has invalid type");
     }
 
+    std::vector<std::string> keys = moduleDictionary.keys();
+
     std::map<std::string, std::vector<std::string>> dependencies;
     std::map<std::string, std::string> parents;
+
+    _rootNode = new SceneGraphNode;
+    _rootNode->setName(SceneGraphNode::RootNodeName);
+    SceneGraphNodeInternal* internalRoot = new SceneGraphNodeInternal;
+    internalRoot->node = _rootNode;
+    _nodes.push_back(internalRoot);
 
     std::sort(keys.begin(), keys.end());
     ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
@@ -159,12 +170,6 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         bool s = ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
         if (!s)
             continue;
-
-        _rootNode = new SceneGraphNode;
-        _rootNode->setName(SceneGraphNode::RootNodeName);
-        SceneGraphNodeInternal* internalRoot = new SceneGraphNodeInternal;
-        internalRoot->node = _rootNode;
-        _nodes.push_back(internalRoot);
 
         std::vector<std::string> keys = moduleDictionary.keys();
         for (const std::string& key : keys) {
@@ -204,11 +209,13 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     FileSys.setCurrentDirectory(oldDirectory);
 
     for (SceneGraphNodeInternal* node : _nodes) {
-        if (node->node == rootNode())
+        if (node->node == _rootNode)
             continue;
         std::string parent = parents[node->node->name()];
         SceneGraphNode* parentNode = sceneGraphNode(parent);
-        if (parentNode)
+        if (parentNode == nullptr) {
+            LERROR("Could not find parent '" << parent << "' for '" << node->node->name() << "'");
+        }
 
         node->node->setParent(parentNode);
     }
@@ -224,7 +231,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 continue;
             }
             node->outgoingEdges.push_back(n);
-            n->incomingEdges.push_back(n);
+            n->incomingEdges.push_back(node);
         }
     }
 
@@ -234,6 +241,12 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             //clear();
             return false;
         }
+    }
+
+    bool s = topologicalSort();
+    if (!s) {
+        LERROR("Topological sort failed");
+        return false;
     }
 
     return true;
@@ -265,7 +278,8 @@ bool SceneGraph::topologicalSort() {
 
     std::unordered_map<SceneGraphNodeInternal*, size_t> inDegrees;
     for (SceneGraphNodeInternal* node : _nodes)
-        inDegrees[node] = node->incomingEdges.size();
+        inDegrees[node] = node->outgoingEdges.size();
+        //inDegrees[node] = node->incomingEdges.size();
     
     _topologicalSortedNodes.clear();
     _topologicalSortedNodes.reserve(_nodes.size());
@@ -273,14 +287,15 @@ bool SceneGraph::topologicalSort() {
         SceneGraphNodeInternal* node = zeroInDegreeNodes.top();
 
         _topologicalSortedNodes.push_back(node->node);
+        zeroInDegreeNodes.pop();
 
-        for (SceneGraphNodeInternal* n : node->outgoingEdges) {
+        //for (SceneGraphNodeInternal* n : node->outgoingEdges) {
+        for (SceneGraphNodeInternal* n : node->incomingEdges) {
             inDegrees[n] -= 1;
             if (inDegrees[n] == 0)
                 zeroInDegreeNodes.push(n);
         }
 
-        zeroInDegreeNodes.pop();
     }
     return true;    
 }
