@@ -104,9 +104,9 @@ namespace openspace{
 }
 
 void RenderableFov::allocateData(){ 
-	int points = 8;
+	int points = 10;
 	_stride[0] = points;
-	_isize[0] = points;
+	_isize[0]  = points;
 	_iarray1[0] = new int[_isize[0]];
 	for (int i = 0; i < points; i++){
 		for (int j = 0; j < 4; j++){
@@ -123,7 +123,7 @@ void RenderableFov::allocateData(){
 	_vtotal[0] = static_cast<int>(_vsize[0] / _stride[0]);
 
 	// allocate second vbo data 
-	int cornerPoints = 5;
+	int cornerPoints = 6;
 	_isize[1] = cornerPoints;
 	_iarray1[1] = new int[_isize[1]];
 	for (int i = 0; i < _isize[1]; i++){
@@ -213,14 +213,6 @@ void RenderableFov::insertPoint(std::vector<float>& arr, psc p, glm::vec4 c){
 	_nrInserted++;
 }
 
-psc RenderableFov::pscInterpolate(psc p0, psc p1, float t){
-	assert(t >= 0 && t <= 1);
-	float t2 = (1.f - t);
-	return PowerScaledCoordinate(t2*p0[0] + t*p1[0],
-								 t2*p0[1] + t*p1[1],	
-								 t2*p0[2] + t*p1[2], 
-								 t2*p0[3] + t*p1[3]);
-}
 glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
 	assert(t >= 0 && t <= 1);
 	float t2 = (1.f - t);
@@ -340,8 +332,6 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 			}
 		}
 	 }
-	// only if new points are inserted are we interested in rebuilding the 
-	// vbo. Note that this can be optimized but is left as is for now. 
 	if (_nrInserted == 0){
 		_rebuild = false;
 	}else{
@@ -383,20 +373,20 @@ void RenderableFov::updateData(){
 	}
 }
 void RenderableFov::computeColors(){
-	double t2 = openspace::ImageSequencer::ref().getNextCaptureTime();
+	double t2 = openspace::ImageSequencer2::ref().getNextCaptureTime();
 	double diff = (t2 - _time);
 	double t = 0.0;
 	if (diff <= 7.0) t = 1.f - diff / 7.0;
 
 	if (diff < 0) t = 0.0;
-
+	// i need to add an *.h file with colortables....
 	c_project = glm::vec4(0.0, 1.0, 0.00,1);
 	col_end   = glm::vec4(1.00, 0.29, 0.00, 1);
 	blue      = glm::vec4(0, 0.5, 0.7, 1);
-	col_gray  = glm::vec4(0.3, 0.3, 0.3, 1);
+	col_gray  = glm::vec4(0.5, 0.5, 0.5, 0.5);
 	col_start = glm::vec4(1.00, 0.89, 0.00, 1);
 	col_sq    = glm::vec4(1.00, 0.29, 0.00, 1);
-	/*
+
 	col_end.x = c_project.x*t + col_end.x*(1 - t);
 	col_end.y = c_project.y*t + col_end.y*(1 - t);
 	col_end.z = c_project.z*t + col_end.z*(1 - t);
@@ -408,7 +398,7 @@ void RenderableFov::computeColors(){
 	col_sq.x = c_project.x*t + col_sq.x*(1 - t);
 	col_sq.y = c_project.y*t + col_sq.y*(1 - t);
 	col_sq.z = c_project.z*t + col_sq.z*(1 - t);
-	*/
+
 	blue.w = 0.5;
 	c_project.w = 0.5;
 	col_end.w = 0.5;
@@ -420,10 +410,10 @@ void RenderableFov::render(const RenderData& data){
 	// fetch data
 	glm::mat4 transform(1);
 
-	glm::mat4 tmp = glm::mat4(1);
+	glm::mat4 spacecraftRot = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			tmp[i][j] = _stateMatrix[i][j];
+			spacecraftRot[i][j] = _stateMatrix[i][j];
 		}
 	}
 	
@@ -431,11 +421,10 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
-
 	
 	bool drawFOV = false;
 
-	if (Time::ref().deltaTime() > 10){
+	if (openspace::ImageSequencer2::ref().isReady()){
 		drawFOV = ImageSequencer2::ref().instumentActive(_instrumentID);
 	}
 
@@ -475,20 +464,19 @@ void RenderableFov::render(const RenderData& data){
 
 			double targetEpoch;
 			// for each FOV vector
-			for (int i = 0; i < bounds.size(); i++){
+			for (int i = 0; i <= bounds.size(); i++){
 				// compute surface intercept
+				int r = (i == bounds.size()) ? 0 : i;
 				openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 					_frame, _method, _aberrationCorrection,
-					_time, targetEpoch, bounds[i], ipoint, ivec, _interceptTag[i]);
+					_time, targetEpoch, bounds[r], ipoint, ivec, _interceptTag[r]);
 				// if not found, use the orthogonal projected point
-
-				if (!_interceptTag[i]) _projectionBounds[i] = orthogonalProjection(bounds[i]);
+				if (!_interceptTag[r]) _projectionBounds[r] = orthogonalProjection(bounds[r]);
 
 				// VBO1 : draw vectors representing outer points of FOV. 
-				if (_interceptTag[i]){
+				if (_interceptTag[r]){
 					_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 					_interceptVector[3] += 3;
-					//_interceptVector = pscInterpolate(_interceptVector, bsvec, t);
 					// INTERCEPTIONS
 					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 					indx += 4;
@@ -505,14 +493,14 @@ void RenderableFov::render(const RenderData& data){
 					indx += 4;
 					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0, 0, 1, 1)), size);
 					indx += 4;
-					memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[i].vec4()), size);
+					memcpy(&_varray1[indx], glm::value_ptr(_projectionBounds[r].vec4()), size);
 					indx += 4;
 					memcpy(&_varray1[indx], glm::value_ptr(blue), size);
 					indx += 4;
 				}
 				else{
-					glm::vec4 corner(bounds[i][0], bounds[i][1], bounds[i][2], data.position[3] + 2);
-					corner = tmp*corner;
+					glm::vec4 corner(bounds[r][0], bounds[r][1], bounds[r][2], data.position[3] + 2);
+					corner = spacecraftRot*corner;
 					// "INFINITE" FOV
 					memcpy(&_varray1[indx], glm::value_ptr(glm::vec4(0)), size);
 					indx += 4;
@@ -524,7 +512,8 @@ void RenderableFov::render(const RenderData& data){
 					indx += 4;
 				}
 			}
-			_interceptTag[4] = _interceptTag[0]; // 0 & 5 same point
+
+			_interceptTag[4] = _interceptTag[0]; 
 			fovProjection(_interceptTag, bounds);
 			updateData();
 		}
@@ -532,7 +521,7 @@ void RenderableFov::render(const RenderData& data){
 
 		glLineWidth(_lineWidth);
 		glBindVertexArray(_vaoID[0]);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, _vtotal[0]);
+		glDrawArrays(GL_LINES, 0, _vtotal[0]); 
 		glBindVertexArray(0);
 
 		glLineWidth(_lineWidth);
@@ -540,26 +529,14 @@ void RenderableFov::render(const RenderData& data){
 		glDrawArrays(GL_LINES, 0, _vtotal[0]);
 		glBindVertexArray(0);
 
-		//render points
-		glPointSize(2.f);
-		glBindVertexArray(_vaoID[0]);
-		glDrawArrays(GL_POINTS, 0, _vtotal[0]);
-		glBindVertexArray(0);
-
 		//second vbo
-		if (_withinFOV){
+		if (drawFOV){
 			glLineWidth(1.f);
 			glBindVertexArray(_vaoID[1]);
 			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
 			glBindVertexArray(0);
 		}
         glLineWidth(1.f);
-
-		/*glPointSize(5.f);
-		glBindVertexArray(_vaoID2);
-		glDrawArrays(GL_POINTS, 0, _vtotal2);
-		glBindVertexArray(0);
-		*/
 	}
 	_programObject->deactivate();
 }

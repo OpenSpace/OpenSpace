@@ -22,29 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/camerainstrument.h>
+#include <openspace/util/decoder.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-    const std::string _loggerCat = "CameraInstrument";
+const std::string _loggerCat = "Decoder";
 }
 
 namespace openspace {
-   
-CameraInstrument::CameraInstrument(const ghoul::Dictionary& dictionary) :_type("CAMERA")
+
+Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
 {
-	std::string value;
-	for (int k = 0; k < dictionary.size(); k++){
-		dictionary.getValue(std::to_string(k + 1), value);
-		_spiceIDs.push_back(value);
-	}
+	ghoul::TemplateFactory<Decoder>* factory
+		= FactoryManager::ref().factory<Decoder>();
+	Decoder* result = factory->create(type, dictionary);
+
+    if (result == nullptr) {
+        LERROR("Failed creating Payload object of type '" << type << "'");
+        return nullptr;
+    }
+    return result;
 }
 
-std::string CameraInstrument::getType(){
-	return _type;
+Decoder::Decoder()
+{
 }
-
-std::vector<std::string> CameraInstrument::getSpiceIDs(){
-	return _spiceIDs;
+    
+Decoder::Decoder(const ghoul::Dictionary& dictionary)
+{
 }
-
+    
+Decoder::~Decoder()
+{
+}
+    
 } // namespace openspace

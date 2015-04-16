@@ -48,9 +48,10 @@ public:
 	static void initialize();
 	static void deinitialize();
 
+	bool isReady();
+
 	//provides the sequencer with current time
 	void updateSequencer(double time);
-
 	void runSequenceParser(SequenceParser* parser);
 
 	//translates playbook ambiguous namesetting to spice calls, augments each observation with targets and 
@@ -68,11 +69,12 @@ public:
 	std::pair<double, std::vector<std::string>> getIncidentTargetList(int range = 2);
 
 	double getNextCaptureTime();
+	double getIntervalLength();
+	std::vector<std::pair<std::string, bool>> getActiveInstruments();
+	bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures, std::string projectee, std::string instrumentID);
+	bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures, std::string projectee);
 
-	//a fov class can check whether or not its active
 	bool instumentActive(std::string instrumentID);
-	//get all currently active instruments
-	std::vector<std::string> getActiveInstruments();
 
 	const Image* findLatestImageInSubset( ImageSubset& subset);
 private:
@@ -88,18 +90,19 @@ private:
 	//var
 	double _currentTime;
 	double _previousTime;
+	double _intervalLength;
+	double _nextCapture;
 
     std::string _defaultCaptureImage;
-	std::vector<std::string> _currentlyActiveInstruments;
+	std::vector<std::pair<std::string, bool>> _instrumentOnOff;
 
 	std::map<std::string, ImageSubset> _subsetMap;
 	std::vector<std::pair<double, std::string>> _targetTimes;
-	std::vector<std::pair<double, std::string>> _instrumentTimes;
-	//std::vector<std::string, TimeRange> _activeInstruments
-	std::map<std::string, std::vector<std::string>> _acronymDictionary;
+	std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
+	std::vector<double> _captureProgression;
+	std::map<std::string, Decoder*> _fileTranslation;
 
-	static bool hasData();
-
+	bool _hasData;
 };
 
 } // namespace openspace

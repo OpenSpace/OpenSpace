@@ -22,20 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CAMERAINSTRUMENT_H__
-#define __CAMERAINSTRUMENT_H__
+#ifndef __INSTRUMENTDECODER_H__
+#define __INSTRUMENTDECODER_H__
 
-#include <openspace/util/payload.h>
+#include <openspace/util/decoder.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     
-class CameraInstrument : public Payload {
+class InstrumentDecoder : public Decoder {
 public:
-    CameraInstrument(const ghoul::Dictionary& dictionary);
-	virtual std::string getType();
-	virtual std::vector<std::string> getSpiceIDs();
+	InstrumentDecoder(const ghoul::Dictionary& dictionary);
+	virtual std::string getDecoderType();
+	virtual std::vector<std::string> getTranslation();
 private:
 	std::string _type;
 	std::vector<std::string> _spiceIDs;
@@ -43,4 +43,4 @@ private:
     
 } // namespace openspace
 
-#endif // __CAMERAINSTRUMENT_H__
+#endif // __INSTRUMENTDECODER_H__

@@ -45,6 +45,7 @@ namespace openspace {
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2() :
+_hasData(false),
 _defaultCaptureImage(absPath("C:/Users/michal/openspace/openspace-data/scene/common/textures/placeholder_blank.png"))
 {}
 
@@ -62,10 +63,10 @@ void ImageSequencer2::deinitialize() {
 	delete _instance;
 	_instance = nullptr;
 }
-/*
-auto cmp = [](const Image &a, const Image &b)->bool{
-	return a.startTime < b.startTime;
-};*/
+
+bool ImageSequencer2::isReady(){
+	return _hasData;
+}
 
 bool ImageSequencer2::imageComparer(const Image &a, const Image &b){
 	return a.startTime < b.startTime;
@@ -77,7 +78,7 @@ std::vector<Image>::iterator ImageSequencer2::binary_find(std::vector<Image>::it
 	bool(*compareFunc)(const Image &a, const Image &b)){
 	// Finds the lower bound in at most log(last - first) + 1 comparisons
 	std::vector<Image>::iterator it = std::lower_bound(begin, end, val, compareFunc);
-	if (it != begin){
+	if (it != begin && it != end){
 		return it;
 	}
 	return end;
@@ -144,192 +145,119 @@ std::pair<double, std::vector<std::string>> ImageSequencer2::getIncidentTargetLi
 	return incidentTargets;
 }
 
-std::vector<std::string> ImageSequencer2::getActiveInstruments(){
-	return _currentlyActiveInstruments;
+double ImageSequencer2::getIntervalLength(){
+	double upcoming = getNextCaptureTime();
+	if (_nextCapture != upcoming){
+		_nextCapture = upcoming;
+		_intervalLength = upcoming - _currentTime;
+	}
+	return _intervalLength;
+}
+
+double ImageSequencer2::getNextCaptureTime(){
+	auto compareTime = [](const double &a, const double &b)->bool{
+		return a < b;
+	};
+	double nextCaptureTime = 0;
+	auto it = std::lower_bound(_captureProgression.begin(), _captureProgression.end(), _currentTime, compareTime);
+	if (it != _captureProgression.end())
+		nextCaptureTime = *it;
+
+	return nextCaptureTime;
+}
+
+std::vector<std::pair<std::string, bool>> ImageSequencer2::getActiveInstruments(){
+	for (int i = 0; i < _instrumentOnOff.size(); i++){
+		_instrumentOnOff[i].second = false;
+	}
+	for (auto key : _fileTranslation){
+		for (auto instrumentID : key.second->getTranslation()){
+				if (instumentActive(instrumentID)){
+					for (int i = 0; i < _instrumentOnOff.size(); i++){
+						if (instrumentID == _instrumentOnOff[i].first){
+							_instrumentOnOff[i].second = true;
+						}
+					}
+				}
+			}
+		}
+	return _instrumentOnOff;
 }
 bool ImageSequencer2::instumentActive(std::string instrumentID){
-	// make into template func
-	auto compareTime  = [](const std::pair<double, std::string> &a, 
-		                   const std::pair<double, std::string> &b)->bool{
-		return a.first < b.first;
-	};
-
-	std::pair<double, std::string> findEqualToThis;
-	findEqualToThis.first = _currentTime;
-	auto it = std::lower_bound(_instrumentTimes.begin(), _instrumentTimes.end(), findEqualToThis, compareTime);
-	
-	it = std::prev(it); 
-	if (it != _instrumentTimes.end()){
-		std::string key = it->second;
-		std::vector<std::string> instruments = _acronymDictionary[key];
-		for (auto i : instruments){
-			if (i == instrumentID){
-				_currentlyActiveInstruments = instruments;
-				return true;
+	for (auto i : _instrumentTimes){
+		//check if this instrument is in range
+		if (i.second.inRange(_currentTime)){
+			//if so, then get the corresponding spiceIDs
+			std::vector < std::string> spiceIDs = _fileTranslation[i.first]->getTranslation();
+			//check which specific subinstrument is firing
+			for (auto s : spiceIDs){
+				if (s == instrumentID){
+					return true;
+				}
 			}
 		}
 	}
 	return false;
 }
-
-double ImageSequencer2::getNextCaptureTime(){
-	// to do this we need getCurrentTarget to ALWAYS work!
-	return 0.0;
+bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures,  std::string projectee, std::string instrumentID){
+	if (!instumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
+	return (instrumentID == "NH_LORRI") ? getImagePaths(captures, projectee) : false;
 }
+
+bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures, 
+	                                std::string projectee){
+	if (_subsetMap[projectee]._range.inRange(_currentTime) ||
+		_subsetMap[projectee]._range.inRange(_previousTime)){
+		auto compareTime = [](const Image &a,
+			const Image &b)->bool{
+			return a.startTime < b.startTime;
+		};
+
+		auto begin = _subsetMap[projectee]._subset.begin();
+		auto end = _subsetMap[projectee]._subset.end();
+
+		std::vector<std::pair<double, std::string>> captureTimes;
+		Image findPrevious;
+		findPrevious.startTime = _previousTime;
+		Image findCurrent;
+		findCurrent.startTime = _currentTime;
+
+		auto curr = std::lower_bound(begin, end, findCurrent, compareTime);
+		auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
+
+		if (curr != begin && curr != end  && prev != begin && prev != end){
+			std::transform(prev, curr, std::back_inserter(captureTimes),
+				[](const Image& i) {
+				return std::make_pair(i.startTime, i.path);
+			});
+			std::reverse(captureTimes.begin(), captureTimes.end());
+			captures = captureTimes;
+			return true;
+		}
+	}
+	return false;
+}
+
 
 void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	parser->create();
+	_fileTranslation    = parser->getTranslation(); // should perhaps be named 'instrumentTranslation'
+	_subsetMap          = parser->getSubsetMap();
+	_instrumentTimes    = parser->getIstrumentTimes();
+	_targetTimes        = parser->getTargetTimes();
+	_captureProgression = parser->getCaptureProgression();
 
-	_subsetMap       = parser->getSubsetMap();
-	_instrumentTimes = parser->getIstrumentTimes();
-	//_targetTimes     = parser->getTargetTimes();
-	_acronymDictionary = parser->getAcronymDictionary();
-}
-
-/*
-bool ImageSequencer2::parsePlaybookFile(const std::string& fileName, 
-	                                          std::string spacecraft, 
-											  std::map<std::string, std::vector<std::string>> acronymDictionary,
-											  std::vector<std::string> potentialTargets) {
-	_acronymDictionary = acronymDictionary;
-	if (size_t position = fileName.find_last_of(".") + 1){
-		if (position != std::string::npos){
-			std::string extension = ghoul::filesystem::File(fileName).fileExtension();
-
-			if (extension == "txt"){// Hong Kang. pre-parsed playbook
-				LINFO("Using Preparsed Playbook V9H");
-				std::ifstream file(fileName);
-				if (!file.good()) LERROR("Failed to open txt file '" << fileName << "'");
-
-				std::string timestr = "";
-				double shutter = 0.01;
-				double startTime, stopTime;
-
-				// for augmentation we only need the keys in acronymDictionary as a vector
-				std::vector<std::string> payload;
-				for (auto p : acronymDictionary)
-					for (auto t : p.second)
-						payload.push_back(t);
-				payload.erase(std::unique(payload.begin(), payload.end()), payload.end());
-				
-				std::string previousInstrument;
-				std::string previousTarget;
-
-				double longExposureStart = 0;
-				double longExposureStop = 0;
-				std::string longExposureKeyword;
-
-				do{
-					std::getline(file, timestr);
-					//For each instrument in acronym dictionary 
-					for (auto it : _acronymDictionary){
-						// check if first col in line has keyword of interest
-						std::string keyword = timestr.substr(0, timestr.find_first_of(" "));
-						auto pos = keyword.find(it.first);
-						if (pos != std::string::npos){ 
-							// grab the time
-							std::string met = timestr.substr(24, 9);
-							//convert to ephemeris time
-							startTime = getETfromMet(met);
-							
-							//std::string checkIfMVIC = "MVIC";
-							//int count = 0;
-							//bool foundStopTime = false;
-							//if (findExactMatch("MVIC", keyword)){
-							//	std::string abortLine;
-							//	int len = file.tellg();
-							//	while (!file.eof() && !findExactMatch("ABORT", abortLine)){
-							//		
-							//		std::getline(file, abortLine);
-							//		std::string abortCommand = abortLine.substr(0, abortLine.find_first_of(" "));
-							//		count++;
-							//		if (findExactMatch("ABORT", abortCommand)){
-							//			met = abortLine.substr(24, 9);
-							//			stopTime = getETfromMet(met);
-							//			foundStopTime = true;
-							//		}
-							//	}
-							//	file.seekg(len, std::ios_base::beg);
-							//}else{
-							//	//assume regular shutter speed;
-							//	stopTime = startTime + shutter;
-							//}
-							//
-							//if (foundStopTime){
-							//	longExposureStart = startTime;
-							//	longExposureStop = stopTime;
-							//	longExposureKeyword = keyword;
-							//}
-
-							// retrieve corresponding SPICE call
-							std::vector<std::string> instrument = it.second;
-
-							// create image
-							Image image;
-							//stoptime- quick setting for now
-							stopTime = startTime + 0.01;
-							createImage(image, startTime, stopTime, instrument, "", _defaultCaptureImage);
-							// add targets 
-							augmentWithSpice(image, spacecraft, payload, potentialTargets);
-
-							//SKA ERSATTAS MED NAGOT ANNAT - "instrument times"
-							if (previousInstrument != it.first){
-								previousInstrument = it.first;
-								std::pair<double, std::string> v_time = std::make_pair(image.startTime, keyword);
-								_instrumentTimes.push_back(v_time);
-							}
-
-							if (previousTarget != image.target ){
-								previousTarget = image.target;
-								std::pair<double, std::string> v_target = std::make_pair(image.startTime, image.target);
-								_targetTimes.push_back(v_target);
-							}
-							
-							//_subsetMap[image.target]._subset[keyword].push_back(image);
-							_subsetMap[image.target]._subset.push_back(image);
-							_subsetMap[image.target]._range.setRange(image.startTime);
-						}
-					}
-				} while (!file.eof());
-			}
+	//copy payload from _fileTranslation 
+	for (auto t : _fileTranslation){
+		std::vector<std::string> spiceIDs = t.second->getTranslation();
+		for (auto id : spiceIDs){
+			_instrumentOnOff.push_back(std::make_pair(id, false));
 		}
 	}
+	_instrumentOnOff.erase(std::unique(_instrumentOnOff.begin(),
+									   _instrumentOnOff.end()),
+									   _instrumentOnOff.end());
+	_hasData = true;
 
-	//PRINT FUNCTION
-	std::string st1 = "2015-07-14T10:00:00.00";
-	std::string st2 = "2015-07-14T12:00:00.00";
-	double start, stop;
-
-	SpiceManager::ref().getETfromDate(st1, start);
-	SpiceManager::ref().getETfromDate(st2, stop);
-
-	std::ofstream myfile;
-	myfile.open("augmentedPef.txt");
-
-	//print all
-	for (auto target : _subsetMap){
-		std::string min, max;
-		SpiceManager::ref().getDateFromET(target.second._range._min, min);
-		SpiceManager::ref().getDateFromET(target.second._range._max, max);
-		
-		myfile << std::endl;
-		for (auto image : target.second._subset){
-			std::string time;
-			SpiceManager::ref().getDateFromET(image.startTime, time);
-			myfile << std::fixed 
-				   << std::setw(10) << time
-				   << std::setw(10) << (int)getMetFromET(image.startTime) 
-				   << std::setw(10) << image.target << std::setw(10);
-			for (auto instrument : image.activeInstruments){
-				myfile << " " << instrument;
-			}
-			myfile << std::endl;
-		}
-	}
-
-	myfile.close();
-	
-	return true;
 }
-*/
 }  // namespace openspace

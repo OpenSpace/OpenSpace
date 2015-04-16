@@ -140,7 +140,6 @@ void createImage(std::vector<ImageParams>& vec, double t1, std::string instrumen
 	image.projected = false;
 	
 	vec.push_back(image);
-	// sort
 }
 
 double ImageSequencer::getNextCaptureTime(){

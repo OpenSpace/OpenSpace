@@ -33,7 +33,8 @@
 
 #include <openspace/util/sequenceparser.h>
 #include <openspace/util/hongkangparser.h>
-#include <openspace/util/payload.h>
+#include <openspace/util/labelparser.h>
+#include <openspace/util/decoder.h>
 
 
 #include <openspace/properties/stringproperty.h>
@@ -77,7 +78,7 @@ protected:
 private:
 	void imageProjectGPU();
 
-	std::map<std::string, Payload*> _fileTranslation;
+	std::map<std::string, Decoder*> _fileTranslation;
 
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
@@ -134,6 +135,8 @@ private:
 	GLuint _fboID;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
+
+	bool _once; //fml
 };
 }  // namespace openspace
 

@@ -22,28 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/scannerinstrument.h>
+#include <openspace/util/targetdecoder.h>
 
 namespace {
-    const std::string _loggerCat = "ScannerInstrument";
+    const std::string _loggerCat = "TargetDecoder";
 }
 
 namespace openspace {
-   
-ScannerInstrument::ScannerInstrument(const ghoul::Dictionary& dictionary) : _type("SCANNER")
+
+TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) :_type("TARGET")
 {
-	std::string value;
-	for (int k = 0; k < dictionary.size(); k++){
-		dictionary.getValue(std::to_string(k + 1), value);
-		_spiceIDs.push_back(value);
+	_names.resize(dictionary.size());
+	for (int i = 0; i < _names.size(); ++i) {
+		std::string readMe;
+		dictionary.getValue(std::to_string(i + 1), readMe);
+		_names[i] = readMe;
 	}
 }
-std::string ScannerInstrument::getType(){
+
+std::string TargetDecoder::getDecoderType(){
 	return _type;
 }
 
-std::vector<std::string> ScannerInstrument::getSpiceIDs(){
-	return _spiceIDs;
+std::vector<std::string> TargetDecoder::getTranslation(){
+	return _names;
 }
 
 } // namespace openspace

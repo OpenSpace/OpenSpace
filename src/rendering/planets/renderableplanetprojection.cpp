@@ -61,7 +61,7 @@ namespace {
 	const std::string keySequenceDir          = "Projection.Sequence";
     const std::string keySequenceType         = "Projection.SequenceType";
     const std::string keyPotentialTargets     = "PotentialTargets";
-	const std::string keyTranslation          = "PlaybookTranslation";
+	const std::string keyTranslation          = "DataInputTranslation";
 
 
 
@@ -93,6 +93,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _textureProj(nullptr)
     , _geometry(nullptr)
 	, _sequenceID(-1)
+	, _once(false)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -166,6 +167,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_projectionTexturePath);
 	_projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
 
+	SequenceParser* parser;
+
    // std::string sequenceSource;
 	bool _foundSequence = dictionary.getValue(keySequenceDir, _sequenceSource);
 	if (_foundSequence) {
@@ -173,49 +176,38 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 		_foundSequence = dictionary.getValue(keySequenceType, _sequenceType);
 		//Important: client must define translation-list in mod file IFF playbook
-		if (dictionary.hasKey(keyTranslation) && _sequenceType == sequenceTypePlaybook){
+		if (dictionary.hasKey(keyTranslation)){
 			ghoul::Dictionary translationDictionary;
 			//get translation dictionary
 			dictionary.getValue(keyTranslation, translationDictionary);
 
-			//get the different instrument types
-			const std::vector<std::string>& types = translationDictionary.keys();
-			//for each instrument
-			for (int i = 0; i < types.size(); i++){
-				std::string classtype = types[i];
-				std::string currentType = keyTranslation + "." + classtype;
-				//create dictionary containing all {playbookKeys , spice IDs}
-				ghoul::Dictionary typeDictionary;
-				dictionary.getValue(keyTranslation + "." + classtype, typeDictionary);
-				//for each playbook call -> create a Payload object
-				const std::vector<std::string>& keys = typeDictionary.keys();
-				for (int j = 0; j < keys.size(); j++){
-					std::string playbookKey = keys[j];
-					std::string currentKey = currentType + "." + playbookKey;
-					//using dictionary as a way to extract the spiceIDs we need
-					ghoul::Dictionary spiceDictionary;
-					dictionary.getValue(currentKey, spiceDictionary);
-					//create payload 
-					Payload *payload = Payload::createFromDictionary(spiceDictionary, classtype);
-					//insert payload to map - this will be used in the parser to determine 
-					//behavioral characteristics of each instrument
-					_fileTranslation[playbookKey] = payload;
-				}
+
+			if (_sequenceType == sequenceTypePlaybook){
+				// eeh to many inputs, bit ugly. beautify later.
+				parser = new HongKangParser(_sequenceSource,
+											"NEW HORIZONS",
+											translationDictionary,
+											_potentialTargets);
 			}
+			/*else if (_sequenceType == sequenceTypeImage){
+				parser = new LabelParser(_sequenceSource, translationDictionary);
+			}*/
 		}
 		else{
 			LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
 		}
-		// Have to delay playbook load in order to augment with targets once current AND spacecraft kernels loaded
-		for (auto p : _fileTranslation){
-			std::vector<std::string> k = _fileTranslation[p.first]->getSpiceIDs();
-			std::cout << "TYPE : " << _fileTranslation[p.first]->getType() << std::endl;
-			std::cout << "FILE-CALL : " << p.first << std::endl;
-			std::cout << "SPICE ID'S :" << std::endl;
-			for (auto r : k){
-				std::cout << r << std::endl;
-			}
-			std::cout << std::endl;
+
+		/*if (_sequenceType == sequenceTypeImage) {
+			LWARNING("LOADING STUFF FOR JUPITER!");
+			//openspace::ImageSequencer::ref().loadSequence(_sequenceSource, _sequenceID);
+			//	SequenceParser *parser = new LabelParser(_sequenceSource,
+			//"NEW HORIZONS",
+			//_fileTranslation,
+			//_potentialTargets); 
+			//openspace::ImageSequencer2::ref().runSequenceParser(parser);
+		}*/
+		/*else*/ if (_sequenceType == sequenceTypePlaybook) {
+			openspace::ImageSequencer2::ref().runSequenceParser(parser);
 		}
     }
 }
@@ -421,18 +413,17 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_up = data.camera.lookUpVector();
 
 #ifdef GPU_PROJ
-/*	if (_capture){
+	if (_capture){
 		for (auto imgSubset : _imageTimes){
 			attitudeParameters(imgSubset.first); // projector viewmatrix
 			_projectionTexturePath = imgSubset.second; // path to current images
 			imageProjectGPU(); //fbopass
 		}
 		_capture = false;
-	}*/
+	}
 #endif
 	attitudeParameters(_time);
 	_projectionTexturePath = _defaultProjImage;
-	_imageTimes.clear();
 
 	psc sun_pos;
 	double  lt;
@@ -466,61 +457,13 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
 	_time = data.time;
 	_capture = false;
-#ifndef ORIGINAL_SEQUENCER
-	static bool once;
-	if (Time::ref().deltaTime() > 0 && !once){
-		if (_foundSequence) {
-			if (_sequenceType == sequenceTypeImage) {
-				openspace::ImageSequencer::ref().loadSequence(_sequenceSource, _sequenceID);
-			}
-			else if (_sequenceType == sequenceTypePlaybook) {
-				SequenceParser* parser = new HongKangParser(_sequenceSource,
-														    "NEW HORIZONS",
-															_fileTranslation,
-														    _potentialTargets);
-				openspace::ImageSequencer2::ref().runSequenceParser(parser);
-			}
-		}
-		once = true;
-	}
-	if (Time::ref().deltaTime() > 10){
+
+	
+	if (openspace::ImageSequencer2::ref().isReady()){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
+		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
-#else
-	//happens only once
-	//ImageSequencer::ref().augumentSequencesWithTargets(_sequenceID);
-	
-	openspace::ImageSequencer::ref().findActiveInstrument(_time, _sequenceID);
-	openspace::ImageSequencer::ref().nextCaptureTime(_time, _sequenceID);
-	
-	bool _withinFOV;
-	if (_sequenceID != -1){
-		std::string _fovTarget = ""; 
-		for (int i = 0; i < _potentialTargets.size(); i++){
-			bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
-				_instrumentID,
-				_potentialTargets[i],
-				_projectorID,
-				"ELLIPSOID",
-				_aberration,
-				_time,
-				_withinFOV);
-			if (success && _withinFOV){
-				_fovTarget = _potentialTargets[i];
-				break;
-			}
-		}
-		
-		//if (_projecteeID == _fovTarget){
-		if (_time >= openspace::ImageSequencer::ref().getNextCaptureTime()){
-				openspace::ImageSequencer::ref().getImagePath(_imageTimes, _sequenceID, _projecteeID, _withinFOV);
-				_capture = true;
-			}
-		//}
-		
-	}
-	
-#endif
+
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){

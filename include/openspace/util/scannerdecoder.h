@@ -22,38 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/payload.h>
-#include <openspace/util/factorymanager.h>
+#ifndef __SCANNERDECODER_H__
+#define __SCANNERDECODER_H__
 
-namespace {
-const std::string _loggerCat = "Payload";
-}
+#include <openspace/util/decoder.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
-
-Payload* Payload::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
-{
-	ghoul::TemplateFactory<Payload>* factory
-		= FactoryManager::ref().factory<Payload>();
-	Payload* result = factory->create(type, dictionary);
-
-    if (result == nullptr) {
-        LERROR("Failed creating Payload object of type '" << type << "'");
-        return nullptr;
-    }
-    return result;
-}
-
-Payload::Payload()
-{
-}
     
-Payload::Payload(const ghoul::Dictionary& dictionary)
-{
-}
-    
-Payload::~Payload()
-{
-}
+class ScannerDecoder : public Decoder {
+public:
+    ScannerDecoder(const ghoul::Dictionary& dictionary);
+	virtual std::string getDecoderType();
+	virtual std::vector<std::string> getSpiceIDs();
+private:
+	std::string _type;
+	std::vector<std::string> _spiceIDs;
+};
     
 } // namespace openspace
+
+#endif // __SCANNERDECODER_H__

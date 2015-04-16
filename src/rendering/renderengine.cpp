@@ -548,7 +548,7 @@ namespace openspace {
                         );
 
                     }
-					std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
+					/*std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
 
 					std::string active ="";
 					for (int i = 0; i < instrVec.size(); i++){
@@ -561,7 +561,7 @@ namespace openspace {
                         glm::vec4(0.3, 0.6, 1, 1),
                         "Active Instrument : %s",
                         active.c_str()
-                    );
+                    );*/
 
                 }
             }
@@ -595,6 +595,7 @@ namespace openspace {
                     int i = 0;
 
 					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+					/*
 					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 					PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
@@ -603,32 +604,28 @@ namespace openspace {
 					PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
+					*/
+					if (openspace::ImageSequencer2::ref().isReady()){
+						double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
+						double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+						std::string progress = "|";
+						int g = ((t)* 30) + 1;
+						for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
+						for (int i = 0; i < 31 - g; i++) progress.append(" ");
 
+						std::string str = "";
+						openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str);
 
-					double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
-					double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
-					std::string progress = "|";
-					int g = ((t)* 20) + 1;
-					for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
-					for (int i = 0; i < 21 - g; i++) progress.append(" ");
+						progress.append("|");
+						if (remaining > 0){
+							glm::vec4 g1(0, t, 0, 1);
+							glm::vec4 g2(1 - t);
+							PrintColorText(i++, "Next projection in:", 10, g1 + g2);
+							PrintColorText(i++, "%.0f sec %s %.1f %%", 10, g1 + g2, remaining, progress.c_str(), t * 100);
+						}
+						glm::vec4 w(1);
+						PrintColorText(i++, "Ucoming capture : %s", 10, w, str.c_str());
 
-					std::string str = "";
-					openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
-
-					progress.append("|");
-					if (remaining > 0){
-						glm::vec4 g1(0, t, 0, 1);
-						glm::vec4 g2(1 - t);
-						PrintColorText(i++, "Next projection in     | %.0f seconds", 10, g1 + g2, remaining);
-						PrintColorText(i++, "%s %.1f %%", 10, g1 + g2, progress.c_str(), t * 100);
-					}
-					glm::vec4 w(1);
-					glm::vec4 b(0.3, 0.6, 1, 1);
-					glm::vec4 b2(0.5, 1, 0.5, 1);
-					PrintColorText(i++, "Ucoming capture : %s", 10, w, str.c_str());
-
-
-					if (Time::ref().deltaTime() > 10){
 						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
 						std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
@@ -648,7 +645,9 @@ namespace openspace {
 						hh.append(std::to_string(hour));
 						mm.append(std::to_string(minute));
 						ss.append(std::to_string(second));
-							
+
+
+						glm::vec4 b2(1.00, 0.51, 0.00, 1);
 						PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
 
 						std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
@@ -659,23 +658,43 @@ namespace openspace {
 								double t = (double)(p + 1) / (double)(isize+1);
 								t = (p > isize / 2) ? 1-t : t;
 								t += 0.3;
-								color = (p == isize / 2) ? glm::vec4(0, 1, 0, 1) : glm::vec4(t, t, t, 1);
+								color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
 								PrintColorText(i, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
 							for (int k = 0; k < 10; k++){ space += " "; }
 						}
 						i++;
+					
+						std::vector<std::pair<std::string, bool>> instrVec = ImageSequencer2::ref().getActiveInstruments();
+
+						glm::vec4 active(0.58, 1, 0.00, 1);
 
 
+						glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
+						glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+
+
+						double reduce = 0.01;
+
+						PrintColorText(i++, "Active Instruments : ", 10, active);
+						for (int k = 0; k < instrVec.size(); k++){
+
+							if (instrVec[k].second == false){
+								PrintColorText(i, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), instrVec[k].first.c_str());
+							}
+							else{
+								PrintColorText(i, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								if (instrVec[k].first == "NH_LORRI"){
+									PrintColorText(i, " + ", 10, firing);
+								}
+								PrintColorText(i, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								PrintColorText(i++, "    %5s", 10, active, instrVec[k].first.c_str());
+
+							}
+						}
+						
 					}
-
-					std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
-
-					std::string active = "";
-					for (int i = 0; i < instrVec.size(); i++){
-						active.append(instrVec[i]);
-						active.append("\n");
-					}
-					PrintColorText(i++, "Active Instrument : %5s", 10, b, active.c_str());
+					
 #undef PrintText
 				}
 

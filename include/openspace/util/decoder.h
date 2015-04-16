@@ -22,26 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PAYLOAD_H__
-#define __PAYLOAD_H__
+#ifndef __DECODER_H__
+#define __DECODER_H__
 
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace {
 
-class Payload {
+class Decoder {
 public:
-    static Payload* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type);
+	static Decoder* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type);
 
-    Payload(const ghoul::Dictionary& dictionary);
-    virtual ~Payload();
-	virtual std::string getType() = 0;
-	virtual std::vector<std::string> getSpiceIDs() = 0;
+	Decoder(const ghoul::Dictionary& dictionary);
+	virtual ~Decoder();
+	virtual std::string getDecoderType() = 0;
+	virtual std::vector<std::string> getTranslation() = 0;
 protected:
-    Payload();
+	Decoder();
 };
 
 }  // namespace openspace
 
-#endif // __PAYLOAD_H__
+#endif // __DECODER_H__

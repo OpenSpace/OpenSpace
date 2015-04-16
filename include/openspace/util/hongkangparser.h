@@ -28,27 +28,26 @@
 #include <openspace/util/ImageSequencer2.h>
 #include <openspace/util/sequenceparser.h>
 
-
 #include <map>
 #include <string>
 #include <vector>
 
 namespace openspace {
-
 	class HongKangParser : public SequenceParser{
 	public:
 		HongKangParser();
 		HongKangParser(const std::string& fileName,
 			           std::string spacecraft,
-					   std::map<std::string, Payload*> acronymDictionary,
+					   ghoul::Dictionary dictionary,
 			           std::vector<std::string> potentialTargets);
 		virtual void create();
 		virtual std::map<std::string, ImageSubset> getSubsetMap();
-		virtual std::vector<std::pair<double, std::string>> getIstrumentTimes();
+		virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
 		virtual std::vector<std::pair<double, std::string>> getTargetTimes();
 
 		// temporary need to figure this out
-		std::map<std::string, Payload*> getAcronymDictionary(){ return _fileTranslation; };
+		virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+		virtual std::vector<double> getCaptureProgression();
 
 	private:
 		double getMetFromET(double et);
@@ -67,18 +66,19 @@ namespace openspace {
 							  std::vector<std::string> payload, 
 							  std::vector<std::string> potentialTargets);
 
-
-		std::map<std::string, ImageSubset> _subsetMap;
-		std::vector<std::pair<double, std::string>> _instrumentTimes;
-		std::vector<std::pair<double, std::string>> _targetTimes;
-
 		std::string _defaultCaptureImage;
 		double _metRef = 299180517;
 
 		std::string _fileName;
 		std::string _spacecraft;
-		std::map<std::string, Payload*> _fileTranslation;
+		std::map<std::string, Decoder*> _fileTranslation;
 		std::vector<std::string> _potentialTargets;
+
+		//returnable
+		std::map<std::string, ImageSubset> _subsetMap;
+		std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
+		std::vector<std::pair<double, std::string>> _targetTimes;
+		std::vector<double> _captureProgression;
 	};
 
 }

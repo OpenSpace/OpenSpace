@@ -22,25 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCANNERINSTRUMENT_H__
-#define __SCANNERINSTRUMENT_H__
+#ifndef __TARGETDECODER_H__
+#define __TARGETDECODER_H__
 
-#include <openspace/util/payload.h>
+#include <openspace/util/decoder.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     
-class ScannerInstrument : public Payload {
+class TargetDecoder : public Decoder {
 public:
-    ScannerInstrument(const ghoul::Dictionary& dictionary);
-	virtual std::string getType();
-	virtual std::vector<std::string> getSpiceIDs();
+	TargetDecoder(const ghoul::Dictionary& dictionary);
+	virtual std::string getDecoderType();
+	virtual std::vector<std::string> getTranslation();
 private:
 	std::string _type;
-	std::vector<std::string> _spiceIDs;
+	std::vector<std::string> _names;
 };
     
 } // namespace openspace
 
-#endif // __SCANNERINSTRUMENT_H__
+#endif // __TARGETDECODER_H__
