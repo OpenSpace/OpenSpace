@@ -291,6 +291,17 @@ void SceneGraphNode::setParent(SceneGraphNode* parent)
     _parent = parent;
 }
 
+bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
+	std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
+
+	if (it != _children.end()){
+		_children.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
 const psc& SceneGraphNode::position() const
 {
     return _ephemeris->position();
