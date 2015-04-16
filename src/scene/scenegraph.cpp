@@ -32,7 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 
-#include <fstream>
 #include <stack>
 
 namespace {
@@ -267,13 +266,6 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         LERROR("Topological sort failed");
         return false;
     }
-
-    std::ofstream f("D:/graph.txt");
-
-    for (SceneGraphNode* node : _topologicalSortedNodes) {
-        f << node->name() << std::endl;
-    }
-    
 
     return true;
 }
