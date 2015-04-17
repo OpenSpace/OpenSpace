@@ -30,7 +30,7 @@
 #include <openspace/scene/ephemeris.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scene/Scene.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
