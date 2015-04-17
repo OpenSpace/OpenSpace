@@ -32,7 +32,7 @@
 #include <openspace/abuffer/abufferdynamic.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/scene/Scene.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
