@@ -68,6 +68,8 @@ public:
     void addNode(SceneGraphNode* child);
 
     void setParent(SceneGraphNode* parent);
+	bool abandonChild(SceneGraphNode* child);
+
     const psc& position() const;
     psc worldPosition() const;
 

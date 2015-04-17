@@ -67,6 +67,7 @@ private:
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
 	properties::IntProperty _rotation;
+	float _alpha;
 
 	glm::dmat3 _stateMatrix;
 

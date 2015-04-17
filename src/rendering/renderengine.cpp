@@ -966,10 +966,16 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
     SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
     SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
+	//SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
+	//SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
 
-    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
-        LERROR("WTF");
-        return;
+    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
+		newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr 
+		//||	dawnNode == nullptr 
+		//||   vestaNode == nullptr
+		) {
+	    LERROR("Necessary nodes does not exist");
+		return;
     }
 
     if (origin == "Pluto") {
@@ -1004,6 +1010,26 @@ void RenderEngine::changeViewPoint(std::string origin) {
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
+		//ghoul::Dictionary dawnDictionary =
+        //{
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("DAWN") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
+        //};
+        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+		//
+		//ghoul::Dictionary vestaDictionary =
+		//{
+		//	  { std::string("Type"), std::string("Spice") },
+		//	  { std::string("Body"), std::string("VESTA") },
+		//	  { std::string("Reference"), std::string("GALACTIC") },
+		//	  { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+		//	  { std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+
         return;
     }
     if (origin == "Sun") {
@@ -1037,7 +1063,28 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-        return;
+        
+		//ghoul::Dictionary dawnDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("DAWN") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("SUN") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+		//
+		//ghoul::Dictionary vestaDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("VESTA") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("SUN") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+		
+		return;
     }
     if (origin == "Jupiter") {
         ghoul::Dictionary plutoDictionary =
@@ -1070,8 +1117,83 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
+		//ghoul::Dictionary dawnDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("DAWN") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+		//
+		//ghoul::Dictionary vestaDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("VESTA") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+
         return;
     }
+	//if (origin == "Vesta") {
+	//	ghoul::Dictionary plutoDictionary =
+	//	{
+	//		{ std::string("Type"), std::string("Spice") },
+	//		{ std::string("Body"), std::string("PLUTO BARYCENTER") },
+	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Observer"), std::string("VESTA") },
+	//		{ std::string("Kernels"), ghoul::Dictionary() }
+	//	};
+	//	ghoul::Dictionary solarDictionary =
+	//	{
+	//		{ std::string("Type"), std::string("Spice") },
+	//		{ std::string("Body"), std::string("SUN") },
+	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Observer"), std::string("VESTA") },
+	//		{ std::string("Kernels"), ghoul::Dictionary() }
+	//	};
+	//
+	//	ghoul::Dictionary jupiterDictionary =
+	//	{
+	//		{ std::string("Type"), std::string("Spice") },
+	//		{ std::string("Body"), std::string("JUPITER BARYCENTER") },
+	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Observer"), std::string("VESTA") },
+	//		{ std::string("Kernels"), ghoul::Dictionary() }
+	//	};
+	//
+	//	solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+	//	plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+	//	jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
+	//
+	//	ghoul::Dictionary newHorizonsDictionary =
+	//	{
+	//		{ std::string("Type"), std::string("Spice") },
+	//		{ std::string("Body"), std::string("NEW HORIZONS") },
+	//		{ std::string("Reference"), std::string("GALACTIC") },
+	//		{ std::string("Observer"), std::string("VESTA") },
+	//		{ std::string("Kernels"), ghoul::Dictionary() }
+	//	};
+	//	newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+	//
+	//	ghoul::Dictionary dawnDictionary =
+	//	{
+	//		{ std::string("Type"), std::string("Spice") },
+	//		{ std::string("Body"), std::string("DAWN") },
+	//		{ std::string("Reference"), std::string("GALACTIC") },
+	//		{ std::string("Observer"), std::string("VESTA") },
+	//		{ std::string("Kernels"), ghoul::Dictionary() }
+	//	};
+	//	dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+	//	vestaNode->setEphemeris(new StaticEphemeris);
+	//
+	//	return;
+	//}
 
     ghoul_assert(false, "This function is being misused");
 }

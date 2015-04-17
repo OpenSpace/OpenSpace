@@ -37,6 +37,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <ghoul/filesystem/filesystem.h>
 #include "ghoul/io/texture/texturereader.h"
 #include <ghoul/misc/dictionary.h>
