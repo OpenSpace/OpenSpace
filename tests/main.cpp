@@ -52,7 +52,9 @@ namespace {
 }
 
 int main(int argc, char** argv) {
-    openspace::OpenSpaceEngine::create(argc, argv, std::vector<std::string>(), std::string());
+    std::vector<std::string> args;
+    std::string glVersion;
+    openspace::OpenSpaceEngine::create(argc, argv, args, glVersion);
 
     
     //LogManager::initialize(LogManager::LogLevel::Debug);

@@ -71,4 +71,4 @@ private:
 
 } // namespace openspace
 
-#endif __SCENEGRAPH_H__
+#endif // __SCENEGRAPH_H__
