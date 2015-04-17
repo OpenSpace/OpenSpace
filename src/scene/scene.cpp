@@ -257,12 +257,12 @@ void Scene::update(const UpdateData& data) {
 		OsEng.renderEngine()->abuffer()->invalidateABuffer();
 #endif
 	}
-    for (SceneGraphNode* node : _graph.linearList())
+    for (SceneGraphNode* node : _graph.nodes())
         node->update(data);
 }
 
 void Scene::evaluate(Camera* camera) {
-    for (SceneGraphNode* node : _graph.linearList())
+    for (SceneGraphNode* node : _graph.nodes())
         node->evaluate(camera);
 	//_root->evaluate(camera);
 }
@@ -285,7 +285,7 @@ void Scene::render(const RenderData& data) {
 			program->setIgnoreSubroutineUniformLocationError(true);
 	}
 
-    for (SceneGraphNode* node : _graph.linearList())
+    for (SceneGraphNode* node : _graph.nodes())
         node->render(data);
 	//if (_root)
 	//	_root->render(data);
@@ -377,14 +377,14 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
             && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus))
         {
             auto focusIterator = std::find_if(
-                _graph.linearList().begin(),
-                _graph.linearList().end(),
+                _graph.nodes().begin(),
+                _graph.nodes().end(),
                 [focus](SceneGraphNode* node) {
                     return node->name() == focus;
                 }
             );
 
-            if (focusIterator != _graph.linearList().end()) {
+            if (focusIterator != _graph.nodes().end()) {
                 _focus = focus;
                 LDEBUG("Setting camera focus to '" << _focus << "'");
             }
@@ -394,7 +394,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
     // Initialize all nodes
-    for (SceneGraphNode* node : _graph.linearList()) {
+    for (SceneGraphNode* node : _graph.nodes()) {
 		bool success = node->initialize();
         if (success)
             LDEBUG(node->name() << " initialized successfully!");
@@ -404,11 +404,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
-	for (SceneGraphNode* node : _graph.linearList()) {
+	for (SceneGraphNode* node : _graph.nodes()) {
 		node->update({ Time::ref().currentTime() });
     }
 
-    for (auto it = _graph.linearList().rbegin(); it != _graph.linearList().rend(); ++it)
+    for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
         (*it)->calculateBoundingSphere();
 
 
@@ -419,8 +419,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	Camera* c = OsEng.ref().renderEngine()->camera();
     //auto focusIterator = _allNodes.find(_focus);
     auto focusIterator = std::find_if(
-                _graph.linearList().begin(),
-                _graph.linearList().end(),
+                _graph.nodes().begin(),
+                _graph.nodes().end(),
                 [&](SceneGraphNode* node) {
         return node->name() == _focus;
     }
@@ -431,7 +431,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	glm::vec3 cameraDirection = glm::vec3(0, 0, -1);
 
     //if (_focus->)
-    if (focusIterator != _graph.linearList().end()) {
+    if (focusIterator != _graph.nodes().end()) {
         LDEBUG("Camera focus is '" << _focus << "'");
         SceneGraphNode* focusNode = *focusIterator;
         //Camera* c = OsEng.interactionHandler().getCamera();
@@ -502,7 +502,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	}
 
 
-	for (SceneGraphNode* node : _graph.linearList()) {
+	for (SceneGraphNode* node : _graph.nodes()) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
             OsEng.gui()->_property.registerProperty(p);
@@ -688,7 +688,7 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
 }
 
 std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() {
-	return _graph.linearList();
+	return _graph.nodes();
 }
 
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
@@ -701,7 +701,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         }
 
         using properties::Property;
-        for (SceneGraphNode* node : _graph.linearList()) {
+        for (SceneGraphNode* node : _graph.nodes()) {
             std::vector<Property*> properties = node->propertiesRecursive();
             if (!properties.empty()) {
                 file << node->name() << std::endl;

@@ -261,7 +261,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         }
     }
 
-    bool s = topologicalSort();
+    bool s = sortTopologially();
     if (!s) {
         LERROR("Topological sort failed");
         return false;
@@ -283,7 +283,7 @@ bool SceneGraph::nodeIsDependentOnRoot(SceneGraphNodeInternal* node) {
     }
 }
 
-bool SceneGraph::topologicalSort() {
+bool SceneGraph::sortTopologially() {
     if (_nodes.empty())
         return true;
 
@@ -342,7 +342,7 @@ SceneGraph::SceneGraphNodeInternal* SceneGraph::nodeByName(const std::string& na
         return *it;
 }
 
-const std::vector<SceneGraphNode*>& SceneGraph::linearList() {
+const std::vector<SceneGraphNode*>& SceneGraph::nodes() {
     return _topologicalSortedNodes;
 }
 

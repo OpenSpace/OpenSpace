@@ -45,8 +45,7 @@ public:
     bool addSceneGraphNode(SceneGraphNode* node);
     bool removeSceneGraphNode(SceneGraphNode* node); 
 
-    // topological sort
-    const std::vector<SceneGraphNode*>& linearList();
+    const std::vector<SceneGraphNode*>& nodes();
 
     SceneGraphNode* rootNode() const;
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
@@ -61,19 +60,13 @@ private:
     };
 
     bool nodeIsDependentOnRoot(SceneGraphNodeInternal* node);
-    bool topologicalSort();
+    bool sortTopologially();
 
     SceneGraphNodeInternal* nodeByName(const std::string& name);
 
     SceneGraphNode* _rootNode;
     std::vector<SceneGraphNodeInternal*> _nodes;
     std::vector<SceneGraphNode*> _topologicalSortedNodes;
-
-    // child -> parent
-    //std::unordered_multimap<std::string, std::string> _forwardEdges;
-    // Edges are in reverse order of dependency
-    // parent -> child
-    //std::unordered_multimap<std::string, std::string> _backwardEdges;
 };
 
 } // namespace openspace
