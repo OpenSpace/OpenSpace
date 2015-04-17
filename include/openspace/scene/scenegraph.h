@@ -21,33 +21,54 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#ifndef __SCENEGRAPH_H__
+#define __SCENEGRAPH_H__
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#include <ghoul/misc/dictionary.h>
 
-#include <openspace/scene/scenegraphnode.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+#include <unordered_map>
+#include <vector>
 
 namespace openspace {
-namespace interaction {
 
-class InteractionHandler;
+class SceneGraphNode;
 
-class Controller {
+class SceneGraph {
 public:
-	Controller() :
-		_handler(nullptr)
-	{}
+    SceneGraph();
 
-	void setHandler(InteractionHandler* handler);
+    void clear();
+    bool loadFromFile(const std::string& sceneDescription);
 
-protected:
-	InteractionHandler* _handler;
+    // Returns if addition was successful
+    bool addSceneGraphNode(SceneGraphNode* node);
+    bool removeSceneGraphNode(SceneGraphNode* node); 
+
+    const std::vector<SceneGraphNode*>& nodes();
+
+    SceneGraphNode* rootNode() const;
+    SceneGraphNode* sceneGraphNode(const std::string& name) const;
+
+private:
+    struct SceneGraphNodeInternal {
+        SceneGraphNode* node;
+        // From nodes that are dependent on this one
+        std::vector<SceneGraphNodeInternal*> incomingEdges;
+        // To nodes that this node depends on
+        std::vector<SceneGraphNodeInternal*> outgoingEdges;
+    };
+
+    bool nodeIsDependentOnRoot(SceneGraphNodeInternal* node);
+    bool sortTopologially();
+
+    SceneGraphNodeInternal* nodeByName(const std::string& name);
+
+    SceneGraphNode* _rootNode;
+    std::vector<SceneGraphNodeInternal*> _nodes;
+    std::vector<SceneGraphNode*> _topologicalSortedNodes;
 };
 
-} // namespace interaction
 } // namespace openspace
 
-#endif // __CONTROLLER_H__
+#endif __SCENEGRAPH_H__

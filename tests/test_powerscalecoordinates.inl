@@ -22,32 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#include "gtest/gtest.h"
 
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/Scene.h>
 
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
-namespace openspace {
-namespace interaction {
-
-class InteractionHandler;
-
-class Controller {
-public:
-	Controller() :
-		_handler(nullptr)
-	{}
-
-	void setHandler(InteractionHandler* handler);
-
+class PowerscaleCoordinatesTest : public testing::Test {
 protected:
-	InteractionHandler* _handler;
+	PowerscaleCoordinatesTest() {
+    }
+
+	~PowerscaleCoordinatesTest() {
+    }
+
+    void reset() {
+    }
+
+    openspace::Scene* scenegraph;
 };
 
-} // namespace interaction
-} // namespace openspace
 
-#endif // __CONTROLLER_H__
+TEST_F(PowerscaleCoordinatesTest, psc) {
+
+    openspace::psc reference(2.f, 1.f, 1.1f, 1.f);
+    
+    openspace::psc first(1.f, 0.f, 1.f, 0.f);
+    openspace::psc second(1.9f, 1.f, 1.f, 1.f);
+    
+    EXPECT_EQ(reference, first + second);
+    EXPECT_TRUE(reference == (first + second));
+    
+    openspace::psc third = first;
+    first[0] = 0.0;
+    
+    EXPECT_TRUE(third != first);
+    
+    
+}
+
+TEST_F(PowerscaleCoordinatesTest, pss) {
+    
+    openspace::pss first(1.f, 1.f);
+    openspace::pss second(1.f, -1.f);
+    EXPECT_EQ(openspace::pss(1.01f, 1.f), first + second);
+    EXPECT_EQ(openspace::pss(1.01f, 1.f), second + first);
+    /*
+    EXPECT_TRUE(first < (first + second));
+    bool retu =(second < (first + second));
+    
+    std::cout << "retu: " << retu << std::endl;
+    EXPECT_TRUE(retu);
+    
+    EXPECT_FALSE(first > (first + second));
+    EXPECT_FALSE(second > (first + second));
+    
+    */
+}
+
+

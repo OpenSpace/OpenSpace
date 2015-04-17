@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <ghoul/misc/assert.h>
 #include "imgui.h"
@@ -41,7 +41,7 @@ namespace gui {
 void GuiOriginComponent::render() {
     const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
 
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
     std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
     auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
     ghoul_assert(it != nodes.end(), "Focus node not found");
