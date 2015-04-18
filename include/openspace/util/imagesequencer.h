@@ -56,7 +56,7 @@ public:
 	std::string& getActiveInstrument(){ return _activeInstrument; };
 	std::string findActiveInstrument(double time);
 
-
+	std::string ImageSequencer::getLatestImage();
 
 	static ImageSequencer* _sequencer;
 
@@ -74,6 +74,7 @@ private:
 
     std::string _defaultCaptureImage;
 	std::string _activeInstrument;
+	std::string _latest;
 };
 
 } // namespace openspace

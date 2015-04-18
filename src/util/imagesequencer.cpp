@@ -139,6 +139,10 @@ std::string ImageSequencer::findActiveInstrument(double time){
 	return _activeInstrument;
 }
 
+std::string ImageSequencer::getLatestImage(){
+	return _latest;
+}
+
 bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool closedInterval){
 	auto binary_find = [](std::vector<ImageParams>::iterator begin,
 						std::vector<ImageParams>::iterator end,
@@ -168,6 +172,8 @@ bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool 
 	it->projected = true;
 	path = it->path;
 	currentTime = it->startTime;
+
+	_latest = path;
 	
 	return true;
 }
