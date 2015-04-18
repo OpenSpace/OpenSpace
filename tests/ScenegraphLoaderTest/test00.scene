@@ -1,0 +1,8 @@
+-- Loading an empty common and module dictionary 
+return {
+    ScenePath = ".",
+    CommonFolder = "",
+    Modules = {
+    }
+}
+

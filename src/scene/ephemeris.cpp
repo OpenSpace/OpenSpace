@@ -22,32 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#include <openspace/scene/ephemeris.h>
+#include <openspace/util/constants.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/scene/scenegraphnode.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+namespace {
+const std::string _loggerCat = "Ephemeris";
+}
 
 namespace openspace {
-namespace interaction {
 
-class InteractionHandler;
+Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    if (!dictionary.hasValue<std::string>(constants::ephemeris::keyType)) {
+        LERROR("Ephemeris did not have key '" << constants::ephemeris::keyType << "'");
+        return nullptr;
+    }
 
-class Controller {
-public:
-	Controller() :
-		_handler(nullptr)
-	{}
+    std::string ephemerisType;
+    dictionary.getValue(constants::ephemeris::keyType, ephemerisType);
+    ghoul::TemplateFactory<Ephemeris>* factory
+          = FactoryManager::ref().factory<Ephemeris>();
+    Ephemeris* result = factory->create(ephemerisType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed creating Ephemeris object of type '" << ephemerisType << "'");
+        return nullptr;
+    }
 
-	void setHandler(InteractionHandler* handler);
+    return result;
+}
 
-protected:
-	InteractionHandler* _handler;
-};
+Ephemeris::Ephemeris()
+{
+}
+    
+Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary)
+{
+}
+    
+Ephemeris::~Ephemeris()
+{
+}
+    
+bool Ephemeris::initialize() {
+    return true;
+}
+    
+void Ephemeris::update(const UpdateData& data) {}
 
-} // namespace interaction
 } // namespace openspace
-
-#endif // __CONTROLLER_H__

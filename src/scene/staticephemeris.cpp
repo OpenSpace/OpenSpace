@@ -22,32 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#include <openspace/scene/staticephemeris.h>
 
-#include <openspace/scene/scenegraphnode.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+#include <openspace/util/constants.h>
 
 namespace openspace {
-namespace interaction {
 
-class InteractionHandler;
+using namespace constants::staticephemeris;
+    
+StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
+    : _position(0.f, 0.f, 0.f, 0.f)
+{
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
+    if (hasPosition) {
+        glm::vec4 tmp;
+        dictionary.getValue(keyPosition, tmp);
+        _position = tmp;
+    }
+}
 
-class Controller {
-public:
-	Controller() :
-		_handler(nullptr)
-	{}
+StaticEphemeris::~StaticEphemeris() {}
 
-	void setHandler(InteractionHandler* handler);
+const psc& StaticEphemeris::position() const {
+    return _position;
+}
 
-protected:
-	InteractionHandler* _handler;
-};
+void StaticEphemeris::update(const UpdateData&) {
 
-} // namespace interaction
+}
+
 } // namespace openspace
-
-#endif // __CONTROLLER_H__

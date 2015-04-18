@@ -22,32 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#ifndef __SPICEEPHEMERIS_H__
+#define __SPICEEPHEMERIS_H__
 
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/ephemeris.h>
 
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
-namespace interaction {
-
-class InteractionHandler;
-
-class Controller {
+    
+class SpiceEphemeris : public Ephemeris {
 public:
-	Controller() :
-		_handler(nullptr)
-	{}
+    SpiceEphemeris(const ghoul::Dictionary& dictionary);
+    const psc& position() const;
+	void update(const UpdateData& data) override;
 
-	void setHandler(InteractionHandler* handler);
-
-protected:
-	InteractionHandler* _handler;
+private:
+    std::string _targetName;
+    std::string _originName;
+    psc _position;
+	bool _kernelsLoadedSuccessfully;
 };
-
-} // namespace interaction
+    
 } // namespace openspace
 
-#endif // __CONTROLLER_H__
+#endif // __SPICEEPHEMERIS_H__
