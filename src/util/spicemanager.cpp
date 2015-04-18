@@ -582,6 +582,8 @@ bool SpiceManager::getEstimatedPosition(const double time, const std::string tar
 // do NOT remove this method. 
 bool SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const{
 	glm::dmat3 transform;
+	if (from == to)
+		return true;
 	// get rotation matrix from frame A - frame B
 	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
 	bool success = !failed_c();
