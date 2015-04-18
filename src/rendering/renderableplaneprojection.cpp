@@ -225,7 +225,7 @@ void RenderablePlaneProjection::updatePlane(double time, std::string newPath) {
 	}
 
 	if (!_moving) {
-		SceneGraphNode* thisNode = OsEng.renderEngine()->sceneGraph()->sceneGraphNode(_target.body);
+		SceneGraphNode* thisNode = OsEng.renderEngine()->sceneGraph()->sceneGraphNode(_name);
 		bool orphan = thisNode->parent()->abandonChild(thisNode);
 		if (orphan) {
 			SceneGraphNode* newParent = OsEng.renderEngine()->sceneGraph()->sceneGraphNode(_target.node);
