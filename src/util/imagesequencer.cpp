@@ -79,7 +79,7 @@ ImageSequencer::ImageSequencer()
 	, _currentTime(-1.0)
 	, _sequenceIDs(0)
 	, _targetsAdded(false)
-    , _defaultCaptureImage(absPath("C:/Users/michal/openspace/openspace-data/scene/common/textures/placeholder_blank.png"))
+    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {}
 
 
