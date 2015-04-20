@@ -1059,7 +1059,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Type"), std::string("Spice") },
             { std::string("Body"), std::string("NEW HORIZONS") },
             { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+            { std::string("Observer"), std::string("SUN") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));

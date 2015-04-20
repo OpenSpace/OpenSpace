@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scenegraph/dynamicephemeris.h>
+#include <openspace/scene/dynamicephemeris.h>
 
 #include <openspace/util/constants.h>
 

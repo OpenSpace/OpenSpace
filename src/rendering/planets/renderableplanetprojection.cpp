@@ -105,7 +105,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(keyFrame, _target);
+	dictionary.getValue(keyBody, _target);
+	dictionary.getValue(keyFrame, _frame);
 
 
     bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
@@ -340,7 +341,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target, _mainFrame, time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, time, _stateMatrix);
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
 
 	_transform = glm::mat4(1);

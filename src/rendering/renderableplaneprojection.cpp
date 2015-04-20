@@ -26,11 +26,11 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/imagesequencer.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scenegraph/staticephemeris.h>
-#include <openspace/scenegraph/dynamicephemeris.h>
+#include <openspace/scene/staticephemeris.h>
+#include <openspace/scene/dynamicephemeris.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -225,10 +225,10 @@ void RenderablePlaneProjection::updatePlane(double time, std::string newPath) {
 	}
 
 	if (!_moving) {
-		SceneGraphNode* thisNode = OsEng.renderEngine()->sceneGraph()->sceneGraphNode(_name);
+		SceneGraphNode* thisNode = OsEng.renderEngine()->scene()->sceneGraphNode(_name);
 		bool orphan = thisNode->parent()->abandonChild(thisNode);
 		if (orphan) {
-			SceneGraphNode* newParent = OsEng.renderEngine()->sceneGraph()->sceneGraphNode(_target.node);
+			SceneGraphNode* newParent = OsEng.renderEngine()->scene()->sceneGraphNode(_target.node);
 			if (newParent != nullptr)
 				newParent->addNode(thisNode);
 		}

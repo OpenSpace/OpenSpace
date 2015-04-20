@@ -107,8 +107,10 @@ private:
 	double lightTime;
 
 	std::string _target;
+	std::string _frame;
 	std::string _defaultProjImage;
 	std::string _next;
+
 	bool _capture;
 
 	// FBO stuff

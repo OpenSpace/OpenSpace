@@ -252,7 +252,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data) {
-    const psc thisPosition = data.position + _ephemeris->position();
+    const psc thisPosition = data.position + worldPosition();
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
