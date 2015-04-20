@@ -46,7 +46,7 @@ ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2() :
 _hasData(false),
-_defaultCaptureImage(absPath("C:/Users/michal/openspace/openspace-data/scene/common/textures/placeholder_blank.png"))
+_defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {}
 
 
