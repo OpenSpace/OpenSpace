@@ -673,6 +673,8 @@ private:
 	std::map<int, std::vector< std::pair<double, double> > > _spkIntervals;
 	std::map<int, std::set<double> > _ckCoverageTimes;
 	std::map<int, std::set<double> > _spkCoverageTimes;
+	
+	const static bool _showErrors = true;
 
     /// The last assigned kernel-id, used to determine the next free kernel id
 	KernelIdentifier _lastAssignedKernel;

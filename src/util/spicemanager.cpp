@@ -586,12 +586,7 @@ bool SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const
 		return true;
 	// get rotation matrix from frame A - frame B
 	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
-	bool success = !failed_c();
-	if (!success){
-		reset_c();
-		return false;
-	}
-
+	
     bool hasError = checkForError("Error converting from frame '" + from +
         "' to frame '" + to + "' at time " + std::to_string(ephemerisTime));
     if (hasError)
@@ -628,12 +623,6 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		     &visible);
     isVisible = (visible == SPICETRUE);
     
-	bool success = !failed_c();
-	if (!success){
-		reset_c();
-		return false;
-	}
-
     bool hasError = checkForError("Checking if target '" + target +
         "' is in view of instrument '" + instrument + "' failed");
 
@@ -663,12 +652,6 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		&targetEpoch,
 		&visible);
     isVisible = (visible == SPICETRUE);
-
-	bool success = !failed_c();
-	if (!success){
-		reset_c();
-		return false;
-	}
 
     bool hasError = checkForError("Checking if target '" + target +
                 "' is in view of instrument '" + instrument + "' failed");
@@ -724,12 +707,6 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 			 &found);
 
     isVisible = (found == SPICETRUE);
-
-	bool success = !failed_c();
-	if (!success){
-		reset_c();
-		return false;
-	}
 
 	bool hasError = checkForError("Error retrieving surface intercept on target '" + target + "'" +
 								  "viewed from observer '" + observer + "' in " +
@@ -830,14 +807,19 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 												 double ephemerisTime,
 												 glm::dmat3& positionMatrix) const 
 {
-	bool success, estimated = false;
+	bool success = false, estimated = false;
 	pxform_c(fromFrame.c_str(), toFrame.c_str(),
 			ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
 
 	success = !(failed_c());
-	if (!success) {
+	if (!success  && !_showErrors) {
 		reset_c();
 		estimated = getEstimatedTransformMatrix(ephemerisTime, fromFrame, toFrame, positionMatrix);		
+	}
+	else {
+		bool hasError = checkForError("Error retrieving position transform matrix from "
+			"frame '" + fromFrame + "' to frame '" + toFrame +
+			"' at time '" + std::to_string(ephemerisTime));
 	}
 
     positionMatrix = glm::transpose(positionMatrix);
@@ -955,12 +937,6 @@ bool SpiceManager::getFieldOfView(int instrument,
 		(double(*)[3])boundsArr // the bounds
 		);
 
-	bool success = !failed_c();
-	if (!success){
-		reset_c();
-		return false;
-	}
-
 	bool hasError = checkForError("Error getting Field-of-View parameters for "
 		"instrument '" + std::to_string(instrument) + "'");
 	if (hasError)
@@ -982,7 +958,7 @@ bool SpiceManager::getFieldOfView(int instrument,
 bool SpiceManager::checkForError(std::string errorMessage) {
 
 	int failed = failed_c();
-    if (failed) {
+	if (failed  && _showErrors) {
         static char msg[1024];
 		if (!errorMessage.empty()) {
 			getmsg_c("LONG", 1024, msg);
@@ -992,6 +968,11 @@ bool SpiceManager::checkForError(std::string errorMessage) {
         reset_c();
         return true;
     }
+	else if (failed) {
+		reset_c();
+		return false;
+	}
+	else
 	return false;
 }
 
