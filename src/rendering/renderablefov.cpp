@@ -526,7 +526,9 @@ void RenderableFov::render(const RenderData& data){
 				}
 			}
 			_interceptTag[4] = _interceptTag[0]; // 0 & 5 same point
-			fovProjection(_interceptTag, bounds);
+			//because other instruments arent implemented as projectable instruments yet
+			if (_instrumentID != "NH_LORRI") 
+				fovProjection(_interceptTag, bounds);
 			updateData();
 		}
 		_oldTime = _time;

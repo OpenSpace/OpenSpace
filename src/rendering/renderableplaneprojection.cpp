@@ -71,14 +71,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 		_textureFile = new ghoul::filesystem::File(_texturePath);
 	}
 
-	//_target.body = "JUPITER";
-	//_target.frame = "IAU_JUPITER";
-	//_target.node = "JupiterProjection";
-
-	_target.body = "IO";
-	_target.frame = "IAU_IO";
-	_target.node = "Io";
-
 	loadTexture();
 }
 
@@ -107,6 +99,7 @@ bool RenderablePlaneProjection::initialize() {
 		return false;
 	_shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
+	setTarget("JUPITER");
 	loadTexture();
 	return isReady();
 }
@@ -198,6 +191,13 @@ void RenderablePlaneProjection::updatePlane(double time, std::string newPath) {
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
 
+	int iTime = static_cast<int>(time);
+	if (iTime % 2 && !_moving)
+		setTarget("JUPITER");
+	else if (!_moving)
+		setTarget("IO");
+
+
 	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrument, shape, frame, boresight, bounds);
 	if (!found) {
 		LERROR("Could not locate instrument");
@@ -226,12 +226,9 @@ void RenderablePlaneProjection::updatePlane(double time, std::string newPath) {
 
 	if (!_moving) {
 		SceneGraphNode* thisNode = OsEng.renderEngine()->scene()->sceneGraphNode(_name);
-		bool orphan = thisNode->parent()->abandonChild(thisNode);
-		if (orphan) {
-			SceneGraphNode* newParent = OsEng.renderEngine()->scene()->sceneGraphNode(_target.node);
-			if (newParent != nullptr)
-				newParent->addNode(thisNode);
-		}
+		SceneGraphNode* newParent = OsEng.renderEngine()->scene()->sceneGraphNode(_target.node);
+		if (thisNode != nullptr && newParent != nullptr)
+			thisNode->setParent(newParent);
 	}
 	
 	const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
@@ -259,9 +256,28 @@ void RenderablePlaneProjection::updatePlane(double time, std::string newPath) {
 }
 
 void RenderablePlaneProjection::setTarget(std::string body) {
-	_target.body = body;
-	_target.frame = "IAU_" + body;
-	_target.node = "Io"; // TODO: search for a node containing the body string @AA
+
+	std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
+	Renderable* possibleTarget;
+	bool hasBody, found = false;
+	std::string targetBody;
+
+	for (auto node : nodes)
+	{
+		possibleTarget = node->renderable();
+		if (possibleTarget != nullptr) {
+			hasBody = possibleTarget->hasBody();
+			if (hasBody && possibleTarget->getBody(targetBody) && (targetBody == body)) {
+				_target.node = node->name(); // get name from propertyOwner
+				found = true;
+				break;
+			}
+		}
+	}
+	if (found) {
+		_target.body = body;
+		_target.frame = "IAU_" + body;
+	}
 }
 
 } // namespace openspace
