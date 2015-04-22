@@ -74,7 +74,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 	: _enabled("enabled", "Is Enabled", true),
 	_hasTimeInterval(false),
 	_startTime(""),
-	_endTime("")
+	_endTime(""),
+	_targetBody("")
 {
     setName("renderable");
 #ifndef NDEBUG
@@ -152,6 +153,10 @@ bool Renderable::hasTimeInterval() {
 	return _hasTimeInterval;
 }
 
+bool Renderable::hasBody() {
+	return _hasBody;
+}
+
 bool Renderable::getInterval(double& start, double& end) {
 	if (_startTime != "" && _endTime != "") {
 		bool successStart = openspace::SpiceManager::ref().getETfromDate(_startTime, start);
@@ -160,6 +165,20 @@ bool Renderable::getInterval(double& start, double& end) {
 	}
 	else
 		return false;
+}
+
+bool Renderable::getBody(std::string& body) {
+	if (_hasBody) {
+		body = _targetBody;
+		return true;
+	}
+	else
+		return false;
+}
+
+void Renderable::setBody(std::string& body) {
+	_targetBody = body;
+	_hasBody = true;
 }
 
 bool Renderable::isReady() const {

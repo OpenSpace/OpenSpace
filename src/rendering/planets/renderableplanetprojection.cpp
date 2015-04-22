@@ -105,9 +105,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
-	dictionary.getValue(keyBody, _target);
 	dictionary.getValue(keyFrame, _frame);
-
+	dictionary.getValue(keyBody, _target);
+	if (_target != "")
+		setBody(_target);
 
     bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
     bool b2 = dictionary.getValue(keyProjObserver, _projectorID);

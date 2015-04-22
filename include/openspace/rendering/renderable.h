@@ -69,8 +69,13 @@ public:
     virtual void update(const UpdateData& data);
 
 	bool isVisible() const;
+	
 	bool hasTimeInterval();
 	bool getInterval(double& start, double& end);
+	
+	bool hasBody();
+	bool getBody(std::string& body);
+	void setBody(std::string& body);
 
 protected:
     std::string findPath(const std::string& path);
@@ -83,6 +88,8 @@ private:
     std::string _relativePath;
 	std::string _startTime;
 	std::string _endTime;
+	std::string _targetBody;
+	bool _hasBody;
 	bool _hasTimeInterval;
 };
 

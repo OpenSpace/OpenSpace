@@ -84,9 +84,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	}
 
 	dictionary.getValue(keyFrame, _frame);
-
 	dictionary.getValue(keyBody, _target);
-	//assert(b1 == true);
+	if (_target != "")
+		setBody(_target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
