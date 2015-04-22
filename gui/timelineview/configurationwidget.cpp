@@ -28,16 +28,25 @@
 
 ConfigurationWidget::ConfigurationWidget(QWidget* parent)
     : QWidget(parent)
-    , _ipAddress(new QLineEdit)
+    , _ipAddress(new QLineEdit("localhost"))
+    , _port(new QLineEdit("20500"))
     , _connect(new QPushButton("Connect"))
     , _playbook(new QLineEdit)
     , _load(new QPushButton("Load"))
 {
     QGridLayout* layout = new QGridLayout;
     layout->addWidget(_ipAddress, 0, 0);
-    layout->addWidget(_connect, 0, 1);
-    layout->addWidget(_playbook, 1, 0);
-    layout->addWidget(_load, 1, 1);
+    layout->addWidget(_port, 0, 1);
+    layout->addWidget(_connect, 0, 2);
+    layout->addWidget(_playbook, 1, 0, 1, 2);
+    layout->addWidget(_load, 1, 2);
 
     setLayout(layout);
+
+    QObject::connect(_connect, SIGNAL(clicked()), this, SLOT(onConnectButton()));
+
+}
+
+void ConfigurationWidget::onConnectButton() {
+    emit connect(_ipAddress->text(), _port->text());
 }

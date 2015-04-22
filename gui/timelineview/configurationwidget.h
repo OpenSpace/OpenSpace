@@ -34,8 +34,15 @@ Q_OBJECT
 public:
 	ConfigurationWidget(QWidget* parent);
 
+signals:
+    void connect(QString host, QString port);
+
+private slots:
+    void onConnectButton();
+
 private:
     QLineEdit* _ipAddress;
+    QLineEdit* _port;
     QPushButton* _connect;
 
     QLineEdit* _playbook;

@@ -33,6 +33,9 @@
 #include <QPushButton>
 #include <QTextEdit>
 
+#include <array>
+#include <cstdint>
+
 MainWindow::MainWindow()
     : QWidget(nullptr)
     , _configurationWidget(nullptr)
@@ -55,70 +58,74 @@ MainWindow::MainWindow()
     layout->addWidget(_timelineWidget, 0, 1, 3, 1);
 
 
+    QObject::connect(
+        _configurationWidget, SIGNAL(connect(QString, QString)),
+        this, SLOT(onConnect(QString, QString))
+    );
 
+    QObject::connect(
+        _timeControlWidget, SIGNAL(scriptActivity(QString)),
+        this, SLOT(sendScript(QString))
+    );
 
-
-	//_ipAddress->setMinimumWidth(200);
-	//_ipAddress->setText("127.0.0.1");
-	//layout->addWidget(_ipAddress, 0, 0);
-
-	//QPushButton* connectButton = new QPushButton("Connect");
-	//connect(connectButton, SIGNAL(clicked()), this, SLOT(onConnectButton()));
-	//connectButton->show();
-	//layout->addWidget(connectButton, 0, 1);
-
-	//_command->setMinimumWidth(200);
-	//layout->addWidget(_command, 1, 0);
-
-	//QPushButton* sendButton = new QPushButton("Send");
-	//sendButton->setDefault(true);
-	//connect(sendButton, SIGNAL(clicked()), this, SLOT(sendCommandButton()));
-	//layout->addWidget(sendButton, 1, 1);
-
-	//layout->addWidget(_logWindow, 2, 0, 1, 2);
 
 	setLayout(layout);
 }
 
 MainWindow::~MainWindow() {
-	//delete _command;
-	//delete _socket;
+	delete _socket;
 }
+
+void MainWindow::onConnect(QString host, QString port) {
+    delete _socket;
+
+    _socket = new QTcpSocket(this);
+    connect(_socket, SIGNAL(readyRead()), SLOT(readTcpData()));
+    _socket->connectToHost(host, port.toUInt());
+}
+
 
 void MainWindow::readTcpData() {
- //   QByteArray data = _socket->readAll();
+    static const uint8_t MessageTypeStatus = 0;
 
-	//if (_logWindow->toPlainText().isEmpty())
-	//	_logWindow->setText(data.data());
-	//else
-	//	_logWindow->setText(_logWindow->toPlainText() + "\n" + data.data());
+    QByteArray data = _socket->readAll();
+
+    if (QString(data) == "Connected to SGCT!\r\n")
+        return;
+    if (QString(data) == "OK\r\n")
+        return;
+
+    uint8_t messageType = data[0];
+
+    if (messageType == MessageTypeStatus)
+        handleStatusMessage(data.mid(1));
+        handleStatusMessage(data.right(data.length() - 1));
 }
 
-void MainWindow::onConnectButton() {
-	//delete _socket;
-	//
-	//_socket = new QTcpSocket(this);
- //   connect( _socket, SIGNAL(readyRead()), SLOT(readTcpData()) );
- //   _socket->connectToHost(_ipAddress->text(), 20500);
+void MainWindow::handleStatusMessage(QByteArray data) {
+    const char* buffer = data.data();
 
+    union {
+        double value;
+        std::array<char, 8> buffer;
+    } et;
+    std::memmove(et.buffer.data(), buffer, sizeof(double));
+
+    std::vector<char> timeString(24);
+    std::memmove(timeString.data(), buffer + sizeof(double), 24);
+
+    union {
+        double value;
+        std::array<char, 8> buffer;
+    } delta;
+    std::memmove(delta.buffer.data(), buffer + sizeof(double) + 24, sizeof(double));
+
+    _timeControlWidget->update(
+        QString::fromStdString(std::string(timeString.begin(), timeString.end())),
+        QString::number(delta.value)
+    );
 }
 
-void MainWindow::sendCommandButton() {
-	//if (!_socket) {
-	//	if (_logWindow->toPlainText().isEmpty())
-	//		_logWindow->setText("No connection found");
-	//	else
-	//		_logWindow->setText(_logWindow->toPlainText() + "\n" + "No connection found");
-	//	return;
-	//}
-
-	//QString command = _command->text();
-
-	//if (_logWindow->toPlainText().isEmpty())
-	//	_logWindow->setText(command);
-	//else
-	//	_logWindow->setText(_logWindow->toPlainText() + "\n" + command);
-
-	//
-	//_socket->write(("0" + command + "\r\n").toLatin1());
+void MainWindow::sendScript(QString script) {
+    _socket->write(("0" + script + "\r\n").toLatin1());
 }

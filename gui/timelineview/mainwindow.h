@@ -39,10 +39,16 @@ public:
 	MainWindow();
 	~MainWindow();
 
+public slots:
+    void sendScript(QString script);
+
 private slots:
-	void onConnectButton();
-	void sendCommandButton();
+    void onConnect(QString host, QString port);
+
+	//void onConnectButton();
+	//void sendCommandButton();
 	void readTcpData();
+    void handleStatusMessage(QByteArray data);
 
 private:
     ConfigurationWidget* _configurationWidget;

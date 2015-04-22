@@ -37,6 +37,18 @@ Q_OBJECT
 public:
 	TimeControlWidget(QWidget* parent);
 
+    void update(QString currentTime, QString currentDelta);
+
+signals:
+    void scriptActivity(QString script);
+
+private slots:
+    void onValueChange();
+    void onRewindButton();
+    void onPauseButton();
+    void onPlayButton();
+    void onForwardButton();
+
 private:
     QLabel* _currentTime;
     QComboBox* _setTime;
@@ -46,6 +58,8 @@ private:
     QPushButton* _pause;
     QPushButton* _play;
     QPushButton* _forward;
+
+    bool _stateNoNotification = false;
 };
 
 #endif // __TIMECONTROLWIDGET_H__
