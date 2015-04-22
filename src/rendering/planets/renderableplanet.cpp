@@ -63,6 +63,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
 	, _rotation("rotation", "Rotation", 0, 0, 360)
+	, _hasNightTexture(false)
 	, _alpha(1.f)
 {
 	std::string name;
@@ -97,15 +98,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _colorTexturePath = path + "/" + texturePath;
 
 	std::string nightTexturePath = "";
-	success = dictionary.getValue("Textures.Night", nightTexturePath);
-	if (success){
+	dictionary.getValue("Textures.Night", nightTexturePath);
+	
+	if (nightTexturePath != ""){
+		_hasNightTexture = true;
 		_nightTexturePath = absPath(nightTexturePath);
 		_nightTexturePath = path + "/" + nightTexturePath;
-	}
-	else
-	{
-		_nightTexturePath = absPath(texturePath);
-		_nightTexturePath = path + "/" + texturePath;
 	}
 
 	addPropertySubOwner(_geometry);
@@ -128,8 +126,10 @@ RenderablePlanet::~RenderablePlanet() {
 }
 
 bool RenderablePlanet::initialize() {
-    if (_programObject == nullptr)
-        OsEng.ref().configurationManager()->getValue("pscShader", _programObject);
+    if (_programObject == nullptr && _hasNightTexture)
+		OsEng.ref().configurationManager()->getValue("nightTextureProgram", _programObject);
+	else if (_programObject == nullptr)
+		OsEng.ref().configurationManager()->getValue("pscShader", _programObject);
 
     loadTexture();
     _geometry->initialize(this);
@@ -204,11 +204,12 @@ void RenderablePlanet::render(const RenderData& data)
 	_programObject->setUniform("texture1", dayUnit);
 
 	// Bind possible night texture
-	ghoul::opengl::TextureUnit nightUnit;
-	nightUnit.activate();
-	_nightTexture->bind();
-	_programObject->setUniform("nightTex", nightUnit);
-
+	if (_hasNightTexture) {
+		ghoul::opengl::TextureUnit nightUnit;
+		nightUnit.activate();
+		_nightTexture->bind();
+		_programObject->setUniform("nightTex", nightUnit);
+	}
     // render
     _geometry->render();
 
@@ -225,17 +226,7 @@ void RenderablePlanet::update(const UpdateData& data){
 void RenderablePlanet::loadTexture() {
     delete _texture;
     _texture = nullptr;
-	delete _nightTexture;
-	_nightTexture = nullptr;
-	if (_nightTexturePath != "") {
-		_nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
-		if (_nightTexture) {
-			LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
-			_nightTexture->uploadTexture();
-			_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-		}
-	}
-    if (_colorTexturePath.value() != "") {
+	if (_colorTexturePath.value() != "") {
         _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
@@ -245,6 +236,18 @@ void RenderablePlanet::loadTexture() {
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         }
     }
+	if (_hasNightTexture) {
+		delete _nightTexture;
+		_nightTexture = nullptr;
+		if (_nightTexturePath != "") {
+			_nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
+			if (_nightTexture) {
+				LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
+				_nightTexture->uploadTexture();
+				_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+			}
+		}
+	}
 }
 
 }  // namespace openspace

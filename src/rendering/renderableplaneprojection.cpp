@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/renderableplaneprojection.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/imagesequencer.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -92,12 +93,8 @@ bool RenderablePlaneProjection::initialize() {
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	
 	// Plane program
-	_shader = ghoul::opengl::ProgramObject::Build("imagePlane",
-		"${SHADERS}/modules/imageplane/imageplane_vs.glsl",
-		"${SHADERS}/modules/imageplane/imageplane_fs.glsl");
-	if (!_shader)
-		return false;
-	_shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
+	if (_shader == nullptr)
+		OsEng.ref().configurationManager()->getValue("planeProgram", _shader);
 
 	setTarget("JUPITER");
 	loadTexture();
@@ -110,7 +107,6 @@ bool RenderablePlaneProjection::deinitialize() {
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
 	delete _texture;
-	delete _shader;
 	return true;
 }
 

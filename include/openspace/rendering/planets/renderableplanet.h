@@ -74,6 +74,7 @@ private:
 	std::string _nightTexturePath;
 	std::string _frame;
 	std::string _target;
+	bool _hasNightTexture;
 	double _time;
 };
 

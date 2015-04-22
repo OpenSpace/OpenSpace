@@ -24,68 +24,34 @@
 
 #version __CONTEXT__
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-uniform vec3 sun_pos;
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
+//layout(location = 3) in vec2 in_nightTex;
 
-uniform bool _performShading = true;
-uniform float transparency;
-uniform int shadows;
 
-uniform float time;
-uniform sampler2D texture1;
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out float s;
 
-in vec2 vs_st;
-in vec2 vs_nightTex;
-in vec4 vs_normal;
-in vec4 vs_position;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
-
-//#include "PowerScaling/powerScaling_vs.hglsl"
 void main()
 {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(texture1, vs_st);
+	// set variables
+	vs_st = in_st;
+	vs_position = in_position;
+	vec4 tmp = in_position;
 
-	if (_performShading) {
-		// directional lighting
-		vec3 origin = vec3(0.0);
-		vec4 spec = vec4(0.0);
-		
-		vec3 n = normalize(vs_normal.xyz);
-		//vec3 e = normalize(camdir);
-		vec3 l_pos = vec3(sun_pos); // sun.
-		vec3 l_dir = normalize(l_pos-objpos.xyz);
-		float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-		
-		float shine = 0.0001;
-
-		vec4 specular = vec4(0.5);
-		vec4 ambient = vec4(0.0,0.0,0.0,transparency);
-		/*
-		if(intensity > 0.f){
-			// halfway vector
-			vec3 h = normalize(l_dir + e);
-			// specular factor
-			float intSpec = max(dot(h,n),0.0);
-			spec = specular * pow(intSpec, shine);
-		}
-		*/
-		diffuse = max(intensity * diffuse, ambient);
-			
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);
-	}
-	else {
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);	
-	}
+	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+	
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
 }
