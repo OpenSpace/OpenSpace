@@ -252,7 +252,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data) {
-    const psc thisPosition = data.position + worldPosition();
+    const psc thisPosition = worldPosition();
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
@@ -278,29 +278,30 @@ void SceneGraphNode::render(const RenderData& data) {
     //    child->render(newData);
 }
 
-// set & get
-void SceneGraphNode::addNode(SceneGraphNode* child)
-{
-    // add a child node and set this node to be the parent
-    child->setParent(this);
-    _children.push_back(child);
-}
+// not used anymore @AA
+//void SceneGraphNode::addNode(SceneGraphNode* child)
+//{
+//    // add a child node and set this node to be the parent
+//    child->setParent(this);
+//    _children.push_back(child);
+//}
 
 void SceneGraphNode::setParent(SceneGraphNode* parent)
 {
     _parent = parent;
 }
 
-bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
-	std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
-
-	if (it != _children.end()){
-		_children.erase(it);
-		return true;
-	}
-
-	return false;
-}
+//not used anymore @AA
+//bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
+//	std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
+//
+//	if (it != _children.end()){
+//		_children.erase(it);
+//		return true;
+//	}
+//
+//	return false;
+//}
 
 const psc& SceneGraphNode::position() const
 {
