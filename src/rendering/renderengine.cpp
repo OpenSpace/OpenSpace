@@ -979,26 +979,28 @@ void RenderEngine::changeViewPoint(std::string origin) {
     }
 
     if (origin == "Pluto") {
-        ghoul::Dictionary solarDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body") , std::string("SUN") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer") , std::string("PLUTO BARYCENTER") },
-            { std::string("Kernels") , ghoul::Dictionary() }
-        };
+		plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+		plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+		
+		solarSystemBarycenterNode->setParent(plutoBarycenterNode);
+		newHorizonsNode->setParent(plutoBarycenterNode);
+		ghoul::Dictionary solarDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("SUN") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+        
         ghoul::Dictionary jupiterDictionary =
         {
             { std::string("Type"), std::string("Spice") },
             { std::string("Body"), std::string("JUPITER BARYCENTER") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer"), std::string("SUN") },
+            { std::string("Reference"), std::string("GALACTIC") },
+            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
-
-        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
 
         ghoul::Dictionary newHorizonsDictionary =
         {
@@ -1008,6 +1010,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Observer"), std::string("PLUTO BARYCENTER") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
+		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+		jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
 		//ghoul::Dictionary dawnDictionary =
@@ -1033,11 +1037,17 @@ void RenderEngine::changeViewPoint(std::string origin) {
         return;
     }
     if (origin == "Sun") {
+		solarSystemBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+
+		plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+		jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+		newHorizonsNode->setParent(solarSystemBarycenterNode);
+
         ghoul::Dictionary plutoDictionary =
         {
             { std::string("Type"), std::string("Spice") },
             { std::string("Body"), std::string("PLUTO BARYCENTER") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Reference"), std::string("GALACTIC") },
             { std::string("Observer"), std::string("SUN") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
@@ -1045,7 +1055,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
         {
             { std::string("Type"), std::string("Spice") },
             { std::string("Body"), std::string("JUPITER BARYCENTER") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
+            { std::string("Reference"), std::string("GALACTIC") },
             { std::string("Observer"), std::string("SUN") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
@@ -1087,36 +1097,42 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		return;
     }
     if (origin == "Jupiter") {
-        ghoul::Dictionary plutoDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("PLUTO BARYCENTER") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        ghoul::Dictionary solarDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("SUN") },
-            { std::string("Reference"), std::string("ECLIPJ2000") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-                
-        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-        jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
+		jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+		jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
 
-        ghoul::Dictionary newHorizonsDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("NEW HORIZONS") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+		solarSystemBarycenterNode->setParent(jupiterBarycenterNode);
+		newHorizonsNode->setParent(jupiterBarycenterNode);
+
+		ghoul::Dictionary solarDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("SUN") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+
+		ghoul::Dictionary plutoDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("PlUTO BARYCENTER") },
+			{ std::string("Reference"), std::string("ECLIPJ2000") },
+			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+
+		ghoul::Dictionary newHorizonsDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("NEW HORIZONS") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+		plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+		newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
 
 		//ghoul::Dictionary dawnDictionary =
 		//{
