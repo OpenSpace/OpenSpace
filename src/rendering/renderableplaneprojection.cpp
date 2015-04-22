@@ -94,7 +94,7 @@ bool RenderablePlaneProjection::initialize() {
 	
 	// Plane program
 	if (_shader == nullptr)
-		OsEng.ref().configurationManager()->getValue("planeProgram", _shader);
+		OsEng.ref().configurationManager()->getValue("imagePlaneProgram", _shader);
 
 	setTarget("JUPITER");
 	loadTexture();
