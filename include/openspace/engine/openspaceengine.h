@@ -40,6 +40,7 @@ namespace openspace {
 
 class ConfigurationManager;
 class LuaConsole;
+class NetworkEngine;
 class GUI;
 class RenderEngine;
 class SyncBuffer;
@@ -111,6 +112,7 @@ private:
     interaction::InteractionHandler* _interactionHandler;
     RenderEngine* _renderEngine;
 	scripting::ScriptEngine* _scriptEngine;
+    NetworkEngine* _networkEngine;
 	ghoul::cmdparser::CommandlineParser* _commandlineParser;
 	LuaConsole* _console;
     gui::GUI* _gui;
