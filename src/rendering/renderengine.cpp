@@ -973,7 +973,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
     SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
     SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
-	SceneGraphNode* newHorizonsGhostNode = sceneGraph()->sceneGraphNode("NewHorizonsGhost");
+	//SceneGraphNode* newHorizonsGhostNode = sceneGraph()->sceneGraphNode("NewHorizonsGhost");
     SceneGraphNode* jupiterBarycenterNode = sceneGraph()->sceneGraphNode("JupiterBarycenter");
 
     if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
@@ -1012,7 +1012,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
+		/*
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
@@ -1022,7 +1022,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-
+		*/
         return;
     }
     if (origin == "Sun") {
@@ -1056,7 +1056,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
+		/*
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
@@ -1066,7 +1066,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-
+		*/
         return;
     }
     if (origin == "Jupiter") {
@@ -1100,7 +1100,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
+		/*
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
@@ -1110,6 +1110,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+		*/
         return;
     }
 
