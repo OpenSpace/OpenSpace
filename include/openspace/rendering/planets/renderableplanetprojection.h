@@ -74,6 +74,7 @@ private:
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
 	properties::TriggerProperty _imageTrigger;
+	properties::IntProperty _rotation;
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;

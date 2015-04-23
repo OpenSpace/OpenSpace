@@ -60,6 +60,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
+	, _rotation("rotation", "Rotation", 0, 0, 360)
+	, _alpha(1.f)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -104,6 +106,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_performShading);
+	// Mainly for debugging purposes @AA
+	addProperty(_rotation);
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -150,17 +154,15 @@ void RenderablePlanet::render(const RenderData& data)
 	
 	//earth needs to be rotated for that to work.
 	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
-		
+	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
-	transform = transform* rot;
-	if (_frame == "IAU_JUPITER"){ //x = 0.935126
-		transform *= glm::scale(glm::mat4(1), glm::vec3(1, 0.93513, 1));
-	}
-
+	transform = transform * rot * roty * rotProp;
 	
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
@@ -171,6 +173,7 @@ void RenderablePlanet::render(const RenderData& data)
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
+	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);

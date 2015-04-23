@@ -78,13 +78,12 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     glm::vec3 color(0.f);
     if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
         dictionary.getValue(keyColor, color);
-    _lineColor = color;
-
+    
+	_lineColor = color;
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+
     addProperty(_lineColor);
-
     addProperty(_lineFade);
-
     addProperty(_lineWidth);
 }
 
@@ -151,7 +150,7 @@ void RenderableTrail::render(const RenderData& data) {
 }
 
 void RenderableTrail::update(const UpdateData& data) {
-    if (data.isTimeJump)
+	if (data.isTimeJump)
         _needsSweep = true;
 
     if (_needsSweep) {
@@ -166,7 +165,14 @@ void RenderableTrail::update(const UpdateData& data) {
         _programIsDirty = false;
     }
     double lightTime = 0.0;
-    psc pscPos, pscVel;
+    psc pscPos;
+
+	bool intervalSet = hasTimeInterval();
+	double start = DBL_MIN;
+	double end = DBL_MAX;
+	if (intervalSet) {
+		getInterval(start, end);
+	}
 
     // Points in the vertex array should always have a fixed distance. For this reason we
     // keep the first entry in the array floating and always pointing to the current date
@@ -176,9 +182,13 @@ void RenderableTrail::update(const UpdateData& data) {
     int nValues = floor(deltaTime / _increment);
 
     // Update the floating current time
-    // Is 'CN+S' correct? It has to be chosen to be the same as in SpiceEphemeris, but
-    // unsure if it is correct ---abock
-    SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, pscPos, pscVel, lightTime);
+	if (start > data.time)
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, pscPos, lightTime);
+	else if (end < data.time)
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, pscPos, lightTime);
+	else
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, pscPos, lightTime);
+
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
@@ -193,8 +203,12 @@ void RenderableTrail::update(const UpdateData& data) {
 
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
-            SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, pscPos, pscVel, lightTime);
-            pscPos[3] += 3;
+			if (start > et)
+				et = start;
+			else if (end < et)
+				et = end;
+			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, pscPos, lightTime);
+			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
 
@@ -222,15 +236,28 @@ void RenderableTrail::fullYearSweep(double time) {
     float planetYear = SecondsPerEarthYear * _ratio;
     int segments = static_cast<int>(_tropic);
 
+	bool intervalSet = hasTimeInterval();
+	double start = DBL_MIN;
+	double end = DBL_MAX;
+	if (intervalSet) {
+		getInterval(start, end);
+	}
+
     _increment = planetYear / _tropic;
     
     _oldTime = time;
 
     psc pscPos, pscVel;
+	bool validPosition = true;
     _vertexArray.resize(segments+2);
-    for (int i = 0; i < segments+2; i++){
-        SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", time, pscPos, pscVel, lightTime);
-        pscPos[3] += 3;
+    for (int i = 0; i < segments+2; i++) {
+		if (start > time)
+			time = start;
+		else if (end < time)
+			time = end;
+
+        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, pscPos, lightTime);
+		pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};
         time -= _increment;

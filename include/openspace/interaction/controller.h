@@ -25,7 +25,7 @@
 #ifndef __CONTROLLER_H__
 #define __CONTROLLER_H__
 
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/glm.h>
 #include <glm/gtx/vector_angle.hpp>

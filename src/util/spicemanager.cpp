@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+#define  MAXOBJ 1000
+#define  WINSIZ 10000
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
@@ -75,6 +77,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 	}
 
 	std::string&& path = absPath(filePath);
+
 	if (!FileSys.fileExists(path)) {
 		LERROR("Kernel file '" << path << "' does not exist");
 		return KernelFailed;
@@ -112,7 +115,16 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
     LINFO("Loading SPICE kernel '" << path << "'");
 	// Load the kernel
 	furnsh_c(path.c_str());
-	
+
+	std::string fileExtension = path.substr(path.size() - 3);
+	if (fileExtension == ".bc" || fileExtension == ".BC") { // binary ck kernel
+		findCkCoverage(path);
+	}
+	else if (fileExtension == "bsp" || fileExtension == "BSP") { // binary spk kernel
+		findSpkCoverage(path);
+	}
+
+
 	// Reset the current directory to the previous one
 	FileSys.setCurrentDirectory(currentDirectory);
 	int failed = failed_c();
@@ -133,6 +145,111 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 		_loadedKernels.push_back(info);
 		return kernelId;
 	}
+}
+
+bool SpiceManager::findCkCoverage(std::string& path) {
+	SpiceInt frame, numberOfIntervals;
+	SpiceDouble b, e;
+	std::pair <double, double> tempInterval;
+	SPICEINT_CELL(ids, MAXOBJ);
+	SPICEDOUBLE_CELL(cover, WINSIZ);
+	
+	ckobj_c(path.c_str(), &ids);
+
+	for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+		frame = SPICE_CELL_ELEM_I(&ids, i);
+
+		scard_c(0, &cover);
+		ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
+		
+		//Get the number of intervals in the coverage window.
+		numberOfIntervals = wncard_c(&cover);
+		
+		for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
+			//Get the endpoints of the jth interval.
+			wnfetd_c(&cover, j, &b, &e);
+			tempInterval = std::make_pair(b, e);
+
+			_ckCoverageTimes[frame].insert(e);
+			_ckCoverageTimes[frame].insert(b);
+			_ckIntervals[frame].push_back(tempInterval);
+		}
+	}
+	return true;
+}
+
+bool SpiceManager::findSpkCoverage(std::string& path) {
+	SpiceInt obj, numberOfIntervals;
+	SpiceDouble b, e;
+	std::pair <double, double> tempInterval;
+	SPICEINT_CELL(ids, MAXOBJ);
+	SPICEDOUBLE_CELL(cover, WINSIZ);
+	
+	spkobj_c(path.c_str(), &ids);
+
+	for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+		obj = SPICE_CELL_ELEM_I(&ids, i);
+
+		scard_c(0, &cover);
+		spkcov_c(path.c_str(), obj, &cover);
+		//Get the number of intervals in the coverage window.
+		numberOfIntervals = wncard_c(&cover);
+
+		for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
+			//Get the endpoints of the jth interval.
+			wnfetd_c(&cover, j, &b, &e);
+			tempInterval = std::make_pair(b, e);
+			//insert all into coverage time set, the windows could be merged @AA
+			_spkCoverageTimes[obj].insert(e);
+			_spkCoverageTimes[obj].insert(b);
+			_spkIntervals[obj].push_back(tempInterval);
+		}		
+	}
+	return true;
+}
+
+bool SpiceManager::hasSpkCoverage(std::string target, double& et) const
+{
+	int id;
+	bool idSuccess = getNaifId(target, id);
+	bool hasCoverage = false;
+
+	std::vector< std::pair<double, double> > intervalVector;
+	if (_spkIntervals.find(id) == _spkIntervals.end())
+		return false;
+	else
+		intervalVector = _spkIntervals.find(id)->second;
+
+	for (auto vecElement : intervalVector) {
+		if (vecElement.first < et && vecElement.second > et) {
+			hasCoverage = true;
+			return idSuccess && hasCoverage;
+		}
+	}
+
+	return idSuccess && hasCoverage;
+}
+
+bool SpiceManager::hasCkCoverage(std::string frame, double& et) const
+{
+	int id;
+	bool idSuccess = getFrameId(frame, id);
+	bool hasCoverage = false;
+
+	std::vector< std::pair<double, double> > intervalVector;
+	if (_ckIntervals.find(id) == _ckIntervals.end())
+		return false;
+	else
+		intervalVector = _ckIntervals.find(id)->second;
+
+	for (auto vecElement : intervalVector) {
+		if (vecElement.first < et && vecElement.second > et) {
+			hasCoverage = true;
+			return idSuccess && hasCoverage;
+		}
+	}
+
+	return idSuccess && hasCoverage;
 }
 
 void SpiceManager::unloadKernel(KernelIdentifier kernelId) {
@@ -206,6 +323,20 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
+	}
+}
+
+bool SpiceManager::getFrameId(const std::string& frame, int& id) const {
+	if (frame.empty()) {
+		LERROR("No frame was provided");
+		return false;
+	}
+	else {
+		SpiceInt sid = id;
+		namfrm_c(frame.c_str(), &sid);
+		id = sid;
+		bool hasError = SpiceManager::checkForError("Error getting id for frame '" + frame + "'");
+		return !hasError;
 	}
 }
 
@@ -294,7 +425,7 @@ bool SpiceManager::getETfromDate(const std::string& timeString,
 }
 
 bool SpiceManager::getDateFromET(double ephemerisTime, std::string& date,
-	const std::string& format)
+	const std::string& format) const
 {
 	static const int BufferSize = 256;
     
@@ -322,15 +453,32 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	                                 glm::dvec3& position,
 	                                 double& lightTime) const
 {
-    spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-             aberrationCorrection.c_str(), observer.c_str(), glm::value_ptr(position),
-             &lightTime);
+	psc pscPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(position[0], position[1], position[2]);
 
-    bool hasError = checkForError("Error retrieving position of target '" + target + "'" +
-                                  " viewed from observer '" + observer + "' in reference"+
-                                  " frame '" + referenceFrame + "' at time '" +
-                                  std::to_string(ephemerisTime) + "'");
-    return !hasError;
+	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
+	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
+	if (!targetHasCoverage && !observerHasCoverage){
+		return false;
+	}
+	else if (targetHasCoverage && observerHasCoverage){
+		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+			aberrationCorrection.c_str(), observer.c_str(), glm::value_ptr(position),
+			&lightTime);
+	}
+	else if (targetHasCoverage) {// observer has no coverage
+		getEstimatedPosition(ephemerisTime, observer, target, pscPosition);
+		pscPosition = pscPosition*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
+		position = pscPosition.vec3();
+	}
+	else { // target has no coverage
+		getEstimatedPosition(ephemerisTime, target, observer, pscPosition);
+		position = pscPosition.vec3();
+	}
+	
+	if (position[0] == 0.0 || position[1] == 0.0 || position[2] == 0.0)
+		return false;
+
+	return targetHasCoverage && observerHasCoverage;
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,
@@ -343,15 +491,92 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 {
 	double pos[3] = { 0.0, 0.0, 0.0};
 
-	spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-		aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-
-	if (pos[0] == 0.0 || pos[1] == 0.0|| pos[2] == 0.0)
+	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
+	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
+	if (!targetHasCoverage && !observerHasCoverage){
+		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
 		return false;
+	}
+	else if (targetHasCoverage && observerHasCoverage){
+		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+			aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
+		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+	}
+	else if (targetHasCoverage) {// observer has no coverage
+		getEstimatedPosition(ephemerisTime, observer, target, position);
+		position = position*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
+	}
+	else {// target has no coverage
+		getEstimatedPosition(ephemerisTime, target, observer, position);
+	}
 
-	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+	return targetHasCoverage && observerHasCoverage;
+}
 
-	return true;
+bool SpiceManager::getEstimatedPosition(const double time, const std::string target,
+										const std::string observer, psc& targetPosition) const 
+{
+	
+	int idTarget, idObserver;
+	bool targetFound = getNaifId(target, idTarget);
+	if (idTarget == 0) { //SOLAR SYSTEM BARYCENTER special case, no def. in kernels
+		targetPosition[0] = 0.f;
+		targetPosition[1] = 0.f;
+		targetPosition[2] = 0.f;
+		targetPosition[3] = 0.f;
+		return true;
+	}
+	
+	double pos[3] = { 0.0, 0.0, 0.0 };
+
+	bool observerFound = getNaifId(observer, idObserver);
+	if (!targetFound || !observerFound || (idTarget == idObserver)) {
+		return false;
+	}
+	double lt, earlier, later, difference, quote;
+	double pos_earlier[3] = { 0.0, 0.0, 0.0 };
+	double pos_later[3] = { 0.0, 0.0, 0.0 };
+	if (_spkCoverageTimes.find(idTarget) == _spkCoverageTimes.end()){ // no coverage
+		LWARNING("No position for " + target + " at any time, was the correct SPK Kernels loaded?");
+		targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+		return false;
+	}
+
+	std::set<double> coveredTimes = _spkCoverageTimes.find(idTarget)->second;
+	
+	std::set<double>::iterator first = coveredTimes.begin();
+	std::set<double>::iterator last = coveredTimes.end();
+	
+	if (coveredTimes.lower_bound(time) == first) { // coverage later, fetch first position
+		spkpos_c(target.c_str(), (*first), "GALACTIC",
+			"NONE", observer.c_str(), pos, &lt);
+	}
+	else if (coveredTimes.upper_bound(time) == last) { // coverage earlier, fetch last position
+		spkpos_c(target.c_str(), *(coveredTimes.rbegin()), "GALACTIC",
+			"NONE", observer.c_str(), pos, &lt);
+
+	}
+	else { // coverage both earlier and later, interpolate these positions
+		earlier = *std::prev((coveredTimes.lower_bound(time)));
+		later = *(coveredTimes.upper_bound(time));
+
+		spkpos_c(target.c_str(), earlier, "GALACTIC",
+			"NONE", observer.c_str(), pos_earlier, &lt);
+		spkpos_c(target.c_str(), later, "GALACTIC",
+			"NONE", observer.c_str(), pos_later, &lt);
+		
+		//linear interpolation
+		difference = later - earlier;
+		quote = (time - earlier) / difference;
+		pos[0] = (pos_earlier[0]*(1-quote) + pos_later[0]*quote);
+		pos[1] = (pos_earlier[1]*(1-quote) + pos_later[1]*quote);
+		pos[2] = (pos_earlier[2]*(1-quote) + pos_later[2]*quote);
+	}
+
+
+	targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+	
+	return targetFound && observerFound;
 }
 
 // do NOT remove this method. 
@@ -359,6 +584,12 @@ bool SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const
 	glm::dmat3 transform;
 	// get rotation matrix from frame A - frame B
 	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
+	bool success = !failed_c();
+	if (!success){
+		reset_c();
+		return false;
+	}
+
     bool hasError = checkForError("Error converting from frame '" + from +
         "' to frame '" + to + "' at time " + std::to_string(ephemerisTime));
     if (hasError)
@@ -384,7 +615,6 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
     bool& isVisible
     ) const
 {
-	
 	int visible;
 	fovtrg_c(instrument.c_str(),
 		     target.c_str(),
@@ -396,6 +626,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		     &visible);
     isVisible = (visible == SPICETRUE);
     
+	bool success = !failed_c();
+	if (!success){
+		reset_c();
+		return false;
+	}
+
     bool hasError = checkForError("Checking if target '" + target +
         "' is in view of instrument '" + instrument + "' failed");
 
@@ -425,6 +661,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 		&targetEpoch,
 		&visible);
     isVisible = (visible == SPICETRUE);
+
+	bool success = !failed_c();
+	if (!success){
+		reset_c();
+		return false;
+	}
 
     bool hasError = checkForError("Checking if target '" + target +
                 "' is in view of instrument '" + instrument + "' failed");
@@ -481,6 +723,12 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 
     isVisible = (found == SPICETRUE);
 
+	bool success = !failed_c();
+	if (!success){
+		reset_c();
+		return false;
+	}
+
 	bool hasError = checkForError("Error retrieving surface intercept on target '" + target + "'" +
 								  "viewed from observer '" + observer + "' in " +
 								  "reference frame '" + bodyfixed + "' at time '" +
@@ -500,6 +748,7 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 	return true;
 }
 
+// Not called at the moment @AA
 bool SpiceManager::getTargetState(const std::string& target,
 	                              const std::string& observer,
 	                              const std::string& referenceFrame,
@@ -525,6 +774,7 @@ bool SpiceManager::getTargetState(const std::string& target,
     return !hasError;
 }
 
+// Not called at the moment @AA
 bool SpiceManager::getTargetState(const std::string& target,
 									 const std::string& observer,
 									 const std::string& referenceFrame,
@@ -540,12 +790,25 @@ bool SpiceManager::getTargetState(const std::string& target,
 	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
 		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
 
-	position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
-	velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+	bool hasError = checkForError("Error retrieving state of target '" + target + "'" +
+		"viewed from observer '" + observer + "' in " +
+		"reference frame '" + referenceFrame + "' at time '" +
+		std::to_string(ephemerisTime) + "'");
 
-	return true;
+	if (!hasError) {
+		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
+		velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
+	}
+	else
+	{
+		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(0.0, 0.0, 0.0);
+		velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(0, 0, 0);
+	}
+
+	return !hasError;
 }
 
+// Not called at the moment @AA
 bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 							const std::string& toFrame,
 							double ephemerisTime,
@@ -560,55 +823,95 @@ bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
 	return !hasError;
 }
 
-// I honestly dont even think we need this, deprecatable relic from previous crunch time. 
-bool SpiceManager::getPositionPrimeMeridian(const std::string& fromFrame,
-	const std::string& body,
-	double ephemerisTime,
-	glm::dmat3& positionMatrix) const{
-
-	int id;
-	getNaifId(body, id);
-	tipbod_c(fromFrame.c_str(), id, ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
-
-	bool hasError = checkForError("Error retrieving position transform matrix from "
-		"frame '" + fromFrame + "' to frame '" + body +
-		"at time '" + std::to_string(ephemerisTime) + "' for prime meridian");
-	positionMatrix = glm::transpose(positionMatrix);
-
-	return !hasError;
-}
-
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 												 const std::string& toFrame,
 												 double ephemerisTime,
-												 glm::dmat3& positionMatrix) const{
+												 glm::dmat3& positionMatrix) const 
+{
+	bool success, estimated = false;
 	pxform_c(fromFrame.c_str(), toFrame.c_str(),
-		ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
-    
-    bool hasError = checkForError("Error retrieving position transform matrix from "
-                                  "frame '" + fromFrame + "' to frame '" + toFrame +
-                                  "' at time '" + std::to_string(ephemerisTime) + "'");
+			ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
+
+	success = !(failed_c());
+	if (!success) {
+		reset_c();
+		estimated = getEstimatedTransformMatrix(ephemerisTime, fromFrame, toFrame, positionMatrix);		
+	}
+
     positionMatrix = glm::transpose(positionMatrix);
     
-	return !hasError;
+	return estimated || success;
 }
 
-
+// Not called at the moment @AA
 bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-	                                          const std::string& toFrame,
-	                                          double ephemerisTimeFrom,
-											  double ephemerisTimeTo,
-	                                          glm::dmat3& positionMatrix) const{
+	const std::string& toFrame,
+	double ephemerisTimeFrom,
+	double ephemerisTimeTo,
+	glm::dmat3& positionMatrix) const{
 
 	pxfrm2_c(fromFrame.c_str(), toFrame.c_str(), ephemerisTimeFrom, ephemerisTimeTo, (double(*)[3])glm::value_ptr(positionMatrix));
 
 	bool hasError = checkForError("Error retrieving position transform matrix from "
 		"frame '" + fromFrame + "' to frame '" + toFrame +
 		"' from time '" + std::to_string(ephemerisTimeFrom) + " to time '"
-        + std::to_string(ephemerisTimeTo) + "'");
+		+ std::to_string(ephemerisTimeTo) + "'");
 	positionMatrix = glm::transpose(positionMatrix);
 
 	return !hasError;
+}
+
+
+bool SpiceManager::getEstimatedTransformMatrix(const double time, const std::string fromFrame,
+	const std::string toFrame, glm::dmat3& positionMatrix) const
+{
+	int idFrame;
+
+	bool frameFound = getFrameId(fromFrame, idFrame);
+	if (!frameFound) {
+		return false;
+	}
+	if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()){ // no coverage
+		return false;
+	}
+
+	double earlier, later, difference, quote;
+
+	std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
+
+	std::set<double>::iterator first = coveredTimes.begin();
+	std::set<double>::iterator last = coveredTimes.end();
+
+	if (coveredTimes.lower_bound(time) == first) { // coverage later, fetch first transform
+		pxform_c(fromFrame.c_str(), toFrame.c_str(),
+			*first, (double(*)[3])glm::value_ptr(positionMatrix));
+	}
+	else if (coveredTimes.upper_bound(time) == last) { // coverage earlier, fetch last transform
+		pxform_c(fromFrame.c_str(), toFrame.c_str(),
+			*(coveredTimes.rbegin()), (double(*)[3])glm::value_ptr(positionMatrix));
+	}
+	else { // coverage both earlier and later, interpolate these transformations
+		earlier = *std::prev((coveredTimes.lower_bound(time)));
+		later = *(coveredTimes.upper_bound(time));
+
+		glm::dmat3 earlierTransform, laterTransform;
+
+		pxform_c(fromFrame.c_str(), toFrame.c_str(),
+			earlier, (double(*)[3])glm::value_ptr(earlierTransform));
+		pxform_c(fromFrame.c_str(), toFrame.c_str(),
+			later, (double(*)[3])glm::value_ptr(laterTransform));
+
+		difference = later - earlier;
+		quote = (time - earlier) / difference;
+
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j) {
+				positionMatrix[i][j] = (earlierTransform[i][j] * (1 - quote) + laterTransform[i][j] * quote);
+			}
+		}
+	}
+
+	return true;
 }
 
 
@@ -649,6 +952,13 @@ bool SpiceManager::getFieldOfView(int instrument,
 		&nrReturned,      // the number of array values returned for the bounds
 		(double(*)[3])boundsArr // the bounds
 		);
+
+	bool success = !failed_c();
+	if (!success){
+		reset_c();
+		return false;
+	}
+
 	bool hasError = checkForError("Error getting Field-of-View parameters for "
 		"instrument '" + std::to_string(instrument) + "'");
 	if (hasError)
@@ -667,89 +977,6 @@ bool SpiceManager::getFieldOfView(int instrument,
 	return true;
 }
 
-bool SpiceManager::geographicToRectangular(const std::string& body,
-											   double longitude,
-											   double latitude,
-											   glm::dvec3& coordinates) const
-{
-	int id;
-	bool success = getNaifId(body, id);
-	if (!success)
-		return false;
-	else
-		return geographicToRectangular(id, longitude, latitude, coordinates);
-}
-
-bool SpiceManager::geographicToRectangular(int id, double longitude, double latitude,
-								               glm::dvec3& coordinates) const
-{
-	srfrec_c(id, longitude*rpd_c(), latitude*rpd_c(), glm::value_ptr(coordinates));
-	bool hasError = checkForError("Error transforming geographic coordinates for '" +
-		std::to_string(id) + "'");
-	return !hasError;
-}
-
-bool SpiceManager::getSubObserverPoint(const std::string& target,
-	                                   const std::string& observer,
-									   const std::string& computationMethod,
-	                                   const std::string& bodyFixedFrame,
-	                                   const std::string& aberrationCorrection,
-	                                   double      ephemerisTime,
-	                                   glm::dvec3& subObserverPoint,
-	                                   double&     targetEphemerisTime,
-	                                   glm::dvec3& vectorToSurfacePoint) const
-{
-	if (target.empty()) {
-		LERROR("No target was provided");
-		return false;
-	}
-	if (observer.empty()) {
-		LERROR("No observer was provided");
-		return false;
-	}
-	if (computationMethod.empty()) {
-		LERROR("No computation method was provided");
-		return false;
-	}
-	if (bodyFixedFrame.empty()) {
-		LERROR("No body fixed frame was provided");
-		return false;
-	}
-	if (aberrationCorrection.empty()) {
-		LERROR("No aberration correction was provided");
-		return false;
-	}
-	
-	subpnt_c(computationMethod.c_str(), 
-		     target.c_str(), 
-			 ephemerisTime,
-			 bodyFixedFrame.c_str(), 
-			 aberrationCorrection.c_str(), 
-			 observer.c_str(),
-			 glm::value_ptr(subObserverPoint),
-			 &targetEphemerisTime,
-			 glm::value_ptr(vectorToSurfacePoint)
-			 );
-
-	bool hasError = checkForError("Error retrieving subobserver point on target '" +
-		target + "' of observer '" + observer + "' for computation method '" +
-		computationMethod + "' and body fixed frame '" + bodyFixedFrame + "'");
-	return !hasError;
-}
-
-void SpiceManager::applyTransformationMatrix(glm::dvec3& position,
-											 glm::dvec3& velocity,
-											 const TransformMatrix& transformationMatrix)
-{
-	double input[6];
-	double output[6];
-	memmove(input, glm::value_ptr(position), 3 * sizeof(glm::dvec3::value_type));
-	memmove(input + 3, glm::value_ptr(velocity), 3 * sizeof(glm::dvec3::value_type));
-	mxvg_c(transformationMatrix.data(), input, 6, 6, output);
-	memmove(glm::value_ptr(position), output, 3 * sizeof(glm::dvec3::value_type));
-	memmove(glm::value_ptr(velocity), output + 3, 3 * sizeof(glm::dvec3::value_type));
-}
-
 bool SpiceManager::checkForError(std::string errorMessage) {
 
 	int failed = failed_c();
@@ -757,8 +984,8 @@ bool SpiceManager::checkForError(std::string errorMessage) {
         static char msg[1024];
 		if (!errorMessage.empty()) {
 			getmsg_c("LONG", 1024, msg);
-			LERROR(errorMessage);
-			LERROR("Spice reported: " + std::string(msg));
+			LWARNING(errorMessage);
+			LWARNING("Spice reported: " + std::string(msg));
 		}
         reset_c();
         return true;
@@ -766,28 +993,28 @@ bool SpiceManager::checkForError(std::string errorMessage) {
 	return false;
 }
 
-//bool SpiceManager::getSubSolarPoint(std::string computationMethod,
-//	                                std::string target,
-//	                                double      ephemeris,
-//	                                std::string bodyFixedFrame,
-//	                                std::string aberrationCorrection,
-//	                                std::string observer,
-//									glm::dvec3& subSolarPoint,
-//	                                double&     targetEpoch,
-//	                                glm::dvec3& vectorToSurfacePoint) const{
-//	double subPoint[3], vecToSurf[3];
-//
-//	subslr_c(computationMethod.c_str(),
-//		     target.c_str(),
-//		     ephemeris,
-//		     bodyFixedFrame.c_str(),
-//		     aberrationCorrection.c_str(),
-//		     observer.c_str(), subPoint, &targetEpoch, vecToSurf);
-//
-//	memcpy(&subSolarPoint, subPoint, sizeof(double)* 3);
-//	memcpy(&vectorToSurfacePoint, vecToSurf, sizeof(double)* 3);
-//
-//	return true;
-//}
+bool SpiceManager::getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c) {
+
+	SpiceDouble radii[3];
+	SpiceInt n;
+	int id;
+
+	getNaifId(planetName, id);
+	if (bodfnd_c(id, "RADII")) {
+		bodvrd_c(planetName.c_str(), "RADII", 3, &n, radii);
+		a = static_cast<float>(radii[0]);
+		b = static_cast<float>(radii[1]);
+		c = static_cast<float>(radii[2]);
+	}
+	else {
+		LWARNING("Could not find SPICE data for the shape of " + planetName + ", using modfile value");
+		a = 1.f;
+		b = 1.f;
+		c = 1.f;
+	}
+
+	bool hasError = checkForError("Error retrieving planet radii of " + planetName);
+	return !hasError;
+}
 
 }

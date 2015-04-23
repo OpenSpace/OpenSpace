@@ -42,8 +42,8 @@ namespace planetgeometryprojection {
 
 SimpleSphereGeometryProjection::SimpleSphereGeometryProjection(const ghoul::Dictionary& dictionary)
     : PlanetGeometryProjection()
-    , _radius("radius", "Radius", glm::vec2(1.f, 0.f), glm::vec2(-10.f, -20.f),
-              glm::vec2(10.f, 20.f))
+	, _realRadius("radius", "Radius", glm::vec4(1.f, 1.f, 1.f, 0.f), glm::vec4(-10.f, -10.f, -10.f, -20.f),
+				glm::vec4(10.f, 10.f, 10.f, 20.f))
     , _segments("segments", "Segments", 20, 1, 1000)
 	, _vaoID("vaoID", "Vao", 1, 1, 1)
 	, _vBufferID("vboID", "Vbo", 1, 1, 1)
@@ -55,30 +55,37 @@ SimpleSphereGeometryProjection::SimpleSphereGeometryProjection(const ghoul::Dict
 	using constants::simplespheregeometryprojection::keySegments;
 
 	// The name is passed down from the SceneGraphNode
-    std::string name;
-    bool success = dictionary.getValue(keyName, name);
+	bool success = dictionary.getValue(keyName, _name);
 	assert(success);
 
-    glm::vec2 radius;
-    success = dictionary.getValue(keyRadius, radius);
+	// removing "Projection"-suffix from name for SPICE compability, TODO: better solution @AA
+	if(_name.find("Projection"))
+		_name = _name.substr(0, _name.size() - 10); 
+
+    glm::vec4 radius;
+	success = dictionary.getValue(keyRadius, _modRadius);
 	if (!success) {
-        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
+		LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
                                            << keyRadius << "'");
 	}
-	else
-		_radius = radius;
-
+	else {
+		radius[0] = _modRadius[0];
+		radius[1] = _modRadius[0];
+		radius[2] = _modRadius[0];
+		radius[3] = _modRadius[1];
+		_realRadius = radius;
+	}
     double segments;
     success = dictionary.getValue(keySegments, segments);
 	if (!success) {
-        LERROR("SimpleSphereGeometry of '" << name << "' did not provide a key '"
+		LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
                                            << keySegments << "'");
 	}
 	else
 		_segments = static_cast<int>(segments);
 
-    addProperty(_radius);
-	_radius.onChange(std::bind(&SimpleSphereGeometryProjection::createSphere, this));
+	addProperty(_realRadius);
+	//_realRadius.onChange(std::bind(&SimpleSphereGeometryProjection::createSphere, this));
     addProperty(_segments);
 	_segments.onChange(std::bind(&SimpleSphereGeometryProjection::createSphere, this));
 }
@@ -117,12 +124,12 @@ void SimpleSphereGeometryProjection::createSphere()
 {
     //create the power scaled scalar
 
-    PowerScaledScalar planetSize(_radius);
+    PowerScaledScalar planetSize(_modRadius);
     _parent->setBoundingSphere(planetSize);
 
     delete _planet;
-    _planet = new PowerScaledSphere(planetSize, _segments);
-    _planet->initialize();
+	_planet = new PowerScaledSphere(_realRadius, _segments, _name);
+	_planet->initialize();
 }
 
 }  // namespace planetgeometry

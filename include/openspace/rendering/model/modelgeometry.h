@@ -37,14 +37,32 @@ class ModelGeometry : public properties::PropertyOwner {
 public:
 	static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	ModelGeometry();
+	ModelGeometry(const ghoul::Dictionary& dictionary);
 	virtual ~ModelGeometry();
     virtual bool initialize(RenderableModel* parent);
     virtual void deinitialize();
-    virtual void render() = 0;
+	void render();
+	virtual bool loadModel(const std::string& filename) = 0;
 
 protected:
 	RenderableModel* _parent;
+	struct Vertex {
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+	};
+
+	bool loadObj(const std::string& filename);
+	bool loadCachedFile(const std::string& filename);
+	bool saveCachedFile(const std::string& filename);
+	
+	GLuint _vaoID;
+	GLuint _vbo;
+	GLuint _ibo;
+
+	std::vector<Vertex> _vertices;
+	std::vector<int> _indices;
+	std::string _file;
 };
 
 }  // namespace modelgeometry

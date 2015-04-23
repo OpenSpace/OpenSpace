@@ -27,8 +27,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scenegraph/scenegraph.h>
-#include <openspace/scenegraph/scenegraphnode.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
 
@@ -36,14 +36,14 @@ namespace {
     const std::string _loggerCat = "Query";
 }
 
-SceneGraph* sceneGraph()
+Scene* sceneGraph()
 {
-    return OsEng.renderEngine()->sceneGraph();
+    return OsEng.renderEngine()->scene();
 }
 
 SceneGraphNode* sceneGraphNode(const std::string& name)
 {
-    const SceneGraph* graph = sceneGraph();
+    const Scene* graph = sceneGraph();
     return graph->sceneGraphNode(name);
 }
 

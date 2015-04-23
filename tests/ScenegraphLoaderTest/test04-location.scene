@@ -1,0 +1,10 @@
+-- Loading a module with a direct dependency in a different folder
+return {
+    ScenePath = "scene-folder",
+    CommonFolder = "common",
+    Modules = {
+        "no-dependency",
+        "direct-dependency"
+    }
+}
+

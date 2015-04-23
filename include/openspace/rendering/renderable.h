@@ -69,6 +69,8 @@ public:
     virtual void update(const UpdateData& data);
 
 	bool isVisible() const;
+	bool hasTimeInterval();
+	bool getInterval(double& start, double& end);
 
 protected:
     std::string findPath(const std::string& path);
@@ -79,6 +81,9 @@ private:
 	
     PowerScaledScalar boundingSphere_;
     std::string _relativePath;
+	std::string _startTime;
+	std::string _endTime;
+	bool _hasTimeInterval;
 };
 
 }  // namespace openspace

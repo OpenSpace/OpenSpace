@@ -1,0 +1,8 @@
+-- Malformed script
+return {
+    ScenePath = ".",
+    CommonFolder = "nonexisting",
+    Modules = {
+    }
+}
+

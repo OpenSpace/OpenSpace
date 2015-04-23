@@ -24,7 +24,7 @@
 
 // open space includes
 #include <openspace/util/powerscaledsphere.h>
-
+#include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 #define _USE_MATH_DEFINES
@@ -123,6 +123,103 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 			*/
         }
     }
+}
+
+// Alternative Constructor for using accurate triaxial ellipsoid 
+PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segments, std::string planetName)
+	: _vaoID(0)
+	, _vBufferID(0)
+	, _iBufferID(0)
+	, _isize(6 * segments * segments)
+	, _vsize((segments + 1) * (segments + 1))
+	, _varray(new Vertex[_vsize])
+	, _iarray(new int[_isize])
+{
+	static_assert(sizeof(Vertex) == 64,
+		"The size of the Vertex needs to be 64 for performance");
+
+	float a, b, c, powerscale;
+	bool accutareRadius = SpiceManager::ref().getPlanetEllipsoid(planetName, a, b, c);
+
+	if (accutareRadius) {
+		PowerScaledCoordinate powerScaledRadii = psc::CreatePowerScaledCoordinate(a, b, c);
+		powerScaledRadii[3] += 3; // SPICE returns radii in km
+		
+		std::swap(powerScaledRadii[1], powerScaledRadii[2]); // c is equivalent to y in our coordinate system
+		radius.set(powerScaledRadii.vec4());
+		a = powerScaledRadii[0];
+		b = powerScaledRadii[1];
+		c = powerScaledRadii[2];
+		powerscale = powerScaledRadii[3];
+	}
+	else {
+		boost::any r = radius.get();
+		glm::vec4 modRadius = boost::any_cast<glm::vec4>(r);
+		a = modRadius[0];
+		b = modRadius[1];
+		c = modRadius[2];
+		powerscale = modRadius[3];
+	}
+
+	int nr = 0;
+	const float fsegments = static_cast<float>(segments);
+
+	for (int i = 0; i <= segments; i++) {
+		// define an extra vertex around the y-axis due to texture mapping
+		for (int j = 0; j <= segments; j++) {
+			const float fi = static_cast<float>(i);
+			const float fj = static_cast<float>(j);
+			// inclination angle (north to south)
+			const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+			// azimuth angle (east to west)
+			const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+
+			const float x = a * sin(phi) * sin(theta);  //
+			const float y = b * cos(theta);             // up
+			const float z = c * cos(phi) * sin(theta);  //
+
+			_varray[nr].location[0] = x;
+			_varray[nr].location[1] = y;
+			_varray[nr].location[2] = z;
+			_varray[nr].location[3] = powerscale;
+
+			glm::vec3 normal = glm::vec3(x, y, z);
+			if (!(x == 0.f && y == 0.f && z == 0.f))
+				normal = glm::normalize(normal);
+
+			_varray[nr].normal[0] = normal[0];
+			_varray[nr].normal[1] = normal[1];
+			_varray[nr].normal[2] = normal[2];
+
+			const float t1 = fj / fsegments;
+			const float t2 = fi / fsegments;
+
+			_varray[nr].tex[0] = t1;
+			_varray[nr].tex[1] = t2;
+			++nr;
+		}
+	}
+
+	nr = 0;
+	// define indices for all triangles
+	for (int i = 1; i <= segments; ++i) {
+		for (int j = 0; j < segments; ++j) {
+			const int t = segments + 1;
+			_iarray[nr] = t * (i - 1) + j + 0; //1
+			++nr;
+			_iarray[nr] = t * (i + 0) + j + 0; //2 
+			++nr;
+			_iarray[nr] = t * (i + 0) + j + 1; //3
+			++nr;
+
+			_iarray[nr] = t * (i - 1) + j + 0; //4 
+			++nr;
+			_iarray[nr] = t * (i + 0) + j + 1; //5
+			++nr;
+			_iarray[nr] = t * (i - 1) + j + 1; //6
+			++nr;
+		}
+	}
 }
 
 PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy) 

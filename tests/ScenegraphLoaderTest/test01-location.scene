@@ -1,0 +1,8 @@
+-- Loading an empty module dictionary in a different folder
+return {
+    ScenePath = "scene-folder",
+    CommonFolder = "common",
+    Modules = {
+    }
+}
+

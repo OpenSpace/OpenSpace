@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WAVEFRONTOBJECT_H__
-#define __WAVEFRONTOBJECT_H__
+#ifndef __WAVEFRONTGEOMETRY_H__
+#define __WAVEFRONTGEOMETRY_H__
 
 #include <openspace/rendering/model/modelgeometry.h>
 
@@ -37,28 +37,11 @@ class WavefrontGeometry : public ModelGeometry {
 public:
 	WavefrontGeometry(const ghoul::Dictionary& dictionary);
 
-    bool initialize(RenderableModel* parent) override;
+	bool initialize(RenderableModel* parent) override;
     void deinitialize() override;
-    void render() override;
 	
 private:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
-
-	bool loadObj(const std::string& filename);
-    bool loadCachedFile(const std::string& filename);
-    bool saveCachedFile(const std::string& filename);
-    bool loadModel(const std::string& filename);
-
-	GLuint _vaoID;
-	GLuint _vbo;
-    GLuint _ibo;
-
-    std::vector<Vertex> _vertices;
-    std::vector<int> _indices;
+	bool loadModel(const std::string& filename);
 };
 
 }  // namespace modelgeometry

@@ -2,7 +2,8 @@
 <Cluster masterAddress="127.0.0.1">
 	<Node address="127.0.0.1" port="20401">
 		<Window fullScreen="false">
-			<Stereo type="none" />
+			<Stereo type="side_by_side" />
+			<!-- <Stereo type="side_by_side_inverted" /> -->
 			<Pos x="200" y="300" />
 			<!-- 16:9 aspect ratio -->
 			<Size x="1280" y="360" />

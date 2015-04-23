@@ -1,0 +1,8 @@
+-- Malformed script
+return {
+    ScenePath = "foobar",
+    CommonFolder = "",
+    Modules = {
+    }
+}
+

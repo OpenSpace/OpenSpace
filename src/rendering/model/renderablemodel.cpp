@@ -40,11 +40,15 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
+#include "imgui.h"
 
 namespace {
-const std::string _loggerCat = "RenderableModel";
+	const std::string _loggerCat = "RenderableModel";
 	const std::string keySource      = "Rotation.Source";
 	const std::string keyDestination = "Rotation.Destination";
+	const std::string keyBody = "Body";
+	const std::string keyStart = "StartTime";
+	const std::string keyEnd = "EndTime";
 }
 
 namespace openspace {
@@ -56,6 +60,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
 	, _geometry(nullptr)
 	, _performShading("performShading", "Perform Shading", true)
+	, _alpha(1.f)
 {
 	std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -85,8 +90,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 	dictionary.getValue(keySource, _source);
 	dictionary.getValue(keyDestination, _destination);
+	dictionary.getValue(keyBody, _target);
 
     setBoundingSphere(pss(1.f, 9.f));
+	addProperty(_performShading);
 }
 
 bool RenderableModel::isReady() const {
@@ -136,15 +143,25 @@ void RenderableModel::render(const RenderData& data) {
 			tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
-	
 	transform *= tmp;
 	
+	double time = openspace::Time::ref().currentTime();
+	bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
+	if (!targetPositionCoverage){
+		int frame = ImGui::GetFrameCount() % 180;
+		float fadingFactor = sin((frame * pi_c()) / 180);
+		_alpha = 0.5f + fadingFactor*0.5f;
+		//_texture = "";
+	}
+	else
+		_alpha = 1.0f;
+	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
-	_programObject->setUniform("_performShading", true);
+	_programObject->setUniform("_performShading", _performShading);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -164,7 +181,7 @@ void RenderableModel::update(const UpdateData& data) {
 	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
 
     double  lt;
-    openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", data.time, _sunPosition, lt);
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", data.time, _sunPosition, lt);
 }
 
 void RenderableModel::loadTexture() {

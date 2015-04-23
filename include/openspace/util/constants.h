@@ -72,6 +72,7 @@ namespace scenegraph {
 namespace scenegraphnode {
     const std::string keyName = "Name";
     const std::string keyParentName = "Parent";
+    const std::string keyDependencies = "Dependencies";
     const std::string keyRenderable = "Renderable";
     const std::string keyEphemeris = "Ephemeris";
 } // namespace scenegraphnode
