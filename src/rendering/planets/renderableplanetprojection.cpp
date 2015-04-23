@@ -86,11 +86,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _colorTexturePath("planetTexture", "RGB Texture")
 	, _projectionTexturePath("projectionTexture", "RGB Texture")
 	, _imageTrigger("clearProjections", "Clear Projections")
-	//, _sequencer(nullptr)
+	, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
     , _texture(nullptr)
 	, _textureProj(nullptr)
+	, _textureOriginal(nullptr)
     , _geometry(nullptr)
 	, _sequenceID(-1)
 	, _once(false)
@@ -158,9 +159,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 		_projectionTexturePath = path + "/" + texturePath;
 	}
 	addPropertySubOwner(_geometry);
-
-	addProperty(_imageTrigger);
-	_imageTrigger.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+	
+	addProperty(_fadeProjection);
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
@@ -181,33 +181,21 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 			//get translation dictionary
 			dictionary.getValue(keyTranslation, translationDictionary);
 
-
 			if (_sequenceType == sequenceTypePlaybook){
-				// eeh to many inputs, bit ugly. beautify later.
 				parser = new HongKangParser(_sequenceSource,
 											"NEW HORIZONS",
 											translationDictionary,
 											_potentialTargets);
+				openspace::ImageSequencer2::ref().runSequenceParser(parser);								
 			}
-			/*else if (_sequenceType == sequenceTypeImage){
+			else if (_sequenceType == sequenceTypeImage){
 				parser = new LabelParser(_sequenceSource, translationDictionary);
-			}*/
+				openspace::ImageSequencer2::ref().runSequenceParser(parser);
+
+			}
 		}
 		else{
 			LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
-		}
-
-		/*if (_sequenceType == sequenceTypeImage) {
-			LWARNING("LOADING STUFF FOR JUPITER!");
-			//openspace::ImageSequencer::ref().loadSequence(_sequenceSource, _sequenceID);
-			//	SequenceParser *parser = new LabelParser(_sequenceSource,
-			//"NEW HORIZONS",
-			//_fileTranslation,
-			//_potentialTargets); 
-			//openspace::ImageSequencer2::ref().runSequenceParser(parser);
-		}*/
-		/*else*/ if (_sequenceType == sequenceTypePlaybook) {
-			openspace::ImageSequencer2::ref().runSequenceParser(parser);
 		}
     }
 }
@@ -311,6 +299,13 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		unitFbo.activate();
 		_textureProj->bind();
 		_fboProgramObject->setUniform("texture1"       , unitFbo);
+		
+		ghoul::opengl::TextureUnit unitFbo2;
+		unitFbo2.activate();
+		_textureOriginal->bind();
+		_fboProgramObject->setUniform("texture2", unitFbo2);
+		_fboProgramObject->setUniform("projectionFading", _fadeProjection);
+
 		_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
 		_fboProgramObject->setUniform("ModelTransform" , _transform);
 		_fboProgramObject->setUniform("_scaling"       , _camScaling);
@@ -395,7 +390,6 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 
 	psc position;                                //observer      target
 	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
-	//if (!found) LERROR("Could not locate target position");
    
 	//change to KM and add psc camera scaling. 
 	position[3] += (3 + _camScaling[1]);
@@ -457,13 +451,13 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
 	_time = data.time;
 	_capture = false;
-
 	
 	if (openspace::ImageSequencer2::ref().isReady()){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
-
+	//floor fading to decimal
+	_fadeProjection = floorf(_fadeProjection * 10) / 10; 
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){
@@ -477,7 +471,6 @@ void RenderablePlanetProjection::loadProjectionTexture(){
 			_textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 		}
 	}
-	//_sequencer->sequenceReset();
 }
 
 void RenderablePlanetProjection::loadTexture(){
@@ -490,5 +483,14 @@ void RenderablePlanetProjection::loadTexture(){
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
+	delete _textureOriginal;
+	_textureOriginal = nullptr;
+	if (_colorTexturePath.value() != "") {
+		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+		if (_textureOriginal) {
+			_textureOriginal->uploadTexture();
+			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		}
+	}
 }
 }  // namespace openspace

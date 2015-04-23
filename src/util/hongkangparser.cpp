@@ -32,8 +32,9 @@
 #include <iterator>
 #include <iomanip>
 #include <limits>
-
 #include <openspace/util/hongkangparser.h>
+#include <openspace/util/instrumentdecoder.h>
+
 
 namespace {
 	const std::string _loggerCat = "HongKangParser";
@@ -61,9 +62,10 @@ namespace openspace {
 			translationDictionary.getValue(decoders[i], typeDictionary);
 			//for each playbook call -> create a Decoder object
 			const std::vector<std::string>& keys = typeDictionary.keys();
+			//std::string abort = decoders[i] + "." + keyStopCommand;
 			for (int j = 0; j < keys.size(); j++){
 				std::string currentKey = decoders[i] + "." + keys[j];
-
+				
 				ghoul::Dictionary decoderDictionary;
 				translationDictionary.getValue(currentKey, decoderDictionary);
 
@@ -101,7 +103,7 @@ void HongKangParser::create(){
 
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
 				LINFO("Using Preparsed Playbook V9H");
-				std::ifstream file(_fileName);
+				std::ifstream file(_fileName , std::ios::binary);
 				if (!file.good()) LERROR("Failed to open txt file '" << _fileName << "'");
 
 				std::string line = "";
@@ -126,18 +128,22 @@ void HongKangParser::create(){
 
 				std::string cameraTarget = "VOID";
 				std::string scannerTarget = "VOID";
-				do{
-					std::getline(file, line);			
+				int counter = 0;
+				
+
+				while (!file.eof()){//only while inte do,  FIX
+					std::getline(file, line);
+					
 					std::string event = line.substr(0, line.find_first_of(" ")); 
 
 					auto it = _fileTranslation.find(event);
 					bool foundEvent = (it != _fileTranslation.end());
-					
+
 					std::string met = line.substr(25, 9);
 					double time = getETfromMet(met);
 
 					Image image;
-
+					
 					if (foundEvent){
 						//store the time, this is used for getNextCaptureTime() 
 						_captureProgression.push_back(time);
@@ -167,13 +173,48 @@ void HongKangParser::create(){
 							//compute and store the range for each subset 
 							_subsetMap[image.target]._range.setRange(time);
 						}
-						if (scan_start == -1 && it->second->getDecoderType() == "SCANNER"){
-							//scanner works like state-machine -only store start time now
+						if (it->second->getDecoderType() == "SCANNER"){ // SCANNER START 
+							scan_start = time;
+
+							InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(it->second);
+							std::string endNominal = scanner->getStopCommand();
+
+							// store current position in file
+							int len = file.tellg();
+							std::string linePeek;
+							bool foundstop = false;
+							while (!file.eof() && !foundstop){
+								//continue grabbing next line until we find what we need
+								getline(file, linePeek);
+								if (linePeek.find(endNominal) != std::string::npos){
+									foundstop = true;
+
+									met = linePeek.substr(25, 9);
+									scan_stop = getETfromMet(met);
+									findPlaybookSpecifiedTarget(line, scannerTarget);
+									scannerSpiceID = it->second->getTranslation();
+
+									scanRange._min = scan_start;
+									scanRange._max = scan_stop;
+									_instrumentTimes.push_back(std::make_pair(it->first, scanRange));
+
+
+									//store individual image
+									createImage(image, scan_start, scan_stop, scannerSpiceID, scannerTarget, _defaultCaptureImage);
+
+									_subsetMap[image.target]._subset.push_back(image);
+									_subsetMap[image.target]._range.setRange(scan_start);
+								}
+							}
+							//go back to stored position in file
+							file.seekg(len, std::ios_base::beg);
+
+							/*//scanner works like state-machine -only store start time now
 							scan_start = time;
 							previousScanner = it->first;
 							//store scanning instrument - store image once stopTime is found!
 							findPlaybookSpecifiedTarget(line, scannerTarget);
-							scannerSpiceID = it->second->getTranslation();
+							scannerSpiceID = it->second->getTranslation();*/
 						}
 					}
 					else{ // we have reached the end of a scan or consecutive capture sequence!
@@ -186,7 +227,7 @@ void HongKangParser::create(){
 
 							capture_start = -1;
 						}
-						if (line.find("END_NOM") != std::string::npos){
+						/*if (line.find("END_NOM") != std::string::npos){
 							assert(scan_start != -1, "SCAN end occured before SCAN call!");
 							//end of scan, store end time of this scan + store the scan image
 							scan_stop = time;
@@ -201,9 +242,9 @@ void HongKangParser::create(){
 							_subsetMap[image.target]._range.setRange(scan_start);
 
 							scan_start = -1;
-						}
+						}*/
 					}
-				} while (!file.eof());
+				}
 			}
 		}
 	}
@@ -273,10 +314,10 @@ bool HongKangParser::augmentWithSpice(Image& image,
 	return false;
 }
 
-void HongKangParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string pot) {
+void HongKangParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string path) {
 	image.startTime = startTime;
 	image.stopTime = stopTime;
-	image.path = pot;
+	image.path = path;
 	for (int i = 0; i < instr.size(); i++){
 		image.activeInstruments.push_back(instr[i]);
 	}

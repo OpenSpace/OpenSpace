@@ -47,6 +47,7 @@ namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
     : ModelGeometry()
+	,_mode(GL_TRIANGLES)
 {
 	using constants::scenegraphnode::keyName;
 
@@ -139,10 +140,14 @@ void WavefrontGeometry::deinitialize() {
     glDeleteBuffers(1, &_ibo);
 }
 
+void WavefrontGeometry::changeRenderMode(const GLenum mode){
+	_mode = mode;
+}
+
 void WavefrontGeometry::render() {
 	glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(_mode, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

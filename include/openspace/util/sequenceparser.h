@@ -37,7 +37,7 @@ namespace openspace {
 		double startTime;
 		double stopTime;
 		std::string path;
-		std::vector<std::string> activeInstruments;
+		std::vector<std::string> activeInstruments; 
 		std::string target;
 		bool projected;
 	};

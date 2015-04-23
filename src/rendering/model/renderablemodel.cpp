@@ -37,6 +37,8 @@
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/imagesequencer2.h>
+
 
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
@@ -47,6 +49,7 @@ const std::string _loggerCat = "RenderableModel";
 	const std::string keyDestination = "Rotation.Destination";
 	const std::string keyShading = "Shading.PerformShading";
 	const std::string keyFading = "Shading.Fadeable";
+	const std::string keyGhosting = "Shading.Ghosting";
 
 }
 
@@ -60,6 +63,7 @@ namespace openspace {
 		, _texture(nullptr)
 		, _bumpMap(nullptr)
 		, _geometry(nullptr)
+		, _isGhost(false)
 		, _performShading("performShading", "Perform Shading", true)
 		, _fading("fading", "Fade", 0)
 		, _performFade("performFading", "Perform Fading", false)
@@ -114,11 +118,17 @@ namespace openspace {
 
 	if (dictionary.hasKeyAndValue<bool>(keyFading)) {
 		bool fading;
-		dictionary.getValue(keyShading, fading);
+		dictionary.getValue(keyFading, fading);
 		_performFade = fading;
 	}
 
 	addProperty(_performFade);
+
+	if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
+		bool ghosting;
+		dictionary.getValue(keyGhosting, ghosting);
+		_isGhost = ghosting;
+	}
 }
 
 bool RenderableModel::isReady() const {
@@ -163,26 +173,21 @@ bool RenderableModel::deinitialize() {
 }
 
 void RenderableModel::render(const RenderData& data) {
-    _programObject->activate();
+	double lt;
 
-    glm::mat4 transform = glm::mat4(1);
 
+	_programObject->activate();
+	glm::mat4 transform = glm::mat4(1);
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
-	
 	transform *= tmp;
-	double lt;
 	psc tmppos;
-	
-	SpiceManager::ref().getTargetPosition(_source, "SUN", "GALACTIC", "NONE", Time::ref().currentTime(), tmppos, lt);
-
+	SpiceManager::ref().getTargetPosition(_source, "SUN", "GALACTIC", "NONE", _time, tmppos, lt);
 	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
-
-	//std::cout << cam_dir << std::endl;
 	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("cam_dir", cam_dir);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -191,44 +196,58 @@ void RenderableModel::render(const RenderData& data) {
 	
 	_programObject->setUniform("_performShading", _performShading);
 
-
 	if (_performFade && _fading > 0.f){
 		_fading = _fading - 0.01f;
-
-	}
-	else if (!_performFade && _fading < 1.f){
+	}else if (!_performFade && _fading < 1.f){
 		_fading = _fading + 0.01f;
 
 	}
-
 	_programObject->setUniform("fading", _fading);
 
-
-
-    // Bind texture
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
-    _programObject->setUniform("texture1", unit);
+	// Bind texture
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
+	_texture->bind();
+	_programObject->setUniform("texture1", unit);
 
 	ghoul::opengl::TextureUnit unitBump;
 	unitBump.activate();
 	_bumpMap->bind();
-	//_programObject->setUniform("texture2", unitBump);
 
 	_geometry->render();
 
-    // disable shader
-    _programObject->deactivate();
+	// disable shader
+	_programObject->deactivate();
 }
 
 void RenderableModel::update(const UpdateData& data) {
+	_time = data.time;
+
+	double futureTime;
+	if (_isGhost){
+		futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
+		double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
+		double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+		double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+		if (interval > 60){
+			if (t < 0.8){
+				_fading = t;
+			}
+			else if (t >= 0.95f){
+				_fading = _fading - 0.5f;
+			}
+		}
+		else{
+			_fading = 0.0f;
+		}
+		_time = futureTime;
+	}
+
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty())
-	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
-
+		openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
     double  lt;
-    openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", data.time, _sunPosition, lt);
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _source, "GALACTIC", "NONE", _time, _sunPosition, lt);
 }
 
 void RenderableModel::loadTexture() {

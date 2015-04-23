@@ -36,8 +36,10 @@ public:
 	InstrumentDecoder(const ghoul::Dictionary& dictionary);
 	virtual std::string getDecoderType();
 	virtual std::vector<std::string> getTranslation();
+	std::string getStopCommand();
 private:
 	std::string _type;
+	std::string _stopCommand;
 	std::vector<std::string> _spiceIDs;
 };
     

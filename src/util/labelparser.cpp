@@ -45,9 +45,7 @@ namespace openspace {
 LabelParser::LabelParser(const std::string& fileName,
 				         ghoul::Dictionary translationDictionary)
 {
-	_fileName          = fileName;
-	//_fileTranslation   = fileTranslation;
-
+	_fileName = fileName;
 	//get the different instrument types
 	const std::vector<std::string>& decoders = translationDictionary.keys();
 	//for each decoder (assuming might have more if hong makes changes)
@@ -95,18 +93,27 @@ LabelParser::LabelParser(const std::string& fileName,
 			};
 		}
 	}
-	for (auto t : _fileTranslation){
-		std::cout << t.first << std::endl;
-		for (auto b : t.second->getTranslation()){
-			std::cout << "   " << b << std::endl;
+}
+
+std::string LabelParser::decode(std::string line){
+	for (auto key : _fileTranslation){
+		std::size_t value = line.find(key.first);
+		if (value != std::string::npos){
+			std::string toTranslate = line.substr(value);
+			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return.
 		}
 	}
-
 }
+
 void LabelParser::create(){
-
-	std::vector<Image> tmp;
-
+	auto imageComparer = [](const Image &a, const Image &b)->bool{
+		return a.startTime < b.startTime;
+	};
+	auto targetComparer = [](const std::pair<double, std::string> &a,
+		const std::pair<double, std::string> &b)->bool{
+		return a.first < b.first;
+	};
+	std::string previousTarget;
 
 	ghoul::filesystem::Directory sequenceDir(_fileName, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
@@ -121,44 +128,130 @@ void LabelParser::create(){
 
 					if (!file.good()) LERROR("Failed to open label file '" << currentFile.path() << "'");
 					
+					int count = 0;
+
 					// open up label files
 					std::string line = "";
-					double timestamp = 0.0;
-					bool found = false;
+					std::string previousSequence;
+					TimeRange instrumentRange;
+
 					do {
 						std::getline(file, line);
-						for (auto spec : _specsOfInterest){
-							auto pos = line.find(spec);
-							if (pos != std::string::npos){
-								if (line.substr(0, line.find_first_of(" ")) == "TARGET_NAME"){
-								/*	std::string target = line.substr(line.find("=") + 2, line.find(" "));
-									target.erase(std::remove(target.begin(), target.end(), '"'), target.end());
-									for (auto t : _fileTranslation[target]->getTranslation()){
-										std::cout << t << std::endl;
-									}*/
 
-								}
+						std::string read = line.substr(0, line.find_first_of(" "));
 
+						line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
+						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
 
+						/* Add more  */
+						if (read == "TARGET_NAME"){
+							_target = decode(line);
+							count++;
+						}
+						if (read == "INSTRUMENT_HOST_NAME"){
+							_instrumentHostID = decode(line);
+							count++;
+						}
+						if (read == "INSTRUMENT_ID"){
+							_instrumentID = decode(line);
+							count++;
+						}
+						if (read == "DETECTOR_TYPE"){
+							_detectorType = decode(line);
+							count++;
+						}
+						if (read == "START_TIME"){
+							std::string start = line.substr(line.find("=") + 2);
+							start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
+							openspace::SpiceManager::ref().getETfromDate(start, _startTime);
+							count++;
+
+							getline(file, line);
+							read = line.substr(0, line.find_first_of(" "));
+							if (read == "STOP_TIME"){
+								std::string stop = line.substr(line.find("=") + 2);
+								stop.erase(std::remove(stop.begin(), stop.end(), ' '), stop.end());
+								openspace::SpiceManager::ref().getETfromDate(stop, _stopTime);
+								count++;
 							}
-							/*if (timestamp != 0.0){
-							found = true;
+							else{
+								LERROR("Label file " + _fileName + " deviates from generic standard!");
+								LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
+							}
+						}
+						if (count == _specsOfInterest.size()){
+							count = 0;
 							std::string ext = "jpg";
 							path.replace(path.begin() + position, path.end(), ext);
 							bool fileExists = FileSys.fileExists(path);
 							if (fileExists) {
-							//	createImage(tmp, timestamp, "NH_LORRI", "", path); /// fix active instrument!
-							//	std::sort(tmp.begin(), tmp.end(), imageComparer);
+								Image image;
+								std::vector<std::string> spiceInstrument;
+								spiceInstrument.push_back(_instrumentID);
+								createImage(image, _startTime, _startTime, spiceInstrument, _target, path);
+								
+								_subsetMap[image.target]._subset.push_back(image);
+								_subsetMap[image.target]._range.setRange(_startTime);
+
+								_captureProgression.push_back(_startTime);
+								std::stable_sort(_captureProgression.begin(), _captureProgression.end());
 							}
-							}*/
+	
 						}
-					} while (!file.eof() && found == false);
+					} while (!file.eof());
 				}
 			}
 		}
 	}
-	int pause;
-	std::cin >> pause;
+	
+	std::vector<Image> tmp;
+	for (auto key : _subsetMap){
+		for (auto image : key.second._subset){
+			tmp.push_back(image);
+		}
+	}
+	std::sort(tmp.begin(), tmp.end(), imageComparer);
+
+	for (auto image : tmp){
+		if (previousTarget != image.target){
+			previousTarget = image.target;
+			std::pair<double, std::string> v_target = std::make_pair(image.startTime, image.target);
+			_targetTimes.push_back(v_target);
+			std::sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);
+		}
+	}
+
+	std::ofstream myfile;
+	myfile.open("LabelFileOutput.txt");
+
+	//print all
+	for (auto target : _subsetMap){
+		_instrumentTimes.push_back(std::make_pair("LORRI", _subsetMap[target.first]._range));
+		std::string min, max;
+		SpiceManager::ref().getDateFromET(target.second._range._min, min);
+		SpiceManager::ref().getDateFromET(target.second._range._max, max);
+
+		myfile << std::endl;
+		for (auto image : target.second._subset){
+			std::string time_beg;
+			std::string time_end;
+			SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+			SpiceManager::ref().getDateFromET(image.stopTime, time_end);
+
+			myfile << std::fixed
+				<< " "   << time_beg
+				<< "-->" << time_end
+				<< " [ " << image.startTime
+				<< " ] "   << image.target << std::setw(10);
+			for (auto instrument : image.activeInstruments){
+				myfile << " " << instrument;
+			}
+			myfile << std::endl;
+		}
+	}
+	myfile.close();
+
+
 }
 
 void LabelParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string pot) {

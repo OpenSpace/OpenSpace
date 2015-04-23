@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#include <openspace/util/imagesequencer.h>
 #include <openspace/util/imagesequencer2.h>
 
 
@@ -433,7 +432,6 @@ namespace openspace {
 			Time::ref().deltaTime(),
 			_doPerformanceMeasurements
 		});
-		ImageSequencer::ref().update(Time::ref().currentTime());
 		_sceneGraph->evaluate(_mainCamera);
 
 		// clear the abuffer before rendering the scene
@@ -509,60 +507,6 @@ namespace openspace {
                     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
                     int startY = ySize - 2 * font_size_mono;
 
-                    double currentTime = Time::ref().currentTime();
-
-                    double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
-                    double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
-                    std::string progress = "|";
-                    int g = ((t)* 20) + 1;
-                    for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
-                    for (int i = 0; i < 21 - g; i++) progress.append(" ");
-
-                    std::string str = "";
-                    openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer::ref().getNextCaptureTime(), str);
-
-                    Freetype::print(font,
-                            _onScreenInformation._position.x * xSize,
-                            _onScreenInformation._position.y * ySize,
-                            "Date: %s",
-                            Time::ref().currentTimeUTC().c_str()
-                    );
-
-                    progress.append("|");
-                    if (remaining > 0){
-                        glm::vec4 g1(0, t, 0, 1);
-                        glm::vec4 g2(1 - t);
-                        Freetype::print(font,
-                            _onScreenInformation._position.x * xSize,
-                            _onScreenInformation._position.y * ySize - font_size_mono * 2,
-                            g1 + g2,
-                            "Next projection in     | %.0f seconds",
-                            remaining
-                        );
-                        Freetype::print(font,
-                            _onScreenInformation._position.x * xSize,
-                            _onScreenInformation._position.y * ySize - font_size_mono * 2 * 2,
-                            g1 + g2,
-                            "%s %.1f %%",
-                            progress.c_str(), t * 100
-                        );
-
-                    }
-					/*std::vector<std::string> instrVec = ImageSequencer2::ref().getActiveInstruments();
-
-					std::string active ="";
-					for (int i = 0; i < instrVec.size(); i++){
-						active.append(instrVec[i]);
-						active.append(" ");
-					}
-					Freetype::print(font,
-                        _onScreenInformation._position.x * xSize,
-                        _onScreenInformation._position.y * ySize - font_size_mono * 3 * 2,
-                        glm::vec4(0.3, 0.6, 1, 1),
-                        "Active Instrument : %s",
-                        active.c_str()
-                    );*/
-
                 }
             }
 
@@ -593,9 +537,9 @@ namespace openspace {
 					// Using a macro to shorten line length and increase readability
 
                     int i = 0;
-
-					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 					/*
+					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+					
 					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 					PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
@@ -605,6 +549,7 @@ namespace openspace {
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 					*/
+				
 					if (openspace::ImageSequencer2::ref().isReady()){
 						double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 						double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
@@ -625,9 +570,9 @@ namespace openspace {
 						}
 						glm::vec4 w(1);
 						PrintColorText(i++, "Ucoming capture : %s", 10, w, str.c_str());
-
+				
 						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
-						std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+   					    std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
 						int timeleft = nextTarget.first - currentTime;
 
@@ -649,7 +594,7 @@ namespace openspace {
 
 						glm::vec4 b2(1.00, 0.51, 0.00, 1);
 						PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
-
+						
 						std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
 						std::string space;
 						glm::vec4 color;
@@ -664,35 +609,26 @@ namespace openspace {
 						}
 						i++;
 					
-						std::vector<std::pair<std::string, bool>> instrVec = ImageSequencer2::ref().getActiveInstruments();
-
+						
+						std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
 						glm::vec4 active(0.58, 1, 0.00, 1);
-
-
 						glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
 						glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-
-
-						double reduce = 0.01;
-
 						PrintColorText(i++, "Active Instruments : ", 10, active);
-						for (int k = 0; k < instrVec.size(); k++){
-
-							if (instrVec[k].second == false){
+						for (auto t : activeMap){
+							if (t.second == false){
 								PrintColorText(i, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), instrVec[k].first.c_str());
+								PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
 							}
 							else{
 								PrintColorText(i, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								if (instrVec[k].first == "NH_LORRI"){
+								if (t.first == "NH_LORRI"){
 									PrintColorText(i, " + ", 10, firing);
 								}
 								PrintColorText(i, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, active, instrVec[k].first.c_str());
-
+								PrintColorText(i++, "    %5s", 10, active, t.first.c_str());
 							}
 						}
-						
 					}
 					
 #undef PrintText
@@ -1037,6 +973,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = sceneGraph()->sceneGraphNode("SolarSystemBarycenter");
     SceneGraphNode* plutoBarycenterNode = sceneGraph()->sceneGraphNode("PlutoBarycenter");
     SceneGraphNode* newHorizonsNode = sceneGraph()->sceneGraphNode("NewHorizons");
+	SceneGraphNode* newHorizonsGhostNode = sceneGraph()->sceneGraphNode("NewHorizonsGhost");
     SceneGraphNode* jupiterBarycenterNode = sceneGraph()->sceneGraphNode("JupiterBarycenter");
 
     if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr) {
@@ -1076,6 +1013,16 @@ void RenderEngine::changeViewPoint(std::string origin) {
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
+		ghoul::Dictionary newHorizonsGhostDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+
         return;
     }
     if (origin == "Sun") {
@@ -1109,6 +1056,17 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
+		ghoul::Dictionary newHorizonsGhostDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+
         return;
     }
     if (origin == "Jupiter") {
@@ -1142,6 +1100,16 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+
+		ghoul::Dictionary newHorizonsGhostDictionary =
+		{
+			{ std::string("Type"), std::string("Spice") },
+			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Reference"), std::string("GALACTIC") },
+			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+			{ std::string("Kernels"), ghoul::Dictionary() }
+		};
+		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
         return;
     }
 

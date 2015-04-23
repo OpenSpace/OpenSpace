@@ -23,7 +23,6 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/util/imagesequencer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>

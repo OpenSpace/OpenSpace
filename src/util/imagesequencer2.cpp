@@ -49,7 +49,6 @@ _hasData(false),
 _defaultCaptureImage(absPath("C:/Users/michal/openspace/openspace-data/scene/common/textures/placeholder_blank.png"))
 {}
 
-
 ImageSequencer2& ImageSequencer2::ref() {
 	assert(_instance != nullptr);
 	return *_instance;
@@ -68,22 +67,6 @@ bool ImageSequencer2::isReady(){
 	return _hasData;
 }
 
-bool ImageSequencer2::imageComparer(const Image &a, const Image &b){
-	return a.startTime < b.startTime;
-};
-
-std::vector<Image>::iterator ImageSequencer2::binary_find(std::vector<Image>::iterator begin,
-	std::vector<Image>::iterator end,
-	const Image &val,
-	bool(*compareFunc)(const Image &a, const Image &b)){
-	// Finds the lower bound in at most log(last - first) + 1 comparisons
-	std::vector<Image>::iterator it = std::lower_bound(begin, end, val, compareFunc);
-	if (it != begin && it != end){
-		return it;
-	}
-	return end;
-}
-
 void ImageSequencer2::updateSequencer(double time){
 	if (_currentTime != time){
 		_previousTime = _currentTime;
@@ -92,7 +75,6 @@ void ImageSequencer2::updateSequencer(double time){
 }
 
 std::pair<double, std::string> ImageSequencer2::getNextTarget(){
-	// make into template func
 	auto compareTime = [](const std::pair<double, std::string> &a,
 	                 	  const std::pair<double, std::string> &b)->bool{
 		return a.first < b.first;
@@ -101,22 +83,21 @@ std::pair<double, std::string> ImageSequencer2::getNextTarget(){
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end()){
+	if (it != _targetTimes.end() && it != _targetTimes.begin()){
 		return (*it);
 	}
 }
 
 std::pair<double, std::string> ImageSequencer2::getCurrentTarget(){
-	// make into template func
 	auto compareTime = [](const std::pair<double, std::string> &a,
-		const std::pair<double, std::string> &b)->bool{
+		                  const std::pair<double, std::string> &b)->bool{
 		return a.first < b.first;
 	};
 	std::pair<double, std::string> findEqualToThis;
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end()){
+	if (it != _targetTimes.end() && it != _targetTimes.begin() ){
 		return *std::prev(it);
 	}
 }
@@ -125,21 +106,26 @@ std::pair<double, std::vector<std::string>> ImageSequencer2::getIncidentTargetLi
 	std::pair<double, std::vector<std::string>> incidentTargets;
 
 	auto compareTime = [](const std::pair<double, std::string> &a,
-		const std::pair<double, std::string> &b)->bool{
-		return a.first < b.first;
+		                 const std::pair<double, std::string> &b)->bool{
+		 return a.first < b.first;
 	};
+	// what to look for
 	std::pair<double, std::string> findEqualToThis;
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 	
-	std::advance(it, -(range+1));
+	if (it != _targetTimes.end() && it != _targetTimes.begin()){
+		// move the iterator to the first element of the range
+		std::advance(it, -(range + 1));
 
-	for (int i = 0; i < 2*range+1; i++){
-		incidentTargets.first = it->first;
-		incidentTargets.second.push_back(it->second);
-		it++;
-		if (it == _targetTimes.end()) 
-			break;
+		// now extract incident range 
+		for (int i = 0; i < 2 * range + 1; i++){
+			incidentTargets.first = it->first;
+			incidentTargets.second.push_back(it->second);
+			it++;
+			if (it == _targetTimes.end())
+				break;
+		}
 	}
 
 	return incidentTargets;
@@ -166,29 +152,36 @@ double ImageSequencer2::getNextCaptureTime(){
 	return nextCaptureTime;
 }
 
-std::vector<std::pair<std::string, bool>> ImageSequencer2::getActiveInstruments(){
-	for (int i = 0; i < _instrumentOnOff.size(); i++){
-		_instrumentOnOff[i].second = false;
-	}
+std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
+	// first set all instruments to off
+	for (auto i : _switchingMap)
+		_switchingMap[i.first] = false;
+	// go over the filetranslation map
 	for (auto key : _fileTranslation){
+		// for each spice-instrument
 		for (auto instrumentID : key.second->getTranslation()){
+			// check if the spice-instrument is active 
 				if (instumentActive(instrumentID)){
-					for (int i = 0; i < _instrumentOnOff.size(); i++){
-						if (instrumentID == _instrumentOnOff[i].first){
-							_instrumentOnOff[i].second = true;
+					// go over switching map
+					for (auto instrument : _switchingMap){
+						// if instrument is present in switching map
+						if (instrumentID == instrument.first){
+							// set as active
+							_switchingMap[instrumentID] = true;
 						}
 					}
 				}
 			}
 		}
-	return _instrumentOnOff;
+	// return entire map, seen in GUI.
+	return _switchingMap;
 }
-bool ImageSequencer2::instumentActive(std::string instrumentID){
+bool ImageSequencer2::instumentActive(std::string instrumentID){ 
 	for (auto i : _instrumentTimes){
 		//check if this instrument is in range
-		if (i.second.inRange(_currentTime)){
-			//if so, then get the corresponding spiceIDs
-			std::vector < std::string> spiceIDs = _fileTranslation[i.first]->getTranslation();
+		if (i.second.inRange(_currentTime)){ 
+			//if so, then get the corresponding spiceID
+			std::vector<std::string> spiceIDs = _fileTranslation[i.first]->getTranslation(); 
 			//check which specific subinstrument is firing
 			for (auto s : spiceIDs){
 				if (s == instrumentID){
@@ -199,65 +192,115 @@ bool ImageSequencer2::instumentActive(std::string instrumentID){
 	}
 	return false;
 }
-bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures,  std::string projectee, std::string instrumentID){
+bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures,  
+	                                std::string projectee, 
+									std::string instrumentID){
+
 	if (!instumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
+	// developer note: this is only due to LORRI being the only instrument implemented so far.
 	return (instrumentID == "NH_LORRI") ? getImagePaths(captures, projectee) : false;
 }
 
 bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>& captures, 
 	                                std::string projectee){
+
+	// check if this instance is either in range or 
+	// a valid candidate to recieve data 
+
+	if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)
 	if (_subsetMap[projectee]._range.inRange(_currentTime) ||
 		_subsetMap[projectee]._range.inRange(_previousTime)){
 		auto compareTime = [](const Image &a,
-			const Image &b)->bool{
+			                  const Image &b)->bool{
 			return a.startTime < b.startTime;
 		};
-
-		auto begin = _subsetMap[projectee]._subset.begin();
-		auto end = _subsetMap[projectee]._subset.end();
-
+		
+		// for readability we store the iterators
+		auto begin = _subsetMap[projectee]._subset.begin(); 
+		auto end   = _subsetMap[projectee]._subset.end();
+		
+		// create temporary storage
 		std::vector<std::pair<double, std::string>> captureTimes;
-		Image findPrevious;
+		// what to look for 
+		Image findPrevious, findCurrent;
 		findPrevious.startTime = _previousTime;
-		Image findCurrent;
-		findCurrent.startTime = _currentTime;
+		findCurrent.startTime  = _currentTime;
 
+		// find the two iterators that correspond to the latest time jump
 		auto curr = std::lower_bound(begin, end, findCurrent, compareTime);
 		auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
 
 		if (curr != begin && curr != end  && prev != begin && prev != end){
-			std::transform(prev, curr, std::back_inserter(captureTimes),
-				[](const Image& i) {
-				return std::make_pair(i.startTime, i.path);
-			});
-			std::reverse(captureTimes.begin(), captureTimes.end());
-			captures = captureTimes;
-			return true;
+			if (curr->startTime >= prev->startTime){
+				// insert 
+				std::transform(prev, curr, std::back_inserter(captureTimes),
+					[](const Image& i) {
+					return std::make_pair(i.startTime, i.path);
+				});
+				std::reverse(captureTimes.begin(), captureTimes.end());
+
+				captures = captureTimes;
+				return true;
+			}
 		}
 	}
 	return false;
 }
+void ImageSequencer2::sortData(){
+	auto targetComparer = [](const std::pair<double, std::string> &a,
+		                     const std::pair<double, std::string> &b)->bool{
+		return a.first < b.first;
+	};
+	auto imageComparer = [](const Image &a, const Image &b)->bool{
+		return a.startTime < b.startTime;
+	};
 
+	std::sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);
+	std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+
+	for (auto sub : _subsetMap){
+		std::sort(_subsetMap[sub.first]._subset.begin(),
+			      _subsetMap[sub.first]._subset.end(), imageComparer);
+	}
+}
 
 void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	parser->create();
-	_fileTranslation    = parser->getTranslation(); // should perhaps be named 'instrumentTranslation'
-	_subsetMap          = parser->getSubsetMap();
-	_instrumentTimes    = parser->getIstrumentTimes();
-	_targetTimes        = parser->getTargetTimes();
-	_captureProgression = parser->getCaptureProgression();
+	// get new data 
+	std::map<std::string, Decoder*>                in1 = parser->getTranslation();
+	std::map<std::string, ImageSubset>             in2 = parser->getSubsetMap();
+	std::vector<std::pair<std::string, TimeRange>> in3 = parser->getIstrumentTimes();
+	std::vector<std::pair<double, std::string>>    in4 = parser->getTargetTimes();
+	std::vector<double>                            in5 = parser->getCaptureProgression();
+	
+	// check for sanity
+	assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
+	assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
+	assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
+	assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
+	assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
 
-	//copy payload from _fileTranslation 
+
+	// append data
+	_fileTranslation.insert   (                           in1.begin(), in1.end());
+	_subsetMap.insert         (                           in2.begin(), in2.end());
+	_instrumentTimes.insert   (   _instrumentTimes.end(), in3.begin(), in3.end());
+	_targetTimes.insert       (       _targetTimes.end(), in4.begin(), in4.end());
+	_captureProgression.insert(_captureProgression.end(), in5.begin(), in5.end());
+
+	// sorting of data _not_ optional
+	sortData();
+
+	// extract payload from _fileTranslation 
 	for (auto t : _fileTranslation){
-		std::vector<std::string> spiceIDs = t.second->getTranslation();
-		for (auto id : spiceIDs){
-			_instrumentOnOff.push_back(std::make_pair(id, false));
+		if (t.second->getDecoderType() == "CAMERA" || 
+			t.second->getDecoderType() == "SCANNER" ){
+			std::vector<std::string> spiceIDs = t.second->getTranslation();
+			for (auto id : spiceIDs){
+				_switchingMap[id] = false;
+			}
 		}
 	}
-	_instrumentOnOff.erase(std::unique(_instrumentOnOff.begin(),
-									   _instrumentOnOff.end()),
-									   _instrumentOnOff.end());
 	_hasData = true;
-
 }
 }  // namespace openspace

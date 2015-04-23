@@ -76,9 +76,9 @@ public:
 	int _nrInserted = 0;
 	int _isteps;
 	bool _rebuild = false;
-	bool _interceptTag[5];
+	bool _interceptTag[9];
 	bool _withinFOV;
-	psc _projectionBounds[4];
+	psc _projectionBounds[8];
 	psc _interceptVector;
 
 	// spice

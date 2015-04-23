@@ -63,7 +63,6 @@ private:
     ghoul::opengl::Texture* _texture;
 	ghoul::opengl::Texture* _bumpMap;
 
-
 	modelgeometry::ModelGeometry* _geometry;
 
 	glm::dmat3 _stateMatrix; 
@@ -75,8 +74,9 @@ private:
 
 	properties::BoolProperty _performShading;
 	properties::BoolProperty _performFade;
-
 	properties::FloatProperty _fading;
+	bool _isGhost;
+	double _time;
 
 };
 

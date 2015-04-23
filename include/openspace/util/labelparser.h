@@ -33,44 +33,54 @@
 #include <vector>
 
 namespace openspace {
-	class LabelParser : public SequenceParser{
-	public:
-		LabelParser();
-		LabelParser(const std::string& fileName,
-					ghoul::Dictionary translationDictionary);
-		virtual void create();
-		virtual std::map<std::string, ImageSubset> getSubsetMap();
-		virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
-		virtual std::vector<std::pair<double, std::string>> getTargetTimes();
+class LabelParser : public SequenceParser{
+public:
+	LabelParser();
+	LabelParser(const std::string& fileName,
+				ghoul::Dictionary translationDictionary);
+	virtual void create();
+	virtual std::map<std::string, ImageSubset> getSubsetMap();
+	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
+	virtual std::vector<std::pair<double, std::string>> getTargetTimes();
 
-		// temporary need to figure this out
-		std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
-		virtual std::vector<double> getCaptureProgression(){ return _captureProgression; };
+	// temporary need to figure this out
+	std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+	virtual std::vector<double> getCaptureProgression(){ return _captureProgression; };
 
-	private:
-		void createImage(Image& image,
-			             double startTime,
-			             double stopTime,
-			             std::vector<std::string> instr,
-			             std::string targ,
-			             std::string pot);
+private:
+	void createImage(Image& image,
+			            double startTime,
+			            double stopTime,
+			            std::vector<std::string> instr,
+			            std::string targ,
+			            std::string path);
 
-		bool augmentWithSpice(Image& image, 
-			                  std::string spacecraft, 
-							  std::vector<std::string> payload, 
-							  std::vector<std::string> potentialTargets);
+	std::string decode(std::string line);
+
+	bool augmentWithSpice(Image& image, 
+			                std::string spacecraft, 
+							std::vector<std::string> payload, 
+							std::vector<std::string> potentialTargets);
 		
-		std::string _fileName;
-		std::string _spacecraft;
-		std::map<std::string, Decoder*> _fileTranslation;
-		std::vector<std::string> _specsOfInterest;
+	std::string _fileName;
+	std::string _spacecraft;
+	std::map<std::string, Decoder*> _fileTranslation;
+	std::vector<std::string> _specsOfInterest;
 
-		//returnable
-		std::map<std::string, ImageSubset> _subsetMap;
-		std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
-		std::vector<std::pair<double, std::string>> _targetTimes;
-		std::vector<double> _captureProgression;
-	};
+	//returnable
+	std::map<std::string, ImageSubset> _subsetMap;
+	std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
+	std::vector<std::pair<double, std::string>> _targetTimes;
+	std::vector<double> _captureProgression;
 
+
+	std::string _target;
+	std::string _instrumentID;
+	std::string _instrumentHostID;
+	std::string _detectorType;
+	std::string _sequenceID;
+	double _startTime;
+	double _stopTime;
+};
 }
 #endif //__LABELPARSER_H__

@@ -40,6 +40,7 @@ public:
     bool initialize(RenderableModel* parent) override;
     void deinitialize() override;
     void render() override;
+	void changeRenderMode(const GLenum mode);
 	
 private:
     struct Vertex {
@@ -56,6 +57,7 @@ private:
 	GLuint _vaoID;
 	GLuint _vbo;
     GLuint _ibo;
+	GLenum _mode;
 
     std::vector<Vertex> _vertices;
     std::vector<int> _indices;

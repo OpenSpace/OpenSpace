@@ -46,4 +46,8 @@ std::vector<std::string> ScannerDecoder::getSpiceIDs(){
 	return _spiceIDs;
 }
 
+void ScannerDecoder::setStopCommand(std::string stopCommand){
+	_abort = stopCommand;
+}
+
 } // namespace openspace

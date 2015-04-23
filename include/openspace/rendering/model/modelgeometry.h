@@ -42,6 +42,8 @@ public:
     virtual bool initialize(RenderableModel* parent);
     virtual void deinitialize();
     virtual void render() = 0;
+	virtual void changeRenderMode(const GLenum mode) = 0;
+
 
 protected:
 	RenderableModel* _parent;

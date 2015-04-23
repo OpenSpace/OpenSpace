@@ -28,6 +28,7 @@ namespace {
     const std::string _loggerCat  = "InstrumentDecoder";
 	const std::string keyDetector = "DetectorType";
 	const std::string keySpice    = "Spice";
+	const std::string keyStopCommand = "StopCommand";
 }
 
 namespace openspace {
@@ -37,6 +38,12 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
 	bool success = dictionary.getValue(keyDetector, _type);
 	ghoul_assert(success, "Instrument has not provided detector type");
 	for_each(_type.begin(), _type.end(), [](char& in){ in = ::toupper(in); });
+
+	if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
+		LWARNING("Scanner must provide stop command, please check mod file.");
+	}else{
+		dictionary.getValue(keyStopCommand, _stopCommand);
+	}
 
 	std::vector<std::string> spice;
 	ghoul::Dictionary spiceDictionary;
@@ -50,6 +57,10 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
 		spiceDictionary.getValue(std::to_string(i + 1), id);
 		_spiceIDs[i] = id;
 	}
+}
+
+std::string InstrumentDecoder::getStopCommand(){
+	return _stopCommand;
 }
 
 std::string InstrumentDecoder::getDecoderType(){

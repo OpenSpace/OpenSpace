@@ -25,11 +25,14 @@
 #version 430
 
 uniform sampler2D texture1;
+uniform sampler2D texture2;
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
 uniform vec2 radius;
 flat in uint vs_segments;
+
+uniform float projectionFading;
 
 in vec4 vs_position;
 uniform vec3 boresight;
@@ -78,7 +81,9 @@ void main() {
 	  dot(v_b, normal) < 0 ) {
 		color = texture(texture1, projected.xy);
   }else{
- 	 color = vec4(1,1,1,0);
+ 	 color = texture(texture2, uv);
+	 color.a = projectionFading;
   }
+  
   // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
 }

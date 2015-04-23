@@ -30,6 +30,9 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/highresclock.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+
 
 /* TODO for this class:
 *  In order to add geometry shader (for pretty-draw),
@@ -40,6 +43,7 @@
 namespace {
     const std::string _loggerCat = "RenderableTrail";
     //constants
+	const std::string keyName                    = "Name";
         const std::string keyBody                = "Body";
         const std::string keyObserver            = "Observer";
         const std::string keyFrame               = "Frame";
@@ -86,6 +90,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_lineFade);
 
     addProperty(_lineWidth);
+	_distanceFade = 1.0;
 }
 
 bool RenderableTrail::initialize() {
@@ -139,6 +144,23 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
 
+	const psc& position = data.camera.position();
+	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+	const PowerScaledScalar& pssl = (position - origin).length();
+
+
+	//std::cout << openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->name()<< std::endl;
+	//std::cout << this->owner()->name() << std::endl;
+
+	if (pssl[0] < 0.00001){
+		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+	else{
+		if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
@@ -151,6 +173,7 @@ void RenderableTrail::render(const RenderData& data) {
 }
 
 void RenderableTrail::update(const UpdateData& data) {
+	_time = data.time;
     if (data.isTimeJump)
         _needsSweep = true;
 

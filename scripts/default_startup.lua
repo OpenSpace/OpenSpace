@@ -14,11 +14,11 @@ dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keyb
 
 -- openspace.time.setDeltaTime(50);
 
-openspace.time.setTime("2015-07-14T10:10:00.00") -- PLUTO
+--openspace.time.setTime("2015-07-14T10:10:00.00") -- PLUTO
 -- NH takes series of images from visible to dark side (across terminator)
 -- Sequence lasts ~10 mins, (recommended dt = 10)
 
---openspace.time.setTime("2015-07-14T11:22:00.00") -- PLUTO
+openspace.time.setTime("2015-07-14T11:00:00.00") -- PLUTO
 --BEAUTIFUL SEQUENCE -- NH takes series of images (same as previous)
 -- Sequence ends at 2015 JUL 14T11:24:00:000, (recommended dt = 1)
 
