@@ -46,7 +46,7 @@ namespace openspace {
 		                           std::string spacecraft,
 								   ghoul::Dictionary translationDictionary,
 		                           std::vector<std::string> potentialTargets) :
-							       _defaultCaptureImage(absPath("C:/Users/michal/openspace/openspace-data/scene/common/textures/placeholder_blank.png"))
+							       _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {
 	_fileName          = fileName;
 	_spacecraft        = spacecraft;
