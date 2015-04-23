@@ -575,7 +575,6 @@ bool SpiceManager::getEstimatedPosition(const double time, const std::string tar
 
 
 	targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-	std::cout << "estimating position for: " << target << ", w observer: " << observer << std::endl;
 	checkForError("Error estimating positin for target: " + target + ", or observer: " + observer);
 
 	return targetFound && observerFound;
@@ -896,7 +895,6 @@ bool SpiceManager::getEstimatedTransformMatrix(const double time, const std::str
 			}
 		}
 	}
-	std::cout <<  "estimating from frame: " << fromFrame << ", to frame: " << toFrame << std::endl;
 	bool hasError = checkForError("Error estimating transform matrix from frame: "
 		+ fromFrame + ", to frame: " + toFrame);
 
