@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/imagesequencer2.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
 
@@ -67,7 +68,8 @@ namespace openspace {
 
 	private:
 		void loadTexture();
-		void updatePlane(double time, std::string newPath);
+		void updatePlane(const Image* img, double currentTime);
+		std::string findClosestTarget(double currentTime);
 		void setTarget(std::string body);
 
 		std::string _texturePath;

@@ -75,7 +75,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 	_hasTimeInterval(false),
 	_startTime(""),
 	_endTime(""),
-	_targetBody("")
+	_targetBody(""),
+	_hasBody(false)
 {
     setName("renderable");
 #ifndef NDEBUG

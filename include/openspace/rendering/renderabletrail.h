@@ -86,6 +86,8 @@ private:
 
     float _increment;
     float _oldTime = 0;
+	float _time;
+	float _distanceFade;
 };
 
 } // namespace openspace

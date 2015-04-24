@@ -49,6 +49,8 @@ namespace {
 	const std::string keyBody = "Body";
 	const std::string keyStart = "StartTime";
 	const std::string keyEnd = "EndTime";
+	const std::string keyFading = "Shading.Fadeable";
+
 }
 
 namespace openspace {
@@ -61,6 +63,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _geometry(nullptr)
 	, _performShading("performShading", "Perform Shading", true)
 	, _alpha(1.f)
+	, _fading("fading", "Fade", 0)
+	, _performFade("performFading", "Perform Fading", false)
 {
 	std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -94,6 +98,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     setBoundingSphere(pss(1.f, 9.f));
 	addProperty(_performShading);
+
+	if (dictionary.hasKeyAndValue<bool>(keyFading)) {
+		bool fading;
+		dictionary.getValue(keyFading, fading);
+		_performFade = fading;
+	}
+	addProperty(_performFade);
 }
 
 bool RenderableModel::isReady() const {
@@ -107,7 +118,7 @@ bool RenderableModel::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr)
         completeSuccess
-              &= OsEng.ref().configurationManager()->getValue("pscShader", _programObject); 
+              &= OsEng.ref().configurationManager()->getValue("GenericModelShader", _programObject); 
 
     loadTexture();
 
@@ -135,6 +146,7 @@ bool RenderableModel::deinitialize() {
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
 
+	double lt;
     glm::mat4 transform = glm::mat4(1);
 
 	glm::mat4 tmp = glm::mat4(1);
@@ -155,6 +167,11 @@ void RenderableModel::render(const RenderData& data) {
 	}
 	else
 		_alpha = 1.0f;
+
+	psc tmppos;
+	SpiceManager::ref().getTargetPosition(_source, "SUN", "GALACTIC", "NONE", time, tmppos, lt);
+	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
+	_programObject->setUniform("cam_dir", cam_dir);
 	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -162,6 +179,16 @@ void RenderableModel::render(const RenderData& data) {
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
 	_programObject->setUniform("_performShading", _performShading);
+
+	if (_performFade && _fading > 0.f){
+		_fading = _fading - 0.01f;
+	}
+	else if (!_performFade && _fading < 1.f){
+		_fading = _fading + 0.01f;
+
+	}
+
+	_programObject->setUniform("fading", _fading);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;

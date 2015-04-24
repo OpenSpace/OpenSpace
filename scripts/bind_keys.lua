@@ -26,4 +26,15 @@ openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); opensp
 openspace.bindKey("q", "local b = openspace.getPropertyValue('SunMarker.renderable.enabled'); openspace.setPropertyValue('SunMarker.renderable.enabled', not b)")
 openspace.bindKey("e", "local b = openspace.getPropertyValue('EarthMarker.renderable.enabled'); openspace.setPropertyValue('EarthMarker.renderable.enabled', not b)")
 
+openspace.bindKey("k", "local b = openspace.getPropertyValue('HydraText.renderable.enabled'); openspace.setPropertyValue('HydraText.renderable.enabled', not b)")
+openspace.bindKey("k", "local b = openspace.getPropertyValue('CharonText.renderable.enabled'); openspace.setPropertyValue('CharonText.renderable.enabled', not b)")
+openspace.bindKey("k", "local b = openspace.getPropertyValue('NixText.renderable.enabled'); openspace.setPropertyValue('NixText.renderable.enabled', not b)")
+openspace.bindKey("k", "local b = openspace.getPropertyValue('KerberosText.renderable.enabled'); openspace.setPropertyValue('KerberosText.renderable.enabled', not b)")
+openspace.bindKey("k", "local b = openspace.getPropertyValue('StyxText.renderable.enabled'); openspace.setPropertyValue('StyxText.renderable.enabled', not b)")
+openspace.bindKey("j", "local b = openspace.getPropertyValue('PlutoText.renderable.enabled'); openspace.setPropertyValue('PlutoText.renderable.enabled', not b)")
+
+
+openspace.bindKey("l", "local b = openspace.getPropertyValue('Labels.renderable.performFading'); openspace.setPropertyValue('Labels.renderable.performFading', not b)")
+
+
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

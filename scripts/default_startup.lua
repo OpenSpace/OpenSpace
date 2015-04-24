@@ -5,9 +5,9 @@
 openspace.setInvertRoll(true);
 --openspace.setInteractionSensitivity(10)               -- This is the default value for the sensitivity (the higher, the more sensitive)
 
-openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
+--openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
 
-openspace.time.setTime("2007 FEB 28 03:45:00")          -- Io Capture!
+--openspace.time.setTime("2007 FEB 28 03:45:00")          -- Io Capture!
 
 openspace.time.setDeltaTime(10)                         -- How many seconds pass per second of realtime, changeable in the GUI
 
@@ -15,7 +15,7 @@ dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keyb
 
 -- openspace.time.setDeltaTime(50);
 
---openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
+openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
 -- NH takes series of images from visible to dark side (across terminator)
 -- Sequence lasts ~10 mins, (recommended dt = 10)
 

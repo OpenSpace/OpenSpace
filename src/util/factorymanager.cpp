@@ -53,6 +53,10 @@
 #include <openspace/rendering/planets/simplespheregeometryprojection.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 
+#include <openspace/util/decoder.h>
+#include <openspace/util/instrumentdecoder.h>
+#include <openspace/util/targetdecoder.h>
+
 
 // std
 #include <cassert>
@@ -103,6 +107,11 @@ void FactoryManager::initialize()
     _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
 	_manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Dynamic");
     _manager->factory<Ephemeris>()->registerClass<SpiceEphemeris>("Spice");
+
+	_manager->addFactory(new ghoul::TemplateFactory<Decoder>);
+	_manager->factory<Decoder>()->registerClass<InstrumentDecoder>("Instrument");
+	_manager->factory<Decoder>()->registerClass<TargetDecoder>("Target");
+
 
     // Add PlanetGeometry
     _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);

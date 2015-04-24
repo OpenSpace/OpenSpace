@@ -51,7 +51,7 @@ namespace openspace {
  * equal to the frame time.
  */
 
-	class SyncBuffer;
+class SyncBuffer;
 
 class Time {
 public:

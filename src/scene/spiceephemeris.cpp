@@ -27,6 +27,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/imagesequencer2.h>
 
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
@@ -73,16 +74,18 @@ void SpiceEphemeris::update(const UpdateData& data) {
 
 	glm::dvec3 position(0,0,0);
 	double lightTime = 0.0;
+	//if (_targetName != "NEW HORIZONS GHOST")
 	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
 		"GALACTIC", "NONE", data.time, position, lightTime);
 
-	/*if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}*/
-	
+	/*
+	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	if (_targetName == "NEW HORIZONS GHOST" && interval > 60){
+		double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
+		SpiceManager::ref().getTargetPosition("NEW HORIZONS", _originName,
+			"GALACTIC", "NONE", _time, position, lightTime);
+	}
+	*/
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	_position[3] += 3;
 }

@@ -199,9 +199,18 @@ bool Scene::initialize() {
 		"${SHADERS}/pscstandard_fs.glsl");
     if( ! tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
-
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
+
+
+	// NH shader
+	tmpProgram = ProgramObject::Build("ModelProgram",
+		"${SHADERS}/model_vs.glsl",
+		"${SHADERS}/model_fs.glsl");
+	if (!tmpProgram) return false;
+	tmpProgram->setProgramObjectCallback(cb);
+	_programs.push_back(tmpProgram);
+	OsEng.ref().configurationManager()->setValue("GenericModelShader", tmpProgram);
 
 	// Night texture program
 	tmpProgram = ProgramObject::Build("nightTextureProgram",
@@ -209,7 +218,6 @@ bool Scene::initialize() {
 		"${SHADERS}/nighttexture_fs.glsl");
 	if (!tmpProgram) return false;
 	tmpProgram->setProgramObjectCallback(cb);
-
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
 

@@ -35,6 +35,7 @@
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/interaction/mousecontroller.h>
+#include <openspace/network/networkengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
@@ -44,7 +45,8 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer.h>
+#include <openspace/util/imagesequencer2.h> // testing
+
 
 
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -92,6 +94,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new scripting::ScriptEngine)
+    , _networkEngine(new NetworkEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
     , _gui(new gui::GUI)
@@ -100,6 +103,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 {
 	SpiceManager::initialize();
 	Time::initialize();
+	ImageSequencer2::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
@@ -111,6 +115,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _interactionHandler;
     delete _renderEngine;
     delete _scriptEngine;
+    delete _networkEngine;
     delete _commandlineParser;
     delete _console;
     delete _gui;
@@ -205,8 +210,6 @@ bool OpenSpaceEngine::create(
 				LERROR("Directory '" << p << "' could not be created");
 		}
 	}
-
-    ImageSequencer::initialize();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
@@ -698,6 +701,7 @@ void OpenSpaceEngine::encode() {
 		
 		_syncBuffer->write();
 	}
+    _networkEngine->sendStatusMessage();
 }
 
 void OpenSpaceEngine::decode() {
@@ -707,7 +711,6 @@ void OpenSpaceEngine::decode() {
 		Time::ref().deserialize(_syncBuffer);
 		_scriptEngine->deserialize(_syncBuffer);
 		_renderEngine->deserialize(_syncBuffer);
-		
 	}
 }
 
@@ -717,17 +720,7 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 	if (size == 0)
 		return;
 
-	// The first byte determines the type of message
-	const char type = receivedChars[0];
-	switch (type) {
-		case '0':  // LuaScript
-		{
-			std::string script = std::string(receivedChars + 1);
-			LINFO("Received Lua Script: '" << script << "'");
-			//_scriptEngine->runScript(script);
-			_scriptEngine->queueScript(script);
-		}
-	}
+    _networkEngine->handleMessage(std::string(receivedChars));
 }
 
 void OpenSpaceEngine::enableBarrier() {

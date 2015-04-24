@@ -192,7 +192,7 @@ void RenderablePlane::loadTexture() {
 			texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
 			if (_texture)
 				delete _texture;

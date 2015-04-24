@@ -27,6 +27,7 @@
 in vec4 vs_point_position;
 in vec4 vs_point_velocity;
 in float fade;
+uniform float forceFade;
 
 uniform vec3 color;
 
@@ -38,7 +39,7 @@ void main() {
     vec4 position = vs_point_position;
     float depth = pscDepth(position);
 
-    vec4 c = vec4(color, fade);
+    vec4 c = vec4(color, fade*forceFade);
     ABufferStruct_t frag = createGeometryFragment(c, position, depth);
     addToBuffer(frag);
 }

@@ -28,7 +28,13 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/imagesequencer.h>
+#include <openspace/util/imagesequencer2.h>
+
+#include <openspace/util/sequenceparser.h>
+#include <openspace/util/hongkangparser.h>
+#include <openspace/util/labelparser.h>
+#include <openspace/util/decoder.h>
+
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -71,15 +77,18 @@ protected:
 private:
 	void imageProjectGPU();
 
+	std::map<std::string, Decoder*> _fileTranslation;
+
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
-	properties::TriggerProperty _imageTrigger;
 	properties::IntProperty _rotation;
+	properties::FloatProperty _fadeProjection;
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
 
     ghoul::opengl::Texture* _texture;
+	ghoul::opengl::Texture* _textureOriginal;
 	ghoul::opengl::Texture* _textureProj;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
@@ -88,12 +97,19 @@ private:
 	glm::mat4  _transform;
 	glm::mat4  _projectorMatrix;
 
+	//sequenceloading
+	std::string _sequenceSource;
+	std::string _sequenceType;
+	bool _foundSequence;
+
 	// spice
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
 	std::string _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
+
+
 	float _fovy;
 	float _aspectRatio;
 	float _nearPlane;
@@ -103,8 +119,13 @@ private:
 	glm::dmat3 _instrumentMatrix;
 	glm::vec3  _boresight;
 
-	double _time[2];
+	double _time;
+	double _previousTime;
+	double _previousCapture;
 	double lightTime;
+
+	std::vector<Image> _imageTimes;
+	int _sequenceID;
 
 	std::string _target;
 	std::string _frame;
@@ -117,6 +138,8 @@ private:
 	GLuint _fboID;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
+
+	bool _once; //fml
 };
 }  // namespace openspace
 

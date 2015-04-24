@@ -38,7 +38,6 @@ uniform float time;
 uniform sampler2D texture1;
 
 in vec2 vs_st;
-in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
 
