@@ -48,9 +48,9 @@ void SpiceManager::initialize() {
 	_manager->_lastAssignedKernel = 0;
 
 	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, static_cast<char*>("REPORT"));
+	erract_c("SET", 0, const_cast<char*>("REPORT"));
 	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, static_cast<char*>("NONE"));
+	errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
 void SpiceManager::deinitialize() {
@@ -61,8 +61,8 @@ void SpiceManager::deinitialize() {
 	_manager = nullptr;
 
 	// Set values back to default
-	erract_c("SET", 0, static_cast<char*>("DEFAULT"));
-	errprt_c("SET", 0, static_cast<char*>("DEFAULT"));
+	erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+	errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
 SpiceManager& SpiceManager::ref() {
