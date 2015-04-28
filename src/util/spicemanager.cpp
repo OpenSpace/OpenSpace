@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-#define  MAXOBJ 1000
+#define  MAXOBJ 64
 #define  WINSIZ 10000
 
 namespace {
@@ -147,7 +147,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 	}
 }
 
-bool SpiceManager::findCkCoverage(std::string& path) {
+bool SpiceManager::findCkCoverage(const std::string& path) {
 	SpiceInt frame, numberOfIntervals;
 	SpiceDouble b, e;
 	std::pair <double, double> tempInterval;
@@ -178,7 +178,7 @@ bool SpiceManager::findCkCoverage(std::string& path) {
 	return true;
 }
 
-bool SpiceManager::findSpkCoverage(std::string& path) {
+bool SpiceManager::findSpkCoverage(const std::string& path) {
 	SpiceInt obj, numberOfIntervals;
 	SpiceDouble b, e;
 	std::pair <double, double> tempInterval;
@@ -186,7 +186,6 @@ bool SpiceManager::findSpkCoverage(std::string& path) {
 	SPICEDOUBLE_CELL(cover, WINSIZ);
 	
 	spkobj_c(path.c_str(), &ids);
-
 	for (SpiceInt i = 0; i < card_c(&ids); ++i) {
 		obj = SPICE_CELL_ELEM_I(&ids, i);
 
