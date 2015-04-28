@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef APPLE
-
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
@@ -38,8 +36,6 @@ layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 	#define _SCREEN_WIDTH_ SCREEN_WIDTH
 	#define _SCREEN_HEIGHT_ SCREEN_HEIGHT
 #endif 
-
-#endif
 
 layout(location = 0) out vec4 framebuffer_output_color;
 
@@ -66,7 +62,7 @@ void addToBuffer(ABufferStruct_t frag) {
 	framebuffer_output_color = _col_(frag);
 	gl_FragDepth = _z_(frag);
 #endif
-#ifndef APPLE
+
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 
 #ifdef ABUFFER_INCLUDE_POSITION
@@ -117,10 +113,7 @@ void addToBuffer(ABufferStruct_t frag) {
 	discard;
 	
 #endif 
-#endif
 }
-
-#ifndef APPLE
 
 ABufferStruct_t loadFromBuffer(uint id) {
 
@@ -136,12 +129,14 @@ ABufferStruct_t loadFromBuffer(uint id) {
 	uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
 #endif 
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED || ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
 	vec4 position = vec4(	uintBitsToFloat(u2.x),
 						uintBitsToFloat(u2.y),
 						uintBitsToFloat(u2.z),
 						uintBitsToFloat(u2.w));
 	
 	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w, position);
+#endif
 #else
 #if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
 	uvec4 u1 = imageLoad(fragmentTexture, int(id));
@@ -153,10 +148,13 @@ ABufferStruct_t loadFromBuffer(uint id) {
 	uvec4 u1 = imageLoad(fragmentTexture, int(offset));
 	//uvec4 u2 = imageLoad(fragmentTexture, int(offset+1));
 #endif 
+
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED || ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
 	return ABufferStruct_t(u1.x, u1.y, u1.z, u1.w);
 #endif
-
-
-}
-
 #endif
+
+	ABufferStruct_t frag;
+	return frag;
+	
+}
