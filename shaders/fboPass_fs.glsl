@@ -39,15 +39,15 @@ out vec4 color;
 #define M_PI 3.14159265358979323846
 
 vec4 uvToModel( float u, float v, vec4 radius, float segments){
-	const float fj = u * segments;
-	const float fi = v * segments;
+	float fj = u * segments;
+	float fi = v * segments;
 
-	const float theta = fi * float(M_PI) / segments;  // 0 -> PI
-	const float phi   = fj * float(M_PI) * 2.0f / segments;
+	float theta = fi * float(M_PI) / segments;  // 0 -> PI
+	float phi   = fj * float(M_PI) * 2.0f / segments;
 
-	const float x = radius[0] * sin(phi) * sin(theta);  //
-	const float y = radius[1] * cos(theta);             // up
-	const float z = radius[2] * cos(phi) * sin(theta);  //
+	float x = radius[0] * sin(phi) * sin(theta);  //
+	float y = radius[1] * cos(theta);             // up
+	float z = radius[2] * cos(phi) * sin(theta);  //
 
 	return vec4(x, y, z, radius[3]);
 }
