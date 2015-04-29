@@ -35,7 +35,6 @@
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
 
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -84,7 +83,7 @@ namespace {
 			-1.0f, 1.0f, 0.0f, 1.0f
 		);
 		_program->activate();
-		_program->setUniform("tex", unit.glEnum());
+		_program->setUniform("tex", unit);
 		_program->setUniform("ortho", ortho);
 
 		// Grow our buffer according to what we need
@@ -132,79 +131,16 @@ namespace {
 	}
 }
 
-//void renderIntProperty(Property* prop, const std::string& ownerName) {
-//	IntProperty* p = static_cast<IntProperty*>(prop);
-//	std::string name = p->guiName();
-//
-//	IntProperty::ValueType value = *p;
-//	ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-//	p->set(value);
-//}
-//
-//void renderFloatProperty(Property* prop, const std::string& ownerName) {
-//	FloatProperty* p = static_cast<FloatProperty*>(prop);
-//	std::string name = p->guiName();
-//
-//	FloatProperty::ValueType value = *p;
-//	ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
-//	p->set(value);
-//}
-//
-//void renderVec2Property(Property* prop, const std::string& ownerName) {
-//	Vec2Property* p = static_cast<Vec2Property*>(prop);
-//	std::string name = p->guiName();
-//
-//	Vec2Property::ValueType value = *p;
-//
-//	ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-//	p->set(value);
-//}
-//
-//void renderVec3Property(Property* prop, const std::string& ownerName) {
-//	Vec3Property* p = static_cast<Vec3Property*>(prop);
-//	std::string name = p->guiName();
-//
-//	Vec3Property::ValueType value = *p;
-//
-//	ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-//	p->set(value);
-//}
-//
-//void renderVec4Property(Property* prop, const std::string& ownerName) {
-//	Vec4Property* p = static_cast<Vec4Property*>(prop);
-//	std::string name = p->guiName();
-//
-//	Vec4Property::ValueType value = *p;
-//
-//	ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
-//	p->set(value);
-//}
-//
-//void renderTriggerProperty(Property* prop, const std::string& ownerName) {
-//	std::string name = prop->guiName();
-//	bool pressed = ImGui::Button((ownerName + "." + name).c_str());
-//	if (pressed)
-//		prop->set(0);
-//}
-//
-//}
-
 namespace openspace {
 namespace gui {
 
 GUI::GUI() 
 	: _isEnabled(false)
-	//, _showPropertyWindow(false)
-	//, _showPerformanceWindow(false)
 	, _showHelp(false)
-	//, _performanceMemory(nullptr)
 {
-	//_minMaxValues[0] = 100.f;
-	//_minMaxValues[1] = 1000.f;
 }
 
 GUI::~GUI() {
-	//delete _performanceMemory;
 	ImGui::Shutdown();
 }
 
@@ -267,8 +203,8 @@ void GUI::initializeGL() {
 	positionLocation = glGetAttribLocation(*_program, "in_position");
 	uvLocation = glGetAttribLocation(*_program, "in_uv");
 	colorLocation = glGetAttribLocation(*_program, "in_color");
-
-	glGenTextures(1, &fontTex);
+    
+    glGenTextures(1, &fontTex);
 	glBindTexture(GL_TEXTURE_2D, fontTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -296,47 +232,11 @@ void GUI::initializeGL() {
 	glVertexAttribPointer(colorLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, col));
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
 
 	_property.initializeGL();
 	_performance.initializeGL();
 	_help.initializeGL();
-	//if (!_program) {
-	//	LERROR("Could not load program object for GUI");
-	//	return;
-	//}
-	//	
- //   positionLocation = glGetAttribLocation(*_program, "in_position");
- //   uvLocation = glGetAttribLocation(*_program, "in_uv");
- //   colorLocation = glGetAttribLocation(*_program, "in_color");
-
- //   glGenTextures(1, &fontTex);
- //   glBindTexture(GL_TEXTURE_2D, fontTex);
- //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
- //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
- //   const void* png_data;
- //   unsigned int png_size;
- //   ImGui::GetDefaultFontData(NULL, NULL, &png_data, &png_size);
- //   int tex_x, tex_y, tex_comp;
- //   void* tex_data = stbi_load_from_memory((const unsigned char*)png_data, (int)png_size, &tex_x, &tex_y, &tex_comp, 0);
- //   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
- //   stbi_image_free(tex_data);
-
- //   glGenBuffers(1, &vbo);
- //   glBindBuffer(GL_ARRAY_BUFFER, vbo);
- //   glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
-
- //   glGenVertexArrays(1, &vao);
- //   glBindVertexArray(vao);
- //   glBindBuffer(GL_ARRAY_BUFFER, vbo);
- //   glEnableVertexAttribArray(positionLocation);
- //   glEnableVertexAttribArray(uvLocation);
- //   glEnableVertexAttribArray(colorLocation);
-
- //   glVertexAttribPointer(positionLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, pos));
- //   glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, uv));
- //   glVertexAttribPointer(colorLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, col));
- //   glBindVertexArray(0);
- //   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GUI::deinitializeGL() {
@@ -357,10 +257,15 @@ void GUI::startFrame(float deltaTime,
 				 const glm::vec2& mousePos,
 				 bool mouseButtonsPressed[2])
 {
+    
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
 	io.DeltaTime = deltaTime;
-	io.MousePos = ImVec2(mousePos.x, mousePos.y);
+#ifdef __APPLE__
+    io.MousePos = ImVec2(mousePos.x * 2, mousePos.y * 2);
+#else
+    io.MousePos = ImVec2(mousePos.x, mousePos.y);
+#endif
 	io.MouseDown[0] = mouseButtonsPressed[0];
 	io.MouseDown[1] = mouseButtonsPressed[1];
 

@@ -32,5 +32,5 @@ layout(location = 2) in vec4 out_color;
 layout(location = 0) out vec4 FragColor;
 
 void main() {
-   FragColor = out_color * texture(tex, out_uv.st);
+  FragColor = out_color * texture(tex, out_uv);
 }
