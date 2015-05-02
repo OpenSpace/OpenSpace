@@ -44,9 +44,6 @@ private:
     QLineEdit* _ipAddress;
     QLineEdit* _port;
     QPushButton* _connect;
-
-    QLineEdit* _playbook;
-    QPushButton* _load;
 };
 
 #endif // __CONFIGURATIONWIDGET_H__
