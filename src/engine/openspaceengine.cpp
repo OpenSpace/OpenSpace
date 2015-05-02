@@ -703,7 +703,8 @@ void OpenSpaceEngine::encode() {
 		
 		_syncBuffer->write();
 	}
-    _networkEngine->sendStatusMessage();
+    _networkEngine->publishStatusMessage();
+    _networkEngine->sendMessages();
 }
 
 void OpenSpaceEngine::decode() {
@@ -731,6 +732,10 @@ void OpenSpaceEngine::enableBarrier() {
 
 void OpenSpaceEngine::disableBarrier() {
     sgct::SGCTWindow::setBarrier(false);
+}
+
+NetworkEngine* OpenSpaceEngine::networkEngine() {
+    return _networkEngine;
 }
 
 }  // namespace openspace

@@ -69,6 +69,7 @@ public:
     interaction::InteractionHandler* interactionHandler();
     RenderEngine* renderEngine();
 	scripting::ScriptEngine* scriptEngine();
+    NetworkEngine* networkEngine();
 	LuaConsole* console();
 
 	gui::GUI* gui();

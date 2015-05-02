@@ -22,45 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMELINEWIDGET_H__
-#define __TIMELINEWIDGET_H__
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
-#include <QWidget>
-
-#include "common.h"
-
-#include <stdint.h>
-#include <map>
-#include <vector>
-
-class QPaintEvent;
-
-class TimelineWidget : public QWidget {
-Q_OBJECT
-public:
-	TimelineWidget(QWidget* parent);
-
-    void setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap);
-    void setCurrentTime(std::string currentTime, double et);
-
-protected:
-    void paintEvent(QPaintEvent* event);  
-    void drawContent(QPainter& painter, QRectF rect);
-    void drawLegend(QPainter& painter, QRectF rect);
-
-
-private:
-    std::vector<Image> _images;
-    std::map<uint8_t, std::string> _targetMap;
-    std::map<uint16_t, std::string> _instrumentMap;
-
-    std::vector<std::string> _targets;
-    std::vector<std::string> _instruments;
-
-    struct {
-        std::string time;
-        double et;
-    } _currentTime;
+struct Image {
+    double beginning;
+    double ending;
+    std::string target;
+    std::vector<std::string> instruments;
 };
 
-#endif // __TIMELINEWIDGET_H__
+#endif // __COMMON_H__

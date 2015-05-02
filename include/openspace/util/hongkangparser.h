@@ -65,6 +65,7 @@ namespace openspace {
 			                  std::string spacecraft, 
 							  std::vector<std::string> payload, 
 							  std::vector<std::string> potentialTargets);
+        void sendPlaybookInformation();
 
 		std::string _defaultCaptureImage;
 		double _metRef = 299180517;

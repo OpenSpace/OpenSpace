@@ -28,6 +28,8 @@
 #include <QWidget>
 #include <QTcpSocket>
 
+#include "common.h"
+
 class ConfigurationWidget;
 class TimeControlWidget;
 class InformationWidget;
@@ -49,6 +51,7 @@ private slots:
 	//void sendCommandButton();
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
+    void handlePlaybook(QByteArray data);
 
 private:
     ConfigurationWidget* _configurationWidget;
