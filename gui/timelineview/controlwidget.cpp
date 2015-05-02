@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "timecontrolwidget.h"
+#include "controlwidget.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -31,7 +31,25 @@
 #include <QPushButton>
 #include <QSlider>
 
-TimeControlWidget::TimeControlWidget(QWidget* parent)
+namespace {
+    struct ImportantDate {
+        QString date;
+        QString focus;
+        QString coordinateSystem;
+    };
+
+    const ImportantDate ImportantDates[] = {
+        { "2007-02-27T16:40:00.00", "JupiterProjection", "Jupiter" },
+        { "2015-07-14T10:50:00.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:22:00.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:36:40.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:48:43.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T12:04:35.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T15:02:46.00", "PlutoProjection", "Pluto" }
+    };
+}
+
+ControlWidget::ControlWidget(QWidget* parent)
     : QWidget(parent)
     , _currentTime(new QLabel("Current Time"))
     , _setTime(new QComboBox)
@@ -42,6 +60,16 @@ TimeControlWidget::TimeControlWidget(QWidget* parent)
     , _play(new QPushButton("|>"))
     , _forward(new QPushButton(">>"))
 {
+    for (const ImportantDate& d : ImportantDates)
+        _setTime->addItem(d.date);
+    QObject::connect(
+        _setTime,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(onDateChange())
+    );
+
+
     _setDelta->setMinimum(-100);
     _setDelta->setMaximum(100);
     _setDelta->setValue(0);
@@ -99,33 +127,47 @@ TimeControlWidget::TimeControlWidget(QWidget* parent)
     setLayout(layout);
 }
 
-void TimeControlWidget::update(QString currentTime, QString currentDelta) {
+void ControlWidget::update(QString currentTime, QString currentDelta) {
     _currentTime->setText(currentTime);
     _currentDelta->setText(currentDelta);
 }
 
-void TimeControlWidget::onValueChange() {
+void ControlWidget::onValueChange() {
     QString script = "openspace.time.setDeltaTime(" + QString::number(_setDelta->value()) + ");";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onRewindButton() {
+void ControlWidget::onRewindButton() {
     QString script = "openspace.time.setDeltaTime(-openspace.time.deltaTime());";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onPauseButton() {
+void ControlWidget::onPauseButton() {
     QString script = "openspace.time.setPause(true);";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onPlayButton() {
+void ControlWidget::onPlayButton() {
     QString script = "openspace.time.setPause(false);";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onForwardButton() {
+void ControlWidget::onForwardButton() {
     QString script = "openspace.time.setDeltaTime(-openspace.time.deltaTime());";
     emit scriptActivity(script);
 
+}
+
+void ControlWidget::onDateChange() {
+    int index = _setTime->currentIndex();
+    QString date = ImportantDates[index].date;
+    QString focus = ImportantDates[index].focus;
+    QString coordinateSystem = ImportantDates[index].coordinateSystem;
+    //QString script =
+    //    "openspace.time.setTime('" + date + "');\
+    //     openspace.setOrigin('" + focus + "');\
+    //     openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    QString script =
+        "openspace.setOrigin('" + focus + "');";
+    emit scriptActivity(script);
 }

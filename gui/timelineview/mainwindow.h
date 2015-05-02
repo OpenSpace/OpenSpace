@@ -31,7 +31,7 @@
 #include "common.h"
 
 class ConfigurationWidget;
-class TimeControlWidget;
+class ControlWidget;
 class InformationWidget;
 class TimelineWidget;
 
@@ -55,7 +55,7 @@ private slots:
 
 private:
     ConfigurationWidget* _configurationWidget;
-    TimeControlWidget* _timeControlWidget;
+    ControlWidget* _timeControlWidget;
     InformationWidget* _informationWidget;
     TimelineWidget* _timelineWidget;
     

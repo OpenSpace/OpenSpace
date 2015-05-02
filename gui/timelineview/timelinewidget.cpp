@@ -124,9 +124,9 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
 
     std::vector<Image>::const_iterator start = _images.end();
     std::vector<Image>::const_iterator end = _images.end();
-    for (std::vector<Image>::const_iterator it = _images.begin(); it != _image.end(); ++it) {
-        if (it->beginning > lowerTime 
-    }
+    //for (std::vector<Image>::const_iterator it = _images.begin(); it != _images.end(); ++it) {
+    //    if (it->beginning > lowerTime 
+    //}
 
     //std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [lowerTime](const Image& i) { return i.beginning < lowerTime; });
     ////std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _iamges.end(), upperTime)

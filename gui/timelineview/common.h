@@ -28,6 +28,8 @@
 struct Image {
     double beginning;
     double ending;
+    std::string beginningString;
+    std::string endingString;
     std::string target;
     std::vector<std::string> instruments;
 };

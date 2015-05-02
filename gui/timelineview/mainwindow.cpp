@@ -25,7 +25,7 @@
 #include "mainwindow.h"
 
 #include "configurationwidget.h"
-#include "timecontrolwidget.h"
+#include "controlwidget.h"
 #include "informationwidget.h"
 #include "timelinewidget.h"
 
@@ -69,7 +69,7 @@ MainWindow::MainWindow()
 	setWindowTitle("OpenSpace Timeline");
 
     _configurationWidget = new ConfigurationWidget(this);
-    _timeControlWidget = new TimeControlWidget(this);
+    _timeControlWidget = new ControlWidget(this);
     _informationWidget = new InformationWidget(this);
     _timelineWidget = new TimelineWidget(this);
 
@@ -174,7 +174,7 @@ void MainWindow::handleStatusMessage(QByteArray data) {
         QString::fromStdString(std::string(timeString.begin(), timeString.end())),
         QString::number(delta.value)
     );
-    _timelineWidget->setCurrentTime(std::string(timeString.begin(), timeString.end()));
+    _timelineWidget->setCurrentTime(std::string(timeString.begin(), timeString.end()), et.value);
 }
 
 std::vector<std::string> instrumentsFromId(uint16_t instrumentId, std::map<uint16_t, std::string> instrumentMap) {
