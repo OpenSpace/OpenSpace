@@ -629,70 +629,72 @@ namespace openspace {
 						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
 						std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
-						int timeleft = nextTarget.first - currentTime;
+                        if (currentTarget.first > 0.0) {
 
-						int hour   = timeleft / 3600;
-						int second = timeleft % 3600;
-						int minute = second / 60;
-					        second = second % 60;
+                            int timeleft = nextTarget.first - currentTime;
 
-						std::string hh, mm, ss, coundtown;
+                            int hour = timeleft / 3600;
+                            int second = timeleft % 3600;
+                            int minute = second / 60;
+                            second = second % 60;
 
-						if (hour   < 10) hh.append("0");
-						if (minute < 10) mm.append("0");
-						if (second < 10) ss.append("0");
+                            std::string hh, mm, ss, coundtown;
 
-						hh.append(std::to_string(hour));
-						mm.append(std::to_string(minute));
-						ss.append(std::to_string(second));
+                            if (hour < 10) hh.append("0");
+                            if (minute < 10) mm.append("0");
+                            if (second < 10) ss.append("0");
 
-
-						glm::vec4 b2(1.00, 0.51, 0.00, 1);
-						PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
-
-						std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
-						std::string space;
-						glm::vec4 color;
-						int isize = incidentTargets.second.size(); 
-							for (int p = 0; p < isize; p++){
-								double t = (double)(p + 1) / (double)(isize+1);
-								t = (p > isize / 2) ? 1-t : t;
-								t += 0.3;
-								color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
-								PrintColorText(i, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
-							for (int k = 0; k < 10; k++){ space += " "; }
-						}
-						i++;
-					
-						std::vector<std::pair<std::string, bool>> instrVec = ImageSequencer2::ref().getActiveInstruments();
-
-						glm::vec4 active(0.58, 1, 0.00, 1);
+                            hh.append(std::to_string(hour));
+                            mm.append(std::to_string(minute));
+                            ss.append(std::to_string(second));
 
 
-						glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
-						glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+                            glm::vec4 b2(1.00, 0.51, 0.00, 1);
+                            PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
+
+                            std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+                            std::string space;
+                            glm::vec4 color;
+                            int isize = incidentTargets.second.size();
+                            for (int p = 0; p < isize; p++){
+                                double t = (double)(p + 1) / (double)(isize + 1);
+                                t = (p > isize / 2) ? 1 - t : t;
+                                t += 0.3;
+                                color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
+                                PrintColorText(i, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
+                                for (int k = 0; k < 10; k++){ space += " "; }
+                            }
+                            i++;
+
+                            std::vector<std::pair<std::string, bool>> instrVec = ImageSequencer2::ref().getActiveInstruments();
+
+                            glm::vec4 active(0.58, 1, 0.00, 1);
 
 
-						double reduce = 0.01;
+                            glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
+                            glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-						PrintColorText(i++, "Active Instruments : ", 10, active);
-						for (int k = 0; k < instrVec.size(); k++){
 
-							if (instrVec[k].second == false){
-								PrintColorText(i, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), instrVec[k].first.c_str());
-							}
-							else{
-								PrintColorText(i, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								if (instrVec[k].first == "NH_LORRI"){
-									PrintColorText(i, " + ", 10, firing);
-								}
-								PrintColorText(i, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, active, instrVec[k].first.c_str());
+                            double reduce = 0.01;
 
-							}
-						}
-						
+                            PrintColorText(i++, "Active Instruments : ", 10, active);
+                            for (int k = 0; k < instrVec.size(); k++){
+
+                                if (instrVec[k].second == false){
+                                    PrintColorText(i, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+                                    PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), instrVec[k].first.c_str());
+                                }
+                                else{
+                                    PrintColorText(i, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+                                    if (instrVec[k].first == "NH_LORRI"){
+                                        PrintColorText(i, " + ", 10, firing);
+                                    }
+                                    PrintColorText(i, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+                                    PrintColorText(i++, "    %5s", 10, active, instrVec[k].first.c_str());
+
+                                }
+                            }
+                        }
 					}
 					
 #undef PrintText

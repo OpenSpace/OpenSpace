@@ -116,9 +116,11 @@ std::pair<double, std::string> ImageSequencer2::getCurrentTarget(){
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end()){
+	if (it != _targetTimes.end() && it != _targetTimes.begin()){
 		return *std::prev(it);
 	}
+    else
+        return std::make_pair(0.0, "No Target");
 }
 
 std::pair<double, std::vector<std::string>> ImageSequencer2::getIncidentTargetList(int range){
@@ -225,7 +227,7 @@ bool ImageSequencer2::getImagePaths(std::vector<std::pair<double, std::string>>&
 		auto curr = std::lower_bound(begin, end, findCurrent, compareTime);
 		auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
 
-		if (curr != begin && curr != end  && prev != begin && prev != end){
+		if (curr != begin && curr != end  && prev != begin && prev != end && prev < curr){
 			std::transform(prev, curr, std::back_inserter(captureTimes),
 				[](const Image& i) {
 				return std::make_pair(i.startTime, i.path);
