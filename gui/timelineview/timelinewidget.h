@@ -47,7 +47,7 @@ protected:
     void paintEvent(QPaintEvent* event);  
     void drawContent(QPainter& painter, QRectF rect);
     void drawLegend(QPainter& painter, QRectF rect);
-
+    void drawImages(QPainter& painter, QRectF rect, std::vector<Image>::const_iterator beginning, std::vector<Image>::const_iterator ending, double minimumTime, double maximumTime);
 
 private:
     std::vector<Image> _images;

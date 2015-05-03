@@ -163,11 +163,11 @@ void ControlWidget::onDateChange() {
     QString date = ImportantDates[index].date;
     QString focus = ImportantDates[index].focus;
     QString coordinateSystem = ImportantDates[index].coordinateSystem;
-    //QString script =
-    //    "openspace.time.setTime('" + date + "');\
-    //     openspace.setOrigin('" + focus + "');\
-    //     openspace.changeCoordinateSystem('" + coordinateSystem + "');";
     QString script =
-        "openspace.setOrigin('" + focus + "');";
+        "openspace.time.setTime('" + date + "');\
+         openspace.setOrigin('" + focus + "');\
+         openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    //QString script =
+    //    "openspace.setOrigin('" + focus + "');";
     emit scriptActivity(script);
 }

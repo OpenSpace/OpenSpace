@@ -121,18 +121,10 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
 
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
-
-    std::vector<Image>::const_iterator start = _images.end();
-    std::vector<Image>::const_iterator end = _images.end();
-    //for (std::vector<Image>::const_iterator it = _images.begin(); it != _images.end(); ++it) {
-    //    if (it->beginning > lowerTime 
-    //}
-
-    //std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [lowerTime](const Image& i) { return i.beginning < lowerTime; });
-    ////std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _iamges.end(), upperTime)
-
-
-
+    std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [](const Image& i, double time) { return i.beginning < time; });
+    std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _images.end(), upperTime, [](const Image& i, double time) { return i.ending < time; });
+    if (lower != _images.end() && upper != _images.end())
+        drawImages(painter, timelineRect, lower, upper, lowerTime, upperTime);
 }
 
 void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
@@ -185,5 +177,30 @@ void TimelineWidget::setCurrentTime(std::string currentTime, double et) {
     _currentTime.et = std::move(et);
     repaint();
 
+}
+
+void TimelineWidget::drawImages(
+    QPainter& painter,
+    QRectF rect,
+    std::vector<Image>::const_iterator beginning,
+    std::vector<Image>::const_iterator ending,
+    double minimumTime, double maximumTime)
+{
+    int width = rect.width();
+
+    for (std::vector<Image>::const_iterator cur = beginning; cur != ending; ++cur) {
+        //double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+        //double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
+        double t = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+
+        int loc = rect.top() + rect.height() * t;
+
+        //int begin = rect.top() + rect.height() * tBeg;
+        //int end = rect.top() + rect.height() * tEnd;
+
+        //painter.drawRect(begin, 0, width, end);
+        painter.drawLine(QPointF(0, loc), QPointF(rect.width(), loc));
+        
+    }
 }
 

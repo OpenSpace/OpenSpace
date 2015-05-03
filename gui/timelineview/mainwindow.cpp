@@ -231,6 +231,7 @@ void MainWindow::handlePlaybook(QByteArray data) {
 
 
 void MainWindow::sendScript(QString script) {
-    _socket->write(("0" + script + "\r\n").toLatin1());
+    if (_socket)
+        _socket->write(("0" + script + "\r\n").toLatin1());
 }
 
