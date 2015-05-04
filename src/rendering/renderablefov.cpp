@@ -104,7 +104,7 @@ namespace openspace{
 }
 
 void RenderableFov::allocateData(){ 
-	int points = 10;
+	int points = 20;
 	_stride[0] = points;
 	_isize[0]  = points;
 	_iarray1[0] = new int[_isize[0]];
