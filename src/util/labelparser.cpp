@@ -74,10 +74,10 @@ LabelParser::LabelParser(const std::string& fileName,
 			typeDictionary.getValue(keySpecs, specsOfInterestDictionary);
 
 			_specsOfInterest.resize(specsOfInterestDictionary.size());
-			for (int i = 0; i < _specsOfInterest.size(); ++i) {
+			for (int n = 0; n < _specsOfInterest.size(); ++n) {
 				std::string readMe;
-				specsOfInterestDictionary.getValue(std::to_string(i + 1), readMe);
-				_specsOfInterest[i] = readMe;
+				specsOfInterestDictionary.getValue(std::to_string(n + 1), readMe);
+				_specsOfInterest[n] = readMe;
 			}
 			ghoul::Dictionary convertDictionary;
 			typeDictionary.getValue(keyConvert, convertDictionary);
@@ -103,6 +103,18 @@ std::string LabelParser::decode(std::string line){
 			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return.
 		}
 	}
+	return "";
+}
+
+std::string LabelParser::encode(std::string line) {
+	for (auto key : _fileTranslation) {
+		std::size_t value = line.find(key.first);
+		if (value != std::string::npos) {
+			//std::cout << line.substr(value) << std::endl;
+			return line.substr(value);
+		}
+	}
+	return "";
 }
 
 void LabelParser::create(){
@@ -114,16 +126,18 @@ void LabelParser::create(){
 		return a.first < b.first;
 	};
 	std::string previousTarget;
+	std::string lblName = "";
 
 	ghoul::filesystem::Directory sequenceDir(_fileName, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	for (auto path : sequencePaths){
+		//std::cout << path << std::endl;
 		if (size_t position = path.find_last_of(".") + 1){
 			if (position != std::string::npos){
 				ghoul::filesystem::File currentFile(path);
 				std::string extension = currentFile.fileExtension();
 
-				if (extension == "lbl"){ // discovered header file 		
+				if (extension == "lbl" || extension == "LBL"){ // discovered header file 		
 					std::ifstream file(currentFile.path());
 
 					if (!file.good()) LERROR("Failed to open label file '" << currentFile.path() << "'");
@@ -154,6 +168,7 @@ void LabelParser::create(){
 						}
 						if (read == "INSTRUMENT_ID"){
 							_instrumentID = decode(line);
+							lblName = encode(line);
 							count++;
 						}
 						if (read == "DETECTOR_TYPE"){
@@ -184,6 +199,11 @@ void LabelParser::create(){
 							std::string ext = "jpg";
 							path.replace(path.begin() + position, path.end(), ext);
 							bool fileExists = FileSys.fileExists(path);
+							if (!fileExists) {
+								ext = "JPG";
+								path.replace(path.begin() + position, path.end(), ext);
+								fileExists = FileSys.fileExists(path);
+							}
 							if (fileExists) {
 								Image image;
 								std::vector<std::string> spiceInstrument;
@@ -226,7 +246,7 @@ void LabelParser::create(){
 
 	//print all
 	for (auto target : _subsetMap){
-		_instrumentTimes.push_back(std::make_pair("LORRI", _subsetMap[target.first]._range));
+		_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
 		std::string min, max;
 		SpiceManager::ref().getDateFromET(target.second._range._min, min);
 		SpiceManager::ref().getDateFromET(target.second._range._max, max);
