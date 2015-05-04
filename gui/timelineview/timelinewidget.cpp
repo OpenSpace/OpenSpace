@@ -32,16 +32,18 @@
 
 namespace {
     static const int LegendHeight = 105;
-    static const int TimeWidth = 150;
+    static const int TimeWidth = 200;
+    
+    static const int TextOffset = 5;
 
-    const QColor targetColors[] = {
-        QColor(251, 180, 174),
-        QColor(179, 205, 227),
-        QColor(204, 235, 197),
-        QColor(222, 203, 228),
-        QColor(254, 217, 166),
-        QColor(255, 255, 204)
-    };
+    //const QColor targetColors[] = {
+    //    QColor(251, 180, 174),
+    //    QColor(179, 205, 227),
+    //    QColor(204, 235, 197),
+    //    QColor(222, 203, 228),
+    //    QColor(254, 217, 166),
+    //    QColor(255, 255, 204)
+    //};
 
     const QColor instrumentColors[] = {
         QColor(228, 26, 28),
@@ -116,8 +118,7 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     // Draw current time
     painter.setBrush(QBrush(Qt::black));
     painter.drawLine(QPointF(0, timelineRect.height() / 2), QPointF(timelineRect.width(), timelineRect.height() / 2));
-    painter.drawText(timelineRect.width(), timelineRect.height() / 2, QString::fromStdString(_currentTime.time));
-
+    painter.drawText(timelineRect.width(), timelineRect.height() / 2 + TextOffset, QString::fromStdString(_currentTime.time));
 
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
@@ -135,18 +136,18 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
     // Draw Targets
     int currentHorizontalPosition = Padding;
     int currentVerticalPosition = Padding;
-    for (int i = 0; i < _targets.size(); ++i) {
+    //for (int i = 0; i < _targets.size(); ++i) {
 
-        const std::string& target = _targets[i];
-        
-        painter.setBrush(QBrush(targetColors[i]));
-        painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
-        currentHorizontalPosition += BoxSize + Padding;
+    //    const std::string& target = _targets[i];
+    //    
+    //    painter.setBrush(QBrush(targetColors[i]));
+    //    painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
+    //    currentHorizontalPosition += BoxSize + Padding;
 
-        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2, QString::fromStdString(target));
-        int textWidth = painter.boundingRect(QRect(), QString::fromStdString(target)).width();
-        currentHorizontalPosition += std::max(textWidth, 25) + Padding;
-    }
+    //    painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, QString::fromStdString(target));
+    //    int textWidth = painter.boundingRect(QRect(), QString::fromStdString(target)).width();
+    //    currentHorizontalPosition += std::max(textWidth, 25) + Padding;
+    //}
 
     // Draw Instruments
     currentHorizontalPosition = Padding;
@@ -160,13 +161,13 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         const std::string& instrument = _instruments[i];
 
         //painter.setBrush(QBrush(instrumentColors[i]));
-        painter.setBrush(Qt::NoBrush);
+        painter.setBrush(QBrush(instrumentColors[i]));
         painter.setPen(QPen(instrumentColors[i]));
         painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
         currentHorizontalPosition += BoxSize + Padding;
 
         painter.setPen(QPen(Qt::black));
-        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2, QString::fromStdString(instrument));
+        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, QString::fromStdString(instrument));
         int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
         currentHorizontalPosition += std::max(textWidth, 25) + Padding;
     }
@@ -181,25 +182,26 @@ void TimelineWidget::setCurrentTime(std::string currentTime, double et) {
 
 void TimelineWidget::drawImages(
     QPainter& painter,
-    QRectF rect,
+    QRectF timelineRect,
     std::vector<Image>::const_iterator beginning,
     std::vector<Image>::const_iterator ending,
     double minimumTime, double maximumTime)
 {
-    int width = rect.width();
+    int width = timelineRect.width();
 
     for (std::vector<Image>::const_iterator cur = beginning; cur <= ending; ++cur) {
-        //double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
-        //double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
-        double t = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+        double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+        double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
+        //double t = (cur->ending - minimumTime) / (maximumTime - minimumTime);
 
-        int loc = rect.top() + rect.height() * t;
-        int height = 25;
+        int loc = timelineRect.top() + timelineRect.height() * tBeg;
+        int height = (timelineRect.top() + timelineRect.height() * tEnd) - loc;
+        height = std::max(height, 5);
 
         std::string target = cur->target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
         int iTarget = std::distance(_targets.begin(), it);
-        QColor targetColor = targetColors[iTarget];
+        //QColor targetColor = targetColors[iTarget];
 
         std::vector<std::string> instruments = cur->instruments;
         std::vector<QColor> colors;
@@ -209,11 +211,23 @@ void TimelineWidget::drawImages(
             colors.push_back(instrumentColors[i]);
         }
 
-        painter.setBrush(QBrush(targetColor));
-        if (colors.empty()))
-            painter.setPen(QPen(Qt::black));
+        //painter.setBrush(QBrush(targetColor));
+        if (colors.empty())
+            painter.setBrush(QBrush(Qt::black));
         else
-            painter.setPen(QPen(colors[0]));
-        painter.drawRect(0, loc, rect.width(), height);
+            painter.setBrush(QBrush(colors[0]));
+        painter.drawRect(0, loc, timelineRect.width(), height);
+
+        painter.setBrush(QBrush(Qt::black));
+        painter.setPen(QPen(Qt::black));
+        //QString firstLine = QString::fromStdString(cur->beginningString);
+        //QString secondLine = QString::fromStdString(cur->target);
+        QString line = QString::fromStdString(cur->beginningString) + QString("(") + QString::fromStdString(cur->target) + QString(")");
+
+        painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
+
+        //painter.drawText(timelineRect.width(), loc + height / 2 - 1.5 * TextOffset, firstLine);
+        //painter.drawText(timelineRect.width(), loc + height / 2 + 1.5 * TextOffset, secondLine);
+
     }
 }

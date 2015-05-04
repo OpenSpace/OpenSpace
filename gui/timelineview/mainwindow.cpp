@@ -142,6 +142,7 @@ void MainWindow::readTcpData() {
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
 
         while (_socket->waitForReadyRead() && data.size() < size) {
+        //while (data.size() < size) {
             data = data.append(_socket->readAll());
         }
         handlePlaybook(data.mid(2));
