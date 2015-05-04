@@ -96,6 +96,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	dictionary.getValue(keyDestination, _destination);
 	dictionary.getValue(keyBody, _target);
 
+	openspace::SpiceManager::ref().addFrame(_target, _source);
+
     setBoundingSphere(pss(1.f, 9.f));
 	addProperty(_performShading);
 

@@ -641,13 +641,12 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 
 	int visible;
 
-	std::string bodyfixed = "IAU_";
-	bodyfixed += target;
+	std::string frame = frameFromBody(target);
 
 	fovtrg_c(instrument.c_str(),
 		target.c_str(),
 		method.c_str(),
-		bodyfixed.c_str(),
+		frame.c_str(),
 		aberrationCorrection.c_str(),
 		observer.c_str(),
 		&targetEpoch,
@@ -688,9 +687,9 @@ bool SpiceManager::getSurfaceIntercept(const std::string& target,
 	// allow client specify non-inertial frame. 
 	std::string bodyfixed = "IAU_";
 	convert = (referenceFrame.find(bodyfixed) == std::string::npos);
-	if (convert){
-		bodyfixed += target;
-	}else{
+	if (convert) {
+		bodyfixed = frameFromBody(target);
+	} else {
 		bodyfixed = referenceFrame;
 	}
 
@@ -813,11 +812,11 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 			ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
 
 	success = !(failed_c());
-	if (!success  && !_showErrors) {
+	if (!success) {
 		reset_c();
 		estimated = getEstimatedTransformMatrix(ephemerisTime, fromFrame, toFrame, positionMatrix);		
 	}
-	else {
+	if (_showErrors) {
 		bool hasError = checkForError("Error retrieving position transform matrix from "
 			"frame '" + fromFrame + "' to frame '" + toFrame +
 			"' at time '" + std::to_string(ephemerisTime));
@@ -956,6 +955,34 @@ bool SpiceManager::getFieldOfView(int instrument,
 	frameName = std::string(frameNameBuffer);
 
 	return true;
+}
+
+std::string SpiceManager::frameFromBody(const std::string body) const {
+
+	for (auto pair : _frameByBody) {
+		if (pair.first == body) {
+			return pair.second;
+		}
+	}
+
+	std::string unionPrefix = "IAU_";
+	std::string frame = "";
+
+	if (body.find(unionPrefix) == std::string::npos)
+		frame = unionPrefix + body;
+	else
+		frame = body;
+
+	return frame;
+}
+
+bool SpiceManager::addFrame(const std::string body, const std::string frame) {
+	if (body == "" || frame == "")
+		return false;
+	else {
+		_frameByBody.push_back(std::make_pair(body, frame));
+		return true;
+	}
 }
 
 bool SpiceManager::checkForError(std::string errorMessage) {
