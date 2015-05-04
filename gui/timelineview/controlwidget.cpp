@@ -47,6 +47,20 @@ namespace {
         { "2015-07-14T12:04:35.00", "PlutoProjection", "Pluto" },
         { "2015-07-14T15:02:46.00", "PlutoProjection", "Pluto" }
     };
+
+    struct FocusNode {
+        QString guiName;
+        QString name;
+        QString coordinateSystem;
+    };
+    const FocusNode FocusNodes[] = {
+        { "Earth", "Earth", "Sun" },
+        { "Sun", "Sun", "Sun" },
+        { "Pluto", "PlutoProjection", "Pluto" },
+        { "Charon", "Charon", "Pluto" },
+        { "Jupiter", "JupiterProjection", "Jupiter" },
+        { "New Horizons", "NewHorizons", ""}
+    };
 }
 
 ControlWidget::ControlWidget(QWidget* parent)
@@ -59,6 +73,7 @@ ControlWidget::ControlWidget(QWidget* parent)
     , _pause(new QPushButton("||"))
     , _play(new QPushButton("|>"))
     , _forward(new QPushButton(">>"))
+    , _focusNode(new QComboBox)
 {
     for (const ImportantDate& d : ImportantDates)
         _setTime->addItem(d.date);
@@ -69,6 +84,14 @@ ControlWidget::ControlWidget(QWidget* parent)
         SLOT(onDateChange())
     );
 
+    for (const FocusNode& f : FocusNodes)
+        _focusNode->addItem(f.guiName);
+    QObject::connect(
+        _focusNode,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(onFocusChange())
+    );
 
     _setDelta->setMinimum(-100);
     _setDelta->setMaximum(100);
@@ -124,6 +147,8 @@ ControlWidget::ControlWidget(QWidget* parent)
     controlContainer->setLayout(controlContainerLayout);
     layout->addWidget(controlContainer, 3, 0, 1, 2);
 
+    layout->addWidget(_focusNode, 4, 0, 1, 2);
+
     setLayout(layout);
 }
 
@@ -167,7 +192,23 @@ void ControlWidget::onDateChange() {
         "openspace.time.setTime('" + date + "');\
          openspace.setOrigin('" + focus + "');\
          openspace.changeCoordinateSystem('" + coordinateSystem + "');";
-    //QString script =
-    //    "openspace.setOrigin('" + focus + "');";
+    emit scriptActivity(script);
+}
+
+void ControlWidget::onFocusChange() {
+    int index = _focusNode->currentIndex();
+    QString name = FocusNodes[index].name;
+    QString coordinateSystem = FocusNodes[index].coordinateSystem;
+    if (coordinateSystem.isEmpty()) {
+        int date = _currentTime->text().left(4).toInt();
+        if (date < 2008)
+            coordinateSystem = "Jupiter";
+        else if (date < 2014)
+            coordinateSystem = "Sun";
+        else
+            coordinateSystem = "Pluto";
+
+    }
+    QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
     emit scriptActivity(script);
 }

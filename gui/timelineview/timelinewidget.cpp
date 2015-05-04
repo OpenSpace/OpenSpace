@@ -188,19 +188,32 @@ void TimelineWidget::drawImages(
 {
     int width = rect.width();
 
-    for (std::vector<Image>::const_iterator cur = beginning; cur != ending; ++cur) {
+    for (std::vector<Image>::const_iterator cur = beginning; cur <= ending; ++cur) {
         //double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
         //double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
         double t = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
 
         int loc = rect.top() + rect.height() * t;
+        int height = 25;
 
-        //int begin = rect.top() + rect.height() * tBeg;
-        //int end = rect.top() + rect.height() * tEnd;
+        std::string target = cur->target;
+        auto it = std::find(_targets.begin(), _targets.end(), target);
+        int iTarget = std::distance(_targets.begin(), it);
+        QColor targetColor = targetColors[iTarget];
 
-        //painter.drawRect(begin, 0, width, end);
-        painter.drawLine(QPointF(0, loc), QPointF(rect.width(), loc));
-        
+        std::vector<std::string> instruments = cur->instruments;
+        std::vector<QColor> colors;
+        for (std::string instrument : instruments) {
+            auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
+            int i = std::distance(_instruments.begin(), it);
+            colors.push_back(instrumentColors[i]);
+        }
+
+        painter.setBrush(QBrush(targetColor));
+        if (colors.empty()))
+            painter.setPen(QPen(Qt::black));
+        else
+            painter.setPen(QPen(colors[0]));
+        painter.drawRect(0, loc, rect.width(), height);
     }
 }
-

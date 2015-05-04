@@ -45,6 +45,7 @@ signals:
 private slots:
     void onValueChange();
     void onDateChange();
+    void onFocusChange();
     void onRewindButton();
     void onPauseButton();
     void onPlayButton();
@@ -60,8 +61,7 @@ private:
     QPushButton* _pause;
     QPushButton* _play;
     QPushButton* _forward;
-
-    bool _stateNoNotification = false;
+    QComboBox* _focusNode;
 };
 
 #endif // __CONTROLWIDGET_H__
