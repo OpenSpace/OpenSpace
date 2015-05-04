@@ -187,8 +187,12 @@ std::vector<std::string> instrumentsFromId(uint16_t instrumentId, std::map<uint1
     std::vector<std::string> results;
     for (int i = 0; i < 16; ++i) {
         uint16_t testValue = 1 << i;
-        if ((testValue & instrumentId) == 1)
-            results.push_back(instrumentMap[testValue]);
+        if ((testValue & instrumentId) != 0) {
+            std::string t = instrumentMap.at(testValue);
+            if (t.empty())
+                qDebug() << "Empty instrument";
+            results.push_back(t);
+        }
     }
     return results;
 }
@@ -200,18 +204,22 @@ void MainWindow::handlePlaybook(QByteArray data) {
     uint32_t totalData = readFromBuffer<uint32_t>(buffer, currentReadLocation);
 
     uint8_t nTargets = readFromBuffer<uint8_t>(buffer, currentReadLocation);
+    qDebug() << "Targets: " << nTargets;
     std::map<uint8_t, std::string> targetMap;
     for (uint8_t i = 0; i < nTargets; ++i) {
         uint8_t id = readFromBuffer<uint8_t>(buffer, currentReadLocation);
         std::string value = readFromBuffer<std::string>(buffer, currentReadLocation);
+        qDebug() << QString::fromStdString(value);
         targetMap[id] = value;
     }
 
     uint8_t nInstruments = readFromBuffer<uint8_t>(buffer, currentReadLocation);
+    qDebug() << "Instruments: " << nInstruments;
     std::map<uint16_t, std::string> instrumentMap;
     for (uint8_t i = 0; i < nInstruments; ++i) {
-        uint8_t id = readFromBuffer<uint16_t>(buffer, currentReadLocation);
+        uint16_t id = readFromBuffer<uint16_t>(buffer, currentReadLocation);
         std::string value = readFromBuffer<std::string>(buffer, currentReadLocation);
+        qDebug() << QString::fromStdString(value);
         instrumentMap[id] = value;
     }
 
@@ -229,6 +237,8 @@ void MainWindow::handlePlaybook(QByteArray data) {
         uint16_t instrumentId = readFromBuffer<uint16_t>(buffer, currentReadLocation);
         image.target = targetMap[targetId];
         image.instruments = instrumentsFromId(instrumentId, instrumentMap);
+        if (image.instruments.empty())
+            qDebug() << "Instruments were empty";
         images.push_back(image);
     }
 

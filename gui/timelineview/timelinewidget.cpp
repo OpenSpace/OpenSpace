@@ -116,17 +116,21 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     painter.setBrush(QBrush(Qt::white));  painter.drawRect(timelineRect);
     painter.setBrush(QBrush(Qt::gray));   painter.drawRect(dateRect);
 
-    // Draw current time
-    painter.setBrush(QBrush(Qt::black));
-    painter.drawLine(QPointF(0, timelineRect.height() / 2), QPointF(timelineRect.width(), timelineRect.height() / 2));
-    painter.drawText(timelineRect.width(), timelineRect.height() / 2 + TextOffset, QString::fromStdString(_currentTime.time));
-
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
     std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [](const Image& i, double time) { return i.beginning < time; });
     std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _images.end(), upperTime, [](const Image& i, double time) { return i.ending < time; });
     if (lower != _images.end() && upper != _images.end())
-        drawImages(painter, timelineRect, lower, upper, lowerTime, upperTime);
+        drawImages(painter, timelineRect, std::vector<Image>(lower, upper), lowerTime, upperTime);
+        
+    //drawImages(painter, timelineRect, _images, lowerTime, upperTime);
+
+
+    // Draw current time
+    painter.setBrush(QBrush(Qt::black));
+    painter.setPen(QPen(Qt::black));
+    painter.drawLine(QPointF(0, timelineRect.height() / 2), QPointF(timelineRect.width(), timelineRect.height() / 2));
+    painter.drawText(timelineRect.width(), timelineRect.height() / 2 + TextOffset, QString::fromStdString(_currentTime.time));
 }
 
 void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
@@ -184,59 +188,56 @@ void TimelineWidget::setCurrentTime(std::string currentTime, double et) {
 void TimelineWidget::drawImages(
     QPainter& painter,
     QRectF timelineRect,
-    std::vector<Image>::const_iterator beginning,
-    std::vector<Image>::const_iterator ending,
+    std::vector<Image> images,
     double minimumTime, double maximumTime)
 {
     int width = timelineRect.width();
 
-    for (std::vector<Image>::const_iterator cur = beginning; cur < ending; ++cur) {
-        double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+    int nInstruments = 0;
+    std::set<std::string> instrumentSet;
+    for (const Image& i : images) {
+        for (std::string instrument : i.instruments)
+            instrumentSet.insert(instrument);
+    }
+    std::map<std::string, int> instruments;
+    for (std::set<std::string>::const_iterator it = instrumentSet.begin(); it != instrumentSet.end(); ++it)
+        instruments[*it] = std::distance(instrumentSet.begin(), it);
+
+    for (const Image& i : images) {
+        double tBeg = (i.beginning - minimumTime) / (maximumTime - minimumTime);
         tBeg = std::max(tBeg, 0.0);
-        double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
+        double tEnd = (i.ending - minimumTime) / (maximumTime - minimumTime);
         tEnd = std::min(tEnd, 1.0);
-        //double t = (cur->ending - minimumTime) / (maximumTime - minimumTime);
 
         int loc = timelineRect.top() + timelineRect.height() * tBeg;
         int height = (timelineRect.top() + timelineRect.height() * tEnd) - loc;
         height = std::max(height, 5);
 
-        std::string target = cur->target;
+        std::string target = i.target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
         int iTarget = std::distance(_targets.begin(), it);
-        //QColor targetColor = targetColors[iTarget];
 
-        std::vector<std::string> instruments = cur->instruments;
-        std::vector<QColor> colors;
-        for (std::string instrument : instruments) {
+        //std::vector<QColor> colors;
+        for (std::string instrument : i.instruments) {
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
+            if (it == _instruments.end())
+                qDebug() << "Instrument not found";
             int i = std::distance(_instruments.begin(), it);
-            colors.push_back(instrumentColors[i]);
-        }
 
-        //painter.setBrush(QBrush(targetColor));
-        if (colors.empty())
-            painter.setBrush(QBrush(Qt::black));
-        else
-            painter.setBrush(QBrush(colors[0]));
-        painter.drawRect(0, loc, timelineRect.width(), height);
+            painter.setBrush(QBrush(instrumentColors[i]));
+
+            double width = timelineRect.width() / instruments.size();
+            double pos = instruments[instrument] * width;
+
+            painter.drawRect(pos, loc, width, height);
+        }
 
         painter.setBrush(QBrush(Qt::black));
         painter.setPen(QPen(Qt::black));
-        //QString firstLine = QString::fromStdString(cur->beginningString);
-        //QString secondLine = QString::fromStdString(cur->target);
-        QString line = QString::fromStdString(cur->beginningString) + QString("(") + QString::fromStdString(cur->target) + QString(")");
+        QString line = QString::fromStdString(i.beginningString) + QString(" (") + QString::fromStdString(i.target) + QString(")");
 
         painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
-
-        //painter.drawText(timelineRect.width(), loc + height / 2 - 1.5 * TextOffset, firstLine);
-        //painter.drawText(timelineRect.width(), loc + height / 2 + 1.5 * TextOffset, secondLine);
-
     }
-
-    painter.setPen(QPen(Qt::green));
-    int _tmp = timelineRect.top() + timelineRect.height() * 1.0;
-    painter.drawLine(QPointF(0, _tmp), QPointF(timelineRect.width(), _tmp));
 }
 
 void TimelineWidget::socketConnected() {

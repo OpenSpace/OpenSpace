@@ -393,7 +393,7 @@ void HongKangParser::sendPlaybookInformation() {
             for (auto instrument : image.activeInstruments) {
                 if (instrumentMap.find(instrument) == instrumentMap.end()) {
                     instrumentMap[instrument] = currentInstrumentId;
-                    currentInstrumentId = currentInstrumentId  << 1;
+                    currentInstrumentId = currentInstrumentId << 1;
                 }
             }
         }
@@ -432,6 +432,10 @@ void HongKangParser::sendPlaybookInformation() {
             uint8_t targetId = targetMap[target.first];
             writeToBuffer(buffer, currentWriteLocation, targetId);
             uint16_t totalInstrumentId = 0;
+            if (image.activeInstruments.empty()) {
+                LERROR("Image had no active instruments");
+            }
+
             for (auto instrument : image.activeInstruments) {
                 uint16_t thisInstrumentId = instrumentMap[instrument];
                 totalInstrumentId |= thisInstrumentId;
