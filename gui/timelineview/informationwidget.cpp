@@ -31,3 +31,11 @@ InformationWidget::InformationWidget(QWidget* parent)
     : QTextEdit(parent)
 {
 }
+
+void InformationWidget::socketConnected() {
+    setDisabled(false);
+}
+
+void InformationWidget::socketDisconnected() {
+    setDisabled(true);
+}

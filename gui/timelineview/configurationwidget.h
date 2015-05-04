@@ -34,6 +34,9 @@ Q_OBJECT
 public:
 	ConfigurationWidget(QWidget* parent);
 
+    void socketConnected();
+    void socketDisconnected();
+
 signals:
     void connect(QString host, QString port);
 

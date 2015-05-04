@@ -31,6 +31,8 @@ class InformationWidget : public QTextEdit {
 Q_OBJECT
 public:
 	InformationWidget(QWidget* parent);
+    void socketConnected();
+    void socketDisconnected();
 };
 
 #endif // __INFORMATIONWIDGET_H__

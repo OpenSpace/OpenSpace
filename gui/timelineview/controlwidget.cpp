@@ -212,3 +212,11 @@ void ControlWidget::onFocusChange() {
     QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
     emit scriptActivity(script);
 }
+
+void ControlWidget::socketConnected() {
+    setDisabled(false);
+}
+
+void ControlWidget::socketDisconnected() {
+    setDisabled(true);
+}

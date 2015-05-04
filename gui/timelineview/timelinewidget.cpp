@@ -28,6 +28,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+#include <iostream>
 #include <set>
 
 namespace {
@@ -189,9 +190,11 @@ void TimelineWidget::drawImages(
 {
     int width = timelineRect.width();
 
-    for (std::vector<Image>::const_iterator cur = beginning; cur <= ending; ++cur) {
+    for (std::vector<Image>::const_iterator cur = beginning; cur < ending; ++cur) {
         double tBeg = (cur->beginning - minimumTime) / (maximumTime - minimumTime);
+        tBeg = std::max(tBeg, 0.0);
         double tEnd = (cur->ending - minimumTime) / (maximumTime - minimumTime);
+        tEnd = std::min(tEnd, 1.0);
         //double t = (cur->ending - minimumTime) / (maximumTime - minimumTime);
 
         int loc = timelineRect.top() + timelineRect.height() * tBeg;
@@ -230,4 +233,19 @@ void TimelineWidget::drawImages(
         //painter.drawText(timelineRect.width(), loc + height / 2 + 1.5 * TextOffset, secondLine);
 
     }
+
+    painter.setPen(QPen(Qt::green));
+    int _tmp = timelineRect.top() + timelineRect.height() * 1.0;
+    painter.drawLine(QPointF(0, _tmp), QPointF(timelineRect.width(), _tmp));
+}
+
+void TimelineWidget::socketConnected() {
+    setDisabled(false);
+}
+
+void TimelineWidget::socketDisconnected() {
+    setDisabled(true);
+    _images.clear();
+    _instruments.clear();
+    _targets.clear();
 }

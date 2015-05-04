@@ -42,6 +42,8 @@ public:
 
     void setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap);
     void setCurrentTime(std::string currentTime, double et);
+    void socketConnected();
+    void socketDisconnected();
 
 protected:
     void paintEvent(QPaintEvent* event);  

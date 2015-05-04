@@ -47,6 +47,9 @@ public slots:
 private slots:
     void onConnect(QString host, QString port);
 
+    void onSocketConnected();
+    void onSocketDisconnected();
+
 	//void onConnectButton();
 	//void sendCommandButton();
 	void readTcpData();

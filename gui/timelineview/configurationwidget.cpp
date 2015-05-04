@@ -46,3 +46,9 @@ ConfigurationWidget::ConfigurationWidget(QWidget* parent)
 void ConfigurationWidget::onConnectButton() {
     emit connect(_ipAddress->text(), _port->text());
 }
+
+void ConfigurationWidget::socketConnected() {
+}
+
+void ConfigurationWidget::socketDisconnected() {
+}

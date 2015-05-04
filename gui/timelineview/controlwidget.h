@@ -39,6 +39,9 @@ public:
 
     void update(QString currentTime, QString currentDelta);
 
+    void socketConnected();
+    void socketDisconnected();
+
 signals:
     void scriptActivity(QString script);
 
@@ -50,7 +53,6 @@ private slots:
     void onPauseButton();
     void onPlayButton();
     void onForwardButton();
-
 
 private:
     QLabel* _currentTime;

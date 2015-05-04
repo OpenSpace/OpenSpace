@@ -90,8 +90,12 @@ MainWindow::MainWindow()
         this, SLOT(sendScript(QString))
     );
 
-
 	setLayout(layout);
+
+    _configurationWidget->socketDisconnected();
+    _timeControlWidget->socketDisconnected();
+    _informationWidget->socketDisconnected();
+    _timelineWidget->socketDisconnected();
 }
 
 MainWindow::~MainWindow() {
@@ -102,10 +106,11 @@ void MainWindow::onConnect(QString host, QString port) {
     delete _socket;
 
     _socket = new QTcpSocket(this);
-    connect(_socket, SIGNAL(readyRead()), SLOT(readTcpData()));
-    _socket->connectToHost(host, port.toUInt());
+    QObject::connect(_socket, SIGNAL(readyRead()), SLOT(readTcpData()));
+    QObject::connect(_socket, SIGNAL(connected()), SLOT(onSocketConnected()));
+    QObject::connect(_socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
 
-    _socket->write(QString("1\r\n").toLatin1());
+    _socket->connectToHost(host, port.toUInt());
 }
 
 
@@ -228,11 +233,26 @@ void MainWindow::handlePlaybook(QByteArray data) {
     }
 
     _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
-}
 
+    _configurationWidget->socketConnected();
+    _timeControlWidget->socketConnected();
+    _informationWidget->socketConnected();
+    _timelineWidget->socketConnected();
+}
 
 void MainWindow::sendScript(QString script) {
     if (_socket)
         _socket->write(("0" + script + "\r\n").toLatin1());
+}
+
+void MainWindow::onSocketConnected() {
+    _socket->write(QString("1\r\n").toLatin1());
+}
+
+void MainWindow::onSocketDisconnected() {
+    _configurationWidget->socketDisconnected();
+    _timeControlWidget->socketDisconnected();
+    _informationWidget->socketDisconnected();
+    _timelineWidget->socketDisconnected();
 }
 
