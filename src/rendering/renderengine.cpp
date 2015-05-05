@@ -629,7 +629,7 @@ namespace openspace {
 							    else{
 								    PrintColorText(line, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
 								    if (t.first == "NH_LORRI"){
-									    PrintColorTextArg(line, " + ", 10, firing);
+									    PrintColorText(line, " + ", 10, firing);
 								    }
 								    PrintColorText(line, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
 								    PrintColorTextArg(line++, "    %5s", 10, active, t.first.c_str());
