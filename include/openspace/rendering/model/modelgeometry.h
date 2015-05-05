@@ -43,6 +43,7 @@ public:
     virtual void deinitialize();
 	void render();
 	virtual bool loadModel(const std::string& filename) = 0;
+	void changeRenderMode(const GLenum mode);
 
 protected:
 	RenderableModel* _parent;
@@ -59,6 +60,7 @@ protected:
 	GLuint _vaoID;
 	GLuint _vbo;
 	GLuint _ibo;
+	GLenum _mode;
 
 	std::vector<Vertex> _vertices;
 	std::vector<int> _indices;

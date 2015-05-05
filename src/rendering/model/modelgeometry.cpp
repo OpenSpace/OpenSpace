@@ -64,6 +64,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
+	, _mode(GL_TRIANGLES)
 {
 	setName("ModelGeometry");
 	using constants::scenegraphnode::keyName;
@@ -90,8 +91,12 @@ ModelGeometry::~ModelGeometry() {
 void ModelGeometry::render() {
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(_mode, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+void ModelGeometry::changeRenderMode(const GLenum mode){
+	_mode = mode;
 }
 
 bool ModelGeometry::initialize(RenderableModel* parent) {
@@ -152,7 +157,7 @@ bool ModelGeometry::loadObj(const std::string& filename){
 		else {
 			LINFO("Cache for Model'" << filename << "' not found");
 		}
-		LINFO("Loading OBJ file '" << filename << "'");
+		LINFO("Loading Model file '" << filename << "'");
 		bool success = loadModel(filename);
 		if (!success)
 			//return false;

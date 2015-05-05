@@ -79,7 +79,6 @@ int main(int argc, char** argv) {
 	sgct::MessageHandler::instance()->setLogToCallback(true);
 	sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
 
-
 	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 

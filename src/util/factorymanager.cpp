@@ -37,6 +37,7 @@
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/planets/simplespheregeometry.h>
 #include <openspace/rendering/renderableplane.h>
+#include <openspace/rendering/renderableplaneprojection.h>
 #include <openspace/rendering/renderablevolumegl.h>
 #include <openspace/rendering/planets/simplespheregeometry.h>
 #include <openspace/rendering/model/modelgeometry.h>
@@ -44,12 +45,17 @@
 
 // positioninformation
 #include <openspace/scene/staticephemeris.h>
+#include <openspace/scene/dynamicephemeris.h>
 #include <openspace/scene/spiceephemeris.h>
 
 // projection
 #include <openspace/rendering/planets/renderableplanetprojection.h>
 #include <openspace/rendering/planets/simplespheregeometryprojection.h>
 #include <openspace/rendering/planets/planetgeometryprojection.h>
+
+#include <openspace/util/decoder.h>
+#include <openspace/util/instrumentdecoder.h>
+#include <openspace/util/targetdecoder.h>
 
 
 // std
@@ -89,6 +95,8 @@ void FactoryManager::initialize()
 		"RenderableModel");
     _manager->factory<Renderable>()->registerClass<RenderablePlane>(
         "RenderablePlane");
+	_manager->factory<Renderable>()->registerClass<RenderablePlaneProjection>(
+		"RenderablePlaneProjection");
     _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
         "RenderableVolumeGL");
     _manager->factory<Renderable>()->registerClass<RenderableFieldlines>(
@@ -97,7 +105,13 @@ void FactoryManager::initialize()
     // Add Ephimerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
     _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
+	_manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Dynamic");
     _manager->factory<Ephemeris>()->registerClass<SpiceEphemeris>("Spice");
+
+	_manager->addFactory(new ghoul::TemplateFactory<Decoder>);
+	_manager->factory<Decoder>()->registerClass<InstrumentDecoder>("Instrument");
+	_manager->factory<Decoder>()->registerClass<TargetDecoder>("Target");
+
 
     // Add PlanetGeometry
     _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);

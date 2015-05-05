@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/rendering/renderableplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -125,14 +126,10 @@ bool RenderablePlane::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    // Plane program
-    _shader = ghoul::opengl::ProgramObject::Build("Plane",
-        "${SHADERS}/modules/plane/plane_vs.glsl",
-        "${SHADERS}/modules/plane/plane_fs.glsl");
-    if (!_shader)
-        return false;
-    _shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
-
+	if (_shader == nullptr)
+		OsEng.ref().configurationManager()->getValue("planeProgram", _shader);
+	
+	_shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 	loadTexture();
 
 	return isReady();
@@ -144,7 +141,6 @@ bool RenderablePlane::deinitialize() {
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
 	delete _texture;
-    delete _shader;
 	return true;
 }
 
@@ -196,7 +192,7 @@ void RenderablePlane::loadTexture() {
 			texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
 			if (_texture)
 				delete _texture;
