@@ -40,6 +40,7 @@ namespace {
 
     const ImportantDate ImportantDates[] = {
         { "2007-02-27T16:40:00.00", "JupiterProjection", "Jupiter" },
+        { "2015-07-14T10:10:00.00", "PlutoProjection", "Pluto" },
         { "2015-07-14T10:50:00.00", "PlutoProjection", "Pluto" },
         { "2015-07-14T11:22:00.00", "PlutoProjection", "Pluto" },
         { "2015-07-14T11:36:40.00", "PlutoProjection", "Pluto" },
@@ -59,7 +60,10 @@ namespace {
         { "Pluto", "PlutoProjection", "Pluto" },
         { "Charon", "Charon", "Pluto" },
         { "Jupiter", "JupiterProjection", "Jupiter" },
-        { "New Horizons", "NewHorizons", ""}
+        { "New Horizons", "NewHorizons", "" },
+        { "Nix", "Nix", "Pluto" },
+        { "Kerberos", "Kerberos", "Pluto" },
+        { "Hydra", "Hydra", "Pluto" },
     };
 }
 
@@ -158,7 +162,20 @@ void ControlWidget::update(QString currentTime, QString currentDelta) {
 }
 
 void ControlWidget::onValueChange() {
-    QString script = "openspace.time.setDeltaTime(" + QString::number(_setDelta->value()) + ");";
+    float value = static_cast<float>(_setDelta->value());
+
+    int delta;
+    if (value < 0.f) {
+        value = -value;
+        float d = std::pow(2, value / 10);
+        delta = static_cast<int>(-d);
+    }
+    else {
+        float d = std::pow(2, value / 10);
+        delta = static_cast<int>(d);
+    }
+    
+    QString script = "openspace.time.setDeltaTime(" + QString::number(delta) + ");";
     emit scriptActivity(script);
 }
 
