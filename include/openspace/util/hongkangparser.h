@@ -25,7 +25,7 @@
 
 #ifndef __HONGKANGPARSER_H__
 #define __HONGKANGPARSER_H__
-#include <openspace/util/ImageSequencer2.h>
+#include <openspace/util/imagesequencer2.h>
 #include <openspace/util/sequenceparser.h>
 
 #include <map>
