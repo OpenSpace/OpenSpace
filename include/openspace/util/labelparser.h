@@ -56,6 +56,7 @@ private:
 			            std::string path);
 
 	std::string decode(std::string line);
+	std::string encode(std::string line);
 
 	bool augmentWithSpice(Image& image, 
 			                std::string spacecraft, 

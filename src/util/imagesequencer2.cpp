@@ -203,7 +203,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 
 	if (!instumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
 	// dev. note: this is only due to LORRI being the only instrument implemented so far.
-	return (instrumentID == "NH_LORRI") ? getImagePaths(captures, projectee) : false;
+	return getImagePaths(captures, projectee);
 }
 
 bool ImageSequencer2::getImagePaths(std::vector<Image>& captures, 

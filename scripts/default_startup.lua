@@ -9,6 +9,10 @@ openspace.setInvertRoll(true);
 
 --openspace.time.setTime("2007 FEB 28 03:45:00")          -- Io Capture!
 
+
+--openspace.time.setTime("2011 AUG 6 07:15:00")			-- Dawn @ Vestaprojection
+--openspace.time.setTime("2014 AUG 28 03:45:00")		-- Rosetta Travels 67p in triangular shape
+
 openspace.time.setDeltaTime(10)                         -- How many seconds pass per second of realtime, changeable in the GUI
 
 dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keybindings

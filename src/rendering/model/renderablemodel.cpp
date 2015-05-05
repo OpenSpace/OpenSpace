@@ -99,6 +99,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	dictionary.getValue(keyDestination, _destination);
 	dictionary.getValue(keyBody, _target);
 
+	openspace::SpiceManager::ref().addFrame(_target, _source);
+
     setBoundingSphere(pss(1.f, 9.f));
 	addProperty(_performShading);
 
@@ -178,7 +180,7 @@ void RenderableModel::render(const RenderData& data) {
 		_alpha = 1.0f;
 
 	psc tmppos;
-	SpiceManager::ref().getTargetPosition(_source, "SUN", "GALACTIC", "NONE", time, tmppos, lt);
+	SpiceManager::ref().getTargetPosition(_target, "SUN", "GALACTIC", "NONE", time, tmppos, lt);
 	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
 	_programObject->setUniform("cam_dir", cam_dir);
 	_programObject->setUniform("transparency", _alpha);

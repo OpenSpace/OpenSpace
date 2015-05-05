@@ -333,7 +333,8 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 	 }
 	if (_nrInserted == 0){
 		_rebuild = false;
-	}else{
+	} 
+	else {
 		_rebuild = true;
 		//update size etc;
 		_vtotal[1] = _nrInserted;

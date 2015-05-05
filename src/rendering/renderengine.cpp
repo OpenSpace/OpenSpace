@@ -539,18 +539,19 @@ namespace openspace {
                     int i = 0;
 			
 					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
-					/*
+				
 					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 					PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
+					/*
 					PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
 					PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
 					PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
 					PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 					PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 					*/
-				
-					if (openspace::ImageSequencer2::ref().isReady()){
+					
+					if (openspace::ImageSequencer2::ref().isReady()) {
 						double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 						double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
 						std::string progress = "|";
@@ -983,7 +984,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
 		newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr 
 		//||	dawnNode == nullptr 
-		//||   vestaNode == nullptr
+		//||  vestaNode == nullptr
 		) {
 	    LERROR("Necessary nodes does not exist");
 		return;
@@ -996,6 +997,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		solarSystemBarycenterNode->setParent(plutoBarycenterNode);
 		newHorizonsNode->setParent(plutoBarycenterNode);
 		newHorizonsGhostNode->setParent(plutoBarycenterNode);
+
+		//dawnNode->setParent(plutoBarycenterNode);
+		//vestaNode->setParent(plutoBarycenterNode);
 
 		//newHorizonsTrailNode->setParent(plutoBarycenterNode);
 		ghoul::Dictionary solarDictionary =
@@ -1074,6 +1078,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
 
 		//newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
+		//dawnNode->setParent(solarSystemBarycenterNode);
+		//vestaNode->setParent(solarSystemBarycenterNode);
 
         ghoul::Dictionary plutoDictionary =
         {
@@ -1150,6 +1156,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		newHorizonsNode->setParent(jupiterBarycenterNode);
 		//newHorizonsTrailNode->setParent(jupiterBarycenterNode);
 
+		//dawnNode->setParent(jupiterBarycenterNode);
+		//vestaNode->setParent(jupiterBarycenterNode);
+
+
 		ghoul::Dictionary solarDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
@@ -1163,7 +1173,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		{
 			{ std::string("Type"), std::string("Spice") },
 			{ std::string("Body"), std::string("PlUTO BARYCENTER") },
-			{ std::string("Reference"), std::string("ECLIPJ2000") },
+			{ std::string("Reference"), std::string("GALACTIC") },
 			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
@@ -1221,11 +1231,22 @@ void RenderEngine::changeViewPoint(std::string origin) {
         return;
     }
 	//if (origin == "Vesta") {
+	//	
+	//	vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+	//	vestaNode->setEphemeris(new StaticEphemeris);
+	//
+	//	solarSystemBarycenterNode->setParent(vestaNode);
+	//	newHorizonsNode->setParent(vestaNode);
+	//
+	//	dawnNode->setParent(vestaNode);
+	//	plutoBarycenterNode->setParent(vestaNode);
+	//
+	//
 	//	ghoul::Dictionary plutoDictionary =
 	//	{
 	//		{ std::string("Type"), std::string("Spice") },
 	//		{ std::string("Body"), std::string("PLUTO BARYCENTER") },
-	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Reference"), std::string("GALACTIC") },
 	//		{ std::string("Observer"), std::string("VESTA") },
 	//		{ std::string("Kernels"), ghoul::Dictionary() }
 	//	};
@@ -1233,7 +1254,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	{
 	//		{ std::string("Type"), std::string("Spice") },
 	//		{ std::string("Body"), std::string("SUN") },
-	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Reference"), std::string("GALACTIC") },
 	//		{ std::string("Observer"), std::string("VESTA") },
 	//		{ std::string("Kernels"), ghoul::Dictionary() }
 	//	};
@@ -1242,7 +1263,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	{
 	//		{ std::string("Type"), std::string("Spice") },
 	//		{ std::string("Body"), std::string("JUPITER BARYCENTER") },
-	//		{ std::string("Reference"), std::string("ECLIPJ2000") },
+	//		{ std::string("Reference"), std::string("GALACTIC") },
 	//		{ std::string("Observer"), std::string("VESTA") },
 	//		{ std::string("Kernels"), ghoul::Dictionary() }
 	//	};

@@ -282,7 +282,7 @@ void RenderablePlaneProjection::setTarget(std::string body) {
 	}
 	if (found) {
 		_target.body = body;
-		_target.frame = "IAU_" + body;
+		_target.frame = openspace::SpiceManager::ref().frameFromBody(body);
 	}
 }
 
