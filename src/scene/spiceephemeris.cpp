@@ -31,6 +31,7 @@
 
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
+	const std::string keyGhosting = "EphmerisGhosting";
 }
 
 namespace openspace {
@@ -50,6 +51,8 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
     if (!hasObserver)
         LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+
+	dictionary.getValue(keyGhosting, _ghosting);
 
 	ghoul::Dictionary kernels;
 	dictionary.getValue(keyKernels, kernels);
@@ -74,18 +77,16 @@ void SpiceEphemeris::update(const UpdateData& data) {
 
 	glm::dvec3 position(0,0,0);
 	double lightTime = 0.0;
-	//if (_targetName != "NEW HORIZONS GHOST")
 	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
 		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	/*
+	
 	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-	if (_targetName == "NEW HORIZONS GHOST" && interval > 60){
+	if (_ghosting == "TRUE" && interval > 60){
 		double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
-		SpiceManager::ref().getTargetPosition("NEW HORIZONS", _originName,
+		SpiceManager::ref().getTargetPosition(_targetName, _originName,
 			"GALACTIC", "NONE", _time, position, lightTime);
 	}
-	*/
+	
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	_position[3] += 3;
 }

@@ -341,7 +341,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 			       m_viewport[2], m_viewport[3]);
 	
 }
-#include <math.h>
+
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
 	//rotate boresight into correct alignment
 	_boresight = _instrumentMatrix*aim;
@@ -435,7 +435,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
 	setPscUniforms(_programObject, &data.camera, data.position);
-	
+
     // Bind texture
     ghoul::opengl::TextureUnit unit[2];
     unit[0].activate();
@@ -444,6 +444,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	unit[1].activate();
 	_textureProj->bind();
 	_programObject->setUniform("texture2", unit[1]); 
+
     // render geometry
     _geometry->render();
     // disable shader
@@ -460,7 +461,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
 	//floor fading to decimal
-	_fadeProjection = floorf(_fadeProjection * 10) / 10; 
+	//_fadeProjection = floorf(_fadeProjection * 10) / 10; 
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){

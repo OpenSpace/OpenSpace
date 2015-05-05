@@ -53,6 +53,7 @@ public:
 
  private:
     properties::FloatProperty _lineWidth;
+	properties::BoolProperty _drawSolid;
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
 	openspace::SceneGraphNode* _targetNode;

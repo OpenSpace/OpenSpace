@@ -68,9 +68,9 @@ void main()
 		float shine = 100;
 	
 		vec4 specular = vec4(1.0);
-		vec4 ambient = vec4(0.0,0.0,0.0,transparency);//diffuse*0.4;
-	
-		if(intensity > 0.0f){
+		vec4 ambient =diffuse*0.4;
+		ambient[3] = transparency;
+ 		if(intensity > 0.0f){
 			// halfway vector
 			vec3 h = normalize(l_dir + normalize(cam_dir));
 			// specular factor

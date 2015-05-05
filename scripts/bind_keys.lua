@@ -36,5 +36,19 @@ openspace.bindKey("j", "local b = openspace.getPropertyValue('PlutoText.renderab
 
 openspace.bindKey("l", "local b = openspace.getPropertyValue('Labels.renderable.performFading'); openspace.setPropertyValue('Labels.renderable.performFading', not b)")
 
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_LORRI.renderable.solidDraw'); openspace.setPropertyValue('NH_LORRI.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_LEISA.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_LEISA.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_PAN1.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_PAN1.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_PAN2.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_PAN2.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_RED.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_RED.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_BLUE.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_BLUE.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_FT.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_FT.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_METHANE.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_METHANE.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
+
+
+
+
 
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

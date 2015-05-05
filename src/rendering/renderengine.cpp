@@ -976,7 +976,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
     SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
 
-	//SceneGraphNode* newHorizonsGhostNode = sceneGraph()->sceneGraphNode("NewHorizonsGhost");
+	SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
 	//SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
 	//SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
 
@@ -995,6 +995,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		
 		solarSystemBarycenterNode->setParent(plutoBarycenterNode);
 		newHorizonsNode->setParent(plutoBarycenterNode);
+		newHorizonsGhostNode->setParent(plutoBarycenterNode);
+
 		//newHorizonsTrailNode->setParent(plutoBarycenterNode);
 		ghoul::Dictionary solarDictionary =
 		{
@@ -1049,17 +1051,18 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		//};
 		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 
-		/*
+		
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Body"), std::string("NEW HORIZONS") },
+			{ std::string("EphmerisGhosting"), std::string("TRUE") },
 			{ std::string("Reference"), std::string("GALACTIC") },
 			{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-		*/
+		
         return;
     }
     if (origin == "Sun") {
@@ -1068,6 +1071,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		plutoBarycenterNode->setParent(solarSystemBarycenterNode);
 		jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
 		newHorizonsNode->setParent(solarSystemBarycenterNode);
+		newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
+
 		//newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
 
         ghoul::Dictionary plutoDictionary =
@@ -1123,17 +1128,18 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		//};
 		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 		
-		/*
+		
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Body"), std::string("NEW HORIZONS") },
+			{ std::string("EphmerisGhosting"), std::string("TRUE") },
 			{ std::string("Reference"), std::string("GALACTIC") },
 			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-		*/
+		
         return;
     }
     if (origin == "Jupiter") {
@@ -1172,7 +1178,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		};
 		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
 		plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-		//newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+		newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+		newHorizonsGhostNode->setParent(jupiterBarycenterNode);
 		//newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
 
@@ -1197,17 +1204,20 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 
 
-		/*
+		
 		ghoul::Dictionary newHorizonsGhostDictionary =
 		{
 			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS GHOST") },
+			{ std::string("Body"), std::string("NEW HORIZONS") },
+			{ std::string("EphmerisGhosting"), std::string("TRUE") },
 			{ std::string("Reference"), std::string("GALACTIC") },
 			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
 			{ std::string("Kernels"), ghoul::Dictionary() }
 		};
 		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-		*/
+		newHorizonsGhostNode->setParent(jupiterBarycenterNode);
+
+	
         return;
     }
 	//if (origin == "Vesta") {

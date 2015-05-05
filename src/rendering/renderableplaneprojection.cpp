@@ -194,9 +194,10 @@ void RenderablePlaneProjection::updatePlane(const Image* img, double currentTime
 	
 	std::string target = "JUPITER"; //default
 	if (!_moving) {
-		target = findClosestTarget(currentTime);
+	//	target = findClosestTarget(currentTime);
 	}
-	
+	if (img != nullptr)
+	target = img->target;
 
 	setTarget(target);
 

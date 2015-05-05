@@ -71,6 +71,7 @@ namespace openspace{
         , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
         , _programObject(nullptr)
         , _texture(nullptr)
+		, _drawSolid("solidDraw", "Draw as Quads", false)
         , _mode(GL_LINES){
 
         bool success = dictionary.getValue(keyBody, _spacecraft);
@@ -100,6 +101,7 @@ namespace openspace{
         }
 
         addProperty(_lineWidth);
+		addProperty(_drawSolid);
 }
 
 void RenderableFov::allocateData(){ 
@@ -305,8 +307,6 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 				mid = bisection(current, next, tolerance);
 				for (int j = 1; j <= _isteps; j++){
 					t = ((double)j / _isteps);
-					// TODO: change the interpolate scheme to place points not on a straight line but instead 
-					//       using either slerp or some other viable method (goal: eliminate checkForIntercept -method)
 					interpolated = interpolate(current, mid, t);
 					_interceptVector = (j < _isteps) ? checkForIntercept(interpolated) : orthogonalProjection(interpolated);
 					insertPoint(_varray2, _interceptVector, col_sq);
@@ -426,6 +426,7 @@ void RenderableFov::render(const RenderData& data){
 		drawFOV = ImageSequencer2::ref().instumentActive(_instrumentID);
 	}
 
+
 	if (drawFOV){
 		// update only when time progresses.
 		if (_oldTime != _time){
@@ -463,8 +464,9 @@ void RenderableFov::render(const RenderData& data){
 			double targetEpoch;
 			// for each FOV vector
 			for (int i = 0; i <= bounds.size(); i++){
-				// compute surface intercept
 				int r = (i == bounds.size()) ? 0 : i;
+				
+				// compute surface intercept
 				openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 					_frame, _method, _aberrationCorrection,
 					_time, targetEpoch, bounds[r], ipoint, ivec, _interceptTag[r]);
@@ -512,17 +514,37 @@ void RenderableFov::render(const RenderData& data){
 			}
 
 			_interceptTag[bounds.size()] = _interceptTag[0]; 
-			
+
+
 			if (!(_instrumentID == "NH_LORRI")) // image plane replaces fov square
 				fovProjection(_interceptTag, bounds);
 			
 			updateData();
+			glm::vec3 aim = (spacecraftRot * glm::vec4(boresight, 1)).xyz;
+			psc position;
+			double lt;
+			SpiceManager::ref().getTargetPosition(_fovTarget,
+				_spacecraft,
+				_frame,
+				_aberrationCorrection,
+				_time,
+				position,
+				lt);
+
+			//if aimed 80 deg away from target, dont draw white square
+			if (glm::dot(glm::normalize(aim), glm::normalize(position.vec3())) < 0.2){
+				drawFOV = false;
+			}
+
 		}
 		_oldTime = _time;
 
+		if (!_drawSolid) _mode = GL_LINES;
+		else _mode = GL_TRIANGLE_STRIP;
+
 		glLineWidth(_lineWidth);
 		glBindVertexArray(_vaoID[0]);
-		glDrawArrays(GL_LINES, 0, _vtotal[0]); 
+		glDrawArrays(_mode, 0, _vtotal[0]);
 		glBindVertexArray(0);
 
 		glLineWidth(_lineWidth);
@@ -530,8 +552,6 @@ void RenderableFov::render(const RenderData& data){
 		glDrawArrays(GL_LINES, 0, _vtotal[0]);
 		glBindVertexArray(0);
 
-
-		//second vbo
 		if (drawFOV){
 			glLineWidth(1.f);
 			glBindVertexArray(_vaoID[1]);

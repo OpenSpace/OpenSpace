@@ -37,19 +37,21 @@
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/imagesequencer2.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
 #include "imgui.h"
 
-namespace {
-	const std::string _loggerCat = "RenderableModel";
+namespace { 
+	const std::string _loggerCat     = "RenderableModel";
 	const std::string keySource      = "Rotation.Source";
 	const std::string keyDestination = "Rotation.Destination";
-	const std::string keyBody = "Body";
-	const std::string keyStart = "StartTime";
-	const std::string keyEnd = "EndTime";
-	const std::string keyFading = "Shading.Fadeable";
+	const std::string keyBody        = "Body";
+	const std::string keyStart       = "StartTime";
+	const std::string keyEnd         = "EndTime";
+	const std::string keyFading      = "Shading.Fadeable";
+	const std::string keyGhosting      = "Shading.Ghosting";
 
 }
 
@@ -61,6 +63,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
 	, _geometry(nullptr)
+	, _isGhost(false)
 	, _performShading("performShading", "Perform Shading", true)
 	, _alpha(1.f)
 	, _fading("fading", "Fade", 0)
@@ -105,6 +108,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 		_performFade = fading;
 	}
 	addProperty(_performFade);
+
+	if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
+		bool ghosting;
+		dictionary.getValue(keyGhosting, ghosting);
+		_isGhost = ghosting;
+	}
 }
 
 bool RenderableModel::isReady() const {
@@ -203,12 +212,34 @@ void RenderableModel::render(const RenderData& data) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
+	double _time = data.time;
+
+	double futureTime;
+	if (_isGhost){
+		futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
+		double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
+		double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+		double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+		if (interval > 60){
+			if (t < 0.8){
+				_fading = t;
+			}
+			else if (t >= 0.95f){
+				_fading = _fading - 0.5f;
+			}
+		}
+		else{
+			_fading = 0.0f;
+		}
+		_time = futureTime;
+	}
+
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty())
-	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, data.time, _stateMatrix);
+	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
 
     double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", data.time, _sunPosition, lt);
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, _sunPosition, lt);
 }
 
 void RenderableModel::loadTexture() {

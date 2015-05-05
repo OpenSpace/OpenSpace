@@ -60,7 +60,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
-    , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+    , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _programObject(nullptr)
     , _programIsDirty(true)
     , _vaoID(0)
@@ -148,7 +148,7 @@ void RenderableTrail::render(const RenderData& data) {
 	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
 	const PowerScaledScalar& pssl = (position - origin).length();
 
-	if (pssl[0] < 0.00001){
+	if (pssl[0] < 0.000001){
 		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
 		_programObject->setUniform("forceFade", _distanceFade);
 	}
