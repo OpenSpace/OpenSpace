@@ -30,6 +30,9 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/highresclock.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+
 
 /* TODO for this class:
 *  In order to add geometry shader (for pretty-draw),
@@ -40,6 +43,7 @@
 namespace {
     const std::string _loggerCat = "RenderableTrail";
     //constants
+	const std::string keyName                    = "Name";
         const std::string keyBody                = "Body";
         const std::string keyObserver            = "Observer";
         const std::string keyFrame               = "Frame";
@@ -48,6 +52,7 @@ namespace {
         const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
         const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
         const std::string keyDayLength           = "DayLength";
+		const std::string keyStamps				 = "Timestamps";
 }
 
 namespace openspace {
@@ -56,7 +61,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
-    , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+    , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _programObject(nullptr)
     , _programIsDirty(true)
     , _vaoID(0)
@@ -64,6 +69,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _oldTime(std::numeric_limits<float>::max())
     , _successfullDictionaryFetch(true)
     , _needsSweep(true)
+	, _showTimestamps("timestamps", "Show Timestamps", false)
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
@@ -80,12 +86,17 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyColor, color);
     _lineColor = color;
 
+	if (dictionary.hasKeyAndValue<bool>(keyStamps))
+		dictionary.getValue(keyStamps, _showTimestamps);
+	addProperty(_showTimestamps);
+
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     addProperty(_lineFade);
 
     addProperty(_lineWidth);
+	_distanceFade = 1.0;
 }
 
 bool RenderableTrail::initialize() {
@@ -139,6 +150,19 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
 
+	const psc& position = data.camera.position();
+	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+	const PowerScaledScalar& pssl = (position - origin).length();
+
+	if (pssl[0] < 0.000001){
+		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+	else{
+		if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
@@ -147,11 +171,18 @@ void RenderableTrail::render(const RenderData& data) {
 
     glLineWidth(1.f);
 
+	if (_showTimestamps){
+		glPointSize(5.f);
+		glBindVertexArray(_vaoID);
+		glDrawArrays(GL_POINTS, 0, _vertexArray.size());
+		glBindVertexArray(0);
+	}
+
     _programObject->deactivate();
 }
 
 void RenderableTrail::update(const UpdateData& data) {
-    if (data.isTimeJump)
+	if (data.isTimeJump)
         _needsSweep = true;
 
     if (_needsSweep) {
@@ -166,7 +197,14 @@ void RenderableTrail::update(const UpdateData& data) {
         _programIsDirty = false;
     }
     double lightTime = 0.0;
-    psc pscPos, pscVel;
+    psc pscPos;
+
+	bool intervalSet = hasTimeInterval();
+	double start = DBL_MIN;
+	double end = DBL_MAX;
+	if (intervalSet) {
+		getInterval(start, end);
+	}
 
     // Points in the vertex array should always have a fixed distance. For this reason we
     // keep the first entry in the array floating and always pointing to the current date
@@ -176,9 +214,13 @@ void RenderableTrail::update(const UpdateData& data) {
     int nValues = floor(deltaTime / _increment);
 
     // Update the floating current time
-    // Is 'CN+S' correct? It has to be chosen to be the same as in SpiceEphemeris, but
-    // unsure if it is correct ---abock
-    SpiceManager::ref().getTargetState(_target, _observer, _frame, "NONE", data.time, pscPos, pscVel, lightTime);
+	if (start > data.time)
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, pscPos, lightTime);
+	else if (end < data.time)
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, pscPos, lightTime);
+	else
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, pscPos, lightTime);
+
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
@@ -193,8 +235,12 @@ void RenderableTrail::update(const UpdateData& data) {
 
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
-            SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", et, pscPos, pscVel, lightTime);
-            pscPos[3] += 3;
+			if (start > et)
+				et = start;
+			else if (end < et)
+				et = end;
+			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, pscPos, lightTime);
+			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
 
@@ -222,15 +268,28 @@ void RenderableTrail::fullYearSweep(double time) {
     float planetYear = SecondsPerEarthYear * _ratio;
     int segments = static_cast<int>(_tropic);
 
+	bool intervalSet = hasTimeInterval();
+	double start = DBL_MIN;
+	double end = DBL_MAX;
+	if (intervalSet) {
+		getInterval(start, end);
+	}
+
     _increment = planetYear / _tropic;
     
     _oldTime = time;
 
-    psc pscPos, pscVel;
+    psc pscPos;
+	bool validPosition = true;
     _vertexArray.resize(segments+2);
-    for (int i = 0; i < segments+2; i++){
-        SpiceManager::ref().getTargetState(_target, _observer, _frame, "CN+S", time, pscPos, pscVel, lightTime);
-        pscPos[3] += 3;
+    for (int i = 0; i < segments+2; i++) {
+		if (start > time)
+			time = start;
+		else if (end < time)
+			time = end;
+
+        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, pscPos, lightTime);
+		pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};
         time -= _increment;

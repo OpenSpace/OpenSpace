@@ -1,0 +1,9 @@
+-- Circular Dependencies in a different folder
+return {
+    ScenePath = "scene-folder",
+    Modules = {
+        "common",
+        "circular-dependency"
+    }
+}
+

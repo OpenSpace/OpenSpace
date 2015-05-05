@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#version __CONTEXT__
 
 uniform vec4 campos;
 uniform vec4 objpos;
@@ -60,7 +60,7 @@ void main()
 	//vec3 e = normalize(camdir);
 	vec3 l_pos = sun_pos; // sun.
 	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float terminatorBright = 0.4;
+	float terminatorBright = 0.1;
 	float intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
 	
 	float shine = 0.0001;

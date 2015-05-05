@@ -53,6 +53,7 @@ public:
 
  private:
     properties::FloatProperty _lineWidth;
+	properties::BoolProperty _drawSolid;
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
 	openspace::SceneGraphNode* _targetNode;
@@ -76,9 +77,9 @@ public:
 	int _nrInserted = 0;
 	int _isteps;
 	bool _rebuild = false;
-	bool _interceptTag[5];
+	bool _interceptTag[9];
 	bool _withinFOV;
-	psc _projectionBounds[4];
+	psc _projectionBounds[8];
 	psc _interceptVector;
 
 	// spice

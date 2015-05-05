@@ -1,0 +1,11 @@
+-- Multiple Dependencies in a different folder
+return {
+    ScenePath = "scene-folder",
+    CommonFolder = "common",
+    Modules = {
+        "multiple-dependencies",
+        "no-dependency",
+        "direct-dependency"
+    }
+}
+

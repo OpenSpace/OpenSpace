@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#version __CONTEXT__
+
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;

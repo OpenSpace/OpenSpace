@@ -147,12 +147,12 @@ void ABuffer::resolve() {
 
 	// Decrease stepsize in volumes if right click is pressed
 	// TODO: Let the interactionhandler handle this
-	/*int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
-	float volumeStepFactor = (val) ? 0.2f: 1.0f;
-	if(volumeStepFactor != _volumeStepFactor) {
-		_volumeStepFactor = volumeStepFactor;
-		_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
-	}*/
+	//int val = sgct::Engine::getMouseButton(0, SGCT_MOUSE_BUTTON_RIGHT);
+	//float volumeStepFactor = (val) ? 0.2f: 1.0f;
+	//if(volumeStepFactor != _volumeStepFactor) {
+	//	_volumeStepFactor = volumeStepFactor;
+	//	_resolveShader->setUniform("volumeStepFactor", _volumeStepFactor);
+	//}
 
 	glBindVertexArray(_screenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -1,0 +1,11 @@
+-- Multiple Dependencies
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Modules = {
+        "multiple-dependencies",
+        "no-dependency",
+        "direct-dependency"
+    }
+}
+

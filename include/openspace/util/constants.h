@@ -72,6 +72,7 @@ namespace scenegraph {
 namespace scenegraphnode {
     const std::string keyName = "Name";
     const std::string keyParentName = "Parent";
+    const std::string keyDependencies = "Dependencies";
     const std::string keyRenderable = "Renderable";
     const std::string keyEphemeris = "Ephemeris";
 } // namespace scenegraphnode
@@ -87,6 +88,15 @@ namespace planetgeometry {
 namespace renderablemodel {
 	const std::string keyGeometry = "Geometry";
 } // namespace renderablemodel
+
+namespace renderableplaneprojection {
+	const std::string keySpacecraft = "Spacecraft";
+	const std::string keyInstrument = "Instrument";
+	const std::string keyMoving = "Moving";
+	const std::string keyTexture = "Texture";
+	const std::string keyName = "Name";
+	const std::string galacticFrame = "GALACTIC";
+} // namespace renderableplaneprojection
 
 namespace renderablestars {
 	const std::string keyFile = "File";
@@ -120,6 +130,10 @@ namespace ephemeris {
 namespace staticephemeris {
     const std::string keyPosition = "Position";
 } // namespace staticephemeris
+
+namespace dynamicephemeris {
+	const std::string keyPosition = "Position";
+} // namespace dynamicephemeris
 
 namespace spiceephemeris {
     const std::string keyBody = "Body";

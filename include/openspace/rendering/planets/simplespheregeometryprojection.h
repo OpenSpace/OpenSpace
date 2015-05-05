@@ -49,9 +49,10 @@ public:
 private:
     void createSphere();
 
-    properties::Vec2Property _radius;
+	glm::vec2 _modRadius;
+	properties::Vec4Property _realRadius;
     properties::IntProperty _segments;
-
+	std::string _name;
 
 	properties::IntProperty _vaoID;
 	properties::IntProperty _vBufferID;

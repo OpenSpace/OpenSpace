@@ -29,6 +29,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace openspace {
 
@@ -37,6 +38,9 @@ public:
     // initializers
     PowerScaledSphere(const PowerScaledScalar& radius, 
 		int segments = 8);
+	PowerScaledSphere(properties::Vec4Property &radius,
+		int segments, std::string planetName);
+
     ~PowerScaledSphere();
     PowerScaledSphere(const PowerScaledSphere& cpy);
 

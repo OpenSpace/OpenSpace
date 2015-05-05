@@ -38,14 +38,13 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scenegraph/scenegraph.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer.h>
 #include <openspace/util/imagesequencer2.h> // testing
 
 
@@ -104,7 +103,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 {
 	SpiceManager::initialize();
 	Time::initialize();
-	ImageSequencer::initialize();
 	ImageSequencer2::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
@@ -128,7 +126,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
-    assert(_engine);
+    ghoul_assert(_engine, "OpenSpaceEngine not created");
     return *_engine;
 }
 
@@ -137,7 +135,7 @@ bool OpenSpaceEngine::create(
     std::vector<std::string>& sgctArguments,
     std::string& openGlVersion)
 {
-	assert(_engine == nullptr);
+    ghoul_assert(!_engine, "OpenSpaceEngine was already created");
 
 	// Initialize the LogManager and add the console log as this will be used every time
 	// and we need a fall back if something goes wrong between here and when we add the
@@ -277,7 +275,7 @@ bool OpenSpaceEngine::initialize() {
 	// Register Lua script functions
 	LDEBUG("Registering Lua libraries");
 	_scriptEngine->addLibrary(RenderEngine::luaLibrary());
-	_scriptEngine->addLibrary(SceneGraph::luaLibrary());
+	_scriptEngine->addLibrary(Scene::luaLibrary());
 	_scriptEngine->addLibrary(Time::luaLibrary());
 	_scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine->addLibrary(LuaConsole::luaLibrary());
@@ -308,7 +306,7 @@ bool OpenSpaceEngine::initialize() {
 
 
 	// Load scenegraph
-	SceneGraph* sceneGraph = new SceneGraph;
+	Scene* sceneGraph = new Scene;
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine

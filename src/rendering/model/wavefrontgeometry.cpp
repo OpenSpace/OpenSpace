@@ -25,20 +25,12 @@
 #include <openspace/rendering/model/wavefrontgeometry.h>
 
 #include <openspace/util/constants.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include "ghoul/logging/logmanager.h"
-
-#include <fstream>
-#include <numeric>
 #include <tiny_obj_loader.h>
 
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
-	const std::string keyEnabled = "StartsEnabled";
-
     const std::string keyObjFile = "ObjFile";
-
     const int8_t CurrentCacheVersion = 3;
 }
 
@@ -46,104 +38,18 @@ namespace openspace {
 namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
-    : ModelGeometry()
+    : ModelGeometry(dictionary) 
 {
-	using constants::scenegraphnode::keyName;
-
-    std::string name;
-    bool success = dictionary.getValue(keyName, name);
-    ghoul_assert(success, "Name tag was not present");
-
-	std::string file;
-	success = dictionary.getValue(keyObjFile, file);
-	if (!success) {
-        LERROR("WaveFrontGeometry of '" << name << "' did not provide a key '"
-			                               << keyObjFile << "'");
-	}
-	file = FileSys.absolutePath(file);
-
-    if (FileSys.fileExists(file, true))
-        loadObj(file);
-    else
-        LERROR("Could not load OBJ file '" << file << "': File not found");
-}
-
-bool WavefrontGeometry::loadObj(const std::string& filename){
-    std::string cachedFile = "";
-	
-    FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
-
-        bool success = loadCachedFile(cachedFile);
-        if (success)
-            return true;
-        else
-            FileSys.cacheManager()->removeCacheFile(filename);
-        // Intentional fall-through to the 'else' computation to generate the cache
-        // file for the next run
-    }
-    else {
-        LINFO("Cache for Model'" << filename << "' not found");
-    }
-	
-    LINFO("Loading OBJ file '" << filename << "'");
-    bool success = loadModel(filename);
-    if (!success)
-        return false;
-
-    LINFO("Saving cache");
-    success = saveCachedFile(cachedFile);
-
-    return success;
+	loadObj(_file);
 }
 
 bool WavefrontGeometry::initialize(RenderableModel* parent) {
 	bool success = ModelGeometry::initialize(parent);
-    PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
-    _parent->setBoundingSphere(ps);
-	
-	if (_vertices.empty())
-        return false;
-	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vbo);
-    glGenBuffers(1, &_ibo);
-
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), _vertices.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))); 
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(int), _indices.data(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-
     return success;
 }
 
 void WavefrontGeometry::deinitialize() {
-	glDeleteBuffers(1, &_vbo);
-	glDeleteVertexArrays(1, &_vaoID);
-    glDeleteBuffers(1, &_ibo);
-}
-
-void WavefrontGeometry::render() {
-	glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	ModelGeometry::deinitialize();
 }
 
 bool WavefrontGeometry::loadModel(const std::string& filename) {
@@ -188,15 +94,16 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             _vertices[j + currentPosition].location[0] = shapes[i].mesh.positions[3 * j + 0];
             _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
             _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
-            _vertices[j + currentPosition].location[3] = 5;
-			
+            _vertices[j + currentPosition].location[3] = 5; // Temp size for the power scale coordinate.
+			// Could be defined per object as a dictionary key.
+
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];
             _vertices[j + currentPosition].normal[1] = shapes[i].mesh.normals[3 * j + 1];
             _vertices[j + currentPosition].normal[2] = shapes[i].mesh.normals[3 * j + 2];
 
             if (2 * j + 1 < shapes[i].mesh.texcoords.size()) {
-                _vertices[j + currentPosition].tex[0] = shapes[0].mesh.texcoords[2 * j + 0];
-                _vertices[j + currentPosition].tex[1] = shapes[0].mesh.texcoords[2 * j + 1];
+                _vertices[j + currentPosition].tex[0] = shapes[i].mesh.texcoords[2 * j + 0];
+                _vertices[j + currentPosition].tex[1] = shapes[i].mesh.texcoords[2 * j + 1];
             }
 			
         }
@@ -209,94 +116,10 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             );
         p += shapes[i].mesh.indices.size();
     }
-	/*
-	std::cout << _vertices.size() << " " << shapes[0].mesh.texcoords.size() << std::endl;
-	
-	const size_t face_count = shapes[0].mesh.indices.size() / 3;
 
-	for (size_t f = 0; f < face_count; f++)
-	{
-		int vertex_index_list[3];
-		vertex_index_list[0] = shapes[0].mesh.indices[f * 3 + 0];
-		vertex_index_list[1] = shapes[0].mesh.indices[f * 3 + 1];
-		vertex_index_list[2] = shapes[0].mesh.indices[f * 3 + 2];
-
-		const int face[] = {
-			vertex_index_list[0],
-			vertex_index_list[1],
-			vertex_index_list[2]
-		};
-
-		if (!shapes[0].mesh.texcoords.empty()) 
-		{
-			for (int k = 0; k < 3; k++)
-			{
-				const int vi = face[k];
-				if (vi*2+1 < shapes[0].mesh.texcoords.size()){
-
-				_vertices[vi].tex[0] = shapes[0].mesh.texcoords[2 * vi + 0];
-				_vertices[vi].tex[1] = shapes[0].mesh.texcoords[2 * vi + 1];
-				}
-
-			}
-		}
-	}
-	*/
-	
-    return true;
+	return true;
 }
 
-bool WavefrontGeometry::saveCachedFile(const std::string& filename) {
-    std::ofstream fileStream(filename, std::ofstream::binary);
-    if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t));
-
-        int64_t vSize = _vertices.size();
-        fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
-        int64_t iSize = _indices.size();
-        fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
-
-        fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
-        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
-
-        return fileStream.good();
-    }
-    else {
-        LERROR("Error opening file '" << filename << "' for save cache file");
-        return false;
-    }
-}
-
-bool WavefrontGeometry::loadCachedFile(const std::string& filename) {
-    std::ifstream fileStream(filename, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed, deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(filename);
-            return false;
-        }
-
-        int64_t vSize, iSize;
-        fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
-        fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
-        
-        _vertices.resize(vSize);
-        _indices.resize(iSize);
-
-        fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
-        fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
-
-        return fileStream.good();
-    }
-    else {
-        LERROR("Error opening file '" << filename << "' for loading cache file");
-        return false;
-    }
-}
 
 }  // namespace modelgeometry
 }  // namespace openspace

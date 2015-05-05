@@ -28,7 +28,6 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/imagesequencer.h>
 #include <openspace/util/imagesequencer2.h>
 
 #include <openspace/util/sequenceparser.h>
@@ -82,12 +81,14 @@ private:
 
     properties::StringProperty  _colorTexturePath;
 	properties::StringProperty  _projectionTexturePath;
-	properties::TriggerProperty _imageTrigger;
+	properties::IntProperty _rotation;
+	properties::FloatProperty _fadeProjection;
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
 
     ghoul::opengl::Texture* _texture;
+	ghoul::opengl::Texture* _textureOriginal;
 	ghoul::opengl::Texture* _textureProj;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
@@ -123,12 +124,14 @@ private:
 	double _previousCapture;
 	double lightTime;
 
-	std::vector<std::pair<double, std::string>> _imageTimes;
+	std::vector<Image> _imageTimes;
 	int _sequenceID;
 
 	std::string _target;
+	std::string _frame;
 	std::string _defaultProjImage;
 	std::string _next;
+
 	bool _capture;
 
 	// FBO stuff

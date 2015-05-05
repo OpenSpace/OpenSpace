@@ -27,6 +27,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 // ghoul
 #include <ghoul/misc/dictionary.h>
@@ -36,6 +37,9 @@
 
 namespace {
 const std::string _loggerCat = "Renderable";
+const std::string keyBody = "Body";
+const std::string keyStart = "StartTime";
+const std::string keyEnd = "EndTime";
 }
 
 namespace openspace {
@@ -67,7 +71,12 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-	: _enabled("enabled", "Is Enabled", true)
+	: _enabled("enabled", "Is Enabled", true),
+	_hasTimeInterval(false),
+	_startTime(""),
+	_endTime(""),
+	_targetBody(""),
+	_hasBody(false)
 {
     setName("renderable");
 #ifndef NDEBUG
@@ -85,6 +94,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 #endif
 	if (success)
 		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
+
+	dictionary.getValue(keyStart, _startTime);
+	dictionary.getValue(keyEnd, _endTime);
+
+	if (_startTime != "" && _endTime != "")
+		_hasTimeInterval = true;
 
 	addProperty(_enabled);
 }
@@ -133,6 +148,38 @@ void Renderable::setPscUniforms(
 
 bool Renderable::isVisible() const {
 	return _enabled;
+}
+
+bool Renderable::hasTimeInterval() {
+	return _hasTimeInterval;
+}
+
+bool Renderable::hasBody() {
+	return _hasBody;
+}
+
+bool Renderable::getInterval(double& start, double& end) {
+	if (_startTime != "" && _endTime != "") {
+		bool successStart = openspace::SpiceManager::ref().getETfromDate(_startTime, start);
+		bool successEnd = openspace::SpiceManager::ref().getETfromDate(_endTime, end);
+		return successStart && successEnd;
+	}
+	else
+		return false;
+}
+
+bool Renderable::getBody(std::string& body) {
+	if (_hasBody) {
+		body = _targetBody;
+		return true;
+	}
+	else
+		return false;
+}
+
+void Renderable::setBody(std::string& body) {
+	_targetBody = body;
+	_hasBody = true;
 }
 
 bool Renderable::isReady() const {

@@ -38,6 +38,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace openspace {
 
@@ -76,15 +77,51 @@ public:
 	 */
 	KernelIdentifier loadKernel(const std::string& filePath);
 
+	/**
+	* Function to find and store the intervals covered by a ck file, this is done
+	* by using mainly the <code>ckcov_c</code> and <code>ckobj_c</code> functions. 
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html ,
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
+	* \param filePath The path to the kernel that should be examined
+	* \return true if the operation was successful
+	*/
+	bool findCkCoverage(std::string& path);
 
 	/**
-	 * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
-	 * by the loading call to loadKernel. The unloading is done by calling the
-	 * <code>unload_c</code> function.
-	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
-	 * \param kernelId The unique identifier that was returned from the call to
-	 * loadKernel which loaded the kernel
+	* Function to find and store the intervals covered by a spk file, this is done
+	* by using mainly the <code>spkcov_c</code> and <code>spkobj_c</code> functions.
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html ,
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
+	* \param filePath The path to the kernel that should be examined
+	* \return true if the operation was successful
+	*/
+	bool findSpkCoverage(std::string& path);
+	
+	/**
+	 * \return true if SPK kernels have been loaded to cover <code>target</code>
+	 * for time <code>et</code>
+	 * \param target, the body to be examined
+	 * \param et, the time when body is possibly covered
 	 */
+
+	bool hasSpkCoverage(std::string target, double& et) const;
+
+	/**
+	* \return true if CK kernels have been loaded to cover <code>frame</code>
+	* for time <code>et</code>
+	* \param frame, the frame to be examined
+	* \param et, the time when frame is possibly covered
+	*/
+	bool hasCkCoverage(std::string frame, double& et) const;
+	
+	/**
+	* Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
+	* by the loading call to loadKernel. The unloading is done by calling the
+	* <code>unload_c</code> function.
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html.
+	* \param kernelId The unique identifier that was returned from the call to
+	* loadKernel which loaded the kernel
+	*/
 	void unloadKernel(KernelIdentifier kernelId);
 
 	/**
@@ -133,6 +170,19 @@ public:
 	 * otherwise
 	 */
 	bool getNaifId(const std::string& body, int& id) const;
+
+	/**
+	* Returns the NAIF ID for a specific frame using namfrm_c(), see
+	* http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html.
+	* The <code>id</code> will only be set if the retrieval was successful, 
+	* otherwise it will remain unchanged.
+	* \param frame The frame name that should be retrieved
+	* \param id The ID of the <code>frame</code> will be stored in this variable. The
+	* value will only be changed if the retrieval was successful
+	* \return <code>true</code> if the <code>frame</code> was found, <code>false</code>
+	* otherwise
+	*/
+	bool getFrameId(const std::string& frame, int& id) const;
 
 	/**
 	 * Retrieves a single <code>value</code> for a certain <code>body</code>. This method
@@ -252,26 +302,8 @@ public:
 	 * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
 	 */
 	bool getDateFromET(double ephemerisTime, std::string& date,
-		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND");
+		const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
-	/**
-	* This helper method converts a 3 dimensional vector from one reference frame to another.
-	* \param v The vector to be converted
-	* \param from The frame to be converted from
-	* \param to The frame to be converted to
-	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
-    * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
-	*/
-	bool frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
-
-	/**
-	 *  Finds the projection of one vector onto another vector.
-     *  All vectors are 3-dimensional.
-  	 *  \param v1 The vector to be projected.
-	 *  \param v2 The vector onto which v1 is to be projected.
-	 *  \return The projection of v1 onto v2.
-	 */
-	glm::dvec3 orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2);
 
 	/**
 	 * Returns the <code>position</code> of a <code>target</code> body relative to an
@@ -312,6 +344,39 @@ public:
 		                   double ephemerisTime,
 						   psc& position, 
 						   double& lightTime) const;
+
+	/**
+	* If a position is requested for an uncovered time in the SPK kernels,
+	* this function will insert a position in <code>modelPosition</code>.
+	* If the coverage has not yet started, the first position will be retrieved,
+	* If the coverage has ended, the last position will be retrieved
+	* If <code>time</code> is in a coverage gap, the position will be interpolated
+	* \param time, for which an estimated position is desirable
+	* \param target, the body which is missing SPK data for this time
+	* \param origin, the observer, the position will be retrieved in relation to this body
+	* \param modelPosition, the position of the body, passed by reference
+	* \return true if an estimated position is found
+	*/
+	bool getEstimatedPosition(const double time, const std::string target, const std::string origin, psc& modelPosition) const;
+
+	/**
+	* This helper method converts a 3 dimensional vector from one reference frame to another.
+	* \param v The vector to be converted
+	* \param from The frame to be converted from
+	* \param to The frame to be converted to
+	* \param ephemerisTime Time at which to get rotational matrix that transforms vector
+	* \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
+	*/
+	bool frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
+
+	/**
+	*  Finds the projection of one vector onto another vector.
+	*  All vectors are 3-dimensional.
+	*  \param v1 The vector to be projected.
+	*  \param v2 The vector onto which v1 is to be projected.
+	*  \return The projection of v1 onto v2.
+	*/
+	glm::dvec3 orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2);
 
 	/**
 	*   Given an observer and a direction vector defining a ray, compute 
@@ -488,11 +553,21 @@ public:
 									double ephemerisTimeTo,
 									glm::dmat3& transformationMatrix) const;
 
+	/**
+	* If a transform matrix is requested for an uncovered time in the CK kernels,
+	* this function will insert a transform matrix in <code>positionMatrix</code>.
+	* If the coverage has not yet started, the first transform matrix will be retrieved,
+	* If the coverage has ended, the last transform matrix will be retrieved
+	* If <code>time</code> is in a coverage gap, the transform matrix will be interpolated
+	* \param time, for which an estimated transform matrix is desirable
+	* \param fromFrame, the transform matrix will be retrieved in relation to this frame
+	* \param toFrame, the frame missing CK data for this time
+	* \param positionMatrix, the estimated transform matrix of the frame, passed by reference
+	* \return true if an estimated transform matrix is found
+	*/
+	bool getEstimatedTransformMatrix(const double time, const std::string fromFrame, const std::string toFrame, glm::dmat3& positionMatrix) const;
 
-	bool getPositionPrimeMeridian(const std::string& sourceFrame,
-									const std::string& destinationFrame,
-									double ephemerisTime,
-									glm::dmat3& transformationMatrix) const;
+
 
 	/**
 	 * Applies the <code>transformationMatrix</code> retrieved from
@@ -555,88 +630,22 @@ public:
 	 */
 	bool getFieldOfView(int instrument, std::string& fovShape, std::string& frameName,
 		glm::dvec3& boresightVector, std::vector<glm::dvec3>& bounds) const;
-	
-	/**
-	 * Converts planeto-centric <code>latitude</code> and <code>longitude</code> of a
-	 * surface point on a specified <code>body</code> to rectangular
-	 * <code>coordinates</code>. For further details, refer to
-	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
-	 * \param body The body on which the <code>longitude</code> and <code>latitude</code>
-	 * are defined. This body needs to have a defined radius for this function to work
-     * \param longitude The longitude of the point on the <code>body</code> in radians
-     * \param latitude The latitude of the point on the <code>body</code> in radians
-     * \param coordinates The output containing the rectangular coordinates of the point
-	 * defined by <code>longitude</code> and <code>latitude</code> on the
-	 * <code>body</code>. If the method fails, the coordinate are unchanged
-	 * \return <code>true</code> if the function was successful, <code>false</code>
-	 * otherwise
-	 */
-	bool geographicToRectangular(const std::string& body, double longitude,
-									 double latitude, glm::dvec3& coordinates) const;
 
 	/**
-	 * Converts planeto-centric <code>latitude</code> and <code>longitude</code> of a
-	 * surface point on a body with the NAIF ID of <code>id</code> to rectangular
-	 * <code>coordinates</code>. For further details, refer to
-	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/srfrec_c.html.
-	 * \param id The body on which the <code>longitude</code> and <code>latitude</code>
-	 * are defined. This body needs to have a defined radius for this function to work
-     * \param longitude The longitude of the point on the <code>body</code> in radians
-     * \param latitude The latitude of the point on the <code>body</code> in radians
-     * \param coordinates The output containing the rectangular coordinates of the point
-	 * defined by <code>longitude</code> and <code>latitude</code> on the
-	 * <code>body</code>. If the method fails, the coordinate are unchanged
-	 * \return <code>true</code> if the function was successful, <code>false</code>
-	 * otherwise
-	 */
-	bool geographicToRectangular(int id, double longitude, double latitude,
-		glm::dvec3& coordinates) const;
+	* This function adds a frame to a body 
+	* \param body - the name of the body
+	* \param frame - the name of the frame
+	* \return false if the arguments are empty
+	*/
+	bool addFrame(const std::string body, const std::string frame);
+
 	/**
-	 * Compute the rectangular coordinates of the sub-observer point of an
-	 * <code>observer</code> on a target <code>body</code> at a specified
-	 * <code>ephemerisTime</code>, optionally corrected for light time and stellar
-	 * aberration. For further details, refer to
-	 * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subpnt_c.html.
-	 * Example: If the sub-observer point on Mars for MRO is requested, the
-	 * <code>target</code> would be <code>Mars</code> and the <code>observer</code> would
-	 * be <code>MRO</code>.
-	 * \param target The name of the target body on which the sub-observer point lies
-	 * \param observer The name of the ephemeris object whose sub-observer point should be
-	 * retrieved
-	 * \param computationMethod The computation method used for the sub-observer point.
-	 * Must be one of <code>Near point: ellipsoid</code> or
-	 * <code>Intercept: ellipsoid</code> and it determines the interpretation of the
-	 * results; see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subpnt_c.html
-	 * for detailed description on the computation methods
-	 * \param bodyFixedFrame The body-fixed, body-centered frame belonging to the
-	 * <code>target</code>
-	 * \param aberrationCorrection The aberration correction flag out of the list of
-	 * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
-	 * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
-	 * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
-	 * \param ephemerisTime The ephemeris time for which the sub-observer point should be
-	 * retrieved
-	 * \param subObserverPoint The output containing the observer's sub-observer point on
-	 * the target body. If the method fails, the value remains unchanged
-	 * \param targetEphemerisTime The output containing the target's ephemeris time
-	 * accounting for the aberration, if an <code>aberrationCorrection</code> value
-	 * different from <code>NONE</code> is chosen. If the method fails, the value remains
-	 * unchanged
-	 * \param vectorToSurfacePoint The output containing the vector from the observer to
-	 * the, potentially aberration corrected, sub-observer point. If the method fails the
-	 * value remains unchanged
-	 * \return <code>true</code> if the function was successful, <code>false</code>
-	 * otherwise
-	 */
-	bool getSubObserverPoint(const std::string& target,
-		                     const std::string& observer,
- 							 const std::string& computationMethod,
-		                     const std::string& bodyFixedFrame,
-		                     const std::string& aberrationCorrection,
-		                     double ephemerisTime,
-		                     glm::dvec3& subObserverPoint,
-		                     double& targetEphemerisTime,
-							 glm::dvec3& vectorToSurfacePoint) const;
+	* This function returns the frame of a body if defined, otherwise it returns 
+	* IAU_ + body (most frames are known by the International Astronomical Union)
+	* \param body - the name of the body
+	* \return  the frame of the body
+	*/
+	std::string frameFromBody(const std::string body) const;
     
     /**
      * This method checks if one of the previous SPICE methods has failed. If it has, the
@@ -647,6 +656,19 @@ public:
      * \return <code>true</code> if an error occurred, <code>false</code> otherwise
      */
     static bool checkForError(std::string errorMessage);
+
+	/**
+	* This method uses the SPICE kernels to get the radii of bodies defined as a
+	* triaxial ellipsoid. The benefit of this is to be able to create more accurate
+	* planet shapes, which is desirable when projecting images with SPICE intersection
+	* methods
+	* \param planetName - the name of the body, should be recognizable by SPICE
+	* \param a - equatorial radius 1
+	* \param b - equatorial radius 2 
+	* \param c - polar radius
+	* \return  <code>true</code> if SPICE reports no errors
+	*/
+	bool getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c);
 
 private:
 	struct KernelInformation {
@@ -662,6 +684,15 @@ private:
 
     /// A list of all loaded kernels
 	std::vector<KernelInformation> _loadedKernels;
+	// Map: id, vector of pairs. Pair: Start time, end time;
+	std::map<int, std::vector< std::pair<double, double> > > _ckIntervals;
+	std::map<int, std::vector< std::pair<double, double> > > _spkIntervals;
+	std::map<int, std::set<double> > _ckCoverageTimes;
+	std::map<int, std::set<double> > _spkCoverageTimes;
+	// Vector of pairs: Body, Frame
+	std::vector< std::pair<std::string, std::string> > _frameByBody;
+	
+	const static bool _showErrors = false;
 
     /// The last assigned kernel-id, used to determine the next free kernel id
 	KernelIdentifier _lastAssignedKernel;

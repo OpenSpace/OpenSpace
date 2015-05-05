@@ -7,14 +7,19 @@ openspace.setInvertRoll(true);
 
 --openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
 
+--openspace.time.setTime("2007 FEB 28 03:45:00")          -- Io Capture!
 
-openspace.time.setDeltaTime(0)                         -- How many seconds pass per second of realtime, changeable in the GUI
+
+--openspace.time.setTime("2011 AUG 6 07:15:00")			-- Dawn @ Vestaprojection
+--openspace.time.setTime("2014 AUG 28 03:45:00")		-- Rosetta Travels 67p in triangular shape
+
+openspace.time.setDeltaTime(10)                         -- How many seconds pass per second of realtime, changeable in the GUI
 
 dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keybindings
 
 -- openspace.time.setDeltaTime(50);
 
-openspace.time.setTime("2015-07-14T10:10:00.00") -- PLUTO
+openspace.time.setTime("2015-07-14T10:50:00.00") -- PLUTO
 -- NH takes series of images from visible to dark side (across terminator)
 -- Sequence lasts ~10 mins, (recommended dt = 10)
 

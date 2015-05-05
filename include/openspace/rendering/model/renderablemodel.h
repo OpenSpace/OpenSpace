@@ -57,27 +57,25 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
-	properties::StringProperty _bumpTexturePath;
-
+	properties::BoolProperty _performFade;
+	properties::FloatProperty _fading;
     ghoul::opengl::ProgramObject* _programObject; 
     ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _bumpMap;
-
 
 	modelgeometry::ModelGeometry* _geometry;
 
+	float _alpha;
 	glm::dmat3 _stateMatrix; 
 
 	std::string _source;
 	std::string _destination;
+	std::string _target;
+
+	bool _isGhost;
 
     psc _sunPosition;
 
 	properties::BoolProperty _performShading;
-	properties::BoolProperty _performFade;
-
-	properties::FloatProperty _fading;
-
 };
 
 }  // namespace openspace

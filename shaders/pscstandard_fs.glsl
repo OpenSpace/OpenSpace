@@ -31,7 +31,7 @@ uniform vec4 objpos;
 uniform vec3 sun_pos;
 
 uniform bool _performShading = true;
-
+uniform float transparency;
 uniform int shadows;
 
 uniform float time;
@@ -66,7 +66,7 @@ void main()
 		float shine = 0.0001;
 
 		vec4 specular = vec4(0.5);
-		vec4 ambient = vec4(0.0,0.0,0.0,1);
+		vec4 ambient = vec4(0.0,0.0,0.0,transparency);
 		/*
 		if(intensity > 0.f){
 			// halfway vector
@@ -77,12 +77,13 @@ void main()
 		}
 		*/
 		diffuse = max(intensity * diffuse, ambient);
-		//diffuse = vec4(1);
-
+			
+		diffuse[3] = transparency;
 		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 		addToBuffer(frag);
 	}
 	else {
+		diffuse[3] = transparency;
 		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 		addToBuffer(frag);	
 	}

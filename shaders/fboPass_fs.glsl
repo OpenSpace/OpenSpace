@@ -22,14 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version 430
+#version __CONTEXT__
 
 uniform sampler2D texture1;
+uniform sampler2D texture2;
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
-uniform vec2 radius;
+uniform vec4 radius;
 flat in uint vs_segments;
+
+uniform float projectionFading;
 
 in vec4 vs_position;
 uniform vec3 boresight;
@@ -38,7 +41,7 @@ out vec4 color;
 
 #define M_PI 3.14159265358979323846
 
-vec4 uvToModel( float u, float v, vec2 radius, float segments){
+vec4 uvToModel( float u, float v, vec4 radius, float segments){
 	const float fj = u * segments;
 	const float fi = v * segments;
 
@@ -46,10 +49,10 @@ vec4 uvToModel( float u, float v, vec2 radius, float segments){
 	const float phi   = fj * float(M_PI) * 2.0f / segments;
 
 	const float x = radius[0] * sin(phi) * sin(theta);  //
-	const float y = radius[0] * cos(theta);             // up
-	const float z = radius[0] * cos(phi) * sin(theta);  //
+	const float y = radius[1] * cos(theta);             // up
+	const float z = radius[2] * cos(phi) * sin(theta);  //
 
-	return vec4(x, y, z, radius[1]);
+	return vec4(x, y, z, radius[3]);
 }
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -78,7 +81,9 @@ void main() {
 	  dot(v_b, normal) < 0 ) {
 		color = texture(texture1, projected.xy);
   }else{
- 	 color = vec4(1,1,1,0);
+ 	 color = texture(texture2, uv);
+	 color.a = projectionFading;
   }
+  
   // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
 }

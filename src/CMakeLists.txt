@@ -110,11 +110,11 @@ file(GLOB RENDERING_MODEL_HEADER ${HEADER_ROOT_DIR}/openspace/rendering/model/*.
 set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${RENDERING_MODEL_HEADER})
 source_group(Rendering\\Model FILES ${RENDERING_MODEL_SOURCE} ${RENDERING_MODEL_HEADER})
 
-file(GLOB SCENEGRAPH_SOURCE ${SOURCE_ROOT_DIR}/scenegraph/*.cpp)
-set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${SCENEGRAPH_SOURCE})
-file(GLOB SCENEGRAPH_HEADER ${HEADER_ROOT_DIR}/openspace/scenegraph/*.h ${HEADER_ROOT_DIR}/openspace/scenegraph/*.inl)
-set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${SCENEGRAPH_HEADER})
-source_group(SceneGraph FILES ${SCENEGRAPH_SOURCE} ${SCENEGRAPH_HEADER})
+file(GLOB SCENE_SOURCE ${SOURCE_ROOT_DIR}/scene/*.cpp)
+set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${SCENE_SOURCE})
+file(GLOB SCENE_HEADER ${HEADER_ROOT_DIR}/openspace/scene/*.h ${HEADER_ROOT_DIR}/openspace/scene/*.inl)
+set(OPENSPACE_HEADER ${OPENSPACE_HEADER} ${SCENE_HEADER})
+source_group(Scene FILES ${SCENE_SOURCE} ${SCENE_HEADER})
 
 file(GLOB SCRIPTING_SOURCE ${SOURCE_ROOT_DIR}/scripting/*.cpp)
 set(OPENSPACE_SOURCE ${OPENSPACE_SOURCE} ${SCRIPTING_SOURCE})
@@ -156,10 +156,25 @@ include_directories("${HEADER_ROOT_DIR}")
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+if (OPENSPACE_HAVE_TESTS)
+    add_definitions(-DOPENSPACE_HAVE_TESTS)
+
+    set(OPENSPACE_TEST_DIR ${OPENSPACE_BASE_DIR}/tests)
+    
+    include_directories("${GHOUL_ROOT_DIR}/ext/gtest/include")
+    include_directories("${GHOUL_ROOT_DIR}/include")
+    include_directories("${OPENSPACE_TEST_DIR}")
+    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
+    
+    source_group(Tests FILES ${OPENSPACE_TEST_FILES})
+    
+    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES} ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+    target_link_libraries(OpenSpaceTest gtest ${DEPENDENT_LIBS})
+
+endif (OPENSPACE_HAVE_TESTS)
+
 #if (NOT UNIX)
     #cotire(OpenSpace)
 #endif ()
 GhoulCopySharedLibraries(OpenSpace)
-
-add_subdirectory(tests)
-
