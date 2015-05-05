@@ -118,12 +118,20 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
 
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
-    std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [](const Image& i, double time) { return i.beginning < time; });
-    std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _images.end(), upperTime, [](const Image& i, double time) { return i.ending < time; });
-    if (lower != _images.end() && upper != _images.end())
-        drawImages(painter, timelineRect, std::vector<Image>(lower, upper), lowerTime, upperTime);
+
+    std::vector<Image*> images;
+    for (Image& i : _images) {
+        if (i.beginning <= upperTime && i.ending >= lowerTime)
+            images.push_back(&i);
+    }
+
+
+    //std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [](const Image& i, double time) { return i.beginning < time; });
+    //std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _images.end(), upperTime, [](const Image& i, double time) { return i.ending < time; });
+    //if (lower != _images.end() && upper != _images.end())
+    //    drawImages(painter, timelineRect, std::vector<Image>(lower, upper), lowerTime, upperTime);
         
-    //drawImages(painter, timelineRect, _images, lowerTime, upperTime);
+    drawImages(painter, timelineRect, images, lowerTime, upperTime);
 
 
     // Draw current time
@@ -188,37 +196,37 @@ void TimelineWidget::setCurrentTime(std::string currentTime, double et) {
 void TimelineWidget::drawImages(
     QPainter& painter,
     QRectF timelineRect,
-    std::vector<Image> images,
+    std::vector<Image*> images,
     double minimumTime, double maximumTime)
 {
     int width = timelineRect.width();
 
     int nInstruments = 0;
     std::set<std::string> instrumentSet;
-    for (const Image& i : images) {
-        for (std::string instrument : i.instruments)
+    for (Image* i : images) {
+        for (std::string instrument : i->instruments)
             instrumentSet.insert(instrument);
     }
     std::map<std::string, int> instruments;
     for (std::set<std::string>::const_iterator it = instrumentSet.begin(); it != instrumentSet.end(); ++it)
         instruments[*it] = std::distance(instrumentSet.begin(), it);
 
-    for (const Image& i : images) {
-        double tBeg = (i.beginning - minimumTime) / (maximumTime - minimumTime);
+    for (Image* i : images) {
+        double tBeg = (i->beginning - minimumTime) / (maximumTime - minimumTime);
         tBeg = std::max(tBeg, 0.0);
-        double tEnd = (i.ending - minimumTime) / (maximumTime - minimumTime);
+        double tEnd = (i->ending - minimumTime) / (maximumTime - minimumTime);
         tEnd = std::min(tEnd, 1.0);
 
         int loc = timelineRect.top() + timelineRect.height() * tBeg;
         int height = (timelineRect.top() + timelineRect.height() * tEnd) - loc;
         height = std::max(height, 5);
 
-        std::string target = i.target;
+        std::string target = i->target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
         int iTarget = std::distance(_targets.begin(), it);
 
         //std::vector<QColor> colors;
-        for (std::string instrument : i.instruments) {
+        for (std::string instrument : i->instruments) {
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
             if (it == _instruments.end())
                 qDebug() << "Instrument not found";
@@ -234,7 +242,7 @@ void TimelineWidget::drawImages(
 
         painter.setBrush(QBrush(Qt::black));
         painter.setPen(QPen(Qt::black));
-        QString line = QString::fromStdString(i.beginningString) + QString(" (") + QString::fromStdString(i.target) + QString(")");
+        QString line = QString::fromStdString(i->beginningString) + QString(" (") + QString::fromStdString(i->target) + QString(")");
 
         painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
     }
