@@ -495,7 +495,8 @@ namespace openspace {
 
 #if 1
 #define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-#define PrintColorText(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
+#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
+#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
 
             if (_onScreenInformation._node != -1) {
                 int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
@@ -570,10 +571,10 @@ namespace openspace {
 							glm::vec4 g1(0, t, 0, 1);
 							glm::vec4 g2(1 - t);
 							PrintColorText(line++, "Next projection in:", 10, g1 + g2);
-							PrintColorText(line++, "%.0f sec %s %.1f %%", 10, g1 + g2, remaining, progress.c_str(), t * 100);
+							PrintColorTextArg(line++, "%.0f sec %s %.1f %%", 10, g1 + g2, remaining, progress.c_str(), t * 100);
 						}
 						glm::vec4 w(1);
-						PrintColorText(line++, "Ucoming capture : %s", 10, w, str.c_str());
+						PrintColorTextArg(line++, "Ucoming capture : %s", 10, w, str.c_str());
 				
 						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
    					    std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
@@ -598,7 +599,7 @@ namespace openspace {
 
 
 						    glm::vec4 b2(1.00, 0.51, 0.00, 1);
-						    PrintColorText(line++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
+						    PrintColorTextArg(line++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
 						
 						    std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
 						    std::string space;
@@ -609,7 +610,7 @@ namespace openspace {
                                 t = (p > isize / 2) ? 1 - t : t;
                                 t += 0.3;
                                 color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
-                                PrintColorText(line, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
+                                PrintColorTextArg(line, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
                                 for (int k = 0; k < 10; k++)
                                     space += " ";
 						    }
@@ -623,15 +624,15 @@ namespace openspace {
 						    for (auto t : activeMap){
 							    if (t.second == false){
 								    PrintColorText(line, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								    PrintColorText(line++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
+								    PrintColorTextArg(line++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
 							    }
 							    else{
 								    PrintColorText(line, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
 								    if (t.first == "NH_LORRI"){
-									    PrintColorText(line, " + ", 10, firing);
+									    PrintColorTextArg(line, " + ", 10, firing);
 								    }
 								    PrintColorText(line, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								    PrintColorText(line++, "    %5s", 10, active, t.first.c_str());
+								    PrintColorTextArg(line++, "    %5s", 10, active, t.first.c_str());
 							    }
 						    }
                         }
