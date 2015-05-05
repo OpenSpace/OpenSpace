@@ -145,7 +145,11 @@ endif ()
 #########################################################################################
 
 add_subdirectory(src)
-add_subdirectory(gui)
+
+option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
+if (BUILD_GUI_APPLICATIONS)
+    add_subdirectory(gui)
+endif ()
 
 #########################################################################################
 # File Fetch
