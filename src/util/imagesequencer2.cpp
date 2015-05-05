@@ -282,11 +282,11 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	std::vector<double>                            in5 = parser->getCaptureProgression();
 	
 	// check for sanity
-	assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
-	assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
-	assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
-	assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
-	assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
+	ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
+	ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
+	ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
+	ghoul_assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
+	ghoul_assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
 
 
 	// append data
