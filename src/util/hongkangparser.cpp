@@ -28,8 +28,6 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/network/networkengine.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
@@ -255,35 +253,35 @@ void HongKangParser::create(){
 
     sendPlaybookInformation();
 	
-	std::ofstream myfile;
-	myfile.open("HongKangOutput.txt");
+	//std::ofstream myfile;
+	//myfile.open("HongKangOutput.txt");
 
-	//print all
-	for (auto target : _subsetMap){
-		std::string min, max;
-		SpiceManager::ref().getDateFromET(target.second._range._min, min);
-		SpiceManager::ref().getDateFromET(target.second._range._max, max);
+	////print all
+	//for (auto target : _subsetMap){
+	//	std::string min, max;
+	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
+	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
 
-		myfile << std::endl;
-		for (auto image : target.second._subset){
-			std::string time_beg;
-			std::string time_end;
-			SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-			SpiceManager::ref().getDateFromET(image.stopTime, time_end);
+	//	myfile << std::endl;
+	//	for (auto image : target.second._subset){
+	//		std::string time_beg;
+	//		std::string time_end;
+	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
 
-			myfile << std::fixed
-				<< std::setw(10) << time_beg
-				<< std::setw(10) << time_end
-				<< std::setw(10) << (int)getMetFromET(image.startTime)
-				<< std::setw(10) << image.target << std::setw(10);
-			for (auto instrument : image.activeInstruments){
-				myfile << " " << instrument;
-			}
-			myfile << std::endl;
-		}
-	}
-	myfile.close();
-	
+	//		myfile << std::fixed
+	//			<< std::setw(10) << time_beg
+	//			<< std::setw(10) << time_end
+	//			<< std::setw(10) << (int)getMetFromET(image.startTime)
+	//			<< std::setw(10) << image.target << std::setw(10);
+	//		for (auto instrument : image.activeInstruments){
+	//			myfile << " " << instrument;
+	//		}
+	//		myfile << std::endl;
+	//	}
+	//}
+	//myfile.close();
+	//
 }
 
 bool HongKangParser::augmentWithSpice(Image& image,
@@ -367,136 +365,5 @@ double HongKangParser::getMetFromET(double et){
 	return met;
 }
 
-std::map<std::string, ImageSubset> HongKangParser::getSubsetMap(){
-	return _subsetMap;
-}
-std::vector<std::pair<std::string, TimeRange>> HongKangParser::getIstrumentTimes(){
-	return _instrumentTimes;
-}
-std::vector<std::pair<double, std::string>> HongKangParser::getTargetTimes(){
-	return _targetTimes;
-}
-std::vector<double> HongKangParser::getCaptureProgression(){ 
-	return _captureProgression; 
-};
-
-
-template <typename T>
-void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T value) {
-    if ((currentWriteLocation + sizeof(T)) > buffer.size())
-        buffer.resize(2 * buffer.size());
-
-    std::memmove(buffer.data() + currentWriteLocation, reinterpret_cast<const void*>(&value), sizeof(T));
-    currentWriteLocation += sizeof(T);
-}
-
-template <>
-
-void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteLocation, std::string value) {
-    if ((currentWriteLocation + sizeof(uint8_t) + value.size()) > buffer.size())
-        buffer.resize(2 * buffer.size());
-
-    uint8_t length = value.size();
-    std::memcpy(buffer.data() + currentWriteLocation, &length, sizeof(uint8_t));
-    currentWriteLocation += sizeof(uint8_t);
-
-    std::memmove(buffer.data() + currentWriteLocation, value.data(), length);
-    currentWriteLocation += length;
-}
-
-
-void HongKangParser::sendPlaybookInformation() {
-    static const NetworkEngine::MessageIdentifier PlaybookIdentifier = OsEng.networkEngine()->identifier(PlaybookIdentifierName);
-
-    std::vector<char> buffer(1024);
-    size_t currentWriteLocation = 0;
-
-    // Protocol:
-    // 4 bytes: Total number of bytes sent
-    // 1 byte : Number of Targets (i)
-    // i times: 1 byte (id), 1 byte (length j of name), j bytes (name)
-    // 1 byte : Number of Instruments (i)
-    // i times: 1 byte (id), 1 byte (length j of name), j bytes (name)
-    // 4 byte: Number (n) of images
-    // n times: 8 byte (beginning time), 8 byte (ending time), 1 byte (target id), 2 byte (instrument id)
-
-    std::map<std::string, uint8_t> targetMap;
-    uint8_t currentTargetId = 0;
-    for (auto target : _subsetMap) {
-        if (targetMap.find(target.first) == targetMap.end())
-            targetMap[target.first] = currentTargetId++;
-    }
-
-    std::map<std::string, uint16_t> instrumentMap;
-    uint16_t currentInstrumentId = 1;
-    for (auto target : _subsetMap) {
-        for (auto image : target.second._subset) {
-            for (auto instrument : image.activeInstruments) {
-                if (instrumentMap.find(instrument) == instrumentMap.end()) {
-                    instrumentMap[instrument] = currentInstrumentId;
-                    currentInstrumentId = currentInstrumentId << 1;
-                }
-            }
-        }
-    }
-
-    writeToBuffer(buffer, currentWriteLocation, uint8_t(targetMap.size()));
-    for (const std::pair<std::string, uint8_t>& p : targetMap) {
-        writeToBuffer(buffer, currentWriteLocation, p.second);
-        writeToBuffer(buffer, currentWriteLocation, p.first);
-    }
-
-    writeToBuffer(buffer, currentWriteLocation, uint8_t(instrumentMap.size()));
-    for (const std::pair<std::string, uint16_t>& p : instrumentMap) {
-        writeToBuffer(buffer, currentWriteLocation, p.second);
-        writeToBuffer(buffer, currentWriteLocation, p.first);
-    }
-
-    uint32_t allImages = 0;
-    for (auto target : _subsetMap)
-        allImages += target.second._subset.size();
-    writeToBuffer(buffer, currentWriteLocation, allImages);
-
-    for (auto target : _subsetMap){
-        for (auto image : target.second._subset){
-            writeToBuffer(buffer, currentWriteLocation, image.startTime);
-            writeToBuffer(buffer, currentWriteLocation, image.stopTime);
-
-            std::string timeBegin;
-            std::string timeEnd;
-            SpiceManager::ref().getDateFromET(image.startTime, timeBegin);
-            SpiceManager::ref().getDateFromET(image.stopTime, timeEnd);
-
-            writeToBuffer(buffer, currentWriteLocation, timeBegin);
-            writeToBuffer(buffer, currentWriteLocation, timeEnd);
-
-            uint8_t targetId = targetMap[target.first];
-            writeToBuffer(buffer, currentWriteLocation, targetId);
-            uint16_t totalInstrumentId = 0;
-            if (image.activeInstruments.empty()) {
-                LERROR("Image had no active instruments");
-            }
-
-            for (auto instrument : image.activeInstruments) {
-                uint16_t thisInstrumentId = instrumentMap[instrument];
-                totalInstrumentId |= thisInstrumentId;
-            }
-            writeToBuffer(buffer, currentWriteLocation, totalInstrumentId);
-        }
-    }
-
-    union {
-        uint32_t value;
-        std::array<char, sizeof(uint32_t)> data;
-    } sizeBuffer;
-    sizeBuffer.value = currentWriteLocation;
-    buffer.insert(buffer.begin(), sizeBuffer.data.begin(), sizeBuffer.data.end());
-    currentWriteLocation += sizeof(uint32_t);
-
-    buffer.resize(currentWriteLocation);
-
-    //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine()->setInitialConnectionMessage(PlaybookIdentifier, buffer);
-}
 
 }
