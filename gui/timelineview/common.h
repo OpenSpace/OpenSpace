@@ -22,20 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "informationwidget.h"
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
-#include <QLayout>
-#include <QTextEdit>
+struct Image {
+    double beginning;
+    double ending;
+    std::string beginningString;
+    std::string endingString;
+    std::string target;
+    std::vector<std::string> instruments;
+};
 
-InformationWidget::InformationWidget(QWidget* parent)
-    : QTextEdit(parent)
-{
-}
-
-void InformationWidget::socketConnected() {
-    setDisabled(false);
-}
-
-void InformationWidget::socketDisconnected() {
-    setDisabled(true);
-}
+#endif // __COMMON_H__

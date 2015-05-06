@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMECONTROLWIDGET_H__
-#define __TIMECONTROLWIDGET_H__
+#ifndef __CONTROLWIDGET_H__
+#define __CONTROLWIDGET_H__
 
 #include <QWidget>
 
@@ -32,18 +32,23 @@ class QLabel;
 class QPushButton;
 class QSlider;
 
-class TimeControlWidget : public QWidget {
+class ControlWidget : public QWidget {
 Q_OBJECT
 public:
-	TimeControlWidget(QWidget* parent);
+	ControlWidget(QWidget* parent);
 
     void update(QString currentTime, QString currentDelta);
+
+    void socketConnected();
+    void socketDisconnected();
 
 signals:
     void scriptActivity(QString script);
 
 private slots:
     void onValueChange();
+    void onDateChange();
+    void onFocusChange();
     void onRewindButton();
     void onPauseButton();
     void onPlayButton();
@@ -58,8 +63,7 @@ private:
     QPushButton* _pause;
     QPushButton* _play;
     QPushButton* _forward;
-
-    bool _stateNoNotification = false;
+    QComboBox* _focusNode;
 };
 
-#endif // __TIMECONTROLWIDGET_H__
+#endif // __CONTROLWIDGET_H__

@@ -28,8 +28,10 @@
 #include <QWidget>
 #include <QTcpSocket>
 
+#include "common.h"
+
 class ConfigurationWidget;
-class TimeControlWidget;
+class ControlWidget;
 class InformationWidget;
 class TimelineWidget;
 
@@ -45,14 +47,18 @@ public slots:
 private slots:
     void onConnect(QString host, QString port);
 
+    void onSocketConnected();
+    void onSocketDisconnected();
+
 	//void onConnectButton();
 	//void sendCommandButton();
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
+    void handlePlaybook(QByteArray data);
 
 private:
     ConfigurationWidget* _configurationWidget;
-    TimeControlWidget* _timeControlWidget;
+    ControlWidget* _timeControlWidget;
     InformationWidget* _informationWidget;
     TimelineWidget* _timelineWidget;
     

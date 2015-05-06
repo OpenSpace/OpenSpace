@@ -25,17 +25,50 @@
 #ifndef __NETWORKENGINE_H__
 #define __NETWORKENGINE_H__
 
+#include <cstdint>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace openspace {
 
 class NetworkEngine {
 public:
-    NetworkEngine() = default;
+    typedef uint16_t MessageIdentifier;
 
+    NetworkEngine();
+
+    // Receiving messages
     bool handleMessage(const std::string& message);
 
-    void sendStatusMessage();
+    // Sending messages
+    void publishStatusMessage();
+    void publishIdentifierMappingMessage();
+    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
+    void sendMessages();
+
+    // Initial Connection Messages
+    void setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message);
+    void sendInitialInformation();
+
+    // Background
+    MessageIdentifier identifier(std::string name);
+private:
+    std::map<MessageIdentifier, std::string> _identifiers;
+    MessageIdentifier _lastAssignedIdentifier;
+
+    struct Message {
+        MessageIdentifier identifer;
+        std::vector<char> body;
+    };
+    std::vector<Message> _messagesToSend;
+
+    std::vector<Message> _initialConnectionMessages;
+
+
+
+    MessageIdentifier _statusMessageIdentifier;
+    MessageIdentifier _identifierMappingIdentifier;
 };
 
 } // namespace openspace

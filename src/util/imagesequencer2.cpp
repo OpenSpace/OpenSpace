@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <openspace/util/ImageSequencer2.h>
+#include <openspace/util/imagesequencer2.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
@@ -98,9 +98,11 @@ std::pair<double, std::string> ImageSequencer2::getCurrentTarget(){
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end() && it != _targetTimes.begin() ){
+	if (it != _targetTimes.end() && it != _targetTimes.begin()){
 		return *std::prev(it);
 	}
+    else
+        return std::make_pair(0.0, "No Target");
 }
 
 std::pair<double, std::vector<std::string>> ImageSequencer2::getIncidentTargetList(int range){
@@ -235,22 +237,19 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 		auto curr = std::lower_bound(begin, end, findCurrent, compareTime);
 		auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
 
-		if (curr != begin && curr != end  && prev != begin && prev != end){
-			if (curr->startTime >= prev->startTime){
-				// insert 
-				std::transform(prev, curr, std::back_inserter(captureTimes),
-					[](const Image& image) {
-					return image;
-				});
-				std::reverse(captureTimes.begin(), captureTimes.end());
+		if (curr != begin && curr != end  && prev != begin && prev != end && prev < curr){
+            if (curr->startTime >= prev->startTime){
+			    std::transform(prev, curr, std::back_inserter(captureTimes),
+				    [](const Image& i) {
+				    return i;
+			    });
+			    std::reverse(captureTimes.begin(), captureTimes.end());
+			    captures = captureTimes;
+                if (!captures.empty())
+                    _latestImage = &captures.back();
 
-				captures = captureTimes;
-
-				if (!captures.empty())
-					_latestImage = &captures.back();
-
-				return true;
-			}
+			    return true;
+            }
 		}
 	}
 	return false;
@@ -283,11 +282,11 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	std::vector<double>                            in5 = parser->getCaptureProgression();
 	
 	// check for sanity
-	assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
-	assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
-	assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
-	assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
-	assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
+	ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
+	ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
+	ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
+	ghoul_assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
+	ghoul_assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
 
 
 	// append data

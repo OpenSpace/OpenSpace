@@ -190,7 +190,7 @@ namespace openspace {
 
 			double t = luaL_checknumber(L, -1);
 			
-			OsEng.renderEngine()->startFading(1, t);
+			OsEng.renderEngine()->startFading(1, static_cast<float>(t));
 			return 0;
 		}
 		/**
@@ -205,7 +205,7 @@ namespace openspace {
 
 			double t = luaL_checknumber(L, -1);
 
-			OsEng.renderEngine()->startFading(-1, t);
+			OsEng.renderEngine()->startFading(-1, static_cast<float>(t));
 			return 0;
 		}
 
@@ -494,8 +494,9 @@ namespace openspace {
             }
 
 #if 1
-#define PrintText(i, format, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * i * 2), format, __VA_ARGS__);
-#define PrintColorText(i, format, size, color, ...) Freetype::print(font, size, static_cast<float>(startY - font_size_mono * i * 2), color, format, __VA_ARGS__);
+#define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
+#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
+#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
 
             if (_onScreenInformation._node != -1) {
                 int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
@@ -536,13 +537,13 @@ namespace openspace {
 					// GUI PRINT 
 					// Using a macro to shorten line length and increase readability
 
-                    int i = 0;
+                    int line = 0;
 			
-					PrintText(i++, "Date: %s", Time::ref().currentTimeUTC().c_str());
+					PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 				
-					PrintText(i++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
-					PrintText(i++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
-					PrintText(i++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
+					PrintText(line++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
+					PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
+					PrintText(line++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
 					/*
 					PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
 					PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
@@ -556,8 +557,11 @@ namespace openspace {
 						double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
 						std::string progress = "|";
 						int g = ((t)* 30) + 1;
-						for (int i = 0; i < g; i++)      progress.append("-"); progress.append(">");
-						for (int i = 0; i < 31 - g; i++) progress.append(" ");
+						for (int i = 0; i < g; i++)
+                            progress.append("-");
+                        progress.append(">");
+						for (int i = 0; i < 31 - g; i++)
+                            progress.append(" ");
 
 						std::string str = "";
 						openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str);
@@ -566,69 +570,72 @@ namespace openspace {
 						if (remaining > 0){
 							glm::vec4 g1(0, t, 0, 1);
 							glm::vec4 g2(1 - t);
-							PrintColorText(i++, "Next projection in:", 10, g1 + g2);
-							PrintColorText(i++, "%.0f sec %s %.1f %%", 10, g1 + g2, remaining, progress.c_str(), t * 100);
+							PrintColorText(line++, "Next projection in:", 10, g1 + g2);
+							PrintColorTextArg(line++, "%.0f sec %s %.1f %%", 10, g1 + g2, remaining, progress.c_str(), t * 100);
 						}
 						glm::vec4 w(1);
-						PrintColorText(i++, "Ucoming capture : %s", 10, w, str.c_str());
+						PrintColorTextArg(line++, "Ucoming capture : %s", 10, w, str.c_str());
 				
 						std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
    					    std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
-						int timeleft = nextTarget.first - currentTime;
+                        if (currentTarget.first > 0.0) {
+						    int timeleft = nextTarget.first - currentTime;
 
-						int hour   = timeleft / 3600;
-						int second = timeleft % 3600;
-						int minute = second / 60;
-					        second = second % 60;
+						    int hour   = timeleft / 3600;
+						    int second = timeleft % 3600;
+						    int minute = second / 60;
+					            second = second % 60;
 
-						std::string hh, mm, ss, coundtown;
+						    std::string hh, mm, ss, coundtown;
 
-						if (hour   < 10) hh.append("0");
-						if (minute < 10) mm.append("0");
-						if (second < 10) ss.append("0");
+						    if (hour   < 10) hh.append("0");
+						    if (minute < 10) mm.append("0");
+						    if (second < 10) ss.append("0");
 
-						hh.append(std::to_string(hour));
-						mm.append(std::to_string(minute));
-						ss.append(std::to_string(second));
+						    hh.append(std::to_string(hour));
+						    mm.append(std::to_string(minute));
+						    ss.append(std::to_string(second));
 
 
-						glm::vec4 b2(1.00, 0.51, 0.00, 1);
-						PrintColorText(i++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
+						    glm::vec4 b2(1.00, 0.51, 0.00, 1);
+						    PrintColorTextArg(line++, "Switching observation focus in : [%s:%s:%s]", 10, b2, hh.c_str(), mm.c_str(), ss.c_str());
 						
-						std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
-						std::string space;
-						glm::vec4 color;
-						int isize = incidentTargets.second.size(); 
-							for (int p = 0; p < isize; p++){
-								double t = (double)(p + 1) / (double)(isize+1);
-								t = (p > isize / 2) ? 1-t : t;
-								t += 0.3;
-								color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
-								PrintColorText(i, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
-							for (int k = 0; k < 10; k++){ space += " "; }
-						}
-						i++;
+						    std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+						    std::string space;
+						    glm::vec4 color;
+						    int isize = incidentTargets.second.size(); 
+                            for (int p = 0; p < isize; p++){
+                                double t = (double)(p + 1) / (double)(isize + 1);
+                                t = (p > isize / 2) ? 1 - t : t;
+                                t += 0.3;
+                                color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
+                                PrintColorTextArg(line, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
+                                for (int k = 0; k < 10; k++)
+                                    space += " ";
+						    }
+						    line++;
 					
-						std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
-						glm::vec4 active(0.58, 1, 0.00, 1);
-						glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
-						glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-						PrintColorText(i++, "Active Instruments : ", 10, active);
-						for (auto t : activeMap){
-							if (t.second == false){
-								PrintColorText(i, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
-							}
-							else{
-								PrintColorText(i, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								if (t.first == "NH_LORRI"){
-									PrintColorText(i, " + ", 10, firing);
-								}
-								PrintColorText(i, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-								PrintColorText(i++, "    %5s", 10, active, t.first.c_str());
-							}
-						}
+						    std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
+						    glm::vec4 active(0.58, 1, 0.00, 1);
+						    glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
+						    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+						    PrintColorText(line++, "Active Instruments : ", 10, active);
+						    for (auto t : activeMap){
+							    if (t.second == false){
+								    PrintColorText(line, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								    PrintColorTextArg(line++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
+							    }
+							    else{
+								    PrintColorText(line, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								    if (t.first == "NH_LORRI"){
+									    PrintColorText(line, " + ", 10, firing);
+								    }
+								    PrintColorText(line, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
+								    PrintColorTextArg(line++, "    %5s", 10, active, t.first.c_str());
+							    }
+						    }
+                        }
 					}
 					
 #undef PrintText
@@ -977,7 +984,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
     SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
 
-	SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
+	//SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
 	//SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
 	//SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
 
@@ -996,7 +1003,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		
 		solarSystemBarycenterNode->setParent(plutoBarycenterNode);
 		newHorizonsNode->setParent(plutoBarycenterNode);
-		newHorizonsGhostNode->setParent(plutoBarycenterNode);
+		//newHorizonsGhostNode->setParent(plutoBarycenterNode);
 
 		//dawnNode->setParent(plutoBarycenterNode);
 		//vestaNode->setParent(plutoBarycenterNode);
@@ -1056,16 +1063,16 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 
 		
-		ghoul::Dictionary newHorizonsGhostDictionary =
-		{
-			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS") },
-			{ std::string("EphmerisGhosting"), std::string("TRUE") },
-			{ std::string("Reference"), std::string("GALACTIC") },
-			{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
-			{ std::string("Kernels"), ghoul::Dictionary() }
-		};
-		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+		//ghoul::Dictionary newHorizonsGhostDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("NEW HORIZONS") },
+		//	{ std::string("EphmerisGhosting"), std::string("TRUE") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
 		
         return;
     }
@@ -1075,7 +1082,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		plutoBarycenterNode->setParent(solarSystemBarycenterNode);
 		jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
 		newHorizonsNode->setParent(solarSystemBarycenterNode);
-		newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
+		//newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
 
 		//newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
 		//dawnNode->setParent(solarSystemBarycenterNode);
@@ -1135,16 +1142,16 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		//vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 		
 		
-		ghoul::Dictionary newHorizonsGhostDictionary =
-		{
-			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS") },
-			{ std::string("EphmerisGhosting"), std::string("TRUE") },
-			{ std::string("Reference"), std::string("GALACTIC") },
-			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-			{ std::string("Kernels"), ghoul::Dictionary() }
-		};
-		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+		//ghoul::Dictionary newHorizonsGhostDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("NEW HORIZONS") },
+		//	{ std::string("EphmerisGhosting"), std::string("TRUE") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
 		
         return;
     }
@@ -1189,7 +1196,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
 		plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
 		newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-		newHorizonsGhostNode->setParent(jupiterBarycenterNode);
+		//newHorizonsGhostNode->setParent(jupiterBarycenterNode);
 		//newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
 
@@ -1215,17 +1222,17 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
 
 		
-		ghoul::Dictionary newHorizonsGhostDictionary =
-		{
-			{ std::string("Type"), std::string("Spice") },
-			{ std::string("Body"), std::string("NEW HORIZONS") },
-			{ std::string("EphmerisGhosting"), std::string("TRUE") },
-			{ std::string("Reference"), std::string("GALACTIC") },
-			{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-			{ std::string("Kernels"), ghoul::Dictionary() }
-		};
-		newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-		newHorizonsGhostNode->setParent(jupiterBarycenterNode);
+		//ghoul::Dictionary newHorizonsGhostDictionary =
+		//{
+		//	{ std::string("Type"), std::string("Spice") },
+		//	{ std::string("Body"), std::string("NEW HORIZONS") },
+		//	{ std::string("EphmerisGhosting"), std::string("TRUE") },
+		//	{ std::string("Reference"), std::string("GALACTIC") },
+		//	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
+		//	{ std::string("Kernels"), ghoul::Dictionary() }
+		//};
+		//newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+		//newHorizonsGhostNode->setParent(jupiterBarycenterNode);
 
 	
         return;

@@ -22,10 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #ifndef __LABELPARSER_H__
 #define __LABELPARSER_H__
-#include <openspace/util/ImageSequencer2.h>
+#include <openspace/util/imagesequencer2.h>
 #include <openspace/util/sequenceparser.h>
 
 #include <map>

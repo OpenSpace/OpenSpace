@@ -92,7 +92,7 @@ include_directories(${GHOUL_ROOT_DIR}/ext/boost)
 find_package(SGCT REQUIRED)
 include_directories(${SGCT_INCLUDE_DIRECTORIES})
 set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SGCT_LIBRARIES})
-if (UNIX)
+if (UNIX AND (NOT APPLE))
     set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Xcursor Xinerama)
 endif ()
 
@@ -145,7 +145,11 @@ endif ()
 #########################################################################################
 
 add_subdirectory(src)
-add_subdirectory(gui)
+
+option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
+if (BUILD_GUI_APPLICATIONS)
+    add_subdirectory(gui)
+endif ()
 
 #########################################################################################
 # File Fetch

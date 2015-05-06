@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "timecontrolwidget.h"
+#include "controlwidget.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -31,7 +31,43 @@
 #include <QPushButton>
 #include <QSlider>
 
-TimeControlWidget::TimeControlWidget(QWidget* parent)
+namespace {
+    struct ImportantDate {
+        QString date;
+        QString focus;
+        QString coordinateSystem;
+    };
+
+    const ImportantDate ImportantDates[] = {
+        { "2007-02-27T16:40:00.00", "JupiterProjection", "Jupiter" },
+        { "2015-07-14T10:10:00.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T10:50:00.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:22:00.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:36:40.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T11:48:43.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T12:04:35.00", "PlutoProjection", "Pluto" },
+        { "2015-07-14T15:02:46.00", "PlutoProjection", "Pluto" }
+    };
+
+    struct FocusNode {
+        QString guiName;
+        QString name;
+        QString coordinateSystem;
+    };
+    const FocusNode FocusNodes[] = {
+        { "Earth", "Earth", "Sun" },
+        { "Sun", "Sun", "Sun" },
+        { "Pluto", "PlutoProjection", "Pluto" },
+        { "Charon", "Charon", "Pluto" },
+        { "Jupiter", "JupiterProjection", "Jupiter" },
+        { "New Horizons", "NewHorizons", "" },
+        { "Nix", "Nix", "Pluto" },
+        { "Kerberos", "Kerberos", "Pluto" },
+        { "Hydra", "Hydra", "Pluto" },
+    };
+}
+
+ControlWidget::ControlWidget(QWidget* parent)
     : QWidget(parent)
     , _currentTime(new QLabel("Current Time"))
     , _setTime(new QComboBox)
@@ -41,7 +77,26 @@ TimeControlWidget::TimeControlWidget(QWidget* parent)
     , _pause(new QPushButton("||"))
     , _play(new QPushButton("|>"))
     , _forward(new QPushButton(">>"))
+    , _focusNode(new QComboBox)
 {
+    for (const ImportantDate& d : ImportantDates)
+        _setTime->addItem(d.date);
+    QObject::connect(
+        _setTime,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(onDateChange())
+    );
+
+    for (const FocusNode& f : FocusNodes)
+        _focusNode->addItem(f.guiName);
+    QObject::connect(
+        _focusNode,
+        SIGNAL(currentIndexChanged(int)),
+        this,
+        SLOT(onFocusChange())
+    );
+
     _setDelta->setMinimum(-100);
     _setDelta->setMaximum(100);
     _setDelta->setValue(0);
@@ -96,36 +151,89 @@ TimeControlWidget::TimeControlWidget(QWidget* parent)
     controlContainer->setLayout(controlContainerLayout);
     layout->addWidget(controlContainer, 3, 0, 1, 2);
 
+    layout->addWidget(_focusNode, 4, 0, 1, 2);
+
     setLayout(layout);
 }
 
-void TimeControlWidget::update(QString currentTime, QString currentDelta) {
+void ControlWidget::update(QString currentTime, QString currentDelta) {
     _currentTime->setText(currentTime);
     _currentDelta->setText(currentDelta);
 }
 
-void TimeControlWidget::onValueChange() {
-    QString script = "openspace.time.setDeltaTime(" + QString::number(_setDelta->value()) + ");";
+void ControlWidget::onValueChange() {
+    float value = static_cast<float>(_setDelta->value());
+
+    int delta;
+    if (value < 0.f) {
+        value = -value;
+        float d = std::pow(2, value / 10);
+        delta = static_cast<int>(-d);
+    }
+    else {
+        float d = std::pow(2, value / 10);
+        delta = static_cast<int>(d);
+    }
+    
+    QString script = "openspace.time.setDeltaTime(" + QString::number(delta) + ");";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onRewindButton() {
+void ControlWidget::onRewindButton() {
     QString script = "openspace.time.setDeltaTime(-openspace.time.deltaTime());";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onPauseButton() {
+void ControlWidget::onPauseButton() {
     QString script = "openspace.time.setPause(true);";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onPlayButton() {
+void ControlWidget::onPlayButton() {
     QString script = "openspace.time.setPause(false);";
     emit scriptActivity(script);
 }
 
-void TimeControlWidget::onForwardButton() {
+void ControlWidget::onForwardButton() {
     QString script = "openspace.time.setDeltaTime(-openspace.time.deltaTime());";
     emit scriptActivity(script);
 
+}
+
+void ControlWidget::onDateChange() {
+    int index = _setTime->currentIndex();
+    QString date = ImportantDates[index].date;
+    QString focus = ImportantDates[index].focus;
+    QString coordinateSystem = ImportantDates[index].coordinateSystem;
+    QString script =
+        "openspace.time.setTime('" + date + "');\
+         openspace.setOrigin('" + focus + "');\
+         openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    emit scriptActivity(script);
+}
+
+void ControlWidget::onFocusChange() {
+    int index = _focusNode->currentIndex();
+    QString name = FocusNodes[index].name;
+    QString coordinateSystem = FocusNodes[index].coordinateSystem;
+    if (coordinateSystem.isEmpty()) {
+        int date = _currentTime->text().left(4).toInt();
+        if (date < 2008)
+            coordinateSystem = "Jupiter";
+        else if (date < 2014)
+            coordinateSystem = "Sun";
+        else
+            coordinateSystem = "Pluto";
+
+    }
+    QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    emit scriptActivity(script);
+}
+
+void ControlWidget::socketConnected() {
+    setDisabled(false);
+}
+
+void ControlWidget::socketDisconnected() {
+    setDisabled(true);
 }

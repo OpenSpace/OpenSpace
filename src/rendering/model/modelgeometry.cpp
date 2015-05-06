@@ -206,6 +206,11 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 			fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
 			fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
 
+            if (vSize == 0 || iSize == 0) {
+                LERROR("Error opening file '" << filename << "' for loading cache file");
+                return false;
+            }
+
 			_vertices.resize(vSize);
 			_indices.resize(iSize);
 
