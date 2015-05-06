@@ -43,6 +43,7 @@
 #include <sgct.h>
 #include <iomanip> 
 #include <string>
+#include <thread>      
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -91,6 +92,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _texture(nullptr)
 	, _textureProj(nullptr)
 	, _textureOriginal(nullptr)
+	, _textureWhiteSquare(nullptr)
     , _geometry(nullptr)
 	, _rotation("rotation", "Rotation", 0, 0, 360)
 	, _once(false)
@@ -219,7 +221,9 @@ bool RenderablePlanetProjection::initialize(){
     loadTexture();
 	loadProjectionTexture();
     completeSuccess &= (_texture != nullptr);
+	completeSuccess &= (_textureOriginal != nullptr);
 	completeSuccess &= (_textureProj != nullptr);
+	completeSuccess &= (_textureWhiteSquare != nullptr);
 
     completeSuccess &= _geometry->initialize(this);
 
@@ -272,6 +276,10 @@ bool RenderablePlanetProjection::deinitialize(){
     _texture = nullptr;
 	delete _textureProj;
 	_textureProj = nullptr;
+	delete _textureOriginal;
+	_textureOriginal = nullptr;
+	delete _textureWhiteSquare;
+	_textureWhiteSquare = nullptr;
 	delete _geometry;
 	_geometry = nullptr;
     return true;
@@ -401,26 +409,43 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	_projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
 }
 
+
+void RenderablePlanetProjection::textureBind(){
+	ghoul::opengl::TextureUnit unit[2];
+	unit[0].activate();
+	_texture->bind();
+	_programObject->setUniform("texture1", unit[0]);
+	unit[1].activate();
+	_textureWhiteSquare->bind();
+	_programObject->setUniform("texture2", unit[1]);
+}
+
+void RenderablePlanetProjection::project(){
+	for (auto img : _imageTimes){
+		std::thread t1(&RenderablePlanetProjection::attitudeParameters, this, img.startTime);
+		t1.join();
+		_projectionTexturePath = img.path; // path to current images
+		imageProjectGPU(); //fbopass
+	}
+	_capture = false;
+}
+
+
 #define GPU_PROJ
 void RenderablePlanetProjection::render(const RenderData& data){
 	if (!_programObject) return;
 	if (!_textureProj) return;
-
+	
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
+	double startTime, endTime;
+	
 #ifdef GPU_PROJ
-	if (_capture){
-		for (auto img : _imageTimes){
-			attitudeParameters(img.startTime); // compute projector viewmatrix
-			_projectionTexturePath = img.path; // path to current images
-			imageProjectGPU(); //fbopass
-		}
-		_capture = false;
-	}
+	if (_capture) 
+		project();
 #endif
 	attitudeParameters(_time);
-	_projectionTexturePath = _defaultProjImage;
 
 	psc sun_pos;
 	double  lt;
@@ -435,20 +460,14 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
 	setPscUniforms(_programObject, &data.camera, data.position);
-
-    // Bind texture
-    ghoul::opengl::TextureUnit unit[2];
-    unit[0].activate();
-    _texture->bind();
-    _programObject->setUniform("texture1", unit[0]); 
-	unit[1].activate();
-	_textureProj->bind();
-	_programObject->setUniform("texture2", unit[1]); 
-
+	
+	textureBind();
+	
     // render geometry
     _geometry->render();
     // disable shader
     _programObject->deactivate();
+	
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
@@ -461,7 +480,6 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
 	//floor fading to decimal
-	//_fadeProjection = floorf(_fadeProjection * 10) / 10; 
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){
@@ -494,6 +512,15 @@ void RenderablePlanetProjection::loadTexture(){
 		if (_textureOriginal) {
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		}
+	}
+	delete _textureWhiteSquare;
+	_textureWhiteSquare = nullptr;
+	if (_colorTexturePath.value() != "") {
+		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage));
+		if (_textureWhiteSquare) {
+			_textureWhiteSquare->uploadTexture();
+			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
 }
