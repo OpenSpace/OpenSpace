@@ -57,6 +57,8 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
+	properties::BoolProperty _performFade;
+	properties::FloatProperty _fading;
     ghoul::opengl::ProgramObject* _programObject; 
     ghoul::opengl::Texture* _texture;
 
@@ -69,6 +71,7 @@ private:
 	std::string _destination;
 	std::string _target;
 
+	bool _isGhost;
 
     psc _sunPosition;
 

@@ -27,9 +27,11 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/imagesequencer2.h>
 
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
+	const std::string keyGhosting = "EphmerisGhosting";
 }
 
 namespace openspace {
@@ -49,6 +51,8 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
     if (!hasObserver)
         LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+
+	dictionary.getValue(keyGhosting, _ghosting);
 
 	ghoul::Dictionary kernels;
 	dictionary.getValue(keyKernels, kernels);
@@ -75,13 +79,13 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	double lightTime = 0.0;
 	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
 		"GALACTIC", "NONE", data.time, position, lightTime);
-
-	/*if (_targetName == "NEW HORIZONS"){
-		// In order to properly draw the viewfrustrum, the craft might have to be
-		// positioned using the X-variations of aberration methods (ongoing investigation).
+	
+	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	if (_ghosting == "TRUE" && interval > 60){
+		double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
 		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", data.time, position, lightTime);
-	}*/
+			"GALACTIC", "NONE", _time, position, lightTime);
+	}
 	
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	_position[3] += 3;

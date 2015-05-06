@@ -42,6 +42,8 @@ private:
     std::string _originName;
     psc _position;
 	bool _kernelsLoadedSuccessfully;
+	std::string _ghosting;
+	std::string _name;
 };
     
 } // namespace openspace

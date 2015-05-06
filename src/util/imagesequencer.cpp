@@ -46,21 +46,40 @@ ImageSequencer* ImageSequencer::_sequencer = nullptr;
 
 struct ImageParams{
 	double startTime;
-	double stopTime;
 	std::string path;
 	std::string activeInstrument;
+	std::string target;
 	bool projected;
 };
 
-auto cmp = [](const ImageParams &a, const ImageParams &b)->bool{
+
+
+std::vector<std::vector<ImageParams>> _timeStamps;
+void createImage(std::vector<ImageParams>& vec, double t1, std::string instrument, std::string target, std::string path = "dummypath");
+
+auto imageComparer = [](const ImageParams &a, const ImageParams &b)->bool{
 	return a.startTime < b.startTime;
 };
 
-std::vector<ImageParams> _timeStamps;
+
+std::vector<ImageParams>::iterator binary_find(std::vector<ImageParams>::iterator begin,
+	std::vector<ImageParams>::iterator end,
+	const ImageParams &val,
+	bool(*imageComparer)(const ImageParams &a, const ImageParams &b)){
+	// Finds the lower bound in at most log(last - first) + 1 comparisons
+	std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, imageComparer);
+	if (it != begin){
+		return it;
+	}
+	return end;
+}
 
 ImageSequencer::ImageSequencer() 
-    : _nextCapture(0.0)
-    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+    : _nextCapture(-1.0)
+	, _currentTime(-1.0)
+	, _sequenceIDs(0)
+	, _targetsAdded(false)
+    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {}
 
 
@@ -78,93 +97,256 @@ void ImageSequencer::deinitialize() {
 	_sequencer = nullptr;
 }
 
-void ImageSequencer::createImage(double t1, double t2, std::string instrument, std::string path) {
+void ImageSequencer::setSequenceId(int& id){
+	id = _sequenceIDs;
+	_sequenceIDs++;
+}
+
+void ImageSequencer::addSequenceObserver(int sequenceID, std::string name, std::vector<std::string> payload){
+	if (sequenceID >= 0){
+		_observers.insert(std::make_pair(sequenceID, name));
+		_instruments.insert(std::make_pair(name, payload));
+	}
+}
+
+void ImageSequencer::registerTargets(std::vector<std::string>& potential){
+	for (auto p : potential){
+		if (_projectableTargets.find(p) == _projectableTargets.end()){
+			_projectableTargets[p] = _currentTime;
+		}
+	}
+}
+
+void ImageSequencer::update(double time){
+	_currentTime = time;
+	static bool time_initialized;
+
+	if (!time_initialized){
+		for (auto &it : _projectableTargets) {
+			it.second = _currentTime;
+			assert(it.second > 0.0);
+		}
+		time_initialized = true;
+	}
+}
+
+void createImage(std::vector<ImageParams>& vec, double t1, std::string instrument, std::string target, std::string path) {
 	// insert
 	ImageParams image;
 	image.startTime = t1;
-	image.stopTime  = t2;
 	image.path      = path;
 	image.activeInstrument = instrument;
+	image.target = target;
 	image.projected = false;
 	
-	_timeStamps.push_back(image);
-	// sort
+	vec.push_back(image);
 }
 
 double ImageSequencer::getNextCaptureTime(){
 	return _nextCapture;
 }
-double ImageSequencer::nextCaptureTime(double _time){
-	auto binary_find = [](std::vector<ImageParams>::iterator begin,
-		std::vector<ImageParams>::iterator end,
-		const ImageParams &val,
-		bool(*cmp)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
-		// Finds the lower bound in at most log(last - first) + 1 comparisons
-		std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, cmp);
-		if (it != begin){
-			return it;
-		}
-		return end;
-	};
-
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { _time, 0, "", "",  false }, cmp);
-
-	if (it == _timeStamps.end() || _time < _nextCapture) return _nextCapture;
+double ImageSequencer::nextCaptureTime(double time, int sequenceID){
+	if (time < _nextCapture) return _nextCapture;
+	auto it = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { time, "", "", "", false }, imageComparer);
+	if (it == _timeStamps[sequenceID].end()) return _nextCapture;
 
 	return it->startTime;
 }
 
-std::string ImageSequencer::findActiveInstrument(double time){
-	auto binary_find = [](std::vector<ImageParams>::iterator begin,
-		std::vector<ImageParams>::iterator end,
-		const ImageParams &val,
-		bool(*cmp)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
-		// Finds the lower bound in at most log(last - first) + 1 comparisons
-		std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, cmp);
-		if (it != begin){
-			return it;
-		}
-		return end;
-	};
-
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { time, 0, "", "", false }, cmp);
-	
-	if ((it == _timeStamps.end())){
+std::string ImageSequencer::findActiveInstrument(double time, int sequenceID){
+	auto it = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { time, "", "", "",false }, imageComparer);
+	if ((it == _timeStamps[sequenceID].end())){
 		_activeInstrument = "Not found, incufficient playbook-data";
 	}else{
 		_activeInstrument = std::prev(it)->activeInstrument;
 	}
 	
-
 	return _activeInstrument;
 }
 
-bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool closedInterval){
-	auto binary_find = [](std::vector<ImageParams>::iterator begin,
-						std::vector<ImageParams>::iterator end,
-						const ImageParams &val,
-						bool(*cmp)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
+void ImageSequencer::augumentSequenceWithTargets(int sequenceID){
+	if (!_targetsAdded){
+		// if there is an registered observer for this sequence 
+		if (_observers.count(sequenceID) > 0) {
+			// find observer
+			std::string observer = _observers.at(sequenceID);
+			// find its instruments
+			std::map <std::string, std::vector<std::string>>::iterator it2 = _instruments.find(observer);
+			if (it2 != _instruments.end()){
+				std::string _targetFOV;
+				bool _withinFOV;
+				// for each image taken
+				for (std::vector<ImageParams>::iterator image = _timeStamps[sequenceID].begin(); image != _timeStamps[sequenceID].end(); ++image) {
+					// traverse potential targets...
+					for (auto t : _projectableTargets){
+						// ... and potential instruments
+						for (auto i : it2->second){
+							//register precisely which target is being projected to upon image-capture
+							bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+								i, // Instrumnet 
+								t.first, // projectables
+								observer, // new horizons
+								"ELLIPSOID",
+								"NONE",
+								image->startTime,
+								_withinFOV);
+							//if (!_withinFOV) image->target = "VOID";
+							if (success && _withinFOV){
+								image->target = t.first;
+								//once we find it abort search, break the loop.
+								break;
+							}
+						}
+					}
+				}
+			}else{
+				LERROR("Spacecraft payload not provided, cannot write playbook");
+			}
+		}
+		else{
+			LERROR("Did not find observing spacecraft for sequence, cannot write playbook");
+		}
+		_targetsAdded = true;
+	}
+}
+
+bool ImageSequencer::getImagePath(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee, bool withinFOV){
+		/*if (withinFOV && !Time::ref().timeJumped()){
+			getSingleImage(_imageTimes, sequenceID, projectee);
+		}else{*/
+			getMultipleImages(_imageTimes, sequenceID, projectee);
+		//}
+	return true;
+}
+
+bool ImageSequencer::getMultipleImages(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee){
+	double previousTime;
+	std::map<std::string, double>::iterator it = _projectableTargets.find(projectee); 
+	if (it != _projectableTargets.end()){
+		previousTime = it->second;
+		it->second = _currentTime;
+	}
+	auto it1 = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { previousTime, "", "", "", false }, imageComparer);
+	auto it2 = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { _currentTime, "", "", "", false }, imageComparer);
+
+	if (it1 != _timeStamps[sequenceID].end() && it2 != _timeStamps[sequenceID].end() && it1 != it2){
+		std::transform(it1, it2, std::back_inserter(_imageTimes),
+			[](const ImageParams& i) { 
+				return std::make_pair(i.startTime, i.path);
+		});
+	}
+	std::reverse(_imageTimes.begin(), _imageTimes.end());
+
+	double upcoming = nextCaptureTime(_currentTime, sequenceID);
+	if (_nextCapture != upcoming){
+		_nextCapture = upcoming;
+		_intervalLength = upcoming - _currentTime;
+	}
+
+	return true;
+}
+
+bool ImageSequencer::getSingleImage(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee){
+
+	auto bfind = [](std::vector<ImageParams>::iterator begin,
+		std::vector<ImageParams>::iterator end,
+		const ImageParams &val,
+		bool(*imageComparer)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
 		// Finds the lower bound in at most log(last - first) + 1 comparisons
-		std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, cmp);
+		std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, imageComparer);
 		if (it != begin){
 			return std::prev(it);
 		}
 		return end;
 	};
 
-	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { currentTime, 0, "", "", false }, cmp);
+	auto it = bfind(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { _currentTime, "", "", "", false }, imageComparer);
+
+	if (it != _timeStamps[sequenceID].end() && !it->projected){
+		it->projected = true;
+		_imageTimes.push_back(std::make_pair(it->startTime, it->path));
+	}
+
+	double upcoming = nextCaptureTime(_currentTime, sequenceID);
+	if (_nextCapture != upcoming){
+		_nextCapture = upcoming;
+		_intervalLength = upcoming - _currentTime;
+	}
+
+	return true;
+}
+/*
+bool ImageSequencer::getImagePath(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee, bool closedInterval){
+	double t = _currentTime;
+
+	double ptime;
+	std::map<std::string, double>::iterator it = _previous.find(projectee);
+	if (it != _previous.end()){
+		ptime = it->second;
+		it->second = _currentTime;
+	}
+
+	while (t > ptime){
+		auto binary_find = [](std::vector<ImageParams>::iterator begin,
+			std::vector<ImageParams>::iterator end,
+			const ImageParams &val,
+			bool(*imageComparer)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
+			// Finds the lower bound in at most log(last - first) + 1 comparisons
+			std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, imageComparer);
+			if (it != begin){
+				return std::prev(it);
+			}
+			return end;
+		};
+
+		auto it = binary_find(_timeStamps[sequenceID].begin(), _timeStamps[sequenceID].end(), { t, 0, "", "", false }, imageComparer);
+
+		if (it == _timeStamps[sequenceID].end() || it->startTime < ptime) break;
+
+		if (!it->projected || it != _timeStamps[sequenceID].end()){
+			_imageTimes.push_back(std::make_pair(it->startTime, it->path));
+		}
+		t = it->startTime - 1;
+		//it->projected = true;
+	}
+	std::reverse(_imageTimes.begin(), _imageTimes.end());
+
+	double upcoming = nextCaptureTime(_currentTime, sequenceID);
+	if (_nextCapture != upcoming){
+		_nextCapture = upcoming;
+		_intervalLength = upcoming - _currentTime;
+	}
+
+	return true;
+}*/
+/*
+bool ImageSequencer::getImagePath(double& currentTime, std::string& path,  bool closedInterval){
+	auto binary_find = [](std::vector<ImageParams>::iterator begin,
+						std::vector<ImageParams>::iterator end,
+						const ImageParams &val,
+						bool(*imageComparer)(const ImageParams &a, const ImageParams &b))->std::vector<ImageParams>::iterator{
+		// Finds the lower bound in at most log(last - first) + 1 comparisons
+	std::vector<ImageParams>::iterator it = std::lower_bound(begin, end, val, imageComparer);
+		if (it != begin){
+			return std::prev(it);
+		}
+		return end;
+	};
+
+	auto it = binary_find(_timeStamps.begin(), _timeStamps.end(), { currentTime, 0, "", "", false }, imageComparer);
 	//check [start, stop] 
 	if (closedInterval && (it == _timeStamps.end() || it->stopTime < currentTime || it->projected)){
 		return false;
 	}else if (!closedInterval && (it == _timeStamps.end() || it->projected)){
 		return false;
 	}
+	
 	double upcoming = nextCaptureTime(currentTime);
 	if (_nextCapture != upcoming){
 		_nextCapture = upcoming;
 		_intervalLength = upcoming - currentTime;
 	}
-
+	
 	it->projected = true;
 	path = it->path;
 	currentTime = it->startTime;
@@ -178,6 +360,9 @@ bool ImageSequencer::sequenceReset(){
 	}
 	return true;
 }
+*/
+
+// ----------------- LOAD-DATA RELATED STUFF --------------------------------------
 
 bool replace(std::string& str, const std::string& from, const std::string& to) {
 	size_t start_pos = str.find(from);
@@ -185,17 +370,6 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 		return false;
 	str.replace(start_pos, from.length(), to);
 	return true;
-}
-
-bool ImageSequencer::parsePlaybook(const std::string& dir, const std::string& type, std::string year){
-	ghoul::filesystem::Directory playbookDir(dir, true);
-	std::vector<std::string> dirlist = playbookDir.read(true, false);
-	for (auto path : dirlist) {
-        bool success = parsePlaybookFile(path, year);
-        if (!success)
-            return false;
-    }
-	return true; // add check
 }
 
 double ImageSequencer::getMissionElapsedTime(std::string timestr){
@@ -213,11 +387,13 @@ double ImageSequencer::getMissionElapsedTime(std::string timestr){
 	else if (met < _metRef){
 		et -= diff;
 	}
-
 	return et;
 }
 
-bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string year) {
+bool ImageSequencer::parsePlaybookFile(const std::string& fileName, int& sequenceID, std::string year) {
+	setSequenceId(sequenceID);
+	std::vector<ImageParams> tmp;
+
 	if (size_t position = fileName.find_last_of(".") + 1){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(fileName).fileExtension();
@@ -272,7 +448,7 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
                         }
                     } while (!file.eof());
 
-                    std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
+                    std::sort(_timeStamps.begin(), _timeStamps.end(), imageComparer);
 
                     std::ofstream cachedFileStream(cachedFile);
                     cachedFileStream << std::setprecision(64);
@@ -305,19 +481,23 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, std::string 
 						if (pos != std::string::npos){
 							timestr = timestr.substr(24, 9);
 							et = getMissionElapsedTime(timestr);
-							createImage(et, et + shutter, id[i], _defaultCaptureImage);
+							createImage(tmp, et, id[i], "", _defaultCaptureImage);
+							std::sort(tmp.begin(), tmp.end(), imageComparer);
 						}
 					}
 				} while (!file.eof());
-                std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
 			}
 				
 		}
 	}
+	_timeStamps.push_back(tmp);
     return true;
 }
 
-bool ImageSequencer::loadSequence(const std::string& dir) {	
+bool ImageSequencer::loadSequence(const std::string& dir, int& sequenceID) {
+	setSequenceId(sequenceID);
+	std::vector<ImageParams> tmp;
+
 	ghoul::filesystem::Directory sequenceDir(dir, true);
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	for (auto path : sequencePaths){
@@ -333,27 +513,25 @@ bool ImageSequencer::loadSequence(const std::string& dir) {
 				
 					// open up label files
 					std::string line = "";
-					std::string specsOfInterest[2] = { "START_TIME", "STOP_TIME" };
-					double timestamps[2] = { 0.0, 0.0 };
+					std::string specsOfInterest = "START_TIME"; // can be extended 
+					double timestamp= 0.0;
 					bool found = false;
 					do {
 						std::getline(file, line);
-						for (int i = 0; i < 2; i++){
-							auto pos = line.find(specsOfInterest[i]);
+							auto pos = line.find(specsOfInterest);
 							if (pos != std::string::npos){
 								std::string time = line.substr(line.find("=") + 2);
 								time.erase(std::remove(time.begin(), time.end(), ' '), time.end());
-								openspace::SpiceManager::ref().getETfromDate(time, timestamps[i]);
+								openspace::SpiceManager::ref().getETfromDate(time, timestamp);
 							}
-						}
-						if (timestamps[0] != 0.0 && timestamps[1] != 0.0){
+						if (timestamp != 0.0){
 							found = true;
 							std::string ext = "jpg";
 							path.replace(path.begin() + position, path.end(), ext);
                             bool fileExists = FileSys.fileExists(path);
 							if (fileExists) {
-								createImage(timestamps[0], timestamps[1], "NH_LORRI", path); /// fix active instrument!
-                                std::sort(_timeStamps.begin(), _timeStamps.end(), cmp);
+								createImage(tmp, timestamp, "NH_LORRI", "", path); /// fix active instrument!
+								std::sort(tmp.begin(), tmp.end(), imageComparer);
 							}
 						}
 					} while (!file.eof() && found == false);
@@ -361,6 +539,7 @@ bool ImageSequencer::loadSequence(const std::string& dir) {
 			}
 		}
 	}
+	_timeStamps.push_back(tmp);
 	return !_timeStamps.empty();
 }
 

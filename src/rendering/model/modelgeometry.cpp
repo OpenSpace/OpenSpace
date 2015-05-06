@@ -64,6 +64,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
+	, _mode(GL_TRIANGLES)
 {
 	setName("ModelGeometry");
 	using constants::scenegraphnode::keyName;
@@ -90,8 +91,12 @@ ModelGeometry::~ModelGeometry() {
 void ModelGeometry::render() {
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(_mode, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+void ModelGeometry::changeRenderMode(const GLenum mode){
+	_mode = mode;
 }
 
 bool ModelGeometry::initialize(RenderableModel* parent) {
@@ -152,7 +157,7 @@ bool ModelGeometry::loadObj(const std::string& filename){
 		else {
 			LINFO("Cache for Model'" << filename << "' not found");
 		}
-		LINFO("Loading OBJ file '" << filename << "'");
+		LINFO("Loading Model file '" << filename << "'");
 		bool success = loadModel(filename);
 		if (!success)
 			//return false;
@@ -200,6 +205,11 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 			int64_t vSize, iSize;
 			fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
 			fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
+
+            if (vSize == 0 || iSize == 0) {
+                LERROR("Error opening file '" << filename << "' for loading cache file");
+                return false;
+            }
 
 			_vertices.resize(vSize);
 			_indices.resize(iSize);

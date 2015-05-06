@@ -306,7 +306,7 @@ void RenderableFieldlines::update(const UpdateData&) {
 
 void RenderableFieldlines::loadSeedPoints() {
 	_seedPoints.clear();
-	switch (_seedPointSource) {
+	switch (_seedPointSource.value()) {
 		case SeedPointSourceFile:
 			loadSeedPointsFromFile();
 			break;

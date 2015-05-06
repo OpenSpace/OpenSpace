@@ -65,10 +65,10 @@ public:
     void render(const RenderData& data);
 	void updateCamera(Camera* camera) const;
 
-    void addNode(SceneGraphNode* child);
+    //void addNode(SceneGraphNode* child);
 
     void setParent(SceneGraphNode* parent);
-	bool abandonChild(SceneGraphNode* child);
+	//bool abandonChild(SceneGraphNode* child);
 
     const psc& position() const;
     psc worldPosition() const;

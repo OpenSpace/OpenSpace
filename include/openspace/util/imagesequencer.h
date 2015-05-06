@@ -37,43 +37,102 @@ namespace openspace {
 class ImageSequencer {
 public:
     ImageSequencer();
-
+	/**
+	* Singelton instantiation
+	*/
 	static ImageSequencer& ref();
-	bool loadSequence(const std::string& dir);
-
-    bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
-    bool parsePlaybookFile(const std::string& fileName, std::string year = "2015");
-
-	void testStartTimeMap();
-
 	static void initialize();
 	static void deinitialize();
-	bool sequenceReset();
 
-	bool getImagePath(double& _currentTime, std::string& path, bool closedInterval = false);
+	/**
+	* Updates current time and initializes the previous time member
+	*/
+	void update(double initTime);
+
+	/**
+	* When the a projectable class loads its sequence it also has to request an ID
+	* which is set by reference and returned to the projectable. This ID is later
+	* used to access whatever data ImageSequencer loads. 
+	*/
+	void setSequenceId(int& id);
+
+	//bool sequenceReset();
+
+	/**
+	* Based on sequenceID and unique projectee name, the ImageSequencer determines which subset of data is to be filled to _imageTimes
+	* which can be used in a projecable class for projections. 
+	*/
+	bool getImagePath(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee, bool withinFOV);
+
+	/*
+	* Returns the time until next capture in seconds.
+	* 
+	*/
 	double getNextCaptureTime();
-	double getIntervalLength(){ return _intervalLength; };
-	std::string& getActiveInstrument(){ return _activeInstrument; };
-	std::string findActiveInstrument(double time);
 
+	/*
+	* Returns the time until next capture in seconds.
+	*/
+	double getIntervalLength(){ return _intervalLength; };
+
+	/*
+	* Returns next active instrument 
+	*/
+	std::string& getActiveInstrument(){ return _activeInstrument; };
+
+	/*
+	* Performs search to find next consective instrument thats active
+	*/
+	std::string findActiveInstrument(double time, int sequenceID);
+
+	/*
+	* Performs search to find next consecutive projection image.
+	*/
+	double nextCaptureTime(double _time, int sequenceID);
+
+	/*
+	* Load (from *.fit converted) jpg image sequence based on corresponding *.lbl header files 
+	*/
+	bool loadSequence(const std::string& dir, int& sequenceID);
+	/*
+	* Load sequence file of either *.csv type (excel) or preparsed *.txt type
+	*/
+	bool parsePlaybook(const std::string& dir, const std::string& type, std::string year = "2015");
+	bool parsePlaybookFile(const std::string& fileName, int& sequenceID, std::string year = "2015");
+	/*
+	* These three methods augment the playbook
+	*/
+	void augumentSequenceWithTargets(int sequenceID);
+	void addSequenceObserver(int sequenceID, std::string name, std::vector<std::string> payload);
+	void registerTargets(std::vector<std::string>& potential);
 
 
 	static ImageSequencer* _sequencer;
 
+protected:
+
+	bool getMultipleImages(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee);
+	bool getSingleImage(std::vector<std::pair<double, std::string>>& _imageTimes, int sequenceID, std::string projectee);
+
 private:
+
 	double getMissionElapsedTime(std::string timestr);
 
-	double nextCaptureTime(double _time);
+	std::map<std::string, double> _projectableTargets;
+	std::map <int, std::string> _observers;
+	std::map <std::string, std::vector<std::string>> _instruments;
 
-	void createImage(double t1, double t2, std::string instrument, std::string path = "dummypath");
-	
 	double _nextCapture;
 	double _intervalLength;
 	double _metRef = 299180517;
-
+	double _currentTime;
+	int _sequenceIDs;
 
     std::string _defaultCaptureImage;
 	std::string _activeInstrument;
+
+	bool _targetsAdded;
+
 };
 
 } // namespace openspace

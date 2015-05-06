@@ -64,15 +64,17 @@ private:
     properties::StringProperty _colorTexturePath;
     ghoul::opengl::ProgramObject* _programObject;
     ghoul::opengl::Texture* _texture;
+	ghoul::opengl::Texture* _nightTexture;
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
 	properties::IntProperty _rotation;
 	float _alpha;
 
 	glm::dmat3 _stateMatrix;
-
+	std::string _nightTexturePath;
 	std::string _frame;
 	std::string _target;
+	bool _hasNightTexture;
 	double _time;
 };
 
