@@ -53,6 +53,7 @@ namespace planetgeometryprojection {
 class PlanetGeometryProjection;
 }
 
+
 class RenderablePlanetProjection : public Renderable {
 public:
 	RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
@@ -74,6 +75,9 @@ protected:
 	glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
 	void attitudeParameters(double time);
 
+	void textureBind();
+	void project();
+
 private:
 	void imageProjectGPU();
 
@@ -90,6 +94,7 @@ private:
     ghoul::opengl::Texture* _texture;
 	ghoul::opengl::Texture* _textureOriginal;
 	ghoul::opengl::Texture* _textureProj;
+	ghoul::opengl::Texture* _textureWhiteSquare;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
 	glm::vec2  _camScaling;
