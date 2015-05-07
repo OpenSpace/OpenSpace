@@ -164,17 +164,17 @@ void ControlWidget::update(QString currentTime, QString currentDelta) {
 void ControlWidget::onValueChange() {
     float value = static_cast<float>(_setDelta->value());
 
-    int delta;
+    float delta;
     if (value < 0.f) {
         value = -value;
-        float d = std::pow(2, value / 10);
-        delta = static_cast<int>(-d);
+        float d = std::pow(2, value / 10) - 1.f;
+        delta = -d;
     }
     else {
-        float d = std::pow(2, value / 10);
-        delta = static_cast<int>(d);
+        float d = std::pow(2, value / 10) - 1.f;
+        delta = d;
     }
-    
+
     QString script = "openspace.time.setDeltaTime(" + QString::number(delta) + ");";
     emit scriptActivity(script);
 }

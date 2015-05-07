@@ -116,7 +116,8 @@ void MainWindow::onConnect(QString host, QString port) {
 
 void MainWindow::readTcpData() {
     static const uint16_t MessageTypeStatus = 0;
-    static const uint16_t MessageTypePlayBook = 2;
+    static const uint16_t MessageTypePlayBookHongKang = 2;
+    static const uint16_t MessageTypePlayBookLabel = 3;
 
     QByteArray data = _socket->readAll();
 
@@ -139,7 +140,8 @@ void MainWindow::readTcpData() {
     case MessageTypeStatus:
         handleStatusMessage(data.mid(2));
         break;
-    case MessageTypePlayBook:
+    case MessageTypePlayBookHongKang:
+    case MessageTypePlayBookLabel:
     {
         const char* payloadDebug = data.mid(2).data();
 

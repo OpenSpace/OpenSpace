@@ -86,12 +86,12 @@ void TimelineWidget::paintEvent(QPaintEvent* event) {
 }
 
 void TimelineWidget::setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap) {
-    _images = std::move(images);
+    _images.insert(_images.end(), images.begin(), images.end());
 
     std::sort(_images.begin(), _images.end(), [](const Image& a, const Image& b) { return a.beginning < b.beginning; });
 
-    _targetMap = std::move(targetMap);
-    _instrumentMap = std::move(instrumentMap);
+    _targetMap.insert(targetMap.begin(), targetMap.end());
+    _instrumentMap.insert(instrumentMap.begin(), instrumentMap.end());
 
     _instruments.clear();
     std::set<std::string> instruments;
