@@ -156,12 +156,6 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
             images.push_back(&i);
     }
 
-
-    //std::vector<Image>::const_iterator lower = std::lower_bound(_images.begin(), _images.end(), lowerTime, [](const Image& i, double time) { return i.beginning < time; });
-    //std::vector<Image>::const_iterator upper = std::lower_bound(_images.begin(), _images.end(), upperTime, [](const Image& i, double time) { return i.ending < time; });
-    //if (lower != _images.end() && upper != _images.end())
-    //    drawImages(painter, timelineRect, std::vector<Image>(lower, upper), lowerTime, upperTime);
-        
     drawImages(painter, timelineRect, images, lowerTime, upperTime);
 
 
@@ -180,18 +174,6 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
     // Draw Targets
     int currentHorizontalPosition = Padding;
     int currentVerticalPosition = Padding;
-    //for (int i = 0; i < _targets.size(); ++i) {
-
-    //    const std::string& target = _targets[i];
-    //    
-    //    painter.setBrush(QBrush(targetColors[i]));
-    //    painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
-    //    currentHorizontalPosition += BoxSize + Padding;
-
-    //    painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, QString::fromStdString(target));
-    //    int textWidth = painter.boundingRect(QRect(), QString::fromStdString(target)).width();
-    //    currentHorizontalPosition += std::max(textWidth, 25) + Padding;
-    //}
 
     // Draw Instruments
     currentHorizontalPosition = Padding;
@@ -204,7 +186,6 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
 
         const std::string& instrument = _instruments[i];
 
-        //painter.setBrush(QBrush(instrumentColors[i]));
         painter.setBrush(QBrush(instrumentColors[i]));
         painter.setPen(QPen(instrumentColors[i]));
         painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
@@ -213,7 +194,8 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         painter.setPen(QPen(Qt::black));
         painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
         int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
-        currentHorizontalPosition += std::max(textWidth, 25) + Padding;
+        //currentHorizontalPosition += std::max(textWidth, 25) + Padding;
+        currentHorizontalPosition += 125;
     }
 }
 
@@ -252,11 +234,13 @@ void TimelineWidget::drawImages(
         int height = (timelineRect.top() + timelineRect.height() * tEnd) - loc;
         height = std::max(height, 5);
 
+        if (loc + height > timelineRect.height())
+            height = timelineRect.height() - loc;
+
         std::string target = i->target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
         int iTarget = std::distance(_targets.begin(), it);
 
-        //std::vector<QColor> colors;
         for (std::string instrument : i->instruments) {
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
             if (it == _instruments.end())
@@ -271,11 +255,13 @@ void TimelineWidget::drawImages(
             painter.drawRect(pos, loc, width, height);
         }
 
-        painter.setBrush(QBrush(Qt::black));
-        painter.setPen(QPen(Qt::black));
-        QString line = QString::fromStdString(i->beginningString) + QString(" (") + QString::fromStdString(i->target) + QString(")");
+        if (height >= 5) {
+            painter.setBrush(QBrush(Qt::black));
+            painter.setPen(QPen(Qt::black));
+            QString line = QString::fromStdString(i->beginningString) + QString(" (") + QString::fromStdString(i->target) + QString(")");
 
-        painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
+            painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
+        }
     }
 }
 
@@ -296,9 +282,4 @@ std::string TimelineWidget::nextTarget() const {
         return it->target;
     else
         return "";
-    //for (const Image& i : _images) {
-    //    double imageTime = i.beginning;
-    //    double currentTime = _currentTime.et;
-    //    if ()
-    //}
 }

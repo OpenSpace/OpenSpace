@@ -235,6 +235,9 @@ void ControlWidget::onDateChange() {
              openspace.changeCoordinateSystem('" + coordinateSystem + "');";
         emit scriptActivity(script);
     }
+    _setTime->blockSignals(true);
+    _setTime->setCurrentIndex(0);
+    _setTime->blockSignals(false);
 }
 
 void ControlWidget::onFocusChange() {

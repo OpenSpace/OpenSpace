@@ -147,8 +147,11 @@ void MainWindow::readTcpData() {
 
     switch (messageType.value) {
     case MessageTypeStatus:
-        handleStatusMessage(data.mid(2));
+    {
+        if (_hasHongKangTimeline && _hasLabelTimeline)
+            handleStatusMessage(data.mid(2));
         break;
+    }
     case MessageTypePlayBookHongKang:
     case MessageTypePlayBookLabel:
     {
