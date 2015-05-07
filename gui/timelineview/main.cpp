@@ -25,8 +25,12 @@
 #include <QApplication>
 #include "mainwindow.h"
 
+//static const QString style = "background: grey";
+
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
+
+    app.setStyleSheet(style);
 
 	MainWindow window;
 	window.show();
