@@ -246,8 +246,8 @@ void LabelParser::create(){
 	//myfile.open("LabelFileOutput.txt");
 
 	////print all
-	//for (auto target : _subsetMap){
-	//	_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
+	for (auto target : _subsetMap){
+		_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
 	//	std::string min, max;
 	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
 	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
@@ -269,7 +269,7 @@ void LabelParser::create(){
 	//		}
 	//		myfile << std::endl;
 	//	}
-	//}
+	}
 	//myfile.close();
 
 
