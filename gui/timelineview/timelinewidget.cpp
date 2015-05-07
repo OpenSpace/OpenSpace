@@ -39,15 +39,40 @@ namespace {
     static const int TextOffset = 5;
 
     const QColor instrumentColors[] = {
-        QColor(228, 26, 28),
-        QColor(55, 126, 184),
-        QColor(77, 175, 74),
-        QColor(152, 78, 163),
-        QColor(255, 127, 0),
-        QColor(255, 255, 51),
-        QColor(166, 86, 40),
-        QColor(247, 129, 191),
-        QColor(153, 153, 153),
+        QColor(242, 101, 74),
+        QColor(175, 18, 18),
+        QColor(211, 154, 31),
+        QColor(241, 231, 48),
+        QColor(149, 219, 32),
+        QColor(49, 234, 219),
+        QColor(49, 155, 234),
+        QColor(139, 86, 152),
+        QColor(84, 79, 149),
+        QColor(203, 153, 200),
+        QColor(82, 145, 57)
+
+        //QColor(166, 206, 227),
+        //QColor(31, 120, 180),
+        //QColor(178, 223, 138),
+        //QColor(51, 160, 44),
+        //QColor(251, 154, 153),
+        //QColor(227, 26, 28),
+        //QColor(253, 191, 111),
+        //QColor(255, 127, 0),
+        //QColor(202, 178, 214),
+        //QColor(106, 61, 154),
+        //QColor(255, 255, 153),
+
+
+        //QColor(228, 26, 28),
+        //QColor(55, 126, 184),
+        //QColor(77, 175, 74),
+        //QColor(152, 78, 163),
+        //QColor(255, 127, 0),
+        //QColor(255, 255, 51),
+        //QColor(166, 86, 40),
+        //QColor(247, 129, 191),
+        //QColor(153, 153, 153),
     };
 
     QMap<QString, QString> InstrumentConversion = {

@@ -32,6 +32,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QThread>
 
 #include <array>
 #include <cstdint>
@@ -157,15 +158,26 @@ void MainWindow::readTcpData() {
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
 
         while (_socket->waitForReadyRead() && data.size() < size) {
-        //while (data.size() < size) {
             data = data.append(_socket->readAll());
+            QThread::msleep(50);
         }
         handlePlaybook(data.mid(2));
+
+        if (messageType.value == MessageTypePlayBookHongKang)
+            _hasHongKangTimeline = true;
+        if (messageType.value == MessageTypePlayBookLabel)
+            _hasLabelTimeline = true;
+
+        if (_hasHongKangTimeline && _hasLabelTimeline) {
+            fullyConnected();
+        }
+
         break;
     }
     default:
         qDebug() << "Unknown message of type '" << messageType.value << "'";
     }
+
 }
 
 void MainWindow::handleStatusMessage(QByteArray data) {
@@ -254,10 +266,6 @@ void MainWindow::handlePlaybook(QByteArray data) {
 
     _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
 
-    _configurationWidget->socketConnected();
-    _timeControlWidget->socketConnected();
-    _informationWidget->socketConnected();
-    _timelineWidget->socketConnected();
 }
 
 void MainWindow::sendScript(QString script) {
@@ -267,6 +275,7 @@ void MainWindow::sendScript(QString script) {
 
 void MainWindow::onSocketConnected() {
     _socket->write(QString("1\r\n").toLatin1());
+
 }
 
 void MainWindow::onSocketDisconnected() {
@@ -274,9 +283,19 @@ void MainWindow::onSocketDisconnected() {
     _timeControlWidget->socketDisconnected();
     _informationWidget->socketDisconnected();
     _timelineWidget->socketDisconnected();
+
+    _informationWidget->logInformation("Disconnected.");
 }
 
 std::string MainWindow::nextTarget() const {
     return _timelineWidget->nextTarget();
 }
 
+void MainWindow::fullyConnected() {
+    _informationWidget->logInformation("Connected to " + _socket->peerName() + " on port " + QString::number(_socket->peerPort()) + ".");
+
+    _configurationWidget->socketConnected();
+    _timeControlWidget->socketConnected();
+    _informationWidget->socketConnected();
+    _timelineWidget->socketConnected();
+}

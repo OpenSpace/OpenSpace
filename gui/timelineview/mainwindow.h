@@ -53,11 +53,11 @@ private slots:
     void onSocketConnected();
     void onSocketDisconnected();
 
-	//void onConnectButton();
-	//void sendCommandButton();
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
     void handlePlaybook(QByteArray data);
+
+    void fullyConnected();
 
 private:
     ConfigurationWidget* _configurationWidget;
@@ -66,6 +66,9 @@ private:
     TimelineWidget* _timelineWidget;
     
 	QTcpSocket* _socket;
+
+    bool _hasHongKangTimeline = false;
+    bool _hasLabelTimeline = false;
 };
 
 #endif // __MAINWINDOW_H__
