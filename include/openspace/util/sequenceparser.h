@@ -64,11 +64,11 @@ namespace openspace {
 class SequenceParser {
 public:
 	virtual void create() = 0;
-	virtual std::map<std::string, ImageSubset> getSubsetMap();
-	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
-	virtual std::vector<std::pair<double, std::string>> getTargetTimes();
+	virtual std::map<std::string, ImageSubset> getSubsetMap() final;
+	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
+	virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
 	virtual std::map<std::string, Decoder*> getTranslation() = 0;
-	virtual std::vector<double> getCaptureProgression() ;
+	virtual std::vector<double> getCaptureProgression() final;
 
 protected:
     void sendPlaybookInformation();
