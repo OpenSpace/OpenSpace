@@ -25,8 +25,8 @@
 #include <openspace/util/sequenceparser.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/network/networkengine.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/decoder.h>
 
 namespace {
 	const std::string _loggerCat = "SequenceParser";
@@ -73,8 +73,9 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
     currentWriteLocation += length;
 }
 
-void SequenceParser::sendPlaybookInformation() {
-    static const NetworkEngine::MessageIdentifier PlaybookIdentifier = OsEng.networkEngine()->identifier(PlaybookIdentifierName);
+void SequenceParser::sendPlaybookInformation(const std::string& name) {
+    std::string fullName = PlaybookIdentifierName + "_" + name;
+    _messageIdentifier = OsEng.networkEngine()->identifier(fullName);
 
     std::vector<char> buffer(1024);
     size_t currentWriteLocation = 0;
@@ -164,7 +165,7 @@ void SequenceParser::sendPlaybookInformation() {
     buffer.resize(currentWriteLocation);
 
     //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine()->setInitialConnectionMessage(PlaybookIdentifier, buffer);
+    OsEng.networkEngine()->setInitialConnectionMessage(_messageIdentifier, buffer);
 }
 
 }

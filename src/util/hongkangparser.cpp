@@ -40,7 +40,7 @@ namespace {
 	const std::string _loggerCat = "HongKangParser";
 	const std::string keyTranslation = "DataInputTranslation";
 
-    const std::string PlaybookIdentifierName = "Playbook";
+    const std::string PlaybookIdentifierName = "HongKang";
 }
 
 namespace openspace {
@@ -251,7 +251,7 @@ void HongKangParser::create(){
 		}
 	}
 
-    sendPlaybookInformation();
+    sendPlaybookInformation(PlaybookIdentifierName);
 	
 	//std::ofstream myfile;
 	//myfile.open("HongKangOutput.txt");

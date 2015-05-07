@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/decoder.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
@@ -38,6 +39,8 @@ namespace {
 	const std::string _loggerCat = "LabelParser";
 	const std::string keySpecs   = "Read";
 	const std::string keyConvert = "Convert";
+
+    const std::string PlaybookIdentifierName = "LabelParser";
 }
 
 namespace openspace {
@@ -272,6 +275,7 @@ void LabelParser::create(){
 	}
 	//myfile.close();
 
+    sendPlaybookInformation(PlaybookIdentifierName);
 
 }
 

@@ -25,6 +25,7 @@
 #include "timelinewidget.h"
 
 #include <QDebug>
+#include <QMap>
 #include <QPainter>
 #include <QPaintEvent>
 
@@ -37,25 +38,55 @@ namespace {
     
     static const int TextOffset = 5;
 
-    //const QColor targetColors[] = {
-    //    QColor(251, 180, 174),
-    //    QColor(179, 205, 227),
-    //    QColor(204, 235, 197),
-    //    QColor(222, 203, 228),
-    //    QColor(254, 217, 166),
-    //    QColor(255, 255, 204)
-    //};
-
     const QColor instrumentColors[] = {
-        QColor(228, 26, 28),
-        QColor(55, 126, 184),
-        QColor(77, 175, 74),
-        QColor(152, 78, 163),
-        QColor(255, 127, 0),
-        QColor(255, 255, 51),
-        QColor(166, 86, 40),
-        QColor(247, 129, 191),
-        QColor(153, 153, 153),
+        QColor(242, 101, 74),
+        QColor(175, 18, 18),
+        QColor(211, 154, 31),
+        QColor(241, 231, 48),
+        QColor(149, 219, 32),
+        QColor(49, 234, 219),
+        QColor(49, 155, 234),
+        QColor(139, 86, 152),
+        QColor(84, 79, 149),
+        QColor(203, 153, 200),
+        QColor(82, 145, 57)
+
+        //QColor(166, 206, 227),
+        //QColor(31, 120, 180),
+        //QColor(178, 223, 138),
+        //QColor(51, 160, 44),
+        //QColor(251, 154, 153),
+        //QColor(227, 26, 28),
+        //QColor(253, 191, 111),
+        //QColor(255, 127, 0),
+        //QColor(202, 178, 214),
+        //QColor(106, 61, 154),
+        //QColor(255, 255, 153),
+
+
+        //QColor(228, 26, 28),
+        //QColor(55, 126, 184),
+        //QColor(77, 175, 74),
+        //QColor(152, 78, 163),
+        //QColor(255, 127, 0),
+        //QColor(255, 255, 51),
+        //QColor(166, 86, 40),
+        //QColor(247, 129, 191),
+        //QColor(153, 153, 153),
+    };
+
+    QMap<QString, QString> InstrumentConversion = {
+        { "NH_ALICE_AIRGLOW", "ALICE Airglow" },
+        { "NH_RALPH_LEISA", "RALPH LEISA" },
+        { "NH_RALPH_MVIC_NIR", "RALPH MVIC NIR" },
+        { "NH_ALICE_SOC", "ALICE SOC" },
+        { "NH_RALPH_MVIC_BLUE", "RALPH MVIC Blue" },
+        { "NH_RALPH_MVIC_PAN1" , "RALPH MVIC Pan1" },
+        { "NH_LORRI", "LORRI" },
+        { "NH_RALPH_MVIC_FT", "RALPH MVIC FT" },
+        { "NH_RALPH_MVIC_PAN2", "RALPH MVIC Pan2" },
+        { "NH_RALPH_MVIC_METHANE", "RALPH MVIC Methane" },
+        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" }
     };
 
     const double etSpread = 100.0;
@@ -86,12 +117,12 @@ void TimelineWidget::paintEvent(QPaintEvent* event) {
 }
 
 void TimelineWidget::setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap) {
-    _images = std::move(images);
+    _images.insert(_images.end(), images.begin(), images.end());
 
     std::sort(_images.begin(), _images.end(), [](const Image& a, const Image& b) { return a.beginning < b.beginning; });
 
-    _targetMap = std::move(targetMap);
-    _instrumentMap = std::move(instrumentMap);
+    _targetMap.insert(targetMap.begin(), targetMap.end());
+    _instrumentMap.insert(instrumentMap.begin(), instrumentMap.end());
 
     _instruments.clear();
     std::set<std::string> instruments;
@@ -180,7 +211,7 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         currentHorizontalPosition += BoxSize + Padding;
 
         painter.setPen(QPen(Qt::black));
-        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, QString::fromStdString(instrument));
+        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
         int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
         currentHorizontalPosition += std::max(textWidth, 25) + Padding;
     }
@@ -257,4 +288,17 @@ void TimelineWidget::socketDisconnected() {
     _images.clear();
     _instruments.clear();
     _targets.clear();
+}
+
+std::string TimelineWidget::nextTarget() const {
+    auto it = std::lower_bound(_images.begin(), _images.end(), _currentTime.et, [](const Image& i, double et) { return i.beginning < et; });
+    if (it != _images.end())
+        return it->target;
+    else
+        return "";
+    //for (const Image& i : _images) {
+    //    double imageTime = i.beginning;
+    //    double currentTime = _currentTime.et;
+    //    if ()
+    //}
 }
