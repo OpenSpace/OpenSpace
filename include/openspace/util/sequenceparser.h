@@ -22,48 +22,52 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #ifndef __SEQUENCEPARSER_H__
 #define __SEQUENCEPARSER_H__
-#include <openspace/util/decoder.h>
 
+#include <openspace/network/networkengine.h>
 
 #include <map>
 #include <string>
 #include <vector>
 
 namespace openspace {
-	struct Image{
-		double startTime;
-		double stopTime;
-		std::string path;
-		std::vector<std::string> activeInstruments; 
-		std::string target;
-		bool projected;
-	};
-	struct TimeRange{
-		TimeRange() : _min(-1), _max(-1){};
-		void setRange(double val){
-			if (_min > val) _min = val;
-			if (_max < val) _max = val;
-		};
-		bool inRange(double min, double max){
-			return (min >= _min && max <= _max);
-		}
-		bool inRange(double val){
-			return (val >= _min && val <= _max);
-		}
-		double _min;
-		double _max;
-	};
-	struct ImageSubset{
-		TimeRange _range;
-		std::vector < Image > _subset;
-	};
+
+class Decoder;
+
+struct Image {
+    double startTime;
+    double stopTime;
+    std::string path;
+    std::vector<std::string> activeInstruments;
+    std::string target;
+    bool projected;
+};
+
+struct TimeRange {
+    TimeRange() : _min(-1), _max(-1){};
+    void setRange(double val){
+        if (_min > val) _min = val;
+        if (_max < val) _max = val;
+    };
+    bool inRange(double min, double max){
+        return (min >= _min && max <= _max);
+    }
+    bool inRange(double val){
+        return (val >= _min && val <= _max);
+    }
+    double _min;
+    double _max;
+};
+
+struct ImageSubset {
+    TimeRange _range;
+    std::vector<Image> _subset;
+};
 
 class SequenceParser {
 public:
-	virtual void create() = 0;
+    virtual void create() = 0;
 	virtual std::map<std::string, ImageSubset> getSubsetMap() final;
 	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
 	virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
@@ -71,13 +75,16 @@ public:
 	virtual std::vector<double> getCaptureProgression() final;
 
 protected:
-    void sendPlaybookInformation();
+    void sendPlaybookInformation(const std::string& name);
 
     std::map<std::string, ImageSubset> _subsetMap;
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
     std::vector<std::pair<double, std::string>> _targetTimes;
     std::vector<double> _captureProgression;
 
+    NetworkEngine::MessageIdentifier _messageIdentifier;
 };
-}
+
+} // namespace openspace
+
 #endif //__SEQUENCEPARSER_H__
