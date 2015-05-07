@@ -25,11 +25,12 @@
 #ifndef __CONFIGURATIONWIDGET_H__
 #define __CONFIGURATIONWIDGET_H__
 
-#include <QWidget>
+#include <QGroupBox>
+//#include <QWidget>
 #include <QLineEdit>
 #include <QPushButton>
 
-class ConfigurationWidget : public QWidget {
+class ConfigurationWidget : public QGroupBox {
 Q_OBJECT
 public:
 	ConfigurationWidget(QWidget* parent);
@@ -39,6 +40,7 @@ public:
 
 signals:
     void connect(QString host, QString port);
+    void disconnect();
 
 private slots:
     void onConnectButton();

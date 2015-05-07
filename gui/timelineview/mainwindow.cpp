@@ -84,6 +84,10 @@ MainWindow::MainWindow()
         _configurationWidget, SIGNAL(connect(QString, QString)),
         this, SLOT(onConnect(QString, QString))
     );
+    QObject::connect(
+        _configurationWidget, SIGNAL(disconnect()),
+        this, SLOT(onDisconnect())
+    );
 
     QObject::connect(
         _timeControlWidget, SIGNAL(scriptActivity(QString)),
@@ -113,6 +117,10 @@ void MainWindow::onConnect(QString host, QString port) {
     _socket->connectToHost(host, port.toUInt());
 }
 
+void MainWindow::onDisconnect() {
+    delete _socket;
+    _socket = nullptr;
+}
 
 void MainWindow::readTcpData() {
     static const uint16_t MessageTypeStatus = 0;
@@ -266,5 +274,9 @@ void MainWindow::onSocketDisconnected() {
     _timeControlWidget->socketDisconnected();
     _informationWidget->socketDisconnected();
     _timelineWidget->socketDisconnected();
+}
+
+std::string MainWindow::nextTarget() const {
+    return _timelineWidget->nextTarget();
 }
 

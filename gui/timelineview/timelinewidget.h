@@ -45,6 +45,8 @@ public:
     void socketConnected();
     void socketDisconnected();
 
+    std::string nextTarget() const;
+
 protected:
     void paintEvent(QPaintEvent* event);  
     void drawContent(QPainter& painter, QRectF rect);

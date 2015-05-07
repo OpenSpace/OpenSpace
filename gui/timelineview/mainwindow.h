@@ -41,11 +41,14 @@ public:
 	MainWindow();
 	~MainWindow();
 
+    std::string nextTarget() const;
+
 public slots:
     void sendScript(QString script);
 
 private slots:
     void onConnect(QString host, QString port);
+    void onDisconnect();
 
     void onSocketConnected();
     void onSocketDisconnected();

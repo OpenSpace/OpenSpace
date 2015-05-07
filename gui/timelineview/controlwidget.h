@@ -49,21 +49,19 @@ private slots:
     void onValueChange();
     void onDateChange();
     void onFocusChange();
-    void onRewindButton();
     void onPauseButton();
     void onPlayButton();
-    void onForwardButton();
+    void onFocusToTargetButton();
 
 private:
     QLabel* _currentTime;
     QComboBox* _setTime;
     QLabel* _currentDelta;
     QSlider* _setDelta;
-    QPushButton* _rewind;
     QPushButton* _pause;
     QPushButton* _play;
-    QPushButton* _forward;
     QComboBox* _focusNode;
+    QPushButton* _setFocusToNextTarget;
 };
 
 #endif // __CONTROLWIDGET_H__

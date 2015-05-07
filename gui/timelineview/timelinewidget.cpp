@@ -25,6 +25,7 @@
 #include "timelinewidget.h"
 
 #include <QDebug>
+#include <QMap>
 #include <QPainter>
 #include <QPaintEvent>
 
@@ -37,15 +38,6 @@ namespace {
     
     static const int TextOffset = 5;
 
-    //const QColor targetColors[] = {
-    //    QColor(251, 180, 174),
-    //    QColor(179, 205, 227),
-    //    QColor(204, 235, 197),
-    //    QColor(222, 203, 228),
-    //    QColor(254, 217, 166),
-    //    QColor(255, 255, 204)
-    //};
-
     const QColor instrumentColors[] = {
         QColor(228, 26, 28),
         QColor(55, 126, 184),
@@ -56,6 +48,20 @@ namespace {
         QColor(166, 86, 40),
         QColor(247, 129, 191),
         QColor(153, 153, 153),
+    };
+
+    QMap<QString, QString> InstrumentConversion = {
+        { "NH_ALICE_AIRGLOW", "ALICE Airglow" },
+        { "NH_RALPH_LEISA", "RALPH LEISA" },
+        { "NH_RALPH_MVIC_NIR", "RALPH MVIC NIR" },
+        { "NH_ALICE_SOC", "ALICE SOC" },
+        { "NH_RALPH_MVIC_BLUE", "RALPH MVIC Blue" },
+        { "NH_RALPH_MVIC_PAN1" , "RALPH MVIC Pan1" },
+        { "NH_LORRI", "LORRI" },
+        { "NH_RALPH_MVIC_FT", "RALPH MVIC FT" },
+        { "NH_RALPH_MVIC_PAN2", "RALPH MVIC Pan2" },
+        { "NH_RALPH_MVIC_METHANE", "RALPH MVIC Methane" },
+        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" }
     };
 
     const double etSpread = 100.0;
@@ -180,7 +186,7 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         currentHorizontalPosition += BoxSize + Padding;
 
         painter.setPen(QPen(Qt::black));
-        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, QString::fromStdString(instrument));
+        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
         int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
         currentHorizontalPosition += std::max(textWidth, 25) + Padding;
     }
@@ -257,4 +263,17 @@ void TimelineWidget::socketDisconnected() {
     _images.clear();
     _instruments.clear();
     _targets.clear();
+}
+
+std::string TimelineWidget::nextTarget() const {
+    auto it = std::lower_bound(_images.begin(), _images.end(), _currentTime.et, [](const Image& i, double et) { return i.beginning < et; });
+    if (it != _images.end())
+        return it->target;
+    else
+        return "";
+    //for (const Image& i : _images) {
+    //    double imageTime = i.beginning;
+    //    double currentTime = _currentTime.et;
+    //    if ()
+    //}
 }
