@@ -65,7 +65,6 @@ namespace {
         { "Pluto", "PlutoProjection", "Pluto" },
         { "Charon", "Charon", "Pluto" },
         { "Jupiter", "JupiterProjection", "Jupiter" },
-        { "New Horizons", "NewHorizons", "" },
         { "Nix", "Nix", "Pluto" },
         { "Kerberos", "Kerberos", "Pluto" },
         { "Hydra", "Hydra", "Pluto" },
@@ -74,15 +73,22 @@ namespace {
 
 ControlWidget::ControlWidget(QWidget* parent)
     : QWidget(parent)
-    , _currentTime(new QLabel("Current Time"))
+    , _currentTime(new QLabel(""))
     , _setTime(new QComboBox)
-    , _currentDelta(new QLabel("Current Delta"))
+    , _currentDelta(new QLabel(""))
     , _setDelta(new QSlider(Qt::Horizontal))
-    , _pause(new QPushButton("||"))
-    , _play(new QPushButton("|>"))
+    , _pause(new QPushButton("Pause"))
+    , _play(new QPushButton("Play"))
     , _focusNode(new QComboBox)
     , _setFocusToNextTarget(new QPushButton("Set Focus to the next Target"))
+    , _setFocusToNewHorizons(new QPushButton("Set Focus to New Horizons"))
 {
+    _pause->setObjectName("pause");
+    _play->setObjectName("play");
+
+    _currentTime->setObjectName("value");
+    _currentDelta->setObjectName("value");
+
     for (const ImportantDate& d : ImportantDates)
         _setTime->addItem(d.date);
     QObject::connect(
@@ -132,6 +138,13 @@ ControlWidget::ControlWidget(QWidget* parent)
         SLOT(onFocusToTargetButton())
     );
 
+    QObject::connect(
+        _setFocusToNewHorizons,
+        SIGNAL(clicked()),
+        this,
+        SLOT(onFocusToNewHorizonsButton())
+);
+
     QVBoxLayout* mainLayout = new QVBoxLayout;
 
     {
@@ -143,25 +156,30 @@ ControlWidget::ControlWidget(QWidget* parent)
 
         {
             QLabel* l = new QLabel("Current Time (UTC):");
+            l->setObjectName("label");
             layout->addWidget(l, 0, 0, Qt::AlignLeft);
             layout->addWidget(_currentTime, 0, 1, Qt::AlignRight);
         }
         {
-            QLabel* l = new QLabel("Bookmarks:");
+            QLabel* l = new QLabel("Bookmarked Times:");
+            l->setObjectName("label");
             layout->addWidget(l, 1, 0, Qt::AlignLeft);
             layout->addWidget(_setTime, 1, 1, Qt::AlignRight);
         }
         layout->addItem(new QSpacerItem(0, 7), 2, 0, 1, 2);
         {
-            QLabel* l = new QLabel("Current Time Increment (seconds per second):");
+            QLabel* l = new QLabel("Current Time Increment\n(seconds per second):");
+            l->setObjectName("label");
             layout->addWidget(l, 3, 0, Qt::AlignLeft);
             layout->addWidget(_currentDelta, 3, 1, Qt::AlignRight);
         }
 
+        _setDelta->setObjectName("background");
         layout->addWidget(_setDelta, 4, 0, 1, 2);
         
 
         QWidget* controlContainer = new QWidget;
+        controlContainer->setObjectName("background");
         QHBoxLayout* controlContainerLayout = new QHBoxLayout;
         controlContainerLayout->addWidget(_pause);
         controlContainerLayout->addWidget(_play);
@@ -178,11 +196,13 @@ ControlWidget::ControlWidget(QWidget* parent)
 
         {
             QLabel* l = new QLabel("Set Focus:");
+            l->setObjectName("label");
             layout->addWidget(l, 0, 0, Qt::AlignLeft);
             _focusNode->setMinimumWidth(200);
             layout->addWidget(_focusNode, 0, 1, Qt::AlignRight);
         }
         layout->addWidget(_setFocusToNextTarget, 1, 0, 1, 2);
+        layout->addWidget(_setFocusToNewHorizons, 2, 0, 1, 2);
 
         mainLayout->addWidget(box);
     }
@@ -191,6 +211,7 @@ ControlWidget::ControlWidget(QWidget* parent)
 }
 
 void ControlWidget::update(QString currentTime, QString currentDelta) {
+    currentTime.replace("T", " ");
     _currentTime->setText(currentTime);
     _currentDelta->setText(currentDelta);
 }
@@ -244,16 +265,6 @@ void ControlWidget::onFocusChange() {
     int index = _focusNode->currentIndex();
     QString name = FocusNodes[index].name;
     QString coordinateSystem = FocusNodes[index].coordinateSystem;
-    if (coordinateSystem.isEmpty()) {
-        int date = _currentTime->text().left(4).toInt();
-        if (date < 2008)
-            coordinateSystem = "Jupiter";
-        else if (date < 2014)
-            coordinateSystem = "Sun";
-        else
-            coordinateSystem = "Pluto";
-
-    }
     QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
     emit scriptActivity(script);
 }
@@ -269,6 +280,21 @@ void ControlWidget::onFocusToTargetButton() {
             emit scriptActivity(script);
         }
     }
+}
+
+void ControlWidget::onFocusToNewHorizonsButton() {
+    QString coordinateSystem;
+    int date = _currentTime->text().left(4).toInt();
+    if (date < 2008)
+        coordinateSystem = "Jupiter";
+    else if (date < 2014)
+        coordinateSystem = "Sun";
+    else
+        coordinateSystem = "Pluto";
+
+
+    QString script = "openspace.setOrigin('NewHorizons');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    emit scriptActivity(script);
 }
 
 void ControlWidget::socketConnected() {

@@ -25,12 +25,11 @@
 #ifndef __CONFIGURATIONWIDGET_H__
 #define __CONFIGURATIONWIDGET_H__
 
-#include <QGroupBox>
-//#include <QWidget>
+#include <QWidget>
 #include <QLineEdit>
 #include <QPushButton>
 
-class ConfigurationWidget : public QGroupBox {
+class ConfigurationWidget : public QWidget {
 Q_OBJECT
 public:
 	ConfigurationWidget(QWidget* parent);

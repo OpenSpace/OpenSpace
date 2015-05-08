@@ -50,29 +50,6 @@ namespace {
         QColor(84, 79, 149),
         QColor(203, 153, 200),
         QColor(82, 145, 57)
-
-        //QColor(166, 206, 227),
-        //QColor(31, 120, 180),
-        //QColor(178, 223, 138),
-        //QColor(51, 160, 44),
-        //QColor(251, 154, 153),
-        //QColor(227, 26, 28),
-        //QColor(253, 191, 111),
-        //QColor(255, 127, 0),
-        //QColor(202, 178, 214),
-        //QColor(106, 61, 154),
-        //QColor(255, 255, 153),
-
-
-        //QColor(228, 26, 28),
-        //QColor(55, 126, 184),
-        //QColor(77, 175, 74),
-        //QColor(152, 78, 163),
-        //QColor(255, 127, 0),
-        //QColor(255, 255, 51),
-        //QColor(166, 86, 40),
-        //QColor(247, 129, 191),
-        //QColor(153, 153, 153),
     };
 
     QMap<QString, QString> InstrumentConversion = {
@@ -144,7 +121,7 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     QRectF dateRect(rect.width() - TimeWidth, 0, TimeWidth, rect.height());
     
     // Draw background
-    painter.setBrush(QBrush(Qt::white));  painter.drawRect(timelineRect);
+    painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
     painter.setBrush(QBrush(Qt::gray));   painter.drawRect(dateRect);
 
     const double lowerTime = _currentTime.et - etSpread;
@@ -161,7 +138,7 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
 
     // Draw current time
     painter.setBrush(QBrush(Qt::black));
-    painter.setPen(QPen(Qt::black));
+    painter.setPen(QPen(Qt::black, 2));
     painter.drawLine(QPointF(0, timelineRect.height() / 2), QPointF(timelineRect.width(), timelineRect.height() / 2));
     painter.drawText(timelineRect.width(), timelineRect.height() / 2 + TextOffset, QString::fromStdString(_currentTime.time));
 }
@@ -191,7 +168,8 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
         currentHorizontalPosition += BoxSize + Padding;
 
-        painter.setPen(QPen(Qt::black));
+        painter.setPen(QPen(QColor(200, 200, 200)));
+        //painter.setPen(QPen(Qt::black));
         painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
         int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
         //currentHorizontalPosition += std::max(textWidth, 25) + Padding;

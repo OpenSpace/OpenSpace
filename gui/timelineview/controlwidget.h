@@ -52,6 +52,7 @@ private slots:
     void onPauseButton();
     void onPlayButton();
     void onFocusToTargetButton();
+    void onFocusToNewHorizonsButton();
 
 private:
     QLabel* _currentTime;
@@ -62,6 +63,7 @@ private:
     QPushButton* _play;
     QComboBox* _focusNode;
     QPushButton* _setFocusToNextTarget;
+    QPushButton* _setFocusToNewHorizons;
 };
 
 #endif // __CONTROLWIDGET_H__

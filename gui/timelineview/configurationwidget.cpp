@@ -25,33 +25,41 @@
 #include "configurationwidget.h"
 
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QTimer>
-#include <QDebug>
 
 ConfigurationWidget::ConfigurationWidget(QWidget* parent)
-    : QGroupBox("Connection", parent)
+    : QWidget(parent)
     , _ipAddress(new QLineEdit("localhost"))
     , _port(new QLineEdit("20500"))
     , _connect(new QPushButton("Connect"))
 {
+    _connect->setObjectName("connection");
+    QGroupBox* box = new QGroupBox("Connection", this);
+
     QGridLayout* layout = new QGridLayout;
     layout->setVerticalSpacing(0);
     {
         QLabel* t = new QLabel("IP Address");
+        t->setObjectName("label");
         layout->addWidget(t, 0, 0);
     }
     layout->addWidget(_ipAddress, 1, 0);
 
     {
         QLabel* t = new QLabel("Port");
+        t->setObjectName("label");
         layout->addWidget(t, 0, 1);
     }
     layout->addWidget(_port, 1, 1);
     layout->addWidget(_connect, 1, 2, 1, 1);
 
-    setLayout(layout);
+    box->setLayout(layout);
 
+    QHBoxLayout* l = new QHBoxLayout;
+    l->addWidget(box);
+    setLayout(l);
     QObject::connect(_connect, SIGNAL(clicked()), this, SLOT(onConnectButton()));
 
     QTimer::singleShot(100, this, SLOT(onConnectButton()));

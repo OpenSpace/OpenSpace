@@ -70,8 +70,11 @@ MainWindow::MainWindow()
 	setWindowTitle("OpenSpace Timeline");
 
     _configurationWidget = new ConfigurationWidget(this);
+    _configurationWidget->setMinimumWidth(350);
     _timeControlWidget = new ControlWidget(this);
+    _timeControlWidget->setMinimumWidth(350);
     _informationWidget = new InformationWidget(this);
+    _informationWidget->setMinimumWidth(350);
     _timelineWidget = new TimelineWidget(this);
 
 	QGridLayout* layout = new QGridLayout;
@@ -79,6 +82,8 @@ MainWindow::MainWindow()
     layout->addWidget(_timeControlWidget, 1, 0);
     layout->addWidget(_informationWidget, 2, 0);
     layout->addWidget(_timelineWidget, 0, 1, 3, 1);
+
+    layout->setColumnStretch(1, 5);
 
 
     QObject::connect(
@@ -160,7 +165,7 @@ void MainWindow::readTcpData() {
         size_t beginning = 0;
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
 
-        while (_socket->waitForReadyRead() && data.size() < size) {
+        while (_socket->waitForReadyRead() && data.size() < int(size)) {
             data = data.append(_socket->readAll());
             QThread::msleep(50);
         }
