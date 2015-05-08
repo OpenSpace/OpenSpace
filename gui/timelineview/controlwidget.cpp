@@ -222,11 +222,11 @@ void ControlWidget::onValueChange() {
     float delta;
     if (value < 0.f) {
         value = -value;
-        float d = std::pow(2, value / 10) - 1.f;
+        float d = std::pow(3, value / 10) - 1.f;
         delta = -d;
     }
     else {
-        float d = std::pow(2, value / 10) - 1.f;
+        float d = std::pow(3, value / 10) - 1.f;
         delta = d;
     }
 

@@ -121,8 +121,9 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     QRectF dateRect(rect.width() - TimeWidth, 0, TimeWidth, rect.height());
     
     // Draw background
-    painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
-    painter.setBrush(QBrush(Qt::gray));   painter.drawRect(dateRect);
+    //painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
+    painter.setBrush(QBrush(QColor(85, 85, 85)));  painter.drawRect(timelineRect);
+    painter.setBrush(QBrush(QColor(165, 165, 165)));   painter.drawRect(dateRect);
 
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
