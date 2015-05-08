@@ -22,46 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MAINWINDOW_H__
-#define __MAINWINDOW_H__
+#version __CONTEXT__
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QTcpSocket>
-#include <QTextEdit>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-class MainWidget : public QWidget {
-Q_OBJECT
-public:
-	MainWidget();
-	~MainWidget();
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
 
-private slots:
-	void onConnectButton();
-	void sendCommandButton();
-	void readTcpData();
+out vec2 vs_st;
+out vec4 vs_position;
+out float s;
 
-private:
-	QLineEdit* _ipAddress;
-	QLineEdit* _command;
-	QTextEdit* _logWindow;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-	QTcpSocket* _socket;
+void main()
+{
+	vec4 tmp = in_position;
+	vec4 position = pscTransform(tmp, ModelTransform);
 
-
-//
-//private slots:
-//    void on__connectButton_clicked();
-//    void on__statsCheckBox_toggled(bool checked);
-//    void readTcpData();
-//    void on__graphCheckBox_toggled(bool checked);
-//    void on__renderComboBox_currentIndexChanged(const QString &arg1);
-//
-//private:
-//    qint64 sendToSGCT(QByteArray data);
-//
-//    Ui::MainWindow *ui;
-//    QTcpSocket* _sgctSocket;
-};
-
-#endif // __MAINWINDOW_H__
+	vs_position = tmp;
+	vs_st = in_st;
+	
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
+}

@@ -77,8 +77,8 @@ void main()
 		}
 		*/
 		diffuse = max(intensity * diffuse, ambient);
+			
 		diffuse[3] = transparency;
-
 		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 		addToBuffer(frag);
 	}

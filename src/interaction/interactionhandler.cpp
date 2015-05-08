@@ -556,7 +556,12 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 	glm::vec3 cameraView = glm::normalize(_camera->viewDirection());
     //set new focus position
     _camera->setFocusPosition(node->worldPosition());
-    if (viewDir != cameraView) {
+    float dot = glm::dot(viewDir, cameraView);
+
+    //static const float Epsilon = 0.001f;
+    if (dot < 1.f && dot > -1.f) {
+    //if (glm::length(viewDir - cameraView) < 0.001) {
+    //if (viewDir != cameraView) {
 	    glm::vec3 rotAxis = glm::normalize(glm::cross(viewDir, cameraView));
 	    float angle = glm::angle(viewDir, cameraView);
 	    glm::quat q = glm::angleAxis(angle, rotAxis);

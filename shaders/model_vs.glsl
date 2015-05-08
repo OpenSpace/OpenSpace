@@ -22,82 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "mainwindow.h"
+#version __CONTEXT__
 
-#include <QGridLayout>
-#include <QPushButton>
-#include <QTextEdit>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-MainWidget::MainWidget()
-	: _ipAddress(new QLineEdit)
-	, _command(new QLineEdit)
-	, _logWindow(new QTextEdit)
-	, _socket(nullptr)
+layout(location = 0) in vec4 in_position;
+//in vec3 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
+
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out float s;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main()
 {
-	setWindowTitle("OpenSpace LuaScripting GUI");
+	// set variables
+	vs_st = in_st;
+	//vs_stp = in_position.xyz;
+	vs_position = in_position;
+	vec4 tmp = in_position;
 
-	QGridLayout* layout = new QGridLayout;
-	_ipAddress->setMinimumWidth(200);
-	_ipAddress->setText("127.0.0.1");
-	layout->addWidget(_ipAddress, 0, 0);
-
-	QPushButton* connectButton = new QPushButton("Connect");
-	connect(connectButton, SIGNAL(clicked()), this, SLOT(onConnectButton()));
-	connectButton->show();
-	layout->addWidget(connectButton, 0, 1);
-
-	_command->setMinimumWidth(200);
-	layout->addWidget(_command, 1, 0);
-
-	QPushButton* sendButton = new QPushButton("Send");
-	sendButton->setDefault(true);
-	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendCommandButton()));
-	layout->addWidget(sendButton, 1, 1);
-
-	layout->addWidget(_logWindow, 2, 0, 1, 2);
-
-	setLayout(layout);
-}
-
-MainWidget::~MainWidget() {
-	delete _command;
-	delete _socket;
-}
-
-void MainWidget::readTcpData() {
-    QByteArray data = _socket->readAll();
-
-	if (_logWindow->toPlainText().isEmpty())
-		_logWindow->setText(data.data());
-	else
-		_logWindow->setText(_logWindow->toPlainText() + "\n" + data.data());
-}
-
-void MainWidget::onConnectButton() {
-	delete _socket;
+	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 	
-	_socket = new QTcpSocket(this);
-    connect( _socket, SIGNAL(readyRead()), SLOT(readTcpData()) );
-    _socket->connectToHost(_ipAddress->text(), 20500);
-
-}
-
-void MainWidget::sendCommandButton() {
-	if (!_socket) {
-		if (_logWindow->toPlainText().isEmpty())
-			_logWindow->setText("No connection found");
-		else
-			_logWindow->setText(_logWindow->toPlainText() + "\n" + "No connection found");
-		return;
-	}
-
-	QString command = _command->text();
-
-	if (_logWindow->toPlainText().isEmpty())
-		_logWindow->setText(command);
-	else
-		_logWindow->setText(_logWindow->toPlainText() + "\n" + command);
-
-	
-	_socket->write(("0" + command + "\r\n").toLatin1());
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
 }

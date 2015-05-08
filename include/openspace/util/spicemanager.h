@@ -630,6 +630,22 @@ public:
 	 */
 	bool getFieldOfView(int instrument, std::string& fovShape, std::string& frameName,
 		glm::dvec3& boresightVector, std::vector<glm::dvec3>& bounds) const;
+
+	/**
+	* This function adds a frame to a body 
+	* \param body - the name of the body
+	* \param frame - the name of the frame
+	* \return false if the arguments are empty
+	*/
+	bool addFrame(const std::string body, const std::string frame);
+
+	/**
+	* This function returns the frame of a body if defined, otherwise it returns 
+	* IAU_ + body (most frames are known by the International Astronomical Union)
+	* \param body - the name of the body
+	* \return  the frame of the body
+	*/
+	std::string frameFromBody(const std::string body) const;
     
     /**
      * This method checks if one of the previous SPICE methods has failed. If it has, the
@@ -673,6 +689,10 @@ private:
 	std::map<int, std::vector< std::pair<double, double> > > _spkIntervals;
 	std::map<int, std::set<double> > _ckCoverageTimes;
 	std::map<int, std::set<double> > _spkCoverageTimes;
+	// Vector of pairs: Body, Frame
+	std::vector< std::pair<std::string, std::string> > _frameByBody;
+	
+	const static bool _showErrors = false;
 
     /// The last assigned kernel-id, used to determine the next free kernel id
 	KernelIdentifier _lastAssignedKernel;

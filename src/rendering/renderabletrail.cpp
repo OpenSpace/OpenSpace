@@ -30,6 +30,9 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/highresclock.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+
 
 /* TODO for this class:
 *  In order to add geometry shader (for pretty-draw),
@@ -40,6 +43,7 @@
 namespace {
     const std::string _loggerCat = "RenderableTrail";
     //constants
+	const std::string keyName                    = "Name";
         const std::string keyBody                = "Body";
         const std::string keyObserver            = "Observer";
         const std::string keyFrame               = "Frame";
@@ -48,6 +52,7 @@ namespace {
         const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
         const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
         const std::string keyDayLength           = "DayLength";
+		const std::string keyStamps				 = "Timestamps";
 }
 
 namespace openspace {
@@ -56,7 +61,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
-    , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+    , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _programObject(nullptr)
     , _programIsDirty(true)
     , _vaoID(0)
@@ -64,6 +69,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _oldTime(std::numeric_limits<float>::max())
     , _successfullDictionaryFetch(true)
     , _needsSweep(true)
+	, _showTimestamps("timestamps", "Show Timestamps", false)
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
@@ -78,13 +84,19 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     glm::vec3 color(0.f);
     if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
         dictionary.getValue(keyColor, color);
-    
-	_lineColor = color;
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor = color;
 
+	if (dictionary.hasKeyAndValue<bool>(keyStamps))
+		dictionary.getValue(keyStamps, _showTimestamps);
+	addProperty(_showTimestamps);
+
+    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
+
     addProperty(_lineFade);
+
     addProperty(_lineWidth);
+	_distanceFade = 1.0;
 }
 
 bool RenderableTrail::initialize() {
@@ -138,6 +150,19 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
 
+	const psc& position = data.camera.position();
+	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+	const PowerScaledScalar& pssl = (position - origin).length();
+
+	if (pssl[0] < 0.000001){
+		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+	else{
+		if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+		_programObject->setUniform("forceFade", _distanceFade);
+	}
+
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
@@ -145,6 +170,13 @@ void RenderableTrail::render(const RenderData& data) {
     glBindVertexArray(0);
 
     glLineWidth(1.f);
+
+	if (_showTimestamps){
+		glPointSize(5.f);
+		glBindVertexArray(_vaoID);
+		glDrawArrays(GL_POINTS, 0, _vertexArray.size());
+		glBindVertexArray(0);
+	}
 
     _programObject->deactivate();
 }
@@ -247,7 +279,7 @@ void RenderableTrail::fullYearSweep(double time) {
     
     _oldTime = time;
 
-    psc pscPos, pscVel;
+    psc pscPos;
 	bool validPosition = true;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {

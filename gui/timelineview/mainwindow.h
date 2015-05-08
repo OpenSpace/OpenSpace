@@ -22,14 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef __MAINWINDOW_H__
+#define __MAINWINDOW_H__
 
-int main(int argc, char** argv) {
-	QApplication app(argc, argv);
+#include <QWidget>
+#include <QTcpSocket>
 
-	MainWidget window;
-	window.show();
+#include "common.h"
 
-	return app.exec();
-}
+class ConfigurationWidget;
+class ControlWidget;
+class InformationWidget;
+class TimelineWidget;
+
+class MainWindow : public QWidget {
+Q_OBJECT
+public:
+	MainWindow();
+	~MainWindow();
+
+    std::string nextTarget() const;
+
+public slots:
+    void sendScript(QString script);
+
+private slots:
+    void onConnect(QString host, QString port);
+    void onDisconnect();
+
+    void onSocketConnected();
+    void onSocketDisconnected();
+
+	void readTcpData();
+    void handleStatusMessage(QByteArray data);
+    void handlePlaybook(QByteArray data);
+
+    void fullyConnected();
+
+private:
+    ConfigurationWidget* _configurationWidget;
+    ControlWidget* _timeControlWidget;
+    InformationWidget* _informationWidget;
+    TimelineWidget* _timelineWidget;
+    
+	QTcpSocket* _socket;
+
+    bool _hasHongKangTimeline = false;
+    bool _hasLabelTimeline = false;
+};
+
+#endif // __MAINWINDOW_H__
