@@ -96,6 +96,5 @@ void main()
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
 
-	discard;
 }
 

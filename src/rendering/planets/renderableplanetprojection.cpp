@@ -233,7 +233,7 @@ bool RenderablePlanetProjection::initialize(){
 }
 
 bool RenderablePlanetProjection::auxiliaryRendertarget(){
-	bool completeSuccess = false;
+	bool completeSuccess = true;
 	// setup FBO
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
