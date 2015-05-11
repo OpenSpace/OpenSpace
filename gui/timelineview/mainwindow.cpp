@@ -57,8 +57,6 @@ std::string readFromBuffer(char* buffer, size_t& currentReadLocation) {
     return result;
 }
 
-
-
 MainWindow::MainWindow()
     : QWidget(nullptr)
     , _configurationWidget(nullptr)

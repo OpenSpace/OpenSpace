@@ -35,8 +35,8 @@ QWidget {
 QGroupBox {
     background-color: qlineargradient(
     	x1: 0, y1: 0, x2: 0, y2: 1,
-    	stop: 0 #a8a8a8,
-    	stop: 1 #d5d5d5);
+    	stop: 0 #858585,
+    	stop: 1 #959595);
     border: 2px solid gray;
     border-radius: 5px;
     margin-top: 4ex;

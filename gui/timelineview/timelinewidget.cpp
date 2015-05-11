@@ -49,7 +49,8 @@ namespace {
         QColor(139, 86, 152),
         QColor(84, 79, 149),
         QColor(203, 153, 200),
-        QColor(82, 145, 57)
+        QColor(82, 145, 57),
+        QColor(35, 185, 125)
     };
 
     QMap<QString, QString> InstrumentConversion = {
@@ -63,7 +64,8 @@ namespace {
         { "NH_RALPH_MVIC_FT", "RALPH MVIC FT" },
         { "NH_RALPH_MVIC_PAN2", "RALPH MVIC Pan2" },
         { "NH_RALPH_MVIC_METHANE", "RALPH MVIC Methane" },
-        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" }
+        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" },
+        { "NH_REX", "REX" }
     };
 
     const double etSpread = 100.0;
