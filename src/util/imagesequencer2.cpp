@@ -200,6 +200,24 @@ bool ImageSequencer2::instumentActive(std::string instrumentID){
 	}
 	return false;
 }
+
+float ImageSequencer2::instrumentActiveTime(const std::string& instrumentID) const {
+    for (auto i : _instrumentTimes){
+        //check if this instrument is in range
+        if (i.second.inRange(_currentTime)){
+            //if so, then get the corresponding spiceID
+            std::vector<std::string> spiceIDs = _fileTranslation.at(i.first)->getTranslation();
+            //check which specific subinstrument is firing
+            for (auto s : spiceIDs){
+                if (s == instrumentID) {
+                    return static_cast<float>((_currentTime - i.second._min) / (i.second._max - i.second._min));
+                }
+            }
+        }
+    }
+    return -1.f;
+}
+
 bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,  
 	                                std::string projectee, 
 									std::string instrumentID){
