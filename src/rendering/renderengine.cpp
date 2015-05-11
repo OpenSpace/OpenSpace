@@ -41,6 +41,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/rendering/renderablepath.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
@@ -980,7 +981,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");
     SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
     SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
-	SceneGraphNode* newHorizonsTrailNode = scene()->sceneGraphNode("NewHorizonsTrail");
+	SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
+	SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
+	RenderablePath* nhPath;
 
     SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
 
@@ -998,6 +1001,13 @@ void RenderEngine::changeViewPoint(std::string origin) {
     }
 
     if (origin == "Pluto") {
+		if (newHorizonsPathNodeP) {
+			Renderable* R = newHorizonsPathNodeP->renderable();
+			nhPath = static_cast<RenderablePath*>(R);
+			nhPath->calculatePath("PLUTO BARYCENTER");
+			newHorizonsPathNodeP->setParent(plutoBarycenterNode);
+		}
+
 		plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
 		plutoBarycenterNode->setEphemeris(new StaticEphemeris);
 		
@@ -1156,6 +1166,13 @@ void RenderEngine::changeViewPoint(std::string origin) {
         return;
     }
     if (origin == "Jupiter") {
+		if (newHorizonsPathNodeJ) {
+			Renderable* R = newHorizonsPathNodeJ->renderable();
+			nhPath = static_cast<RenderablePath*>(R);
+			nhPath->calculatePath("JUPITER BARYCENTER");
+			newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
+		}
+
 		jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
 		jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
 

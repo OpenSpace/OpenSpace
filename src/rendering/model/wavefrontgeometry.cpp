@@ -94,7 +94,7 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             _vertices[j + currentPosition].location[0] = shapes[i].mesh.positions[3 * j + 0];
             _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
             _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
-            _vertices[j + currentPosition].location[3] = 5; // Temp size for the power scale coordinate.
+            _vertices[j + currentPosition].location[3] = 4; // Temp size for the power scale coordinate.
 			// Could be defined per object as a dictionary key.
 
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];

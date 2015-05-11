@@ -52,7 +52,7 @@ namespace {
         const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
         const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
         const std::string keyDayLength           = "DayLength";
-		const std::string keyStamps				 = "Timestamps";
+		const std::string keyStamps				 = "TimeStamps";
 }
 
 namespace openspace {
@@ -86,8 +86,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyColor, color);
     _lineColor = color;
 
+	bool timeStamps = false;
 	if (dictionary.hasKeyAndValue<bool>(keyStamps))
-		dictionary.getValue(keyStamps, _showTimestamps);
+		dictionary.getValue(keyStamps, timeStamps);
+	_showTimestamps = timeStamps;
 	addProperty(_showTimestamps);
 
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
