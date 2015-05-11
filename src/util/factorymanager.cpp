@@ -34,6 +34,7 @@
 #include <openspace/rendering/renderablesphere.h>
 #include <openspace/rendering/renderablesphericalgrid.h>
 #include <openspace/rendering/renderablefieldlines.h>
+#include <openspace/rendering/renderablecrawlingline.h>
 #include <openspace/rendering/planets/renderableplanet.h>
 #include <openspace/rendering/planets/simplespheregeometry.h>
 #include <openspace/rendering/renderableplane.h>
@@ -101,8 +102,10 @@ void FactoryManager::initialize()
         "RenderableVolumeGL");
     _manager->factory<Renderable>()->registerClass<RenderableFieldlines>(
 		"RenderableFieldlines");
+    _manager->factory<Renderable>()->registerClass<RenderableCrawlingLine>(
+        "RenderableCrawlingLine");
 
-    // Add Ephimerides
+    // Add Ephemerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
     _manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Static");
 	_manager->factory<Ephemeris>()->registerClass<StaticEphemeris>("Dynamic");

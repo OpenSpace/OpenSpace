@@ -133,6 +133,9 @@ public:
 	 * returns true if instrumentID is within a capture range. 
 	 */
 	bool instumentActive(std::string instrumentID);
+
+    float instrumentActiveTime(const std::string& instrumentID) const;
+
 	/*
 	* returns latest captured image
 	*/
