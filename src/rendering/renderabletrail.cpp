@@ -151,19 +151,20 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
+	_programObject->setUniform("forceFade", _distanceFade);
 
-	const psc& position = data.camera.position();
-	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
-	const PowerScaledScalar& pssl = (position - origin).length();
-
-	if (pssl[0] < 0.000001){
-		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
-		_programObject->setUniform("forceFade", _distanceFade);
-	}
-	else{
-		if (_distanceFade < 1.0f) _distanceFade += 0.05f;
-		_programObject->setUniform("forceFade", _distanceFade);
-	}
+	//const psc& position = data.camera.position();
+	//const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+	//const PowerScaledScalar& pssl = (position - origin).length();
+	//
+	//if (pssl[0] < 0.000001){
+	//	if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+	//	_programObject->setUniform("forceFade", _distanceFade);
+	//}
+	//else{
+	//	if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+	//	_programObject->setUniform("forceFade", _distanceFade);
+	//}
 
     glLineWidth(_lineWidth);
 

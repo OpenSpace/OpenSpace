@@ -70,7 +70,11 @@ bool ImageSequencer2::isReady(){
 }
 
 void ImageSequencer2::updateSequencer(double time){
-	if (_currentTime != time){
+	if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0){
+		Time::ref().setDeltaTime(0.1);
+	} // Time is not properly updated when time jump with dt = 0 
+
+	if (_currentTime < time){
 		_previousTime = _currentTime;
 		_currentTime = time;
 	}
