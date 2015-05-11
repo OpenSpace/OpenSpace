@@ -113,9 +113,6 @@ bool RenderablePath::initialize() {
 		std::string stop, start;
 		SpiceManager::ref().getDateFromET(_start, start);
 		SpiceManager::ref().getDateFromET(_stop, stop);
-
-		std::cout << "STARTS: " << start << " " << "ENDS :" << stop << std::endl;
-
 	}
 
 	return completeSuccess;
