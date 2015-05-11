@@ -25,6 +25,9 @@
 #include "configurationwidget.h"
 
 #include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QTimer>
 
 ConfigurationWidget::ConfigurationWidget(QWidget* parent)
     : QWidget(parent)
@@ -32,15 +35,34 @@ ConfigurationWidget::ConfigurationWidget(QWidget* parent)
     , _port(new QLineEdit("20500"))
     , _connect(new QPushButton("Connect"))
 {
+    _connect->setObjectName("connection");
+    QGroupBox* box = new QGroupBox("Connection", this);
+
     QGridLayout* layout = new QGridLayout;
-    layout->addWidget(_ipAddress, 0, 0);
-    layout->addWidget(_port, 0, 1);
-    layout->addWidget(_connect, 0, 2);
+    layout->setVerticalSpacing(0);
+    {
+        QLabel* t = new QLabel("IP Address");
+        t->setObjectName("label");
+        layout->addWidget(t, 0, 0);
+    }
+    layout->addWidget(_ipAddress, 1, 0);
 
-    setLayout(layout);
+    {
+        QLabel* t = new QLabel("Port");
+        t->setObjectName("label");
+        layout->addWidget(t, 0, 1);
+    }
+    layout->addWidget(_port, 1, 1);
+    layout->addWidget(_connect, 1, 2, 1, 1);
 
+    box->setLayout(layout);
+
+    QHBoxLayout* l = new QHBoxLayout;
+    l->addWidget(box);
+    setLayout(l);
     QObject::connect(_connect, SIGNAL(clicked()), this, SLOT(onConnectButton()));
 
+    QTimer::singleShot(100, this, SLOT(onConnectButton()));
 }
 
 void ConfigurationWidget::onConnectButton() {
@@ -48,7 +70,17 @@ void ConfigurationWidget::onConnectButton() {
 }
 
 void ConfigurationWidget::socketConnected() {
+    _ipAddress->setEnabled(false);
+    _port->setEnabled(false);
+    _connect->setText("Disconnect");
+    QObject::disconnect(_connect, SIGNAL(clicked()), this, SLOT(onConnectButton()));
+    QObject::connect(_connect, SIGNAL(clicked()), this, SIGNAL(disconnect()));
 }
 
 void ConfigurationWidget::socketDisconnected() {
+    _ipAddress->setEnabled(true);
+    _port->setEnabled(true);
+    _connect->setText("Connect");
+    QObject::disconnect(_connect, SIGNAL(clicked()), this, SIGNAL(disconnect()));
+    QObject::connect(_connect, SIGNAL(clicked()), this, SLOT(onConnectButton()));
 }

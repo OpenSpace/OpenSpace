@@ -32,6 +32,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QThread>
 
 #include <array>
 #include <cstdint>
@@ -56,8 +57,6 @@ std::string readFromBuffer(char* buffer, size_t& currentReadLocation) {
     return result;
 }
 
-
-
 MainWindow::MainWindow()
     : QWidget(nullptr)
     , _configurationWidget(nullptr)
@@ -69,8 +68,11 @@ MainWindow::MainWindow()
 	setWindowTitle("OpenSpace Timeline");
 
     _configurationWidget = new ConfigurationWidget(this);
+    _configurationWidget->setMinimumWidth(350);
     _timeControlWidget = new ControlWidget(this);
+    _timeControlWidget->setMinimumWidth(350);
     _informationWidget = new InformationWidget(this);
+    _informationWidget->setMinimumWidth(350);
     _timelineWidget = new TimelineWidget(this);
 
 	QGridLayout* layout = new QGridLayout;
@@ -79,10 +81,16 @@ MainWindow::MainWindow()
     layout->addWidget(_informationWidget, 2, 0);
     layout->addWidget(_timelineWidget, 0, 1, 3, 1);
 
+    layout->setColumnStretch(1, 5);
+
 
     QObject::connect(
         _configurationWidget, SIGNAL(connect(QString, QString)),
         this, SLOT(onConnect(QString, QString))
+    );
+    QObject::connect(
+        _configurationWidget, SIGNAL(disconnect()),
+        this, SLOT(onDisconnect())
     );
 
     QObject::connect(
@@ -113,10 +121,15 @@ void MainWindow::onConnect(QString host, QString port) {
     _socket->connectToHost(host, port.toUInt());
 }
 
+void MainWindow::onDisconnect() {
+    delete _socket;
+    _socket = nullptr;
+}
 
 void MainWindow::readTcpData() {
     static const uint16_t MessageTypeStatus = 0;
-    static const uint16_t MessageTypePlayBook = 2;
+    static const uint16_t MessageTypePlayBookHongKang = 2;
+    static const uint16_t MessageTypePlayBookLabel = 3;
 
     QByteArray data = _socket->readAll();
 
@@ -137,25 +150,40 @@ void MainWindow::readTcpData() {
 
     switch (messageType.value) {
     case MessageTypeStatus:
-        handleStatusMessage(data.mid(2));
+    {
+        if (_hasHongKangTimeline && _hasLabelTimeline)
+            handleStatusMessage(data.mid(2));
         break;
-    case MessageTypePlayBook:
+    }
+    case MessageTypePlayBookHongKang:
+    case MessageTypePlayBookLabel:
     {
         const char* payloadDebug = data.mid(2).data();
 
         size_t beginning = 0;
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
 
-        while (_socket->waitForReadyRead() && data.size() < size) {
-        //while (data.size() < size) {
+        while (_socket->waitForReadyRead() && data.size() < int(size)) {
             data = data.append(_socket->readAll());
+            QThread::msleep(50);
         }
         handlePlaybook(data.mid(2));
+
+        if (messageType.value == MessageTypePlayBookHongKang)
+            _hasHongKangTimeline = true;
+        if (messageType.value == MessageTypePlayBookLabel)
+            _hasLabelTimeline = true;
+
+        if (_hasHongKangTimeline && _hasLabelTimeline) {
+            fullyConnected();
+        }
+
         break;
     }
     default:
         qDebug() << "Unknown message of type '" << messageType.value << "'";
     }
+
 }
 
 void MainWindow::handleStatusMessage(QByteArray data) {
@@ -244,10 +272,6 @@ void MainWindow::handlePlaybook(QByteArray data) {
 
     _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
 
-    _configurationWidget->socketConnected();
-    _timeControlWidget->socketConnected();
-    _informationWidget->socketConnected();
-    _timelineWidget->socketConnected();
 }
 
 void MainWindow::sendScript(QString script) {
@@ -257,6 +281,7 @@ void MainWindow::sendScript(QString script) {
 
 void MainWindow::onSocketConnected() {
     _socket->write(QString("1\r\n").toLatin1());
+
 }
 
 void MainWindow::onSocketDisconnected() {
@@ -264,5 +289,19 @@ void MainWindow::onSocketDisconnected() {
     _timeControlWidget->socketDisconnected();
     _informationWidget->socketDisconnected();
     _timelineWidget->socketDisconnected();
+
+    _informationWidget->logInformation("Disconnected.");
 }
 
+std::string MainWindow::nextTarget() const {
+    return _timelineWidget->nextTarget();
+}
+
+void MainWindow::fullyConnected() {
+    _informationWidget->logInformation("Connected to " + _socket->peerName() + " on port " + QString::number(_socket->peerPort()) + ".");
+
+    _configurationWidget->socketConnected();
+    _timeControlWidget->socketConnected();
+    _informationWidget->socketConnected();
+    _timelineWidget->socketConnected();
+}

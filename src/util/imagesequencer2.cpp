@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/cachemanager.h>
+#include <openspace/util/decoder.h>
 
 #include <openspace/util/spicemanager.h>
 #include <fstream>

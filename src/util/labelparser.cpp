@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/decoder.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
@@ -38,6 +39,8 @@ namespace {
 	const std::string _loggerCat = "LabelParser";
 	const std::string keySpecs   = "Read";
 	const std::string keyConvert = "Convert";
+
+    const std::string PlaybookIdentifierName = "LabelParser";
 }
 
 namespace openspace {
@@ -240,36 +243,39 @@ void LabelParser::create(){
 		}
 	}
 
-	std::ofstream myfile;
-	myfile.open("LabelFileOutput.txt");
+    //sendPlaybookInformation();
 
-	//print all
+	//std::ofstream myfile;
+	//myfile.open("LabelFileOutput.txt");
+
+	////print all
 	for (auto target : _subsetMap){
 		_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
-		std::string min, max;
-		SpiceManager::ref().getDateFromET(target.second._range._min, min);
-		SpiceManager::ref().getDateFromET(target.second._range._max, max);
+	//	std::string min, max;
+	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
+	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
 
-		myfile << std::endl;
-		for (auto image : target.second._subset){
-			std::string time_beg;
-			std::string time_end;
-			SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-			SpiceManager::ref().getDateFromET(image.stopTime, time_end);
+	//	myfile << std::endl;
+	//	for (auto image : target.second._subset){
+	//		std::string time_beg;
+	//		std::string time_end;
+	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
 
-			myfile << std::fixed
-				<< " "   << time_beg
-				<< "-->" << time_end
-				<< " [ " << image.startTime
-				<< " ] "   << image.target << std::setw(10);
-			for (auto instrument : image.activeInstruments){
-				myfile << " " << instrument;
-			}
-			myfile << std::endl;
-		}
+	//		myfile << std::fixed
+	//			<< " "   << time_beg
+	//			<< "-->" << time_end
+	//			<< " [ " << image.startTime
+	//			<< " ] "   << image.target << std::setw(10);
+	//		for (auto instrument : image.activeInstruments){
+	//			myfile << " " << instrument;
+	//		}
+	//		myfile << std::endl;
+	//	}
 	}
-	myfile.close();
+	//myfile.close();
 
+    sendPlaybookInformation(PlaybookIdentifierName);
 
 }
 
@@ -284,14 +290,4 @@ void LabelParser::createImage(Image& image, double startTime, double stopTime, s
 	image.projected = false;
 }
 
-
-std::map<std::string, ImageSubset> LabelParser::getSubsetMap(){
-	return _subsetMap;
-}
-std::vector<std::pair<std::string, TimeRange>> LabelParser::getIstrumentTimes(){
-	return _instrumentTimes;
-}
-std::vector<std::pair<double, std::string>> LabelParser::getTargetTimes(){
-	return _targetTimes;
-}
 }

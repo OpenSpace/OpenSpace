@@ -39,6 +39,7 @@ public:
 
 signals:
     void connect(QString host, QString port);
+    void disconnect();
 
 private slots:
     void onConnectButton();

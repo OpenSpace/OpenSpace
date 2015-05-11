@@ -30,6 +30,7 @@
 InformationWidget::InformationWidget(QWidget* parent)
     : QTextEdit(parent)
 {
+    setReadOnly(true);
 }
 
 void InformationWidget::socketConnected() {
@@ -38,4 +39,12 @@ void InformationWidget::socketConnected() {
 
 void InformationWidget::socketDisconnected() {
     setDisabled(true);
+}
+
+void InformationWidget::logInformation(QString text) {
+    QString currentText = toPlainText();
+
+    currentText += text + "\n";
+
+    setPlainText(currentText);
 }

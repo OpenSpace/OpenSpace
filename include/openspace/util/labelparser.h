@@ -38,13 +38,9 @@ public:
 	LabelParser(const std::string& fileName,
 				ghoul::Dictionary translationDictionary);
 	virtual void create();
-	virtual std::map<std::string, ImageSubset> getSubsetMap();
-	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
-	virtual std::vector<std::pair<double, std::string>> getTargetTimes();
 
 	// temporary need to figure this out
 	std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
-	virtual std::vector<double> getCaptureProgression(){ return _captureProgression; };
 
 private:
 	void createImage(Image& image,
@@ -66,13 +62,6 @@ private:
 	std::string _spacecraft;
 	std::map<std::string, Decoder*> _fileTranslation;
 	std::vector<std::string> _specsOfInterest;
-
-	//returnable
-	std::map<std::string, ImageSubset> _subsetMap;
-	std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
-	std::vector<std::pair<double, std::string>> _targetTimes;
-	std::vector<double> _captureProgression;
-
 
 	std::string _target;
 	std::string _instrumentID;

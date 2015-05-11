@@ -33,6 +33,9 @@ public:
 	InformationWidget(QWidget* parent);
     void socketConnected();
     void socketDisconnected();
+
+public slots:
+    void logInformation(QString text);
 };
 
 #endif // __INFORMATIONWIDGET_H__

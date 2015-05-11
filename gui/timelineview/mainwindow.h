@@ -41,20 +41,23 @@ public:
 	MainWindow();
 	~MainWindow();
 
+    std::string nextTarget() const;
+
 public slots:
     void sendScript(QString script);
 
 private slots:
     void onConnect(QString host, QString port);
+    void onDisconnect();
 
     void onSocketConnected();
     void onSocketDisconnected();
 
-	//void onConnectButton();
-	//void sendCommandButton();
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
     void handlePlaybook(QByteArray data);
+
+    void fullyConnected();
 
 private:
     ConfigurationWidget* _configurationWidget;
@@ -63,6 +66,9 @@ private:
     TimelineWidget* _timelineWidget;
     
 	QTcpSocket* _socket;
+
+    bool _hasHongKangTimeline = false;
+    bool _hasLabelTimeline = false;
 };
 
 #endif // __MAINWINDOW_H__

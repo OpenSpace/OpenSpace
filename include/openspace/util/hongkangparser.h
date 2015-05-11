@@ -33,54 +33,44 @@
 #include <vector>
 
 namespace openspace {
-	class HongKangParser : public SequenceParser{
-	public:
-		HongKangParser();
-		HongKangParser(const std::string& fileName,
-			           std::string spacecraft,
-					   ghoul::Dictionary dictionary,
-			           std::vector<std::string> potentialTargets);
-		virtual void create();
-		virtual std::map<std::string, ImageSubset> getSubsetMap();
-		virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes();
-		virtual std::vector<std::pair<double, std::string>> getTargetTimes();
 
-		// temporary need to figure this out
-		virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
-		virtual std::vector<double> getCaptureProgression();
+class HongKangParser : public SequenceParser {
+public:
+	HongKangParser();
+	HongKangParser(const std::string& fileName,
+			        std::string spacecraft,
+					ghoul::Dictionary dictionary,
+			        std::vector<std::string> potentialTargets);
+	virtual void create();
 
-	private:
-		double getMetFromET(double et);
-		double getETfromMet(std::string timestr);
-		double getETfromMet(double met);
+	// temporary need to figure this out
+	virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
-		void createImage(Image& image,
-			             double startTime,
-			             double stopTime,
-			             std::vector<std::string> instr,
-			             std::string targ,
-			             std::string pot);
+private:
+	double getMetFromET(double et);
+	double getETfromMet(std::string timestr);
+	double getETfromMet(double met);
 
-		bool augmentWithSpice(Image& image, 
-			                  std::string spacecraft, 
-							  std::vector<std::string> payload, 
-							  std::vector<std::string> potentialTargets);
-        void sendPlaybookInformation();
+	void createImage(Image& image,
+			            double startTime,
+			            double stopTime,
+			            std::vector<std::string> instr,
+			            std::string targ,
+			            std::string pot);
 
-		std::string _defaultCaptureImage;
-		double _metRef = 299180517;
+	bool augmentWithSpice(Image& image, 
+			                std::string spacecraft, 
+							std::vector<std::string> payload, 
+							std::vector<std::string> potentialTargets);
 
-		std::string _fileName;
-		std::string _spacecraft;
-		std::map<std::string, Decoder*> _fileTranslation;
-		std::vector<std::string> _potentialTargets;
+	std::string _defaultCaptureImage;
+	double _metRef = 299180517;
 
-		//returnable
-		std::map<std::string, ImageSubset> _subsetMap;
-		std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
-		std::vector<std::pair<double, std::string>> _targetTimes;
-		std::vector<double> _captureProgression;
-	};
+	std::string _fileName;
+	std::string _spacecraft;
+	std::map<std::string, Decoder*> _fileTranslation;
+	std::vector<std::string> _potentialTargets;
+};
 
 }
 #endif //__HONGKANGPARSER_H__
