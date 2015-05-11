@@ -1,46 +1,48 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2015                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 
-#ifndef __RenderablePath_H__
-#define __RenderablePath_H__
+#ifndef __RENDERABLEPATH_H__
+#define __RENDERABLEPATH_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/properties/vectorproperty.h>
 
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-//#include <openspace/util/runtimedata.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul {
+	namespace opengl {
+		class ProgramObject;
+		class Texture;
+	}
+}
 
 namespace openspace {
-	class RenderablePath : public Renderable{
+
+	class RenderablePath : public Renderable {
 	public:
 		RenderablePath(const ghoul::Dictionary& dictionary);
-		~RenderablePath();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -49,45 +51,45 @@ namespace openspace {
 
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
-	private:
-		ghoul::opengl::ProgramObject* _programObject;
-		void loadTexture();
-		bool fullYearSweep();
 
-		// modfile reads
-		// spice
+		void calculatePath(std::string observer);
+	private:
+		struct VertexInfo {
+			float x, y, z, e;
+			//float r, g, b, a;
+		};
+		void sendToGPU();
+		void addPosition(psc pos);
+		void addColor(glm::vec4 col);
+
+		glm::vec3 _lineColor;
+		glm::vec4 _lastPosition;
+		properties::FloatProperty _lineFade;
+		properties::FloatProperty _lineWidth;
+		properties::BoolProperty _drawLine;
+
+		ghoul::opengl::ProgramObject* _programObject;
+		bool _programIsDirty;
+
+		bool _successfullDictionaryFetch;
+
 		std::string _target;
 		std::string _observer;
 		std::string _frame;
-		// color
-		glm::vec3 _c;
-		double _r, _g, _b;
 
-		// need to write robust method for vbo id selection 
-		// (right now galactic grid has to be present) (why though?) solve later...
 		GLuint _vaoID;
 		GLuint _vBufferID;
-		GLuint _iBufferID;
+		
+		bool _needsSweep;
 
-		void nextIndex();
-
-		unsigned int _isize;
-		unsigned int _vsize;
-		unsigned int _vtotal;
-		unsigned int _stride;
-
-		//Vertex* _varray;
-		std::vector<float> _varray;
-		std::vector<int> _iarray;
-
-		//used for update of trail
-		psc _pscpos, _pscvel;
-		double _increment;
-		double _time = 0;
-		double _oldTime = 0;
-
-		int _delta = 0;
-		int _dtprogress = 0;
+		std::vector<VertexInfo> _vertexArray;
+		
+		float _increment;
+		double _start;
+		double _stop;
+		float _distanceFade;
 	};
-}
-#endif
+
+} // namespace openspace
+
+#endif // __RENDERABLEPATH_H__
