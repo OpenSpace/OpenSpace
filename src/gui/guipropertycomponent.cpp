@@ -112,12 +112,7 @@ namespace {
 
         static const int bufferSize = 256;
         static char buffer[bufferSize];
-#ifdef WIN32
-        ghoul_assert(p->value().length() < bufferSize, "Buffer Size too small");
-        strcpy_s(buffer, p->value().length(), p->value().c_str());
-#else
         strcpy(buffer, p->value().c_str());
-#endif
         ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
         std::string newValue(buffer);
 

@@ -950,11 +950,7 @@ namespace openspace {
 					SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 
 					memset(layout->entries[i].name, 0, lengthName);
-#ifdef WIN32
-                    strcpy_s(layout->entries[i].name, node->name().length(), node->name().c_str());
-#else
 					strcpy(layout->entries[i].name, node->name().c_str());
-#endif
 
 					layout->entries[i].currentRenderTime = 0;
 					layout->entries[i].currentUpdateRenderable = 0;
