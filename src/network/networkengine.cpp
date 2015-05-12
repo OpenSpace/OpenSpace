@@ -28,6 +28,8 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <array>
+#include <chrono>
+#include <thread>
 
 #include "sgct.h"
 
@@ -181,6 +183,7 @@ void NetworkEngine::sendMessages() {
 }
 
 void NetworkEngine::sendInitialInformation() {
+    static const int SleepTime = 25;
     for (const Message& m : _initialConnectionMessages) {
         union {
             MessageIdentifier value;
@@ -194,7 +197,9 @@ void NetworkEngine::sendInitialInformation() {
             payload.data(),
             static_cast<int>(payload.size())
         );
+        std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
+
 }
 
 void NetworkEngine::setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message) {
