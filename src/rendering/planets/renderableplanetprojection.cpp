@@ -303,7 +303,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-		glViewport(0, 0, _texture->width(), _texture->height());
+		glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
 		_fboProgramObject->activate();
 
 		ghoul::opengl::TextureUnit unitFbo;
@@ -440,8 +440,6 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
-	double startTime, endTime;
-	
 #ifdef GPU_PROJ
 	if (_capture && _performProjection)
 		project();

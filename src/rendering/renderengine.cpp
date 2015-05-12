@@ -233,7 +233,7 @@ namespace openspace {
 	{
         _onScreenInformation = {
             glm::vec2(0.f),
-            12.f,
+            12,
             -1
         };
 	}
@@ -503,7 +503,7 @@ namespace openspace {
                 int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
 
                 if (thisId == _onScreenInformation._node) {
-                    const int font_size_mono = _onScreenInformation._size;
+                    const unsigned int font_size_mono = _onScreenInformation._size;
                     int x1, xSize, y1, ySize;
                     const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
                     sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
@@ -555,9 +555,9 @@ namespace openspace {
 					
 					if (openspace::ImageSequencer2::ref().isReady()) {
 						double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
-						double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+						double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
 						std::string progress = "|";
-						int g = ((t)* 30) + 1;
+						int g = static_cast<int>((t * 30) + 1);
 						for (int i = 0; i < g; i++)
                             progress.append("-");
                         progress.append(">");
@@ -581,7 +581,7 @@ namespace openspace {
    					    std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
                         if (currentTarget.first > 0.0) {
-						    int timeleft = nextTarget.first - currentTime;
+						    int timeleft = static_cast<int>(nextTarget.first - currentTime);
 
 						    int hour   = timeleft / 3600;
 						    int second = timeleft % 3600;
@@ -605,9 +605,9 @@ namespace openspace {
 						    std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
 						    std::string space;
 						    glm::vec4 color;
-						    int isize = incidentTargets.second.size(); 
-                            for (int p = 0; p < isize; p++){
-                                double t = (double)(p + 1) / (double)(isize + 1);
+						    size_t isize = incidentTargets.second.size(); 
+                            for (size_t p = 0; p < isize; p++){
+                                double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
                                 t = (p > isize / 2) ? 1 - t : t;
                                 t += 0.3;
                                 color = (p == isize / 2) ? glm::vec4(1.00, 0.51, 0.00, 1) : glm::vec4(t, t, t, 1);
@@ -950,7 +950,11 @@ namespace openspace {
 					SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 
 					memset(layout->entries[i].name, 0, lengthName);
+#ifdef WIN32
+                    strcpy_s(layout->entries[i].name, node->name().length(), node->name().c_str());
+#else
 					strcpy(layout->entries[i].name, node->name().c_str());
+#endif
 
 					layout->entries[i].currentRenderTime = 0;
 					layout->entries[i].currentUpdateRenderable = 0;

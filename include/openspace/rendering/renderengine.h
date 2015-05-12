@@ -103,7 +103,7 @@ public:
     // This is temporary until a proper screenspace solution is found ---abock
     struct {
         glm::vec2 _position;
-        float _size;
+        unsigned int _size;
         int _node;
     } _onScreenInformation;
 

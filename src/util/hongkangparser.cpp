@@ -110,7 +110,6 @@ void HongKangParser::create(){
 
 				std::string line = "";
 				double shutter = 0.01;
-				double startTime, stopTime;
 
 				std::string previousTarget;
 
@@ -182,7 +181,7 @@ void HongKangParser::create(){
 							std::string endNominal = scanner->getStopCommand();
 
 							// store current position in file
-							int len = file.tellg();
+                            std::streampos len = file.tellg();
 							std::string linePeek;
 							bool foundstop = false;
 							while (!file.eof() && !foundstop){
@@ -290,9 +289,11 @@ bool HongKangParser::augmentWithSpice(Image& image,
 									  std::vector<std::string> potentialTargets){
 	image.target = "VOID";
 	// we have (?) to cast to int, unfortunately
+    // Why? --abock
 	int exposureTime = image.stopTime - image.startTime;
-	if (exposureTime == 0) exposureTime = 1;
-	double et;
+	if (exposureTime == 0)
+        exposureTime = 1;
+
 	for (int i = 0; i < potentialTargets.size(); i++){
 		bool success = false;
 		bool _withinFOV = false;

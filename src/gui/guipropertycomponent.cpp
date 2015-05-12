@@ -112,7 +112,12 @@ namespace {
 
         static const int bufferSize = 256;
         static char buffer[bufferSize];
+#ifdef WIN32
+        ghoul_assert(p->value().length() < bufferSize, "Buffer Size too small");
+        strcpy_s(buffer, p->value().length(), p->value().c_str());
+#else
         strcpy(buffer, p->value().c_str());
+#endif
         ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
         std::string newValue(buffer);
 
@@ -433,10 +438,10 @@ void GuiPropertyComponent::render() {
         ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
         pos = value;
      
-        float& size = OsEng.renderEngine()->_onScreenInformation._size;
-        float fValue = size;
-        ImGui::SliderFloat("Size", &fValue, 0.f, 36.f);
-        size = fValue;
+        unsigned int& size = OsEng.renderEngine()->_onScreenInformation._size;
+        int sizeValue = static_cast<int>(size);
+        ImGui::SliderInt("Size", &sizeValue, 0, 36);
+        size = static_cast<unsigned int>(sizeValue);
 
         int& node = OsEng.renderEngine()->_onScreenInformation._node;
         int iValue = node;

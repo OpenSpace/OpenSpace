@@ -93,7 +93,7 @@ void NetworkEngine::publishStatusMessage() {
     double delta = Time::ref().deltaTime();
 
     messageSize += sizeof(time);
-    messageSize += timeString.length();
+    messageSize += static_cast<uint16_t>(timeString.length());
     messageSize += sizeof(delta);
 
     ghoul_assert(messageSize == 40, "Message size is not correct");
@@ -104,7 +104,7 @@ void NetworkEngine::publishStatusMessage() {
     std::memmove(buffer.data() + currentLocation, &time, sizeof(time));
     currentLocation += sizeof(time);
     std::memmove(buffer.data() + currentLocation, timeString.c_str(), timeString.length());
-    currentLocation += timeString.length();
+    currentLocation += static_cast<unsigned int>(timeString.length());
     std::memmove(buffer.data() + currentLocation, &delta, sizeof(delta));
 
     publishMessage(_statusMessageIdentifier, std::move(buffer));
@@ -171,7 +171,10 @@ void NetworkEngine::sendMessages() {
 
         // Prepending the message identifier to the front
         m.body.insert(m.body.begin(), identifier.data.begin(), identifier.data.end());
-        sgct::Engine::instance()->sendMessageToExternalControl(m.body.data(), m.body.size());
+        sgct::Engine::instance()->sendMessageToExternalControl(
+            m.body.data(),
+            static_cast<int>(m.body.size())
+        );
     }
 
     _messagesToSend.clear();
@@ -187,7 +190,10 @@ void NetworkEngine::sendInitialInformation() {
 
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
-        sgct::Engine::instance()->sendMessageToExternalControl(payload.data(), payload.size());
+        sgct::Engine::instance()->sendMessageToExternalControl(
+            payload.data(),
+            static_cast<int>(payload.size())
+        );
     }
 }
 

@@ -43,6 +43,9 @@
 #include <sgct.h>
 #include "imgui.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace { 
 	const std::string _loggerCat     = "RenderableModel";
 	const std::string keySource      = "Rotation.Source";
@@ -172,9 +175,9 @@ void RenderableModel::render(const RenderData& data) {
 	bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
 	if (!targetPositionCoverage){
 		int frame = ImGui::GetFrameCount() % 180;
-		float fadingFactor = sin((frame * pi_c()) / 180);
-		_alpha = 0.5f + fadingFactor*0.5f;
-		//_texture = "";
+        
+		float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
+		_alpha = 0.5f + fadingFactor * 0.5f;
 	}
 	else
 		_alpha = 1.0f;
@@ -222,17 +225,14 @@ void RenderableModel::update(const UpdateData& data) {
 		double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
 		double interval = openspace::ImageSequencer2::ref().getIntervalLength();
 		double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
-		if (interval > 60){
-			if (t < 0.8){
-				_fading = t;
-			}
-			else if (t >= 0.95f){
+		if (interval > 60) {
+			if (t < 0.8)
+				_fading = static_cast<float>(t);
+			else if (t >= 0.95)
 				_fading = _fading - 0.5f;
-			}
 		}
-		else{
-			_fading = 0.0f;
-		}
+		else
+			_fading = 0.f;
 		_time = futureTime;
 	}
 

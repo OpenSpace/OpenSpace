@@ -55,56 +55,57 @@ namespace {
 	const std::string keyInstrumentMethod     = "Instrument.Method";
 	const std::string keyInstrumentAberration = "Instrument.Aberration";
     const std::string keyPotentialTargets     = "PotentialTargets";
-}
-//#define DEBUG
-namespace openspace{
-	// colors, move later
-	glm::vec4 col_sq;
-	glm::vec4 c_project;
-	glm::vec4 col_end;
-	glm::vec4 blue;
-	glm::vec4 col_gray;
-	glm::vec4 col_start;
 
-    RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary)
-        , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
-        , _programObject(nullptr)
-        , _texture(nullptr)
-		, _drawSolid("solidDraw", "Draw as Quads", false)
-        , _mode(GL_LINES){
-
-        bool success = dictionary.getValue(keyBody, _spacecraft);
-        ghoul_assert(success, "");
-
-        success = dictionary.getValue(keyFrame, _frame);
-        ghoul_assert(success, "");
-
-        success = dictionary.getValue(keyInstrument, _instrumentID);
-        ghoul_assert(success, "");
-
-        success = dictionary.getValue(keyInstrumentMethod, _method);
-        ghoul_assert(success, "");
-
-        success = dictionary.getValue(keyInstrumentAberration, _aberrationCorrection);
-        ghoul_assert(success, "");
-
-        ghoul::Dictionary potentialTargets;
-        success = dictionary.getValue(keyPotentialTargets, potentialTargets);
-        ghoul_assert(success, "");
-
-        _potentialTargets.resize(potentialTargets.size());
-        for (int i = 0; i < potentialTargets.size(); ++i) {
-            std::string target;
-            potentialTargets.getValue(std::to_string(i + 1), target);
-            _potentialTargets[i] = target;
-        }
-
-        addProperty(_lineWidth);
-		addProperty(_drawSolid);
+    // colors, move later
+    glm::vec4 col_sq;
+    glm::vec4 c_project;
+    glm::vec4 col_end;
+    glm::vec4 blue;
+    glm::vec4 col_gray;
+    glm::vec4 col_start;
 }
 
-void RenderableFov::allocateData(){ 
+namespace openspace {
+
+RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+    , _programObject(nullptr)
+    , _texture(nullptr)
+	, _drawSolid("solidDraw", "Draw as Quads", false)
+    , _mode(GL_LINES)
+{
+    bool success = dictionary.getValue(keyBody, _spacecraft);
+    ghoul_assert(success, "");
+
+    success = dictionary.getValue(keyFrame, _frame);
+    ghoul_assert(success, "");
+
+    success = dictionary.getValue(keyInstrument, _instrumentID);
+    ghoul_assert(success, "");
+
+    success = dictionary.getValue(keyInstrumentMethod, _method);
+    ghoul_assert(success, "");
+
+    success = dictionary.getValue(keyInstrumentAberration, _aberrationCorrection);
+    ghoul_assert(success, "");
+
+    ghoul::Dictionary potentialTargets;
+    success = dictionary.getValue(keyPotentialTargets, potentialTargets);
+    ghoul_assert(success, "");
+
+    _potentialTargets.resize(potentialTargets.size());
+    for (int i = 0; i < potentialTargets.size(); ++i) {
+        std::string target;
+        potentialTargets.getValue(std::to_string(i + 1), target);
+        _potentialTargets[i] = target;
+    }
+
+    addProperty(_lineWidth);
+	addProperty(_drawSolid);
+}
+
+void RenderableFov::allocateData() { 
 	int points = 20;
 	_stride[0] = points;
 	_isize[0]  = points;
@@ -120,14 +121,14 @@ void RenderableFov::allocateData(){
 	}
 
 	_stride[0] = 8;
-	_vsize[0] = _varray1.size();
+	_vsize[0] = static_cast<unsigned int>(_varray1.size());
 	_vtotal[0] = static_cast<int>(_vsize[0] / _stride[0]);
 
 	// allocate second vbo data 
 	int cornerPoints = 12;
 	_isize[1] = cornerPoints;
 	_iarray1[1] = new int[_isize[1]];
-	for (int i = 0; i < _isize[1]; i++){
+	for (unsigned int i = 0; i < _isize[1]; i++){
 		_iarray1[1][i] = i;
 	}
 	_varray2.resize(40);
@@ -136,12 +137,11 @@ void RenderableFov::allocateData(){
 	_isteps = 10;
 }
 
-RenderableFov::~RenderableFov(){
+RenderableFov::~RenderableFov() {
 	deinitialize();
 }
 
-
-bool RenderableFov::initialize(){
+bool RenderableFov::initialize() {
 	bool completeSuccess = true;
 	if (_programObject == nullptr)
 		completeSuccess &= OsEng.ref().configurationManager()->getValue("FovProgram", _programObject);
@@ -153,7 +153,7 @@ bool RenderableFov::initialize(){
 	return completeSuccess;
 }
 
-bool RenderableFov::deinitialize(){
+bool RenderableFov::deinitialize() {
 	return true;
 }
 
@@ -161,7 +161,7 @@ bool RenderableFov::isReady() const {
 	return _programObject != nullptr;
 }
 
-void RenderableFov::sendToGPU(){
+void RenderableFov::sendToGPU() {
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID[0]);
 	glGenBuffers(1, &_vboID[0]);
@@ -204,7 +204,7 @@ void RenderableFov::sendToGPU(){
 }
 // various helper methods
 
-void RenderableFov::insertPoint(std::vector<float>& arr, psc p, glm::vec4 c){
+void RenderableFov::insertPoint(std::vector<float>& arr, psc p, glm::vec4 c) {
 	for (int i = 0; i < 4; i++){
 		arr.push_back(p[i]);
 	}
@@ -214,13 +214,14 @@ void RenderableFov::insertPoint(std::vector<float>& arr, psc p, glm::vec4 c){
 	_nrInserted++;
 }
 
-glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t){
+glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t) {
 	assert(t >= 0 && t <= 1);
 	float t2 = (1.f - t);
 	return glm::dvec3(p0.x*t2 + p1.x*t, p0.y*t2 + p1.y*t, p0.z*t2 + p1.z*t);
 }
+
 // This method is the current bottleneck.
-psc RenderableFov::checkForIntercept(glm::dvec3 ray){
+psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
 	double targetEt;
 	bool intercepted = false;
     openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
@@ -232,7 +233,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray){
 	return _interceptVector;
 }
 // Orthogonal projection next to planets surface, can also be optimized. 
-psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov){
+psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
 	glm::dvec3 vecToTarget;
 	double lt;
 	SpiceManager::ref().getTargetPosition(_fovTarget, _spacecraft, _frame, _aberrationCorrection, _time, vecToTarget, lt);
@@ -245,7 +246,7 @@ psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov){
 	return projection;
 }
 // Bisection method, simple recurtion
-glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance){
+glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance) {
 	//check if point is on surface
 	double targetEt;
 	glm::dvec3 half = interpolate(p1, p2, 0.5f);
@@ -281,11 +282,10 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double toleran
 	targets surface,  each consecutive point is queried for a surface intercept and 
 	thereby moved to the hull. 
 */
-void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
+void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds) {
 	_nrInserted = 0;
 	_varray2.clear();// empty the array
 
-	double t;
 	double tolerance = 0.0000001; // very low tolerance factor
 	
 	glm::dvec3 mid; 
@@ -306,7 +306,7 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 				// find outer most point for interpolation
 				mid = bisection(current, next, tolerance);
 				for (int j = 1; j <= _isteps; j++){
-					t = ((double)j / _isteps);
+					float t = (static_cast<float>(j) / _isteps);
 					interpolated = interpolate(current, mid, t);
 					_interceptVector = (j < _isteps) ? checkForIntercept(interpolated) : orthogonalProjection(interpolated);
 					insertPoint(_varray2, _interceptVector, col_sq);
@@ -315,7 +315,7 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 			if (H[i] == false && H[i + 1] == true){ // current point is non-interceptive, next is
 				mid = bisection(next, current, tolerance);
 				for (int j = 1; j <= _isteps; j++){
-					t = ((double)j / _isteps);
+					float t = (static_cast<float>(j) / _isteps);
 					interpolated = interpolate(mid, next, t);
 					_interceptVector = (j > 1) ? checkForIntercept(interpolated) : orthogonalProjection(interpolated);
 					insertPoint(_varray2, _interceptVector, col_sq);
@@ -323,7 +323,7 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 			}
 			if (H[i] == true && H[i + 1] == true){ // both points intercept
 				for (int j = 0; j <= _isteps; j++){
-					t = ((double)j / _isteps);
+					float t = (static_cast<float>(j) / _isteps);
 					interpolated = interpolate(current, next, t);
 					_interceptVector = checkForIntercept(interpolated);
 					insertPoint(_varray2, _interceptVector, col_sq);
@@ -339,15 +339,15 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds){
 		//update size etc;
 		_vtotal[1] = _nrInserted;
 		_isize[1]  = _nrInserted;
-		_vsize[1]  = _varray2.size();
+		_vsize[1]  = static_cast<unsigned int>(_varray2.size());
 		_iarray1[1] = new int[_isize[1]];
-		for (int i = 0; i < _isize[1]; i++)
+		for (unsigned int i = 0; i < _isize[1]; i++)
 			_iarray1[1][i] = i;
 	}
  
 }
 
-void RenderableFov::updateData(){
+void RenderableFov::updateData() {
 	glBindBuffer(GL_ARRAY_BUFFER, _vboID[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize[0] * sizeof(GLfloat), &_varray1[0]);
 
@@ -372,13 +372,15 @@ void RenderableFov::updateData(){
 		glBindVertexArray(0);
 	}
 }
-void RenderableFov::computeColors(){
+void RenderableFov::computeColors() {
 	double t2 = openspace::ImageSequencer2::ref().getNextCaptureTime();
 	double diff = (t2 - _time);
-	double t = 0.0;
-	if (diff <= 7.0) t = 1.f - diff / 7.0;
+	float t = 0.0;
+	if (diff <= 7.0)
+        t = static_cast<float>(1.0 - (diff / 7.0));
 
-	if (diff < 0) t = 0.0;
+	if (diff < 0.0)
+        t = 0.f;
 	// i need to add an *.h file with colortables....
 	c_project = glm::vec4(0.0, 1.0, 0.00,1);
 	col_end   = glm::vec4(1.00, 0.29, 0.00, 1);
@@ -404,7 +406,7 @@ void RenderableFov::computeColors(){
 	col_end.w = 0.5;
 }
 
-void RenderableFov::render(const RenderData& data){
+void RenderableFov::render(const RenderData& data) {
 	assert(_programObject);
 	_programObject->activate();
 	// fetch data
@@ -413,7 +415,7 @@ void RenderableFov::render(const RenderData& data){
 	glm::mat4 spacecraftRot = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			spacecraftRot[i][j] = _stateMatrix[i][j];
+			spacecraftRot[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
 	bool drawFOV = false;
@@ -441,7 +443,7 @@ void RenderableFov::render(const RenderData& data){
                 LERROR("Could not locate instrument");
                 return;
             }
-			float size = 4 * sizeof(float);
+			const unsigned int size = 4 * sizeof(float);
 			int indx = 0;
 
 			_fovTarget = _potentialTargets[0]; //default
@@ -564,10 +566,9 @@ void RenderableFov::render(const RenderData& data){
 	_programObject->deactivate();
 }
 
-void RenderableFov::update(const UpdateData& data){
-	double lightTime;
+void RenderableFov::update(const UpdateData& data) {
 	_time  = data.time;
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time, _stateMatrix);
 }
 
-}
+} // namespace openspace

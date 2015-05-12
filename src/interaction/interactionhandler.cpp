@@ -308,7 +308,7 @@ int setInteractionSensitivity(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    double sensitivity = luaL_checknumber(L, -1);
+    float sensitivity = static_cast<float>(luaL_checknumber(L, -1));
     OsEng.interactionHandler()->setInteractionSensitivity(sensitivity);
     return 0;
 }
@@ -334,7 +334,7 @@ int setInvertRoll(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    bool invert = lua_toboolean(L, -1);
+    bool invert = lua_toboolean(L, -1) == 1;
     OsEng.interactionHandler()->setInvertRoll(invert);
     return 0;
 }
@@ -360,7 +360,7 @@ int setInvertRotation(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    bool invert = lua_toboolean(L, -1);
+    bool invert = lua_toboolean(L, -1) == 1;
     OsEng.interactionHandler()->setInvertRotation(invert);
     return 0;
 }

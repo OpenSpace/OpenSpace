@@ -149,9 +149,9 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     //_positions[TargetPosition][1] = 0.f;
     //_positions[TargetPosition][2] = 0.f;
     //_positions[TargetPosition][3] = 0.f;
-    SpiceManager::ref().getTargetPosition(_source, "SUN", _referenceFrame, "NONE", data.time, _positions[SourcePosition], t);
+    SpiceManager::ref().getTargetPosition(_source, "PLUTO BARYCENTER", _referenceFrame, "NONE", data.time, _positions[SourcePosition], t);
     _positions[SourcePosition][3] += 3;
-    SpiceManager::ref().getTargetPosition(_target, "SUN", _referenceFrame, "NONE", data.time, _positions[TargetPosition], t);
+    SpiceManager::ref().getTargetPosition(_target, "PLUTO BARYCENTER", _referenceFrame, "NONE", data.time, _positions[TargetPosition], t);
     _positions[TargetPosition][3] += 3;
 
     if (ImageSequencer2::ref().isReady()) {

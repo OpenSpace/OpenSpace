@@ -89,9 +89,10 @@ std::pair<double, std::string> ImageSequencer2::getNextTarget(){
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end() && it != _targetTimes.begin()){
+	if (it != _targetTimes.end() && it != _targetTimes.begin())
 		return (*it);
-	}
+    else
+        return std::make_pair(0.0, "");
 }
 
 std::pair<double, std::string> ImageSequencer2::getCurrentTarget(){
