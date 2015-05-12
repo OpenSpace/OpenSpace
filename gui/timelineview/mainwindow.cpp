@@ -292,12 +292,20 @@ void MainWindow::handlePlaybook(QByteArray data) {
 }
 
 void MainWindow::sendScript(QString script) {
-    if (_socket)
+    if (_socket) {
         _socket->write(("0" + script + "\r\n").toLatin1());
+        //QByteArray data = (QString("0") + script).toLocal8Bit();
+        //qDebug() << data;
+        //_socket->write(data);
+        //QThread::msleep(25);
+    }
+        //_socket->write(("0" + script + "\r\n").toLatin1());
+        //_socket->write(("0" + script + "\0").toLatin1());
 }
 
 void MainWindow::onSocketConnected() {
     _socket->write(QString("1\r\n").toLatin1());
+    //_socket->write(QString("1").toLatin1());
 
 }
 
