@@ -721,7 +721,7 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 	if (size == 0)
 		return;
 
-    _networkEngine->handleMessage(std::string(receivedChars));
+    _networkEngine->handleMessage(std::string(receivedChars, size));
 }
 
 void OpenSpaceEngine::enableBarrier() {
