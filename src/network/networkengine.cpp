@@ -47,6 +47,7 @@ namespace openspace {
 
 NetworkEngine::NetworkEngine() 
     : _lastAssignedIdentifier(-1) // -1 is okay as we assign one identifier in this ctor
+    , _shouldPublishStatusMessage(true)
 {
     static_assert(
         sizeof(MessageIdentifier) == 2,
@@ -80,7 +81,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
 }
 
 void NetworkEngine::publishStatusMessage() {
-    if (!sgct::Engine::instance()->isExternalControlConnected())
+    if (!_shouldPublishStatusMessage || !sgct::Engine::instance()->isExternalControlConnected())
         return;
     // Protocol:
     // 8 bytes: time as a ET double
@@ -183,7 +184,8 @@ void NetworkEngine::sendMessages() {
 }
 
 void NetworkEngine::sendInitialInformation() {
-    static const int SleepTime = 25;
+    static const int SleepTime = 100;
+    _shouldPublishStatusMessage = false;
     for (const Message& m : _initialConnectionMessages) {
         union {
             MessageIdentifier value;
@@ -197,9 +199,11 @@ void NetworkEngine::sendInitialInformation() {
             payload.data(),
             static_cast<int>(payload.size())
         );
+
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
 
+    _shouldPublishStatusMessage = true;
 }
 
 void NetworkEngine::setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message) {
