@@ -259,6 +259,7 @@ void postFXPass(){
 }
 
 void setupPostFX(){
+#ifndef __APPLE__
 	sgct::PostFX fx[1];
 	sgct::ShaderProgram *shader;
 	fx[0].init("OpacityControl", absPath("${SHADERS}/postFX_vs.glsl"), absPath("${SHADERS}/postFX_fs.glsl"));
@@ -269,4 +270,5 @@ void setupPostFX(){
 	_postFXOpacityLoc = shader->getUniformLocation("Opacity");
 	shader->unbind();
 	_sgctEngine->addPostFX(fx[0]);
+#endif
 }

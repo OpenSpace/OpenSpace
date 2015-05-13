@@ -67,6 +67,8 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 	, _successfullDictionaryFetch(true)
 	, _needsSweep(true)
 	, _drawLine("drawline", "Draw Line", false)
+    , _start(0.0)
+    , _stop(0.0)
 {
 	_successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
 	_successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);

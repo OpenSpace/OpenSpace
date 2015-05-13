@@ -315,7 +315,8 @@ bool SceneGraph::sortTopologially() {
         }
 
     }
-    return true;    
+    
+    return true;
 }
 
 bool SceneGraph::addSceneGraphNode(SceneGraphNode* node) {

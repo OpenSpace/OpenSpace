@@ -176,6 +176,7 @@ bool RenderableStars::deinitialize() {
 void RenderableStars::render(const RenderData& data) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+    
 	_program->activate();
 
 	// @Check overwriting the scaling from the camera; error as parsec->meter conversion

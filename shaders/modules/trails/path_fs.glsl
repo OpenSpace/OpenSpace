@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 layout(location = 0) in vec4 vs_point_position;
-layout(location = 1) in flat int isHour;
+layout(location = 1) flat in int isHour;
 layout(location = 2) in vec4 vs_point_color;
 //in flat int isHour;
 //uniform vec4 campos;
