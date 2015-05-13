@@ -74,7 +74,7 @@ void ImageSequencer2::updateSequencer(double time){
 		Time::ref().setDeltaTime(0.1);
 	} // Time is not properly updated when time jump with dt = 0 
 
-	if (_currentTime < time){
+	if (_currentTime != time){
 		_previousTime = _currentTime;
 		_currentTime = time;
 	}

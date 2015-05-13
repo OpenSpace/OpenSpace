@@ -77,7 +77,7 @@ protected:
 
 	void textureBind();
 	void project();
-
+	void clearAllProjections();
 private:
 	void imageProjectGPU();
 
@@ -88,6 +88,8 @@ private:
 	properties::IntProperty _rotation;
 	properties::FloatProperty _fadeProjection;
 	properties::BoolProperty _performProjection;
+	properties::BoolProperty _clearAllProjections;
+
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
@@ -136,6 +138,7 @@ private:
 	std::string _target;
 	std::string _frame;
 	std::string _defaultProjImage;
+	std::string _clearingImage;
 	std::string _next;
 
 	bool _capture;
