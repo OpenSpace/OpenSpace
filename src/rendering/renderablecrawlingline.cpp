@@ -123,8 +123,8 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 	    _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	    _program->setUniform("ModelTransform", transform);
 
-		int frame = _frameCounter % 20;
-		float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 20));
+		int frame = _frameCounter % 60;
+		float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 60));
 		float alpha = 0.6f + fadingFactor*0.4f;
 
 		glLineWidth(2.f);
@@ -165,7 +165,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 	glm::dvec3 boresight;
 
 	bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
-	glm::vec4 target(boresight[0], boresight[1], boresight[2], 14);
+	glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
 	target = tmp * target;
 
 	_positions[TargetPosition] = target;

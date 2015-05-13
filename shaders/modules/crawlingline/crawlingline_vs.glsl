@@ -27,16 +27,28 @@
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
+uniform vec3 color;
+
 layout(location = 0) in vec4 in_position;
 
+out vec4 vs_color;
 out vec4 vs_position;
+const int targetId = 1;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
 	vs_position = in_position;
 	vec4 tmp = in_position;
+	int id = gl_VertexID;
+	
+	vec3 black = { 0.f, 0.f, 0.f };
 
+	if(id == targetId)
+		vs_color.xyz = black;
+	else
+		vs_color.xyz = color;
+		
 	vec4 position = pscTransform(tmp, ModelTransform);
 	vs_position = tmp;
 	position = ViewProjection * position;

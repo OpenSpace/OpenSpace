@@ -560,7 +560,7 @@ namespace openspace {
 						double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
 						std::string progress = "|";
 						int g = static_cast<int>((t* 24) + 1);
-
+						g = std::max(g, 0);
 						for (int i = 0; i < g; i++)
                             progress.append("-");
                         progress.append(">");

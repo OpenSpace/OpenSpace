@@ -71,6 +71,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _alpha(1.f)
 	, _fading("fading", "Fade", 0)
 	, _performFade("performFading", "Perform Fading", false)
+	, _frameCount(0)
 {
 	std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -159,6 +160,7 @@ bool RenderableModel::deinitialize() {
 
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
+	_frameCount++;
 
 	double lt;
     glm::mat4 transform = glm::mat4(1);
@@ -174,7 +176,7 @@ void RenderableModel::render(const RenderData& data) {
 	double time = openspace::Time::ref().currentTime();
 	bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
 	if (!targetPositionCoverage){
-		int frame = ImGui::GetFrameCount() % 180;
+		int frame = _frameCount % 180;
         
 		float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
 		_alpha = 0.5f + fadingFactor * 0.5f;

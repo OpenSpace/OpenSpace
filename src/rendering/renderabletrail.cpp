@@ -286,10 +286,10 @@ void RenderableTrail::fullYearSweep(double time) {
 	bool validPosition = true;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {
-		if (start > time)
-			time = start;
-		else if (end < time)
-			time = end;
+		//if (start > time)
+		//	time = start;
+		//else if (end < time)
+		//	time = end;
 
         SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, pscPos, lightTime);
 		pscPos[3] += 3;

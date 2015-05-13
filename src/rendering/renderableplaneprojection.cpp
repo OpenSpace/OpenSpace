@@ -58,6 +58,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 	, _name("ImagePlane")
 	, _texturePath("")
 	, _planeIsDirty(false)
+	, _previousTime(0)
 {
 
 	dictionary.getValue(keySpacecraft, _spacecraft);
@@ -148,12 +149,18 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, galacticFrame, time, _stateMatrix);
 	
+	double timePast = 0.0;
+	if (img.path != "")
+	{
+		timePast = abs(img.startTime - _previousTime);
+	}
+	
 	std::string tex = _texturePath;
 	if (img.path != "" && (_moving || _planeIsDirty))
 		updatePlane(img, time);
 
-	else if (img.path != "" && img.path != tex) {
-		time = img.startTime;
+	else if (img.path != "" && timePast > DBL_EPSILON) {
+		_previousTime = time = img.startTime;
 		updatePlane(img, time);
 	}
 

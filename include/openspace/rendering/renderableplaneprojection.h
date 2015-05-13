@@ -89,6 +89,7 @@ namespace openspace {
 		std::string _spacecraft;
 		std::string _instrument;
 
+		double _previousTime;
 		target _target;
 		std::string _name;
 		bool _moving;

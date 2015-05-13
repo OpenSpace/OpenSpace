@@ -30,6 +30,7 @@ uniform vec3 color;
 uniform float _alpha;
 
 in vec4 vs_position;
+in vec4 vs_color;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"
@@ -37,9 +38,8 @@ in vec4 vs_position;
 
 void main() {
 	vec4 position = vs_position;
+	vec4 diffuse = vs_color;
 	float depth = pscDepth(position);
-	// vec4 diffuse = texture(texture1, vs_st);
-	vec4 diffuse = vec4(color, 1.0);
 	diffuse.a = _alpha;
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
