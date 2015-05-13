@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,55 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NETWORKENGINE_H__
-#define __NETWORKENGINE_H__
+#version __CONTEXT__
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
+uniform vec4 campos;
+uniform vec4 objpos;
+uniform vec3 color;
+uniform float _alpha;
 
-namespace openspace {
+in vec4 vs_position;
 
-class NetworkEngine {
-public:
-    typedef uint16_t MessageIdentifier;
+#include "ABuffer/abufferStruct.hglsl"
+#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-    NetworkEngine();
+void main() {
+	vec4 position = vs_position;
+	float depth = pscDepth(position);
+	// vec4 diffuse = texture(texture1, vs_st);
+	vec4 diffuse = vec4(color, 1.0);
+	diffuse.a = _alpha;
+	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
+	addToBuffer(frag);
 
-    // Receiving messages
-    bool handleMessage(const std::string& message);
-
-    // Sending messages
-    void publishStatusMessage();
-    void publishIdentifierMappingMessage();
-    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendMessages();
-
-    // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendInitialInformation();
-
-    // Background
-    MessageIdentifier identifier(std::string name);
-private:
-    std::map<MessageIdentifier, std::string> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier;
-
-    struct Message {
-        MessageIdentifier identifer;
-        std::vector<char> body;
-    };
-    std::vector<Message> _messagesToSend;
-
-    std::vector<Message> _initialConnectionMessages;
-
-    bool _shouldPublishStatusMessage;
-
-    MessageIdentifier _statusMessageIdentifier;
-    MessageIdentifier _identifierMappingIdentifier;
-};
-
-} // namespace openspace
-
-#endif // __NETWORKENGINE_H__
+}

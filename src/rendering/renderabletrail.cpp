@@ -52,7 +52,7 @@ namespace {
         const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
         const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
         const std::string keyDayLength           = "DayLength";
-		const std::string keyStamps				 = "Timestamps";
+		const std::string keyStamps				 = "TimeStamps";
 }
 
 namespace openspace {
@@ -86,8 +86,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyColor, color);
     _lineColor = color;
 
+	bool timeStamps = false;
 	if (dictionary.hasKeyAndValue<bool>(keyStamps))
-		dictionary.getValue(keyStamps, _showTimestamps);
+		dictionary.getValue(keyStamps, timeStamps);
+	_showTimestamps = timeStamps;
 	addProperty(_showTimestamps);
 
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -149,24 +151,25 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
+	_programObject->setUniform("forceFade", _distanceFade);
 
-	const psc& position = data.camera.position();
-	const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
-	const PowerScaledScalar& pssl = (position - origin).length();
-
-	if (pssl[0] < 0.000001){
-		if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
-		_programObject->setUniform("forceFade", _distanceFade);
-	}
-	else{
-		if (_distanceFade < 1.0f) _distanceFade += 0.05f;
-		_programObject->setUniform("forceFade", _distanceFade);
-	}
+	//const psc& position = data.camera.position();
+	//const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+	//const PowerScaledScalar& pssl = (position - origin).length();
+	//
+	//if (pssl[0] < 0.000001){
+	//	if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+	//	_programObject->setUniform("forceFade", _distanceFade);
+	//}
+	//else{
+	//	if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+	//	_programObject->setUniform("forceFade", _distanceFade);
+	//}
 
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
-    glDrawArrays(GL_LINE_STRIP, 0, _vertexArray.size());
+    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexArray.size()));
     glBindVertexArray(0);
 
     glLineWidth(1.f);
@@ -174,7 +177,7 @@ void RenderableTrail::render(const RenderData& data) {
 	if (_showTimestamps){
 		glPointSize(5.f);
 		glBindVertexArray(_vaoID);
-		glDrawArrays(GL_POINTS, 0, _vertexArray.size());
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
 		glBindVertexArray(0);
 	}
 
@@ -211,7 +214,7 @@ void RenderableTrail::update(const UpdateData& data) {
     // As soon as the time difference between the current time and the last time is bigger
     // than the fixed distance, we need to create a new fixed point
     double deltaTime = abs(data.time - _oldTime);
-    int nValues = floor(deltaTime / _increment);
+    int nValues = static_cast<int>(floor(deltaTime / _increment));
 
     // Update the floating current time
 	if (start > data.time)

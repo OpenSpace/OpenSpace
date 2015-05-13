@@ -5,8 +5,8 @@
 openspace.setInvertRoll(true);
 --openspace.setInteractionSensitivity(10)               -- This is the default value for the sensitivity (the higher, the more sensitive)
 
---openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
-
+openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
+--openspace.time.setTime("2007 FEB 28 11:45:00")          -- europa rise
 --TESTING ALICE 
 --openspace.time.setTime("2015-07-13T00:00:00.00")
 
@@ -22,7 +22,7 @@ dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keyb
 -- NH takes series of images from visible to dark side (across terminator)
 -- Sequence lasts ~10 mins, (recommended dt = 10)
 
-openspace.time.setTime("2015-07-14T11:22:00.00") -- PLUTO
+--openspace.time.setTime("2015-07-14T11:22:00.00") -- PLUTO
 --BEAUTIFUL SEQUENCE -- NH takes series of images (same as previous)
 -- Sequence ends at 2015 JUL 14T11:24:00:000, (recommended dt = 1)
 

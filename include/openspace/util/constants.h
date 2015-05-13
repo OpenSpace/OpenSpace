@@ -96,6 +96,7 @@ namespace renderableplaneprojection {
 	const std::string keyTexture = "Texture";
 	const std::string keyName = "Name";
 	const std::string galacticFrame = "GALACTIC";
+	const double REALLY_FAR = 99999999999;
 } // namespace renderableplaneprojection
 
 namespace renderablestars {

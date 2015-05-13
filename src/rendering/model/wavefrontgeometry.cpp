@@ -66,8 +66,8 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
         LWARNING("Loading models with more than one shape is currently untested");
     }
 
-    int totalSizeIndex = 0;
-    int totalSizeVertex = 0;
+    size_t totalSizeIndex = 0;
+    size_t totalSizeVertex = 0;
     for (int i = 0; i < shapes.size(); ++i) {
         totalSizeIndex += shapes[i].mesh.indices.size();
         totalSizeVertex += shapes[i].mesh.positions.size();
@@ -86,15 +86,15 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
 
     // We add all shapes of the model into the same vertex array, one after the other
     // The _shapeCounts array stores for each shape, how many vertices that shape has
-    int currentPosition = 0;
+    size_t currentPosition = 0;
     int currentIndices = 0;
-    int p = 0;
+    size_t p = 0;
     for (int i = 0; i < shapes.size(); ++i) {
         for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {
             _vertices[j + currentPosition].location[0] = shapes[i].mesh.positions[3 * j + 0];
             _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
             _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
-            _vertices[j + currentPosition].location[3] = 5; // Temp size for the power scale coordinate.
+            _vertices[j + currentPosition].location[3] = 4; // Temp size for the power scale coordinate.
 			// Could be defined per object as a dictionary key.
 
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];

@@ -100,7 +100,7 @@ int time_setPause(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    bool pause = lua_toboolean(L, -1);
+    bool pause = lua_toboolean(L, -1) == 1;
     openspace::Time::ref().setPause(pause);
     return 0;
 }

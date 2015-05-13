@@ -22,57 +22,86 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/gui/guitimecomponent.h>
+#version __CONTEXT__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/time.h>
+const vec2 corners[4] = vec2[4]( 
+    vec2(0.0, 1.0), 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
+);
 
-#include <ghoul/misc/assert.h>
-#include "imgui.h"
+#include "PowerScaling/powerScalingMath.hglsl"
+#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
 
-namespace {
-	const std::string _loggerCat = "GuiTimeComponent";
+layout(points) in;
+layout(points, max_vertices = 4) out;
+
+uniform mat4 ViewProjection;
+layout(location = 0) in vec4 vs_point_position[];
+
+//out flat int isHour;
+layout(location = 1) in flat int isHour[];
+layout(location = 2) in vec4 vs_point_color[];
+
+layout(location = 0) out vec4 gs_point_position;
+layout(location = 1) out vec4 gs_point_color;
+
+
+//out flat int isHour;
+
+//out float billboardSize;
+
+uniform mat4 projection;
+
+//uniform float scaleFactor;
+
+void main() {
+  
+	gs_point_color = vs_point_color[0];
+	gs_point_position = vs_point_position[0];
+	//gs_point_position = gl_in[0].gl_Position;
+	if (isHour[0] == 1) {
+	/*vec4 projPos[4];
+    for (int i = 0; i < 4; ++i) {
+        vec4 p1     = gl_in[0].gl_Position;
+        p1.xy      += vec2(99999999*(corners[i] - vec2(0.5))); 
+        projPos[i] = ViewProjection * p1;
+    }
+
+    // Calculate the positions of the lower left and upper right corners of the
+    // billboard in screen-space
+    const vec2 screenSize = vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1) / 2) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1) / 2) * screenSize;
+
+    // The billboard is smaller than one pixel, we can discard it
+    vec2 distance = abs(ll - ur);
+    float sizeInPixels = length(distance);
+    //if (sizeInPixels < 3)
+    //    return;
+
+    for(int i = 0; i < 4; i++) {
+		gs_point_position = gl_in[0].gl_Position;
+        gl_Position = projPos[i];
+       // billboardSize = sizeInPixels;
+		EmitVertex();
+    }
+
+		
+	    for(int i = 0; i < 4; i++) {
+        gl_Position = gl_in[0].gl_Position;;
+       // billboardSize = sizeInPixels;
+      
+		}*/
+		gl_Position =  gl_in[0].gl_Position;
+		EmitVertex();
+		EndPrimitive();
+	}
+	else {
+		gl_Position =  gl_in[0].gl_Position;
+		EmitVertex();
+		EndPrimitive();
+	return;
+	}
 }
-
-namespace openspace {
-namespace gui {
-
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(Time::ref().deltaTime());
-    
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
-    if (changed)
-        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
-
-
-    //char dateBuffer[512] = {};
-    //ImGui::InputText("Date", dateBuffer, 512);
-    //bool pressed = ImGui::Button("Set Date");
-    //if (pressed)
-    //    OsEng.scriptEngine()->queueScript("openspace.time.setTime('" + std::string(dateBuffer) + "')");
-
-    //const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
-
-    //std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
-    //std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
-    //auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
-    //ghoul_assert(it != nodes.end(), "Focus node not found");
-
-    //std::string nodeNames = "";
-    //for (SceneGraphNode* n : nodes) 
-    //    nodeNames += n->name() + '\0';
-
-
-    //int position = it - nodes.begin();
-
-    //bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
-
-    //if (result) {
-    //    LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
-    //    OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
-    //}
-
-}
-
-} // gui
-} // openspace

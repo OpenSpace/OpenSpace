@@ -433,10 +433,10 @@ void GuiPropertyComponent::render() {
         ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
         pos = value;
      
-        float& size = OsEng.renderEngine()->_onScreenInformation._size;
-        float fValue = size;
-        ImGui::SliderFloat("Size", &fValue, 0.f, 36.f);
-        size = fValue;
+        unsigned int& size = OsEng.renderEngine()->_onScreenInformation._size;
+        int sizeValue = static_cast<int>(size);
+        ImGui::SliderInt("Size", &sizeValue, 0, 36);
+        size = static_cast<unsigned int>(sizeValue);
 
         int& node = OsEng.renderEngine()->_onScreenInformation._node;
         int iValue = node;

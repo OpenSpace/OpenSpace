@@ -41,16 +41,14 @@ namespace openspace {
 const PowerScaledScalar radius = PowerScaledScalar(1.f, 20.f);
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
-: Renderable(dictionary)
-, _gridProgram(nullptr)
-, _vaoID(0)
-, _vBufferID(0)
-, _iBufferID(0)
-, _mode(GL_LINES)
-
+    : Renderable(dictionary)
+    , _gridProgram(nullptr)
+    , _vaoID(0)
+    , _vBufferID(0)
+    , _iBufferID(0)
+    , _mode(GL_LINES)
 {
 	_gridMatrix = glm::mat4(1);
-	glm::vec2 s;
 	dictionary.getValue(constants::renderablesphericalgrid::gridType   , _gridType);
 	dictionary.getValue(constants::renderablesphericalgrid::gridColor  , _gridColor);
 
@@ -59,13 +57,12 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 		staticGrid = dictionary.getValue(constants::renderablesphericalgrid::gridPatentsRotiation, _parentsRotation);
 	}
 	
-	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, s);
+	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, _segments);
 
 
 	/*glm::vec2 radius;
 	dictionary.getValue(constants::renderablesphericalgrid::gridRadius, radius);
 	*/
-	_segments = s[0];
 
 	_isize = int(6 * _segments * _segments);
 	_vsize = int((_segments + 1) * (_segments + 1));
@@ -199,7 +196,7 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	glm::mat4 transform;
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
-			transform[i][j] = _parentMatrix[i][j];
+			transform[i][j] = static_cast<float>(_parentMatrix[i][j]);
 		}
 	}
 

@@ -308,7 +308,7 @@ int setInteractionSensitivity(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    double sensitivity = luaL_checknumber(L, -1);
+    float sensitivity = static_cast<float>(luaL_checknumber(L, -1));
     OsEng.interactionHandler()->setInteractionSensitivity(sensitivity);
     return 0;
 }
@@ -334,7 +334,7 @@ int setInvertRoll(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    bool invert = lua_toboolean(L, -1);
+    bool invert = lua_toboolean(L, -1) == 1;
     OsEng.interactionHandler()->setInvertRoll(invert);
     return 0;
 }
@@ -360,7 +360,7 @@ int setInvertRotation(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    bool invert = lua_toboolean(L, -1);
+    bool invert = lua_toboolean(L, -1) == 1;
     OsEng.interactionHandler()->setInvertRotation(invert);
     return 0;
 }
@@ -886,7 +886,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	const float dt = static_cast<float>(_deltaTime);
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 		
-	    if (key == SGCT_KEY_S) {
+	    /*if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbitDelta(rot);
@@ -911,7 +911,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 		}
 		if (key == SGCT_KEY_X) {
 			Time::ref().advanceTime(-sgct::Engine::instance()->getDt());
-		}
+		}*/
 	    if (key == 262) {
 	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);

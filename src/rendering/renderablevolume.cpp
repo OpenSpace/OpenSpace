@@ -339,9 +339,9 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
         if (tokenSize > 0) {
             std::string key = tokens.at(0);
             if(key == "width" && tokenSize == 2) {
-                width = stringToNumber<int>(tokens.at(1),widthValidator);
+                width = static_cast<int>(stringToNumber<size_t>(tokens.at(1), widthValidator));
             } else if(key == "lower" && tokenSize == 2) {
-                lower = stringToNumber<float>(tokens.at(1),upperLowerValidator);
+                lower = stringToNumber<float>(tokens.at(1), upperLowerValidator);
             } else if(key == "upper" && tokenSize == 2) {
                 upper = stringToNumber<float>(tokens.at(1),upperLowerValidator);
             } else if(key == "mappingkey" && tokenSize == 6) {

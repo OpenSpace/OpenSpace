@@ -15,6 +15,28 @@ openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
 openspace.bindKey("SPACE", "openspace.time.togglePause()")
 
 -- Bookmarks for the New Horizons encounter
+openspace.bindKey("1", "openspace.time.setDeltaTime(1)")
+openspace.bindKey("2", "openspace.time.setDeltaTime(5)")
+openspace.bindKey("3", "openspace.time.setDeltaTime(10)")
+openspace.bindKey("4", "openspace.time.setDeltaTime(30)")
+openspace.bindKey("5", "openspace.time.setDeltaTime(60)")
+openspace.bindKey("6", "openspace.time.setDeltaTime(120)")
+openspace.bindKey("7", "openspace.time.setDeltaTime(360)")
+openspace.bindKey("8", "openspace.time.setDeltaTime(540)")
+openspace.bindKey("9", "openspace.time.setDeltaTime(720)")
+
+openspace.bindKey("a", "openspace.setOrigin('NewHorizons')")
+openspace.bindKey("s", "openspace.setOrigin('PlutoProjection')")
+openspace.bindKey("d", "openspace.setOrigin('Charon')")
+openspace.bindKey("z", "openspace.setOrigin('JupiterProjection')")
+openspace.bindKey("x", "openspace.setOrigin('Europa')")
+
+
+openspace.bindKey("g", "openspace.time.setTime('2007-02-28T11:40:00.00'); openspace.time.setDeltaTime(1);")
+
+openspace.bindKey("h", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
+
+--[[
 openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
 openspace.bindKey("2", "openspace.time.setTime('2015-07-14T10:50:00.00'); openspace.time.setDeltaTime(10)")
 openspace.bindKey("3", "openspace.time.setTime('2015-07-14T11:22:00.00'); openspace.time.setDeltaTime(1)")
@@ -22,6 +44,7 @@ openspace.bindKey("4", "openspace.time.setTime('2015-07-14T11:36:40.00'); opensp
 openspace.bindKey("5", "openspace.time.setTime('2015-07-14T11:48:43.00'); openspace.time.setDeltaTime(1)")
 openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); openspace.time.setDeltaTime(1)")
 openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
+]]--
 
 openspace.bindKey("q", "local b = openspace.getPropertyValue('SunMarker.renderable.enabled'); openspace.setPropertyValue('SunMarker.renderable.enabled', not b)")
 openspace.bindKey("e", "local b = openspace.getPropertyValue('EarthMarker.renderable.enabled'); openspace.setPropertyValue('EarthMarker.renderable.enabled', not b)")
@@ -47,8 +70,11 @@ openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_METH
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw', not b)")
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
 
-
-
+openspace.bindKey("p", "local b = openspace.getPropertyValue('JupiterProjection.renderable.performProjection'); openspace.setPropertyValue('JupiterProjection.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('Io.renderable.performProjection'); openspace.setPropertyValue('Io.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('Ganymede.renderable.performProjection'); openspace.setPropertyValue('Ganymede.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('Europa.renderable.performProjection'); openspace.setPropertyValue('Europa.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('Callisto.renderable.performProjection'); openspace.setPropertyValue('Callisto.renderable.performProjection', not b)")
 
 
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

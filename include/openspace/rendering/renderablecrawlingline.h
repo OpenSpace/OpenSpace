@@ -22,55 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NETWORKENGINE_H__
-#define __NETWORKENGINE_H__
+#ifndef __RENDERABLECRAWLINGLINE_H__
+#define __RENDERABLECRAWLINGLINE_H__
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace {
 
-class NetworkEngine {
+class RenderableCrawlingLine : public Renderable {
 public:
-    typedef uint16_t MessageIdentifier;
+    RenderableCrawlingLine(const ghoul::Dictionary& dictionary);
 
-    NetworkEngine();
+    bool initialize() override;
+    bool deinitialize() override;
 
-    // Receiving messages
-    bool handleMessage(const std::string& message);
+    bool isReady() const override;
 
-    // Sending messages
-    void publishStatusMessage();
-    void publishIdentifierMappingMessage();
-    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendMessages();
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
-    // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendInitialInformation();
-
-    // Background
-    MessageIdentifier identifier(std::string name);
 private:
-    std::map<MessageIdentifier, std::string> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier;
+    ghoul::opengl::ProgramObject* _program;
+    bool _programIsDirty;
 
-    struct Message {
-        MessageIdentifier identifer;
-        std::vector<char> body;
-    };
-    std::vector<Message> _messagesToSend;
+    std::string _instrumentName;
+    std::string _source;
+    std::string _target;
+    std::string _referenceFrame;
+	glm::vec3 _lineColor;
 
-    std::vector<Message> _initialConnectionMessages;
+    psc _positions[2];
+	int _frameCounter;
 
-    bool _shouldPublishStatusMessage;
+    bool _drawLine;
+    float _imageSequenceTime;
 
-    MessageIdentifier _statusMessageIdentifier;
-    MessageIdentifier _identifierMappingIdentifier;
+    GLuint _vao;
+    GLuint _vbo;
 };
 
 } // namespace openspace
 
-#endif // __NETWORKENGINE_H__
+#endif // __RENDERABLECRAWLINGLINE_H__

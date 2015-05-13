@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,55 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NETWORKENGINE_H__
-#define __NETWORKENGINE_H__
+#version __CONTEXT__
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-namespace openspace {
+layout(location = 0) in vec4 in_position;
 
-class NetworkEngine {
-public:
-    typedef uint16_t MessageIdentifier;
+out vec4 vs_position;
 
-    NetworkEngine();
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-    // Receiving messages
-    bool handleMessage(const std::string& message);
+void main() {
+	vs_position = in_position;
+	vec4 tmp = in_position;
 
-    // Sending messages
-    void publishStatusMessage();
-    void publishIdentifierMappingMessage();
-    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendMessages();
-
-    // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendInitialInformation();
-
-    // Background
-    MessageIdentifier identifier(std::string name);
-private:
-    std::map<MessageIdentifier, std::string> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier;
-
-    struct Message {
-        MessageIdentifier identifer;
-        std::vector<char> body;
-    };
-    std::vector<Message> _messagesToSend;
-
-    std::vector<Message> _initialConnectionMessages;
-
-    bool _shouldPublishStatusMessage;
-
-    MessageIdentifier _statusMessageIdentifier;
-    MessageIdentifier _identifierMappingIdentifier;
-};
-
-} // namespace openspace
-
-#endif // __NETWORKENGINE_H__
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
+}

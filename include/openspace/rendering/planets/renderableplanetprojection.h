@@ -87,6 +87,7 @@ private:
 	properties::StringProperty  _projectionTexturePath;
 	properties::IntProperty _rotation;
 	properties::FloatProperty _fadeProjection;
+	properties::BoolProperty _performProjection;
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
@@ -144,7 +145,6 @@ private:
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
-	bool _once; //fml
 };
 }  // namespace openspace
 

@@ -65,7 +65,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
     if ((currentWriteLocation + sizeof(uint8_t) + value.size()) > buffer.size())
         buffer.resize(2 * buffer.size());
 
-    uint8_t length = value.size();
+    uint8_t length = static_cast<uint8_t>(value.size());
     std::memcpy(buffer.data() + currentWriteLocation, &length, sizeof(uint8_t));
     currentWriteLocation += sizeof(uint8_t);
 
@@ -123,7 +123,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
 
     uint32_t allImages = 0;
     for (auto target : _subsetMap)
-        allImages += target.second._subset.size();
+        allImages += static_cast<uint32_t>(target.second._subset.size());
     writeToBuffer(buffer, currentWriteLocation, allImages);
 
     for (auto target : _subsetMap){
@@ -158,7 +158,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
         uint32_t value;
         std::array<char, sizeof(uint32_t)> data;
     } sizeBuffer;
-    sizeBuffer.value = currentWriteLocation;
+    sizeBuffer.value = static_cast<uint32_t>(currentWriteLocation);
     buffer.insert(buffer.begin(), sizeBuffer.data.begin(), sizeBuffer.data.end());
     currentWriteLocation += sizeof(uint32_t);
 

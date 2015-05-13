@@ -38,19 +38,25 @@ namespace {
     
     static const int TextOffset = 5;
 
-    const QColor instrumentColors[] = {
-        QColor(242, 101, 74),
-        QColor(175, 18, 18),
-        QColor(211, 154, 31),
-        QColor(241, 231, 48),
-        QColor(149, 219, 32),
-        QColor(49, 234, 219),
-        QColor(49, 155, 234),
-        QColor(139, 86, 152),
-        QColor(84, 79, 149),
-        QColor(203, 153, 200),
-        QColor(82, 145, 57)
+    QMap<QString, QColor> InstrumentColors = {
+        { "NH_ALICE_AIRGLOW", QColor(40, 130, 200) },
+        { "NH_ALICE_SOC", QColor(49, 234, 219) },
+        { "NH_RALPH_LEISA", QColor(139, 86, 152) },
+        { "NH_RALPH_MVIC_NIR", QColor(100, 14, 14) },
+        { "NH_RALPH_MVIC_METHANE", QColor(211, 154, 31) },
+        { "NH_RALPH_MVIC_RED", QColor(175, 18, 18) },
+        { "NH_RALPH_MVIC_BLUE", QColor(84, 79, 149) },
+        { "NH_LORRI", QColor(149, 219, 32) },
+        { "NH_REX", QColor(35, 185, 125) },
+
+        { "NH_RALPH_MVIC_PAN1", QColor(203, 153, 200) },
+        { "NH_RALPH_MVIC_FT", QColor(242, 101, 74) },
+        { "NH_RALPH_MVIC_PAN2", QColor(180, 180, 140) }
     };
+
+    //{ "NH_ALICE_AIRGLOW", QColor(82, 145, 57) },
+    //{ "NH_ALICE_SOC", QColor(241, 231, 48) },
+
 
     QMap<QString, QString> InstrumentConversion = {
         { "NH_ALICE_AIRGLOW", "ALICE Airglow" },
@@ -63,7 +69,8 @@ namespace {
         { "NH_RALPH_MVIC_FT", "RALPH MVIC FT" },
         { "NH_RALPH_MVIC_PAN2", "RALPH MVIC Pan2" },
         { "NH_RALPH_MVIC_METHANE", "RALPH MVIC Methane" },
-        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" }
+        { "NH_RALPH_MVIC_RED", "RALPH MVIC Red" },
+        { "NH_REX", "REX" }
     };
 
     const double etSpread = 100.0;
@@ -121,8 +128,9 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     QRectF dateRect(rect.width() - TimeWidth, 0, TimeWidth, rect.height());
     
     // Draw background
-    painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
-    painter.setBrush(QBrush(Qt::gray));   painter.drawRect(dateRect);
+    //painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
+    painter.setBrush(QBrush(QColor(85, 85, 85)));  painter.drawRect(timelineRect);
+    painter.setBrush(QBrush(QColor(165, 165, 165)));   painter.drawRect(dateRect);
 
     const double lowerTime = _currentTime.et - etSpread;
     const double upperTime = _currentTime.et + etSpread;
@@ -162,9 +170,9 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         }
 
         const std::string& instrument = _instruments[i];
-
-        painter.setBrush(QBrush(instrumentColors[i]));
-        painter.setPen(QPen(instrumentColors[i]));
+        ;
+        painter.setBrush(QBrush(InstrumentColors[QString::fromStdString(instrument)]));
+        painter.setPen(QPen(InstrumentColors[QString::fromStdString(instrument)]));
         painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
         currentHorizontalPosition += BoxSize + Padding;
 
@@ -223,9 +231,8 @@ void TimelineWidget::drawImages(
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
             if (it == _instruments.end())
                 qDebug() << "Instrument not found";
-            int i = std::distance(_instruments.begin(), it);
 
-            painter.setBrush(QBrush(instrumentColors[i]));
+            painter.setBrush(QBrush(InstrumentColors[QString::fromStdString(instrument)]));
 
             double width = timelineRect.width() / instruments.size();
             double pos = instruments[instrument] * width;

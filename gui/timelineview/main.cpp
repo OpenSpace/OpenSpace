@@ -28,15 +28,15 @@
 
 static const QString style = R"style(
 QWidget {
-	background-color: rgb(100, 100, 100);
+	background-color: rgb(80, 80, 80);
 	font-family: Helvetica;
 }
 
 QGroupBox {
     background-color: qlineargradient(
     	x1: 0, y1: 0, x2: 0, y2: 1,
-    	stop: 0 #a8a8a8,
-    	stop: 1 #d5d5d5);
+    	stop: 0 #858585,
+    	stop: 1 #959595);
     border: 2px solid gray;
     border-radius: 5px;
     margin-top: 4ex;
@@ -52,13 +52,17 @@ QGroupBox::title {
     padding: 0 10px;
 }
 
+QLineEdit {
+    color: lightgray;
+}
+
 QSlider::groove:horizontal {
     border: 1px solid #999999;
     height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
     background: qlineargradient(
     	x1:0, y1:0, x2:1, y2:0,
     	stop:0 #c4c4c4,
-    	stop:0.5 #888888,
+    	stop:0.5 #555555,
     	stop:1 #c4c4c4
     );
     margin: 2px 0;

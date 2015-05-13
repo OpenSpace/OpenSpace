@@ -95,7 +95,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _textureWhiteSquare(nullptr)
     , _geometry(nullptr)
 	, _rotation("rotation", "Rotation", 0, 0, 360)
-	, _once(false)
+	, _performProjection("performProjection", "Perform Projections", true)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -165,6 +165,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addPropertySubOwner(_geometry);
 	addProperty(_rotation);
 	addProperty(_fadeProjection);
+	addProperty(_performProjection);
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
@@ -302,7 +303,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-		glViewport(0, 0, _texture->width(), _texture->height());
+		glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
 		_fboProgramObject->activate();
 
 		ghoul::opengl::TextureUnit unitFbo;
@@ -439,13 +440,12 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
-	double startTime, endTime;
-	
 #ifdef GPU_PROJ
-	if (_capture) 
+	if (_capture && _performProjection)
 		project();
 #endif
 	attitudeParameters(_time);
+	_imageTimes.clear();
 
 	psc sun_pos;
 	double  lt;
@@ -472,10 +472,10 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 void RenderablePlanetProjection::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	_time = data.time;
+	_time = Time::ref().currentTime();
 	_capture = false;
 	
-	if (openspace::ImageSequencer2::ref().isReady()){
+	if (openspace::ImageSequencer2::ref().isReady() && _performProjection){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}

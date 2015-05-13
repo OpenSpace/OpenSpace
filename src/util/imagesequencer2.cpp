@@ -47,7 +47,7 @@ ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2() :
 _hasData(false),
-_latestImage(nullptr),
+_latestImage(),
 _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {}
 
@@ -70,7 +70,11 @@ bool ImageSequencer2::isReady(){
 }
 
 void ImageSequencer2::updateSequencer(double time){
-	if (_currentTime != time){
+	if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0){
+		Time::ref().setDeltaTime(0.1);
+	} // Time is not properly updated when time jump with dt = 0 
+
+	if (_currentTime < time){
 		_previousTime = _currentTime;
 		_currentTime = time;
 	}
@@ -85,9 +89,10 @@ std::pair<double, std::string> ImageSequencer2::getNextTarget(){
 	findEqualToThis.first = _currentTime;
 	auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
 
-	if (it != _targetTimes.end() && it != _targetTimes.begin()){
+	if (it != _targetTimes.end() && it != _targetTimes.begin())
 		return (*it);
-	}
+    else
+        return std::make_pair(0.0, "");
 }
 
 std::pair<double, std::string> ImageSequencer2::getCurrentTarget(){
@@ -155,8 +160,8 @@ double ImageSequencer2::getNextCaptureTime(){
 
 	return nextCaptureTime;
 }
-const Image* ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
-
+const Image ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
+	
 	return _latestImage;
 }
 
@@ -200,6 +205,24 @@ bool ImageSequencer2::instumentActive(std::string instrumentID){
 	}
 	return false;
 }
+
+float ImageSequencer2::instrumentActiveTime(const std::string& instrumentID) const {
+    for (auto i : _instrumentTimes){
+        //check if this instrument is in range
+        if (i.second.inRange(_currentTime)){
+            //if so, then get the corresponding spiceID
+            std::vector<std::string> spiceIDs = _fileTranslation.at(i.first)->getTranslation();
+            //check which specific subinstrument is firing
+            for (auto s : spiceIDs){
+                if (s == instrumentID) {
+                    return static_cast<float>((_currentTime - i.second._min) / (i.second._max - i.second._min));
+                }
+            }
+        }
+    }
+    return -1.f;
+}
+
 bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,  
 	                                std::string projectee, 
 									std::string instrumentID){
@@ -247,7 +270,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 			    std::reverse(captureTimes.begin(), captureTimes.end());
 			    captures = captureTimes;
                 if (!captures.empty())
-                    _latestImage = &captures.back();
+					_latestImage = captures.back();
 
 			    return true;
             }
