@@ -188,10 +188,7 @@ private:
     Time& operator=(const Time& rhs) = delete;
 
 	static Time* _instance; ///< The singleton instance
-	
-
-	double _deltaTimePerSecond; ///< The delta time that is used to advance the time
-	
+		
 	//sync variables
 	
 	//local copies 

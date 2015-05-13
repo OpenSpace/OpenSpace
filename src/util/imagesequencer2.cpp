@@ -45,10 +45,10 @@ namespace openspace {
 
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
-ImageSequencer2::ImageSequencer2() :
-_hasData(false),
-_latestImage(),
-_defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
+ImageSequencer2::ImageSequencer2()
+    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
+    , _latestImage()
+    , _hasData(false)
 {}
 
 ImageSequencer2& ImageSequencer2::ref() {

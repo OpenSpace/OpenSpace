@@ -74,9 +74,9 @@ PowerScaledCoordinate
     char buff[600];
 
     // find the number with maximum number of digits
-    double ad1 = abs(d1);
-    double ad2 = abs(d2);
-    double ad3 = abs(d3);
+    double ad1 = std::abs(d1);
+    double ad2 = std::abs(d2);
+    double ad3 = std::abs(d3);
     double max = (ad2 > ad1) ? ad2 : (ad3 > ad1) ? ad3 : ad1;
 
     // find out how many digits

@@ -819,6 +819,8 @@ bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
 		bool hasError = checkForError("Error retrieving position transform matrix from "
 			"frame '" + fromFrame + "' to frame '" + toFrame +
 			"' at time '" + std::to_string(ephemerisTime));
+        if (hasError)
+            return false;
 	}
 
     positionMatrix = glm::transpose(positionMatrix);

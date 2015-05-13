@@ -467,7 +467,6 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
 	glm::vec2 cameraScaling(1);
 	psc cameraPosition(0,0,1,0);
-	glm::vec3 cameraDirection = glm::vec3(0, 0, -1);
 
     //if (_focus->)
     if (focusIterator != _graph.nodes().end()) {
@@ -525,7 +524,6 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	// the camera position
 	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
 	//psc relative = fn->worldPosition() - c->position();
-	psc relative = fn->worldPosition() - cameraPosition;
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 
