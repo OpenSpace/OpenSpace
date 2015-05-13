@@ -57,6 +57,9 @@ int build_local_fragments_list() {
 	return int(frag_count);
 #endif
 
+#if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
+	return 0;
+#endif
 }
 
 float pscLength(vec4 v1, vec4 v2) {

@@ -55,14 +55,14 @@ uniform vec3 color;
 //uniform vec4 campos;
 
 layout(location = 0) out vec4 vs_point_position;
-layout(location = 1) out flat int isHour;
+layout(location = 1) flat out int isHour;
 layout(location = 2) out vec4 vs_point_color;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() { 
 
-	vec4 gray = { 0.6f, 0.6f, 0.6f, 0.8f};
+	vec4 gray = vec4(0.6f, 0.6f, 0.6f, 0.8f);
 	float cameraTooFar = 1 * pow(k, 10);
 	float bigPoint = 5.f;
 	float smallPoint = 2.f;

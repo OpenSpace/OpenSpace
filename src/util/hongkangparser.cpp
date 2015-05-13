@@ -129,8 +129,6 @@ void HongKangParser::create(){
 
 				std::string cameraTarget = "VOID";
 				std::string scannerTarget = "VOID";
-				int counter = 0;
-				
 
 				while (!file.eof()){//only while inte do,  FIX
 					std::getline(file, line);
@@ -338,14 +336,13 @@ double HongKangParser::getETfromMet(std::string line){
 double HongKangParser::getETfromMet(double met){
 	double diff;
 	double referenceET;
-	double et;
 	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
-	double missionLaunch = referenceET - _metRef;
+    double et = referenceET;
 
-	diff = abs(met - _metRef);
+    diff = std::abs(met - _metRef);
 	if (met > _metRef){
 		et = referenceET + diff;
-	}else if (met < _metRef){
+	} else if (met < _metRef){
 		et = referenceET - diff;
 	}
 	return et;

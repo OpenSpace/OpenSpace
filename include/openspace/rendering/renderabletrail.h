@@ -87,7 +87,6 @@ private:
 
     float _increment;
     double _oldTime = 0.0;
-	float _time;
 	float _distanceFade;
 };
 

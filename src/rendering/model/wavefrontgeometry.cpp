@@ -31,7 +31,7 @@
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
     const std::string keyObjFile = "ObjFile";
-    const int8_t CurrentCacheVersion = 3;
+//    const int8_t CurrentCacheVersion = 3;
 }
 
 namespace openspace {
@@ -87,7 +87,6 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
     // We add all shapes of the model into the same vertex array, one after the other
     // The _shapeCounts array stores for each shape, how many vertices that shape has
     size_t currentPosition = 0;
-    int currentIndices = 0;
     size_t p = 0;
     for (int i = 0; i < shapes.size(); ++i) {
         for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {

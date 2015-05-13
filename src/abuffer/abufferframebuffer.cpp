@@ -33,7 +33,7 @@
 #include <string>
 
 namespace {
-	std::string _loggerCat = "ABufferSingleLinked";
+	std::string _loggerCat = "ABufferFrameBuffer";
 }
 
 namespace openspace {

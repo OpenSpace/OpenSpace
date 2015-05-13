@@ -162,6 +162,7 @@ void LabelParser::create(){
 
 						line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
 						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+                        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
 						/* Add more  */
 						if (read == "TARGET_NAME"){

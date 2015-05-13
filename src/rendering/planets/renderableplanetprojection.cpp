@@ -86,16 +86,18 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dictionary)
 	, _colorTexturePath("planetTexture", "RGB Texture")
 	, _projectionTexturePath("projectionTexture", "RGB Texture")
+    , _rotation("rotation", "Rotation", 0, 0, 360)
 	, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
+    , _performProjection("performProjection", "Perform Projections", true)
+	, _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
     , _texture(nullptr)
-	, _textureProj(nullptr)
 	, _textureOriginal(nullptr)
+    , _textureProj(nullptr)
 	, _textureWhiteSquare(nullptr)
     , _geometry(nullptr)
-	, _rotation("rotation", "Rotation", 0, 0, 360)
-	, _performProjection("performProjection", "Perform Projections", true)
+	, _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -166,6 +168,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_rotation);
 	addProperty(_fadeProjection);
 	addProperty(_performProjection);
+	addProperty(_clearAllProjections);
 
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
@@ -234,7 +237,7 @@ bool RenderablePlanetProjection::initialize(){
 }
 
 bool RenderablePlanetProjection::auxiliaryRendertarget(){
-	bool completeSuccess = false;
+	bool completeSuccess = true;
 	// setup FBO
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
@@ -431,12 +434,23 @@ void RenderablePlanetProjection::project(){
 	_capture = false;
 }
 
+void RenderablePlanetProjection::clearAllProjections(){
+	float tmp = _fadeProjection;
+	_fadeProjection = 1.f;
+	_projectionTexturePath = _clearingImage;
+	imageProjectGPU();
+	_fadeProjection = tmp;
+	_clearAllProjections = false;
+}
+
 
 #define GPU_PROJ
 void RenderablePlanetProjection::render(const RenderData& data){
 	if (!_programObject) return;
 	if (!_textureProj) return;
 	
+	if (_clearAllProjections) clearAllProjections();
+
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 

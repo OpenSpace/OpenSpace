@@ -53,7 +53,7 @@ PowerScaledScalar PowerScaledScalar::CreatePSS(double d1) {
 	char buff[30];
 
 	// find the number with maximum number of digits
-	double ad1 = abs(d1);
+    double ad1 = std::abs(d1);
 
 	// find out how many digits
 	sprintf ( buff, "%.0f", ad1);

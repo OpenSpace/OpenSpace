@@ -223,13 +223,13 @@ namespace openspace {
 		, _takeScreenshot(false)
 		, _doPerformanceMeasurements(false)
 		, _performanceMemory(nullptr)
-		, _visualizeABuffer(false)
-		, _visualizer(nullptr)
 		, _globalBlackOutFactor(0.f)
 		, _fadeDuration(2.f)
 		, _currentFadeTime(0.f)
 		, _fadeDirection(0)
         , _sgctRenderStatisticsVisible(false)
+        , _visualizeABuffer(false)
+        , _visualizer(nullptr)
 	{
         _onScreenInformation = {
             glm::vec2(0.f),
@@ -460,8 +460,11 @@ namespace openspace {
 			glDisable(GL_BLEND);
 #else
 			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_BLEND);
+//			glDisable(GL_CULL_FACE);
+            glEnable(GL_CULL_FACE);
+//			glDisable(GL_BLEND);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #endif
 			// setup the camera for the current frame
 

@@ -52,4 +52,8 @@ void main()
 
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);
+
+	gl_FragDepth = depth;
+	if (diffuse.a == 0.0)
+		discard;
 }

@@ -37,6 +37,7 @@ namespace interaction {
 class MouseController : public Controller {
 public:
 	MouseController();
+    virtual ~MouseController() {}
 
 	virtual void button(MouseAction action, MouseButton button) = 0;
 	virtual void move(float x, float y) = 0;

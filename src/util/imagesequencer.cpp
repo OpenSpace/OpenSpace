@@ -78,8 +78,8 @@ ImageSequencer::ImageSequencer()
     : _nextCapture(-1.0)
 	, _currentTime(-1.0)
 	, _sequenceIDs(0)
-	, _targetsAdded(false)
     , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
+    , _targetsAdded(false)
 {}
 
 
@@ -380,7 +380,7 @@ double ImageSequencer::getMissionElapsedTime(std::string timestr){
 	//met ref time.
 	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", et);
 
-	diff = abs(met - _metRef);
+    diff = std::abs(met - _metRef);
 	if (met > _metRef){
 		et += diff;
 	}
@@ -466,7 +466,6 @@ bool ImageSequencer::parsePlaybookFile(const std::string& fileName, int& sequenc
 				if (!file.good()) LERROR("Failed to open txt file '" << fileName << "'");
 
 				std::string timestr = "";
-				double shutter = 0.01;
 				double et;
 				
 				//@TODO: change similar to renderableFOV

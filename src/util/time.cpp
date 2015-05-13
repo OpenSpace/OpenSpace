@@ -172,17 +172,16 @@ int time_currentTimeUTC(lua_State* L) {
 Time* Time::_instance = nullptr;
 
 Time::Time()
-	: _time(-1.0)
+    : _time(-1.0)
 	, _dt(1.0)
 	, _timeJumped(false)
     , _timePaused(false)
+    , _sharedTime(-1.0)
+    , _sharedDt(1.0)
+    , _sharedTimeJumped(false)
 	, _syncedTime(-1.0)
 	, _syncedDt(1.0)
 	, _syncedTimeJumped(false)
-	, _deltaTimePerSecond(1.0)
-	, _sharedTime(-1.0)
-	, _sharedDt(1.0)
-	, _sharedTimeJumped(false)
 {
 }
 

@@ -70,9 +70,9 @@ namespace openspace {
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
+    , _drawSolid("solidDraw", "Draw as Quads", false)
     , _programObject(nullptr)
     , _texture(nullptr)
-	, _drawSolid("solidDraw", "Draw as Quads", false)
     , _mode(GL_LINES)
 {
     bool success = dictionary.getValue(keyBody, _spacecraft);

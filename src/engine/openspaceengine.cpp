@@ -98,8 +98,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
     , _gui(new gui::GUI)
-    , _syncBuffer(nullptr)
 	, _isMaster(false)
+    , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
 	Time::initialize();
@@ -147,6 +147,13 @@ bool OpenSpaceEngine::create(
 
 	LDEBUG("Initialize FileSystem");
 	ghoul::filesystem::FileSystem::initialize();
+
+#ifdef __APPLE__
+    ghoul::filesystem::File app(argv[0]);
+    std::string dirName = app.directoryName();
+    LINFO("Setting starting directory to '" << dirName << "'");
+    FileSys.setCurrentDirectory(dirName);
+#endif
 
 	// Sanity check of values
 	if (argc < 1 || argv == nullptr) {
@@ -585,7 +592,6 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
 	Time::ref().postSynchronizationPreDraw();
-    bool d = Time::ref().timeJumped();
 
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();

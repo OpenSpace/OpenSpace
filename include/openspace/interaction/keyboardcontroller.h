@@ -34,6 +34,7 @@ namespace interaction {
 
 class KeyboardController : public Controller {
 public:
+    virtual ~KeyboardController() {};
 	virtual void keyPressed(KeyAction action, Key key, KeyModifier modifier) = 0;
 };
 

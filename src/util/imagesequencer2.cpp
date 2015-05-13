@@ -45,10 +45,10 @@ namespace openspace {
 
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
-ImageSequencer2::ImageSequencer2() :
-_hasData(false),
-_latestImage(),
-_defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
+ImageSequencer2::ImageSequencer2()
+    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
+    , _latestImage()
+    , _hasData(false)
 {}
 
 ImageSequencer2& ImageSequencer2::ref() {
@@ -74,7 +74,7 @@ void ImageSequencer2::updateSequencer(double time){
 		Time::ref().setDeltaTime(0.1);
 	} // Time is not properly updated when time jump with dt = 0 
 
-	if (_currentTime < time){
+	if (_currentTime != time){
 		_previousTime = _currentTime;
 		_currentTime = time;
 	}
