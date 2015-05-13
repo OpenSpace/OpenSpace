@@ -98,8 +98,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
     , _gui(new gui::GUI)
-    , _syncBuffer(nullptr)
 	, _isMaster(false)
+    , _syncBuffer(nullptr)
 {
 	SpiceManager::initialize();
 	Time::initialize();
@@ -592,7 +592,6 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
 	Time::ref().postSynchronizationPreDraw();
-    bool d = Time::ref().timeJumped();
 
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();

@@ -115,7 +115,6 @@ namespace {
 		for (int n = 0; n < nCommandLists; ++n) {
 			const ImDrawList* cmd_list = commandLists[n];
 			int vtx_offset = cmd_offset;
-			const ImDrawCmd* pcmd_end = cmd_list->commands.end();
 			for (auto pcmd : cmd_list->commands) {
 				glScissor((int)pcmd.clip_rect.x, (int)(height - pcmd.clip_rect.w), (int)(pcmd.clip_rect.z - pcmd.clip_rect.x), (int)(pcmd.clip_rect.w - pcmd.clip_rect.y));
 				glDrawArrays(GL_TRIANGLES, vtx_offset, pcmd.vtx_count);
@@ -273,7 +272,6 @@ void GUI::startFrame(float deltaTime,
 }
 
 void GUI::endFrame() {
-	static bool show = true;
 	renderMainWindow();
 
 	if (_property.isEnabled())

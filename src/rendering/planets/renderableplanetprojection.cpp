@@ -86,16 +86,16 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dictionary)
 	, _colorTexturePath("planetTexture", "RGB Texture")
 	, _projectionTexturePath("projectionTexture", "RGB Texture")
+    , _rotation("rotation", "Rotation", 0, 0, 360)
 	, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
+    , _performProjection("performProjection", "Perform Projections", true)
     , _programObject(nullptr)
 	, _fboProgramObject(nullptr)
     , _texture(nullptr)
-	, _textureProj(nullptr)
 	, _textureOriginal(nullptr)
+    , _textureProj(nullptr)
 	, _textureWhiteSquare(nullptr)
     , _geometry(nullptr)
-	, _rotation("rotation", "Rotation", 0, 0, 360)
-	, _performProjection("performProjection", "Perform Projections", true)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);

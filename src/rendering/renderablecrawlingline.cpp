@@ -165,6 +165,8 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 	glm::dvec3 boresight;
 
 	bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
+    if (!found)
+        LERROR("Could not find field of view for instrument");
 	glm::vec4 target(boresight[0], boresight[1], boresight[2], 14);
 	target = tmp * target;
 

@@ -49,17 +49,16 @@ using namespace constants::renderableplaneprojection;
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
+    , _texturePath("")
+    , _planeIsDirty(false)
 	, _shader(nullptr)
 	, _programIsDirty(false)
+    , _textureIsDirty(false)
 	, _texture(nullptr)
-	, _textureIsDirty(false)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	, _name("ImagePlane")
-	, _texturePath("")
-	, _planeIsDirty(false)
 {
-
 	dictionary.getValue(keySpacecraft, _spacecraft);
 	dictionary.getValue(keyInstrument, _instrument);
 	dictionary.getValue(keyMoving, _moving);
@@ -127,7 +126,6 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 	_shader->setUniform("ModelTransform", transform);
 	setPscUniforms(_shader, &data.camera, data.position);
 
-	data.position;
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();

@@ -67,16 +67,14 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaVa
 
 	std::vector<int> result;
 
-	if (!lua_istable(state, -1)) {
+	if (!lua_istable(state, VAL)) {
 		LERROR("Parameter passed to the property is not a table");
 		success = false;
 		return result;
 	}
 
 	lua_pushnil(state);
-	while (lua_next(state, -2) != 0) {
-		int valueType = lua_type(state, VAL);
-
+	while (lua_next(state, KEY) != 0) {
 		if (lua_isnumber(state, VAL)) {
 			int number = static_cast<int>(lua_tonumber(state, VAL));
 			result.push_back(number);

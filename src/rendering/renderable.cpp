@@ -71,12 +71,12 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-	: _enabled("enabled", "Is Enabled", true),
-	_hasTimeInterval(false),
-	_startTime(""),
-	_endTime(""),
-	_targetBody(""),
-	_hasBody(false)
+	: _enabled("enabled", "Is Enabled", true)
+    , _startTime("")
+    , _endTime("")
+    , _targetBody("")
+    , _hasBody(false)
+    , _hasTimeInterval(false)
 {
     setName("renderable");
 #ifndef NDEBUG

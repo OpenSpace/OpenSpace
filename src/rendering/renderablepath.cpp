@@ -60,13 +60,13 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
 	, _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
+    , _drawLine("drawline", "Draw Line", false)
 	, _programObject(nullptr)
 	, _programIsDirty(true)
+    , _successfullDictionaryFetch(true)
 	, _vaoID(0)
 	, _vBufferID(0)
-	, _successfullDictionaryFetch(true)
 	, _needsSweep(true)
-	, _drawLine("drawline", "Draw Line", false)
     , _start(0.0)
     , _stop(0.0)
 {
@@ -80,7 +80,7 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 		dictionary.getValue(keyColor, color);
 	_lineColor = color;
 
-	bool drawLine;
+	bool drawLine = false;
 	if (dictionary.hasKeyAndValue<bool>(keyDrawLine))
 		dictionary.getValue(keyDrawLine, drawLine);
 	_drawLine = drawLine;
@@ -217,7 +217,6 @@ void RenderablePath::calculatePath(std::string observer) {
 		//float r, g, b;
 		//float g = _lineColor[1];
 		//float b = _lineColor[2];
-		float a = 1.f;
 		for (int i = 0; i < segments; i++) {
 			correctPosition = SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
 			pscPos[3] += 3;

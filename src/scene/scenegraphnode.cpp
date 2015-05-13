@@ -126,10 +126,10 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
     , _ephemeris(new StaticEphemeris)
+    , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
     , _boundingSphereVisible(false)
-	, _performanceRecord({0, 0, 0})
 {
 }
 

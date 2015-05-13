@@ -56,15 +56,15 @@ namespace openspace {
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
-	, _nightTexturePath("")
     , _programObject(nullptr)
     , _texture(nullptr)
 	, _nightTexture(nullptr)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
 	, _rotation("rotation", "Rotation", 0, 0, 360)
-	, _hasNightTexture(false)
 	, _alpha(1.f)
+    , _nightTexturePath("")
+    , _hasNightTexture(false)
 {
 	std::string name;
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);

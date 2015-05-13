@@ -84,12 +84,12 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	  )
 	, _seedPointSource("source", "SeedPoint Source")
 	, _seedPointSourceFile("sourceFile", "SeedPoint File")
+    , _program(nullptr)
+    , _programIsDirty(false)
 	, _seedPointsAreDirty(true)
 	, _fieldLinesAreDirty(true)
-	, _fieldlineVAO(0)
-	, _vertexPositionBuffer(0)
-	, _program(nullptr)
-	, _programIsDirty(false)
+    , _fieldlineVAO(0)
+    , _vertexPositionBuffer(0)
 {
 	ghoul_assert(
 		dictionary.hasKeyAndValue<std::string>(constants::scenegraphnode::keyName),

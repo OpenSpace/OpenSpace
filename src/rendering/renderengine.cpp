@@ -223,13 +223,13 @@ namespace openspace {
 		, _takeScreenshot(false)
 		, _doPerformanceMeasurements(false)
 		, _performanceMemory(nullptr)
-		, _visualizeABuffer(false)
-		, _visualizer(nullptr)
 		, _globalBlackOutFactor(0.f)
 		, _fadeDuration(2.f)
 		, _currentFadeTime(0.f)
 		, _fadeDirection(0)
         , _sgctRenderStatisticsVisible(false)
+        , _visualizeABuffer(false)
+        , _visualizer(nullptr)
 	{
         _onScreenInformation = {
             glm::vec2(0.f),

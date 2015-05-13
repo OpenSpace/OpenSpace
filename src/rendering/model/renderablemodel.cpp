@@ -63,14 +63,14 @@ namespace openspace {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 	, _colorTexturePath("colorTexture", "Color Texture")
+	, _performFade("performFading", "Perform Fading", false)
+    , _fading("fading", "Fade", 0)
     , _programObject(nullptr)
     , _texture(nullptr)
-	, _geometry(nullptr)
-	, _isGhost(false)
-	, _performShading("performShading", "Perform Shading", true)
-	, _alpha(1.f)
-	, _fading("fading", "Fade", 0)
-	, _performFade("performFading", "Perform Fading", false)
+    , _geometry(nullptr)
+    , _alpha(1.f)
+    , _isGhost(false)
+    , _performShading("performShading", "Perform Shading", true)
 {
 	std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);

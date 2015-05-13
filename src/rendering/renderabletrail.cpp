@@ -62,14 +62,14 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _lineColor("lineColor", "Line Color")
     , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
     , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
+    , _showTimestamps("timestamps", "Show Timestamps", false)
     , _programObject(nullptr)
     , _programIsDirty(true)
+    , _successfullDictionaryFetch(true)
     , _vaoID(0)
     , _vBufferID(0)
-    , _oldTime(std::numeric_limits<float>::max())
-    , _successfullDictionaryFetch(true)
     , _needsSweep(true)
-	, _showTimestamps("timestamps", "Show Timestamps", false)
+    , _oldTime(std::numeric_limits<float>::max())
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
@@ -213,7 +213,7 @@ void RenderableTrail::update(const UpdateData& data) {
     // keep the first entry in the array floating and always pointing to the current date
     // As soon as the time difference between the current time and the last time is bigger
     // than the fixed distance, we need to create a new fixed point
-    double deltaTime = abs(data.time - _oldTime);
+    double deltaTime = std::abs(data.time - _oldTime);
     int nValues = static_cast<int>(floor(deltaTime / _increment));
 
     // Update the floating current time
@@ -283,7 +283,6 @@ void RenderableTrail::fullYearSweep(double time) {
     _oldTime = time;
 
     psc pscPos;
-	bool validPosition = true;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {
 		if (start > time)

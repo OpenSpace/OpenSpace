@@ -129,8 +129,6 @@ void HongKangParser::create(){
 
 				std::string cameraTarget = "VOID";
 				std::string scannerTarget = "VOID";
-				int counter = 0;
-				
 
 				while (!file.eof()){//only while inte do,  FIX
 					std::getline(file, line);

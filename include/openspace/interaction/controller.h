@@ -40,7 +40,7 @@ public:
 	Controller() :
 		_handler(nullptr)
 	{}
-
+    
 	void setHandler(InteractionHandler* handler);
 
 protected:

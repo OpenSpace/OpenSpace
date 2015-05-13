@@ -49,7 +49,7 @@ void GuiPerformanceComponent::deinitialize() {
 
 void GuiPerformanceComponent::render() {
 	// Copy and paste from renderengine.cpp::storePerformanceMeasurements method
-	const int8_t Version = 0;
+//	const int8_t Version = 0;
 	const int nValues = 250;
 	const int lengthName = 256;
 	const int maxValues = 256;
