@@ -131,6 +131,10 @@ void LabelParser::create(){
 	std::string lblName = "";
 
 	ghoul::filesystem::Directory sequenceDir(_fileName, true);
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
+        return;
+    }
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	for (auto path : sequencePaths){
 		//std::cout << path << std::endl;

@@ -51,7 +51,7 @@ void GuiOriginComponent::render() {
         nodeNames += n->name() + '\0';
 
 
-    int position = it - nodes.begin();
+    int position = static_cast<int>(std::distance(it, nodes.begin()));
 
     bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
 

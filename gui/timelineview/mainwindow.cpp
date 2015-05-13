@@ -133,9 +133,6 @@ void MainWindow::readTcpData() {
 
     QByteArray data = _socket->readAll();
 
-    //QString debug(data);
-    //qDebug() << debug;
-
     if (QString(data) == "Connected to SGCT!\r\n")
         return;
     if (QString(data) == "OK\r\n")
@@ -147,6 +144,19 @@ void MainWindow::readTcpData() {
         std::array<char, 2> data;
     } messageType;
     std::memcpy(messageType.data.data(), messageTypeData.data(), sizeof(uint16_t));
+
+    switch (messageType.value) {
+    case MessageTypeStatus:
+        break;
+    case MessageTypePlayBookHongKang:
+        qDebug() << "Hong Kang Playbook received";
+        break;
+    case MessageTypePlayBookLabel:
+        qDebug() << "Label Playbook received";
+        break;
+    default:
+        qDebug() << "Unknown message of type '" << messageType.value << "'";
+    }
 
     switch (messageType.value) {
     case MessageTypeStatus:
@@ -163,11 +173,18 @@ void MainWindow::readTcpData() {
         size_t beginning = 0;
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
 
+        //qDebug() << "Begin reading data";
         while (_socket->waitForReadyRead() && data.size() < int(size)) {
+            //qDebug() << ".";
             data = data.append(_socket->readAll());
+            //data = data.append(_socket->read(int(size) - data.size()));
             QThread::msleep(50);
         }
+        //qDebug() << "Finished reading data. Handling playbook";
+
         handlePlaybook(data.mid(2));
+
+        //qDebug() << "Finished handling playbook";
 
         if (messageType.value == MessageTypePlayBookHongKang)
             _hasHongKangTimeline = true;
@@ -181,7 +198,7 @@ void MainWindow::readTcpData() {
         break;
     }
     default:
-        qDebug() << "Unknown message of type '" << messageType.value << "'";
+        qDebug() << QString(data);
     }
 
 }
@@ -275,12 +292,20 @@ void MainWindow::handlePlaybook(QByteArray data) {
 }
 
 void MainWindow::sendScript(QString script) {
-    if (_socket)
+    if (_socket) {
         _socket->write(("0" + script + "\r\n").toLatin1());
+        //QByteArray data = (QString("0") + script).toLocal8Bit();
+        //qDebug() << data;
+        //_socket->write(data);
+        //QThread::msleep(25);
+    }
+        //_socket->write(("0" + script + "\r\n").toLatin1());
+        //_socket->write(("0" + script + "\0").toLatin1());
 }
 
 void MainWindow::onSocketConnected() {
     _socket->write(QString("1\r\n").toLatin1());
+    //_socket->write(QString("1").toLatin1());
 
 }
 

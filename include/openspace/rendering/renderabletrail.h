@@ -86,7 +86,7 @@ private:
     std::vector<TrailVBOLayout> _vertexArray;
 
     float _increment;
-    float _oldTime = 0;
+    double _oldTime = 0.0;
 	float _time;
 	float _distanceFade;
 };

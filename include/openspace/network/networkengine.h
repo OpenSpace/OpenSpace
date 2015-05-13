@@ -65,7 +65,7 @@ private:
 
     std::vector<Message> _initialConnectionMessages;
 
-
+    bool _shouldPublishStatusMessage;
 
     MessageIdentifier _statusMessageIdentifier;
     MessageIdentifier _identifierMappingIdentifier;

@@ -169,7 +169,7 @@ void RenderableTrail::render(const RenderData& data) {
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
-    glDrawArrays(GL_LINE_STRIP, 0, _vertexArray.size());
+    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexArray.size()));
     glBindVertexArray(0);
 
     glLineWidth(1.f);
@@ -177,7 +177,7 @@ void RenderableTrail::render(const RenderData& data) {
 	if (_showTimestamps){
 		glPointSize(5.f);
 		glBindVertexArray(_vaoID);
-		glDrawArrays(GL_POINTS, 0, _vertexArray.size());
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
 		glBindVertexArray(0);
 	}
 
@@ -214,7 +214,7 @@ void RenderableTrail::update(const UpdateData& data) {
     // As soon as the time difference between the current time and the last time is bigger
     // than the fixed distance, we need to create a new fixed point
     double deltaTime = abs(data.time - _oldTime);
-    int nValues = floor(deltaTime / _increment);
+    int nValues = static_cast<int>(floor(deltaTime / _increment));
 
     // Update the floating current time
 	if (start > data.time)

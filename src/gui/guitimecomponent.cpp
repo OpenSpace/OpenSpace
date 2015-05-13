@@ -38,9 +38,8 @@ namespace openspace {
 namespace gui {
 
 void GuiTimeComponent::render() {
-    float deltaTime = Time::ref().deltaTime();
+    float deltaTime = static_cast<float>(Time::ref().deltaTime());
     
-
     bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
     if (changed)
         OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");

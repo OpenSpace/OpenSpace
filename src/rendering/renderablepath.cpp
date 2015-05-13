@@ -159,7 +159,7 @@ void RenderablePath::render(const RenderData& data) {
 	if (_drawLine) {
 		glLineWidth(_lineWidth);
 		glBindVertexArray(_vaoID);
-		glDrawArrays(GL_LINE_STRIP, 0, _vertexArray.size());
+		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexArray.size()));
 		glBindVertexArray(0);
 		glLineWidth(1.f);
 	}
@@ -178,7 +178,7 @@ void RenderablePath::render(const RenderData& data) {
 	//glPointParameterfv(GL_POINT_FADE_THRESHOLD_SIZE, fadeThreshold);
 
 	glBindVertexArray(_vaoID);
-	glDrawArrays(GL_POINTS, 0, _vertexArray.size());
+	glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
 	glBindVertexArray(0);
 	
 	_programObject->deactivate();
