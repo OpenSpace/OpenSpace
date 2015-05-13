@@ -68,7 +68,7 @@ namespace openspace {
 
 	private:
 		void loadTexture();
-		void updatePlane(const Image* img, double currentTime);
+		void updatePlane(const Image img, double currentTime);
 		std::string findClosestTarget(double currentTime);
 		void setTarget(std::string body);
 

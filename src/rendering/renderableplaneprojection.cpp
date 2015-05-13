@@ -144,17 +144,16 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 	
 
 	double time = data.time;
-	const Image* img = openspace::ImageSequencer2::ref().getLatestImageForInstrument(_instrument);
+	const Image img = openspace::ImageSequencer2::ref().getLatestImageForInstrument(_instrument);
 
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, galacticFrame, time, _stateMatrix);
 	
 	std::string tex = _texturePath;
-
-	if (_moving || _planeIsDirty)
+	if (img.path != "" && (_moving || _planeIsDirty))
 		updatePlane(img, time);
 
-	else if (img != nullptr && img->path != tex) {
-		time = img->startTime;
+	else if (img.path != "" && img.path != tex) {
+		time = img.startTime;
 		updatePlane(img, time);
 	}
 
@@ -186,7 +185,7 @@ void RenderablePlaneProjection::loadTexture() {
 	}
 }
 
-void RenderablePlaneProjection::updatePlane(const Image* img, double currentTime) {
+void RenderablePlaneProjection::updatePlane(const Image img, double currentTime) {
 	
 	std::string shape, frame;
 	std::vector<glm::dvec3> bounds;
@@ -194,10 +193,10 @@ void RenderablePlaneProjection::updatePlane(const Image* img, double currentTime
 	
 	std::string target = "JUPITER"; //default
 	if (!_moving) {
-	//	target = findClosestTarget(currentTime);
+		target = findClosestTarget(currentTime);
 	}
-	if (img != nullptr)
-	target = img->target;
+	if (img.path != "")
+	target = img.target;
 
 	setTarget(target);
 
@@ -252,8 +251,8 @@ void RenderablePlaneProjection::updatePlane(const Image* img, double currentTime
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-	if (!_moving && img != nullptr) {
-		_texturePath = img->path;
+	if (!_moving && img.path != "") {
+		_texturePath = img.path;
 		loadTexture();
 	}
 }
@@ -295,7 +294,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 	std::string targetBody;
 	bool hasBody, found = false;
 
-	PowerScaledScalar min = PowerScaledScalar::CreatePSS(9999999999999);
+	PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
 	PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
 
 	std::string closestTarget = "";

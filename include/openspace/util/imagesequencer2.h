@@ -139,7 +139,7 @@ public:
 	/*
 	* returns latest captured image
 	*/
-	const Image* getLatestImageForInstrument(const std::string _instrumentID);
+	const Image getLatestImageForInstrument(const std::string _instrumentID);
 private:
 	void sortData();
 	
@@ -196,7 +196,7 @@ private:
 	// default capture image
 	std::string _defaultCaptureImage;
 
-	Image* _latestImage;
+	Image _latestImage;
 	// if no data, no run 
 	bool _hasData;
 };

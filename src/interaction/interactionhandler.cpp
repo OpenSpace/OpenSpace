@@ -886,7 +886,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 	const float dt = static_cast<float>(_deltaTime);
 	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
 		
-	    if (key == SGCT_KEY_S) {
+	    /*if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        orbitDelta(rot);
@@ -911,7 +911,7 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 		}
 		if (key == SGCT_KEY_X) {
 			Time::ref().advanceTime(-sgct::Engine::instance()->getDt());
-		}
+		}*/
 	    if (key == 262) {
 	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);

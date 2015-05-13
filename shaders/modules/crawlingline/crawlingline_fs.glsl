@@ -26,7 +26,7 @@
 
 uniform vec4 campos;
 uniform vec4 objpos;
-
+uniform vec3 color;
 uniform float _alpha;
 
 in vec4 vs_position;
@@ -39,7 +39,7 @@ void main() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	// vec4 diffuse = texture(texture1, vs_st);
-	vec4 diffuse = vec4(1.0);
+	vec4 diffuse = vec4(color, 1.0);
 	diffuse.a = _alpha;
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 	addToBuffer(frag);

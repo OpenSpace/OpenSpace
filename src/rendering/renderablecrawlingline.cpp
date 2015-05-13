@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/imagesequencer2.h>
+#include <imgui.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableCrawlingLine";
@@ -36,6 +37,7 @@ namespace {
     const std::string KeyTarget = "Target";
     const std::string KeyInstrument = "Instrument";
     const std::string KeyReferenceFrame = "Frame";
+	const std::string keyColor = "RGB";
 
     static const int SourcePosition = 0;
     static const int TargetPosition = 1;
@@ -55,6 +57,12 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyTarget, _target);
     dictionary.getValue(KeyInstrument, _instrumentName);
     dictionary.getValue(KeyReferenceFrame, _referenceFrame);
+
+
+	if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
+		dictionary.getValue(keyColor, _lineColor);
+	else
+		_lineColor = glm::vec3(1);
 }
 
 bool RenderableCrawlingLine::isReady() const {
@@ -67,6 +75,7 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 bool RenderableCrawlingLine::initialize() {
+	_frameCounter = 0;
     bool completeSuccess = true;
     _program = ghoul::opengl::ProgramObject::Build("RenderableCrawlingLine",
         "${SHADERS}/modules/crawlingline/crawlingline_vs.glsl",
@@ -100,9 +109,9 @@ bool RenderableCrawlingLine::deinitialize(){
 }
 
 void RenderableCrawlingLine::render(const RenderData& data) {
-    if (_drawLine) {
+	if (_drawLine) {
 	    _program->activate();
-
+		_frameCounter++;
 	    // fetch data
 	    psc currentPosition = data.position;
 	    psc campos = data.camera.position();
@@ -114,20 +123,20 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 	    _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	    _program->setUniform("ModelTransform", transform);
 
-        static const float CutoffValue = 0.15f;
-        float alpha;
-        if (_imageSequenceTime < 0.5f)
-            alpha = std::min(_imageSequenceTime / CutoffValue, 1.f);
-        else
-            alpha = std::min((1.f - _imageSequenceTime) / CutoffValue, 1.f);
+		int frame = _frameCounter % 20;
+		float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 20));
+		float alpha = 0.6f + fadingFactor*0.4f;
+
+		glLineWidth(2.f);
 
         _program->setUniform("_alpha", alpha);
+		_program->setUniform("color", _lineColor);
 	    setPscUniforms(_program, &data.camera, data.position);
 
 	    glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(psc) * 2, _positions);
-        //glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(psc), _positions, GL_DYNAMIC_DRAW);
+
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -139,20 +148,27 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 }
 
 void RenderableCrawlingLine::update(const UpdateData& data) {
-    double t;
-    //_positions[SourcePosition][0] = 0.f;
-    //_positions[SourcePosition][1] = 0.f;
-    //_positions[SourcePosition][2] = 0.f;
-    //_positions[SourcePosition][3] = 0.f;
-    //
-    //_positions[TargetPosition][0] = 0.f;
-    //_positions[TargetPosition][1] = 0.f;
-    //_positions[TargetPosition][2] = 0.f;
-    //_positions[TargetPosition][3] = 0.f;
-    SpiceManager::ref().getTargetPosition(_source, "SUN", _referenceFrame, "NONE", data.time, _positions[SourcePosition], t);
-    _positions[SourcePosition][3] += 3;
-    SpiceManager::ref().getTargetPosition(_target, "SUN", _referenceFrame, "NONE", data.time, _positions[TargetPosition], t);
-    _positions[TargetPosition][3] += 3;
+    glm::dmat3 transformMatrix = glm::dmat3(1);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
+
+	glm::mat4 tmp = glm::mat4(1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++){
+			tmp[i][j] = static_cast<float>(transformMatrix[i][j]);
+		}
+	}
+
+	_positions[SourcePosition] = PowerScaledCoordinate::CreatePowerScaledCoordinate(0, 0, 0);
+
+	std::string shape, instrument;
+	std::vector<glm::dvec3> bounds;
+	glm::dvec3 boresight;
+
+	bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
+	glm::vec4 target(boresight[0], boresight[1], boresight[2], 14);
+	target = tmp * target;
+
+	_positions[TargetPosition] = target;
 
     if (ImageSequencer2::ref().isReady()) {
         _imageSequenceTime = ImageSequencer2::ref().instrumentActiveTime(_instrumentName);

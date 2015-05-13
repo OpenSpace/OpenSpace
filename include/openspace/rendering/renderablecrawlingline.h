@@ -49,8 +49,10 @@ private:
     std::string _source;
     std::string _target;
     std::string _referenceFrame;
+	glm::vec3 _lineColor;
 
     psc _positions[2];
+	int _frameCounter;
 
     bool _drawLine;
     float _imageSequenceTime;

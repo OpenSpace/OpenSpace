@@ -47,7 +47,7 @@ ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2() :
 _hasData(false),
-_latestImage(nullptr),
+_latestImage(),
 _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
 {}
 
@@ -159,8 +159,8 @@ double ImageSequencer2::getNextCaptureTime(){
 
 	return nextCaptureTime;
 }
-const Image* ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
-
+const Image ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
+	
 	return _latestImage;
 }
 
@@ -269,7 +269,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 			    std::reverse(captureTimes.begin(), captureTimes.end());
 			    captures = captureTimes;
                 if (!captures.empty())
-                    _latestImage = &captures.back();
+					_latestImage = captures.back();
 
 			    return true;
             }
