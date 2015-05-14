@@ -44,8 +44,6 @@ namespace {
 namespace openspace {
 
 SceneGraph::SceneGraph() {
-
-
 }
 
 void SceneGraph::clear() {
@@ -266,7 +264,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         LERROR("Topological sort failed");
         return false;
     }
-
+    
     return true;
 }
 
@@ -315,6 +313,32 @@ bool SceneGraph::sortTopologially() {
         }
 
     }
+    
+#ifdef __APPLE__
+    auto it = std::find_if(
+                           _topologicalSortedNodes.begin(),
+                           _topologicalSortedNodes.end(),
+                           [](SceneGraphNode* node) {
+                               return node->name() == "Stars";
+                           }
+                           );
+    SceneGraphNode* n = *it;
+    _topologicalSortedNodes.erase(it);
+    _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 3, n);
+    
+    it = std::find_if(
+                     _topologicalSortedNodes.begin(),
+                     _topologicalSortedNodes.end(),
+                     [](SceneGraphNode* node) {
+                         return node->name() == "MilkyWay";
+                     }
+                     );
+    n = *it;
+    _topologicalSortedNodes.erase(it);
+    _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 2, n);
+#endif
+    
+
     
     return true;
 }

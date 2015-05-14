@@ -39,8 +39,8 @@ void main()
 {
     vec4 position = vs_position;
     // This has to be fixed with the ScaleGraph in place (precision deficiency in depth buffer) ---abock
-    // float depth = pscDepth(position);
-    float depth = 1000.0;
+    //float depth = pscDepth(position);
+    float depth = 0.1;
     vec4 diffuse;
 
     vec2 texCoord = vs_st;
@@ -71,7 +71,7 @@ void main()
     //     diffuse = vec4(0.0);
     // #endif
 
-    // diffuse = vec4(1.0, 0.0, 0.0, 1.0);
+    //diffuse = vec4(1.0, 0.0, 0.0, 1.0);
 
     ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
     addToBuffer(frag);
