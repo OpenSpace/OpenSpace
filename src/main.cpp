@@ -79,6 +79,10 @@ int main(int argc, char** argv) {
 	sgct::MessageHandler::instance()->setLogToCallback(true);
 	sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
 
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
+#endif
+    
 	LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 

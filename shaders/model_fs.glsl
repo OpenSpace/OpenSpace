@@ -52,6 +52,7 @@ void main()
 {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
+	depth = length(campos - position);
 	vec4 diffuse = texture(texture1, vs_st);
 	
 	diffuse[3] = fading;
@@ -89,5 +90,5 @@ void main()
 		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
 		addToBuffer(frag);	
 	}
-	
+
 }
