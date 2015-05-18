@@ -732,15 +732,13 @@ void RenderEngine::toggleInfoText(bool b) {
 	_showInfo = b;
 }
 
-Scene* RenderEngine::scene()
-{
+Scene* RenderEngine::scene() {
 	// TODO custom assert (ticket #5)
 	assert(_sceneGraph);
 	return _sceneGraph;
 }
 
-void RenderEngine::setSceneGraph(Scene* sceneGraph)
-{
+void RenderEngine::setSceneGraph(Scene* sceneGraph) {
 	_sceneGraph = sceneGraph;
 }
 
@@ -775,15 +773,15 @@ ABuffer* RenderEngine::abuffer() const {
 	return _abuffer;
 }
 
-float RenderEngine::globalBlackOutFactor(){
+float RenderEngine::globalBlackOutFactor() {
 	return _globalBlackOutFactor;
 }
 
-void RenderEngine::setGlobalBlackOutFactor(float opacity){
+void RenderEngine::setGlobalBlackOutFactor(float opacity) {
 	_globalBlackOutFactor = opacity;
 }
 
-void RenderEngine::startFading(int direction, float fadeDuration){
+void RenderEngine::startFading(int direction, float fadeDuration) {
 	_fadeDirection = direction;
 	_fadeDuration = fadeDuration;
 	_currentFadeTime = 0.f;
