@@ -188,5 +188,4 @@ std::vector<ABuffer::fragmentData> ABufferFixed::pixelData() {
 	return d;
 }
 
-
 } // openspace

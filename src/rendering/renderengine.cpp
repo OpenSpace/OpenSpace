@@ -70,14 +70,21 @@
 #define ABUFFER_FIXED 2
 #define ABUFFER_DYNAMIC 3
 
-#ifdef __APPLE__
-#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
-#else
-#define ABUFFER_IMPLEMENTATION ABUFFER_SINGLE_LINKED
-#endif
+//#ifdef __APPLE__
+//#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
+//#else
+//#define ABUFFER_IMPLEMENTATION ABUFFER_SINGLE_LINKED
+//#endif
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
+
+    const std::map<std::string, int> RenderingMethods = {
+        { "ABufferFrameBuffer", ABUFFER_FRAMEBUFFER},
+        { "ABufferSingleLinked", ABUFFER_SINGLE_LINKED },
+        { "ABufferFixed", ABUFFER_FIXED },
+        { "ABufferDynamic", ABUFFER_DYNAMIC }
+    };
 }
 
 namespace openspace {
@@ -216,6 +223,7 @@ RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
 	, _abuffer(nullptr)
+    , _abufferImplementation(-1)
 	, _log(nullptr)
 	, _showInfo(true)
 	, _showScreenLog(true)
@@ -252,7 +260,35 @@ RenderEngine::~RenderEngine() {
 		ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
-bool RenderEngine::initialize() {
+bool RenderEngine::initialize(const std::string& renderingMethod) {
+    auto it = RenderingMethods.find(renderingMethod);
+    if (it == RenderingMethods.end()) {
+        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
+            << "rendering methods");
+        return false;
+    }
+    else {
+        _abufferImplementation = it->second;
+        switch (_abufferImplementation) {
+        case ABUFFER_FRAMEBUFFER:
+            LINFO("Creating ABufferFramebuffer implementation");
+            _abuffer = new ABufferFramebuffer;
+            break;
+        case ABUFFER_SINGLE_LINKED:
+            LINFO("Creating ABufferSingleLinked implementation");
+            _abuffer = new ABufferSingleLinked();
+            break;
+        case ABUFFER_FIXED:
+            LINFO("Creating ABufferFixed implementation");
+            _abuffer = new ABufferFixed();
+            break;
+        case ABUFFER_DYNAMIC:
+            LINFO("Creating ABufferDynamic implementation");
+            _abuffer = new ABufferDynamic();
+            break;
+        }
+    }
+
 	generateGlslConfig();
 
 	// init camera and set temporary position and scaling
@@ -270,15 +306,6 @@ bool RenderEngine::initialize() {
 
 	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
 
-#if ABUFFER_IMPLEMENTATION == ABUFFER_FRAMEBUFFER
-	_abuffer = new ABufferFramebuffer();
-#elif ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
-	_abuffer = new ABufferSingleLinked();
-#elif ABUFFER_IMPLEMENTATION == ABUFFER_FIXED
-	_abuffer = new ABufferFixed();
-#elif ABUFFER_IMPLEMENTATION == ABUFFER_DYNAMIC
-	_abuffer = new ABufferDynamic();
-#endif
 
 	return true;
 }
@@ -788,6 +815,7 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 }
 
 void RenderEngine::generateGlslConfig() {
+    ghoul_assert(_abuffer != nullptr, "ABuffer not initialized");
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
 	int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
 	int ySize = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();;
@@ -805,7 +833,7 @@ void RenderEngine::generateGlslConfig() {
 		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
 		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
 		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
-		<< "#define ABUFFER_IMPLEMENTATION    " << ABUFFER_IMPLEMENTATION << "\n";
+		<< "#define ABUFFER_IMPLEMENTATION    " << _abufferImplementation << "\n";
 	// System specific
 #ifdef WIN32
 	os << "#define WIN32\n";
