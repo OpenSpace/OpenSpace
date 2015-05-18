@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abuffersinglelinked.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>

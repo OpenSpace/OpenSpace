@@ -30,7 +30,7 @@
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/abuffer/abufferframebuffer.h>
-#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abuffersinglelinked.h>
 #include <openspace/abuffer/abufferfixed.h>
 #include <openspace/abuffer/abufferdynamic.h>
 #include <openspace/engine/openspaceengine.h>
