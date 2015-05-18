@@ -45,9 +45,6 @@ ABufferFixed::ABufferFixed(): _data(0), _anchorPointerTexture(0),
 {}
 
 ABufferFixed::~ABufferFixed() {
-	if(_data != 0)
-		delete _data;
-
 	glDeleteTextures(1,&_anchorPointerTexture);
 	glDeleteTextures(1,&_fragmentTexture);
 	// glDeleteTextures(1,&_atomicCounterTexture);

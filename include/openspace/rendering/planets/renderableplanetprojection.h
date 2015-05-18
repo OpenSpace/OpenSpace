@@ -24,6 +24,7 @@
 
 #ifndef __RENDERABLEPLANETPROJECTION_H__
 #define __RENDERABLEPLANETPROJECTION_H__
+
 #include <ghoul/opengl/textureunit.h>
 
 // open space includes
