@@ -103,7 +103,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 {
 	SpiceManager::initialize();
 	Time::initialize();
-	ImageSequencer2::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
@@ -221,6 +220,8 @@ bool OpenSpaceEngine::create(
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 	_engine->_console->initialize();
+
+    ImageSequencer2::initialize();
 
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");

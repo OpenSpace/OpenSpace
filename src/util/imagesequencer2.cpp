@@ -46,8 +46,7 @@ namespace openspace {
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2()
-    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
-    , _latestImage()
+    : _latestImage()
     , _hasData(false)
 {}
 
@@ -58,6 +57,7 @@ ImageSequencer2& ImageSequencer2::ref() {
 void ImageSequencer2::initialize() {
 	assert(_instance == nullptr);
 	_instance = new ImageSequencer2;
+    _instance->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
 }
 
 void ImageSequencer2::deinitialize() {
