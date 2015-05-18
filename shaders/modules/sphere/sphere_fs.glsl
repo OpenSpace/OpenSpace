@@ -39,8 +39,8 @@ void main()
 {
     vec4 position = vs_position;
     // This has to be fixed with the ScaleGraph in place (precision deficiency in depth buffer) ---abock
-    //float depth = pscDepth(position);
-    float depth = 0.1;
+    // float depth = pscDepth(position);
+    float depth = 200;
     vec4 diffuse;
 
     vec2 texCoord = vs_st;
@@ -53,6 +53,8 @@ void main()
         // diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
 
     diffuse.a *= alpha;
+
+    // diffuse.a = 0.0;
 
     //vec4 diffuse = vec4(1,vs_st,1);
     //vec4 diffuse = vec4(1,0,0,1);
