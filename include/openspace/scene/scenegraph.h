@@ -60,7 +60,7 @@ private:
     };
 
     bool nodeIsDependentOnRoot(SceneGraphNodeInternal* node);
-    bool sortTopologially();
+    bool sortTopologically();
 
     SceneGraphNodeInternal* nodeByName(const std::string& name);
 
