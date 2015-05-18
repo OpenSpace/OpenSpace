@@ -241,7 +241,8 @@ bool OpenSpaceEngine::create(
 	}
 
     openGlVersion = commandlineArgumentPlaceholders.openGlVersion;
-    LINFO("Using OpenGL version " << openGlVersion);
+    if (openGlVersion != DefaultOpenGlVersion)
+        LINFO("Using OpenGL version " << openGlVersion);
 
 	// Prepend the outgoing sgctArguments with the program name
 	// as well as the configuration file that sgct is supposed to use
