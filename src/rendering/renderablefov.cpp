@@ -426,7 +426,7 @@ void RenderableFov::render(const RenderData& data) {
 	setPscUniforms(_programObject, &data.camera, data.position);
 	
 	if (openspace::ImageSequencer2::ref().isReady()){
-		drawFOV = ImageSequencer2::ref().instumentActive(_instrumentID);
+		drawFOV = ImageSequencer2::ref().instrumentActive(_instrumentID);
 	}
 
 

@@ -91,4 +91,7 @@ void main() {
 
     ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
     addToBuffer(frag);
+
+    if (fullColor.a == 0)
+        discard;
 }

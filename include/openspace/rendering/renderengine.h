@@ -51,7 +51,7 @@ public:
 	RenderEngine();
 	~RenderEngine();
 	
-	bool initialize();
+	bool initialize(const std::string& renderingMethod);
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();
@@ -113,6 +113,7 @@ private:
 	Camera* _mainCamera;
 	Scene* _sceneGraph;
 	ABuffer* _abuffer;
+    int _abufferImplementation;
 	ScreenLog* _log;
 
 	bool _showInfo;

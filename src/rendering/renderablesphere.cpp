@@ -186,9 +186,7 @@ void RenderableSphere::update(const UpdateData& data) {
 }
 
 void RenderableSphere::loadTexture() {
-	LDEBUG("loadTexture");
 	if (_texturePath.value() != "") {
-		LDEBUG("loadTexture2");
 		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");

@@ -54,10 +54,6 @@ private:
     properties::IntProperty _segments;
 	std::string _name;
 
-	properties::IntProperty _vaoID;
-	properties::IntProperty _vBufferID;
-	properties::IntProperty _iBufferID;
-
     PowerScaledSphere* _planet;
 };
 

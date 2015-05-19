@@ -78,7 +78,7 @@ openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_FT.r
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_METHANE.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_METHANE.renderable.solidDraw', not b)")
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw'); openspace.setPropertyValue('NH_RALPH_MVIC_NIR.renderable.solidDraw', not b)")
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
-openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_SOC.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
+openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_SOC.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_SOC.renderable.solidDraw', not b)")
 
 openspace.bindKey("p", "local b = openspace.getPropertyValue('JupiterProjection.renderable.performProjection'); openspace.setPropertyValue('JupiterProjection.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Io.renderable.performProjection'); openspace.setPropertyValue('Io.renderable.performProjection', not b)")

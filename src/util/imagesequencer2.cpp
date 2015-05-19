@@ -46,8 +46,7 @@ namespace openspace {
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2()
-    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png"))
-    , _latestImage()
+    : _latestImage()
     , _hasData(false)
 {}
 
@@ -58,6 +57,7 @@ ImageSequencer2& ImageSequencer2::ref() {
 void ImageSequencer2::initialize() {
 	assert(_instance == nullptr);
 	_instance = new ImageSequencer2;
+    _instance->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
 }
 
 void ImageSequencer2::deinitialize() {
@@ -174,7 +174,7 @@ std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
 		// for each spice-instrument
 		for (auto instrumentID : key.second->getTranslation()){
 			// check if the spice-instrument is active 
-				if (instumentActive(instrumentID)){
+				if (instrumentActive(instrumentID)){
 					// go over switching map
 					for (auto instrument : _switchingMap){
 						// if instrument is present in switching map
@@ -189,7 +189,7 @@ std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
 	// return entire map, seen in GUI.
 	return _switchingMap;
 }
-bool ImageSequencer2::instumentActive(std::string instrumentID){ 
+bool ImageSequencer2::instrumentActive(std::string instrumentID){ 
 	for (auto i : _instrumentTimes){
 		//check if this instrument is in range
 		if (i.second.inRange(_currentTime)){ 
@@ -227,7 +227,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 	                                std::string projectee, 
 									std::string instrumentID){
 
-	if (!instumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
+	if (!instrumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
 	// dev. note: this is only due to LORRI being the only instrument implemented so far.
 	return getImagePaths(captures, projectee);
 }

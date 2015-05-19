@@ -109,7 +109,7 @@ set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
 
 # Lua
 set(LUA_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/lua")
-include_directories("${LUA_ROOT_DIR}/include")
+include_directories("${LUA_ROOT_DIR}/src")
 
 # Spice
 set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")

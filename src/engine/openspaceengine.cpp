@@ -75,6 +75,9 @@ namespace {
     
     const std::string _sgctConfigArgumentCommand = "-config";
 
+    const std::string KeyRenderingMethod = "RenderingMethod";
+    const std::string DefaultRenderingMethod = "ABufferSingleLinked";
+
     const std::string DefaultOpenGlVersion = "4.3";
     
     struct {
@@ -103,7 +106,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 {
 	SpiceManager::initialize();
 	Time::initialize();
-	ImageSequencer2::initialize();
 	FactoryManager::initialize();
 	ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
@@ -222,6 +224,8 @@ bool OpenSpaceEngine::create(
 	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
 	_engine->_console->initialize();
 
+    ImageSequencer2::initialize();
+
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
 
@@ -240,7 +244,8 @@ bool OpenSpaceEngine::create(
 	}
 
     openGlVersion = commandlineArgumentPlaceholders.openGlVersion;
-    LINFO("Using OpenGL version " << openGlVersion);
+    if (openGlVersion != DefaultOpenGlVersion)
+        LINFO("Using OpenGL version " << openGlVersion);
 
 	// Prepend the outgoing sgctArguments with the program name
 	// as well as the configuration file that sgct is supposed to use
@@ -317,7 +322,11 @@ bool OpenSpaceEngine::initialize() {
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine
-	_renderEngine->initialize();
+    if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
+        _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
+    else
+    	_renderEngine->initialize(DefaultRenderingMethod);
+
 	sceneGraph->initialize();
 
 	std::string sceneDescriptionPath;
@@ -681,13 +690,13 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	}
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y) {
+void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 	if (_isMaster) {
 	    _interactionHandler->mousePositionCallback(x, y);
 	}
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->mouseWheelCallback(pos);

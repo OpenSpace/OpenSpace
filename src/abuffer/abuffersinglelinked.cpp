@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/abuffer/abufferSingleLinked.h>
+#include <openspace/abuffer/abuffersinglelinked.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -68,12 +68,17 @@ bool ABufferSingleLinked::initialize() {
 	//          BUFFERS
 	// ============================
 	glGenTextures(1, &_anchorPointerTexture);
+    LDEBUG("AnchorPointerTexture ID: " << _anchorPointerTexture);
 	glGenBuffers(1, &_anchorPointerTextureInitializer);
+    LDEBUG("AnchorPointerTextureInitializer ID: " << _anchorPointerTextureInitializer);
 	glGenBuffers(1, &_atomicCounterBuffer);
+    LDEBUG("AtomicCounterBuffer ID: " << _atomicCounterBuffer);
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
 	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
 	glGenBuffers(1, &_fragmentBuffer);
+    LDEBUG("FragmentBuffer ID: " << _fragmentBuffer);
     glGenTextures(1, &_fragmentTexture);
+    LDEBUG("FragmentTexture ID: " << _fragmentTexture);
 
 	reinitialize();
 

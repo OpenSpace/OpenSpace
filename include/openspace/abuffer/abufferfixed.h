@@ -33,19 +33,19 @@ class ABufferFixed: public ABuffer {
 public:
 
 	ABufferFixed();
-	virtual ~ABufferFixed();
-	virtual bool initialize();
+	~ABufferFixed();
+	bool initialize() override;
 
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
+	void clear() override;
+	void preRender() override;
+	void postRender() override;
 
-	std::vector<fragmentData> pixelData();
+	std::vector<fragmentData> pixelData() override;
+
 protected:
-	virtual bool reinitializeInternal();
+	virtual bool reinitializeInternal() override;
 
 private:
-
 	GLuint *_data;
 	GLuint _anchorPointerTexture;
 	GLuint _anchorPointerTextureInitializer;
@@ -53,11 +53,8 @@ private:
 	GLuint _atomicCounterTexture;
 	GLuint _fragmentBuffer;
 	GLuint _fragmentTexture;
-
-
-
-
 }; 		// ABufferFixed
+
 } 		// openspace
 
 #endif 	// __ABUFFERFIXED_H__
