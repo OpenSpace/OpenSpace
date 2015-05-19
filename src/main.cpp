@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
     }
 
 	//is this node the master?	(must be set after call to _sgctEngine->init())
-	OsEng.ref().setMaster(_sgctEngine->isMaster());
+	OsEng.setMaster(_sgctEngine->isMaster());
 
     // Main loop
 	LDEBUG("Starting rendering loop");
@@ -151,8 +151,7 @@ int main(int argc, char** argv) {
     exit(EXIT_SUCCESS); 
 }
 
-void mainInitFunc()
-{
+void mainInitFunc() {
 	bool success = OsEng.initialize();
 	if (success)
 		success = OsEng.initializeGL();
@@ -168,83 +167,70 @@ void mainInitFunc()
 	setupPostFX();
 }
 
-void mainPreSyncFunc()
-{
+void mainPreSyncFunc() {
 	OsEng.preSynchronization();
 }
 
-void mainPostSyncPreDrawFunc()
-{
+void mainPostSyncPreDrawFunc() {
 	OsEng.postSynchronizationPreDraw();
 }
 
-void mainRenderFunc()
-{
+void mainRenderFunc() {
+    using glm::mat4;
+    using glm::translate;
 	//not the most efficient, but for clarity @JK
 	
-	glm::mat4 userMatrix = glm::translate(glm::mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
-	glm::mat4 sceneMatrix = _sgctEngine->getModelMatrix();
-	glm::mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
+	mat4 userMatrix = translate(mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
+	mat4 sceneMatrix = _sgctEngine->getModelMatrix();
+	mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
 	
 	//dont shift nav-direction on master, makes it very tricky to navigate @JK
-	if (!OsEng.ref().isMaster()){
+	if (!OsEng.ref().isMaster())
 		viewMatrix = viewMatrix * sceneMatrix;
-	}
 
-	glm::mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
+	mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
 	OsEng.render(projectionMatrix, viewMatrix);
 }
 
-void mainPostDrawFunc()
-{
+void mainPostDrawFunc() {
     OsEng.postDraw();
 }
 
-void mainExternalControlCallback(const char* receivedChars, int size)
-{
-    if (OsEng.ref().isMaster())
+void mainExternalControlCallback(const char* receivedChars, int size) {
+    if (OsEng.isMaster())
 		OsEng.externalControlCallback(receivedChars, size, 0);
 }
 
-void mainKeyboardCallback(int key, int action)
-{
-    if (OsEng.ref().isMaster())
+void mainKeyboardCallback(int key, int action) {
+    if (OsEng.isMaster())
         OsEng.keyboardCallback(key, action);
 }
 
-void mainMouseButtonCallback(int key, int action)
-{
-    if (OsEng.ref().isMaster())
+void mainMouseButtonCallback(int key, int action) {
+    if (OsEng.isMaster())
         OsEng.mouseButtonCallback(key, action);
 }
 
-void mainMousePosCallback(double x, double y)
-{
-    // TODO use float instead
-    if (OsEng.ref().isMaster())
-        OsEng.mousePositionCallback(static_cast<int>(x), static_cast<int>(y));
+void mainMousePosCallback(double x, double y) {
+    if (OsEng.isMaster())
+        OsEng.mousePositionCallback(x, y);
 }
 
-void mainMouseScrollCallback(double posX, double posY)
-{
-    // TODO use float instead
-    if (OsEng.ref().isMaster())
-        OsEng.mouseScrollWheelCallback(static_cast<int>(posY));
+void mainMouseScrollCallback(double posX, double posY) {
+    if (OsEng.isMaster())
+        OsEng.mouseScrollWheelCallback(posY);
 }
 
 void mainCharCallback(unsigned int codepoint) {
-
-	if (OsEng.ref().isMaster())
+	if (OsEng.isMaster())
 		OsEng.charCallback(codepoint);
 }
 
-void mainEncodeFun()
-{
+void mainEncodeFun() {
     OsEng.encode();
 }
 
-void mainDecodeFun()
-{
+void mainDecodeFun() {
     OsEng.decode();
 }
 
@@ -259,7 +245,7 @@ void postFXPass(){
     if (OsEng.isMaster())
         glUniform1f(_postFXOpacityLoc, 1.f);
     else
-		glUniform1f(_postFXOpacityLoc, OsEng.ref().renderEngine()->globalBlackOutFactor());
+		glUniform1f(_postFXOpacityLoc, OsEng.renderEngine()->globalBlackOutFactor());
 }
 
 void setupPostFX(){

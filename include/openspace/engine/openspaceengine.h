@@ -83,8 +83,8 @@ public:
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);
     void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
 	void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();

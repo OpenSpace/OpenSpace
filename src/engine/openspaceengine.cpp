@@ -690,13 +690,13 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	}
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y) {
+void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 	if (_isMaster) {
 	    _interactionHandler->mousePositionCallback(x, y);
 	}
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->mouseWheelCallback(pos);
