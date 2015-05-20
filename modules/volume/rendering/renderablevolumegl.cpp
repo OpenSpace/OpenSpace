@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/renderablevolumegl.h>
+#include <modules/volume/rendering/renderablevolumegl.h>
 
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>

@@ -45,10 +45,6 @@
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/wavefrontgeometry.h>
 
-namespace {
-    const std::string _loggerCat = "BaseModule";
-}
-
 namespace openspace {
 
 bool BaseModule::initialize() {
@@ -79,10 +75,6 @@ bool BaseModule::initialize() {
     fModelGeometry->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
 
     return true;
-}
-
-bool BaseModule::deinitialize() {
-    return false;
 }
 
 } // namespace openspace

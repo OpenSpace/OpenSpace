@@ -22,32 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PlanetGeometryProjection_H__
-#define __PlanetGeometryProjection_H__
+#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/planets/renderableplanetprojection.h>
-#include <ghoul/misc/dictionary.h>
+namespace {
+    const std::string _loggerCat = "PlanetGeometryProjection";
+    const std::string KeyType = "Type";
+}
 
 namespace openspace {
-
 namespace planetgeometryprojection {
 
-class PlanetGeometryProjection : public properties::PropertyOwner {
-public:
-    static PlanetGeometryProjection* createFromDictionary(const ghoul::Dictionary& dictionary);
+PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+	std::string geometryType;
+	const bool success = dictionary.getValue(KeyType, geometryType);
+	if (!success) {
+        LERROR("PlanetGeometry did not contain a correct value of the key '"
+			<< KeyType << "'");
+        return nullptr;
+	}
+	ghoul::TemplateFactory<PlanetGeometryProjection>* factory
+		= FactoryManager::ref().factory<PlanetGeometryProjection>();
 
-	PlanetGeometryProjection();
-	virtual ~PlanetGeometryProjection();
-    virtual bool initialize(RenderablePlanetProjection* parent);
-    virtual void deinitialize();
-    virtual void render() = 0;
+	PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
+                                                                    << "'");
+        return nullptr;
+    }
+    return result;
+}
 
-protected:
-	RenderablePlanetProjection* _parent;
-};
+PlanetGeometryProjection::PlanetGeometryProjection()
+    : _parent(nullptr)
+{
+	setName("PlanetGeometryProjection");
+}
+
+PlanetGeometryProjection::~PlanetGeometryProjection()
+{
+}
+
+bool PlanetGeometryProjection::initialize(RenderablePlanetProjection* parent)
+{
+    _parent = parent;
+    return true;
+}
+
+void PlanetGeometryProjection::deinitialize()
+{
+}
 
 }  // namespace planetgeometry
 }  // namespace openspace
-
-#endif  // __PLANETGEOMETRY_H__

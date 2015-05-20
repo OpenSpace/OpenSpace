@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/planets/planetgeometryprojection.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/factorymanager.h>
+#ifndef __VOLUMEMODULE_H__
+#define __VOLUMEMODULE_H__
 
-namespace {
-    const std::string _loggerCat = "PlanetGeometryProjection";
-    const std::string KeyType = "Type";
-}
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
-namespace planetgeometryprojection {
 
-PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
-	std::string geometryType;
-	const bool success = dictionary.getValue(KeyType, geometryType);
-	if (!success) {
-        LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< KeyType << "'");
-        return nullptr;
-	}
-	ghoul::TemplateFactory<PlanetGeometryProjection>* factory
-		= FactoryManager::ref().factory<PlanetGeometryProjection>();
+class VolumeModule : public OpenSpaceModule {
+public:
+    bool initialize() override;
+};
 
-	PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
-                                                                    << "'");
-        return nullptr;
-    }
-    return result;
-}
+} // namespace openspace
 
-PlanetGeometryProjection::PlanetGeometryProjection()
-    : _parent(nullptr)
-{
-	setName("PlanetGeometryProjection");
-}
-
-PlanetGeometryProjection::~PlanetGeometryProjection()
-{
-}
-
-bool PlanetGeometryProjection::initialize(RenderablePlanetProjection* parent)
-{
-    _parent = parent;
-    return true;
-}
-
-void PlanetGeometryProjection::deinitialize()
-{
-}
-
-}  // namespace planetgeometry
-}  // namespace openspace
+#endif // __VOLUMEMODULE_H__

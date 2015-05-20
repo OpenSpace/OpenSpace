@@ -32,7 +32,6 @@ namespace openspace {
 class BaseModule : public OpenSpaceModule {
 public:
     bool initialize() override;
-    bool deinitialize() override;
 };
 
 } // namespace openspace

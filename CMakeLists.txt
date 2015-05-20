@@ -146,6 +146,8 @@ endif ()
 
 add_subdirectory(src)
 add_subdirectory(modules/base)
+add_subdirectory(modules/newhorizons)
+add_subdirectory(modules/volume)
 
 option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
 if (BUILD_GUI_APPLICATIONS)

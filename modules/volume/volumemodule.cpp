@@ -22,65 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEVOLUMEGL_H__
-#define __RENDERABLEVOLUMEGL_H__
+#include <modules/volume/volumemodule.h>
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-// Forward declare to minimize dependencies
-namespace ghoul {
-	namespace filesystem {
-		class File;
-	}
-	namespace opengl {
-		class ProgramObject;
-		class Texture;
-	}
-}
+#include <ghoul/misc/assert.h>
+
+#include <modules/volume/rendering/renderablevolumegl.h>
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
-public:
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
-    
-	bool initialize() override;
-    bool deinitialize() override;
+bool VolumeModule::initialize() {
 
-	bool isReady() const override;
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
+    fRenderable->registerClass<RenderableVolumeGL>("RenderableVolumeGL");
 
-private:
-	ghoul::Dictionary _hintsDictionary;
-
-    std::string _filename;
-
-    std::string _transferFunctionName;
-	std::string _volumeName;
-
-    std::string _transferFunctionPath;
-	std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::Texture* _transferFunction;
-
-	GLuint _boxArray; 
-	GLuint _vertexPositionBuffer;
-	ghoul::opengl::ProgramObject* _boxProgram;
-	glm::vec3 _boxScaling;
-	psc _pscOffset;
-	float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
-};
+    return true;
+}
 
 } // namespace openspace
-
-#endif

@@ -151,8 +151,7 @@ if (UNIX AND NOT APPLE)
 endif (UNIX AND NOT APPLE)
 
 
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} openspace-module-base)
-message(${DEPENDENT_LIBS})
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} openspace-module-base openspace-module-newhorizons openspace-module-volume)
 
 include_directories("${HEADER_ROOT_DIR}")
 include_directories("${OPENSPACE_BASE_DIR}")

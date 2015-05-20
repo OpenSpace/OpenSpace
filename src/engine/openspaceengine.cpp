@@ -89,8 +89,6 @@ namespace {
     } commandlineArgumentPlaceholders;
 }
 
-#include <modules/base/basemodule.h>
-
 namespace openspace {
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
@@ -114,7 +112,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     ghoul::systemcapabilities::SystemCapabilities::initialize();
 
     // Register modules
-    _moduleEngine->registerModule(new BaseModule);
     _moduleEngine->initialize();
 }
 

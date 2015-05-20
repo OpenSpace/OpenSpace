@@ -25,7 +25,7 @@
 #ifndef __SIMPLESPHEREGEOMETRYPROJECTION_H__
 #define __SIMPLESPHEREGEOMETRYPROJECTION_H__
 
-#include <openspace/rendering/planets/planetgeometryprojection.h>
+#include <modules/newhorizons/rendering/planetgeometryprojection.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledsphere.h>

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/renderablevolume.h>
+#include <modules/volume/rendering/renderablevolume.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>

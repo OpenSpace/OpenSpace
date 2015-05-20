@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,65 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEVOLUMEGL_H__
-#define __RENDERABLEVOLUMEGL_H__
+#ifndef __PlanetGeometryProjection_H__
+#define __PlanetGeometryProjection_H__
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-	namespace filesystem {
-		class File;
-	}
-	namespace opengl {
-		class ProgramObject;
-		class Texture;
-	}
-}
+#include <openspace/properties/propertyowner.h>
+#include <modules/newhorizons/rendering/renderableplanetprojection.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
+namespace planetgeometryprojection {
+
+class PlanetGeometryProjection : public properties::PropertyOwner {
 public:
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
-    
-	bool initialize() override;
-    bool deinitialize() override;
+    static PlanetGeometryProjection* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	bool isReady() const override;
+	PlanetGeometryProjection();
+	virtual ~PlanetGeometryProjection();
+    virtual bool initialize(RenderablePlanetProjection* parent);
+    virtual void deinitialize();
+    virtual void render() = 0;
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
-
-private:
-	ghoul::Dictionary _hintsDictionary;
-
-    std::string _filename;
-
-    std::string _transferFunctionName;
-	std::string _volumeName;
-
-    std::string _transferFunctionPath;
-	std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::Texture* _transferFunction;
-
-	GLuint _boxArray; 
-	GLuint _vertexPositionBuffer;
-	ghoul::opengl::ProgramObject* _boxProgram;
-	glm::vec3 _boxScaling;
-	psc _pscOffset;
-	float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
+protected:
+	RenderablePlanetProjection* _parent;
 };
 
-} // namespace openspace
+}  // namespace planetgeometry
+}  // namespace openspace
 
-#endif
+#endif  // __PLANETGEOMETRY_H__

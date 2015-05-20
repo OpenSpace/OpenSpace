@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <openspace/rendering/renderableplaneprojection.h>
+#include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/util/constants.h>

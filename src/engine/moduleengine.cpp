@@ -28,6 +28,10 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <modules/base/basemodule.h>
+#include <modules/newhorizons/newhorizonsmodule.h>
+#include <modules/volume/volumemodule.h>
+
 namespace {
     const std::string _loggerCat = "ModuleEngine";
 }
@@ -36,6 +40,11 @@ namespace openspace {
 
 bool ModuleEngine::initialize() {
     LDEBUG("Initializing modules");
+    
+    registerModule(new BaseModule);
+    registerModule(new NewHorizonsModule);
+    registerModule(new VolumeModule);
+
     for (OpenSpaceModule* m : _modules) {
         bool success = m->initialize();
         if (!success) {
