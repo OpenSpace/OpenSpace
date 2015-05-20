@@ -92,8 +92,13 @@ bool RenderablePlaneProjection::initialize() {
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	
 	// Plane program
-	if (_shader == nullptr)
-		OsEng.ref().configurationManager()->getValue("imagePlaneProgram", _shader);
+	if (_shader == nullptr) {
+        // Image Plane Program
+        _shader = ghoul::opengl::ProgramObject::Build("ImagePlaneProgram",
+            "${SHADERS}/modules/imageplane/imageplane_vs.glsl",
+            "${SHADERS}/modules/imageplane/imageplane_fs.glsl");
+        if (!_shader) return false;
+    }
 
 	setTarget("JUPITER");
 	loadTexture();

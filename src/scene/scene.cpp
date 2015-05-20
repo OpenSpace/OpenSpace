@@ -197,33 +197,6 @@ bool Scene::initialize() {
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
 
-	// Fov Program
-	tmpProgram = ProgramObject::Build("FovProgram",
-		"${SHADERS}/fov_vs.glsl",
-		"${SHADERS}/fov_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("FovProgram", tmpProgram);
-
-	// Plane Program
-	tmpProgram = ProgramObject::Build("planeProgram",
-		"${SHADERS}/modules/plane/plane_vs.glsl",
-		"${SHADERS}/modules/plane/plane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("planeProgram", tmpProgram);
-
-	// Image Plane Program
-	tmpProgram = ProgramObject::Build("imagePlaneProgram",
-		"${SHADERS}/modules/imageplane/imageplane_vs.glsl",
-		"${SHADERS}/modules/imageplane/imageplane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("imagePlaneProgram", tmpProgram);
-
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
@@ -232,15 +205,6 @@ bool Scene::initialize() {
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
-
-	// Grid program
-	tmpProgram = ProgramObject::Build("Grid",
-		"${SHADERS}/grid_vs.glsl",
-		"${SHADERS}/grid_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("GridProgram", tmpProgram);
 
     return true;
 }

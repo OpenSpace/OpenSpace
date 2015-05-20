@@ -143,9 +143,13 @@ RenderableFov::~RenderableFov() {
 
 bool RenderableFov::initialize() {
 	bool completeSuccess = true;
-	if (_programObject == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager()->getValue("FovProgram", _programObject);
-		completeSuccess &= OsEng.ref().configurationManager()->getValue("EphemerisProgram", _programObject);
+    if (_programObject == nullptr) {
+        _programObject = ghoul::opengl::ProgramObject::Build("FovProgram",
+            "${SHADERS}/modules/projection/fov_vs.glsl",
+            "${SHADERS}/modules/projection/fov_fs.glsl");
+        if (!_programObject)
+            return false;
+    }
 
 	allocateData();
 	sendToGPU();

@@ -125,10 +125,16 @@ bool RenderablePlane::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-	if (_shader == nullptr)
-		OsEng.ref().configurationManager()->getValue("planeProgram", _shader);
-	
-	loadTexture();
+	if (_shader == nullptr) {
+        // Plane Program
+        _shader = ghoul::opengl::ProgramObject::Build("PlaneProgram",
+            "${SHADERS}/modules/plane/plane_vs.glsl",
+            "${SHADERS}/modules/plane/plane_fs.glsl");
+        if (!_shader)
+            return false;
+    }
+
+    loadTexture();
 
 	return isReady();
 }
