@@ -53,6 +53,8 @@
 #include <string>
 #include <chrono>
 
+#include "scene_lua.inl"
+
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
@@ -62,95 +64,7 @@ namespace {
 
 namespace openspace {
 
-namespace luascriptfunctions {
-
-/**
- * \ingroup LuaScripts
- * setPropertyValue(string, *):
- * Sets the property identified by the URI in the first argument to the value passed to
- * the second argument. The type of the second argument is arbitrary, but it must agree
- * with the type the denoted Property expects
- */
-int property_setValue(lua_State* L) {
-    static const std::string _loggerCat = "property_setValue";
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
-
-	std::string uri = luaL_checkstring(L, -2);
-	const int type = lua_type(L, -1);
-
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-        LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
-        return 0;
-    }
-
-
-	if (type != prop->typeLua()) {
-        LERROR(errorLocation(L) << "Property '" << uri <<
-            "' does not accept input of type '" << luaTypeToString(type) <<
-            "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
-        return 0;
-    }
-	else
-		prop->setLua(L);
-
-	return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
-int property_getValue(lua_State* L) {
-    static const std::string _loggerCat = "property_getValue";
-    using ghoul::lua::errorLocation;
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
-
-	std::string uri = luaL_checkstring(L, -1);
-
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-        LERROR(errorLocation(L) << "Property with URL '" << uri << "' was not found");
-        return 0;
-    }
-	else
-		prop->getLua(L);
-	return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
-int loadScene(lua_State* L) {
-    static const std::string _loggerCat = "loadScene";
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
-
-	std::string sceneFile = luaL_checkstring(L, -1);
-
-	OsEng.renderEngine()->scene()->scheduleLoadSceneFile(sceneFile);
-
-	return 0;
-}
-
-} // namespace luascriptfunctions
-
-Scene::Scene()
-    : _focus(SceneGraphNode::RootNodeName)
-{
-}
+Scene::Scene() : _focus(SceneGraphNode::RootNodeName) {}
 
 Scene::~Scene() {
     deinitialize();

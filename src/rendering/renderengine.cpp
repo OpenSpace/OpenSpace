@@ -44,7 +44,6 @@
 #include <openspace/rendering/renderablepath.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/sharedmemory.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -70,11 +69,7 @@
 #define ABUFFER_FIXED 2
 #define ABUFFER_DYNAMIC 3
 
-//#ifdef __APPLE__
-//#define ABUFFER_IMPLEMENTATION ABUFFER_FRAMEBUFFER
-//#else
-//#define ABUFFER_IMPLEMENTATION ABUFFER_SINGLE_LINKED
-//#endif
+#include "renderengine_lua.inl"
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
@@ -91,133 +86,6 @@ namespace openspace {
 
 const std::string RenderEngine::PerformanceMeasurementSharedData =
 	"OpenSpacePerformanceMeasurementSharedData";
-
-namespace luascriptfunctions {
-
-int changeCoordinateSystem(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    std::string newCenter = std::string(lua_tostring(L, -1));
-    OsEng.renderEngine()->changeViewPoint(newCenter);
-    return 1;
-}
-
-/**
-	* \ingroup LuaScripts
-	* takeScreenshot():
-	* Save the rendering to an image file
-	*/
-int takeScreenshot(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.renderEngine()->takeScreenshot();
-	return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
-*/
-int visualizeABuffer(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleVisualizeABuffer(b);
-	return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
-*/
-int showRenderInformation(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleInfoText(b);
-	return 0;
-}
-
-/**
-    * \ingroup LuaScripts
-    * showSGCTRenderStatistics(bool):
-    * Set the rendering of the SGCTRenderStatistics
-    */
-int showSGCTRenderStatistics(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-    bool b = lua_toboolean(L, -1) != 0;
-    OsEng.renderEngine()->setSGCTRenderStatistics(b);
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
-*/
-int setPerformanceMeasurement(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->setPerformanceMeasurements(b);
-	return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadein over (float) seconds
-*/
-int fadeIn(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	double t = luaL_checknumber(L, -1);
-			
-	OsEng.renderEngine()->startFading(1, static_cast<float>(t));
-	return 0;
-}
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadeout over (float) seconds
-*/
-int fadeOut(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	double t = luaL_checknumber(L, -1);
-
-	OsEng.renderEngine()->startFading(-1, static_cast<float>(t));
-	return 0;
-}
-
-} // namespace luascriptfunctions
 
 RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
