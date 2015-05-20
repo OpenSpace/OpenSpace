@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/renderablefieldlines.h>
+#include <modules/base/rendering/renderablefieldlines.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/kameleonwrapper.h>

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/planets/planetgeometry.h>
+#include <modules/base/rendering/planetgeometry.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>

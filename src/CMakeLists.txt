@@ -151,7 +151,11 @@ if (UNIX AND NOT APPLE)
 endif (UNIX AND NOT APPLE)
 
 
+set(DEPENDENT_LIBS ${DEPENDENT_LIBS} openspace-module-base)
+message(${DEPENDENT_LIBS})
+
 include_directories("${HEADER_ROOT_DIR}")
+include_directories("${OPENSPACE_BASE_DIR}")
 
 add_executable(OpenSpace ${SOURCE_ROOT_DIR}/main.cpp ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_link_libraries(OpenSpace ${DEPENDENT_LIBS})

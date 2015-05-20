@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/model/modelgeometry.h>
+#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/constants.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
-#include <openspace/rendering/model/wavefrontgeometry.h>
+#include <modules/base/rendering/wavefrontgeometry.h>
 
 namespace {
     const std::string _loggerCat = "ModelGeometry";

@@ -145,6 +145,7 @@ endif ()
 #########################################################################################
 
 add_subdirectory(src)
+add_subdirectory(modules/base)
 
 option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
 if (BUILD_GUI_APPLICATIONS)

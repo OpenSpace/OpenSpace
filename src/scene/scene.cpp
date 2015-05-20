@@ -377,7 +377,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
 	// the camera position
 	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
-	//psc relative = fn->worldPosition() - c->position();
+    // Check crash for when fn == nullptr
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 

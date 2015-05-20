@@ -46,7 +46,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/imagesequencer2.h> // testing
-
+#include <openspace/engine/moduleengine.h>
 
 
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -89,6 +89,7 @@ namespace {
     } commandlineArgumentPlaceholders;
 }
 
+#include <modules/base/basemodule.h>
 
 namespace openspace {
 
@@ -102,14 +103,19 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _networkEngine(new NetworkEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
+    , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
 	, _isMaster(false)
     , _syncBuffer(nullptr)
 {
-	SpiceManager::initialize();
-	Time::initialize();
-	FactoryManager::initialize();
-	ghoul::systemcapabilities::SystemCapabilities::initialize();
+    FactoryManager::initialize();
+    SpiceManager::initialize();
+    Time::initialize();
+    ghoul::systemcapabilities::SystemCapabilities::initialize();
+
+    // Register modules
+    _moduleEngine->registerModule(new BaseModule);
+    _moduleEngine->initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -122,6 +128,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _networkEngine;
     delete _commandlineParser;
     delete _console;
+    delete _moduleEngine;
     delete _gui;
 
     if(_syncBuffer)
@@ -259,6 +266,7 @@ bool OpenSpaceEngine::create(
 }
 
 void OpenSpaceEngine::destroy() {
+    _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
@@ -743,6 +751,10 @@ void OpenSpaceEngine::disableBarrier() {
 
 NetworkEngine* OpenSpaceEngine::networkEngine() {
     return _networkEngine;
+}
+
+ModuleEngine* OpenSpaceEngine::moduleEngine() {
+    return _moduleEngine;
 }
 
 }  // namespace openspace

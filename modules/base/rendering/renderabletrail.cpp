@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/renderabletrail.h>
+#include <modules/base/rendering/renderabletrail.h>
 #include <openspace/util/time.h>
 
 #include <openspace/util/constants.h>

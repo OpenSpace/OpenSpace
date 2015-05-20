@@ -22,52 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MODELGEOMETRY_H__
-#define __MODELGEOMETRY_H__
+#ifndef __PLANETGEOMETRY_H__
+#define __PLANETGEOMETRY_H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/model/renderablemodel.h>
+#include <modules/base/rendering/renderableplanet.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-namespace modelgeometry {
+namespace planetgeometry {
 
-class ModelGeometry : public properties::PropertyOwner {
+class PlanetGeometry : public properties::PropertyOwner {
 public:
-	static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	ModelGeometry(const ghoul::Dictionary& dictionary);
-	virtual ~ModelGeometry();
-    virtual bool initialize(RenderableModel* parent);
+    PlanetGeometry();
+    virtual ~PlanetGeometry();
+    virtual bool initialize(RenderablePlanet* parent);
     virtual void deinitialize();
-	void render();
-	virtual bool loadModel(const std::string& filename) = 0;
-	void changeRenderMode(const GLenum mode);
+    virtual void render() = 0;
 
 protected:
-	RenderableModel* _parent;
-	struct Vertex {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-	};
-
-	bool loadObj(const std::string& filename);
-	bool loadCachedFile(const std::string& filename);
-	bool saveCachedFile(const std::string& filename);
-	
-	GLuint _vaoID;
-	GLuint _vbo;
-	GLuint _ibo;
-	GLenum _mode;
-
-	std::vector<Vertex> _vertices;
-	std::vector<int> _indices;
-	std::string _file;
+    RenderablePlanet* _parent;
 };
 
-}  // namespace modelgeometry
+}  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __MODELGEOMETRY_H__
+#endif  // __PLANETGEOMETRY_H__

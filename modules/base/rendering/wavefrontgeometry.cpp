@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/model/wavefrontgeometry.h>
+#include <modules/base/rendering/wavefrontgeometry.h>
 
 #include <openspace/util/constants.h>
 #include "ghoul/logging/logmanager.h"

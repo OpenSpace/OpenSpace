@@ -22,32 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PLANETGEOMETRY_H__
-#define __PLANETGEOMETRY_H__
+#ifndef __SIMPLESPHEREGEOMETRY_H__
+#define __SIMPLESPHEREGEOMETRY_H__
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/planets/renderableplanet.h>
-#include <ghoul/misc/dictionary.h>
+#include <modules/base/rendering/planetgeometry.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
 
+class RenderablePlanet;
+class PowerScaledSphere;
+
 namespace planetgeometry {
 
-class PlanetGeometry : public properties::PropertyOwner {
+class SimpleSphereGeometry : public PlanetGeometry {
 public:
-    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
+    ~SimpleSphereGeometry();
 
-    PlanetGeometry();
-    virtual ~PlanetGeometry();
-    virtual bool initialize(RenderablePlanet* parent);
-    virtual void deinitialize();
-    virtual void render() = 0;
 
-protected:
-    RenderablePlanet* _parent;
+    bool initialize(RenderablePlanet* parent) override;
+    void deinitialize() override;
+    void render() override;
+	PowerScaledSphere* _planet;
+
+private:
+    void createSphere();
+
+	glm::vec2 _modRadius;
+	properties::Vec4Property _realRadius;
+    properties::IntProperty _segments;
+	std::string _name;
+
+    PowerScaledSphere* _sphere;
 };
 
 }  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __PLANETGEOMETRY_H__
+#endif // __SIMPLESPHEREGEOMETRY_H__

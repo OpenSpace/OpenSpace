@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          *
 *****************************************************************************************/
 
-#include <openspace/rendering/stars/renderablestars.h>
+#include <modules/base/rendering/renderablestars.h>
 
 #include <openspace/util/updatestructures.h>
 

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 // openspace
-#include <openspace/rendering/stars/renderableconstellationbounds.h>
+#include <modules/base/rendering/renderableconstellationbounds.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 

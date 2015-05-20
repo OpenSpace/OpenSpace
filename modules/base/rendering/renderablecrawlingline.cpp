@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/renderablecrawlingline.h>
+#include <modules/base/rendering/renderablecrawlingline.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/imagesequencer2.h>
-#include <imgui.h>
+//#include <imgui.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableCrawlingLine";

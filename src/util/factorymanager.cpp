@@ -25,24 +25,25 @@
 #include <openspace/util/factorymanager.h>
 
 // renderables
-#include <openspace/rendering/model/renderablemodel.h>
-#include <openspace/rendering/stars/renderableconstellationbounds.h>
-#include <openspace/rendering/stars/renderablestars.h>
-#include <openspace/rendering/renderabletrail.h>
-#include <openspace/rendering/renderablepath.h>
-#include <openspace/rendering/renderablefov.h>
-#include <openspace/rendering/renderablesphere.h>
-#include <openspace/rendering/renderablesphericalgrid.h>
-#include <openspace/rendering/renderablefieldlines.h>
-#include <openspace/rendering/renderablecrawlingline.h>
-#include <openspace/rendering/planets/renderableplanet.h>
-#include <openspace/rendering/planets/simplespheregeometry.h>
-#include <openspace/rendering/renderableplane.h>
-#include <openspace/rendering/renderableplaneprojection.h>
-#include <openspace/rendering/renderablevolumegl.h>
-#include <openspace/rendering/planets/simplespheregeometry.h>
-#include <openspace/rendering/model/modelgeometry.h>
-#include <openspace/rendering/model/wavefrontgeometry.h>
+#include <openspace/rendering/renderable.h>
+//#include <openspace/rendering/model/renderablemodel.h>
+//#include <openspace/rendering/stars/renderableconstellationbounds.h>
+//#include <openspace/rendering/stars/renderablestars.h>
+//#include <openspace/rendering/renderabletrail.h>
+//#include <openspace/rendering/renderablepath.h>
+//#include <openspace/rendering/renderablefov.h>
+//#include <openspace/rendering/renderablesphere.h>
+//#include <openspace/rendering/renderablesphericalgrid.h>
+//#include <openspace/rendering/renderablefieldlines.h>
+//#include <openspace/rendering/renderablecrawlingline.h>
+//#include <openspace/rendering/planets/renderableplanet.h>
+//#include <openspace/rendering/planets/simplespheregeometry.h>
+//#include <openspace/rendering/renderableplane.h>
+//#include <openspace/rendering/renderableplaneprojection.h>
+//#include <openspace/rendering/renderablevolumegl.h>
+//#include <openspace/rendering/planets/simplespheregeometry.h>
+//#include <openspace/rendering/model/modelgeometry.h>
+//#include <openspace/rendering/model/wavefrontgeometry.h>
 
 // positioninformation
 #include <openspace/scene/staticephemeris.h>
@@ -50,9 +51,9 @@
 #include <openspace/scene/spiceephemeris.h>
 
 // projection
-#include <openspace/rendering/planets/renderableplanetprojection.h>
-#include <openspace/rendering/planets/simplespheregeometryprojection.h>
-#include <openspace/rendering/planets/planetgeometryprojection.h>
+//#include <openspace/rendering/planets/renderableplanetprojection.h>
+//#include <openspace/rendering/planets/simplespheregeometryprojection.h>
+//#include <openspace/rendering/planets/planetgeometryprojection.h>
 
 #include <openspace/util/decoder.h>
 #include <openspace/util/instrumentdecoder.h>
@@ -73,37 +74,7 @@ void FactoryManager::initialize()
         _manager = new FactoryManager;
     assert(_manager != nullptr);
 
-    // TODO: This has to be moved into a sort of module structure (ab)
-    // Add Renderables
     _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-    _manager->factory<Renderable>()->registerClass<RenderablePlanet>("RenderablePlanet");
-	_manager->factory<Renderable>()->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-	_manager->factory<Renderable>()->registerClass<RenderableStars>("RenderableStars");
-	_manager->factory<Renderable>()->registerClass<RenderableConstellationBounds>
-		("RenderableConstellationBounds");
-	//will replace ephemeris class soon...
-	_manager->factory<Renderable>()->registerClass<RenderablePath>(
-		"RenderablePath");
-	_manager->factory<Renderable>()->registerClass<RenderableTrail>(
-		"RenderableTrail");
-	_manager->factory<Renderable>()->registerClass<RenderableFov>(
-		"RenderableFov");
-    _manager->factory<Renderable>()->registerClass<RenderableSphere>(
-        "RenderableSphere");
-	_manager->factory<Renderable>()->registerClass<RenderableSphericalGrid>(
-		"RenderableSphericalGrid");
-	_manager->factory<Renderable>()->registerClass<RenderableModel>(
-		"RenderableModel");
-    _manager->factory<Renderable>()->registerClass<RenderablePlane>(
-        "RenderablePlane");
-	_manager->factory<Renderable>()->registerClass<RenderablePlaneProjection>(
-		"RenderablePlaneProjection");
-    _manager->factory<Renderable>()->registerClass<RenderableVolumeGL>(
-        "RenderableVolumeGL");
-    _manager->factory<Renderable>()->registerClass<RenderableFieldlines>(
-		"RenderableFieldlines");
-    _manager->factory<Renderable>()->registerClass<RenderableCrawlingLine>(
-        "RenderableCrawlingLine");
 
     // Add Ephemerides
     _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
@@ -116,20 +87,14 @@ void FactoryManager::initialize()
 	_manager->factory<Decoder>()->registerClass<TargetDecoder>("Target");
 
 
-    // Add PlanetGeometry
-    _manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
-    _manager->factory<planetgeometry::PlanetGeometry>()
-          ->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
-	
-	// Add PlanetGeometryProjection
-	_manager->addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
-	_manager->factory<planetgeometryprojection::PlanetGeometryProjection>()
-		->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
-	
-	// Add ModelGeometry
-	_manager->addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
-	_manager->factory<modelgeometry::ModelGeometry>()
-		->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
+    //_manager->addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
+    //_manager->addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
+
+
+	//// Add PlanetGeometryProjection
+	//_manager->addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
+	//_manager->factory<planetgeometryprojection::PlanetGeometryProjection>()
+	//	->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
 }
 
 void FactoryManager::deinitialize()

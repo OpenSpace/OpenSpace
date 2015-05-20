@@ -47,8 +47,9 @@ namespace {
 
 namespace openspace {
 
-SceneGraph::SceneGraph() {
-}
+SceneGraph::SceneGraph()
+    : _rootNode(nullptr)
+{}
 
 void SceneGraph::clear() {
     // Untested ---abock
@@ -58,6 +59,7 @@ void SceneGraph::clear() {
     }
 
     _nodes.clear();
+    _rootNode = nullptr;
 }
 
 bool SceneGraph::loadFromFile(const std::string& sceneDescription) {

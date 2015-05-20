@@ -22,43 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SIMPLESPHEREGEOMETRY_H__
-#define __SIMPLESPHEREGEOMETRY_H__
+#ifndef __BASEMODULE_H__
+#define __BASEMODULE_H__
 
-#include <openspace/rendering/planets/planetgeometry.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-class RenderablePlanet;
-class PowerScaledSphere;
-
-namespace planetgeometry {
-
-class SimpleSphereGeometry : public PlanetGeometry {
+class BaseModule : public OpenSpaceModule {
 public:
-    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry();
-
-
-    bool initialize(RenderablePlanet* parent) override;
-    void deinitialize() override;
-    void render() override;
-	PowerScaledSphere* _planet;
-
-private:
-    void createSphere();
-
-	glm::vec2 _modRadius;
-	properties::Vec4Property _realRadius;
-    properties::IntProperty _segments;
-	std::string _name;
-
-    PowerScaledSphere* _sphere;
+    bool initialize() override;
+    bool deinitialize() override;
 };
 
-}  // namespace planetgeometry
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __SIMPLESPHEREGEOMETRY_H__
+#endif // __BASEMODULE_H__

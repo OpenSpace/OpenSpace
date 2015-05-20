@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configurationmanager.h>
-#include <openspace/rendering/renderableplane.h>
+#include <modules/base/rendering/renderableplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/constants.h>

@@ -41,7 +41,8 @@
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/renderablepath.h>
+//#include <openspace/rendering/renderablepath.h>
+#include <modules/base/rendering/renderablepath.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/sharedmemory.h>

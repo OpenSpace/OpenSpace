@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/planets/simplespheregeometry.h>
+#include <modules/base/rendering/simplespheregeometry.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/powerscaledsphere.h>
 

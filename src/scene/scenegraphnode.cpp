@@ -79,6 +79,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
                    << result->name() << "'");
+            delete result;
             return nullptr;
         }
 		result->addPropertySubOwner(result->_renderable);
@@ -92,6 +93,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                    << result->name() << "'");
+            delete result;
             return nullptr;
         }
 		//result->addPropertySubOwner(result->_ephemeris);

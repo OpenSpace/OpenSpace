@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <openspace/rendering/renderablepath.h>
+#include <modules/base/rendering/renderablepath.h>
 #include <openspace/util/time.h>
 
 #include <openspace/util/constants.h>

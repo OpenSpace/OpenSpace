@@ -26,9 +26,9 @@
 //                     ie after I see model on screen)
 
 // open space includes
-#include <openspace/rendering/model/renderablemodel.h>
+#include <modules/base/rendering/renderablemodel.h>
 #include <openspace/util/constants.h>
-#include <openspace/rendering/model/modelgeometry.h>
+#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -41,7 +41,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <sgct.h>
-#include "imgui.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>

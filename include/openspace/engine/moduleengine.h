@@ -22,29 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WAVEFRONTGEOMETRY_H__
-#define __WAVEFRONTGEOMETRY_H__
+#ifndef __MODULEENGINE_H__
+#define __MODULEENGINE_H__
 
-#include <openspace/rendering/model/modelgeometry.h>
+#include <vector>
 
 namespace openspace {
 
-class RenderableModel;
+class OpenSpaceModule;
 
-namespace modelgeometry {
-
-class WavefrontGeometry : public ModelGeometry {
+class ModuleEngine {
 public:
-	WavefrontGeometry(const ghoul::Dictionary& dictionary);
+    bool initialize();
+    bool deinitialize();
 
-	bool initialize(RenderableModel* parent) override;
-    void deinitialize() override;
-	
-private:
-	bool loadModel(const std::string& filename);
+    void registerModules(std::vector<OpenSpaceModule*> modules);
+    void registerModule(OpenSpaceModule* module);
+    const std::vector<OpenSpaceModule*> modules() const;
+
+protected:
+    std::vector<OpenSpaceModule*> _modules;
 };
 
-}  // namespace modelgeometry
-}  // namespace openspace
 
-#endif // __WAVEFRONTOBJECT_H__
+} // namespace openspace
+
+#endif // __MODULEENGINE_H__

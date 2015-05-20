@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 // open space includes
-#include <openspace/rendering/planets/renderableplanet.h>
+#include <modules/base/rendering/renderableplanet.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/planets/planetgeometry.h>
+#include <modules/base/rendering/planetgeometry.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
