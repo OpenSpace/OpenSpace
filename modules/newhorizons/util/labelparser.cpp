@@ -27,13 +27,13 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/decoder.h>
+#include <modules/newhorizons/util/decoder.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
 #include <limits>
 
-#include <openspace/util/labelparser.h>
+#include <modules/newhorizons/util/labelparser.h>
 
 namespace {
 	const std::string _loggerCat = "LabelParser";

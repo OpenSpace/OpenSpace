@@ -22,32 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/scannerdecoder.h>
+#ifndef __STATICEPHEMERIS_H__
+#define __STATICEPHEMERIS_H__
 
-namespace {
-    const std::string _loggerCat = "ScannerDecoder";
-}
+#include <openspace/scene/ephemeris.h>
 
 namespace openspace {
-   
-ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER")
-{
-	std::string value;
-	for (int k = 0; k < dictionary.size(); k++){
-		dictionary.getValue(std::to_string(k + 1), value);
-		_spiceIDs.push_back(value);
-	}
-}
-std::string ScannerDecoder::getDecoderType(){
-	return _type;
-}
-
-std::vector<std::string> ScannerDecoder::getSpiceIDs(){
-	return _spiceIDs;
-}
-
-void ScannerDecoder::setStopCommand(std::string stopCommand){
-	_abort = stopCommand;
-}
-
+    
+class StaticEphemeris: public Ephemeris {
+public:
+    StaticEphemeris(const ghoul::Dictionary& dictionary
+                                = ghoul::Dictionary());
+    virtual ~StaticEphemeris();
+    virtual const psc& position() const;
+	virtual void update(const UpdateData& data) override;
+private:
+    psc _position;
+};
+    
 } // namespace openspace
+
+#endif // __STATICEPHEMERIS_H__

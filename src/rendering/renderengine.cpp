@@ -24,7 +24,7 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#include <openspace/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer2.h>
 
 
 #include <openspace/abuffer/abuffervisualizer.h>
@@ -61,8 +61,8 @@
 #include <sgct.h>
 
 // These are temporary ---abock
-#include <openspace/scene/spiceephemeris.h>
-#include <openspace/scene/staticephemeris.h>
+#include <modules/base/ephemeris/spiceephemeris.h>
+#include <modules/base/ephemeris/staticephemeris.h>
 
 // ABuffer defines
 #define ABUFFER_FRAMEBUFFER 0

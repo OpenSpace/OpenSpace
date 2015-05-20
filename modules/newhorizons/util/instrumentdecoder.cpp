@@ -22,38 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/decoder.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/newhorizons/util/instrumentdecoder.h>
 
 namespace {
-const std::string _loggerCat = "Decoder";
+    const std::string _loggerCat  = "InstrumentDecoder";
+	const std::string keyDetector = "DetectorType";
+	const std::string keySpice    = "Spice";
+	const std::string keyStopCommand = "StopCommand";
 }
 
 namespace openspace {
+   
+InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
+{
+	bool success = dictionary.getValue(keyDetector, _type);
+	ghoul_assert(success, "Instrument has not provided detector type");
+	for_each(_type.begin(), _type.end(), [](char& in){ in = ::toupper(in); });
 
-Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
-{
-	ghoul::TemplateFactory<Decoder>* factory
-		= FactoryManager::ref().factory<Decoder>();
-	Decoder* result = factory->create(type, dictionary);
+	if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
+		LWARNING("Scanner must provide stop command, please check mod file.");
+	}else{
+		dictionary.getValue(keyStopCommand, _stopCommand);
+	}
 
-    if (result == nullptr) {
-        LERROR("Failed creating Payload object of type '" << type << "'");
-        return nullptr;
-    }
-    return result;
+	std::vector<std::string> spice;
+	ghoul::Dictionary spiceDictionary;
+	success = dictionary.getValue(keySpice, spiceDictionary);
+	ghoul_assert(success, "Instrument did not provide spice ids");
+
+
+	_spiceIDs.resize(spiceDictionary.size());
+	for (int i = 0; i < _spiceIDs.size(); ++i) {
+		std::string id;
+		spiceDictionary.getValue(std::to_string(i + 1), id);
+		_spiceIDs[i] = id;
+	}
 }
 
-Decoder::Decoder()
-{
+std::string InstrumentDecoder::getStopCommand(){
+	return _stopCommand;
 }
-    
-Decoder::Decoder(const ghoul::Dictionary& dictionary)
-{
+
+std::string InstrumentDecoder::getDecoderType(){
+	return _type;
 }
-    
-Decoder::~Decoder()
-{
+
+std::vector<std::string> InstrumentDecoder::getTranslation(){
+	return _spiceIDs;
 }
-    
+
 } // namespace openspace

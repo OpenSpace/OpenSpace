@@ -45,7 +45,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer2.h> // testing
+#include <modules/newhorizons/util/imagesequencer2.h> // testing
 #include <openspace/engine/moduleengine.h>
 
 

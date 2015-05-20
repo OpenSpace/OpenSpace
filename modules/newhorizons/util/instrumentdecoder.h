@@ -25,7 +25,7 @@
 #ifndef __INSTRUMENTDECODER_H__
 #define __INSTRUMENTDECODER_H__
 
-#include <openspace/util/decoder.h>
+#include <modules/newhorizons/util/decoder.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
 

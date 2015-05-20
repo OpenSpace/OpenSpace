@@ -22,27 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCANNERDECODER_H__
-#define __SCANNERDECODER_H__
+#include <modules/base/ephemeris/dynamicephemeris.h>
 
-#include <openspace/util/decoder.h>
-#include <openspace/util/powerscaledcoordinate.h>
+namespace {
+    const std::string KeyPosition = "Position";
+}
 
 namespace openspace {
-    
-class ScannerDecoder : public Decoder {
-public:
-    ScannerDecoder(const ghoul::Dictionary& dictionary);
-	virtual std::string getDecoderType();
-	virtual std::vector<std::string> getSpiceIDs();
-    std::string getStopCommand();
-	void setStopCommand(std::string stopCommand);
-private:
-	std::string _type;
-	std::string _abort;
-	std::vector<std::string> _spiceIDs;
-};
-    
-} // namespace openspace
 
-#endif // __SCANNERDECODER_H__
+DynamicEphemeris::DynamicEphemeris(const ghoul::Dictionary& dictionary)
+    : _position(0.f, 0.f, 0.f, 0.f)
+{
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(KeyPosition);
+    if (hasPosition) {
+        glm::vec4 tmp;
+        dictionary.getValue(KeyPosition, tmp);
+        _position = tmp;
+    }
+}
+
+DynamicEphemeris::~DynamicEphemeris() {}
+
+const psc& DynamicEphemeris::position() const {
+    return _position;
+}
+
+void DynamicEphemeris::setPosition(psc pos) {
+	_position = pos;
+}
+
+void DynamicEphemeris::update(const UpdateData&) {}
+
+} // namespace openspace

@@ -25,7 +25,7 @@
 #ifndef __DYNAMICEPHEMERIS_H__
 #define __DYNAMICEPHEMERIS_H__
 
-#include "ephemeris.h"
+#include <openspace/scene/ephemeris.h>
 
 namespace openspace {
     

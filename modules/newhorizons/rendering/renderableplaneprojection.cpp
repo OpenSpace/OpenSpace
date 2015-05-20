@@ -29,8 +29,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/staticephemeris.h>
-#include <openspace/scene/dynamicephemeris.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>

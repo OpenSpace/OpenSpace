@@ -22,24 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICEPHEMERIS_H__
-#define __STATICEPHEMERIS_H__
+#ifndef __SCANNERDECODER_H__
+#define __SCANNERDECODER_H__
 
-#include "ephemeris.h"
+#include <modules/newhorizons/util/decoder.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     
-class StaticEphemeris: public Ephemeris {
+class ScannerDecoder : public Decoder {
 public:
-    StaticEphemeris(const ghoul::Dictionary& dictionary
-                                = ghoul::Dictionary());
-    virtual ~StaticEphemeris();
-    virtual const psc& position() const;
-	virtual void update(const UpdateData& data) override;
+    ScannerDecoder(const ghoul::Dictionary& dictionary);
+	virtual std::string getDecoderType();
+	virtual std::vector<std::string> getSpiceIDs();
+    std::string getStopCommand();
+	void setStopCommand(std::string stopCommand);
 private:
-    psc _position;
+	std::string _type;
+	std::string _abort;
+	std::vector<std::string> _spiceIDs;
 };
     
 } // namespace openspace
 
-#endif // __STATICEPHEMERIS_H__
+#endif // __SCANNERDECODER_H__

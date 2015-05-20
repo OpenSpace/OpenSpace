@@ -22,25 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TARGETDECODER_H__
-#define __TARGETDECODER_H__
+#include <modules/newhorizons/util/decoder.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/util/decoder.h>
-
-#include <openspace/util/powerscaledcoordinate.h>
+namespace {
+const std::string _loggerCat = "Decoder";
+}
 
 namespace openspace {
+
+Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
+{
+	ghoul::TemplateFactory<Decoder>* factory
+		= FactoryManager::ref().factory<Decoder>();
+	Decoder* result = factory->create(type, dictionary);
+
+    if (result == nullptr) {
+        LERROR("Failed creating Payload object of type '" << type << "'");
+        return nullptr;
+    }
+    return result;
+}
+
+Decoder::Decoder()
+{
+}
     
-class TargetDecoder : public Decoder {
-public:
-	TargetDecoder(const ghoul::Dictionary& dictionary);
-	virtual std::string getDecoderType();
-	virtual std::vector<std::string> getTranslation();
-private:
-	std::string _type;
-	std::vector<std::string> _names;
-};
+Decoder::Decoder(const ghoul::Dictionary& dictionary)
+{
+}
+    
+Decoder::~Decoder()
+{
+}
     
 } // namespace openspace
-
-#endif // __TARGETDECODER_H__

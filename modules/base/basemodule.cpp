@@ -37,13 +37,16 @@
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablefieldlines.h>
-#include <modules/base/rendering/renderablecrawlingline.h>
 #include <modules/base/rendering/renderableplanet.h>
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/wavefrontgeometry.h>
+
+#include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/ephemeris/dynamicephemeris.h>
+#include <modules/base/ephemeris/spiceephemeris.h>
 
 namespace openspace {
 
@@ -52,7 +55,7 @@ bool BaseModule::initialize() {
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
@@ -64,14 +67,19 @@ bool BaseModule::initialize() {
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlane>("RenderablePlane");
     fRenderable->registerClass<RenderableFieldlines>("RenderableFieldlines");
-    fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
+
+    auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
+    ghoul_assert(fEphemeris, "Ephemeris factory was not created");
+    fEphemeris->registerClass<StaticEphemeris>("Static");
+    fEphemeris->registerClass<StaticEphemeris>("Dynamic");
+    fEphemeris->registerClass<SpiceEphemeris>("Spice");
 
     auto fPlanetGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
-    ghoul_assert(fPlanetGeometry, "No planet geometry factory existed");
+    ghoul_assert(fPlanetGeometry, "Planet geometry factory was not created");
     fPlanetGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fModelGeometry, "No model geometry factory existed");
+    ghoul_assert(fModelGeometry, "Model geometry factory was not created");
     fModelGeometry->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
 
     return true;

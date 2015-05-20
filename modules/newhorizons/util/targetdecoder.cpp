@@ -22,53 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/instrumentdecoder.h>
+#include <modules/newhorizons/util/targetdecoder.h>
 
 namespace {
-    const std::string _loggerCat  = "InstrumentDecoder";
-	const std::string keyDetector = "DetectorType";
-	const std::string keySpice    = "Spice";
-	const std::string keyStopCommand = "StopCommand";
+    const std::string _loggerCat = "TargetDecoder";
 }
 
 namespace openspace {
-   
-InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
+
+TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) :_type("TARGET")
 {
-	bool success = dictionary.getValue(keyDetector, _type);
-	ghoul_assert(success, "Instrument has not provided detector type");
-	for_each(_type.begin(), _type.end(), [](char& in){ in = ::toupper(in); });
-
-	if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
-		LWARNING("Scanner must provide stop command, please check mod file.");
-	}else{
-		dictionary.getValue(keyStopCommand, _stopCommand);
-	}
-
-	std::vector<std::string> spice;
-	ghoul::Dictionary spiceDictionary;
-	success = dictionary.getValue(keySpice, spiceDictionary);
-	ghoul_assert(success, "Instrument did not provide spice ids");
-
-
-	_spiceIDs.resize(spiceDictionary.size());
-	for (int i = 0; i < _spiceIDs.size(); ++i) {
-		std::string id;
-		spiceDictionary.getValue(std::to_string(i + 1), id);
-		_spiceIDs[i] = id;
+	_names.resize(dictionary.size());
+	for (int i = 0; i < _names.size(); ++i) {
+		std::string readMe;
+		dictionary.getValue(std::to_string(i + 1), readMe);
+		_names[i] = readMe;
 	}
 }
 
-std::string InstrumentDecoder::getStopCommand(){
-	return _stopCommand;
-}
-
-std::string InstrumentDecoder::getDecoderType(){
+std::string TargetDecoder::getDecoderType(){
 	return _type;
 }
 
-std::vector<std::string> InstrumentDecoder::getTranslation(){
-	return _spiceIDs;
+std::vector<std::string> TargetDecoder::getTranslation(){
+	return _names;
 }
 
 } // namespace openspace

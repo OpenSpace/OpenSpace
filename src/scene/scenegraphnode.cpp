@@ -36,7 +36,7 @@
 #include <ghoul/opengl/shaderobject.h>
 #include <ghoul/misc/highresclock.h>
 
-#include <openspace/scene/staticephemeris.h>
+#include <modules/base/ephemeris/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 

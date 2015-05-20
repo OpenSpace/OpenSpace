@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/sequenceparser.h>
+#include <modules/newhorizons/util/sequenceparser.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/decoder.h>
+#include <modules/newhorizons/util/decoder.h>
 
 namespace {
 	const std::string _loggerCat = "SequenceParser";

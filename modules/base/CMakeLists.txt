@@ -2,7 +2,6 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.h
@@ -14,6 +13,9 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.h
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.h
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -21,7 +23,6 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.cpp
@@ -33,6 +34,9 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

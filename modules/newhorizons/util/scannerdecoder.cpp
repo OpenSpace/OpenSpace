@@ -22,30 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/targetdecoder.h>
+#include <modules/newhorizons/util/scannerdecoder.h>
 
 namespace {
-    const std::string _loggerCat = "TargetDecoder";
+    const std::string _loggerCat = "ScannerDecoder";
 }
 
 namespace openspace {
-
-TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) :_type("TARGET")
+   
+ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER")
 {
-	_names.resize(dictionary.size());
-	for (int i = 0; i < _names.size(); ++i) {
-		std::string readMe;
-		dictionary.getValue(std::to_string(i + 1), readMe);
-		_names[i] = readMe;
+	std::string value;
+	for (int k = 0; k < dictionary.size(); k++){
+		dictionary.getValue(std::to_string(k + 1), value);
+		_spiceIDs.push_back(value);
 	}
 }
-
-std::string TargetDecoder::getDecoderType(){
+std::string ScannerDecoder::getDecoderType(){
 	return _type;
 }
 
-std::vector<std::string> TargetDecoder::getTranslation(){
-	return _names;
+std::vector<std::string> ScannerDecoder::getSpiceIDs(){
+	return _spiceIDs;
+}
+
+void ScannerDecoder::setStopCommand(std::string stopCommand){
+	_abort = stopCommand;
 }
 
 } // namespace openspace

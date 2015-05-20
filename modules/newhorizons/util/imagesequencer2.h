@@ -33,7 +33,7 @@
 #include <map>
 #include <vector>
 
-#include <openspace/util/sequenceparser.h>
+#include <modules/newhorizons/util/sequenceparser.h>
 
 namespace openspace {
 	/**

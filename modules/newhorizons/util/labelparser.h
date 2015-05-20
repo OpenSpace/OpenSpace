@@ -22,55 +22,55 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#ifndef __LABELPARSER_H__
+#define __LABELPARSER_H__
 
-#ifndef __HONGKANGPARSER_H__
-#define __HONGKANGPARSER_H__
-#include <openspace/util/imagesequencer2.h>
-#include <openspace/util/sequenceparser.h>
+#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/sequenceparser.h>
 
 #include <map>
 #include <string>
 #include <vector>
 
 namespace openspace {
-
-class HongKangParser : public SequenceParser {
+class LabelParser : public SequenceParser{
 public:
-	HongKangParser();
-	HongKangParser(const std::string& fileName,
-			        std::string spacecraft,
-					ghoul::Dictionary dictionary,
-			        std::vector<std::string> potentialTargets);
+	LabelParser();
+	LabelParser(const std::string& fileName,
+				ghoul::Dictionary translationDictionary);
 	virtual void create();
 
 	// temporary need to figure this out
-	virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+	std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
 private:
-	double getMetFromET(double et);
-	double getETfromMet(std::string timestr);
-	double getETfromMet(double met);
-
 	void createImage(Image& image,
 			            double startTime,
 			            double stopTime,
 			            std::vector<std::string> instr,
 			            std::string targ,
-			            std::string pot);
+			            std::string path);
+
+	std::string decode(std::string line);
+	std::string encode(std::string line);
 
 	bool augmentWithSpice(Image& image, 
 			                std::string spacecraft, 
 							std::vector<std::string> payload, 
 							std::vector<std::string> potentialTargets);
-
-	std::string _defaultCaptureImage;
-	double _metRef = 299180517;
-
+		
 	std::string _fileName;
 	std::string _spacecraft;
 	std::map<std::string, Decoder*> _fileTranslation;
-	std::vector<std::string> _potentialTargets;
-};
+	std::vector<std::string> _specsOfInterest;
 
+	std::string _target;
+	std::string _instrumentID;
+	std::string _instrumentHostID;
+	std::string _detectorType;
+	std::string _sequenceID;
+	double _startTime;
+	double _stopTime;
+};
 }
-#endif //__HONGKANGPARSER_H__
+#endif //__LABELPARSER_H__

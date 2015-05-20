@@ -22,31 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/staticephemeris.h>
+#ifndef __TARGETDECODER_H__
+#define __TARGETDECODER_H__
 
-namespace {
-    const std::string KeyPosition = "Position";
-}
+#include <modules/newhorizons/util/decoder.h>
+
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
-
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.f, 0.f, 0.f, 0.f)
-{
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(KeyPosition);
-    if (hasPosition) {
-        glm::vec4 tmp;
-        dictionary.getValue(KeyPosition, tmp);
-        _position = tmp;
-    }
-}
-
-StaticEphemeris::~StaticEphemeris() {}
-
-const psc& StaticEphemeris::position() const {
-    return _position;
-}
-
-void StaticEphemeris::update(const UpdateData&) {}
-
+    
+class TargetDecoder : public Decoder {
+public:
+	TargetDecoder(const ghoul::Dictionary& dictionary);
+	virtual std::string getDecoderType();
+	virtual std::vector<std::string> getTranslation();
+private:
+	std::string _type;
+	std::vector<std::string> _names;
+};
+    
 } // namespace openspace
+
+#endif // __TARGETDECODER_H__

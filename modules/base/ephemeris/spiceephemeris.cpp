@@ -22,35 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/dynamicephemeris.h>
+#include <modules/base/ephemeris/spiceephemeris.h>
+
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 namespace {
-    const std::string KeyPosition = "Position";
+    const std::string _loggerCat = "SpiceEphemeris";
+	//const std::string keyGhosting = "EphmerisGhosting";
+
+    const std::string KeyBody = "Body";
+    const std::string KeyOrigin = "Observer";
+    const std::string KeyKernels = "Kernels";
 }
 
 namespace openspace {
-
-DynamicEphemeris::DynamicEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.f, 0.f, 0.f, 0.f)
+    
+SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
+    : _targetName("")
+    , _originName("")
+    , _position()
+	, _kernelsLoadedSuccessfully(true)
 {
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(KeyPosition);
-    if (hasPosition) {
-        glm::vec4 tmp;
-        dictionary.getValue(KeyPosition, tmp);
-        _position = tmp;
-    }
+    const bool hasBody = dictionary.getValue(KeyBody, _targetName);
+    if (!hasBody)
+        LERROR("SpiceEphemeris does not contain the key '" << KeyBody << "'");
+
+    const bool hasObserver = dictionary.getValue(KeyOrigin, _originName);
+    if (!hasObserver)
+        LERROR("SpiceEphemeris does not contain the key '" << KeyOrigin << "'");
+
+	//dictionary.getValue(keyGhosting, _ghosting);
+
+	ghoul::Dictionary kernels;
+	dictionary.getValue(KeyKernels, kernels);
+	for (size_t i = 1; i <= kernels.size(); ++i) {
+		std::string kernel;
+		bool success = kernels.getValue(std::to_string(i), kernel);
+		if (!success)
+			LERROR("'" << KeyKernels << "' has to be an array-style table");
+
+		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
+		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
+	}
 }
-
-DynamicEphemeris::~DynamicEphemeris() {}
-
-const psc& DynamicEphemeris::position() const {
+    
+const psc& SpiceEphemeris::position() const {
     return _position;
 }
 
-void DynamicEphemeris::setPosition(psc pos) {
-	_position = pos;
-}
+void SpiceEphemeris::update(const UpdateData& data) {
+	if (!_kernelsLoadedSuccessfully)
+		return;
 
-void DynamicEphemeris::update(const UpdateData&) {}
+	glm::dvec3 position(0,0,0);
+	double lightTime = 0.0;
+	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
+		"GALACTIC", "NONE", data.time, position, lightTime);
+	
+	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	//if (_ghosting == "TRUE" && interval > 60){
+	//	double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
+	//	SpiceManager::ref().getTargetPosition(_targetName, _originName,
+	//		"GALACTIC", "NONE", _time, position, lightTime);
+	//}
+	//
+	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
+	_position[3] += 3;
+}
 
 } // namespace openspace

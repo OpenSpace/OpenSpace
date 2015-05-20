@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <openspace/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer2.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
@@ -32,8 +32,8 @@
 #include <iterator>
 #include <iomanip>
 #include <limits>
-#include <openspace/util/hongkangparser.h>
-#include <openspace/util/instrumentdecoder.h>
+#include <modules/newhorizons/util/hongkangparser.h>
+#include <modules/newhorizons/util/instrumentdecoder.h>
 
 
 namespace {
