@@ -79,6 +79,8 @@ namespace {
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
 
     const std::string DefaultOpenGlVersion = "4.3";
+
+    const int CacheVersion = 1;
     
     struct {
         std::string configurationName;
@@ -221,7 +223,7 @@ bool OpenSpaceEngine::create(
 	}
 
 	// Create the cachemanager
-	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
+	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"), CacheVersion);
 	_engine->_console->initialize();
 
     ImageSequencer2::initialize();
