@@ -60,7 +60,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 	: Renderable(dictionary)
 	, _vertexFilename("")
 	, _constellationFilename("")
-	, _programIsDirty(false)
 	, _distance("distance", "Distance to the celestial Sphere", 15.f, 0.f, 30.f)
 	, _constellationSelection("constellationSelection", "Constellation Selection")
 	, _originReferenceFrame("")
@@ -96,7 +95,6 @@ bool RenderableConstellationBounds::initialize() {
 		"${SHADERS}/modules/constellationbounds/constellationbounds_fs.glsl");
 	if (!_program)
 		return false;
-	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ this->_programIsDirty = true; });
 
 	bool loadSuccess = loadVertexFile();
 	if (!loadSuccess)
@@ -178,10 +176,8 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 }
 
 void RenderableConstellationBounds::update(const UpdateData& data) {
-	if (_programIsDirty) {
+	if (_program->isDirty())
 		_program->rebuildFromFile();
-		_programIsDirty = false;
-	}
 
 	SpiceManager::ref().getPositionTransformMatrix(
 		_originReferenceFrame,

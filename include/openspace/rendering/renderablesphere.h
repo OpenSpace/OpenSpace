@@ -67,7 +67,6 @@ private:
 
     PowerScaledSphere* _sphere;
 
-    bool _programIsDirty;
     bool _sphereIsDirty;
 };
 

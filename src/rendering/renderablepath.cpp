@@ -62,7 +62,6 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
 	, _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _drawLine("drawline", "Draw Line", false)
 	, _programObject(nullptr)
-	, _programIsDirty(true)
     , _successfullDictionaryFetch(true)
 	, _vaoID(0)
 	, _vBufferID(0)
@@ -107,7 +106,6 @@ bool RenderablePath::initialize() {
 		);
 	if (!_programObject)
 		return false;
-	_programObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
 	bool intervalSet = hasTimeInterval();
 	if (intervalSet) {
@@ -197,10 +195,8 @@ void RenderablePath::update(const UpdateData& data) {
 		return;
 	}
 
-	if (_programIsDirty) {
+	if (_programObject->isDirty())
 		_programObject->rebuildFromFile();
-		_programIsDirty = false;
-	}
 }
 
 void RenderablePath::calculatePath(std::string observer) {

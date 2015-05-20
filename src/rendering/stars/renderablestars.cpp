@@ -90,7 +90,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _scaleFactor("scaleFactor", "Scale Factor", 5.f, 0.f, 10.f)
     , _minBillboardSize("minBillboardSize", "Min Billboard Size", 15.f, 1.f, 100.f)
 	, _program(nullptr)
-	, _programIsDirty(false)
 	, _speckFile("")
 	, _nValuesPerStar(0)
 	, _vao(0)
@@ -151,7 +150,6 @@ bool RenderableStars::initialize() {
 		"${SHADERS}/modules/stars/star_ge.glsl");
 	if (!_program)
 		return false;
-	_program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 	completeSuccess &= loadData();
 	completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
 
@@ -227,10 +225,9 @@ void RenderableStars::render(const RenderData& data) {
 }
 
 void RenderableStars::update(const UpdateData& data) {
-	if (_programIsDirty) {
+	if (_program->isDirty()) {
 		_program->rebuildFromFile();
 		_dataIsDirty = true;
-		_programIsDirty = false;
 	}
 	
 	if (_dataIsDirty) {

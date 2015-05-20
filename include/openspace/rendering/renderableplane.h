@@ -75,7 +75,6 @@ private:
     bool _planeIsDirty;
 
 	ghoul::opengl::ProgramObject* _shader;
-    bool _programIsDirty;
     bool _textureIsDirty;
 	ghoul::opengl::Texture* _texture;
     ghoul::filesystem::File* _textureFile;

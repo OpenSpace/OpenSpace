@@ -43,7 +43,6 @@ public:
 
 private:
     ghoul::opengl::ProgramObject* _program;
-    bool _programIsDirty;
 
     std::string _instrumentName;
     std::string _source;

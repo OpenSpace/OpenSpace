@@ -85,7 +85,6 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 	, _seedPointSource("source", "SeedPoint Source")
 	, _seedPointSourceFile("sourceFile", "SeedPoint File")
     , _program(nullptr)
-    , _programIsDirty(false)
 	, _seedPointsAreDirty(true)
 	, _fieldLinesAreDirty(true)
     , _fieldlineVAO(0)
@@ -210,12 +209,6 @@ bool RenderableFieldlines::initialize() {
 	if (!_program)
 		return false;
 
-	_program->setProgramObjectCallback(
-		[&](ghoul::opengl::ProgramObject*) {
-			this->_programIsDirty = true;
-		}
-	);
-
 	return true;
 }
 
@@ -251,10 +244,8 @@ void RenderableFieldlines::render(const RenderData& data) {
 }
 
 void RenderableFieldlines::update(const UpdateData&) {
-	if (_programIsDirty) {
+	if (_program->isDirty())
 		_program->rebuildFromFile();
-		_programIsDirty = false;
-	}
 
 	if (_seedPointsAreDirty) {
 		loadSeedPoints();

@@ -77,7 +77,6 @@ private:
     properties::FloatProperty _minBillboardSize;
 
 	ghoul::opengl::ProgramObject* _program;
-	bool _programIsDirty;
 
 	std::string _speckFile;
 

@@ -74,6 +74,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < newArgc; ++i)
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
 
+    // Need to set this before the creation of the sgct::Engine
 	sgct::MessageHandler::instance()->setLogToConsole(false);
 	sgct::MessageHandler::instance()->setShowTime(false);
 	sgct::MessageHandler::instance()->setLogToCallback(true);

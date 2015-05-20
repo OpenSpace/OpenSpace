@@ -184,15 +184,6 @@ bool Scene::initialize() {
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
 
-	// projection program
-	tmpProgram = ProgramObject::Build("projectiveProgram", 
-		"${SHADERS}/projectiveTexture_vs.glsl",
-		"${SHADERS}/projectiveTexture_fs.glsl"); 
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("projectiveProgram", tmpProgram);
-	
 	// pscstandard
 	tmpProgram = ProgramObject::Build("pscstandard",
 		"${SHADERS}/pscstandard_vs.glsl",

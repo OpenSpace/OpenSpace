@@ -52,7 +52,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     , _texturePath("")
     , _planeIsDirty(false)
 	, _shader(nullptr)
-	, _programIsDirty(false)
     , _textureIsDirty(false)
 	, _texture(nullptr)
 	, _quad(0)
@@ -162,10 +161,8 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 		updatePlane(img, time);
 	}
 
-	if (_programIsDirty) {
+	if (_shader->isDirty())
 		_shader->rebuildFromFile();
-		_programIsDirty = false;
-	}
 
 	if (_textureIsDirty) {
 		loadTexture();

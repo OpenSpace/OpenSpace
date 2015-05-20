@@ -54,7 +54,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	, _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
-    , _programIsDirty(false)
     , _textureIsDirty(false)
     , _texture(nullptr)
 	, _quad(0)
@@ -129,7 +128,6 @@ bool RenderablePlane::initialize() {
 	if (_shader == nullptr)
 		OsEng.ref().configurationManager()->getValue("planeProgram", _shader);
 	
-	_shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 	loadTexture();
 
 	return isReady();
@@ -168,10 +166,8 @@ void RenderablePlane::render(const RenderData& data) {
 }
 
 void RenderablePlane::update(const UpdateData& data) {
-    if (_programIsDirty) {
+    if (_shader->isDirty())
         _shader->rebuildFromFile();
-        _programIsDirty = false;
-    }
 
     if (_planeIsDirty)
         createPlane();

@@ -43,57 +43,56 @@ namespace ghoul {
 }
 
 namespace openspace {
-	struct LinePoint;
+struct LinePoint;
 
-	struct target {
-		std::string body;
-		std::string frame;
-		std::string node;
-	};
+struct target {
+	std::string body;
+	std::string frame;
+	std::string node;
+};
 
-	class RenderablePlaneProjection : public Renderable {
+class RenderablePlaneProjection : public Renderable {
 
 
-	public:
-		RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-		~RenderablePlaneProjection();
+public:
+	RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
+	~RenderablePlaneProjection();
 
-		bool initialize() override;
-		bool deinitialize() override;
+	bool initialize() override;
+	bool deinitialize() override;
 
-		bool isReady() const override;
+	bool isReady() const override;
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
 
-	private:
-		void loadTexture();
-		void updatePlane(const Image img, double currentTime);
-		std::string findClosestTarget(double currentTime);
-		void setTarget(std::string body);
+private:
+	void loadTexture();
+	void updatePlane(const Image img, double currentTime);
+	std::string findClosestTarget(double currentTime);
+	void setTarget(std::string body);
 
-		std::string _texturePath;
+	std::string _texturePath;
 		
-		bool _planeIsDirty;
+	bool _planeIsDirty;
 
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
+	glm::dmat3 _stateMatrix;
+	std::string _frame;
 
-		ghoul::opengl::ProgramObject* _shader;
-		bool _programIsDirty;
-		bool _textureIsDirty;
-		ghoul::opengl::Texture* _texture;
-		ghoul::filesystem::File* _textureFile;
-		GLuint _quad;
-		GLuint _vertexPositionBuffer;
-		std::string _spacecraft;
-		std::string _instrument;
+	ghoul::opengl::ProgramObject* _shader;
+	bool _textureIsDirty;
+	ghoul::opengl::Texture* _texture;
+	ghoul::filesystem::File* _textureFile;
+	GLuint _quad;
+	GLuint _vertexPositionBuffer;
+	std::string _spacecraft;
+	std::string _instrument;
 
-		double _previousTime;
-		target _target;
-		std::string _name;
-		bool _moving;
-	};
+	double _previousTime;
+	target _target;
+	std::string _name;
+	bool _moving;
+};
 
 } // namespace openspace
 #endif 

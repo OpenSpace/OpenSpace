@@ -102,7 +102,6 @@ private:
 	std::string _constellationFilename; ///< The file containing constellation names
 
 	ghoul::opengl::ProgramObject* _program;
-	bool _programIsDirty;
 
 	/// The list of all loaded constellation bounds
 	std::vector<ConstellationBound> _constellationBounds;

@@ -66,7 +66,6 @@ private:
 	properties::BoolProperty _showTimestamps;
 
     ghoul::opengl::ProgramObject* _programObject;
-    bool _programIsDirty;
 
     bool _successfullDictionaryFetch;
 

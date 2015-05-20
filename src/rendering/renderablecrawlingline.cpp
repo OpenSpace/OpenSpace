@@ -48,7 +48,6 @@ namespace openspace {
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _programIsDirty(false)
     , _imageSequenceTime(-1.f)
     , _vao(0)
     , _vbo(0)
@@ -83,7 +82,6 @@ bool RenderableCrawlingLine::initialize() {
     );
     if (!_program)
         return false;
-    _program->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
 	glGenVertexArrays(1, &_vao);
 	glGenBuffers(1, &_vbo);
@@ -148,6 +146,8 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 }
 
 void RenderableCrawlingLine::update(const UpdateData& data) {
+    if (_program->isDirty())
+        _program->rebuildFromFile();
     glm::dmat3 transformMatrix = glm::dmat3(1);
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
 

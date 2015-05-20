@@ -76,7 +76,6 @@ private:
 	properties::StringProperty _seedPointSourceFile;
 
 	ghoul::opengl::ProgramObject* _program;
-	bool _programIsDirty;
 
 	ghoul::Dictionary _vectorFieldInfo;
 	ghoul::Dictionary _fieldlineInfo;

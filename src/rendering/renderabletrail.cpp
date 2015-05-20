@@ -64,7 +64,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _showTimestamps("timestamps", "Show Timestamps", false)
     , _programObject(nullptr)
-    , _programIsDirty(true)
     , _successfullDictionaryFetch(true)
     , _vaoID(0)
     , _vBufferID(0)
@@ -119,7 +118,6 @@ bool RenderableTrail::initialize() {
         "${SHADERS}/modules/trails/ephemeris_fs.glsl");
     if (!_programObject)
         return false;
-    _programObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
     return completeSuccess;
 }
@@ -195,10 +193,8 @@ void RenderableTrail::update(const UpdateData& data) {
         return;
     }
 
-    if (_programIsDirty) {
+    if (_programObject->isDirty())
         _programObject->rebuildFromFile();
-        _programIsDirty = false;
-    }
     double lightTime = 0.0;
     psc pscPos;
 

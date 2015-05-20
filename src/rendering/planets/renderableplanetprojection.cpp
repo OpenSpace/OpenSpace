@@ -208,15 +208,20 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection(){
+RenderablePlanetProjection::~RenderablePlanetProjection() {
     deinitialize();
 }
 
-bool RenderablePlanetProjection::initialize(){
+bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
-    if (_programObject == nullptr)
-        completeSuccess
-              &= OsEng.ref().configurationManager()->getValue("projectiveProgram", _programObject);
+    if (_programObject == nullptr) {
+        // projection program
+        _programObject = ghoul::opengl::ProgramObject::Build("projectiveProgram",
+            "${SHADERS}/modules/projection/projectiveTexture_vs.glsl",
+            "${SHADERS}/modules/projection/projectiveTexture_fs.glsl");
+        if (!_programObject)
+            return false;
+    }
 
 	if (_fboProgramObject == nullptr)
 		completeSuccess
@@ -492,8 +497,10 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	if (openspace::ImageSequencer2::ref().isReady() && _performProjection){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
-	}
-	//floor fading to decimal
+    }
+
+    if (_programObject->isDirty())
+        _programObject->rebuildFromFile();
 }
 
 void RenderablePlanetProjection::loadProjectionTexture(){

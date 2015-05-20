@@ -27,9 +27,9 @@
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
+  
 
-
-uniform float time;
+uniform float  time;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 

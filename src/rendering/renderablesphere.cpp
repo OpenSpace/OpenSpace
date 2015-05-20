@@ -59,7 +59,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _sphere(nullptr)
-    , _programIsDirty(false)
     , _sphereIsDirty(false)
 {
     std::string path;
@@ -130,7 +129,6 @@ bool RenderableSphere::initialize() {
         "${SHADERS}/modules/sphere/sphere_fs.glsl");
     if (!_shader)
         return false;
-    _shader->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*){ _programIsDirty = true; });
 
     loadTexture();
 
@@ -172,10 +170,8 @@ void RenderableSphere::render(const RenderData& data) {
 }
 
 void RenderableSphere::update(const UpdateData& data) {
-    if (_programIsDirty) {
+    if (_shader->isDirty())
         _shader->rebuildFromFile();
-        _programIsDirty = false;
-    }
 
     if (_sphereIsDirty) {
         delete _sphere;

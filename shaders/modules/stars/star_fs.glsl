@@ -28,7 +28,7 @@
 const int COLOROPTION_COLOR = 0;
 const int COLOROPTION_VELOCITY = 1; 
 const int COLOROPTION_SPEED = 2;
-
+ 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float minBillboardSize;
