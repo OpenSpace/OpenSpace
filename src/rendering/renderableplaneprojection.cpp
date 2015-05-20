@@ -41,11 +41,16 @@
 
 namespace {
 	const std::string _loggerCat = "RenderablePlaneProjection";
+    const std::string KeySpacecraft = "Spacecraft";
+    const std::string KeyInstrument = "Instrument";
+    const std::string KeyMoving = "Moving";
+    const std::string KeyTexture = "Texture";
+    const std::string KeyName = "Name";
+    const std::string GalacticFrame = "GALACTIC";
+    const double REALLY_FAR = 99999999999;
 }
 
 namespace openspace {
-
-using namespace constants::renderableplaneprojection;
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
@@ -59,13 +64,13 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 	, _name("ImagePlane")
 	, _previousTime(0)
 {
-	dictionary.getValue(keySpacecraft, _spacecraft);
-	dictionary.getValue(keyInstrument, _instrument);
-	dictionary.getValue(keyMoving, _moving);
-	dictionary.getValue(keyName, _name);
+	dictionary.getValue(KeySpacecraft, _spacecraft);
+	dictionary.getValue(KeyInstrument, _instrument);
+	dictionary.getValue(KeyMoving, _moving);
+	dictionary.getValue(KeyName, _name);
 
 	std::string texturePath = "";
-	bool success = dictionary.getValue(keyTexture, _texturePath);
+	bool success = dictionary.getValue(KeyTexture, _texturePath);
 	if (success) {
 		_texturePath = absPath(_texturePath);
 		_textureFile = new ghoul::filesystem::File(_texturePath);
@@ -149,7 +154,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 	double time = data.time;
 	const Image img = openspace::ImageSequencer2::ref().getLatestImageForInstrument(_instrument);
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, galacticFrame, time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time, _stateMatrix);
 	
 	double timePast = 0.0;
 	if (img.path != "")
@@ -217,17 +222,17 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 	double lt;
 	psc projection[4];
 
-	SpiceManager::ref().getTargetPosition(_target.body, _spacecraft, galacticFrame, "CN+S", currentTime, vecToTarget, lt);
+	SpiceManager::ref().getTargetPosition(_target.body, _spacecraft, GalacticFrame, "CN+S", currentTime, vecToTarget, lt);
 	// The apparent position, CN+S, makes image align best with target 
 
 	for (int j = 0; j < bounds.size(); ++j) {
-		openspace::SpiceManager::ref().frameConversion(bounds[j], frame, galacticFrame, currentTime);
+		openspace::SpiceManager::ref().frameConversion(bounds[j], frame, GalacticFrame, currentTime);
 		glm::dvec3 cornerPosition = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, bounds[j]);
 		
 		if (!_moving) {
 			cornerPosition -= vecToTarget;
 		}
-		openspace::SpiceManager::ref().frameConversion(cornerPosition, galacticFrame, _target.frame, currentTime);
+		openspace::SpiceManager::ref().frameConversion(cornerPosition, GalacticFrame, _target.frame, currentTime);
 				
 		projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(cornerPosition[0], cornerPosition[1], cornerPosition[2]);
 		projection[j][3] += 3;
@@ -308,7 +313,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	psc spacecraftPos;
 	double lt;
-	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", galacticFrame, "NONE", currentTime, spacecraftPos, lt);
+	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", GalacticFrame, "NONE", currentTime, spacecraftPos, lt);
 
 
 	for (auto node : nodes)

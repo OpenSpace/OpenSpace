@@ -50,6 +50,7 @@ namespace {
 	const std::string _loggerCat     = "RenderableModel";
 	const std::string keySource      = "Rotation.Source";
 	const std::string keyDestination = "Rotation.Destination";
+    const std::string keyGeometry    = "Geometry";
 	const std::string keyBody        = "Body";
 	const std::string keyStart       = "StartTime";
 	const std::string keyEnd         = "EndTime";
@@ -76,23 +77,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModel");
-	//std::string path;
-	//success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
- //   ghoul_assert(success, "Module path was not passed to RenderableModel");
 
 	ghoul::Dictionary geometryDictionary;
-	success = dictionary.getValue(
-		constants::renderablemodel::keyGeometry, geometryDictionary);
+	success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
-		//geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
 		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 	}
 
 	std::string texturePath = "";
 	success = dictionary.getValue("Textures.Color", texturePath);
 	if (success)
-		//_colorTexturePath = /*path + "/"*/ + texturePath;
         _colorTexturePath = absPath(texturePath);
 
 	addPropertySubOwner(_geometry);

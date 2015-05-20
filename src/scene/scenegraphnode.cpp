@@ -45,7 +45,9 @@
 #include <cctype>
 
 namespace {
-const std::string _loggerCat = "SceneGraphNode";
+    const std::string _loggerCat = "SceneGraphNode";
+    const std::string KeyRenderable = "Renderable";
+    const std::string KeyEphemeris = "Ephemeris";
 }
 
 namespace openspace {
@@ -57,24 +59,21 @@ const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
-    using namespace constants::scenegraph;
-    using namespace constants::scenegraphnode;
-
     SceneGraphNode* result = new SceneGraphNode;
 
-    if (!dictionary.hasValue<std::string>(keyName)) {
-        LERROR("SceneGraphNode did not contain a '" << keyName << "' key");
+    if (!dictionary.hasValue<std::string>(KeyName)) {
+        LERROR("SceneGraphNode did not contain a '" << KeyName << "' key");
         return nullptr;
     }
     std::string name;
-    dictionary.getValue(keyName, name);
+    dictionary.getValue(KeyName, name);
     result->setName(name);
 
-    if (dictionary.hasValue<ghoul::Dictionary>(keyRenderable)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
         ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(keyRenderable, renderableDictionary);
+        dictionary.getValue(KeyRenderable, renderableDictionary);
 
-		renderableDictionary.setValue(keyName, name);
+		renderableDictionary.setValue(KeyName, name);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
@@ -86,9 +85,9 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
 
-    if (dictionary.hasKey(keyEphemeris)) {
+    if (dictionary.hasKey(KeyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
-        dictionary.getValue(keyEphemeris, ephemerisDictionary);
+        dictionary.getValue(KeyEphemeris, ephemerisDictionary);
         result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
@@ -100,9 +99,8 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     }
 
     std::string parentName;
-    if (!dictionary.getValue(constants::scenegraphnode::keyParentName, parentName)) {
-        LWARNING("Could not find '" << constants::scenegraphnode::keyParentName <<
-			"' key, using 'Root'.");
+    if (!dictionary.getValue(KeyParentName, parentName)) {
+        LWARNING("Could not find '" << KeyParentName << "' key, using 'Root'.");
         parentName = "Root";
     }
 
@@ -130,13 +128,11 @@ SceneGraphNode::SceneGraphNode()
 {
 }
 
-SceneGraphNode::~SceneGraphNode()
-{
+SceneGraphNode::~SceneGraphNode() {
     deinitialize();
 }
 
-bool SceneGraphNode::initialize()
-{
+bool SceneGraphNode::initialize() {
     if (_renderable)
         _renderable->initialize();
 
@@ -146,8 +142,7 @@ bool SceneGraphNode::initialize()
     return true;
 }
 
-bool SceneGraphNode::deinitialize()
-{
+bool SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {

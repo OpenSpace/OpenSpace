@@ -36,26 +36,25 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-const std::string _loggerCat = "Renderable";
-const std::string keyBody = "Body";
-const std::string keyStart = "StartTime";
-const std::string keyEnd = "EndTime";
+    const std::string _loggerCat = "Renderable";
+    const std::string keyBody = "Body";
+    const std::string keyStart = "StartTime";
+    const std::string keyEnd = "EndTime";
+    const std::string KeyType = "Type";
 }
 
 namespace openspace {
 
-Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
+Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
 	// The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
 	assert(success);
 
     std::string renderableType;
-    success = dictionary.getValue(constants::renderable::keyType, renderableType);
+    success = dictionary.getValue(KeyType, renderableType);
 	if (!success) {
-        LERROR("Renderable '" << name << "' did not have key '"
-                              << constants::renderable::keyType << "'");
+        LERROR("Renderable '" << name << "' did not have key '" << KeyType << "'");
         return nullptr;
 	}
 

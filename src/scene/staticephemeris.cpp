@@ -24,19 +24,19 @@
 
 #include <openspace/scene/staticephemeris.h>
 
-#include <openspace/util/constants.h>
+namespace {
+    const std::string KeyPosition = "Position";
+}
 
 namespace openspace {
 
-using namespace constants::staticephemeris;
-    
 StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
     : _position(0.f, 0.f, 0.f, 0.f)
 {
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(keyPosition);
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(KeyPosition);
     if (hasPosition) {
         glm::vec4 tmp;
-        dictionary.getValue(keyPosition, tmp);
+        dictionary.getValue(KeyPosition, tmp);
         _position = tmp;
     }
 }
@@ -47,8 +47,6 @@ const psc& StaticEphemeris::position() const {
     return _position;
 }
 
-void StaticEphemeris::update(const UpdateData&) {
-
-}
+void StaticEphemeris::update(const UpdateData&) {}
 
 } // namespace openspace

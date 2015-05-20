@@ -31,7 +31,6 @@
 #include <openspace/util/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
-// ghoul includes
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/framebufferobject.h>
@@ -39,11 +38,17 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 
-// std
 #include <algorithm>
 
 namespace {
     const std::string _loggerCat = "RenderableVolumeGL";
+    const std::string KeyVolume = "Volume";
+    const std::string KeyHints = "Hints";
+    const std::string KeyTransferFunction = "TransferFunction";
+    const std::string KeySampler = "Sampler";
+    const std::string KeyBoxScaling = "BoxScaling";
+    const std::string KeyVolumeName = "VolumeName";
+    const std::string KeyTransferFunctionName = "TransferFunctionName";
 }
 
 namespace openspace {
@@ -67,11 +72,9 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	assert(success);
     
     _filename = "";
-	success = dictionary.getValue(constants::renderablevolumegl::keyVolume,
-		_filename);
+	success = dictionary.getValue(KeyVolume, _filename);
 	if (!success) {
-		LERROR("Node '" << name << "' did not contain a valid '" << 
-			constants::renderablevolumegl::keyVolume << "'");
+		LERROR("Node '" << name << "' did not contain a valid '" <<  KeyVolume << "'");
 		return;
 	}
 	_filename = absPath(_filename);
@@ -81,47 +84,42 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 
     LDEBUG("Volume Filename: " << _filename);
 
-	dictionary.getValue(constants::renderablevolumegl::keyHints, _hintsDictionary);
+	dictionary.getValue(KeyHints, _hintsDictionary);
 
     _transferFunction = nullptr;
     _transferFunctionFile = nullptr;
     _transferFunctionPath = "";
-	success = dictionary.getValue(
-		constants::renderablevolumegl::keyTransferFunction, _transferFunctionPath);
+	success = dictionary.getValue(KeyTransferFunction, _transferFunctionPath);
 	if (!success) {
 		LERROR("Node '" << name << "' did not contain a valid '" <<
-			constants::renderablevolumegl::keyTransferFunction << "'");
+			KeyTransferFunction << "'");
 		return;
 	}
 	_transferFunctionPath = absPath(_transferFunctionPath);
 	_transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
     
 	_samplerFilename = "";
-	success = dictionary.getValue(constants::renderablevolumegl::keySampler,
-		_samplerFilename);
+	success = dictionary.getValue(KeySampler, _samplerFilename);
 	if (!success) {
-		LERROR("Node '" << name << "' did not contain a valid '" <<
-			constants::renderablevolumegl::keySampler << "'");
+		LERROR("Node '" << name << "' did not contain a valid '" << KeySampler << "'");
 		return;
 	}
     _samplerFilename = absPath(_samplerFilename);
 
 	KameleonWrapper kw(_filename);
 	auto t = kw.getGridUnits();
-	if (dictionary.hasKey(constants::renderablevolumegl::keyBoxScaling)) {
+	if (dictionary.hasKey(KeyBoxScaling)) {
 		glm::vec4 scalingVec4(_boxScaling, _w);
-		success = dictionary.getValue(constants::renderablevolumegl::keyBoxScaling,
-			scalingVec4);
+		success = dictionary.getValue(KeyBoxScaling, scalingVec4);
 		if (success) {
 			_boxScaling = scalingVec4.xyz;
 			_w = scalingVec4.w;
 		}
 		else {
-			success = dictionary.getValue(constants::renderablevolumegl::keyBoxScaling,
-				_boxScaling);
+			success = dictionary.getValue(KeyBoxScaling, _boxScaling);
 			if (!success) {
 				LERROR("Node '" << name << "' did not contain a valid '" <<
-					constants::renderablevolumegl::keyBoxScaling << "'");
+					KeyBoxScaling << "'");
 				return;
 			}
 		}
@@ -157,9 +155,8 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 		// Current spherical models no need for offset
 	}
 	
-	dictionary.getValue(constants::renderablevolumegl::keyVolumeName, _volumeName);
-	dictionary.getValue(constants::renderablevolumegl::keyTransferFunctionName,
-		_transferFunctionName);
+	dictionary.getValue(KeyVolumeName, _volumeName);
+	dictionary.getValue(KeyTransferFunctionName, _transferFunctionName);
 
     setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
 }

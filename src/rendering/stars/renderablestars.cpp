@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/stars/renderablestars.h>
 
-#include <openspace/util/constants.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -38,6 +37,10 @@
 
 namespace {
 	const std::string _loggerCat = "RenderableStars";
+
+    const std::string KeyFile = "File";
+    const std::string KeyTexture = "Texture";
+    const std::string KeyColorMap = "ColorMap";
 
     ghoul::filesystem::File* _psfTextureFile;
     ghoul::filesystem::File* _colorTextureFile;
@@ -98,18 +101,17 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     using ghoul::filesystem::File;
 
 	std::string texturePath = "";
-	dictionary.getValue(constants::renderablestars::keyTexture, texturePath);
+	dictionary.getValue(KeyTexture, texturePath);
 	_pointSpreadFunctionTexturePath = absPath(texturePath);
     _psfTextureFile = new File(_pointSpreadFunctionTexturePath);
 
-	dictionary.getValue(constants::renderablestars::keyColorMap, texturePath);
+	dictionary.getValue(KeyColorMap, texturePath);
 	_colorTexturePath = absPath(texturePath);
     _colorTextureFile = new File(_colorTexturePath);
 
-	bool success = dictionary.getValue(constants::renderablestars::keyFile, _speckFile);
+	bool success = dictionary.getValue(KeyFile, _speckFile);
 	if (!success) {
-		LERROR("SpeckDataSource did not contain key '" <<
-			constants::renderablestars::keyFile << "'");
+		LERROR("SpeckDataSource did not contain key '" << KeyFile << "'");
 		return;
 	}
 	_speckFile = absPath(_speckFile);

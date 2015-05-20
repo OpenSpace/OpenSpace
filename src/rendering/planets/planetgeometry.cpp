@@ -28,20 +28,19 @@
 #include <openspace/util/factorymanager.h>
 
 namespace {
-const std::string _loggerCat = "PlanetGeometry";
+    const std::string _loggerCat = "PlanetGeometry";
+    const std::string KeyType = "Type";
 }
 
 namespace openspace {
 namespace planetgeometry {
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
+PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
 	std::string geometryType;
-	const bool success = dictionary.getValue(
-		constants::planetgeometry::keyType, geometryType);
+	const bool success = dictionary.getValue(KeyType, geometryType);
 	if (!success) {
         LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< constants::planetgeometry::keyType << "'");
+			<< KeyType << "'");
         return nullptr;
 	}
     ghoul::TemplateFactory<PlanetGeometry>* factory

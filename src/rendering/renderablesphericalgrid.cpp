@@ -34,6 +34,12 @@
 
 namespace {
 	const std::string _loggerCat = "RenderableSphericalGrid";
+    const std::string KeyGridType = "GridType";
+    const std::string KeyGridColor = "GridColor";
+    const std::string KeyGridMatrix = "GridMatrix";
+    const std::string KeyGridSegments = "GridSegments";
+    const std::string KeyGridRadius = "GridRadius";
+    const std::string KeyGridParentsRotation = "ParentsRotation";
 }
 namespace openspace {
 
@@ -49,15 +55,15 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _mode(GL_LINES)
 {
 	_gridMatrix = glm::mat4(1);
-	dictionary.getValue(constants::renderablesphericalgrid::gridType   , _gridType);
-	dictionary.getValue(constants::renderablesphericalgrid::gridColor  , _gridColor);
+	dictionary.getValue(KeyGridType, _gridType);
+	dictionary.getValue(KeyGridColor, _gridColor);
 
-	staticGrid = dictionary.getValue(constants::renderablesphericalgrid::gridMatrix, _gridMatrix);
+	staticGrid = dictionary.getValue(KeyGridMatrix, _gridMatrix);
 	if (!staticGrid){
-		staticGrid = dictionary.getValue(constants::renderablesphericalgrid::gridPatentsRotiation, _parentsRotation);
+		staticGrid = dictionary.getValue(KeyGridParentsRotation, _parentsRotation);
 	}
 	
-	dictionary.getValue(constants::renderablesphericalgrid::gridSegments, _segments);
+	dictionary.getValue(KeyGridSegments, _segments);
 
 
 	/*glm::vec2 radius;

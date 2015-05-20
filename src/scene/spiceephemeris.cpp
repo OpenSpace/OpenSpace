@@ -24,19 +24,20 @@
 
 #include <openspace/scene/spiceephemeris.h>
 
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/imagesequencer2.h>
 
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
-	const std::string keyGhosting = "EphmerisGhosting";
+	//const std::string keyGhosting = "EphmerisGhosting";
+
+    const std::string KeyBody = "Body";
+    const std::string KeyOrigin = "Observer";
+    const std::string KeyKernels = "Kernels";
 }
 
 namespace openspace {
-    
-using namespace constants::spiceephemeris;
     
 SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     : _targetName("")
@@ -44,23 +45,23 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     , _position()
 	, _kernelsLoadedSuccessfully(true)
 {
-    const bool hasBody = dictionary.getValue(keyBody, _targetName);
+    const bool hasBody = dictionary.getValue(KeyBody, _targetName);
     if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << keyBody << "'");
+        LERROR("SpiceEphemeris does not contain the key '" << KeyBody << "'");
 
-    const bool hasObserver = dictionary.getValue(keyOrigin, _originName);
+    const bool hasObserver = dictionary.getValue(KeyOrigin, _originName);
     if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << keyOrigin << "'");
+        LERROR("SpiceEphemeris does not contain the key '" << KeyOrigin << "'");
 
-	dictionary.getValue(keyGhosting, _ghosting);
+	//dictionary.getValue(keyGhosting, _ghosting);
 
 	ghoul::Dictionary kernels;
-	dictionary.getValue(keyKernels, kernels);
+	dictionary.getValue(KeyKernels, kernels);
 	for (size_t i = 1; i <= kernels.size(); ++i) {
 		std::string kernel;
 		bool success = kernels.getValue(std::to_string(i), kernel);
 		if (!success)
-			LERROR("'" << keyKernels << "' has to be an array-style table");
+			LERROR("'" << KeyKernels << "' has to be an array-style table");
 
 		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
 		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
@@ -80,13 +81,13 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
 		"GALACTIC", "NONE", data.time, position, lightTime);
 	
-	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-	if (_ghosting == "TRUE" && interval > 60){
-		double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
-		SpiceManager::ref().getTargetPosition(_targetName, _originName,
-			"GALACTIC", "NONE", _time, position, lightTime);
-	}
-	
+	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	//if (_ghosting == "TRUE" && interval > 60){
+	//	double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
+	//	SpiceManager::ref().getTargetPosition(_targetName, _originName,
+	//		"GALACTIC", "NONE", _time, position, lightTime);
+	//}
+	//
 	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	_position[3] += 3;
 }

@@ -24,11 +24,11 @@
 
 #include <openspace/rendering/planets/planetgeometryprojection.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 
 namespace {
-const std::string _loggerCat = "PlanetGeometryProjection";
+    const std::string _loggerCat = "PlanetGeometryProjection";
+    const std::string KeyType = "Type";
 }
 
 namespace openspace {
@@ -37,11 +37,10 @@ namespace planetgeometryprojection {
 PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
 	std::string geometryType;
-	const bool success = dictionary.getValue(
-		constants::planetgeometry::keyType, geometryType);
+	const bool success = dictionary.getValue(KeyType, geometryType);
 	if (!success) {
         LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< constants::planetgeometry::keyType << "'");
+			<< KeyType << "'");
         return nullptr;
 	}
 	ghoul::TemplateFactory<PlanetGeometryProjection>* factory

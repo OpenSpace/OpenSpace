@@ -36,89 +36,9 @@ namespace fonts {
 	const std::string keyLight = "Light";
 } // namespace fonts
 
-namespace scenegraph {
- //   const std::string keyPathScene = "ScenePath";
-	//const std::string keyCommonFolder = "CommonFolder";
- //   const std::string keyModules = "Modules";
- //   const std::string keyCamera = "Camera";
- //   const std::string keyFocusObject = "Focus";
- //   const std::string keyPositionObject = "Position";
- //   const std::string keyViewOffset = "Offset";
- //   const std::string keyPathModule = "ModulePath";
-}  // namespace scenegraph
-
 namespace scenegraphnode {
     const std::string keyName = "Name";
-    const std::string keyParentName = "Parent";
-    const std::string keyDependencies = "Dependencies";
-    const std::string keyRenderable = "Renderable";
-    const std::string keyEphemeris = "Ephemeris";
 } // namespace scenegraphnode
-
-namespace renderable {
-    const std::string keyType = "Type";
-} // namespace renderable
-
-namespace planetgeometry {
-	const std::string keyType = "Type";
-} // namespace planetgeometry
-
-namespace renderablemodel {
-	const std::string keyGeometry = "Geometry";
-} // namespace renderablemodel
-
-namespace renderableplaneprojection {
-	const std::string keySpacecraft = "Spacecraft";
-	const std::string keyInstrument = "Instrument";
-	const std::string keyMoving = "Moving";
-	const std::string keyTexture = "Texture";
-	const std::string keyName = "Name";
-	const std::string galacticFrame = "GALACTIC";
-	const double REALLY_FAR = 99999999999;
-} // namespace renderableplaneprojection
-
-namespace renderablestars {
-	const std::string keyFile = "File";
-	const std::string keyTexture = "Texture";
-	const std::string keyColorMap = "ColorMap";
-} // namespace renderablestars
-
-namespace renderablevolumegl {
-	const std::string keyVolume = "Volume";
-	const std::string keyHints = "Hints";
-	const std::string keyTransferFunction = "TransferFunction";
-	const std::string keySampler = "Sampler";
-	const std::string keyBoxScaling = "BoxScaling";
-	const std::string keyVolumeName = "VolumeName";
-	const std::string keyTransferFunctionName = "TransferFunctionName";
-} // namespace renderablevolumegl
-
-namespace renderablesphericalgrid {
-	const std::string gridType = "GridType";
-	const std::string gridColor = "GridColor";
-	const std::string gridMatrix = "GridMatrix";
-	const std::string gridSegments = "GridSegments";
-	const std::string gridRadius = "GridRadius";
-	const std::string gridPatentsRotiation = "ParentsRotation";
-} // namespace renderablesphericalgrid
-
-namespace ephemeris {
-    const std::string keyType = "Type";
-} // namespace ephemeris
-
-namespace staticephemeris {
-    const std::string keyPosition = "Position";
-} // namespace staticephemeris
-
-namespace dynamicephemeris {
-	const std::string keyPosition = "Position";
-} // namespace dynamicephemeris
-
-namespace spiceephemeris {
-    const std::string keyBody = "Body";
-    const std::string keyOrigin = "Observer";
-	const std::string keyKernels = "Kernels";
-} // namespace spiceephemeris
 
 }  // namespace constants
 }  // namespace openspace
