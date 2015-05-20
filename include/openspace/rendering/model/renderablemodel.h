@@ -71,7 +71,7 @@ private:
 	std::string _destination;
 	std::string _target;
 
-	bool _isGhost;
+	//bool _isGhost;
 	int _frameCount;
 
     psc _sunPosition;

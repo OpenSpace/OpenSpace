@@ -170,11 +170,6 @@ bool Scene::initialize() {
 		_programUpdateLock.unlock();
 	};
 
-	// Start Timing for building SceneGraph shaders
-	typedef std::chrono::high_resolution_clock clock_;
-	typedef std::chrono::duration<double, std::ratio<1> > second_;
-	std::chrono::time_point<clock_> beginning(clock_::now()); 
-
 	// fboPassthrough program
 	tmpProgram = ProgramObject::Build("fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
@@ -192,16 +187,6 @@ bool Scene::initialize() {
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
-
-
-	// NH shader
-	tmpProgram = ProgramObject::Build("ModelProgram",
-		"${SHADERS}/model_vs.glsl",
-		"${SHADERS}/model_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("GenericModelShader", tmpProgram);
 
 	// Night texture program
 	tmpProgram = ProgramObject::Build("nightTextureProgram",
@@ -256,11 +241,6 @@ bool Scene::initialize() {
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("GridProgram", tmpProgram);
-
-	// Done building shaders
-    double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
-    LINFO("Time to load scene graph shaders: " << elapsed << " seconds");
-
 
     return true;
 }

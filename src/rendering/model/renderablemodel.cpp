@@ -54,7 +54,7 @@ namespace {
 	const std::string keyStart       = "StartTime";
 	const std::string keyEnd         = "EndTime";
 	const std::string keyFading      = "Shading.Fadeable";
-	const std::string keyGhosting      = "Shading.Ghosting";
+	//const std::string keyGhosting      = "Shading.Ghosting";
 
 }
 
@@ -69,7 +69,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _geometry(nullptr)
     , _alpha(1.f)
-    , _isGhost(false)
+    //, _isGhost(false)
     , _performShading("performShading", "Perform Shading", true)
 	, _frameCount(0)
 {
@@ -115,11 +115,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	}
 	addProperty(_performFade);
 
-	if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
-		bool ghosting;
-		dictionary.getValue(keyGhosting, ghosting);
-		_isGhost = ghosting;
-	}
+	//if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
+	//	bool ghosting;
+	//	dictionary.getValue(keyGhosting, ghosting);
+	//	_isGhost = ghosting;
+	//}
 }
 
 bool RenderableModel::isReady() const {
@@ -131,9 +131,14 @@ bool RenderableModel::isReady() const {
 
 bool RenderableModel::initialize() {
     bool completeSuccess = true;
-    if (_programObject == nullptr)
-        completeSuccess
-              &= OsEng.ref().configurationManager()->getValue("GenericModelShader", _programObject); 
+    if (_programObject == nullptr) {
+        // NH shader
+        _programObject = ghoul::opengl::ProgramObject::Build("ModelProgram",
+            "${SHADERS}/modules/model/model_vs.glsl",
+            "${SHADERS}/modules/model/model_fs.glsl");
+        if (!_programObject)
+            return false;
+    }
 
     loadTexture();
 
@@ -219,24 +224,26 @@ void RenderableModel::render(const RenderData& data) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
+    if (_programObject->isDirty())
+        _programObject->rebuildFromFile();
 	double _time = data.time;
 
 	double futureTime;
-	if (_isGhost){
-		futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
-		double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
-		double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-		double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
-		if (interval > 60) {
-			if (t < 0.8)
-				_fading = static_cast<float>(t);
-			else if (t >= 0.95)
-				_fading = _fading - 0.5f;
-		}
-		else
-			_fading = 0.f;
-		_time = futureTime;
-	}
+	//if (_isGhost){
+	//	futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
+	//	double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
+	//	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	//	double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+	//	if (interval > 60) {
+	//		if (t < 0.8)
+	//			_fading = static_cast<float>(t);
+	//		else if (t >= 0.95)
+	//			_fading = _fading - 0.5f;
+	//	}
+	//	else
+	//		_fading = 0.f;
+	//	_time = futureTime;
+	//}
 
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty())
