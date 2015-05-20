@@ -71,8 +71,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	ghoul_assert(success,
             "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
 
-    std::string path;
-    success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
+    //std::string path;
+    //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
     //ghoul_assert(success,
     //        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
 
@@ -93,9 +93,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // as the requirements are fixed (ab)
     std::string texturePath = "";
 	success = dictionary.getValue("Textures.Color", texturePath);
-    _colorTexturePath = absPath(texturePath);
 	if (success)
-        _colorTexturePath = path + "/" + texturePath;
+        _colorTexturePath = absPath(texturePath);
 
 	std::string nightTexturePath = "";
 	dictionary.getValue("Textures.Night", nightTexturePath);
@@ -103,7 +102,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 	if (nightTexturePath != ""){
 		_hasNightTexture = true;
 		_nightTexturePath = absPath(nightTexturePath);
-		_nightTexturePath = path + "/" + nightTexturePath;
 	}
 
 	addPropertySubOwner(_geometry);

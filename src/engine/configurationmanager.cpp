@@ -39,9 +39,28 @@ namespace {
 
 namespace openspace {
 
+const std::string ConfigurationManager::KeyPaths = "Paths";
+const std::string ConfigurationManager::KeyCache = "CACHE";
+const std::string ConfigurationManager::KeyCachePath = KeyPaths + "." + KeyCache;
+const std::string ConfigurationManager::KeyFonts = "Fonts";
+const std::string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
+const std::string ConfigurationManager::KeyLuaDocumentationType = "LuaDocumentationFile.Type";
+const std::string ConfigurationManager::KeyLuaDocumentationFile = "LuaDocumentationFile.File";
+const std::string ConfigurationManager::KeyPropertyDocumentationType = "PropertyDocumentationFile.Type";
+const std::string ConfigurationManager::KeyPropertyDocumentationFile = "PropertyDocumentationFile.File";
+const std::string ConfigurationManager::KeyConfigScene = "Scene";
+const std::string ConfigurationManager::KeyEnableGui = "EnableGUI";
+const std::string ConfigurationManager::KeyStartupScript = "StartupScripts";
+const std::string ConfigurationManager::KeySettingsScript = "SettingsScripts";
+const std::string ConfigurationManager::KeySpiceTimeKernel = "SpiceKernel.Time";
+const std::string ConfigurationManager::KeySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
+const std::string ConfigurationManager::KeyLogLevel = "Logging.LogLevel";
+const std::string ConfigurationManager::KeyLogImmediateFlush = "Logging.ImmediateFlush";
+const std::string ConfigurationManager::KeyLogs = "Logging.Logs";
+const std::string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
+
 bool ConfigurationManager::loadFromFile(const std::string& filename) {
 	using ghoul::filesystem::FileSystem;
-	using constants::configurationmanager::keyPaths;
     if (!FileSys.fileExists(filename)) {
 		LERROR("Could not find file '" << filename << "'");
         return false;
@@ -65,9 +84,9 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 
 	// Register all the paths
 	ghoul::Dictionary dictionary;
-	const bool success = getValue(keyPaths, dictionary);
+	const bool success = getValue(KeyPaths, dictionary);
 	if (!success) {
-		LERROR("Configuration does not contain the key '" << keyPaths << "'");
+		LERROR("Configuration does not contain the key '" << KeyPaths << "'");
 		return false;
 	}
 
@@ -94,17 +113,17 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 
 	// Remove the Paths dictionary from the configuration manager as those paths might
 	// change later and we don't want to be forced to keep our local copy up to date
-	removeKey(keyPaths);
+	removeKey(KeyPaths);
 
 	return true;
 }
 
 bool ConfigurationManager::checkCompleteness() const {
 	std::vector<std::string> requiredTokens = {
-		constants::configurationmanager::keyPaths,
-		constants::configurationmanager::keyCachePath,
-		constants::configurationmanager::keyFonts,
-		constants::configurationmanager::keyConfigSgct
+		KeyPaths,
+		KeyCachePath,
+		KeyFonts,
+		KeyConfigSgct
 	};
 
 	bool totalSuccess = true;

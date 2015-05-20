@@ -223,7 +223,7 @@ bool OpenSpaceEngine::create(
 	}
 
 	// Create the cachemanager
-	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"), CacheVersion);
+	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);
 	_engine->_console->initialize();
 
     ImageSequencer2::initialize();
@@ -237,7 +237,7 @@ bool OpenSpaceEngine::create(
 	LDEBUG("Determining SGCT configuration file");
 	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
 	_engine->configurationManager()->getValue(
-		constants::configurationmanager::keyConfigSgct, sgctConfigurationPath);
+		ConfigurationManager::KeyConfigSgct, sgctConfigurationPath);
 
 	if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
 		LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
@@ -299,15 +299,13 @@ bool OpenSpaceEngine::initialize() {
 	scriptEngine()->initialize();
 
 	// If a LuaDocumentationFile was specified, generate it now
-	using constants::configurationmanager::keyLuaDocumentationType;
-	using constants::configurationmanager::keyLuaDocumentationFile;
-	const bool hasType = configurationManager()->hasKey(keyLuaDocumentationType);
-	const bool hasFile = configurationManager()->hasKey(keyLuaDocumentationFile);
+	const bool hasType = configurationManager()->hasKey(ConfigurationManager::KeyLuaDocumentationType);
+	const bool hasFile = configurationManager()->hasKey(ConfigurationManager::KeyLuaDocumentationFile);
 	if (hasType && hasFile) {
 		std::string luaDocumentationType;
-		configurationManager()->getValue(keyLuaDocumentationType, luaDocumentationType);
+		configurationManager()->getValue(ConfigurationManager::KeyLuaDocumentationType, luaDocumentationType);
 		std::string luaDocumentationFile;
-		configurationManager()->getValue(keyLuaDocumentationFile, luaDocumentationFile);
+		configurationManager()->getValue(ConfigurationManager::KeyLuaDocumentationFile, luaDocumentationFile);
 
 		luaDocumentationFile = absPath(luaDocumentationFile);
 		_scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
@@ -315,7 +313,7 @@ bool OpenSpaceEngine::initialize() {
 
     bool disableMasterRendering = false;
     configurationManager()->getValue(
-        constants::configurationmanager::keyDisableMasterRendering, disableMasterRendering);
+        ConfigurationManager::KeyDisableMasterRendering, disableMasterRendering);
     _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
 
 
@@ -333,7 +331,7 @@ bool OpenSpaceEngine::initialize() {
 
 	std::string sceneDescriptionPath;
 	success = configurationManager()->getValue(
-		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
+		ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
 	if (success)
 		sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
@@ -419,11 +417,11 @@ bool OpenSpaceEngine::findConfiguration(std::string& filename) {
 
 bool OpenSpaceEngine::loadSpiceKernels() {
 	// Load time kernel
-	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
-	bool success = configurationManager()->getValue(keySpiceTimeKernel, timeKernel);
+	bool success = configurationManager()->getValue(ConfigurationManager::KeySpiceTimeKernel, timeKernel);
+    // Move this to configurationmanager::completenesscheck ---abock
 	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
+		LERROR("Configuration file does not contain a '" << ConfigurationManager::KeySpiceTimeKernel << "'");
 		return false;
 	}
 	SpiceManager::KernelIdentifier id =
@@ -434,11 +432,11 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 	}
 
 	// Load SPICE leap second kernel
-	using constants::configurationmanager::keySpiceLeapsecondKernel;
 	std::string leapSecondKernel;
-	success = configurationManager()->getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	success = configurationManager()->getValue(ConfigurationManager::KeySpiceLeapsecondKernel, leapSecondKernel);
 	if (!success) {
-		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
+        // Move this to configurationmanager::completenesscheck ---abock
+		LERROR("Configuration file does not have a '" << ConfigurationManager::KeySpiceLeapsecondKernel << "'");
 		return false;
 	}
 	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
@@ -472,14 +470,14 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
 void OpenSpaceEngine::runStartupScripts() {
 	ghoul::Dictionary scripts;
 	configurationManager()->getValue(
-		constants::configurationmanager::keyStartupScript, scripts);
+		ConfigurationManager::KeyStartupScript, scripts);
     runScripts(scripts);
 }
 
 void OpenSpaceEngine::runSettingsScripts() {
     ghoul::Dictionary scripts;
     configurationManager()->getValue(
-        constants::configurationmanager::keySettingsScript, scripts);
+        ConfigurationManager::KeySettingsScript, scripts);
     runScripts(scripts);
 }
 
@@ -488,7 +486,7 @@ void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
 
 	ghoul::Dictionary fonts;
-	configurationManager()->getValue(constants::configurationmanager::keyFonts, fonts);
+	configurationManager()->getValue(ConfigurationManager::KeyFonts, fonts);
 
 	for (const std::string& key : fonts.keys()) {
 		std::string font;
@@ -505,18 +503,12 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::configureLogging() {
-	using constants::configurationmanager::keyLogLevel;
-	using constants::configurationmanager::keyLogs;
-
-	if (configurationManager()->hasKeyAndValue<std::string>(keyLogLevel)) {
-		using constants::configurationmanager::keyLogLevel;
-		using constants::configurationmanager::keyLogImmediateFlush;
-
+	if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyLogLevel)) {
 		std::string logLevel;
-		configurationManager()->getValue(keyLogLevel, logLevel);
+		configurationManager()->getValue(ConfigurationManager::KeyLogLevel, logLevel);
 
 		bool immediateFlush = false;
-		configurationManager()->getValue(keyLogImmediateFlush, immediateFlush);
+		configurationManager()->getValue(ConfigurationManager::KeyLogImmediateFlush, immediateFlush);
 
 		LogManager::LogLevel level = LogManager::levelFromString(logLevel);
 		LogManager::deinitialize();
@@ -524,9 +516,9 @@ void OpenSpaceEngine::configureLogging() {
 		LogMgr.addLog(new ConsoleLog);
 	}
 
-	if (configurationManager()->hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
+	if (configurationManager()->hasKeyAndValue<ghoul::Dictionary>(ConfigurationManager::KeyLogs)) {
 		ghoul::Dictionary logs;
-		configurationManager()->getValue(keyLogs, logs);
+		configurationManager()->getValue(ConfigurationManager::KeyLogs, logs);
 
 		for (size_t i = 1; i <= logs.size(); ++i) {
 			ghoul::Dictionary logInfo;

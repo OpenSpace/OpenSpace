@@ -51,6 +51,10 @@ public:
 	};
 
     static std::string RootNodeName;
+
+    static const std::string KeyName;
+    static const std::string KeyParentName;
+    static const std::string KeyDependencies;
     
     SceneGraphNode();
     ~SceneGraphNode();

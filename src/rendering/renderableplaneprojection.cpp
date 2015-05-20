@@ -67,7 +67,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 	std::string texturePath = "";
 	bool success = dictionary.getValue(keyTexture, _texturePath);
 	if (success) {
-		_texturePath = findPath(_texturePath);
+		_texturePath = absPath(_texturePath);
 		_textureFile = new ghoul::filesystem::File(_texturePath);
 	}
 

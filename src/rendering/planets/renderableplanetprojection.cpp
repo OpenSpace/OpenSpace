@@ -103,18 +103,13 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
 	ghoul_assert(success, "");
 
-    std::string path;
-    success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-	ghoul_assert(success, "");
-
-	_defaultProjImage = path + "/textures/defaultProj.png";
+	_defaultProjImage = absPath("textures/defaultProj.png");
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(
 		keyGeometry, geometryDictionary);
 	if (success) {
 		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
-        geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
@@ -158,11 +153,11 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     std::string texturePath = "";
 	success = dictionary.getValue("Textures.Color", texturePath);
 	if (success){
-		_colorTexturePath = path + "/" + texturePath; 
+		_colorTexturePath = absPath(texturePath); 
 	}
 	success = dictionary.getValue("Textures.Project", texturePath);
 	if (success){
-		_projectionTexturePath = path + "/" + texturePath;
+		_projectionTexturePath = absPath(texturePath);
 	}
 	addPropertySubOwner(_geometry);
 	addProperty(_rotation);
@@ -520,7 +515,7 @@ void RenderablePlanetProjection::loadTexture(){
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+		_texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
         if (_texture) {
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -529,7 +524,7 @@ void RenderablePlanetProjection::loadTexture(){
 	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
 		if (_textureOriginal) {
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -538,7 +533,7 @@ void RenderablePlanetProjection::loadTexture(){
 	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage));
+		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage);
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

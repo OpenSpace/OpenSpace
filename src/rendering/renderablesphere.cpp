@@ -61,11 +61,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 	, _sphere(nullptr)
     , _sphereIsDirty(false)
 {
-    std::string path;
-    bool success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-    ghoul_assert(success,
-            "RenderablePlanet need the '" << constants::scenegraph::keyPathModule << "' be specified");
-
     if (dictionary.hasKeyAndValue<glm::vec2>(keySize)) {
         glm::vec2 size;
         dictionary.getValue(keySize, size);
@@ -81,7 +76,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<std::string>(keyTexture)) {
         std::string texture;
         dictionary.getValue(keyTexture, texture);
-        _texturePath = path + '/' + texture;
+        _texturePath = absPath(texture);
     }
 
     _orientation.addOption(Outside, "Outside");
@@ -183,7 +178,7 @@ void RenderableSphere::update(const UpdateData& data) {
 
 void RenderableSphere::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();

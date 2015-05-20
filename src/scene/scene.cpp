@@ -60,6 +60,11 @@ namespace {
     const std::string _moduleExtension = ".mod";
 	const std::string _defaultCommonDirectory = "common";
 	const std::string _commonModuleToken = "${COMMON_MODULE}";
+
+    const std::string KeyCamera = "Camera";
+    const std::string KeyFocusObject = "Focus";
+    const std::string KeyPositionObject = "Position";
+    const std::string KeyViewOffset = "Offset";
 }
 
 namespace openspace {
@@ -257,12 +262,12 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     ghoul::Dictionary cameraDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
+    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
 
-        if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus))
+        if (cameraDictionary.hasKey(KeyFocusObject)
+            && cameraDictionary.getValue(KeyFocusObject, focus))
         {
             auto focusIterator = std::find_if(
                 _graph.nodes().begin(),
@@ -357,8 +362,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         OsEng.interactionHandler()->setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
-	if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
-		&& cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
+	if (cameraDictionary.hasKey(KeyPositionObject)
+		&& cameraDictionary.getValue(KeyPositionObject, position)) {
 
 		LDEBUG("Camera position is (" 
 			<< position[0] << ", " 
@@ -381,8 +386,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	c->setScaling(cameraScaling);
 
 	glm::vec3 viewOffset;
-	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)
-		&& cameraDictionary.getValue(constants::scenegraph::keyViewOffset, viewOffset)) {
+	if (cameraDictionary.hasKey(KeyViewOffset)
+		&& cameraDictionary.getValue(KeyViewOffset, viewOffset)) {
 	    glm::quat rot = glm::quat(viewOffset);
 	    c->rotate(rot);
 	}
@@ -396,15 +401,13 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	}
 
     // If a LuaDocumentationFile was specified, generate it now
-    using constants::configurationmanager::keyPropertyDocumentationType;
-    using constants::configurationmanager::keyPropertyDocumentationFile;
-    const bool hasType = OsEng.configurationManager()->hasKey(keyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager()->hasKey(keyPropertyDocumentationFile);
+    const bool hasType = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager()->getValue(keyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager()->getValue(keyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);

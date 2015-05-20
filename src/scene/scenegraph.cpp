@@ -26,7 +26,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,6 +38,11 @@ namespace {
     const std::string _moduleExtension = ".mod";
 	const std::string _defaultCommonDirectory = "common";
 	const std::string _commonModuleToken = "${COMMON_MODULE}";
+
+    const std::string KeyPathScene = "ScenePath";
+    const std::string KeyModules = "Modules";
+    const std::string KeyCommonFolder = "CommonFolder";
+    const std::string KeyPathModule = "ModulePath";
 }
 
 namespace openspace {
@@ -78,7 +82,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     std::string sceneDescriptionDirectory =
     ghoul::filesystem::File(absSceneFile, true).directoryName();
     std::string sceneDirectory(".");
-    sceneDictionary.getValue(constants::scenegraph::keyPathScene, sceneDirectory);
+    sceneDictionary.getValue(KeyPathScene, sceneDirectory);
 
     // The scene path could either be an absolute or relative path to the description
     // paths directory
@@ -91,14 +95,13 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     else if (FileSys.directoryExists(absoluteCandidate))
         sceneDirectory = absoluteCandidate;
     else {
-        LERROR("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
+        LERROR("The '" << KeyPathScene << "' pointed to a "
             "path '" << sceneDirectory << "' that did not exist");
         return false;
     }
 
-    using constants::scenegraph::keyModules;
     ghoul::Dictionary moduleDictionary;
-    success = sceneDictionary.getValue(keyModules, moduleDictionary);
+    success = sceneDictionary.getValue(KeyModules, moduleDictionary);
     if (!success)
         // There are no modules that are loaded
         return true;
@@ -107,13 +110,12 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     OsEng.scriptEngine()->initializeLuaState(state);
 
     // Get the common directory
-    using constants::scenegraph::keyCommonFolder;
-    bool commonFolderSpecified = sceneDictionary.hasKey(keyCommonFolder);
-    bool commonFolderCorrectType = sceneDictionary.hasKeyAndValue<std::string>(keyCommonFolder);
+    bool commonFolderSpecified = sceneDictionary.hasKey(KeyCommonFolder);
+    bool commonFolderCorrectType = sceneDictionary.hasKeyAndValue<std::string>(KeyCommonFolder);
 
     if (commonFolderSpecified) {
         if (commonFolderCorrectType) {
-            std::string commonFolder = sceneDictionary.value<std::string>(keyCommonFolder);
+            std::string commonFolder = sceneDictionary.value<std::string>(KeyCommonFolder);
             std::string fullCommonFolder = FileSys.pathByAppendingComponent(
                 sceneDirectory,
                 commonFolder
@@ -182,10 +184,10 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             std::string parentName;
 
             moduleDictionary.getValue(key, element);
-            element.setValue(constants::scenegraph::keyPathModule, modulePath);
+            element.setValue(KeyPathModule, modulePath);
 
-            element.getValue(constants::scenegraphnode::keyName, nodeName);
-            element.getValue(constants::scenegraphnode::keyParentName, parentName);
+            element.getValue(SceneGraphNode::KeyName, nodeName);
+            element.getValue(SceneGraphNode::KeyParentName, parentName);
 
             FileSys.setCurrentDirectory(modulePath);
             SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
@@ -199,11 +201,10 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             parents[nodeName] = parentName;
             // Also include loaded dependencies
 
-            using constants::scenegraphnode::keyDependencies;
-            if (element.hasKey(keyDependencies)) {
-                if (element.hasValue<ghoul::Dictionary>(keyDependencies)) {
+            if (element.hasKey(SceneGraphNode::KeyDependencies)) {
+                if (element.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
                     ghoul::Dictionary nodeDependencies;
-                    element.getValue(constants::scenegraphnode::keyDependencies, nodeDependencies);
+                    element.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
 
                     std::vector<std::string> keys = nodeDependencies.keys();
                     for (const std::string& key : keys) {

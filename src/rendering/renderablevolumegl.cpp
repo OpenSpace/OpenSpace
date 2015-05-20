@@ -74,7 +74,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 			constants::renderablevolumegl::keyVolume << "'");
 		return;
 	}
-	_filename = findPath(_filename);
+	_filename = absPath(_filename);
 	if (_filename == "") {
 		return;
 	}
@@ -93,7 +93,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 			constants::renderablevolumegl::keyTransferFunction << "'");
 		return;
 	}
-	_transferFunctionPath = findPath(_transferFunctionPath);
+	_transferFunctionPath = absPath(_transferFunctionPath);
 	_transferFunctionFile = new ghoul::filesystem::File(_transferFunctionPath, true);
     
 	_samplerFilename = "";
@@ -104,7 +104,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 			constants::renderablevolumegl::keySampler << "'");
 		return;
 	}
-    _samplerFilename = findPath(_samplerFilename);
+    _samplerFilename = absPath(_samplerFilename);
 
 	KameleonWrapper kw(_filename);
 	auto t = kw.getGridUnits();

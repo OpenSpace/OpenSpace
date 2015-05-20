@@ -85,15 +85,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 		"Scenegraphnode need to specify '" << constants::scenegraphnode::keyName 
 		<< "' because renderables is going to use this for debugging!");
 #endif
-    // get path if available
-	bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
-#ifndef NDEBUG
-	ghoul_assert(success,
-		"Scenegraphnode need to specify '" << constants::scenegraph::keyPathModule
-		<< "' because renderables is going to use this for debugging!");
-#endif
-	if (success)
-		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 
 	dictionary.getValue(keyStart, _startTime);
 	dictionary.getValue(keyEnd, _endTime);
@@ -119,20 +110,6 @@ const PowerScaledScalar& Renderable::getBoundingSphere()
 
 void Renderable::update(const UpdateData&)
 {
-}
-
-std::string Renderable::findPath(const std::string& path) {
-    std::string tmp = absPath(path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-
-    tmp = absPath(_relativePath + path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-
-    LERROR("Could not find file '" << path << "'");
-
-    return "";
 }
 
 void Renderable::setPscUniforms(

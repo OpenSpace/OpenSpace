@@ -36,37 +36,15 @@ namespace fonts {
 	const std::string keyLight = "Light";
 } // namespace fonts
 
-namespace configurationmanager {
-    const std::string keyPaths = "Paths";
-	const std::string keyCache = "CACHE";
-	const std::string keyCachePath = keyPaths + "." + keyCache;
-	const std::string keyFonts = "Fonts";
-    const std::string keyConfigSgct = "SGCTConfig";
-	const std::string keyLuaDocumentationType = "LuaDocumentationFile.Type";
-	const std::string keyLuaDocumentationFile = "LuaDocumentationFile.File";
-    const std::string keyPropertyDocumentationType = "PropertyDocumentationFile.Type";
-    const std::string keyPropertyDocumentationFile = "PropertyDocumentationFile.File";
-    const std::string keyConfigScene = "Scene";
-	const std::string keyEnableGui = "EnableGUI";
-    const std::string keyStartupScript = "StartupScripts";
-    const std::string keySettingsScript = "SettingsScripts";
-	const std::string keySpiceTimeKernel = "SpiceKernel.Time";
-	const std::string keySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
-	const std::string keyLogLevel = "Logging.LogLevel";
-	const std::string keyLogImmediateFlush = "Logging.ImmediateFlush";
-	const std::string keyLogs = "Logging.Logs";
-    const std::string keyDisableMasterRendering = "DisableRenderingOnMaster";
-} // namespace configurationmanager
-
 namespace scenegraph {
-    const std::string keyPathScene = "ScenePath";
-	const std::string keyCommonFolder = "CommonFolder";
-    const std::string keyModules = "Modules";
-    const std::string keyCamera = "Camera";
-    const std::string keyFocusObject = "Focus";
-    const std::string keyPositionObject = "Position";
-    const std::string keyViewOffset = "Offset";
-    const std::string keyPathModule = "ModulePath";
+ //   const std::string keyPathScene = "ScenePath";
+	//const std::string keyCommonFolder = "CommonFolder";
+ //   const std::string keyModules = "Modules";
+ //   const std::string keyCamera = "Camera";
+ //   const std::string keyFocusObject = "Focus";
+ //   const std::string keyPositionObject = "Position";
+ //   const std::string keyViewOffset = "Offset";
+ //   const std::string keyPathModule = "ModulePath";
 }  // namespace scenegraph
 
 namespace scenegraphnode {
