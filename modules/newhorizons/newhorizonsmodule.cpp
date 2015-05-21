@@ -43,7 +43,15 @@
 
 namespace openspace {
 
+NewHorizonsModule::NewHorizonsModule() {
+    setName("NewHorizons");
+}
+
 bool NewHorizonsModule::initialize() {
+    bool success = OpenSpaceModule::initialize();
+    if (!success)
+        return false;
+
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Decoder>);
 

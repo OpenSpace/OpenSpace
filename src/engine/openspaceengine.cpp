@@ -110,9 +110,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     SpiceManager::initialize();
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
-
-    // Register modules
-    _moduleEngine->initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -225,6 +222,9 @@ bool OpenSpaceEngine::create(
 				LERROR("Directory '" << p << "' could not be created");
 		}
 	}
+
+    // Register modules
+    _engine->_moduleEngine->initialize();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);

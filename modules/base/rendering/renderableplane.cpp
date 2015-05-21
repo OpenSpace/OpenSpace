@@ -128,8 +128,8 @@ bool RenderablePlane::initialize() {
 	if (_shader == nullptr) {
         // Plane Program
         _shader = ghoul::opengl::ProgramObject::Build("PlaneProgram",
-            "${SHADERS}/modules/plane/plane_vs.glsl",
-            "${SHADERS}/modules/plane/plane_fs.glsl");
+            "${MODULE_BASE}/shaders/plane_vs.glsl",
+            "${MODULE_BASE}/shaders/plane_fs.glsl");
         if (!_shader)
             return false;
     }

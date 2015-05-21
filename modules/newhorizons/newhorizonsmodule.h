@@ -31,6 +31,7 @@ namespace openspace {
 
 class NewHorizonsModule : public OpenSpaceModule {
 public:
+    NewHorizonsModule();
     bool initialize() override;
 };
 

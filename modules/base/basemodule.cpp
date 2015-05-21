@@ -48,9 +48,19 @@
 #include <modules/base/ephemeris/dynamicephemeris.h>
 #include <modules/base/ephemeris/spiceephemeris.h>
 
+#include <ghoul/filesystem/filesystem>
+
 namespace openspace {
 
+BaseModule::BaseModule() {
+    setName("Base");
+}
+
 bool BaseModule::initialize() {
+    bool success = OpenSpaceModule::initialize();
+    if (!success)
+        return false;
+
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
 

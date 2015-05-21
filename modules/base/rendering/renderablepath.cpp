@@ -100,9 +100,8 @@ bool RenderablePath::initialize() {
 
 	bool completeSuccess = true;
 	_programObject = ghoul::opengl::ProgramObject::Build("PathProgram",
-		"${SHADERS}/modules/trails/path_vs.glsl",
-		"${SHADERS}/modules/trails/path_fs.glsl"
-		//,"${SHADERS}/modules/trails/path_gs.glsl"
+		"${MODULE_BASE}/shaders/path_vs.glsl",
+		"${MODULE_BASE}/shaders/path_fs.glsl"
 		);
 	if (!_programObject)
 		return false;
@@ -200,45 +199,48 @@ void RenderablePath::update(const UpdateData& data) {
 }
 
 void RenderablePath::calculatePath(std::string observer) {
-		
-		double interval = (_stop - _start);
-		int segments = static_cast<int>(interval /_increment);
-		double lightTime;
-		bool correctPosition = true;
+	double interval = (_stop - _start);
+	int segments = static_cast<int>(interval /_increment);
 
-		psc pscPos;
-		double currentTime = _start;
-		_vertexArray.resize(segments);
+    if (segments == 0)
+        return;
 
-		//float r, g, b;
-		//float g = _lineColor[1];
-		//float b = _lineColor[2];
-		for (int i = 0; i < segments; i++) {
-			correctPosition = SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
-			pscPos[3] += 3;
+	double lightTime;
+	bool correctPosition = true;
+
+	psc pscPos;
+	double currentTime = _start;
+	_vertexArray.resize(segments);
+
+	//float r, g, b;
+	//float g = _lineColor[1];
+	//float b = _lineColor[2];
+	for (int i = 0; i < segments; i++) {
+		correctPosition = SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
+		pscPos[3] += 3;
 			
-			//if (!correctPosition) {
-			//	r = 1.f;
-			//	g = b = 0.5f;
-			//}
-			//else if ((i % 8) == 0) {
-			//	r = _lineColor[0];
-			//	g = _lineColor[1];
-			//	b = _lineColor[2];
-			//}
-			//else {
-			//	r = g = b = 0.6f;
-			//}
-			//add position
-			_vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
-			//add color for position
-			//_vertexArray[i + 1] = { r, g, b, a };
-			currentTime += _increment;
-		}
-		_lastPosition = pscPos.dvec4();
+		//if (!correctPosition) {
+		//	r = 1.f;
+		//	g = b = 0.5f;
+		//}
+		//else if ((i % 8) == 0) {
+		//	r = _lineColor[0];
+		//	g = _lineColor[1];
+		//	b = _lineColor[2];
+		//}
+		//else {
+		//	r = g = b = 0.6f;
+		//}
+		//add position
+		_vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
+		//add color for position
+		//_vertexArray[i + 1] = { r, g, b, a };
+		currentTime += _increment;
+	}
+	_lastPosition = pscPos.dvec4();
 
-		glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() *  sizeof(VertexInfo), &_vertexArray[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() *  sizeof(VertexInfo), &_vertexArray[0]);
 }
 
 void RenderablePath::sendToGPU() {

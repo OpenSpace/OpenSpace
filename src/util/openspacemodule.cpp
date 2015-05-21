@@ -22,32 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#include <openspace/util/openspacemodule.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem>
+#include <ghoul/logging/logmanager.h>
 
-#include <ghoul/misc/assert.h>
+#include <algorithm>
 
-#include <modules/volume/rendering/renderablevolumegl.h>
-
+namespace {
+    const std::string _loggerCat = "OpenSpaceModule";
+    const std::string ModuleBaseToken = "MODULE_";
+}
+//ghoul::filesystem::FileSystem::TokenOpeningBraces
+//ghoul::filesystem::FileSystem::TokenClosingBraces
 namespace openspace {
 
-VolumeModule::VolumeModule() {
-    setName("Volume");
-}
+bool OpenSpaceModule::initialize() {
+    ghoul_assert(!(name().empty()), "Module name must be set before initialize call");
+    std::string moduleNameUpper = name();
+    std::transform(moduleNameUpper.begin(), moduleNameUpper.end(), moduleNameUpper.begin(), toupper);
+    std::string moduleToken = 
+        ghoul::filesystem::FileSystem::TokenOpeningBraces +
+        ModuleBaseToken +
+        moduleNameUpper +
+        ghoul::filesystem::FileSystem::TokenClosingBraces;
 
-bool VolumeModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
-    if (!success)
-        return false;
-
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableVolumeGL>("RenderableVolumeGL");
-
+    std::string path = modulePath();
+    LDEBUG("Registering module path: " << moduleToken << ": " << path);
+    FileSys.registerPathToken(moduleToken, path);
     return true;
 }
+
+bool OpenSpaceModule::deinitialize() {
+    return true;
+}
+
+std::string OpenSpaceModule::name() const {
+    return _name;
+}
+
+void OpenSpaceModule::setName(std::string name) {
+    _name = std::move(name);
+}
+
+std::string OpenSpaceModule::modulePath() const {
+    std::string moduleName = name();
+    std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
+
+    if (FileSys.directoryExists("${MODULES}/" + moduleName))
+        return absPath("${MODULES}/" + moduleName);
+
+#ifdef EXTERNAL_MODULES_PATHS
+
+#endif
+    LERROR("Could not resolve path for module '" << name() << "'");
+    return "";
+}
+
 
 } // namespace openspace

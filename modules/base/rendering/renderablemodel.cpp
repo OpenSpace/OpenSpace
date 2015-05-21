@@ -128,8 +128,8 @@ bool RenderableModel::initialize() {
     if (_programObject == nullptr) {
         // NH shader
         _programObject = ghoul::opengl::ProgramObject::Build("ModelProgram",
-            "${SHADERS}/modules/model/model_vs.glsl",
-            "${SHADERS}/modules/model/model_fs.glsl");
+            "${MODULE_BASE}/shaders/model_vs.glsl",
+            "${MODULE_BASE}/shaders/model_fs.glsl");
         if (!_programObject)
             return false;
     }

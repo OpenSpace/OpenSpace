@@ -198,6 +198,8 @@ void GUI::initialize() {
 void GUI::initializeGL() {
 	_program = ghoul::opengl::ProgramObject::Build("GUI",
 		"${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
+    if (!_program)
+        return;
 
 	positionLocation = glGetAttribLocation(*_program, "in_position");
 	uvLocation = glGetAttribLocation(*_program, "in_uv");

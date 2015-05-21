@@ -91,8 +91,8 @@ RenderableConstellationBounds::~RenderableConstellationBounds() {
 
 bool RenderableConstellationBounds::initialize() {
 	_program = ghoul::opengl::ProgramObject::Build("ConstellationBounds",
-		"${SHADERS}/modules/constellationbounds/constellationbounds_vs.glsl",
-		"${SHADERS}/modules/constellationbounds/constellationbounds_fs.glsl");
+		"${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
+		"${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
 	if (!_program)
 		return false;
 

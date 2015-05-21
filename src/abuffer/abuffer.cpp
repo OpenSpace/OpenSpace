@@ -191,6 +191,8 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 }
 
 bool ABuffer::updateShader() {
+    if (_resolveShader == nullptr)
+        return false;
 	bool s = _resolveShader->rebuildFromFile();
 	if (s) {
 		int startAt = 0;

@@ -147,9 +147,9 @@ bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
 	_program = ghoul::opengl::ProgramObject::Build("Star",
-		"${SHADERS}/modules/stars/star_vs.glsl",
-		"${SHADERS}/modules/stars/star_fs.glsl",
-		"${SHADERS}/modules/stars/star_ge.glsl");
+		"${MODULE_BASE}/shaders/star_vs.glsl",
+		"${MODULE_BASE}/shaders/star_fs.glsl",
+		"${MODULE_BASE}/shaders/star_ge.glsl");
 	if (!_program)
 		return false;
 	completeSuccess &= loadData();

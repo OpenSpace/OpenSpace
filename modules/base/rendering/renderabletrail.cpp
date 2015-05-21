@@ -114,8 +114,8 @@ bool RenderableTrail::initialize() {
 
     bool completeSuccess = true;
     _programObject = ghoul::opengl::ProgramObject::Build("EphemerisProgram",
-        "${SHADERS}/modules/trails/ephemeris_vs.glsl",
-        "${SHADERS}/modules/trails/ephemeris_fs.glsl");
+        "${MODULE_BASE}/shaders/ephemeris_vs.glsl",
+        "${MODULE_BASE}/shaders/ephemeris_fs.glsl");
     if (!_programObject)
         return false;
 

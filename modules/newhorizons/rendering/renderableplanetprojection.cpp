@@ -212,8 +212,8 @@ bool RenderablePlanetProjection::initialize() {
     if (_programObject == nullptr) {
         // projection program
         _programObject = ghoul::opengl::ProgramObject::Build("projectiveProgram",
-            "${SHADERS}/modules/projection/projectiveTexture_vs.glsl",
-            "${SHADERS}/modules/projection/projectiveTexture_fs.glsl");
+            "${MODULES}/newhorizons/shaders/projectiveTexture_vs.glsl",
+            "${MODULES}/newhorizons/shaders/projectiveTexture_fs.glsl");
         if (!_programObject)
             return false;
     }
@@ -289,7 +289,7 @@ bool RenderablePlanetProjection::deinitialize(){
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
-	return (_geometry != nullptr);
+	return _geometry && _programObject;
 }
 
 void RenderablePlanetProjection::imageProjectGPU(){

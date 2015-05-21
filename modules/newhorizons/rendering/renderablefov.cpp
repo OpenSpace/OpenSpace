@@ -145,8 +145,8 @@ bool RenderableFov::initialize() {
 	bool completeSuccess = true;
     if (_programObject == nullptr) {
         _programObject = ghoul::opengl::ProgramObject::Build("FovProgram",
-            "${SHADERS}/modules/projection/fov_vs.glsl",
-            "${SHADERS}/modules/projection/fov_fs.glsl");
+            "${MODULE_NEWHORIZONS}/shaders/fov_vs.glsl",
+            "${MODULE_NEWHORIZONS}/shaders/fov_fs.glsl");
         if (!_programObject)
             return false;
     }

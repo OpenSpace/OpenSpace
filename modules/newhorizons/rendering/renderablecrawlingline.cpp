@@ -77,8 +77,8 @@ bool RenderableCrawlingLine::initialize() {
 	_frameCounter = 0;
     bool completeSuccess = true;
     _program = ghoul::opengl::ProgramObject::Build("RenderableCrawlingLine",
-        "${SHADERS}/modules/crawlingline/crawlingline_vs.glsl",
-        "${SHADERS}/modules/crawlingline/crawlingline_fs.glsl"
+        "${MODULE_NEWHORIZONS}/shaders/crawlingline_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl"
     );
     if (!_program)
         return false;

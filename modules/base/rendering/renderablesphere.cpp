@@ -120,8 +120,8 @@ bool RenderableSphere::initialize() {
 
     // pscstandard
     _shader = ghoul::opengl::ProgramObject::Build("Sphere",
-        "${SHADERS}/modules/sphere/sphere_vs.glsl",
-        "${SHADERS}/modules/sphere/sphere_fs.glsl");
+        "${MODULES}/base/shaders/sphere_vs.glsl",
+        "${MODULES}/base/shaders/sphere_fs.glsl");
     if (!_shader)
         return false;
 

@@ -34,13 +34,14 @@ public:
     OpenSpaceModule() = default;
     virtual ~OpenSpaceModule() = default;
 
-    virtual bool initialize() { return true; }
-    virtual bool deinitialize() { return true; }
+    virtual bool initialize();
+    virtual bool deinitialize();
 
-    std::string name() const { return _name; }
+    std::string name() const;
 
 protected:
-    void setName(std::string name) { _name = std::move(name); }
+    void setName(std::string name);
+    std::string modulePath() const;
 
     std::string _name;
 };
