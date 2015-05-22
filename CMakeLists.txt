@@ -201,23 +201,23 @@ endif ()
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
+    if (NOT TARGET gtest)
+        add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
+    endif ()
+
     file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
 
     add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-    target_include_directories(OpenSpaceTest PUBLIC "${OPENSPACE_BASE_DIR}/include")
+    target_include_directories(OpenSpaceTest PUBLIC
+        "${OPENSPACE_BASE_DIR}/include"
+        "${OPENSPACE_BASE_DIR}/tests"
+        "${OPENSPACE_EXT_DIR}/ghoul/ext/gtest/include"
+    )
     target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
-
-    # set(OPENSPACE_TEST_DIR ${OPENSPACE_BASE_DIR}/tests)
-    
-    # include_directories("${GHOUL_ROOT_DIR}/ext/gtest/include")
-    # include_directories("${GHOUL_ROOT_DIR}/include")
-    # include_directories("${OPENSPACE_TEST_DIR}")
-    # file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-    
-    # source_group(Tests FILES ${OPENSPACE_TEST_FILES})
-    
-
+    set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
+        "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+    )
 endif (OPENSPACE_HAVE_TESTS)
 
 #############################
