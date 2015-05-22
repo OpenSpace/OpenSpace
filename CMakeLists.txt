@@ -224,10 +224,20 @@ endif (OPENSPACE_HAVE_TESTS)
 #############################
 # Modules
 #############################
-add_subdirectory(modules/base)
-add_subdirectory(modules/newhorizons)
-add_subdirectory(modules/volume)
-target_link_libraries(libOpenSpace openspace-module-base openspace-module-newhorizons openspace-module-volume)
+
+#add_internal_modules
+generate_unset_mod_options_and_depend_sort(${OPENSPACE_MODULE_DIR} OPENSPACE_SORTED_MODULES)
+#Resolve dependencies for selected modules
+resolve_module_dependencies(${OPENSPACE_MODULE_DIR} ${OPENSPACE_SORTED_MODULES})
+
+foreach (moduleDir ${OPENSPACE_SORTED_MODULES})
+    openspace_dir_to_mod_prefix(module ${moduleDir})
+    if (${module})
+        add_subdirectory(modules/${moduleDir})
+        target_link_libraries(libOpenSpace openspace-module-${moduleDir})
+    endif ()
+endforeach ()
+
 
 #############################
 # Project Folder structure (where appropriate)
