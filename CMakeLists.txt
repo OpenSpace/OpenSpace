@@ -96,7 +96,9 @@ if (MSVC)
     endif ()
 
     target_compile_options(libOpenSpace PUBLIC "/MP" "/wd4201" "/wd4127")
-    set_target_properties(OpenSpace PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\"")
+    set_target_properties(OpenSpace PROPERTIES LINK_FLAGS
+		"/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+	)
 elseif (APPLE)
     target_compile_definitions(libOpenSpace PUBLIC "__APPLE__")
 

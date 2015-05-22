@@ -210,7 +210,7 @@ bool OpenSpaceEngine::create(
     LINFOC("OpenSpace Version", 
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_REVISION << " (" << OPENSPACE_VERSION_STRING << ")");
+        OPENSPACE_VERSION_PATCH << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
