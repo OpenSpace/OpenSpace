@@ -168,7 +168,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/version.h
 )
 
 # Place files into source groups

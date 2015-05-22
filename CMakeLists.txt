@@ -32,29 +32,33 @@ mark_as_advanced(CMAKE_INSTALL_PREFIX)
 project (OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
-#########################################################################################
+#############################
 # General Settings
-#########################################################################################
+#############################
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
-set(OPENSPACE_BINARY_DIR ${OPENSPACE_BASE_DIR}/bin/openspace)
-set(OPENSPACE_LIBRARY_DIR ${OPENSPACE_BASE_DIR}/bin/lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/openspace)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS On)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
+
+include (${OPENSPACE_CMAKE_EXT_DIR}/module_macros.cmake)
+
+#############################
 # Set current OpenSpace Version
+#############################
 set(OPENSPACE_MAJOR_VERSION 0)
 set(OPENSPACE_MINOR_VERSION 1)
 set(OPENSPACE_PATCH_VERSION 0)
-mark_as_advanced(OPENSPACE_MAJOR_VERSION,O configurPENSPACE_MINOR_VERSION, OPENSPACE_PATCH_VERSION)
-set(OPENSPACE_VERSION ${OPENSPACE_MAJOR_VERSION}.${OPENSPACE_MINOR_VERSION}.${OPENSPACE_PATCH_VERSION})
 set(OPENSPACE_VERSION_STRING "prerelease-5")
-message(STATUS "Version: ${OPENSPACE_VERSION} (${OPENSPACE_VERSION_STRING})")
-configure_file(${OPENSPACE_CMAKE_EXT_DIR}/version.template ${OPENSPACE_BASE_DIR}/include/openspace/version.h)
+message(STATUS "Version: ${OPENSPACE_MAJOR_VERSION}.${OPENSPACE_MINOR_VERSION}.${OPENSPACE_PATCH_VERSION} (${OPENSPACE_VERSION_STRING})")
+mark_as_advanced(OPENSPACE_MAJOR_VERSION, OPENSPACE_MINOR_VERSION, OPENSPACE_PATCH_VERSION, OPENSPACE_VERSION_STRING)
+configure_file(${OPENSPACE_CMAKE_EXT_DIR}/version.template ${CMAKE_BINARY_DIR}/_generated/include/openspace/version.h)
 
 #############################
 # Including the source files (with source groups already defined)
@@ -66,20 +70,49 @@ include(src/CMakeLists.txt)
 #############################
 add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
 target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
+target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
 
 add_executable(OpenSpace ${OPENSPACE_MAIN})
 target_include_directories(OpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
 target_link_libraries(OpenSpace libOpenSpace)
 
 #############################
+# General Options
+#############################
+if (MSVC)
+    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
+    if (OPENSPACE_ENABLE_VLD)
+        target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
+        target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+    endif ()
+endif ()
+
+#############################
 # Compile settings
 #############################
 if (MSVC)
+    if (MSVC_VERSION LESS 1800)
+        message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2013")
+    endif ()
+
     target_compile_options(libOpenSpace PUBLIC "/MP" "/wd4201" "/wd4127")
     set_target_properties(OpenSpace PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\"")
 elseif (APPLE)
     target_compile_definitions(libOpenSpace PUBLIC "__APPLE__")
-    target_compile_options(libOpenSpace PUBLIC "-std=c++11" "-stdlib=libc++")
+
+    include (CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
+    if (COMPILER_SUPPORTS_CXX11)
+        target_compile_options(libOpenSpace PUBLIC "-std=c++11")
+    elseif (COMPILER_SUPPORTS_CXX0X)
+        target_compile_options(libOpenSpace PUBLIC "-std=c++0x")
+    else ()
+      message(FATAL_ERROR "Compiler does not have C++11 support")
+    endif ()
+
+    target_compile_options(libOpenSpace PUBLIC"-stdlib=libc++")
 
     target_include_directories(libOpenSpace "/Developer/Headers/FlatCarbon")
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -94,7 +127,19 @@ elseif (APPLE)
         ${APP_SERVICES_LIBRARY}
     )
 elseif (UNIX)
-    target_compile_definitions(libOpenSpace PUBLIC "-std=c++0x -ggdb")
+      include (CheckCXXCompilerFlag)
+      CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+      CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+      mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
+      if (COMPILER_SUPPORTS_CXX11)
+        target_compile_options(libOpenSpace PUBLIC "-std=c++11")
+      elseif (COMPILER_SUPPORTS_CXX0X)
+        target_compile_options(libOpenSpace PUBLIC "-std=c++0x")
+      else ()
+        message(FATAL_ERROR "Compiler does not have C++11 support")
+      endif ()
+
+    target_compile_definitions(libOpenSpace PUBLIC "-ggdb")
 endif ()
 
 #############################
@@ -147,8 +192,8 @@ target_include_directories(libOpenSpace PUBLIC ${IMGUI_INCLUDE_DIR})
 #############################
 # Other applications
 #############################
-option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
-if (BUILD_GUI_APPLICATIONS)
+option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
+if (OPENSPACE_BUILD_GUI_APPLICATIONS)
     add_subdirectory(gui)
 endif ()
 
@@ -179,10 +224,28 @@ endif (OPENSPACE_HAVE_TESTS)
 add_subdirectory(modules/base)
 add_subdirectory(modules/newhorizons)
 add_subdirectory(modules/volume)
-
 target_link_libraries(libOpenSpace openspace-module-base openspace-module-newhorizons openspace-module-volume)
 
+#############################
+# Project Folder structure (where appropriate)
+#############################
 
+macro (os_folder target_name folder_name)
+    if (TARGET ${target_name})
+        set_property(TARGET ${target_name} PROPERTY FOLDER ${folder_name})
+    endif ()
+endmacro ()
+
+os_folder(ccmc "External")
+os_folder(cdf "External")
+os_folder(gtest "External" "External")
+os_folder(Imgui "External")
+os_folder(Lua "External")
+os_folder(lz4 "External")
+os_folder(tinyobjloader "External")
+
+os_folder(GhoulTest "Unit Tests")
+os_folder(OpenSpaceTest "Unit Tests")
 
 # set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_EXT_DIR}/ghoul/ext)
 
