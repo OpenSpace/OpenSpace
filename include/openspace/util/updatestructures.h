@@ -42,6 +42,9 @@ struct UpdateData {
 };
 
 struct RenderData {
+    RenderData() = delete;
+    RenderData& operator=(const RenderData& rhs) = delete;
+
 	const Camera& camera;
 	psc position;
 	bool doPerformanceMeasurement;

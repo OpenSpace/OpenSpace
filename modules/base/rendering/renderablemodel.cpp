@@ -222,7 +222,6 @@ void RenderableModel::update(const UpdateData& data) {
         _programObject->rebuildFromFile();
 	double _time = data.time;
 
-	double futureTime;
 	//if (_isGhost){
 	//	futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
 	//	double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
