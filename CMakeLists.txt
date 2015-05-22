@@ -35,7 +35,6 @@ message(STATUS "Generating OpenSpace project")
 #########################################################################################
 # General Settings
 #########################################################################################
-
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
@@ -46,6 +45,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
+
+# Set current OpenSpace Version
+set(OPENSPACE_MAJOR_VERSION 0)
+set(OPENSPACE_MINOR_VERSION 1)
+set(OPENSPACE_PATCH_VERSION 0)
+mark_as_advanced(OPENSPACE_MAJOR_VERSION,O configurPENSPACE_MINOR_VERSION, OPENSPACE_PATCH_VERSION)
+set(OPENSPACE_VERSION ${OPENSPACE_MAJOR_VERSION}.${OPENSPACE_MINOR_VERSION}.${OPENSPACE_PATCH_VERSION})
+set(OPENSPACE_VERSION_STRING "prerelease-5")
+message(STATUS "Version: ${OPENSPACE_VERSION} (${OPENSPACE_VERSION_STRING})")
+configure_file(${OPENSPACE_CMAKE_EXT_DIR}/version.template ${OPENSPACE_BASE_DIR}/include/openspace/version.h)
 
 #############################
 # Including the source files (with source groups already defined)
@@ -65,7 +74,6 @@ target_link_libraries(OpenSpace libOpenSpace)
 #############################
 # Compile settings
 #############################
-
 if (MSVC)
     target_compile_options(libOpenSpace PUBLIC "/MP" "/wd4201" "/wd4127")
     set_target_properties(OpenSpace PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\"")
@@ -92,7 +100,6 @@ endif ()
 #############################
 # Dependencies
 #############################
-
 # Ghoul
 add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
 target_link_libraries(libOpenSpace Ghoul)
