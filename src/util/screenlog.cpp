@@ -24,6 +24,7 @@
 
 #include <openspace/util/screenlog.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
 #include <sgct.h> // sgct::Engine::instance()->getTime()
 
 namespace openspace {

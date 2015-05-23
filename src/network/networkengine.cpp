@@ -31,6 +31,8 @@
 #include <chrono>
 #include <thread>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #include "sgct.h"
 
 namespace {

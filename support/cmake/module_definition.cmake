@@ -41,7 +41,7 @@ function (create_new_module module_name output_library_name)
     add_module_files()
 
     # Create the library
-    add_library(${library_name} ${sources})
+    add_library(${library_name} STATIC ${sources})
 
     # Set compile settings that are common to all modules
     set_common_compile_settings(${library_name})
@@ -87,7 +87,37 @@ function (set_common_compile_settings target_name)
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "/Wx")
         endif ()
-    endif ()    
+    elseif (APPLE)
+        target_compile_definitions(${library_name} PUBLIC "__APPLE__")
+
+        include (CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+        CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+        mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
+        if (COMPILER_SUPPORTS_CXX11)
+            target_compile_options(${library_name} PUBLIC "-std=c++11")
+        elseif (COMPILER_SUPPORTS_CXX0X)
+            target_compile_options(${library_name} PUBLIC "-std=c++0x")
+        else ()
+          message(FATAL_ERROR "Compiler does not have C++11 support")
+        endif ()
+
+        target_compile_options(${library_name} PUBLIC "-stdlib=libc++")
+    elseif (UNIX)
+          include (CheckCXXCompilerFlag)
+          CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+          CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+          mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
+          if (COMPILER_SUPPORTS_CXX11)
+            target_compile_options(${library_name} PUBLIC "-std=c++11")
+          elseif (COMPILER_SUPPORTS_CXX0X)
+            target_compile_options(${library_name} PUBLIC "-std=c++0x")
+          else ()
+            message(FATAL_ERROR "Compiler does not have C++11 support")
+          endif ()
+
+        target_compile_definitions(${library_name} PUBLIC "-ggdb")
+    endif ()
 endfunction ()
 
 
@@ -111,6 +141,7 @@ function (set_openspace_settings target_name)
     )
     target_compile_definitions(${target_name} PUBLIC ${OPENSPACE_DEFINES})
 
+    target_link_libraries(${target_name} Ghoul)
     target_link_libraries(${target_name} libOpenSpace)
 endfunction ()
 

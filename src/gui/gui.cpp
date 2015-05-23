@@ -24,6 +24,8 @@
 
 #include <openspace/gui/gui.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 // This needs to be included first due to Windows.h / winsock2.h complications
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>

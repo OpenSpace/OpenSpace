@@ -26,6 +26,7 @@
 #define SYNCBUFFER_H
 
 #include <vector>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <sgct.h>
 #include <stdint.h>
 
