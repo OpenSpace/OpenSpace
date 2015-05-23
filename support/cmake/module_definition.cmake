@@ -42,6 +42,8 @@ function (create_new_module
     set_openspace_includes(${library_name})
 
     handle_dependencies(${library_name} ${module_name})
+
+    write_module_name(${module_name})
 endfunction ()
 
 # I couldn't make adding the module files to the ${sources} variable to work with a function ---abock
@@ -128,4 +130,13 @@ function (handle_dependencies target_name module_name)
             target_link_libraries(${target_name}  ${${dep_upper}_LIBRARIES})
         endforeach ()
     endif ()
+endfunction ()
+
+function (write_module_name module_name)
+    string(TOLOWER ${module_name} module_name_lower)
+
+    file(WRITE ${CMAKE_BINARY_DIR}/modules/${module_name}/modulename.cmake
+        "set(MODULE_NAME ${module_name}Module)\n"
+        "set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)"
+    )
 endfunction ()

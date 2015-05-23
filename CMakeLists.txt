@@ -293,6 +293,8 @@ foreach (dir ${dir_list})
     endif ()
 endforeach ()
 
+set(MODULE_HEADERS "")
+set(MODULE_CLASSES "")
 
 # Add subdirectories in the correct order
 foreach (module ${sortedModules})
@@ -301,8 +303,40 @@ foreach (module ${sortedModules})
         create_library_name(${module} libraryName)
         add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
         target_link_libraries(libOpenSpace ${libraryName})
+
+        # Create registration file
+        string(TOUPPER ${module} module_upper)
+        unset(MODULE_NAME)
+        unset(MODULE_PATH)
+        include(${CMAKE_BINARY_DIR}/modules/${module}/modulename.cmake)
+
+        list(APPEND MODULE_HEADERS
+            #"#ifdef REGISTRATION_OPENSPACE${module_upper}MODULE\n"
+            "#include <${MODULE_PATH}>\n"
+            #"#endif\n\n"
+        )
+
+        list(APPEND MODULE_CLASSES
+            "new ${MODULE_NAME},\n"
+        )
+
     endif ()
 endforeach ()
+
+function(JOIN VALUES GLUE OUTPUT)
+  string (REGEX REPLACE "([^\\]|^);" "\\1${GLUE}" _TMP_STR "${VALUES}")
+  string (REGEX REPLACE "[\\](.)" "\\1" _TMP_STR "${_TMP_STR}") #fixes escaping
+  set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
+endfunction()
+
+string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
+string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+
+configure_file(
+    ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
+    ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
+)
+
 
 #############################
 # Project Folder structure (where appropriate)

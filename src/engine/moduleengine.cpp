@@ -32,6 +32,8 @@
 #include <modules/newhorizons/newhorizonsmodule.h>
 #include <modules/volume/volumemodule.h>
 
+#include <openspace/moduleregistration.h>
+
 namespace {
     const std::string _loggerCat = "ModuleEngine";
 }
@@ -40,10 +42,8 @@ namespace openspace {
 
 bool ModuleEngine::initialize() {
     LDEBUG("Initializing modules");
-    
-    registerModule(new BaseModule);
-    registerModule(new NewHorizonsModule);
-    registerModule(new VolumeModule);
+
+    registerModules(AllModules);
 
     for (OpenSpaceModule* m : _modules) {
         bool success = m->initialize();
