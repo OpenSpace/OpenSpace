@@ -120,7 +120,6 @@ bool RenderablePath::initialize() {
 bool RenderablePath::deinitialize() {
 	glDeleteVertexArrays(1, &_vaoID);
 	glDeleteBuffers(1, &_vBufferID);
-    //Renderable::deinitialize();
 	return true;
 }
 

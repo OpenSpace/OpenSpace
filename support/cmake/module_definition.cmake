@@ -24,27 +24,39 @@
 
 include (${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 
-function (create_new_module
-        module_name
-                        # Sources
-    )
+# Creates a new project and a library for the module with name <module_name>. The name of
+# the library is returned in <output_library_name> for outside configuration
+# The library will have the name openspace-module-<name> and has all of their
+# dependencies set correctly.
+# Dependencies will have to be set in a file called "include.cmake" 
+function (create_new_module module_name output_library_name)
     set(sources ${ARGN})
     project(${module_name})
     # Create a library name of the style: openspace-module-${name}
     create_library_name(${module_name} library_name)
 
-    message(STATUS "Configuring module ${MODULE_NAME}: ${library_name}")
+    message(STATUS "Configuring module ${module_name}: ${library_name}")
 
+    # Add the module files to the list of sources
     add_module_files()
 
+    # Create the library
     add_library(${library_name} ${sources})
+
+    # Set compile settings that are common to all modules
     set_common_compile_settings(${library_name})
-    set_openspace_includes(${library_name})
+
+    # Propagate the includes and compiler definitions that are set in the libOpenSpace target
+    set_openspace_settings(${library_name})
 
     handle_dependencies(${library_name} ${module_name})
 
     write_module_name(${module_name})
+
+    set(${output_library_name} ${library_name})
 endfunction ()
+
+
 
 # I couldn't make adding the module files to the ${sources} variable to work with a function ---abock
 # Adds the <name>module.h and <name>module.cpp files to the list of sources and provides
@@ -58,6 +70,8 @@ macro (add_module_files)
     source_group("Module Files" FILES ${module_files})
     list(APPEND sources ${module_files})
 endmacro ()
+
+
 
 # Set the compiler settings that are common to all modules
 function (set_common_compile_settings target_name)
@@ -76,8 +90,10 @@ function (set_common_compile_settings target_name)
     endif ()    
 endfunction ()
 
+
+
 # Propagate the include directives from the libOpenSpace target into this module
-function (set_openspace_includes target_name)
+function (set_openspace_settings target_name)
     get_property(
         OPENSPACE_INCLUDE_DIR
         TARGET libOpenSpace
@@ -98,14 +114,12 @@ function (set_openspace_includes target_name)
     target_link_libraries(${target_name} libOpenSpace)
 endfunction ()
 
+
+
 # Loads the dependencies from 'include.cmake' and deals with them
 function (handle_dependencies target_name module_name)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
         include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)
-
-        # if (NOT ${module_name} STREQUAL "Base")
-        #     list(APPEND OPENSPACE_DEPENDENCIES "base")
-        # endif ()
 
         # Handle OpenSpace dependencies
         foreach (dep ${OPENSPACE_DEPENDENCIES})
@@ -131,6 +145,8 @@ function (handle_dependencies target_name module_name)
         endforeach ()
     endif ()
 endfunction ()
+
+
 
 function (write_module_name module_name)
     string(TOLOWER ${module_name} module_name_lower)

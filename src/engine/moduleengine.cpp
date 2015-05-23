@@ -28,10 +28,6 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include <modules/base/basemodule.h>
-#include <modules/newhorizons/newhorizonsmodule.h>
-#include <modules/volume/volumemodule.h>
-
 #include <openspace/moduleregistration.h>
 
 namespace {

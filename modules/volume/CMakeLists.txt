@@ -38,5 +38,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
     "Volume"
+    volume_module
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

@@ -125,7 +125,6 @@ bool RenderableTrail::initialize() {
 bool RenderableTrail::deinitialize() {
     glDeleteVertexArrays(1, &_vaoID);
     glDeleteBuffers(1, &_vBufferID);
-    //Renderable::deinitialize();
     return true;
 }
 
