@@ -386,16 +386,15 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 #define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
 
     if (_onScreenInformation._node != -1) {
-        int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
+        //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
 
-        if (thisId == _onScreenInformation._node) {
-            const unsigned int font_size_mono = _onScreenInformation._size;
-            int x1, xSize, y1, ySize;
-            const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-            sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-            int startY = ySize - 2 * font_size_mono;
-
-        }
+        //if (thisId == _onScreenInformation._node) {
+            //const unsigned int font_size_mono = _onScreenInformation._size;
+            //int x1, xSize, y1, ySize;
+            //const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
+            //sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+            //int startY = ySize - 2 * font_size_mono;
+        //}
     }
 
 	// Print some useful information on the master viewport
@@ -413,14 +412,14 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			int x1, xSize, y1, ySize;
 			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 			int startY = ySize - 2 * font_size_mono;
-			const glm::vec2& scaling = _mainCamera->scaling();
-			const glm::vec3& viewdirection = _mainCamera->viewDirection();
-			const psc& position = _mainCamera->position();
-			const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
-			const PowerScaledScalar& pssl = (position - origin).length();
+			//const glm::vec2& scaling = _mainCamera->scaling();
+			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
+			//const psc& position = _mainCamera->position();
+			//const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
+			//const PowerScaledScalar& pssl = (position - origin).length();
 					
 			// Next 2 lines neccesary for instrument switching to work. 
-			double currentTime = Time::ref().currentTime();
+			//double currentTime = Time::ref().currentTime();
 			// GUI PRINT 
 			// Using a macro to shorten line length and increase readability
 
@@ -837,7 +836,11 @@ void RenderEngine::storePerformanceMeasurements() {
 			SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 
 			memset(layout->entries[i].name, 0, lengthName);
-			strcpy(layout->entries[i].name, node->name().c_str());
+#ifdef _MSC_VER
+            strcpy_s(layout->entries[i].name, node->name().length() + 1, node->name().c_str());
+#else
+            strcpy(layout->entries[i].name, node->name().c_str());
+#endif
 
 			layout->entries[i].currentRenderTime = 0;
 			layout->entries[i].currentUpdateRenderable = 0;

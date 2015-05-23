@@ -81,7 +81,12 @@ PowerScaledCoordinate
 
     // find out how many digits
     // TODO: profile the next two lines and replace with something more efficient (ab)
+#ifdef _MSC_VER
+    sprintf_s(buff, 600, "%.0f", max);
+    //sprintf(buff, "%.0f", max);
+#else
     sprintf(buff, "%.0f", max);
+#endif
     size_t digits = strlen(buff);
 
 	//digits += 3;
