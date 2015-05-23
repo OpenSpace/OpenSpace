@@ -249,8 +249,8 @@ function (handle_option_tests)
 
         set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
             "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-        set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
         )
+        set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
         set_property(TARGET GhoulTest PROPERTY FOLDER "Unit Tests")
