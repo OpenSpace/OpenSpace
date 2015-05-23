@@ -40,6 +40,8 @@
 #include <modules/newhorizons/util/instrumentdecoder.h>
 #include <modules/newhorizons/util/targetdecoder.h>
 
+#include <modules/newhorizons/util/imagesequencer2.h>
+
 
 namespace openspace {
 
@@ -51,6 +53,9 @@ bool NewHorizonsModule::initialize() {
     bool success = OpenSpaceModule::initialize();
     if (!success)
         return false;
+
+    ImageSequencer2::initialize();
+
 
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Decoder>);

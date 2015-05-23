@@ -47,7 +47,6 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <modules/newhorizons/util/imagesequencer2.h> // testing
 #include <openspace/engine/moduleengine.h>
 
 
@@ -231,8 +230,6 @@ bool OpenSpaceEngine::create(
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);
 	_engine->_console->initialize();
-
-    ImageSequencer2::initialize();
 
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");

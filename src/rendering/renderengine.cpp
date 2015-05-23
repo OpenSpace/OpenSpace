@@ -24,8 +24,9 @@
 
 #include <openspace/rendering/renderengine.h> 
 
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer2.h>
-
+#endif
 
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/abuffer/abuffer.h>
@@ -440,6 +441,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			//PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
 			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 			if (openspace::ImageSequencer2::ref().isReady()) {
 				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
@@ -523,7 +525,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 					}
                 }
 			}
-					
+#endif
+
 #undef PrintText
 		}
 
