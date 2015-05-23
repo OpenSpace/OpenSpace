@@ -22,6 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
+include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
@@ -89,15 +91,7 @@ set(SHADER_FILES
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
-set(MODULE_CLASS_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/basemodule.h
-	${CMAKE_CURRENT_SOURCE_DIR}/basemodule.cpp
+create_new_module(
+    "Base"
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
-
-add_library(openspace-module-base ${HEADER_FILES} ${SOURCE_FILES} ${MODULE_CLASS_FILES})
-target_include_directories(openspace-module-base PUBLIC "${OPENSPACE_BASE_DIR}/include" "${OPENSPACE_BASE_DIR}")
-
-get_property(OPENSPACE_INCLUDE_DIR TARGET libOpenSpace PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(openspace-module-base PUBLIC ${OPENSPACE_INCLUDE_DIR})
-get_property(OPENSPACE_DEFINITIONS TARGET libOpenSpace PROPERTY INTERFACE_COMPILE_DEFINITIONS)
-target_compile_definitions(openspace-module-base PUBLIC ${OPENSPACE_DEFINITIONS})

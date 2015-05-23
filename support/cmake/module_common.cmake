@@ -22,21 +22,12 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+function (create_library_name module_name library_name)
+    string(TOLOWER ${module_name} module_name)
+    set(${library_name} "openspace-module-${module_name}" PARENT_SCOPE)
+endfunction ()
 
-set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.h
-)
-source_group("Header Files" FILES ${HEADER_FILES})
-
-set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.cpp
-)
-source_group("Source Files" FILES ${SOURCE_FILES})
-
-create_new_module(
-    "Volume"
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
-)
+function (create_option_name module_name option_name)
+    string(TOUPPER ${module_name} module_name)
+    set(${option_name} "OPENSPACE_MODULE_${module_name}" PARENT_SCOPE)
+endfunction ()

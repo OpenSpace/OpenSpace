@@ -48,7 +48,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/openspace)
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_macros.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_EXT_DIR}/ghoul/ext/CopySharedLibraries.cmake) 
 #############################
 # Set current OpenSpace Version
@@ -80,6 +80,7 @@ target_link_libraries(OpenSpace libOpenSpace)
 #############################
 # General Options
 #############################
+option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 if (MSVC)
     option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
     if (OPENSPACE_ENABLE_VLD)
@@ -97,9 +98,14 @@ if (MSVC)
     endif ()
 
     target_compile_options(libOpenSpace PUBLIC "/MP" "/wd4201" "/wd4127")
+    if (OPENSPACE_WARNINGS_AS_ERRORS)
+        target_compile_options(libOpenSpace PUBLIC "/WX")
+        target_compile_options(OpenSpace PUBLIC "/WX")
+    endif ()
+
     set_target_properties(OpenSpace PROPERTIES LINK_FLAGS
-		"/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-	)
+        "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+    )
 elseif (APPLE)
     target_compile_definitions(libOpenSpace PUBLIC "__APPLE__")
 
@@ -225,19 +231,78 @@ endif (OPENSPACE_HAVE_TESTS)
 # Modules
 #############################
 
-#add_internal_modules
-generate_unset_mod_options_and_depend_sort(${OPENSPACE_MODULE_DIR} OPENSPACE_SORTED_MODULES)
-#Resolve dependencies for selected modules
-resolve_module_dependencies(${OPENSPACE_MODULE_DIR} ${OPENSPACE_SORTED_MODULES})
+# Get all modules in the correct order based on their dependencies
+file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
+set(sortedModules ${moduleDirs})
+foreach (dir ${moduleDirs})
+    if(IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
+        set(defaultModule OFF)
+        if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
+            unset(OPENSPACE_DEPENDENCIES)
+            unset(DEFAULT_MODULE)
+            include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
 
-foreach (moduleDir ${OPENSPACE_SORTED_MODULES})
-    openspace_dir_to_mod_prefix(module ${moduleDir})
-    if (${module})
-        add_subdirectory(modules/${moduleDir})
-        target_link_libraries(libOpenSpace openspace-module-${moduleDir})
+            if (DEFINED DEFAULT_MODULE)
+                set(defaultModule ${DEFAULT_MODULE})
+            endif ()
+            if (OPENSPACE_DEPENDENCIES)
+                foreach (dependency ${OPENSPACE_DEPENDENCIES})
+                    create_library_name(${dependency} library)
+                    if (TARGET ${library})
+                        # already registered
+                        list(REMOVE_ITEM OPENSPACE_DEPENDENCIES ${dependency})
+                    endif ()
+                endforeach ()
+
+                list(APPEND OPENSPACE_DEPENDENCIES ${dir})
+                list(FIND sortedModules ${dir} dir_index)
+                # if (NOT dir STREQUAL "base")
+                #     list(INSERT OPENSPACE_DEPENDENCIES 0 "base")
+                # endif ()
+                list(INSERT sortedModules ${dir_index} ${OPENSPACE_DEPENDENCIES})
+                list(REMOVE_DUPLICATES sortedModules)
+            endif ()
+        endif ()
+        create_option_name(${dir} optionName)
+        option(${optionName} "Build ${dir} Module" ${defaultModule})
+        # create_library_name(${module} ${library})
+    else ()
+        list(REMOVE_ITEM sortedModules ${dir})
     endif ()
 endforeach ()
 
+# Automatically set dependent modules to ON
+set(dir_list ${sortedModules})
+list(REVERSE dir_list)
+foreach (dir ${dir_list})
+    create_option_name(${dir} optionName)
+    if (${optionName})
+        if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
+            unset(OPENSPACE_DEPENDENCIES)
+            unset(DEFAULT_MODULE)
+            include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
+
+            if (OPENSPACE_DEPENDENCIES)
+                foreach (dependency ${OPENSPACE_DEPENDENCIES})
+                    create_option_name(${dependency} dependencyOptionName)
+                    set(${dependencyOptionName} ON CACHE BOOL "ff" FORCE)
+                    message(STATUS "${dependencyOptionName} was set to build, due to dependency towards ${optionName}")
+                endforeach ()
+            endif ()
+        endif ()
+    endif ()
+endforeach ()
+
+
+# Add subdirectories in the correct order
+foreach (module ${sortedModules})
+    create_option_name(${module} optionName)
+    if (${optionName})
+        create_library_name(${module} libraryName)
+        add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
+        target_link_libraries(libOpenSpace ${libraryName})
+    endif ()
+endforeach ()
 
 #############################
 # Project Folder structure (where appropriate)
