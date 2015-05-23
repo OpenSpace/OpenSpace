@@ -342,7 +342,7 @@ function (handle_internal_modules)
 
             # Create registration file
             string(TOUPPER ${module} module_upper)
-            string(TOLOWER ${module{ module_lower)
+            string(TOLOWER ${module} module_lower)
             unset(MODULE_NAME)
             unset(MODULE_PATH)
             include(${CMAKE_BINARY_DIR}/modules/${module_lower}/modulename.cmake)
