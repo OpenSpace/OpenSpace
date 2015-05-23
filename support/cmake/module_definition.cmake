@@ -119,7 +119,7 @@ function (set_common_compile_settings target_name)
             message(FATAL_ERROR "Compiler does not have C++11 support")
           endif ()
 
-        target_compile_definitions(${library_name} PUBLIC "-ggdb")
+        target_compile_options(${library_name} PUBLIC "-ggdb")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "-Werror")
         endif ()        

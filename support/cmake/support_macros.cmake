@@ -135,7 +135,7 @@ function (set_compile_settings)
             message(FATAL_ERROR "Compiler does not have C++11 support")
           endif ()
 
-        target_compile_definitions(libOpenSpace PUBLIC "-ggdb")
+        target_compile_options(libOpenSpace PUBLIC "-ggdb")
     endif ()
 endfunction ()
 
