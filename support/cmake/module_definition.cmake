@@ -188,7 +188,7 @@ endfunction ()
 function (write_module_name module_name)
     string(TOLOWER ${module_name} module_name_lower)
 
-    file(WRITE ${CMAKE_BINARY_DIR}/modules/${module_name}/modulename.cmake
+    file(WRITE ${CMAKE_BINARY_DIR}/modules/${module_name_lower}/modulename.cmake
         "set(MODULE_NAME ${module_name}Module)\n"
         "set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)"
     )

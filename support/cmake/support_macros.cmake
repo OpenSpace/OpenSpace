@@ -342,9 +342,10 @@ function (handle_internal_modules)
 
             # Create registration file
             string(TOUPPER ${module} module_upper)
+            string(TOLOWER ${module{ module_lower)
             unset(MODULE_NAME)
             unset(MODULE_PATH)
-            include(${CMAKE_BINARY_DIR}/modules/${module}/modulename.cmake)
+            include(${CMAKE_BINARY_DIR}/modules/${module_lower}/modulename.cmake)
 
             list(APPEND MODULE_HEADERS
                 #"#ifdef REGISTRATION_OPENSPACE${module_upper}MODULE\n"
