@@ -31,3 +31,8 @@ function (create_option_name module_name option_name)
     string(TOUPPER ${module_name} module_name)
     set(${option_name} "OPENSPACE_MODULE_${module_name}" PARENT_SCOPE)
 endfunction ()
+
+function (create_define_name module_name define_name)
+    string(TOUPPER ${module_name} module_name)
+    set(${define_name} "OPENSPACE_MODULE_${module_name}_ENABLED" PARENT_SCOPE)
+endfunction ()

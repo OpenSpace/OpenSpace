@@ -309,6 +309,8 @@ function (handle_internal_modules)
             create_library_name(${module} libraryName)
             add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
             target_link_libraries(OpenSpace ${libraryName})
+            create_define_name(${module} defineName)
+            target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
 
             # Create registration file
             string(TOUPPER ${module} module_upper)
