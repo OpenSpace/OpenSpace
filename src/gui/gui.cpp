@@ -294,7 +294,7 @@ bool GUI::mouseButtonCallback(int key, int action) {
 	return consumeEvent;
 }
 
-bool GUI::mouseWheelCallback(int position) {
+bool GUI::mouseWheelCallback(double position) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureMouse;
 	if (consumeEvent)

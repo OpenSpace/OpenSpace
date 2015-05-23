@@ -650,7 +650,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 				return;
 		}
 
-		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
+		if (static_cast<unsigned int>(key) == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
 			_console->toggleVisibility();
 
 		if (!_console->isVisible()) {
