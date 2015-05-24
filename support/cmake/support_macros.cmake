@@ -158,7 +158,7 @@ function (add_external_dependencies)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SGCT_INCLUDE_DIRECTORIES})
     target_link_libraries(libOpenSpace ${SGCT_LIBRARIES})
     if (UNIX AND (NOT APPLE))
-        target_link_libraries(libOpenSpace Xcursor Xinerama)
+        target_link_libraries(libOpenSpace Xcursor Xinerama X11)
     endif ()
 
     # Spice
