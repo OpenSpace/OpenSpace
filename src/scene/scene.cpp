@@ -56,7 +56,7 @@
 #include "scene_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "SceneGraph";
+    const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
 	const std::string _defaultCommonDirectory = "common";
 	const std::string _commonModuleToken = "${COMMON_MODULE}";
@@ -281,8 +281,10 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
                 _focus = focus;
                 LDEBUG("Setting camera focus to '" << _focus << "'");
             }
-            else
+            else {
                 LERROR("Could not find focus object '" << focus << "'");
+                _focus = "Root";
+            }
         }
     }
 
@@ -377,7 +379,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
 	// the camera position
 	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
-	//psc relative = fn->worldPosition() - c->position();
+    // Check crash for when fn == nullptr
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 

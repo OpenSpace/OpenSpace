@@ -50,7 +50,7 @@ public:
 	void deinitializeGL();
 
 	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(int position);
+	bool mouseWheelCallback(double position);
 	bool keyCallback(int key, int action);
 	bool charCallback(unsigned int character);
 

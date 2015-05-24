@@ -24,6 +24,8 @@
 
 #include <openspace/gui/gui.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 // This needs to be included first due to Windows.h / winsock2.h complications
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
@@ -40,8 +42,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <imgui.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 namespace {
 	const std::string _loggerCat = "GUI";
@@ -167,7 +167,7 @@ void GUI::initialize() {
 	io.IniFilename = buffer;
 	//io.IniSavingRate = 5.f;
 	io.DeltaTime = 1.f / 60.f;
-	io.PixelCenterOffset = 0.5f;
+	//io.PixelCenterOffset = 0.5f;
 	io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
 	io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
 	io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
@@ -198,6 +198,8 @@ void GUI::initialize() {
 void GUI::initializeGL() {
 	_program = ghoul::opengl::ProgramObject::Build("GUI",
 		"${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
+    if (!_program)
+        return;
 
 	positionLocation = glGetAttribLocation(*_program, "in_position");
 	uvLocation = glGetAttribLocation(*_program, "in_uv");
@@ -207,13 +209,11 @@ void GUI::initializeGL() {
 	glBindTexture(GL_TEXTURE_2D, fontTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	const void* png_data;
-	unsigned int png_size;
-	ImGui::GetDefaultFontData(NULL, NULL, &png_data, &png_size);
-	int tex_x, tex_y, tex_comp;
-	void* tex_data = stbi_load_from_memory((const unsigned char*)png_data, (int)png_size, &tex_x, &tex_y, &tex_comp, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-	stbi_image_free(tex_data);
+	unsigned char* png_data;
+	int tex_x, tex_y;
+    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&png_data, &tex_x, &tex_y);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, png_data);
+	//stbi_image_free(tex_data);
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -290,7 +290,7 @@ bool GUI::mouseButtonCallback(int key, int action) {
 	return consumeEvent;
 }
 
-bool GUI::mouseWheelCallback(int position) {
+bool GUI::mouseWheelCallback(double position) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureMouse;
 	if (consumeEvent)

@@ -47,8 +47,9 @@ namespace {
 
 namespace openspace {
 
-SceneGraph::SceneGraph() {
-}
+SceneGraph::SceneGraph()
+    : _rootNode(nullptr)
+{}
 
 void SceneGraph::clear() {
     // Untested ---abock
@@ -58,6 +59,7 @@ void SceneGraph::clear() {
     }
 
     _nodes.clear();
+    _rootNode = nullptr;
 }
 
 bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
@@ -193,8 +195,9 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
             if (node == nullptr) {
                 LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
-                clear();
-                return false;
+                continue;
+                //clear();
+                //return false;
             }
 
             dependencies[nodeName].push_back(parentName);
@@ -252,12 +255,17 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         }
     }
 
+    std::vector<SceneGraphNodeInternal*> nodesToDelete;
     for (SceneGraphNodeInternal* node : _nodes) {
         if (!nodeIsDependentOnRoot(node)) {
             LERROR("Node '" << node->node->name() << "' has no direct connection to Root.");
-            //clear();
-            return false;
+            nodesToDelete.push_back(node);
         }
+    }
+
+    for (SceneGraphNodeInternal* node : nodesToDelete) {
+        _nodes.erase(std::find(_nodes.begin(), _nodes.end(), node));
+        delete node;
     }
 
     bool s = sortTopologically();

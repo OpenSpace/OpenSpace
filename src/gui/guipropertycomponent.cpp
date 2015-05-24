@@ -112,7 +112,11 @@ namespace {
 
         static const int bufferSize = 256;
         static char buffer[bufferSize];
+#ifdef _MSC_VER
+        strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
+#else
         strcpy(buffer, p->value().c_str());
+#endif
         ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
         std::string newValue(buffer);
 

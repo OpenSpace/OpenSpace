@@ -405,15 +405,15 @@ void InteractionHandler::mouseButtonCallback(int button, int action) {
 		_mouseController->button(MouseAction(action), MouseButton(button));
 }
 
-void InteractionHandler::mousePositionCallback(int x, int y) {
+void InteractionHandler::mousePositionCallback(double x, double y) {
 	if (_mouseController)
 		// TODO Remap screen coordinates to [0,1]
-		_mouseController->move(float(x), float(y));
+		_mouseController->move(static_cast<float>(x), static_cast<float>(y));
 }
 
-void InteractionHandler::mouseScrollWheelCallback(int pos) {
+void InteractionHandler::mouseScrollWheelCallback(double pos) {
 	if (_mouseController)
-		_mouseController->scrollWheel(pos);
+		_mouseController->scrollWheel(static_cast<int>(pos));
 }
 
 void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz, const float &dist){

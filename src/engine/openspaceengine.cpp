@@ -24,6 +24,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 #include <openspace/version.h>
@@ -45,8 +47,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer2.h> // testing
-
+#include <openspace/engine/moduleengine.h>
 
 
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -89,7 +90,6 @@ namespace {
     } commandlineArgumentPlaceholders;
 }
 
-
 namespace openspace {
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
@@ -102,14 +102,15 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _networkEngine(new NetworkEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
+    , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
 	, _isMaster(false)
     , _syncBuffer(nullptr)
 {
-	SpiceManager::initialize();
-	Time::initialize();
-	FactoryManager::initialize();
-	ghoul::systemcapabilities::SystemCapabilities::initialize();
+    FactoryManager::initialize();
+    SpiceManager::initialize();
+    Time::initialize();
+    ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -122,6 +123,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _networkEngine;
     delete _commandlineParser;
     delete _console;
+    delete _moduleEngine;
     delete _gui;
 
     if(_syncBuffer)
@@ -209,7 +211,7 @@ bool OpenSpaceEngine::create(
     LINFOC("OpenSpace Version", 
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_REVISION << " (" << OPENSPACE_VERSION_STRING << ")");
+        OPENSPACE_VERSION_PATCH << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
@@ -222,11 +224,12 @@ bool OpenSpaceEngine::create(
 		}
 	}
 
+    // Register modules
+    _engine->_moduleEngine->initialize();
+
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);
 	_engine->_console->initialize();
-
-    ImageSequencer2::initialize();
 
 	// Register the provided shader directories
 	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
@@ -259,6 +262,7 @@ bool OpenSpaceEngine::create(
 }
 
 void OpenSpaceEngine::destroy() {
+    _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
@@ -646,7 +650,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 				return;
 		}
 
-		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
+		if (static_cast<unsigned int>(key) == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
 			_console->toggleVisibility();
 
 		if (!_console->isVisible()) {
@@ -743,6 +747,10 @@ void OpenSpaceEngine::disableBarrier() {
 
 NetworkEngine* OpenSpaceEngine::networkEngine() {
     return _networkEngine;
+}
+
+ModuleEngine* OpenSpaceEngine::moduleEngine() {
+    return _moduleEngine;
 }
 
 }  // namespace openspace

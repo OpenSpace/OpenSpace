@@ -36,7 +36,7 @@
 #include <ghoul/opengl/shaderobject.h>
 #include <ghoul/misc/highresclock.h>
 
-#include <openspace/scene/staticephemeris.h>
+#include <modules/base/ephemeris/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
@@ -79,6 +79,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
                    << result->name() << "'");
+            delete result;
             return nullptr;
         }
 		result->addPropertySubOwner(result->_renderable);
@@ -92,6 +93,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                    << result->name() << "'");
+            delete result;
             return nullptr;
         }
 		//result->addPropertySubOwner(result->_ephemeris);

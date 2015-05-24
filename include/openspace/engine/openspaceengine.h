@@ -44,6 +44,7 @@ class NetworkEngine;
 class GUI;
 class RenderEngine;
 class SyncBuffer;
+class ModuleEngine;
 
 namespace interaction {
     class InteractionHandler;
@@ -71,6 +72,7 @@ public:
 	scripting::ScriptEngine* scriptEngine();
     NetworkEngine* networkEngine();
 	LuaConsole* console();
+    ModuleEngine* moduleEngine();
 
 	gui::GUI* gui();
 
@@ -116,6 +118,7 @@ private:
     NetworkEngine* _networkEngine;
 	ghoul::cmdparser::CommandlineParser* _commandlineParser;
 	LuaConsole* _console;
+    ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
 	bool _isMaster;
 

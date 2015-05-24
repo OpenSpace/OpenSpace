@@ -56,7 +56,11 @@ PowerScaledScalar PowerScaledScalar::CreatePSS(double d1) {
     double ad1 = std::abs(d1);
 
 	// find out how many digits
-	sprintf ( buff, "%.0f", ad1);
+#ifdef _MSC_VER
+    sprintf_s(buff, 30, "%.0f", ad1);
+#else
+    sprintf(buff, "%.0f", ad1);
+#endif
 	size_t digits = strlen(buff)-1;
 
 	// rescale and return

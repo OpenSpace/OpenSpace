@@ -31,6 +31,8 @@
 #include <chrono>
 #include <thread>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #include "sgct.h"
 
 namespace {
@@ -46,7 +48,7 @@ namespace {
 namespace openspace {
 
 NetworkEngine::NetworkEngine() 
-    : _lastAssignedIdentifier(-1) // -1 is okay as we assign one identifier in this ctor
+    : _lastAssignedIdentifier(MessageIdentifier(-1)) // -1 is okay as we assign one identifier in this ctor
     , _shouldPublishStatusMessage(true)
 {
     static_assert(

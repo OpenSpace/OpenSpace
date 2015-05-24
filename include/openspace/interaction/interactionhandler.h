@@ -108,8 +108,8 @@ public:
 
     void keyboardCallback(int key, int action);
 	void mouseButtonCallback(int button, int action);
-	void mousePositionCallback(int x, int y);
-	void mouseScrollWheelCallback(int pos);
+	void mousePositionCallback(double x, double y);
+	void mouseScrollWheelCallback(double pos);
 
 	double deltaTime() const;
 

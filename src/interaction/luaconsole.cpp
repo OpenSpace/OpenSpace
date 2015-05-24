@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #include <string>
 #include <iostream>

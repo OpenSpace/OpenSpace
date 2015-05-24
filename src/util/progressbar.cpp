@@ -27,9 +27,6 @@
 #include <iomanip>
 
 namespace openspace {
-ProgressBar::ProgressBar(int end, int width) 
-	: ProgressBar(end, width, std::cout) 
-{}
 
 ProgressBar::ProgressBar(int end, int width, std::ostream& stream)
 	: _width(width)

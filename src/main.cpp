@@ -26,6 +26,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logging>
 #include <openspace/rendering/renderengine.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;

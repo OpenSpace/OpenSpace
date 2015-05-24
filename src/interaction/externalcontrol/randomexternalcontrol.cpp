@@ -21,11 +21,12 @@ void *updatedx(void * arg) {
 		//printf("Hello world!\n");
 		*dx = *dx + 0.5;
 
-		// random sleep time
-		int diff = rand() % 200;
 		
 #ifndef __WIN32__
-		usleep(10000*diff);
+        // random sleep time
+        int diff = rand() % 200;
+
+        usleep(10000*diff);
 #endif
 	}
 	delete p;
