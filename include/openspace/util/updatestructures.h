@@ -42,7 +42,13 @@ struct UpdateData {
 };
 
 struct RenderData {
-    RenderData() = delete;
+    RenderData(const Camera& cam, psc pos, bool performance)
+        : camera(cam)
+        , position(std::move(pos))
+        , doPerformanceMeasurement(std::move(performance))
+    {}
+
+    //RenderData() = default;
     RenderData& operator=(const RenderData& rhs) = delete;
 
 	const Camera& camera;
