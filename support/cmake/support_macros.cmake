@@ -252,9 +252,11 @@ function (handle_option_tests)
         )
         target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
-        set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-        )
+        if (MSVC)
+            set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
+                "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+            )
+        endif ()
         set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
