@@ -52,7 +52,7 @@ class RenderablePlane : public Renderable {
 
 public:
 	RenderablePlane(const ghoul::Dictionary& dictionary);
-	~RenderablePlane();
+    ~RenderablePlane();
 
 	bool initialize() override;
 	bool deinitialize() override;

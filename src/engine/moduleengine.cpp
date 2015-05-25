@@ -60,6 +60,7 @@ bool ModuleEngine::deinitialize() {
             LERROR("Could not deinitialize module '" << m->name() << "'");
             return false;
         }
+        delete m;
     }
     LDEBUG("Finished Deinitializing modules");
     return true;

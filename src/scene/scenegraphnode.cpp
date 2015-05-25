@@ -63,6 +63,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     if (!dictionary.hasValue<std::string>(KeyName)) {
         LERROR("SceneGraphNode did not contain a '" << KeyName << "' key");
+        delete result;
         return nullptr;
     }
     std::string name;

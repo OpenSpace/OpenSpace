@@ -33,6 +33,12 @@
 
 #include <stack>
 
+#ifdef _MSC_VER
+#ifdef OPENSPACE_ENABLE_VLD
+#include <vld.h>
+#endif
+#endif
+
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
@@ -169,7 +175,13 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         }
 
         ghoul::Dictionary moduleDictionary;
+//#ifdef OPENSPACE_ENABLE_VLD
+//        VLDDisable();
+//#endif
         bool s = ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+//#ifdef OPENSPACE_ENABLE_VLD
+//        VLDEnable();
+//#endif
         if (!s)
             continue;
 
@@ -226,6 +238,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             _nodes.push_back(internalNode);
         }
     }
+    ghoul::lua::destroyLuaState(state);
     FileSys.setCurrentDirectory(oldDirectory);
 
     for (SceneGraphNodeInternal* node : _nodes) {

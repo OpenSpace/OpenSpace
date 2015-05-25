@@ -53,8 +53,10 @@ void setupPostFX();
 GLint _postFXTexLoc;
 GLint _postFXOpacityLoc;
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
-	const std::string _loggerCat = "main";
+    const std::string _loggerCat = "main";
 }
 
 int main(int argc, char** argv) {
@@ -76,16 +78,16 @@ int main(int argc, char** argv) {
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
 
     // Need to set this before the creation of the sgct::Engine
-	sgct::MessageHandler::instance()->setLogToConsole(false);
-	sgct::MessageHandler::instance()->setShowTime(false);
-	sgct::MessageHandler::instance()->setLogToCallback(true);
-	sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
+    sgct::MessageHandler::instance()->setLogToConsole(false);
+    sgct::MessageHandler::instance()->setShowTime(false);
+    sgct::MessageHandler::instance()->setLogToCallback(true);
+    sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
     
-	LDEBUG("Creating SGCT Engine");
+    LDEBUG("Creating SGCT Engine");
     _sgctEngine = new sgct::Engine(newArgc, newArgv);
 
     // deallocate sgct c arguments
@@ -100,9 +102,9 @@ int main(int argc, char** argv) {
     _sgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
     _sgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
     _sgctEngine->setMousePosCallbackFunction(mainMousePosCallback);
-	_sgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
-	_sgctEngine->setExternalControlCallback(mainExternalControlCallback);
-	_sgctEngine->setCharCallbackFunction(mainCharCallback);
+    _sgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
+    _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
+    _sgctEngine->setCharCallbackFunction(mainCharCallback);
 
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions
@@ -110,9 +112,9 @@ int main(int argc, char** argv) {
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
 
     // try to open a window
-	LDEBUG("Initialize SGCT Engine");
+    LDEBUG("Initialize SGCT Engine");
 #ifdef __APPLE__
-	sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
+    sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
 #else
     std::map<std::string, sgct::Engine::RunMode> versionMapping = {
         { "4.2", sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
@@ -126,27 +128,27 @@ int main(int argc, char** argv) {
     }
     sgct::Engine::RunMode rm = versionMapping[openGlVersion];
 #endif
-	const bool initSuccess = _sgctEngine->init(rm);
+    const bool initSuccess = _sgctEngine->init(rm);
     if (!initSuccess) {
-		LFATAL("Initializing failed");
+        LFATAL("Initializing failed");
         // could not open a window, deallocates and exits
         delete _sgctEngine;
         openspace::OpenSpaceEngine::destroy();
         return EXIT_FAILURE;
     }
 
-	//is this node the master?	(must be set after call to _sgctEngine->init())
-	OsEng.setMaster(_sgctEngine->isMaster());
+    //is this node the master?	(must be set after call to _sgctEngine->init())
+    OsEng.setMaster(_sgctEngine->isMaster());
 
     // Main loop
-	LDEBUG("Starting rendering loop");
+    LDEBUG("Starting rendering loop");
     _sgctEngine->render();
 
-	LDEBUG("Destroying OpenSpaceEngine");
-	openspace::OpenSpaceEngine::destroy();
+    LDEBUG("Destroying OpenSpaceEngine");
+    openspace::OpenSpaceEngine::destroy();
 
     // Clean up (de-allocate)
-	LDEBUG("Destroying SGCT Engine");
+    LDEBUG("Destroying SGCT Engine");
     delete _sgctEngine;
 
     // Exit program
@@ -154,44 +156,44 @@ int main(int argc, char** argv) {
 }
 
 void mainInitFunc() {
-	bool success = OsEng.initialize();
-	if (success)
-		success = OsEng.initializeGL();
+    bool success = OsEng.initialize();
+    if (success)
+        success = OsEng.initializeGL();
 
-	if (!success) {
-		LFATAL("Initializing OpenSpaceEngine failed");
-		std::cout << "Press any key to continue...";
-		std::cin.ignore(100);
-		exit(EXIT_FAILURE);
-	}
+    if (!success) {
+        LFATAL("Initializing OpenSpaceEngine failed");
+        std::cout << "Press any key to continue...";
+        std::cin.ignore(100);
+        exit(EXIT_FAILURE);
+    }
 
-	//temporary post-FX solution, TODO add a more permanent solution @JK
-	setupPostFX();
+    //temporary post-FX solution, TODO add a more permanent solution @JK
+    setupPostFX();
 }
 
 void mainPreSyncFunc() {
-	OsEng.preSynchronization();
+    OsEng.preSynchronization();
 }
 
 void mainPostSyncPreDrawFunc() {
-	OsEng.postSynchronizationPreDraw();
+    OsEng.postSynchronizationPreDraw();
 }
 
 void mainRenderFunc() {
     using glm::mat4;
     using glm::translate;
-	//not the most efficient, but for clarity @JK
-	
-	mat4 userMatrix = translate(mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
-	mat4 sceneMatrix = _sgctEngine->getModelMatrix();
-	mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
-	
-	//dont shift nav-direction on master, makes it very tricky to navigate @JK
-	if (!OsEng.ref().isMaster())
-		viewMatrix = viewMatrix * sceneMatrix;
+    //not the most efficient, but for clarity @JK
+    
+    mat4 userMatrix = translate(mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
+    mat4 sceneMatrix = _sgctEngine->getModelMatrix();
+    mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
+    
+    //dont shift nav-direction on master, makes it very tricky to navigate @JK
+    if (!OsEng.ref().isMaster())
+        viewMatrix = viewMatrix * sceneMatrix;
 
-	mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
-	OsEng.render(projectionMatrix, viewMatrix);
+    mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
+    OsEng.render(projectionMatrix, viewMatrix);
 }
 
 void mainPostDrawFunc() {
@@ -200,7 +202,7 @@ void mainPostDrawFunc() {
 
 void mainExternalControlCallback(const char* receivedChars, int size) {
     if (OsEng.isMaster())
-		OsEng.externalControlCallback(receivedChars, size, 0);
+        OsEng.externalControlCallback(receivedChars, size, 0);
 }
 
 void mainKeyboardCallback(int key, int action) {
@@ -224,8 +226,8 @@ void mainMouseScrollCallback(double posX, double posY) {
 }
 
 void mainCharCallback(unsigned int codepoint) {
-	if (OsEng.isMaster())
-		OsEng.charCallback(codepoint);
+    if (OsEng.isMaster())
+        OsEng.charCallback(codepoint);
 }
 
 void mainEncodeFun() {
@@ -237,30 +239,30 @@ void mainDecodeFun() {
 }
 
 void mainLogCallback(const char* msg){
-	std::string message = msg;
-	// Remove the trailing \n that is passed along
-	LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
+    std::string message = msg;
+    // Remove the trailing \n that is passed along
+    LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
 }
 
 void postFXPass(){
-	glUniform1i(_postFXTexLoc, 0);
+    glUniform1i(_postFXTexLoc, 0);
     if (OsEng.isMaster())
         glUniform1f(_postFXOpacityLoc, 1.f);
     else
-		glUniform1f(_postFXOpacityLoc, OsEng.renderEngine()->globalBlackOutFactor());
+        glUniform1f(_postFXOpacityLoc, OsEng.renderEngine()->globalBlackOutFactor());
 }
 
 void setupPostFX(){
 #ifndef __APPLE__
-	sgct::PostFX fx[1];
-	sgct::ShaderProgram *shader;
-	fx[0].init("OpacityControl", absPath("${SHADERS}/postFX_vs.glsl"), absPath("${SHADERS}/postFX_fs.glsl"));
-	fx[0].setUpdateUniformsFunction(postFXPass);
-	shader = fx[0].getShaderProgram();
-	shader->bind();
-	_postFXTexLoc = shader->getUniformLocation("Tex");
-	_postFXOpacityLoc = shader->getUniformLocation("Opacity");
-	shader->unbind();
-	_sgctEngine->addPostFX(fx[0]);
+    sgct::PostFX fx[1];
+    sgct::ShaderProgram *shader;
+    fx[0].init("OpacityControl", absPath("${SHADERS}/postFX_vs.glsl"), absPath("${SHADERS}/postFX_fs.glsl"));
+    fx[0].setUpdateUniformsFunction(postFXPass);
+    shader = fx[0].getShaderProgram();
+    shader->bind();
+    _postFXTexLoc = shader->getUniformLocation("Tex");
+    _postFXOpacityLoc = shader->getUniformLocation("Opacity");
+    shader->unbind();
+    _sgctEngine->addPostFX(fx[0]);
 #endif
 }

@@ -137,6 +137,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {
     delete _psfTextureFile;
     delete _colorTextureFile;
+    delete _colorTexture;
 }
 
 bool RenderableStars::isReady() const {

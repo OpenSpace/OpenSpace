@@ -109,6 +109,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
 RenderablePlane::~RenderablePlane() {
     delete _textureFile;
+    _textureFile = nullptr;
 }
 
 bool RenderablePlane::isReady() const {
@@ -142,9 +143,19 @@ bool RenderablePlane::initialize() {
 bool RenderablePlane::deinitialize() {
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
+
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
+
 	delete _texture;
+    _texture = nullptr;
+
+    delete _textureFile;
+    _textureFile = nullptr;
+
+    delete _shader;
+    _shader = nullptr;
+
 	return true;
 }
 

@@ -43,6 +43,7 @@ namespace openspace {
 class RenderableTrail : public Renderable {
 public:
     RenderableTrail(const ghoul::Dictionary& dictionary);
+    ~RenderableTrail();
 
     bool initialize() override;
     bool deinitialize() override;

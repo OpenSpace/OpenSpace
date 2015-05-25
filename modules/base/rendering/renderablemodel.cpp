@@ -148,12 +148,13 @@ bool RenderableModel::deinitialize() {
 	if (_geometry) {
 		_geometry->deinitialize();
 		delete _geometry;
+        _geometry = nullptr;
 	}
-	if (_texture)
-		delete _texture;
+	delete _texture;
+    _texture = nullptr;
 
-	_geometry = nullptr;
-	_texture = nullptr;
+    delete _programObject;
+    _programObject = nullptr;
 	return true;
 }
 

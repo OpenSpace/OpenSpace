@@ -49,7 +49,7 @@
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
 
-
+#include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -148,6 +148,8 @@ bool OpenSpaceEngine::create(
     std::vector<std::string>& sgctArguments,
     std::string& openGlVersion)
 {
+    ghoul::initialize();
+
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
 
 	// Initialize the LogManager and add the console log as this will be used every time
@@ -271,6 +273,8 @@ bool OpenSpaceEngine::create(
 void OpenSpaceEngine::destroy() {
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
+
+    _engine->_scriptEngine->deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
@@ -279,6 +283,8 @@ void OpenSpaceEngine::destroy() {
 
 	FileSystem::deinitialize();
 	LogManager::deinitialize();
+
+    ghoul::deinitialize();
 }
 
 bool OpenSpaceEngine::initialize() {

@@ -100,6 +100,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 	_distanceFade = 1.0;
 }
 
+RenderableTrail::~RenderableTrail() {
+    delete _programObject;
+}
+
 bool RenderableTrail::initialize() {
     if (!_successfullDictionaryFetch) {
         LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");

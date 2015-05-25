@@ -106,9 +106,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 	_texturePath.onChange(std::bind(&RenderableSphere::loadTexture, this));
 }
 
-RenderableSphere::~RenderableSphere() {
-}
-
 bool RenderableSphere::isReady() const {
     return (_sphere != nullptr) && (_shader != nullptr) && (_texture != nullptr);
 }
@@ -132,7 +129,14 @@ bool RenderableSphere::initialize() {
 
 bool RenderableSphere::deinitialize() {
     delete _sphere;
+    _sphere = nullptr;
+
 	delete _texture;
+    _texture = nullptr;
+
+    delete _shader;
+    _shader = nullptr;
+
 	return true;
 }
 

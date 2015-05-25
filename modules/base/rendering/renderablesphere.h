@@ -41,7 +41,6 @@ class PowerScaledSphere;
 class RenderableSphere : public Renderable {
 public:
 	RenderableSphere(const ghoul::Dictionary& dictionary);
-	~RenderableSphere();
 
 	bool initialize() override;
 	bool deinitialize() override;
