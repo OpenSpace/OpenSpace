@@ -232,7 +232,7 @@ function (handle_option_vld)
 
         copy_files(OpenSpace
             "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll"
-            "${OPENSPACE_EXT_DIR/vld/bin/Microsoft.DTfW.DHL.manifest"
+            "${OPENSPACE_EXT_DIR}/vld/bin/Microsoft.DTfW.DHL.manifest"
         )
     endif ()
 endfunction ()
