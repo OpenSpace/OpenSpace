@@ -226,14 +226,11 @@ endfunction ()
 
 function (handle_option_vld)
     if (OPENSPACE_ENABLE_VLD)
-        target_compile_definitions(OpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
-        target_link_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
-        target_include_directories(OpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
+        target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
+        target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
 
-        copy_files(OpenSpace
-            "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll"
-            "${OPENSPACE_EXT_DIR}/vld/bin/Microsoft.DTfW.DHL.manifest"
-        )
+        copy_files(OpenSpace "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
     endif ()
 endfunction ()
 

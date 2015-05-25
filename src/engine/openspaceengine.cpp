@@ -63,6 +63,13 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef _MSC_VER
+#ifdef OPENSPACE_ENABLE_VLD
+#include <vld.h>
+#endif
+#endif
+
+
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;

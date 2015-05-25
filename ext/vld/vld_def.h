@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  Visual Leak Detector - Import Library Header
-//  Copyright (c) 2005-2013 VLD Team
+//  Copyright (c) 2005-2014 VLD Team
 //
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <wchar.h>
+
 #define VLD_OPT_AGGREGATE_DUPLICATES    0x0001 //   If set, aggregate duplicate leaks in the leak report.
 #define VLD_OPT_MODULE_LIST_INCLUDE     0x0002 //   If set, modules in the module list are included, all others are excluded.
 #define VLD_OPT_REPORT_TO_DEBUGGER      0x0004 //   If set, the memory leak report is sent to the debugger.
@@ -37,7 +39,6 @@
 #define VLD_OPT_REPORT_TO_STDOUT        0x0800 //   If set, the memory leak report is sent to stdout.
 #define VLD_OPT_SKIP_HEAPFREE_LEAKS     0x1000 //   If set, VLD skip HeapFree memory leaks.
 #define VLD_OPT_VALIDATE_HEAPFREE       0x2000 //   If set, VLD verifies and reports heap consistency for HeapFree calls.
-#define VLD_OPT_RELEASE_CRT_RUNTIME     0x4000 //   If set, VLD treat CRT runtime as release version (use only with define VLD_FORCE_ENABLE).
 
 #define VLD_RPTHOOK_INSTALL  0
 #define VLD_RPTHOOK_REMOVE   1
