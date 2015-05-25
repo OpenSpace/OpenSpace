@@ -42,10 +42,6 @@ set_build_output_directories()
 configure_openspace_version(0 1 0 "prerelease-5")
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-if (MSVC)
-    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    handle_option_vld()
-endif ()
 
 option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
 option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
@@ -55,6 +51,11 @@ include(src/CMakeLists.txt)
 create_openspace_targets()
 set_compile_settings()
 add_external_dependencies()
+
+if (MSVC)
+    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
+    handle_option_vld()
+endif ()
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 handle_option_tests()

@@ -29,6 +29,12 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <sgct.h>
 
+#ifdef _MSC_VER
+#ifdef OPENSPACE_ENABLE_VLD
+#include <vld.h>
+#endif
+#endif
+
 sgct::Engine* _sgctEngine;
 
 // function pointer declarations

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  Visual Leak Detector - Import Library Header
-//  Copyright (c) 2005-2014 VLD Team
+//  Copyright (c) 2005-2013 VLD Team
 //
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,9 @@
 
 #include "vld_def.h"
 
-typedef int            VLD_BOOL;
-typedef unsigned int   VLD_UINT;
-typedef size_t         VLD_SIZET;
-typedef void*          VLD_HMODULE;
-
 #if defined _DEBUG || defined VLD_FORCE_ENABLE
+
+#include <windows.h>
 
 #pragma comment(lib, "vld.lib")
 
@@ -126,17 +123,7 @@ __declspec(dllimport) void VLDGlobalEnable ();
 //
 //    None.
 //
-__declspec(dllimport) VLD_UINT VLDReportLeaks ();
-
-// VLDReportThreadLeaks - Report thread leaks up to the execution point.
-//
-// threadId: thread Id.
-//
-//  Return Value:
-//
-//    None.
-//
-__declspec(dllimport) VLD_UINT VLDReportThreadLeaks (VLD_UINT threadId);
+__declspec(dllimport) UINT VLDReportLeaks ();
 
 // VLDGetLeaksCount - Return memory leaks count to the execution point.
 //
@@ -144,17 +131,7 @@ __declspec(dllimport) VLD_UINT VLDReportThreadLeaks (VLD_UINT threadId);
 //
 //    None.
 //
-__declspec(dllimport) VLD_UINT VLDGetLeaksCount ();
-
-// VLDGetThreadLeaksCount - Return thread memory leaks count to the execution point.
-//
-// threadId: thread Id.
-//
-//  Return Value:
-//
-//    None.
-//
-__declspec(dllimport) VLD_UINT VLDGetThreadLeaksCount (VLD_UINT threadId);
+__declspec(dllimport) UINT VLDGetLeaksCount ();
 
 // VLDMarkAllLeaksAsReported - Mark all leaks as reported.
 //
@@ -163,16 +140,6 @@ __declspec(dllimport) VLD_UINT VLDGetThreadLeaksCount (VLD_UINT threadId);
 //    None.
 //
 __declspec(dllimport) void VLDMarkAllLeaksAsReported ();
-
-// VLDMarkThreadLeaksAsReported - Mark thread leaks as reported.
-//
-// threadId: thread Id.
-//
-//  Return Value:
-//
-//    None.
-//
-__declspec(dllimport) void VLDMarkThreadLeaksAsReported (VLD_UINT threadId);
 
 
 // VLDRefreshModules - Look for recently loaded DLLs and patch them if necessary.
@@ -193,7 +160,7 @@ __declspec(dllimport) void VLDRefreshModules();
 //    None.
 //
 
-__declspec(dllimport) void VLDEnableModule(VLD_HMODULE module);
+__declspec(dllimport) void VLDEnableModule(HMODULE module);
 
 
 // VLDDisableModule - Disable Memory leak checking on the specified module.
@@ -204,7 +171,7 @@ __declspec(dllimport) void VLDEnableModule(VLD_HMODULE module);
 //
 //    None.
 //
-__declspec(dllimport) void VLDDisableModule(VLD_HMODULE module);
+__declspec(dllimport) void VLDDisableModule(HMODULE module);
 
 // VLDGetOptions - Return all current options.
 //
@@ -212,7 +179,7 @@ __declspec(dllimport) void VLDDisableModule(VLD_HMODULE module);
 //
 //    Mask of current options.
 //
-__declspec(dllimport) VLD_UINT VLDGetOptions();
+__declspec(dllimport) UINT VLDGetOptions();
 
 // VLDGetReportFilename - Return current report filename.
 //
@@ -222,7 +189,7 @@ __declspec(dllimport) VLD_UINT VLDGetOptions();
 //
 //    None.
 //
-__declspec(dllimport) void VLDGetReportFilename(wchar_t *filename);
+__declspec(dllimport) void VLDGetReportFilename(WCHAR *filename);
 
 // VLDSetOptions - Update the report options via function call rather than INI file.
 //
@@ -244,7 +211,7 @@ __declspec(dllimport) void VLDGetReportFilename(wchar_t *filename);
 //
 //    None.
 //
-__declspec(dllimport) void VLDSetOptions(VLD_UINT option_mask, VLD_SIZET maxDataDump, VLD_UINT maxTraceFrames);
+__declspec(dllimport) void VLDSetOptions(UINT option_mask, SIZE_T maxDataDump, UINT maxTraceFrames);
 
 // VLDSetModulesList - Set list of modules included/excluded in leak detection
 // depending on parameter "includeModules".
@@ -257,7 +224,7 @@ __declspec(dllimport) void VLDSetOptions(VLD_UINT option_mask, VLD_SIZET maxData
 //
 //    None.
 //
-__declspec(dllimport) void VLDSetModulesList(const wchar_t *modules, VLD_BOOL includeModules);
+__declspec(dllimport) void VLDSetModulesList(CONST WCHAR *modules, BOOL includeModules);
 
 // VLDGetModulesList - Return current list of included/excluded modules
 // depending on flag VLD_OPT_TRACE_INTERNAL_FRAMES.
@@ -268,9 +235,9 @@ __declspec(dllimport) void VLDSetModulesList(const wchar_t *modules, VLD_BOOL in
 //
 //  Return Value:
 //
-//    VLD_BOOL: TRUE if include modules, otherwise FALSE.
+//    BOOL: TRUE if include modules, otherwise FALSE.
 //
-__declspec(dllimport) VLD_BOOL VLDGetModulesList(wchar_t *modules, VLD_UINT size);
+__declspec(dllimport) BOOL VLDGetModulesList(WCHAR *modules, UINT size);
 
 // VLDSetReportOptions - Update the report options via function call rather than INI file.
 //
@@ -286,7 +253,7 @@ __declspec(dllimport) VLD_BOOL VLDGetModulesList(wchar_t *modules, VLD_UINT size
 //
 //    None.
 //
-__declspec(dllimport) void VLDSetReportOptions(VLD_UINT option_mask, const wchar_t *filename);
+__declspec(dllimport) void VLDSetReportOptions(UINT option_mask, CONST WCHAR *filename);
 
 // VLDSetReportHook - Installs or uninstalls a client-defined reporting function by hooking it 
 //  into the C run-time debug reporting process (debug version only).
@@ -323,21 +290,18 @@ __declspec(dllexport) void VLDResolveCallstacks();
 #define VLDEnable()
 #define VLDDisable()
 #define VLDRestore()
-#define VLDReportLeaks() (0)
-#define VLDReportThreadLeaks() (0)
-#define VLDGetLeaksCount() (0)
-#define VLDGetThreadLeaksCount() (0)
+#define VLDReportLeaks() 0
+#define VLDGetLeaksCount() 0
 #define VLDMarkAllLeaksAsReported()
-#define VLDMarkThreadLeaksAsReported(a)
 #define VLDRefreshModules()
 #define VLDEnableModule(a)
 #define VLDDisableModule(b)
-#define VLDGetOptions() (0)
+#define VLDGetOptions() 0
 #define VLDGetReportFilename(a)
 #define VLDSetOptions(a, b, c)
 #define VLDSetReportHook(a, b)
 #define VLDSetModulesList(a)
-#define VLDGetModulesList(a, b) (FALSE)
+#define VLDGetModulesList(a, b) FALSE
 #define VLDSetReportOptions(a, b)
 
 #endif // _DEBUG
