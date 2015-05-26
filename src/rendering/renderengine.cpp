@@ -419,7 +419,6 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			//const PowerScaledScalar& pssl = (position - origin).length();
 					
 			// Next 2 lines neccesary for instrument switching to work. 
-			//double currentTime = Time::ref().currentTime();
 			// GUI PRINT 
 			// Using a macro to shorten line length and increase readability
 
@@ -441,6 +440,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+            double currentTime = Time::ref().currentTime();
 			if (openspace::ImageSequencer2::ref().isReady()) {
 				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();

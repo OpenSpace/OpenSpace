@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablefieldlines.h>
+#include <modules/fieldlines/rendering/renderablefieldlines.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/kameleonwrapper.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem.h>

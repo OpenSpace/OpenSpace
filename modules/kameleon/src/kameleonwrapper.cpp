@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/kameleonwrapper.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/progressbar.h>
 
 #include <ghoul/logging/logmanager.h>

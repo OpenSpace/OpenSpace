@@ -28,7 +28,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/kameleonwrapper.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/constants.h>
 
 #include <ghoul/filesystem/filesystem.h>

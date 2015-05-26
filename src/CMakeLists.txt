@@ -71,7 +71,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/kameleonwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
@@ -142,7 +141,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/constants.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/kameleonwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h

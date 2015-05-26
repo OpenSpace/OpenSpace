@@ -36,7 +36,6 @@
 #include <modules/base/rendering/renderablepath.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
-#include <modules/base/rendering/renderablefieldlines.h>
 #include <modules/base/rendering/renderableplanet.h>
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/renderableplane.h>
@@ -76,7 +75,6 @@ bool BaseModule::initialize() {
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlane>("RenderablePlane");
-    fRenderable->registerClass<RenderableFieldlines>("RenderableFieldlines");
 
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
