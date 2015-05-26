@@ -1,7 +1,8 @@
 import os
 from subprocess import call
 
-modules = os.listdir("../../modules")
+# To be called from the OpenSpace main folder
+modules = os.listdir("modules")
 
 cmd = ["cmake"]
 cmd.append("-DGHOUL_USE_DEVIL=OFF")
