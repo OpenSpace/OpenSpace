@@ -22,6 +22,7 @@ for s in settings:
 
 # Build cmake and compile
 for c in cmds:
+    print "CMake:" , cmd
     call(cmd)
     call(["make", "clean"])
     call(["make", "-j4"])
