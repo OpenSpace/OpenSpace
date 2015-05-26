@@ -204,59 +204,8 @@ void Scene::clearSceneGraph() {
 }
 
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
- //   using ghoul::Dictionary;
- //   using ghoul::lua::loadDictionaryFromFile;
-
-	//if (!FileSys.fileExists(sceneDescriptionFilePath)) {
-	//	LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
-	//	return false;
-	//}
-
- //   LDEBUG("Loading scenegraph nodes");
- //   if (_root != nullptr) {
- //       LFATAL("Scenegraph already loaded");
- //       return false;
- //   }
-
- //   OsEng.disableBarrier();
-
- //   _root = new SceneGraphNode();
- //   _root->setName(SceneGraphNode::RootNodeName);
- //   _nodes.push_back(_root);
- //   _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
- //   _focus = SceneGraphNode::RootNodeName;
-
- //   bool success = SceneGraphLoader::load(sceneDescriptionFilePath, _nodes);
-
-
     ghoul::Dictionary dictionary;
-	////load default.scene 
     ghoul::lua::loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
-
-	//std::string&& sceneDescriptionDirectory =
-	//	ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
-	//std::string moduleDirectory(".");
-	//dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
-
-	//// The scene path could either be an absolute or relative path to the description
-	//// paths directory
-	//std::string&& relativeCandidate = sceneDescriptionDirectory +
-	//	ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
-	//std::string&& absoluteCandidate = absPath(moduleDirectory);
-
-	//if (FileSys.directoryExists(relativeCandidate))
-	//	moduleDirectory = relativeCandidate;
-	//else if (FileSys.directoryExists(absoluteCandidate))
-	//	moduleDirectory = absoluteCandidate;
-	//else {
-	//	LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
-	//		"path '" << moduleDirectory << "' that did not exist");
- //       OsEng.enableBarrier();
-	//	return false;
-	//}
-
-	//// Load the modules/scenegraph nodes
-	//loadModules(moduleDirectory, dictionary);
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 

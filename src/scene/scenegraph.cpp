@@ -53,16 +53,22 @@ namespace {
 
 namespace openspace {
 
+SceneGraph::SceneGraphNodeInternal::~SceneGraphNodeInternal() {
+    delete node;
+}
+
 SceneGraph::SceneGraph()
     : _rootNode(nullptr)
 {}
 
+SceneGraph::~SceneGraph() {
+    clear();
+}
+
 void SceneGraph::clear() {
     // Untested ---abock
-    for (SceneGraphNodeInternal* n : _nodes) {
-        delete n->node;
+    for (SceneGraphNodeInternal* n : _nodes)
         delete n;
-    }
 
     _nodes.clear();
     _rootNode = nullptr;
@@ -175,13 +181,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         }
 
         ghoul::Dictionary moduleDictionary;
-//#ifdef OPENSPACE_ENABLE_VLD
-//        VLDDisable();
-//#endif
         bool s = ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
-//#ifdef OPENSPACE_ENABLE_VLD
-//        VLDEnable();
-//#endif
         if (!s)
             continue;
 
