@@ -22,76 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIORIGINCOMPONENT_H__
-#define __GUIORIGINCOMPONENT_H__
+#ifndef __GUIPERFORMANCECOMPONENT_H__
+#define __GUIPERFORMANCECOMPONENT_H__
 
-#include <openspace/gui/guicomponent.h>
+#include <modules/onscreengui/include/guicomponent.h>
+
+namespace ghoul {
+	class SharedMemory;
+}
 
 namespace openspace {
-
 namespace gui {
 
-class GuiOriginComponent : public GuiComponent {
+class GuiPerformanceComponent : public GuiComponent {
 public:
-    void render() override;
-};
+	void initialize();
+	void deinitialize();
 
-//
-//class GuiPropertyComponent : public GuiComponent {
-//public:
-//	//void registerProperty(const std::string& propertyDescription);
-//    void registerProperty(properties::Property* prop);
-//	void render();
-//
-//protected:
-//	enum class PropertyType {
-//		BoolProperty = 0,
-//		IntProperty,
-//		FloatProperty,
-//		Vec2Property,
-//		Vec3Property,
-//		StringProperty,
-//		OptionProperty,
-//		SelectionProperty,
-//		TriggerProperty,
-//		InvalidPropertyType
-//	};
-//
-//	struct PropertyInfo {
-//		PropertyType type;
-//		std::string identifier;
-//		std::string name;
-//		std::string group;
-//	};
-//	typedef std::string PropertyOwner;
-//
-//	struct Property {
-//		PropertyOwner owner;
-//		std::vector<PropertyInfo> properties;
-//	};
-//
-//	void handleProperty(const ghoul::Dictionary& value);
-//
-//	PropertyType toPropertyType(const std::string& name) const;
-//
-//	void renderProperty(const PropertyInfo& info) const;
-//
-//    std::set<properties::Property*> _boolProperties;
-//    std::set<properties::Property*> _intProperties;
-//    std::set<properties::Property*> _floatProperties;
-//    std::set<properties::Property*> _vec2Properties;
-//    std::set<properties::Property*> _vec3Properties;
-//    std::set<properties::Property*> _vec4Properties;
-//    std::set<properties::Property*> _stringProperties;
-//    std::set<properties::Property*> _optionProperties;
-//    std::set<properties::Property*> _selectionProperties;
-//    std::set<properties::Property*> _triggerProperties;
-//    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
-//
-//	//std::vector<Property> _properties;
-//};
+	void render();
+
+protected:
+	ghoul::SharedMemory* _performanceMemory = nullptr;
+	float _minMaxValues[2];
+};
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUIORIGINCOMPONENT_H__
+#endif // __GUIPERFORMANCECOMPONENT_H__

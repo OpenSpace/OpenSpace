@@ -22,76 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUITIMECOMPONENT_H__
-#define __GUITIMECOMPONENT_H__
+#include <modules/onscreengui/include/guihelpcomponent.h>
 
-#include <openspace/gui/guicomponent.h>
+#include "imgui.h"
+
+namespace {
+	const ImVec2 size = ImVec2(350, 500);
+}
 
 namespace openspace {
-
 namespace gui {
 
-class GuiTimeComponent : public GuiComponent {
-public:
-    void render() override;
-};
+void GuiHelpComponent::render() {
+	ImGui::Begin("Help", &_isEnabled, size, 0.5f);
+	ImGui::ShowUserGuide();
+	ImGui::End();
+}
 
-//
-//class GuiPropertyComponent : public GuiComponent {
-//public:
-//	//void registerProperty(const std::string& propertyDescription);
-//    void registerProperty(properties::Property* prop);
-//	void render();
-//
-//protected:
-//	enum class PropertyType {
-//		BoolProperty = 0,
-//		IntProperty,
-//		FloatProperty,
-//		Vec2Property,
-//		Vec3Property,
-//		StringProperty,
-//		OptionProperty,
-//		SelectionProperty,
-//		TriggerProperty,
-//		InvalidPropertyType
-//	};
-//
-//	struct PropertyInfo {
-//		PropertyType type;
-//		std::string identifier;
-//		std::string name;
-//		std::string group;
-//	};
-//	typedef std::string PropertyOwner;
-//
-//	struct Property {
-//		PropertyOwner owner;
-//		std::vector<PropertyInfo> properties;
-//	};
-//
-//	void handleProperty(const ghoul::Dictionary& value);
-//
-//	PropertyType toPropertyType(const std::string& name) const;
-//
-//	void renderProperty(const PropertyInfo& info) const;
-//
-//    std::set<properties::Property*> _boolProperties;
-//    std::set<properties::Property*> _intProperties;
-//    std::set<properties::Property*> _floatProperties;
-//    std::set<properties::Property*> _vec2Properties;
-//    std::set<properties::Property*> _vec3Properties;
-//    std::set<properties::Property*> _vec4Properties;
-//    std::set<properties::Property*> _stringProperties;
-//    std::set<properties::Property*> _optionProperties;
-//    std::set<properties::Property*> _selectionProperties;
-//    std::set<properties::Property*> _triggerProperties;
-//    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
-//
-//	//std::vector<Property> _properties;
-//};
-
-} // namespace gui
-} // namespace openspace
-
-#endif // __GUITIMECOMPONENT_H__
+} // gui
+} // openspace

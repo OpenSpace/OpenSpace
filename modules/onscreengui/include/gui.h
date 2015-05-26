@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,22 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/gui/guihelpcomponent.h>
+#ifndef __GUI_H__
+#define __GUI_H__
 
-#include "imgui.h"
-
-namespace {
-	const ImVec2 size = ImVec2(350, 500);
-}
+#include <modules/onscreengui/include/guihelpcomponent.h>
+#include <modules/onscreengui/include/guiperformancecomponent.h>
+#include <modules/onscreengui/include/guipropertycomponent.h>
+#include <modules/onscreengui/include/guiorigincomponent.h>
+#include <modules/onscreengui/include/guitimecomponent.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
 namespace gui {
 
-void GuiHelpComponent::render() {
-	ImGui::Begin("Help", &_isEnabled, size, 0.5f);
-	ImGui::ShowUserGuide();
-	ImGui::End();
-}
+class GUI {
+public:
+	GUI();
+    ~GUI();
 
-} // gui
-} // openspace
+	bool isEnabled() const;
+	void setEnabled(bool enabled);
+
+	void initialize();
+	void deinitialize();
+
+	void initializeGL();
+	void deinitializeGL();
+
+	bool mouseButtonCallback(int key, int action);
+	bool mouseWheelCallback(double position);
+	bool keyCallback(int key, int action);
+	bool charCallback(unsigned int character);
+
+	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
+	void endFrame();
+
+	void renderMainWindow();
+
+	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+//protected:
+    GuiHelpComponent _help;
+    GuiOriginComponent _origin;
+	GuiPerformanceComponent _performance;
+	GuiPropertyComponent _property;
+    GuiTimeComponent _time;
+
+	bool _isEnabled;
+
+	bool _showHelp;
+};
+
+} // namespace gui
+} // namespace openspace
+
+#endif // __GUI_H__

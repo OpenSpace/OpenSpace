@@ -22,31 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#include <modules/onscreengui/include/guitimecomponent.h>
 
-#include <openspace/gui/guicomponent.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/time.h>
 
-namespace ghoul {
-	class SharedMemory;
+#include <ghoul/misc/assert.h>
+#include "imgui.h"
+
+namespace {
+	const std::string _loggerCat = "GuiTimeComponent";
 }
 
 namespace openspace {
 namespace gui {
 
-class GuiPerformanceComponent : public GuiComponent {
-public:
-	void initialize();
-	void deinitialize();
+void GuiTimeComponent::render() {
+    float deltaTime = static_cast<float>(Time::ref().deltaTime());
+    
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
+    if (changed)
+        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
 
-	void render();
 
-protected:
-	ghoul::SharedMemory* _performanceMemory = nullptr;
-	float _minMaxValues[2];
-};
+    //char dateBuffer[512] = {};
+    //ImGui::InputText("Date", dateBuffer, 512);
+    //bool pressed = ImGui::Button("Set Date");
+    //if (pressed)
+    //    OsEng.scriptEngine()->queueScript("openspace.time.setTime('" + std::string(dateBuffer) + "')");
 
-} // namespace gui
-} // namespace openspace
+    //const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
 
-#endif // __GUIPERFORMANCECOMPONENT_H__
+    //std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
+    //std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
+    //auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
+    //ghoul_assert(it != nodes.end(), "Focus node not found");
+
+    //std::string nodeNames = "";
+    //for (SceneGraphNode* n : nodes) 
+    //    nodeNames += n->name() + '\0';
+
+
+    //int position = it - nodes.begin();
+
+    //bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
+
+    //if (result) {
+    //    LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //    OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
+    //}
+
+}
+
+} // gui
+} // openspace

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/gui/guipropertycomponent.h>
+#include <modules/onscreengui/include/guipropertycomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>

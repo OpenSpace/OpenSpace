@@ -33,13 +33,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/gui.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guicomponent.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guihelpcomponent.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guiorigincomponent.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guiperformancecomponent.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guipropertycomponent.cpp
-    ${OPENSPACE_BASE_DIR}/src/gui/guitimecomponent.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/deviceidentifier.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
@@ -106,13 +99,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/gui.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guicomponent.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guihelpcomponent.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guiorigincomponent.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guiperformancecomponent.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guipropertycomponent.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/gui/guitimecomponent.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/deviceidentifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h

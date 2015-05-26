@@ -25,7 +25,7 @@
 #ifndef __GUIPROPERTYCOMPONENT_H__
 #define __GUIPROPERTYCOMPONENT_H__
 
-#include <openspace/gui/guicomponent.h>
+#include <modules/onscreengui/include/guicomponent.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <string>

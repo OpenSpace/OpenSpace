@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/gui/gui.h>
+#include <modules/onscreengui/include/gui.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -196,8 +196,11 @@ void GUI::initialize() {
 }
 
 void GUI::initializeGL() {
-	_program = ghoul::opengl::ProgramObject::Build("GUI",
-		"${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
+	_program = ghoul::opengl::ProgramObject::Build(
+        "GUI",
+		"${MODULE_ONSCREENGUI}/shaders/gui_vs.glsl",
+        "${MODULE_ONSCREENGUI}/shaders/gui_fs.glsl"
+    );
     if (!_program)
         return;
 

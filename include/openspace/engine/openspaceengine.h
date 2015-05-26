@@ -25,7 +25,8 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include <openspace/gui/gui.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <string>
 #include <vector>
@@ -48,6 +49,9 @@ class ModuleEngine;
 
 namespace interaction {
     class InteractionHandler;
+}
+namespace gui {
+    class GUI;
 }
 namespace scripting {
 	class ScriptEngine;

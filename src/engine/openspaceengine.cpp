@@ -32,7 +32,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
-#include <openspace/gui/gui.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
@@ -62,6 +61,10 @@
 // std
 #include <iostream>
 #include <fstream>
+
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+#include <modules/onscreengui/include/gui.h>
+#endif
 
 #ifdef _MSC_VER
 #ifdef OPENSPACE_ENABLE_VLD

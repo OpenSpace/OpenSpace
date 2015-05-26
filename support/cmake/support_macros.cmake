@@ -206,20 +206,6 @@ function (add_external_dependencies)
         endif ()
         set_property(TARGET cdf PROPERTY FOLDER "External")
     endif ()
-
-    # Imgui
-    add_subdirectory(${OPENSPACE_EXT_DIR}/imgui)
-    get_property(IMGUI_INCLUDE_DIR TARGET Imgui PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-    target_link_libraries(libOpenSpace Imgui)
-    target_include_directories(libOpenSpace PUBLIC ${IMGUI_INCLUDE_DIR})
-    set_property(TARGET Imgui PROPERTY FOLDER "External")
-    if (OPENSPACE_DISABLE_EXTERNAL_WARNINGS)
-        if (MSVC)
-            target_compile_options(Imgui PUBLIC "/W0" "/MP")
-        else ()
-            target_compile_options(ccmc PUBLIC "-w")
-        endif ()
-    endif ()
 endfunction ()
 
 

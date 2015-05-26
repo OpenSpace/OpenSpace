@@ -22,57 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/gui/guitimecomponent.h>
+#ifndef __GUITIMECOMPONENT_H__
+#define __GUITIMECOMPONENT_H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/time.h>
-
-#include <ghoul/misc/assert.h>
-#include "imgui.h"
-
-namespace {
-	const std::string _loggerCat = "GuiTimeComponent";
-}
+#include <modules/onscreengui/include/guicomponent.h>
 
 namespace openspace {
+
 namespace gui {
 
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(Time::ref().deltaTime());
-    
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
-    if (changed)
-        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
+class GuiTimeComponent : public GuiComponent {
+public:
+    void render() override;
+};
 
+//
+//class GuiPropertyComponent : public GuiComponent {
+//public:
+//	//void registerProperty(const std::string& propertyDescription);
+//    void registerProperty(properties::Property* prop);
+//	void render();
+//
+//protected:
+//	enum class PropertyType {
+//		BoolProperty = 0,
+//		IntProperty,
+//		FloatProperty,
+//		Vec2Property,
+//		Vec3Property,
+//		StringProperty,
+//		OptionProperty,
+//		SelectionProperty,
+//		TriggerProperty,
+//		InvalidPropertyType
+//	};
+//
+//	struct PropertyInfo {
+//		PropertyType type;
+//		std::string identifier;
+//		std::string name;
+//		std::string group;
+//	};
+//	typedef std::string PropertyOwner;
+//
+//	struct Property {
+//		PropertyOwner owner;
+//		std::vector<PropertyInfo> properties;
+//	};
+//
+//	void handleProperty(const ghoul::Dictionary& value);
+//
+//	PropertyType toPropertyType(const std::string& name) const;
+//
+//	void renderProperty(const PropertyInfo& info) const;
+//
+//    std::set<properties::Property*> _boolProperties;
+//    std::set<properties::Property*> _intProperties;
+//    std::set<properties::Property*> _floatProperties;
+//    std::set<properties::Property*> _vec2Properties;
+//    std::set<properties::Property*> _vec3Properties;
+//    std::set<properties::Property*> _vec4Properties;
+//    std::set<properties::Property*> _stringProperties;
+//    std::set<properties::Property*> _optionProperties;
+//    std::set<properties::Property*> _selectionProperties;
+//    std::set<properties::Property*> _triggerProperties;
+//    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
+//
+//	//std::vector<Property> _properties;
+//};
 
-    //char dateBuffer[512] = {};
-    //ImGui::InputText("Date", dateBuffer, 512);
-    //bool pressed = ImGui::Button("Set Date");
-    //if (pressed)
-    //    OsEng.scriptEngine()->queueScript("openspace.time.setTime('" + std::string(dateBuffer) + "')");
+} // namespace gui
+} // namespace openspace
 
-    //const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
-
-    //std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->sceneGraph()->allSceneGraphNodes();
-    //std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
-    //auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
-    //ghoul_assert(it != nodes.end(), "Focus node not found");
-
-    //std::string nodeNames = "";
-    //for (SceneGraphNode* n : nodes) 
-    //    nodeNames += n->name() + '\0';
-
-
-    //int position = it - nodes.begin();
-
-    //bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
-
-    //if (result) {
-    //    LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
-    //    OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
-    //}
-
-}
-
-} // gui
-} // openspace
+#endif // __GUITIMECOMPONENT_H__

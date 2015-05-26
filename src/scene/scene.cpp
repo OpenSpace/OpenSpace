@@ -27,7 +27,6 @@
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/gui/gui.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -52,6 +51,10 @@
 #include <fstream>
 #include <string>
 #include <chrono>
+
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+#include <modules/onscreengui/include/gui.h>
+#endif
 
 #include "scene_lua.inl"
 

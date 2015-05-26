@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIHELPCOMPONENT_H__
-#define __GUIHELPCOMPONENT_H__
-
-#include <openspace/gui/guicomponent.h>
+#include <modules/onscreengui/onscreenguimodule.h>
 
 namespace openspace {
-namespace gui {
 
-class GuiHelpComponent : public GuiComponent {
-public:
-	void render();
-};
+OnScreenGUIModule::OnScreenGUIModule() {
+    setName("OnScreenGUI");
+}
 
-} // namespace gui
+bool OnScreenGUIModule::initialize() {
+    bool success = OpenSpaceModule::initialize();
+    if (!success)
+        return false;
+    return true;
+}
+
 } // namespace openspace
-
-#endif // __GUIHELPCOMPONENT_H__
