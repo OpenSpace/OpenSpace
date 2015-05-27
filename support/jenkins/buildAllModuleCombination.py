@@ -1,6 +1,7 @@
 import os
 from subprocess import call
 from itertools import product, repeat
+import shutil
 
 # To be called from the main OpenSpace
 modules = os.listdir("modules")
@@ -24,9 +25,10 @@ for s in settings:
 # Build cmake and compile
 for c in cmds:
     print "CMake:" , cmd
-    call(["rm", "-rf", "build", "bin"])
-    call(["mkdir", "build"])
-    call(["cd", "build"])
+    shutil.rmtree("build")
+    shutil.rmtree("bin")
+    os.makedirs("build")
+    os.chdir("build")
     call(cmd)
     call(["make", "-j4"])
-    call(["cd", ".."])
+    os.chdir("..")
