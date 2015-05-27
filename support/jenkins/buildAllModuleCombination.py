@@ -2,8 +2,8 @@ import os
 from subprocess import call
 from itertools import product, repeat
 
-# To be called from the build folder in the OpenSpace
-modules = os.listdir("../modules")
+# To be called from the main OpenSpace
+modules = os.listdir("modules")
 modules.remove("base")
 
 # Get 2**len(modules) combinatorical combinations of ON/OFF
