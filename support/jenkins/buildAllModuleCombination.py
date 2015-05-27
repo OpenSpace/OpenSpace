@@ -25,8 +25,8 @@ for s in settings:
 # Build cmake and compile
 for c in cmds:
     print "CMake:" , cmd
-    shutil.rmtree("build")
-    shutil.rmtree("bin")
+    shutil.rmtree("build", ignore_errors=True)
+    shutil.rmtree("bin", ignore_errors=True)
     os.makedirs("build")
     os.chdir("build")
     call(cmd)
