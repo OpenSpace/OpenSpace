@@ -22,26 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DOWNLOADENGINE_H__
-#define __DOWNLOADENGINE_H__
+#include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/filesystem/file.h>
-#include <functional>
-#include <string>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#ifdef OPENSPACE_CURL_ENABLED
+#include <curl/curl.h>
+#endif
+
+namespace {
+    const std::string _loggerCat = "DownloadManager";
+
+    size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
+        size_t written;
+        written = fwrite(ptr, size, nmemb, stream);
+        return written;
+    }
+}
 
 namespace openspace {
 
-class DownloadEngine {
-public:
-    typedef std::function<void (const File&)> DownloadFinishedCallback;
+DownloadManager::DownloadManager(std::string requestURL)
+    : _requestURL(std::move(requestURL))
+{
+    curl_global_init(CURL_GLOBAL_ALL);
+    // Check if URL is accessible
+}
 
-    static bool downloadFile(
-        const std::string& url,
-        const ghoul::filesystem::File& file,
-        DownloadFinishedCallback callback = DownloadFinishedCallback()
-    );
-};
+bool DownloadManager::downloadFile(
+    const std::string& url,
+    const ghoul::filesystem::File& file,
+    DownloadFinishedCallback callback)
+{
+    CURL* curl = curl_easy_init();
+    if (curl) {
+        FILE* fp = fopen(file.path().c_str(), "wb");
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+        fclose(fp);
+
+        if (res != CURLE_OK) {
+            LERROR("Error downloading file 'url': " << curl_easy_strerror(res));
+            return false;
+        }
+
+        if (callback)
+            callback(file);
+        return true;
+    }
+}
+
 
 } // namespace openspace
-
-#endif // __DOWNLOADENGINE_H__

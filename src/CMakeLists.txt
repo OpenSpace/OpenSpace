@@ -30,7 +30,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/abuffer/abuffersinglelinked.cpp
     ${OPENSPACE_BASE_DIR}/src/abuffer/abuffervisualizer.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/downloadengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
@@ -96,7 +96,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffersinglelinked.h
     ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffervisualizer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h

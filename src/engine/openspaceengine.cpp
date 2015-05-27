@@ -47,7 +47,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/downloadengine.h>
+#include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -88,6 +88,7 @@ namespace {
 
     const std::string KeyRenderingMethod = "RenderingMethod";
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
+    const std::string KeyDownloadRequestURL = "DownloadRequestURL";
 
     const std::string DefaultOpenGlVersion = "4.3";
 
@@ -301,8 +302,13 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.detectCapabilities();
 	SysCap.logCapabilities();
 
+    std::string requestURL = "";
+    bool success = configurationManager()->getValue(KeyDownloadRequestURL, requestURL);
+    if (success)
+        DownloadManager::initialize(requestURL);
+
 	// Load SPICE time kernel
-	bool success = loadSpiceKernels();
+	success = loadSpiceKernels();
 	if (!success)
 		return false;
 
@@ -366,8 +372,8 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
-    ghoul::filesystem::File f("d:/foo.txt");
-    DownloadEngine::downloadFile("http://curl.haxx.se/libcurl/c/example.html", f);
+    //ghoul::filesystem::File f("d:/foo.txt");
+    //DownloadEngine::downloadFile("http://curl.haxx.se/libcurl/c/example.html", f);
 
 	_gui->initialize();
 

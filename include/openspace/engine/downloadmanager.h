@@ -22,52 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/downloadengine.h>
+#ifndef __DOWNLOADMANAGER_H__
+#define __DOWNLOADMANAGER_H__
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#include <curl/curl.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "DownloadEngine";
-
-    size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
-        size_t written;
-        written = fwrite(ptr, size, nmemb, stream);
-        return written;
-    }
-}
+#include <ghoul/designpattern/singleton.h>
+#include <ghoul/filesystem/file.h>
+#include <functional>
+#include <string>
 
 namespace openspace {
 
-bool DownloadEngine::downloadFile(
-    const std::string& url,
-    const ghoul::filesystem::File& file,
-    DownloadFinishedCallback callback)
-{
-    CURL* curl = curl_easy_init();
-    if (curl) {
-        FILE* fp = fopen(file.path().c_str(), "wb");
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-        CURLcode res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        fclose(fp);
+class DownloadManager : public ghoul::Singleton<DownloadManager> {
+public:
+    typedef std::function<void (const ghoul::filesystem::File&)> DownloadFinishedCallback;
 
-        if (res != CURLE_OK) {
-            LERROR("Error downloading file 'url': " << curl_easy_strerror(res));
-            return false;
-        }
+    DownloadManager(std::string requestURL);
 
-        if (callback)
-            callback(file);
-        return true;
-    }
-}
+    bool downloadFile(
+        const std::string& url,
+        const ghoul::filesystem::File& file,
+        DownloadFinishedCallback callback = DownloadFinishedCallback()
+    );
+
+private:
+    std::string _requestURL;
+};
+
+#define DlManager (openspace::DownloadManager::ref())
 
 } // namespace openspace
+
+#endif // __DOWNLOADMANAGER_H__
