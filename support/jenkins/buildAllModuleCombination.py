@@ -24,9 +24,9 @@ for s in settings:
 # Build cmake and compile
 for c in cmds:
     print "CMake:" , cmd
-    call["rm", "-rf", "build", "bin"]
-    call["mkdir", "build"]
-    call["cd", "build"]
+    call(["rm", "-rf", "build", "bin"])
+    call(["mkdir", "build"])
+    call(["cd", "build"])
     call(cmd)
     call(["make", "-j4"])
-    call["cd", ".."]
+    call(["cd", ".."])
