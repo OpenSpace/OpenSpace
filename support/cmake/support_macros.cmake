@@ -173,6 +173,25 @@ function (add_external_dependencies)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SPICE_INCLUDE_DIRS})
     target_link_libraries(libOpenSpace ${SPICE_LIBRARIES})
 
+    # Curl
+    if (WIN32)
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
+        target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
+        target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
+        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
+    else ()
+        find_package(curl)
+        if (CURL_FOUND)
+            target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
+            target_link_libraries(libOpenSpace ${CURL_LIBRARIES})
+            target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED")
+        endif ()
+    endif()
+
+    # add_subdirectory(${OPENSPACE_EXT_DIR}/curl)
+    # target_link_libraries(libOpenSpace 
+
 endfunction ()
 
 

@@ -47,6 +47,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/downloadengine.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -71,7 +72,6 @@
 #include <vld.h>
 #endif
 #endif
-
 
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
@@ -365,6 +365,9 @@ bool OpenSpaceEngine::initialize() {
 
 	// Load a light and a monospaced font
 	loadFonts();
+
+    ghoul::filesystem::File f("d:/foo.txt");
+    DownloadEngine::downloadFile("http://curl.haxx.se/libcurl/c/example.html", f);
 
 	_gui->initialize();
 
