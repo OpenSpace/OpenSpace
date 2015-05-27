@@ -140,7 +140,8 @@ function (set_compile_settings)
             target_compile_options(OpenSpace PUBLIC "-Werror")
         endif ()
 
-        target_compile_options(libOpenSpace PUBLIC "-ggdb")
+        target_compile_options(libOpenSpace PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
+        target_compile_options(OpenSpace PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
     endif ()
 endfunction ()
 
