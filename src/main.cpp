@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
     _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
     _sgctEngine->setCharCallbackFunction(mainCharCallback);
 
+    _sgctEngine->setFisheyeClearColor(0.f, 0.f, 0.f);
+
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
