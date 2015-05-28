@@ -86,11 +86,6 @@ namespace {
     
     const std::string _sgctConfigArgumentCommand = "-config";
 
-    const std::string KeyRenderingMethod = "RenderingMethod";
-    const std::string DefaultRenderingMethod = "ABufferSingleLinked";
-
-    const std::string DefaultOpenGlVersion = "4.3";
-
     const int CacheVersion = 1;
     
     struct {
@@ -336,10 +331,11 @@ bool OpenSpaceEngine::initialize() {
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine
-    if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
-        _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
-    else
-    	_renderEngine->initialize(DefaultRenderingMethod);
+    _renderEngine->initialize();
+ //   if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
+ //       _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
+ //   else
+ //   	_renderEngine->initialize(DefaultRenderingMethod);
 
 	sceneGraph->initialize();
 
