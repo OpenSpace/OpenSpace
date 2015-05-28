@@ -59,7 +59,7 @@ namespace scripting {
 
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments, std::string& openGlVersion);
+    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 

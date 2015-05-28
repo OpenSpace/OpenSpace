@@ -47,6 +47,21 @@ void mainDecodeFun();
 void mainExternalControlCallback(const char * receivedChars, int size);
 void mainLogCallback(const char* msg);
 
+std::pair<int, int> supportedOpenGLVersion () {
+    glfwInit();
+    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    GLFWwindow* offscreen = glfwCreateWindow(128, 128, "", nullptr, nullptr);
+    glfwMakeContextCurrent(offscreen);
+
+    int major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+    glfwDestroyWindow(offscreen);
+    glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
+    return { major, minor };
+}
+
 //temporary post-FX functions, TODO make a more permanent solution to this @JK
 void postFXPass();
 void setupPostFX();
@@ -60,13 +75,13 @@ namespace {
 }
 
 int main(int argc, char** argv) {
+    auto glVersion = supportedOpenGLVersion();
+    
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
-    std::string openGlVersion = "";
     const bool success = openspace::OpenSpaceEngine::create(
         argc, argv,
-        sgctArguments,
-        openGlVersion
+        sgctArguments
     );
     if (!success)
         return EXIT_FAILURE;
@@ -115,21 +130,20 @@ int main(int argc, char** argv) {
 
     // try to open a window
     LDEBUG("Initialize SGCT Engine");
-#ifdef __APPLE__
-    sgct::Engine::RunMode rm = sgct::Engine::RunMode::OpenGL_4_1_Core_Profile;
-#else
-    std::map<std::string, sgct::Engine::RunMode> versionMapping = {
-        { "4.2", sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
-        { "4.3", sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
-        { "4.4", sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
-        { "4.5", sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
+    std::map<std::pair<int, int>, sgct::Engine::RunMode> versionMapping = {
+        { { 3, 3 }, sgct::Engine::RunMode::OpenGL_3_3_Core_Profile },
+        { { 4, 0 }, sgct::Engine::RunMode::OpenGL_4_0_Core_Profile },
+        { { 4, 1 }, sgct::Engine::RunMode::OpenGL_4_1_Core_Profile },
+        { { 4, 2 }, sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
+        { { 4, 3 }, sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
+        { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
+        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
     };
-    if (versionMapping.find(openGlVersion) == versionMapping.end()) {
-        LFATAL("Requested OpenGL version " << openGlVersion << " not supported");
+    if (versionMapping.find(glVersion) == versionMapping.end()) {
+        LFATAL("Requested OpenGL version " << glVersion.first << "." << glVersion.second << " not supported");
         return EXIT_FAILURE;
     }
-    sgct::Engine::RunMode rm = versionMapping[openGlVersion];
-#endif
+    sgct::Engine::RunMode rm = versionMapping[glVersion];
     const bool initSuccess = _sgctEngine->init(rm);
     if (!initSuccess) {
         LFATAL("Initializing failed");
