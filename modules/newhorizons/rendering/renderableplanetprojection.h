@@ -67,6 +67,7 @@ public:
 
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+	ghoul::opengl::Texture* baseTexture() { return _texture; };
 
 protected:
 
@@ -90,7 +91,6 @@ private:
 	properties::FloatProperty _fadeProjection;
 	properties::BoolProperty _performProjection;
 	properties::BoolProperty _clearAllProjections;
-
 
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;

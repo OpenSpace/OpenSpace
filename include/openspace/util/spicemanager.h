@@ -630,6 +630,42 @@ public:
 	 */
 	bool getFieldOfView(int instrument, std::string& fovShape, std::string& frameName,
 		glm::dvec3& boresightVector, std::vector<glm::dvec3>& bounds) const;
+	
+	/**
+	This routine computes a set of points on the umbral or penumbral terminator of
+    a specified target body, where SPICE models the target shape as an ellipsoid.
+	\param numberOfPoints - number of points along terminator returned by this method
+	\param terminatorType - is a string indicating the type of terminator to compute: 
+	 umbral or penumbral. The umbral terminator is the boundary of the portion of the 
+	 ellipsoid surface in total shadow. The penumbral terminator is the boundary of 
+	 the portion of the surface that is completely illuminated. Note that in astronomy 
+	 references, the unqualified word "terminator" refers to the umbral terminator. 
+	 Here, the unqualified word refers to either type of terminator.
+    \param lightSource - name of body acting as light source
+	\param observer - name of bodserving body
+	\param target - name of target body
+	\param frame - name of the reference frame relative to which the output terminator 
+	 points are expressed.
+	\param aberrationCorrection - correction for light time and/or stellar aberration 
+	\param ephemerisTime - the epoch of participation of the observer
+	\param targetEpoch -  is the "target epoch.", time it takes for 
+	\param observerPosition - is the vector from the target body at targetEpoch
+	\param terminatorPoints - an array of points on the umbral or penumbral terminator 
+	 of the ellipsoid, as specified by the input argument `numberOfPoints'
+	 For further, more specific details please refer to
+	 http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/edterm_c.html
+	*/
+	bool getTerminatorEllipse(const int numberOfPoints, 
+		                      const std::string terminatorType,
+		                      const std::string lightSource,
+		                      const std::string observer,
+		                      const std::string target,
+		                      const std::string frame,
+		                      const std::string aberrationCorrection,
+		                      double ephemerisTime,
+		                      double& targetEpoch,
+							  glm::dvec3& observerPosition,
+							  std::vector<psc>& terminatorPoints);
 
 	/**
 	* This function adds a frame to a body 

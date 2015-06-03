@@ -28,6 +28,10 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/constants.h>
 
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderengine.h>
+#include <modules/newhorizons/rendering/renderableplanetprojection.h>
+
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -51,6 +55,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _texturePath("texture", "Texture")
 	, _billboard("billboard", "Billboard", false)
+	, _projectionListener("projectionListener", "DisplayProjections", false)
 	, _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
 	, _origin(Origin::Center)
 	, _shader(nullptr)
@@ -62,6 +67,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     glm::vec2 size;
 	dictionary.getValue("Size", size);
     _size = size;
+
+	if (dictionary.hasKey("Name")){
+		dictionary.getValue("Name", _nodeName);
+	}
 
 	std::string origin;
 	if (dictionary.getValue("Origin", origin)) {
@@ -87,6 +96,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 	if (dictionary.getValue("Billboard", billboard)) {
 		_billboard = billboard;
 	}
+	if (dictionary.hasKey("ProjectionListener")){
+		bool projectionListener = false;
+		if (dictionary.getValue("ProjectionListener", projectionListener)) {
+			_projectionListener = projectionListener;
+		}
+	}
+
 
 	std::string texturePath = "";
 	bool success = dictionary.getValue("Texture", texturePath);
@@ -147,8 +163,12 @@ bool RenderablePlane::deinitialize() {
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
 
-	delete _texture;
-    _texture = nullptr;
+	if (!_projectionListener){
+		// its parents job to kill texture
+		// iff projectionlistener 
+		delete _texture;
+		_texture = nullptr;
+	}
 
     delete _textureFile;
     _textureFile = nullptr;
@@ -166,6 +186,18 @@ void RenderablePlane::render(const RenderData& data) {
 
 	// Activate shader
 	_shader->activate();
+	if (_projectionListener){
+		//get parent node-texture and set with correct dimensions  
+		SceneGraphNode* textureNode = OsEng.renderEngine()->scene()->sceneGraphNode(_nodeName)->parent();
+		if (textureNode != nullptr){
+			RenderablePlanetProjection *t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+			_texture = t->baseTexture();
+			float h = _texture->height();
+			float w = _texture->width();
+			float scale = h / w;
+			transform = glm::scale(transform, glm::vec3(1.f, scale, 1.f));
+		}
+	}
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);

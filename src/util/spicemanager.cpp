@@ -955,6 +955,45 @@ bool SpiceManager::getFieldOfView(int instrument,
 
 	return true;
 }
+bool SpiceManager::getTerminatorEllipse(const int numberOfPoints,
+										const std::string terminatorType,
+										const std::string lightSource,
+										const std::string observer,
+										const std::string target,
+										const std::string frame,
+										const std::string aberrationCorrection,
+										double ephemerisTime,
+										double& targetEpoch,
+										glm::dvec3& observerPosition,
+										std::vector<psc>& terminatorPoints){
+
+	double(*tpoints)[3] = new double[numberOfPoints][3];
+
+	edterm_c(terminatorType.c_str(), 
+		     lightSource.c_str(), 
+			 target.c_str(), 
+			 ephemerisTime, 
+			 frame.c_str(), 
+			 aberrationCorrection.c_str(), 
+			 observer.c_str(),
+		     numberOfPoints, 
+			 &targetEpoch, 
+			 glm::value_ptr(observerPosition), 
+			 (double(*)[3])tpoints );
+
+	bool hasError = checkForError("Error getting " + terminatorType + 
+		"terminator for'" + target + "'");
+	if (hasError)
+		return false;
+
+	for (int i = 0; i < numberOfPoints; i++){
+		psc point = psc::CreatePowerScaledCoordinate(tpoints[i][0], tpoints[i][1], tpoints[i][2]);
+		point[3] += 3;
+		terminatorPoints.push_back(point);
+	}
+
+	return true;
+}
 
 std::string SpiceManager::frameFromBody(const std::string body) const {
 
