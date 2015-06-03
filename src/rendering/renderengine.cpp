@@ -138,14 +138,15 @@ RenderEngine::~RenderEngine() {
 
 bool RenderEngine::initialize() {
     std::string renderingMethod = DefaultRenderingMethod;
-    bool overwritingDefaultRenderingMethod = false;
-    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod)) {
+    
+    // If the user specified a rendering method that he would like to use, use that
+    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
         renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
-        overwritingDefaultRenderingMethod = true;
-    }
     else {
         using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
-        
+
+        // The default rendering method has a requirement of OpenGL 4.3, so if we are
+        // below that, we will fall back to frame buffer operation
         if (OpenGLCap.openGLVersion() < Version(4,3)) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "ABufferFrameBuffer";
@@ -329,7 +330,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 	}
 
 	// converts the quaternion used to rotation matrices
-	_mainCamera->compileViewRotationMatrix();
+    if (_mainCamera)
+        _mainCamera->compileViewRotationMatrix();
 
 	// update and evaluate the scene starting from the root node
 	_sceneGraph->update({
