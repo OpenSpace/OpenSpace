@@ -324,10 +324,7 @@ function (handle_internal_modules)
                 #"#endif\n\n"
             )
 
-            list(APPEND MODULE_CLASSES
-                "new ${MODULE_NAME},\n"
-            )
-
+            list(APPEND MODULE_CLASSES "    new ${MODULE_NAME},\n")
         endif ()
     endforeach ()
 
