@@ -531,12 +531,12 @@ void RenderableFov::render(const RenderData& data) {
 			psc position;
 			double lt;
 			SpiceManager::ref().getTargetPosition(_fovTarget,
-				_spacecraft,
-				_frame,
-				_aberrationCorrection,
-				_time,
-				position,
-				lt);
+												  _spacecraft,
+												  _frame,
+												  _aberrationCorrection,
+												  _time,
+												  position,
+												  lt);
 
 			//if aimed 80 deg away from target, dont draw white square
 			if (glm::dot(glm::normalize(aim), glm::normalize(position.vec3())) < 0.2){

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEPLANE_H_
-#define RENDERABLEPLANE_H_
+#ifndef RENDERABLESHADOWCYLINDER_H_
+#define RENDERABLESHADOWCYLINDER_H_
 
 #include <openspace/rendering/renderable.h>
 
@@ -32,57 +32,66 @@
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+	namespace filesystem {
+		class File;
+	}
+	namespace opengl {
+		class ProgramObject;
+		class Texture;
+	}
 }
 
 namespace openspace {
 	struct LinePoint;
+	class RenderableShadowCylinder : public Renderable {
 
-class RenderablePlane : public Renderable {
+	public:
+		RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
+		~RenderableShadowCylinder();
 
-	enum class Origin {
-		LowerLeft, LowerRight, UpperLeft, UpperRight, Center
+		bool initialize() override;
+		bool deinitialize() override;
+
+		bool isReady() const override;
+
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
+
+	private:
+		struct CylinderVBOLayout {
+			CylinderVBOLayout(double a1, double a2, double a3, double a4){
+				x = a1;
+				y = a2;
+				z = a3;
+				e = a4;
+			}
+			float x, y, z, e;
+		};
+
+		void createCylinder();
+		properties::IntProperty _numberOfPoints;
+		properties::FloatProperty _shadowLength;
+
+		ghoul::opengl::ProgramObject* _shader;
+		
+		glm::dmat3 _stateMatrix;
+
+		GLuint _vao;
+		GLuint _vbo;
+
+		std::vector<CylinderVBOLayout> _vertices;
+
+		std::string _terminatorType;
+		std::string _lightSource;
+		std::string _observer;
+		std::string _body;
+		std::string _bodyFrame;
+		std::string _mainFrame;
+		std::string _aberration;
+		
+		double _time;
 	};
 
-public:
-	RenderablePlane(const ghoul::Dictionary& dictionary);
-    ~RenderablePlane();
-
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-private:
-	void loadTexture();
-    void createPlane();
-
-	properties::StringProperty _texturePath;
-	properties::BoolProperty _billboard;
-	properties::BoolProperty _projectionListener;
-    properties::Vec2Property _size;
-
-	Origin _origin;
-	std::string _nodeName;
-
-    bool _planeIsDirty;
-
-	ghoul::opengl::ProgramObject* _shader;
-    bool _textureIsDirty;
-	ghoul::opengl::Texture* _texture;
-    ghoul::filesystem::File* _textureFile;
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
-};
-
 } // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+#endif // RENDERABLESHADOWCYLINDER_H_
+

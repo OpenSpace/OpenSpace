@@ -31,6 +31,7 @@
 
 #include <modules/newhorizons/rendering/planetgeometryprojection.h>
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
+#include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <modules/newhorizons/rendering/renderablefov.h>
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
@@ -63,6 +64,7 @@ bool NewHorizonsModule::initialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
+	fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
