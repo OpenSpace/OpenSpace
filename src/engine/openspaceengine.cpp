@@ -289,7 +289,7 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
 	SysCap.logCapabilities();
-
+    
 	// Load SPICE time kernel
 	bool success = loadSpiceKernels();
 	if (!success)

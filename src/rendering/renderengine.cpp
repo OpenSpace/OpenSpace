@@ -48,6 +48,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <openspace/engine/configurationmanager.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -136,8 +138,19 @@ RenderEngine::~RenderEngine() {
 
 bool RenderEngine::initialize() {
     std::string renderingMethod = DefaultRenderingMethod;
-    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
+    bool overwritingDefaultRenderingMethod = false;
+    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod)) {
         renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
+        overwritingDefaultRenderingMethod = true;
+    }
+    else {
+        using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+        
+        if (OpenGLCap.openGLVersion() < Version(4,3)) {
+            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
+            renderingMethod = "ABufferFrameBuffer";
+        }
+    }
 
     auto it = RenderingMethods.find(renderingMethod);
     if (it == RenderingMethods.end()) {
