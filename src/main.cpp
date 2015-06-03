@@ -96,6 +96,8 @@ int main(int argc, char** argv) {
     );
     if (!success)
         return EXIT_FAILURE;
+    
+    LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
 
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
