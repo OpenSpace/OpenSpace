@@ -484,7 +484,6 @@ void OpenSpaceEngine::runSettingsScripts() {
     runScripts(scripts);
 }
 
-
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
 

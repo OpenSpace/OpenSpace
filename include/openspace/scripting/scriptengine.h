@@ -92,7 +92,7 @@ private:
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
-
+    
 	//sync variables
 	std::mutex _mutex;
 	std::vector<std::string> _queuedScripts;
