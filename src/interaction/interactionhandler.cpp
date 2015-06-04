@@ -253,6 +253,7 @@ InteractionHandler::InteractionHandler()
     , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
+	, _remoteController(nullptr)
 {
 }
 
@@ -275,6 +276,13 @@ void InteractionHandler::setMouseController(MouseController* controller) {
 	delete _mouseController;
 	_mouseController = controller;
 	_mouseController->setHandler(this);
+}
+
+void InteractionHandler::setRemoteController(RemoteController* controller) {
+	assert(controller);
+	delete _remoteController;
+	_remoteController = controller;
+	_remoteController->setHandler(this);
 }
 
 void InteractionHandler::addController(Controller* controller) {
@@ -347,6 +355,7 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
+	_remoteController->update(deltaTime);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -463,7 +472,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	_camera->setFocusPosition(origin);
 	_camera->setPosition(target);
 	_camera->rotate(glm::quat_cast(transform));
-
+	
 	unlockControls();
 }
 

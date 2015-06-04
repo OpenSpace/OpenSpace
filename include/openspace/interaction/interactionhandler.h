@@ -76,6 +76,7 @@
 
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
+#include <openspace/interaction/remotecontroller.h>
 
 #include <mutex>
 
@@ -94,6 +95,7 @@ public:
 
 	void setKeyboardController(KeyboardController* controller);
 	void setMouseController(MouseController* controller);
+	void setRemoteController(RemoteController* controller);
 	void addController(Controller* controller);
 
 	void lockControls();
@@ -171,6 +173,7 @@ private:
 
 	KeyboardController* _keyboardController;
 	MouseController* _mouseController;
+	RemoteController* _remoteController;
 	std::vector<Controller*> _controllers;
 };
 
