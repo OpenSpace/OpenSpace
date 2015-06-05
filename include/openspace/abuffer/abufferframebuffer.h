@@ -36,6 +36,8 @@ public:
     virtual ~ABufferFramebuffer();
     virtual bool initialize();
     
+    void resolve(float blackoutFactor);
+    
     virtual void clear();
     virtual void preRender();
     virtual void postRender();

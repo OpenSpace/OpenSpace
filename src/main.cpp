@@ -73,12 +73,6 @@ std::pair<int, int> supportedOpenGLVersion () {
     return { major, minor };
 }
 
-//temporary post-FX functions, TODO make a more permanent solution to this @JK
-void postFXPass();
-void setupPostFX();
-GLint _postFXTexLoc;
-GLint _postFXOpacityLoc;
-
 #include <ghoul/lua/lua_helper.h>
 
 namespace {
@@ -195,9 +189,6 @@ void mainInitFunc() {
         std::cin.ignore(100);
         exit(EXIT_FAILURE);
     }
-
-    //temporary post-FX solution, TODO add a more permanent solution @JK
-    setupPostFX();
 }
 
 void mainPreSyncFunc() {
@@ -271,27 +262,4 @@ void mainLogCallback(const char* msg){
     std::string message = msg;
     // Remove the trailing \n that is passed along
     LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
-}
-
-void postFXPass(){
-    glUniform1i(_postFXTexLoc, 0);
-    if (OsEng.isMaster())
-        glUniform1f(_postFXOpacityLoc, 1.f);
-    else
-        glUniform1f(_postFXOpacityLoc, OsEng.renderEngine()->globalBlackOutFactor());
-}
-
-void setupPostFX(){
-#ifndef __APPLE__
-    sgct::PostFX fx[1];
-    sgct::ShaderProgram *shader;
-    fx[0].init("OpacityControl", absPath("${SHADERS}/postFX_vs.glsl"), absPath("${SHADERS}/postFX_fs.glsl"));
-    fx[0].setUpdateUniformsFunction(postFXPass);
-    shader = fx[0].getShaderProgram();
-    shader->bind();
-    _postFXTexLoc = shader->getUniformLocation("Tex");
-    _postFXOpacityLoc = shader->getUniformLocation("Opacity");
-    shader->unbind();
-    _sgctEngine->addPostFX(fx[0]);
-#endif
 }
