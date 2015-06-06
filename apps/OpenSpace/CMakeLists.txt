@@ -22,44 +22,25 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-cmake_minimum_required (VERSION 3.0)
-
-project (OpenSpace)
-message(STATUS "Generating OpenSpace project")
-
-set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
-set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
-set(OPENSPACE_MODULE_DIR "${OPENSPACE_BASE_DIR}/modules")
-set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_EXT_DIR}/ghoul/ext/CopySharedLibraries.cmake) 
-
-test_compiler_compatibility()
-cleanup_project()
-set_build_output_directories()
-configure_openspace_version(0 1 0 "prerelease-5")
-
-option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-
-option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
-option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
-
-
-include(src/CMakeLists.txt)
-create_openspace_target()
-add_external_dependencies()
-handle_applications()
+add_executable(OpenSpace ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp)
+target_include_directories(OpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
+target_link_libraries(OpenSpace libOpenSpace)
 
 if (MSVC)
-    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    handle_option_vld()
+    if (OPENSPACE_WARNINGS_AS_ERRORS)
+        target_compile_options(OpenSpace PUBLIC "/WX")
+    endif ()
+
+    set_target_properties(OpenSpace PROPERTIES LINK_FLAGS
+        "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+    )
+elseif (APPLE)
+    if (OPENSPACE_WARNINGS_AS_ERRORS)
+        target_compile_options(OpenSpace PUBLIC "-Werror")
+    endif ()
+elseif (UNIX)
+    if (OPENSPACE_WARNINGS_AS_ERRORS)
+        target_compile_options(OpenSpace PUBLIC "-Werror")
+    endif ()
+    target_compile_options(OpenSpace PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")    
 endif ()
-
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-handle_option_tests()
-
-handle_internal_modules()
-copy_dynamic_libraries()

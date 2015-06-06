@@ -83,10 +83,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
 )
 
-set(OPENSPACE_MAIN
-    ${OPENSPACE_BASE_DIR}/src/main.cpp
-)
-
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abufferdynamic.h
