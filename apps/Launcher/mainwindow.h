@@ -26,9 +26,11 @@
 #define __MAINWINDOW_H__
 
 #include <QWidget>
-#include <QTcpSocket>
 
-class InformationWidget;
+#include <QNetworkReply>
+#include <QTextEdit>
+
+class QNetworkAccessManager;
 
 class MainWindow : public QWidget {
 Q_OBJECT
@@ -38,9 +40,18 @@ public:
 
 private slots:
     void shortcutButtonPressed();
+    
+    void newsNetworkError();
+    void newsReadyRead();
 
 private:
-    InformationWidget* _informationWidget;
+    void initialize();
+    
+    QNetworkReply* _newsReply;
+    
+    QTextEdit* _informationWidget;
+    
+    QNetworkAccessManager* _networkManager;
 };
 
 //class MainWindow : public QWidget {

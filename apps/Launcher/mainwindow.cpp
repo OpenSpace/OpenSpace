@@ -24,22 +24,25 @@
 
 #include "mainwindow.h"
 
-#include "informationwidget.h"
-
 #include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QNetworkAccessManager>
 #include <QPushButton>
 #include <QThread>
 
 namespace {
     const QSize WindowSize = QSize(640, 480);
+
+    const QString NewsURL = "http://openspace.itn.liu.se/news.txt";
 }
 
 MainWindow::MainWindow()
     : QWidget(nullptr)
+    , _newsReply(nullptr)
     , _informationWidget(nullptr)
+    , _networkManager(new QNetworkAccessManager)
 {
     setFixedSize(WindowSize);
     
@@ -50,7 +53,9 @@ MainWindow::MainWindow()
     image->setPixmap(p.scaledToWidth(WindowSize.width()));
     layout->addWidget(image, 0, 0, 1, 2);
     
-    _informationWidget = new InformationWidget(this);
+    
+    _informationWidget = new QTextEdit(this);
+    _informationWidget->setReadOnly(true);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
 
     QWidget* container = new QWidget;
@@ -92,15 +97,46 @@ MainWindow::MainWindow()
     layout->addWidget(container, 2, 1);
     
     setLayout(layout);
+    
+    initialize();
 }
 
 MainWindow::~MainWindow() {
     delete _informationWidget;
+    delete _networkManager;
+}
+
+void MainWindow::initialize() {
+    // Get the news information
+    QNetworkRequest request;
+    request.setUrl(QUrl(NewsURL));
+    
+    _newsReply = _networkManager->get(request);
+    connect(_newsReply, SIGNAL(finished()),
+            this, SLOT(newsReadyRead())
+    );
+    connect(_newsReply, SIGNAL(error(QNetworkReply::NetworkError)),
+            this, SLOT(newsNetworkError())
+    );
 }
 
 void MainWindow::shortcutButtonPressed() {
     
 }
+
+void MainWindow::newsNetworkError() {
+    QString error = _newsReply->errorString();
+    _informationWidget->setText(error);
+    _newsReply->deleteLater();
+}
+
+void MainWindow::newsReadyRead() {
+    QByteArray data = _newsReply->readAll();
+    QString news = QString::fromLatin1(data);
+    _informationWidget->setText(news);
+    _newsReply->deleteLater();
+}
+
 
 //MainWindow::MainWindow()
 //    : QWidget(nullptr)

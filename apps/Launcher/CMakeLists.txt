@@ -27,14 +27,12 @@ set(APPLICATION_LINK_TO_OPENSPACE ON)
 
 set(SOURCE_FILES
     ${OPENSPACE_APPS_DIR}/Launcher/main.cpp
-    ${OPENSPACE_APPS_DIR}/Launcher/informationwidget.cpp
     ${OPENSPACE_APPS_DIR}/Launcher/mainwindow.cpp
     ${OPENSPACE_APPS_DIR}/Launcher/shortcutwidget.cpp
     ${OPENSPACE_APPS_DIR}/Launcher/syncwidget.cpp
 )
 
 set(HEADER_FILES
-    ${OPENSPACE_APPS_DIR}/Launcher/informationwidget.h
     ${OPENSPACE_APPS_DIR}/Launcher/mainwindow.h
     ${OPENSPACE_APPS_DIR}/Launcher/shortcutwidget.h
     ${OPENSPACE_APPS_DIR}/Launcher/syncwidget.h
