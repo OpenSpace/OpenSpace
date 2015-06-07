@@ -22,15 +22,41 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-set(APPLICATION_NAME OpenSpace)
-set(APPLICATION_LINK_TO_OPENSPACE ON)
+set(APPLICATION_NAME TimelineView)
+set(APPLICATION_LINK_TO_OPENSPACE OFF)
 
-add_executable(${APPLICATION_NAME} ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp)
-target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include)
-target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+set(SOURCE_FILES
+    ${OPENSPACE_APPS_DIR}/TimelineView/main.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.cpp
+)
 
-if (MSVC)
-    set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
-        "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-    )
+set(HEADER_FILES
+    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.h
+) 
+
+find_package(Qt5Widgets)
+find_package(Qt5Network)
+
+qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
+
+add_executable(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})
+
+target_link_libraries(${APPLICATION_NAME}
+    Qt5::Widgets
+    Qt5::Network
+)
+
+if (APPLE)
+INSTALL(CODE "
+   include(BundleUtilities)
+   fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/MacOS/TimelineView\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+   " COMPONENT Runtime)
 endif ()

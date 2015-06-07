@@ -168,17 +168,55 @@ endfunction ()
 
 function (handle_applications)
     set(applications "")
-    option(OPENSPACE_APPLICATION_OPENSPACE "Main OpenSpace Application" ON)
-    if (OPENSPACE_APPLICATION_OPENSPACE)
-        include(${OPENSPACE_APPS_DIR}/OpenSpace/CMakeLists.txt)
-        list(APPEND applications "OpenSpace")
-    endif ()
+    set(applications_link_to_openspace "")
+
+    file(GLOB appDirs RELATIVE ${OPENSPACE_APPS_DIR} ${OPENSPACE_APPS_DIR}/*)
+    list(REMOVE_ITEM appDirs ".DS_Store") # Removing the .DS_Store present on Mac
+
+    set(DEFAULT_APPLICATIONS
+        "OpenSpace"
+    )
+    mark_as_advanced(DEFAULT_APPLICATIONS)
+
+    foreach (app ${appDirs})
+        string(TOUPPER ${app} upper_app)
+        list (FIND DEFAULT_APPLICATIONS "${app}" _index)
+        if (${_index} GREATER -1)
+            # App is a default application
+            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" ON)
+        else ()
+            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" OFF)
+        endif()
+        if (OPENSPACE_APPLICATION_${upper_app})
+            unset(APPLICATION_NAME)
+            unset(APPLICATION_LINK_TO_OPENSPACE)
+            include(${OPENSPACE_APPS_DIR}/${app}/CMakeLists.txt)
+            set_compile_settings(${APPLICATION_NAME})
+            list(APPEND applications ${APPLICATION_NAME})
+            list(APPEND applications_link_to_openspace ${APPLICATION_LINK_TO_OPENSPACE})
+            unset(APPLICATION_NAME)
+            unset(APPLICATION_LINK_TO_OPENSPACE)
+        endif ()
+    endforeach ()
+
+
+    # option(OPENSPACE_APPLICATION_OPENSPACE "Main OpenSpace Application" ON)
+    # if (OPENSPACE_APPLICATION_OPENSPACE)
+    #     include(${OPENSPACE_APPS_DIR}/OpenSpace/CMakeLists.txt)
+    #     list(APPEND applications "OpenSpace")
+    # endif ()
     set(OPENSPACE_APPLICATIONS ${applications} PARENT_SCOPE)
+    set(OPENSPACE_APPLICATIONS_LINK_REQUEST ${applications_link_to_openspace} PARENT_SCOPE)
 
     message(STATUS "Applications:")
-    foreach (app ${applications})
-        message(STATUS "\t${app}")
-    endforeach ()
+    list(LENGTH applications len1)
+    math(EXPR len2 "${len1} - 1")
+
+    foreach(val RANGE ${len2})
+      list(GET applications ${val} val1)
+      list(GET applications_link_to_openspace ${val} val2)
+      message(STATUS "\t${val1} (Link: ${val2})")
+    endforeach()
 endfunction()
 
 
@@ -316,9 +354,18 @@ function (handle_internal_modules)
         if (${optionName})
             create_library_name(${module} libraryName)
             add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
-            foreach (app ${OPENSPACE_APPLICATIONS})
-                target_link_libraries(${app} ${libraryName})
-            endforeach ()
+
+            list(LENGTH OPENSPACE_APPLICATIONS len1)
+            math(EXPR len2 "${len1} - 1")
+
+            foreach(val RANGE ${len2})
+                list(GET OPENSPACE_APPLICATIONS ${val} val1)
+                list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
+                if (${val2})
+                    target_link_libraries(${app} ${libraryName})                    
+                endif ()
+            endforeach()
+
             target_link_libraries(libOpenSpace ${libraryName})
             create_define_name(${module} defineName)
             target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
