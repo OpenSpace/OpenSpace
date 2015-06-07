@@ -149,8 +149,6 @@ int main(int argc, char** argv) {
 
     app.setStyleSheet(style);
 
-    std::string s = style.toStdString();
-
 	MainWindow window;
 	window.show();
 
