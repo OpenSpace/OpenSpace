@@ -192,6 +192,29 @@ function (handle_applications)
             unset(APPLICATION_LINK_TO_OPENSPACE)
             include(${OPENSPACE_APPS_DIR}/${app}/CMakeLists.txt)
             set_compile_settings(${APPLICATION_NAME})
+
+            if (APPLICATION_LINK_TO_OPENSPACE)
+                    get_property(
+                        OPENSPACE_INCLUDE_DIR
+                        TARGET libOpenSpace
+                        PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                    )
+                    target_include_directories(${APPLICATION_NAME} PUBLIC 
+                        "${OPENSPACE_BASE_DIR}"
+                        ${OPENSPACE_INCLUDE_DIR}
+                    )
+
+                    get_property(
+                        OPENSPACE_DEFINES
+                        TARGET libOpenSpace
+                        PROPERTY INTERFACE_COMPILE_DEFINITIONS
+                    )
+                    target_compile_definitions(${APPLICATION_NAME} PUBLIC ${OPENSPACE_DEFINES})
+
+                    target_link_libraries(${APPLICATION_NAME} Ghoul)
+                    target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+            endif ()
+
             list(APPEND applications ${APPLICATION_NAME})
             list(APPEND applications_link_to_openspace ${APPLICATION_LINK_TO_OPENSPACE})
             unset(APPLICATION_NAME)
@@ -362,7 +385,7 @@ function (handle_internal_modules)
                 list(GET OPENSPACE_APPLICATIONS ${val} val1)
                 list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
                 if (${val2})
-                    target_link_libraries(${app} ${libraryName})                    
+                    target_link_libraries(${app} ${libraryName})
                 endif ()
             endforeach()
 
