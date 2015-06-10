@@ -152,6 +152,7 @@ void MainWindow::initialize() {
         _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
         _scenes->addItem(i.fileName());
     }
+    _syncWidget.setSceneFiles(_sceneFiles);
 }
 
 void MainWindow::shortcutButtonPressed() {
@@ -159,8 +160,6 @@ void MainWindow::shortcutButtonPressed() {
 }
 
 void MainWindow::syncButtonPressed() {
-    QString currentScene = _scenes->currentText();
-    _syncWidget.setSceneFile(_sceneFiles[currentScene]);
     _syncWidget.show();
 }
 

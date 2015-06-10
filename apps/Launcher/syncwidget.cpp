@@ -30,20 +30,40 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 
+#include <QCheckBox>
 #include <QDebug>
 #include <QDir>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QPushButton>
 #include <QString>
+#include <QVBoxLayout>
 
 namespace {
+    const int nColumns = 3;
 }
 
 SyncWidget::SyncWidget(QWidget* parent) 
     : QWidget(parent)
+    , _sceneLayout(nullptr)
 {
     setFixedSize(500, 500);
 
-    ghoul::initialize();
+    QBoxLayout* layout = new QVBoxLayout;
+    {
+        QGroupBox* sceneBox = new QGroupBox;
+        _sceneLayout = new QGridLayout;
+        sceneBox->setLayout(_sceneLayout);
+        layout->addWidget(sceneBox);
+    }
+    {
+        QPushButton* syncButton = new QPushButton("Synchronize Scenes");
+        layout->addWidget(syncButton);
+    }
 
+    setLayout(layout);
+
+    ghoul::initialize();
     openspace::DownloadManager::initialize("http://openspace.itn.liu.se/request.cgi");
 }
 
@@ -52,10 +72,38 @@ SyncWidget::~SyncWidget() {
     ghoul::deinitialize();
 }
 
-void SyncWidget::setSceneFile(QString scene) {
+void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
+    _sceneFiles = std::move(sceneFiles);
+    qDebug() << _sceneFiles;
+    QStringList keys = _sceneFiles.keys();
+    qDebug() << keys;
+    for (int i = 0; i < keys.size(); ++i) {
+        const QString& sceneName = keys[i];
+
+        QCheckBox* checkbox = new QCheckBox(sceneName);
+
+        _sceneLayout->addWidget(checkbox, i / nColumns, i % nColumns);
+    }
+}
+
+void SyncWidget::clear() {
+
+}
+
+void SyncWidget::handleDirectFiles(QString module, QStringList files) {
+    qDebug() << files;
+}
+
+void SyncWidget::handleTorrentFiles(QString module, QStringList torrents) {
+    qDebug() << torrents;
+}
+
+void SyncWidget::syncButtonPressed() {
     clear();
 
-    qDebug() << scene;
+    
+
+    qDebug() << _sceneFiles;
 
     ghoul::Dictionary sceneDictionary;
     ghoul::lua::loadDictionaryFromFile(
@@ -100,7 +148,7 @@ void SyncWidget::setSceneFile(QString scene) {
                 }
                 handleDirectFiles(module, files);
             }
-            
+
             found = dataDictionary.getValue<ghoul::Dictionary>("Torrents", torrentFiles);
             if (found) {
                 QStringList torrents;
@@ -114,15 +162,6 @@ void SyncWidget::setSceneFile(QString scene) {
     }
 }
 
-void SyncWidget::clear() {
+QStringList SyncWidget::selectedScenes() const {
 
-
-}
-
-void SyncWidget::handleDirectFiles(QString module, QStringList files) {
-    qDebug() << files;
-}
-
-void SyncWidget::handleTorrentFiles(QString module, QStringList torrents) {
-    qDebug() << torrents;
 }

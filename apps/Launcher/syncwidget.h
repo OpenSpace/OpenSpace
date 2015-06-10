@@ -27,17 +27,30 @@
 
 #include <QWidget>
 
+#include <QMap>
+
+class QGridLayout;
+
 class SyncWidget : public QWidget {
+Q_OBJECT
 public:
     SyncWidget(QWidget* parent);
     ~SyncWidget();
     
-    void setSceneFile(QString scene);
+    void setSceneFiles(QMap<QString, QString>  sceneFiles);
+
+private slots:
+    void syncButtonPressed();
 
 private:
     void clear();
+    QStringList selectedScenes() const;
+
     void handleDirectFiles(QString module, QStringList files);
     void handleTorrentFiles(QString module, QStringList torrents);
+
+    QMap<QString, QString>  _sceneFiles;
+    QGridLayout* _sceneLayout;
 };
 
 #endif // __SYNCWIDGET_H__
