@@ -166,10 +166,10 @@ function (add_external_dependencies)
     # Curl
     if (WIN32)
         set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl" PARENT_SCOPE)
         target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
         target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
         target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
-        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
     else ()
         find_package(curl)
         if (CURL_FOUND)
@@ -437,6 +437,9 @@ endfunction ()
 
 function (copy_dynamic_libraries)
     if (WIN32)
+
+        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
+
         # Copy DLLs needed by Ghoul into the executable directory
         ghl_copy_shared_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/ghoul)
 

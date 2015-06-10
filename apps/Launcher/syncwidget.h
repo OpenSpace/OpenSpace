@@ -30,6 +30,7 @@
 class SyncWidget : public QWidget {
 public:
     SyncWidget(QWidget* parent);
+    ~SyncWidget();
     
     void setSceneFile(QString scene);
 

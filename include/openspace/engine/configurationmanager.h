@@ -50,6 +50,7 @@ public:
     static const std::string KeyLogImmediateFlush;
     static const std::string KeyLogs;
     static const std::string KeyDisableMasterRendering;
+    static const std::string KeyDownloadRequestURL;
 
 	bool loadFromFile(const std::string& filename);
 

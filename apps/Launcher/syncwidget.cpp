@@ -24,6 +24,8 @@
 
 #include "syncwidget.h"
 
+#include <openspace/engine/downloadmanager.h>
+
 #include <ghoul/ghoul.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -42,6 +44,12 @@ SyncWidget::SyncWidget(QWidget* parent)
 
     ghoul::initialize();
 
+    openspace::DownloadManager::initialize("http://openspace.itn.liu.se/request.cgi");
+}
+
+SyncWidget::~SyncWidget() {
+    openspace::DownloadManager::deinitialize();
+    ghoul::deinitialize();
 }
 
 void SyncWidget::setSceneFile(QString scene) {

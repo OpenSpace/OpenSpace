@@ -290,7 +290,7 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.logCapabilities();
     
     std::string requestURL = "";
-    bool success = configurationManager()->getValue(KeyDownloadRequestURL, requestURL);
+    bool success = configurationManager()->getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
     if (success)
         DownloadManager::initialize(requestURL);
 
