@@ -355,8 +355,11 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
+    LINFO("Initializing GUI");
 	_gui->initialize();
 
+
+    LINFO("Finished initializing");
 	return true;
 }
 
@@ -564,8 +567,11 @@ gui::GUI* OpenSpaceEngine::gui() {
 }
 
 bool OpenSpaceEngine::initializeGL() {
+    LINFO("Initializing Rendering Engine");
     bool success = _renderEngine->initializeGL();
+    LINFO("Initializing OnScreen GUI GL");
 	_gui->initializeGL();
+    LINFO("Finished initializing OpenGL");
 	return success;
 }
 
