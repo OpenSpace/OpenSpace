@@ -157,7 +157,6 @@ bool OpenSpaceEngine::create(
 	LogMgr.addLog(new ConsoleLog);
 
 	LDEBUG("Initialize FileSystem");
-	ghoul::filesystem::FileSystem::initialize();
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
