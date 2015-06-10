@@ -27,9 +27,15 @@
 
 #include <QWidget>
 
+#include "shortcutwidget.h"
+#include "syncwidget.h"
+
+#include <QMap>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTextEdit>
 
+class QComboBox;
 class QNetworkAccessManager;
 
 class MainWindow : public QWidget {
@@ -40,6 +46,8 @@ public:
 
 private slots:
     void shortcutButtonPressed();
+    void syncButtonPressed();
+    void startButtonPressed();
     
     void newsNetworkError();
     void newsReadyRead();
@@ -50,8 +58,15 @@ private:
     QNetworkReply* _newsReply;
     
     QTextEdit* _informationWidget;
+
+    QComboBox* _scenes;
+    QMap<QString, QString> _sceneFiles;
+
+    ShortcutWidget _shortcutWidget;
+    SyncWidget _syncWidget;
+
     
-    QNetworkAccessManager* _networkManager;
+    QNetworkAccessManager _networkManager;
 };
 
 //class MainWindow : public QWidget {

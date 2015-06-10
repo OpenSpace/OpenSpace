@@ -28,7 +28,15 @@
 #include <QWidget>
 
 class SyncWidget : public QWidget {
+public:
+    SyncWidget(QWidget* parent);
     
+    void setSceneFile(QString scene);
+
+private:
+    void clear();
+    void handleDirectFiles(QString module, QStringList files);
+    void handleTorrentFiles(QString module, QStringList torrents);
 };
 
 #endif // __SYNCWIDGET_H__

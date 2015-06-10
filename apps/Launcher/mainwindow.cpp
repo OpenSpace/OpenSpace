@@ -24,11 +24,13 @@
 
 #include "mainwindow.h"
 
+#include <QApplication>
 #include <QComboBox>
+#include <QDir>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QNetworkAccessManager>
+#include <QProcess>
 #include <QPushButton>
 #include <QThread>
 
@@ -36,13 +38,23 @@ namespace {
     const QSize WindowSize = QSize(640, 480);
 
     const QString NewsURL = "http://openspace.itn.liu.se/news.txt";
+
+    const QString ModulesDirectory = "../data/scene"; // temporary ---abock
+
+#ifdef WIN32
+    const QString OpenSpaceExecutable = "OpenSpace.exe";
+#else
+    const QString OpenSpaceExecutable = "OpenSpace";
+#endif
 }
 
 MainWindow::MainWindow()
     : QWidget(nullptr)
     , _newsReply(nullptr)
     , _informationWidget(nullptr)
-    , _networkManager(new QNetworkAccessManager)
+    , _scenes(nullptr)
+    , _shortcutWidget(nullptr)
+    , _syncWidget(nullptr)
 {
     setFixedSize(WindowSize);
     
@@ -52,7 +64,6 @@ MainWindow::MainWindow()
     QPixmap p = QPixmap(":/images/header.png");
     image->setPixmap(p.scaledToWidth(WindowSize.width()));
     layout->addWidget(image, 0, 0, 1, 2);
-    
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
@@ -72,8 +83,8 @@ MainWindow::MainWindow()
         
         QLabel* sceneSelectionLabel = new QLabel("Scenes:");
         layout->addWidget(sceneSelectionLabel, 1, 0);
-        QComboBox* sceneSelection = new QComboBox;
-        layout->addWidget(sceneSelection);
+        _scenes = new QComboBox;
+        layout->addWidget(_scenes);
         
         container->setLayout(layout);
     }
@@ -84,12 +95,24 @@ MainWindow::MainWindow()
         QBoxLayout* layout = new QHBoxLayout;
         
         QPushButton* cancelButton = new QPushButton("Cancel");
+        QObject::connect(
+            cancelButton, SIGNAL(clicked(bool)),
+            QApplication::instance(), SLOT(quit())
+        );
         layout->addWidget(cancelButton);
         
         QPushButton* syncButton = new QPushButton("Sync");
+        QObject::connect(
+            syncButton, SIGNAL(clicked(bool)),
+            this, SLOT(syncButtonPressed())
+        );
         layout->addWidget(syncButton);
         
         QPushButton* startButton = new QPushButton("Start");
+        QObject::connect(
+            startButton, SIGNAL(clicked(bool)),
+            this, SLOT(startButtonPressed())
+        );
         layout->addWidget(startButton);
         
         container->setLayout(layout);
@@ -103,7 +126,6 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow() {
     delete _informationWidget;
-    delete _networkManager;
 }
 
 void MainWindow::initialize() {
@@ -111,17 +133,40 @@ void MainWindow::initialize() {
     QNetworkRequest request;
     request.setUrl(QUrl(NewsURL));
     
-    _newsReply = _networkManager->get(request);
-    connect(_newsReply, SIGNAL(finished()),
+    _newsReply = _networkManager.get(request);
+    QObject::connect(_newsReply, SIGNAL(finished()),
             this, SLOT(newsReadyRead())
     );
-    connect(_newsReply, SIGNAL(error(QNetworkReply::NetworkError)),
+    QObject::connect(_newsReply, SIGNAL(error(QNetworkReply::NetworkError)),
             this, SLOT(newsNetworkError())
     );
+
+    _shortcutWidget.hide();
+    _syncWidget.hide();
+
+    QDir d(ModulesDirectory);
+    d.setFilter(QDir::Files);
+
+    QFileInfoList list = d.entryInfoList();
+    for (const QFileInfo& i : list) {
+        _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
+        _scenes->addItem(i.fileName());
+    }
 }
 
 void MainWindow::shortcutButtonPressed() {
-    
+    _shortcutWidget.show();
+}
+
+void MainWindow::syncButtonPressed() {
+    QString currentScene = _scenes->currentText();
+    _syncWidget.setSceneFile(_sceneFiles[currentScene]);
+    _syncWidget.show();
+}
+
+void MainWindow::startButtonPressed() {
+    QProcess* p = new QProcess(this);
+    p->start(OpenSpaceExecutable);
 }
 
 void MainWindow::newsNetworkError() {
@@ -136,7 +181,6 @@ void MainWindow::newsReadyRead() {
     _informationWidget->setText(news);
     _newsReply->deleteLater();
 }
-
 
 //MainWindow::MainWindow()
 //    : QWidget(nullptr)

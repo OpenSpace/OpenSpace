@@ -23,3 +23,98 @@
  ****************************************************************************************/
 
 #include "syncwidget.h"
+
+#include <ghoul/ghoul.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/lua/ghoul_lua.h>
+
+#include <QDebug>
+#include <QDir>
+#include <QString>
+
+namespace {
+}
+
+SyncWidget::SyncWidget(QWidget* parent) 
+    : QWidget(parent)
+{
+    setFixedSize(500, 500);
+
+    ghoul::initialize();
+
+}
+
+void SyncWidget::setSceneFile(QString scene) {
+    clear();
+
+    qDebug() << scene;
+
+    ghoul::Dictionary sceneDictionary;
+    ghoul::lua::loadDictionaryFromFile(
+        scene.toStdString(),
+        sceneDictionary
+    );
+
+    ghoul::Dictionary modules;
+    bool success = sceneDictionary.getValue<ghoul::Dictionary>("Modules", modules);
+    qDebug() << success;
+
+    QStringList modulesList;
+    for (int i = 1; i < modules.size(); ++i) {
+        std::string module = modules.value<std::string>(std::to_string(i));
+        modulesList.append(QString::fromStdString(module));
+    }
+    qDebug() << modulesList;
+
+    QDir sceneDir(scene);
+    sceneDir.cdUp();
+    for (QString module : modulesList) {
+        QString moduleFile = sceneDir.absoluteFilePath(module + "/" + module + ".mod");
+        QString dataFile = sceneDir.absoluteFilePath(module + "/" + module + ".data");
+
+        qDebug() << module;
+        qDebug() << moduleFile << QFileInfo(moduleFile).exists();
+        qDebug() << dataFile << QFileInfo(dataFile).exists();
+
+        if (QFileInfo(dataFile).exists()) {
+            ghoul::Dictionary dataDictionary;
+            ghoul::lua::loadDictionaryFromFile(dataFile.toStdString(), dataDictionary);
+
+            ghoul::Dictionary directFiles;
+            ghoul::Dictionary torrentFiles;
+
+            bool found = dataDictionary.getValue<ghoul::Dictionary>("Files", directFiles);
+            if (found) {
+                QStringList files;
+                for (int i = 1; i < directFiles.size(); ++i) {
+                    std::string f = directFiles.value<std::string>(std::to_string(i));
+                    files.append(QString::fromStdString(f));
+                }
+                handleDirectFiles(module, files);
+            }
+            
+            found = dataDictionary.getValue<ghoul::Dictionary>("Torrents", torrentFiles);
+            if (found) {
+                QStringList torrents;
+                for (int i = 1; i < torrentFiles.size(); ++i) {
+                    std::string f = torrentFiles.value<std::string>(std::to_string(i));
+                    torrents.append(QString::fromStdString(f));
+                }
+                handleTorrentFiles(module, torrents);
+            }
+        }
+    }
+}
+
+void SyncWidget::clear() {
+
+
+}
+
+void SyncWidget::handleDirectFiles(QString module, QStringList files) {
+    qDebug() << files;
+}
+
+void SyncWidget::handleTorrentFiles(QString module, QStringList torrents) {
+    qDebug() << torrents;
+}
