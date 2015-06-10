@@ -51,7 +51,7 @@ public:
 	RenderEngine();
 	~RenderEngine();
 	
-	bool initialize(const std::string& renderingMethod);
+	bool initialize();
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();

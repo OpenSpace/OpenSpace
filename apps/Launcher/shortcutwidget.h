@@ -22,39 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __SHORTCUTWIDGET_H__
+#define __SHORTCUTWIDGET_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <QWidget>
 
-#include <test_common.inl>
-//#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+class ShortcutWidget : public QWidget {
+Q_OBJECT
+public:
+    ShortcutWidget(QWidget* parent);
+};
 
-#include <iostream>
-
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
-
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
-}
-
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, args);
-
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif // __SHORTCUTWIDGET_H__

@@ -22,39 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __MAINWINDOW_H__
+#define __MAINWINDOW_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <QWidget>
+#include <QTcpSocket>
 
-#include <test_common.inl>
-//#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+#include "common.h"
 
-#include <iostream>
+class ConfigurationWidget;
+class ControlWidget;
+class InformationWidget;
+class TimelineWidget;
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+class MainWindow : public QWidget {
+Q_OBJECT
+public:
+	MainWindow();
+	~MainWindow();
 
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
-}
+    std::string nextTarget() const;
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, args);
+public slots:
+    void sendScript(QString script);
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+private slots:
+    void onConnect(QString host, QString port);
+    void onDisconnect();
+
+    void onSocketConnected();
+    void onSocketDisconnected();
+
+	void readTcpData();
+    void handleStatusMessage(QByteArray data);
+    void handlePlaybook(QByteArray data);
+
+    void fullyConnected();
+
+private:
+    ConfigurationWidget* _configurationWidget;
+    ControlWidget* _timeControlWidget;
+    InformationWidget* _informationWidget;
+    TimelineWidget* _timelineWidget;
+    
+	QTcpSocket* _socket;
+
+    bool _hasHongKangTimeline = false;
+    bool _hasLabelTimeline = false;
+};
+
+#endif // __MAINWINDOW_H__

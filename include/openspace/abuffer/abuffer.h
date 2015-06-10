@@ -45,7 +45,6 @@ namespace openspace {
 
 class ABuffer {
 public:
-
 	struct fragmentData {
 		GLfloat _position[3];
 		GLfloat _color[4];

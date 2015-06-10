@@ -68,9 +68,11 @@ private:
 
 	properties::StringProperty _texturePath;
 	properties::BoolProperty _billboard;
+	properties::BoolProperty _projectionListener;
     properties::Vec2Property _size;
 
 	Origin _origin;
+	std::string _nodeName;
 
     bool _planeIsDirty;
 

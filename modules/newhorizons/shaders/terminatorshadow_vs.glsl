@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#version __CONTEXT__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
+uniform vec4 objectVelocity;
 
-#include <test_common.inl>
-//#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+layout(location = 0) in vec4 in_point_position;
 
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
-}
+out vec4 vs_point_position;
+out vec4 vs_color;
+//out float fade;
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, args);
+uniform uint nVertices;
+//uniform float lineFade;
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main() {
+	//float id = float(gl_VertexID) / float(nVertices * lineFade);
+	//fade = 1.0 - id;
+
+	if(mod(gl_VertexID,2) == 0.f){
+		vs_color = vec4(1,1,1,0.5);
+	}else{
+		vs_color = vec4(0);
+	}
+	
+	vec4 tmp = in_point_position;
+	//tmp = psc_to_meter(tmp, vec2(1,0.f));
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_point_position = tmp;
+	position = ViewProjection * position;
+	gl_Position =  z_normalization(position);
 }

@@ -155,7 +155,7 @@ bool ModelGeometry::loadObj(const std::string& filename){
 			// file for the next run
 		}
 		else {
-			LINFO("Cache for Model'" << filename << "' not found");
+			LINFO("Cache for Model '" << filename << "' not found");
 		}
 		LINFO("Loading Model file '" << filename << "'");
 		bool success = loadModel(filename);

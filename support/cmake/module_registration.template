@@ -6,12 +6,10 @@
 #define __MODULE_REGISTRATION_H__
 
 @MODULE_HEADERS@
-
 namespace openspace {
 
 std::vector<OpenSpaceModule*> AllModules = {
-@MODULE_CLASSES@
-};
+@MODULE_CLASSES@};
 
 } // namespace openspace
 

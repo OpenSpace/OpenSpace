@@ -189,8 +189,11 @@ endfunction ()
 function (write_module_name module_name)
     string(TOLOWER ${module_name} module_name_lower)
 
+    set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)
+    string(REPLACE "${OPENSPACE_BASE_DIR}/" "" MODULE_PATH ${MODULE_PATH})
+
     file(WRITE ${CMAKE_BINARY_DIR}/modules/${module_name_lower}/modulename.cmake
         "set(MODULE_NAME ${module_name}Module)\n"
-        "set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)"
+        "set(MODULE_PATH ${MODULE_PATH})"
     )
 endfunction ()

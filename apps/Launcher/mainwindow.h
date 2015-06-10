@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,49 +26,83 @@
 #define __MAINWINDOW_H__
 
 #include <QWidget>
-#include <QTcpSocket>
 
-#include "common.h"
+#include "shortcutwidget.h"
+#include "syncwidget.h"
 
-class ConfigurationWidget;
-class ControlWidget;
-class InformationWidget;
-class TimelineWidget;
+#include <QMap>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTextEdit>
+
+class QComboBox;
+class QNetworkAccessManager;
 
 class MainWindow : public QWidget {
 Q_OBJECT
 public:
-	MainWindow();
-	~MainWindow();
-
-    std::string nextTarget() const;
-
-public slots:
-    void sendScript(QString script);
+    MainWindow();
+    ~MainWindow();
 
 private slots:
-    void onConnect(QString host, QString port);
-    void onDisconnect();
-
-    void onSocketConnected();
-    void onSocketDisconnected();
-
-	void readTcpData();
-    void handleStatusMessage(QByteArray data);
-    void handlePlaybook(QByteArray data);
-
-    void fullyConnected();
+    void shortcutButtonPressed();
+    void syncButtonPressed();
+    void startButtonPressed();
+    
+    void newsNetworkError();
+    void newsReadyRead();
 
 private:
-    ConfigurationWidget* _configurationWidget;
-    ControlWidget* _timeControlWidget;
-    InformationWidget* _informationWidget;
-    TimelineWidget* _timelineWidget;
+    void initialize();
     
-	QTcpSocket* _socket;
+    QNetworkReply* _newsReply;
+    
+    QTextEdit* _informationWidget;
 
-    bool _hasHongKangTimeline = false;
-    bool _hasLabelTimeline = false;
+    QComboBox* _scenes;
+    QMap<QString, QString> _sceneFiles;
+
+    ShortcutWidget _shortcutWidget;
+    SyncWidget _syncWidget;
+
+    
+    QNetworkAccessManager _networkManager;
 };
+
+//class MainWindow : public QWidget {
+//Q_OBJECT
+//public:
+//	MainWindow();
+//	~MainWindow();
+//
+//    std::string nextTarget() const;
+//
+//public slots:
+//    void sendScript(QString script);
+//
+//private slots:
+//    void onConnect(QString host, QString port);
+//    void onDisconnect();
+//
+//    void onSocketConnected();
+//    void onSocketDisconnected();
+//
+//	void readTcpData();
+//    void handleStatusMessage(QByteArray data);
+//    void handlePlaybook(QByteArray data);
+//
+//    void fullyConnected();
+//
+//private:
+//    ConfigurationWidget* _configurationWidget;
+//    ControlWidget* _timeControlWidget;
+//    InformationWidget* _informationWidget;
+//    TimelineWidget* _timelineWidget;
+//    
+//	QTcpSocket* _socket;
+//
+//    bool _hasHongKangTimeline = false;
+//    bool _hasLabelTimeline = false;
+//};
 
 #endif // __MAINWINDOW_H__

@@ -22,44 +22,41 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
+set(APPLICATION_NAME TimelineView)
+set(APPLICATION_LINK_TO_OPENSPACE OFF)
 
-project (OpenSpace)
-message(STATUS "Generating OpenSpace project")
+set(SOURCE_FILES
+    ${OPENSPACE_APPS_DIR}/TimelineView/main.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.cpp
+    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.cpp
+)
 
-set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
-set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
-set(OPENSPACE_MODULE_DIR "${OPENSPACE_BASE_DIR}/modules")
-set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
+set(HEADER_FILES
+    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.h
+    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.h
+) 
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_EXT_DIR}/ghoul/ext/CopySharedLibraries.cmake) 
+find_package(Qt5Widgets)
+find_package(Qt5Network)
 
-test_compiler_compatibility()
-cleanup_project()
-set_build_output_directories()
-configure_openspace_version(0 1 0 "prerelease-5")
+qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
-option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+add_executable(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})
 
-option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
-option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
+target_link_libraries(${APPLICATION_NAME}
+    Qt5::Widgets
+    Qt5::Network
+)
 
-
-include(src/CMakeLists.txt)
-create_openspace_target()
-add_external_dependencies()
-handle_applications()
-
-if (MSVC)
-    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    handle_option_vld()
+if (APPLE)
+INSTALL(CODE "
+   include(BundleUtilities)
+   fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/MacOS/TimelineView\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+   " COMPONENT Runtime)
 endif ()
-
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-handle_option_tests()
-
-handle_internal_modules()
-copy_dynamic_libraries()

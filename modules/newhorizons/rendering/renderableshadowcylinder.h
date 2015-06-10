@@ -22,39 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef RENDERABLESHADOWCYLINDER_H_
+#define RENDERABLESHADOWCYLINDER_H_
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/rendering/renderable.h>
 
-#include <test_common.inl>
-//#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/updatestructures.h>
 
-#include <iostream>
-
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
-
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
+namespace ghoul {
+	namespace filesystem {
+		class File;
+	}
+	namespace opengl {
+		class ProgramObject;
+		class Texture;
+	}
 }
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, args);
+namespace openspace {
+	struct LinePoint;
+	class RenderableShadowCylinder : public Renderable {
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+	public:
+		RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
+		~RenderableShadowCylinder();
+
+		bool initialize() override;
+		bool deinitialize() override;
+
+		bool isReady() const override;
+
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
+
+	private:
+		struct CylinderVBOLayout {
+			CylinderVBOLayout(double a1, double a2, double a3, double a4){
+				x = a1;
+				y = a2;
+				z = a3;
+				e = a4;
+			}
+			float x, y, z, e;
+		};
+
+		void createCylinder();
+		properties::IntProperty _numberOfPoints;
+		properties::FloatProperty _shadowLength;
+
+		ghoul::opengl::ProgramObject* _shader;
+		
+		glm::dmat3 _stateMatrix;
+
+		GLuint _vao;
+		GLuint _vbo;
+
+		std::vector<CylinderVBOLayout> _vertices;
+
+		std::string _terminatorType;
+		std::string _lightSource;
+		std::string _observer;
+		std::string _body;
+		std::string _bodyFrame;
+		std::string _mainFrame;
+		std::string _aberration;
+		
+		double _time;
+	};
+
+} // namespace openspace
+#endif // RENDERABLESHADOWCYLINDER_H_
+

@@ -47,6 +47,9 @@
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/sharedmemory.h>
+#include <openspace/engine/configurationmanager.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -75,6 +78,9 @@
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
+
+    const std::string KeyRenderingMethod = "RenderingMethod";
+    const std::string DefaultRenderingMethod = "ABufferSingleLinked";
 
     const std::map<std::string, int> RenderingMethods = {
         { "ABufferFrameBuffer", ABUFFER_FRAMEBUFFER},
@@ -130,7 +136,23 @@ RenderEngine::~RenderEngine() {
 		ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
-bool RenderEngine::initialize(const std::string& renderingMethod) {
+bool RenderEngine::initialize() {
+    std::string renderingMethod = DefaultRenderingMethod;
+    
+    // If the user specified a rendering method that he would like to use, use that
+    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
+        renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
+    else {
+        using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+
+        // The default rendering method has a requirement of OpenGL 4.3, so if we are
+        // below that, we will fall back to frame buffer operation
+        if (OpenGLCap.openGLVersion() < Version(4,3)) {
+            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
+            renderingMethod = "ABufferFrameBuffer";
+        }
+    }
+
     auto it = RenderingMethods.find(renderingMethod);
     if (it == RenderingMethods.end()) {
         LFATAL("Rendering method '" << renderingMethod << "' not among the available "
@@ -308,7 +330,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 	}
 
 	// converts the quaternion used to rotation matrices
-	_mainCamera->compileViewRotationMatrix();
+    if (_mainCamera)
+        _mainCamera->compileViewRotationMatrix();
 
 	// update and evaluate the scene starting from the root node
 	_sceneGraph->update({

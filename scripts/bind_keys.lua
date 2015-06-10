@@ -53,6 +53,8 @@ openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); opensp
 openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
 ]]--
 
+openspace.bindKey("i", "local b = openspace.getPropertyValue('PlutoTexture.renderable.enabled'); openspace.setPropertyValue('PlutoTexture.renderable.enabled', not b)")
+
 openspace.bindKey("q", "local b = openspace.getPropertyValue('SunMarker.renderable.enabled'); openspace.setPropertyValue('SunMarker.renderable.enabled', not b)")
 openspace.bindKey("e", "local b = openspace.getPropertyValue('EarthMarker.renderable.enabled'); openspace.setPropertyValue('EarthMarker.renderable.enabled', not b)")
 

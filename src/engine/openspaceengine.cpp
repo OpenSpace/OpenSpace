@@ -86,18 +86,11 @@ namespace {
     
     const std::string _sgctConfigArgumentCommand = "-config";
 
-    const std::string KeyRenderingMethod = "RenderingMethod";
-    const std::string DefaultRenderingMethod = "ABufferSingleLinked";
-    const std::string KeyDownloadRequestURL = "DownloadRequestURL";
-
-    const std::string DefaultOpenGlVersion = "4.3";
-
     const int CacheVersion = 1;
     
     struct {
         std::string configurationName;
 		std::string sgctConfigurationName;
-        std::string openGlVersion;
     } commandlineArgumentPlaceholders;
 }
 
@@ -149,8 +142,7 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 
 bool OpenSpaceEngine::create(
     int argc, char** argv,
-    std::vector<std::string>& sgctArguments,
-    std::string& openGlVersion)
+    std::vector<std::string>& sgctArguments)
 {
     ghoul::initialize();
 
@@ -165,7 +157,6 @@ bool OpenSpaceEngine::create(
 	LogMgr.addLog(new ConsoleLog);
 
 	LDEBUG("Initialize FileSystem");
-	ghoul::filesystem::FileSystem::initialize();
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -261,10 +252,6 @@ bool OpenSpaceEngine::create(
 		sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
 	}
 
-    openGlVersion = commandlineArgumentPlaceholders.openGlVersion;
-    if (openGlVersion != DefaultOpenGlVersion)
-        LINFO("Using OpenGL version " << openGlVersion);
-
 	// Prepend the outgoing sgctArguments with the program name
 	// as well as the configuration file that sgct is supposed to use
 	sgctArguments.insert(sgctArguments.begin(), argv[0]);
@@ -301,7 +288,7 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
 	SysCap.logCapabilities();
-
+    
     std::string requestURL = "";
     bool success = configurationManager()->getValue(KeyDownloadRequestURL, requestURL);
     if (success)
@@ -348,10 +335,11 @@ bool OpenSpaceEngine::initialize() {
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine
-    if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
-        _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
-    else
-    	_renderEngine->initialize(DefaultRenderingMethod);
+    _renderEngine->initialize();
+ //   if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
+ //       _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
+ //   else
+ //   	_renderEngine->initialize(DefaultRenderingMethod);
 
 	sceneGraph->initialize();
 
@@ -409,13 +397,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
 		"Provides the path to the SGCT configuration file, overriding the value set in"
 		"the OpenSpace configuration file");
 	_commandlineParser->addCommand(sgctConfigFileCommand);
-
-    commandlineArgumentPlaceholders.openGlVersion = DefaultOpenGlVersion;
-    CommandlineCommand* openGlVersionCommand = new SingleCommand<std::string>(
-        &commandlineArgumentPlaceholders.openGlVersion,
-        "-ogl", "-o",
-        "Sets the OpenGL version that is to be used; valid values are '4.2' and '4.3'");
-    _commandlineParser->addCommand(openGlVersionCommand);
 
     return true;
 }
@@ -509,7 +490,6 @@ void OpenSpaceEngine::runSettingsScripts() {
         ConfigurationManager::KeySettingsScript, scripts);
     runScripts(scripts);
 }
-
 
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;

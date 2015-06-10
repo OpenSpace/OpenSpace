@@ -316,9 +316,9 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 	}
 	else {
 		SpiceBoolean success;
-		SpiceInt sid = id;
-		bods2c_c(body.c_str(), &sid, &success);
-		id = sid;
+//		SpiceInt sid = id;
+		bods2c_c(body.c_str(), &id, &success);
+//		id = sid;
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
@@ -331,9 +331,7 @@ bool SpiceManager::getFrameId(const std::string& frame, int& id) const {
 		return false;
 	}
 	else {
-		SpiceInt sid = id;
-		namfrm_c(frame.c_str(), &sid);
-		id = sid;
+		namfrm_c(frame.c_str(), &id);
 		bool hasError = SpiceManager::checkForError("Error getting id for frame '" + frame + "'");
 		return !hasError;
 	}
@@ -403,7 +401,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 }
 
 bool SpiceManager::spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et){
-	int craftID;
+	int craftID = -1;
 	getNaifId(craftIdCode, craftID);
 	sct2e_c(craftID, craftTicks, &et);
     bool hasError = checkForError("Error transforming spacecraft clock of '" + craftIdCode + "' at time " + std::to_string(craftTicks));
@@ -957,6 +955,45 @@ bool SpiceManager::getFieldOfView(int instrument,
 
 	return true;
 }
+bool SpiceManager::getTerminatorEllipse(const int numberOfPoints,
+										const std::string terminatorType,
+										const std::string lightSource,
+										const std::string observer,
+										const std::string target,
+										const std::string frame,
+										const std::string aberrationCorrection,
+										double ephemerisTime,
+										double& targetEpoch,
+										glm::dvec3& observerPosition,
+										std::vector<psc>& terminatorPoints){
+
+	double(*tpoints)[3] = new double[numberOfPoints][3];
+
+	edterm_c(terminatorType.c_str(), 
+		     lightSource.c_str(), 
+			 target.c_str(), 
+			 ephemerisTime, 
+			 frame.c_str(), 
+			 aberrationCorrection.c_str(), 
+			 observer.c_str(),
+		     numberOfPoints, 
+			 &targetEpoch, 
+			 glm::value_ptr(observerPosition), 
+			 (double(*)[3])tpoints );
+
+	bool hasError = checkForError("Error getting " + terminatorType + 
+		"terminator for'" + target + "'");
+	if (hasError)
+		return false;
+
+	for (int i = 0; i < numberOfPoints; i++){
+		psc point = psc::CreatePowerScaledCoordinate(tpoints[i][0], tpoints[i][1], tpoints[i][2]);
+		point[3] += 3;
+		terminatorPoints.push_back(point);
+	}
+
+	return true;
+}
 
 std::string SpiceManager::frameFromBody(const std::string body) const {
 
@@ -1010,8 +1047,8 @@ bool SpiceManager::checkForError(std::string errorMessage) {
 bool SpiceManager::getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c) {
 
 	SpiceDouble radii[3];
-	SpiceInt n;
-	int id;
+	SpiceInt n = -1;
+	int id = -1;
 
 	getNaifId(planetName, id);
 	if (bodfnd_c(id, "RADII")) {

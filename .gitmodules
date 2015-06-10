@@ -1,8 +1,8 @@
 [submodule "ext/ghoul"]
 	path = ext/ghoul
 	url = https://github.com/OpenSpace/Ghoul.git
-[submodule "openspace-data"]
-	path = openspace-data
+[submodule "data"]
+	path = data
 	url = git@openspace.itn.liu.se:/openspace-data
 [submodule "modules/kameleon/ext/kameleon"]
 	path = modules/kameleon/ext/kameleon
