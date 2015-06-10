@@ -25,24 +25,28 @@
 set(APPLICATION_NAME Launcher)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
+include (${OPENSPACE_CMAKE_EXT_DIR}/handle_external_library.cmake)
+
+set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
+
 set(SOURCE_FILES
-    ${OPENSPACE_APPS_DIR}/Launcher/main.cpp
-    ${OPENSPACE_APPS_DIR}/Launcher/mainwindow.cpp
-    ${OPENSPACE_APPS_DIR}/Launcher/shortcutwidget.cpp
-    ${OPENSPACE_APPS_DIR}/Launcher/syncwidget.cpp
+    ${application_path}/main.cpp
+    ${application_path}/mainwindow.cpp
+    ${application_path}/shortcutwidget.cpp
+    ${application_path}/syncwidget.cpp
 )
 
 set(HEADER_FILES
-    ${OPENSPACE_APPS_DIR}/Launcher/mainwindow.h
-    ${OPENSPACE_APPS_DIR}/Launcher/shortcutwidget.h
-    ${OPENSPACE_APPS_DIR}/Launcher/syncwidget.h
+    ${application_path}/mainwindow.h
+    ${application_path}/shortcutwidget.h
+    ${application_path}/syncwidget.h
 ) 
 
 find_package(Qt5Widgets)
 find_package(Qt5Network)
 
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
-qt5_add_resources(RESOURCE_FILES ${OPENSPACE_APPS_DIR}/Launcher/files.qrc)
+qt5_add_resources(RESOURCE_FILES ${application_path}/files.qrc)
 
 add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
@@ -57,8 +61,15 @@ target_link_libraries(${APPLICATION_NAME}
 )
 
 if (APPLE)
-INSTALL(CODE "
-   include(BundleUtilities)
-   fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
-   " COMPONENT Runtime)
+    INSTALL(CODE "
+       include(BundleUtilities)
+       fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+       " COMPONENT Runtime)
 endif ()
+
+# Libtorrent
+set(encryption OFF CACHE BOOL "")
+set(shared OFF CACHE BOOL "")
+include_external_library(${APPLICATION_NAME} torrent-rasterbar ${application_path}/ext/libtorrent)
+
+copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
