@@ -128,6 +128,12 @@ void SyncWidget::handleFileRequest(QString module, FileRequests files) {
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
+        DlManager.downloadRequestFiles(
+            f.identifier.toStdString(),
+            fullPath(module, f.destination).toStdString(),
+            f.version,
+            [](const ghoul::filesystem::File& f) { qDebug() << "finished"; }
+        );
 
 
     }

@@ -27,6 +27,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <fstream>
+
 #ifdef OPENSPACE_CURL_ENABLED
 #include <curl/curl.h>
 #endif
@@ -69,7 +71,7 @@ bool DownloadManager::downloadFile(
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
         LDEBUG("Starting download for file: '" << url <<
-            "' into file '" << file.filename() << "'");
+            "' into file '" << file.path() << "'");
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
@@ -95,12 +97,40 @@ bool DownloadManager::downloadRequestFiles(
     DownloadFinishedCallback finishedCallback,
     DownloadProgressCallback progressCallback)
 {
-    // Escaping is necessary ---abock
+    bool s = FileSys.createDirectory(destination, true);
+    // TODO: Check s ---abock
+    // TODO: Escaping is necessary ---abock
     const std::string fullRequest =_requestURL + "?" +
         RequestIdentifier + "=" + identifier + "&" +
         RequestFileVersion + "=" + std::to_string(version) + "&" +
-        RequestApplicationVersion = "=" + std::to_string(_applicationVersion);
+        RequestApplicationVersion + "=" + std::to_string(_applicationVersion);
+    LDEBUG("Request: " << fullRequest);
 
+    std::string requestFile = absPath("${TEMPORARY}/" + identifier);
+    LDEBUG("Request File: " << requestFile);
+
+    bool success = downloadFile(
+        fullRequest,
+        requestFile,
+        [destination](const ghoul::filesystem::File& f) {
+            LDEBUG("Finished: " << f.path());
+            std::ifstream temporary(f.path());
+            std::string line;
+            int nFiles = 0;
+            int nFinished = 0;
+            while (std::getline(temporary, line)) {
+                ++nFiles;
+                std::string file = ghoul::filesystem::File(line).filename();
+
+                LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
+                bool success = DlManager.downloadFile(
+                    line,
+                    destination.path() + "/" + file,
+                    [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; }
+                );
+            }
+        }
+    );
 
 
 
