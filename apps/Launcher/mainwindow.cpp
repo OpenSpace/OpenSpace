@@ -153,6 +153,7 @@ void MainWindow::initialize() {
         _scenes->addItem(i.fileName());
     }
     _syncWidget.setSceneFiles(_sceneFiles);
+    _syncWidget.setModulesDirectory(ModulesDirectory);
 }
 
 void MainWindow::shortcutButtonPressed() {

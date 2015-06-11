@@ -37,19 +37,42 @@ public:
     SyncWidget(QWidget* parent);
     ~SyncWidget();
     
-    void setSceneFiles(QMap<QString, QString>  sceneFiles);
+    void setSceneFiles(QMap<QString, QString> sceneFiles);
+    void setModulesDirectory(QString modulesDirectory);
 
 private slots:
     void syncButtonPressed();
 
 private:
+    struct DirectFile {
+        QString url;
+        QString destination;
+    };
+    typedef QList<DirectFile> DirectFiles;
+
+    struct FileRequest {
+        QString identifier;
+        QString destination;
+        int version;
+    };
+    typedef QList<FileRequest> FileRequests;
+
+    struct TorrentFile {
+        QString file;
+    };
+    typedef QList<TorrentFile> TorrentFiles;
+
     void clear();
     QStringList selectedScenes() const;
 
-    void handleDirectFiles(QString module, QStringList files);
-    void handleTorrentFiles(QString module, QStringList torrents);
+    QString fullPath(QString module, QString destination) const;
+
+    void handleDirectFiles(QString module, DirectFiles files);
+    void handleFileRequest(QString module, FileRequests files);
+    void handleTorrentFiles(QString module, TorrentFiles files);
 
     QMap<QString, QString>  _sceneFiles;
+    QString _modulesDirectory;
     QGridLayout* _sceneLayout;
 };
 

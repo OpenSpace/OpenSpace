@@ -87,6 +87,7 @@ namespace {
     const std::string _sgctConfigArgumentCommand = "-config";
 
     const int CacheVersion = 1;
+    const int DownloadVersion = 1;
     
     struct {
         std::string configurationName;
@@ -292,7 +293,7 @@ bool OpenSpaceEngine::initialize() {
     std::string requestURL = "";
     bool success = configurationManager()->getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
     if (success)
-        DownloadManager::initialize(requestURL);
+        DownloadManager::initialize(requestURL, DownloadVersion);
 
 	// Load SPICE time kernel
 	success = loadSpiceKernels();

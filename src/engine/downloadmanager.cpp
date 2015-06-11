@@ -33,6 +33,10 @@
 
 namespace {
     const std::string _loggerCat = "DownloadManager";
+    
+    const std::string RequestIdentifier = "identifier";
+    const std::string RequestFileVersion = "file_version";
+    const std::string RequestApplicationVersion = "application_version";
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
         size_t written;
@@ -43,8 +47,9 @@ namespace {
 
 namespace openspace {
 
-DownloadManager::DownloadManager(std::string requestURL)
+DownloadManager::DownloadManager(std::string requestURL, int applicationVersion)
     : _requestURL(std::move(requestURL))
+    , _applicationVersion(std::move(applicationVersion))
 {
     curl_global_init(CURL_GLOBAL_ALL);
     // Check if URL is accessible
@@ -53,7 +58,8 @@ DownloadManager::DownloadManager(std::string requestURL)
 bool DownloadManager::downloadFile(
     const std::string& url,
     const ghoul::filesystem::File& file,
-    DownloadFinishedCallback callback)
+    DownloadFinishedCallback finishedCallback,
+    DownloadProgressCallback progressCallback)
 {
     CURL* curl = curl_easy_init();
     if (curl) {
@@ -62,19 +68,43 @@ bool DownloadManager::downloadFile(
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+        LDEBUG("Starting download for file: '" << url <<
+            "' into file '" << file.filename() << "'");
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
+
+        // TODO: incorporate progressCallback ---abock
+        // http://curl.haxx.se/libcurl/c/progressfunc.html
 
         if (res != CURLE_OK) {
             LERROR("Error downloading file 'url': " << curl_easy_strerror(res));
             return false;
         }
 
-        if (callback)
-            callback(file);
+        if (finishedCallback)
+            finishedCallback(file);
         return true;
     }
+}
+
+bool DownloadManager::downloadRequestFiles(
+    const std::string& identifier,
+    const ghoul::filesystem::Directory& destination,
+    int version,
+    DownloadFinishedCallback finishedCallback,
+    DownloadProgressCallback progressCallback)
+{
+    // Escaping is necessary ---abock
+    const std::string fullRequest =_requestURL + "?" +
+        RequestIdentifier + "=" + identifier + "&" +
+        RequestFileVersion + "=" + std::to_string(version) + "&" +
+        RequestApplicationVersion = "=" + std::to_string(_applicationVersion);
+
+
+
+
+    return true;
 }
 
 

@@ -27,6 +27,7 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/directory.h>
 #include <functional>
 #include <string>
 
@@ -34,18 +35,33 @@ namespace openspace {
 
 class DownloadManager : public ghoul::Singleton<DownloadManager> {
 public:
-    typedef std::function<void (const ghoul::filesystem::File&)> DownloadFinishedCallback;
+    typedef std::function <
+        void(const ghoul::filesystem::File&, float progress)
+    > DownloadProgressCallback;
+    typedef std::function<
+        void (const ghoul::filesystem::File&)
+    > DownloadFinishedCallback;
 
-    DownloadManager(std::string requestURL);
+    DownloadManager(std::string requestURL, int applicationVersion);
 
     bool downloadFile(
         const std::string& url,
         const ghoul::filesystem::File& file,
-        DownloadFinishedCallback callback = DownloadFinishedCallback()
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()
+    );
+
+    bool downloadRequestFiles(
+        const std::string& identifier,
+        const ghoul::filesystem::Directory& destination,
+        int version,
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
 private:
     std::string _requestURL;
+    int _applicationVersion;
 };
 
 #define DlManager (openspace::DownloadManager::ref())
