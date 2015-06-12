@@ -41,5 +41,4 @@ function (include_external_library target_name library_name path)
             endif ()
         endif ()
     endif ()
-
 endfunction ()

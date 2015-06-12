@@ -124,7 +124,6 @@ option(shared "build libtorrent as a shared library" ON)
 option(static_runtime "build libtorrent with static runtime" OFF)
 option(tcmalloc "link against google performance tools tcmalloc" OFF)
 option(pool-allocators "Uses a pool allocator for disk and piece buffers" ON)
-option(encryption "link against openssl and enable encryption" ON)
 option(geoip "link against LGPL GeoIP code from Maxmind, to enable geoip database support" OFF)
 option(dht "enable support for Mainline DHT" ON)
 option(resolve-countries "enable support for resolving countries from peer IPs" ON)
@@ -133,7 +132,6 @@ option(deprecated-functions "enable deprecated functions for backwards compatibi
 option(exceptions "build with exception support" ON)
 option(logging "build with logging" OFF)
 option(verbose-logging "build with verbose logging" OFF)
-option(build_tests "build tests" OFF)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release RelWithDebInfo)
 
@@ -148,25 +146,10 @@ if(UNIX)
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
 endif()
 
-if (build_tests)
-	# this will make some internal functions available in the
-	# DLL interface, for the tests to access
-	add_definitions(-DTORRENT_EXPORT_EXTRA)
-endif (build_tests)
-
 include_directories(${includes})
 
-if (encryption)
-	list(APPEND sources pe_crypto asio_ssl)
-	if(NOT DEFINED OPENSSL_INCLUDE_DIR OR NOT DEFINED OPENSSL_LIBRARIES)
-		FIND_PACKAGE(OpenSSL REQUIRED)
-	endif()
-	add_definitions(-DTORRENT_USE_OPENSSL)
-	include_directories(${OPENSSL_INCLUDE_DIR})
-else()
-	add_definitions(-DTORRENT_DISABLE_ENCRYPTION)
-	list(APPEND sources sha1)
-endif (encryption)
+add_definitions(-DTORRENT_DISABLE_ENCRYPTION)
+list(APPEND sources sha1)
 
 if (logging)
 	add_definitions(-DTORRENT_LOGGING)
@@ -197,7 +180,7 @@ endif()
 
 if (shared)
 	add_definitions(-DTORRENT_BUILDING_SHARED)
-	add_library(torrent-rasterbar SHARED ${sources2})
+	add_library(libtorrent SHARED ${sources2})
 else (shared)
 	if(static_runtime)
 		# fix /MT flag:
@@ -215,35 +198,36 @@ else (shared)
 			string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 		endforeach()
 	endif()
-	add_library(torrent-rasterbar STATIC ${sources2})
+	add_library(libtorrent STATIC ${sources2})
 endif()
 
 # Boost
+set(Boost_USE_STATIC_LIBS  ON)
 if(NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
 	FIND_PACKAGE( Boost COMPONENTS system thread date_time chrono)
 endif()
 include_directories(${Boost_INCLUDE_DIR})
-target_link_libraries(torrent-rasterbar ${Boost_LIBRARIES})
+target_link_libraries(libtorrent ${Boost_LIBRARIES})
+
+if (WIN32)
+	target_link_libraries(libtorrent Iphlpapi.lib)
+endif ()
 
 # this works around a bug in asio in boost-1.39
 #add_definitions(-DBOOST_ASIO_HASH_MAP_BUCKETS=1021  -D__USE_W32_SOCKETS -DWIN32_LEAN_AND_MEAN )
 
-if(NOT static_runtime)
-	add_definitions(-DBOOST_ASIO_DYN_LINK -DBOOST_DATE_TIME_DYN_LINK -DBOOST_THREAD_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_CHRONO_DYN_LINK)
-else()
+# if(NOT static_runtime)
+# 	add_definitions(-DBOOST_ASIO_DYN_LINK -DBOOST_DATE_TIME_DYN_LINK -DBOOST_THREAD_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_CHRONO_DYN_LINK)
+# else()
 	add_definitions(-DBOOST_ASIO_SEPARATE_COMPILATION)
-endif()
+# endif()
 
 if (WIN32)
-	target_link_libraries(torrent-rasterbar wsock32 ws2_32)
+	target_link_libraries(libtorrent wsock32 ws2_32)
 	add_definitions(-D_WIN32_WINNT=0x0600)
 	if (MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # multicore compilation
 	endif()
-endif()
-
-if (encryption)
-	target_link_libraries(torrent-rasterbar ${OPENSSL_LIBRARIES})
 endif()
 
 if (NOT pool-allocators)
@@ -303,10 +287,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 if (tcmalloc)
-	target_link_libraries(torrent-rasterbar tcmalloc)
+	target_link_libraries(libtorrent tcmalloc)
 endif()
 
-set_target_properties(torrent-rasterbar PROPERTIES
+set_target_properties(libtorrent PROPERTIES
 	SOVERSION ${SOVERSION})
 
 get_property (COMPILETIME_OPTIONS_LIST
@@ -327,7 +311,7 @@ else()
 	set (LIBDIR "lib")
 endif()
 
-install(TARGETS torrent-rasterbar DESTINATION ${LIBDIR})
+install(TARGETS libtorrent DESTINATION ${LIBDIR})
 install(DIRECTORY include/libtorrent
 	DESTINATION include
 	PATTERN ".svn" EXCLUDE)
@@ -337,25 +321,3 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtorrent-rasterbar.pc DESTINATION ${
 #file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/examples)
 #configure_file(examples/run_cmake.sh.in examples/run_cmake.sh)
 # to build the examples, run examples/run_cmake.sh after building libtorrent
-
-# === build tests ===
-if(build_tests)
-	FILE(GLOB tests RELATIVE "${PROJECT_SOURCE_DIR}" "test/test_*.cpp")
-	add_library(test_common STATIC test/main.cpp test/setup_transfer.cpp
-		test/dht_server.cpp test/udp_tracker.cpp test/peer_server.cpp
-		test/web_seed_suite.cpp)
-	enable_testing()
-
-	foreach(s ${tests})
-		get_filename_component (sn ${s} NAME_WE)
-		add_executable(${sn} ${s})
-		target_link_libraries(${sn} torrent-rasterbar test_common)
-		add_test(${sn} ${s})
-	endforeach(s)
-
-#	add_executable(test_upnp test/test_upnp.cpp)
-#	target_link_libraries(test_upnp torrent-rasterbar)
-
-#	add_executable(test_natpmp test/test_natpmp.cpp)
-#	target_link_libraries(test_natpmp torrent-rasterbar)
-endif()

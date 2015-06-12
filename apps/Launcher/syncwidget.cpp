@@ -40,6 +40,10 @@
 #include <QString>
 #include <QVBoxLayout>
 
+#include <libtorrent/entry.hpp>
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/session.hpp>
+
 namespace {
     const int nColumns = 3;
 
@@ -112,6 +116,7 @@ void SyncWidget::clear() {
 }
 
 void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
+    return;
     qDebug() << "Direct Files";
     for (const DirectFile& f : files) {
         qDebug() << f.url << " -> " << f.destination;
@@ -125,6 +130,7 @@ void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
 }
 
 void SyncWidget::handleFileRequest(QString module, FileRequests files) {
+    return;
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
@@ -143,6 +149,27 @@ void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
     qDebug() << "Torrent Files";
     for (const TorrentFile& f : files) {
         qDebug() << f.file;
+
+        libtorrent::session s;
+        libtorrent::error_code ec;
+        s.listen_on(std::make_pair(6881, 6889), ec);
+        if (ec) {
+            qDebug() << "Failed to open socket: " << QString::fromStdString(ec.message());
+            return;
+        }
+
+        libtorrent::add_torrent_params p;
+        p.save_path = fullPath(module, ".").toStdString();
+        p.ti = new libtorrent::torrent_info(f.file.toStdString(), ec);
+        if (ec) {
+            qDebug() << QString::fromStdString(ec.message());
+            return;
+        }
+        s.add_torrent(p, ec);
+        if (ec) {
+            qDebug() << QString::fromStdString(ec.message());
+            return;
+        }
     }
 }
 
