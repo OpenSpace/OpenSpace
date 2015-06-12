@@ -229,6 +229,9 @@ function (handle_applications)
 
                     target_link_libraries(${APPLICATION_NAME} Ghoul)
                     target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+
+                    copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+
             endif ()
 
             list(APPEND applications ${APPLICATION_NAME})

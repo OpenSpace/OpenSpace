@@ -22,74 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SYNCWIDGET_H__
-#define __SYNCWIDGET_H__
+#include "infowidget.h"
 
-#include <QWidget>
+#include <QGridLayout>
+#include <QLabel>
+#include <QProgressBar>
 
-#include <QMap>
+InfoWidget::InfoWidget(QString name, int totalBytes)
+    : QWidget(nullptr)
+    , _name(nullptr)
+    , _bytes(nullptr)
+    , _progress(nullptr)
+    , _messages(nullptr)
+    , _totalBytes(totalBytes)
+{
+    QGridLayout* layout = new QGridLayout;
 
-#include <libtorrent/torrent_handle.hpp>
+    _name = new QLabel(name);
+    layout->addWidget(_name, 0, 0);
 
-class QBoxLayout;
-class QGridLayout;
+    _bytes = new QLabel("");
+    layout->addWidget(_bytes, 0, 1);
 
-class InfoWidget;
+    _progress = new QProgressBar;
+    layout->addWidget(_progress, 0, 2);
 
-namespace libtorrent {
-    class session;
-    class torrent_handle;
+    _messages = new QLabel("");
+    layout->addWidget(_messages, 1, 0, 1, 3);
+
+    setLayout(layout);
+
+    update(0, 0.f);
 }
 
-class SyncWidget : public QWidget {
-Q_OBJECT
-public:
-    SyncWidget(QWidget* parent);
-    ~SyncWidget();
-    
-    void setSceneFiles(QMap<QString, QString> sceneFiles);
-    void setModulesDirectory(QString modulesDirectory);
+void InfoWidget::update(int currentBytes, float progress) {
+    _bytes->setText(
+        QString("%1 / %2").arg(currentBytes).arg(_totalBytes)
+    );
 
-private slots:
-    void syncButtonPressed();
-    void handleTimer();
+    _progress->setValue(static_cast<int>(progress * 100));
+}
 
-private:
-    struct DirectFile {
-        QString url;
-        QString destination;
-    };
-    typedef QList<DirectFile> DirectFiles;
-
-    struct FileRequest {
-        QString identifier;
-        QString destination;
-        int version;
-    };
-    typedef QList<FileRequest> FileRequests;
-
-    struct TorrentFile {
-        QString file;
-    };
-    typedef QList<TorrentFile> TorrentFiles;
-
-    void clear();
-    QStringList selectedScenes() const;
-
-    QString fullPath(QString module, QString destination) const;
-
-    void handleDirectFiles(QString module, DirectFiles files);
-    void handleFileRequest(QString module, FileRequests files);
-    void handleTorrentFiles(QString module, TorrentFiles files);
-
-    QMap<QString, QString>  _sceneFiles;
-    QString _modulesDirectory;
-    QGridLayout* _sceneLayout;
-    QBoxLayout* _downloadLayout;
-
-    libtorrent::session* _session;
-    //QMap<QString, InfoWidget*> _infoWidgetMap;
-    QMap<libtorrent::torrent_handle, InfoWidget*> _infoWidgetMap;
-};
-
-#endif // __SYNCWIDGET_H__
+void InfoWidget::error(QString message) {
+    _messages->setText(message);
+}

@@ -31,12 +31,14 @@ set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
 
 set(SOURCE_FILES
     ${application_path}/main.cpp
+    ${application_path}/infowidget.cpp
     ${application_path}/mainwindow.cpp
     ${application_path}/shortcutwidget.cpp
     ${application_path}/syncwidget.cpp
 )
 
 set(HEADER_FILES
+    ${application_path}/infowidget.h
     ${application_path}/mainwindow.h
     ${application_path}/shortcutwidget.h
     ${application_path}/syncwidget.h
@@ -67,35 +69,6 @@ if (APPLE)
        " COMPONENT Runtime)
 endif ()
 
-# if(NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
-#     FIND_PACKAGE( Boost COMPONENTS system thread date_time chrono)
-# endif()
-# include_directories(${Boost_INCLUDE_DIR})
-# target_link_libraries(${APPLICATION_NAME} ${Boost_LIBRARIES})
-
 # Libtorrent
-add_subdirectory(${application_path}/ext/libtorrent)
-target_link_libraries(${APPLICATION_NAME} libtorrent)
-target_compile_definitions(${APPLICATION_NAME} PUBLIC BOOST_ASIO_SEPARATE_COMPILATION)
-
-
-# get_property(INCLUDE_DIR TARGET ${target_name} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-# target_link_libraries(${target_name} ${library_name})
+include_external_library(${APPLICATION_NAME} libtorrent ${application_path}/ext/libtorrent)
 target_include_directories(${APPLICATION_NAME} PUBLIC SYSTEM ${application_path}/ext/libtorrent/include)
-set_property(TARGET libtorrent PROPERTY FOLDER "External")
-if (OPENSPACE_DISABLE_EXTERNAL_WARNINGS)
-    if (MSVC)
-        target_compile_options(libtorrent PUBLIC "/W0" "/MP")
-    else ()
-        target_compile_options(libtorrent PUBLIC "-w")
-    endif ()
-endif ()
-
-# include_external_library(${APPLICATION_NAME} libtorrent ${application_path}/ext/libtorrent)
-# We have to set it manually since the libtorrent doesn't use the new system that can be queried
-# target_include_directories(${APPLICATION_NAME} PUBLIC SYSTEM ${application_path}/ext/libtorrent/include)
-
-target_compile_definitions(${APPLICATION_NAME} PUBLIC BOOST_LIB_DIAGNOSTIC)
-target_compile_definitions(libtorrent PUBLIC BOOST_LIB_DIAGNOSTIC)
-
-copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")

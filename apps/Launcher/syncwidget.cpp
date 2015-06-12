@@ -24,9 +24,12 @@
 
 #include "syncwidget.h"
 
+#include "infowidget.h"
+
 #include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -38,11 +41,14 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include <QString>
+#include <QThread>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <libtorrent/entry.hpp>
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
+#include <libtorrent/alert_types.hpp>
 
 namespace {
     const int nColumns = 3;
@@ -62,6 +68,7 @@ namespace {
 SyncWidget::SyncWidget(QWidget* parent) 
     : QWidget(parent)
     , _sceneLayout(nullptr)
+    , _session(new libtorrent::session)
 {
     setFixedSize(500, 500);
 
@@ -82,15 +89,37 @@ SyncWidget::SyncWidget(QWidget* parent)
         layout->addWidget(syncButton);
     }
 
+    {
+        QGroupBox* downloadBox = new QGroupBox;
+        _downloadLayout = new QVBoxLayout;
+
+        downloadBox->setLayout(_downloadLayout);
+        layout->addWidget(downloadBox);
+    }
+
     setLayout(layout);
 
     ghoul::initialize();
     openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
+
+    libtorrent::error_code ec;
+    _session->listen_on(std::make_pair(6881, 6889), ec);
+    if (ec) {
+        qDebug() << "Failed to open socket: " << QString::fromStdString(ec.message());
+        _session = nullptr;
+        return;
+    }
+    _session->start_upnp();
+
+    QTimer* timer = new QTimer(this);
+    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
+    timer->start(100);
 }
 
 SyncWidget::~SyncWidget() {
     openspace::DownloadManager::deinitialize();
     ghoul::deinitialize();
+    delete _session;
 }
 
 void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
@@ -148,28 +177,31 @@ void SyncWidget::handleFileRequest(QString module, FileRequests files) {
 void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
     qDebug() << "Torrent Files";
     for (const TorrentFile& f : files) {
-        qDebug() << f.file;
+        QString file = QString::fromStdString(absPath(fullPath(module, f.file).toStdString()));
+        qDebug() << file;
 
-        libtorrent::session s;
+        //libtorrent::bdecode()
+
         libtorrent::error_code ec;
-        s.listen_on(std::make_pair(6881, 6889), ec);
+        libtorrent::add_torrent_params p;
+        p.save_path = absPath(fullPath(module, ".").toStdString());
+        qDebug() << QString::fromStdString(p.save_path);
+        p.ti = new libtorrent::torrent_info(file.toStdString(), ec);
+        p.name = f.file.toStdString();
+        p.storage_mode = libtorrent::storage_mode_allocate;
+        p.auto_managed = true;
         if (ec) {
-            qDebug() << "Failed to open socket: " << QString::fromStdString(ec.message());
-            return;
+            qDebug() << QString::fromStdString(ec.message());
+            //return;
+        }
+        libtorrent::torrent_handle h = _session->add_torrent(p, ec);
+        if (ec) {
+            qDebug() << QString::fromStdString(ec.message());
+            //return;
         }
 
-        libtorrent::add_torrent_params p;
-        p.save_path = fullPath(module, ".").toStdString();
-        p.ti = new libtorrent::torrent_info(f.file.toStdString(), ec);
-        if (ec) {
-            qDebug() << QString::fromStdString(ec.message());
-            return;
-        }
-        s.add_torrent(p, ec);
-        if (ec) {
-            qDebug() << QString::fromStdString(ec.message());
-            return;
-        }
+        InfoWidget* w = new InfoWidget(f.file, h.status().total_done);
+        _downloadLayout->addWidget(w);
     }
 }
 
@@ -279,4 +311,50 @@ QStringList SyncWidget::selectedScenes() const {
 
 QString SyncWidget::fullPath(QString module, QString destination) const {
     return _modulesDirectory + "/" + module + "/" + destination;
+}
+
+void SyncWidget::handleTimer() {
+    //using namespace libtorrent;
+
+    //_session->post_torrent_updates();
+
+    //qDebug() << "Session";
+    //qDebug() << "nPeers: " << _session->status().num_peers;
+    //qDebug() << "===";
+
+    //qDebug() << "Alerts";
+    //std::deque<alert*> alerts;
+    //_session->pop_alerts(&alerts);
+    //for (alert* a : alerts) {
+    //    qDebug() << QString::fromStdString(a->message());
+
+    //    //if (a->category() == alert::status_notification) {
+    //    //    state_update_alert* sua = static_cast<state_update_alert*>(a);
+    //    //    for (torrent_status s )
+    //    //}
+    //}
+    //qDebug() << "===";
+
+
+    //std::vector<torrent_handle> handles = _session->get_torrents();
+    //for (torrent_handle h : handles) {
+    //    //qDebug() << "Name: " << QString::fromStdString(h.name());
+    //    //torrent_status s = h.status();
+
+    //    //qDebug() << "Error: " << QString::fromStdString(s.error);
+
+    //    //qDebug() << "Total Wanted: " << s.total_wanted;
+    //    //qDebug() << "Total Wanted Done: " << s.total_wanted_done;
+    //    //qDebug() << "Has Incoming: " << s.has_incoming;
+    //    //qDebug() << "Connect Candidates: " << s.connect_candidates;
+    //    //qDebug() << "Last Seen Complete: " << s.last_seen_complete;
+    //    //qDebug() << "List Peers: " << s.list_peers;
+    //    //qDebug() << "Num Pieces: " << s.num_pieces;
+    //    //qDebug() << "Download Rate: " << s.download_rate;
+    //    //qDebug() << "List Seeds: " << s.list_seeds;
+    //    //qDebug() << "Paused: " << s.paused;
+    //    //qDebug() << "Progress: " << s.progress;
+
+    //    qDebug() << "";
+    //}
 }
