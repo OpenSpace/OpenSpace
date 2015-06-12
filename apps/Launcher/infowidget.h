@@ -35,7 +35,7 @@ Q_OBJECT
 public:
     InfoWidget(QString name, int totalBytes);
 
-    void update(int currentBytes, float progress);
+    void update(int currentBytes);
     void error(QString message);
 
 private:

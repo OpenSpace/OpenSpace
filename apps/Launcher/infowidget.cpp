@@ -52,14 +52,17 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
 
     setLayout(layout);
 
-    update(0, 0.f);
+    update(0);
 }
 
-void InfoWidget::update(int currentBytes, float progress) {
+void InfoWidget::update(int currentBytes) {
     _bytes->setText(
-        QString("%1 / %2").arg(currentBytes).arg(_totalBytes)
+        QString("%1 / %2")
+        .arg(currentBytes)
+        .arg(_totalBytes)
     );
 
+    float progress = static_cast<float>(currentBytes) / static_cast<float>(_totalBytes);
     _progress->setValue(static_cast<int>(progress * 100));
 }
 

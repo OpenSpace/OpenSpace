@@ -37,6 +37,7 @@
 #include <QCheckBox>
 #include <QDebug>
 #include <QDir>
+#include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QPushButton>
@@ -110,6 +111,7 @@ SyncWidget::SyncWidget(QWidget* parent)
         return;
     }
     _session->start_upnp();
+    _session->start_dht();
 
     QTimer* timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
@@ -180,7 +182,10 @@ void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
         QString file = QString::fromStdString(absPath(fullPath(module, f.file).toStdString()));
         qDebug() << file;
 
-        //libtorrent::bdecode()
+        if (!QFileInfo(file).exists()) {
+            qDebug() << file << " does not exist";
+            continue;
+        }
 
         libtorrent::error_code ec;
         libtorrent::add_torrent_params p;
@@ -192,16 +197,18 @@ void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
         p.auto_managed = true;
         if (ec) {
             qDebug() << QString::fromStdString(ec.message());
-            //return;
+            continue;
         }
         libtorrent::torrent_handle h = _session->add_torrent(p, ec);
         if (ec) {
             qDebug() << QString::fromStdString(ec.message());
-            //return;
+            continue;
         }
 
-        InfoWidget* w = new InfoWidget(f.file, h.status().total_done);
+        libtorrent::size_type s = h.status().total_wanted;
+        InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
         _downloadLayout->addWidget(w);
+        _infoWidgetMap[h] = w;
     }
 }
 
@@ -246,7 +253,6 @@ void SyncWidget::syncButtonPressed() {
                 bool found = dataDictionary.getValue<ghoul::Dictionary>(FileDownloadKey, directDownloadFiles);
                 if (found) {
                     DirectFiles files;
-                    //QStringList files;
                     for (int i = 1; i <= directDownloadFiles.size(); ++i) {
                         ghoul::Dictionary d = directDownloadFiles.value<ghoul::Dictionary>(std::to_string(i));
                         std::string url = d.value<std::string>(UrlKey);
@@ -314,7 +320,7 @@ QString SyncWidget::fullPath(QString module, QString destination) const {
 }
 
 void SyncWidget::handleTimer() {
-    //using namespace libtorrent;
+    using namespace libtorrent;
 
     //_session->post_torrent_updates();
 
@@ -336,25 +342,30 @@ void SyncWidget::handleTimer() {
     //qDebug() << "===";
 
 
-    //std::vector<torrent_handle> handles = _session->get_torrents();
-    //for (torrent_handle h : handles) {
-    //    //qDebug() << "Name: " << QString::fromStdString(h.name());
-    //    //torrent_status s = h.status();
+    std::vector<torrent_handle> handles = _session->get_torrents();
+    for (torrent_handle h : handles) {
+        torrent_status s = h.status();
+        InfoWidget* w = _infoWidgetMap[h];
 
-    //    //qDebug() << "Error: " << QString::fromStdString(s.error);
+        w->update(s.total_wanted_done);
 
-    //    //qDebug() << "Total Wanted: " << s.total_wanted;
-    //    //qDebug() << "Total Wanted Done: " << s.total_wanted_done;
-    //    //qDebug() << "Has Incoming: " << s.has_incoming;
-    //    //qDebug() << "Connect Candidates: " << s.connect_candidates;
-    //    //qDebug() << "Last Seen Complete: " << s.last_seen_complete;
-    //    //qDebug() << "List Peers: " << s.list_peers;
-    //    //qDebug() << "Num Pieces: " << s.num_pieces;
-    //    //qDebug() << "Download Rate: " << s.download_rate;
-    //    //qDebug() << "List Seeds: " << s.list_seeds;
-    //    //qDebug() << "Paused: " << s.paused;
-    //    //qDebug() << "Progress: " << s.progress;
+        qDebug() << "Name: " << QString::fromStdString(h.name());
+        //torrent_status s = h.status();
 
-    //    qDebug() << "";
-    //}
+        qDebug() << "Error: " << QString::fromStdString(s.error);
+
+        qDebug() << "Total Wanted: " << s.total_wanted;
+        qDebug() << "Total Wanted Done: " << s.total_wanted_done;
+        qDebug() << "Has Incoming: " << s.has_incoming;
+        qDebug() << "Connect Candidates: " << s.connect_candidates;
+        qDebug() << "Last Seen Complete: " << s.last_seen_complete;
+        qDebug() << "List Peers: " << s.list_peers;
+        qDebug() << "Num Pieces: " << s.num_pieces;
+        qDebug() << "Download Rate: " << s.download_rate;
+        qDebug() << "List Seeds: " << s.list_seeds;
+        qDebug() << "Paused: " << s.paused;
+        qDebug() << "Progress: " << s.progress;
+
+        qDebug() << "";
+    }
 }

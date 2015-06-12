@@ -38,7 +38,7 @@ class InfoWidget;
 
 namespace libtorrent {
     class session;
-    class torrent_handle;
+    struct torrent_handle;
 }
 
 class SyncWidget : public QWidget {
@@ -88,7 +88,6 @@ private:
     QBoxLayout* _downloadLayout;
 
     libtorrent::session* _session;
-    //QMap<QString, InfoWidget*> _infoWidgetMap;
     QMap<libtorrent::torrent_handle, InfoWidget*> _infoWidgetMap;
 };
 
