@@ -22,85 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __MAINWINDOW_H__
+#define __MAINWINDOW_H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <QWidget>
+#include <QTcpSocket>
 
-#include <set>
+#include "common.h"
 
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+class ConfigurationWidget;
+class ControlWidget;
+class InformationWidget;
+class TimelineWidget;
 
-namespace openspace {
-	class SyncBuffer;
-
-namespace scripting {
-
-class ScriptEngine {
+class MainWindow : public QWidget {
+Q_OBJECT
 public:
-    struct LuaLibrary {
-		struct Function {
-			std::string name;
-			lua_CFunction function;
-			std::string argumentText;
-			std::string helpText;
-		};
-        std::string name;
-		std::vector<Function> functions;
+	MainWindow();
+	~MainWindow();
 
-		bool operator<(const LuaLibrary& rhs) const;
-    };
+    std::string nextTarget() const;
 
-    ScriptEngine();
-    ~ScriptEngine();
+public slots:
+    void sendScript(QString script);
 
-    bool initialize();
-    void deinitialize();
-    
-	void initializeLuaState(lua_State* state);
+private slots:
+    void onConnect(QString host, QString port);
+    void onDisconnect();
 
-	void addLibrary(LuaLibrary library);
-    bool hasLibrary(const std::string& name);
-    
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
+    void onSocketConnected();
+    void onSocketDisconnected();
 
-	bool writeDocumentation(const std::string& filename, const std::string& type) const;
+	void readTcpData();
+    void handleStatusMessage(QByteArray data);
+    void handlePlaybook(QByteArray data);
 
-	void serialize(SyncBuffer* syncBuffer);
+    void fullyConnected();
 
-	void deserialize(SyncBuffer* syncBuffer);
-
-	void postSynchronizationPreDraw();
-
-	void preSynchronization();
-
-	void queueScript(const std::string &script);
-
-    std::vector<std::string> allLuaFunctions() const;
-    
 private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
+    ConfigurationWidget* _configurationWidget;
+    ControlWidget* _timeControlWidget;
+    InformationWidget* _informationWidget;
+    TimelineWidget* _timelineWidget;
+    
+	QTcpSocket* _socket;
 
-    bool isLibraryNameAllowed(lua_State* state, const std::string& name);
-    
-    void addBaseLibrary();
-    void remapPrintFunction();
-    
-    lua_State* _state;
-    std::set<LuaLibrary> _registeredLibraries;
-    
-	//sync variables
-	std::mutex _mutex;
-	std::vector<std::string> _queuedScripts;
-	std::vector<std::string> _receivedScripts;
-	std::string _currentSyncedScript;
+    bool _hasHongKangTimeline = false;
+    bool _hasLabelTimeline = false;
 };
 
-} // namespace scripting
-} // namespace openspace
-
-#endif // __SCRIPTENGINE_H__
+#endif // __MAINWINDOW_H__

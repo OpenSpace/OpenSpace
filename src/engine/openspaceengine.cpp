@@ -157,7 +157,6 @@ bool OpenSpaceEngine::create(
 	LogMgr.addLog(new ConsoleLog);
 
 	LDEBUG("Initialize FileSystem");
-	ghoul::filesystem::FileSystem::initialize();
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -359,8 +358,11 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
+    LINFO("Initializing GUI");
 	_gui->initialize();
 
+
+    LINFO("Finished initializing");
 	return true;
 }
 
@@ -487,7 +489,6 @@ void OpenSpaceEngine::runSettingsScripts() {
     runScripts(scripts);
 }
 
-
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
 
@@ -569,8 +570,11 @@ gui::GUI* OpenSpaceEngine::gui() {
 }
 
 bool OpenSpaceEngine::initializeGL() {
+    LINFO("Initializing Rendering Engine");
     bool success = _renderEngine->initializeGL();
+    LINFO("Initializing OnScreen GUI GL");
 	_gui->initializeGL();
+    LINFO("Finished initializing OpenGL");
 	return success;
 }
 

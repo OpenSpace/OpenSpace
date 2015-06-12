@@ -280,14 +280,17 @@ bool RenderEngine::initializeGL() {
 		_mainCamera->setMaxFov(maxFov);
 	}
 
+    LINFO("Initializing ABuffer");
 	_abuffer->initialize();
 
+    LINFO("Initializing Log");
 	_log = new ScreenLog();
 	ghoul::logging::LogManager::ref().addLog(_log);
 
+    LINFO("Initializing Visualizer");
 	_visualizer = new ABufferVisualizer();
 
-	// successful init
+    LINFO("Finished initializing GL");
 	return true;
 }
 
