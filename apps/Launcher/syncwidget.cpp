@@ -104,7 +104,7 @@ SyncWidget::SyncWidget(QWidget* parent)
     openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
 
     libtorrent::error_code ec;
-    _session->listen_on(std::make_pair(6881, 6889), ec);
+    _session->listen_on(std::make_pair(20285, 20285), ec);
     if (ec) {
         qDebug() << "Failed to open socket: " << QString::fromStdString(ec.message());
         _session = nullptr;
@@ -367,6 +367,7 @@ void SyncWidget::handleTimer() {
         qDebug() << "Connect Candidates: " << s.connect_candidates;
         qDebug() << "Last Seen Complete: " << s.last_seen_complete;
         qDebug() << "List Peers: " << s.list_peers;
+        qDebug() << "List Seeds: " << s.list_seeds;
         qDebug() << "Num Pieces: " << s.num_pieces;
         qDebug() << "Download Rate: " << s.download_rate;
         qDebug() << "List Seeds: " << s.list_seeds;
