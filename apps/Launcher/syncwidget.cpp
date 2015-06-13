@@ -112,6 +112,7 @@ SyncWidget::SyncWidget(QWidget* parent)
     }
     _session->start_upnp();
     _session->start_dht();
+    
 
     QTimer* timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
@@ -322,24 +323,30 @@ QString SyncWidget::fullPath(QString module, QString destination) const {
 void SyncWidget::handleTimer() {
     using namespace libtorrent;
 
-    //_session->post_torrent_updates();
+    _session->post_torrent_updates();
+    libtorrent::session_settings settings = _session->settings();
 
-    //qDebug() << "Session";
-    //qDebug() << "nPeers: " << _session->status().num_peers;
-    //qDebug() << "===";
+    qDebug() << "Session";
+    qDebug() << "nPeers: " << _session->status().num_peers;
+    qDebug() << "DHT: " << _session->is_dht_running();
+    qDebug() << "Incoming TCP" << settings.enable_incoming_tcp;
+    qDebug() << "Outgoing TCP" << settings.enable_outgoing_tcp;
+    qDebug() << "Incoming UTP" << settings.enable_incoming_utp;
+    qDebug() << "Outgoing UTP" << settings.enable_outgoing_utp;
+    qDebug() << "===";
 
-    //qDebug() << "Alerts";
-    //std::deque<alert*> alerts;
-    //_session->pop_alerts(&alerts);
-    //for (alert* a : alerts) {
-    //    qDebug() << QString::fromStdString(a->message());
+    qDebug() << "Alerts";
+    std::deque<alert*> alerts;
+    _session->pop_alerts(&alerts);
+    for (alert* a : alerts) {
+        qDebug() << QString::fromStdString(a->message());
 
-    //    //if (a->category() == alert::status_notification) {
-    //    //    state_update_alert* sua = static_cast<state_update_alert*>(a);
-    //    //    for (torrent_status s )
-    //    //}
-    //}
-    //qDebug() << "===";
+        //if (a->category() == alert::status_notification) {
+        //    state_update_alert* sua = static_cast<state_update_alert*>(a);
+        //    for (torrent_status s )
+        //}
+    }
+    qDebug() << "===";
 
 
     std::vector<torrent_handle> handles = _session->get_torrents();
