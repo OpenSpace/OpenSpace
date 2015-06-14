@@ -44,7 +44,7 @@ namespace libtorrent {
 class SyncWidget : public QWidget {
 Q_OBJECT
 public:
-    SyncWidget(QWidget* parent);
+    SyncWidget(QWidget* parent, Qt::WindowFlags f = 0);
     ~SyncWidget();
     
     void setSceneFiles(QMap<QString, QString> sceneFiles);

@@ -30,7 +30,7 @@
 class ShortcutWidget : public QWidget {
 Q_OBJECT
 public:
-    ShortcutWidget(QWidget* parent);
+    ShortcutWidget(QWidget* parent, Qt::WindowFlags f = 0);
 };
 
 #endif // __SHORTCUTWIDGET_H__

@@ -24,6 +24,9 @@
 
 #include "mainwindow.h"
 
+#include "shortcutwidget.h"
+#include "syncwidget.h"
+
 #include <QApplication>
 #include <QComboBox>
 #include <QDir>
@@ -141,8 +144,13 @@ void MainWindow::initialize() {
             this, SLOT(newsNetworkError())
     );
 
-    _shortcutWidget.hide();
-    _syncWidget.hide();
+    _shortcutWidget = new ShortcutWidget(this, Qt::Popup | Qt::Dialog);
+    _shortcutWidget->setWindowModality(Qt::WindowModal);
+    _shortcutWidget->hide();
+
+    _syncWidget = new SyncWidget(this, Qt::Popup | Qt::Dialog);
+    _syncWidget->setWindowModality(Qt::WindowModal);
+    _syncWidget->hide();
 
     QDir d(ModulesDirectory);
     d.setFilter(QDir::Files);
@@ -152,16 +160,16 @@ void MainWindow::initialize() {
         _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
         _scenes->addItem(i.fileName());
     }
-    _syncWidget.setSceneFiles(_sceneFiles);
-    _syncWidget.setModulesDirectory(ModulesDirectory);
+    _syncWidget->setSceneFiles(_sceneFiles);
+    _syncWidget->setModulesDirectory(ModulesDirectory);
 }
 
 void MainWindow::shortcutButtonPressed() {
-    _shortcutWidget.show();
+    _shortcutWidget->show();
 }
 
 void MainWindow::syncButtonPressed() {
-    _syncWidget.show();
+    _syncWidget->show();
 }
 
 void MainWindow::startButtonPressed() {

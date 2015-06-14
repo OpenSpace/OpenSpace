@@ -45,6 +45,51 @@ namespace {
         written = fwrite(ptr, size, nmemb, stream);
         return written;
     }
+
+    struct Progress {
+        CURL* curl;
+        const ghoul::filesystem::File* file;
+        openspace::DownloadManager::DownloadProgressCallback* callback;
+    };
+
+    int xferinfo(void *p,
+                    curl_off_t dltotal, curl_off_t dlnow,
+                    curl_off_t ultotal, curl_off_t ulnow)
+    {
+        Progress* myp = static_cast<Progress*>(p);
+
+        if (myp->callback && *(myp->callback)) {
+            (*(myp->callback))(
+                *(myp->file),
+                static_cast<float>(dlnow) / static_cast<float>(dltotal)
+            );
+        }
+
+
+        //if (*(myp->callback)) {
+        //    *(myp->callback)(
+        //        myp->file,
+        //        static_cast<float>(dlnow) / static_cast<float>(dltotal)
+        //    );
+        //}
+        //CURL* curl = myp->curl;
+
+
+
+        //double curtime = 0;
+ 
+        //curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &curtime);
+ 
+        //fprintf(stderr, "UP: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
+        //        "  DOWN: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
+        //        "\r\n",
+        //        ulnow, ultotal, dlnow, dltotal);
+ 
+        return 0;
+    }
+
+
+
 }
 
 namespace openspace {
@@ -65,19 +110,25 @@ bool DownloadManager::downloadFile(
 {
     CURL* curl = curl_easy_init();
     if (curl) {
+
         FILE* fp = fopen(file.path().c_str(), "wb");
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+
+        if (progressCallback) {
+            Progress p = { curl, &file, &progressCallback };
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        }
+
         LDEBUG("Starting download for file: '" << url <<
             "' into file '" << file.path() << "'");
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
-
-        // TODO: incorporate progressCallback ---abock
-        // http://curl.haxx.se/libcurl/c/progressfunc.html
 
         if (res != CURLE_OK) {
             LERROR("Error downloading file 'url': " << curl_easy_strerror(res));
@@ -112,7 +163,7 @@ bool DownloadManager::downloadRequestFiles(
     bool success = downloadFile(
         fullRequest,
         requestFile,
-        [destination](const ghoul::filesystem::File& f) {
+        [destination, &progressCallback](const ghoul::filesystem::File& f) {
             LDEBUG("Finished: " << f.path());
             std::ifstream temporary(f.path());
             std::string line;
@@ -126,7 +177,8 @@ bool DownloadManager::downloadRequestFiles(
                 bool success = DlManager.downloadFile(
                     line,
                     destination.path() + "/" + file,
-                    [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; }
+                    [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; },
+                    [&progressCallback](const ghoul::filesystem::File& f, float progress) { progressCallback(f, progress); }
                 );
             }
         }

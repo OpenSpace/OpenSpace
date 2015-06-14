@@ -64,10 +64,12 @@ namespace {
     const std::string DestinationKey = "Destination";
     const std::string IdentifierKey = "Identifier";
     const std::string VersionKey = "Version";
+
+    const QString DefaultSceneName = "default.scene";
 }
 
-SyncWidget::SyncWidget(QWidget* parent) 
-    : QWidget(parent)
+SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
+    : QWidget(parent, f)
     , _sceneLayout(nullptr)
     , _session(new libtorrent::session)
 {
@@ -135,6 +137,9 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
 
         QCheckBox* checkbox = new QCheckBox(sceneName);
 
+        if (sceneName == DefaultSceneName)
+            checkbox->setChecked(true);
+
         _sceneLayout->addWidget(checkbox, i / nColumns, i % nColumns);
     }
 }
@@ -148,29 +153,44 @@ void SyncWidget::clear() {
 }
 
 void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
-    //return;
     qDebug() << "Direct Files";
     for (const DirectFile& f : files) {
         qDebug() << f.url << " -> " << f.destination;
 
+        auto finishedCallback =
+            [](const ghoul::filesystem::File& f) {
+                qDebug() << QString::fromStdString(f.filename()) << "finished";
+            };
+        auto progressCallback =
+            [](const ghoul::filesystem::File& f, float progress) {
+                qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
+            };
+
         DlManager.downloadFile(
             f.url.toStdString(),
             fullPath(module, f.destination).toStdString(),
-            [](const ghoul::filesystem::File& f) { qDebug() << QString::fromStdString(f.filename()) << "finished";}
+            finishedCallback,
+            progressCallback
         );
     }
 }
 
 void SyncWidget::handleFileRequest(QString module, FileRequests files) {
-    //return;
+    return;
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
+        auto progressCallback =
+            [](const ghoul::filesystem::File& f, float progress) {
+            qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
+        };
+
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
         DlManager.downloadRequestFiles(
             f.identifier.toStdString(),
             fullPath(module, f.destination).toStdString(),
             f.version,
-            [](const ghoul::filesystem::File& f) { qDebug() << "finished"; }
+            [](const ghoul::filesystem::File& f) { qDebug() << "finished"; },
+            progressCallback
         );
 
 
@@ -255,8 +275,18 @@ void SyncWidget::syncButtonPressed() {
                 if (found) {
                     DirectFiles files;
                     for (int i = 1; i <= directDownloadFiles.size(); ++i) {
+                       if (!directDownloadFiles.hasKeyAndValue<ghoul::Dictionary>(std::to_string(i))) {
+                           qDebug() << QString::fromStdString(FileDownloadKey) << " is not a dictionary";
+                           continue;
+                        }
                         ghoul::Dictionary d = directDownloadFiles.value<ghoul::Dictionary>(std::to_string(i));
+                        if (!directDownloadFiles.hasKeyAndValue<std::string>(UrlKey)) {
+                            qDebug() << "No '" << QString::fromStdString(UrlKey);
+                        }
                         std::string url = d.value<std::string>(UrlKey);
+                        if (!directDownloadFiles.hasKeyAndValue<std::string>(DestinationKey)) {
+                            qDebug() << "No '" << QString::fromStdString(DestinationKey);
+                        }
                         std::string dest = d.value<std::string>(DestinationKey);
 
                         files.append({
@@ -323,30 +353,30 @@ QString SyncWidget::fullPath(QString module, QString destination) const {
 void SyncWidget::handleTimer() {
     using namespace libtorrent;
 
-    _session->post_torrent_updates();
-    libtorrent::session_settings settings = _session->settings();
+    //_session->post_torrent_updates();
+    //libtorrent::session_settings settings = _session->settings();
 
-    qDebug() << "Session";
-    qDebug() << "nPeers: " << _session->status().num_peers;
-    qDebug() << "DHT: " << _session->is_dht_running();
-    qDebug() << "Incoming TCP" << settings.enable_incoming_tcp;
-    qDebug() << "Outgoing TCP" << settings.enable_outgoing_tcp;
-    qDebug() << "Incoming UTP" << settings.enable_incoming_utp;
-    qDebug() << "Outgoing UTP" << settings.enable_outgoing_utp;
-    qDebug() << "===";
+    //qDebug() << "Session";
+    //qDebug() << "nPeers: " << _session->status().num_peers;
+    //qDebug() << "DHT: " << _session->is_dht_running();
+    //qDebug() << "Incoming TCP" << settings.enable_incoming_tcp;
+    //qDebug() << "Outgoing TCP" << settings.enable_outgoing_tcp;
+    //qDebug() << "Incoming UTP" << settings.enable_incoming_utp;
+    //qDebug() << "Outgoing UTP" << settings.enable_outgoing_utp;
+    //qDebug() << "===";
 
-    qDebug() << "Alerts";
-    std::deque<alert*> alerts;
-    _session->pop_alerts(&alerts);
-    for (alert* a : alerts) {
-        qDebug() << QString::fromStdString(a->message());
+    //qDebug() << "Alerts";
+    //std::deque<alert*> alerts;
+    //_session->pop_alerts(&alerts);
+    //for (alert* a : alerts) {
+    //    qDebug() << QString::fromStdString(a->message());
 
-        //if (a->category() == alert::status_notification) {
-        //    state_update_alert* sua = static_cast<state_update_alert*>(a);
-        //    for (torrent_status s )
-        //}
-    }
-    qDebug() << "===";
+    //    //if (a->category() == alert::status_notification) {
+    //    //    state_update_alert* sua = static_cast<state_update_alert*>(a);
+    //    //    for (torrent_status s )
+    //    //}
+    //}
+    //qDebug() << "===";
 
 
     std::vector<torrent_handle> handles = _session->get_torrents();
@@ -356,24 +386,24 @@ void SyncWidget::handleTimer() {
 
         w->update(s.total_wanted_done);
 
-        qDebug() << "Name: " << QString::fromStdString(h.name());
-        //torrent_status s = h.status();
+    //    qDebug() << "Name: " << QString::fromStdString(h.name());
+    //    //torrent_status s = h.status();
 
-        qDebug() << "Error: " << QString::fromStdString(s.error);
+    //    qDebug() << "Error: " << QString::fromStdString(s.error);
 
-        qDebug() << "Total Wanted: " << s.total_wanted;
-        qDebug() << "Total Wanted Done: " << s.total_wanted_done;
-        qDebug() << "Has Incoming: " << s.has_incoming;
-        qDebug() << "Connect Candidates: " << s.connect_candidates;
-        qDebug() << "Last Seen Complete: " << s.last_seen_complete;
-        qDebug() << "List Peers: " << s.list_peers;
-        qDebug() << "List Seeds: " << s.list_seeds;
-        qDebug() << "Num Pieces: " << s.num_pieces;
-        qDebug() << "Download Rate: " << s.download_rate;
-        qDebug() << "List Seeds: " << s.list_seeds;
-        qDebug() << "Paused: " << s.paused;
-        qDebug() << "Progress: " << s.progress;
+    //    qDebug() << "Total Wanted: " << s.total_wanted;
+    //    qDebug() << "Total Wanted Done: " << s.total_wanted_done;
+    //    qDebug() << "Has Incoming: " << s.has_incoming;
+    //    qDebug() << "Connect Candidates: " << s.connect_candidates;
+    //    qDebug() << "Last Seen Complete: " << s.last_seen_complete;
+    //    qDebug() << "List Peers: " << s.list_peers;
+    //    qDebug() << "List Seeds: " << s.list_seeds;
+    //    qDebug() << "Num Pieces: " << s.num_pieces;
+    //    qDebug() << "Download Rate: " << s.download_rate;
+    //    qDebug() << "List Seeds: " << s.list_seeds;
+    //    qDebug() << "Paused: " << s.paused;
+    //    qDebug() << "Progress: " << s.progress;
 
-        qDebug() << "";
+    //    qDebug() << "";
     }
 }
