@@ -213,7 +213,7 @@ else ()
     target_compile_options(libtorrent PUBLIC "-fexceptions" "-Wno-c++11-extensions")
 endif ()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     target_compile_options(libtorrent PUBLIC "-fcolor-diagnostics")
 endif ()
 

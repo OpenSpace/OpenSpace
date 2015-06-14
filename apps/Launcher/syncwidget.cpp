@@ -148,7 +148,7 @@ void SyncWidget::clear() {
 }
 
 void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
-    return;
+    //return;
     qDebug() << "Direct Files";
     for (const DirectFile& f : files) {
         qDebug() << f.url << " -> " << f.destination;
@@ -162,7 +162,7 @@ void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
 }
 
 void SyncWidget::handleFileRequest(QString module, FileRequests files) {
-    return;
+    //return;
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
