@@ -41,6 +41,7 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QString>
 #include <QThread>
 #include <QTimer>
@@ -93,11 +94,15 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     }
 
     {
-        QGroupBox* downloadBox = new QGroupBox;
+        QWidget* downloadBox = new QGroupBox;
+        downloadBox->setFixedSize(500, 500);
         _downloadLayout = new QVBoxLayout;
-
         downloadBox->setLayout(_downloadLayout);
-        layout->addWidget(downloadBox);
+
+        QScrollArea* area = new QScrollArea;
+        area->setWidget(downloadBox);
+
+        layout->addWidget(area);
     }
 
     setLayout(layout);
@@ -155,15 +160,23 @@ void SyncWidget::clear() {
 void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
     qDebug() << "Direct Files";
     for (const DirectFile& f : files) {
+        InfoWidget* w = new InfoWidget(f.destination);
+        _downloadLayout->addWidget(w);
+        //_stringInfoWidgetMap[f.destination] = w;
+
         qDebug() << f.url << " -> " << f.destination;
 
+        
+
         auto finishedCallback =
-            [](const ghoul::filesystem::File& f) {
+            [w](const ghoul::filesystem::File& f) {
                 qDebug() << QString::fromStdString(f.filename()) << "finished";
+                //delete w;
             };
         auto progressCallback =
-            [](const ghoul::filesystem::File& f, float progress) {
+            [w](const ghoul::filesystem::File& f, float progress) {
                 qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
+                w->update(progress);
             };
 
         std::string url = f.url.toStdString();
@@ -185,9 +198,14 @@ void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
 void SyncWidget::handleFileRequest(QString module, FileRequests files) {
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
+        InfoWidget* w = new InfoWidget(f.identifier, -1);
+        _downloadLayout->addWidget(w);
+        //_stringInfoWidgetMap[f.identifier] = w;
+
         auto progressCallback =
-            [](const ghoul::filesystem::File& f, float progress) {
+            [w](const ghoul::filesystem::File& f, float progress) {
             qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
+            w->update(progress);
         };
 
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
@@ -241,7 +259,7 @@ void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
         libtorrent::size_type s = h.status().total_wanted;
         InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
         _downloadLayout->addWidget(w);
-        _infoWidgetMap[h] = w;
+        _torrentInfoWidgetMap[h] = w;
     }
 }
 
@@ -394,9 +412,9 @@ void SyncWidget::handleTimer() {
     std::vector<torrent_handle> handles = _session->get_torrents();
     for (torrent_handle h : handles) {
         torrent_status s = h.status();
-        InfoWidget* w = _infoWidgetMap[h];
+        InfoWidget* w = _torrentInfoWidgetMap[h];
 
-        w->update(s.total_wanted_done);
+        w->update(static_cast<int>(s.total_wanted_done));
 
     //    qDebug() << "Name: " << QString::fromStdString(h.name());
     //    //torrent_status s = h.status();

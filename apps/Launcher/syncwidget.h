@@ -90,7 +90,8 @@ private:
     QBoxLayout* _downloadLayout;
 
     libtorrent::session* _session;
-    QMap<libtorrent::torrent_handle, InfoWidget*> _infoWidgetMap;
+    QMap<libtorrent::torrent_handle, InfoWidget*> _torrentInfoWidgetMap;
+    //QMap<QString, InfoWidget*> _stringInfoWidgetMap;
 
     std::vector<std::thread> _threads;
 };

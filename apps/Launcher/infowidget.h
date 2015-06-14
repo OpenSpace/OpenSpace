@@ -33,9 +33,11 @@ class QProgressBar;
 class InfoWidget : public QWidget {
 Q_OBJECT
 public:
-    InfoWidget(QString name, int totalBytes);
+    InfoWidget(QString name, int totalBytes = -1);
 
     void update(int currentBytes);
+    void update(float progress);
+
     void error(QString message);
 
 private:
