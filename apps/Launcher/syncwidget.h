@@ -31,6 +31,8 @@
 
 #include <libtorrent/torrent_handle.hpp>
 
+#include <thread>
+
 class QBoxLayout;
 class QGridLayout;
 
@@ -89,6 +91,8 @@ private:
 
     libtorrent::session* _session;
     QMap<libtorrent::torrent_handle, InfoWidget*> _infoWidgetMap;
+
+    std::vector<std::thread> _threads;
 };
 
 #endif // __SYNCWIDGET_H__

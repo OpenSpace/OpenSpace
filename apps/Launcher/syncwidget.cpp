@@ -166,17 +166,23 @@ void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
                 qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
             };
 
-        DlManager.downloadFile(
-            f.url.toStdString(),
-            fullPath(module, f.destination).toStdString(),
-            finishedCallback,
-            progressCallback
+        std::string url = f.url.toStdString();
+        std::string path = fullPath(module, f.destination).toStdString();
+
+        _threads.push_back(
+            std::thread([url, path, finishedCallback, progressCallback](){
+                DlManager.downloadFile(
+                    url,
+                    path,
+                    finishedCallback,
+                    progressCallback
+                );
+            })
         );
     }
 }
 
 void SyncWidget::handleFileRequest(QString module, FileRequests files) {
-    return;
     qDebug() << "File Requests";
     for (const FileRequest& f : files) {
         auto progressCallback =
@@ -185,15 +191,21 @@ void SyncWidget::handleFileRequest(QString module, FileRequests files) {
         };
 
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
-        DlManager.downloadRequestFiles(
-            f.identifier.toStdString(),
-            fullPath(module, f.destination).toStdString(),
-            f.version,
-            [](const ghoul::filesystem::File& f) { qDebug() << "finished"; },
-            progressCallback
+
+        std::string identifier =  f.identifier.toStdString();
+        std::string path = fullPath(module, f.destination).toStdString();
+        int version = f.version;
+        _threads.push_back(
+            std::thread([identifier, path, version, progressCallback](){
+                DlManager.downloadRequestFiles(
+                    identifier,
+                    path,
+                    version,
+                    [](const ghoul::filesystem::File& f) { qDebug() << "finished"; },
+                    progressCallback
+                );
+            })
         );
-
-
     }
 }
 

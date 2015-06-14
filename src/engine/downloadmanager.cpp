@@ -28,6 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <fstream>
+#include <thread>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #include <curl/curl.h>
@@ -160,10 +161,12 @@ bool DownloadManager::downloadRequestFiles(
     std::string requestFile = absPath("${TEMPORARY}/" + identifier);
     LDEBUG("Request File: " << requestFile);
 
+    std::vector<std::thread> threads;
+
     bool success = downloadFile(
         fullRequest,
         requestFile,
-        [destination, &progressCallback](const ghoul::filesystem::File& f) {
+        [destination, &progressCallback, &threads](const ghoul::filesystem::File& f) {
             LDEBUG("Finished: " << f.path());
             std::ifstream temporary(f.path());
             std::string line;
@@ -174,15 +177,21 @@ bool DownloadManager::downloadRequestFiles(
                 std::string file = ghoul::filesystem::File(line).filename();
 
                 LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
-                bool success = DlManager.downloadFile(
-                    line,
-                    destination.path() + "/" + file,
-                    [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; },
-                    [&progressCallback](const ghoul::filesystem::File& f, float progress) { progressCallback(f, progress); }
+                threads.push_back(
+                    std::thread([&nFinished, line, destination, file, progressCallback](){
+                    DlManager.downloadFile(
+                        line,
+                        destination.path() + "/" + file,
+                        [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; },
+                        [&progressCallback](const ghoul::filesystem::File& f, float progress) { progressCallback(f, progress); }
+                    );})
                 );
             }
         }
     );
+
+    for (std::thread& t : threads)
+        t.join();
 
 
 
