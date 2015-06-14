@@ -34,6 +34,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QDebug>
 #include <QDir>
@@ -95,7 +96,7 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 
     {
         QWidget* downloadBox = new QGroupBox;
-        downloadBox->setFixedSize(500, 500);
+        downloadBox->setMinimumSize(450, 1000);
         _downloadLayout = new QVBoxLayout;
         downloadBox->setLayout(_downloadLayout);
 
@@ -157,80 +158,76 @@ void SyncWidget::clear() {
 
 }
 
-void SyncWidget::handleDirectFiles(QString module, DirectFiles files) {
+void SyncWidget::handleDirectFiles() {
     qDebug() << "Direct Files";
-    for (const DirectFile& f : files) {
+    for (const DirectFile& f : _directFiles) {
         InfoWidget* w = new InfoWidget(f.destination);
         _downloadLayout->addWidget(w);
         //_stringInfoWidgetMap[f.destination] = w;
 
         qDebug() << f.url << " -> " << f.destination;
 
-        
-
         auto finishedCallback =
             [w](const ghoul::filesystem::File& f) {
                 qDebug() << QString::fromStdString(f.filename()) << "finished";
-                //delete w;
+                delete w;
+                qApp->processEvents();
             };
         auto progressCallback =
             [w](const ghoul::filesystem::File& f, float progress) {
                 qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
                 w->update(progress);
+                qApp->processEvents();
             };
 
-        std::string url = f.url.toStdString();
-        std::string path = fullPath(module, f.destination).toStdString();
-
-        _threads.push_back(
-            std::thread([url, path, finishedCallback, progressCallback](){
-                DlManager.downloadFile(
-                    url,
-                    path,
-                    finishedCallback,
-                    progressCallback
-                );
-            })
+        DlManager.downloadFile(
+            f.url.toStdString(),
+            fullPath(f.module, f.destination).toStdString(),
+            finishedCallback,
+            progressCallback
         );
     }
 }
 
-void SyncWidget::handleFileRequest(QString module, FileRequests files) {
+void SyncWidget::handleFileRequest() {
     qDebug() << "File Requests";
-    for (const FileRequest& f : files) {
+    for (const FileRequest& f : _fileRequests) {
         InfoWidget* w = new InfoWidget(f.identifier, -1);
         _downloadLayout->addWidget(w);
-        //_stringInfoWidgetMap[f.identifier] = w;
+
+        auto finishedCallback =
+            [w](const ghoul::filesystem::File& f) {
+            qDebug() << QString::fromStdString(f.filename()) << "finished";
+            delete w;
+            qApp->processEvents();
+        };
 
         auto progressCallback =
             [w](const ghoul::filesystem::File& f, float progress) {
             qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
             w->update(progress);
+            qApp->processEvents();
         };
 
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
 
         std::string identifier =  f.identifier.toStdString();
-        std::string path = fullPath(module, f.destination).toStdString();
+        std::string path = fullPath(f.module, f.destination).toStdString();
         int version = f.version;
-        _threads.push_back(
-            std::thread([identifier, path, version, progressCallback](){
-                DlManager.downloadRequestFiles(
-                    identifier,
-                    path,
-                    version,
-                    [](const ghoul::filesystem::File& f) { qDebug() << "finished"; },
-                    progressCallback
-                );
-            })
+        DlManager.downloadRequestFiles(
+            identifier,
+            path,
+            version,
+            finishedCallback,
+            progressCallback
         );
     }
 }
 
-void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
+void SyncWidget::handleTorrentFiles() {
     qDebug() << "Torrent Files";
-    for (const TorrentFile& f : files) {
-        QString file = QString::fromStdString(absPath(fullPath(module, f.file).toStdString()));
+    for (const TorrentFile& f : _torrentFiles) {
+        QString file = QString::fromStdString(absPath(fullPath(f.module, f.file).toStdString()));
         qDebug() << file;
 
         if (!QFileInfo(file).exists()) {
@@ -240,7 +237,7 @@ void SyncWidget::handleTorrentFiles(QString module, TorrentFiles files) {
 
         libtorrent::error_code ec;
         libtorrent::add_torrent_params p;
-        p.save_path = absPath(fullPath(module, ".").toStdString());
+        p.save_path = absPath(fullPath(f.module, ".").toStdString());
         qDebug() << QString::fromStdString(p.save_path);
         p.ti = new libtorrent::torrent_info(file.toStdString(), ec);
         p.name = f.file.toStdString();
@@ -303,7 +300,6 @@ void SyncWidget::syncButtonPressed() {
 
                 bool found = dataDictionary.getValue<ghoul::Dictionary>(FileDownloadKey, directDownloadFiles);
                 if (found) {
-                    DirectFiles files;
                     for (int i = 1; i <= directDownloadFiles.size(); ++i) {
                        if (!directDownloadFiles.hasKeyAndValue<ghoul::Dictionary>(std::to_string(i))) {
                            qDebug() << QString::fromStdString(FileDownloadKey) << " is not a dictionary";
@@ -319,17 +315,16 @@ void SyncWidget::syncButtonPressed() {
                         }
                         std::string dest = d.value<std::string>(DestinationKey);
 
-                        files.append({
+                        _directFiles.append({
+                            module,
                             QString::fromStdString(url),
                             QString::fromStdString(dest)
                         });
                     }
-                    handleDirectFiles(module, files);
                 }
 
                 found = dataDictionary.getValue<ghoul::Dictionary>(FileRequestKey, fileRequests);
                 if (found) {
-                    FileRequests files;
                     for (int i = 1; i <= fileRequests.size(); ++i) {
                         ghoul::Dictionary d = fileRequests.value<ghoul::Dictionary>(std::to_string(i));
                         std::string url = d.value<std::string>(IdentifierKey);
@@ -337,28 +332,47 @@ void SyncWidget::syncButtonPressed() {
                         int version = static_cast<int>(d.value<double>(VersionKey));
 
 
-                        files.append({
+                        _fileRequests.append({
+                            module,
                             QString::fromStdString(url),
                             QString::fromStdString(dest),
                             version
                         });
                     }
-                    handleFileRequest(module, files);
                 }
 
                 found = dataDictionary.getValue<ghoul::Dictionary>(TorrentFilesKey, torrentFiles);
                 if (found) {
-                    TorrentFiles torrents;
                     for (int i = 1; i <= torrentFiles.size(); ++i) {
                         std::string f = torrentFiles.value<std::string>(std::to_string(i));
 
-                        torrents.append({QString::fromStdString(f)});
+                        _torrentFiles.append({
+                            module,
+                            QString::fromStdString(f)
+                        });
                     }
-                    handleTorrentFiles(module, torrents);
                 }
             }
         }
     }
+
+    //// Make the lists unique
+    //{
+    //    QSet<DirectFile> s = _directFiles.toSet();
+    //    _directFiles = QList<DirectFile>::fromSet(s);
+    //}
+    //{
+    //    QSet<FileRequest> s = _fileRequests.toSet();
+    //    _fileRequests = QList<FileRequest>::fromSet(s);
+    //}
+    //{
+    //    QSet<TorrentFile> s = _torrentFiles.toSet();
+    //    _torrentFiles = QList<TorrentFile>::fromSet(s);
+    //}
+
+    handleDirectFiles();
+    handleFileRequest();
+    handleTorrentFiles();
 }
 
 QStringList SyncWidget::selectedScenes() const {

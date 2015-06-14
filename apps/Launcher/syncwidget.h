@@ -31,7 +31,7 @@
 
 #include <libtorrent/torrent_handle.hpp>
 
-#include <thread>
+//#include <thread>
 
 class QBoxLayout;
 class QGridLayout;
@@ -58,31 +58,31 @@ private slots:
 
 private:
     struct DirectFile {
+        QString module;
         QString url;
         QString destination;
     };
-    typedef QList<DirectFile> DirectFiles;
 
     struct FileRequest {
+        QString module;
         QString identifier;
         QString destination;
         int version;
     };
-    typedef QList<FileRequest> FileRequests;
 
     struct TorrentFile {
+        QString module;
         QString file;
     };
-    typedef QList<TorrentFile> TorrentFiles;
 
     void clear();
     QStringList selectedScenes() const;
 
     QString fullPath(QString module, QString destination) const;
 
-    void handleDirectFiles(QString module, DirectFiles files);
-    void handleFileRequest(QString module, FileRequests files);
-    void handleTorrentFiles(QString module, TorrentFiles files);
+    void handleDirectFiles();
+    void handleFileRequest();
+    void handleTorrentFiles();
 
     QMap<QString, QString>  _sceneFiles;
     QString _modulesDirectory;
@@ -91,9 +91,10 @@ private:
 
     libtorrent::session* _session;
     QMap<libtorrent::torrent_handle, InfoWidget*> _torrentInfoWidgetMap;
-    //QMap<QString, InfoWidget*> _stringInfoWidgetMap;
 
-    std::vector<std::thread> _threads;
+    QList<DirectFile> _directFiles;
+    QList<FileRequest> _fileRequests;
+    QList<TorrentFile> _torrentFiles;
 };
 
 #endif // __SYNCWIDGET_H__

@@ -42,6 +42,10 @@ public:
         void (const ghoul::filesystem::File&)
     > DownloadFinishedCallback;
 
+    //struct FileFuture {
+
+    //};
+
     DownloadManager(std::string requestURL, int applicationVersion);
 
     bool downloadFile(

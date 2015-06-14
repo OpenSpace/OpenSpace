@@ -36,6 +36,8 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     , _messages(nullptr)
     , _totalBytes(totalBytes)
 {
+    setFixedHeight(100);
+
     QGridLayout* layout = new QGridLayout;
 
     _name = new QLabel(name);
@@ -68,7 +70,7 @@ void InfoWidget::update(int currentBytes) {
 
 void InfoWidget::update(float progress) {
     _bytes->setText("");
-    _progress->setValue(progress);
+    _progress->setValue(static_cast<int>(progress * 100));
 }
 
 void InfoWidget::error(QString message) {
