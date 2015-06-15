@@ -61,13 +61,13 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    //bool downloadRequestFiles(
-    //    const std::string& identifier,
-    //    const ghoul::filesystem::Directory& destination,
-    //    int version,
-    //    DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-    //    DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    //);
+    std::vector<FileFuture*> downloadRequestFiles(
+        const std::string& identifier,
+        const ghoul::filesystem::Directory& destination,
+        int version,
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()
+    );
 
 private:
     std::string _requestURL;

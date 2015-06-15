@@ -150,64 +150,58 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
     return future;
 }
 
-//bool DownloadManager::downloadRequestFiles(
-//    const std::string& identifier,
-//    const ghoul::filesystem::Directory& destination,
-//    int version,
-//    DownloadFinishedCallback finishedCallback,
-//    DownloadProgressCallback progressCallback)
-//{
-//    bool s = FileSys.createDirectory(destination, true);
-//    // TODO: Check s ---abock
-//    // TODO: Escaping is necessary ---abock
-//    const std::string fullRequest =_requestURL + "?" +
-//        RequestIdentifier + "=" + identifier + "&" +
-//        RequestFileVersion + "=" + std::to_string(version) + "&" +
-//        RequestApplicationVersion + "=" + std::to_string(_applicationVersion);
-//    LDEBUG("Request: " << fullRequest);
-//
-//    std::string requestFile = absPath("${TEMPORARY}/" + identifier);
-//    LDEBUG("Request File: " << requestFile);
-//
-//    //std::vector<std::thread> threads;
-//
-//    bool success = downloadFile(
-//        fullRequest,
-//        requestFile,
-//        [destination, &progressCallback](const ghoul::filesystem::File& f) {
-//            LDEBUG("Finished: " << f.path());
-//            std::ifstream temporary(f.path());
-//            std::string line;
-//            int nFiles = 0;
-//            int nFinished = 0;
-//            while (std::getline(temporary, line)) {
-//                ++nFiles;
-//                std::string file = ghoul::filesystem::File(line).filename();
-//
-//                LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
-//                //threads.push_back(
-//                    //std::thread([&nFinished, line, destination, file, progressCallback](){
-//                    DlManager.downloadFile(
-//                        line,
-//                        destination.path() + "/" + file,
-//                        [&nFinished](const ghoul::filesystem::File& f) { ++nFinished; },
-//                        [&progressCallback](const ghoul::filesystem::File& f, float progress) { progressCallback(f, progress); }
-//                    //);}
-//                    //)
-//                );
-//            }
-//        }
-//    );
-//
-//    //for (std::thread& t : threads)
-//        //t.join();
-//
-//
-//
-//    return true;
-//}
+std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
+    const std::string& identifier,
+    const ghoul::filesystem::Directory& destination,
+    int version,
+    DownloadFinishedCallback finishedCallback,
+    DownloadProgressCallback progressCallback)
+{
+    std::vector<FileFuture*> futures;
+    bool s = FileSys.createDirectory(destination, true);
+    // TODO: Check s ---abock
+    // TODO: Escaping is necessary ---abock
+    const std::string fullRequest =_requestURL + "?" +
+        RequestIdentifier + "=" + identifier + "&" +
+        RequestFileVersion + "=" + std::to_string(version) + "&" +
+        RequestApplicationVersion + "=" + std::to_string(_applicationVersion);
+    LDEBUG("Request: " << fullRequest);
 
+    std::string requestFile = absPath("${TEMPORARY}/" + identifier);
+    LDEBUG("Request File: " << requestFile);
 
+    bool isFinished = false;
+    auto callback = [&futures, destination, &progressCallback, &isFinished, requestFile](const FileFuture& f) {
+        LDEBUG("Finished: " << requestFile);
+        std::ifstream temporary(requestFile);
+        std::string line;
+        int nFiles = 0;
+        int nFinished = 0;
+        while (std::getline(temporary, line)) {
+            ++nFiles;
+            std::string file = ghoul::filesystem::File(line).filename();
+
+            LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
+
+            FileFuture* future = DlManager.downloadFile(
+                line,
+                destination.path() + "/" + file
+            );
+            futures.push_back(future);
+        }
+        isFinished = true;
+    };
+    
+    FileFuture* f = downloadFile(
+        fullRequest,
+        requestFile,
+        callback
+    );
+
+    while (!isFinished) {}
+
+    return futures;
+}
 
 DownloadManager::FileFuture::FileFuture(std::string file)
     : totalSize(-1)

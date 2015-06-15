@@ -177,35 +177,25 @@ void SyncWidget::handleDirectFiles() {
 void SyncWidget::handleFileRequest() {
     qDebug() << "File Requests";
     for (const FileRequest& f : _fileRequests) {
-        InfoWidget* w = new InfoWidget(f.identifier, -1);
-        _downloadLayout->addWidget(w);
-
-        auto finishedCallback =
-            [w](const ghoul::filesystem::File& f) {
-            qDebug() << QString::fromStdString(f.filename()) << "finished";
-            delete w;
-            qApp->processEvents();
-        };
-
-        auto progressCallback =
-            [w](const ghoul::filesystem::File& f, float progress) {
-            qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
-            w->update(progress);
-            qApp->processEvents();
-        };
-
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
 
         std::string identifier =  f.identifier.toStdString();
         std::string path = fullPath(f.module, f.destination).toStdString();
         int version = f.version;
-        //DlManager.downloadRequestFiles(
-        //    identifier,
-        //    path,
-        //    version,
-        //    finishedCallback,
-        //    progressCallback
-        //);
+        std::vector<openspace::DownloadManager::FileFuture*> futures =
+            DlManager.downloadRequestFiles(
+                identifier,
+                path,
+                version
+            );
+
+        _futures.insert(_futures.end(), futures.begin(), futures.end());
+        for (openspace::DownloadManager::FileFuture* f : futures) {
+            InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
+            _downloadLayout->addWidget(w);
+
+            _futureInfoWidgetMap[f] = w;
+        }
     }
 }
 
