@@ -29,6 +29,8 @@
 
 #include <QMap>
 
+#include <openspace/engine/downloadmanager.h>
+
 #include <libtorrent/torrent_handle.hpp>
 
 //#include <thread>
@@ -95,6 +97,9 @@ private:
     QList<DirectFile> _directFiles;
     QList<FileRequest> _fileRequests;
     QList<TorrentFile> _torrentFiles;
+
+    std::vector<openspace::DownloadManager::FileFuture*> _futures;
+    std::map<openspace::DownloadManager::FileFuture*, InfoWidget*> _futureInfoWidgetMap;
 };
 
 #endif // __SYNCWIDGET_H__

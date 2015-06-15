@@ -41,7 +41,9 @@ public:
     struct FileFuture {
         FileFuture(std::string file);
 
+        long long totalSize;
         float progress; // [0,1]
+        bool isFinished;
         std::string filePath;
         std::string errorMessage;
     };

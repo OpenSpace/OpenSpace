@@ -70,6 +70,7 @@ namespace {
 
         ghoul_assert(dltotal, "Download total is 0");
         ghoul_assert(dlnow <= dltotal, "Downloaded filesize is bigger then total size");
+        i->future->totalSize = dltotal;
         i->future->progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
 
         if (*(i->callback)) {
@@ -123,24 +124,23 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
 
-            if (progressCallback) {
-                ProgressInformation p = {
-                    curl,
-                    future,
-                    &progressCallback
-                };
-                curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
-                curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-                curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-            }
+            ProgressInformation p = {
+                curl,
+                future,
+                &progressCallback
+            };
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             CURLcode res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
             fclose(fp);
 
-            if (res != CURLE_OK) {
+            if (res == CURLE_OK)
+                future->isFinished = true;
+            else
                 future->errorMessage = curl_easy_strerror(res);
-            }
 
             if (finishedCallback)
                 finishedCallback(*future);
@@ -210,8 +210,11 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
 
 
 DownloadManager::FileFuture::FileFuture(std::string file)
-    : progress(0.f)
+    : totalSize(-1)
+    , progress(0.f)
+    , isFinished(false)
     , filePath(std::move(file))
+    , errorMessage("")
 {}
 
 } // namespace openspace

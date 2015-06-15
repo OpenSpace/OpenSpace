@@ -26,7 +26,6 @@
 
 #include "infowidget.h"
 
-#include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -163,31 +162,15 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         InfoWidget* w = new InfoWidget(f.destination);
         _downloadLayout->addWidget(w);
-        //_stringInfoWidgetMap[f.destination] = w;
 
         qDebug() << f.url << " -> " << f.destination;
 
-        auto finishedCallback =
-            [w](const openspace::DownloadManager::FileFuture& f) {
-            std::cout << f.filePath << ": Finished" << std::endl;
-                //qDebug() << QString::fromStdString(f.file.filename()) << "finished";
-                //delete w;
-                //qApp->processEvents();
-            };
-        auto progressCallback =
-            [w](const openspace::DownloadManager::FileFuture& f) {
-                std::cout << f.filePath << ": " << f.progress << std::endl;
-                //qDebug() << QString::fromStdString(f.file.filename()) << ": " << f.progress;
-                //w->update(f.progress);
-                //qApp->processEvents();
-            };
-
-        DlManager.downloadFile(
+        openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
             f.url.toStdString(),
-            fullPath(f.module, f.destination).toStdString(),
-            finishedCallback,
-            progressCallback
+            fullPath(f.module, f.destination).toStdString()
         );
+        _futures.push_back(future);
+        _futureInfoWidgetMap[future] = w;
     }
 }
 
@@ -398,6 +381,13 @@ QString SyncWidget::fullPath(QString module, QString destination) const {
 
 void SyncWidget::handleTimer() {
     using namespace libtorrent;
+    using FileFuture = openspace::DownloadManager::FileFuture;
+
+    for (FileFuture* f : _futures) {
+        InfoWidget* w = _futureInfoWidgetMap[f];
+
+        w->update(f->progress);
+    }
 
     //_session->post_torrent_updates();
     //libtorrent::session_settings settings = _session->settings();
