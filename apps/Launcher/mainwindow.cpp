@@ -27,6 +27,10 @@
 #include "shortcutwidget.h"
 #include "syncwidget.h"
 
+#include <ghoul/logging/log.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
+
 #include <QApplication>
 #include <QComboBox>
 #include <QDir>
@@ -49,6 +53,17 @@ namespace {
 #else
     const QString OpenSpaceExecutable = "OpenSpace";
 #endif
+
+    class QLog : public ghoul::logging::Log {
+    public:
+        void log(
+            ghoul::logging::LogManager::LogLevel level,
+            const std::string& category,
+            const std::string& message
+        ) {
+            //qDebug() << QString::fromStdString(category) << ": " << QString::fromStdString(message);
+        }
+    };
 }
 
 MainWindow::MainWindow()
@@ -162,6 +177,10 @@ void MainWindow::initialize() {
     }
     _syncWidget->setSceneFiles(_sceneFiles);
     _syncWidget->setModulesDirectory(ModulesDirectory);
+
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
+    LogMgr.addLog(new ghoul::logging::ConsoleLog);
+    LogMgr.addLog(new QLog);
 }
 
 void MainWindow::shortcutButtonPressed() {

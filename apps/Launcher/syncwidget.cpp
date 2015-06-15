@@ -373,11 +373,21 @@ void SyncWidget::handleTimer() {
     using namespace libtorrent;
     using FileFuture = openspace::DownloadManager::FileFuture;
 
+    std::vector<FileFuture*> toRemove;
     for (FileFuture* f : _futures) {
         InfoWidget* w = _futureInfoWidgetMap[f];
 
-        w->update(f->progress);
+        if (f->isFinished) {
+            toRemove.push_back(f);
+            _downloadLayout->removeWidget(w);
+            delete w;
+        }
+        else
+            w->update(f->progress);
     }
+
+    for (FileFuture* f : toRemove)
+        _futures.erase(std::remove(_futures.begin(), _futures.end(), f), _futures.end()); 
 
     //_session->post_torrent_updates();
     //libtorrent::session_settings settings = _session->settings();

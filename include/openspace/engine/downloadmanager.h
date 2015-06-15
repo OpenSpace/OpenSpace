@@ -69,6 +69,9 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
+    // TODO: Add async version of downloadRequestFiles that returns a filefuture
+    // that can be used to call an additional function
+
 private:
     std::string _requestURL;
     int _applicationVersion;

@@ -26,6 +26,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 
 #include <fstream>
 #include <thread>
@@ -46,6 +47,7 @@ namespace {
         openspace::DownloadManager::FileFuture* future;
         const openspace::DownloadManager::DownloadProgressCallback* callback;
     };
+
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
         size_t written;
@@ -68,8 +70,6 @@ namespace {
         ghoul_assert(i->future, "FileFuture is not initialized");
         ghoul_assert(i->callback, "Callback pointer is nullptr");
 
-        ghoul_assert(dltotal, "Download total is 0");
-        ghoul_assert(dlnow <= dltotal, "Downloaded filesize is bigger then total size");
         i->future->totalSize = dltotal;
         i->future->progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
 
