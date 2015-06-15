@@ -168,16 +168,18 @@ void SyncWidget::handleDirectFiles() {
         qDebug() << f.url << " -> " << f.destination;
 
         auto finishedCallback =
-            [w](const ghoul::filesystem::File& f) {
-                qDebug() << QString::fromStdString(f.filename()) << "finished";
-                delete w;
-                qApp->processEvents();
+            [w](const openspace::DownloadManager::FileFuture& f) {
+            std::cout << f.filePath << ": Finished" << std::endl;
+                //qDebug() << QString::fromStdString(f.file.filename()) << "finished";
+                //delete w;
+                //qApp->processEvents();
             };
         auto progressCallback =
-            [w](const ghoul::filesystem::File& f, float progress) {
-                qDebug() << QString::fromStdString(f.filename()) << ": " << progress;
-                w->update(progress);
-                qApp->processEvents();
+            [w](const openspace::DownloadManager::FileFuture& f) {
+                std::cout << f.filePath << ": " << f.progress << std::endl;
+                //qDebug() << QString::fromStdString(f.file.filename()) << ": " << f.progress;
+                //w->update(f.progress);
+                //qApp->processEvents();
             };
 
         DlManager.downloadFile(
@@ -214,13 +216,13 @@ void SyncWidget::handleFileRequest() {
         std::string identifier =  f.identifier.toStdString();
         std::string path = fullPath(f.module, f.destination).toStdString();
         int version = f.version;
-        DlManager.downloadRequestFiles(
-            identifier,
-            path,
-            version,
-            finishedCallback,
-            progressCallback
-        );
+        //DlManager.downloadRequestFiles(
+        //    identifier,
+        //    path,
+        //    version,
+        //    finishedCallback,
+        //    progressCallback
+        //);
     }
 }
 

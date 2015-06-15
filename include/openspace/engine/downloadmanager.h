@@ -28,40 +28,44 @@
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
+
+#include <cstdint>
 #include <functional>
 #include <string>
 
 namespace openspace {
 
+// Multithreaded
 class DownloadManager : public ghoul::Singleton<DownloadManager> {
 public:
-    typedef std::function <
-        void(const ghoul::filesystem::File&, float progress)
-    > DownloadProgressCallback;
-    typedef std::function<
-        void (const ghoul::filesystem::File&)
-    > DownloadFinishedCallback;
+    struct FileFuture {
+        FileFuture(std::string file);
 
-    //struct FileFuture {
+        float progress; // [0,1]
+        std::string filePath;
+        std::string errorMessage;
+    };
 
-    //};
+    typedef std::function<void(const FileFuture&)> DownloadProgressCallback;
+    typedef std::function<void(const FileFuture&)> DownloadFinishedCallback;
 
     DownloadManager(std::string requestURL, int applicationVersion);
 
-    bool downloadFile(
+    // callers responsibility to delete
+    FileFuture* downloadFile(
         const std::string& url,
         const ghoul::filesystem::File& file,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    bool downloadRequestFiles(
-        const std::string& identifier,
-        const ghoul::filesystem::Directory& destination,
-        int version,
-        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    );
+    //bool downloadRequestFiles(
+    //    const std::string& identifier,
+    //    const ghoul::filesystem::Directory& destination,
+    //    int version,
+    //    DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
+    //    DownloadProgressCallback progressCallback = DownloadProgressCallback()
+    //);
 
 private:
     std::string _requestURL;
