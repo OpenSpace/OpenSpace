@@ -106,9 +106,13 @@ DownloadManager::DownloadManager(std::string requestURL, int applicationVersion)
 DownloadManager::FileFuture* DownloadManager::downloadFile(
     const std::string& url,
     const ghoul::filesystem::File& file,
+    bool overrideFile,
     DownloadFinishedCallback finishedCallback,
     DownloadProgressCallback progressCallback)
 {
+    if (!overrideFile && FileSys.fileExists(file))
+        return nullptr;
+
     FileFuture* future = new FileFuture(
         file.filename()
     );
@@ -154,6 +158,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     const std::string& identifier,
     const ghoul::filesystem::Directory& destination,
     int version,
+    bool overrideFiles,
     DownloadFinishedCallback finishedCallback,
     DownloadProgressCallback progressCallback)
 {
@@ -171,7 +176,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     LDEBUG("Request File: " << requestFile);
 
     bool isFinished = false;
-    auto callback = [&futures, destination, &progressCallback, &isFinished, requestFile](const FileFuture& f) {
+    auto callback = [&futures, destination, &progressCallback, &isFinished, requestFile, overrideFiles](const FileFuture& f) {
         LDEBUG("Finished: " << requestFile);
         std::ifstream temporary(requestFile);
         std::string line;
@@ -185,9 +190,11 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
 
             FileFuture* future = DlManager.downloadFile(
                 line,
-                destination.path() + "/" + file
+                destination.path() + "/" + file,
+                overrideFiles
             );
-            futures.push_back(future);
+            if (future)
+                futures.push_back(future);
         }
         isFinished = true;
     };
@@ -195,6 +202,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     FileFuture* f = downloadFile(
         fullRequest,
         requestFile,
+        true,
         callback
     );
 

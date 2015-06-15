@@ -119,7 +119,11 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     }
     _session->start_upnp();
     _session->start_dht();
-    
+
+    _session->add_dht_router({ "dht.transmissionbt.com", 6881});
+    _session->add_dht_router({ "router.bittorrent.com", 6881});
+    _session->add_dht_router({ "router.utorrent.com", 6881 });
+    _session->add_dht_router({ "router.bitcomet.com", 6881 });
 
     QTimer* timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
@@ -160,17 +164,21 @@ void SyncWidget::clear() {
 void SyncWidget::handleDirectFiles() {
     qDebug() << "Direct Files";
     for (const DirectFile& f : _directFiles) {
-        InfoWidget* w = new InfoWidget(f.destination);
-        _downloadLayout->addWidget(w);
 
         qDebug() << f.url << " -> " << f.destination;
 
         openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
             f.url.toStdString(),
-            fullPath(f.module, f.destination).toStdString()
+            fullPath(f.module, f.destination).toStdString(),
+            false
         );
-        _futures.push_back(future);
-        _futureInfoWidgetMap[future] = w;
+        if (future) {
+            InfoWidget* w = new InfoWidget(f.destination);
+            _downloadLayout->addWidget(w);
+
+            _futures.push_back(future);
+            _futureInfoWidgetMap[future] = w;
+        }
     }
 }
 
@@ -186,7 +194,8 @@ void SyncWidget::handleFileRequest() {
             DlManager.downloadRequestFiles(
                 identifier,
                 path,
-                version
+                version,
+                false
             );
 
         _futures.insert(_futures.end(), futures.begin(), futures.end());

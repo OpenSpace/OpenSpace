@@ -57,6 +57,7 @@ public:
     FileFuture* downloadFile(
         const std::string& url,
         const ghoul::filesystem::File& file,
+        bool overrideFile = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
@@ -65,6 +66,7 @@ public:
         const std::string& identifier,
         const ghoul::filesystem::Directory& destination,
         int version,
+        bool overrideFiles = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
