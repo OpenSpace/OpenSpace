@@ -97,13 +97,31 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     }
 
     {
-        QWidget* downloadBox = new QGroupBox;
-        downloadBox->setMinimumSize(450, 1000);
-        _downloadLayout = new QVBoxLayout;
-        downloadBox->setLayout(_downloadLayout);
-
         QScrollArea* area = new QScrollArea;
-        area->setWidget(downloadBox);
+        area->setWidgetResizable(true);
+
+        QWidget* w = new QWidget;
+        area->setWidget(w);
+
+        _downloadLayout = new QVBoxLayout(w);
+        _downloadLayout->addStretch(100);
+
+
+
+        //QGroupBox* downloadBox = new QGroupBox;
+
+        //QWidget* 
+
+        //_downloadLayout = new QVBoxLayout(area);
+        //area->setWidget(_downloadLayout)
+
+
+
+        ////downloadBox->setMinimumSize(450, 1000);
+        //downloadBox->setLayout(_downloadLayout);
+
+        //QScrollArea* area = new QScrollArea;
+        //area->setWidget(downloadBox);
 
         layout->addWidget(area);
     }
@@ -191,7 +209,8 @@ void SyncWidget::handleDirectFiles() {
         );
         if (future) {
             InfoWidget* w = new InfoWidget(f.destination);
-            _downloadLayout->addWidget(w);
+            _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
+            //_downloadLayout->addWidget(w);
 
             _futures.push_back(future);
             _futureInfoWidgetMap[future] = w;
@@ -276,7 +295,8 @@ void SyncWidget::handleTorrentFiles() {
 
         libtorrent::size_type s = h.status().total_wanted;
         InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
-        _downloadLayout->addWidget(w);
+        _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
+        //_downloadLayout->addWidget(w);
         _torrentInfoWidgetMap[h] = w;
 
         FileSys.setCurrentDirectory(d);
@@ -505,7 +525,8 @@ void SyncWidget::handleTimer() {
     while (_mutex.test_and_set()) {}
     for (openspace::DownloadManager::FileFuture* f : _futuresToAdd) {
         InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
-        _downloadLayout->addWidget(w);
+        _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
+        //_downloadLayout->addWidget(w);
 
         _futureInfoWidgetMap[f] = w;
         _futures.push_back(f);

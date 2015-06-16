@@ -81,9 +81,6 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    // TODO: Add async version of downloadRequestFiles that returns a filefuture
-    // that can be used to call an additional function
-
     void downloadRequestFilesAsync(
         const std::string& identifier,
         const ghoul::filesystem::Directory& destination,
