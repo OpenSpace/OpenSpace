@@ -50,7 +50,6 @@ create_new_module(
     option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
     set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
     set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-    set(BOOST_ROOT "${OPENSPACE_EXT_DIR}/ghoul/ext/boost")
     add_subdirectory(${KAMELEON_ROOT_DIR})
     target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
     target_link_libraries(${kameleon_module} ccmc)
