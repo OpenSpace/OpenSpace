@@ -52,7 +52,6 @@ public:
     ~SyncWidget();
     
     void setSceneFiles(QMap<QString, QString> sceneFiles);
-    void setModulesDirectory(QString modulesDirectory);
 
 private slots:
     void syncButtonPressed();
@@ -75,12 +74,11 @@ private:
     struct TorrentFile {
         QString module;
         QString file;
+        QString destination;
     };
 
     void clear();
     QStringList selectedScenes() const;
-
-    QString fullPath(QString module, QString destination) const;
 
     void handleDirectFiles();
     void handleFileRequest();

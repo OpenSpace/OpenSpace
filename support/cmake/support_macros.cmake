@@ -230,6 +230,13 @@ function (handle_applications)
                     target_link_libraries(${APPLICATION_NAME} Ghoul)
                     target_link_libraries(${APPLICATION_NAME} libOpenSpace)
 
+                    if (MSVC)
+                        set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
+                            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+                        )
+                    endif ()
+
+
                     copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
 
             endif ()

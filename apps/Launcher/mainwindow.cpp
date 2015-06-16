@@ -27,6 +27,10 @@
 #include "shortcutwidget.h"
 #include "syncwidget.h"
 
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/openspaceengine.h>
+
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/log.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -46,7 +50,7 @@ namespace {
 
     const QString NewsURL = "http://openspace.itn.liu.se/news.txt";
 
-    const QString ModulesDirectory = "../data/scene"; // temporary ---abock
+    const std::string _configurationFile = "openspace.cfg";
 
 #ifdef WIN32
     const QString OpenSpaceExecutable = "OpenSpace.exe";
@@ -167,7 +171,23 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    QDir d(ModulesDirectory);
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Error);
+    LogMgr.addLog(new ghoul::logging::ConsoleLog);
+    LogMgr.addLog(new QLog);
+
+    std::string configurationFile = _configurationFile;
+    bool found = openspace::OpenSpaceEngine::findConfiguration(configurationFile);
+    if (!found) {
+    }
+
+    _configuration = new openspace::ConfigurationManager;
+    _configuration->loadFromFile(configurationFile);
+
+
+    QString modulesDirectory = QString::fromStdString(
+        absPath("${SCENE}")
+    );
+    QDir d(modulesDirectory);
     d.setFilter(QDir::Files);
 
     QFileInfoList list = d.entryInfoList();
@@ -176,11 +196,7 @@ void MainWindow::initialize() {
         _scenes->addItem(i.fileName());
     }
     _syncWidget->setSceneFiles(_sceneFiles);
-    _syncWidget->setModulesDirectory(ModulesDirectory);
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Error);
-    LogMgr.addLog(new ghoul::logging::ConsoleLog);
-    LogMgr.addLog(new QLog);
 }
 
 void MainWindow::shortcutButtonPressed() {

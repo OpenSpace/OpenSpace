@@ -62,6 +62,7 @@ namespace {
     const std::string TorrentFilesKey = "TorrentFiles";
 
     const std::string UrlKey = "URL";
+    const std::string FileKey = "File";
     const std::string DestinationKey = "Destination";
     const std::string IdentifierKey = "Identifier";
     const std::string VersionKey = "Version";
@@ -155,10 +156,6 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
     }
 }
 
-void SyncWidget::setModulesDirectory(QString modulesDirectory) {
-    _modulesDirectory = std::move(modulesDirectory);
-}
-
 void SyncWidget::clear() {
     for (openspace::DownloadManager::FileFuture* f : _futures)
         f->abortDownload = true;
@@ -187,7 +184,7 @@ void SyncWidget::handleDirectFiles() {
 
         openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
             f.url.toStdString(),
-            fullPath(f.module, f.destination).toStdString(),
+            absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
         );
         if (future) {
@@ -206,7 +203,7 @@ void SyncWidget::handleFileRequest() {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
 
         std::string identifier =  f.identifier.toStdString();
-        std::string path = fullPath(f.module, f.destination).toStdString();
+        std::string path = absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString());
         int version = f.version;
         std::vector<openspace::DownloadManager::FileFuture*> futures =
             DlManager.downloadRequestFiles(
@@ -231,7 +228,11 @@ void SyncWidget::handleFileRequest() {
 void SyncWidget::handleTorrentFiles() {
     qDebug() << "Torrent Files";
     for (const TorrentFile& f : _torrentFiles) {
-        QString file = QString::fromStdString(absPath(fullPath(f.module, f.file).toStdString()));
+        ghoul::filesystem::Directory d = FileSys.currentDirectory();
+        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(thisDirectory);
+
+        QString file = QString::fromStdString(absPath(f.file.toStdString()));
         qDebug() << file;
 
         if (!QFileInfo(file).exists()) {
@@ -241,7 +242,14 @@ void SyncWidget::handleTorrentFiles() {
 
         libtorrent::error_code ec;
         libtorrent::add_torrent_params p;
-        p.save_path = absPath(fullPath(f.module, ".").toStdString());
+
+        //if (f.destination.isEmpty())
+            //p.save_path = absPath(fullPath(f.module, ".").toStdString());
+        //else
+            //p.save_path = 
+        p.save_path = absPath(f.destination.toStdString());
+
+
         qDebug() << QString::fromStdString(p.save_path);
         p.ti = new libtorrent::torrent_info(file.toStdString(), ec);
         p.name = f.file.toStdString();
@@ -262,6 +270,7 @@ void SyncWidget::handleTorrentFiles() {
         _downloadLayout->addWidget(w);
         _torrentInfoWidgetMap[h] = w;
 
+        FileSys.setCurrentDirectory(d);
         qApp->processEvents();
     }
 }
@@ -350,11 +359,19 @@ void SyncWidget::syncButtonPressed() {
                 found = dataDictionary.getValue<ghoul::Dictionary>(TorrentFilesKey, torrentFiles);
                 if (found) {
                     for (int i = 1; i <= torrentFiles.size(); ++i) {
-                        std::string f = torrentFiles.value<std::string>(std::to_string(i));
+                        ghoul::Dictionary d = torrentFiles.value<ghoul::Dictionary>(std::to_string(i));
+                        std::string file = d.value<std::string>(FileKey);
+                        
+                        std::string dest;
+                        if (d.hasKeyAndValue<std::string>(DestinationKey))
+                            dest = d.value<std::string>(DestinationKey);
+                        else
+                            dest = "";
 
                         _torrentFiles.append({
                             module,
-                            QString::fromStdString(f)
+                            QString::fromStdString(file),
+                            QString::fromStdString(dest)
                         });
                     }
                 }
@@ -413,7 +430,8 @@ void SyncWidget::syncButtonPressed() {
         auto equal = [](const TorrentFile& lhs, const TorrentFile& rhs) -> bool {
             return
                 lhs.module == rhs.module &&
-                lhs.file == rhs.file;
+                lhs.file == rhs.file &&
+                lhs.destination == rhs.destination;
         };
 
         QList<TorrentFile> files;
@@ -453,10 +471,6 @@ QStringList SyncWidget::selectedScenes() const {
     return result;
 }
 
-QString SyncWidget::fullPath(QString module, QString destination) const {
-    return _modulesDirectory + "/" + module + "/" + destination;
-}
-
 void SyncWidget::handleTimer() {
     using namespace libtorrent;
     using FileFuture = openspace::DownloadManager::FileFuture;
@@ -483,7 +497,8 @@ void SyncWidget::handleTimer() {
         torrent_status s = h.status();
         InfoWidget* w = _torrentInfoWidgetMap[h];
 
-        w->update(static_cast<int>(s.total_wanted_done));
+        if (w)
+            w->update(static_cast<int>(s.total_wanted_done));
 
         if (s.state == torrent_status::finished || s.state == torrent_status::seeding) {
             //_session->remove_torrent(h);
