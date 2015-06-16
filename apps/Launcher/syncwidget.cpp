@@ -162,6 +162,18 @@ void SyncWidget::setModulesDirectory(QString modulesDirectory) {
 void SyncWidget::clear() {
     for (openspace::DownloadManager::FileFuture* f : _futures)
         f->abortDownload = true;
+
+    using libtorrent::torrent_handle;
+    for (QMap<torrent_handle, InfoWidget*>::iterator i = _torrentInfoWidgetMap.begin();
+         i != _torrentInfoWidgetMap.end();
+         ++i)
+    {
+        delete i.value();
+    }
+    _torrentInfoWidgetMap.clear();
+    _session->abort();
+
+
     _directFiles.clear();
     _fileRequests.clear();
     _torrentFiles.clear();
@@ -189,7 +201,6 @@ void SyncWidget::handleDirectFiles() {
 }
 
 void SyncWidget::handleFileRequest() {
-    return;
     qDebug() << "File Requests";
     for (const FileRequest& f : _fileRequests) {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
@@ -216,7 +227,6 @@ void SyncWidget::handleFileRequest() {
 }
 
 void SyncWidget::handleTorrentFiles() {
-    return;
     qDebug() << "Torrent Files";
     for (const TorrentFile& f : _torrentFiles) {
         QString file = QString::fromStdString(absPath(fullPath(f.module, f.file).toStdString()));
