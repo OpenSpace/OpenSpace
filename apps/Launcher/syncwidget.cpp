@@ -489,8 +489,10 @@ void SyncWidget::handleTimer() {
             w->update(f->progress);
     }
 
-    for (FileFuture* f : toRemove)
+    for (FileFuture* f : toRemove) {
         _futures.erase(std::remove(_futures.begin(), _futures.end(), f), _futures.end()); 
+        delete f;
+    }
 
     std::vector<torrent_handle> handles = _session->get_torrents();
     for (torrent_handle h : handles) {
