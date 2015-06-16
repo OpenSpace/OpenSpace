@@ -47,6 +47,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/network/osparallelconnection.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -110,6 +111,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _gui(new gui::GUI)
 	, _isMaster(false)
     , _syncBuffer(nullptr)
+    , _parallelConnection(new network::OSParallelConnection)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -129,6 +131,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _console;
     delete _moduleEngine;
     delete _gui;
+    delete _parallelConnection;
 
     if(_syncBuffer)
 		delete _syncBuffer;
@@ -302,6 +305,7 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine->addLibrary(LuaConsole::luaLibrary());
 	_scriptEngine->addLibrary(gui::GUI::luaLibrary());
+    _scriptEngine->addLibrary(network::OSParallelConnection::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine()->initialize();
@@ -757,6 +761,11 @@ NetworkEngine* OpenSpaceEngine::networkEngine() {
 
 ModuleEngine* OpenSpaceEngine::moduleEngine() {
     return _moduleEngine;
+}
+    
+network::OSParallelConnection* OpenSpaceEngine::parallelConnection() {
+    ghoul_assert(_parallelConnection != nullptr, "ParallelConnection is nullptr");
+    return _parallelConnection;
 }
 
 }  // namespace openspace

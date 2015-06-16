@@ -50,6 +50,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/pythonexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/randomexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/network/osparallelconnection.cpp
+    ${OPENSPACE_BASE_DIR}/src/network/osparallelconnection_lua.inl
     ${OPENSPACE_BASE_DIR}/src/properties/matrixproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
@@ -111,6 +113,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/pythonexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/randomexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/osparallelconnection.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
