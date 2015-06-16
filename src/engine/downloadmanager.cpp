@@ -226,4 +226,24 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     return futures;
 }
 
+void DownloadManager::downloadRequestFilesAsync(
+    const std::string& identifier,
+    const ghoul::filesystem::Directory& destination,
+    int version,
+    bool overrideFiles,
+    AsyncDownloadFinishedCallback callback)
+{
+    std::thread([this, identifier, destination, version, overrideFiles, callback](){
+        std::vector<FileFuture*> f = downloadRequestFiles(
+            identifier,
+            destination,
+            version,
+            overrideFiles
+        );
+
+        callback(f);
+    }).detach();
+
+}
+
 } // namespace openspace

@@ -131,6 +131,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     QTimer* timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
     timer->start(100);
+
+    _mutex.clear();
 }
 
 SyncWidget::~SyncWidget() {
@@ -205,23 +207,30 @@ void SyncWidget::handleFileRequest() {
         std::string identifier =  f.identifier.toStdString();
         std::string path = absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString());
         int version = f.version;
-        std::vector<openspace::DownloadManager::FileFuture*> futures =
-            DlManager.downloadRequestFiles(
+
+        DlManager.downloadRequestFilesAsync(
                 identifier,
                 path,
                 version,
-                OverwriteFiles
-            );
+                OverwriteFiles,
+                std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
+        );
 
-        _futures.insert(_futures.end(), futures.begin(), futures.end());
-        for (openspace::DownloadManager::FileFuture* f : futures) {
-            InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
-            _downloadLayout->addWidget(w);
+        //std::vector<openspace::DownloadManager::FileFuture*> futures =
+        //    DlManager.downloadRequestFiles(
+        //        identifier,
+        //        path,
+        //        version,
+        //        OverwriteFiles
+        //    );
 
-            _futureInfoWidgetMap[f] = w;
-        }
+        //_futures.insert(_futures.end(), futures.begin(), futures.end());
+        //for (openspace::DownloadManager::FileFuture* f : futures) {
+        //    InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
+        //    _downloadLayout->addWidget(w);
 
-        qApp->processEvents();
+        //    _futureInfoWidgetMap[f] = w;
+        //}
     }
 }
 
@@ -271,7 +280,6 @@ void SyncWidget::handleTorrentFiles() {
         _torrentInfoWidgetMap[h] = w;
 
         FileSys.setCurrentDirectory(d);
-        qApp->processEvents();
     }
 }
 
@@ -494,6 +502,18 @@ void SyncWidget::handleTimer() {
         delete f;
     }
 
+    while (_mutex.test_and_set()) {}
+    for (openspace::DownloadManager::FileFuture* f : _futuresToAdd) {
+        InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
+        _downloadLayout->addWidget(w);
+
+        _futureInfoWidgetMap[f] = w;
+        _futures.push_back(f);
+    }
+    _futuresToAdd.clear();
+    _mutex.clear();
+
+
     std::vector<torrent_handle> handles = _session->get_torrents();
     for (torrent_handle h : handles) {
         torrent_status s = h.status();
@@ -569,4 +589,20 @@ void SyncWidget::handleTimer() {
     //    qDebug() << "Progress: " << s.progress;
 
     //    qDebug() << "";
+}
+
+void SyncWidget::handleFileFutureAddition(
+    const std::vector<openspace::DownloadManager::FileFuture*>& futures)
+{
+    while (_mutex.test_and_set()) {}
+    _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());
+    _mutex.clear();
+    //_futures.insert(_futures.end(), futures.begin(), futures.end());
+    //for (openspace::DownloadManager::FileFuture* f : futures) {
+    //    InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
+    //    _downloadLayout->addWidget(w);
+
+    //    _futureInfoWidgetMap[f] = w;
+    //}
+
 }

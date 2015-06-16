@@ -58,10 +58,12 @@ public:
 
     typedef std::function<void(const FileFuture&)> DownloadProgressCallback;
     typedef std::function<void(const FileFuture&)> DownloadFinishedCallback;
+    typedef std::function<void(const std::vector<FileFuture*>&)> AsyncDownloadFinishedCallback;
 
     DownloadManager(std::string requestURL, int applicationVersion);
 
     // callers responsibility to delete
+    // callbacks happen on a different thread
     FileFuture* downloadFile(
         const std::string& url,
         const ghoul::filesystem::File& file,
@@ -81,6 +83,14 @@ public:
 
     // TODO: Add async version of downloadRequestFiles that returns a filefuture
     // that can be used to call an additional function
+
+    void downloadRequestFilesAsync(
+        const std::string& identifier,
+        const ghoul::filesystem::Directory& destination,
+        int version,
+        bool overrideFiles,
+        AsyncDownloadFinishedCallback callback
+    );
 
 private:
     std::string _requestURL;

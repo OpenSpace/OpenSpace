@@ -33,6 +33,7 @@
 
 #include <libtorrent/torrent_handle.hpp>
 
+#include <atomic>
 //#include <thread>
 
 class QBoxLayout;
@@ -80,6 +81,8 @@ private:
     void clear();
     QStringList selectedScenes() const;
 
+    void handleFileFutureAddition(const std::vector<openspace::DownloadManager::FileFuture*>& futures);
+
     void handleDirectFiles();
     void handleFileRequest();
     void handleTorrentFiles();
@@ -98,6 +101,9 @@ private:
 
     std::vector<openspace::DownloadManager::FileFuture*> _futures;
     std::map<openspace::DownloadManager::FileFuture*, InfoWidget*> _futureInfoWidgetMap;
+
+    std::vector<openspace::DownloadManager::FileFuture*> _futuresToAdd;
+    std::atomic_flag _mutex;
 };
 
 #endif // __SYNCWIDGET_H__
