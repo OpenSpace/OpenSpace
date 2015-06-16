@@ -39,13 +39,21 @@ namespace openspace {
 class DownloadManager : public ghoul::Singleton<DownloadManager> {
 public:
     struct FileFuture {
+        // Since the FileFuture object will be used from multiple threads, we have to be
+        // careful about the access pattern, that is, no values should be read and written
+        // by both the DownloadManager and the outside threads.
         FileFuture(std::string file);
 
+        // Values that are written by the DownloadManager to be consumed by others
         long long totalSize;
         float progress; // [0,1]
         bool isFinished;
         std::string filePath;
         std::string errorMessage;
+        bool isAborted;
+
+        // Values set by others to be consumed by the DownloadManager
+        bool abortDownload;
     };
 
     typedef std::function<void(const FileFuture&)> DownloadProgressCallback;

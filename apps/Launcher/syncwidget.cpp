@@ -67,6 +67,8 @@ namespace {
     const std::string VersionKey = "Version";
 
     const QString DefaultSceneName = "default.scene";
+
+    const bool OverwriteFiles = true;
 }
 
 SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
@@ -158,7 +160,11 @@ void SyncWidget::setModulesDirectory(QString modulesDirectory) {
 }
 
 void SyncWidget::clear() {
-
+    for (openspace::DownloadManager::FileFuture* f : _futures)
+        f->abortDownload = true;
+    _directFiles.clear();
+    _fileRequests.clear();
+    _torrentFiles.clear();
 }
 
 void SyncWidget::handleDirectFiles() {
@@ -170,7 +176,7 @@ void SyncWidget::handleDirectFiles() {
         openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
             f.url.toStdString(),
             fullPath(f.module, f.destination).toStdString(),
-            false
+            OverwriteFiles
         );
         if (future) {
             InfoWidget* w = new InfoWidget(f.destination);
@@ -183,6 +189,7 @@ void SyncWidget::handleDirectFiles() {
 }
 
 void SyncWidget::handleFileRequest() {
+    return;
     qDebug() << "File Requests";
     for (const FileRequest& f : _fileRequests) {
         qDebug() << f.identifier << " (" << f.version << ")" << " -> " << f.destination;
@@ -195,7 +202,7 @@ void SyncWidget::handleFileRequest() {
                 identifier,
                 path,
                 version,
-                false
+                OverwriteFiles
             );
 
         _futures.insert(_futures.end(), futures.begin(), futures.end());
@@ -209,6 +216,7 @@ void SyncWidget::handleFileRequest() {
 }
 
 void SyncWidget::handleTorrentFiles() {
+    return;
     qDebug() << "Torrent Files";
     for (const TorrentFile& f : _torrentFiles) {
         QString file = QString::fromStdString(absPath(fullPath(f.module, f.file).toStdString()));
@@ -386,9 +394,10 @@ void SyncWidget::handleTimer() {
     for (FileFuture* f : _futures) {
         InfoWidget* w = _futureInfoWidgetMap[f];
 
-        if (f->isFinished) {
+        if (f->isFinished || f->isAborted) {
             toRemove.push_back(f);
             _downloadLayout->removeWidget(w);
+            _futureInfoWidgetMap.erase(f);
             delete w;
         }
         else

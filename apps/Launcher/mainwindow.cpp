@@ -178,7 +178,7 @@ void MainWindow::initialize() {
     _syncWidget->setSceneFiles(_sceneFiles);
     _syncWidget->setModulesDirectory(ModulesDirectory);
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Error);
     LogMgr.addLog(new ghoul::logging::ConsoleLog);
     LogMgr.addLog(new QLog);
 }

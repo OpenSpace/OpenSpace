@@ -69,6 +69,11 @@ namespace {
         ghoul_assert(i->curl, "CURL pointer is nullptr");
         ghoul_assert(i->future, "FileFuture is not initialized");
         ghoul_assert(i->callback, "Callback pointer is nullptr");
+        
+        if (i->future->abortDownload) {
+            i->future->isAborted = true;
+            return 1;
+        }
 
         i->future->totalSize = dltotal;
         i->future->progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
@@ -93,6 +98,16 @@ namespace {
 }
 
 namespace openspace {
+
+DownloadManager::FileFuture::FileFuture(std::string file)
+    : totalSize(-1)
+    , progress(0.f)
+    , isFinished(false)
+    , filePath(std::move(file))
+    , errorMessage("")
+    , isAborted(false)
+    , abortDownload(false)
+{}
 
 DownloadManager::DownloadManager(std::string requestURL, int applicationVersion)
     : _requestURL(std::move(requestURL))
@@ -210,13 +225,5 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
 
     return futures;
 }
-
-DownloadManager::FileFuture::FileFuture(std::string file)
-    : totalSize(-1)
-    , progress(0.f)
-    , isFinished(false)
-    , filePath(std::move(file))
-    , errorMessage("")
-{}
 
 } // namespace openspace
