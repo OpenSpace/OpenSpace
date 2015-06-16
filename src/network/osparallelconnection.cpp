@@ -59,6 +59,8 @@ const int headerSize = 8;
 
 #include <openspace/network/osparallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/remotecontroller.h>
 
 #include "osparallelconnection_lua.inl"
 
@@ -207,7 +209,7 @@ namespace openspace {
 			buffer.insert(buffer.end(), 0);
 
 			//msg type, 0 = auth
-			int type = 0;
+			int type = MessageTypes::Authentication;
 			buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(int));
 
 			//passcode
@@ -227,6 +229,67 @@ namespace openspace {
 			}
 		}
 
+		void OSParallelConnection::delegateDecoding(int type){
+			switch (type){
+			case MessageTypes::Authentication:
+				decodeAuthenticationMessage();
+				break;
+			case MessageTypes::Initialization:
+				decodeInitializationMessage();
+				break;
+			case MessageTypes::Data:
+				decodeDataMessage();
+				break;
+			case MessageTypes::HostInfo:
+				decodeHostInfoMessage();
+				break;
+			case MessageTypes::InitializationRequest:
+				decodeInitializationRequestMessage();
+				break;
+			default:
+				//unknown message type
+				break;
+			}
+		}
+
+		void OSParallelConnection::decodeAuthenticationMessage(){
+			printf("Auth OK!\n");	//more stuff here later
+		}
+
+		void OSParallelConnection::decodeInitializationMessage(){
+			printf("Init message received!\n");
+		}
+
+		void OSParallelConnection::decodeDataMessage(){
+			printf("Data message received!\n");
+		}
+
+		void OSParallelConnection::decodeHostInfoMessage(){
+			std::vector<char> hostflag;
+			hostflag.resize(1);
+			int result = receiveData(_clientSocket, hostflag, 1, 0);
+
+			if (result > 0){
+				if (hostflag.at(0) == 1){
+					printf("IM MASTER!\n");
+					_isHost.store(true);
+				}
+				else{
+					printf("IM A SLAVE!\n");
+					_isHost.store(false);
+				}
+				
+			}
+			else{
+				std::cerr << "Error " << _ERRNO << " detected in connection!" << std::endl;
+				disconnect();
+			}
+		}
+
+		void OSParallelConnection::decodeInitializationRequestMessage(){
+			printf("InitRequest message received!\n");
+		}
+
 		void OSParallelConnection::communicate(){
 			
 			std::vector<char> buffer;
@@ -237,7 +300,16 @@ namespace openspace {
 				result = receiveData(_clientSocket, buffer, headerSize, 0);
 
 				if (result > 0){
-					int i = 0;
+					if (buffer[0] == 'O' && //Open
+						buffer[1] == 'S' && //Space
+						buffer[2] == 0 && //version
+						buffer[3] == 0 //version
+						)
+					{
+						//parse type
+						int type = (*(reinterpret_cast<int*>(&buffer[4])));
+						delegateDecoding(type);
+					}
 				}
 				else{
 					if (result == 0){

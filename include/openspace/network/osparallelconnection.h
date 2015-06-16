@@ -96,7 +96,7 @@ namespace openspace{
                 Initialization,
                 Data,
                 HostInfo,
-                InitRequest
+                InitializationRequest
             };
             
             /**
@@ -140,6 +140,18 @@ namespace openspace{
 			void authenticate();
 
 			void communicate();
+
+			void delegateDecoding(int type);
+
+			void decodeAuthenticationMessage();
+
+			void decodeInitializationMessage();
+
+			void decodeDataMessage();
+
+			void decodeHostInfoMessage();
+			
+			void decodeInitializationRequestMessage();
 
 			int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
 
