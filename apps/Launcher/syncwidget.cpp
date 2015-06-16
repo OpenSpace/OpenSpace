@@ -223,6 +223,8 @@ void SyncWidget::handleFileRequest() {
 
             _futureInfoWidgetMap[f] = w;
         }
+
+        qApp->processEvents();
     }
 }
 
@@ -259,6 +261,8 @@ void SyncWidget::handleTorrentFiles() {
         InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
         _downloadLayout->addWidget(w);
         _torrentInfoWidgetMap[h] = w;
+
+        qApp->processEvents();
     }
 }
 
@@ -359,18 +363,75 @@ void SyncWidget::syncButtonPressed() {
     }
 
     //// Make the lists unique
-    //{
-    //    QSet<DirectFile> s = _directFiles.toSet();
-    //    _directFiles = QList<DirectFile>::fromSet(s);
-    //}
-    //{
-    //    QSet<FileRequest> s = _fileRequests.toSet();
-    //    _fileRequests = QList<FileRequest>::fromSet(s);
-    //}
-    //{
-    //    QSet<TorrentFile> s = _torrentFiles.toSet();
-    //    _torrentFiles = QList<TorrentFile>::fromSet(s);
-    //}
+    {
+        auto equal = [](const DirectFile& lhs, const DirectFile& rhs) -> bool {
+            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination;
+        };
+
+        QList<DirectFile> files;
+        for (const DirectFile& f : _directFiles) {
+            bool found = false;
+            for (const DirectFile& g : files) {
+                if (equal(g, f)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                files.append(f);
+        }
+
+        _directFiles = files;
+    }
+    {
+        auto equal = [](const FileRequest& lhs, const FileRequest& rhs) -> bool {
+            return
+                lhs.module == rhs.module &&
+                lhs.identifier == rhs.identifier &&
+                lhs.destination == rhs.destination &&
+                lhs.version == rhs.version;
+        };
+
+        QList<FileRequest> files;
+        for (const FileRequest& f : _fileRequests) {
+            bool found = false;
+            for (const FileRequest& g : files) {
+                if (equal(g, f)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                files.append(f);
+        }
+
+        _fileRequests = files;
+    }
+    {
+        auto equal = [](const TorrentFile& lhs, const TorrentFile& rhs) -> bool {
+            return
+                lhs.module == rhs.module &&
+                lhs.file == rhs.file;
+        };
+
+        QList<TorrentFile> files;
+        for (const TorrentFile& f : _torrentFiles) {
+            bool found = false;
+            for (const TorrentFile& g : files) {
+                if (equal(g, f)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                files.append(f);
+        }
+
+        _torrentFiles = files;
+    }
 
     handleDirectFiles();
     handleFileRequest();
@@ -417,6 +478,35 @@ void SyncWidget::handleTimer() {
     for (FileFuture* f : toRemove)
         _futures.erase(std::remove(_futures.begin(), _futures.end(), f), _futures.end()); 
 
+    std::vector<torrent_handle> handles = _session->get_torrents();
+    for (torrent_handle h : handles) {
+        torrent_status s = h.status();
+        InfoWidget* w = _torrentInfoWidgetMap[h];
+
+        w->update(static_cast<int>(s.total_wanted_done));
+
+        if (s.state == torrent_status::finished || s.state == torrent_status::seeding) {
+            //_session->remove_torrent(h);
+            _torrentInfoWidgetMap.remove(h);
+            delete w;
+        }
+    }
+
+    // Only close every torrent if all torrents are finished
+    bool allSeeding = true;
+    for (torrent_handle h : handles) {
+        torrent_status s = h.status();
+        allSeeding &= (s.state == torrent_status::seeding);
+    }
+
+    if (allSeeding) {
+        for (torrent_handle h : handles)
+            _session->remove_torrent(h);
+    }
+
+
+
+
     //_session->post_torrent_updates();
     //libtorrent::session_settings settings = _session->settings();
 
@@ -443,13 +533,6 @@ void SyncWidget::handleTimer() {
     //qDebug() << "===";
 
 
-    std::vector<torrent_handle> handles = _session->get_torrents();
-    for (torrent_handle h : handles) {
-        torrent_status s = h.status();
-        InfoWidget* w = _torrentInfoWidgetMap[h];
-
-        w->update(static_cast<int>(s.total_wanted_done));
-
     //    qDebug() << "Name: " << QString::fromStdString(h.name());
     //    //torrent_status s = h.status();
 
@@ -469,5 +552,4 @@ void SyncWidget::handleTimer() {
     //    qDebug() << "Progress: " << s.progress;
 
     //    qDebug() << "";
-    }
 }
