@@ -52,7 +52,7 @@ namespace interaction {
 
 		std::string write = std::to_string(kf._position.vec4().x) + "\t" + std::to_string(kf._position.vec4().y) + "\t" + std::to_string(kf._position.vec4().z) + "\t" + std::to_string(kf._position.vec4().w) + "\n";
 		//write += 
-		printf("%s", write.c_str());
+		//printf("%s", write.c_str());
 	}
 
 	void RemoteController::sendKeyFrame(){
