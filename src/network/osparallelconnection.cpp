@@ -22,21 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+//@TODO CHANGE THIS!
+const int headerSize = 8;
+
+#ifdef __WIN32__
+#ifndef _ERRNO
+#define _ERRNO WSAGetLastError()
+#endif
+#else //Use BSD sockets
+#ifdef _XCODE
+#include <unistd.h>
+#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR (-1)
+#endif
+
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET (_SOCKET)(~0)
+#endif
+
+#ifndef NO_ERROR
+#define NO_ERROR 0L
+#endif
+
+#ifndef _ERRNO
+#define _ERRNO errno
+#endif
+#endif
+
 #include <openspace/network/osparallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include "osparallelconnection_lua.inl"
+
+namespace{
+	const std::string _loggerCat = "Parallel";
+}
 
 namespace openspace {
     namespace network{
         
         OSParallelConnection::OSParallelConnection():
         _passCode(0),
-        _port(""),
-        _address(""),
+        _port("20501"),
+        _address("127.0.0.1"),
         _name("No name"),
-        _password(""),
-        _clientSocket(0),
+        _clientSocket(INVALID_SOCKET),
         _thread(nullptr),
         _isRunning(false),
         _isHost(false)
@@ -45,12 +83,195 @@ namespace openspace {
         }
         
         OSParallelConnection::~OSParallelConnection(){
-            
+			_isRunning.store(false);
+
+			disconnect();
+
+			#if defined(__WIN32__)
+						WSACleanup();
+			#endif
         }
         
-        void OSParallelConnection::connect(){
-            
+		void OSParallelConnection::clientConnect(){
+			if (!initNetworkAPI()){
+				//error, handle this
+			}
+			
+			struct addrinfo *addresult = NULL, *ptr = NULL, hints;
+			#ifdef __WIN32__ //WinSock
+				ZeroMemory(&hints, sizeof(hints));
+			#else
+				memset(&hints, 0, sizeof(hints));
+			#endif
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_protocol = IPPROTO_TCP;
+			hints.ai_flags = AI_PASSIVE;
+
+			int result;
+
+			// Resolve the local address and port to be used by the server
+			result = getaddrinfo(_address.c_str(), _port.c_str(), &hints, &addresult);
+			if (result != 0)
+			{
+			#if defined(__WIN32__)
+				WSACleanup();
+			#endif
+				std::cerr << "Failed to parse hints for connection!" << std::endl;
+			}
+
+			// Attempt to connect to the first address returned by
+			// the call to getaddrinfo
+			ptr = addresult;
+
+			std::cout << "Client started on port " << _port << std::endl;
+
+			//start accept connections thread
+			_isRunning.store(true);
+			_thread = new (std::nothrow) std::thread(&OSParallelConnection::connection, this, addresult);
+			
         }
+
+		void OSParallelConnection::connection(addrinfo *info){
+			int result;
+
+			while (_isRunning.load()){
+				_clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+
+				if (_clientSocket == INVALID_SOCKET){
+					freeaddrinfo(info);
+					#if defined(__WIN32__)
+						WSACleanup();
+					#endif
+					std::cerr << "Failed to init client socket!" << std::endl;
+					return;
+				}
+
+				int flag = 1;
+				int result;
+
+				//set send timeout
+				int timeout = 0; //infinite
+				result = setsockopt(
+					_clientSocket,
+					SOL_SOCKET,
+					SO_SNDTIMEO,
+					(char *)&timeout,
+					sizeof(timeout));
+
+				//set receive timeout
+				result = setsockopt(
+					_clientSocket,
+					SOL_SOCKET,
+					SO_RCVTIMEO,
+					(char *)&timeout,
+					sizeof(timeout));
+
+				result = setsockopt(_clientSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, sizeof(int));
+				if (result == SOCKET_ERROR)
+					std::cout << "Failed to set reuse address with error:" << _ERRNO << std::endl;
+
+				result = setsockopt(_clientSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&flag, sizeof(int));
+				if (result == SOCKET_ERROR)
+					std::cout << "Failed to set keep alive with error: " << _ERRNO << std::endl;
+
+				result = connect(_clientSocket, info->ai_addr, (int)info->ai_addrlen);
+				if (result != SOCKET_ERROR)
+				{
+					//send authentication
+					authenticate();
+
+					//start listening for communication
+					communicate();
+				}
+
+				//one sec sleep
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+			}
+
+			//cleanup
+			freeaddrinfo(info);
+		}
+
+		void OSParallelConnection::authenticate(){
+			int pos = 4;
+			uint16_t namelen = static_cast<uint16_t>(_name.length());
+			int size = headerSize + sizeof(uint32_t) + sizeof(uint16_t) + static_cast<int>(namelen);
+			std::vector<char> buffer;
+			buffer.reserve(size);
+
+			//version
+			buffer.insert(buffer.end(), 'O');
+			buffer.insert(buffer.end(), 'S');
+			buffer.insert(buffer.end(), 0);
+			buffer.insert(buffer.end(), 0);
+
+			//msg type, 0 = auth
+			int type = 0;
+			buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(int));
+
+			//passcode
+			buffer.insert(buffer.end(), reinterpret_cast<char*>(&_passCode), reinterpret_cast<char*>(&_passCode) + sizeof(uint32_t));
+
+			//name length
+			buffer.insert(buffer.end(), reinterpret_cast<char*>(&namelen), reinterpret_cast<char*>(&namelen) + sizeof(uint16_t));
+
+			//name
+			buffer.insert(buffer.end(), _name.begin(), _name.end());
+
+			int result = send(_clientSocket, buffer.data(), size, 0);
+
+			if (result == SOCKET_ERROR){
+				//failed to send auth msg.
+				std::cerr << "Failed to send authentication message!" << std::endl;
+			}
+		}
+
+		void OSParallelConnection::communicate(){
+			
+			std::vector<char> buffer;
+			buffer.resize(8);
+			int result;
+
+			while (_isRunning.load()){
+				result = receiveData(_clientSocket, buffer, headerSize, 0);
+
+				if (result > 0){
+					int i = 0;
+				}
+				else{
+					if (result == 0){
+						//connection rejected
+						_isRunning.store(false);
+					}
+					else{
+						std::cerr << "Error " << _ERRNO << " detected in connection!" << std::endl;
+					}
+					break;
+				}
+			}
+
+		}
+
+		int OSParallelConnection::receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags){
+			int result = 0;
+			int received = 0;
+			while (result < length){
+				received = recv(socket, buffer.data() + result, length - result, flags);
+
+				if (received > 0){
+					result += received;
+					received = 0;
+				}
+				else{
+					//error receiving
+					result = received;
+					break;
+				}
+			}
+
+			return result;
+		}
         
         void OSParallelConnection::setPort(const std::string  &port){
             _port = port;
@@ -80,7 +301,7 @@ namespace openspace {
             _clientSocket = socket;
         }
         
-        _SOCKET OSParallelConnection::socket(){
+        _SOCKET OSParallelConnection::clientSocket(){
             return _clientSocket;
         }
         
@@ -99,78 +320,107 @@ namespace openspace {
         void OSParallelConnection::requestHostship(){
             
         }
-        
+
+		void OSParallelConnection::setPassword(const std::string& pwd){
+			_passCode = hash(pwd);
+		}
+
+		void OSParallelConnection::disconnect(){
+			closeSocket();
+
+			if (_thread != nullptr){
+				_thread->join();
+				delete _thread;
+				_thread = nullptr;
+			}
+		}
+
+		void OSParallelConnection::closeSocket(){
+			if (_clientSocket != INVALID_SOCKET)
+			{
+				/*
+				Windows shutdown options
+				* SD_RECIEVE
+				* SD_SEND
+				* SD_BOTH
+
+				Linux & Mac shutdown options
+				* SHUT_RD (Disables further receive operations)
+				* SHUT_WR (Disables further send operations)
+				* SHUT_RDWR (Disables further send and receive operations)
+				*/
+
+				#ifdef __WIN32__
+					shutdown(_clientSocket, SD_BOTH);
+					closesocket(_clientSocket);
+				#else
+					shutdown(_clientSocket, SHUT_RDWR);
+				#endif
+
+				_clientSocket = INVALID_SOCKET;
+			}
+		}
+
+		bool OSParallelConnection::initNetworkAPI(){
+			#if defined(__WIN32__)
+				WSADATA wsaData;
+				WORD version;
+				int error;
+
+				version = MAKEWORD(2, 2);
+
+				error = WSAStartup(version, &wsaData);
+
+				if (error != 0 ||
+					LOBYTE(wsaData.wVersion) != 2 ||
+					HIBYTE(wsaData.wVersion) != 2)
+				{
+					/* incorrect WinSock version */
+					std::cerr << "Failed to init winsock API!" << std::endl;
+					WSACleanup();
+					return false;
+				}
+			#else
+						//No init needed on unix
+			#endif
+
+			return true;
+		}
+
         scripting::ScriptEngine::LuaLibrary OSParallelConnection::luaLibrary() {
             return {
-                "",
+                "parallel",
                 {
                     {
                         "setPort",
                         &luascriptfunctions::setPort,
-                        "string",
+                        "number",
                         "Set the port for the parallel connection"
                     },
-//                    {
-//                        "clearKeys",
-//                        &luascriptfunctions::clearKeys,
-//                        "",
-//                        "Clear all key bindings"
-//                    },
-//                    {
-//                        "bindKey",
-//                        &luascriptfunctions::bindKey,
-//                        "string, string",
-//                        "Binds a key by name to a lua string command"
-//                    },
-//                    {
-//                        "dt",
-//                        &luascriptfunctions::dt,
-//                        "",
-//                        "Get current frame time"
-//                    },
-//                    {
-//                        "distance",
-//                        &luascriptfunctions::distance,
-//                        "number",
-//                        "Change distance to origin"
-//                    },
-//                    {
-//                        "setInteractionSensitivity",
-//                        &luascriptfunctions::setInteractionSensitivity,
-//                        "number",
-//                        "Sets the global interaction sensitivity"
-//                    },
-//                    {
-//                        "interactionSensitivity",
-//                        &luascriptfunctions::interactionSensitivity,
-//                        "",
-//                        "Gets the current global interaction sensitivity"
-//                    },
-//                    {
-//                        "setInvertRoll",
-//                        &luascriptfunctions::setInvertRoll,
-//                        "bool",
-//                        "Sets the setting if roll movements are inverted"
-//                    },
-//                    {
-//                        "invertRoll",
-//                        &luascriptfunctions::invertRoll,
-//                        "",
-//                        "Returns the status of roll movement inversion"
-//                    },
-//                    {
-//                        "setInvertRotation",
-//                        &luascriptfunctions::setInvertRotation,
-//                        "bool",
-//                        "Sets the setting if rotation movements are inverted"
-//                    },
-//                    {
-//                        "invertRotation",
-//                        &luascriptfunctions::invertRotation,
-//                        "",
-//                        "Returns the status of rotation movement inversion"
-//                    }
-                    
+					{
+						"setAddress",
+						&luascriptfunctions::setAddress,
+						"string",
+						"Set the address for the parallel connection"
+					},
+					{
+						"setPassword",
+						&luascriptfunctions::setPassword,
+						"string",
+						"Set the password for the parallel connection"
+					},
+					{
+						"setDisplayName",
+						&luascriptfunctions::setDisplayName,
+						"string",
+						"Set your display name for the parallel connection"
+					},
+					{
+						"connect",
+						&luascriptfunctions::connect,
+						"",
+						"Connect to parallel"
+					},
                 }
             };
         }

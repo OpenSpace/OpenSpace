@@ -63,7 +63,7 @@ namespace openspace{
             
             ~OSParallelConnection();
             
-            void connect();
+            void clientConnect();
             
             void setPort(const std::string &port);
             
@@ -79,7 +79,7 @@ namespace openspace{
             
             void setSocket(_SOCKET socket);
             
-            _SOCKET socket();
+            _SOCKET clientSocket();
             
             void setHost(bool host);
             
@@ -88,6 +88,8 @@ namespace openspace{
             bool isRunning();
             
             void requestHostship();
+
+			void setPassword(const std::string &password);
             
             enum MessageTypes{
                 Authentication=0,
@@ -109,8 +111,39 @@ namespace openspace{
         protected:
             
         private:
-            uint32_t _passCode;
-            std::string _password;
+			//@TODO change this into the ghoul hasher for client AND server
+			uint32_t hash(const std::string &val){
+				uint32_t hashVal = 0, i;
+				size_t len = val.length();
+
+				for (hashVal = i = 0; i < len; ++i){
+					hashVal += val.c_str()[i];
+					hashVal += (hashVal << 10);
+					hashVal ^= (hashVal >> 6);
+				}
+
+				hashVal += (hashVal << 3);
+				hashVal ^= (hashVal >> 11);
+				hashVal += (hashVal << 15);
+
+				return hashVal;
+			};
+
+			void disconnect();
+
+			void closeSocket();
+
+			bool initNetworkAPI();
+
+			void connection(addrinfo *info);
+
+			void authenticate();
+
+			void communicate();
+
+			int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
+
+			uint32_t _passCode;
             std::string _port;
             std::string _address;
             std::string _name;
