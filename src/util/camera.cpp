@@ -219,43 +219,43 @@ const glm::vec3& Camera::lookUpVector() const
 }
 
 void Camera::serialize(SyncBuffer* syncBuffer){
-	_syncMutex.lock();
+	_mutex.lock();
 
 	syncBuffer->encode(_sharedViewRotationMatrix);
 	syncBuffer->encode(_sharedPosition);
 	syncBuffer->encode(_sharedScaling);
 
-	_syncMutex.unlock();
+	_mutex.unlock();
 }
 
 void Camera::deserialize(SyncBuffer* syncBuffer){	
-	_syncMutex.lock();
+	_mutex.lock();
 
 	syncBuffer->decode(_sharedViewRotationMatrix);
 	syncBuffer->decode(_sharedPosition);
 	syncBuffer->decode(_sharedScaling);
 
-	_syncMutex.unlock();
+	_mutex.unlock();
 }
 
 void Camera::postSynchronizationPreDraw(){
-	_syncMutex.lock();
+	_mutex.lock();
 
 	_syncedViewRotationMatrix = _sharedViewRotationMatrix;
 	_syncedPosition = _sharedPosition;
 	_syncedScaling = _sharedScaling;
 
-	_syncMutex.unlock();
+	_mutex.unlock();
 }
 
 void Camera::preSynchronization(){
-	_syncMutex.lock();
+	_mutex.lock();
 
 	_sharedViewRotationMatrix = _localViewRotationMatrix;
 	_sharedPosition = _localPosition;
 	_sharedScaling = _localScaling;
 
-	_syncMutex.unlock();
+	_mutex.unlock();
 }
 
 //
