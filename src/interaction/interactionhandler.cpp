@@ -253,7 +253,6 @@ InteractionHandler::InteractionHandler()
     , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
-	, _remoteController(nullptr)
 {
 }
 
@@ -276,13 +275,6 @@ void InteractionHandler::setMouseController(MouseController* controller) {
 	delete _mouseController;
 	_mouseController = controller;
 	_mouseController->setHandler(this);
-}
-
-void InteractionHandler::setRemoteController(RemoteController* controller) {
-	assert(controller);
-	delete _remoteController;
-	_remoteController = controller;
-	_remoteController->setHandler(this);
 }
 
 void InteractionHandler::addController(Controller* controller) {
@@ -355,7 +347,6 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
-	_remoteController->update(deltaTime);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {

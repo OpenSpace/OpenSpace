@@ -353,9 +353,6 @@ bool OpenSpaceEngine::initialize() {
 	//_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 	_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
-	//@TODO fix this -JK
-	_interactionHandler->setRemoteController(new interaction::RemoteController);
-
 	// Run start up scripts
 	runStartupScripts();
 
