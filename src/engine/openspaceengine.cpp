@@ -122,6 +122,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 OpenSpaceEngine::~OpenSpaceEngine() {
     _gui->deinitializeGL();
 
+	delete _parallelConnection;
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
@@ -130,8 +131,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _commandlineParser;
     delete _console;
     delete _moduleEngine;
-    delete _gui;
-    delete _parallelConnection;
+    delete _gui;    
 
     if(_syncBuffer)
 		delete _syncBuffer;
