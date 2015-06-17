@@ -358,19 +358,25 @@ void InteractionHandler::update(double deltaTime) {
 		
 		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
+		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
 		double t0 = _keyframes[1]._timeStamp;
 		double t1 = _keyframes[2]._timeStamp;
 		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
-
-		glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
-		//glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
+		if (fact > 1.0){
+			printf("%f\n", fact);
+			fact = fmin(1.0, fact);
+		}
+		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
+		glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
 		psc pos(v.x, v.y, v.z, v.w);
+
+		glm::quat q = quatInterpLin.interpolate(fact, _keyframes[1]._viewRotationQuat, _keyframes[2]._viewRotationQuat);
 
 		//printf("---fact: %f\nT0: %f, T1%f\n, CURR:%f---\n", fact, t0, t1, _currentKeyframeTime);
 		//printf("Fact: %f\n", fact);
 		
 		_camera->setPosition(pos);
-        _camera->setViewRotationMatrix(glm::mat4_cast(_keyframes[3]._viewRotationQuat));
+		_camera->setViewRotationMatrix(glm::mat4_cast(q));
 
 		_currentKeyframeTime += deltaTime;
 		_currentKeyframeTime = std::fmin(_currentKeyframeTime, t1);
