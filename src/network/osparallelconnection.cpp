@@ -262,7 +262,7 @@ namespace openspace {
 		}
 
 		void OSParallelConnection::decodeDataMessage(){
-//			printf("Data message received!\n");
+
 			int result;
 			uint16_t msglen;
 			std::vector<char> buffer;
@@ -287,8 +287,8 @@ namespace openspace {
             
             network::Keyframe kf;
             kf.deserialize(buffer);
-            printf("--- %f ---\n", kf._timeStamp);
-//            OsEng.interactionHandler()->addKeyframe(kf);
+//            printf("--- %f ---\n", kf._timeStamp);
+            OsEng.interactionHandler()->addKeyframe(kf);
             
 		}
 

@@ -59,11 +59,11 @@ namespace openspace{
     
     namespace network{
         
-		struct Keyframe{
-			glm::quat _viewRotationQuat;
-			psc _position;
-			double _timeStamp;
-
+        struct Keyframe{
+            glm::quat _viewRotationQuat;
+            psc _position;
+            double _timeStamp;
+            
             void serialize(std::vector<char> &buffer){
                 //add position
                 buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
@@ -94,7 +94,7 @@ namespace openspace{
                 memcpy(&_timeStamp, buffer.data() + offset, size);
                 offset += size;
             };
-		};
+        };
 
         class OSParallelConnection : public properties::PropertyOwner {
         public:

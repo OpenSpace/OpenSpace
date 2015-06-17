@@ -254,9 +254,9 @@ InteractionHandler::InteractionHandler()
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
 {
-//	network::Keyframe kf;
-//	kf._timeStamp = -std::numeric_limits<double>::max();
-//	_keyframes.assign(4, kf);
+	network::Keyframe kf;
+	kf._timeStamp = -std::numeric_limits<double>::max();
+	_keyframes.assign(4, kf);
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -350,7 +350,9 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
-//    printf("%f\n", _keyframes[0]._timeStamp);
+    
+    _camera->setPosition(_keyframes[3]._position);
+    _camera->setViewRotationMatrix(glm::mat4_cast(_keyframes[3]._viewRotationQuat));
 //    printf("%f\n %f\n %f\n %f\n", _keyframes[0]._timeStamp,  _keyframes[1]._timeStamp,  _keyframes[2]._timeStamp,  _keyframes[3]._timeStamp);
 //	printf("Current keys:\n, %s\n %s\n %s\n %s\n\n\n", _keyframes[0].to_string().c_str(), _keyframes[1].to_string().c_str(), _keyframes[2].to_string().c_str(), _keyframes[3].to_string().c_str());
 }
@@ -925,13 +927,10 @@ bool InteractionHandler::invertRotation() const {
     return _invertRotation;
 }
 
-//void InteractionHandler::addKeyframe(const network::Keyframe &kf){
-////	_keyframes.erase(_keyframes.begin());
-//    _keyframes.clear();
-//    _keyframes.resize(1);
-//    _keyframes.push_back(kf);
-//    printf("%f\n", kf._timeStamp);
-//}
+void InteractionHandler::addKeyframe(const network::Keyframe &kf){
+	_keyframes.erase(_keyframes.begin());
+    _keyframes.push_back(kf);
+}
 
 } // namespace interaction
 //>>>>>>> feature/interactionhandler
