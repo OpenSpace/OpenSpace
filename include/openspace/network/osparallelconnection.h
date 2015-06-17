@@ -29,12 +29,15 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <glm/gtx/quaternion.hpp>
 
 //std includes
 #include <string>
 #include <vector>
 #include <atomic>
 #include <thread>
+#include <sstream>
 
 #ifdef __WIN32__
 #ifndef WIN32_LEAN_AND_MEAN
@@ -56,6 +59,63 @@ namespace openspace{
     
     namespace network{
         
+		struct Keyframe{
+			glm::quat _viewRotationQuat;
+			psc _position;
+			double _timeStamp;
+
+			std::string to_string(){
+				std::stringstream ss;
+				//position
+				ss << _position.dvec4().x;
+				ss << "\t";
+				ss << _position.dvec4().y;
+				ss << "\t";
+				ss << _position.dvec4().z;
+				ss << "\t";
+				ss << _position.dvec4().w;
+				ss << "\t";
+
+				ss << "\n";
+				//orientation
+				ss << _viewRotationQuat.x;
+				ss << "\t";
+				ss << _viewRotationQuat.y;
+				ss << "\t";
+				ss << _viewRotationQuat.z;
+				ss << "\t";
+				ss << _viewRotationQuat.w;
+
+				ss << "\n";
+				//timestamp
+				ss << _timeStamp;
+
+				return ss.str();
+			}
+
+			void from_string(std::string &val){
+				std::stringstream ss(val);
+				double x, y, z, w;
+				
+				//position
+				ss >> x;
+				ss >> y;
+				ss >> z;
+				ss >> w;
+				_position = psc(x, y, z, w);
+
+				//orientation
+				ss >> x;
+				ss >> y;
+				ss >> z;
+				ss >> w;
+				_viewRotationQuat = glm::quat(x, y, z, w);
+
+				//timestamp
+				ss >> _timeStamp;
+			}
+		};
+
         class OSParallelConnection : public properties::PropertyOwner {
         public:
             
@@ -153,6 +213,8 @@ namespace openspace{
 			
 			void decodeInitializationRequestMessage();
 
+			void broadcast();
+
 			int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
 
 			uint32_t _passCode;
@@ -160,7 +222,8 @@ namespace openspace{
             std::string _address;
             std::string _name;
             _SOCKET _clientSocket;
-            std::thread *_thread;
+            std::thread *_connectionThread;
+			std::thread *_broadcastThread;
             std::atomic<bool> _isRunning;
             std::atomic<bool> _isHost;
         };

@@ -60,7 +60,7 @@ const int headerSize = 8;
 #include <openspace/network/osparallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/remotecontroller.h>
+#include <openspace/util/time.h>
 
 #include "osparallelconnection_lua.inl"
 
@@ -75,9 +75,10 @@ namespace openspace {
         _passCode(0),
         _port("20501"),
         _address("127.0.0.1"),
-        _name("No name"),
+        _name("Local Connection"),
         _clientSocket(INVALID_SOCKET),
-        _thread(nullptr),
+		_connectionThread(nullptr),
+		_broadcastThread(nullptr),
         _isRunning(false),
         _isHost(false)
         {
@@ -130,7 +131,7 @@ namespace openspace {
 
 			//start accept connections thread
 			_isRunning.store(true);
-			_thread = new (std::nothrow) std::thread(&OSParallelConnection::connection, this, addresult);
+			_connectionThread = new (std::nothrow) std::thread(&OSParallelConnection::connection, this, addresult);
 			
         }
 
@@ -262,6 +263,27 @@ namespace openspace {
 
 		void OSParallelConnection::decodeDataMessage(){
 			printf("Data message received!\n");
+			int result;
+			uint16_t msglen;
+			std::vector<char> buffer;
+			buffer.reserve(sizeof(msglen));
+			result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
+
+			if (result <= 0){
+				//error
+				return;
+			}
+
+			msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
+
+			buffer.clear();
+			buffer.reserve(msglen);
+
+			result = receiveData(_clientSocket, buffer, msglen, 0);
+			if (result <= 0){
+				//error
+				return;
+			}
 		}
 
 		void OSParallelConnection::decodeHostInfoMessage(){
@@ -271,14 +293,30 @@ namespace openspace {
 
 			if (result > 0){
 				if (hostflag.at(0) == 1){
-					printf("IM MASTER!\n");
-					_isHost.store(true);
+					//we're already host, do nothing (dummy check)
+					if (_isHost.load()){
+						return;
+					}
+					else{
+						//start broadcasting
+						_isHost.store(true);
+						_broadcastThread = new (std::nothrow) std::thread(&OSParallelConnection::broadcast, this);
+					}					
 				}
 				else{
-					printf("IM A SLAVE!\n");
-					_isHost.store(false);
+					//we were broadcasting but should stop now
+					if (_isHost.load()){
+						_isHost.store(false);
+						if (_broadcastThread != nullptr){
+							_broadcastThread->join();
+							delete _broadcastThread;
+							_broadcastThread = nullptr;
+						}
+					}
+					else{
+						//we were not host so nothing to do
+					}
 				}
-				
 			}
 			else{
 				std::cerr << "Error " << _ERRNO << " detected in connection!" << std::endl;
@@ -398,13 +436,23 @@ namespace openspace {
 		}
 
 		void OSParallelConnection::disconnect(){
-			closeSocket();
+			_isHost.store(false);
 
-			if (_thread != nullptr){
-				_thread->join();
-				delete _thread;
-				_thread = nullptr;
+			if (_broadcastThread != nullptr){
+				_broadcastThread->join();
+				delete _broadcastThread;
+				_broadcastThread = nullptr;
 			}
+
+			_isRunning.store(false);
+
+			if (_connectionThread != nullptr){
+				_connectionThread->join();
+				delete _connectionThread;
+				_connectionThread = nullptr;
+			}
+
+			closeSocket();
 		}
 
 		void OSParallelConnection::closeSocket(){
@@ -457,6 +505,45 @@ namespace openspace {
 			#endif
 
 			return true;
+		}
+
+		void OSParallelConnection::broadcast(){
+			
+			while (_isHost.load()){
+
+				network::Keyframe kf;
+				kf._position = OsEng.interactionHandler()->camera()->position();
+				kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
+				kf._timeStamp = Time::ref().currentTime();
+
+				std::string msg = kf.to_string();
+				
+				uint16_t msglen = static_cast<uint16_t>(msg.length());
+				std::vector<char> buffer;
+				buffer.reserve(headerSize + sizeof(msglen) + msglen);
+				
+				//header
+				buffer.insert(buffer.end(), 'O');
+				buffer.insert(buffer.end(), 'S');
+				buffer.insert(buffer.end(), 0);
+				buffer.insert(buffer.end(), 0);
+
+				//type of message
+				int type = OSParallelConnection::MessageTypes::Data;
+				buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
+
+				//size of message
+				buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
+
+				//actual message
+				buffer.insert(buffer.end(), msg.begin(), msg.end());
+
+				//send message
+				send(_clientSocket, buffer.data(), buffer.size(), 0);
+
+				//100 ms sleep
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
 		}
 
         scripting::ScriptEngine::LuaLibrary OSParallelConnection::luaLibrary() {
