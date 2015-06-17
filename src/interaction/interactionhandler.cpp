@@ -32,6 +32,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/highresclock.h>
+#include <ghoul/misc/interpolator.h>
 
 namespace {
 	const std::string _loggerCat = "InteractionHandler";
@@ -351,10 +352,31 @@ void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
     
-    if(_keyframes[0]._timeStamp > -std::numeric_limits<double>::max()){
-        _camera->setPosition(_keyframes[3]._position);
+	_keyframeMutex.lock();
+	//if the target keyframe has a valid timestamp and time within range
+	if (_keyframes[1]._timeStamp > 0.0){// && _currentKeyframeTime <= _keyframes[2]._timeStamp){
+		
+		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
+		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
+		double t0 = _keyframes[1]._timeStamp;
+		double t1 = _keyframes[2]._timeStamp;
+		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
+
+		glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
+		//glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
+		psc pos(v.x, v.y, v.z, v.w);
+
+		//printf("---fact: %f\nT0: %f, T1%f\n, CURR:%f---\n", fact, t0, t1, _currentKeyframeTime);
+		//printf("Fact: %f\n", fact);
+		
+		_camera->setPosition(pos);
         _camera->setViewRotationMatrix(glm::mat4_cast(_keyframes[3]._viewRotationQuat));
+
+		_currentKeyframeTime += deltaTime;
+		_currentKeyframeTime = std::fmin(_currentKeyframeTime, t1);
     }
+	_keyframeMutex.unlock();
+	
 //    printf("%f\n %f\n %f\n %f\n", _keyframes[0]._timeStamp,  _keyframes[1]._timeStamp,  _keyframes[2]._timeStamp,  _keyframes[3]._timeStamp);
 //	printf("Current keys:\n, %s\n %s\n %s\n %s\n\n\n", _keyframes[0].to_string().c_str(), _keyframes[1].to_string().c_str(), _keyframes[2].to_string().c_str(), _keyframes[3].to_string().c_str());
 }
@@ -930,8 +952,11 @@ bool InteractionHandler::invertRotation() const {
 }
 
 void InteractionHandler::addKeyframe(const network::Keyframe &kf){
+	_keyframeMutex.lock();
 	_keyframes.erase(_keyframes.begin());
     _keyframes.push_back(kf);
+	_currentKeyframeTime = _keyframes[1]._timeStamp;
+	_keyframeMutex.unlock();
 }
 
 } // namespace interaction

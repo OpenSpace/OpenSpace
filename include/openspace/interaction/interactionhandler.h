@@ -179,6 +179,8 @@ private:
 
 	//remote controller
 	std::vector<network::Keyframe> _keyframes;
+	double _currentKeyframeTime;
+	std::mutex _keyframeMutex;
 };
 
 } // namespace interaction

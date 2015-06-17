@@ -153,6 +153,13 @@ namespace openspace {
 				int flag = 1;
 				int result;
 
+				//set no delay
+				result = setsockopt(_clientSocket, /* socket affected */
+					IPPROTO_TCP,     /* set option at TCP level */
+					TCP_NODELAY,     /* name of option */
+					(char *)&flag,  /* the cast is historical cruft */
+					sizeof(int));    /* length of option value */
+
 				//set send timeout
 				int timeout = 0; //infinite
 				result = setsockopt(
@@ -287,9 +294,7 @@ namespace openspace {
             
             network::Keyframe kf;
             kf.deserialize(buffer);
-//            printf("--- %f ---\n", kf._timeStamp);
-            OsEng.interactionHandler()->addKeyframe(kf);
-            
+            OsEng.interactionHandler()->addKeyframe(kf);            
 		}
 
 		void OSParallelConnection::decodeHostInfoMessage(){
@@ -520,7 +525,10 @@ namespace openspace {
 				network::Keyframe kf;
 				kf._position = OsEng.interactionHandler()->camera()->position();
 				kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
-				kf._timeStamp = Time::ref().currentTime();
+				
+				//@TODO, implement method in openspace engine for this
+				kf._timeStamp = sgct::Engine::getTime();
+				
 
                 std::vector<char> kfBuffer;
                 kf.serialize(kfBuffer);
