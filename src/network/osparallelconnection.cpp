@@ -262,11 +262,11 @@ namespace openspace {
 		}
 
 		void OSParallelConnection::decodeDataMessage(){
-			printf("Data message received!\n");
+//			printf("Data message received!\n");
 			int result;
 			uint16_t msglen;
 			std::vector<char> buffer;
-			buffer.reserve(sizeof(msglen));
+			buffer.resize(sizeof(msglen));
 			result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
 
 			if (result <= 0){
@@ -277,13 +277,19 @@ namespace openspace {
 			msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
 
 			buffer.clear();
-			buffer.reserve(msglen);
+			buffer.resize(msglen);
 
 			result = receiveData(_clientSocket, buffer, msglen, 0);
 			if (result <= 0){
 				//error
 				return;
 			}
+            
+            network::Keyframe kf;
+            kf.deserialize(buffer);
+            printf("--- %f ---\n", kf._timeStamp);
+//            OsEng.interactionHandler()->addKeyframe(kf);
+            
 		}
 
 		void OSParallelConnection::decodeHostInfoMessage(){
@@ -516,9 +522,10 @@ namespace openspace {
 				kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
 				kf._timeStamp = Time::ref().currentTime();
 
-				std::string msg = kf.to_string();
-				
-				uint16_t msglen = static_cast<uint16_t>(msg.length());
+                std::vector<char> kfBuffer;
+                kf.serialize(kfBuffer);
+                
+				uint16_t msglen = static_cast<uint16_t>(kfBuffer.size());
 				std::vector<char> buffer;
 				buffer.reserve(headerSize + sizeof(msglen) + msglen);
 				
@@ -536,7 +543,7 @@ namespace openspace {
 				buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
 
 				//actual message
-				buffer.insert(buffer.end(), msg.begin(), msg.end());
+				buffer.insert(buffer.end(), kfBuffer.begin(), kfBuffer.end());
 
 				//send message
 				send(_clientSocket, buffer.data(), buffer.size(), 0);

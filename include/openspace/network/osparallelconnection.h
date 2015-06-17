@@ -64,56 +64,36 @@ namespace openspace{
 			psc _position;
 			double _timeStamp;
 
-			std::string to_string(){
-				std::stringstream ss;
-				//position
-				ss << _position.dvec4().x;
-				ss << "\t";
-				ss << _position.dvec4().y;
-				ss << "\t";
-				ss << _position.dvec4().z;
-				ss << "\t";
-				ss << _position.dvec4().w;
-				ss << "\t";
-
-				ss << "\n";
-				//orientation
-				ss << _viewRotationQuat.x;
-				ss << "\t";
-				ss << _viewRotationQuat.y;
-				ss << "\t";
-				ss << _viewRotationQuat.z;
-				ss << "\t";
-				ss << _viewRotationQuat.w;
-
-				ss << "\n";
-				//timestamp
-				ss << _timeStamp;
-
-				return ss.str();
-			}
-
-			void from_string(std::string &val){
-				std::stringstream ss(val);
-				double x, y, z, w;
-				
-				//position
-				ss >> x;
-				ss >> y;
-				ss >> z;
-				ss >> w;
-				_position = psc(x, y, z, w);
-
-				//orientation
-				ss >> x;
-				ss >> y;
-				ss >> z;
-				ss >> w;
-				_viewRotationQuat = glm::quat(x, y, z, w);
-
-				//timestamp
-				ss >> _timeStamp;
-			}
+            void serialize(std::vector<char> &buffer){
+                //add position
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
+                
+                //add orientation
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_viewRotationQuat), reinterpret_cast<char*>(&_viewRotationQuat) + sizeof(_viewRotationQuat));
+                
+                //add timestamp
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timeStamp), reinterpret_cast<char*>(&_timeStamp) + sizeof(_timeStamp));
+            };
+            
+            void deserialize(const std::vector<char> &buffer){
+                int offset = 0;
+                int size = 0;
+                
+                //position
+                size = sizeof(_position);
+                memcpy(&_position, buffer.data() + offset, size);
+                offset += size;
+                
+                //orientation
+                size = sizeof(_viewRotationQuat);
+                memcpy(&_viewRotationQuat, buffer.data() + offset, size);
+                offset += size;
+                
+                //timestamp
+                size = sizeof(_timeStamp);
+                memcpy(&_timeStamp, buffer.data() + offset, size);
+                offset += size;
+            };
 		};
 
         class OSParallelConnection : public properties::PropertyOwner {
