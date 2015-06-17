@@ -34,7 +34,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
-	${OPENSPACE_BASE_DIR}/src/interaction/remotecontroller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/deviceidentifier.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler_lua.inl
@@ -98,7 +97,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
-	${OPENSPACE_BASE_DIR}/include/openspace/interaction/remotecontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/deviceidentifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardcontroller.h
