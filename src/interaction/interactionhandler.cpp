@@ -351,8 +351,10 @@ void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
     
-    _camera->setPosition(_keyframes[3]._position);
-    _camera->setViewRotationMatrix(glm::mat4_cast(_keyframes[3]._viewRotationQuat));
+    if(_keyframes[0]._timeStamp > -std::numeric_limits<double>::max()){
+        _camera->setPosition(_keyframes[3]._position);
+        _camera->setViewRotationMatrix(glm::mat4_cast(_keyframes[3]._viewRotationQuat));
+    }
 //    printf("%f\n %f\n %f\n %f\n", _keyframes[0]._timeStamp,  _keyframes[1]._timeStamp,  _keyframes[2]._timeStamp,  _keyframes[3]._timeStamp);
 //	printf("Current keys:\n, %s\n %s\n %s\n %s\n\n\n", _keyframes[0].to_string().c_str(), _keyframes[1].to_string().c_str(), _keyframes[2].to_string().c_str(), _keyframes[3].to_string().c_str());
 }
