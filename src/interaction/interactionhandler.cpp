@@ -254,6 +254,9 @@ InteractionHandler::InteractionHandler()
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
 {
+	network::Keyframe kf;
+	kf._timeStamp = std::numeric_limits<double>::min();
+	_keyframes.assign(4, kf);
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -347,6 +350,7 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
+	printf("Current keys:\n, %s\n %s\n %s\n %s\n\n\n", _keyframes[0].to_string(), _keyframes[1].to_string(), _keyframes[2].to_string(), _keyframes[3].to_string());
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -917,6 +921,11 @@ void InteractionHandler::setInvertRotation(bool invert) {
 
 bool InteractionHandler::invertRotation() const {
     return _invertRotation;
+}
+
+void InteractionHandler::addKeyframe(const network::Keyframe &kf){
+	_keyframes.push_back(kf);
+	_keyframes.erase(_keyframes.begin());
 }
 
 } // namespace interaction
