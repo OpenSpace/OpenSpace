@@ -26,6 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -335,31 +336,31 @@ bool SceneGraph::sortTopologically() {
         }
 
     }
-    
-#ifdef __APPLE__
-    auto it = std::find_if(
-                           _topologicalSortedNodes.begin(),
-                           _topologicalSortedNodes.end(),
-                           [](SceneGraphNode* node) {
-                               return node->name() == "Stars";
-                           }
-                           );
-    SceneGraphNode* n = *it;
-    _topologicalSortedNodes.erase(it);
-    _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 3, n);
-    
-    it = std::find_if(
-                     _topologicalSortedNodes.begin(),
-                     _topologicalSortedNodes.end(),
-                     [](SceneGraphNode* node) {
-                         return node->name() == "MilkyWay";
-                     }
-                     );
-    n = *it;
-    _topologicalSortedNodes.erase(it);
-    _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 2, n);
-#endif
-    
+
+    RenderEngine::ABufferImplementation i = OsEng.renderEngine()->aBufferImplementation();
+    if (i == RenderEngine::ABufferImplementation::FrameBuffer) {
+        auto it = std::find_if(
+                               _topologicalSortedNodes.begin(),
+                               _topologicalSortedNodes.end(),
+                               [](SceneGraphNode* node) {
+            return node->name() == "Stars";
+        }
+        );
+        SceneGraphNode* n = *it;
+        _topologicalSortedNodes.erase(it);
+        _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 3, n);
+
+        it = std::find_if(
+                         _topologicalSortedNodes.begin(),
+                         _topologicalSortedNodes.end(),
+                         [](SceneGraphNode* node) {
+            return node->name() == "MilkyWay";
+        }
+        );
+        n = *it;
+        _topologicalSortedNodes.erase(it);
+        _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 2, n);
+    }
 
     
     return true;

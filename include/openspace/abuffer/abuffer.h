@@ -74,7 +74,7 @@ public:
 protected:
 	virtual bool reinitializeInternal() = 0;
 
-	bool initializeABuffer();
+	virtual bool initializeABuffer();
 
 	void generateShaderSource();
 	bool updateShader();
@@ -85,8 +85,6 @@ protected:
 	void openspaceTransferFunction();
 
 	unsigned int _width, _height, _totalPixels;
-
-private:
 
 	void updateDimensions();
 
