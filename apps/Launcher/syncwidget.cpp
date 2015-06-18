@@ -68,9 +68,8 @@ namespace {
     const std::string IdentifierKey = "Identifier";
     const std::string VersionKey = "Version";
 
-    const QString DefaultSceneName = "default.scene";
-
     const bool OverwriteFiles = true;
+    const bool CleanInfoWidgets = false;
 }
 
 SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
@@ -106,23 +105,6 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 
         _downloadLayout = new QVBoxLayout(w);
         _downloadLayout->addStretch(100);
-
-
-
-        //QGroupBox* downloadBox = new QGroupBox;
-
-        //QWidget* 
-
-        //_downloadLayout = new QVBoxLayout(area);
-        //area->setWidget(_downloadLayout)
-
-
-
-        ////downloadBox->setMinimumSize(450, 1000);
-        //downloadBox->setLayout(_downloadLayout);
-
-        //QScrollArea* area = new QScrollArea;
-        //area->setWidget(downloadBox);
 
         layout->addWidget(area);
     }
@@ -167,8 +149,7 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
 
         QCheckBox* checkbox = new QCheckBox(sceneName);
 
-        if (sceneName == DefaultSceneName)
-            checkbox->setChecked(true);
+        checkbox->setChecked(true);
 
         _sceneLayout->addWidget(checkbox, i / nColumns, i % nColumns);
     }
@@ -484,14 +465,14 @@ void SyncWidget::handleTimer() {
     for (FileFuture* f : _futures) {
         InfoWidget* w = _futureInfoWidgetMap[f];
 
-        if (f->isFinished || f->isAborted) {
+        if (CleanInfoWidgets && (f->isFinished || f->isAborted)) {
             toRemove.push_back(f);
             _downloadLayout->removeWidget(w);
             _futureInfoWidgetMap.erase(f);
             delete w;
         }
         else
-            w->update(f->progress);
+            w->update(f);
     }
 
     for (FileFuture* f : toRemove) {
@@ -519,7 +500,7 @@ void SyncWidget::handleTimer() {
         if (w)
             w->update(static_cast<int>(s.total_wanted_done));
 
-        if (s.state == torrent_status::finished || s.state == torrent_status::seeding) {
+        if (CleanInfoWidgets && (s.state == torrent_status::finished || s.state == torrent_status::seeding)) {
             _torrentInfoWidgetMap.remove(h);
             delete w;
         }

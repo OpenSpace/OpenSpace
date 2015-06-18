@@ -28,6 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 
+#include <chrono>
 #include <fstream>
 #include <thread>
 
@@ -45,9 +46,9 @@ namespace {
     struct ProgressInformation {
         CURL* curl;
         openspace::DownloadManager::FileFuture* future;
+        std::chrono::system_clock::time_point startTime;
         const openspace::DownloadManager::DownloadProgressCallback* callback;
     };
-
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
         size_t written;
@@ -75,23 +76,28 @@ namespace {
             return 1;
         }
 
+        i->future->currentSize = dlnow;
         i->future->totalSize = dltotal;
         i->future->progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
+
+        auto now = std::chrono::system_clock::now();
+
+        // Compute time spent transferring.
+        auto transferTime = now - i->startTime;
+        // Compute estimated transfer time.
+        auto estimatedTime = transferTime / i->future->progress;
+        // Compute estimated time remaining.
+        auto timeRemaining = estimatedTime - transferTime;
+
+        float s = std::chrono::duration_cast<std::chrono::seconds>(timeRemaining).count();
+
+        i->future->secondsRemaining = s;
 
         if (*(i->callback)) {
             // The callback function is a pointer to an std::function; that is the reason
             // for the excessive referencing
             (*(i->callback))(*(i->future));
         }
-
-
-        //CURL* curl = myp->curl;
-        //double curtime = 0;
-        //curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &curtime);
-        //fprintf(stderr, "UP: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
-        //        "  DOWN: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
-        //        "\r\n",
-        //        ulnow, ultotal, dlnow, dltotal);
  
         return 0;
     }
@@ -100,12 +106,14 @@ namespace {
 namespace openspace {
 
 DownloadManager::FileFuture::FileFuture(std::string file)
-    : totalSize(-1)
+    : currentSize(-1)
+    , totalSize(-1)
     , progress(0.f)
+    , secondsRemaining(-1.f)
     , isFinished(false)
+    , isAborted(false)
     , filePath(std::move(file))
     , errorMessage("")
-    , isAborted(false)
     , abortDownload(false)
 {}
 
@@ -146,6 +154,7 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             ProgressInformation p = {
                 curl,
                 future,
+                std::chrono::system_clock::now(),
                 &progressCallback
             };
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);

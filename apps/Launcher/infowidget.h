@@ -27,6 +27,8 @@
 
 #include <QWidget>
 
+#include <openspace/engine/downloadmanager.h>
+
 class QLabel;
 class QProgressBar;
 
@@ -37,6 +39,8 @@ public:
 
     void update(int currentBytes);
     void update(float progress);
+
+    void update(openspace::DownloadManager::FileFuture* f);
 
     void error(QString message);
 

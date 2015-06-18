@@ -45,12 +45,14 @@ public:
         FileFuture(std::string file);
 
         // Values that are written by the DownloadManager to be consumed by others
+        long long currentSize;
         long long totalSize;
         float progress; // [0,1]
+        float secondsRemaining;
         bool isFinished;
+        bool isAborted;
         std::string filePath;
         std::string errorMessage;
-        bool isAborted;
 
         // Values set by others to be consumed by the DownloadManager
         bool abortDownload;

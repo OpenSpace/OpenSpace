@@ -24,6 +24,8 @@
 
 #include "infowidget.h"
 
+#include "syncwidget.h"
+
 #include <QGridLayout>
 #include <QLabel>
 #include <QProgressBar>
@@ -71,6 +73,23 @@ void InfoWidget::update(int currentBytes) {
 void InfoWidget::update(float progress) {
     _bytes->setText("");
     _progress->setValue(static_cast<int>(progress * 100));
+}
+
+void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
+    _bytes->setText(
+        QString("%1 / %2")
+        .arg(f->currentSize)
+        .arg(f->totalSize)
+    );
+    _progress->setValue(static_cast<int>(f->progress * 100));
+
+    if (f->errorMessage.empty()) {
+        QString t = "Time remaining %1 s";
+        _messages->setText(t.arg(f->secondsRemaining));
+    }
+    else {
+        _messages->setText(QString::fromStdString(f->errorMessage));
+    }
 }
 
 void InfoWidget::error(QString message) {
