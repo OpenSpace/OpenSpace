@@ -43,10 +43,7 @@ set_build_output_directories()
 configure_openspace_version(0 1 0 "prerelease-5")
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-
 option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
-option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
-
 
 include(src/CMakeLists.txt)
 create_openspace_target()

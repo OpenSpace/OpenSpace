@@ -283,14 +283,6 @@ endfunction ()
 
 
 
-function(handle_option_gui)
-    if (OPENSPACE_BUILD_GUI_APPLICATIONS)
-        add_subdirectory(gui)
-    endif ()
-endfunction ()
-
-
-
 function (handle_option_tests)
     if (OPENSPACE_HAVE_TESTS)
         if (NOT TARGET gtest)
