@@ -31,7 +31,7 @@
 #include <QProgressBar>
 
 InfoWidget::InfoWidget(QString name, int totalBytes)
-    : QWidget(nullptr)
+    : QGroupBox(nullptr)
     , _name(nullptr)
     , _bytes(nullptr)
     , _progress(nullptr)
@@ -41,39 +41,40 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     setFixedHeight(100);
 
     QGridLayout* layout = new QGridLayout;
+    layout->setVerticalSpacing(0);
+    layout->setHorizontalSpacing(10);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     _name = new QLabel(name);
     layout->addWidget(_name, 0, 0);
 
     _bytes = new QLabel("");
-    layout->addWidget(_bytes, 0, 1);
+    layout->addWidget(_bytes, 1, 0);
 
     _progress = new QProgressBar;
-    layout->addWidget(_progress, 0, 2);
+    layout->addWidget(_progress, 1, 1);
 
     _messages = new QLabel("");
-    layout->addWidget(_messages, 1, 0, 1, 3);
+    layout->addWidget(_messages, 2, 0, 1, 2);
 
     setLayout(layout);
-
-    update(0);
 }
 
-void InfoWidget::update(int currentBytes) {
-    _bytes->setText(
-        QString("%1 / %2")
-        .arg(currentBytes)
-        .arg(_totalBytes)
-    );
-
-    float progress = static_cast<float>(currentBytes) / static_cast<float>(_totalBytes);
-    _progress->setValue(static_cast<int>(progress * 100));
-}
-
-void InfoWidget::update(float progress) {
-    _bytes->setText("");
-    _progress->setValue(static_cast<int>(progress * 100));
-}
+//void InfoWidget::update(int currentBytes) {
+//    _bytes->setText(
+//        QString("%1 / %2")
+//        .arg(currentBytes)
+//        .arg(_totalBytes)
+//    );
+//
+//    float progress = static_cast<float>(currentBytes) / static_cast<float>(_totalBytes);
+//    _progress->setValue(static_cast<int>(progress * 100));
+//}
+//
+//void InfoWidget::update(float progress) {
+//    _bytes->setText("");
+//    _progress->setValue(static_cast<int>(progress * 100));
+//}
 
 void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
     _bytes->setText(
@@ -85,11 +86,42 @@ void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
 
     if (f->errorMessage.empty()) {
         QString t = "Time remaining %1 s";
-        _messages->setText(t.arg(f->secondsRemaining));
+        _messages->setText(t.arg(static_cast<int>(f->secondsRemaining)));
     }
     else {
         _messages->setText(QString::fromStdString(f->errorMessage));
     }
+}
+
+void InfoWidget::update(libtorrent::torrent_status s) {
+    _bytes->setText(
+        QString("%1 / %2")
+        .arg(s.total_wanted_done)
+        .arg(s.total_wanted)
+    );
+    float progress = static_cast<float>(s.total_wanted_done) / s.total_wanted;
+    _progress->setValue(static_cast<int>(progress * 100));
+
+    if (s.error.empty()) {
+        int bytesPerSecond = s.download_rate;
+        long long remainingBytes = s.total_wanted - s.total_wanted_done;
+        if (remainingBytes > 0) {
+            float seconds = static_cast<float>(remainingBytes) / remainingBytes;
+
+            //auto now = time(NULL);
+            //auto transferTime = now - s.added_time;
+            //auto estimatedTime = transferTime / progress;
+            //auto timeRemaining = estimatedTime - transferTime;
+            QString t = "Time remaining %1 s";
+            _messages->setText(t.arg(static_cast<int>(seconds)));
+        }
+        else
+            _messages->setText("");
+    }
+    else {
+        _messages->setText(QString::fromStdString(s.error));
+    }
+
 }
 
 void InfoWidget::error(QString message) {

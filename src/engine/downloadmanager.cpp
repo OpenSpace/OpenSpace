@@ -44,7 +44,6 @@ namespace {
     const std::string RequestApplicationVersion = "application_version";
 
     struct ProgressInformation {
-        CURL* curl;
         openspace::DownloadManager::FileFuture* future;
         std::chrono::system_clock::time_point startTime;
         const openspace::DownloadManager::DownloadProgressCallback* callback;
@@ -67,7 +66,6 @@ namespace {
         ghoul_assert(p, "Passed progress information is nullptr");
         ProgressInformation* i = static_cast<ProgressInformation*>(p);
         ghoul_assert(i, "Passed pointer is not a ProgressInformation");
-        ghoul_assert(i->curl, "CURL pointer is nullptr");
         ghoul_assert(i->future, "FileFuture is not initialized");
         ghoul_assert(i->callback, "Callback pointer is nullptr");
         
@@ -152,7 +150,6 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
 
             ProgressInformation p = {
-                curl,
                 future,
                 std::chrono::system_clock::now(),
                 &progressCallback

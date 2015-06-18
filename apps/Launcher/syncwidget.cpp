@@ -104,6 +104,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
         area->setWidget(w);
 
         _downloadLayout = new QVBoxLayout(w);
+        _downloadLayout->setMargin(0);
+        _downloadLayout->setSpacing(0);
         _downloadLayout->addStretch(100);
 
         layout->addWidget(area);
@@ -498,7 +500,7 @@ void SyncWidget::handleTimer() {
         InfoWidget* w = _torrentInfoWidgetMap[h];
 
         if (w)
-            w->update(static_cast<int>(s.total_wanted_done));
+            w->update(s);
 
         if (CleanInfoWidgets && (s.state == torrent_status::finished || s.state == torrent_status::seeding)) {
             _torrentInfoWidgetMap.remove(h);
@@ -574,12 +576,4 @@ void SyncWidget::handleFileFutureAddition(
     while (_mutex.test_and_set()) {}
     _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());
     _mutex.clear();
-    //_futures.insert(_futures.end(), futures.begin(), futures.end());
-    //for (openspace::DownloadManager::FileFuture* f : futures) {
-    //    InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
-    //    _downloadLayout->addWidget(w);
-
-    //    _futureInfoWidgetMap[f] = w;
-    //}
-
 }

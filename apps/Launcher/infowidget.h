@@ -25,22 +25,23 @@
 #ifndef __INFOWIDGET_H__
 #define __INFOWIDGET_H__
 
-#include <QWidget>
+//#include <QWidget>
+#include <QGroupBox>
 
 #include <openspace/engine/downloadmanager.h>
+
+#include <libtorrent/torrent_handle.hpp>
 
 class QLabel;
 class QProgressBar;
 
-class InfoWidget : public QWidget {
+class InfoWidget : public QGroupBox {
 Q_OBJECT
 public:
     InfoWidget(QString name, int totalBytes = -1);
 
-    void update(int currentBytes);
-    void update(float progress);
-
     void update(openspace::DownloadManager::FileFuture* f);
+    void update(libtorrent::torrent_status s);
 
     void error(QString message);
 
