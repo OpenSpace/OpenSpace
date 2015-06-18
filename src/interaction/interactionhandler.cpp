@@ -256,10 +256,6 @@ InteractionHandler::InteractionHandler()
 	, _mouseController(nullptr)
 	, _currentKeyframeTime(-1.0)
 {
-	//add 4 dummy keyframes
-	network::Keyframe kf;
-	kf._timeStamp = -std::numeric_limits<double>::max();
-	_keyframes.assign(4, kf);
 }
 
 InteractionHandler::~InteractionHandler() {
