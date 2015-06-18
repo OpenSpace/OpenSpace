@@ -573,8 +573,8 @@ namespace openspace {
 				//send message
 				send(_clientSocket, buffer.data(), buffer.size(), 0);
 
-				//200 ms sleep
-				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+				//100 ms sleep
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}
 
