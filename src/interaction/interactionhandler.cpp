@@ -254,7 +254,9 @@ InteractionHandler::InteractionHandler()
     , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
+	, _currentKeyframeTime(-1.0)
 {
+	//add 4 dummy keyframes
 	network::Keyframe kf;
 	kf._timeStamp = -std::numeric_limits<double>::max();
 	_keyframes.assign(4, kf);
@@ -353,18 +355,23 @@ void InteractionHandler::update(double deltaTime) {
 	_mouseController->update(deltaTime);
     
 	_keyframeMutex.lock();
-	//if the target keyframe has a valid timestamp and time within range
-	if (_keyframes[1]._timeStamp > 0.0){// && _currentKeyframeTime <= _keyframes[2]._timeStamp){
-		
+
+	if (_keyframes.size() > 4){	//wait until enough samples are buffered
 		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
+
+		//interval check
+		if (_currentKeyframeTime < _keyframes[1]._timeStamp){
+			_currentKeyframeTime = _keyframes[1]._timeStamp;
+		}
+
 		double t0 = _keyframes[1]._timeStamp;
 		double t1 = _keyframes[2]._timeStamp;
 		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
 		if (fact > 1.0){
 			printf("%f\n", fact);
-			fact = fmin(1.0, fact);
+			//fact = fmin(1.0, fact);
 		}
 		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
 		glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
@@ -372,19 +379,19 @@ void InteractionHandler::update(double deltaTime) {
 
 		glm::quat q = quatInterpLin.interpolate(fact, _keyframes[1]._viewRotationQuat, _keyframes[2]._viewRotationQuat);
 
-		//printf("---fact: %f\nT0: %f, T1%f\n, CURR:%f---\n", fact, t0, t1, _currentKeyframeTime);
-		//printf("Fact: %f\n", fact);
-		
 		_camera->setPosition(pos);
 		_camera->setViewRotationMatrix(glm::mat4_cast(q));
 
 		_currentKeyframeTime += deltaTime;
-		_currentKeyframeTime = std::fmin(_currentKeyframeTime, t1);
+
+		//we're done with this sample interval
+		if (_currentKeyframeTime >= _keyframes[2]._timeStamp){
+			_keyframes.erase(_keyframes.begin());
+			_currentKeyframeTime = _keyframes[1]._timeStamp;
+		}
     }
+
 	_keyframeMutex.unlock();
-	
-//    printf("%f\n %f\n %f\n %f\n", _keyframes[0]._timeStamp,  _keyframes[1]._timeStamp,  _keyframes[2]._timeStamp,  _keyframes[3]._timeStamp);
-//	printf("Current keys:\n, %s\n %s\n %s\n %s\n\n\n", _keyframes[0].to_string().c_str(), _keyframes[1].to_string().c_str(), _keyframes[2].to_string().c_str(), _keyframes[3].to_string().c_str());
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -959,9 +966,13 @@ bool InteractionHandler::invertRotation() const {
 
 void InteractionHandler::addKeyframe(const network::Keyframe &kf){
 	_keyframeMutex.lock();
-	_keyframes.erase(_keyframes.begin());
+
+	//save a maximum of 10 samples (1 seconds of buffer)
+	if (_keyframes.size() >= 10){
+		_keyframes.erase(_keyframes.begin());
+	}
     _keyframes.push_back(kf);
-	_currentKeyframeTime = _keyframes[1]._timeStamp;
+
 	_keyframeMutex.unlock();
 }
 
