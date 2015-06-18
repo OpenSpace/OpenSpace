@@ -60,22 +60,6 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     setLayout(layout);
 }
 
-//void InfoWidget::update(int currentBytes) {
-//    _bytes->setText(
-//        QString("%1 / %2")
-//        .arg(currentBytes)
-//        .arg(_totalBytes)
-//    );
-//
-//    float progress = static_cast<float>(currentBytes) / static_cast<float>(_totalBytes);
-//    _progress->setValue(static_cast<int>(progress * 100));
-//}
-//
-//void InfoWidget::update(float progress) {
-//    _bytes->setText("");
-//    _progress->setValue(static_cast<int>(progress * 100));
-//}
-
 void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
     _bytes->setText(
         QString("%1 / %2")

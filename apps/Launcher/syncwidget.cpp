@@ -68,8 +68,8 @@ namespace {
     const std::string IdentifierKey = "Identifier";
     const std::string VersionKey = "Version";
 
-    const bool OverwriteFiles = true;
-    const bool CleanInfoWidgets = false;
+    const bool OverwriteFiles = false;
+    const bool CleanInfoWidgets = true;
 }
 
 SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
@@ -202,8 +202,13 @@ void SyncWidget::handleFileRequest() {
     for (const FileRequest& f : _fileRequests) {
         LDEBUG(f.identifier.toStdString() << " (" << f.version << ") -> " << f.destination.toStdString()); 
 
+        ghoul::filesystem::Directory d = FileSys.currentDirectory();
+        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(thisDirectory);
+
+
         std::string identifier =  f.identifier.toStdString();
-        std::string path = absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString());
+        std::string path = absPath(f.destination.toStdString());
         int version = f.version;
 
         DlManager.downloadRequestFilesAsync(
@@ -213,6 +218,8 @@ void SyncWidget::handleFileRequest() {
                 OverwriteFiles,
                 std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
         );
+
+        FileSys.setCurrentDirectory(d);
     }
 }
 
@@ -282,6 +289,7 @@ void SyncWidget::syncButtonPressed() {
             std::string module = modules.value<std::string>(std::to_string(i));
             modulesList.append(QString::fromStdString(module));
         }
+        modulesList.append("common");
 
         QDir sceneDir(scene);
         sceneDir.cdUp();

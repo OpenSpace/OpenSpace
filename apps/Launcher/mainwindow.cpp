@@ -34,6 +34,7 @@
 #include <ghoul/logging/log.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/htmllog.h>
 
 #include <QApplication>
 #include <QComboBox>
@@ -171,8 +172,9 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Error);
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
     LogMgr.addLog(new ghoul::logging::ConsoleLog);
+    LogMgr.addLog(new ghoul::logging::HTMLLog("LauncherLog.html"));
     LogMgr.addLog(new QLog);
 
     std::string configurationFile = _configurationFile;
