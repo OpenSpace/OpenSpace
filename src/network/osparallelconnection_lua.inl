@@ -132,6 +132,21 @@ int connect(lua_State* L) {
 	return 0;
 }
 
+int disconnect(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+    return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    OsEng.parallelConnection()->disconnect();
+    return 0;
+}
+
+int requestHostship(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+    return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    OsEng.parallelConnection()->requestHostship();
+    return 0;
+}
 
 } // namespace luascriptfunctions
 

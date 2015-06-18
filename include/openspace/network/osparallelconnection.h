@@ -105,6 +105,8 @@ namespace openspace{
             
             void clientConnect();
             
+            void disconnect();
+            
             void setPort(const std::string &port);
             
             std::string port();
@@ -136,7 +138,8 @@ namespace openspace{
                 Initialization,
                 Data,
                 HostInfo,
-                InitializationRequest
+                InitializationRequest,
+                HostshipRequest
             };
             
             /**
@@ -168,8 +171,6 @@ namespace openspace{
 
 				return hashVal;
 			};
-
-			void disconnect();
 
 			void closeSocket();
 
