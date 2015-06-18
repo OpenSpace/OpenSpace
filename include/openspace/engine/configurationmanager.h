@@ -49,6 +49,7 @@ public:
     static const std::string KeyLogLevel;
     static const std::string KeyLogImmediateFlush;
     static const std::string KeyLogs;
+    static const std::string KeyCapabilitiesVerbosity;
     static const std::string KeyDisableMasterRendering;
     static const std::string KeyDownloadRequestURL;
 

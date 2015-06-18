@@ -306,6 +306,7 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	std::vector<double>                            in5 = parser->getCaptureProgression();
 	
 	// check for sanity
+    // TODO: This cannot crash the program! ---abock
 	ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
 	ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
 	ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");

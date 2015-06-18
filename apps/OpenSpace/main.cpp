@@ -53,7 +53,7 @@ std::pair<int, int> supportedOpenGLVersion () {
     //On OS X we need to explicitly set the version and specify that we are using CORE profile
     //to be able to use glGetIntegerv(GL_MAJOR_VERSION, &major) and glGetIntegerv(GL_MINOR_VERSION, &minor)
     //explicitly setting to OGL 3.3 CORE works since all Mac's now support at least 3.3
-#if __APPLE__
+#ifdef __APPLE__
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

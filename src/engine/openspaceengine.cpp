@@ -288,7 +288,21 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
-	SysCap.logCapabilities();
+
+    using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
+    Verbosity verbosity = Verbosity::Default;
+    if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity)) {
+        std::map<std::string, Verbosity> verbosityMap = {
+            { "Minimal", Verbosity::Minimal },
+            { "Default", Verbosity::Default },
+            { "Full", Verbosity::Full }
+        };
+
+        std::string v = configurationManager()->value<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity);
+        if (verbosityMap.find(v) != verbosityMap.end())
+            verbosity = verbosityMap[v];
+    }
+	SysCap.logCapabilities(verbosity);
     
     std::string requestURL = "";
     bool success = configurationManager()->getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);

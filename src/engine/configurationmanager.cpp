@@ -57,6 +57,7 @@ const std::string ConfigurationManager::KeySpiceLeapsecondKernel = "SpiceKernel.
 const std::string ConfigurationManager::KeyLogLevel = "Logging.LogLevel";
 const std::string ConfigurationManager::KeyLogImmediateFlush = "Logging.ImmediateFlush";
 const std::string ConfigurationManager::KeyLogs = "Logging.Logs";
+const std::string ConfigurationManager::KeyCapabilitiesVerbosity = "Logging.CapabilitiesVerbosity";
 const std::string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const std::string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 
