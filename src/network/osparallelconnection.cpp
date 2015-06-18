@@ -312,13 +312,6 @@ namespace openspace {
 						_isHost.store(true);
 						_broadcastThread = new (std::nothrow) std::thread(&OSParallelConnection::broadcast, this);
 					}
-					//@TODO fix this to a more permanent solution
-					Keyframe kf;
-					kf._timeStamp = -1.0;
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
 				}
 				else{
 					//we were broadcasting but should stop now
