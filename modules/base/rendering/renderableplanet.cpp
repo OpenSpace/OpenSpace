@@ -231,7 +231,9 @@ void RenderablePlanet::loadTexture() {
 			_texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
 	if (_hasNightTexture) {
@@ -242,7 +244,8 @@ void RenderablePlanet::loadTexture() {
 			if (_nightTexture) {
 				LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
 				_nightTexture->uploadTexture();
-				_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+				//_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			}
 		}
 	}

@@ -505,7 +505,9 @@ void RenderablePlanetProjection::loadProjectionTexture(){
 		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
 			_textureProj->uploadTexture(); 
-			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureProj->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 			_textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 		}
 	}
