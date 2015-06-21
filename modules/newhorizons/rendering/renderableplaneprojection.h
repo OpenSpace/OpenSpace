@@ -87,11 +87,13 @@ private:
 	GLuint _vertexPositionBuffer;
 	std::string _spacecraft;
 	std::string _instrument;
+	std::string _defaultTarget;
 
 	double _previousTime;
 	target _target;
 	std::string _name;
 	bool _moving;
+	bool _hasImage;
 };
 
 } // namespace openspace
