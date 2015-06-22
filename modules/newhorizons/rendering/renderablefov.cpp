@@ -523,7 +523,7 @@ void RenderableFov::render(const RenderData& data) {
 			_interceptTag[bounds.size()] = _interceptTag[0]; 
 
 
-			if (!(_instrumentID == "NH_LORRI")) // image plane replaces fov square
+			if (!(_instrumentID == "NH_LORRI") && !(_instrumentID == "ROS_NAVCAM-A")) // image plane replaces fov square
 				fovProjection(_interceptTag, bounds);
 			
 			updateData();
@@ -537,7 +537,11 @@ void RenderableFov::render(const RenderData& data) {
 												  _time,
 												  position,
 												  lt);
-
+			pss length = position.length();
+			if (length[0] < DBL_EPSILON) {
+				drawFOV = false;
+				return;
+			}
 			//if aimed 80 deg away from target, dont draw white square
 			if (glm::dot(glm::normalize(aim), glm::normalize(position.vec3())) < 0.2){
 				drawFOV = false;
