@@ -285,11 +285,9 @@ void RenderableTrail::fullYearSweep(double time) {
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {
 		if (start > time && intervalSet){
-			//std::cout << _target << " hasnt started at " << time << " it does at: " << start << std::endl;
 			time = start;
 		}
 		else if (end < time && intervalSet){
-			//std::cout << _target << " has ended at " << time << " it does at: " << end << std::endl;
 			time = end;
 		}
 
