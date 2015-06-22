@@ -120,7 +120,6 @@ set(ed25519_sources
 
 set(includes include ed25519/src)
 
-option(LIBTORRENT_shared "build libtorrent as a shared library" ON)
 option(LIBTORRENT_pool-allocators "Uses a pool allocator for disk and piece buffers" ON)
 option(LIBTORRENT_dht "enable support for Mainline DHT" OFF)
 option(LIBTORRENT_unicode "enable unicode support" ON)
@@ -153,12 +152,7 @@ if (LIBTORRENT_dht)
     endforeach(s)
 endif ()
 
-if (LIBTORRENT_shared)
-    add_definitions(-DTORRENT_BUILDING_SHARED)
-    add_library(libtorrent SHARED ${sources2})
-else ()
-    add_library(libtorrent STATIC ${sources2})
-endif ()
+add_library(libtorrent STATIC ${sources2})
 
 target_include_directories(libtorrent PUBLIC ${includes})
 target_compile_definitions(libtorrent PUBLIC
