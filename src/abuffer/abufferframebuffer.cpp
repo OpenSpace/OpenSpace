@@ -87,10 +87,4 @@ bool ABufferFramebuffer::initializeABuffer() {
     _resolveShader->setProgramObjectCallback(shaderCallback);
 }
 
-void ABufferFramebuffer::resolve()
-{
-
-}
-
-
 } // openspace

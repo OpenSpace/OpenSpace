@@ -98,12 +98,12 @@ void findPlaybookSpecifiedTarget(std::string line, std::string& target){
 	}
 }
 
-void HongKangParser::create(){
+bool HongKangParser::create(){
 	if (size_t position = _fileName.find_last_of(".") + 1){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(_fileName).fileExtension();
 
-			if (extension == "txt"){// Hong Kang. pre-parsed playbook
+			if (extension == "txt") {// Hong Kang. pre-parsed playbook
 				LINFO("Using Preparsed Playbook V9H");
 				std::ifstream file(_fileName , std::ios::binary);
 				if (!file.good()) LERROR("Failed to open txt file '" << _fileName << "'");
@@ -130,8 +130,8 @@ void HongKangParser::create(){
 				std::string cameraTarget = "VOID";
 				std::string scannerTarget = "VOID";
 
-				while (!file.eof()){//only while inte do,  FIX
-					std::getline(file, line);
+				while (std::getline(file, line)) {//only while inte do,  FIX
+					//std::getline(file, line);
 					
 					std::string event = line.substr(0, line.find_first_of(" ")); 
 
@@ -249,36 +249,7 @@ void HongKangParser::create(){
 	}
 
     sendPlaybookInformation(PlaybookIdentifierName);
-	
-	//std::ofstream myfile;
-	//myfile.open("HongKangOutput.txt");
-
-	////print all
-	//for (auto target : _subsetMap){
-	//	std::string min, max;
-	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
-	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
-
-	//	myfile << std::endl;
-	//	for (auto image : target.second._subset){
-	//		std::string time_beg;
-	//		std::string time_end;
-	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
-
-	//		myfile << std::fixed
-	//			<< std::setw(10) << time_beg
-	//			<< std::setw(10) << time_end
-	//			<< std::setw(10) << (int)getMetFromET(image.startTime)
-	//			<< std::setw(10) << image.target << std::setw(10);
-	//		for (auto instrument : image.activeInstruments){
-	//			myfile << " " << instrument;
-	//		}
-	//		myfile << std::endl;
-	//	}
-	//}
-	//myfile.close();
-	//
+    return true;
 }
 
 bool HongKangParser::augmentWithSpice(Image& image,
