@@ -312,16 +312,15 @@ void SyncWidget::syncButtonPressed() {
                            continue;
                         }
                         ghoul::Dictionary d = directDownloadFiles.value<ghoul::Dictionary>(std::to_string(i));
-                        if (!directDownloadFiles.hasKeyAndValue<std::string>(UrlKey)) {
+                        if (!d.hasKeyAndValue<std::string>(UrlKey)) {
                             LERROR(dataFile.toStdString() << ": No " << UrlKey);
                             continue;
                         }
                         std::string url = d.value<std::string>(UrlKey);
-                        if (!directDownloadFiles.hasKeyAndValue<std::string>(DestinationKey)) {
-                            LERROR(dataFile.toStdString() << ": No " << DestinationKey);
-                            continue;
-                        }
-                        std::string dest = d.value<std::string>(DestinationKey);
+
+                        std::string dest = "";
+                        if (d.hasKeyAndValue<std::string>(DestinationKey))
+                            dest = d.value<std::string>(DestinationKey);
 
                         _directFiles.append({
                             module,
@@ -335,10 +334,22 @@ void SyncWidget::syncButtonPressed() {
                 if (found) {
                     for (int i = 1; i <= fileRequests.size(); ++i) {
                         ghoul::Dictionary d = fileRequests.value<ghoul::Dictionary>(std::to_string(i));
-                        std::string url = d.value<std::string>(IdentifierKey);
-                        std::string dest = d.value<std::string>(DestinationKey);
-                        int version = static_cast<int>(d.value<double>(VersionKey));
 
+                        if (!d.hasKeyAndValue<std::string>(IdentifierKey)) {
+                            LERROR(dataFile.toStdString() << ": No " << IdentifierKey);
+                            continue;
+                        }
+                        std::string url = d.value<std::string>(IdentifierKey);
+
+                        std::string dest = "";
+                        if (d.hasKeyAndValue<std::string>(DestinationKey))
+                            dest = d.value<std::string>(DestinationKey);
+
+                        if (!d.hasKeyAndValue<double>(VersionKey)) {
+                            LERROR(dataFile.toStdString() << ": No " << VersionKey);
+                            continue;
+                        }
+                        int version = static_cast<int>(d.value<double>(VersionKey));
 
                         _fileRequests.append({
                             module,
@@ -353,6 +364,11 @@ void SyncWidget::syncButtonPressed() {
                 if (found) {
                     for (int i = 1; i <= torrentFiles.size(); ++i) {
                         ghoul::Dictionary d = torrentFiles.value<ghoul::Dictionary>(std::to_string(i));
+
+                        if (!d.hasKeyAndValue<std::string>(FileKey)) {
+                            LERROR(dataFile.toStdString() << ": No " << FileKey);
+                            continue;
+                        }
                         std::string file = d.value<std::string>(FileKey);
                         
                         std::string dest;
