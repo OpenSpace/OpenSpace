@@ -35,7 +35,8 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     , _name(nullptr)
     , _bytes(nullptr)
     , _progress(nullptr)
-    , _messages(nullptr)
+    , _messagesLeft(nullptr)
+    , _messagesRight(nullptr)
     , _totalBytes(totalBytes)
 {
     setFixedHeight(100);
@@ -54,8 +55,11 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     _progress = new QProgressBar;
     layout->addWidget(_progress, 1, 1);
 
-    _messages = new QLabel("");
-    layout->addWidget(_messages, 2, 0, 1, 2);
+    _messagesLeft = new QLabel("");
+    _messagesRight = new QLabel("");
+    
+    layout->addWidget(_messagesLeft, 2, 0, 1, 2);
+    layout->addWidget(_messagesRight, 2, 0, 1, 2, Qt::AlignRight);
 
     setLayout(layout);
 }
@@ -70,10 +74,10 @@ void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
 
     if (f->errorMessage.empty()) {
         QString t = "Time remaining %1 s";
-        _messages->setText(t.arg(static_cast<int>(f->secondsRemaining)));
+        _messagesLeft->setText(t.arg(static_cast<int>(f->secondsRemaining)));
     }
     else {
-        _messages->setText(QString::fromStdString(f->errorMessage));
+        _messagesLeft->setText(QString::fromStdString(f->errorMessage));
     }
 }
 
@@ -92,22 +96,21 @@ void InfoWidget::update(libtorrent::torrent_status s) {
         if (bytesPerSecond > 0 && remainingBytes > 0) {
             float seconds = static_cast<float>(remainingBytes) / bytesPerSecond;
 
-            //auto now = time(NULL);
-            //auto transferTime = now - s.added_time;
-            //auto estimatedTime = transferTime / progress;
-            //auto timeRemaining = estimatedTime - transferTime;
-            QString t = "Time remaining %1 s";
-            _messages->setText(t.arg(static_cast<int>(seconds)));
+            QString left = "Time remaining %1 s";
+            _messagesLeft->setText(left.arg(static_cast<int>(seconds)));
+
+            QString right = "Download Rate: %1 KiB/s";
+            _messagesRight->setText(right.arg(bytesPerSecond / 1024));
         }
         else
-            _messages->setText("");
+            _messagesLeft->setText("");
     }
     else {
-        _messages->setText(QString::fromStdString(s.error));
+        _messagesLeft->setText(QString::fromStdString(s.error));
     }
 
 }
 
 void InfoWidget::error(QString message) {
-    _messages->setText(message);
+    _messagesLeft->setText(message);
 }

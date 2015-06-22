@@ -51,7 +51,8 @@ private:
     QLabel* _name;
     QLabel* _bytes;
     QProgressBar* _progress;
-    QLabel* _messages;
+    QLabel* _messagesLeft;
+    QLabel* _messagesRight;
 
     int _totalBytes;
 };
