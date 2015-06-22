@@ -101,8 +101,7 @@ std::string LabelParser::decode(std::string line){
 	for (auto key : _fileTranslation){
 		std::size_t value = line.find(key.first);
 		if (value != std::string::npos){
-			std::string toTranslate = line.substr(value);
-			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return.
+			return _fileTranslation[key.first]->getTranslation()[0]; //lbls always 1:1 -> single value return.
 		}
 	}
 	return "";
