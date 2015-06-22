@@ -89,8 +89,8 @@ void InfoWidget::update(libtorrent::torrent_status s) {
     if (s.error.empty()) {
         int bytesPerSecond = s.download_rate;
         long long remainingBytes = s.total_wanted - s.total_wanted_done;
-        if (remainingBytes > 0) {
-            float seconds = static_cast<float>(remainingBytes) / remainingBytes;
+        if (bytesPerSecond > 0 && remainingBytes > 0) {
+            float seconds = static_cast<float>(remainingBytes) / bytesPerSecond;
 
             //auto now = time(NULL);
             //auto transferTime = now - s.added_time;
