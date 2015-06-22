@@ -230,7 +230,7 @@ bool OpenSpaceEngine::create(
 	}
 
     // Register modules
-    _engine->_moduleEngine->initialize();
+    _engine->_moduleEngine->create();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);
@@ -264,6 +264,7 @@ bool OpenSpaceEngine::create(
 
 void OpenSpaceEngine::destroy() {
     _engine->_moduleEngine->deinitialize();
+    _engine->_moduleEngine->destroy();
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
@@ -351,11 +352,6 @@ bool OpenSpaceEngine::initialize() {
 
 	// initialize the RenderEngine
     _renderEngine->initialize();
- //   if (_configurationManager->hasKeyAndValue<std::string>(KeyRenderingMethod))
- //       _renderEngine->initialize(_configurationManager->value<std::string>(KeyRenderingMethod));
- //   else
- //   	_renderEngine->initialize(DefaultRenderingMethod);
-
 	sceneGraph->initialize();
 
 	std::string sceneDescriptionPath;
@@ -365,8 +361,6 @@ bool OpenSpaceEngine::initialize() {
 		sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
 	_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
-	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
-	//_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 	_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
 	// Run start up scripts
@@ -378,6 +372,8 @@ bool OpenSpaceEngine::initialize() {
     LINFO("Initializing GUI");
 	_gui->initialize();
 
+    // Initialize modules
+    _moduleEngine->initialize();
 
     LINFO("Finished initializing");
 	return true;

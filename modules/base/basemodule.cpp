@@ -55,8 +55,8 @@ BaseModule::BaseModule()
     : OpenSpaceModule("Base")
 {}
 
-bool BaseModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
+bool BaseModule::create() {
+    bool success = OpenSpaceModule::create();
     if (!success)
         return false;
 

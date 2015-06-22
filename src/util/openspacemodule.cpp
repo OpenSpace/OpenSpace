@@ -43,7 +43,7 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     ghoul_assert(!_name.empty(), "Empty module name is not allowed");
 }
 
-bool OpenSpaceModule::initialize() {
+bool OpenSpaceModule::create() {
     std::string moduleNameUpper = name();
     std::transform(moduleNameUpper.begin(), moduleNameUpper.end(), moduleNameUpper.begin(), toupper);
     std::string moduleToken = 
@@ -58,7 +58,7 @@ bool OpenSpaceModule::initialize() {
     return true;
 }
 
-bool OpenSpaceModule::deinitialize() {
+bool OpenSpaceModule::destroy() {
     return true;
 }
 
@@ -78,6 +78,14 @@ std::string OpenSpaceModule::modulePath() const {
 #endif
     LERROR("Could not resolve path for module '" << name() << "'");
     return "";
+}
+
+bool OpenSpaceModule::initialize() {
+    return true;
+}
+
+bool OpenSpaceModule::deinitialize() {
+    return true;
 }
 
 

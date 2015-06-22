@@ -37,8 +37,8 @@ FieldlinesModule::FieldlinesModule()
     : OpenSpaceModule("Fieldlines")
 {}
 
-bool FieldlinesModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
+bool FieldlinesModule::create() {
+    bool success = OpenSpaceModule::create();
     if (!success)
         return false;
 

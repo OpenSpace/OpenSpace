@@ -50,8 +50,8 @@ NewHorizonsModule::NewHorizonsModule()
     : OpenSpaceModule("NewHorizons")
 {}
 
-bool NewHorizonsModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
+bool NewHorizonsModule::create() {
+    bool success = OpenSpaceModule::create();
     if (!success)
         return false;
 

@@ -34,6 +34,9 @@ public:
     OpenSpaceModule(std::string name);
     virtual ~OpenSpaceModule() = default;
 
+    virtual bool create();
+    virtual bool destroy();
+
     virtual bool initialize();
     virtual bool deinitialize();
 

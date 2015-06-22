@@ -30,8 +30,8 @@ OnScreenGUIModule::OnScreenGUIModule()
     : OpenSpaceModule("OnScreenGUI")
 {}
 
-bool OnScreenGUIModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
+bool OnScreenGUIModule::create() {
+    bool success = OpenSpaceModule::create();
     if (!success)
         return false;
     return true;
