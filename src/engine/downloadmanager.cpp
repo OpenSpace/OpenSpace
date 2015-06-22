@@ -36,6 +36,10 @@
 #include <curl/curl.h>
 #endif
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 namespace {
     const std::string _loggerCat = "DownloadManager";
     
@@ -141,7 +145,7 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
 
     LDEBUG("Starting download for file: '" << url <<
     "' into file '" << file.path() << "'");
-    std::thread([url, finishedCallback, progressCallback, future, fp]() {
+    std::thread t = std::thread([url, finishedCallback, progressCallback, future, fp]() {
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -170,7 +174,17 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             if (finishedCallback)
                 finishedCallback(*future);
         }
-    }).detach();
+    });
+
+#ifdef WIN32
+    std::thread::native_handle_type h = t.native_handle();
+    SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+    SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+#else
+    // TODO: Implement thread priority ---abock
+#endif
+
+    t.detach();
 
     return future;
 }
@@ -239,7 +253,7 @@ void DownloadManager::downloadRequestFilesAsync(
     bool overrideFiles,
     AsyncDownloadFinishedCallback callback)
 {
-    std::thread([this, identifier, destination, version, overrideFiles, callback](){
+    std::thread t = std::thread([this, identifier, destination, version, overrideFiles, callback](){
         std::vector<FileFuture*> f = downloadRequestFiles(
             identifier,
             destination,
@@ -248,8 +262,17 @@ void DownloadManager::downloadRequestFilesAsync(
         );
 
         callback(f);
-    }).detach();
+    });
 
+#ifdef WIN32
+    std::thread::native_handle_type h = t.native_handle();
+    SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+    SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+#else
+    // TODO: Implement thread priority ---abock
+#endif
+
+    t.detach();
 }
 
 } // namespace openspace
