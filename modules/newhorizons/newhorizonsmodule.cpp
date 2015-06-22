@@ -46,9 +46,9 @@
 
 namespace openspace {
 
-NewHorizonsModule::NewHorizonsModule() {
-    setName("NewHorizons");
-}
+NewHorizonsModule::NewHorizonsModule()
+    : OpenSpaceModule("NewHorizons")
+{}
 
 bool NewHorizonsModule::initialize() {
     bool success = OpenSpaceModule::initialize();

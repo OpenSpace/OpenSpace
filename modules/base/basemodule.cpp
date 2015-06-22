@@ -51,9 +51,9 @@
 
 namespace openspace {
 
-BaseModule::BaseModule() {
-    setName("Base");
-}
+BaseModule::BaseModule() 
+    : OpenSpaceModule("Base")
+{}
 
 bool BaseModule::initialize() {
     bool success = OpenSpaceModule::initialize();

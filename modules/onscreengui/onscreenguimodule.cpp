@@ -26,9 +26,9 @@
 
 namespace openspace {
 
-OnScreenGUIModule::OnScreenGUIModule() {
-    setName("OnScreenGUI");
-}
+OnScreenGUIModule::OnScreenGUIModule() 
+    : OpenSpaceModule("OnScreenGUI")
+{}
 
 bool OnScreenGUIModule::initialize() {
     bool success = OpenSpaceModule::initialize();

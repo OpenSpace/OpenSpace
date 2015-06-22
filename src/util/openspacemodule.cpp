@@ -37,8 +37,13 @@ namespace {
 //ghoul::filesystem::FileSystem::TokenClosingBraces
 namespace openspace {
 
+OpenSpaceModule::OpenSpaceModule(std::string name)
+    : _name(std::move(name))
+{
+    ghoul_assert(!_name.empty(), "Empty module name is not allowed");
+}
+
 bool OpenSpaceModule::initialize() {
-    ghoul_assert(!(name().empty()), "Module name must be set before initialize call");
     std::string moduleNameUpper = name();
     std::transform(moduleNameUpper.begin(), moduleNameUpper.end(), moduleNameUpper.begin(), toupper);
     std::string moduleToken = 
@@ -59,10 +64,6 @@ bool OpenSpaceModule::deinitialize() {
 
 std::string OpenSpaceModule::name() const {
     return _name;
-}
-
-void OpenSpaceModule::setName(std::string name) {
-    _name = std::move(name);
 }
 
 std::string OpenSpaceModule::modulePath() const {

@@ -33,9 +33,9 @@
 
 namespace openspace {
 
-VolumeModule::VolumeModule() {
-    setName("Volume");
-}
+VolumeModule::VolumeModule() 
+    : OpenSpaceModule("Volume")
+{}
 
 bool VolumeModule::initialize() {
     bool success = OpenSpaceModule::initialize();

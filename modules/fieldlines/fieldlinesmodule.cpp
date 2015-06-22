@@ -33,9 +33,9 @@
 
 namespace openspace {
 
-FieldlinesModule::FieldlinesModule() {
-    setName("Fieldlines");
-}
+FieldlinesModule::FieldlinesModule()
+    : OpenSpaceModule("Fieldlines")
+{}
 
 bool FieldlinesModule::initialize() {
     bool success = OpenSpaceModule::initialize();
