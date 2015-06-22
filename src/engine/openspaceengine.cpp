@@ -47,6 +47,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -72,7 +73,6 @@
 #endif
 #endif
 
-
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -87,6 +87,7 @@ namespace {
     const std::string _sgctConfigArgumentCommand = "-config";
 
     const int CacheVersion = 1;
+    const int DownloadVersion = 1;
     
     struct {
         std::string configurationName;
@@ -287,10 +288,29 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
-	SysCap.logCapabilities();
+
+    using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
+    Verbosity verbosity = Verbosity::Default;
+    if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity)) {
+        std::map<std::string, Verbosity> verbosityMap = {
+            { "Minimal", Verbosity::Minimal },
+            { "Default", Verbosity::Default },
+            { "Full", Verbosity::Full }
+        };
+
+        std::string v = configurationManager()->value<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity);
+        if (verbosityMap.find(v) != verbosityMap.end())
+            verbosity = verbosityMap[v];
+    }
+	SysCap.logCapabilities(verbosity);
     
+    std::string requestURL = "";
+    bool success = configurationManager()->getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
+    if (success)
+        DownloadManager::initialize(requestURL, DownloadVersion);
+
 	// Load SPICE time kernel
-	bool success = loadSpiceKernels();
+	success = loadSpiceKernels();
 	if (!success)
 		return false;
 

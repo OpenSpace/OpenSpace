@@ -191,7 +191,9 @@ void RenderablePlaneProjection::loadTexture() {
 		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			texture->uploadTexture();
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 			if (_texture)
 				delete _texture;
 			_texture = texture;

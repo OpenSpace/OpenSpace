@@ -56,11 +56,11 @@ ABufferSingleLinked::ABufferSingleLinked()
 {}
 
 ABufferSingleLinked::~ABufferSingleLinked() {
-	glDeleteTextures(1,&_anchorPointerTexture);
-	glDeleteTextures(1,&_fragmentTexture);
-	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
-	glDeleteBuffers(1,&_atomicCounterBuffer);
-	glDeleteBuffers(1,&_anchorPointerTextureInitializer);
+	glDeleteTextures(1, &_anchorPointerTexture);
+	glDeleteTextures(1, &_fragmentTexture);
+	glDeleteBuffers(1, &_anchorPointerTextureInitializer);
+	glDeleteBuffers(1, &_atomicCounterBuffer);
+	glDeleteBuffers(1, &_anchorPointerTextureInitializer);
 }
 
 bool ABufferSingleLinked::initialize() {
@@ -123,7 +123,6 @@ void ABufferSingleLinked::clear() {
 }
 
 void ABufferSingleLinked::preRender() {
-
 	// Bind head-pointer image for read-write
 	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
     glBindImageTexture(0, _anchorPointerTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
@@ -135,7 +134,6 @@ void ABufferSingleLinked::postRender() {
 }
 
 std::vector<ABufferSingleLinked::fragmentData> ABufferSingleLinked::pixelData() {
-	
 	unsigned int* anchorTexture = new unsigned int[_totalPixels];
 	unsigned int* fragmentBuffer = new unsigned int[_totalPixels*MAX_LAYERS*4];
 

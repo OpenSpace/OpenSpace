@@ -27,6 +27,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
 
 #include <iostream>
 #include <fstream>
@@ -59,10 +60,31 @@ void ABufferFramebuffer::preRender() {
 void ABufferFramebuffer::postRender() {
 
 }
+    
+void ABufferFramebuffer::resolve(float blackoutFactor) {
+}
 
 std::vector<ABuffer::fragmentData> ABufferFramebuffer::pixelData() {
     return std::vector<ABuffer::fragmentData>();
 }
 
+bool ABufferFramebuffer::initializeABuffer() {
+    // ============================
+    // 			SHADERS
+    // ============================
+    auto shaderCallback = [this](ghoul::opengl::ProgramObject* program) {
+        // Error for visibility in log
+        _validShader = false;
+    };
+
+    generateShaderSource();
+    _resolveShader = ghoul::opengl::ProgramObject::Build(
+        "ABufferResolve",
+        "${SHADERS}/ABuffer/abufferResolveVertex.glsl",
+        "${SHADERS}/ABuffer/abufferResolveFragment.glsl");
+    if (!_resolveShader)
+        return false;
+    _resolveShader->setProgramObjectCallback(shaderCallback);
+}
 
 } // openspace

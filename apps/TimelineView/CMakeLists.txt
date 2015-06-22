@@ -45,6 +45,7 @@ set(HEADER_FILES
 find_package(Qt5Widgets)
 find_package(Qt5Network)
 
+set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
 add_executable(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})

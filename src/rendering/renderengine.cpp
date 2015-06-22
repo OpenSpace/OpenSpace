@@ -81,13 +81,6 @@ namespace {
 
     const std::string KeyRenderingMethod = "RenderingMethod";
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
-
-    const std::map<std::string, int> RenderingMethods = {
-        { "ABufferFrameBuffer", ABUFFER_FRAMEBUFFER},
-        { "ABufferSingleLinked", ABUFFER_SINGLE_LINKED },
-        { "ABufferFixed", ABUFFER_FIXED },
-        { "ABufferDynamic", ABUFFER_DYNAMIC }
-    };
 }
 
 namespace openspace {
@@ -99,7 +92,7 @@ RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
 	, _abuffer(nullptr)
-    , _abufferImplementation(-1)
+    , _abufferImplementation(ABufferImplementation::Invalid)
 	, _log(nullptr)
 	, _showInfo(true)
 	, _showScreenLog(true)
@@ -153,32 +146,28 @@ bool RenderEngine::initialize() {
         }
     }
 
-    auto it = RenderingMethods.find(renderingMethod);
-    if (it == RenderingMethods.end()) {
+    _abufferImplementation = aBufferFromString(renderingMethod);
+    switch (_abufferImplementation) {
+    case ABufferImplementation::FrameBuffer:
+        LINFO("Creating ABufferFramebuffer implementation");
+        _abuffer = new ABufferFramebuffer;
+        break;
+    case ABufferImplementation::SingleLinked:
+        LINFO("Creating ABufferSingleLinked implementation");
+        _abuffer = new ABufferSingleLinked();
+        break;
+    case ABufferImplementation::Fixed:
+        LINFO("Creating ABufferFixed implementation");
+        _abuffer = new ABufferFixed();
+        break;
+    case ABufferImplementation::Dynamic:
+        LINFO("Creating ABufferDynamic implementation");
+        _abuffer = new ABufferDynamic();
+        break;
+    case ABufferImplementation::Invalid:
         LFATAL("Rendering method '" << renderingMethod << "' not among the available "
             << "rendering methods");
         return false;
-    }
-    else {
-        _abufferImplementation = it->second;
-        switch (_abufferImplementation) {
-        case ABUFFER_FRAMEBUFFER:
-            LINFO("Creating ABufferFramebuffer implementation");
-            _abuffer = new ABufferFramebuffer;
-            break;
-        case ABUFFER_SINGLE_LINKED:
-            LINFO("Creating ABufferSingleLinked implementation");
-            _abuffer = new ABufferSingleLinked();
-            break;
-        case ABUFFER_FIXED:
-            LINFO("Creating ABufferFixed implementation");
-            _abuffer = new ABufferFixed();
-            break;
-        case ABUFFER_DYNAMIC:
-            LINFO("Creating ABufferDynamic implementation");
-            _abuffer = new ABufferDynamic();
-            break;
-        }
     }
 
 	generateGlslConfig();
@@ -363,18 +352,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		_abuffer->clear();
 
 	// SGCT resets certain settings
-#ifndef __APPLE__
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-#else
-	glEnable(GL_DEPTH_TEST);
-//			glDisable(GL_CULL_FACE);
-    glEnable(GL_CULL_FACE);
-//			glDisable(GL_BLEND);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
+    
+    if (_abufferImplementation == ABufferImplementation::FrameBuffer) {
+        glEnable(GL_DEPTH_TEST);
+        //			glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
+        //			glDisable(GL_BLEND);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else {
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+    }
 	// setup the camera for the current frame
 
 	_mainCamera->setViewMatrix(
@@ -398,7 +389,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            _abuffer->resolve();
+            _abuffer->resolve(_globalBlackOutFactor);
             glDisable(GL_BLEND);
         }
         else {
@@ -692,8 +683,12 @@ Camera* RenderEngine::camera() const {
 	return _mainCamera;
 }
 
-ABuffer* RenderEngine::abuffer() const {
+ABuffer* RenderEngine::aBuffer() const {
 	return _abuffer;
+}
+
+RenderEngine::ABufferImplementation RenderEngine::aBufferImplementation() const {
+    return _abufferImplementation;
 }
 
 float RenderEngine::globalBlackOutFactor() {
@@ -729,7 +724,7 @@ void RenderEngine::generateGlslConfig() {
 		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
 		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
 		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
-		<< "#define ABUFFER_IMPLEMENTATION    " << _abufferImplementation << "\n";
+		<< "#define ABUFFER_IMPLEMENTATION    " << int(_abufferImplementation) << "\n";
 	// System specific
 #ifdef WIN32
 	os << "#define WIN32\n";
@@ -1245,6 +1240,20 @@ void RenderEngine::setSGCTRenderStatistics(bool visible) {
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
+}
+
+RenderEngine::ABufferImplementation RenderEngine::aBufferFromString(const std::string& impl) {
+    const std::map<std::string, RenderEngine::ABufferImplementation> RenderingMethods = {
+        { "ABufferFrameBuffer", ABufferImplementation::FrameBuffer },
+        { "ABufferSingleLinked", ABufferImplementation::SingleLinked },
+        { "ABufferFixed", ABufferImplementation::Fixed },
+        { "ABufferDynamic", ABufferImplementation::Dynamic }
+    };
+
+    if (RenderingMethods.find(impl) != RenderingMethods.end())
+        return RenderingMethods.at(impl);
+    else
+        return ABufferImplementation::Invalid;
 }
 
 }// namespace openspace

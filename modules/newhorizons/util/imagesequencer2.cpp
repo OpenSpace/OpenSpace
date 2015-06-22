@@ -297,34 +297,31 @@ void ImageSequencer2::sortData(){
 }
 
 void ImageSequencer2::runSequenceParser(SequenceParser* parser){
-	parser->create();
+	bool success = parser->create();
+    if (!success)
+        return;
 	// get new data 
-	std::map<std::string, Decoder*>                in1 = parser->getTranslation();
-	std::map<std::string, ImageSubset>             in2 = parser->getSubsetMap();
-	std::vector<std::pair<std::string, TimeRange>> in3 = parser->getIstrumentTimes();
-	std::vector<std::pair<double, std::string>>    in4 = parser->getTargetTimes();
-	std::vector<double>                            in5 = parser->getCaptureProgression();
+	std::map<std::string, Decoder*> translations = parser->getTranslation();
+	std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();
+	std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getIstrumentTimes();
+	std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();
+	std::vector<double> captureProgression = parser->getCaptureProgression();
 	
 	// check for sanity
-	ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
-	ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
-	ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
-	ghoul_assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
-	ghoul_assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
+    if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty())
+        return;
 
-
-	// append data
-	_fileTranslation.insert   (                           in1.begin(), in1.end());
-	_subsetMap.insert         (                           in2.begin(), in2.end());
-	_instrumentTimes.insert   (   _instrumentTimes.end(), in3.begin(), in3.end());
-	_targetTimes.insert       (       _targetTimes.end(), in4.begin(), in4.end());
-	_captureProgression.insert(_captureProgression.end(), in5.begin(), in5.end());
+	_fileTranslation.insert(translations.begin(), translations.end());
+	_subsetMap.insert(imageData.begin(), imageData.end());
+	_instrumentTimes.insert(_instrumentTimes.end(), instrumentTimes.begin(), instrumentTimes.end());
+	_targetTimes.insert(_targetTimes.end(), targetTimes.begin(), targetTimes.end());
+	_captureProgression.insert(_captureProgression.end(), captureProgression.begin(), captureProgression.end());
 
 	// sorting of data _not_ optional
 	sortData();
 
 	// extract payload from _fileTranslation 
-	for (auto t : _fileTranslation){
+	for (auto t : _fileTranslation) {
 		if (t.second->getDecoderType() == "CAMERA" || 
 			t.second->getDecoderType() == "SCANNER" ){
 			std::vector<std::string> spiceIDs = t.second->getTranslation();
@@ -335,4 +332,5 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	}
 	_hasData = true;
 }
+
 }  // namespace openspace
