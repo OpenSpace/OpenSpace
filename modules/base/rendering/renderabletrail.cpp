@@ -284,10 +284,10 @@ void RenderableTrail::fullYearSweep(double time) {
     psc pscPos;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {
-		if (start > time && intervalSet){
+		if (start > time && intervalSet) {
 			time = start;
 		}
-		else if (end < time && intervalSet){
+		else if (end < time && intervalSet) {
 			time = end;
 		}
 

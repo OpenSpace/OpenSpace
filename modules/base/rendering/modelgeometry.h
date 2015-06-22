@@ -50,8 +50,8 @@ namespace openspace {
 			void render();
 			virtual bool loadModel(const std::string& filename) = 0;
 			void changeRenderMode(const GLenum mode);
-			bool ModelGeometry::getVertices(std::vector<Vertex>* vertexList);
-			bool ModelGeometry::getIndices(std::vector<int>* indexList);
+			bool getVertices(std::vector<Vertex>* vertexList);
+			bool getIndices(std::vector<int>* indexList);
 
 		protected:
 			Renderable* _parent;

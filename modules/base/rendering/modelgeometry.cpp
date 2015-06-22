@@ -100,7 +100,7 @@ void ModelGeometry::render() {
 	glBindVertexArray(0);
 }
 
-void ModelGeometry::changeRenderMode(const GLenum mode){
+void ModelGeometry::changeRenderMode(const GLenum mode) {
 	_mode = mode;
 }
 
@@ -143,7 +143,7 @@ void ModelGeometry::deinitialize() {
 	glDeleteBuffers(1, &_ibo);
 }
 
-bool ModelGeometry::loadObj(const std::string& filename){
+bool ModelGeometry::loadObj(const std::string& filename) {
 		std::string cachedFile = "";
 		FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
 
