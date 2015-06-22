@@ -191,6 +191,7 @@ function (handle_applications)
 
     set(DEFAULT_APPLICATIONS
         "OpenSpace"
+        "Launcher"
     )
     mark_as_advanced(DEFAULT_APPLICATIONS)
 
@@ -237,8 +238,9 @@ function (handle_applications)
                     endif ()
 
 
-                    copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
-
+                    if (WIN32)
+                        copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+                    endif ()
             endif ()
 
             list(APPEND applications ${APPLICATION_NAME})
