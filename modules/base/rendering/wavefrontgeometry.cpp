@@ -43,7 +43,7 @@ WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
 	loadObj(_file);
 }
 
-bool WavefrontGeometry::initialize(RenderableModel* parent) {
+bool WavefrontGeometry::initialize(Renderable* parent) {
 	bool success = ModelGeometry::initialize(parent);
     return success;
 }
@@ -88,13 +88,18 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
     // The _shapeCounts array stores for each shape, how many vertices that shape has
     size_t currentPosition = 0;
     size_t p = 0;
-    for (int i = 0; i < shapes.size(); ++i) {
-        for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {
-            _vertices[j + currentPosition].location[0] = shapes[i].mesh.positions[3 * j + 0];
-            _vertices[j + currentPosition].location[1] = shapes[i].mesh.positions[3 * j + 1];
-            _vertices[j + currentPosition].location[2] = shapes[i].mesh.positions[3 * j + 2];
-            _vertices[j + currentPosition].location[3] = 4; // Temp size for the power scale coordinate.
-			// Could be defined per object as a dictionary key.
+	psc tmp;
+	for (int i = 0; i < shapes.size(); ++i) {
+		for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {
+			tmp = PowerScaledCoordinate::CreatePowerScaledCoordinate(shapes[i].mesh.positions[3 * j + 0],
+				shapes[i].mesh.positions[3 * j + 1],
+				shapes[i].mesh.positions[3 * j + 2]
+				);
+
+			_vertices[j + currentPosition].location[0] = tmp[0];
+			_vertices[j + currentPosition].location[1] = tmp[1];
+			_vertices[j + currentPosition].location[2] = tmp[2];
+			_vertices[j + currentPosition].location[3] = tmp[3] + _magnification;
 
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];
             _vertices[j + currentPosition].normal[1] = shapes[i].mesh.normals[3 * j + 1];
