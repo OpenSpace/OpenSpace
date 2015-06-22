@@ -60,6 +60,9 @@ void ABufferFramebuffer::preRender() {
 void ABufferFramebuffer::postRender() {
 
 }
+    
+void ABufferFramebuffer::resolve(float blackoutFactor) {
+}
 
 std::vector<ABuffer::fragmentData> ABufferFramebuffer::pixelData() {
     return std::vector<ABuffer::fragmentData>();

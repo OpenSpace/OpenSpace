@@ -55,7 +55,7 @@ public:
 
 	ABuffer();
 	virtual ~ABuffer();
-	virtual void resolve();
+	virtual void resolve(float blackoutFactor);
     virtual bool initialize() = 0;
 	virtual bool reinitialize();
 

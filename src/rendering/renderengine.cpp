@@ -389,7 +389,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            _abuffer->resolve();
+            _abuffer->resolve(_globalBlackOutFactor);
             glDisable(GL_BLEND);
         }
         else {

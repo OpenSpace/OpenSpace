@@ -55,20 +55,17 @@ namespace openspace {
 ABuffer::ABuffer()
 	: _validShader(false)
 	, _resolveShader(nullptr)
-	, _volumeStepFactor(0.0f)
+	, _volumeStepFactor(0.f)
 {
 
 	updateDimensions();
 }
 
 ABuffer::~ABuffer() {
-
-	if(_resolveShader)
-		delete _resolveShader;
+    delete _resolveShader;
 	
-	for(auto file: _samplerFiles) {
+	for (auto file: _samplerFiles)
 		delete file;
-	}
 }
 
 bool ABuffer::initializeABuffer() {
@@ -88,13 +85,14 @@ bool ABuffer::initializeABuffer() {
 	if (!_resolveShader)
 		return false;
 	_resolveShader->setProgramObjectCallback(shaderCallback);
+    // Remove explicit callback and use programobject isDirty instead ---abock
     
     // ============================
     // 		GEOMETRY (quad)
     // ============================
 	const GLfloat size = 1.0f;
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
+    const GLfloat vertex_data[] = {
+        //	  x      y     s     t
         -size, -size, 0.0f, 1.0f,
         size,	size, 0.0f, 1.0f, 
         -size,  size, 0.0f, 1.0f, 
@@ -114,14 +112,13 @@ bool ABuffer::initializeABuffer() {
 }
 
 bool ABuffer::reinitialize() {
-
 	// set the total resolution for all viewports
 	updateDimensions();
 	return reinitializeInternal();
 }
 
-void ABuffer::resolve() {
-	if( ! _validShader) {
+void ABuffer::resolve(float blackoutFactor) {
+	if (!_validShader) {
 		generateShaderSource();
 		updateShader();
 		_validShader = true;
@@ -131,13 +128,14 @@ void ABuffer::resolve() {
 		return;
 
 	_resolveShader->activate();
+    _resolveShader->setUniform("blackoutFactor", blackoutFactor);
 	int startAt = 0;
-	for(int i = 0; i < _volumes.size(); ++i) {
+	for (int i = 0; i < _volumes.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		_volumes.at(i).second->bind();
 		startAt = i + 1;
 	}
-	for(int i = 0; i < _transferFunctions.size(); ++i) {
+	for (int i = 0; i < _transferFunctions.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + startAt + i);
 		_transferFunctions.at(i).second->bind();
 	}
@@ -204,8 +202,7 @@ bool ABuffer::updateShader() {
 }
 
 void ABuffer::generateShaderSource() {
-
-	for(int i = 0; i < _samplerFiles.size(); ++i) {
+	for (int i = 0; i < _samplerFiles.size(); ++i) {
 		std::string line, source = "";
 		std::ifstream samplerFile(_samplerFiles.at(i)->path());
 		if(samplerFile.is_open()) {
@@ -225,7 +222,6 @@ void ABuffer::generateShaderSource() {
 }
 
 void ABuffer::openspaceHeaders() {
-
 	std::ofstream f(absPath(generatedHeadersPath));
 	f << "#define MAX_VOLUMES " << std::to_string(_samplers.size()) << "\n"
 		<< "#define MAX_TF " << _transferFunctions.size() << "\n";

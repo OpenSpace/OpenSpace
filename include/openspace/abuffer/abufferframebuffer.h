@@ -39,7 +39,7 @@ public:
     void clear();
     void preRender();
     void postRender();
-    void resolve();
+    void resolve(float blackoutFactor);
     
     std::vector<fragmentData> pixelData();
 protected:
