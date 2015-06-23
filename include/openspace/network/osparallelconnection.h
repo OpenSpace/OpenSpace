@@ -26,8 +26,6 @@
 #define __OSPARALLELCONNECTION_H__
 
 //openspace includes
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -95,11 +93,10 @@ namespace openspace{
                 //timestamp
                 size = sizeof(_timeStamp);
                 memcpy(&_timeStamp, buffer.data() + offset, size);
-                offset += size;
             };
         };
 
-        class OSParallelConnection : public properties::PropertyOwner {
+        class OSParallelConnection{
         public:
             
             OSParallelConnection();

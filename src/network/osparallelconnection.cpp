@@ -204,7 +204,6 @@ namespace openspace {
 		}
 
 		void OSParallelConnection::authenticate(){
-			int pos = 4;
 			uint16_t namelen = static_cast<uint16_t>(_name.length());
 			int size = headerSize + sizeof(uint32_t) + sizeof(uint16_t) + static_cast<int>(namelen);
 			std::vector<char> buffer;
@@ -355,6 +354,25 @@ namespace openspace {
 					else{
 						//we were not host so nothing to do
 					}
+                    
+                    //request init packages from the host
+                    int size = headerSize + sizeof(uint32_t);
+                    std::vector<char> buffer;
+                    buffer.reserve(size);
+                    
+                    //version
+                    buffer.insert(buffer.end(), 'O');
+                    buffer.insert(buffer.end(), 'S');
+                    buffer.insert(buffer.end(), 0);
+                    buffer.insert(buffer.end(), 0);
+                    
+                    //msg type, 0 = auth
+                    int type = MessageTypes::InitializationRequest;
+                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(int));
+                    
+                    //send message
+                    send(_clientSocket, buffer.data(), buffer.size(), 0);
+
 				}
 			}
 			else{
