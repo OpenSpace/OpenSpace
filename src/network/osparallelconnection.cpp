@@ -248,6 +248,8 @@ namespace openspace {
 			case MessageTypes::Data:
 				decodeDataMessage();
 				break;
+            case MessageTypes::Script:
+                break;
 			case MessageTypes::HostInfo:
 				decodeHostInfoMessage();
 				break;
@@ -296,6 +298,33 @@ namespace openspace {
             OsEng.interactionHandler()->addKeyframe(kf);            
 		}
 
+        void OSParallelConnection::decodeScript(){
+            int result;
+            uint16_t msglen;
+            std::vector<char> buffer;
+            buffer.resize(sizeof(msglen));
+            result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
+            
+            if (result <= 0){
+                //error
+                return;
+            }
+            
+            msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
+            
+            buffer.clear();
+            buffer.resize(msglen);
+            
+            result = receiveData(_clientSocket, buffer, msglen, 0);
+            if (result <= 0){
+                //error
+                return;
+            }
+            
+            std::string script(buffer.data());
+            OsEng.scriptEngine()->queueScript(script);
+        }
+        
 		void OSParallelConnection::decodeHostInfoMessage(){
 			std::vector<char> hostflag;
 			hostflag.resize(1);
@@ -312,13 +341,6 @@ namespace openspace {
 						_isHost.store(true);
 						_broadcastThread = new (std::nothrow) std::thread(&OSParallelConnection::broadcast, this);
 					}
-					//@TODO fix this to a more permanent solution
-					Keyframe kf;
-					kf._timeStamp = -1.0;
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
-					OsEng.interactionHandler()->addKeyframe(kf);
 				}
 				else{
 					//we were broadcasting but should stop now
@@ -464,6 +486,33 @@ namespace openspace {
 		void OSParallelConnection::setPassword(const std::string& pwd){
 			_passCode = hash(pwd);
 		}
+        
+        void OSParallelConnection::sendScript(const std::string script){
+            
+            uint16_t msglen = static_cast<uint16_t>(script.length());
+            std::vector<char> buffer;
+            buffer.reserve(headerSize + sizeof(msglen) + msglen);
+            
+            //header
+            buffer.insert(buffer.end(), 'O');
+            buffer.insert(buffer.end(), 'S');
+            buffer.insert(buffer.end(), 0);
+            buffer.insert(buffer.end(), 0);
+            
+            //type of message
+            int type = OSParallelConnection::MessageTypes::Script;
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
+            
+            //size of message
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
+            
+            //actual message
+            buffer.insert(buffer.end(), script.begin(), script.end());
+            
+            //send message
+            send(_clientSocket, buffer.data(), buffer.size(), 0);
+        }
+
 
 		void OSParallelConnection::disconnect(){
             //must be run before trying to join communication threads, else the threads are stuck trying to receive data
@@ -580,8 +629,8 @@ namespace openspace {
 				//send message
 				send(_clientSocket, buffer.data(), buffer.size(), 0);
 
-				//200 ms sleep
-				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+				//100 ms sleep
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}
 

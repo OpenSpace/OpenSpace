@@ -27,7 +27,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/syncbuffer.h>
-
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/network/osparallelconnection.h>
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
 #include <iomanip>
@@ -153,6 +154,8 @@ bool ScriptEngine::runScript(const std::string& script) {
         LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
     }
+    
+    OsEng.parallelConnection()->sendScript(script);
     
     return true;
 }
@@ -497,6 +500,10 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 		_mutex.lock();
 		_receivedScripts.push_back(_currentSyncedScript);
 		_mutex.unlock();
+        
+        _executedScriptsMutex.lock();
+        _executedScripts.push_back(_currentSyncedScript);
+        _executedScriptsMutex.unlock();
 	}
 }
 
@@ -527,12 +534,17 @@ void ScriptEngine::preSynchronization(){
 void ScriptEngine::queueScript(const std::string &script){
 	if (script.empty())
 		return;
-
+    
 	_mutex.lock();
 
 	_queuedScripts.insert(_queuedScripts.begin(), script);
 
 	_mutex.unlock();
+}
+    
+std::vector<std::string> ScriptEngine::executedScripts(){
+    std::lock_guard<std::mutex> lockGuard(_executedScriptsMutex);
+    return _executedScripts;
 }
 
 
