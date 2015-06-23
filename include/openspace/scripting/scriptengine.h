@@ -78,6 +78,8 @@ public:
 	void preSynchronization();
 
 	void queueScript(const std::string &script);
+    
+    std::vector<std::string> executedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
     
@@ -98,6 +100,10 @@ private:
 	std::vector<std::string> _queuedScripts;
 	std::vector<std::string> _receivedScripts;
 	std::string _currentSyncedScript;
+    
+    //parallel variables @TODO make a more permanent solution to this - JK
+    std::vector<std::string> _executedScripts;
+    std::mutex _executedScriptsMutex;
 };
 
 } // namespace scripting
