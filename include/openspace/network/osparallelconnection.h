@@ -30,6 +30,8 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
+
+//glm includes
 #include <glm/gtx/quaternion.hpp>
 
 //std includes
@@ -38,6 +40,7 @@
 #include <atomic>
 #include <thread>
 #include <sstream>
+#include <mutex>
 
 #ifdef __WIN32__
 #ifndef WIN32_LEAN_AND_MEAN
@@ -133,10 +136,13 @@ namespace openspace{
 
 			void setPassword(const std::string &password);
             
+            void sendScript(const std::string script);
+            
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
                 Data,
+                Script,
                 HostInfo,
                 InitializationRequest,
                 HostshipRequest
@@ -189,6 +195,8 @@ namespace openspace{
 			void decodeInitializationMessage();
 
 			void decodeDataMessage();
+            
+            void decodeScript();
 
 			void decodeHostInfoMessage();
 			
@@ -196,8 +204,8 @@ namespace openspace{
 
 			void broadcast();
 
-			int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
-
+            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
+            
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
