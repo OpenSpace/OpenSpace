@@ -121,7 +121,7 @@ namespace openspace{
             
             _SOCKET clientSocket();
             
-            bool isRunning();
+            bool isHost();
             
             void requestHostship();
 
@@ -209,6 +209,8 @@ namespace openspace{
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isListening;
+            std::vector<std::string> _sentScripts;
+            std::mutex _sentScriptsMutex;
         };
     } // namespace network
     

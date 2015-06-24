@@ -349,6 +349,11 @@ namespace openspace {
             
             //tell the script engine to execute the script when appropriate
             OsEng.scriptEngine()->queueScript(script);
+            
+            //add script to all executed scripts
+            _sentScriptsMutex.lock();
+            _sentScripts.push_back(script);
+            _sentScriptsMutex.unlock();
         }
         
 		void ParallelConnection::decodeHostInfoMessage(){
@@ -513,6 +518,10 @@ namespace openspace {
             return _clientSocket;
         }
         
+        bool ParallelConnection::isHost(){
+            return _isHost.load();
+        }
+        
         void ParallelConnection::requestHostship(){
             std::vector<char> buffer;
             buffer.reserve(headerSize());
@@ -529,6 +538,9 @@ namespace openspace {
 		}
         
         void ParallelConnection::sendScript(const std::string script){
+            _sentScriptsMutex.lock();
+            _sentScripts.push_back(script);
+            _sentScriptsMutex.unlock();
             
             uint16_t msglen = static_cast<uint16_t>(script.length());
             std::vector<char> buffer;
