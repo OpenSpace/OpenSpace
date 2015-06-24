@@ -119,13 +119,7 @@ namespace openspace{
             
             std::string name();
             
-            void setSocket(_SOCKET socket);
-            
             _SOCKET clientSocket();
-            
-            void setHost(bool host);
-            
-            bool isHost();
             
             bool isRunning();
             
@@ -175,27 +169,25 @@ namespace openspace{
 				return hashVal;
 			};
             
-            void writeHeader(std::vector<char> &buffer);
+            void writeHeader(std::vector<char> &buffer, uint32_t messageType);
 
 			void closeSocket();
 
 			bool initNetworkAPI();
 
-			void connection(addrinfo *info);
+			void tryConnect(addrinfo *info);
 
-			void authenticate();
+			void sendAuthentication();
 
-			void communicate();
+			void listenCommunication();
 
-			void delegateDecoding(int type);
-
-			void decodeAuthenticationMessage();
+			void delegateDecoding(uint32_t type);
 
 			void decodeInitializationMessage();
 
-			void decodeDataMessage();
+			void decodeStreamDataMessage();
             
-            void decodeScript();
+            void decodeScriptMessage();
 
 			void decodeHostInfoMessage();
 			
@@ -207,7 +199,6 @@ namespace openspace{
 
             int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
             
-            int _headerSize;
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
@@ -215,8 +206,9 @@ namespace openspace{
             _SOCKET _clientSocket;
             std::thread *_connectionThread;
 			std::thread *_broadcastThread;
-            std::atomic<bool> _isRunning;
             std::atomic<bool> _isHost;
+            std::atomic<bool> _isConnected;
+            std::atomic<bool> _isListening;
         };
     } // namespace network
     
