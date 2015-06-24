@@ -46,6 +46,17 @@ public:
 			lua_CFunction function;
 			std::string argumentText;
 			std::string helpText;
+            bool parallelShared;
+            
+            Function(std::string n, lua_CFunction f, std::string a, std::string h , bool ps = false):
+            name(n),
+            function(f),
+            argumentText(a),
+            helpText(h),
+            parallelShared(ps)
+            {
+            
+            }
 		};
         std::string name;
 		std::vector<Function> functions;
@@ -78,8 +89,6 @@ public:
 	void preSynchronization();
 
 	void queueScript(const std::string &script);
-    
-    std::vector<std::string> executedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
     
@@ -101,9 +110,6 @@ private:
 	std::vector<std::string> _receivedScripts;
 	std::string _currentSyncedScript;
     
-    //parallel variables @TODO make a more permanent solution to this - JK
-    std::vector<std::string> _executedScripts;
-    std::mutex _executedScriptsMutex;
 };
 
 } // namespace scripting

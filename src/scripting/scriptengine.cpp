@@ -141,7 +141,7 @@ bool ScriptEngine::runScript(const std::string& script) {
 		LWARNING("Script was empty");
 		return false;
 	}
-        
+    
     int status = luaL_loadstring(_state, script.c_str());
     if (status != LUA_OK) {
         LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
@@ -153,6 +153,72 @@ bool ScriptEngine::runScript(const std::string& script) {
     if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
         LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
+    }
+    
+    //if we're currently hosting the parallel session find out if script should be synchronized.
+    if(OsEng.parallelConnection()->isHost()){
+        
+        //"deconstruct the script to find library and function name
+        //assuming a script looks like: "openspace.library.function()"
+        //or openspace.funcion()
+        std::string sub;
+        std::string lib;
+        std::string func;
+        //find first "."
+        std::size_t pos = script.find(".");
+        if(pos != std::string::npos){
+            //strip "openspace."
+            sub = script.substr(pos + 1, script.size());
+            pos = sub.find(".");
+            //one more "." was found, we have a library name
+            if(pos != std::string::npos){
+                //assing library name
+                lib = sub.substr(0, pos);
+                //strip "library."
+                sub = sub.substr(pos + 1, sub.size());
+                
+                pos = sub.find("(");
+                if(pos != std::string::npos && pos > 0){
+                    //strip the () and we're left with function name
+                    func = sub.substr(0, pos);
+                }
+            }
+            else{
+                //no more "." was found, we have the case of "openspace.funcion()"
+                pos = sub.find("(");
+                if(pos != std::string::npos && pos > 0){
+                    //strip the () and we're left with function name
+                    func = sub.substr(0, pos);
+                }
+            }
+        }
+        
+        LuaLibrary *library = nullptr;
+        std::set<LuaLibrary>::const_iterator libit;
+        for(libit = _registeredLibraries.cbegin();
+            libit != _registeredLibraries.cend();
+            ++libit){
+            if(libit->name.compare(lib) == 0){
+                break;
+            }
+        }
+        
+        std::vector<scripting::ScriptEngine::LuaLibrary::Function>::const_iterator funcit;
+        //library was found
+        if(libit != _registeredLibraries.cend()){
+            for( funcit = libit->functions.cbegin();
+                funcit != libit->functions.cend();
+                ++funcit){
+                //function was found!
+                if(funcit->name.compare(func) == 0){
+                    //is the function of a type that should be shared via parallel connection?
+                    //and are we currently hosting the session?
+                    if(funcit->parallelShared ){
+                        OsEng.parallelConnection()->sendScript(script);
+                    }
+                }
+            }
+        }
     }
     
     return true;
@@ -498,10 +564,6 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 		_mutex.lock();
 		_receivedScripts.push_back(_currentSyncedScript);
 		_mutex.unlock();
-        
-        _executedScriptsMutex.lock();
-        _executedScripts.push_back(_currentSyncedScript);
-        _executedScriptsMutex.unlock();
 	}
 }
 
@@ -539,12 +601,6 @@ void ScriptEngine::queueScript(const std::string &script){
 
 	_mutex.unlock();
 }
-    
-std::vector<std::string> ScriptEngine::executedScripts(){
-    std::lock_guard<std::mutex> lockGuard(_executedScriptsMutex);
-    return _executedScripts;
-}
-
 
 } // namespace scripting
 } // namespace openspace
