@@ -201,6 +201,7 @@ void mainInitFunc() {
 }
 
 void mainPreSyncFunc() {
+    OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
 }
 

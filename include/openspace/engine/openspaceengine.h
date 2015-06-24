@@ -71,6 +71,8 @@ public:
     bool initialize();
 	bool isMaster();
 	void setMaster(bool master);
+    double runTime();
+    void setRunTime(double t);
     static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
@@ -131,6 +133,7 @@ private:
     gui::GUI* _gui;
     network::ParallelConnection* _parallelConnection;
 	bool _isMaster;
+    double _runTime;
 
 	SyncBuffer* _syncBuffer;
 };

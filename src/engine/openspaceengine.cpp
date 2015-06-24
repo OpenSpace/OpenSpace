@@ -110,6 +110,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
 	, _isMaster(false)
+    , _runTime(0.0)
     , _syncBuffer(nullptr)
     , _parallelConnection(new network::ParallelConnection)
 {
@@ -586,7 +587,15 @@ bool OpenSpaceEngine::isMaster(){
 void OpenSpaceEngine::setMaster(bool master){
 	_isMaster = master;
 }
+    
+double OpenSpaceEngine::runTime(){
+    return _runTime;
+}
 
+void OpenSpaceEngine::setRunTime(double d){
+    _runTime = d;
+}
+    
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (_isMaster) {
