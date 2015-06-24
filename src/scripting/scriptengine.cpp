@@ -155,8 +155,6 @@ bool ScriptEngine::runScript(const std::string& script) {
         return false;
     }
     
-    OsEng.parallelConnection()->sendScript(script);
-    
     return true;
 }
 
