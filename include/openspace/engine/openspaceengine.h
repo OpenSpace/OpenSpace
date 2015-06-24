@@ -58,7 +58,7 @@ namespace scripting {
 }
     
 namespace network{
-    class OSParallelConnection;
+    class ParallelConnection;
 }
 
 class OpenSpaceEngine {
@@ -81,7 +81,7 @@ public:
     NetworkEngine* networkEngine();
 	LuaConsole* console();
     ModuleEngine* moduleEngine();
-    network::OSParallelConnection* parallelConnection();
+    network::ParallelConnection* parallelConnection();
 
 	gui::GUI* gui();
 
@@ -129,7 +129,7 @@ private:
 	LuaConsole* _console;
     ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
-    network::OSParallelConnection* _parallelConnection;
+    network::ParallelConnection* _parallelConnection;
 	bool _isMaster;
 
 	SyncBuffer* _syncBuffer;

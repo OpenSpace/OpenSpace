@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//@TODO CHANGE THIS!
-const int headerSize = 8;
-
 #ifdef __WIN32__
 #ifndef _ERRNO
 #define _ERRNO WSAGetLastError()
@@ -57,21 +54,25 @@ const int headerSize = 8;
 #endif
 #endif
 
-#include <openspace/network/osparallelconnection.h>
+//openspace includes
+#include <openspace/network/ParallelConnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/time.h>
+#include <openspace/version.h>
+#include <ghoul/logging/logmanager.h>
 
-#include "osparallelconnection_lua.inl"
+//lua functions
+#include "ParallelConnection_lua.inl"
 
 namespace{
-	const std::string _loggerCat = "Parallel";
+	const std::string _loggerCat = "ParallelConnection";
 }
 
 namespace openspace {
     namespace network{
         
-        OSParallelConnection::OSParallelConnection():
+        ParallelConnection::ParallelConnection():
         _passCode(0),
         _port("20501"),
         _address("127.0.0.1"),
@@ -80,18 +81,19 @@ namespace openspace {
 		_connectionThread(nullptr),
 		_broadcastThread(nullptr),
         _isRunning(false),
-        _isHost(false)
+        _isHost(false),
+        _headerSize(headerSize())
         {
             
         }
         
-        OSParallelConnection::~OSParallelConnection(){
+        ParallelConnection::~ParallelConnection(){
             disconnect();
         }
         
-		void OSParallelConnection::clientConnect(){
+		void ParallelConnection::clientConnect(){
 			if (!initNetworkAPI()){
-				//error, handle this
+                LERROR("Failed to initialize network API for Parallel Connection");
 			}
 			
 			struct addrinfo *addresult = NULL, *ptr = NULL, hints;
@@ -114,22 +116,18 @@ namespace openspace {
 			#if defined(__WIN32__)
 				WSACleanup();
 			#endif
-				std::cerr << "Failed to parse hints for connection!" << std::endl;
+                LERROR("Failed to parse hints for Parallel Connection");
 			}
 
-			// Attempt to connect to the first address returned by
-			// the call to getaddrinfo
-			ptr = addresult;
+            LINFO("Attempting to connect to address "<< _address << " on port " << _port);
 
-			std::cout << "Client started on port " << _port << std::endl;
-
-			//start accept connections thread
+			//start connection thread
 			_isRunning.store(true);
-			_connectionThread = new (std::nothrow) std::thread(&OSParallelConnection::connection, this, addresult);
+			_connectionThread = new (std::nothrow) std::thread(&ParallelConnection::connection, this, addresult);
 			
         }
 
-		void OSParallelConnection::connection(addrinfo *info){
+		void ParallelConnection::connection(addrinfo *info){
 
             _clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
             
@@ -138,7 +136,7 @@ namespace openspace {
 #if defined(__WIN32__)
                 WSACleanup();
 #endif
-                std::cerr << "Failed to InitializationRequest client socket!" << std::endl;
+                LERROR("Failed to create client socket, shutting down connection thread");
                 return;
             }
             
@@ -162,6 +160,7 @@ namespace openspace {
                                 sizeof(timeout));
             
             //set receive timeout
+            timeout = 0; //infinite
             result = setsockopt(
                                 _clientSocket,
                                 SOL_SOCKET,
@@ -171,41 +170,46 @@ namespace openspace {
             
             result = setsockopt(_clientSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, sizeof(int));
             if (result == SOCKET_ERROR)
-                std::cout << "Failed to set reuse address with error:" << _ERRNO << std::endl;
+                LERROR("Failed to set socket option 'reuse address'. Error code: " << _ERRNO);
             
             result = setsockopt(_clientSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&flag, sizeof(int));
             if (result == SOCKET_ERROR)
-                std::cout << "Failed to set keep alive with error: " << _ERRNO << std::endl;
-
-            //try to connect to server
+                LERROR("Failed to set socket option 'keep alive'. Error code: " << _ERRNO);
+            
+            //while the connection thread is still running
 			while (_isRunning.load()){
 				
+                //try to connect
 				result = connect(_clientSocket, info->ai_addr, (int)info->ai_addrlen);
+                
+                //if the connection was successfull
 				if (result != SOCKET_ERROR)
 				{
 					//send authentication
 					authenticate();
 
 					//start listening for communication
-					communicate();
+					//communicate();
 				}
 
-				//one sec sleep
+				//try to connect once per second
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
+            
             //make sure to join the broadcast thread if started
             //dont delete it, that will be done in disconnect() function
-            if(_broadcastThread != nullptr && _isHost.load()){
-                _isHost.store(false);
-                _broadcastThread->join();
-            }
+//            if(_broadcastThread != nullptr && _isHost.load()){
+//                _isHost.store(false);
+//                _broadcastThread->join();
+//            }
+            
 			//cleanup
 			freeaddrinfo(info);
 		}
 
-		void OSParallelConnection::authenticate(){
+		void ParallelConnection::authenticate(){
 			uint16_t namelen = static_cast<uint16_t>(_name.length());
-			int size = headerSize + sizeof(uint32_t) + sizeof(uint16_t) + static_cast<int>(namelen);
+			int size = headerSize() + sizeof(uint32_t) + sizeof(uint16_t) + static_cast<int>(namelen);
 			std::vector<char> buffer;
 			buffer.reserve(size);
 
@@ -236,7 +240,7 @@ namespace openspace {
 			}
 		}
 
-		void OSParallelConnection::delegateDecoding(int type){
+		void ParallelConnection::delegateDecoding(int type){
 			switch (type){
 			case MessageTypes::Authentication:
 				decodeAuthenticationMessage();
@@ -244,7 +248,7 @@ namespace openspace {
 			case MessageTypes::Initialization:
 				decodeInitializationMessage();
 				break;
-			case MessageTypes::Data:
+			case MessageTypes::StreamData:
 				decodeDataMessage();
 				break;
             case MessageTypes::Script:
@@ -261,15 +265,15 @@ namespace openspace {
 			}
 		}
 
-		void OSParallelConnection::decodeAuthenticationMessage(){
+		void ParallelConnection::decodeAuthenticationMessage(){
 			printf("Auth OK!\n");	//more stuff here later
 		}
 
-		void OSParallelConnection::decodeInitializationMessage(){
+		void ParallelConnection::decodeInitializationMessage(){
 			printf("Init message received!\n");
 		}
 
-		void OSParallelConnection::decodeDataMessage(){
+		void ParallelConnection::decodeDataMessage(){
 			int result;
 			uint16_t msglen;
 			std::vector<char> buffer;
@@ -292,12 +296,12 @@ namespace openspace {
 				return;
 			}
             
-            network::Keyframe kf;
+            network::StreamDataKeyframe kf;
             kf.deserialize(buffer);
             OsEng.interactionHandler()->addKeyframe(kf);            
 		}
 
-        void OSParallelConnection::decodeScript(){
+        void ParallelConnection::decodeScript(){
             int result;
             uint16_t msglen;
             std::vector<char> buffer;
@@ -324,7 +328,7 @@ namespace openspace {
             OsEng.scriptEngine()->queueScript(script);
         }
         
-		void OSParallelConnection::decodeHostInfoMessage(){
+		void ParallelConnection::decodeHostInfoMessage(){
 			std::vector<char> hostflag;
 			hostflag.resize(1);
 			int result = receiveData(_clientSocket, hostflag, 1, 0);
@@ -338,7 +342,7 @@ namespace openspace {
 					else{
 						//start broadcasting
 						_isHost.store(true);
-						_broadcastThread = new (std::nothrow) std::thread(&OSParallelConnection::broadcast, this);
+						_broadcastThread = new (std::nothrow) std::thread(&ParallelConnection::broadcast, this);
 					}
 				}
 				else{
@@ -356,7 +360,7 @@ namespace openspace {
 					}
                     
                     //request init packages from the host
-                    int size = headerSize + sizeof(uint32_t);
+                    int size = headerSize() + sizeof(uint32_t);
                     std::vector<char> buffer;
                     buffer.reserve(size);
                     
@@ -381,18 +385,18 @@ namespace openspace {
 			}
 		}
 
-		void OSParallelConnection::decodeInitializationRequestMessage(){
+		void ParallelConnection::decodeInitializationRequestMessage(){
 			printf("InitRequest message received!\n");
 		}
 
-		void OSParallelConnection::communicate(){
+		void ParallelConnection::communicate(){
 			
 			std::vector<char> buffer;
 			buffer.resize(8);
 			int result;
 
 			while (_isRunning.load()){
-				result = receiveData(_clientSocket, buffer, headerSize, 0);
+				result = receiveData(_clientSocket, buffer, headerSize(), 0);
 
 				if (result > 0){
 					if (buffer[0] == 'O' && //Open
@@ -420,7 +424,7 @@ namespace openspace {
 
 		}
 
-		int OSParallelConnection::receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags){
+		int ParallelConnection::receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags){
 			int result = 0;
 			int received = 0;
 			while (result < length){
@@ -440,53 +444,53 @@ namespace openspace {
 			return result;
 		}
         
-        void OSParallelConnection::setPort(const std::string  &port){
+        void ParallelConnection::setPort(const std::string  &port){
             _port = port;
         }
         
-        std::string OSParallelConnection::port(){
+        std::string ParallelConnection::port(){
             return _port;
         }
         
-        void OSParallelConnection::setAddress(const std::string &address){
+        void ParallelConnection::setAddress(const std::string &address){
             _address = address;
         }
         
-        std::string OSParallelConnection::address(){
+        std::string ParallelConnection::address(){
             return _address;
         }
         
-        void OSParallelConnection::setName(const std::string& name){
+        void ParallelConnection::setName(const std::string& name){
             _name = name;
         }
         
-        std::string OSParallelConnection::name(){
+        std::string ParallelConnection::name(){
             return  _name;
         }
         
-        void OSParallelConnection::setSocket(_SOCKET socket){
+        void ParallelConnection::setSocket(_SOCKET socket){
             _clientSocket = socket;
         }
         
-        _SOCKET OSParallelConnection::clientSocket(){
+        _SOCKET ParallelConnection::clientSocket(){
             return _clientSocket;
         }
         
-        void OSParallelConnection::setHost(bool host){
+        void ParallelConnection::setHost(bool host){
             _isHost.store(host);
         }
         
-        bool OSParallelConnection::isHost(){
+        bool ParallelConnection::isHost(){
             return _isHost.load();
         }
         
-        bool OSParallelConnection::isRunning(){
+        bool ParallelConnection::isRunning(){
             return _isRunning.load();
         }
         
-        void OSParallelConnection::requestHostship(){
+        void ParallelConnection::requestHostship(){
             std::vector<char> buffer;
-            buffer.reserve(headerSize + sizeof(int));
+            buffer.reserve(headerSize() + sizeof(int));
             //header
             buffer.insert(buffer.end(), 'O');
             buffer.insert(buffer.end(), 'S');
@@ -494,22 +498,22 @@ namespace openspace {
             buffer.insert(buffer.end(), 0);
             
             //type of message
-            int type = OSParallelConnection::MessageTypes::HostshipRequest;
+            int type = ParallelConnection::MessageTypes::HostshipRequest;
             buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
             
             //send message
             send(_clientSocket, buffer.data(), buffer.size(), 0);
         }
 
-		void OSParallelConnection::setPassword(const std::string& pwd){
+		void ParallelConnection::setPassword(const std::string& pwd){
 			_passCode = hash(pwd);
 		}
         
-        void OSParallelConnection::sendScript(const std::string script){
+        void ParallelConnection::sendScript(const std::string script){
             
             uint16_t msglen = static_cast<uint16_t>(script.length());
             std::vector<char> buffer;
-            buffer.reserve(headerSize + sizeof(msglen) + msglen);
+            buffer.reserve(headerSize() + sizeof(msglen) + msglen);
             
             //header
             buffer.insert(buffer.end(), 'O');
@@ -518,7 +522,7 @@ namespace openspace {
             buffer.insert(buffer.end(), 0);
             
             //type of message
-            int type = OSParallelConnection::MessageTypes::Script;
+            int type = ParallelConnection::MessageTypes::Script;
             buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
             
             //size of message
@@ -532,7 +536,8 @@ namespace openspace {
         }
 
 
-		void OSParallelConnection::disconnect(){
+		void ParallelConnection::disconnect(){
+            
             //must be run before trying to join communication threads, else the threads are stuck trying to receive data
             closeSocket();
             
@@ -557,7 +562,7 @@ namespace openspace {
 #endif
 		}
 
-		void OSParallelConnection::closeSocket(){
+		void ParallelConnection::closeSocket(){
 			if (_clientSocket != INVALID_SOCKET)
 			{
 				/*
@@ -583,7 +588,7 @@ namespace openspace {
 			}
 		}
 
-		bool OSParallelConnection::initNetworkAPI(){
+		bool ParallelConnection::initNetworkAPI(){
 			#if defined(__WIN32__)
 				WSADATA wsaData;
 				WORD version;
@@ -609,11 +614,11 @@ namespace openspace {
 			return true;
 		}
 
-		void OSParallelConnection::broadcast(){
+		void ParallelConnection::broadcast(){
 			
 			while (_isHost.load()){
 
-				network::Keyframe kf;
+				network::StreamDataKeyframe kf;
 				kf._position = OsEng.interactionHandler()->camera()->position();
 				kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
 				
@@ -626,7 +631,7 @@ namespace openspace {
                 
 				uint16_t msglen = static_cast<uint16_t>(kfBuffer.size());
 				std::vector<char> buffer;
-				buffer.reserve(headerSize + sizeof(msglen) + msglen);
+				buffer.reserve(headerSize() + sizeof(msglen) + msglen);
 				
 				//header
 				buffer.insert(buffer.end(), 'O');
@@ -635,7 +640,7 @@ namespace openspace {
 				buffer.insert(buffer.end(), 0);
 
 				//type of message
-				int type = OSParallelConnection::MessageTypes::Data;
+				int type = ParallelConnection::MessageTypes::StreamData;
 				buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
 
 				//size of message
@@ -651,8 +656,30 @@ namespace openspace {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}
+        
+        void ParallelConnection::writeHeader(std::vector<char> &buffer){
+            //make sure the buffer is large enough to hold at least the header
+            if(buffer.size() < headerSize()){
+                buffer.reserve(headerSize());
+            }
+            
+            //get the current running version of openspace
+            uint8_t versionMajor = static_cast<uint8_t>(OPENSPACE_VERSION_MAJOR);
+            uint8_t versionMinor = static_cast<uint8_t>(OPENSPACE_VERSION_MINOR);
+            
+            //insert header into buffer
+            buffer.insert(buffer.begin(), 'O');
+            buffer.insert(buffer.begin(), 'S');
+            buffer.insert(buffer.begin(), static_cast<char>(versionMajor));
+            buffer.insert(buffer.begin(), static_cast<char>(versionMinor));
+        }
+        
+        int ParallelConnection::headerSize(){
+            //minor and major version (as uint8_t) + two bytes for the chars 'O' and 'S'
+            return 2 * sizeof(uint8_t) + 2;
+        }
 
-        scripting::ScriptEngine::LuaLibrary OSParallelConnection::luaLibrary() {
+        scripting::ScriptEngine::LuaLibrary ParallelConnection::luaLibrary() {
             return {
                 "parallel",
                 {

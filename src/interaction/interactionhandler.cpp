@@ -960,7 +960,7 @@ bool InteractionHandler::invertRotation() const {
     return _invertRotation;
 }
 
-void InteractionHandler::addKeyframe(const network::Keyframe &kf){
+void InteractionHandler::addKeyframe(const network::StreamDataKeyframe &kf){
 	_keyframeMutex.lock();
 
 	//save a maximum of 10 samples (1 seconds of buffer)

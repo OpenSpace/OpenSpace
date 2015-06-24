@@ -76,7 +76,7 @@
 
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
-#include <openspace/network/osparallelconnection.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <mutex>
 
@@ -140,7 +140,7 @@ public:
     void setInvertRotation(bool invert);
     bool invertRotation() const;
 
-	void addKeyframe(const network::Keyframe &kf);
+	void addKeyframe(const network::StreamDataKeyframe &kf);
 
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the
@@ -178,7 +178,7 @@ private:
 	std::vector<Controller*> _controllers;
 
 	//remote controller
-	std::vector<network::Keyframe> _keyframes;
+	std::vector<network::StreamDataKeyframe> _keyframes;
 	double _currentKeyframeTime;
 	std::mutex _keyframeMutex;
 };

@@ -28,7 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/network/osparallelconnection.h>
+#include <openspace/network/parallelconnection.h>
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
 #include <iomanip>

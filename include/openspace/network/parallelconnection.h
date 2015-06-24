@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OSPARALLELCONNECTION_H__
-#define __OSPARALLELCONNECTION_H__
+#ifndef __PARALLELCONNECTION_H__
+#define __PARALLELCONNECTION_H__
 
 //openspace includes
 #include <openspace/scripting/scriptengine.h>
@@ -60,7 +60,7 @@ namespace openspace{
     
     namespace network{
         
-        struct Keyframe{
+        struct StreamDataKeyframe{
             glm::quat _viewRotationQuat;
             psc _position;
             double _timeStamp;
@@ -96,12 +96,12 @@ namespace openspace{
             };
         };
 
-        class OSParallelConnection{
+        class ParallelConnection{
         public:
             
-            OSParallelConnection();
+            ParallelConnection();
             
-            ~OSParallelConnection();
+            ~ParallelConnection();
             
             void clientConnect();
             
@@ -138,7 +138,7 @@ namespace openspace{
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
-                Data,
+                StreamData,
                 Script,
                 HostInfo,
                 InitializationRequest,
@@ -174,6 +174,8 @@ namespace openspace{
 
 				return hashVal;
 			};
+            
+            void writeHeader(std::vector<char> &buffer);
 
 			void closeSocket();
 
@@ -200,9 +202,12 @@ namespace openspace{
 			void decodeInitializationRequestMessage();
 
 			void broadcast();
+            
+            int headerSize();
 
             int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
             
+            int _headerSize;
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
