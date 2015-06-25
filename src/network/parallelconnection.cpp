@@ -422,7 +422,11 @@ namespace openspace {
 		}
 
 		void ParallelConnection::decodeInitializationRequestMessage(){
-			printf("InitRequest message received!\n");
+            std::vector<char> buffer;
+            buffer.resize(sizeof(uint32_t));
+            receiveData(_clientSocket, buffer, sizeof(uint32_t), 0);
+            uint32_t requesterID = *reinterpret_cast<uint32_t*>(buffer.data());
+			printf("InitRequest message received from client %d!\n", requesterID);
 		}
 
 		void ParallelConnection::listenCommunication(){
