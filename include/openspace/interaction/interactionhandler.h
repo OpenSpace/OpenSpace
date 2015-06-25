@@ -141,6 +141,7 @@ public:
     bool invertRotation() const;
 
 	void addKeyframe(const network::StreamDataKeyframe &kf);
+    void clearKeyframes();
 
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the

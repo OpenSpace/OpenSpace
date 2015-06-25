@@ -972,6 +972,11 @@ void InteractionHandler::addKeyframe(const network::StreamDataKeyframe &kf){
 	_keyframeMutex.unlock();
 }
 
+void InteractionHandler::clearKeyframes(){
+    _keyframeMutex.lock();
+    _keyframes.clear();
+    _keyframeMutex.unlock();
+}
 } // namespace interaction
 //>>>>>>> feature/interactionhandler
 } // namespace openspace

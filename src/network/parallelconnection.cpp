@@ -402,6 +402,9 @@ namespace openspace {
 						//we were not broadcasting so nothing to do
 					}
                     
+                    //clear buffered any keyframes
+                    OsEng.interactionHandler()->clearKeyframes();
+                    
                     //request init package from the host
                     int size = headerSize();
                     std::vector<char> buffer;
