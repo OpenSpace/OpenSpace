@@ -155,7 +155,7 @@ bool ScriptEngine::runScript(const std::string& script) {
         return false;
     }
     
-    //if we're currently hosting the parallel session find out if script should be synchronized.
+    //if we're currently hosting the parallel session, find out if script should be synchronized.
     if(OsEng.parallelConnection()->isHost()){
         
         //"deconstruct the script to find library and function name
@@ -212,7 +212,6 @@ bool ScriptEngine::runScript(const std::string& script) {
                 //function was found!
                 if(funcit->name.compare(func) == 0){
                     //is the function of a type that should be shared via parallel connection?
-                    //and are we currently hosting the session?
                     if(funcit->parallelShared ){
                         OsEng.parallelConnection()->sendScript(script);
                     }
