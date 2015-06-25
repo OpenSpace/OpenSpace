@@ -365,10 +365,7 @@ void InteractionHandler::update(double deltaTime) {
 		double t0 = _keyframes[1]._timeStamp;
 		double t1 = _keyframes[2]._timeStamp;
 		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
-		if (fact > 1.0){
-			printf("%f\n", fact);
-			//fact = fmin(1.0, fact);
-		}
+
 		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
 		glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
 		psc pos(v.x, v.y, v.z, v.w);
