@@ -156,71 +156,82 @@ bool ScriptEngine::runScript(const std::string& script) {
     }
     
     //if we're currently hosting the parallel session, find out if script should be synchronized.
-    if(OsEng.parallelConnection()->isHost()){
-        
-        //"deconstruct the script to find library and function name
-        //assuming a script looks like: "openspace.library.function()"
-        //or openspace.funcion()
-        std::string sub;
-        std::string lib;
-        std::string func;
-        //find first "."
-        std::size_t pos = script.find(".");
-        if(pos != std::string::npos){
-            //strip "openspace."
-            sub = script.substr(pos + 1, script.size());
-            pos = sub.find(".");
-            //one more "." was found, we have a library name
-            if(pos != std::string::npos){
-                //assing library name
-                lib = sub.substr(0, pos);
-                //strip "library."
-                sub = sub.substr(pos + 1, sub.size());
-                
-                pos = sub.find("(");
-                if(pos != std::string::npos && pos > 0){
-                    //strip the () and we're left with function name
-                    func = sub.substr(0, pos);
-                }
-            }
-            else{
-                //no more "." was found, we have the case of "openspace.funcion()"
-                pos = sub.find("(");
-                if(pos != std::string::npos && pos > 0){
-                    //strip the () and we're left with function name
-                    func = sub.substr(0, pos);
-                }
-            }
-        }
-        
-        LuaLibrary *library = nullptr;
-        std::set<LuaLibrary>::const_iterator libit;
-        for(libit = _registeredLibraries.cbegin();
-            libit != _registeredLibraries.cend();
-            ++libit){
-            if(libit->name.compare(lib) == 0){
-                break;
-            }
-        }
-        
-        std::vector<scripting::ScriptEngine::LuaLibrary::Function>::const_iterator funcit;
-        //library was found
-        if(libit != _registeredLibraries.cend()){
-            for( funcit = libit->functions.cbegin();
-                funcit != libit->functions.cend();
-                ++funcit){
-                //function was found!
-                if(funcit->name.compare(func) == 0){
-                    //is the function of a type that should be shared via parallel connection?
-                    if(funcit->parallelShared ){
-                        OsEng.parallelConnection()->sendScript(script);
-                    }
-                }
-            }
-        }
-    }
+	if (OsEng.parallelConnection()->isHost()){
+
+		std::string lib, func;
+		if (findLibraryAndFunction(lib, func, script)){
+
+			LuaLibrary *library = nullptr;
+			std::set<LuaLibrary>::const_iterator libit;
+			for (libit = _registeredLibraries.cbegin();
+				libit != _registeredLibraries.cend();
+				++libit){
+				if (libit->name.compare(lib) == 0){
+					break;
+				}
+			}
+
+			std::vector<scripting::ScriptEngine::LuaLibrary::Function>::const_iterator funcit;
+			//library was found
+			if (libit != _registeredLibraries.cend()){
+				for (funcit = libit->functions.cbegin();
+					funcit != libit->functions.cend();
+					++funcit){
+					//function was found!
+					if (funcit->name.compare(func) == 0){
+						//is the function of a type that should be shared via parallel connection?
+						if (funcit->parallelShared){
+							OsEng.parallelConnection()->sendScript(script);
+						}
+					}
+				}
+			}
+		}
+	}
     
     return true;
+}
+
+bool ScriptEngine::findLibraryAndFunction(std::string &library, std::string &function, const std::string &script){
+	
+	//"deconstruct the script to find library and function name
+	//assuming a script looks like: "openspace.library.function()"
+	//or openspace.funcion()
+	std::string sub;
+	library.clear();
+	function.clear();
+	//find first "."
+	std::size_t pos = script.find(".");
+	
+	if (pos != std::string::npos){
+		//strip "openspace."
+		sub = script.substr(pos + 1, script.size());
+		pos = sub.find(".");
+		//one more "." was found, if the "." comes before first "(" we have a library name
+		if (pos != std::string::npos && pos < sub.find("(")){
+			//assing library name
+			library = sub.substr(0, pos);
+			//strip "library."
+			sub = sub.substr(pos + 1, sub.size());
+
+			pos = sub.find("(");
+			if (pos != std::string::npos && pos > 0){
+				//strip the () and we're left with function name
+				function = sub.substr(0, pos);
+			}
+		}
+		else{
+			//no more "." was found, we have the case of "openspace.funcion()"
+			pos = sub.find("(");
+			if (pos != std::string::npos && pos > 0){
+				//strip the () and we're left with function name
+				function = sub.substr(0, pos);
+			}
+		}
+	}
+
+	//if we found a function all is good
+	return !function.empty();
 }
 
 bool ScriptEngine::runScriptFile(const std::string& filename) {

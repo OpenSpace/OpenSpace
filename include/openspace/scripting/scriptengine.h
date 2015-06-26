@@ -100,6 +100,8 @@ private:
     
     void addBaseLibrary();
     void remapPrintFunction();
+
+	bool findLibraryAndFunction(std::string &library, std::string &function, const std::string &script);
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
