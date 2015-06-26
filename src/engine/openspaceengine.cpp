@@ -473,6 +473,23 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         scripts.getValue(key, scriptPath);
         std::string&& absoluteScriptPath = absPath(scriptPath);
         _engine->scriptEngine()->runScriptFile(absoluteScriptPath);
+        
+        //@JK
+        //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
+        std::ifstream scriptFile;
+        scriptFile.open(absoluteScriptPath.c_str());
+        std::string line;
+       
+        while(getline(scriptFile,line)){
+            //valid line and not a comment
+            if(line.size() > 0 && line.at(0) != '-'){
+                std::string lib, func;
+                if(_engine->scriptEngine()->parseLibraryAndFunctionNames(lib, func, line) &&
+                   _engine->scriptEngine()->shouldScriptBeSent(lib, func)){
+                    _engine->scriptEngine()->cacheScript(lib, func, line);
+                }
+            }
+        }
     }
 }
 
