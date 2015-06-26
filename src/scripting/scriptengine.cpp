@@ -240,11 +240,13 @@ std::vector<std::string> ScriptEngine::cachedScripts(){
         for(innerIt = outerIt->second.cbegin();
             innerIt != outerIt->second.cend();
             ++innerIt){
-        
+			retVal.push_back(innerIt->second);
         }
     }
     
     _cachedScriptsMutex.unlock();
+
+	return retVal;
 }
     
 bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
