@@ -69,13 +69,12 @@ namespace {
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
 	const std::string keyShading = "PerformShading";
-
 	const std::string keyBody = "Body";
-
 	const std::string _mainFrame = "GALACTIC";
-
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
+	const std::string sequenceTypeHybrid = "hybrid";
+
 }
 
 namespace openspace {
@@ -165,6 +164,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	addProperty(_performProjection);
 	addProperty(_clearAllProjections);
 
+
 	addProperty(_colorTexturePath);
 	_colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 	addProperty(_projectionTexturePath);
@@ -186,15 +186,34 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 			if (_sequenceType == sequenceTypePlaybook){
 				parser = new HongKangParser(_sequenceSource,
-											"NEW HORIZONS",
+											_projectorID,
 											translationDictionary,
 											_potentialTargets);
-				openspace::ImageSequencer2::ref().runSequenceParser(parser);								
+				openspace::ImageSequencer2::ref().runSequenceParser(parser);
 			}
 			else if (_sequenceType == sequenceTypeImage){
 				parser = new LabelParser(_sequenceSource, translationDictionary);
 				openspace::ImageSequencer2::ref().runSequenceParser(parser);
+			}
+			else if (_sequenceType == sequenceTypeHybrid){
+				//first read labels
+				parser = new LabelParser(_sequenceSource, translationDictionary);
+				openspace::ImageSequencer2::ref().runSequenceParser(parser);
 
+				std::string _eventFile;
+				bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
+				if (foundEventFile){
+					//then read playbook
+					_eventFile = absPath(_eventFile);
+					parser = new HongKangParser(_eventFile,
+						                        _projectorID,
+						                        translationDictionary,
+						                        _potentialTargets);
+					openspace::ImageSequencer2::ref().runSequenceParser(parser);
+				}
+				else{
+					LWARNING("No eventfile has been provided, please check modfiles");
+				}
 			}
 		}
 		else{
@@ -238,6 +257,7 @@ bool RenderablePlanetProjection::initialize() {
 
 bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	bool completeSuccess = true;
+	if (!_texture) return false;
 	// setup FBO
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
@@ -379,7 +399,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, time, _stateMatrix);
+	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time, _stateMatrix);
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
 
 	_transform = glm::mat4(1);
@@ -425,11 +445,12 @@ void RenderablePlanetProjection::textureBind(){
 }
 
 void RenderablePlanetProjection::project(){
-	for (auto img : _imageTimes){
-		std::thread t1(&RenderablePlanetProjection::attitudeParameters, this, img.startTime);
-		t1.join();
-		_projectionTexturePath = img.path; // path to current images
-		imageProjectGPU(); //fbopass
+	for (auto const &img : _imageTimes){
+		//if (img.activeInstruments[0] == "NH_LORRI"){
+			RenderablePlanetProjection::attitudeParameters(img.startTime);
+			_projectionTexturePath = img.path; // path to current images
+			imageProjectGPU(); //fbopass
+		//}
 	}
 	_capture = false;
 }
@@ -444,7 +465,6 @@ void RenderablePlanetProjection::clearAllProjections(){
 }
 
 
-#define GPU_PROJ
 void RenderablePlanetProjection::render(const RenderData& data){
 	if (!_programObject) return;
 	if (!_textureProj) return;
@@ -454,11 +474,9 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_camScaling = data.camera.scaling();
 	_up = data.camera.lookUpVector();
 
-#ifdef GPU_PROJ
 	if (_capture && _performProjection)
 		project();
-#endif
-	attitudeParameters(_time);
+    attitudeParameters(_time);
 	_imageTimes.clear();
 
 	psc sun_pos;
@@ -481,11 +499,9 @@ void RenderablePlanetProjection::render(const RenderData& data){
     _geometry->render();
     // disable shader
     _programObject->deactivate();
-	
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
-	// set spice-orientation in accordance to timestamp
 	_time = Time::ref().currentTime();
 	_capture = false;
 	

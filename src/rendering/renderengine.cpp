@@ -445,11 +445,25 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
             int line = 0;
 			
+			double currentTime = Time::ref().currentTime();
+
 			//PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 			PrintColorTextArg(line++, "Date: %s", 10, glm::vec4(1), Time::ref().currentTimeUTC().c_str());
 			glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
 			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
+
+			psc nhPos;
+			double lt;
+			SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
+			//nhPos[3] += 3;
+			float a, b, c;
+			SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
+			float radius = (a + b) / 2.f;
+
+			float distToSurf = glm::length(nhPos.vec3()) - radius;
+			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
+
 			PrintText(line++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 		
 			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
@@ -461,7 +475,6 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-            double currentTime = Time::ref().currentTime();
 			if (openspace::ImageSequencer2::ref().isReady()) {
 				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();

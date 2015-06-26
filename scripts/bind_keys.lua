@@ -32,6 +32,8 @@ openspace.bindKey("F10", "openspace.time.setTime('2015-07-14T10:00:00.00'); open
 openspace.bindKey("F11", "openspace.time.setTime('2015-07-14T11:17:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 openspace.bindKey("F12", "openspace.time.setTime('2015-07-14T12:45:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 
+openspace.bindKey("r", "local b = openspace.getPropertyValue('PlutoProjection.renderable.fk'); openspace.setPropertyValue('PlutoProjection.renderable.fk', not b)")
+
 openspace.bindKey("a", "openspace.setOrigin('NewHorizons')")
 openspace.bindKey("s", "openspace.setOrigin('PlutoProjection')")
 openspace.bindKey("d", "openspace.setOrigin('Charon')")
@@ -82,6 +84,8 @@ openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_NIR.
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_SOC.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_SOC.renderable.solidDraw', not b)")
 
+openspace.bindKey("t", "local b = openspace.getPropertyValue('PlutoShadow.renderable.enabled'); openspace.setPropertyValue('PlutoShadow.renderable.enabled', not b)")
+openspace.bindKey("t", "local b = openspace.getPropertyValue('CharonShadow.renderable.enabled'); openspace.setPropertyValue('CharonShadow.renderable.enabled', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('JupiterProjection.renderable.performProjection'); openspace.setPropertyValue('JupiterProjection.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Io.renderable.performProjection'); openspace.setPropertyValue('Io.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Ganymede.renderable.performProjection'); openspace.setPropertyValue('Ganymede.renderable.performProjection', not b)")

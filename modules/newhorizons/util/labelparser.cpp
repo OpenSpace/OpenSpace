@@ -45,7 +45,7 @@ namespace {
 
 namespace openspace {
 LabelParser::LabelParser(const std::string& fileName,
-				         ghoul::Dictionary translationDictionary)
+	ghoul::Dictionary translationDictionary) : _badDecoding(false)
 {
 	_fileName = fileName;
 	//get the different instrument types
@@ -102,7 +102,16 @@ std::string LabelParser::decode(std::string line){
 		std::size_t value = line.find(key.first);
 		if (value != std::string::npos){
 			std::string toTranslate = line.substr(value);
-			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return.
+			
+			//if (_fileTranslation.find(toTranslate) == _fileTranslation.end()) {
+			//	// not found
+			//	_badDecoding = true;
+			//	LERROR("Could not fins '" << toTranslate << "' in translation map." <<
+			//		   "\nPlease check label files");
+			//	return "";
+			//}
+			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return
+			
 		}
 	}
 	return "";
@@ -112,14 +121,13 @@ std::string LabelParser::encode(std::string line) {
 	for (auto key : _fileTranslation) {
 		std::size_t value = line.find(key.first);
 		if (value != std::string::npos) {
-			//std::cout << line.substr(value) << std::endl;
 			return line.substr(value);
 		}
 	}
 	return "";
 }
 
-void LabelParser::create(){
+bool LabelParser::create(){
 	auto imageComparer = [](const Image &a, const Image &b)->bool{
 		return a.startTime < b.startTime;
 	};
@@ -133,20 +141,21 @@ void LabelParser::create(){
 	ghoul::filesystem::Directory sequenceDir(_fileName, true);
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
-        return;
+        return false;
     }
 	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
 	for (auto path : sequencePaths){
-		//std::cout << path << std::endl;
 		if (size_t position = path.find_last_of(".") + 1){
 			if (position != std::string::npos){
 				ghoul::filesystem::File currentFile(path);
 				std::string extension = currentFile.fileExtension();
-
 				if (extension == "lbl" || extension == "LBL"){ // discovered header file 		
 					std::ifstream file(currentFile.path());
 
-					if (!file.good()) LERROR("Failed to open label file '" << currentFile.path() << "'");
+					if (!file.good()){
+						LERROR("Failed to open label file '" << currentFile.path() << "'");
+						return false;
+					}
 					
 					int count = 0;
 
@@ -164,6 +173,8 @@ void LabelParser::create(){
 						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
+						_detectorType = "CAMERA"; //default value
+
 						/* Add more  */
 						if (read == "TARGET_NAME"){
 							_target = decode(line);
@@ -180,8 +191,13 @@ void LabelParser::create(){
 						}
 						if (read == "DETECTOR_TYPE"){
 							_detectorType = decode(line);
-							count++;
+							count++; 
 						}
+					//	if (_badDecoding){
+					//		LERROR("Please examine file: '" << currentFile.path() << "'");
+					//		return false;
+					//	}
+
 						if (read == "START_TIME"){
 							std::string start = line.substr(line.find("=") + 2);
 							start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
@@ -197,7 +213,7 @@ void LabelParser::create(){
 								count++;
 							}
 							else{
-								LERROR("Label file " + _fileName + " deviates from generic standard!");
+								LERROR("Label file " + currentFile.path() + " deviates from generic standard!");
 								LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
 							}
 						}
@@ -248,40 +264,11 @@ void LabelParser::create(){
 		}
 	}
 
-    //sendPlaybookInformation();
-
-	//std::ofstream myfile;
-	//myfile.open("LabelFileOutput.txt");
-
-	////print all
 	for (auto target : _subsetMap){
 		_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
-	//	std::string min, max;
-	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
-	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
-
-	//	myfile << std::endl;
-	//	for (auto image : target.second._subset){
-	//		std::string time_beg;
-	//		std::string time_end;
-	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
-
-	//		myfile << std::fixed
-	//			<< " "   << time_beg
-	//			<< "-->" << time_end
-	//			<< " [ " << image.startTime
-	//			<< " ] "   << image.target << std::setw(10);
-	//		for (auto instrument : image.activeInstruments){
-	//			myfile << " " << instrument;
-	//		}
-	//		myfile << std::endl;
-	//	}
 	}
-	//myfile.close();
-
     sendPlaybookInformation(PlaybookIdentifierName);
-
+	return true;
 }
 
 void LabelParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string pot) {

@@ -138,6 +138,8 @@ void RenderableFov::allocateData() {
 }
 
 RenderableFov::~RenderableFov() {
+	delete[] _iarray1[0];
+	delete[] _iarray1[1];
 	deinitialize();
 }
 
@@ -224,6 +226,19 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t) {
 	return glm::dvec3(p0.x*t2 + p1.x*t, p0.y*t2 + p1.y*t, p0.z*t2 + p1.z*t);
 }
 
+glm::dvec3 RenderableFov::pscSlerp(glm::dvec3 p0, glm::dvec3 p1, float t){
+	assert(t >= 0 && t <= 1);
+	float t2 = (1.f - t);
+	float omega = acosf(glm::dot(p0, p1));
+	if (omega > 0.f){
+		float s1 = sin(t*omega) / sin(omega);
+		float s2 = sin(t2*omega) / sin(omega);
+		return glm::dvec3(p0.x*s2 + p1.x*s1, p0.y*s2 + p1.y*s1, p0.z*s2 + p1.z*s1);
+
+	}
+	return p0;//tmp
+}
+
 // This method is the current bottleneck.
 psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
 	double targetEt;
@@ -231,6 +246,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
 																	      _frame, _method, _aberrationCorrection, 
 																		  _time, targetEt, ray, ipoint, ivec, intercepted);
+	ivec *= 0.9999;
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 	_interceptVector[3] += 3;
 
@@ -297,6 +313,7 @@ void RenderableFov::fovProjection(bool H[], std::vector<glm::dvec3> bounds) {
 	glm::dvec3 current;
 	glm::dvec3 next;
 	glm::vec4 tmp(1);
+	glm::vec4 test_col(0, 0, 1, 1);
 	if (bounds.size() > 1){
 		for (int i = 0; i < bounds.size(); i++){
 			int k = (i + 1 > bounds.size() - 1) ? 0 : i + 1;
@@ -475,8 +492,8 @@ void RenderableFov::render(const RenderData& data) {
 				
 				// compute surface intercept
 				openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-					_frame, _method, _aberrationCorrection,
-					_time, targetEpoch, bounds[r], ipoint, ivec, _interceptTag[r]);
+																   _frame, _method, _aberrationCorrection,
+																   _time, targetEpoch, bounds[r], ipoint, ivec, _interceptTag[r]);
 				// if not found, use the orthogonal projected point
 				if (!_interceptTag[r]) _projectionBounds[r] = orthogonalProjection(bounds[r]);
 
@@ -554,16 +571,17 @@ void RenderableFov::render(const RenderData& data) {
 		glDrawArrays(_mode, 0, _vtotal[0]);
 		glBindVertexArray(0);
 
-		glLineWidth(_lineWidth);
-		glBindVertexArray(_vaoID[0]);
-		glDrawArrays(GL_LINES, 0, _vtotal[0]);
-		glBindVertexArray(0);
-
 		if (drawFOV){
-			glLineWidth(1.f);
+			glLineWidth(2.f);
 			glBindVertexArray(_vaoID[1]);
 			glDrawArrays(GL_LINE_LOOP, 0, _vtotal[1]);
 			glBindVertexArray(0);
+
+			glPointSize(5.f);
+			glBindVertexArray(_vaoID[1]);
+			glDrawArrays(GL_POINTS, 0, _vtotal[1]);
+			glBindVertexArray(0);
+			glPointSize(1.f);
 		}
         glLineWidth(1.f);
 	}

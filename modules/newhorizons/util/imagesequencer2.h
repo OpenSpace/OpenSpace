@@ -122,12 +122,9 @@ public:
 	 * makes the request. If an instance is not registered in the class then the singleton
 	 * returns false and no projections will occur. 
 	 */
-	bool getImagePaths(std::vector<Image>& captures, 
-		                                std::string projectee, 
-										std::string instrumentID);
-
 	bool getImagePaths(std::vector<Image>& captures,
-		                                std::string projectee);
+		                                std::string projectee,
+										std::string instrumentRequest);
 
 	/*
 	 * returns true if instrumentID is within a capture range. 

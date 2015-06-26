@@ -28,7 +28,6 @@
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <fstream>
 #include <iterator>
 #include <iomanip>
 #include <limits>
@@ -44,11 +43,12 @@ namespace {
 }
 
 namespace openspace {
-	HongKangParser::HongKangParser(const std::string& fileName,
-		                           std::string spacecraft,
-								   ghoul::Dictionary translationDictionary,
-		                           std::vector<std::string> potentialTargets) :
-							       _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+HongKangParser::HongKangParser(const std::string& fileName,
+		                       std::string spacecraft,
+							   ghoul::Dictionary translationDictionary,
+		                       std::vector<std::string> potentialTargets) :
+						 
+							   _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
 {
 	_fileName          = fileName;
 	_spacecraft        = spacecraft;
@@ -81,9 +81,9 @@ namespace openspace {
 	}
 }
 
-void findPlaybookSpecifiedTarget(std::string line, std::string& target){
+void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target){
 	//remembto add this lua later... 
-	std::vector<std::string> ptarg = { "PLUTO", "CHARON", "NIX", "HYDRA", "P5", "P4" };
+	std::vector<std::string> ptarg = _potentialTargets;
 	for (auto p : ptarg){
 		// loop over all targets and determine from 4th col which target this instrument points to
 		std::transform(line.begin(), line.end(), line.begin(), toupper);
@@ -98,7 +98,40 @@ void findPlaybookSpecifiedTarget(std::string line, std::string& target){
 	}
 }
 
-void HongKangParser::create(){
+void HongKangParser::writeUTCEventFile(const Image image){
+		std::string time_beg;
+		std::string time_end;
+		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+		SpiceManager::ref().getDateFromET(image.stopTime, time_end, "HR:MN:SC.### ::RND");
+
+		_eventsAsUTCFile << std::fixed
+			<< std::setw(10) << time_beg << "->"
+			<< std::setw(10) << time_end
+			<< std::setw(10) << (int)getMetFromET(image.startTime) << "->"
+			<< std::setw(10) << (int)getMetFromET(image.stopTime)
+			<< std::setw(10) << image.target << std::setw(10);
+		for (auto instrument : image.activeInstruments){
+			_eventsAsUTCFile << " " << instrument;
+		}
+}
+
+bool HongKangParser::create(){
+	//check input for errors. 
+	int tmp;
+	bool hasObserver = SpiceManager::ref().getNaifId(_spacecraft, tmp);
+	if (!hasObserver){
+		LERROR("SPICE navigation system has no pooled observer: '" << _spacecraft << "' in kernel" <<
+			   "Please check that all necessary kernels are loaded"<<
+			   "along with correct modfile definition.");
+		return hasObserver;
+	}
+	if (_potentialTargets.size() == 0){
+		LERROR("In order to find targeting from event file user has to provide list of potential targets "
+			   << "please check modfile");
+	}
+
+	_eventsAsUTCFile.open("utcEvents.txt");
+
 	if (size_t position = _fileName.find_last_of(".") + 1){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(_fileName).fileExtension();
@@ -106,7 +139,10 @@ void HongKangParser::create(){
 			if (extension == "txt"){// Hong Kang. pre-parsed playbook
 				LINFO("Using Preparsed Playbook V9H");
 				std::ifstream file(_fileName , std::ios::binary);
-				if (!file.good()) LERROR("Failed to open txt file '" << _fileName << "'");
+				if (!file.good()){
+					LERROR("Failed to open event file '" << _fileName << "'");
+					return false;
+				}
 
 				std::string line = "";
 				double shutter = 0.01;
@@ -127,10 +163,10 @@ void HongKangParser::create(){
 				double scan_start = -1;
 				double scan_stop = -1;
 
-				std::string cameraTarget = "VOID";
+				std::string cameraTarget  = "VOID";
 				std::string scannerTarget = "VOID";
 
-				while (!file.eof()){//only while inte do,  FIX
+				while (!file.eof()){
 					std::getline(file, line);
 					
 					std::string event = line.substr(0, line.find_first_of(" ")); 
@@ -160,6 +196,7 @@ void HongKangParser::create(){
 
 							//fill image
 							createImage(image, time, time + shutter, cameraSpiceID, cameraTarget, _defaultCaptureImage);
+							writeUTCEventFile(image);
 							//IFF spaccraft has decided to switch target, store in target map (used for: 'next observation focus')
 							if (previousTarget != image.target){
 								previousTarget = image.target;
@@ -197,9 +234,9 @@ void HongKangParser::create(){
 									scanRange._max = scan_stop;
 									_instrumentTimes.push_back(std::make_pair(it->first, scanRange));
 
-
 									//store individual image
 									createImage(image, scan_start, scan_stop, scannerSpiceID, scannerTarget, _defaultCaptureImage);
+									writeUTCEventFile(image);
 
 									_subsetMap[image.target]._subset.push_back(image);
 									_subsetMap[image.target]._range.setRange(scan_start);
@@ -207,13 +244,6 @@ void HongKangParser::create(){
 							}
 							//go back to stored position in file
 							file.seekg(len, std::ios_base::beg);
-
-							/*//scanner works like state-machine -only store start time now
-							scan_start = time;
-							previousScanner = it->first;
-							//store scanning instrument - store image once stopTime is found!
-							findPlaybookSpecifiedTarget(line, scannerTarget);
-							scannerSpiceID = it->second->getTranslation();*/
 						}
 					}
 					else{ // we have reached the end of a scan or consecutive capture sequence!
@@ -226,59 +256,14 @@ void HongKangParser::create(){
 
 							capture_start = -1;
 						}
-						/*if (line.find("END_NOM") != std::string::npos){
-							assert(scan_start != -1, "SCAN end occured before SCAN call!");
-							//end of scan, store end time of this scan + store the scan image
-							scan_stop = time;
-							scanRange._min = scan_start;
-							scanRange._max = scan_stop;
-							_instrumentTimes.push_back(std::make_pair(previousScanner, scanRange));
-							
-							//store individual image
-							createImage(image, scan_start, scan_stop, scannerSpiceID, scannerTarget, _defaultCaptureImage);
-
-							_subsetMap[image.target]._subset.push_back(image);
-							_subsetMap[image.target]._range.setRange(scan_start);
-
-							scan_start = -1;
-						}*/
 					}
+					_eventsAsUTCFile << std::endl;
 				}
 			}
 		}
 	}
 
-    sendPlaybookInformation(PlaybookIdentifierName);
-	
-	//std::ofstream myfile;
-	//myfile.open("HongKangOutput.txt");
-
-	////print all
-	//for (auto target : _subsetMap){
-	//	std::string min, max;
-	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
-	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
-
-	//	myfile << std::endl;
-	//	for (auto image : target.second._subset){
-	//		std::string time_beg;
-	//		std::string time_end;
-	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
-
-	//		myfile << std::fixed
-	//			<< std::setw(10) << time_beg
-	//			<< std::setw(10) << time_end
-	//			<< std::setw(10) << (int)getMetFromET(image.startTime)
-	//			<< std::setw(10) << image.target << std::setw(10);
-	//		for (auto instrument : image.activeInstruments){
-	//			myfile << " " << instrument;
-	//		}
-	//		myfile << std::endl;
-	//	}
-	//}
-	//myfile.close();
-	//
+	return true;
 }
 
 bool HongKangParser::augmentWithSpice(Image& image,
@@ -288,6 +273,7 @@ bool HongKangParser::augmentWithSpice(Image& image,
 	image.target = "VOID";
 	// we have (?) to cast to int, unfortunately
     // Why? --abock
+	// because: old comment --m
 	int exposureTime = image.stopTime - image.startTime;
 	if (exposureTime == 0)
         exposureTime = 1;
@@ -338,6 +324,8 @@ double HongKangParser::getETfromMet(double met){
 	double referenceET;
 	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
     double et = referenceET;
+
+	//_metRef += 3; // MET reference time is off by 3 sec? 
 
     diff = std::abs(met - _metRef);
 	if (met > _metRef){
