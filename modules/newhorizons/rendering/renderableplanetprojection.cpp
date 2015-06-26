@@ -231,7 +231,8 @@ bool RenderablePlanetProjection::initialize() {
 
     completeSuccess &= _geometry->initialize(this);
 
-	completeSuccess &= auxiliaryRendertarget();
+    if (completeSuccess)
+	    completeSuccess &= auxiliaryRendertarget();
 
     return completeSuccess;
 }
@@ -289,7 +290,7 @@ bool RenderablePlanetProjection::deinitialize(){
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
-	return _geometry && _programObject;
+	return _geometry && _programObject && _texture && _textureWhiteSquare;
 }
 
 void RenderablePlanetProjection::imageProjectGPU(){
@@ -414,7 +415,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 }
 
 
-void RenderablePlanetProjection::textureBind(){
+void RenderablePlanetProjection::textureBind() {
 	ghoul::opengl::TextureUnit unit[2];
 	unit[0].activate();
 	_texture->bind();
@@ -424,7 +425,7 @@ void RenderablePlanetProjection::textureBind(){
 	_programObject->setUniform("texture2", unit[1]);
 }
 
-void RenderablePlanetProjection::project(){
+void RenderablePlanetProjection::project() {
 	for (auto img : _imageTimes){
 		std::thread t1(&RenderablePlanetProjection::attitudeParameters, this, img.startTime);
 		t1.join();
@@ -484,7 +485,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	
 }
 
-void RenderablePlanetProjection::update(const UpdateData& data){
+void RenderablePlanetProjection::update(const UpdateData& data) {
 	// set spice-orientation in accordance to timestamp
 	_time = Time::ref().currentTime();
 	_capture = false;
@@ -498,20 +499,22 @@ void RenderablePlanetProjection::update(const UpdateData& data){
         _programObject->rebuildFromFile();
 }
 
-void RenderablePlanetProjection::loadProjectionTexture(){
+void RenderablePlanetProjection::loadProjectionTexture() {
 	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
 		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
 		if (_textureProj) {
 			_textureProj->uploadTexture(); 
-			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureProj->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 			_textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 		}
 	}
 }
 
-void RenderablePlanetProjection::loadTexture(){
+void RenderablePlanetProjection::loadTexture() {
     delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {

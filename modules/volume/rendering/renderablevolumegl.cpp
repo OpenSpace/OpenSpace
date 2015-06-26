@@ -177,13 +177,13 @@ bool RenderableVolumeGL::initialize() {
     if(_filename != "") {
         _volume = loadVolume(_filename, _hintsDictionary);
         _volume->uploadTexture();
-        OsEng.renderEngine()->abuffer()->addVolume(_volumeName, _volume);
+        OsEng.renderEngine()->aBuffer()->addVolume(_volumeName, _volume);
     }
 
     if(_transferFunctionPath != "") {
         _transferFunction = loadTransferFunction(_transferFunctionPath);
         _transferFunction->uploadTexture();
-        OsEng.renderEngine()->abuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
+        OsEng.renderEngine()->aBuffer()->addTransferFunction(_transferFunctionName, _transferFunction);
 
         auto textureCallback = [this](const ghoul::filesystem::File& file) {
             _updateTransferfunction = true;
@@ -192,7 +192,7 @@ bool RenderableVolumeGL::initialize() {
     }
 
     // add the sampler and get the ID
-    _id = OsEng.renderEngine()->abuffer()->addSamplerfile(_samplerFilename);
+    _id = OsEng.renderEngine()->aBuffer()->addSamplerfile(_samplerFilename);
 
     OsEng.configurationManager()->getValue("RaycastProgram", _boxProgram);
 

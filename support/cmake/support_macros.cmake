@@ -162,6 +162,22 @@ function (add_external_dependencies)
     find_package(Spice REQUIRED)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SPICE_INCLUDE_DIRS})
     target_link_libraries(libOpenSpace ${SPICE_LIBRARIES})
+
+    # Curl
+    if (WIN32)
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl" PARENT_SCOPE)
+        target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
+        target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
+        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+    else ()
+        find_package(CURL)
+        if (CURL_FOUND)
+            target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
+            target_link_libraries(libOpenSpace ${CURL_LIBRARIES})
+            target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED")
+        endif ()
+    endif()
 endfunction ()
 
 
@@ -175,6 +191,7 @@ function (handle_applications)
 
     set(DEFAULT_APPLICATIONS
         "OpenSpace"
+        "Launcher"
     )
     mark_as_advanced(DEFAULT_APPLICATIONS)
 
@@ -213,6 +230,17 @@ function (handle_applications)
 
                     target_link_libraries(${APPLICATION_NAME} Ghoul)
                     target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+
+                    if (MSVC)
+                        set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
+                            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+                        )
+                    endif ()
+
+
+                    if (WIN32)
+                        copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+                    endif ()
             endif ()
 
             list(APPEND applications ${APPLICATION_NAME})
@@ -252,14 +280,6 @@ function (handle_option_vld)
         foreach (app ${OPENSPACE_APPLCATIONS})
             copy_files(${app} "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
         endforeach ()
-    endif ()
-endfunction ()
-
-
-
-function(handle_option_gui)
-    if (OPENSPACE_BUILD_GUI_APPLICATIONS)
-        add_subdirectory(gui)
     endif ()
 endfunction ()
 
@@ -421,6 +441,9 @@ endfunction ()
 
 function (copy_dynamic_libraries)
     if (WIN32)
+
+        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
+
         # Copy DLLs needed by Ghoul into the executable directory
         ghl_copy_shared_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/ghoul)
 

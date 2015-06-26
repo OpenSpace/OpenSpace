@@ -31,8 +31,11 @@ namespace openspace {
 
 class OpenSpaceModule {
 public:
-    OpenSpaceModule() = default;
+    OpenSpaceModule(std::string name);
     virtual ~OpenSpaceModule() = default;
+
+    virtual bool create();
+    virtual bool destroy();
 
     virtual bool initialize();
     virtual bool deinitialize();
@@ -40,10 +43,9 @@ public:
     std::string name() const;
 
 protected:
-    void setName(std::string name);
     std::string modulePath() const;
 
-    std::string _name;
+    const std::string _name;
 };
 
 } // namespace openspace

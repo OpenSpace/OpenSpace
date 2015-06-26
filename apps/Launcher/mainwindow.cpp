@@ -24,6 +24,18 @@
 
 #include "mainwindow.h"
 
+#include "shortcutwidget.h"
+#include "syncwidget.h"
+
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/openspaceengine.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/log.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/htmllog.h>
+
 #include <QApplication>
 #include <QComboBox>
 #include <QDir>
@@ -39,13 +51,24 @@ namespace {
 
     const QString NewsURL = "http://openspace.itn.liu.se/news.txt";
 
-    const QString ModulesDirectory = "../data/scene"; // temporary ---abock
+    const std::string _configurationFile = "openspace.cfg";
 
 #ifdef WIN32
     const QString OpenSpaceExecutable = "OpenSpace.exe";
 #else
     const QString OpenSpaceExecutable = "OpenSpace";
 #endif
+
+    class QLog : public ghoul::logging::Log {
+    public:
+        void log(
+            ghoul::logging::LogManager::LogLevel level,
+            const std::string& category,
+            const std::string& message
+        ) {
+            //qDebug() << QString::fromStdString(category) << ": " << QString::fromStdString(message);
+        }
+    };
 }
 
 MainWindow::MainWindow()
@@ -141,10 +164,32 @@ void MainWindow::initialize() {
             this, SLOT(newsNetworkError())
     );
 
-    _shortcutWidget.hide();
-    _syncWidget.hide();
+    _shortcutWidget = new ShortcutWidget(this, Qt::Popup | Qt::Dialog);
+    _shortcutWidget->setWindowModality(Qt::WindowModal);
+    _shortcutWidget->hide();
 
-    QDir d(ModulesDirectory);
+    _syncWidget = new SyncWidget(this, Qt::Popup | Qt::Dialog);
+    _syncWidget->setWindowModality(Qt::WindowModal);
+    _syncWidget->hide();
+
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
+    LogMgr.addLog(new ghoul::logging::ConsoleLog);
+    LogMgr.addLog(new ghoul::logging::HTMLLog("LauncherLog.html"));
+    LogMgr.addLog(new QLog);
+
+    std::string configurationFile = _configurationFile;
+    bool found = openspace::OpenSpaceEngine::findConfiguration(configurationFile);
+    if (!found) {
+    }
+
+    _configuration = new openspace::ConfigurationManager;
+    _configuration->loadFromFile(configurationFile);
+
+
+    QString modulesDirectory = QString::fromStdString(
+        absPath("${SCENE}")
+    );
+    QDir d(modulesDirectory);
     d.setFilter(QDir::Files);
 
     QFileInfoList list = d.entryInfoList();
@@ -152,21 +197,19 @@ void MainWindow::initialize() {
         _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
         _scenes->addItem(i.fileName());
     }
+    _syncWidget->setSceneFiles(_sceneFiles);
 }
 
 void MainWindow::shortcutButtonPressed() {
-    _shortcutWidget.show();
+    _shortcutWidget->show();
 }
 
 void MainWindow::syncButtonPressed() {
-    QString currentScene = _scenes->currentText();
-    _syncWidget.setSceneFile(_sceneFiles[currentScene]);
-    _syncWidget.show();
+    _syncWidget->show();
 }
 
 void MainWindow::startButtonPressed() {
-    QProcess* p = new QProcess(this);
-    p->start(OpenSpaceExecutable);
+    QProcess::startDetached(OpenSpaceExecutable);
 }
 
 void MainWindow::newsNetworkError() {
@@ -181,277 +224,3 @@ void MainWindow::newsReadyRead() {
     _informationWidget->setText(news);
     _newsReply->deleteLater();
 }
-
-//MainWindow::MainWindow()
-//    : QWidget(nullptr)
-//    , _configurationWidget(nullptr)
-//    , _timeControlWidget(nullptr)
-//    , _informationWidget(nullptr)
-//    , _timelineWidget(nullptr)
-//	, _socket(nullptr)
-//{
-//	setWindowTitle("OpenSpace Timeline");
-//
-//    _configurationWidget = new ConfigurationWidget(this);
-//    _configurationWidget->setMinimumWidth(350);
-//    _timeControlWidget = new ControlWidget(this);
-//    _timeControlWidget->setMinimumWidth(350);
-//    _informationWidget = new InformationWidget(this);
-//    _informationWidget->setMinimumWidth(350);
-//    _timelineWidget = new TimelineWidget(this);
-//
-//	QGridLayout* layout = new QGridLayout;
-//    layout->addWidget(_configurationWidget, 0, 0);
-//    layout->addWidget(_timeControlWidget, 1, 0);
-//    layout->addWidget(_informationWidget, 2, 0);
-//    layout->addWidget(_timelineWidget, 0, 1, 3, 1);
-//
-//    layout->setColumnStretch(1, 5);
-//
-//
-//    QObject::connect(
-//        _configurationWidget, SIGNAL(connect(QString, QString)),
-//        this, SLOT(onConnect(QString, QString))
-//    );
-//    QObject::connect(
-//        _configurationWidget, SIGNAL(disconnect()),
-//        this, SLOT(onDisconnect())
-//    );
-//
-//    QObject::connect(
-//        _timeControlWidget, SIGNAL(scriptActivity(QString)),
-//        this, SLOT(sendScript(QString))
-//    );
-//
-//	setLayout(layout);
-//
-//    _configurationWidget->socketDisconnected();
-//    _timeControlWidget->socketDisconnected();
-//    _informationWidget->socketDisconnected();
-//    _timelineWidget->socketDisconnected();
-//}
-//
-//MainWindow::~MainWindow() {
-//	delete _socket;
-//}
-//
-//void MainWindow::onConnect(QString host, QString port) {
-//    delete _socket;
-//
-//    _socket = new QTcpSocket(this);
-//    QObject::connect(_socket, SIGNAL(readyRead()), SLOT(readTcpData()));
-//    QObject::connect(_socket, SIGNAL(connected()), SLOT(onSocketConnected()));
-//    QObject::connect(_socket, SIGNAL(disconnected()), SLOT(onSocketDisconnected()));
-//
-//    _socket->connectToHost(host, port.toUInt());
-//}
-//
-//void MainWindow::onDisconnect() {
-//    delete _socket;
-//    _socket = nullptr;
-//}
-//
-//void MainWindow::readTcpData() {
-//    static const uint16_t MessageTypeStatus = 0;
-//    static const uint16_t MessageTypePlayBookHongKang = 2;
-//    static const uint16_t MessageTypePlayBookLabel = 3;
-//
-//    QByteArray data = _socket->readAll();
-//
-//    if (QString(data) == "Connected to SGCT!\r\n")
-//        return;
-//    if (QString(data) == "OK\r\n")
-//        return;
-//
-//    QByteArray messageTypeData = data.left(2);
-//    union {
-//        uint16_t value;
-//        std::array<char, 2> data;
-//    } messageType;
-//    std::memcpy(messageType.data.data(), messageTypeData.data(), sizeof(uint16_t));
-//
-//    switch (messageType.value) {
-//    case MessageTypeStatus:
-//        break;
-//    case MessageTypePlayBookHongKang:
-//        qDebug() << "Hong Kang Playbook received";
-//        break;
-//    case MessageTypePlayBookLabel:
-//        qDebug() << "Label Playbook received";
-//        break;
-//    default:
-//        qDebug() << "Unknown message of type '" << messageType.value << "'";
-//    }
-//
-//    switch (messageType.value) {
-//    case MessageTypeStatus:
-//    {
-//        if (_hasHongKangTimeline && _hasLabelTimeline)
-//            handleStatusMessage(data.mid(2));
-//        break;
-//    }
-//    case MessageTypePlayBookHongKang:
-//    case MessageTypePlayBookLabel:
-//    {
-//        const char* payloadDebug = data.mid(2).data();
-//
-//        size_t beginning = 0;
-//        uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);
-//
-//        //qDebug() << "Begin reading data";
-//        while (_socket->waitForReadyRead() && data.size() < int(size)) {
-//            //qDebug() << ".";
-//            data = data.append(_socket->readAll());
-//            //data = data.append(_socket->read(int(size) - data.size()));
-//            QThread::msleep(50);
-//        }
-//        //qDebug() << "Finished reading data. Handling playbook";
-//
-//        handlePlaybook(data.mid(2));
-//
-//        //qDebug() << "Finished handling playbook";
-//
-//        if (messageType.value == MessageTypePlayBookHongKang)
-//            _hasHongKangTimeline = true;
-//        if (messageType.value == MessageTypePlayBookLabel)
-//            _hasLabelTimeline = true;
-//
-//        if (_hasHongKangTimeline && _hasLabelTimeline) {
-//            fullyConnected();
-//        }
-//
-//        break;
-//    }
-//    default:
-//        qDebug() << QString(data);
-//    }
-//
-//}
-//
-//void MainWindow::handleStatusMessage(QByteArray data) {
-//    const char* buffer = data.data();
-//
-//    union {
-//        double value;
-//        std::array<char, 8> buffer;
-//    } et;
-//    std::memmove(et.buffer.data(), buffer, sizeof(double));
-//
-//    std::vector<char> timeString(24);
-//    std::memmove(timeString.data(), buffer + sizeof(double), 24);
-//
-//    union {
-//        double value;
-//        std::array<char, 8> buffer;
-//    } delta;
-//    std::memmove(delta.buffer.data(), buffer + sizeof(double) + 24, sizeof(double));
-//
-//    _timeControlWidget->update(
-//        QString::fromStdString(std::string(timeString.begin(), timeString.end())),
-//        QString::number(delta.value)
-//    );
-//    _timelineWidget->setCurrentTime(std::string(timeString.begin(), timeString.end()), et.value);
-//}
-//
-//std::vector<std::string> instrumentsFromId(uint16_t instrumentId, std::map<uint16_t, std::string> instrumentMap) {
-//    std::vector<std::string> results;
-//    for (int i = 0; i < 16; ++i) {
-//        uint16_t testValue = 1 << i;
-//        if ((testValue & instrumentId) != 0) {
-//            std::string t = instrumentMap.at(testValue);
-//            if (t.empty())
-//                qDebug() << "Empty instrument";
-//            results.push_back(t);
-//        }
-//    }
-//    return results;
-//}
-//
-//void MainWindow::handlePlaybook(QByteArray data) {
-//    char* buffer = data.data();
-//    size_t currentReadLocation = 0;
-//
-//    uint32_t totalData = readFromBuffer<uint32_t>(buffer, currentReadLocation);
-//
-//    uint8_t nTargets = readFromBuffer<uint8_t>(buffer, currentReadLocation);
-//    qDebug() << "Targets: " << nTargets;
-//    std::map<uint8_t, std::string> targetMap;
-//    for (uint8_t i = 0; i < nTargets; ++i) {
-//        uint8_t id = readFromBuffer<uint8_t>(buffer, currentReadLocation);
-//        std::string value = readFromBuffer<std::string>(buffer, currentReadLocation);
-//        qDebug() << QString::fromStdString(value);
-//        targetMap[id] = value;
-//    }
-//
-//    uint8_t nInstruments = readFromBuffer<uint8_t>(buffer, currentReadLocation);
-//    qDebug() << "Instruments: " << nInstruments;
-//    std::map<uint16_t, std::string> instrumentMap;
-//    for (uint8_t i = 0; i < nInstruments; ++i) {
-//        uint16_t id = readFromBuffer<uint16_t>(buffer, currentReadLocation);
-//        std::string value = readFromBuffer<std::string>(buffer, currentReadLocation);
-//        qDebug() << QString::fromStdString(value);
-//        instrumentMap[id] = value;
-//    }
-//
-//    uint32_t nImages = readFromBuffer<uint32_t>(buffer, currentReadLocation);
-//    std::vector<Image> images;
-//    for (uint32_t i = 0; i < nImages; ++i) {
-//        Image image;
-//        image.beginning = readFromBuffer<double>(buffer, currentReadLocation);
-//        image.ending = readFromBuffer<double>(buffer, currentReadLocation);
-//
-//        image.beginningString = readFromBuffer<std::string>(buffer, currentReadLocation);
-//        image.endingString = readFromBuffer<std::string>(buffer, currentReadLocation);
-//        
-//        uint8_t targetId = readFromBuffer<uint8_t>(buffer, currentReadLocation);
-//        uint16_t instrumentId = readFromBuffer<uint16_t>(buffer, currentReadLocation);
-//        image.target = targetMap[targetId];
-//        image.instruments = instrumentsFromId(instrumentId, instrumentMap);
-//        if (image.instruments.empty())
-//            qDebug() << "Instruments were empty";
-//        images.push_back(image);
-//    }
-//
-//    _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
-//
-//}
-//
-//void MainWindow::sendScript(QString script) {
-//    if (_socket) {
-//        _socket->write(("0" + script + "\r\n").toLatin1());
-//        //QByteArray data = (QString("0") + script).toLocal8Bit();
-//        //qDebug() << data;
-//        //_socket->write(data);
-//        //QThread::msleep(25);
-//    }
-//        //_socket->write(("0" + script + "\r\n").toLatin1());
-//        //_socket->write(("0" + script + "\0").toLatin1());
-//}
-//
-//void MainWindow::onSocketConnected() {
-//    _socket->write(QString("1\r\n").toLatin1());
-//    //_socket->write(QString("1").toLatin1());
-//
-//}
-//
-//void MainWindow::onSocketDisconnected() {
-//    _configurationWidget->socketDisconnected();
-//    _timeControlWidget->socketDisconnected();
-//    _informationWidget->socketDisconnected();
-//    _timelineWidget->socketDisconnected();
-//
-//    _informationWidget->logInformation("Disconnected.");
-//}
-//
-//std::string MainWindow::nextTarget() const {
-//    return _timelineWidget->nextTarget();
-//}
-//
-//void MainWindow::fullyConnected() {
-//    _informationWidget->logInformation("Connected to " + _socket->peerName() + " on port " + QString::number(_socket->peerPort()) + ".");
-//
-//    _configurationWidget->socketConnected();
-//    _timeControlWidget->socketConnected();
-//    _informationWidget->socketConnected();
-//    _timelineWidget->socketConnected();
-//}
