@@ -345,8 +345,9 @@ namespace openspace {
             }
             
             //construct a script (string) from the data contained in the buffer
-            std::string script(buffer.data());
-            
+            std::string script;
+            script.assign(buffer.begin(), buffer.end());
+
             //tell the script engine to execute the script when appropriate
             OsEng.scriptEngine()->queueScript(script);
             
