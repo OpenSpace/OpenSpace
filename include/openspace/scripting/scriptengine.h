@@ -28,6 +28,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 #include <set>
+#include <map>
 
 /**
  * \defgroup LuaScripts Lua Scripts
@@ -89,8 +90,15 @@ public:
 	void preSynchronization();
 
 	void queueScript(const std::string &script);
+    
+    std::vector<std::string> cachedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
+    
+    //parallel functions
+    bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
+    bool shouldScriptBeSent(const std::string &library, const std::string &function);
+    void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
@@ -100,8 +108,6 @@ private:
     
     void addBaseLibrary();
     void remapPrintFunction();
-
-	bool findLibraryAndFunction(std::string &library, std::string &function, const std::string &script);
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
@@ -111,6 +117,10 @@ private:
 	std::vector<std::string> _queuedScripts;
 	std::vector<std::string> _receivedScripts;
 	std::string _currentSyncedScript;
+    
+    //parallel variables
+    std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
+    std::mutex _cachedScriptsMutex;
     
 };
 
