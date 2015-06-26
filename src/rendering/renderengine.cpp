@@ -759,7 +759,8 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"visualizeABuffer",
 				&luascriptfunctions::visualizeABuffer,
 				"bool",
-				"Toggles the visualization of the ABuffer"
+				"Toggles the visualization of the ABuffer",
+                true
 			},
 			{
 				"showRenderInformation",
@@ -784,20 +785,23 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "changeCoordinateSystem",
                 &luascriptfunctions::changeCoordinateSystem,
                 "string",
-                "Changes the origin of the coordinate system to the passed node"
+                "Changes the origin of the coordinate system to the passed node",
+                true
             },
 		{
 			"fadeIn",
 			&luascriptfunctions::fadeIn,
 			"number",
-			""
+			"",
+            true
 		},
 		//also temporary @JK
 		{
 			"fadeOut",
 			&luascriptfunctions::fadeOut,
 			"number",
-			""
+			"",
+            true
 		},
 		},
 	};

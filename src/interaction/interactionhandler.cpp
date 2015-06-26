@@ -856,7 +856,8 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 				"setOrigin",
 				&luascriptfunctions::setOrigin,
 				"string",
-				"Set the camera origin node by name"
+				"Set the camera origin node by name",
+                true
 			},
 			{
 				"clearKeys",
@@ -880,7 +881,8 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 				"distance",
 				&luascriptfunctions::distance,
 				"number",
-				"Change distance to origin"
+				"Change distance to origin",
+                true
 			},
             {
                 "setInteractionSensitivity",

@@ -195,7 +195,8 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 				&luascriptfunctions::time_setDeltaTime,
 				"number",
 				"Sets the amount of simulation time that happens "
-				"in one second of real time"
+				"in one second of real time",
+                true
 			},
 			{
 				"deltaTime",
@@ -208,14 +209,16 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
                 "setPause",
                 &luascriptfunctions::time_setPause,
                 "bool",
-                "Pauses the simulation time or restores the delta time"
+                "Pauses the simulation time or restores the delta time",
+                true
             },
             {
                 "togglePause",
                 &luascriptfunctions::time_togglePause,
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
+                " and restoring it afterwards",
+                true
             },
 			{
 				"setTime",
@@ -224,7 +227,8 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 				"Sets the current simulation time to the "
 				"specified value. If the parameter is a number, the value is the number "
 				"of seconds past the J2000 epoch. If it is a string, it has to be a "
-				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
+				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)",
+                true
 			},
 			{
 				"currentTime",
