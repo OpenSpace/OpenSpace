@@ -46,8 +46,7 @@ namespace openspace {
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2()
-    : _latestImage()
-    , _hasData(false)
+    : _hasData(false)
 {}
 
 ImageSequencer2& ImageSequencer2::ref() {
@@ -161,8 +160,13 @@ double ImageSequencer2::getNextCaptureTime(){
 	return nextCaptureTime;
 }
 const Image ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
-	
-	return _latestImage;
+	auto it = _latestImages.find(_instrumentID);
+	if (it != _latestImages.end())
+		return _latestImages[_instrumentID];
+	else {
+		Image dummyImage = { 0, 0, "", std::vector<std::string>(), "", false };
+		return dummyImage;
+	}
 }
 
 std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
@@ -270,7 +274,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 			    std::reverse(captureTimes.begin(), captureTimes.end());
 			    captures = captureTimes;
                 if (!captures.empty())
-					_latestImage = captures.back();
+					_latestImages[captures.back().activeInstruments.front()] = captures.back();
 
 			    return true;
             }
