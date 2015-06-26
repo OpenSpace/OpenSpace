@@ -40,8 +40,6 @@ namespace {
 
 namespace openspace {
 
-SpiceManager* SpiceManager::_manager = nullptr;
-
 SpiceManager::SpiceManager() 
     : _lastAssignedKernel(0)
 {
@@ -52,7 +50,7 @@ SpiceManager::SpiceManager()
 }
 
 SpiceManager::~SpiceManager() {
-    for (const KernelInformation& i : _manager->_loadedKernels)
+    for (const KernelInformation& i : _loadedKernels)
         unload_c(i.path.c_str());
 
     // Set values back to default

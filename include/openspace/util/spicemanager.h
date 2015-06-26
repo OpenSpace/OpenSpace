@@ -718,8 +718,6 @@ protected:
 
     /// The last assigned kernel-id, used to determine the next free kernel id
     KernelIdentifier _lastAssignedKernel;
-
-    static SpiceManager* _manager;
 };
 
 } // namespace openspace
