@@ -209,8 +209,8 @@ namespace openspace{
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isListening;
-            std::vector<std::string> _sentScripts;
-            std::mutex _sentScriptsMutex;
+            std::vector<std::string> _executedScripts;
+            std::mutex _executedScriptsMutex;
         };
     } // namespace network
     
