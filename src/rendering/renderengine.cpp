@@ -914,9 +914,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (origin == "Pluto") {
 		if (newHorizonsPathNodeP) {
 			Renderable* R = newHorizonsPathNodeP->renderable();
+			newHorizonsPathNodeP->setParent(plutoBarycenterNode);
 			nhPath = static_cast<RenderablePath*>(R);
 			nhPath->calculatePath("PLUTO BARYCENTER");
-			newHorizonsPathNodeP->setParent(plutoBarycenterNode);
 		}
 
 		plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
@@ -1079,9 +1079,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (origin == "Jupiter") {
 		if (newHorizonsPathNodeJ) {
 			Renderable* R = newHorizonsPathNodeJ->renderable();
+			newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
 			nhPath = static_cast<RenderablePath*>(R);
 			nhPath->calculatePath("JUPITER BARYCENTER");
-			newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
 		}
 
 		jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
