@@ -193,7 +193,7 @@ private:
 	// default capture image
 	std::string _defaultCaptureImage;
 
-	Image _latestImage;
+	std::map<std::string, Image> _latestImages;
 	// if no data, no run 
 	bool _hasData;
 };

@@ -76,7 +76,7 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 
 	success = dictionary.getValue(keySize, _magnification);
 	if (!success)
-		_magnification = 4; // if not set, models will be 1:1000, feel free to change @AA
+		_magnification = 0; // if not set, models will be 1:1 (earlier 1:1000) @AA
 
 	success = dictionary.getValue(keyObjFile, _file);
 	if (!success) {

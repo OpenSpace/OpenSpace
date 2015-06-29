@@ -22,7 +22,23 @@ openspace.bindKey("5", "openspace.time.setDeltaTime(60)")
 openspace.bindKey("6", "openspace.time.setDeltaTime(120)")
 openspace.bindKey("7", "openspace.time.setDeltaTime(360)")
 openspace.bindKey("8", "openspace.time.setDeltaTime(540)")
-openspace.bindKey("9", "openspace.time.setDeltaTime(720)")
+openspace.bindKey("9", "openspace.time.setDeltaTime(720)") 
+
+--[[openspace.bindKey("2", "openspace.time.setDeltaTime(30)")
+openspace.bindKey("3", "openspace.time.setDeltaTime(180)") -- 3m
+openspace.bindKey("4", "openspace.time.setDeltaTime(900)") -- 15m
+openspace.bindKey("5", "openspace.time.setDeltaTime(3600)") -- 1h
+openspace.bindKey("6", "openspace.time.setDeltaTime(14400)") -- 3h
+openspace.bindKey("7", "openspace.time.setDeltaTime(43200)") -- 12h
+openspace.bindKey("8", "openspace.time.setDeltaTime(86400)") -- 1d
+openspace.bindKey("9", "openspace.time.setDeltaTime(172800)") -- 2d
+
+openspace.bindKey("v", "openspace.time.setTime('2014 AUG 22 03:45:00'); openspace.time.setDeltaTime(1);")
+openspace.bindKey("b", "openspace.time.setTime('2014 SEP 02 11:30:30'); openspace.time.setDeltaTime(1);")
+openspace.bindKey("n", "openspace.time.setTime('2014 SEP 14 17:55:00'); openspace.time.setDeltaTime(1);")
+
+openspace.bindKey("i", "local b = openspace.getPropertyValue('ImagePlaneRosetta.renderable.enabled'); openspace.setPropertyValue('ImagePlaneRosetta.renderable.enabled', not b)")
+--]]
 
 openspace.bindKey("F8", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 

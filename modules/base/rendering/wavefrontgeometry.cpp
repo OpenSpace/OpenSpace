@@ -30,8 +30,6 @@
 
 namespace {
     const std::string _loggerCat = "WavefrontGeometry";
-    const std::string keyObjFile = "ObjFile";
-//    const int8_t CurrentCacheVersion = 3;
 }
 
 namespace openspace {

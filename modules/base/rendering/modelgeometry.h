@@ -59,7 +59,7 @@ namespace openspace {
 			bool loadObj(const std::string& filename);
 			bool loadCachedFile(const std::string& filename);
 			bool saveCachedFile(const std::string& filename);
-			int _magnification;
+			float _magnification;
 
 			GLuint _vaoID;
 			GLuint _vbo;

@@ -36,6 +36,7 @@
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
 #include <modules/newhorizons/rendering/simplespheregeometryprojection.h>
+#include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
 #include <modules/newhorizons/util/decoder.h>
 #include <modules/newhorizons/util/instrumentdecoder.h>
@@ -69,6 +70,7 @@ bool NewHorizonsModule::create() {
     fRenderable->registerClass<RenderableFov>("RenderableFov");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
+	fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
 
     auto fPlanetGeometryProjection = FactoryManager::ref().factory<planetgeometryprojection::PlanetGeometryProjection>();
     fPlanetGeometryProjection->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
