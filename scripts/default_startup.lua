@@ -16,6 +16,8 @@ openspace.time.setDeltaTime(0)                         -- How many seconds pass 
 
 dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))   -- Load the default keybindings
 
+openspace.fadeIn(1)
+
 -- openspace.time.setDeltaTime(50);
 
 --openspace.time.setTime("2015-07-14T12:30:00.00") -- PLUTO

@@ -295,22 +295,19 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 	bool parserComplete = parser->create();
 	if (parserComplete){
 		// get new data 
-		std::map<std::string, Decoder*>                in1 = parser->getTranslation();
-		std::map<std::string, ImageSubset>             in2 = parser->getSubsetMap();
-		std::vector<std::pair<std::string, TimeRange>> in3 = parser->getIstrumentTimes();
-		std::vector<std::pair<double, std::string>>    in4 = parser->getTargetTimes();
-		std::vector<double>                            in5 = parser->getCaptureProgression();
+		std::map<std::string, Decoder*> translations = parser->getTranslation(); // in1
+		std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();   // in2
+		std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getIstrumentTimes(); //in3
+		std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();  //in4
+		std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 
 		// check for sanity
-		ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation");
-		ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data");
-		ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
-		ghoul_assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule");
-		ghoul_assert(in5.size() > 0, "Sequencer failed to load Capture progression");
+		if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty())
+			return;
 
 		// append data
-		_fileTranslation.insert(in1.begin(), in1.end());
-		for (auto it : in2){
+		_fileTranslation.insert(translations.begin(), translations.end());
+		for (auto it : imageData){
 			if (_subsetMap.find(it.first) == _subsetMap.end()) {
 				// if key not exist yet - add sequence data for key (target)
 				_subsetMap.insert(it);
@@ -354,9 +351,9 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 			}
 		}
 
-		_instrumentTimes.insert(_instrumentTimes.end(), in3.begin(), in3.end());
-		_targetTimes.insert(_targetTimes.end(), in4.begin(), in4.end());
-		_captureProgression.insert(_captureProgression.end(), in5.begin(), in5.end());
+		_instrumentTimes.insert(_instrumentTimes.end(), instrumentTimes.begin(), instrumentTimes.end());
+		_targetTimes.insert(_targetTimes.end(), targetTimes.begin(), targetTimes.end());
+		_captureProgression.insert(_captureProgression.end(), captureProgression.begin(), captureProgression.end());
 
 		// sorting of data _not_ optional
 		sortData();
@@ -377,4 +374,5 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 		ghoul_assert(parserComplete, "one or more sequence loads failed, please check mod files. ");
 	}
 }
+
 }  // namespace openspace

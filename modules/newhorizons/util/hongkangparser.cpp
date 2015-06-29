@@ -136,7 +136,7 @@ bool HongKangParser::create(){
 		if (position != std::string::npos){
 			std::string extension = ghoul::filesystem::File(_fileName).fileExtension();
 
-			if (extension == "txt"){// Hong Kang. pre-parsed playbook
+			if (extension == "txt") {// Hong Kang. pre-parsed playbook
 				LINFO("Using Preparsed Playbook V9H");
 				std::ifstream file(_fileName , std::ios::binary);
 				if (!file.good()){
@@ -263,7 +263,9 @@ bool HongKangParser::create(){
 		}
 	}
 
-	return true;
+
+    sendPlaybookInformation(PlaybookIdentifierName);
+    return true;
 }
 
 bool HongKangParser::augmentWithSpice(Image& image,

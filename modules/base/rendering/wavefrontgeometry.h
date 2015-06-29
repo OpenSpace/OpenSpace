@@ -29,22 +29,23 @@
 
 namespace openspace {
 
-class RenderableModel;
+	class RenderableModel;
+	class RenderableModelProjection;
 
-namespace modelgeometry {
+	namespace modelgeometry {
 
-class WavefrontGeometry : public ModelGeometry {
-public:
-	WavefrontGeometry(const ghoul::Dictionary& dictionary);
+		class WavefrontGeometry : public ModelGeometry {
+		public:
+			WavefrontGeometry(const ghoul::Dictionary& dictionary);
 
-	bool initialize(RenderableModel* parent) override;
-    void deinitialize() override;
-	
-private:
-	bool loadModel(const std::string& filename);
-};
+			bool initialize(Renderable* parent) override;
+			void deinitialize() override;
 
-}  // namespace modelgeometry
+		private:
+			bool loadModel(const std::string& filename);
+		};
+
+	}  // namespace modelgeometry
 }  // namespace openspace
 
 #endif // __WAVEFRONTOBJECT_H__

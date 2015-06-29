@@ -111,7 +111,7 @@ std::string LabelParser::decode(std::string line){
 			//	return "";
 			//}
 			return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return
-			
+
 		}
 	}
 	return "";
@@ -127,7 +127,7 @@ std::string LabelParser::encode(std::string line) {
 	return "";
 }
 
-bool LabelParser::create(){
+bool LabelParser::create() {
 	auto imageComparer = [](const Image &a, const Image &b)->bool{
 		return a.startTime < b.startTime;
 	};
@@ -266,6 +266,28 @@ bool LabelParser::create(){
 
 	for (auto target : _subsetMap){
 		_instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
+
+	//	std::string min, max;
+	//	SpiceManager::ref().getDateFromET(target.second._range._min, min);
+	//	SpiceManager::ref().getDateFromET(target.second._range._max, max);
+
+	//	myfile << std::endl;
+	//	for (auto image : target.second._subset){
+	//		std::string time_beg;
+	//		std::string time_end;
+	//		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+	//		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
+
+	//		myfile << std::fixed
+	//			<< " "   << time_beg
+	//			<< "-->" << time_end
+	//			<< " [ " << image.startTime
+	//			<< " ] "   << image.target << std::setw(10);
+	//		for (auto instrument : image.activeInstruments){
+	//			myfile << " " << instrument;
+	//		}
+	//		myfile << std::endl;
+	//	}
 	}
     sendPlaybookInformation(PlaybookIdentifierName);
 	return true;

@@ -25,12 +25,12 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
@@ -46,12 +46,12 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp
@@ -66,14 +66,14 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

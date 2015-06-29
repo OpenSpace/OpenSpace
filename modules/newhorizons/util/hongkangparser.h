@@ -42,8 +42,8 @@ public:
 			        std::string spacecraft,
 					ghoul::Dictionary dictionary,
 			        std::vector<std::string> potentialTargets);
-	virtual bool create();
 
+	bool create() override;
 	void findPlaybookSpecifiedTarget(std::string line, std::string& target);
 	virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 

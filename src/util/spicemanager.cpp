@@ -42,33 +42,24 @@ namespace openspace {
 
 SpiceManager* SpiceManager::_manager = nullptr;
 
-void SpiceManager::initialize() {
-	assert(_manager == nullptr);
-	_manager = new SpiceManager;
-	_manager->_lastAssignedKernel = 0;
-
-	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, const_cast<char*>("REPORT"));
-	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, const_cast<char*>("NONE"));
+SpiceManager::SpiceManager() 
+    : _lastAssignedKernel(0)
+{
+    // Set the SPICE library to not exit the program if an error occurs
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    // But we do not want SPICE to print the errors, we will fetch them ourselves
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
-void SpiceManager::deinitialize() {
-	for (const KernelInformation& i : _manager->_loadedKernels)
-		unload_c(i.path.c_str());
+SpiceManager::~SpiceManager() {
+    for (const KernelInformation& i : _manager->_loadedKernels)
+        unload_c(i.path.c_str());
 
-	delete _manager;
-	_manager = nullptr;
-
-	// Set values back to default
-	erract_c("SET", 0, const_cast<char*>("DEFAULT"));
-	errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
+    // Set values back to default
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
-SpiceManager& SpiceManager::ref() {
-	assert(_manager != nullptr);
-	return *_manager;
-}
 
 SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& filePath) {
 	if (filePath.empty()) {
@@ -316,9 +307,9 @@ bool SpiceManager::getNaifId(const std::string& body, int& id) const {
 	}
 	else {
 		SpiceBoolean success;
-		SpiceInt sid = id;
-		bods2c_c(body.c_str(), &sid, &success);
-		id = sid;
+//		SpiceInt sid = id;
+		bods2c_c(body.c_str(), &id, &success);
+//		id = sid;
         if (success == SPICEFALSE)
             LERROR("Could not find NAIF ID of body '" + body + "'");
 		return (success == SPICETRUE);
@@ -331,9 +322,7 @@ bool SpiceManager::getFrameId(const std::string& frame, int& id) const {
 		return false;
 	}
 	else {
-		SpiceInt sid = id;
-		namfrm_c(frame.c_str(), &sid);
-		id = sid;
+		namfrm_c(frame.c_str(), &id);
 		bool hasError = SpiceManager::checkForError("Error getting id for frame '" + frame + "'");
 		return !hasError;
 	}
@@ -403,7 +392,7 @@ bool SpiceManager::getValue(const std::string& body, const std::string& value,
 }
 
 bool SpiceManager::spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et){
-	int craftID;
+	int craftID = -1;
 	getNaifId(craftIdCode, craftID);
 	sct2e_c(craftID, craftTicks, &et);
     bool hasError = checkForError("Error transforming spacecraft clock of '" + craftIdCode + "' at time " + std::to_string(craftTicks));
@@ -1049,8 +1038,8 @@ bool SpiceManager::checkForError(std::string errorMessage) {
 bool SpiceManager::getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c) {
 
 	SpiceDouble radii[3];
-	SpiceInt n;
-	int id;
+	SpiceInt n = -1;
+	int id = -1;
 
 	getNaifId(planetName, id);
 	if (bodfnd_c(id, "RADII")) {

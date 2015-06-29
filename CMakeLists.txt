@@ -22,12 +22,13 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 
 project (OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
+set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 set(OPENSPACE_MODULE_DIR "${OPENSPACE_BASE_DIR}/modules")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
@@ -42,15 +43,12 @@ set_build_output_directories()
 configure_openspace_version(0 1 0 "prerelease-5")
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-
 option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
-option(OPENSPACE_BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
-
 
 include(src/CMakeLists.txt)
-create_openspace_targets()
-set_compile_settings()
+create_openspace_target()
 add_external_dependencies()
+handle_applications()
 
 if (MSVC)
     option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)

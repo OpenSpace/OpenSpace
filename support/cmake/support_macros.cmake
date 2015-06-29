@@ -64,59 +64,51 @@ endfunction ()
 
 
 
-function (create_openspace_targets)
+function (create_openspace_target)
     add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
     target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
 
-    add_executable(OpenSpace ${OPENSPACE_MAIN})
-    target_include_directories(OpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
-    target_link_libraries(OpenSpace libOpenSpace)
+    set_compile_settings(libOpenSpace)
 endfunction ()
 
 
 
-function (set_compile_settings)
+function (set_compile_settings project)
     if (MSVC)
-        target_compile_options(libOpenSpace PUBLIC "/MP" "/wd4201" "/wd4127")
+        target_compile_options(${project} PUBLIC "/MP" "/wd4201" "/wd4127")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(libOpenSpace PUBLIC "/WX")
-            target_compile_options(OpenSpace PUBLIC "/WX")
+            target_compile_options(${project} PUBLIC "/WX")
         endif ()
-
-        set_target_properties(OpenSpace PROPERTIES LINK_FLAGS
-            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-        )
     elseif (APPLE)
-        target_compile_definitions(libOpenSpace PUBLIC "__APPLE__")
+        target_compile_definitions(${project} PUBLIC "__APPLE__")
 
         include (CheckCXXCompilerFlag)
         CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
         CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
         mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
         if (COMPILER_SUPPORTS_CXX11)
-            target_compile_options(libOpenSpace PUBLIC "-std=c++11")
+            target_compile_options(${project} PUBLIC "-std=c++11")
         elseif (COMPILER_SUPPORTS_CXX0X)
-            target_compile_options(libOpenSpace PUBLIC "-std=c++0x")
+            target_compile_options(${project} PUBLIC "-std=c++0x")
         else ()
           message(FATAL_ERROR "Compiler does not have C++11 support")
         endif ()
 
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(libOpenSpace PUBLIC "-Werror")
-            target_compile_options(OpenSpace PUBLIC "-Werror")
+            target_compile_options(${project} PUBLIC "-Werror")
         endif ()
 
-        target_compile_options(libOpenSpace PUBLIC "-stdlib=libc++")
+        target_compile_options(${project} PUBLIC "-stdlib=libc++")
 
-        target_include_directories(libOpenSpace PUBLIC "/Developer/Headers/FlatCarbon")
+        target_include_directories(${project} PUBLIC "/Developer/Headers/FlatCarbon")
         find_library(COREFOUNDATION_LIBRARY CoreFoundation)
         find_library(CARBON_LIBRARY Carbon)
         find_library(COCOA_LIBRARY Carbon)
         find_library(APP_SERVICES_LIBRARY ApplicationServices)
         mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-        target_link_libraries(libOpenSpace
+        target_link_libraries(${project}
             ${CARBON_LIBRARY}
             ${COREFOUNDATION_LIBRARY}
             ${COCOA_LIBRARY}
@@ -128,20 +120,18 @@ function (set_compile_settings)
           CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
           mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
           if (COMPILER_SUPPORTS_CXX11)
-            target_compile_options(libOpenSpace PUBLIC "-std=c++11")
+            target_compile_options(${project} PUBLIC "-std=c++11")
           elseif (COMPILER_SUPPORTS_CXX0X)
-            target_compile_options(libOpenSpace PUBLIC "-std=c++0x")
+            target_compile_options(${project} PUBLIC "-std=c++0x")
           else ()
             message(FATAL_ERROR "Compiler does not have C++11 support")
           endif ()
 
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(libOpenSpace PUBLIC "-Werror")
-            target_compile_options(OpenSpace PUBLIC "-Werror")
+            target_compile_options(${project} PUBLIC "-Werror")
         endif ()
 
-        target_compile_options(libOpenSpace PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
-        target_compile_options(OpenSpace PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
+        target_compile_options(${project} PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
     endif ()
 endfunction ()
 
@@ -173,8 +163,112 @@ function (add_external_dependencies)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SPICE_INCLUDE_DIRS})
     target_link_libraries(libOpenSpace ${SPICE_LIBRARIES})
 
+    # Curl
+    if (WIN32)
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
+        set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl" PARENT_SCOPE)
+        target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
+        target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
+        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+    else ()
+        find_package(CURL)
+        if (CURL_FOUND)
+            target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
+            target_link_libraries(libOpenSpace ${CURL_LIBRARIES})
+            target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED")
+        endif ()
+    endif()
 endfunction ()
 
+
+
+function (handle_applications)
+    set(applications "")
+    set(applications_link_to_openspace "")
+
+    file(GLOB appDirs RELATIVE ${OPENSPACE_APPS_DIR} ${OPENSPACE_APPS_DIR}/*)
+    list(REMOVE_ITEM appDirs ".DS_Store") # Removing the .DS_Store present on Mac
+
+    set(DEFAULT_APPLICATIONS
+        "OpenSpace"
+        "Launcher"
+    )
+    mark_as_advanced(DEFAULT_APPLICATIONS)
+
+    foreach (app ${appDirs})
+        string(TOUPPER ${app} upper_app)
+        list (FIND DEFAULT_APPLICATIONS "${app}" _index)
+        if (${_index} GREATER -1)
+            # App is a default application
+            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" ON)
+        else ()
+            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" OFF)
+        endif()
+        if (OPENSPACE_APPLICATION_${upper_app})
+            unset(APPLICATION_NAME)
+            unset(APPLICATION_LINK_TO_OPENSPACE)
+            include(${OPENSPACE_APPS_DIR}/${app}/CMakeLists.txt)
+            set_compile_settings(${APPLICATION_NAME})
+
+            if (APPLICATION_LINK_TO_OPENSPACE)
+                    get_property(
+                        OPENSPACE_INCLUDE_DIR
+                        TARGET libOpenSpace
+                        PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                    )
+                    target_include_directories(${APPLICATION_NAME} PUBLIC 
+                        "${OPENSPACE_BASE_DIR}"
+                        ${OPENSPACE_INCLUDE_DIR}
+                    )
+
+                    get_property(
+                        OPENSPACE_DEFINES
+                        TARGET libOpenSpace
+                        PROPERTY INTERFACE_COMPILE_DEFINITIONS
+                    )
+                    target_compile_definitions(${APPLICATION_NAME} PUBLIC ${OPENSPACE_DEFINES})
+
+                    target_link_libraries(${APPLICATION_NAME} Ghoul)
+                    target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+
+                    if (MSVC)
+                        set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
+                            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+                        )
+                    endif ()
+
+
+                    if (WIN32)
+                        copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+                    endif ()
+            endif ()
+
+            list(APPEND applications ${APPLICATION_NAME})
+            list(APPEND applications_link_to_openspace ${APPLICATION_LINK_TO_OPENSPACE})
+            unset(APPLICATION_NAME)
+            unset(APPLICATION_LINK_TO_OPENSPACE)
+        endif ()
+    endforeach ()
+
+
+    # option(OPENSPACE_APPLICATION_OPENSPACE "Main OpenSpace Application" ON)
+    # if (OPENSPACE_APPLICATION_OPENSPACE)
+    #     include(${OPENSPACE_APPS_DIR}/OpenSpace/CMakeLists.txt)
+    #     list(APPEND applications "OpenSpace")
+    # endif ()
+    set(OPENSPACE_APPLICATIONS ${applications} PARENT_SCOPE)
+    set(OPENSPACE_APPLICATIONS_LINK_REQUEST ${applications_link_to_openspace} PARENT_SCOPE)
+
+    message(STATUS "Applications:")
+    list(LENGTH applications len1)
+    math(EXPR len2 "${len1} - 1")
+
+    foreach(val RANGE ${len2})
+      list(GET applications ${val} val1)
+      list(GET applications_link_to_openspace ${val} val2)
+      message(STATUS "\t${val1} (Link: ${val2})")
+    endforeach()
+endfunction()
 
 
 function (handle_option_vld)
@@ -183,15 +277,9 @@ function (handle_option_vld)
         target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
         target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
 
-        copy_files(OpenSpace "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
-    endif ()
-endfunction ()
-
-
-
-function(handle_option_gui)
-    if (OPENSPACE_BUILD_GUI_APPLICATIONS)
-        add_subdirectory(gui)
+        foreach (app ${OPENSPACE_APPLCATIONS})
+            copy_files(${app} "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
+        endforeach ()
     endif ()
 endfunction ()
 
@@ -298,7 +386,10 @@ function (handle_internal_modules)
     set(MODULE_HEADERS "")
     set(MODULE_CLASSES "")
 
-    message(STATUS ${sortedModules})
+    message(STATUS "Included modules:")
+    foreach (module ${sortedModules})
+        message(STATUS "\t${module}")
+    endforeach ()
 
     # Add subdirectories in the correct order
     foreach (module ${sortedModules})
@@ -306,7 +397,18 @@ function (handle_internal_modules)
         if (${optionName})
             create_library_name(${module} libraryName)
             add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
-            target_link_libraries(OpenSpace ${libraryName})
+
+            list(LENGTH OPENSPACE_APPLICATIONS len1)
+            math(EXPR len2 "${len1} - 1")
+
+            foreach(val RANGE ${len2})
+                list(GET OPENSPACE_APPLICATIONS ${val} val1)
+                list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
+                if (${val2})
+                    target_link_libraries(${app} ${libraryName})
+                endif ()
+            endforeach()
+
             target_link_libraries(libOpenSpace ${libraryName})
             create_define_name(${module} defineName)
             target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
@@ -339,6 +441,9 @@ endfunction ()
 
 function (copy_dynamic_libraries)
     if (WIN32)
+
+        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
+
         # Copy DLLs needed by Ghoul into the executable directory
         ghl_copy_shared_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/ghoul)
 

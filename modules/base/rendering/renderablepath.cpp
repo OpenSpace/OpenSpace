@@ -212,7 +212,7 @@ void RenderablePath::calculatePath(std::string observer) {
         return;
 
 	double lightTime;
-	bool correctPosition = true;
+//	bool correctPosition = true;
 
 	psc pscPos;
 	double currentTime = _start;
@@ -222,7 +222,7 @@ void RenderablePath::calculatePath(std::string observer) {
 	//float g = _lineColor[1];
 	//float b = _lineColor[2];
 	for (int i = 0; i < segments; i++) {
-		correctPosition = SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
+		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
 		pscPos[3] += 3;
 			
 		//if (!correctPosition) {

@@ -33,6 +33,9 @@ class OpenSpaceModule;
 
 class ModuleEngine {
 public:
+    bool create();
+    bool destroy();
+
     bool initialize();
     bool deinitialize();
 
