@@ -122,8 +122,6 @@ namespace openspace {
                 LERROR("Failed to parse hints for Parallel Connection");
 			}
 
-            LINFO("Attempting to connect to address "<< _address << " on port " << _port);
-
             //we're not connected
 			_isConnected.store(false);
             
@@ -183,6 +181,8 @@ namespace openspace {
 
             //while the connection thread is still running
             while (!_isConnected.load()){
+                
+                LINFO("Attempting to connect to server "<< _address << " on port " << _port);
                 
                 //try to connect
                 result = connect(_clientSocket, info->ai_addr, (int)info->ai_addrlen);
@@ -271,7 +271,71 @@ namespace openspace {
 		}
 
 		void ParallelConnection::decodeInitializationMessage(){
-			printf("Init message received!\n");
+            
+            int result;
+            uint16_t numScripts;
+            
+            //create a buffer to hold the number of scripts in the initialization message
+            std::vector<char> buffer;
+            buffer.resize(sizeof(numScripts));
+            
+            //read number of scripts in the initialization message
+            result = receiveData(_clientSocket, buffer, sizeof(numScripts), 0);
+            
+            if (result <= 0){
+                //error
+                return;
+            }
+            
+            //assign number of scripts
+            numScripts = *reinterpret_cast<uint16_t*>(buffer.data());
+            
+            //declare placeholder for all received scripts
+            std::vector<std::string> initScripts;
+            initScripts.reserve(numScripts);
+            
+            //length of each script and resize receiveing buffer
+            uint16_t scriptlen;
+            buffer.clear();
+            buffer.resize(sizeof(scriptlen));
+            
+            //buffer for holding received scripts
+            std::vector<char> scriptbuffer;
+            
+            for(int n = 0; n < numScripts; ++n){
+                
+                //read size in chars of next script
+                result = receiveData(_clientSocket, buffer, sizeof(scriptlen), 0);
+                
+                if (result <= 0){
+                    //error
+                    return;
+                }
+                
+                //assign size of next script
+                scriptlen = *reinterpret_cast<uint16_t*>(buffer.data());
+                
+                //resize buffer
+                scriptbuffer.clear();
+                scriptbuffer.resize(scriptlen);
+                
+                //read next script
+                result = receiveData(_clientSocket, scriptbuffer, scriptlen, 0);
+                
+                if (result <= 0){
+                    //error
+                    return;
+                }
+                
+                //create a string from received chars in buffer
+                std::string script;
+                script.assign(scriptbuffer.begin(), scriptbuffer.end());
+                
+                //and add that script to all received init scripts
+                initScripts.push_back(script);
+                
+            }
+            
 		}
 
 		void ParallelConnection::decodeStreamDataMessage(){
@@ -431,6 +495,33 @@ namespace openspace {
             receiveData(_clientSocket, buffer, sizeof(uint32_t), 0);
             uint32_t requesterID = *reinterpret_cast<uint32_t*>(buffer.data());
 			printf("InitRequest message received from client %d!\n", requesterID);
+            
+            //construct init msg
+            std::vector<std::string> scripts = OsEng.scriptEngine()->cachedScripts();
+            uint16_t numScrips = scripts.size();
+            
+            //write header
+            buffer.clear();
+            writeHeader(buffer, MessageTypes::Initialization);
+            
+            //write number of scripts
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&numScrips), reinterpret_cast<char*>(&numScrips) + sizeof(numScrips));
+            
+            uint16_t msglen;
+            std::vector<std::string>::const_iterator it;
+            
+            //write all scripts
+            for(it = scripts.cbegin();
+                it != scripts.cend();
+                ++it){
+                //write size of script in chars
+                msglen = (*it).size();
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(msglen), reinterpret_cast<char*>(msglen) + sizeof(msglen));
+                buffer.insert(buffer.end(), (*it).begin(), (*it).end());
+            }
+            
+            //send initialization message
+            send(_clientSocket, buffer.data(), buffer.size(), 0);
 		}
 
 		void ParallelConnection::listenCommunication(){
