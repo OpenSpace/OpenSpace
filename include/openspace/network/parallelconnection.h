@@ -211,6 +211,7 @@ namespace openspace{
             std::thread *_connectionThread;
 			std::thread *_broadcastThread;
             std::thread *_sendThread;
+			std::thread *_receiveThread;
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isListening;
