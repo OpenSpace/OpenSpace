@@ -27,6 +27,8 @@
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
+uniform float _magnification;
+
 layout(location = 0) in vec4 in_position;
 //in vec3 in_position;
 layout(location = 1) in vec2 in_st;
@@ -39,13 +41,15 @@ out float s;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main()
-{
+void main() {
+	vec4 pos = in_position;
+	pos.w += _magnification;
+
 	// set variables
 	vs_st = in_st;
 	//vs_stp = in_position.xyz;
-	vs_position = in_position;
-	vec4 tmp = in_position;
+	vs_position = pos;
+	vec4 tmp = pos;
 
 	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
 	vs_normal = normalize(ModelTransform * vec4(in_normal,0));

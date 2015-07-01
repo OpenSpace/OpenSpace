@@ -66,6 +66,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
+    , _magnification("magnification", "Magnification", 0.f, 0.f, 10.f)
 	, _mode(GL_TRIANGLES)
 {
 	setName("ModelGeometry");
@@ -74,9 +75,8 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 	bool success = dictionary.getValue(keyName, name);
 	ghoul_assert(success, "Name tag was not present");
 
-	success = dictionary.getValue(keySize, _magnification);
-	if (!success)
-		_magnification = 0; // if not set, models will be 1:1 (earlier 1:1000) @AA
+    if (dictionary.hasKeyAndValue<double>(keySize))
+        _magnification = static_cast<float>(dictionary.value<double>(keySize));
 
 	success = dictionary.getValue(keyObjFile, _file);
 	if (!success) {
@@ -88,6 +88,8 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 	if (!FileSys.fileExists(_file, true))
 		LERROR("Could not load OBJ file '" << _file << "': File not found");
 	
+
+    addProperty(_magnification);
 }
 
 ModelGeometry::~ModelGeometry() {
@@ -244,6 +246,10 @@ bool ModelGeometry::getIndices(std::vector<int>* indexList) {
 		indexList->push_back(i);
 
 	return !(indexList->empty());
+}
+
+void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {
+    program.setUniform("_magnification", _magnification);
 }
 
 }  // namespace modelgeometry
