@@ -275,22 +275,39 @@ namespace openspace {
             
             int result;
             uint16_t numScripts;
+			uint32_t datalen;
+			uint32_t id;
             
             //create a buffer to hold the number of scripts in the initialization message
             std::vector<char> buffer;
-            buffer.resize(sizeof(numScripts));
+            buffer.resize(sizeof(id));
             
-            //read number of scripts in the initialization message
-            result = receiveData(_clientSocket, buffer, sizeof(numScripts), 0);
-            
-            if (result <= 0){
-                //error
-                return;
-            }
-            
-            //assign number of scripts
-            numScripts = *reinterpret_cast<uint16_t*>(buffer.data());
-            
+			//read recepient ID (mine)
+            result = receiveData(_clientSocket, buffer, sizeof(id), 0);
+			if (result <= 0){
+				//error
+				return;
+			}
+			id = *(reinterpret_cast<uint32_t*>(buffer.data()));
+
+			//read data length
+			result = receiveData(_clientSocket, buffer, sizeof(datalen), 0);
+			if (result <= 0){
+				//error
+				return;
+			}
+			datalen = *(reinterpret_cast<uint32_t*>(buffer.data()));
+
+			buffer.clear();
+			buffer.resize(sizeof(numScripts));
+			//read number of scripts
+			result = receiveData(_clientSocket, buffer, sizeof(numScripts), 0);
+			if (result <= 0){
+				//error
+				return;
+			}
+			numScripts = *(reinterpret_cast<uint16_t*>(buffer.data()));
+						          
             //declare placeholder for all received scripts
             std::vector<std::string> initScripts;
             initScripts.reserve(numScripts);
@@ -334,7 +351,6 @@ namespace openspace {
                 
                 //que script with the script engine
                 OsEng.scriptEngine()->queueScript(script);
-                
             }
             
 		}
