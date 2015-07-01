@@ -22,7 +22,23 @@ openspace.bindKey("5", "openspace.time.setDeltaTime(60)")
 openspace.bindKey("6", "openspace.time.setDeltaTime(120)")
 openspace.bindKey("7", "openspace.time.setDeltaTime(360)")
 openspace.bindKey("8", "openspace.time.setDeltaTime(540)")
-openspace.bindKey("9", "openspace.time.setDeltaTime(720)")
+openspace.bindKey("9", "openspace.time.setDeltaTime(720)") 
+
+--[[openspace.bindKey("2", "openspace.time.setDeltaTime(30)")
+openspace.bindKey("3", "openspace.time.setDeltaTime(180)") -- 3m
+openspace.bindKey("4", "openspace.time.setDeltaTime(900)") -- 15m
+openspace.bindKey("5", "openspace.time.setDeltaTime(3600)") -- 1h
+openspace.bindKey("6", "openspace.time.setDeltaTime(14400)") -- 3h
+openspace.bindKey("7", "openspace.time.setDeltaTime(43200)") -- 12h
+openspace.bindKey("8", "openspace.time.setDeltaTime(86400)") -- 1d
+openspace.bindKey("9", "openspace.time.setDeltaTime(172800)") -- 2d
+
+openspace.bindKey("v", "openspace.time.setTime('2014 AUG 22 03:45:00'); openspace.time.setDeltaTime(1);")
+openspace.bindKey("b", "openspace.time.setTime('2014 SEP 02 11:30:30'); openspace.time.setDeltaTime(1);")
+openspace.bindKey("n", "openspace.time.setTime('2014 SEP 14 17:55:00'); openspace.time.setDeltaTime(1);")
+
+openspace.bindKey("i", "local b = openspace.getPropertyValue('ImagePlaneRosetta.renderable.enabled'); openspace.setPropertyValue('ImagePlaneRosetta.renderable.enabled', not b)")
+--]]
 
 openspace.bindKey("F8", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 
@@ -31,6 +47,8 @@ openspace.bindKey("F9", "openspace.time.setTime('2015-07-14T09:00:00.00'); opens
 openspace.bindKey("F10", "openspace.time.setTime('2015-07-14T10:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 openspace.bindKey("F11", "openspace.time.setTime('2015-07-14T11:17:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 openspace.bindKey("F12", "openspace.time.setTime('2015-07-14T12:45:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
+
+openspace.bindKey("r", "local b = openspace.getPropertyValue('PlutoProjection.renderable.fk'); openspace.setPropertyValue('PlutoProjection.renderable.fk', not b)")
 
 openspace.bindKey("a", "openspace.setOrigin('NewHorizons')")
 openspace.bindKey("s", "openspace.setOrigin('PlutoProjection')")
@@ -82,6 +100,8 @@ openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_RALPH_MVIC_NIR.
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_AIRGLOW.renderable.solidDraw', not b)")
 openspace.bindKey("m", "local b = openspace.getPropertyValue('NH_ALICE_SOC.renderable.solidDraw'); openspace.setPropertyValue('NH_ALICE_SOC.renderable.solidDraw', not b)")
 
+openspace.bindKey("t", "local b = openspace.getPropertyValue('PlutoShadow.renderable.enabled'); openspace.setPropertyValue('PlutoShadow.renderable.enabled', not b)")
+openspace.bindKey("t", "local b = openspace.getPropertyValue('CharonShadow.renderable.enabled'); openspace.setPropertyValue('CharonShadow.renderable.enabled', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('JupiterProjection.renderable.performProjection'); openspace.setPropertyValue('JupiterProjection.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Io.renderable.performProjection'); openspace.setPropertyValue('Io.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Ganymede.renderable.performProjection'); openspace.setPropertyValue('Ganymede.renderable.performProjection', not b)")

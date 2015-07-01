@@ -27,16 +27,83 @@
 
 #include <QWidget>
 
+#include <QMap>
+
+#include <openspace/engine/downloadmanager.h>
+
+#include <libtorrent/torrent_handle.hpp>
+
+#include <atomic>
+//#include <thread>
+
+class QBoxLayout;
+class QGridLayout;
+
+class InfoWidget;
+
+namespace libtorrent {
+    class session;
+    struct torrent_handle;
+}
+
 class SyncWidget : public QWidget {
+Q_OBJECT
 public:
-    SyncWidget(QWidget* parent);
+    SyncWidget(QWidget* parent, Qt::WindowFlags f = 0);
+    ~SyncWidget();
     
-    void setSceneFile(QString scene);
+    void setSceneFiles(QMap<QString, QString> sceneFiles);
+
+private slots:
+    void syncButtonPressed();
+    void handleTimer();
 
 private:
+    struct DirectFile {
+        QString module;
+        QString url;
+        QString destination;
+    };
+
+    struct FileRequest {
+        QString module;
+        QString identifier;
+        QString destination;
+        int version;
+    };
+
+    struct TorrentFile {
+        QString module;
+        QString file;
+        QString destination;
+    };
+
     void clear();
-    void handleDirectFiles(QString module, QStringList files);
-    void handleTorrentFiles(QString module, QStringList torrents);
+    QStringList selectedScenes() const;
+
+    void handleFileFutureAddition(const std::vector<openspace::DownloadManager::FileFuture*>& futures);
+
+    void handleDirectFiles();
+    void handleFileRequest();
+    void handleTorrentFiles();
+
+    QMap<QString, QString>  _sceneFiles;
+    QString _modulesDirectory;
+    QGridLayout* _sceneLayout;
+    QBoxLayout* _downloadLayout;
+
+    libtorrent::session* _session;
+    QMap<libtorrent::torrent_handle, InfoWidget*> _torrentInfoWidgetMap;
+
+    QList<DirectFile> _directFiles;
+    QList<FileRequest> _fileRequests;
+    QList<TorrentFile> _torrentFiles;
+
+    std::vector<openspace::DownloadManager::FileFuture*> _futures;
+    std::map<openspace::DownloadManager::FileFuture*, InfoWidget*> _futureInfoWidgetMap;
+
+    std::vector<openspace::DownloadManager::FileFuture*> _futuresToAdd;
+    std::atomic_flag _mutex;
 };
 
 #endif // __SYNCWIDGET_H__

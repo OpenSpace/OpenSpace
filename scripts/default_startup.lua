@@ -6,6 +6,9 @@ openspace.setInvertRoll(true);
 --openspace.setInteractionSensitivity(10)               -- This is the default value for the sensitivity (the higher, the more sensitive)
 
 openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start time for a Jupiter run of New Horizons
+
+--openspace.time.setTime("2011 AUG 06 00:00:00")          -- Dawn takes pictures of Vesta
+--openspace.time.setTime("2011 JUL 28 12:00:00")          -- Rosetta starts dancing around 67p
 --openspace.time.setTime("2007 FEB 28 11:45:00")          -- europa rise
 --TESTING ALICE 
 --openspace.time.setTime("2015-07-13T00:00:00.00")

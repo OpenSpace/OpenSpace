@@ -32,7 +32,7 @@ namespace openspace {
 class FieldlinesModule : public OpenSpaceModule {
 public:
     FieldlinesModule();
-    bool initialize() override;
+    bool create() override;
 };
 
 } // namespace openspace

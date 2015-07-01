@@ -36,6 +36,8 @@ namespace {
 	const std::string keyObjFile = "ObjFile";
 	const int8_t CurrentCacheVersion = 3;
     const std::string keyType = "Type";
+	const std::string keyName = "Name";
+	const std::string keySize = "Magnification";
 }
 
 namespace openspace {
@@ -67,11 +69,14 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 	, _mode(GL_TRIANGLES)
 {
 	setName("ModelGeometry");
-	using constants::scenegraphnode::keyName;
 
 	std::string name;
 	bool success = dictionary.getValue(keyName, name);
 	ghoul_assert(success, "Name tag was not present");
+
+	success = dictionary.getValue(keySize, _magnification);
+	if (!success)
+		_magnification = 0; // if not set, models will be 1:1 (earlier 1:1000) @AA
 
 	success = dictionary.getValue(keyObjFile, _file);
 	if (!success) {
@@ -95,11 +100,11 @@ void ModelGeometry::render() {
 	glBindVertexArray(0);
 }
 
-void ModelGeometry::changeRenderMode(const GLenum mode){
+void ModelGeometry::changeRenderMode(const GLenum mode) {
 	_mode = mode;
 }
 
-bool ModelGeometry::initialize(RenderableModel* parent) {
+bool ModelGeometry::initialize(Renderable* parent) {
     _parent = parent;
 	PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
 	_parent->setBoundingSphere(ps);
@@ -138,7 +143,7 @@ void ModelGeometry::deinitialize() {
 	glDeleteBuffers(1, &_ibo);
 }
 
-bool ModelGeometry::loadObj(const std::string& filename){
+bool ModelGeometry::loadObj(const std::string& filename) {
 		std::string cachedFile = "";
 		FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
 
@@ -224,6 +229,22 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 			return false;
 		}
 	}
+
+bool ModelGeometry::getVertices(std::vector<Vertex>* vertexList) {
+	vertexList->clear();
+	for (auto v : _vertices)
+		vertexList->push_back(v);
+
+	return !(vertexList->empty());
+}
+
+bool ModelGeometry::getIndices(std::vector<int>* indexList) {
+	indexList->clear();
+	for (auto i : _indices)
+		indexList->push_back(i);
+
+	return !(indexList->empty());
+}
 
 }  // namespace modelgeometry
 }  // namespace openspace

@@ -69,6 +69,7 @@ public:
 	psc sphericalInterpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
 	
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
+	glm::dvec3 pscSlerp(glm::dvec3 p0, glm::dvec3 p1, float t);
 	glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
 
 	void computeColors();

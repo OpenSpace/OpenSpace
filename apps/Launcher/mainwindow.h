@@ -27,9 +27,6 @@
 
 #include <QWidget>
 
-#include "shortcutwidget.h"
-#include "syncwidget.h"
-
 #include <QMap>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -37,6 +34,13 @@
 
 class QComboBox;
 class QNetworkAccessManager;
+
+class ShortcutWidget;
+class SyncWidget;
+
+namespace openspace {
+    class ConfigurationManager;
+}
 
 class MainWindow : public QWidget {
 Q_OBJECT
@@ -62,11 +66,11 @@ private:
     QComboBox* _scenes;
     QMap<QString, QString> _sceneFiles;
 
-    ShortcutWidget _shortcutWidget;
-    SyncWidget _syncWidget;
+    ShortcutWidget* _shortcutWidget;
+    SyncWidget* _syncWidget;
 
-    
     QNetworkAccessManager _networkManager;
+    openspace::ConfigurationManager* _configuration;
 };
 
 //class MainWindow : public QWidget {

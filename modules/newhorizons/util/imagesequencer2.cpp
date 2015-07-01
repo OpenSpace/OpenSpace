@@ -30,6 +30,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <modules/newhorizons/util/decoder.h>
+#include <boost/algorithm/string.hpp>
 
 #include <openspace/util/spicemanager.h>
 #include <fstream>
@@ -46,8 +47,7 @@ namespace openspace {
 ImageSequencer2* ImageSequencer2::_instance = nullptr;
 
 ImageSequencer2::ImageSequencer2()
-    : _latestImage()
-    , _hasData(false)
+    : _hasData(false)
 {}
 
 ImageSequencer2& ImageSequencer2::ref() {
@@ -161,8 +161,13 @@ double ImageSequencer2::getNextCaptureTime(){
 	return nextCaptureTime;
 }
 const Image ImageSequencer2::getLatestImageForInstrument(const std::string _instrumentID){
-	
-	return _latestImage;
+	auto it = _latestImages.find(_instrumentID);
+	if (it != _latestImages.end())
+		return _latestImages[_instrumentID];
+	else {
+		Image dummyImage = { 0, 0, "", std::vector<std::string>(), "", false };
+		return dummyImage;
+	}
 }
 
 std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
@@ -170,13 +175,13 @@ std::map<std::string, bool> ImageSequencer2::getActiveInstruments(){
 	for (auto i : _switchingMap)
 		_switchingMap[i.first] = false;
 	// go over the filetranslation map
-	for (auto key : _fileTranslation){
+	for (const auto &key : _fileTranslation){
 		// for each spice-instrument
-		for (auto instrumentID : key.second->getTranslation()){
+		for (const auto &instrumentID : key.second->getTranslation()){
 			// check if the spice-instrument is active 
 				if (instrumentActive(instrumentID)){
 					// go over switching map
-					for (auto instrument : _switchingMap){
+					for (const auto &instrument : _switchingMap){
 						// if instrument is present in switching map
 						if (instrumentID == instrument.first){
 							// set as active
@@ -223,20 +228,14 @@ float ImageSequencer2::instrumentActiveTime(const std::string& instrumentID) con
     return -1.f;
 }
 
-bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,  
-	                                std::string projectee, 
-									std::string instrumentID){
-
-	if (!instrumentActive(instrumentID) && !Time::ref().timeJumped()) return false;
-	// dev. note: this is only due to LORRI being the only instrument implemented so far.
-	return getImagePaths(captures, projectee);
-}
-
 bool ImageSequencer2::getImagePaths(std::vector<Image>& captures, 
-	                                std::string projectee){
+	                                std::string projectee,
+									std::string instrumentRequest){
 
 	// check if this instance is either in range or 
 	// a valid candidate to recieve data 
+	if (!instrumentActive(instrumentRequest) && !Time::ref().timeJumped()) return false;
+
 
 	//if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)
 	if (_subsetMap[projectee]._range.inRange(_currentTime) ||
@@ -244,8 +243,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 		auto compareTime = [](const Image &a,
 			                  const Image &b)->bool{
 			return a.startTime < b.startTime;
-		};
-		
+		};		
 		// for readability we store the iterators
 		auto begin = _subsetMap[projectee]._subset.begin(); 
 		auto end   = _subsetMap[projectee]._subset.end();
@@ -258,19 +256,20 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 		findCurrent.startTime  = _currentTime;
 
 		// find the two iterators that correspond to the latest time jump
-		auto curr = std::lower_bound(begin, end, findCurrent, compareTime);
+		auto curr = std::lower_bound(begin, end, findCurrent , compareTime);
 		auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
-
+	
 		if (curr != begin && curr != end  && prev != begin && prev != end && prev < curr){
             if (curr->startTime >= prev->startTime){
-			    std::transform(prev, curr, std::back_inserter(captureTimes),
-				    [](const Image& i) {
-				    return i;
-			    });
+				std::copy_if(prev, curr, back_inserter(captureTimes), 
+					[instrumentRequest](const Image& i) {
+					return i.activeInstruments[0] == instrumentRequest;
+				});
+
 			    std::reverse(captureTimes.begin(), captureTimes.end());
 			    captures = captureTimes;
                 if (!captures.empty())
-					_latestImage = captures.back();
+					_latestImages[captures.back().activeInstruments.front()] = captures.back();
 
 			    return true;
             }
@@ -297,42 +296,87 @@ void ImageSequencer2::sortData(){
 }
 
 void ImageSequencer2::runSequenceParser(SequenceParser* parser){
-	parser->create();
-	// get new data 
-	std::map<std::string, Decoder*>                in1 = parser->getTranslation();
-	std::map<std::string, ImageSubset>             in2 = parser->getSubsetMap();
-	std::vector<std::pair<std::string, TimeRange>> in3 = parser->getIstrumentTimes();
-	std::vector<std::pair<double, std::string>>    in4 = parser->getTargetTimes();
-	std::vector<double>                            in5 = parser->getCaptureProgression();
-	
-	// check for sanity
-	ghoul_assert(in1.size() > 0, "Sequencer failed to load Translation"                  );
-	ghoul_assert(in2.size() > 0, "Sequencer failed to load Image data"                   );
-	ghoul_assert(in3.size() > 0, "Sequencer failed to load Instrument Switching schedule");
-	ghoul_assert(in4.size() > 0, "Sequencer failed to load Target Switching schedule"    );
-	ghoul_assert(in5.size() > 0, "Sequencer failed to load Capture progression"          );
+	bool parserComplete = parser->create();
+	if (parserComplete){
+		// get new data 
+		std::map<std::string, Decoder*> translations = parser->getTranslation(); // in1
+		std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();   // in2
+		std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getIstrumentTimes(); //in3
+		std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();  //in4
+		std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 
+		// check for sanity
+		if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty())
+			return;
 
-	// append data
-	_fileTranslation.insert   (                           in1.begin(), in1.end());
-	_subsetMap.insert         (                           in2.begin(), in2.end());
-	_instrumentTimes.insert   (   _instrumentTimes.end(), in3.begin(), in3.end());
-	_targetTimes.insert       (       _targetTimes.end(), in4.begin(), in4.end());
-	_captureProgression.insert(_captureProgression.end(), in5.begin(), in5.end());
+		// append data
+		_fileTranslation.insert(translations.begin(), translations.end());
+		for (auto it : imageData){
+			if (_subsetMap.find(it.first) == _subsetMap.end()) {
+				// if key not exist yet - add sequence data for key (target)
+				_subsetMap.insert(it);
+			} else {
+				std::string key = it.first;
+				std::vector<Image> &source      = it.second._subset; // prediction 
+				std::vector<Image> &destination = _subsetMap[key]._subset; // imagery
 
-	// sorting of data _not_ optional
-	sortData();
-
-	// extract payload from _fileTranslation 
-	for (auto t : _fileTranslation){
-		if (t.second->getDecoderType() == "CAMERA" || 
-			t.second->getDecoderType() == "SCANNER" ){
-			std::vector<std::string> spiceIDs = t.second->getTranslation();
-			for (auto id : spiceIDs){
-				_switchingMap[id] = false;
+				// simple search function
+				double min = 10;				
+				auto findMin = [&](std::vector<Image> &vector)->double{
+					for (int i = 1; i < vector.size(); i++){
+						double e = abs(vector[i].startTime - vector[i - 1].startTime);
+						if (e < min){
+							min = e;
+						}
+					}	
+					return min;
+				};
+				
+				// find the smallest separation of images in time
+				double epsilon;
+				epsilon = findMin(source);
+				epsilon = findMin(destination);
+				// set epsilon as 1% smaller than min
+				epsilon -= min*0.01;
+				
+				// IFF images have same time as mission planned capture, erase that event from 
+				// 'predicted event file' (mission-playbook)
+				std::vector<Image> tmp;
+				for (int i = 0; i < source.size(); i++){
+					for (int j = 0; j < destination.size(); j++){
+						double diff = abs(source[i].startTime - destination[j].startTime);
+						if (diff < epsilon){
+							source.erase(source.begin() + i);
+						}
+					}
+				}
+				// pad image data with predictions (ie - where no actual images, add placeholder) 
+				_subsetMap[key]._subset.insert(_subsetMap[key]._subset.end(), source.begin(), source.end());
 			}
 		}
+
+		_instrumentTimes.insert(_instrumentTimes.end(), instrumentTimes.begin(), instrumentTimes.end());
+		_targetTimes.insert(_targetTimes.end(), targetTimes.begin(), targetTimes.end());
+		_captureProgression.insert(_captureProgression.end(), captureProgression.begin(), captureProgression.end());
+
+		// sorting of data _not_ optional
+		sortData();
+
+		// extract payload from _fileTranslation 
+		for (auto t : _fileTranslation){
+			if (t.second->getDecoderType() == "CAMERA" ||
+				t.second->getDecoderType() == "SCANNER"){
+				std::vector<std::string> spiceIDs = t.second->getTranslation();
+				for (auto id : spiceIDs){
+					_switchingMap[id] = false;
+				}
+			}
+		}
+		_hasData = true;
 	}
-	_hasData = true;
+	else{
+		ghoul_assert(parserComplete, "one or more sequence loads failed, please check mod files. ");
+	}
 }
+
 }  // namespace openspace

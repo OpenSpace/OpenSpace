@@ -149,9 +149,7 @@ void Scene::update(const UpdateData& data) {
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-#ifndef __APPLE__
-		OsEng.renderEngine()->abuffer()->invalidateABuffer();
-#endif
+		OsEng.renderEngine()->aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes())
         node->update(data);

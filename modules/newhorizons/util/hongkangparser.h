@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 namespace openspace {
 
@@ -41,10 +42,12 @@ public:
 			        std::string spacecraft,
 					ghoul::Dictionary dictionary,
 			        std::vector<std::string> potentialTargets);
-	virtual void create();
 
-	// temporary need to figure this out
+	bool create() override;
+	void findPlaybookSpecifiedTarget(std::string line, std::string& target);
 	virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+
+	void writeUTCEventFile(const Image image);
 
 private:
 	double getMetFromET(double et);
@@ -70,6 +73,7 @@ private:
 	std::string _spacecraft;
 	std::map<std::string, Decoder*> _fileTranslation;
 	std::vector<std::string> _potentialTargets;
+	std::ofstream _eventsAsUTCFile;
 };
 
 }

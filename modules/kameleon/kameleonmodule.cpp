@@ -26,12 +26,12 @@
 
 namespace openspace {
 
-KameleonModule::KameleonModule() {
-    setName("Kameleon");
-}
+KameleonModule::KameleonModule()
+    : OpenSpaceModule("Kameleon")
+{}
 
-bool KameleonModule::initialize() {
-    bool success = OpenSpaceModule::initialize();
+bool KameleonModule::create() {
+    bool success = OpenSpaceModule::create();
     if (!success)
         return false;
 

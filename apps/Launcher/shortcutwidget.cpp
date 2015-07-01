@@ -24,6 +24,6 @@
 
 #include "shortcutwidget.h"
 
-ShortcutWidget::ShortcutWidget(QWidget* parent)
-    : QWidget(parent)
+ShortcutWidget::ShortcutWidget(QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
 {}

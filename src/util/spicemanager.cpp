@@ -40,35 +40,24 @@ namespace {
 
 namespace openspace {
 
-SpiceManager* SpiceManager::_manager = nullptr;
-
-void SpiceManager::initialize() {
-	assert(_manager == nullptr);
-	_manager = new SpiceManager;
-	_manager->_lastAssignedKernel = 0;
-
-	// Set the SPICE library to not exit the program if an error occurs
-	erract_c("SET", 0, const_cast<char*>("REPORT"));
-	// But we do not want SPICE to print the errors, we will fetch them ourselves
-	errprt_c("SET", 0, const_cast<char*>("NONE"));
+SpiceManager::SpiceManager() 
+    : _lastAssignedKernel(0)
+{
+    // Set the SPICE library to not exit the program if an error occurs
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    // But we do not want SPICE to print the errors, we will fetch them ourselves
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
-void SpiceManager::deinitialize() {
-	for (const KernelInformation& i : _manager->_loadedKernels)
-		unload_c(i.path.c_str());
+SpiceManager::~SpiceManager() {
+    for (const KernelInformation& i : _loadedKernels)
+        unload_c(i.path.c_str());
 
-	delete _manager;
-	_manager = nullptr;
-
-	// Set values back to default
-	erract_c("SET", 0, const_cast<char*>("DEFAULT"));
-	errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
+    // Set values back to default
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
-SpiceManager& SpiceManager::ref() {
-	assert(_manager != nullptr);
-	return *_manager;
-}
 
 SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& filePath) {
 	if (filePath.empty()) {

@@ -36,10 +36,38 @@ namespace {
 
 namespace openspace {
 
-bool ModuleEngine::initialize() {
-    LDEBUG("Initializing modules");
+bool ModuleEngine::create() {
+    LDEBUG("Creating modules");
 
     registerModules(AllModules);
+
+    for (OpenSpaceModule* m : _modules) {
+        bool success = m->create();
+        if (!success) {
+            LERROR("Could not initialize module '" << m->name() << "'");
+            return false;
+        }
+    }
+    LDEBUG("Finished creating modules");
+    return true;
+}
+
+bool ModuleEngine::destroy() {
+    LDEBUG("Destroying modules");
+    for (OpenSpaceModule* m : _modules) {
+        bool success = m->destroy();
+        if (!success) {
+            LERROR("Could not deinitialize module '" << m->name() << "'");
+            return false;
+        }
+        delete m;
+    }
+    LDEBUG("Finished destroying modules");
+    return true;
+}
+
+bool ModuleEngine::initialize() {
+    LDEBUG("Initializing modules");
 
     for (OpenSpaceModule* m : _modules) {
         bool success = m->initialize();
@@ -54,13 +82,13 @@ bool ModuleEngine::initialize() {
 
 bool ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
+
     for (OpenSpaceModule* m : _modules) {
         bool success = m->deinitialize();
         if (!success) {
             LERROR("Could not deinitialize module '" << m->name() << "'");
             return false;
         }
-        delete m;
     }
     LDEBUG("Finished Deinitializing modules");
     return true;
@@ -77,6 +105,5 @@ void ModuleEngine::registerModule(OpenSpaceModule* module) {
 const std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     return _modules;
 }
-
 
 } // namespace openspace

@@ -38,7 +38,8 @@ public:
 	LabelParser();
 	LabelParser(const std::string& fileName,
 				ghoul::Dictionary translationDictionary);
-	virtual void create();
+
+	bool create() override;
 
 	// temporary need to figure this out
 	std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
@@ -71,6 +72,7 @@ private:
 	std::string _sequenceID;
 	double _startTime;
 	double _stopTime;
+	bool _badDecoding;
 };
 }
 #endif //__LABELPARSER_H__

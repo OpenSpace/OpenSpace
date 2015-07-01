@@ -81,13 +81,6 @@ namespace {
 
     const std::string KeyRenderingMethod = "RenderingMethod";
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
-
-    const std::map<std::string, int> RenderingMethods = {
-        { "ABufferFrameBuffer", ABUFFER_FRAMEBUFFER},
-        { "ABufferSingleLinked", ABUFFER_SINGLE_LINKED },
-        { "ABufferFixed", ABUFFER_FIXED },
-        { "ABufferDynamic", ABUFFER_DYNAMIC }
-    };
 }
 
 namespace openspace {
@@ -99,14 +92,14 @@ RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
 	, _abuffer(nullptr)
-    , _abufferImplementation(-1)
+    , _abufferImplementation(ABufferImplementation::Invalid)
 	, _log(nullptr)
 	, _showInfo(true)
 	, _showScreenLog(true)
 	, _takeScreenshot(false)
 	, _doPerformanceMeasurements(false)
 	, _performanceMemory(nullptr)
-	, _globalBlackOutFactor(0.f)
+	, _globalBlackOutFactor(1.f)
 	, _fadeDuration(2.f)
 	, _currentFadeTime(0.f)
 	, _fadeDirection(0)
@@ -153,32 +146,28 @@ bool RenderEngine::initialize() {
         }
     }
 
-    auto it = RenderingMethods.find(renderingMethod);
-    if (it == RenderingMethods.end()) {
+    _abufferImplementation = aBufferFromString(renderingMethod);
+    switch (_abufferImplementation) {
+    case ABufferImplementation::FrameBuffer:
+        LINFO("Creating ABufferFramebuffer implementation");
+        _abuffer = new ABufferFramebuffer;
+        break;
+    case ABufferImplementation::SingleLinked:
+        LINFO("Creating ABufferSingleLinked implementation");
+        _abuffer = new ABufferSingleLinked();
+        break;
+    case ABufferImplementation::Fixed:
+        LINFO("Creating ABufferFixed implementation");
+        _abuffer = new ABufferFixed();
+        break;
+    case ABufferImplementation::Dynamic:
+        LINFO("Creating ABufferDynamic implementation");
+        _abuffer = new ABufferDynamic();
+        break;
+    case ABufferImplementation::Invalid:
         LFATAL("Rendering method '" << renderingMethod << "' not among the available "
             << "rendering methods");
         return false;
-    }
-    else {
-        _abufferImplementation = it->second;
-        switch (_abufferImplementation) {
-        case ABUFFER_FRAMEBUFFER:
-            LINFO("Creating ABufferFramebuffer implementation");
-            _abuffer = new ABufferFramebuffer;
-            break;
-        case ABUFFER_SINGLE_LINKED:
-            LINFO("Creating ABufferSingleLinked implementation");
-            _abuffer = new ABufferSingleLinked();
-            break;
-        case ABUFFER_FIXED:
-            LINFO("Creating ABufferFixed implementation");
-            _abuffer = new ABufferFixed();
-            break;
-        case ABUFFER_DYNAMIC:
-            LINFO("Creating ABufferDynamic implementation");
-            _abuffer = new ABufferDynamic();
-            break;
-        }
     }
 
 	generateGlslConfig();
@@ -363,18 +352,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		_abuffer->clear();
 
 	// SGCT resets certain settings
-#ifndef __APPLE__
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-#else
-	glEnable(GL_DEPTH_TEST);
-//			glDisable(GL_CULL_FACE);
-    glEnable(GL_CULL_FACE);
-//			glDisable(GL_BLEND);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
+    
+    if (_abufferImplementation == ABufferImplementation::FrameBuffer) {
+        glEnable(GL_DEPTH_TEST);
+        //			glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
+        //			glDisable(GL_BLEND);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else {
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+    }
 	// setup the camera for the current frame
 
 	_mainCamera->setViewMatrix(
@@ -398,7 +389,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            _abuffer->resolve();
+            _abuffer->resolve(_globalBlackOutFactor);
             glDisable(GL_BLEND);
         }
         else {
@@ -450,11 +441,25 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
             int line = 0;
 			
+			double currentTime = Time::ref().currentTime();
+
 			//PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
 			PrintColorTextArg(line++, "Date: %s", 10, glm::vec4(1), Time::ref().currentTimeUTC().c_str());
 			glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
 			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
+
+			psc nhPos;
+			double lt;
+			SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
+			//nhPos[3] += 3;
+			float a, b, c;
+			SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
+			float radius = (a + b) / 2.f;
+
+			float distToSurf = glm::length(nhPos.vec3()) - radius;
+			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
+
 			PrintText(line++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
 		
 			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
@@ -466,7 +471,6 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-            double currentTime = Time::ref().currentTime();
 			if (openspace::ImageSequencer2::ref().isReady()) {
 				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
@@ -692,8 +696,12 @@ Camera* RenderEngine::camera() const {
 	return _mainCamera;
 }
 
-ABuffer* RenderEngine::abuffer() const {
+ABuffer* RenderEngine::aBuffer() const {
 	return _abuffer;
+}
+
+RenderEngine::ABufferImplementation RenderEngine::aBufferImplementation() const {
+    return _abufferImplementation;
 }
 
 float RenderEngine::globalBlackOutFactor() {
@@ -729,7 +737,7 @@ void RenderEngine::generateGlslConfig() {
 		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
 		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
 		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
-		<< "#define ABUFFER_IMPLEMENTATION    " << _abufferImplementation << "\n";
+		<< "#define ABUFFER_IMPLEMENTATION    " << int(_abufferImplementation) << "\n";
 	// System specific
 #ifdef WIN32
 	os << "#define WIN32\n";
@@ -923,9 +931,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (origin == "Pluto") {
 		if (newHorizonsPathNodeP) {
 			Renderable* R = newHorizonsPathNodeP->renderable();
+			newHorizonsPathNodeP->setParent(plutoBarycenterNode);
 			nhPath = static_cast<RenderablePath*>(R);
 			nhPath->calculatePath("PLUTO BARYCENTER");
-			newHorizonsPathNodeP->setParent(plutoBarycenterNode);
 		}
 
 		plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
@@ -1088,9 +1096,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (origin == "Jupiter") {
 		if (newHorizonsPathNodeJ) {
 			Renderable* R = newHorizonsPathNodeJ->renderable();
+			newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
 			nhPath = static_cast<RenderablePath*>(R);
 			nhPath->calculatePath("JUPITER BARYCENTER");
-			newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
 		}
 
 		jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
@@ -1240,6 +1248,41 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	return;
 	//}
 
+	//if (origin == "67P") {
+	//	SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+	//	SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
+	//	//jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+	//	//plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+	//	solarSystemBarycenterNode->setParent(cgNode);
+	//	rosettaNode->setParent(cgNode);
+	//	
+	//	ghoul::Dictionary solarDictionary =
+	//		{
+	//		{ std::string("Type"), std::string("Spice") },
+	//			{ std::string("Body"), std::string("SUN") },
+	//			{ std::string("Reference"), std::string("GALACTIC") },
+	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+	//			{ std::string("Kernels"), ghoul::Dictionary() }
+	//		};
+	//	solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+	//	
+	//	ghoul::Dictionary rosettaDictionary =
+	//		{
+	//		{ std::string("Type"), std::string("Spice") },
+	//			{ std::string("Body"), std::string("ROSETTA") },
+	//			{ std::string("Reference"), std::string("GALACTIC") },
+	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+	//			{ std::string("Kernels"), ghoul::Dictionary() }
+	//		};
+	//	
+	//	cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+	//	rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
+	//	cgNode->setEphemeris(new StaticEphemeris);
+	//	
+	//	return;
+	//	
+	//}
+
     ghoul_assert(false, "This function is being misused");
 }
 
@@ -1249,6 +1292,20 @@ void RenderEngine::setSGCTRenderStatistics(bool visible) {
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
+}
+
+RenderEngine::ABufferImplementation RenderEngine::aBufferFromString(const std::string& impl) {
+    const std::map<std::string, RenderEngine::ABufferImplementation> RenderingMethods = {
+        { "ABufferFrameBuffer", ABufferImplementation::FrameBuffer },
+        { "ABufferSingleLinked", ABufferImplementation::SingleLinked },
+        { "ABufferFixed", ABufferImplementation::Fixed },
+        { "ABufferDynamic", ABufferImplementation::Dynamic }
+    };
+
+    if (RenderingMethods.find(impl) != RenderingMethods.end())
+        return RenderingMethods.at(impl);
+    else
+        return ABufferImplementation::Invalid;
 }
 
 }// namespace openspace

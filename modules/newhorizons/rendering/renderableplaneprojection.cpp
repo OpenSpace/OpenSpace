@@ -44,6 +44,7 @@ namespace {
     const std::string KeyMoving = "Moving";
     const std::string KeyTexture = "Texture";
     const std::string KeyName = "Name";
+	const std::string KeyTarget = "DefaultTarget";
     const std::string GalacticFrame = "GALACTIC";
     const double REALLY_FAR = 99999999999;
 }
@@ -61,11 +62,14 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 	, _vertexPositionBuffer(0)
 	, _name("ImagePlane")
 	, _previousTime(0)
+	, _moving(false)
+	, _hasImage(false)
 {
 	dictionary.getValue(KeySpacecraft, _spacecraft);
 	dictionary.getValue(KeyInstrument, _instrument);
 	dictionary.getValue(KeyMoving, _moving);
 	dictionary.getValue(KeyName, _name);
+	dictionary.getValue(KeyTarget, _defaultTarget);
 
 	std::string texturePath = "";
 	bool success = dictionary.getValue(KeyTexture, _texturePath);
@@ -103,7 +107,7 @@ bool RenderablePlaneProjection::initialize() {
         if (!_shader) return false;
     }
 
-	setTarget("JUPITER");
+	setTarget(_defaultTarget);
 	loadTexture();
 	return isReady();
 }
@@ -118,7 +122,10 @@ bool RenderablePlaneProjection::deinitialize() {
 }
 
 void RenderablePlaneProjection::render(const RenderData& data) {
-	
+	bool active = ImageSequencer2::ref().instrumentActive(_instrument);
+	if (!_hasImage || (_moving && !active))
+		return;
+
 	glm::mat4 transform = glm::mat4(1.0);
 
 	for (int i = 0; i < 3; i++){
@@ -151,20 +158,21 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
 	double time = data.time;
 	const Image img = openspace::ImageSequencer2::ref().getLatestImageForInstrument(_instrument);
+	
+	if (img.path == "")
+		return;
+	else
+		_hasImage = true;
 
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time, _stateMatrix);
 	
-	double timePast = 0.0;
-	if (img.path != "")
-	{
-		timePast = abs(img.startTime - _previousTime);
-	}
+	double timePast = abs(img.startTime - _previousTime);
 	
 	std::string tex = _texturePath;
-	if (img.path != "" && (_moving || _planeIsDirty))
+	if (_moving || _planeIsDirty)
 		updatePlane(img, time);
 
-	else if (img.path != "" && timePast > DBL_EPSILON) {
+	else if (timePast > DBL_EPSILON) {
 		_previousTime = time = img.startTime;
 		updatePlane(img, time);
 	}
@@ -183,7 +191,9 @@ void RenderablePlaneProjection::loadTexture() {
 		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			texture->uploadTexture();
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 			if (_texture)
 				delete _texture;
 			_texture = texture;
@@ -201,10 +211,12 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
 	
-	std::string target = "JUPITER"; //default
-	if (!_moving) {
-		target = findClosestTarget(currentTime);
-	}
+	std::string target = _defaultTarget;
+	// Turned on if the plane should be attached to the closest target, 
+	// rather than the target specified in img 
+	//if (!_moving) {
+	//	target = findClosestTarget(currentTime);
+	//}
 	if (img.path != "")
 	target = img.target;
 
