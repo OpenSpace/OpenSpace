@@ -456,7 +456,12 @@ namespace openspace {
 					if (result == SOCKET_ERROR){
 						//failed to send message
 						LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                        
+                        //stop all threads and signal that a disconnect should be performed
                         _performDisconnect.store(true);
+                        _isConnected.store(false);
+                        _isHost.store(false);
+                        _isListening.store(false);
 					}
 
                 }
@@ -528,7 +533,11 @@ namespace openspace {
 			}
 			else{
 				LERROR("Error " << _ERRNO << " detected in connection, disconnecting.");
+                //stop all threads and signal that a disconnect should be performed
                 _performDisconnect.store(true);
+                _isConnected.store(false);
+                _isHost.store(false);
+                _isListening.store(false);
 			}
 		}
 
@@ -625,7 +634,11 @@ namespace openspace {
 						LERROR("Error " << _ERRNO << " detected in connection, disconnecting!");
 					}
 
+                    //stop all threads and signal that a disconnect should be performed
                     _performDisconnect.store(true);
+                    _isConnected.store(false);
+                    _isHost.store(false);
+                    _isListening.store(false);
 					break;
 				}
 			}
