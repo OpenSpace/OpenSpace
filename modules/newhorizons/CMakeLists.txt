@@ -32,11 +32,10 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
@@ -54,10 +53,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp
@@ -74,9 +72,9 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_vs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectionPass_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectionPass_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectionPass_vs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/modelShader_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/modelShader_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/modelShader_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_vs.glsl
