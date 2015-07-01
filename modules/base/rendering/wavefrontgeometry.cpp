@@ -97,7 +97,7 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
 			_vertices[j + currentPosition].location[0] = tmp[0];
 			_vertices[j + currentPosition].location[1] = tmp[1];
 			_vertices[j + currentPosition].location[2] = tmp[2];
-			_vertices[j + currentPosition].location[3] = tmp[3] + _magnification;
+			_vertices[j + currentPosition].location[3] = tmp[3];
 
             _vertices[j + currentPosition].normal[0] = shapes[i].mesh.normals[3 * j + 0];
             _vertices[j + currentPosition].normal[1] = shapes[i].mesh.normals[3 * j + 1];

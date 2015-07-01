@@ -26,52 +26,56 @@
 #define __MODELGEOMETRY_H__
 
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/scalarproperty.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-	namespace modelgeometry {
+namespace modelgeometry {
 
-		class ModelGeometry : public properties::PropertyOwner {
-		public:
-			static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+class ModelGeometry : public properties::PropertyOwner {
+public:
+	static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-			struct Vertex {
-				GLfloat location[4];
-				GLfloat tex[2];
-				GLfloat normal[3];
-			};
+	struct Vertex {
+		GLfloat location[4];
+		GLfloat tex[2];
+		GLfloat normal[3];
+	};
 
-			ModelGeometry(const ghoul::Dictionary& dictionary);
-			virtual ~ModelGeometry();
-			virtual bool initialize(Renderable* parent);
-			virtual void deinitialize();
-			void render();
-			virtual bool loadModel(const std::string& filename) = 0;
-			void changeRenderMode(const GLenum mode);
-			bool getVertices(std::vector<Vertex>* vertexList);
-			bool getIndices(std::vector<int>* indexList);
+	ModelGeometry(const ghoul::Dictionary& dictionary);
+	virtual ~ModelGeometry();
+	virtual bool initialize(Renderable* parent);
+	virtual void deinitialize();
+	void render();
+	virtual bool loadModel(const std::string& filename) = 0;
+	void changeRenderMode(const GLenum mode);
+	bool getVertices(std::vector<Vertex>* vertexList);
+	bool getIndices(std::vector<int>* indexList);
 
-		protected:
-			Renderable* _parent;
+    virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
-			bool loadObj(const std::string& filename);
-			bool loadCachedFile(const std::string& filename);
-			bool saveCachedFile(const std::string& filename);
-			float _magnification;
+protected:
+	Renderable* _parent;
 
-			GLuint _vaoID;
-			GLuint _vbo;
-			GLuint _ibo;
-			GLenum _mode;
+	bool loadObj(const std::string& filename);
+	bool loadCachedFile(const std::string& filename);
+	bool saveCachedFile(const std::string& filename);
+    properties::FloatProperty _magnification;
 
-			std::vector<Vertex> _vertices;
-			std::vector<int> _indices;
-			std::string _file;
-		};
+	GLuint _vaoID;
+	GLuint _vbo;
+	GLuint _ibo;
+	GLenum _mode;
 
-	}  // namespace modelgeometry
+	std::vector<Vertex> _vertices;
+	std::vector<int> _indices;
+	std::string _file;
+};
+
+}  // namespace modelgeometry
 }  // namespace openspace
 
 #endif  // __MODELGEOMETRY_H__

@@ -196,6 +196,8 @@ void RenderableModel::render(const RenderData& data) {
 	
 	_programObject->setUniform("_performShading", _performShading);
 
+    _geometry->setUniforms(*_programObject);
+
 	if (_performFade && _fading > 0.f){
 		_fading = _fading - 0.01f;
 	}

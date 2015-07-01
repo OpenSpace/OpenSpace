@@ -34,26 +34,29 @@ layout(location = 2) in vec3 in_normal;
 
 uniform vec3 boresight;
 
+uniform float _magnification;
+
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out float s;
-
-
 out vec4 ProjTexCoord;
+
+
 #include "PowerScaling/powerScaling_vs.hglsl"
-void main(){
+void main() {
+    vec4 pos = in_position;
+    pos.w += _magnification;
 
 	vs_st = in_st;
-	vs_position = in_position;
-	vec4 tmp    = in_position;
-	//tmp[3] += _magnification for runtime alteration of model size @AA
+	vs_position = pos;
+	vec4 tmp    = pos;
 	
 	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 	vec4 position = pscTransform(tmp, ModelTransform);
 	vs_position = tmp;
 
-	vec4 raw_pos = psc_to_meter(in_position, scaling);
+	vec4 raw_pos = psc_to_meter(pos, scaling);
 	ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 	position = ViewProjection * position;
 	gl_Position =  z_normalization(position);

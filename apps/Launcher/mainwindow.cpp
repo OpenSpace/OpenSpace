@@ -197,6 +197,9 @@ void MainWindow::initialize() {
         _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
         _scenes->addItem(i.fileName());
     }
+
+    _scenes->setCurrentText("default.scene");
+
     _syncWidget->setSceneFiles(_sceneFiles);
 }
 
