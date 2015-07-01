@@ -80,6 +80,7 @@ namespace openspace {
         _clientSocket(INVALID_SOCKET),
 		_connectionThread(nullptr),
 		_broadcastThread(nullptr),
+        _sendThread(nullptr),
         _isHost(false),
         _isConnected(false),
         _isListening(false)
@@ -201,6 +202,7 @@ namespace openspace {
                     
                     //start listening for communication
                     listenCommunication();
+                    
                 }
                 
                 //try to connect once per second
@@ -331,8 +333,8 @@ namespace openspace {
                 std::string script;
                 script.assign(scriptbuffer.begin(), scriptbuffer.end());
                 
-                //and add that script to all received init scripts
-                initScripts.push_back(script);
+                //que script with the script engine
+                OsEng.scriptEngine()->queueScript(script);
                 
             }
             
@@ -414,11 +416,24 @@ namespace openspace {
 
             //tell the script engine to execute the script when appropriate
             OsEng.scriptEngine()->queueScript(script);
-            
-            //add script to all executed scripts
-            _executedScriptsMutex.lock();
-            _executedScripts.push_back(script);
-            _executedScriptsMutex.unlock();
+        }
+        
+        void ParallelConnection::queMessage(std::vector<char> message){
+            _sendBufferMutex.lock();
+            _sendBuffer.push_back(message);
+            _sendBufferMutex.unlock();
+        }
+        
+        void ParallelConnection::sendLoop(){
+            while(_isHost.load()){
+                _sendBufferMutex.lock();
+                if(_sendBuffer.size() > 0){
+                    //send first queued message
+                    send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
+                    _sendBuffer.erase(_sendBuffer.begin());
+                }
+                _sendBufferMutex.unlock();
+            }
         }
         
 		void ParallelConnection::decodeHostInfoMessage(){
@@ -445,6 +460,9 @@ namespace openspace {
 						//start broadcasting
 						_isHost.store(true);
 						_broadcastThread = new (std::nothrow) std::thread(&ParallelConnection::broadcast, this);
+                        
+                        //and sending messages
+                        _sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendLoop, this);
 					}
 				}
 				else{   //we've been assigned as client
@@ -461,6 +479,18 @@ namespace openspace {
 							delete _broadcastThread;
 							_broadcastThread = nullptr;
 						}
+                        
+                        //delete send thread
+                        if(_sendThread != nullptr){
+                            _sendThread->join();
+                            delete _sendThread;
+                            _sendThread = nullptr;
+                            
+                            //and clear all queued messages
+                            _sendBufferMutex.lock();
+                            _sendBuffer.clear();
+                            _sendBufferMutex.unlock();
+                        }
                         
 					}
 					else{
@@ -637,10 +667,6 @@ namespace openspace {
 		}
         
         void ParallelConnection::sendScript(const std::string script){
-            _executedScriptsMutex.lock();
-            _executedScripts.push_back(script);
-            _executedScriptsMutex.unlock();
-            
             uint16_t msglen = static_cast<uint16_t>(script.length());
             std::vector<char> buffer;
             buffer.reserve(headerSize() + sizeof(msglen) + msglen);
@@ -683,6 +709,13 @@ namespace openspace {
                 _broadcastThread->join();
                 delete _broadcastThread;
                 _broadcastThread = nullptr;
+            }
+            
+            //join send thread and delete it
+            if (_sendThread != nullptr){
+                _sendThread->join();
+                delete _sendThread;
+                _sendThread = nullptr;
             }
             
 #if defined(__WIN32__)

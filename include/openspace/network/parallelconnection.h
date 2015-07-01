@@ -129,6 +129,8 @@ namespace openspace{
             
             void sendScript(const std::string script);
             
+            void queMessage(std::vector<char> message);
+            
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
@@ -199,6 +201,8 @@ namespace openspace{
 
             int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
             
+            void sendLoop();
+            
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
@@ -206,11 +210,12 @@ namespace openspace{
             _SOCKET _clientSocket;
             std::thread *_connectionThread;
 			std::thread *_broadcastThread;
+            std::thread *_sendThread;
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isListening;
-            std::vector<std::string> _executedScripts;
-            std::mutex _executedScriptsMutex;
+            std::vector<std::vector<char>> _sendBuffer;
+            std::mutex _sendBufferMutex;
         };
     } // namespace network
     
