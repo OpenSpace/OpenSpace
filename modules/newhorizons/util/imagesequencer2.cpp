@@ -374,9 +374,8 @@ void ImageSequencer2::runSequenceParser(SequenceParser* parser){
 		}
 		_hasData = true;
 	}
-	else{
-		ghoul_assert(parserComplete, "one or more sequence loads failed, please check mod files. ");
-	}
+	else
+        LERROR("One of more sequence loads failed; please check mod files");
 }
 
 }  // namespace openspace
