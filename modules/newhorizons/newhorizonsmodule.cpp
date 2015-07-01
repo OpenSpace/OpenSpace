@@ -42,7 +42,7 @@
 #include <modules/newhorizons/util/instrumentdecoder.h>
 #include <modules/newhorizons/util/targetdecoder.h>
 
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 
 
 namespace openspace {

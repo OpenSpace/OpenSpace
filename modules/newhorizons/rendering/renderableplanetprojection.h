@@ -29,7 +29,7 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 
 #include <modules/newhorizons/util/sequenceparser.h>
 #include <modules/newhorizons/util/hongkangparser.h>
