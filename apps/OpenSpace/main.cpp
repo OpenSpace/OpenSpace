@@ -173,6 +173,10 @@ int main(int argc, char** argv) {
     LDEBUG("Starting rendering loop");
     _sgctEngine->render();
 
+	//clear function bindings to avoid crash after destroying the OpenSpace Engine
+	sgct::MessageHandler::instance()->setLogToCallback(false);
+	sgct::MessageHandler::instance()->setLogCallback(nullptr);
+
     LDEBUG("Destroying OpenSpaceEngine");
     openspace::OpenSpaceEngine::destroy();
 
