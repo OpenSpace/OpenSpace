@@ -131,6 +131,8 @@ namespace openspace{
             
             void queMessage(std::vector<char> message);
             
+            void update(double dt);
+            
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
@@ -215,6 +217,7 @@ namespace openspace{
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isListening;
+            std::atomic<bool> _performDisconnect;
             std::vector<std::vector<char>> _sendBuffer;
             std::mutex _sendBufferMutex;
         };
