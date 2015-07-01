@@ -725,10 +725,10 @@ namespace openspace {
 
 
 		void ParallelConnection::disconnect(){
+			//we're disconnecting
+			_performDisconnect.store(false);
+
 			if (_clientSocket != INVALID_SOCKET){
-                
-                //we're disconnecting
-                _performDisconnect.store(false);
                 
 				//must be run before trying to join communication threads, else the threads are stuck trying to receive data
 				closeSocket();
