@@ -84,7 +84,8 @@ namespace openspace {
 		_receiveThread(nullptr),
         _isHost(false),
         _isConnected(false),
-        _isListening(false)
+        _isListening(false),
+        _performDisconnect(false)
         {
             
         }
@@ -439,10 +440,7 @@ namespace openspace {
 					if (result == SOCKET_ERROR){
 						//failed to send message
 						LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
-						//@TODO a better solution for this - description:
-						//A thread cannot delete/join itself, in this case the listener thread would need to remove itself
-						//solution (for now) is to call the disconnect script via scriptengine. This is done from a separate thread so it works.
-						OsEng.scriptEngine()->queueScript("openspace.parallel.disconnect();");
+                        _performDisconnect.store(true);
 					}
 
                 }
@@ -514,10 +512,7 @@ namespace openspace {
 			}
 			else{
 				LERROR("Error " << _ERRNO << " detected in connection, disconnecting.");
-				//@TODO a better solution for this - description:
-				//A thread cannot delete/join itself, in this case the listener thread would need to remove itself
-				//solution (for now) is to call the disconnect script via scriptengine. This is done from a separate thread so it works.
-				OsEng.scriptEngine()->queueScript("openspace.parallel.disconnect();");
+                _performDisconnect.store(true);
 			}
 		}
 
@@ -614,16 +609,18 @@ namespace openspace {
 						LERROR("Error " << _ERRNO << " detected in connection, disconnecting!");
 					}
 
-					//@TODO (JK) a better solution for this - description:
-					//A thread cannot delete/join itself, in this case the listener thread would need to remove itself
-					//solution (for now) is to call the disconnect script via scriptengine. This is done from a separate thread so it works.
-					OsEng.scriptEngine()->queueScript("openspace.parallel.disconnect();");
-					
+                    _performDisconnect.store(true);
 					break;
 				}
 			}
 
 		}
+        
+        void ParallelConnection::update(double dt){
+            if(_performDisconnect.load()){
+                disconnect();
+            }
+        }
 
 		int ParallelConnection::receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags){
 			int result = 0;
@@ -713,6 +710,10 @@ namespace openspace {
 
 		void ParallelConnection::disconnect(){
 			if (_clientSocket != INVALID_SOCKET){
+                
+                //we're disconnecting
+                _performDisconnect.store(false);
+                
 				//must be run before trying to join communication threads, else the threads are stuck trying to receive data
 				closeSocket();
 
@@ -758,7 +759,9 @@ namespace openspace {
 				}
 
 #if defined(__WIN32__)
-				WSACleanup();
+                //this line causes issues with SGCT since winsock dll file is unloaded upon call
+                //@TODO should this be here?
+//				WSACleanup();
 #endif
 			}
 		}
