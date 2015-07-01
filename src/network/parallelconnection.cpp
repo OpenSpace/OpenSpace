@@ -86,7 +86,7 @@ namespace openspace {
         _isConnected(false),
         _isListening(false)
         {
-
+            
         }
         
         ParallelConnection::~ParallelConnection(){
@@ -94,6 +94,7 @@ namespace openspace {
         }
         
 		void ParallelConnection::clientConnect(){
+
             //we're already connected, do nothing (dummy check)
             if(_isConnected.load()){
                 return;
@@ -267,7 +268,7 @@ namespace openspace {
 			default:
 				//unknown message type
 				break;
-			}
+            }
 		}
 
 		void ParallelConnection::decodeInitializationMessage(){
@@ -531,28 +532,47 @@ namespace openspace {
             std::vector<std::string> scripts = OsEng.scriptEngine()->cachedScripts();
             uint16_t numScrips = scripts.size();
             
-            //write header
-            buffer.clear();
-            writeHeader(buffer, MessageTypes::Initialization);
-            
-            //write number of scripts
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&numScrips), reinterpret_cast<char*>(&numScrips) + sizeof(numScrips));
-            
-            uint16_t msglen;
+            uint16_t scriptlen;
+            uint32_t totlen = 0;
             std::vector<std::string>::const_iterator it;
             
+            std::vector<char> scriptMsg;
             //write all scripts
             for(it = scripts.cbegin();
                 it != scripts.cend();
                 ++it){
                 //write size of script in chars
-                msglen = (*it).size();
-                buffer.insert(buffer.end(), reinterpret_cast<char*>(msglen), reinterpret_cast<char*>(msglen) + sizeof(msglen));
-                buffer.insert(buffer.end(), (*it).begin(), (*it).end());
+                scriptlen = (*it).size();
+                scriptMsg.insert(scriptMsg.end(), reinterpret_cast<char*>(&scriptlen), reinterpret_cast<char*>(&scriptlen) + sizeof(scriptlen));
+                
+                //write actual scripts
+                scriptMsg.insert(scriptMsg.end(), (*it).begin(), (*it).end());
+                
+                //add script length to total data length
+                totlen += static_cast<uint32_t>(scriptlen) + sizeof(scriptlen);
             }
             
+            //clear buffer
+            buffer.clear();
+            
+            //write header
+            writeHeader(buffer, MessageTypes::Initialization);
+            
+            //write requester ID
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&requesterID), reinterpret_cast<char*>(&requesterID) + sizeof(requesterID));
+            
+            
+            //write size of data chunk
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&totlen), reinterpret_cast<char*>(&totlen) + sizeof(totlen));
+            
+            //write number of scripts
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&numScrips), reinterpret_cast<char*>(&numScrips) + sizeof(numScrips));
+            
+            //write all scripts and their lengths
+            buffer.insert(buffer.end(), scriptMsg.begin(), scriptMsg.end());
+            
             //send initialization message
-			queMessage(buffer);
+            queMessage(buffer);
 		}
 
 		void ParallelConnection::listenCommunication(){
