@@ -67,8 +67,7 @@ private:
     
 	QTcpSocket* _socket;
 
-    bool _hasHongKangTimeline = false;
-    bool _hasLabelTimeline = false;
+    bool _isConnected = false;
 };
 
 #endif // __MAINWINDOW_H__

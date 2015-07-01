@@ -130,6 +130,7 @@ void MainWindow::readTcpData() {
     static const uint16_t MessageTypeStatus = 0;
     static const uint16_t MessageTypePlayBookHongKang = 2;
     static const uint16_t MessageTypePlayBookLabel = 3;
+    static const uint16_t MessageTypeInitialMessageFinished = 4;
 
     QByteArray data = _socket->readAll();
 
@@ -161,7 +162,7 @@ void MainWindow::readTcpData() {
     switch (messageType.value) {
     case MessageTypeStatus:
     {
-        if (_hasHongKangTimeline && _hasLabelTimeline)
+        if (_isConnected)
             handleStatusMessage(data.mid(2));
         break;
     }
@@ -186,17 +187,22 @@ void MainWindow::readTcpData() {
 
         //qDebug() << "Finished handling playbook";
 
-        if (messageType.value == MessageTypePlayBookHongKang)
-            _hasHongKangTimeline = true;
-        if (messageType.value == MessageTypePlayBookLabel)
-            _hasLabelTimeline = true;
+        //if (messageType.value == MessageTypePlayBookHongKang)
+        //    _hasHongKangTimeline = true;
+        //if (messageType.value == MessageTypePlayBookLabel)
+        //    _hasLabelTimeline = true;
 
-        if (_hasHongKangTimeline && _hasLabelTimeline) {
-            fullyConnected();
-        }
+        //if (_hasHongKangTimeline && _hasLabelTimeline) {
+        //    fullyConnected();
+        //}
 
         break;
     }
+    case MessageTypeInitialMessageFinished:
+        _isConnected = true;
+        fullyConnected();
+        break;
+        
     default:
         qDebug() << QString(data);
     }

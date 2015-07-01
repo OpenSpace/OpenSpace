@@ -44,8 +44,11 @@ namespace {
 }
 
 namespace openspace {
-LabelParser::LabelParser(const std::string& fileName,
-	ghoul::Dictionary translationDictionary) : _badDecoding(false)
+
+LabelParser::LabelParser(std::string name, const std::string& fileName,
+                         ghoul::Dictionary translationDictionary)
+    : _name(std::move(name))
+    , _badDecoding(false)
 {
 	_fileName = fileName;
 	//get the different instrument types

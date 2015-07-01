@@ -43,12 +43,12 @@ namespace {
 }
 
 namespace openspace {
-HongKangParser::HongKangParser(const std::string& fileName,
+HongKangParser::HongKangParser(std::string name, const std::string& fileName,
 		                       std::string spacecraft,
 							   ghoul::Dictionary translationDictionary,
-		                       std::vector<std::string> potentialTargets) :
-						 
-							   _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+		                       std::vector<std::string> potentialTargets)
+    : _name(std::move(name))
+    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
 {
 	_fileName          = fileName;
 	_spacecraft        = spacecraft;

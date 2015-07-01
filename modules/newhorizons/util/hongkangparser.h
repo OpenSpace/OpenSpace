@@ -38,7 +38,7 @@ namespace openspace {
 class HongKangParser : public SequenceParser {
 public:
 	HongKangParser();
-	HongKangParser(const std::string& fileName,
+	HongKangParser(std::string name, const std::string& fileName,
 			        std::string spacecraft,
 					ghoul::Dictionary dictionary,
 			        std::vector<std::string> potentialTargets);
@@ -69,6 +69,7 @@ private:
 	std::string _defaultCaptureImage;
 	double _metRef = 299180517;
 
+    std::string _name;
 	std::string _fileName;
 	std::string _spacecraft;
 	std::map<std::string, Decoder*> _fileTranslation;

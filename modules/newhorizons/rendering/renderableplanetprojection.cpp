@@ -184,20 +184,25 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 			//get translation dictionary
 			dictionary.getValue(keyTranslation, translationDictionary);
 
-			if (_sequenceType == sequenceTypePlaybook){
-				parser = new HongKangParser(_sequenceSource,
+			if (_sequenceType == sequenceTypePlaybook) {
+				parser = new HongKangParser(name,
+                                            _sequenceSource,
 											_projectorID,
 											translationDictionary,
 											_potentialTargets);
 				openspace::ImageSequencer2::ref().runSequenceParser(parser);
 			}
-			else if (_sequenceType == sequenceTypeImage){
-				parser = new LabelParser(_sequenceSource, translationDictionary);
+			else if (_sequenceType == sequenceTypeImage) {
+				parser = new LabelParser(name,
+                                         _sequenceSource,
+                                         translationDictionary);
 				openspace::ImageSequencer2::ref().runSequenceParser(parser);
 			}
-			else if (_sequenceType == sequenceTypeHybrid){
+			else if (_sequenceType == sequenceTypeHybrid) {
 				//first read labels
-				parser = new LabelParser(_sequenceSource, translationDictionary);
+				parser = new LabelParser(name,
+                                         _sequenceSource,
+                                         translationDictionary);
 				openspace::ImageSequencer2::ref().runSequenceParser(parser);
 
 				std::string _eventFile;
@@ -205,7 +210,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 				if (foundEventFile){
 					//then read playbook
 					_eventFile = absPath(_eventFile);
-					parser = new HongKangParser(_eventFile,
+					parser = new HongKangParser(name,
+                                                _eventFile,
 						                        _projectorID,
 						                        translationDictionary,
 						                        _potentialTargets);

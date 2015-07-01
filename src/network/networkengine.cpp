@@ -40,6 +40,7 @@ namespace {
 
     const std::string StatusMessageIdentifierName = "StatusMessage";
     const std::string MappingIdentifierIdentifierName = "IdentifierMapping";
+    const std::string InitialMessageFinishedIdentifierName = "InitialMessageFinished";
 
     const char MessageTypeLuaScript = '0';
     const char MessageTypeExternalControlConnected = '1';
@@ -57,6 +58,7 @@ NetworkEngine::NetworkEngine()
     );
     _statusMessageIdentifier = identifier(StatusMessageIdentifierName);
     _identifierMappingIdentifier = identifier(MappingIdentifierIdentifierName);
+    _initialMessageFinishedIdentifier = identifier(InitialMessageFinishedIdentifierName);
 }
 
 bool NetworkEngine::handleMessage(const std::string& message) {
@@ -117,18 +119,18 @@ void NetworkEngine::publishStatusMessage() {
 
 void NetworkEngine::publishIdentifierMappingMessage() {
     size_t bufferSize = 0;
-    for (const std::pair<MessageIdentifier, std::string>& i : _identifiers) {
+    for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
         bufferSize += sizeof(MessageIdentifier);
-        bufferSize += i.second.size() + 1; // +1 for \0 terminating character
+        bufferSize += i.first.size() + 1; // +1 for \0 terminating character
     }
 
     std::vector<char> buffer(bufferSize);
     size_t currentWritingPosition = 0;
-    for (const std::pair<MessageIdentifier, std::string>& i : _identifiers) {
-        std::memcpy(buffer.data() + currentWritingPosition, &(i.first), sizeof(MessageIdentifier));
+    for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
+        std::memcpy(buffer.data() + currentWritingPosition, &(i.second), sizeof(MessageIdentifier));
         currentWritingPosition += sizeof(MessageIdentifier);
-        std::memcpy(buffer.data() + currentWritingPosition, i.second.data(), i.second.size());
-        currentWritingPosition += i.second.size();
+        std::memcpy(buffer.data() + currentWritingPosition, i.first.data(), i.first.size());
+        currentWritingPosition += i.first.size();
         buffer[currentWritingPosition] = '\0';
         currentWritingPosition += 1;
     }
@@ -138,21 +140,17 @@ void NetworkEngine::publishIdentifierMappingMessage() {
 
 
 NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
-#ifdef DEBUG
-    // Check if name has been assigned already
-    for (const std::pair<MessageIdentifier, std::string>& p : _identifiers) {
-        if (p.second == name) {
-            LERROR("Name '" << name << "' for identifier has been registered before");
-            return -1;
-        }
+    auto i = _identifiers.find(name);
+    if (i != _identifiers.end())
+        return i->second;
+    else {
+        _lastAssignedIdentifier++;
+
+        MessageIdentifier result = _lastAssignedIdentifier;
+
+        _identifiers[std::move(name)] = result;
+        return result;
     }
-#endif
-    _lastAssignedIdentifier++;
-
-    MessageIdentifier result = _lastAssignedIdentifier;
-
-    _identifiers[result] = std::move(name);
-    return result;
 }
 
 void NetworkEngine::publishMessage(MessageIdentifier identifier, std::vector<char> message) {
@@ -204,6 +202,20 @@ void NetworkEngine::sendInitialInformation() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
+
+    // Send finished message
+    union {
+        MessageIdentifier value;
+        std::array<char, 2> data;
+    } identifier;
+    identifier.value = _initialMessageFinishedIdentifier;
+
+    sgct::Engine::instance()->sendMessageToExternalControl(
+        identifier.data.data(),
+        2
+    );
 
     _shouldPublishStatusMessage = true;
 }
