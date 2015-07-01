@@ -93,7 +93,7 @@ namespace openspace {
         }
         
 		void ParallelConnection::clientConnect(){
-            //we're already connected, do nothing
+            //we're already connected, do nothing (dummy check)
             if(_isConnected.load()){
                 return;
             }
@@ -237,13 +237,7 @@ namespace openspace {
 			buffer.insert(buffer.end(), _name.begin(), _name.end());
             
             //send buffer
-			int result = send(_clientSocket, buffer.data(), size, 0);
-
-            //if send failed
-			if (result == SOCKET_ERROR){
-				//failed to send auth msg.
-                LERROR("Failed to send authentication message.");
-			}
+			queMessage(buffer);
 		}
 
 		void ParallelConnection::delegateDecoding(uint32_t type){
@@ -425,12 +419,24 @@ namespace openspace {
         }
         
         void ParallelConnection::sendLoop(){
+			int result;
             while(_isHost.load()){
                 _sendBufferMutex.lock();
                 if(_sendBuffer.size() > 0){
-                    //send first queued message
-                    send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
-                    _sendBuffer.erase(_sendBuffer.begin());
+                    
+					//send first queued message
+					result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
+                    
+					//remove the message that was just sent
+					_sendBuffer.erase(_sendBuffer.begin());
+
+					//make sure everything went well
+					if (result == SOCKET_ERROR){
+						//failed to send message
+						LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection.");
+						disconnect();
+					}
+
                 }
                 _sendBufferMutex.unlock();
             }
@@ -457,8 +463,10 @@ namespace openspace {
 					}
 					else{
                         
-						//start broadcasting
+						//we're the host
 						_isHost.store(true);
+
+						//start broadcasting
 						_broadcastThread = new (std::nothrow) std::thread(&ParallelConnection::broadcast, this);
                         
                         //and sending messages
@@ -509,8 +517,7 @@ namespace openspace {
                     writeHeader(buffer, MessageTypes::InitializationRequest);
 
                     //send message
-                    send(_clientSocket, buffer.data(), buffer.size(), 0);
-
+					queMessage(buffer);
 				}
 			}
 			else{
@@ -551,7 +558,7 @@ namespace openspace {
             }
             
             //send initialization message
-            send(_clientSocket, buffer.data(), buffer.size(), 0);
+			queMessage(buffer);
 		}
 
 		void ParallelConnection::listenCommunication(){
@@ -589,6 +596,7 @@ namespace openspace {
 						//connection rejected
 						_isConnected.store(false);
                         _isListening.store(false);
+						_isHost.store(false);
 					}
 					else{
 						LERROR("Error " << _ERRNO << " detected in connection!");
@@ -659,7 +667,7 @@ namespace openspace {
             writeHeader(buffer, MessageTypes::HostshipRequest);
             
             //send message
-            send(_clientSocket, buffer.data(), buffer.size(), 0);
+			queMessage(buffer);
         }
 
 		void ParallelConnection::setPassword(const std::string& pwd){
@@ -681,7 +689,7 @@ namespace openspace {
             buffer.insert(buffer.end(), script.begin(), script.end());
             
             //send message
-            send(_clientSocket, buffer.data(), buffer.size(), 0);
+			queMessage(buffer);
         }
 
 
@@ -693,9 +701,11 @@ namespace openspace {
             //tell broadcast thread to stop broadcasting
             _isHost.store(false);
             
-            //tell connection thread to stop trying to connect and stop listening for communication
-            _isConnected.store(true);
+            //tell connection thread to stop listening
             _isListening.store(false);
+
+			//tell connection thread that we are connected (to be able to join and delete thread)
+			_isConnected.store(true);
             
             //join connection thread and delete it
             if (_connectionThread != nullptr){
@@ -703,7 +713,10 @@ namespace openspace {
                 delete _connectionThread;
                 _connectionThread = nullptr;
             }
-            
+
+			//make sure to set us as NOT connected again, connection thread is now deleted
+			_isConnected.store(false);
+
             //join broadcast thread and delete it
             if (_broadcastThread != nullptr){
                 _broadcastThread->join();
@@ -812,7 +825,7 @@ namespace openspace {
 				buffer.insert(buffer.end(), kfBuffer.begin(), kfBuffer.end());
 
 				//send message
-				send(_clientSocket, buffer.data(), buffer.size(), 0);
+				queMessage(buffer);
 
 				//100 ms sleep - send keyframes 10 times per second
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
