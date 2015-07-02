@@ -92,6 +92,7 @@ namespace openspace {
         
         ParallelConnection::~ParallelConnection(){
             disconnect();
+			WSACleanup();
         }
         
 		void ParallelConnection::clientConnect(){
@@ -121,9 +122,10 @@ namespace openspace {
 			if (result != 0)
 			{
 			#if defined(__WIN32__)
-				WSACleanup();
+				//WSACleanup();
 			#endif
                 LERROR("Failed to parse hints for Parallel Connection");
+				return;
 			}
 
             //we're not connected
@@ -141,7 +143,7 @@ namespace openspace {
             if (_clientSocket == INVALID_SOCKET){
                 freeaddrinfo(info);
 #if defined(__WIN32__)
-                WSACleanup();
+                //WSACleanup();
 #endif
                 LERROR("Failed to create client socket, shutting down connection thread");
                 return;
@@ -855,7 +857,7 @@ namespace openspace {
 				{
 					/* incorrect WinSock version */
 					LERROR("Failed to init winsock API.");
-					WSACleanup();
+					//WSACleanup();
 					return false;
 				}
 			#else
