@@ -92,7 +92,9 @@ namespace openspace {
         
         ParallelConnection::~ParallelConnection(){
             disconnect();
-			WSACleanup();
+#if defined(__WIN32__)
+            WSACleanup();
+#endif
         }
         
 		void ParallelConnection::clientConnect(){
