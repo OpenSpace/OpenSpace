@@ -194,6 +194,9 @@ namespace openspace {
                 //if the connection was successfull
                 if (result != SOCKET_ERROR)
                 {
+                    
+                    LINFO("Connection established with server at ip: "<< _address);
+                    
                     //we're connected
                     _isConnected.store(true);
 
@@ -550,7 +553,7 @@ namespace openspace {
             
             //construct init msg
             std::vector<std::string> scripts = OsEng.scriptEngine()->cachedScripts();
-            uint16_t numScrips = scripts.size();
+            
             
             uint16_t scriptlen;
             uint32_t totlen = 0;
@@ -558,10 +561,21 @@ namespace openspace {
             
             std::vector<char> scriptMsg;
             
-            //add as a first script the current time to ensure all nodes are on the same page
-            std::string timenow = Time::ref().currentTimeUTC();
-            std::string timescript = "openspace.time.setTime(\"" + timenow + "\");";
+            //add a script of the current time to ensure all nodes are on the same page
+            std::string timescript = "openspace.time.setTime(\"" + std::to_string(Time::ref().currentTime()); + "\");";
             scripts.push_back(timescript);
+            
+            //add a script of the current delta time to ensure all nodes are on the same page
+            
+            std::string dtscript = "openspace.time.setTime(\"" + std::to_string(Time::ref().deltaTime()) + "\");";
+            scripts.push_back(dtscript);
+            
+            //add a terminating script letting the server know the client is fully initialized
+            std::string donescript = "openspace.parallel.initialized();";
+            scripts.push_back(donescript);
+            
+            //total number of scripts
+            uint16_t numScrips = static_cast<uint16_t>(scripts.size());
             
             //write all scripts
             for(it = scripts.cbegin();
@@ -917,6 +931,18 @@ namespace openspace {
             //minor and major version (as uint8_t -> 1 byte) + two bytes for the chars 'O' and 'S' + 4 bytes for type of message
             return 2 * sizeof(uint8_t) + 2 + sizeof(uint32_t);
         }
+        
+        void ParallelConnection::initDone(){
+            //create buffer and reserve size
+            std::vector<char> buffer;
+            buffer.reserve(headerSize());
+
+            //write header
+            writeHeader(buffer, MessageTypes::InitializationCompleted);
+            
+            //queue script
+            queMessage(buffer);
+        }
 
         scripting::ScriptEngine::LuaLibrary ParallelConnection::luaLibrary() {
             return {
@@ -961,6 +987,12 @@ namespace openspace {
                     {
                         "requestHostship",
                         &luascriptfunctions::requestHostship,
+                        "",
+                        "Request to be the host for this session"
+                    },
+                    {
+                        "initialized",
+                        &luascriptfunctions::initialized,
                         "",
                         "Request to be the host for this session"
                     },

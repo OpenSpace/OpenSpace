@@ -133,6 +133,8 @@ namespace openspace{
             
             void update(double dt);
             
+            void initDone();
+            
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
@@ -140,7 +142,8 @@ namespace openspace{
                 Script,
                 HostInfo,
                 InitializationRequest,
-                HostshipRequest
+                HostshipRequest,
+                InitializationCompleted
             };
             
             /**
