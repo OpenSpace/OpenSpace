@@ -32,6 +32,9 @@ namespace luascriptfunctions {
  * Set the port for parallel connection
  */
 int setPort(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -56,6 +59,9 @@ int setPort(lua_State* L) {
 }
 
 int setAddress(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -79,6 +85,9 @@ int setAddress(lua_State* L) {
 }
 
 int setPassword(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -102,6 +111,9 @@ int setPassword(lua_State* L) {
 }
 
 int setDisplayName(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -125,6 +137,9 @@ int setDisplayName(lua_State* L) {
 }
 
 int connect(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
@@ -133,6 +148,9 @@ int connect(lua_State* L) {
 }
 
 int disconnect(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
@@ -141,6 +159,9 @@ int disconnect(lua_State* L) {
 }
 
 int requestHostship(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
@@ -149,6 +170,9 @@ int requestHostship(lua_State* L) {
 }
 
 int initialized(lua_State* L) {
+    if(!OsEng.isMaster()){
+        return;
+    }
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
