@@ -55,7 +55,8 @@ private slots:
 
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
-    void handlePlaybook(QByteArray data);
+    QByteArray handlePlaybook(QByteArray data);
+    void printMapping(QByteArray data);
 
     void fullyConnected();
 

@@ -74,6 +74,8 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     }
     case MessageTypeExternalControlConnected:
     {
+        publishIdentifierMappingMessage();
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
         sendInitialInformation();
         return true;
     }
@@ -118,7 +120,7 @@ void NetworkEngine::publishStatusMessage() {
 }
 
 void NetworkEngine::publishIdentifierMappingMessage() {
-    size_t bufferSize = 0;
+    size_t bufferSize = sizeof(uint16_t);
     for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
         bufferSize += sizeof(MessageIdentifier);
         bufferSize += i.first.size() + 1; // +1 for \0 terminating character
@@ -126,13 +128,17 @@ void NetworkEngine::publishIdentifierMappingMessage() {
 
     std::vector<char> buffer(bufferSize);
     size_t currentWritingPosition = 0;
+    uint16_t size = _identifiers.size();
+    std::memcpy(buffer.data(), &size, sizeof(uint16_t));
+    currentWritingPosition += sizeof(uint16_t);
     for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
         std::memcpy(buffer.data() + currentWritingPosition, &(i.second), sizeof(MessageIdentifier));
         currentWritingPosition += sizeof(MessageIdentifier);
-        std::memcpy(buffer.data() + currentWritingPosition, i.first.data(), i.first.size());
+        uint8_t stringSize = i.first.size();
+        std::memcpy(buffer.data() + currentWritingPosition, &stringSize, sizeof(uint8_t));
+        currentWritingPosition += sizeof(uint8_t);
+        std::memcpy(buffer.data() + currentWritingPosition, i.first.data(), stringSize);
         currentWritingPosition += i.first.size();
-        buffer[currentWritingPosition] = '\0';
-        currentWritingPosition += 1;
     }
 
     publishMessage(_identifierMappingIdentifier, std::move(buffer));
@@ -178,13 +184,14 @@ void NetworkEngine::sendMessages() {
             m.body.data(),
             static_cast<int>(m.body.size())
         );
+        //LINFO("Sent message: (s=" << m.body.size() << "): " << std::string(m.body.begin(), m.body.end()));
     }
 
     _messagesToSend.clear();
 }
 
 void NetworkEngine::sendInitialInformation() {
-    static const int SleepTime = 100;
+    static const int SleepTime = 250;
     _shouldPublishStatusMessage = false;
     for (const Message& m : _initialConnectionMessages) {
         union {
@@ -199,11 +206,12 @@ void NetworkEngine::sendInitialInformation() {
             payload.data(),
             static_cast<int>(payload.size())
         );
+        LINFO("Sent initial message: (s=" << m.body.size() << ") [i=" << identifier.value << "]");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
+    std::this_thread::sleep_for(std::chrono::milliseconds(4 * SleepTime));
 
     // Send finished message
     union {
