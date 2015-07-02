@@ -55,7 +55,8 @@ private slots:
 
 	void readTcpData();
     void handleStatusMessage(QByteArray data);
-    void handlePlaybook(QByteArray data);
+    QByteArray handlePlaybook(QByteArray data);
+    void printMapping(QByteArray data);
 
     void fullyConnected();
 
@@ -67,8 +68,7 @@ private:
     
 	QTcpSocket* _socket;
 
-    bool _hasHongKangTimeline = false;
-    bool _hasLabelTimeline = false;
+    bool _isConnected = false;
 };
 
 #endif // __MAINWINDOW_H__

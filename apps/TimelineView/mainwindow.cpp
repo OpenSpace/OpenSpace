@@ -37,6 +37,10 @@
 #include <array>
 #include <cstdint>
 
+namespace {
+    QByteArray continuousData;
+}
+
 template <typename T>
 T readFromBuffer(char* buffer, size_t& currentReadLocation) {
     union {
@@ -128,15 +132,25 @@ void MainWindow::onDisconnect() {
 
 void MainWindow::readTcpData() {
     static const uint16_t MessageTypeStatus = 0;
-    static const uint16_t MessageTypePlayBookHongKang = 2;
+    static const uint16_t MessageTypeMappingIdentifier = 1;
+    static const uint16_t MessageTypeInitialMessageFinished = 2;
     static const uint16_t MessageTypePlayBookLabel = 3;
+    static const uint16_t MessageTypePlayBookHongKang = 4;
 
-    QByteArray data = _socket->readAll();
+    QByteArray data = continuousData.append(_socket->readAll());
+    int d = data.size();
 
-    if (QString(data) == "Connected to SGCT!\r\n")
+    if (data.size() != 42)
+        qDebug() << QString(data);
+
+    if (QString(data) == "Connected to SGCT!\r\n") {
+        continuousData.clear();
         return;
-    if (QString(data) == "OK\r\n")
+    }
+    if (QString(data) == "OK\r\n") {
+        continuousData.clear();
         return;
+    }
 
     QByteArray messageTypeData = data.left(2);
     union {
@@ -147,6 +161,14 @@ void MainWindow::readTcpData() {
 
     switch (messageType.value) {
     case MessageTypeStatus:
+        break;
+    case MessageTypeMappingIdentifier:
+        qDebug() << "Mapping Identifier received";
+        printMapping(data.mid(2));
+        continuousData.clear();
+        break;
+    case MessageTypeInitialMessageFinished:
+        qDebug() << "InitialMessageFinished received";
         break;
     case MessageTypePlayBookHongKang:
         qDebug() << "Hong Kang Playbook received";
@@ -161,8 +183,9 @@ void MainWindow::readTcpData() {
     switch (messageType.value) {
     case MessageTypeStatus:
     {
-        if (_hasHongKangTimeline && _hasLabelTimeline)
+        if (_isConnected)
             handleStatusMessage(data.mid(2));
+        continuousData.clear();
         break;
     }
     case MessageTypePlayBookHongKang:
@@ -176,27 +199,36 @@ void MainWindow::readTcpData() {
         //qDebug() << "Begin reading data";
         while (_socket->waitForReadyRead() && data.size() < int(size)) {
             //qDebug() << ".";
+            //_socket->read
+            //data = data.append(_socket->re)
             data = data.append(_socket->readAll());
             //data = data.append(_socket->read(int(size) - data.size()));
-            QThread::msleep(50);
+            //QThread::msleep(50);
         }
         //qDebug() << "Finished reading data. Handling playbook";
 
-        handlePlaybook(data.mid(2));
+        continuousData = handlePlaybook(data.mid(2));
+
 
         //qDebug() << "Finished handling playbook";
 
-        if (messageType.value == MessageTypePlayBookHongKang)
-            _hasHongKangTimeline = true;
-        if (messageType.value == MessageTypePlayBookLabel)
-            _hasLabelTimeline = true;
+        //if (messageType.value == MessageTypePlayBookHongKang)
+        //    _hasHongKangTimeline = true;
+        //if (messageType.value == MessageTypePlayBookLabel)
+        //    _hasLabelTimeline = true;
 
-        if (_hasHongKangTimeline && _hasLabelTimeline) {
-            fullyConnected();
-        }
+        //if (_hasHongKangTimeline && _hasLabelTimeline) {
+        //    fullyConnected();
+        //}
 
         break;
     }
+    case MessageTypeInitialMessageFinished:
+        _isConnected = true;
+        fullyConnected();
+        continuousData.clear();
+        break;
+        
     default:
         qDebug() << QString(data);
     }
@@ -242,7 +274,7 @@ std::vector<std::string> instrumentsFromId(uint16_t instrumentId, std::map<uint1
     return results;
 }
 
-void MainWindow::handlePlaybook(QByteArray data) {
+QByteArray MainWindow::handlePlaybook(QByteArray data) {
     char* buffer = data.data();
     size_t currentReadLocation = 0;
 
@@ -286,9 +318,15 @@ void MainWindow::handlePlaybook(QByteArray data) {
             qDebug() << "Instruments were empty";
         images.push_back(image);
     }
-
     _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
 
+    auto dataSize = data.size();
+    auto readSize = currentReadLocation;
+    auto extraBytes = dataSize - readSize;
+    if (extraBytes > 0)
+        return data.mid(currentReadLocation);
+    else
+        return QByteArray();
 }
 
 void MainWindow::sendScript(QString script) {
@@ -329,4 +367,18 @@ void MainWindow::fullyConnected() {
     _timeControlWidget->socketConnected();
     _informationWidget->socketConnected();
     _timelineWidget->socketConnected();
+}
+
+void MainWindow::printMapping(QByteArray data) {
+    char* buffer = data.data();
+    size_t currentReadPosition = 0;
+
+    uint16_t size = readFromBuffer<uint16_t>(buffer, currentReadPosition);
+    for (uint16_t i = 0; i < size; ++i) {
+        uint16_t identifier = readFromBuffer<uint16_t>(buffer, currentReadPosition);
+        std::string mapping = readFromBuffer<std::string>(buffer, currentReadPosition);
+
+        qDebug() << identifier << ": " << QString::fromStdString(mapping);
+
+    }
 }
