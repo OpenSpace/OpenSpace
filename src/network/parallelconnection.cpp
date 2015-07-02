@@ -562,12 +562,12 @@ namespace openspace {
             std::vector<char> scriptMsg;
             
             //add a script of the current time to ensure all nodes are on the same page
-            std::string timescript = "openspace.time.setTime(\"" + std::to_string(Time::ref().currentTime()); + "\");";
+            std::string timescript = "openspace.time.setTime(" + std::to_string(Time::ref().currentTime()) + ");";
             scripts.push_back(timescript);
             
             //add a script of the current delta time to ensure all nodes are on the same page
             
-            std::string dtscript = "openspace.time.setTime(\"" + std::to_string(Time::ref().deltaTime()) + "\");";
+            std::string dtscript = "openspace.time.setDeltaTime(" + std::to_string(Time::ref().deltaTime()) + ");";
             scripts.push_back(dtscript);
             
             //add a terminating script letting the server know the client is fully initialized
@@ -770,22 +770,8 @@ namespace openspace {
 				_isHost.store(false);
 
 				//tell connection thread to stop listening
-				_isListening.store(false);
-
-				//tell connection thread that we are connected (to be able to join and delete thread)
-				_isConnected.store(true);
-
-				//join connection thread and delete it
-				if (_connectionThread != nullptr){
-					_connectionThread->join();
-					delete _connectionThread;
-					_connectionThread = nullptr;
-				}
-
-				//make sure to set us as NOT connected again, connection thread is now deleted
-				_isConnected.store(false);
-
-
+                _isListening.store(false);
+                
 				//join receive thread and delete it
 				if (_receiveThread != nullptr){
 					_receiveThread->join();
@@ -806,6 +792,19 @@ namespace openspace {
 					delete _sendThread;
 					_sendThread = nullptr;
 				}
+                
+                //tell connection thread that we are connected (to be able to join and delete thread)
+                _isConnected.store(true);
+                
+                //join connection thread and delete it
+                if (_connectionThread != nullptr){
+                    _connectionThread->join();
+                    delete _connectionThread;
+                    _connectionThread = nullptr;
+                }
+                
+                //make sure to set us as NOT connected again, connection thread is now deleted
+                _isConnected.store(false);
 
 #if defined(__WIN32__)
                 //this line causes issues with SGCT since winsock dll file is unloaded upon call
