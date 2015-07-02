@@ -90,6 +90,7 @@ MainWindow::MainWindow()
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
+    _informationWidget->setEnabled(false);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
 
     QWidget* container = new QWidget;
