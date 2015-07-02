@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/labelparser.h>
 
 #include <openspace/properties/stringproperty.h>

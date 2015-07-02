@@ -25,7 +25,7 @@
 #ifndef __LABELPARSER_H__
 #define __LABELPARSER_H__
 
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/sequenceparser.h>
 
 #include <map>

@@ -36,7 +36,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.h
@@ -56,7 +56,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.cpp

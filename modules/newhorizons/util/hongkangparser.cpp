@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>

@@ -25,7 +25,7 @@
 #include <openspace/rendering/renderengine.h> 
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 #endif
 
 #include <openspace/abuffer/abuffervisualizer.h>

@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <modules/newhorizons/util/imagesequencer2.h>
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
 

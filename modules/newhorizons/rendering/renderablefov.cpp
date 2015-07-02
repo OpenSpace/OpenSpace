@@ -29,7 +29,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
-#include <modules/newhorizons/util/imagesequencer2.h> // testing
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <openspace/util/time.h>
 
 
