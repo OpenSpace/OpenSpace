@@ -557,6 +557,12 @@ namespace openspace {
             std::vector<std::string>::const_iterator it;
             
             std::vector<char> scriptMsg;
+            
+            //add as a first script the current time to ensure all nodes are on the same page
+            std::string timenow = Time::ref().currentTimeUTC();
+            std::string timescript = "openspace.time.setTime(\"" + timenow + "\");";
+            scripts.push_back(timescript);
+            
             //write all scripts
             for(it = scripts.cbegin();
                 it != scripts.cend();
