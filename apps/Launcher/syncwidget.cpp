@@ -117,7 +117,7 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
 
     libtorrent::error_code ec;
-    _session->listen_on(std::make_pair(20285, 20285), ec);
+    _session->listen_on(std::make_pair(20280, 20290), ec);
     if (ec) {
         LFATAL("Failed to open socket: " << ec.message());
         return;
@@ -125,9 +125,9 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     _session->start_upnp();
     _session->start_dht();
 
-    _session->add_dht_router({ "dht.transmissionbt.com", 6881});
-    _session->add_dht_router({ "router.bittorrent.com", 6881});
     _session->add_dht_router({ "router.utorrent.com", 6881 });
+    _session->add_dht_router({ "dht.transmissionbt.com", 6881 });
+    _session->add_dht_router({ "router.bittorrent.com", 6881 });
     _session->add_dht_router({ "router.bitcomet.com", 6881 });
 
     QTimer* timer = new QTimer(this);

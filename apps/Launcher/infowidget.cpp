@@ -36,6 +36,7 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     , _bytes(nullptr)
     , _progress(nullptr)
     , _messagesLeft(nullptr)
+    , _messagesCenter(nullptr)
     , _messagesRight(nullptr)
     , _totalBytes(totalBytes)
 {
@@ -56,9 +57,11 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     layout->addWidget(_progress, 1, 1);
 
     _messagesLeft = new QLabel("");
+    _messagesCenter = new QLabel("");
     _messagesRight = new QLabel("");
     
     layout->addWidget(_messagesLeft, 2, 0, 1, 2);
+    layout->addWidget(_messagesCenter, 2, 0, 1, 2, Qt::AlignCenter);
     layout->addWidget(_messagesRight, 2, 0, 1, 2, Qt::AlignRight);
 
     setLayout(layout);
@@ -98,6 +101,9 @@ void InfoWidget::update(libtorrent::torrent_status s) {
 
             QString left = "Time remaining %1 s";
             _messagesLeft->setText(left.arg(static_cast<int>(seconds)));
+
+            QString center = "Peers: %1 (%2) | Seeds: %3 (%4)";
+            _messagesCenter->setText(center.arg(s.num_peers).arg(s.list_peers).arg(s.num_seeds).arg(s.list_seeds));
 
             QString right = "Download Rate: %1 KiB/s";
             _messagesRight->setText(right.arg(bytesPerSecond / 1024));

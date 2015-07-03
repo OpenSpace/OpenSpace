@@ -36,7 +36,8 @@ namespace openspace {
 class LabelParser : public SequenceParser{
 public:
 	LabelParser();
-	LabelParser(const std::string& fileName,
+	LabelParser(std::string name,
+                const std::string& fileName,
 				ghoul::Dictionary translationDictionary);
 
 	bool create() override;
@@ -60,6 +61,7 @@ private:
 							std::vector<std::string> payload, 
 							std::vector<std::string> potentialTargets);
 		
+    std::string _name;
 	std::string _fileName;
 	std::string _spacecraft;
 	std::map<std::string, Decoder*> _fileTranslation;
