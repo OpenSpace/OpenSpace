@@ -152,6 +152,7 @@ int main(int argc, char** argv) {
     }
     sgct::Engine::RunMode rm = versionMapping[glVersion];
     const bool initSuccess = _sgctEngine->init(rm);
+
     if (!initSuccess) {
         LFATAL("Initializing failed");
         // could not open a window, deallocates and exits
@@ -160,8 +161,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    //is this node the master?	(must be set after call to _sgctEngine->init())
-    OsEng.setMaster(_sgctEngine->isMaster());
+   
 
     // Main loop
     LDEBUG("Starting rendering loop");
@@ -183,6 +183,9 @@ int main(int argc, char** argv) {
 }
 
 void mainInitFunc() {
+    //is this node the master?	(must be set after call to _sgctEngine->init())
+    OsEng.setMaster(_sgctEngine->isMaster());
+    
     bool success = OsEng.initialize();
     if (success)
         success = OsEng.initializeGL();
