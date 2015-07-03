@@ -610,12 +610,19 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 }
 
 void ScriptEngine::postSynchronizationPreDraw(){
+	
+	std::vector<std::string> scripts;
+
 	_mutex.lock();
-	while(!_receivedScripts.empty()){
-		runScript(_receivedScripts.back());
-		_receivedScripts.pop_back();
-	}
+	scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
+	_receivedScripts.clear();
 	_mutex.unlock();
+	
+	while (!scripts.empty()){
+		runScript(scripts.back());
+		scripts.pop_back();
+	}
+	
 }
 
 void ScriptEngine::preSynchronization(){
