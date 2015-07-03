@@ -32,6 +32,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+
 namespace openspace {
 
     
@@ -64,12 +65,12 @@ Camera::~Camera()
 
 void Camera::setPosition(psc pos)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_localPosition = std::move(pos);
 }
 
 const psc& Camera::position() const
 {
-	//return _localPosition;
 	return _syncedPosition;
 }
 
@@ -78,6 +79,7 @@ const psc& Camera::unsynchedPosition() const{
 }
 
 void Camera::setModelMatrix(glm::mat4 modelMatrix){
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_modelMatrix = std::move(modelMatrix);
 }
 
@@ -86,6 +88,7 @@ const glm::mat4& Camera::modelMatrix() const{
 }
 
 void Camera::setViewMatrix(glm::mat4 viewMatrix){
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_viewMatrix = std::move(viewMatrix);
 }
 
@@ -94,6 +97,7 @@ const glm::mat4& Camera::viewMatrix() const{
 }
 
 void Camera::setProjectionMatrix(glm::mat4 projectionMatrix){
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_projectionMatrix = std::move(projectionMatrix);
 }
 
@@ -103,6 +107,7 @@ const glm::mat4& Camera::projectionMatrix() const{
 
 void Camera::setViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     _viewProjectionMatrix = std::move(viewProjectionMatrix);
 }
 
@@ -113,6 +118,7 @@ const glm::mat4& Camera::viewProjectionMatrix() const
 
 void Camera::setCameraDirection(glm::vec3 cameraDirection)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     _cameraDirection = std::move(cameraDirection);
 }
 
@@ -122,6 +128,7 @@ glm::vec3 Camera::cameraDirection() const
 }
 
 void Camera::setViewRotationMatrix(glm::mat4 m) {
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_localViewRotationMatrix = m;
 }
 
@@ -133,6 +140,7 @@ const glm::mat4& Camera::viewRotationMatrix() const
 
 void Camera::compileViewRotationMatrix()
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     // convert from quaternion to rotation matrix using glm
     //_viewRotationMatrix = glm::mat4_cast(_viewRotation);
 
@@ -145,6 +153,7 @@ void Camera::compileViewRotationMatrix()
 
 void Camera::rotate(const glm::quat& rotation)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
 	glm::mat4 tmp = glm::mat4_cast(rotation);
 	_localViewRotationMatrix = _localViewRotationMatrix * tmp;
     //_viewRotation = rotation * _viewRotation;
@@ -153,12 +162,14 @@ void Camera::rotate(const glm::quat& rotation)
 
 void Camera::setRotation(glm::quat rotation)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     //_viewRotation = glm::normalize(std::move(rotation));
 	_localViewRotationMatrix = glm::mat4_cast(rotation);
 }
 
 void Camera::setRotation(glm::mat4 rotation)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_localViewRotationMatrix = std::move(rotation);
 }
 
@@ -168,6 +179,7 @@ void Camera::setRotation(glm::mat4 rotation)
 //}
 
 void Camera::setFocusPosition(psc pos){
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_focusPosition = pos;
 }
 
@@ -193,12 +205,14 @@ const float& Camera::sinMaxFov() const
 
 void Camera::setMaxFov(float fov)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     _maxFov = fov;
     _sinMaxFov = sin(_maxFov);
 }
 
 void Camera::setScaling(glm::vec2 scaling)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
 	_localScaling = std::move(scaling);
 }
 
@@ -210,6 +224,7 @@ const glm::vec2& Camera::scaling() const
 
 void Camera::setLookUpVector(glm::vec3 lookUp)
 {
+    std::lock_guard<std::mutex> _lock(_mutex);
     _lookUp = std::move(lookUp);
 }
 

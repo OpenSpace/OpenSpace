@@ -350,41 +350,63 @@ void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
     
+    bool hasKeys = false;
+    psc pos;
+    glm::quat q;
+    
 	_keyframeMutex.lock();
 
 	if (_keyframes.size() > 4){	//wait until enough samples are buffered
+        hasKeys = true;
 		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
+        
+        openspace::network::StreamDataKeyframe p0, p1, p2, p3;
+        
+        p0 = _keyframes[0];
+        p1 = _keyframes[1];
+        p2 = _keyframes[2];
+        p3 = _keyframes[3];
 
 		//interval check
-		if (_currentKeyframeTime < _keyframes[1]._timeStamp){
-			_currentKeyframeTime = _keyframes[1]._timeStamp;
+		if (_currentKeyframeTime < p1._timeStamp){
+			_currentKeyframeTime = p1._timeStamp;
 		}
 
-		double t0 = _keyframes[1]._timeStamp;
-		double t1 = _keyframes[2]._timeStamp;
+		double t0 = p1._timeStamp;
+		double t1 = p2._timeStamp;
 		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
 
+        
+        
 		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
-		glm::dvec4 v = positionInterpLin.interpolate(fact, _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4());
-		psc pos(v.x, v.y, v.z, v.w);
-
-		glm::quat q = quatInterpLin.interpolate(fact, _keyframes[1]._viewRotationQuat, _keyframes[2]._viewRotationQuat);
-
+		glm::dvec4 v = positionInterpLin.interpolate(fact, p1._position.dvec4(), p2._position.dvec4());
+		
+        pos = psc(v.x, v.y, v.z, v.w);
+        q = quatInterpLin.interpolate(fact, p1._viewRotationQuat, p2._viewRotationQuat);
+        
+        //we're done with this sample interval
+        if (_currentKeyframeTime >= p2._timeStamp){
+            _keyframes.erase(_keyframes.begin());
+            _currentKeyframeTime = p1._timeStamp;
+        }
+        
+        _currentKeyframeTime += deltaTime;
+        
+    }
+    
+    _keyframeMutex.unlock();
+    
+    if(hasKeys){
 		_camera->setPosition(pos);
 		_camera->setViewRotationMatrix(glm::mat4_cast(q));
-
-		_currentKeyframeTime += deltaTime;
-
-		//we're done with this sample interval
-		if (_currentKeyframeTime >= _keyframes[2]._timeStamp){
-			_keyframes.erase(_keyframes.begin());
-			_currentKeyframeTime = _keyframes[1]._timeStamp;
-		}
     }
 
-	_keyframeMutex.unlock();
+		
+
+
+	
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -498,11 +520,12 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 		target = relative;
 	}
 
-	_camera->setFocusPosition(origin);
+	unlockControls();
+    
+    _camera->setFocusPosition(origin);
 	_camera->setPosition(target);
 	_camera->rotate(glm::quat_cast(transform));
 	
-	unlockControls();
 }
 
 //void InteractionHandler::distance(const float &d){
@@ -543,16 +566,19 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
 	//relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
 	relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
 	relative = relative_origin_coordinate + origin;
-
+    glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+    
+    unlockControls();
+    
 	_camera->setPosition(relative);
 	//camera_->rotate(rotation);
 	//camera_->setRotation(glm::mat4_cast(rotation));
 
-	glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+	
 	_camera->setRotation(la);
 	//camera_->setLookUpVector();
 
-	unlockControls();
+	
 }
 
 //<<<<<<< HEAD
@@ -571,9 +597,7 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
 //=======
 void InteractionHandler::rotateDelta(const glm::quat& rotation)
 {
-	lockControls();
 	_camera->rotate(rotation);
-	unlockControls();
 }
 
 void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t iterations)
@@ -586,7 +610,9 @@ void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t
 	psc relative = _camera->position();
 	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
 	
-	psc relative_origin_coordinate = relative - origin;
+    unlockControls();
+
+    psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
 	glm::vec3 newdir = dir * distance[0];
 
@@ -604,11 +630,8 @@ void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t
 	// update only if on the same side of the origin
 	if (glm::angle(newdir, dir) < 90.0f) {
 		_camera->setPosition(relative);
-		unlockControls();
-
 	}
 	else {
-		unlockControls();
 		PowerScaledScalar d2 = distance;
 		d2[0] *= 0.75f;
 		d2[1] *= 0.85f;
