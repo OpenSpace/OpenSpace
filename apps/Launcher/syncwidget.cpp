@@ -26,6 +26,8 @@
 
 #include "infowidget.h"
 
+#include <openspace/version.h>
+
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -122,6 +124,21 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
+
+    libtorrent::session_settings settings = _session->settings();
+    settings.user_agent =
+        "OpenSpace/" +
+        std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
+        std::to_string(OPENSPACE_VERSION_MINOR) + "." +
+        std::to_string(OPENSPACE_VERSION_PATCH);
+    settings.allow_multiple_connections_per_ip = true;
+    settings.ignore_limits_on_local_network = true;
+    settings.connection_speed = 20;
+    settings.active_downloads = -1;
+    settings.active_seeds = -1;
+    settings.active_limit = 30;
+    settings.dht_announce_interval = 60;
+
     if (ec) {
         LFATAL("Failed to open socket: " << ec.message());
         return;
@@ -308,9 +325,11 @@ void SyncWidget::handleTorrentFiles() {
             continue;
         }
 
-        InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
-        _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
-        _torrentInfoWidgetMap[h] = w;
+        if (_torrentInfoWidgetMap.find(h) == _torrentInfoWidgetMap.end()) {
+            InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
+            _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
+            _torrentInfoWidgetMap[h] = w;
+        }
 
         FileSys.setCurrentDirectory(d);
     }
