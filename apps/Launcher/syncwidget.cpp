@@ -138,9 +138,20 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 }
 
 SyncWidget::~SyncWidget() {
+    libtorrent::entry dht = _session->dht_state();
+    std::string s = dht.to_string();
+
     openspace::DownloadManager::deinitialize();
     ghoul::deinitialize();
     delete _session;
+}
+
+void SyncWidget::closeEvent(QCloseEvent* event) {
+    std::vector<libtorrent::torrent_handle> handles = _session->get_torrents();
+    for (libtorrent::torrent_handle h : handles) {
+        h.flush_cache();
+        _session->remove_torrent(h);
+    }
 }
 
 void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
@@ -601,3 +612,4 @@ void SyncWidget::handleFileFutureAddition(
     _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());
     _mutex.clear();
 }
+
