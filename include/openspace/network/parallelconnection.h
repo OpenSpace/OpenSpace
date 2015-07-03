@@ -105,21 +105,11 @@ namespace openspace{
             
             void clientConnect();
             
-            void disconnect();
-            
             void setPort(const std::string &port);
-            
-            std::string port();
             
             void setAddress(const std::string &address);
             
-            std::string address();
-            
             void setName(const std::string& name);
-            
-            std::string name();
-            
-            _SOCKET clientSocket();
             
             bool isHost();
             
@@ -129,11 +119,9 @@ namespace openspace{
             
             void sendScript(const std::string script);
             
-            void queMessage(std::vector<char> message);
-            
-            void update(double dt);
-            
             void initDone();
+            
+            void signalDisconnect();
             
             enum MessageTypes{
                 Authentication=0,
@@ -176,13 +164,17 @@ namespace openspace{
 				return hashVal;
 			};
             
+            void queMessage(std::vector<char> message);
+            
+            void disconnect();
+            
             void writeHeader(std::vector<char> &buffer, uint32_t messageType);
 
 			void closeSocket();
 
 			bool initNetworkAPI();
 
-			void tryConnect(addrinfo *info);
+			void establishConnection(addrinfo *info);
 
 			void sendAuthentication();
 
@@ -208,6 +200,10 @@ namespace openspace{
             
             void sendLoop();
             
+            bool parseHints(addrinfo &info);
+            
+            void threadManagement();
+            
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
@@ -216,11 +212,13 @@ namespace openspace{
             std::thread *_connectionThread;
 			std::thread *_broadcastThread;
             std::thread *_sendThread;
-			std::thread *_receiveThread;
+			std::thread *_listenThread;
+            std::thread *_handlerThread;
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
-            std::atomic<bool> _isListening;
             std::atomic<bool> _performDisconnect;
+            std::atomic<bool> _isRunning;
+            std::atomic<bool> _tryConnect;
             std::vector<std::vector<char>> _sendBuffer;
             std::mutex _sendBufferMutex;
         };

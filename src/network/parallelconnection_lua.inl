@@ -32,9 +32,7 @@ namespace luascriptfunctions {
  * Set the port for parallel connection
  */
 int setPort(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -46,7 +44,9 @@ int setPort(lua_State* L) {
 	if (isNumber) {
 		int value = lua_tonumber(L, -1);
 		std::string port = std::to_string(value);
-		OsEng.parallelConnection()->setPort(port);
+        if(OsEng.isMaster()){
+            OsEng.parallelConnection()->setPort(port);
+        }
 		return 0;
 	}
 	else {
@@ -59,9 +59,7 @@ int setPort(lua_State* L) {
 }
 
 int setAddress(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -72,7 +70,9 @@ int setAddress(lua_State* L) {
 	const int type = lua_type(L, -1);
 	if (type == LUA_TSTRING) {
 		std::string address = luaL_checkstring(L, -1);
-		OsEng.parallelConnection()->setAddress(address);
+        if(OsEng.isMaster()){
+            OsEng.parallelConnection()->setAddress(address);
+        }
 		return 0;
 	}
 	else {
@@ -85,9 +85,7 @@ int setAddress(lua_State* L) {
 }
 
 int setPassword(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -98,7 +96,9 @@ int setPassword(lua_State* L) {
 	const int type = lua_type(L, -1);
 	if (type == LUA_TSTRING) {
 		std::string pwd = luaL_checkstring(L, -1);
-		OsEng.parallelConnection()->setPassword(pwd);
+        if(OsEng.isMaster()){
+            OsEng.parallelConnection()->setPassword(pwd);
+        }
 		return 0;
 	}
 	else {
@@ -111,9 +111,7 @@ int setPassword(lua_State* L) {
 }
 
 int setDisplayName(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
 	const bool isFunction = (lua_isfunction(L, -1) != 0);
 	if (isFunction) {
 		// If the top of the stack is a function, it is ourself
@@ -124,7 +122,9 @@ int setDisplayName(lua_State* L) {
 	const int type = lua_type(L, -1);
 	if (type == LUA_TSTRING) {
 		std::string name = luaL_checkstring(L, -1);
-		OsEng.parallelConnection()->setName(name);
+        if(OsEng.isMaster()){
+            OsEng.parallelConnection()->setName(name);
+        }
 		return 0;
 	}
 	else {
@@ -137,46 +137,46 @@ int setDisplayName(lua_State* L) {
 }
 
 int connect(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.parallelConnection()->clientConnect();
+    if(OsEng.isMaster()){
+        OsEng.parallelConnection()->clientConnect();
+    }
 	return 0;
 }
 
 int disconnect(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    OsEng.parallelConnection()->disconnect();
+    if(OsEng.isMaster()){
+        OsEng.parallelConnection()->signalDisconnect();
+    }
     return 0;
 }
 
 int requestHostship(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    OsEng.parallelConnection()->requestHostship();
+    if(OsEng.isMaster()){
+        OsEng.parallelConnection()->requestHostship();
+    }
     return 0;
 }
 
 int initialized(lua_State* L) {
-    if(!OsEng.isMaster()){
-        return;
-    }
+    
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    OsEng.parallelConnection()->initDone();
+    if(OsEng.isMaster()){
+        OsEng.parallelConnection()->initDone();
+    }
     return 0;
 }
 

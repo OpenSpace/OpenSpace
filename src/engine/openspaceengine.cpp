@@ -638,7 +638,6 @@ void OpenSpaceEngine::preSynchronization() {
 		Time::ref().preSynchronization();
 		
         _interactionHandler->update(dt);
-        _parallelConnection->update(dt);
         //_interactionHandler.lockControls();		
 
 		_scriptEngine->preSynchronization();			

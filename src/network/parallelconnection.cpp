@@ -81,31 +81,132 @@ namespace openspace {
 		_connectionThread(nullptr),
 		_broadcastThread(nullptr),
         _sendThread(nullptr),
-		_receiveThread(nullptr),
+		_listenThread(nullptr),
+        _handlerThread(nullptr),
+        _isRunning(true),
         _isHost(false),
         _isConnected(false),
-        _isListening(false),
+        _tryConnect(false),
         _performDisconnect(false)
         {
-            
+            //create handler thread
+            _handlerThread = new (std::nothrow) std::thread(&ParallelConnection::threadManagement, this);
         }
         
         ParallelConnection::~ParallelConnection(){
-            disconnect();
-#if defined(__WIN32__)
-            WSACleanup();
+            
+            //signal that a disconnect should occur
+            signalDisconnect();
+            
+            //signal that execution has stopped
+            _isRunning.store(false);
+            
+            //join handler
+            _handlerThread->join();
+            
+            //and delete handler
+            delete _handlerThread;
+        }
+        
+        void ParallelConnection::threadManagement(){
+            //while program is running
+            while(_isRunning.load()){
+                //if we need to disconnect and clean up
+                if(_performDisconnect.load()){
+                    disconnect();
+                }
+            }
+        }
+        
+        void ParallelConnection::signalDisconnect(){
+            _performDisconnect.store(true);
+        }
+        
+        void ParallelConnection::closeSocket(){
+            
+            /*
+             Windows shutdown options
+             * SD_RECIEVE
+             * SD_SEND
+             * SD_BOTH
+             
+             Linux & Mac shutdown options
+             * SHUT_RD (Disables further receive operations)
+             * SHUT_WR (Disables further send operations)
+             * SHUT_RDWR (Disables further send and receive operations)
+             */
+            
+#ifdef __WIN32__
+            shutdown(_clientSocket, SD_BOTH);
+            closesocket(_clientSocket);
+#else
+            shutdown(_clientSocket, SHUT_RDWR);
+            close(_clientSocket);
 #endif
+            
+            _clientSocket = INVALID_SOCKET;
+        }
+        
+        void ParallelConnection::disconnect(){
+            //we're disconnecting
+            
+            if (_clientSocket != INVALID_SOCKET){
+                
+                //must be run before trying to join communication threads, else the threads are stuck trying to receive data
+                closeSocket();
+                
+                //tell connection thread to stop trying to connect
+                _tryConnect.store(false);
+                
+                //tell send thread to stop sending and listen thread to stop listenin
+                _isConnected.store(false);
+                
+                //tell broadcast thread to stop broadcasting (we're no longer host)
+                _isHost.store(false);
+                
+                //join connection thread and delete it
+                if(_connectionThread != nullptr){
+                    _connectionThread->join();
+                    delete _connectionThread;
+                    _connectionThread = nullptr;
+                }
+                
+                //join send thread and delete it
+                if (_sendThread != nullptr){
+                    _sendThread->join();
+                    delete _sendThread;
+                    _sendThread = nullptr;
+                }
+                
+                //join listen thread and delete it
+                if( _listenThread != nullptr){
+                    _listenThread->join();
+                    delete _listenThread;
+                    _listenThread = nullptr;
+                }
+                
+                //join broadcast thread and delete it
+                if(_broadcastThread != nullptr){
+                    _broadcastThread->join();
+                    delete _broadcastThread;
+                    _broadcastThread = nullptr;
+                }
+                
+                // disconnect and cleanup completed
+                _performDisconnect.store(false);
+            }
         }
         
 		void ParallelConnection::clientConnect(){
 
-            //we're already connected, do nothing (dummy check)
-            if(_isConnected.load()){
+            //we're already connected (or already trying to connect), do nothing (dummy check)
+            if(_isConnected.load() || _tryConnect.load()){
                 return;
             }
             
 			if (!initNetworkAPI()){
                 LERROR("Failed to initialize network API for Parallel Connection");
+                return;
 			}
 			
 			struct addrinfo *addresult = NULL, *ptr = NULL, hints;
@@ -123,32 +224,31 @@ namespace openspace {
 			int result = getaddrinfo(_address.c_str(), _port.c_str(), &hints, &addresult);
 			if (result != 0)
 			{
-			#if defined(__WIN32__)
-				//WSACleanup();
-			#endif
                 LERROR("Failed to parse hints for Parallel Connection");
 				return;
 			}
-
+            
             //we're not connected
-			_isConnected.store(false);
+            _isConnected.store(false);
+            
+            //we want to try and establish a connection
+            _tryConnect.store(true);
             
             //start connection thread
-			_connectionThread = new (std::nothrow) std::thread(&ParallelConnection::tryConnect, this, addresult);
+			_connectionThread = new (std::nothrow) std::thread(&ParallelConnection::establishConnection, this, addresult);
 			
         }
 
-		void ParallelConnection::tryConnect(addrinfo *info){
+		void ParallelConnection::establishConnection(addrinfo *info){
 
             _clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
             
             if (_clientSocket == INVALID_SOCKET){
                 freeaddrinfo(info);
-#if defined(__WIN32__)
-                //WSACleanup();
-#endif
-                LERROR("Failed to create client socket, shutting down connection thread");
-                return;
+                LERROR("Failed to create client socket, disconnecting.");
+
+                //signal a disconnect
+                signalDisconnect();
             }
             
             int flag = 1;
@@ -188,7 +288,7 @@ namespace openspace {
 
 
             //while the connection thread is still running
-            while (!_isConnected.load()){
+            while (_tryConnect.load()){
                 
                 LINFO("Attempting to connect to server "<< _address << " on port " << _port);
                 
@@ -203,23 +303,36 @@ namespace openspace {
                     
                     //we're connected
                     _isConnected.store(true);
-
-					//and ready to start receiving messages
-					_isListening.store(true);
+                    
+                    //we no longer need to try to establish connection
+                    _tryConnect.store(false);
 
 					//start listening for communication
-					_receiveThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
+					_listenThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
 
 					//start sending messages
 					_sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendLoop, this);  
 
-					//and send authentication
+					//send authentication
 					sendAuthentication();
 
                 }
                 
-                //try to connect once per second
+#ifdef __WIN32__
+                //on windows: try to connect once per second
                 std::this_thread::sleep_for(std::chrono::seconds(1));
+#else
+                if(!_isConnected.load()){
+                    //on unix disconnect and display error message if we're not connected
+                    LERROR("Failed to establish a connection with server "<< _address << " on port " << _port<<", terminating connection.");
+                    
+                    //signal disconnect
+                    signalDisconnect();
+                    
+                    //stop loop
+                    break;
+                }
+#endif
             }
             
 			//cleanup
@@ -465,10 +578,7 @@ namespace openspace {
 						LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
                         
                         //stop all threads and signal that a disconnect should be performed
-                        _performDisconnect.store(true);
-                        _isConnected.store(false);
-                        _isHost.store(false);
-                        _isListening.store(false);
+                        signalDisconnect();
 					}
 
                 }
@@ -539,12 +649,8 @@ namespace openspace {
 				}
 			}
 			else{
-				LERROR("Error " << _ERRNO << " detected in connection, disconnecting.");
-                //stop all threads and signal that a disconnect should be performed
-                _performDisconnect.store(true);
-                _isConnected.store(false);
-                _isHost.store(false);
-                _isListening.store(false);
+                LERROR("Error " << _ERRNO << " detected in connection, disconnecting.");
+                signalDisconnect();
 			}
 		}
 
@@ -627,8 +733,9 @@ namespace openspace {
 			buffer.resize(headerSize());
             
 			int result;
-            //while we're still connected and listening
-			while (_isListening.load()){
+            
+            //while we're still connected
+			while (_isConnected.load()){
                 //receive the first parts of a message
 				result = receiveData(_clientSocket, buffer, headerSize(), 0);
 
@@ -658,22 +765,13 @@ namespace openspace {
 						LERROR("Error " << _ERRNO << " detected in connection, disconnecting!");
 					}
 
-                    //stop all threads and signal that a disconnect should be performed
-                    _performDisconnect.store(true);
-                    _isConnected.store(false);
-                    _isHost.store(false);
-                    _isListening.store(false);
+                    //signal that a disconnect should be performed
+                    signalDisconnect();
 					break;
 				}
 			}
 
 		}
-        
-        void ParallelConnection::update(double dt){
-            if(_performDisconnect.load()){
-                disconnect();
-            }
-        }
 
 		int ParallelConnection::receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags){
 			int result = 0;
@@ -698,29 +796,13 @@ namespace openspace {
         void ParallelConnection::setPort(const std::string  &port){
             _port = port;
         }
-        
-        std::string ParallelConnection::port(){
-            return _port;
-        }
-        
+
         void ParallelConnection::setAddress(const std::string &address){
             _address = address;
         }
         
-        std::string ParallelConnection::address(){
-            return _address;
-        }
-        
         void ParallelConnection::setName(const std::string& name){
             _name = name;
-        }
-        
-        std::string ParallelConnection::name(){
-            return  _name;
-        }
-        
-        _SOCKET ParallelConnection::clientSocket(){
-            return _clientSocket;
         }
         
         bool ParallelConnection::isHost(){
@@ -760,89 +842,6 @@ namespace openspace {
 			queMessage(buffer);
         }
 
-
-		void ParallelConnection::disconnect(){
-			//we're disconnecting
-			_performDisconnect.store(false);
-
-			if (_clientSocket != INVALID_SOCKET){
-                
-				//must be run before trying to join communication threads, else the threads are stuck trying to receive data
-				closeSocket();
-
-				//tell broadcast thread to stop broadcasting
-				_isHost.store(false);
-
-				//tell connection thread to stop listening
-                _isListening.store(false);
-                
-				//join receive thread and delete it
-				if (_receiveThread != nullptr){
-					_receiveThread->join();
-					delete _receiveThread;
-					_receiveThread = nullptr;
-				}
-
-				//join broadcast thread and delete it
-				if (_broadcastThread != nullptr){
-					_broadcastThread->join();
-					delete _broadcastThread;
-					_broadcastThread = nullptr;
-				}
-
-				//join send thread and delete it
-				if (_sendThread != nullptr){
-					_sendThread->join();
-					delete _sendThread;
-					_sendThread = nullptr;
-				}
-                
-                //tell connection thread that we are connected (to be able to join and delete thread)
-                _isConnected.store(true);
-                
-                //join connection thread and delete it
-                if (_connectionThread != nullptr){
-                    _connectionThread->join();
-                    delete _connectionThread;
-                    _connectionThread = nullptr;
-                }
-                
-                //make sure to set us as NOT connected again, connection thread is now deleted
-                _isConnected.store(false);
-
-#if defined(__WIN32__)
-                //this line causes issues with SGCT since winsock dll file is unloaded upon call
-                //@TODO should this be here?
-//				WSACleanup();
-#endif
-			}
-		}
-
-		void ParallelConnection::closeSocket(){
-
-			/*
-			Windows shutdown options
-			* SD_RECIEVE
-			* SD_SEND
-			* SD_BOTH
-
-			Linux & Mac shutdown options
-			* SHUT_RD (Disables further receive operations)
-			* SHUT_WR (Disables further send operations)
-			* SHUT_RDWR (Disables further send and receive operations)
-			*/
-
-#ifdef __WIN32__
-			shutdown(_clientSocket, SD_BOTH);
-			closesocket(_clientSocket);
-#else
-			shutdown(_clientSocket, SHUT_RDWR);
-			close(_clientSocket);
-#endif
-
-			_clientSocket = INVALID_SOCKET;
-		}
-
 		bool ParallelConnection::initNetworkAPI(){
 			#if defined(__WIN32__)
 				WSADATA wsaData;
@@ -871,8 +870,8 @@ namespace openspace {
 
 		void ParallelConnection::broadcast(){
 			
-            //while we're still the host
-			while (_isHost.load()){
+            //while we're still connected and we're the host
+			while (_isConnected.load() && _isHost.load()){
 
                 //create a keyframe with current position and orientation of camera
 				network::StreamDataKeyframe kf;
