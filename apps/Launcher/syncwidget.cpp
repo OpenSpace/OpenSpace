@@ -119,6 +119,12 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 
         layout->addWidget(area);
     }
+    QPushButton* close = new QPushButton("Close");
+    layout->addWidget(close, Qt::AlignRight);
+    QObject::connect(
+        close, SIGNAL(clicked(bool)),
+        this, SLOT(close())
+    );
 
     setLayout(layout);
 
