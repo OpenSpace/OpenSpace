@@ -26,6 +26,7 @@
 
 #include "infowidget.h"
 
+#include <openspace/version.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -51,8 +52,12 @@
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
 
+#include <fstream>
+
 namespace {
     const std::string _loggerCat = "SyncWidget";
+
+    const std::string _configurationFile = "libtorrent.config";
 
     const int nColumns = 3;
 
@@ -116,19 +121,54 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     ghoul::initialize();
     openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
 
+
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
+
+    libtorrent::session_settings settings = _session->settings();
+    settings.user_agent =
+        "OpenSpace/" +
+        std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
+        std::to_string(OPENSPACE_VERSION_MINOR) + "." +
+        std::to_string(OPENSPACE_VERSION_PATCH);
+    settings.allow_multiple_connections_per_ip = true;
+    settings.ignore_limits_on_local_network = true;
+    settings.connection_speed = 20;
+    settings.active_downloads = -1;
+    settings.active_seeds = -1;
+    settings.active_limit = 30;
+    settings.dht_announce_interval = 60;
+
     if (ec) {
         LFATAL("Failed to open socket: " << ec.message());
         return;
     }
     _session->start_upnp();
-    _session->start_dht();
+
+    std::ifstream file(_configurationFile);
+    if (!file.fail()) {
+        union {
+            uint32_t value;
+            std::array<char, 4> data;
+        } size;
+
+        file.read(size.data.data(), sizeof(uint32_t));
+        std::vector<char> buffer(size.value);
+        file.read(buffer.data(), size.value);
+        file.close();
+
+        libtorrent::entry e = libtorrent::bdecode(buffer.begin(), buffer.end());
+        _session->start_dht(e);
+    }
+    else 
+        _session->start_dht();
 
     _session->add_dht_router({ "router.utorrent.com", 6881 });
     _session->add_dht_router({ "dht.transmissionbt.com", 6881 });
     _session->add_dht_router({ "router.bittorrent.com", 6881 });
     _session->add_dht_router({ "router.bitcomet.com", 6881 });
+
+
 
     QTimer* timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(handleTimer()));
@@ -138,9 +178,32 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 }
 
 SyncWidget::~SyncWidget() {
+    libtorrent::entry dht = _session->dht_state();
+
+    std::vector<char> buffer;
+    libtorrent::bencode(std::back_inserter(buffer), dht);
+
+    std::ofstream f(_configurationFile);
+
+    union {
+        uint32_t value;
+        std::array<char, 4> data;
+    } size;
+    size.value = buffer.size();
+    f.write(size.data.data(), sizeof(uint32_t));
+    f.write(buffer.data(), buffer.size());
+
     openspace::DownloadManager::deinitialize();
     ghoul::deinitialize();
     delete _session;
+}
+
+void SyncWidget::closeEvent(QCloseEvent* event) {
+    std::vector<libtorrent::torrent_handle> handles = _session->get_torrents();
+    for (libtorrent::torrent_handle h : handles) {
+        h.flush_cache();
+        _session->remove_torrent(h);
+    }
 }
 
 void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
@@ -262,9 +325,11 @@ void SyncWidget::handleTorrentFiles() {
             continue;
         }
 
-        InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
-        _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
-        _torrentInfoWidgetMap[h] = w;
+        if (_torrentInfoWidgetMap.find(h) == _torrentInfoWidgetMap.end()) {
+            InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
+            _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
+            _torrentInfoWidgetMap[h] = w;
+        }
 
         FileSys.setCurrentDirectory(d);
     }
@@ -283,6 +348,10 @@ void SyncWidget::syncButtonPressed() {
 
         ghoul::Dictionary modules;
         bool success = sceneDictionary.getValue<ghoul::Dictionary>("Modules", modules);
+        if (!success) {
+            LERROR("Could not find 'Modules'");
+            return;
+        }
 
         QStringList modulesList;
         for (int i = 1; i <= modules.size(); ++i) {
@@ -601,3 +670,4 @@ void SyncWidget::handleFileFutureAddition(
     _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());
     _mutex.clear();
 }
+

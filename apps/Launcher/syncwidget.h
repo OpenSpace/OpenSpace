@@ -58,6 +58,8 @@ private slots:
     void syncButtonPressed();
     void handleTimer();
 
+    void closeEvent(QCloseEvent* event);
+
 private:
     struct DirectFile {
         QString module;

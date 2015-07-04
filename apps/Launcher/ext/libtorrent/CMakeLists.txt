@@ -121,7 +121,7 @@ set(ed25519_sources
 set(includes include ed25519/src)
 
 option(LIBTORRENT_pool-allocators "Uses a pool allocator for disk and piece buffers" ON)
-option(LIBTORRENT_dht "enable support for Mainline DHT" OFF)
+option(LIBTORRENT_dht "enable support for Mainline DHT" ON)
 option(LIBTORRENT_unicode "enable unicode support" ON)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release RelWithDebInfo)
