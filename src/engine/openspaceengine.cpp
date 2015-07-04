@@ -684,7 +684,7 @@ void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 
 }
 
 void OpenSpaceEngine::postDraw() {
-	if (_isMaster)
+	//if (_isMaster)
         //_interactionHandler.unlockControls();
 
 	_renderEngine->postDraw();

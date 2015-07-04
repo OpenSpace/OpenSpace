@@ -186,6 +186,8 @@ void RenderablePath::render(const RenderData& data) {
 	glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
 	glBindVertexArray(0);
 	
+    glDisable(GL_PROGRAM_POINT_SIZE);
+
 	_programObject->deactivate();
 }
 
@@ -197,7 +199,6 @@ void RenderablePath::update(const UpdateData& data) {
 		calculatePath(_observer);
 		sendToGPU();
 		_needsSweep = false;
-		return;
 	}
 
 	if (_programObject->isDirty())

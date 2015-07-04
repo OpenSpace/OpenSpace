@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
+
 layout(location = 0) in vec4 vs_point_position;
 layout(location = 1) flat in int isHour;
 layout(location = 2) in vec4 vs_point_color;
@@ -43,5 +44,3 @@ void main() {
 	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
     addToBuffer(frag);
 }
-
-
