@@ -74,7 +74,7 @@ namespace {
     const std::string VersionKey = "Version";
 
     const bool OverwriteFiles = false;
-    const bool CleanInfoWidgets = true;
+    const bool CleanInfoWidgets = false;
 }
 
 SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
@@ -82,9 +82,11 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     , _sceneLayout(nullptr)
     , _session(new libtorrent::session)
 {
+    setObjectName("SyncWidget");
     setFixedSize(500, 500);
 
     QBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
     {
         QGroupBox* sceneBox = new QGroupBox;
         _sceneLayout = new QGridLayout;
@@ -92,7 +94,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
         layout->addWidget(sceneBox);
     }
     {
-        QPushButton* syncButton = new QPushButton("Synchronize Scenes");
+        QPushButton* syncButton = new QPushButton("Synchronize Data");
+        syncButton->setObjectName("SyncButton");
         QObject::connect(
             syncButton, SIGNAL(clicked(bool)),
             this, SLOT(syncButtonPressed())
@@ -106,6 +109,7 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
         area->setWidgetResizable(true);
 
         QWidget* w = new QWidget;
+        w->setObjectName("DownloadArea");
         area->setWidget(w);
 
         _downloadLayout = new QVBoxLayout(w);
@@ -213,7 +217,6 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
         const QString& sceneName = keys[i];
 
         QCheckBox* checkbox = new QCheckBox(sceneName);
-
         checkbox->setChecked(true);
 
         _sceneLayout->addWidget(checkbox, i / nColumns, i % nColumns);
@@ -326,7 +329,13 @@ void SyncWidget::handleTorrentFiles() {
         }
 
         if (_torrentInfoWidgetMap.find(h) == _torrentInfoWidgetMap.end()) {
-            InfoWidget* w = new InfoWidget(f.file, h.status().total_wanted);
+            QString fileString = f.file;
+            QString t = QString(".torrent");
+            fileString.replace(fileString.indexOf(t), t.size(), "");
+
+            fileString = f.module + "/" + fileString;
+
+            InfoWidget* w = new InfoWidget(fileString, h.status().total_wanted);
             _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
             _torrentInfoWidgetMap[h] = w;
         }

@@ -43,26 +43,36 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     setFixedHeight(100);
 
     QGridLayout* layout = new QGridLayout;
-    layout->setVerticalSpacing(0);
+    //layout->setVerticalSpacing(0);
     layout->setHorizontalSpacing(10);
     layout->setContentsMargins(0, 0, 0, 0);
 
     _name = new QLabel(name);
-    layout->addWidget(_name, 0, 0);
+    _name->setObjectName("Name");
+    //_name->setMaximumWidth(300);
+    _name->setFixedWidth(450);
+    layout->addWidget(_name, 0, 0, 1, 2);
+    layout->setRowStretch(1, 10);
 
     _bytes = new QLabel("");
-    layout->addWidget(_bytes, 1, 0);
+    _bytes->setObjectName("Bytes");
+    layout->addWidget(_bytes, 2, 0);
 
     _progress = new QProgressBar;
-    layout->addWidget(_progress, 1, 1);
+    _progress->setTextVisible(false);
+    _progress->setFixedWidth(285);
+    layout->addWidget(_progress, 2, 1);
 
     _messagesLeft = new QLabel("");
+    _messagesLeft->setObjectName("MessageLeft");
     _messagesCenter = new QLabel("");
+    _messagesCenter->setObjectName("MessageCenter");
     _messagesRight = new QLabel("");
-    
-    layout->addWidget(_messagesLeft, 2, 0, 1, 2);
-    layout->addWidget(_messagesCenter, 2, 0, 1, 2, Qt::AlignCenter);
-    layout->addWidget(_messagesRight, 2, 0, 1, 2, Qt::AlignRight);
+    _messagesRight->setObjectName("MessageRight");
+
+    layout->addWidget(_messagesLeft, 3, 0, 1, 2);
+    layout->addWidget(_messagesCenter, 3, 0, 1, 2, Qt::AlignCenter);
+    layout->addWidget(_messagesRight, 3, 0, 1, 2, Qt::AlignRight);
 
     setLayout(layout);
 }
@@ -99,13 +109,13 @@ void InfoWidget::update(libtorrent::torrent_status s) {
         if (bytesPerSecond > 0 && remainingBytes > 0) {
             float seconds = static_cast<float>(remainingBytes) / bytesPerSecond;
 
-            QString left = "Time remaining %1 s";
+            QString left = "Remaining: %1 s";
             _messagesLeft->setText(left.arg(static_cast<int>(seconds)));
 
             QString center = "Peers: %1 (%2) | Seeds: %3 (%4)";
             _messagesCenter->setText(center.arg(s.num_peers).arg(s.list_peers).arg(s.num_seeds).arg(s.list_seeds));
 
-            QString right = "Download Rate: %1 KiB/s";
+            QString right = "%1 KiB/s";
             _messagesRight->setText(right.arg(bytesPerSecond / 1024));
         }
         else

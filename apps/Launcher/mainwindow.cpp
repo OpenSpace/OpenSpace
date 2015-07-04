@@ -79,19 +79,28 @@ MainWindow::MainWindow()
     , _shortcutWidget(nullptr)
     , _syncWidget(nullptr)
 {
+    setObjectName("MainWindow");
     setFixedSize(WindowSize);
+    //setContentsMargins(0, 0, 0, 0);
     
     QGridLayout* layout = new QGridLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
     
     QLabel* image = new QLabel;
+    //image->setContentsMargins(0, 0, 0, 0);
+    image->setObjectName("Image");
     QPixmap p = QPixmap(":/images/header.png");
     image->setPixmap(p.scaledToWidth(WindowSize.width()));
     layout->addWidget(image, 0, 0, 1, 2);
+
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
     _informationWidget->setEnabled(false);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
+    layout->setRowStretch(1, 10);
+    layout->setColumnStretch(0, 4);
+    layout->setColumnStretch(1, 5);
 
     QWidget* container = new QWidget;
     {
@@ -104,11 +113,13 @@ MainWindow::MainWindow()
                          this, SLOT(shortcutButtonPressed())
                          );
         layout->addWidget(shortcutButton, 0, 1);
+
+        layout->setRowStretch(1, 10);
         
         QLabel* sceneSelectionLabel = new QLabel("Scenes:");
-        layout->addWidget(sceneSelectionLabel, 1, 0);
+        layout->addWidget(sceneSelectionLabel, 2, 0);
         _scenes = new QComboBox;
-        layout->addWidget(_scenes);
+        layout->addWidget(_scenes, 2, 1);
         
         container->setLayout(layout);
     }
