@@ -63,9 +63,12 @@ private:
     
     QTextEdit* _informationWidget;
 
+    QComboBox* _configurations;
+    QMap<QString, QString> _configurationFiles;
+
     QComboBox* _scenes;
     QMap<QString, QString> _sceneFiles;
-
+    
     ShortcutWidget* _shortcutWidget;
     SyncWidget* _syncWidget;
 
