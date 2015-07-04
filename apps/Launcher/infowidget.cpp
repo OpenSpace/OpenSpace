@@ -43,9 +43,7 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     setFixedHeight(100);
 
     QGridLayout* layout = new QGridLayout;
-    //layout->setVerticalSpacing(0);
     layout->setHorizontalSpacing(10);
-    layout->setContentsMargins(0, 0, 0, 0);
 
     _name = new QLabel(name);
     _name->setObjectName("Name");

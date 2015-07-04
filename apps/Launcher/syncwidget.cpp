@@ -74,7 +74,7 @@ namespace {
     const std::string VersionKey = "Version";
 
     const bool OverwriteFiles = false;
-    const bool CleanInfoWidgets = false;
+    const bool CleanInfoWidgets = true;
 }
 
 SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f) 
