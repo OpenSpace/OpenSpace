@@ -303,7 +303,7 @@ int NumericalProperty<T>::typeLua() const {
 
 template <typename T>
 bool NumericalProperty<T>::getStringValue(std::string& value) const {
-    bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(value, _value);
+    bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(value, TemplateProperty<T>::_value);
     return success;
 }
 
