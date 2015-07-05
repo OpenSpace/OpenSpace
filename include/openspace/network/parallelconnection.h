@@ -28,6 +28,7 @@
 //openspace includes
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/network/messagestructures.h>
 
 //glm includes
 #include <glm/gtx/quaternion.hpp>
@@ -60,42 +61,6 @@ namespace openspace{
     
     namespace network{
         
-        struct StreamDataKeyframe{
-            glm::quat _viewRotationQuat;
-            psc _position;
-            double _timeStamp;
-            
-            void serialize(std::vector<char> &buffer){
-                //add position
-                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
-                
-                //add orientation
-                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_viewRotationQuat), reinterpret_cast<char*>(&_viewRotationQuat) + sizeof(_viewRotationQuat));
-                
-                //add timestamp
-                buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timeStamp), reinterpret_cast<char*>(&_timeStamp) + sizeof(_timeStamp));
-            };
-            
-            void deserialize(const std::vector<char> &buffer){
-                int offset = 0;
-                int size = 0;
-                
-                //position
-                size = sizeof(_position);
-                memcpy(&_position, buffer.data() + offset, size);
-                offset += size;
-                
-                //orientation
-                size = sizeof(_viewRotationQuat);
-                memcpy(&_viewRotationQuat, buffer.data() + offset, size);
-                offset += size;
-                
-                //timestamp
-                size = sizeof(_timeStamp);
-                memcpy(&_timeStamp, buffer.data() + offset, size);
-            };
-        };
-
         class ParallelConnection{
         public:
             
@@ -123,11 +88,13 @@ namespace openspace{
             
             void signalDisconnect();
             
+            void update(double dt);
+            
             enum MessageTypes{
                 Authentication=0,
                 Initialization,
-                StreamData,
-                Script,
+                Data,
+                Script, //obsolete now 
                 HostInfo,
                 InitializationRequest,
                 HostshipRequest,
@@ -182,15 +149,15 @@ namespace openspace{
 
 			void delegateDecoding(uint32_t type);
 
-			void decodeInitializationMessage();
+			void initializationMessageReceived();
 
-			void decodeStreamDataMessage();
+			void dataMessageReceived();
             
             void decodeScriptMessage();
 
-			void decodeHostInfoMessage();
+			void hostInfoMessageReceived();
 			
-			void decodeInitializationRequestMessage();
+			void initializationRequestMessageReceived();
 
 			void broadcast();
             

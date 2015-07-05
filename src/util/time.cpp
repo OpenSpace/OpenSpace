@@ -80,9 +80,9 @@ bool Time::isInitialized() {
 	return (_instance != nullptr);
 }
 
-void Time::setTime(double value) {
+void Time::setTime(double value, bool requireJump) {
 	_time = std::move(value);
-	_timeJumped = true;
+	_timeJumped = requireJump;
 }
 
 double Time::currentTime() const {
@@ -116,9 +116,9 @@ bool Time::togglePause() {
     return _timePaused;
 }
 
-void Time::setTime(std::string time) {
+void Time::setTime(std::string time, bool requireJump) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
-	_timeJumped = true;
+	_timeJumped = requireJump;
 }
 
 std::string Time::currentTimeUTC() const {
@@ -184,6 +184,10 @@ bool Time::timeJumped() const {
 
 void Time::setTimeJumped(bool jumped){
 	_timeJumped = jumped;
+}
+    
+bool Time::paused() const{
+    return _timePaused;
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {

@@ -114,6 +114,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/randomexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl

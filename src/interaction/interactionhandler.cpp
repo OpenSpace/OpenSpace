@@ -362,7 +362,7 @@ void InteractionHandler::update(double deltaTime) {
 		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
 		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
         
-        openspace::network::StreamDataKeyframe p0, p1, p2, p3;
+        openspace::network::datamessagestructures::PositionKeyframe p0, p1, p2, p3;
         
         p0 = _keyframes[0];
         p1 = _keyframes[1];
@@ -982,7 +982,7 @@ bool InteractionHandler::invertRotation() const {
     return _invertRotation;
 }
 
-void InteractionHandler::addKeyframe(const network::StreamDataKeyframe &kf){
+    void InteractionHandler::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf){
 	_keyframeMutex.lock();
 
 	//save a maximum of 10 samples (1 seconds of buffer)

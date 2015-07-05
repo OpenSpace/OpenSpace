@@ -140,7 +140,7 @@ public:
     void setInvertRotation(bool invert);
     bool invertRotation() const;
 
-	void addKeyframe(const network::StreamDataKeyframe &kf);
+	void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
     void clearKeyframes();
 
 	/**
@@ -179,7 +179,7 @@ private:
 	std::vector<Controller*> _controllers;
 
 	//remote controller
-	std::vector<network::StreamDataKeyframe> _keyframes;
+	std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
 	double _currentKeyframeTime;
 	std::mutex _keyframeMutex;
 };

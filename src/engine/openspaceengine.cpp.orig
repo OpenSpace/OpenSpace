@@ -47,7 +47,11 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/engine/moduleengine.h>
+<<<<<<< HEAD
+#include <openspace/network/parallelconnection.h>
+=======
 #include <openspace/engine/downloadmanager.h>
+>>>>>>> develop
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -638,12 +642,11 @@ void OpenSpaceEngine::preSynchronization() {
 		Time::ref().preSynchronization();
 		
         _interactionHandler->update(dt);
+        _parallelConnection->update(dt);
+        //_interactionHandler.lockControls();		
 
 		_scriptEngine->preSynchronization();			
-		
-        _renderEngine->preSynchronization();
-        
-        _parallelConnection->update(dt);
+		_renderEngine->preSynchronization();
     }
 }
 
@@ -686,7 +689,7 @@ void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 
 }
 
 void OpenSpaceEngine::postDraw() {
-	//if (_isMaster)
+	if (_isMaster)
         //_interactionHandler.unlockControls();
 
 	_renderEngine->postDraw();

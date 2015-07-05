@@ -372,19 +372,20 @@ namespace openspace {
                 //do nothing for now
 				break;
 			case MessageTypes::Initialization:
-				decodeInitializationMessage();
+				initializationMessageReceived();
 				break;
-			case MessageTypes::StreamData:
-				decodeStreamDataMessage();
+			case MessageTypes::Data:
+				dataMessageReceived();
 				break;
             case MessageTypes::Script:
-                decodeScriptMessage();
+                    //disabled for now
+//                decodeScriptMessage();
                 break;
 			case MessageTypes::HostInfo:
-				decodeHostInfoMessage();
+				hostInfoMessageReceived();
 				break;
 			case MessageTypes::InitializationRequest:
-				decodeInitializationRequestMessage();
+				initializationRequestMessageReceived();
 				break;
 			default:
 				//unknown message type
@@ -392,7 +393,7 @@ namespace openspace {
             }
 		}
 
-		void ParallelConnection::decodeInitializationMessage(){
+		void ParallelConnection::initializationMessageReceived(){
             
             int result;
             uint16_t numScripts;
@@ -476,21 +477,35 @@ namespace openspace {
             
 		}
 
-		void ParallelConnection::decodeStreamDataMessage(){
+		void ParallelConnection::dataMessageReceived(){
 			int result;
 			uint16_t msglen;
+            uint16_t type;
 
             //create a buffer to hold the size of streamdata message
             std::vector<char> buffer;
-			buffer.resize(sizeof(msglen));
+			buffer.resize(sizeof(type));
             
-            //read size of streamdata message
-			result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
+            //read type of data message
+			result = receiveData(_clientSocket, buffer, sizeof(type), 0);
 
 			if (result <= 0){
 				//error
+                LERROR("Failed to read type of data message received.");
 				return;
 			}
+            
+            //the type of data message received
+            type =(*(reinterpret_cast<uint16_t*>(buffer.data())));
+            
+            //read size of streamdata message
+            result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
+            
+            if (result <= 0){
+                //error
+                LERROR("Failed to read size of data message received.");
+                return;
+            }
             
             //the size in bytes of the streamdata message
 			msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
@@ -504,15 +519,49 @@ namespace openspace {
             
 			if (result <= 0){
 				//error
+                LERROR("Failed to read data message.");
 				return;
 			}
             
-            //construct a keyframe ffrom the streamdata
-            network::StreamDataKeyframe kf;
-            kf.deserialize(buffer);
-            
-            //and add the keyframe to the interaction handler
-            OsEng.interactionHandler()->addKeyframe(kf);            
+            //which type of data message was received?
+            switch(type){
+                case network::datamessagestructures::PositionData:{
+                    //position data message
+                    //create and read a position keyframe from the data buffer
+                    network::datamessagestructures::PositionKeyframe kf;
+                    kf.deserialize(buffer);
+                    
+                    //add the keyframe to the interaction handler
+                    OsEng.interactionHandler()->addKeyframe(kf);
+                    break;
+                }
+                case network::datamessagestructures::TimeData:{
+                    //time data message
+                    //create and read a time keyframe from the data buffer
+                    network::datamessagestructures::TimeKeyframe tf;
+                    tf.deserialize(buffer);
+                    
+                    //set the time parameters based on recevied keyframe
+                    Time::ref().setDeltaTime(tf._dt);
+                    Time::ref().setPause(tf._paused);
+                    Time::ref().setTime(tf._time, tf._requiresTimeJump);
+                    break;
+                }
+                case network::datamessagestructures::ScriptData:{
+                    //script data message
+                    //create and read a script message from data buffer
+                    network::datamessagestructures::ScriptMessage sm;
+                    sm.deserialize(buffer);
+                    
+                    //Que script to be executed by script engine
+                    OsEng.scriptEngine()->queueScript(sm._script);
+                    break;
+                }
+                default:{
+                    LERROR("Unidentified data message with identifier " << type << " received in parallel connection.");
+                    break;
+                }
+            }
 		}
 
         void ParallelConnection::decodeScriptMessage(){
@@ -586,7 +635,7 @@ namespace openspace {
             }
         }
         
-		void ParallelConnection::decodeHostInfoMessage(){
+		void ParallelConnection::hostInfoMessageReceived(){
             //create buffer
 			std::vector<char> hostflag;
             //resize to hold a flag saying if we're host or not
@@ -654,7 +703,7 @@ namespace openspace {
 			}
 		}
 
-		void ParallelConnection::decodeInitializationRequestMessage(){
+		void ParallelConnection::initializationRequestMessageReceived(){
             std::vector<char> buffer;
             buffer.resize(sizeof(uint32_t));
             receiveData(_clientSocket, buffer, sizeof(uint32_t), 0);
@@ -868,13 +917,51 @@ namespace openspace {
 			return true;
 		}
 
+        void ParallelConnection::update(double dt){
+            
+            //get current time parameters and create a keyframe
+            network::datamessagestructures::TimeKeyframe tf;
+            tf._dt = Time::ref().deltaTime();
+            tf._paused = Time::ref().paused();
+            tf._requiresTimeJump = Time::ref().timeJumped();
+            tf._time = Time::ref().currentTime();
+            
+            //create a buffer and serialize message
+            std::vector<char> tbuffer;
+            tf.serialize(tbuffer);
+            
+            //get the size of the keyframebuffer
+            uint16_t msglen = static_cast<uint16_t>(tbuffer.size());
+            
+            uint16_t type = static_cast<uint16_t>(network::datamessagestructures::PositionData);
+            
+            //create the full buffer
+            std::vector<char> buffer;
+            buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
+            
+            //write header
+            writeHeader(buffer, MessageTypes::Data);
+            
+            //type of message
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
+            
+            //size of message
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
+            
+            //actual message
+            buffer.insert(buffer.end(), tbuffer.begin(), tbuffer.end());
+            
+            //send message
+            queMessage(buffer);
+        }
+        
 		void ParallelConnection::broadcast(){
 			
             //while we're still connected and we're the host
 			while (_isConnected.load() && _isHost.load()){
 
                 //create a keyframe with current position and orientation of camera
-				network::StreamDataKeyframe kf;
+                network::datamessagestructures::PositionKeyframe kf;
 				kf._position = OsEng.interactionHandler()->camera()->position();
 				kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
 				
@@ -890,12 +977,17 @@ namespace openspace {
                 //get the size of the keyframebuffer
 				uint16_t msglen = static_cast<uint16_t>(kfBuffer.size());
                 
+                uint16_t type = static_cast<uint16_t>(network::datamessagestructures::PositionData);
+                
                 //create the full buffer
 				std::vector<char> buffer;
-				buffer.reserve(headerSize() + sizeof(msglen) + msglen);
+				buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
 				
 				//write header
-                writeHeader(buffer, MessageTypes::StreamData);
+                writeHeader(buffer, MessageTypes::Data);
+                
+                //type of message
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
 
 				//size of message
 				buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));

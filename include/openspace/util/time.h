@@ -86,16 +86,18 @@ public:
 	 * Sets the current time to the specified value in seconds past the J2000 epoch. This
 	 * value can be negative to represent dates before the epoch.
 	 * \param value The number of seconds after the J2000 epoch
+     * \param requireJump Wether or not the time change is big enough to require a time-jump, defaults to false
 	 */
-	void setTime(double value);
+	void setTime(double value, bool requireJump = false);
 
 	/**
 	 * Sets the current time to the specified value given as a Spice compliant string as
 	 * described in the Spice documentation
 	 * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
 	 * \param time The time to be set as a date string
+     * \param requireJump Wether or not the time change is big enough to require a time-jump, defaults to false
 	 */
-	void setTime(std::string time);
+	void setTime(std::string time, bool requireJump = false);
 
 	/**
 	 * Returns the current time as the number of seconds past the J2000 epoch. If the
@@ -167,6 +169,8 @@ public:
 	bool timeJumped() const;
 
 	void setTimeJumped(bool jumped);
+    
+    bool paused() const;
 
 	/**
 	 * Returns the Lua library that contains all Lua functions available to change the
