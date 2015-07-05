@@ -44,6 +44,9 @@ public:
 	bool setLua(lua_State* state) override;
 	int typeLua() const override;
 
+    bool getString(std::string& value) const override;
+    bool setString(std::string value) override;
+
 	T minValue() const;
 	T maxValue() const;
 

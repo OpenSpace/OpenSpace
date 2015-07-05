@@ -27,26 +27,43 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 #include <limits>
+#include <sstream>
 
 using std::numeric_limits;
 
 namespace openspace {
 namespace properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE) \
-	[](lua_State* state, bool& success) -> TYPE { \
-		success = (lua_isnumber(state, -1) == 1); \
-		if (success) \
-			return static_cast<TYPE>(lua_tonumber(state, -1)); \
-		else \
-			return DEFAULT_VALUE; \
+#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
+	[](lua_State* state, bool& success) -> TYPE {                                        \
+		success = (lua_isnumber(state, -1) == 1);                                        \
+		if (success)                                                                     \
+			return static_cast<TYPE>(lua_tonumber(state, -1));                           \
+		else                                                                             \
+			return DEFAULT_VALUE;                                                        \
 	}
 
-#define DEFAULT_TO_LUA_LAMBDA(TYPE) \
-	[](lua_State* state, TYPE value) -> bool { \
-		lua_pushnumber(state, static_cast<lua_Number>(value)); \
-		return true; \
+#define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
+	[](lua_State* state, TYPE value) -> bool {                                           \
+		lua_pushnumber(state, static_cast<lua_Number>(value));                           \
+		return true;                                                                     \
 	}
+
+#define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
+    [](std::string value, bool& success) -> TYPE {                                       \
+        std::stringstream s(value);                                                      \
+        TYPE v;                                                                          \
+        s >> v;                                                                          \
+        success = !s.fail();                                                             \
+        if (success)                                                                     \
+            return v;                                                                    \
+    }
+
+#define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \
+    [](std::string& outValue, TYPE inValue) -> bool {                                    \
+        outValue = std::to_string(inValue);                                              \
+        return true;                                                                     \
+    }
 
 // char16_t and char32_t are not supported on Visual Studio 2013 and are defined to
 // be equal to unsigned short and unsigned int which causes a compile error
@@ -63,6 +80,8 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
 		lua_pushboolean(state, value);
 		return true;
 	},
+    DEFAULT_FROM_STRING_LAMBDA(bool, false),
+    DEFAULT_TO_STRING_LAMBDA(bool),
 	LUA_TBOOLEAN
 	);
 
@@ -70,7 +89,10 @@ REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
                                   numeric_limits<char>::lowest(),
                                   numeric_limits<char>::max(), char(1),
                                   DEFAULT_FROM_LUA_LAMBDA(char, char(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(char), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(char),
+                                  DEFAULT_FROM_STRING_LAMBDA(char, char(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(char),
+                                  LUA_TNUMBER);
 
 // REGISTER_NUMERICALPROPERTY_SOURCE(Char16Property, char16_t, char16_t(0),
 //    numeric_limits<char16_t>::lowest(), numeric_limits<char16_t>::max(), char16_t(1));
@@ -78,92 +100,145 @@ REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
 // REGISTER_NUMERICALPROPERTY_SOURCE(Char32Property, char32_t, char32_t(0),
 //    numeric_limits<char32_t>::lowest(), numeric_limits<char32_t>::max(), char32_t(1));
 
-REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-                                  numeric_limits<wchar_t>::lowest(),
-                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(wchar_t), LUA_TNUMBER);
+//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
+//                                  numeric_limits<wchar_t>::lowest(),
+//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
+//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
+//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
+//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
+//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
+//                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(SignedCharProperty, signed char, (signed char)(0),
                                   numeric_limits<signed char>::lowest(),
                                   numeric_limits<signed char>::max(), (signed char)0,
                                   DEFAULT_FROM_LUA_LAMBDA(signed char, (signed char)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(signed char), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(signed char),
+                                  DEFAULT_FROM_STRING_LAMBDA(signed char, (signed char)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(signed char),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(UCharProperty, unsigned char, (unsigned char)0,
                                   numeric_limits<unsigned char>::lowest(),
                                   numeric_limits<unsigned char>::max(), (unsigned char)1,
                                   DEFAULT_FROM_LUA_LAMBDA(unsigned char,
                                                           (unsigned char)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(unsigned char), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(unsigned char),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned char,
+                                                             (unsigned char)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(unsigned char),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(ShortProperty, short, short(0),
                                   numeric_limits<short>::lowest(),
                                   numeric_limits<short>::max(), short(1),
                                   DEFAULT_FROM_LUA_LAMBDA(short, short(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(short), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(short),
+                                  DEFAULT_FROM_STRING_LAMBDA(short, short(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(short),
+                                  LUA_TNUMBER);
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-      UShortProperty, unsigned short, (unsigned short)(0),
-      numeric_limits<unsigned short>::lowest(), numeric_limits<unsigned short>::max(),
-      (unsigned short)1, DEFAULT_FROM_LUA_LAMBDA(unsigned short, (unsigned short)(0)),
-      DEFAULT_TO_LUA_LAMBDA(unsigned short), LUA_TNUMBER);
+REGISTER_NUMERICALPROPERTY_SOURCE(UShortProperty, unsigned short, (unsigned short)(0),
+                                  numeric_limits<unsigned short>::lowest(),
+                                  numeric_limits<unsigned short>::max(),
+                                  (unsigned short)1,
+                                  DEFAULT_FROM_LUA_LAMBDA(unsigned short,
+                                                          (unsigned short)(0)),
+                                  DEFAULT_TO_LUA_LAMBDA(unsigned short),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned short,
+                                                          (unsigned short)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(unsigned short),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(IntProperty, int, int(0), numeric_limits<int>::lowest(),
                                   numeric_limits<int>::max(), int(1),
                                   DEFAULT_FROM_LUA_LAMBDA(int, int(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(int), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(int),
+                                  DEFAULT_FROM_STRING_LAMBDA(int, int(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(int),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(UIntProperty, unsigned int, (unsigned int)0,
                                   numeric_limits<unsigned int>::lowest(),
                                   numeric_limits<unsigned int>::max(), (unsigned int)1,
                                   DEFAULT_FROM_LUA_LAMBDA(unsigned int,
                                                           (unsigned int)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(unsigned int), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(unsigned int),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned int,
+                                                             (unsigned int)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(unsigned int),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(LongProperty, long, long(0),
                                   numeric_limits<long>::lowest(),
                                   numeric_limits<long>::max(), long(1),
                                   DEFAULT_FROM_LUA_LAMBDA(long, long(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(long), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(long),
+                                  DEFAULT_FROM_STRING_LAMBDA(long, long(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(long),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(ULongProperty, unsigned long, (unsigned long)0,
                                   numeric_limits<unsigned long>::lowest(),
                                   numeric_limits<unsigned long>::max(), (unsigned long)1,
                                   DEFAULT_FROM_LUA_LAMBDA(unsigned long,
                                                           (unsigned long)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(unsigned long), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(unsigned long),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned long,
+                                                          (unsigned long)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(unsigned long),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(LongLongProperty, long long, (long long)0,
                                   numeric_limits<long long>::lowest(),
                                   numeric_limits<long long>::max(), (long long)1,
                                   DEFAULT_FROM_LUA_LAMBDA(long long, (long long)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(long long), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(long long),
+                                  DEFAULT_FROM_STRING_LAMBDA(long long,
+                                                              (long long)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(long long),
+                                  LUA_TNUMBER);
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-      ULongLongProperty, unsigned long long, (unsigned long long)1,
-      numeric_limits<unsigned long long>::lowest(),
-      numeric_limits<unsigned long long>::max(), (unsigned long long)1,
-      DEFAULT_FROM_LUA_LAMBDA(unsigned long long, (unsigned long long)(0)),
-      DEFAULT_TO_LUA_LAMBDA(unsigned long long), LUA_TNUMBER);
+REGISTER_NUMERICALPROPERTY_SOURCE(ULongLongProperty, unsigned long long,
+                                  (unsigned long long)1,
+                                  numeric_limits<unsigned long long>::lowest(),
+                                  numeric_limits<unsigned long long>::max(),
+                                  (unsigned long long)1,
+                                  DEFAULT_FROM_LUA_LAMBDA(unsigned long long,
+                                                          (unsigned long long)(0)),
+                                  DEFAULT_TO_LUA_LAMBDA(unsigned long long),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned long long,
+                                                             (unsigned long long)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(unsigned long long),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(FloatProperty, float, 0.f,
                                   numeric_limits<float>::lowest(),
                                   numeric_limits<float>::max(), 0.01f,
                                   DEFAULT_FROM_LUA_LAMBDA(float, float(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(float), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(float),
+                                  DEFAULT_FROM_STRING_LAMBDA(float, float(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(float),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(DoubleProperty, double, 0.0,
                                   numeric_limits<double>::lowest(),
                                   numeric_limits<double>::max(), 0.01,
                                   DEFAULT_FROM_LUA_LAMBDA(double, double(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(double), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(double),
+                                  DEFAULT_FROM_STRING_LAMBDA(double, double(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(double),
+                                  LUA_TNUMBER);
 
 REGISTER_NUMERICALPROPERTY_SOURCE(LongDoubleProperty, long double, (long double)0,
                                   numeric_limits<long double>::lowest(),
                                   numeric_limits<long double>::max(), (long double)0.01f,
                                   DEFAULT_FROM_LUA_LAMBDA(long double, (long double)(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(long double), LUA_TNUMBER);
+                                  DEFAULT_TO_LUA_LAMBDA(long double),
+                                  DEFAULT_FROM_STRING_LAMBDA(long double,
+                                                             (long double)(0)),
+                                  DEFAULT_TO_STRING_LAMBDA(long double),
+                                  LUA_TNUMBER);
 
 }  // namespace properties
 } // namespace openspace

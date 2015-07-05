@@ -152,6 +152,10 @@ public:
 	 */
 	virtual int typeLua() const;
 
+    virtual bool getString(std::string& value) const;
+
+    virtual bool setString(std::string value);
+
 	/**
 	 * This method registers a <code>callback</code> function that will be called every
 	 * time if either Property:set or Property::setLua was called with a value that is

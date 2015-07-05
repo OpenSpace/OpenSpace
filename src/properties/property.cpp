@@ -86,11 +86,10 @@ boost::any Property::get() const {
 }
 
 bool Property::getLua(lua_State* state) const {
-	return true;
+	return false;
 }
 
-void Property::set(boost::any value) {
-}
+void Property::set(boost::any value) {}
 
 bool Property::setLua(lua_State* state) {
 	return false;
@@ -102,6 +101,14 @@ const std::type_info& Property::type() const {
 
 int Property::typeLua() const {
 	return LUA_TNIL;
+}
+
+bool Property::getString(std::string& value) const {
+    return false;
+}
+
+bool Property::setString(std::string value) {
+    return false;
 }
 
 std::string Property::guiName() const {

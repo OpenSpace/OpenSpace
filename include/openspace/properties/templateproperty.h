@@ -127,6 +127,10 @@ public:
 	/// \see Property::typeLua
 	int typeLua() const override;
 
+    bool getString(std::string& value) const override;
+
+    bool setString(std::string value) override;
+
 	/**
 	 * Returns the description for this TemplateProperty as a Lua script that returns a
 	 * table on execution
