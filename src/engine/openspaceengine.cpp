@@ -643,7 +643,7 @@ void OpenSpaceEngine::preSynchronization() {
 		
         _renderEngine->preSynchronization();
         
-        _parallelConnection->update(dt);
+        _parallelConnection->preSynchronization();
     }
 }
 

@@ -87,7 +87,9 @@ namespace openspace {
         _isHost(false),
         _isConnected(false),
         _tryConnect(false),
-        _performDisconnect(false)
+        _performDisconnect(false),
+        _latestTimeKeyframeValid(false)
+        
         {
             //create handler thread
             _handlerThread = new (std::nothrow) std::thread(&ParallelConnection::threadManagement, this);
@@ -541,10 +543,29 @@ namespace openspace {
                     network::datamessagestructures::TimeKeyframe tf;
                     tf.deserialize(buffer);
                     
-                    //set the time parameters based on recevied keyframe
-                    Time::ref().setDeltaTime(tf._dt);
-                    Time::ref().setPause(tf._paused);
-                    Time::ref().setTime(tf._time, tf._requiresTimeJump);
+                    //lock mutex and assign latest time keyframe parameters
+                    _timeKeyframeMutex.lock();
+                    
+                    _latestTimeKeyframe._dt = tf._dt;
+                    _latestTimeKeyframe._time = tf._time;
+                    _latestTimeKeyframe._paused = tf._paused;
+                    
+                    //ensure that we never miss a timejump
+                    //if last keyframe required a jump and that keyframe has not been used yet
+                    if(_latestTimeKeyframe._requiresTimeJump && _latestTimeKeyframeValid){
+                        //do nothing to the boolean. Old value must be executed
+                    }else{
+                        //either the latest keyframe didnt require a jump, or we have already spent that keyframe.
+                        //in either case we can go ahead and write the bool value of newest frame
+                        _latestTimeKeyframe._requiresTimeJump = tf._requiresTimeJump;
+                    }
+                    
+                    //unlock mutex
+                    _timeKeyframeMutex.unlock();
+                    
+                    //the keyframe is now valid for use
+                    _latestTimeKeyframeValid.store(true);
+                    
                     break;
                 }
                 case network::datamessagestructures::ScriptData:{
@@ -917,42 +938,70 @@ namespace openspace {
 			return true;
 		}
 
-        void ParallelConnection::update(double dt){
+        void ParallelConnection::preSynchronization(){
             
-            //get current time parameters and create a keyframe
-            network::datamessagestructures::TimeKeyframe tf;
-            tf._dt = Time::ref().deltaTime();
-            tf._paused = Time::ref().paused();
-            tf._requiresTimeJump = Time::ref().timeJumped();
-            tf._time = Time::ref().currentTime();
-            
-            //create a buffer and serialize message
-            std::vector<char> tbuffer;
-            tf.serialize(tbuffer);
-            
-            //get the size of the keyframebuffer
-            uint16_t msglen = static_cast<uint16_t>(tbuffer.size());
-            
-            uint16_t type = static_cast<uint16_t>(network::datamessagestructures::PositionData);
-            
-            //create the full buffer
-            std::vector<char> buffer;
-            buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-            
-            //write header
-            writeHeader(buffer, MessageTypes::Data);
-            
-            //type of message
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-            
-            //size of message
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-            
-            //actual message
-            buffer.insert(buffer.end(), tbuffer.begin(), tbuffer.end());
-            
-            //send message
-            queMessage(buffer);
+            //if we're the host
+            if(_isHost){
+                //get current time parameters and create a keyframe
+                network::datamessagestructures::TimeKeyframe tf;
+                tf._dt = Time::ref().deltaTime();
+                tf._paused = Time::ref().paused();
+                tf._requiresTimeJump = Time::ref().timeJumped();
+                tf._time = Time::ref().currentTime();
+                
+                //create a buffer and serialize message
+                std::vector<char> tbuffer;
+                tf.serialize(tbuffer);
+                
+                //get the size of the keyframebuffer
+                uint16_t msglen = static_cast<uint16_t>(tbuffer.size());
+                
+                //the type of data message
+                uint16_t type = static_cast<uint16_t>(network::datamessagestructures::TimeData);
+                
+                //create the full buffer
+                std::vector<char> buffer;
+                buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
+                
+                //write header
+                writeHeader(buffer, MessageTypes::Data);
+                
+                //type of message
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
+                
+                //size of message
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
+                
+                //actual message
+                buffer.insert(buffer.end(), tbuffer.begin(), tbuffer.end());
+                
+                //send message
+                queMessage(buffer);
+            }
+            else{
+                //if we're not the host and we have a valid keyframe (one that hasnt been used before)
+                if(_latestTimeKeyframeValid.load()){
+                    
+                    //lock mutex and retrieve parameters from latest keyframe
+                    _timeKeyframeMutex.lock();
+                    
+                    double dt = _latestTimeKeyframe._dt;
+                    double time = _latestTimeKeyframe._time;
+                    bool jump = _latestTimeKeyframe._requiresTimeJump;
+                    bool paused = _latestTimeKeyframe._paused;
+                    
+                    _timeKeyframeMutex.unlock();
+                    
+                    //this keyframe is now spent
+                    _latestTimeKeyframeValid.store(false);
+                    
+                    //assign latest params
+                    Time::ref().setDeltaTime(dt);
+                    Time::ref().setTime(time, jump);
+                    Time::ref().setPause(paused);
+                    
+                }
+            }
         }
         
 		void ParallelConnection::broadcast(){
@@ -977,6 +1026,7 @@ namespace openspace {
                 //get the size of the keyframebuffer
 				uint16_t msglen = static_cast<uint16_t>(kfBuffer.size());
                 
+                //the type of message
                 uint16_t type = static_cast<uint16_t>(network::datamessagestructures::PositionData);
                 
                 //create the full buffer

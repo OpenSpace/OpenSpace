@@ -88,7 +88,7 @@ namespace openspace{
             
             void signalDisconnect();
             
-            void update(double dt);
+            void preSynchronization();
             
             enum MessageTypes{
                 Authentication=0,
@@ -188,6 +188,10 @@ namespace openspace{
             std::atomic<bool> _tryConnect;
             std::vector<std::vector<char>> _sendBuffer;
             std::mutex _sendBufferMutex;
+            
+            network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
+            std::mutex _timeKeyframeMutex;
+            std::atomic<bool> _latestTimeKeyframeValid;
         };
     } // namespace network
     
