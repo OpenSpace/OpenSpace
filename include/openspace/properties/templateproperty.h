@@ -111,7 +111,7 @@ public:
 	 * \param state The Lua state onto which the encoded object will be pushed
 	 * \return <code>true</code> if the encoding succeeded; <code>false</code> otherwise
 	 */
-	bool getLua(lua_State* state) const override;
+	bool getLuaValue(lua_State* state) const override;
 
 	/**
 	 * Sets the value of this TemplateProprty by decoding the object at the top of the Lua
@@ -122,14 +122,14 @@ public:
 	 * \param state The Lua state from which the value will be decoded
 	 * \return <code>true</code> if the decoding succeeded; <code>false</code> otherwise
 	 */
-	bool setLua(lua_State* state) override;
+	bool setLuaValue(lua_State* state) override;
 
 	/// \see Property::typeLua
 	int typeLua() const override;
 
-    bool getString(std::string& value) const override;
+    bool getStringValue(std::string& value) const override;
 
-    bool setString(std::string value) override;
+    bool setStringValue(std::string value) override;
 
 	/**
 	 * Returns the description for this TemplateProperty as a Lua script that returns a

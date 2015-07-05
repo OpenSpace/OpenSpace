@@ -35,7 +35,7 @@ std::string TriggerProperty::className() const {
 	return "TriggerProperty";
 }
 
-bool TriggerProperty::setLua(lua_State* state) {
+bool TriggerProperty::setLuaValue(lua_State* state) {
 	notifyListener();
 	return true;
 }

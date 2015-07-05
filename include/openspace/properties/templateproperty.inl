@@ -235,13 +235,13 @@ const std::type_info& TemplateProperty<T>::type() const {
 }
 
 template <typename T>
-bool TemplateProperty<T>::getLua(lua_State* state) const {
+bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
     bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(state, _value);
     return success;
 }
 
 template <typename T>
-bool TemplateProperty<T>::setLua(lua_State* state) {
+bool TemplateProperty<T>::setLuaValue(lua_State* state) {
 	bool success = false;
 	T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
@@ -255,13 +255,13 @@ int TemplateProperty<T>::typeLua() const {
 }
 
 template <typename T>
-bool TemplateProperty<T>::getString(std::string& value) const {
+bool TemplateProperty<T>::getStringValue(std::string& value) const {
     bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(value, _value);
     return success;
 }
 
 template <typename T>
-bool TemplateProperty<T>::setString(std::string value) {
+bool TemplateProperty<T>::setStringValue(std::string value) {
     bool success = false;
     T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(value, success);
     if (success)

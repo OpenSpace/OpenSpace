@@ -85,13 +85,13 @@ boost::any Property::get() const {
     return boost::any();
 }
 
-bool Property::getLua(lua_State* state) const {
+bool Property::getLuaValue(lua_State* state) const {
 	return false;
 }
 
 void Property::set(boost::any value) {}
 
-bool Property::setLua(lua_State* state) {
+bool Property::setLuaValue(lua_State* state) {
 	return false;
 }
 
@@ -103,11 +103,11 @@ int Property::typeLua() const {
 	return LUA_TNIL;
 }
 
-bool Property::getString(std::string& value) const {
+bool Property::getStringValue(std::string& value) const {
     return false;
 }
 
-bool Property::setString(std::string value) {
+bool Property::setStringValue(std::string value) {
     return false;
 }
 

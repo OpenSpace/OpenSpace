@@ -56,7 +56,7 @@ public:
 	 * \param state The unused Lua state 
 	 * \return Returns always <code>true</code>
 	 */
-	bool setLua(lua_State* state);
+	bool setLuaValue(lua_State* state);
 
 	/**
 	 * Silently ignores any value that is passed into this function and will trigger the

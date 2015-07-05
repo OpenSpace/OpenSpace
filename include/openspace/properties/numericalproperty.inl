@@ -280,7 +280,7 @@ std::string NumericalProperty<T>::className() const {
 }
 
 template <typename T>
-bool NumericalProperty<T>::setLua(lua_State* state)
+bool NumericalProperty<T>::setLuaValue(lua_State* state)
 {
 	bool success = false;
 	T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
@@ -290,7 +290,7 @@ bool NumericalProperty<T>::setLua(lua_State* state)
 }
 
 template <typename T>
-bool NumericalProperty<T>::getLua(lua_State* state) const
+bool NumericalProperty<T>::getLuaValue(lua_State* state) const
 {
 	bool success = PropertyDelegate<NumericalProperty<T>>::template toLuaValue<T>(state, TemplateProperty<T>::_value);
 	return success;
@@ -302,13 +302,13 @@ int NumericalProperty<T>::typeLua() const {
 }
 
 template <typename T>
-bool NumericalProperty<T>::getString(std::string& value) const {
+bool NumericalProperty<T>::getStringValue(std::string& value) const {
     bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(value, _value);
     return success;
 }
 
 template <typename T>
-bool NumericalProperty<T>::setString(std::string value) {
+bool NumericalProperty<T>::setStringValue(std::string value) {
     bool success = false;
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(value, success);
     if (success)
