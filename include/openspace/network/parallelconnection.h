@@ -40,6 +40,7 @@
 #include <thread>
 #include <sstream>
 #include <mutex>
+#include <map>
 
 #ifdef __WIN32__
 #ifndef WIN32_LEAN_AND_MEAN
@@ -89,6 +90,8 @@ namespace openspace{
             void signalDisconnect();
             
             void preSynchronization();
+            
+            void scriptMessage(const std::string propIdentifier, const std::string propValue);
             
             enum MessageTypes{
                 Authentication=0,
@@ -171,6 +174,8 @@ namespace openspace{
             
             void threadManagement();
             
+            std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
+            
 			uint32_t _passCode;
             std::string _port;
             std::string _address;
@@ -192,6 +197,7 @@ namespace openspace{
             network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
             std::mutex _timeKeyframeMutex;
             std::atomic<bool> _latestTimeKeyframeValid;
+            std::map<std::string, std::string> _currentState;
         };
     } // namespace network
     
