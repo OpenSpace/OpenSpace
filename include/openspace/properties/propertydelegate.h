@@ -149,6 +149,12 @@ public:
 	 * PropertyDelegate::toLuaValue and PropertyDelegate::fromLuaValue methods.
 	 */
 	static int typeLua();
+
+    template <typename U>
+    static U fromString(std::string value, bool& success);
+
+    template <typename U>
+    static bool toString(std::string& outValue, U inValue);
 };
 
 } // namespace properties

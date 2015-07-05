@@ -79,19 +79,28 @@ MainWindow::MainWindow()
     , _shortcutWidget(nullptr)
     , _syncWidget(nullptr)
 {
+    setObjectName("MainWindow");
     setFixedSize(WindowSize);
+    //setContentsMargins(0, 0, 0, 0);
     
     QGridLayout* layout = new QGridLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
     
     QLabel* image = new QLabel;
+    //image->setContentsMargins(0, 0, 0, 0);
+    image->setObjectName("Image");
     QPixmap p = QPixmap(":/images/header.png");
     image->setPixmap(p.scaledToWidth(WindowSize.width()));
     layout->addWidget(image, 0, 0, 1, 2);
+
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
     _informationWidget->setEnabled(false);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
+    layout->setRowStretch(1, 10);
+    layout->setColumnStretch(0, 4);
+    layout->setColumnStretch(1, 5);
 
     QWidget* container = new QWidget;
     {
@@ -104,11 +113,18 @@ MainWindow::MainWindow()
                          this, SLOT(shortcutButtonPressed())
                          );
         layout->addWidget(shortcutButton, 0, 1);
+
+        layout->setRowStretch(1, 10);
+
+        QLabel* configurationSelectionLabel = new QLabel("Configuration:");
+        layout->addWidget(configurationSelectionLabel, 2, 0);
+        _configurations = new QComboBox;
+        layout->addWidget(_configurations, 2, 1);
         
         QLabel* sceneSelectionLabel = new QLabel("Scenes:");
-        layout->addWidget(sceneSelectionLabel, 1, 0);
+        layout->addWidget(sceneSelectionLabel, 3, 0);
         _scenes = new QComboBox;
-        layout->addWidget(_scenes);
+        layout->addWidget(_scenes, 3, 1);
         
         container->setLayout(layout);
     }
@@ -181,27 +197,40 @@ void MainWindow::initialize() {
     std::string configurationFile = _configurationFile;
     bool found = openspace::OpenSpaceEngine::findConfiguration(configurationFile);
     if (!found) {
+        LERRORC("MainWindow", "Could not find configuration file");
     }
 
     _configuration = new openspace::ConfigurationManager;
     _configuration->loadFromFile(configurationFile);
 
-
-    QString modulesDirectory = QString::fromStdString(
-        absPath("${SCENE}")
-    );
+    // Load all available scenes
+    QString modulesDirectory = QString::fromStdString(absPath("${SCENE}"));
     QDir d(modulesDirectory);
     d.setFilter(QDir::Files);
-
     QFileInfoList list = d.entryInfoList();
+    _scenes->addItem("Use Default");
     for (const QFileInfo& i : list) {
-        _sceneFiles.insert(i.fileName(), i.absoluteFilePath());
-        _scenes->addItem(i.fileName());
+        QString file = i.fileName();
+        file = file.replace(".scene", "");
+        _sceneFiles.insert(file, i.absoluteFilePath());
+        _scenes->addItem(file);
     }
-
-    _scenes->setCurrentText("default.scene");
-
+    _scenes->setCurrentText("Use Default");
     _syncWidget->setSceneFiles(_sceneFiles);
+
+    // Load all available configuration files
+    QString configurationDirectory = QString::fromStdString(absPath("${SGCT}"));
+    d = QDir(configurationDirectory);
+    d.setFilter(QDir::Files);
+    list = d.entryInfoList();
+    _configurations->addItem("Use Default");
+    for (const QFileInfo& i : list) {
+        QString file = i.fileName();
+        file = file.replace(".xml", "");
+        _configurationFiles.insert(file, i.absoluteFilePath());
+        _configurations->addItem(file);
+    }
+    _configurations->setCurrentText("Use Default");
 }
 
 void MainWindow::shortcutButtonPressed() {
@@ -213,7 +242,15 @@ void MainWindow::syncButtonPressed() {
 }
 
 void MainWindow::startButtonPressed() {
-    QProcess::startDetached(OpenSpaceExecutable);
+    QString exec = OpenSpaceExecutable;
+    if (_sceneFiles.contains(_scenes->currentText()))
+        exec += " -scene \"" + _sceneFiles[_scenes->currentText()] + "\"";
+
+    if (_configurationFiles.contains(_configurations->currentText()))
+        exec += " -sgct \"" + _configurationFiles[_configurations->currentText()] + "\"";
+
+    LINFOC("MainWindow", "Executing: " << exec.toStdString());
+    QProcess::startDetached(exec);
 }
 
 void MainWindow::newsNetworkError() {

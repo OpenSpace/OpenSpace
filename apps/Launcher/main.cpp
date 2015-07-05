@@ -24,130 +24,151 @@
 
 #include <QApplication>
 
+#include <QFile>
+
 #include "mainwindow.h"
 
-//static const QString style = R"style(
-//QWidget {
-//	background-color: rgb(80, 80, 80);
-//	font-family: Helvetica;
-//}
-//
-//QGroupBox {
-//    background-color: qlineargradient(
-//    	x1: 0, y1: 0, x2: 0, y2: 1,
-//    	stop: 0 #858585,
-//    	stop: 1 #959595);
-//    border: 2px solid gray;
-//    border-radius: 5px;
-//    margin-top: 4ex;
-//    font-size: bold 12px;
-//}
-//
-//QGroupBox::title {
-//	background-color: #E0E0E0;
-//    border: 2px solid gray;
-//    border-radius: 5px;
-//    subcontrol-origin: margin;
-//    subcontrol-position: top center;
-//    padding: 0 10px;
-//}
-//
-//QLineEdit {
-//    color: lightgray;
-//}
-//
-//QSlider::groove:horizontal {
-//    border: 1px solid #999999;
-//    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-//    background: qlineargradient(
-//    	x1:0, y1:0, x2:1, y2:0,
-//    	stop:0 #c4c4c4,
-//    	stop:0.5 #555555,
-//    	stop:1 #c4c4c4
-//    );
-//    margin: 2px 0;
-//}
-//
-//QSlider::handle:horizontal {
-//    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
-//    border: 1px solid #5c5c5c;
-//    width: 18px;
-//    margin: -2px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-//    border-radius: 3px;
-//}
-//
-//QPushButton {
-//	background-color: lightgray;
-//    border-style: outset;
-//    border-width: 0.5px;
-//    border-radius: 5px;
-//    border-color: black;
-//    font: bold 12px;
-//    min-width: 10em;
-//}
-//
-//QPushButton#connection {
-//	background-color: lightgreen;
-//}
-//
-//QPushButton#connection:pressed {
-//	background-color: green;
-//}
-//
-//
-//QPushButton#pause, QPushButton#play {
-//	padding: 5px;
-//}
-//
-//QPushButton#pause:pressed, QPushButton#play:pressed, QPushButton:pressed {
-//    background-color: darkgray;
-//    border-style: inset;
-//}
-//
-//QCombobox {
-//    border: 1px solid gray;
-//    border-radius: 3px;
-//    padding: 1px 18px 1px 3px;
-//    min-width: 6em;
-//}
-//
-//QComboBox:editable {
-//    background: lightgrey;	
-//}
-//
-//QComboBox QAbstractItemView {
-//    border: 2px solid darkgray;
-//    border-radius: 5px;
-//    background-color: #a8a8a8;
-//    selection-background-color: #a8a8a8;
-//}
-//
-//QLabel#label {
-//	font-size: 13px;
-//	background-color: transparent;
-//	font-variant: small-caps;
-//}
-//
-//QLabel#value {
-//	font-family: monospace;
-//	font-weight: bold;
-//	font-size: 14px;
-//	background-color: transparent;
-//}
-//
-//QWidget#background {
-//	background-color: transparent;
-//}
-//
-//QTextEdit {
-//	font-family: monospace;
-//}
-//)style";
+#include <ghoul/filesystem/filesystem>
+
+static const QString style = R"style(
+QWidget {
+    /*font-family: "Helvetica";*/
+}
+QWidget#MainWindow, QTextEdit, QWidget#SyncWidget, QWidget#DownloadArea {
+    background-color: rgb(40, 40, 40);
+}
+QTextEdit, QLabel, QComboBox, QCheckBox {
+    color: #EDEDED;
+    font-size: 12px;
+}
+QLabel {
+    font-size: 13px;
+}
+QLabel#Image {
+    margin: -10px 0px -5px 0px;
+}
+QTextEdit {
+    border-width: 2px 2px 0px 0px;
+    border-style: solid;
+    background-color: rgb(60, 60, 60);
+}
+QPushButton {
+    color:#202020;
+    background-color:
+        qlineargradient(
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 white,
+            stop: 1 #555555
+        );
+    border: 1px solid black;
+    font-size: 11px;
+    min-height: 20px;
+}
+QComboBox { 
+    background-color: rgb(60, 60, 60);
+    min-height: 20px;
+}
+QComboBox:focus, QComboBox:focus QAbstractItemView {
+    color: white;
+    background-color: rgb(60, 60, 60);
+    selection-background-color: rgb(75, 75, 75);
+}
+QCheckBox {
+    border: none;
+}
+QCheckBox::indicator {
+    width: 12px;
+    height: 12px;
+}
+QCheckBox::indicator::unchecked {
+    border: 1px solid #5A5A5A;
+    background: transparent;
+}
+QCheckBox::indicator:unchecked:hover {
+    border: 1px solid #DDDDDD;
+}
+QCheckBox::indicator::checked {
+    border: 1px solid #AAAAAA;
+    background: #666666;
+}
+QCheckBox::indicator:checked:hover {
+    border: 1px solid #DDDDDD;
+    background: #555555;
+}
+QGroupBox, QScrollArea {
+    border: 0px;
+}
+InfoWidget {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    margin: 2px 1px 2px 1px;
+    padding: 7.5px;
+}
+InfoWidget QLabel#Name {
+    font-size: 17px;
+}
+InfoWidget QLabel#Bytes {
+    font-size: 13px;
+    font-family: "Lucida Console";
+} 
+InfoWidget QLabel#MessageLeft, QLabel#MessageCenter, QLabel#MessageRight {
+    font-size: 11.5px;
+    margin-top: -2px;
+} 
+InfoWidget QProgressBar {
+    border: 2px solid #BBBBBB;
+    border-radius: 5px;
+    background: white;
+    height: 15px;
+}
+InfoWidget QProgressBar::chunk {
+    background: qlineargradient(
+        x1: 0, y1: 0.5, x2: 1, y2: 0.5,
+        stop: 0 #444444,
+        stop: 1 #600000
+    );
+}
+QScrollBar {
+    border: 1px solid #000000;
+    background: #282828;
+    width: 15px;
+    margin: 16px 0px 16px 0px;
+}
+QScrollBar::handle {
+    background: #B0B0B0;
+    border: 1px solid #000000;
+    border-width: 1px 0px 1px 0px;
+    min-height: 20px;
+}
+QScrollBar::add-line, QScrollBar::sub-line {
+    background:#B0B0B0;
+    border: 1px solid #5A5A5A;
+    subcontrol-origin: margin;
+}
+QScrollBar::add-line {
+    top: 15px;
+    height: 15px;
+}
+QScrollBar::sub-line {
+    height: 15px;
+    subcontrol-position: top;
+}
+QScrollBar::up-arrow, QScrollBar::down-arrow {
+    border: 1px solid #5A5A5A;
+    width: 3px;
+    height: 3px;
+    background-color: #353535;
+}
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+)style";
 
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
+    app.setStyleSheet(style);
 
-//    app.setStyleSheet(style);
 	MainWindow window;
 	window.show();
 

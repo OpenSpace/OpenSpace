@@ -26,6 +26,8 @@
 
 namespace {
 	const std::string _loggerCat = "SelectionProperty";
+
+    const std::string Delimiter = ",";
 }
 
 namespace openspace {
@@ -107,6 +109,29 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State*
 template <>
 int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
 	return LUA_TTABLE;
+}
+
+template <>
+template <>
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(std::string value, bool& success) {
+    std::vector<int> result;
+    size_t pos = 0;
+    while ((pos = value.find(Delimiter)) != std::string::npos) {
+        std::string token = value.substr(0, pos);
+        result.push_back(std::stoi(token));
+        value.erase(0, pos + Delimiter.length());
+    }
+    return result;
+}
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue) {
+    outValue = "[";
+    for (int i : inValue)
+        outValue += std::to_string(i) + Delimiter;
+    outValue += "]";
+    return true;
 }
 
 std::string SelectionProperty::generateAdditionalDescription() const {

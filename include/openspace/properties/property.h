@@ -45,8 +45,9 @@ class PropertyOwner;
  * Property. Per PropertyOwner, the <code>identifier</code> needs to be unique and can be
  * used as a URI. This class is an abstract base class and each subclass (most notable
  * TemplateProperty) needs to implement the methods Property::className, Property::get,
- * Property::set, Property::type(), Property::getLua, Property::setLua, and
- * Property::typeLua to make full use of the infrastructure.
+ * Property::set, Property::type(), Property::getLuaValue, Property::setLuaValue,
+ * Property::getStringValue, Property::setStringValue and Property::typeLua to make full
+ * use of the infrastructure.
  * The most common types can be implemented by creating a specialized instantiation of
  * TemplateProperty, which provides default implementations for these methods.
  *
@@ -118,47 +119,69 @@ public:
 	 * This method encodes the encapsulated value of this Property at the top of the Lua
 	 * stack. The specific details of this serialization is up to the property developer
 	 * as long as the rest of the stack is unchanged. The implementation has to be
-	 * synchronized with the Property::setLua method. The default implementation is a
+	 * synchronized with the Property::setLuaValue method. The default implementation is a
 	 * no-op.
 	 * \param state The Lua state to which the value will be encoded
 	 * \return <code>true</code> if the encoding succeeded, <code>false</code> otherwise
 	 */
-	virtual bool getLua(lua_State* state) const;
+	virtual bool getLuaValue(lua_State* state) const;
 
 	/**
 	 * This method sets the value encapsulated by this Property by deserializing the value
 	 * on top of the passed Lua stack. The specific details of the deserialization are up
 	 * to the Property developer, but they must only depend on the top element of the
 	 * stack and must leave all other elements unchanged. The implementation has to be
-	 * synchronized with the Property::getLua method. The default implementation is a
+	 * synchronized with the Property::getLuaValue method. The default implementation is a
 	 * no-op.
 	 * \param state The Lua state from which the value will be decoded
 	 * \return <code>true</code> if the decoding and setting of the value succeeded,
 	 * <code>false</code> otherwise
 	 */
-	virtual bool setLua(lua_State* state);
+	virtual bool setLuaValue(lua_State* state);
 
 	/**
 	 * Returns the Lua type that will be put onto the stack in the Property::getLua method
-	 * and which will be consumed by the Property::setLua method. The returned value
+	 * and which will be consumed by the Property::setLuaValue method. The returned value
 	 * can belong to the set of Lua types: <code>LUA_TNONE</code>, <code>LUA_TNIL</code>,
 	 * <code>LUA_TBOOLEAN</code>, <code>LUA_TLIGHTUSERDATA</code>,
 	 * <code>LUA_TNUMBER</code>, <code>LUA_TSTRING</code>, <code>LUA_TTABLE</code>,
 	 * <code>LUA_TFUNCTION</code>, <code>LUA_TUSERDATA</code>, or
 	 * <code>LUA_TTHREAD</code>. The default implementation will return
 	 * <code>LUA_TNONE</code>.
-	 * \return The Lua type that will be consumed or produced by the Property::getLua and
-	 * Property::setLua methods.
+	 * \return The Lua type that will be consumed or produced by the Property::getLuaValue
+     * and Property::setLuaValue methods.
 	 */
 	virtual int typeLua() const;
 
 	/**
+	 * This method encodes the encapsulated value of this Property as a
+     * <code>std::string</code>. The specific details of this serialization is up to the
+     * property developer. The implementation has to be synchronized with the
+     Property::setStringValue method. The default implementation is a no-op.
+	 * \param value The value to which the Property will be encoded
+	 * \return <code>true</code> if the encoding succeeded, <code>false</code> otherwise
+	 */
+    virtual bool getStringValue(std::string& value) const;
+
+	/**
+	 * This method sets the value encapsulated by this Property by deserializing the
+     * passed <code>std::string</code>. The specific details of the deserialization are up
+	 * to the Property developer. The implementation has to be synchronized with the
+     * Property::getLuaValue method. The default implementation is a no-op.
+	 * \param value The value from which the Property will be decoded
+	 * \return <code>true</code> if the decoding and setting of the value succeeded,
+	 * <code>false</code> otherwise
+	 */
+    virtual bool setStringValue(std::string value);
+
+	/**
 	 * This method registers a <code>callback</code> function that will be called every
-	 * time if either Property:set or Property::setLua was called with a value that is
-	 * different from the previously stored value. The callback can be removed my passing
-	 * an empty <code>std::function<void()></code> object.
+	 * time if either Property:set or Property::setLuaValue was called with a value that
+     * is different from the previously stored value. The callback can be removed by
+     * passing an empty <code>std::function<void()></code> object.
 	 * \param callback The callback function that is called when the encapsulated type has
-	 * been successfully changed by either the Property::set or Property::setLua methods.
+	 * been successfully changed by either the Property::set or Property::setLuaValue
+     * methods.
 	 */
     virtual void onChange(std::function<void()> callback);
 
@@ -243,9 +266,10 @@ public:
 	/**
 	 * This method determines if this Property should be read-only in external
 	 * applications. This setting is only a hint and does not need to be followed by GUI
-	 * applications and does not have any effect on the Property::set or Property::setLua
-	 * methods. The value is stored in the metaData Dictionary with the key:
-	 * <code>isReadOnly</code>. The default value is <code>false</code>.
+	 * applications and does not have any effect on the Property::set,
+     * Property::setLuaValue, or Property::setStringValue methods. The value is stored in
+     * the metaData Dictionary with the key: <code>isReadOnly</code>. The default value is
+     * <code>false</code>.
 	 * \param state <code>true</code> if the Property should be read only,
 	 * <code>false</code> otherwise
 	 */

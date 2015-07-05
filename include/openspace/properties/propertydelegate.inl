@@ -81,5 +81,19 @@ int PropertyDelegate<T>::typeLua() {
 		"Unimplemented PropertyDelegate::luaType specialization");
 }
 
+template <typename T>
+template <typename U>
+bool PropertyDelegate<T>::toString(std::string& outValue, U inValue) {
+    static_assert(sizeof(T) == 0,
+        "Unimplemented PropertyDelegate::toString specialization");
+}
+
+template <typename T>
+template <typename U>
+U PropertyDelegate<T>::fromString(std::string value, bool& success) {
+    static_assert(sizeof(T) == 0,
+        "Unimplemented PropertyDelegate::fromString specialization");
+}
+
 } // namespace properties
 } // namespace openspace

@@ -41,6 +41,14 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
 		lua_pushstring(state, value.c_str());
 		return true;
 	},
+[](std::string value, bool& success) -> std::string {
+    success = true;
+    return value;
+},
+[](std::string& outValue, std::string inValue) -> bool {
+    outValue = inValue;
+    return true;
+},
 LUA_TSTRING
 );
 

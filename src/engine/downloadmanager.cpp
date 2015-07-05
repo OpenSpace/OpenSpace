@@ -40,13 +40,15 @@
 #include <Windows.h>
 #endif
 
+#define USE_MULTITHREADED_DOWNLOAD
+
 namespace {
     const std::string _loggerCat = "DownloadManager";
     
     const std::string RequestIdentifier = "identifier";
     const std::string RequestFileVersion = "file_version";
     const std::string RequestApplicationVersion = "application_version";
-
+    
     struct ProgressInformation {
         openspace::DownloadManager::FileFuture* future;
         std::chrono::system_clock::time_point startTime;
@@ -145,7 +147,10 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
 
     LDEBUG("Starting download for file: '" << url <<
     "' into file '" << file.path() << "'");
+    
+#ifdef USE_MULTITHREADED_DOWNLOAD
     std::thread t = std::thread([url, finishedCallback, progressCallback, future, fp]() {
+#endif
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -174,6 +179,7 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             if (finishedCallback)
                 finishedCallback(*future);
         }
+#ifdef USE_MULTITHREADED_DOWNLOAD
     });
 
 #ifdef WIN32
@@ -185,6 +191,7 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
 #endif
 
     t.detach();
+#endif // USE_MULTITHREADED_DOWNLOAD
 
     return future;
 }
@@ -253,7 +260,9 @@ void DownloadManager::downloadRequestFilesAsync(
     bool overrideFiles,
     AsyncDownloadFinishedCallback callback)
 {
+#ifdef USE_MULTITHREADED_DOWNLOAD
     std::thread t = std::thread([this, identifier, destination, version, overrideFiles, callback](){
+#endif
         std::vector<FileFuture*> f = downloadRequestFiles(
             identifier,
             destination,
@@ -262,6 +271,7 @@ void DownloadManager::downloadRequestFilesAsync(
         );
 
         callback(f);
+#ifdef USE_MULTITHREADED_DOWNLOAD
     });
 
 #ifdef WIN32
@@ -273,6 +283,7 @@ void DownloadManager::downloadRequestFilesAsync(
 #endif
 
     t.detach();
+#endif // USE_MULTITHREADED_DOWNLOAD
 }
 
 } // namespace openspace

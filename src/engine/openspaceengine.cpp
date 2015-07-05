@@ -92,6 +92,7 @@ namespace {
     struct {
         std::string configurationName;
 		std::string sgctConfigurationName;
+        std::string sceneName;
     } commandlineArgumentPlaceholders;
 }
 
@@ -358,11 +359,14 @@ bool OpenSpaceEngine::initialize() {
     _renderEngine->initialize();
 	sceneGraph->initialize();
 
-	std::string sceneDescriptionPath;
-	success = configurationManager()->getValue(
-		ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
-	if (success)
-		sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
+    std::string sceneDescriptionPath = "";
+    if (commandlineArgumentPlaceholders.sceneName.empty()) {
+	    success = configurationManager()->getValue(
+		    ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
+    }
+    else
+        sceneDescriptionPath = commandlineArgumentPlaceholders.sceneName;
+	sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
 	_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
 	_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
@@ -412,6 +416,13 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
 		"Provides the path to the SGCT configuration file, overriding the value set in"
 		"the OpenSpace configuration file");
 	_commandlineParser->addCommand(sgctConfigFileCommand);
+
+    commandlineArgumentPlaceholders.sceneName = "";
+    CommandlineCommand* sceneFileCommand = new SingleCommand<std::string>(
+        &commandlineArgumentPlaceholders.sceneName, "-scene", "",
+        "Provides the path to the scene file, overriding the value set in the OpenSpace"
+        " configuration file");
+    _commandlineParser->addCommand(sceneFileCommand);
 
     return true;
 }

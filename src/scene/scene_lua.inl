@@ -58,7 +58,7 @@ int property_setValue(lua_State* L) {
         return 0;
     }
 	else
-		prop->setLua(L);
+		prop->setLuaValue(L);
 
 	return 0;
 }
@@ -84,7 +84,7 @@ int property_getValue(lua_State* L) {
         return 0;
     }
 	else
-		prop->getLua(L);
+		prop->getLuaValue(L);
 	return 1;
 }
 
