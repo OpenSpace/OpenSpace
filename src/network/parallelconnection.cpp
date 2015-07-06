@@ -399,18 +399,33 @@ namespace openspace {
             
             int result;
             
-            //ID and size of data chunk are removed by the server
+			uint32_t id, datasize;
             uint16_t numscripts;
             
             std::vector<char> buffer;
-            buffer.resize(sizeof(numscripts));
+			buffer.resize(sizeof(id));
+
+			//read id
+			result = receiveData(_clientSocket, buffer, sizeof(id), 0);
+			if (result < 0){
+				//error
+			}
+			id = *(reinterpret_cast<uint32_t*>(buffer.data()));
+
+			//read datalength
+			result = receiveData(_clientSocket, buffer, sizeof(datasize), 0);
+			if (result < 0){
+				//error
+			}
+			datasize = *(reinterpret_cast<uint32_t*>(buffer.data()));
             
+			buffer.clear();
+			buffer.resize(sizeof(uint16_t));
             //read number of scripts
             result = receiveData(_clientSocket, buffer, sizeof(numscripts), 0);
             if(result < 0){
                 //error
-            }
-            
+            }        
             numscripts = *(reinterpret_cast<uint16_t*>(buffer.data()));
             
             //length of current script
