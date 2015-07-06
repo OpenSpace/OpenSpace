@@ -255,12 +255,12 @@ InteractionHandler::InteractionHandler()
     , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
-	, _currentKeyframeTime(-1.0)
     , _origin("origin", "Origin", "")
+    , _coordinateSystem("coordinateSystem", "Coordinate System", "")
+	, _currentKeyframeTime(-1.0)
 {
     setName("Interaction");
     
-    addProperty(_origin);
     _origin.onChange([this](){
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
@@ -269,7 +269,12 @@ InteractionHandler::InteractionHandler()
         }
         setFocusNode(node);
     });
+    addProperty(_origin);
     
+    _coordinateSystem.onChange([this](){
+        OsEng.renderEngine()->changeViewPoint(_coordinateSystem.value());
+    });
+    addProperty(_coordinateSystem);
 }
 
 InteractionHandler::~InteractionHandler() {

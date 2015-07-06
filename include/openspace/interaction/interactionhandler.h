@@ -180,9 +180,9 @@ private:
 	MouseController* _mouseController;
 	std::vector<Controller*> _controllers;
 
-
     properties::StringProperty _origin;
-        
+    properties::StringProperty _coordinateSystem;
+    
 	//remote controller
 	std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
 	double _currentKeyframeTime;

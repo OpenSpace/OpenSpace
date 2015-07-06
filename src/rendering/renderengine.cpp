@@ -789,13 +789,13 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"Sets the performance measurements"
 			},
             // These are temporary ---abock
-            {
-                "changeCoordinateSystem",
-                &luascriptfunctions::changeCoordinateSystem,
-                "string",
-                "Changes the origin of the coordinate system to the passed node",
-                true
-            },
+//            {
+//                "changeCoordinateSystem",
+//                &luascriptfunctions::changeCoordinateSystem,
+//                "string",
+//                "Changes the origin of the coordinate system to the passed node",
+//                true
+//            },
 		{
 			"fadeIn",
 			&luascriptfunctions::fadeIn,
@@ -1283,7 +1283,7 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	
 	//}
 
-    ghoul_assert(false, "This function is being misused");
+    LFATAL("This function is being misused with an argument of '" << origin << "'");
 }
 
 void RenderEngine::setSGCTRenderStatistics(bool visible) {

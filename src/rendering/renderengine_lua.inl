@@ -26,6 +26,7 @@ namespace openspace {
 
 namespace luascriptfunctions {
 
+/**
 int changeCoordinateSystem(lua_State* L) {
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -35,6 +36,7 @@ int changeCoordinateSystem(lua_State* L) {
     OsEng.renderEngine()->changeViewPoint(newCenter);
     return 1;
 }
+*/
 
 /**
 	* \ingroup LuaScripts
