@@ -532,7 +532,6 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 void RenderablePlanetProjection::update(const UpdateData& data){
 	if (_time > Time::ref().currentTime()){
-		std::cout << "detected backjump, clearing queue" << std::endl;
 		imageQueue = {}; // if jump back in time -> empty queue.  
 	}
 
