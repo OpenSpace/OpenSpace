@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -36,13 +37,11 @@ namespace {
     const std::string _loggerCat = "Query";
 }
 
-Scene* sceneGraph()
-{
+Scene* sceneGraph() {
     return OsEng.renderEngine()->scene();
 }
 
-SceneGraphNode* sceneGraphNode(const std::string& name)
-{
+SceneGraphNode* sceneGraphNode(const std::string& name) {
     const Scene* graph = sceneGraph();
     return graph->sceneGraphNode(name);
 }
@@ -52,8 +51,7 @@ Renderable* renderable(const std::string& name) {
 	return node->renderable();
 }
 
-properties::Property* property(const std::string& uri)
-{
+properties::Property* property(const std::string& uri) {
     // The URI consists of the following form at this stage:
     // <node name>.{<property owner>.}^(0..n)<property id>
     
@@ -65,6 +63,17 @@ properties::Property* property(const std::string& uri)
     }
     const std::string nodeName = uri.substr(0, nodeNameSeparator);
     const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
+
+    if (nodeName == "Interaction") {
+        properties::Property* p = OsEng.interactionHandler()->property(remainingUri);
+        
+        if (!p) {
+            LERROR("Node '" << nodeName << "' did not exist");
+            return nullptr;
+        }
+        else
+            return p;
+    }
     
     SceneGraphNode* node = sceneGraphNode(nodeName);
     if (!node) {
