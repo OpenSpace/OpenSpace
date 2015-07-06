@@ -417,7 +417,7 @@ namespace openspace {
             uint16_t scriptlen;
             
             buffer.clear();
-            buffer.resize(scriptlen);
+            buffer.resize(sizeof(scriptlen));
             
             //holder for current script
             std::string script;
