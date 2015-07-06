@@ -226,7 +226,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
         int nFinished = 0;
         while (std::getline(temporary, line)) {
             ++nFiles;
-            std::string file = ghoul::filesystem::File(line).filename();
+            std::string file = ghoul::filesystem::File(line, true).filename();
 
             LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
 
