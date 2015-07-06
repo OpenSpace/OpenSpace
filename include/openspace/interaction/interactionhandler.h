@@ -89,7 +89,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-    class InteractionHandler : public properties::PropertyOwner{
+class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
 

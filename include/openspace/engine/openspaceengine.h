@@ -57,10 +57,14 @@ namespace scripting {
 	class ScriptEngine;
 }
     
-namespace network{
+namespace network {
     class ParallelConnection;
 }
-
+    
+namespace properties {
+    class PropertyOwner;
+}
+    
 class OpenSpaceEngine {
 public:
     static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
@@ -84,6 +88,7 @@ public:
 	LuaConsole* console();
     ModuleEngine* moduleEngine();
     network::ParallelConnection* parallelConnection();
+    properties::PropertyOwner* globalPropertyOwner();
 
 	gui::GUI* gui();
 
@@ -132,6 +137,9 @@ private:
     ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
     network::ParallelConnection* _parallelConnection;
+    
+    properties::PropertyOwner* _globalPropertyNamespace;
+    
 	bool _isMaster;
     double _runTime;
 

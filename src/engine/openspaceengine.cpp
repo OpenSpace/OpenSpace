@@ -37,6 +37,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
@@ -110,11 +111,14 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
+    , _parallelConnection(new network::ParallelConnection)
+    , _globalPropertyNamespace(new properties::PropertyOwner)
 	, _isMaster(false)
     , _runTime(0.0)
     , _syncBuffer(nullptr)
-    , _parallelConnection(new network::ParallelConnection)
 {
+    _globalPropertyNamespace->setName("Global");
+    _interactionHandler->setPropertyOwner(_globalPropertyNamespace);
     FactoryManager::initialize();
     SpiceManager::initialize();
     Time::initialize();
@@ -817,6 +821,11 @@ ModuleEngine* OpenSpaceEngine::moduleEngine() {
 network::ParallelConnection* OpenSpaceEngine::parallelConnection() {
     ghoul_assert(_parallelConnection != nullptr, "ParallelConnection is nullptr");
     return _parallelConnection;
+}
+    
+properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
+    ghoul_assert(_globalPropertyNamespace, "Global Property Namespace");
+    return _globalPropertyNamespace;
 }
 
 }  // namespace openspace

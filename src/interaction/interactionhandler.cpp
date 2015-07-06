@@ -245,7 +245,8 @@ namespace openspace {
 namespace interaction {
 
 InteractionHandler::InteractionHandler()
-	: _camera(nullptr)
+    : properties::PropertyOwner()
+	, _camera(nullptr)
 	, _focusNode(nullptr)
     , _deltaTime(0.0)
     , _validKeyLua(false)
@@ -257,6 +258,7 @@ InteractionHandler::InteractionHandler()
 	, _currentKeyframeTime(-1.0)
     , _origin("origin", "Origin", "")
 {
+    setName("Interaction");
     
     addProperty(_origin);
     _origin.onChange([this](){
