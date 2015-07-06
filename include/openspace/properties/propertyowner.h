@@ -114,7 +114,7 @@ public:
 	 */
     bool hasProperty(const std::string& URI) const;
     
-	void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
+    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; _owner->addPropertySubOwner(this); }
 	PropertyOwner* owner() const { return _owner; }
 
 	/**
