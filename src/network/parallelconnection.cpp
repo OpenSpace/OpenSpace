@@ -378,7 +378,7 @@ namespace openspace {
 				break;
 			case MessageTypes::Data:
 				dataMessageReceived();
-//				break;
+				break;
 //            case MessageTypes::Script:
 //                    //disabled for now
 ////                decodeScriptMessage();
@@ -780,8 +780,7 @@ namespace openspace {
 		}
 
 		void ParallelConnection::initializationRequestMessageReceived(){
-            //@FIX
-            return;
+            
             //get current state as scripts
             std::vector<std::string> scripts;
             std::map<std::string, std::string>::iterator state_it;
@@ -792,7 +791,7 @@ namespace openspace {
                 for(state_it = _currentState.begin();
                     state_it != _currentState.end();
                     ++state_it){
-//                    scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
+                    scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
                 }
             }
             
