@@ -151,8 +151,6 @@ namespace openspace{
 			void initializationMessageReceived();
 
 			void dataMessageReceived();
-            
-            void decodeScriptMessage();
 
 			void hostInfoMessageReceived();
 			

@@ -655,45 +655,6 @@ namespace openspace {
             }
 		}
 
-        void ParallelConnection::decodeScriptMessage(){
-            int result;
-            uint16_t msglen;
-            
-            //create buffer to decode size of script
-            std::vector<char> buffer;
-            buffer.resize(sizeof(msglen));
-            
-            //read size of received script
-            result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
-            
-            if (result <= 0){
-                //error
-                return;
-            }
-            
-            //size of recived script
-            msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
-            
-            //clear and resize buffer to decode actual script
-            buffer.clear();
-            buffer.resize(msglen);
-            
-            //decode script
-            result = receiveData(_clientSocket, buffer, msglen, 0);
-            
-            if (result <= 0){
-                //error
-                return;
-            }
-            
-            //construct a script (string) from the data contained in the buffer
-            std::string script;
-            script.assign(buffer.begin(), buffer.end());
-
-            //tell the script engine to execute the script when appropriate
-            OsEng.scriptEngine()->queueScript(script);
-        }
-        
         void ParallelConnection::queueMessage(std::vector<char> message){
             _sendBufferMutex.lock();
             _sendBuffer.push_back(message);
