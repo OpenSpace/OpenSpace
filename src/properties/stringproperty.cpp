@@ -46,7 +46,7 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
     return value;
 },
 [](std::string& outValue, std::string inValue) -> bool {
-    outValue = inValue;
+    outValue = "\"" + inValue + "\"";
     return true;
 },
 LUA_TSTRING
