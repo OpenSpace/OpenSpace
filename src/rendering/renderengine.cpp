@@ -178,12 +178,12 @@ bool RenderEngine::initialize() {
 	_mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
 	OsEng.interactionHandler()->setCamera(_mainCamera);
 
+#ifdef GHOUL_USE_FREEIMAGE
+    ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
+#endif // GHOUL_USE_FREEIMAGE
 #ifdef GHOUL_USE_DEVIL
 	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
 #endif // GHOUL_USE_DEVIL
-#ifdef GHOUL_USE_FREEIMAGE
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
-#endif // GHOUL_USE_FREEIMAGE
 
 	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
 
