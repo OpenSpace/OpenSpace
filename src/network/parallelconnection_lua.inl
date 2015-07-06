@@ -169,17 +169,6 @@ int requestHostship(lua_State* L) {
     return 0;
 }
 
-int initialized(lua_State* L) {
-    
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-    return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    if(OsEng.isMaster()){
-        OsEng.parallelConnection()->initDone();
-    }
-    return 0;
-}
-
 } // namespace luascriptfunctions
 
 } // namespace openspace
