@@ -77,6 +77,8 @@
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
 
 #include <mutex>
 
@@ -87,7 +89,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class InteractionHandler {
+    class InteractionHandler : public properties::PropertyOwner{
 public:
     InteractionHandler();
 
@@ -178,6 +180,9 @@ private:
 	MouseController* _mouseController;
 	std::vector<Controller*> _controllers;
 
+
+    properties::StringProperty _origin;
+        
 	//remote controller
 	std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
 	double _currentKeyframeTime;

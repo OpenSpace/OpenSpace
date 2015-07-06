@@ -255,7 +255,19 @@ InteractionHandler::InteractionHandler()
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
 	, _currentKeyframeTime(-1.0)
+    , _origin("origin", "Origin", "")
 {
+    
+    addProperty(_origin);
+    _origin.onChange([this](){
+        SceneGraphNode* node = sceneGraphNode(_origin.value());
+        if (!node) {
+            LWARNING("Could not find a node in scenegraph called '" << _origin.value() <<"'");
+            return;
+        }
+        setFocusNode(node);
+    });
+    
 }
 
 InteractionHandler::~InteractionHandler() {
