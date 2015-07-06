@@ -83,10 +83,6 @@ namespace openspace{
 
 			void setPassword(const std::string &password);
             
-            void sendScript(const std::string script);
-            
-            void initDone();
-            
             void signalDisconnect();
             
             void preSynchronization();

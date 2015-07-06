@@ -1013,24 +1013,6 @@ namespace openspace {
 		void ParallelConnection::setPassword(const std::string& pwd){
 			_passCode = hash(pwd);
 		}
-        
-        void ParallelConnection::sendScript(const std::string script){
-            uint16_t msglen = static_cast<uint16_t>(script.length());
-            std::vector<char> buffer;
-            buffer.reserve(headerSize() + sizeof(msglen) + msglen);
-            
-            //write header
-            writeHeader(buffer, MessageTypes::Script);
-
-            //size of message
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-            
-            //actual message
-            buffer.insert(buffer.end(), script.begin(), script.end());
-            
-            //send message
-			queueMessage(buffer);
-        }
 
 		bool ParallelConnection::initNetworkAPI(){
 			#if defined(__WIN32__)
@@ -1254,18 +1236,6 @@ namespace openspace {
             //minor and major version (as uint8_t -> 1 byte) + two bytes for the chars 'O' and 'S' + 4 bytes for type of message
             return 2 * sizeof(uint8_t) + 2 + sizeof(uint32_t);
         }
-        
-        void ParallelConnection::initDone(){
-            //create buffer and reserve size
-            std::vector<char> buffer;
-            buffer.reserve(headerSize());
-
-            //write header
-            writeHeader(buffer, MessageTypes::InitializationCompleted);
-            
-            //queue script
-            queueMessage(buffer);
-        }
 
         scripting::ScriptEngine::LuaLibrary ParallelConnection::luaLibrary() {
             return {
@@ -1310,12 +1280,6 @@ namespace openspace {
                     {
                         "requestHostship",
                         &luascriptfunctions::requestHostship,
-                        "",
-                        "Request to be the host for this session"
-                    },
-                    {
-                        "initialized",
-                        &luascriptfunctions::initialized,
                         "",
                         "Request to be the host for this session"
                     },
