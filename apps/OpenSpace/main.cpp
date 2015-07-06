@@ -260,6 +260,10 @@ void mainDecodeFun() {
 
 void mainLogCallback(const char* msg){
     std::string message = msg;
+    if (message == ".")
+        // We don't want the empty '.' message that SGCT sends while it is waiting for
+        // connections from other network nodes
+        return;
     // Remove the trailing \n that is passed along
     LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
 }

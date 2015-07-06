@@ -57,7 +57,7 @@
 namespace {
     const std::string _loggerCat = "SyncWidget";
 
-    const std::string _configurationFile = "libtorrent.config";
+    const std::string _configurationFile = "Launcher.config";
 
     const int nColumns = 3;
 
