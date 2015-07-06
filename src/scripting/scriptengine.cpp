@@ -160,8 +160,8 @@ bool ScriptEngine::runScript(const std::string& script) {
 
 		std::string lib, func;
 		if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
-            OsEng.parallelConnection()->sendScript(script);
-            cacheScript(lib, func, script);
+//            OsEng.parallelConnection()->sendScript(script);
+//            cacheScript(lib, func, script);
 		}
 	}
     
