@@ -75,7 +75,6 @@ namespace properties {
     [](std::string value, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
-        tokens.pop_back();                                                               \
         if (tokens.size() != (__TYPE__::row_size() * __TYPE__::col_size())) {            \
             success = false;                                                             \
             return result;                                                               \
@@ -107,6 +106,7 @@ namespace properties {
             for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
                 outValue += std::to_string(inValue[i][j]) + ",";                         \
             }                                                                            \
+            outValue.pop_back();                                                         \
         }                                                                                \
         return true;                                                                     \
     }
