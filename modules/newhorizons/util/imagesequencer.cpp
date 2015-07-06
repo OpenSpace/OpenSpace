@@ -266,7 +266,7 @@ bool ImageSequencer2::getImagePaths(std::vector<Image>& captures,
 					return i.activeInstruments[0] == instrumentRequest;
 				});
 
-			    std::reverse(captureTimes.begin(), captureTimes.end());
+			    //std::reverse(captureTimes.begin(), captureTimes.end());
 			    captures = captureTimes;
                 if (!captures.empty())
 					_latestImages[captures.back().activeInstruments.front()] = captures.back();

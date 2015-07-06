@@ -48,6 +48,8 @@
 #include <ghoul/opengl/texture.h>
 #include <openspace/query/query.h>
 
+#include <queue>
+
 namespace openspace {
 
 namespace planetgeometryprojection {
@@ -149,6 +151,7 @@ private:
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
+	std::queue<Image> imageQueue;
 };
 }  // namespace openspace
 
