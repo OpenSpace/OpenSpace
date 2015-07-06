@@ -1012,9 +1012,9 @@ namespace openspace {
             //save script as current state
             _currentState[propIdentifier] = propValue;
             
-            //if we're connected, also send the script
+            //if we're connected and we're the host, also send the script
             
-            if(_isConnected.load()){
+            if(_isConnected.load() && _isHost.load()){
                 //construct script
                 std::string script = scriptFromPropertyAndValue(propIdentifier, propValue);
                 
@@ -1059,7 +1059,7 @@ namespace openspace {
         
         std::string ParallelConnection::scriptFromPropertyAndValue(const std::string property, const std::string value){
             //consruct script
-            std::string script = "openspace.setPropertyValue(\"" + property + ",\"" + value + "\")";
+            std::string script = "openspace.setPropertyValue(\"" + property + "\"," + value + ");";
             return script;
         }
         
