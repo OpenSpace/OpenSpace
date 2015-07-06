@@ -154,10 +154,8 @@ bool SceneGraphNode::deinitialize() {
 		_renderable = nullptr;
 	}
 
-    if (_ephemeris) {
-        delete _ephemeris;
-		_ephemeris = nullptr;
-	}
+    delete _ephemeris;
+    _ephemeris = nullptr;
 
     for (SceneGraphNode* child : _children) {
 		child->deinitialize();
