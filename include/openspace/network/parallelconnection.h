@@ -134,7 +134,7 @@ namespace openspace{
 				return hashVal;
 			};
             
-            void queMessage(std::vector<char> message);
+            void queueMessage(std::vector<char> message);
             
             void disconnect();
             
@@ -198,6 +198,7 @@ namespace openspace{
             std::mutex _timeKeyframeMutex;
             std::atomic<bool> _latestTimeKeyframeValid;
             std::map<std::string, std::string> _currentState;
+            std::mutex _currentStateMutex;
         };
     } // namespace network
     
