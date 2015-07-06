@@ -780,7 +780,8 @@ namespace openspace {
 		}
 
 		void ParallelConnection::initializationRequestMessageReceived(){
-            
+            //@FIX
+            return;
             //get current state as scripts
             std::vector<std::string> scripts;
             std::map<std::string, std::string>::iterator state_it;
@@ -791,7 +792,7 @@ namespace openspace {
                 for(state_it = _currentState.begin();
                     state_it != _currentState.end();
                     ++state_it){
-                    scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
+//                    scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
                 }
             }
             
@@ -831,6 +832,9 @@ namespace openspace {
             //write header
             buffer.clear();
             writeHeader(buffer, MessageTypes::Initialization);
+            
+            //write client ID to receive init message
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&requesterID), reinterpret_cast<char*>(&requesterID) + sizeof(uint32_t));
             
             //write total size of data chunk
             uint32_t totlen = static_cast<uint32_t>(scriptbuffer.size());
