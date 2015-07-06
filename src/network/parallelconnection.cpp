@@ -373,22 +373,22 @@ namespace openspace {
 			case MessageTypes::Authentication:
                 //do nothing for now
 				break;
-			case MessageTypes::Initialization:
-				initializationMessageReceived();
-				break;
+//			case MessageTypes::Initialization:
+//				initializationMessageReceived();
+//				break;
 			case MessageTypes::Data:
 				dataMessageReceived();
-				break;
-            case MessageTypes::Script:
-                    //disabled for now
-//                decodeScriptMessage();
-                break;
+//				break;
+//            case MessageTypes::Script:
+//                    //disabled for now
+////                decodeScriptMessage();
+//                break;
 			case MessageTypes::HostInfo:
 				hostInfoMessageReceived();
 				break;
-			case MessageTypes::InitializationRequest:
-				initializationRequestMessageReceived();
-				break;
+//			case MessageTypes::InitializationRequest:
+//				initializationRequestMessageReceived();
+//				break;
 			default:
 				//unknown message type
 				break;
@@ -825,6 +825,9 @@ namespace openspace {
                         //and delegate decoding depending on type
 						delegateDecoding(type);
 					}
+                    else{
+                        LERROR("Error: Client OpenSpace version " << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << " does not match server version " << buffer[2] <<", " << buffer[3] << std::endl << "Message not decoded.");
+                    }
 				}
 				else{
 					if (result == 0){
@@ -1009,44 +1012,48 @@ namespace openspace {
             //save script as current state
             _currentState[propIdentifier] = propValue;
             
-            //construct script
-            std::string script = scriptFromPropertyAndValue(propIdentifier, propValue);
+            //if we're connected, also send the script
             
-            //create a script message
-            network::datamessagestructures::ScriptMessage sm;
-            sm._script = script;
-            sm._scriptlen = static_cast<uint16_t>(script.length());
-            
-            //create a buffer for the script
-            std::vector<char> sbuffer;
-            
-            //fill the script buffer
-            sm.serialize(sbuffer);
-            
-            //get the size of the keyframebuffer
-            uint16_t msglen = static_cast<uint16_t>(sbuffer.size());
-            
-            //the type of message
-            uint16_t type = static_cast<uint16_t>(network::datamessagestructures::ScriptData);
-            
-            //create the full buffer
-            std::vector<char> buffer;
-            buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-            
-            //write header
-            writeHeader(buffer, MessageTypes::Data);
-            
-            //type of message
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-            
-            //size of message
-            buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-            
-            //actual message
-            buffer.insert(buffer.end(), sbuffer.begin(), sbuffer.end());
-            
-            //send message
-            queMessage(buffer);
+            if(_isConnected.load()){
+                //construct script
+                std::string script = scriptFromPropertyAndValue(propIdentifier, propValue);
+                
+                //create a script message
+                network::datamessagestructures::ScriptMessage sm;
+                sm._script = script;
+                sm._scriptlen = static_cast<uint16_t>(script.length());
+                
+                //create a buffer for the script
+                std::vector<char> sbuffer;
+                
+                //fill the script buffer
+                sm.serialize(sbuffer);
+                
+                //get the size of the keyframebuffer
+                uint16_t msglen = static_cast<uint16_t>(sbuffer.size());
+                
+                //the type of message
+                uint16_t type = static_cast<uint16_t>(network::datamessagestructures::ScriptData);
+                
+                //create the full buffer
+                std::vector<char> buffer;
+                buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
+                
+                //write header
+                writeHeader(buffer, MessageTypes::Data);
+                
+                //type of message
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
+                
+                //size of message
+                buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
+                
+                //actual message
+                buffer.insert(buffer.end(), sbuffer.begin(), sbuffer.end());
+                
+                //send message
+                queMessage(buffer);
+            }
 
         }
         

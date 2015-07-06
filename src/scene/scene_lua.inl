@@ -57,8 +57,13 @@ int property_setValue(lua_State* L) {
             "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
         return 0;
     }
-	else
+    else{
 		prop->setLuaValue(L);
+        //ensure properties are synced over parallel connection
+        std::string value;
+        prop->getStringValue(value);
+        OsEng.parallelConnection()->scriptMessage(prop->fullyQualifiedIdentifier(), value);
+    }
 
 	return 0;
 }
