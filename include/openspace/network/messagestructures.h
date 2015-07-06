@@ -120,6 +120,7 @@ namespace openspace{
                     //is time paused?
                     size = sizeof(_paused);
                     memcpy(&_paused, buffer.data() + offset, size);
+                    offset += sizeof(_paused);
     
                     //is a time jump required?
                     size = sizeof(_requiresTimeJump);
