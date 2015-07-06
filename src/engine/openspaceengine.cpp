@@ -117,8 +117,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _runTime(0.0)
     , _syncBuffer(nullptr)
 {
-    _globalPropertyNamespace->setName("Global");
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace);
+    _globalPropertyNamespace->addPropertySubOwner(_interactionHandler);
     FactoryManager::initialize();
     SpiceManager::initialize();
     Time::initialize();

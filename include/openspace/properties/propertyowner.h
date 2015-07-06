@@ -114,7 +114,7 @@ public:
 	 */
     bool hasProperty(const std::string& URI) const;
     
-    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; _owner->addPropertySubOwner(this); }
+    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
 	PropertyOwner* owner() const { return _owner; }
 
 	/**
@@ -162,7 +162,6 @@ public:
 	 */
     const std::string& propertyGroupName(const std::string& groupID) const;
     
-protected:
 	/**
 	 * Assigns the Property <code>prop</code> to this PropertyOwner. This method will
 	 * check if the name of the Property is unique amongst Propertys and sub-owners in
