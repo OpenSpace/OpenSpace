@@ -163,7 +163,7 @@ namespace openspace{
 
             int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
             
-            void sendLoop();
+            void sendFunc();
             
             bool parseHints(addrinfo &info);
             
