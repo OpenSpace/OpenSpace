@@ -611,16 +611,18 @@ namespace openspace {
                     _sendCondition.wait_for(unqlock, std::chrono::milliseconds(500));
                     
                     if(!_sendBuffer.empty()){
-                        result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
-                        _sendBuffer.erase(_sendBuffer.begin());
-                        
-                        //make sure everything went well
-                        if (result == SOCKET_ERROR){
-                            //failed to send message
-                            LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                        while(!_sendBuffer.empty()){
+                            result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
+                            _sendBuffer.erase(_sendBuffer.begin());
                             
-                            //signal that a disconnect should be performed
-                            signalDisconnect();
+                            //make sure everything went well
+                            if (result == SOCKET_ERROR){
+                                //failed to send message
+                                LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                                
+                                //signal that a disconnect should be performed
+                                signalDisconnect();
+                            }
                         }
                     }
                 }
