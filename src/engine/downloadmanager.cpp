@@ -226,14 +226,20 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
         int nFinished = 0;
         while (std::getline(temporary, line)) {
             ++nFiles;
+#ifdef __APPLE__
+            // @TODO: Fix this so that the ifdef is not necessary anymore ---abock
             std::string file = ghoul::filesystem::File(line, true).filename();
+#else
+            std::string file = ghoul::filesystem::File(line).filename();
+#endif
 
             LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
 
             FileFuture* future = DlManager.downloadFile(
                 line,
                 destination.path() + "/" + file,
-                overrideFiles
+                overrideFiles,
+                [](const FileFuture& f) { LDEBUG("Finished: " << f.filePath); }
             );
             if (future)
                 futures.push_back(future);

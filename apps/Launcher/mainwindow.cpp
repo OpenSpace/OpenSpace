@@ -191,7 +191,7 @@ void MainWindow::initialize() {
 
     ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
     LogMgr.addLog(new ghoul::logging::ConsoleLog);
-    LogMgr.addLog(new ghoul::logging::HTMLLog("LauncherLog.html"));
+    LogMgr.addLog(new ghoul::logging::HTMLLog("LauncherLog.html", false));
     LogMgr.addLog(new QLog);
 
     std::string configurationFile = _configurationFile;
