@@ -855,12 +855,17 @@ namespace openspace {
             return _isHost.load();
         }
         
-        void ParallelConnection::requestHostship(){
+        void ParallelConnection::requestHostship(const std::string &password){
             std::vector<char> buffer;
             buffer.reserve(headerSize());
           
+            uint32_t passcode = hash(password);
+            
             //write header
             writeHeader(buffer, MessageTypes::HostshipRequest);
+            
+            //write passcode
+            buffer.insert(buffer.end(), reinterpret_cast<char*>(&passcode), reinterpret_cast<char*>(&passcode) + sizeof(uint32_t));
             
             //send message
 			queueMessage(buffer);
@@ -1136,7 +1141,7 @@ namespace openspace {
                     {
                         "requestHostship",
                         &luascriptfunctions::requestHostship,
-                        "",
+                        "string",
                         "Request to be the host for this session"
                     },
                 }

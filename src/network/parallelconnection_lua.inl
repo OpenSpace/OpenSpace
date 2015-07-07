@@ -160,12 +160,27 @@ int disconnect(lua_State* L) {
 
 int requestHostship(lua_State* L) {
     
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-    return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    if(OsEng.isMaster()){
-        OsEng.parallelConnection()->requestHostship();
+    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    if (isFunction) {
+        // If the top of the stack is a function, it is ourself
+        const char* msg = lua_pushfstring(L, "method called without argument");
+        return luaL_error(L, "bad argument (%s)", msg);
     }
+    
+    const int type = lua_type(L, -1);
+    if (type == LUA_TSTRING) {
+        std::string pwd = luaL_checkstring(L, -1);
+        if(OsEng.isMaster()){
+            OsEng.parallelConnection()->requestHostship(pwd);
+        }
+        return 0;
+    }
+    else {
+        const char* msg = lua_pushfstring(L, "%s expected, got %s",
+        lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+    }
+    
     return 0;
 }
 

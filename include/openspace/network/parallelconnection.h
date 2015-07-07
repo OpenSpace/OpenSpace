@@ -80,7 +80,7 @@ namespace openspace{
             
             bool isHost();
             
-            void requestHostship();
+            void requestHostship(const std::string &password);
 
 			void setPassword(const std::string &password);
             
