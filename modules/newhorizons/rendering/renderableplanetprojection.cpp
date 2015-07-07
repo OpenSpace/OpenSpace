@@ -452,11 +452,35 @@ void RenderablePlanetProjection::textureBind() {
 }
 
 void RenderablePlanetProjection::project(){
-	for (auto const &img : _imageTimes){
-			RenderablePlanetProjection::attitudeParameters(img.startTime);
-			_projectionTexturePath = img.path; // path to current images
-			imageProjectGPU(); // fbopass
+	// If high dt -> results in GPU queue overflow
+	// switching to using a simple queue to distribute
+	// images 1 image / frame -> projections appear slower
+	// but less viewable lagg for the sim overall.
+
+	// Comment out if not using queue and prefer old method -------------
+	// + in update() function
+	if (!imageQueue.empty()){
+		Image& img = imageQueue.front();
+		RenderablePlanetProjection::attitudeParameters(img.startTime);
+		// if image has new path - ie actual image, NOT placeholder
+		if (_projectionTexturePath.value() != img.path){
+			// rebind and upload 
+			_projectionTexturePath = img.path; 
+		}
+		imageProjectGPU(); // fbopass
+		imageQueue.pop();
 	}
+	// ------------------------------------------------------------------
+
+	//---- Old method --- // 
+	// @mm
+	//for (auto const &img : _imageTimes){
+	//		RenderablePlanetProjection::attitudeParameters(img.startTime);
+	//		if (_projectionTexturePath.value() != img.path){
+	//			_projectionTexturePath = img.path; // path to current images
+	//		}
+	//		imageProjectGPU(); // fbopass
+	//}
 	_capture = false;
 }
 
@@ -507,6 +531,10 @@ void RenderablePlanetProjection::render(const RenderData& data){
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
+	if (_time > Time::ref().currentTime()){
+		imageQueue = {}; // if jump back in time -> empty queue.  
+	}
+
 	_time = Time::ref().currentTime();
 	_capture = false;
 	
@@ -514,6 +542,15 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
     }
+	
+	// remove these lines if not using queue ------------------------
+	// @mm
+	_capture = true;
+	for (auto img : _imageTimes){
+		imageQueue.push(img);
+	}
+	_imageTimes.clear();
+	// --------------------------------------------------------------
 
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();

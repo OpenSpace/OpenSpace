@@ -24,6 +24,13 @@
 
 #version __CONTEXT__
 
+in vec4 in_point_position;
+uniform vec3 color;
+
+out vec4 vs_point_position;
+flat out int isHour;
+out vec4 vs_point_color;
+
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 uniform vec4 objectVelocity;
@@ -52,15 +59,6 @@ float psc_distance(vec4 v1, vec4 v2) {
     // using native distance function   
     return distance(v1.xyz, v2.xyz); 
 }
-
-layout(location = 0) in vec4 in_point_position;
-//layout(location = 1) in vec4 in_point_color;
-uniform vec3 color;
-//uniform vec4 campos;
-
-layout(location = 0) out vec4 vs_point_position;
-layout(location = 1) flat out int isHour;
-layout(location = 2) out vec4 vs_point_color;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 

@@ -62,9 +62,9 @@ const uint mask_29 = 536870911;
 const uint mask_30 = 1073741823;
 const uint mask_31 = 2147483647;
 const uint mask_32 = 4294967295;
-const uint  mask_id = mask_16;
+const uint mask_id = mask_16;
 const uint shift_id = 0;
-const uint  mask_type = mask_24 - mask_16;
+const uint mask_type = mask_24 - mask_16;
 const uint shift_type = 16;
 /*
 const uint  mask_zid_z  = mask_24;

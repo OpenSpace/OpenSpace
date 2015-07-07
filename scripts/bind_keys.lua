@@ -40,7 +40,7 @@ openspace.bindKey("n", "openspace.time.setTime('2014 SEP 14 17:55:00'); openspac
 openspace.bindKey("i", "local b = openspace.getPropertyValue('ImagePlaneRosetta.renderable.enabled'); openspace.setPropertyValue('ImagePlaneRosetta.renderable.enabled', not b)")
 --]]
 
-openspace.bindKey("F8", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
+openspace.bindKey("F8", "openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 
 -- Quickfix backjumps in pluto sequence
 openspace.bindKey("F9", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
@@ -59,7 +59,7 @@ openspace.bindKey("x", "openspace.setOrigin('Europa')")
 
 openspace.bindKey("g", "openspace.time.setTime('2007-02-28T11:40:00.00'); openspace.time.setDeltaTime(1);")
 
-openspace.bindKey("h", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.setOrigin('PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
+openspace.bindKey("h", "openspace.setPropertyValue('PlutoProjection.renderable.performProjection', false); openspace.setPropertyValue('Charon.renderable.performProjection', false);openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.setOrigin('PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
 
 --[[
 openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
@@ -107,6 +107,8 @@ openspace.bindKey("p", "local b = openspace.getPropertyValue('Io.renderable.perf
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Ganymede.renderable.performProjection'); openspace.setPropertyValue('Ganymede.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Europa.renderable.performProjection'); openspace.setPropertyValue('Europa.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Callisto.renderable.performProjection'); openspace.setPropertyValue('Callisto.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('PlutoProjection.renderable.performProjection'); openspace.setPropertyValue('PlutoProjection.renderable.performProjection', not b)")
+openspace.bindKey("p", "local b = openspace.getPropertyValue('Charon.renderable.performProjection'); openspace.setPropertyValue('Charon.renderable.performProjection', not b)")
 
 
 openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")

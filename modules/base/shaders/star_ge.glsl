@@ -37,18 +37,18 @@ const vec2 corners[4] = vec2[4](
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-layout(location = 0) in vec4 psc_position[];
-layout(location = 1) in vec3 vs_brightness[];
-layout(location = 2) in vec3 vs_velocity[];
-layout(location = 3) in float vs_speed[];
-layout(location = 4) in vec4 cam_position[];
+in vec4 psc_position[];
+in vec3 vs_brightness[];
+in vec3 vs_velocity[];
+in float vs_speed[];
+in vec4 cam_position[];
 
-layout(location = 0) out vec4 vs_position;
-layout(location = 1) out vec3 ge_brightness;
-layout(location = 2) out vec3 ge_velocity;
-layout(location = 3) out float ge_speed;
-layout(location = 4) out vec2 texCoord;
-layout(location = 5) out float billboardSize;
+out vec4 vs_position;
+out vec3 ge_brightness;
+out vec3 ge_velocity;
+out float ge_speed;
+out vec2 texCoord;
+out float billboardSize;
 
 uniform mat4 projection;
 
