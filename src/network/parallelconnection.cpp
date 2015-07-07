@@ -88,7 +88,8 @@ namespace openspace {
         _isConnected(false),
         _tryConnect(false),
         _performDisconnect(false),
-        _latestTimeKeyframeValid(false)
+        _latestTimeKeyframeValid(false),
+        _initializationTimejumpRequired(false)
         
         {
             //create handler thread
@@ -467,6 +468,9 @@ namespace openspace {
             //let the server know
             queueMessage(buffer);
             
+            //we also need to force a time jump just to ensure that the server and client are synced
+            _initializationTimejumpRequired.store(true);
+            
 //            int result;
 //            uint16_t numScripts;
 //			uint32_t datalen;
@@ -628,6 +632,12 @@ namespace openspace {
                         //either the latest keyframe didnt require a jump, or we have already spent that keyframe.
                         //in either case we can go ahead and write the bool value of newest frame
                         _latestTimeKeyframe._requiresTimeJump = tf._requiresTimeJump;
+                    }
+                    
+                    //if we're just initialized we need to perform a time jump as soon as a valid keyframe has been received
+                    if(_initializationTimejumpRequired.load() && _latestTimeKeyframeValid){
+                        _latestTimeKeyframe._requiresTimeJump = true;
+                        _initializationTimejumpRequired.store(false);
                     }
                     
                     //unlock mutex
