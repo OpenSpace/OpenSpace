@@ -318,7 +318,7 @@ namespace openspace {
                     _isConnected.store(true);
                     
                     //start sending messages
-                    _sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendLoop, this);
+                    _sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendFunc, this);
                     
                     //start listening for communication
                     _listenThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
@@ -601,16 +601,16 @@ namespace openspace {
             }
         }
         
-        void ParallelConnection::sendLoop(){
+        void ParallelConnection::sendFunc(){
             int result;
             //while we're connected
             while(_isConnected.load()){
                 {
                     //wait for signal then lock mutex and send first queued message
                     std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
-                    _sendCondition.wait_for(unqlock, std::chrono::milliseconds(500));
+                    _sendCondition.wait_for(unqlock, std::chrono::milliseconds(1500));
                     
-                    if(!_sendBuffer.front().empty()){
+                    if(!_sendBuffer.empty()){
                         result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
                         _sendBuffer.erase(_sendBuffer.begin());
                     }
