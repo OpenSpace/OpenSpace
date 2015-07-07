@@ -35,12 +35,12 @@ uniform float minBillboardSize;
 
 uniform int colorOption;
 
-layout(location = 0) in vec4 vs_position;
-layout(location = 1) in vec3 ge_brightness;
-layout(location = 2) in vec3 ge_velocity;
-layout(location = 3) in float ge_speed;
-layout(location = 4) in vec2 texCoord;
-layout(location = 5) in float billboardSize;
+in vec4 vs_position;
+in vec3 ge_brightness;
+in vec3 ge_velocity;
+in float ge_speed;
+in vec2 texCoord;
+in float billboardSize;
 
 #include "ABuffer/abufferStruct.hglsl"
 #include "ABuffer/abufferAddToBuffer.hglsl"

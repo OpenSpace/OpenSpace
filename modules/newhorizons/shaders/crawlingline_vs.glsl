@@ -42,7 +42,7 @@ void main() {
 	vec4 tmp = in_position;
 	int id = gl_VertexID;
 	
-	vec3 black = { 0.f, 0.f, 0.f };
+	vec3 black = vec3(0.0);
 
 	if(id == targetId)
 		vs_color.xyz = black;

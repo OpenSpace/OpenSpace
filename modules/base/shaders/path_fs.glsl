@@ -23,11 +23,10 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
-layout(location = 0) in vec4 vs_point_position;
-layout(location = 1) flat in int isHour;
-layout(location = 2) in vec4 vs_point_color;
-//in flat int isHour;
-//uniform vec4 campos;
+in vec4 vs_point_position;
+flat in int isHour;
+in vec4 vs_point_color;
+
 uniform vec3 color;
 
 #include "ABuffer/abufferStruct.hglsl"
