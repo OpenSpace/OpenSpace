@@ -140,9 +140,6 @@ void MainWindow::readTcpData() {
     QByteArray data = continuousData.append(_socket->readAll());
     int d = data.size();
 
-    if (data.size() != 42)
-        qDebug() << QString(data);
-
     if (QString(data) == "Connected to SGCT!\r\n") {
         continuousData.clear();
         return;
@@ -151,6 +148,9 @@ void MainWindow::readTcpData() {
         continuousData.clear();
         return;
     }
+
+    if (data.size() != 42)
+        qDebug() << QString(data);
 
     QByteArray messageTypeData = data.left(2);
     union {

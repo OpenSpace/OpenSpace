@@ -788,29 +788,21 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"bool",
 				"Sets the performance measurements"
 			},
-            // These are temporary ---abock
-//            {
-//                "changeCoordinateSystem",
-//                &luascriptfunctions::changeCoordinateSystem,
-//                "string",
-//                "Changes the origin of the coordinate system to the passed node",
-//                true
-//            },
-		{
-			"fadeIn",
-			&luascriptfunctions::fadeIn,
-			"number",
-			"",
-            true
-		},
-		//also temporary @JK
-		{
-			"fadeOut",
-			&luascriptfunctions::fadeOut,
-			"number",
-			"",
-            true
-		},
+		    {
+			    "fadeIn",
+			    &luascriptfunctions::fadeIn,
+			    "number",
+			    "",
+                true
+		    },
+		    //also temporary @JK
+		    {
+			    "fadeOut",
+			    &luascriptfunctions::fadeOut,
+			    "number",
+			    "",
+                true
+		    },
 		},
 	};
 }

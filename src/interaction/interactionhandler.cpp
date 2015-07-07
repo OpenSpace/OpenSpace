@@ -895,13 +895,6 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 		"",
 		{
 			{
-				"setOrigin",
-				&luascriptfunctions::setOrigin,
-				"string",
-				"Set the camera origin node by name",
-                true
-			},
-			{
 				"clearKeys",
 				&luascriptfunctions::clearKeys,
 				"",
