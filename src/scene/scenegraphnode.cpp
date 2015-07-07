@@ -90,6 +90,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     if (dictionary.hasKey(KeyEphemeris)) {
         ghoul::Dictionary ephemerisDictionary;
         dictionary.getValue(KeyEphemeris, ephemerisDictionary);
+        delete result->_ephemeris;
         result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
@@ -154,10 +155,8 @@ bool SceneGraphNode::deinitialize() {
 		_renderable = nullptr;
 	}
 
-    if (_ephemeris) {
-        delete _ephemeris;
-		_ephemeris = nullptr;
-	}
+    delete _ephemeris;
+    _ephemeris = nullptr;
 
     for (SceneGraphNode* child : _children) {
 		child->deinitialize();
