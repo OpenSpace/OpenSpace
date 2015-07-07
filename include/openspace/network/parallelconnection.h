@@ -41,6 +41,7 @@
 #include <sstream>
 #include <mutex>
 #include <map>
+#include <condition_variable>
 
 #ifdef __WIN32__
 #ifndef WIN32_LEAN_AND_MEAN
@@ -186,9 +187,13 @@ namespace openspace{
             std::atomic<bool> _isRunning;
             std::atomic<bool> _tryConnect;
             std::atomic<bool> _initializationTimejumpRequired;
+
+            std::condition_variable _disconnectCondition;
+            std::mutex _disconnectMutex;
             
             std::vector<std::vector<char>> _sendBuffer;
             std::mutex _sendBufferMutex;
+            std::condition_variable _sendCondition;
             
             network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
             std::mutex _timeKeyframeMutex;

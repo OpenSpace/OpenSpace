@@ -90,7 +90,6 @@ namespace openspace {
         _performDisconnect(false),
         _latestTimeKeyframeValid(false),
         _initializationTimejumpRequired(false)
-        
         {
             //create handler thread
             _handlerThread = new (std::nothrow) std::thread(&ParallelConnection::threadManagement, this);
@@ -112,17 +111,25 @@ namespace openspace {
         }
         
         void ParallelConnection::threadManagement(){
-            //while program is running
+            //while we're still running
             while(_isRunning.load()){
-                //if we need to disconnect and clean up
-                if(_performDisconnect.load()){
+                {
+                    //lock disconnect mutex mutex
+                    //not really needed since no data is modified but conditions need a mutex
+                    std::unique_lock<std::mutex> unqlock(_disconnectMutex);
+                    //wait for a signal to disconnect
+                    _disconnectCondition.wait(unqlock);
+                
+                    //perform actual disconnect
                     disconnect();
+                    
                 }
             }
         }
         
         void ParallelConnection::signalDisconnect(){
-            _performDisconnect.store(true);
+            //signal handler thread to disconnect
+            _disconnectCondition.notify_all();
         }
         
         void ParallelConnection::closeSocket(){
@@ -166,6 +173,9 @@ namespace openspace {
                 
                 //tell broadcast thread to stop broadcasting (we're no longer host)
                 _isHost.store(false);
+                
+                //signal send thread to stop waiting and finish current run
+                _sendCondition.notify_all();
                 
                 //join connection thread and delete it
                 if(_connectionThread != nullptr){
@@ -307,18 +317,17 @@ namespace openspace {
                     //we're connected
                     _isConnected.store(true);
                     
+                    //start sending messages
+                    _sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendLoop, this);
+                    
+                    //start listening for communication
+                    _listenThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
+                    
                     //we no longer need to try to establish connection
                     _tryConnect.store(false);
-
-					//start listening for communication
-					_listenThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
-
-					//start sending messages
-					_sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendLoop, this);  
-
-					//send authentication
-					sendAuthentication();
-
+                    
+                    //send authentication
+                    sendAuthentication();
                 }
                 
 #ifdef __WIN32__
@@ -372,18 +381,17 @@ namespace openspace {
 		void ParallelConnection::delegateDecoding(uint32_t type){
 			switch (type){
 			case MessageTypes::Authentication:
-                //do nothing for now
+                //not used
 				break;
 			case MessageTypes::Initialization:
 				initializationMessageReceived();
 				break;
 			case MessageTypes::Data:
 				dataMessageReceived();
+                break;
+            case MessageTypes::Script:
+                    //not used
 				break;
-//            case MessageTypes::Script:
-//                    //disabled for now
-////                decodeScriptMessage();
-//                break;
 			case MessageTypes::HostInfo:
 				hostInfoMessageReceived();
 				break;
@@ -470,86 +478,6 @@ namespace openspace {
             
             //we also need to force a time jump just to ensure that the server and client are synced
             _initializationTimejumpRequired.store(true);
-            
-//            int result;
-//            uint16_t numScripts;
-//			uint32_t datalen;
-//			uint32_t id;
-//            
-//            //create a buffer to hold the number of scripts in the initialization message
-//            std::vector<char> buffer;
-//            buffer.resize(sizeof(id));
-//            
-//			//read recepient ID (mine)
-//            result = receiveData(_clientSocket, buffer, sizeof(id), 0);
-//			if (result <= 0){
-//				//error
-//				return;
-//			}
-//			id = *(reinterpret_cast<uint32_t*>(buffer.data()));
-//
-//			//read data length
-//			result = receiveData(_clientSocket, buffer, sizeof(datalen), 0);
-//			if (result <= 0){
-//				//error
-//				return;
-//			}
-//			datalen = *(reinterpret_cast<uint32_t*>(buffer.data()));
-//
-//			buffer.clear();
-//			buffer.resize(sizeof(numScripts));
-//			//read number of scripts
-//			result = receiveData(_clientSocket, buffer, sizeof(numScripts), 0);
-//			if (result <= 0){
-//				//error
-//				return;
-//			}
-//			numScripts = *(reinterpret_cast<uint16_t*>(buffer.data()));
-//						          
-//            //declare placeholder for all received scripts
-//            std::vector<std::string> initScripts;
-//            initScripts.reserve(numScripts);
-//            
-//            //length of each script and resize receiveing buffer
-//            uint16_t scriptlen;
-//            buffer.clear();
-//            buffer.resize(sizeof(scriptlen));
-//            
-//            //buffer for holding received scripts
-//            std::vector<char> scriptbuffer;
-//            
-//            for(int n = 0; n < numScripts; ++n){
-//                
-//                //read size in chars of next script
-//                result = receiveData(_clientSocket, buffer, sizeof(scriptlen), 0);
-//                
-//                if (result <= 0){
-//                    //error
-//                    return;
-//                }
-//                
-//                //assign size of next script
-//                scriptlen = *reinterpret_cast<uint16_t*>(buffer.data());
-//                
-//                //resize buffer
-//                scriptbuffer.clear();
-//                scriptbuffer.resize(scriptlen);
-//                
-//                //read next script
-//                result = receiveData(_clientSocket, scriptbuffer, scriptlen, 0);
-//                
-//                if (result <= 0){
-//                    //error
-//                    return;
-//                }
-//                
-//                //create a string from received chars in buffer
-//                std::string script;
-//                script.assign(scriptbuffer.begin(), scriptbuffer.end());
-//                
-//                //que script with the script engine
-//                OsEng.scriptEngine()->queueScript(script);
-//            }
             
 		}
 
@@ -666,34 +594,35 @@ namespace openspace {
 		}
 
         void ParallelConnection::queueMessage(std::vector<char> message){
-            _sendBufferMutex.lock();
-            _sendBuffer.push_back(message);
-            _sendBufferMutex.unlock();
+            {
+                std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
+                _sendBuffer.push_back(message);
+                _sendCondition.notify_all();
+            }
         }
         
         void ParallelConnection::sendLoop(){
-			int result;
+            int result;
+            //while we're connected
             while(_isConnected.load()){
-                _sendBufferMutex.lock();
-                if(_sendBuffer.size() > 0){
+                {
+                    //wait for signal then lock mutex and send first queued message
+                    std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
+                    _sendCondition.wait_for(unqlock, std::chrono::milliseconds(500));
                     
-					//send first queued message
-					result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
-                    
-					//remove the message that was just sent
-					_sendBuffer.erase(_sendBuffer.begin());
-
-					//make sure everything went well
-					if (result == SOCKET_ERROR){
-						//failed to send message
-						LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
-                        
-                        //stop all threads and signal that a disconnect should be performed
-                        signalDisconnect();
-					}
-
+                    if(!_sendBuffer.front().empty()){
+                        result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
+                        _sendBuffer.erase(_sendBuffer.begin());
+                    }
                 }
-                _sendBufferMutex.unlock();
+                    //make sure everything went well
+                if (result == SOCKET_ERROR){
+                    //failed to send message
+                    LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                    
+                    //signal that a disconnect should be performed
+                    signalDisconnect();
+                }
             }
         }
         
@@ -833,69 +762,6 @@ namespace openspace {
             
             //queue message
             queueMessage(buffer);
-//
-//            //construct init msg
-//            std::vector<std::string> scripts = OsEng.scriptEngine()->cachedScripts();
-//            
-//            
-//            uint16_t scriptlen;
-//            uint32_t totlen = 0;
-//            std::vector<std::string>::const_iterator it;
-//            
-//            std::vector<char> scriptMsg;
-//            
-//            //add a script of the current time to ensure all nodes are on the same page
-//            std::string timescript = "openspace.time.setTime(" + std::to_string(Time::ref().currentTime()) + ");";
-//            scripts.push_back(timescript);
-//            
-//            //add a script of the current delta time to ensure all nodes are on the same page
-//            
-//            std::string dtscript = "openspace.time.setDeltaTime(" + std::to_string(Time::ref().deltaTime()) + ");";
-//            scripts.push_back(dtscript);
-//            
-//            //add a terminating script letting the server know the client is fully initialized
-//            std::string donescript = "openspace.parallel.initialized();";
-//            scripts.push_back(donescript);
-//            
-//            //total number of scripts
-//            uint16_t numScrips = static_cast<uint16_t>(scripts.size());
-//            
-//            //write all scripts
-//            for(it = scripts.cbegin();
-//                it != scripts.cend();
-//                ++it){
-//                //write size of script in chars
-//                scriptlen = (*it).size();
-//                scriptMsg.insert(scriptMsg.end(), reinterpret_cast<char*>(&scriptlen), reinterpret_cast<char*>(&scriptlen) + sizeof(scriptlen));
-//                
-//                //write actual scripts
-//                scriptMsg.insert(scriptMsg.end(), (*it).begin(), (*it).end());
-//                
-//                //add script length to total data length
-//                totlen += static_cast<uint32_t>(scriptlen) + sizeof(scriptlen);
-//            }
-//            
-//            //clear buffer
-//            buffer.clear();
-//            
-//            //write header
-//            writeHeader(buffer, MessageTypes::Initialization);
-//            
-//            //write requester ID
-//            buffer.insert(buffer.end(), reinterpret_cast<char*>(&requesterID), reinterpret_cast<char*>(&requesterID) + sizeof(requesterID));
-//            
-//            
-//            //write size of data chunk
-//            buffer.insert(buffer.end(), reinterpret_cast<char*>(&totlen), reinterpret_cast<char*>(&totlen) + sizeof(totlen));
-//            
-//            //write number of scripts
-//            buffer.insert(buffer.end(), reinterpret_cast<char*>(&numScrips), reinterpret_cast<char*>(&numScrips) + sizeof(numScrips));
-//            
-//            //write all scripts and their lengths
-//            buffer.insert(buffer.end(), scriptMsg.begin(), scriptMsg.end());
-//            
-//            //send initialization message
-//            queueMessage(buffer);
 		}
 
 		void ParallelConnection::listenCommunication(){
