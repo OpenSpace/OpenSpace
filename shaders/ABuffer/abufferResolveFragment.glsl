@@ -54,7 +54,7 @@
 // constants
 const float stepSize = 	0.01;
 const float samplingRate = 1.0;
-uniform float ALPHA_LIMIT = 0.99;
+uniform float ALPHA_LIMIT = 0.7;
 
 uniform float blackoutFactor = 0.0;
 

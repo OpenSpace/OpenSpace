@@ -13,7 +13,7 @@ openspace.time.setTime("2007 FEB 27 16:30:00")          -- This is the start tim
 --TESTING ALICE 
 --openspace.time.setTime("2015-07-13T00:00:00.00")
 
---openspace.time.setTime("2015-07-14T08:00:00.00")        
+--openspace.time.setTime("2015-07-14T10:00:00.00")        
 
 openspace.time.setDeltaTime(0)                         -- How many seconds pass per second of realtime, changeable in the GUI
 

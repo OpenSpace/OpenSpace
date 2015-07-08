@@ -957,7 +957,6 @@ bool SpiceManager::getTerminatorEllipse(const int numberOfPoints,
 										std::vector<psc>& terminatorPoints)
 {
     std::vector<std::array<double, 3>> tpoints(numberOfPoints);
-//	double (*tpoints)[3] = new double[numberOfPoints][3];
 
 	edterm_c(terminatorType.c_str(), 
 		     lightSource.c_str(), 

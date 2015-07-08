@@ -52,36 +52,43 @@ public:
 	void update(const UpdateData& data) override;
 
  private:
+    // properties
     properties::FloatProperty _lineWidth;
 	properties::BoolProperty _drawSolid;
 	ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::Texture* _texture;
 	openspace::SceneGraphNode* _targetNode;
 
+	// class methods
 	void loadTexture();
 	void allocateData();
-	void insertPoint(std::vector<float>& arr, psc p, glm::vec4 c);
-	void fovProjection(bool H[], std::vector<glm::dvec3> bounds);
+	void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
+	void fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds);
+	void determineTarget();
+	void updateGPU();
+	void sendToGPU();
 
+
+	// helper methods
+	void computeColors();
+	void computeIntercepts(const RenderData& data);
 	psc orthogonalProjection(glm::dvec3 camvec);
 	psc checkForIntercept(glm::dvec3 ray);
 	psc pscInterpolate(psc p0, psc p1, float t);
-	psc sphericalInterpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
-	
 	glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
-	glm::dvec3 pscSlerp(glm::dvec3 p0, glm::dvec3 p1, float t);
 	glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
-
-	void computeColors();
 
 	// instance variables
 	int _nrInserted = 0;
 	int _isteps;
 	bool _rebuild = false;
-	bool _interceptTag[9];
+	bool _interceptTag[8];
 	bool _withinFOV;
-	psc _projectionBounds[8];
+	std::vector<psc> _projectionBounds;
 	psc _interceptVector;
+
+	std::vector<float> _fovBounds;
+	std::vector<float> _fovPlane;
 
 	// spice
 	std::string _spacecraft;
@@ -91,38 +98,39 @@ public:
 	std::string _method;
 	std::string _aberrationCorrection;
 	std::string _fovTarget;
-    std::vector<std::string> _potentialTargets;
-
 	glm::dvec3 ipoint, ivec;
 	glm::dvec3 _previousHalf;
-	glm::vec3 _c; 
-	double _r, _g, _b;
-
-	// GPU stuff
-	GLuint _vaoID[2] ;
-	GLuint _vboID[2] ;
-	GLuint _iboID[2];
-	GLenum _mode;
-	unsigned int _isize[2];
-	unsigned int _vsize[2];
-	unsigned int _vtotal[2];
-	unsigned int _stride[2];
-	std::vector<float> _varray1;
-	std::vector<float> _varray2;
-	int* _iarray1[2];
-
-	void updateData();
-	void sendToGPU();
-
+	glm::dvec3 _boresight;
 	glm::dmat3 _stateMatrix;
+	glm::mat4 _spacecraftRotation;
+	std::vector<glm::dvec3> _bounds;
+	std::vector<std::string> _potentialTargets;
+	bool _drawFOV;
+	double _targetEpoch;
+	double _lt;
+
+	// GPU 
+	GLuint _fovBoundsVAO;
+	GLuint _fovBoundsVBO;
+	unsigned int _vBoundsSize;
+	GLuint _fovPlaneVAO;
+	GLuint _fovPlaneVBO;
+	unsigned int _vPlaneSize;
+	GLenum _mode;
+	unsigned int _stride;
 
 	// time
 	double _time = 0;
 	double _oldTime = 0;
 
-	// capturetime
-	double _timeInterval;
-	double _nextCaptureTime;
+	// colors
+	glm::vec4 col_sq;      // orthogonal white square
+	glm::vec4 col_project; // color when projections occur
+	glm::vec4 col_start;   // intersection start color
+	glm::vec4 col_end;     // intersection end color
+	glm::vec4 col_blue;    // withinFov color
+	glm::vec4 col_gray;    // no intersection color
+
 };
 }
 #endif

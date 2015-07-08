@@ -96,6 +96,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _textureProj(nullptr)
 	, _textureWhiteSquare(nullptr)
     , _geometry(nullptr)
+	, _capture(false)
 	, _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
 	std::string name;
@@ -459,28 +460,28 @@ void RenderablePlanetProjection::project(){
 
 	// Comment out if not using queue and prefer old method -------------
 	// + in update() function
-	if (!imageQueue.empty()){
-		Image& img = imageQueue.front();
-		RenderablePlanetProjection::attitudeParameters(img.startTime);
-		// if image has new path - ie actual image, NOT placeholder
-		if (_projectionTexturePath.value() != img.path){
-			// rebind and upload 
-			_projectionTexturePath = img.path; 
-		}
-		imageProjectGPU(); // fbopass
-		imageQueue.pop();
-	}
+	//if (!imageQueue.empty()){
+	//	Image& img = imageQueue.front();
+	//	RenderablePlanetProjection::attitudeParameters(img.startTime);
+	//	// if image has new path - ie actual image, NOT placeholder
+	//	if (_projectionTexturePath.value() != img.path){
+	//		// rebind and upload 
+	//		_projectionTexturePath = img.path; 
+	//	}
+	//	imageProjectGPU(); // fbopass
+	//	imageQueue.pop();
+	//}
 	// ------------------------------------------------------------------
 
 	//---- Old method --- // 
 	// @mm
-	//for (auto const &img : _imageTimes){
-	//		RenderablePlanetProjection::attitudeParameters(img.startTime);
-	//		if (_projectionTexturePath.value() != img.path){
-	//			_projectionTexturePath = img.path; // path to current images
-	//		}
-	//		imageProjectGPU(); // fbopass
-	//}
+	for (auto const &img : _imageTimes){
+			RenderablePlanetProjection::attitudeParameters(img.startTime);
+			if (_projectionTexturePath.value() != img.path){
+				_projectionTexturePath = img.path; // path to current images
+			}
+			imageProjectGPU(); // fbopass
+	}
 	_capture = false;
 }
 
@@ -531,13 +532,13 @@ void RenderablePlanetProjection::render(const RenderData& data){
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
-	if (_time > Time::ref().currentTime()){
+	if (_time >= Time::ref().currentTime()){
 		imageQueue = {}; // if jump back in time -> empty queue.  
 	}
 
 	_time = Time::ref().currentTime();
 	_capture = false;
-	
+
 	if (openspace::ImageSequencer2::ref().isReady() && _performProjection){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
@@ -545,11 +546,11 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 	
 	// remove these lines if not using queue ------------------------
 	// @mm
-	_capture = true;
-	for (auto img : _imageTimes){
-		imageQueue.push(img);
-	}
-	_imageTimes.clear();
+	//_capture = true;
+	//for (auto img : _imageTimes){
+	//	imageQueue.push(img);
+	//}
+	//_imageTimes.clear();
 	// --------------------------------------------------------------
 
     if (_programObject->isDirty())
