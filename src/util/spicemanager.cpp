@@ -956,19 +956,20 @@ bool SpiceManager::getTerminatorEllipse(const int numberOfPoints,
 										glm::dvec3& observerPosition,
 										std::vector<psc>& terminatorPoints){
 
-	double(*tpoints)[3] = new double[numberOfPoints][3];
+	std::vector<std::array<double, 3>> tpoints(numberOfPoints);
+	//	double (*tpoints)[3] = new double[numberOfPoints][3];
 
-	edterm_c(terminatorType.c_str(), 
-		     lightSource.c_str(), 
-			 target.c_str(), 
-			 ephemerisTime, 
-			 frame.c_str(), 
-			 aberrationCorrection.c_str(), 
-			 observer.c_str(),
-		     numberOfPoints, 
-			 &targetEpoch, 
-			 glm::value_ptr(observerPosition), 
-			 (double(*)[3])tpoints );
+	edterm_c(terminatorType.c_str(),
+		     lightSource.c_str(),
+		     target.c_str(),
+		     ephemerisTime,
+		     frame.c_str(),
+		     aberrationCorrection.c_str(),
+		     observer.c_str(),
+		     numberOfPoints,
+		     &targetEpoch,
+		     glm::value_ptr(observerPosition),
+		     (double(*)[3])tpoints.data());
 
 	bool hasError = checkForError("Error getting " + terminatorType + 
 		"terminator for'" + target + "'");

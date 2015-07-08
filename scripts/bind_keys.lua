@@ -17,12 +17,12 @@ openspace.bindKey("SPACE", "openspace.time.togglePause()")
 openspace.bindKey("1", "openspace.time.setDeltaTime(1)")
 openspace.bindKey("2", "openspace.time.setDeltaTime(5)")
 openspace.bindKey("3", "openspace.time.setDeltaTime(10)")
-openspace.bindKey("4", "openspace.time.setDeltaTime(30)")
-openspace.bindKey("5", "openspace.time.setDeltaTime(60)")
-openspace.bindKey("6", "openspace.time.setDeltaTime(120)")
-openspace.bindKey("7", "openspace.time.setDeltaTime(360)")
-openspace.bindKey("8", "openspace.time.setDeltaTime(540)")
-openspace.bindKey("9", "openspace.time.setDeltaTime(720)") 
+openspace.bindKey("4", "openspace.time.setDeltaTime(20)")
+openspace.bindKey("5", "openspace.time.setDeltaTime(40)")
+openspace.bindKey("6", "openspace.time.setDeltaTime(60)")
+openspace.bindKey("7", "openspace.time.setDeltaTime(120)")
+openspace.bindKey("8", "openspace.time.setDeltaTime(360)")
+openspace.bindKey("9", "openspace.time.setDeltaTime(540)") 
 
 --[[openspace.bindKey("2", "openspace.time.setDeltaTime(30)")
 openspace.bindKey("3", "openspace.time.setDeltaTime(180)") -- 3m
@@ -59,17 +59,7 @@ openspace.bindKey("x", "openspace.setOrigin('Europa')")
 
 openspace.bindKey("g", "openspace.time.setTime('2007-02-28T11:40:00.00'); openspace.time.setDeltaTime(1);")
 
-openspace.bindKey("h", "openspace.setPropertyValue('PlutoProjection.renderable.performProjection', false); openspace.setPropertyValue('Charon.renderable.performProjection', false);openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.setOrigin('PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
-
---[[
-openspace.bindKey("1", "openspace.time.setTime('2007-02-27T16:40:00.00'); openspace.time.setDeltaTime(10)")
-openspace.bindKey("2", "openspace.time.setTime('2015-07-14T10:50:00.00'); openspace.time.setDeltaTime(10)")
-openspace.bindKey("3", "openspace.time.setTime('2015-07-14T11:22:00.00'); openspace.time.setDeltaTime(1)")
-openspace.bindKey("4", "openspace.time.setTime('2015-07-14T11:36:40.00'); openspace.time.setDeltaTime(1)")
-openspace.bindKey("5", "openspace.time.setTime('2015-07-14T11:48:43.00'); openspace.time.setDeltaTime(1)")
-openspace.bindKey("6", "openspace.time.setTime('2015-07-14T12:04:35.00'); openspace.time.setDeltaTime(1)")
-openspace.bindKey("7", "openspace.time.setTime('2015-07-14T15:02:46.00'); openspace.time.setDeltaTime(100)")
-]]--
+openspace.bindKey("h", "openspace.time.setTime('2015-07-14T10:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.setOrigin('PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
 
 openspace.bindKey("i", "local b = openspace.getPropertyValue('PlutoTexture.renderable.enabled'); openspace.setPropertyValue('PlutoTexture.renderable.enabled', not b)")
 
@@ -84,7 +74,6 @@ openspace.bindKey("k", "local b = openspace.getPropertyValue('NixText.renderable
 openspace.bindKey("k", "local b = openspace.getPropertyValue('KerberosText.renderable.enabled'); openspace.setPropertyValue('KerberosText.renderable.enabled', not b)")
 openspace.bindKey("k", "local b = openspace.getPropertyValue('StyxText.renderable.enabled'); openspace.setPropertyValue('StyxText.renderable.enabled', not b)")
 openspace.bindKey("j", "local b = openspace.getPropertyValue('PlutoText.renderable.enabled'); openspace.setPropertyValue('PlutoText.renderable.enabled', not b)")
-
 
 openspace.bindKey("l", "local b = openspace.getPropertyValue('Labels.renderable.performFading'); openspace.setPropertyValue('Labels.renderable.performFading', not b)")
 
