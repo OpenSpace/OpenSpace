@@ -5,9 +5,9 @@ openspace.clearKeys()
 openspace.bindKey("F1", "openspace.gui.toggle()")
 openspace.bindKey("F2", "openspace.setPerformanceMeasurement(true)")
 openspace.bindKey("F3", "openspace.setPerformanceMeasurement(false)")
-openspace.bindKey("F5", "openspace.changeCoordinateSystem('Sun'); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
-openspace.bindKey("F6", "openspace.changeCoordinateSystem('Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter-in-center');");
-openspace.bindKey("F7", "openspace.changeCoordinateSystem('Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
+openspace.bindKey("F5", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun'); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
+openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter-in-center');");
+openspace.bindKey("F7", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
 
 openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
 
@@ -50,16 +50,16 @@ openspace.bindKey("F12", "openspace.time.setTime('2015-07-14T12:45:00.00'); open
 
 openspace.bindKey("r", "local b = openspace.getPropertyValue('PlutoProjection.renderable.fk'); openspace.setPropertyValue('PlutoProjection.renderable.fk', not b)")
 
-openspace.bindKey("a", "openspace.setOrigin('NewHorizons')")
-openspace.bindKey("s", "openspace.setOrigin('PlutoProjection')")
-openspace.bindKey("d", "openspace.setOrigin('Charon')")
-openspace.bindKey("z", "openspace.setOrigin('JupiterProjection')")
-openspace.bindKey("x", "openspace.setOrigin('Europa')")
+openspace.bindKey("a", "openspace.setPropertyValue('Interaction.origin', 'NewHorizons')")
+openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'PlutoProjection')")
+openspace.bindKey("d", "openspace.setPropertyValue('Interaction.origin', 'Charon')")
+openspace.bindKey("z", "openspace.setPropertyValue('Interaction.origin', 'JupiterProjection')")
+openspace.bindKey("x", "openspace.setPropertyValue('Interaction.origin', 'Europa')")
 
 
 openspace.bindKey("g", "openspace.time.setTime('2007-02-28T11:40:00.00'); openspace.time.setDeltaTime(1);")
 
-openspace.bindKey("h", "openspace.time.setTime('2015-07-14T10:00:00.00'); openspace.time.setDeltaTime(1); openspace.changeCoordinateSystem('Pluto'); openspace.setOrigin('PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
+openspace.bindKey("h", "openspace.time.setTime('2015-07-14T10:00:00.00'); openspace.time.setDeltaTime(1); openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');openspace.setPropertyValue('Interaction.origin', 'PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
 
 openspace.bindKey("i", "local b = openspace.getPropertyValue('PlutoTexture.renderable.enabled'); openspace.setPropertyValue('PlutoTexture.renderable.enabled', not b)")
 
@@ -99,5 +99,4 @@ openspace.bindKey("p", "local b = openspace.getPropertyValue('Callisto.renderabl
 openspace.bindKey("p", "local b = openspace.getPropertyValue('PlutoProjection.renderable.performProjection'); openspace.setPropertyValue('PlutoProjection.renderable.performProjection', not b)")
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Charon.renderable.performProjection'); openspace.setPropertyValue('Charon.renderable.performProjection', not b)")
 
-
-openspace.bindKey("PAUSE", "openspace.printInfo('F5: Toogle to Sun, F6: Toggle to Jupiter, F7: Toggle to Pluto'); openspace.printInfo('Bookmarks: 1: Jupter, 2-7: Pluto');")
+openspace.bindKey("c", "openspace.parallel.setAddress('130.236.142.51');openspace.parallel.setPassword('newhorizons-20150714');openspace.parallel.connect();")
