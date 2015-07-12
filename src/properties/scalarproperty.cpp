@@ -81,7 +81,10 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
 		return true;
 	},
     DEFAULT_FROM_STRING_LAMBDA(bool, false),
-    DEFAULT_TO_STRING_LAMBDA(bool),
+                                 [](std::string& outValue, bool inValue) -> bool {
+                                     outValue = inValue ? "true" : "false";
+                                     return true;
+                                 },
 	LUA_TBOOLEAN
 	);
 

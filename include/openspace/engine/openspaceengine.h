@@ -56,7 +56,15 @@ namespace gui {
 namespace scripting {
 	class ScriptEngine;
 }
-
+    
+namespace network {
+    class ParallelConnection;
+}
+    
+namespace properties {
+    class PropertyOwner;
+}
+    
 class OpenSpaceEngine {
 public:
     static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
@@ -67,6 +75,8 @@ public:
     bool initialize();
 	bool isMaster();
 	void setMaster(bool master);
+    double runTime();
+    void setRunTime(double t);
     static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
@@ -77,6 +87,8 @@ public:
     NetworkEngine* networkEngine();
 	LuaConsole* console();
     ModuleEngine* moduleEngine();
+    network::ParallelConnection* parallelConnection();
+    properties::PropertyOwner* globalPropertyOwner();
 
 	gui::GUI* gui();
 
@@ -124,7 +136,12 @@ private:
 	LuaConsole* _console;
     ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
+    network::ParallelConnection* _parallelConnection;
+    
+    properties::PropertyOwner* _globalPropertyNamespace;
+    
 	bool _isMaster;
+    double _runTime;
 
 	SyncBuffer* _syncBuffer;
 };

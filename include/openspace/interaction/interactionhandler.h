@@ -76,6 +76,9 @@
 
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
+#include <openspace/network/parallelconnection.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
 
 #include <mutex>
 
@@ -86,7 +89,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class InteractionHandler {
+class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
 
@@ -139,6 +142,9 @@ public:
     void setInvertRotation(bool invert);
     bool invertRotation() const;
 
+	void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
 	/**
 	* Returns the Lua library that contains all Lua functions available to affect the
 	* interaction. The functions contained are
@@ -149,6 +155,7 @@ public:
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 	
 private:
+
 	friend class Controller;
 
     InteractionHandler(const InteractionHandler&) = delete;
@@ -172,6 +179,14 @@ private:
 	KeyboardController* _keyboardController;
 	MouseController* _mouseController;
 	std::vector<Controller*> _controllers;
+
+    properties::StringProperty _origin;
+    properties::StringProperty _coordinateSystem;
+    
+	//remote controller
+	std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
+	double _currentKeyframeTime;
+	std::mutex _keyframeMutex;
 };
 
 } // namespace interaction

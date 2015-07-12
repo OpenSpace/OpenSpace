@@ -38,79 +38,95 @@ uniform vec4 lastPosition;
 
 //this function does not consider cases where w component is negative
 float psc_distance(vec4 v1, vec4 v2) {
-	// reduce position numbers
-	/*while(v1.w > 1 && v2.w > 1) {
-		v1.w -= 1;
-		v2.w -= 1;
-	} */
-	// get position in vec3
-	while(v1.w > 1) {
-		v1.xyz *= 10;
-		v1.w -= 1;
-	} 
-	while(v2.w > 1 ) {
-		v2.xyz *= 10;
-		v2.w -= 1;
-	}
-	// using native distance function 	
-	return distance(v1.xyz, v2.xyz); 
+    // reduce position numbers
+    /*while(v1.w > 1 && v2.w > 1) {
+        v1.w -= 1;
+        v2.w -= 1;
+    } */
+    // get position in vec3
+    if (v1.w > 1) {
+        float f = floor(v1.w);
+        v1.xyz *= pow(10, f);
+        v1.w -= f;
+    }
+
+    if (v2.w > 1) {
+        float f = floor(v2.w);
+        v2.xyz *= pow(10, f);
+        v2.w -= f;
+    }
+    
+    // using native distance function   
+    return distance(v1.xyz, v2.xyz); 
 }
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() { 
+void main() {
+    vec4 gray = vec4(0.6f, 0.6f, 0.6f, 0.8f);
+    float cameraTooFar = 1 * pow(k, 10);
+    float bigPoint = 5.f;
+    float smallPoint = 2.f;
+    
+    vec4 tmp = in_point_position; 
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_point_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 
-	vec4 gray = vec4(0.6f, 0.6f, 0.6f, 0.8f);
-	float cameraTooFar = 1 * pow(k, 10);
-	float bigPoint = 5.f;
-	float smallPoint = 2.f;
-	
-	vec4 tmp = in_point_position; 
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_point_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
-	
-	
-	int id = gl_VertexID;
-	float hour = mod(id, 4);
-	
-	vs_point_color.xyz = color;
-	vs_point_color[3] = 1.f;
-	
-	vec4 v1 = campos;
-	vec4 v2 = vs_point_position;
-	float cameraDistance = psc_distance(v1,v2);
+    
+    int id = gl_VertexID;
+    float hour = mod(id, 4);
+    
+    vs_point_color.xyz = color;
+    vs_point_color[3] = 1.f;
 
-	vec4 temp = in_point_position;
-	vec4 templast = lastPosition;
-	while(temp.w > 1) {
-		temp.xyz *= 10;
-		temp.w -= 1;
-	} 
-	while(templast.w > 1) {
-		templast.xyz *= 10;
-		templast.w -= 1;
-	} 
-	float observerDistance = length(temp.xyz);
-	float lastDistance = length(templast.xyz);
-	
-	if(hour > 0.1f)	{
-		isHour = 0;
-		vs_point_color = gray;
-		gl_PointSize = bigPoint;	
-	}
-	else {	
-		isHour = 1;
-		gl_PointSize = bigPoint;
-	}
-	if (observerDistance > (lastDistance/20)) {
-			gl_PointSize = smallPoint;
-			//vs_point_color = gray;
-	}
-	/*if (cameraDistance > cameraTooFar ) {
-			vs_point_color[3] = 0.0f;
-			
-	}*/
+    vec4 v1 = campos;
+    vec4 v2 = vs_point_position;
+    float cameraDistance = psc_distance(v1,v2);
+
+    vec4 temp = in_point_position;
+    vec4 templast = lastPosition;
+
+    if (temp.w > 1) {
+        float f = floor(temp.w);
+        temp.w -= f;
+        temp.xyz *= pow(10, f);
+    }
+
+    if (templast.w > 1) {
+        float f = floor(templast.w);
+        templast.w -= f;
+        templast.xyz *= pow(10, f);
+    }
+
+    // while(temp.w > 1) {
+    //  temp.xyz *= 10;
+    //  temp.w -= 1;
+    // } 
+    // while(templast.w > 1) {
+    //  templast.xyz *= 10;
+    //  templast.w -= 1;
+    // } 
+    float observerDistance = length(temp.xyz);
+    float lastDistance = length(templast.xyz);
+    
+    if(hour > 0.1f) {
+        isHour = 0;
+        vs_point_color = gray;
+        gl_PointSize = bigPoint;    
+    }
+    else {  
+        isHour = 1;
+        gl_PointSize = bigPoint;
+    }
+    if (observerDistance > (lastDistance/20)) {
+            gl_PointSize = smallPoint;
+            //vs_point_color = gray;
+    }
+    /*if (cameraDistance > cameraTooFar ) {
+            vs_point_color[3] = 0.0f;
+            
+    }*/
 
 }

@@ -56,8 +56,8 @@ void GuiOriginComponent::render() {
     bool result = ImGui::Combo("Origin", &position, nodeNames.c_str());
 
     if (result) {
-        LINFO("openspace.setOrigin('" + nodes[position]->name() + "');");
-        OsEng.scriptEngine()->queueScript("openspace.setOrigin('" + nodes[position]->name() + "');");
+        LINFO("openspace.setPropertyValue('Interaction.origin', '" + nodes[position]->name() + "');");
+        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.origin', '" + nodes[position]->name() + "');");
     }
 
 }

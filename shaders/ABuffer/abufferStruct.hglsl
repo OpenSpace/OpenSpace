@@ -54,14 +54,15 @@ struct ABufferStruct_t {
 //========================================================================================
 // Bitwise operations
 //========================================================================================
-const uint mask_1 = 1;
-const uint mask_8 = 255;
-const uint mask_16 = 65535;
-const uint mask_24 = 16777215;
-const uint mask_29 = 536870911;
-const uint mask_30 = 1073741823;
-const uint mask_31 = 2147483647;
-const uint mask_32 = 4294967295;
+#if ABUFFER_IMPLEMENTATION == ABUFFER_SINGLE_LINKED
+const uint mask_1 = uint(1);
+const uint mask_8 = uint(255);
+const uint mask_16 = uint(65535);
+const uint mask_24 = uint(16777215);
+const uint mask_29 = uint(536870911);
+const uint mask_30 = uint(1073741823);
+const uint mask_31 = uint(2147483647);
+const uint mask_32 = uint(4294967295);
 const uint mask_id = mask_16;
 const uint shift_id = 0;
 const uint mask_type = mask_24 - mask_16;
@@ -81,6 +82,7 @@ const uint mask_id_next		= mask_29;
 const uint shift_id_next  	= 0;
 const uint mask_id_type		= mask_32 - mask_29;
 const uint shift_id_type  	= 29;
+#endif
 
 void bitinsert_u(inout uint pack, uint val, uint mask, uint shift) {
 	pack &= ~mask;

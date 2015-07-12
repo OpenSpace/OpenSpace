@@ -32,6 +32,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/highresclock.h>
+#include <ghoul/misc/interpolator.h>
 
 namespace {
 	const std::string _loggerCat = "InteractionHandler";
@@ -244,7 +245,8 @@ namespace openspace {
 namespace interaction {
 
 InteractionHandler::InteractionHandler()
-	: _camera(nullptr)
+    : properties::PropertyOwner()
+	, _camera(nullptr)
 	, _focusNode(nullptr)
     , _deltaTime(0.0)
     , _validKeyLua(false)
@@ -253,7 +255,26 @@ InteractionHandler::InteractionHandler()
     , _invertRotation(false)
 	, _keyboardController(nullptr)
 	, _mouseController(nullptr)
+    , _origin("origin", "Origin", "")
+    , _coordinateSystem("coordinateSystem", "Coordinate System", "")
+	, _currentKeyframeTime(-1.0)
 {
+    setName("Interaction");
+    
+    _origin.onChange([this](){
+        SceneGraphNode* node = sceneGraphNode(_origin.value());
+        if (!node) {
+            LWARNING("Could not find a node in scenegraph called '" << _origin.value() <<"'");
+            return;
+        }
+        setFocusNode(node);
+    });
+    addProperty(_origin);
+    
+    _coordinateSystem.onChange([this](){
+        OsEng.renderEngine()->changeViewPoint(_coordinateSystem.value());
+    });
+    addProperty(_coordinateSystem);
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -347,6 +368,64 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) {
 	_deltaTime = deltaTime;
 	_mouseController->update(deltaTime);
+    
+    bool hasKeys = false;
+    psc pos;
+    glm::quat q;
+    
+	_keyframeMutex.lock();
+
+	if (_keyframes.size() > 4){	//wait until enough samples are buffered
+        hasKeys = true;
+		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
+		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
+		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
+        
+        openspace::network::datamessagestructures::PositionKeyframe p0, p1, p2, p3;
+        
+        p0 = _keyframes[0];
+        p1 = _keyframes[1];
+        p2 = _keyframes[2];
+        p3 = _keyframes[3];
+
+		//interval check
+		if (_currentKeyframeTime < p1._timeStamp){
+			_currentKeyframeTime = p1._timeStamp;
+		}
+
+		double t0 = p1._timeStamp;
+		double t1 = p2._timeStamp;
+		double fact = (_currentKeyframeTime - t0) / (t1 - t0);
+
+        
+        
+		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
+		glm::dvec4 v = positionInterpLin.interpolate(fact, p1._position.dvec4(), p2._position.dvec4());
+		
+        pos = psc(v.x, v.y, v.z, v.w);
+        q = quatInterpLin.interpolate(fact, p1._viewRotationQuat, p2._viewRotationQuat);
+        
+        //we're done with this sample interval
+        if (_currentKeyframeTime >= p2._timeStamp){
+            _keyframes.erase(_keyframes.begin());
+            _currentKeyframeTime = p1._timeStamp;
+        }
+        
+        _currentKeyframeTime += deltaTime;
+        
+    }
+    
+    _keyframeMutex.unlock();
+    
+    if(hasKeys){
+		_camera->setPosition(pos);
+		_camera->setViewRotationMatrix(glm::mat4_cast(q));
+    }
+
+		
+
+
+	
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -460,11 +539,12 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 		target = relative;
 	}
 
-	_camera->setFocusPosition(origin);
+	unlockControls();
+    
+    _camera->setFocusPosition(origin);
 	_camera->setPosition(target);
 	_camera->rotate(glm::quat_cast(transform));
-
-	unlockControls();
+	
 }
 
 //void InteractionHandler::distance(const float &d){
@@ -505,16 +585,19 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
 	//relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
 	relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
 	relative = relative_origin_coordinate + origin;
-
+    glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+    
+    unlockControls();
+    
 	_camera->setPosition(relative);
 	//camera_->rotate(rotation);
 	//camera_->setRotation(glm::mat4_cast(rotation));
 
-	glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+	
 	_camera->setRotation(la);
 	//camera_->setLookUpVector();
 
-	unlockControls();
+	
 }
 
 //<<<<<<< HEAD
@@ -533,9 +616,7 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
 //=======
 void InteractionHandler::rotateDelta(const glm::quat& rotation)
 {
-	lockControls();
 	_camera->rotate(rotation);
-	unlockControls();
 }
 
 void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t iterations)
@@ -548,7 +629,9 @@ void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t
 	psc relative = _camera->position();
 	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
 	
-	psc relative_origin_coordinate = relative - origin;
+    unlockControls();
+
+    psc relative_origin_coordinate = relative - origin;
 	const glm::vec3 dir(relative_origin_coordinate.direction());
 	glm::vec3 newdir = dir * distance[0];
 
@@ -566,11 +649,8 @@ void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t
 	// update only if on the same side of the origin
 	if (glm::angle(newdir, dir) < 90.0f) {
 		_camera->setPosition(relative);
-		unlockControls();
-
 	}
 	else {
-		unlockControls();
 		PowerScaledScalar d2 = distance;
 		d2[0] *= 0.75f;
 		d2[1] *= 0.85f;
@@ -815,12 +895,6 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 		"",
 		{
 			{
-				"setOrigin",
-				&luascriptfunctions::setOrigin,
-				"string",
-				"Set the camera origin node by name"
-			},
-			{
 				"clearKeys",
 				&luascriptfunctions::clearKeys,
 				"",
@@ -842,7 +916,8 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 				"distance",
 				&luascriptfunctions::distance,
 				"number",
-				"Change distance to origin"
+				"Change distance to origin",
+                true
 			},
             {
                 "setInteractionSensitivity",
@@ -919,6 +994,23 @@ bool InteractionHandler::invertRotation() const {
     return _invertRotation;
 }
 
+    void InteractionHandler::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf){
+	_keyframeMutex.lock();
+
+	//save a maximum of 10 samples (1 seconds of buffer)
+	if (_keyframes.size() >= 10){
+		_keyframes.erase(_keyframes.begin());
+	}
+    _keyframes.push_back(kf);
+
+	_keyframeMutex.unlock();
+}
+
+void InteractionHandler::clearKeyframes(){
+    _keyframeMutex.lock();
+    _keyframes.clear();
+    _keyframeMutex.unlock();
+}
 } // namespace interaction
 //>>>>>>> feature/interactionhandler
 } // namespace openspace

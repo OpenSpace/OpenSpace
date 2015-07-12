@@ -253,8 +253,8 @@ void ControlWidget::onDateChange() {
         QString coordinateSystem = ImportantDates[index].coordinateSystem;
         QString script =
             "openspace.time.setTime('" + date + "');\
-             openspace.setOrigin('" + focus + "');\
-             openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+             openspace.setPropertyValue('Interaction.origin', '" + focus + "');\
+             openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "')";
         emit scriptActivity(script);
     }
     _setTime->blockSignals(true);
@@ -266,7 +266,7 @@ void ControlWidget::onFocusChange() {
     int index = _focusNode->currentIndex();
     QString name = FocusNodes[index].name;
     QString coordinateSystem = FocusNodes[index].coordinateSystem;
-    QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    QString script = "openspace.setPropertyValue('Interaction.origin', '" + name + "');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
     emit scriptActivity(script);
 }
 
@@ -277,7 +277,7 @@ void ControlWidget::onFocusToTargetButton() {
         if (it != std::end(FocusNodes)) {
             QString name = it->name;
             QString coordinateSystem = it->coordinateSystem;
-            QString script = "openspace.setOrigin('" + name + "');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+            QString script = "openspace.setPropertyValue('Interaction.origin', '" + name + "');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
             emit scriptActivity(script);
         }
     }
@@ -293,8 +293,7 @@ void ControlWidget::onFocusToNewHorizonsButton() {
     else
         coordinateSystem = "Pluto";
 
-
-    QString script = "openspace.setOrigin('NewHorizons');openspace.changeCoordinateSystem('" + coordinateSystem + "');";
+    QString script = "openspace.setPropertyValue('Interaction.origin', 'NewHorizons');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
     emit scriptActivity(script);
 }
 

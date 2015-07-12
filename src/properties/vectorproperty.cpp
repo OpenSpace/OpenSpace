@@ -94,9 +94,11 @@ namespace properties {
 
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
-        outValue = "";                                                                   \
+        outValue = "{";                                                                  \
         for (__TYPE__::size_type i = 0; i < inValue.length(); ++i)                       \
             outValue += std::to_string(inValue[i]) + ",";                                \
+        outValue.pop_back();                                                             \
+        outValue += "}";                                                                 \
         return true;                                                                     \
     }
 

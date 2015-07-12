@@ -106,6 +106,7 @@ namespace properties {
             for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
                 outValue += std::to_string(inValue[i][j]) + ",";                         \
             }                                                                            \
+            outValue.pop_back();                                                         \
         }                                                                                \
         return true;                                                                     \
     }
