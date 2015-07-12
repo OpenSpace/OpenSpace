@@ -419,16 +419,18 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono = 10;
+        const int font_size_time = 15;
 		const int font_size_light = 8;
 		const int font_with_light = static_cast<int>(font_size_light*0.7);
 		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
 		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
+        const sgct_text::Font* fontTime = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_time);
 
 		if (_showInfo) {
 			const sgct_text::Font* font = fontMono;
 			int x1, xSize, y1, ySize;
 			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-			int startY = ySize - 2 * font_size_mono;
+			int startY = ySize - 2 * font_size_time;
 			//const glm::vec2& scaling = _mainCamera->scaling();
 			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
 			//const psc& position = _mainCamera->position();
@@ -444,8 +446,13 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			double currentTime = Time::ref().currentTime();
 
 			//PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
-			PrintColorTextArg(line++, "Date: %s", 10, glm::vec4(1), Time::ref().currentTimeUTC().c_str());
-			glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+            std::string timeString = Time::ref().currentTimeUTC();
+            if (timeString.size() > 11)
+                // This should never happen, but it's an emergency hack ---abock
+                timeString[11] = ' ';
+            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), glm::vec4(1), "Date: %s", timeString.c_str());
+			
+            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
 			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
 
