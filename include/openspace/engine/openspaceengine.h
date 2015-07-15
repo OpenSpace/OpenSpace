@@ -25,7 +25,8 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-#include <openspace/gui/gui.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <string>
 #include <vector>
@@ -44,17 +45,29 @@ class NetworkEngine;
 class GUI;
 class RenderEngine;
 class SyncBuffer;
+class ModuleEngine;
 
 namespace interaction {
     class InteractionHandler;
 }
+namespace gui {
+    class GUI;
+}
 namespace scripting {
 	class ScriptEngine;
 }
-
+    
+namespace network {
+    class ParallelConnection;
+}
+    
+namespace properties {
+    class PropertyOwner;
+}
+    
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments, std::string& openGlVersion);
+    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -62,6 +75,8 @@ public:
     bool initialize();
 	bool isMaster();
 	void setMaster(bool master);
+    double runTime();
+    void setRunTime(double t);
     static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
@@ -71,6 +86,9 @@ public:
 	scripting::ScriptEngine* scriptEngine();
     NetworkEngine* networkEngine();
 	LuaConsole* console();
+    ModuleEngine* moduleEngine();
+    network::ParallelConnection* parallelConnection();
+    properties::PropertyOwner* globalPropertyOwner();
 
 	gui::GUI* gui();
 
@@ -83,8 +101,8 @@ public:
 	void keyboardCallback(int key, int action);
 	void charCallback(unsigned int codepoint);
     void mouseButtonCallback(int key, int action);
-    void mousePositionCallback(int x, int y);
-    void mouseScrollWheelCallback(int pos);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
 	void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
@@ -116,8 +134,14 @@ private:
     NetworkEngine* _networkEngine;
 	ghoul::cmdparser::CommandlineParser* _commandlineParser;
 	LuaConsole* _console;
+    ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
+    network::ParallelConnection* _parallelConnection;
+    
+    properties::PropertyOwner* _globalPropertyNamespace;
+    
 	bool _isMaster;
+    double _runTime;
 
 	SyncBuffer* _syncBuffer;
 };

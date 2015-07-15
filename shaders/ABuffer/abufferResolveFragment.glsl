@@ -54,7 +54,9 @@
 // constants
 const float stepSize = 	0.01;
 const float samplingRate = 1.0;
-uniform float ALPHA_LIMIT = 0.99;
+uniform float ALPHA_LIMIT = 0.7;
+
+uniform float blackoutFactor = 0.0;
 
 
 // Math defintions
@@ -307,7 +309,7 @@ void main() {
     out_color = vec4(texCoord,0.0,1.0);
     int frag_count = build_local_fragments_list();
     sort_fragments_list(frag_count);
-    out_color = calculate_final_color(frag_count);
+    out_color = blackoutFactor * calculate_final_color(frag_count);
 }
 
 // ================================================================================

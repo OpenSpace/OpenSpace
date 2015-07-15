@@ -53,8 +53,9 @@ public:
 
     // Background
     MessageIdentifier identifier(std::string name);
+
 private:
-    std::map<MessageIdentifier, std::string> _identifiers;
+    std::map<std::string, MessageIdentifier> _identifiers;
     MessageIdentifier _lastAssignedIdentifier;
 
     struct Message {
@@ -69,6 +70,7 @@ private:
 
     MessageIdentifier _statusMessageIdentifier;
     MessageIdentifier _identifierMappingIdentifier;
+    MessageIdentifier _initialMessageFinishedIdentifier;
 };
 
 } // namespace openspace

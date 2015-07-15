@@ -27,20 +27,20 @@
 #include <openspace/util/factorymanager.h>
 
 namespace {
-const std::string _loggerCat = "Ephemeris";
+    const std::string _loggerCat = "Ephemeris";
+    const std::string KeyType = "Type";
 }
 
 namespace openspace {
 
-Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
-    if (!dictionary.hasValue<std::string>(constants::ephemeris::keyType)) {
-        LERROR("Ephemeris did not have key '" << constants::ephemeris::keyType << "'");
+Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    if (!dictionary.hasValue<std::string>(KeyType)) {
+        LERROR("Ephemeris did not have key '" << KeyType << "'");
         return nullptr;
     }
 
     std::string ephemerisType;
-    dictionary.getValue(constants::ephemeris::keyType, ephemerisType);
+    dictionary.getValue(KeyType, ephemerisType);
     ghoul::TemplateFactory<Ephemeris>* factory
           = FactoryManager::ref().factory<Ephemeris>();
     Ephemeris* result = factory->create(ephemerisType, dictionary);
@@ -52,17 +52,11 @@ Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary)
     return result;
 }
 
-Ephemeris::Ephemeris()
-{
-}
+Ephemeris::Ephemeris() {}
     
-Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary)
-{
-}
+Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary) {}
     
-Ephemeris::~Ephemeris()
-{
-}
+Ephemeris::~Ephemeris() {}
     
 bool Ephemeris::initialize() {
     return true;

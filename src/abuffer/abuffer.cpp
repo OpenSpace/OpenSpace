@@ -55,20 +55,17 @@ namespace openspace {
 ABuffer::ABuffer()
 	: _validShader(false)
 	, _resolveShader(nullptr)
-	, _volumeStepFactor(0.0f)
+	, _volumeStepFactor(0.f)
 {
 
 	updateDimensions();
 }
 
 ABuffer::~ABuffer() {
-
-	if(_resolveShader)
-		delete _resolveShader;
+    delete _resolveShader;
 	
-	for(auto file: _samplerFiles) {
+	for (auto file: _samplerFiles)
 		delete file;
-	}
 }
 
 bool ABuffer::initializeABuffer() {
@@ -88,14 +85,14 @@ bool ABuffer::initializeABuffer() {
 	if (!_resolveShader)
 		return false;
 	_resolveShader->setProgramObjectCallback(shaderCallback);
+    // Remove explicit callback and use programobject isDirty instead ---abock
     
-#ifndef __APPLE__
     // ============================
     // 		GEOMETRY (quad)
     // ============================
 	const GLfloat size = 1.0f;
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
+    const GLfloat vertex_data[] = {
+        //	  x      y     s     t
         -size, -size, 0.0f, 1.0f,
         size,	size, 0.0f, 1.0f, 
         -size,  size, 0.0f, 1.0f, 
@@ -111,20 +108,17 @@ bool ABuffer::initializeABuffer() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
 	glEnableVertexAttribArray(0);
-#endif
 	return true;
 }
 
 bool ABuffer::reinitialize() {
-
 	// set the total resolution for all viewports
 	updateDimensions();
 	return reinitializeInternal();
 }
 
-void ABuffer::resolve() {
-#ifndef __APPLE__
-	if( ! _validShader) {
+void ABuffer::resolve(float blackoutFactor) {
+	if (!_validShader) {
 		generateShaderSource();
 		updateShader();
 		_validShader = true;
@@ -134,13 +128,14 @@ void ABuffer::resolve() {
 		return;
 
 	_resolveShader->activate();
+    _resolveShader->setUniform("blackoutFactor", blackoutFactor);
 	int startAt = 0;
-	for(int i = 0; i < _volumes.size(); ++i) {
+	for (int i = 0; i < _volumes.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		_volumes.at(i).second->bind();
 		startAt = i + 1;
 	}
-	for(int i = 0; i < _transferFunctions.size(); ++i) {
+	for (int i = 0; i < _transferFunctions.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + startAt + i);
 		_transferFunctions.at(i).second->bind();
 	}
@@ -158,7 +153,6 @@ void ABuffer::resolve() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _resolveShader->deactivate();
-#endif
 }
 
 void ABuffer::addVolume(const std::string& tag,ghoul::opengl::Texture* volume) {
@@ -173,7 +167,6 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 	if( ! FileSys.fileExists(filename))
 		return -1;
     
-#ifndef __APPLE__
   	auto fileCallback = [this](const ghoul::filesystem::File& file) {
         _validShader = false;
     };
@@ -185,12 +178,11 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 	// ID is one more than "actual" position since ID=0 is considered geometry
 	//return 1 << (_samplers.size()-1);
 	return static_cast<int>(_samplers.size());
-#else
-    return 0;
-#endif
 }
 
 bool ABuffer::updateShader() {
+    if (_resolveShader == nullptr)
+        return false;
 	bool s = _resolveShader->rebuildFromFile();
 	if (s) {
 		int startAt = 0;
@@ -210,8 +202,7 @@ bool ABuffer::updateShader() {
 }
 
 void ABuffer::generateShaderSource() {
-
-	for(int i = 0; i < _samplerFiles.size(); ++i) {
+	for (int i = 0; i < _samplerFiles.size(); ++i) {
 		std::string line, source = "";
 		std::ifstream samplerFile(_samplerFiles.at(i)->path());
 		if(samplerFile.is_open()) {
@@ -231,7 +222,6 @@ void ABuffer::generateShaderSource() {
 }
 
 void ABuffer::openspaceHeaders() {
-
 	std::ofstream f(absPath(generatedHeadersPath));
 	f << "#define MAX_VOLUMES " << std::to_string(_samplers.size()) << "\n"
 		<< "#define MAX_TF " << _transferFunctions.size() << "\n";

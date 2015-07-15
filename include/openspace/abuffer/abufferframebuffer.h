@@ -34,15 +34,19 @@ public:
     
     ABufferFramebuffer();
     virtual ~ABufferFramebuffer();
-    virtual bool initialize();
+    bool initialize();
     
-    virtual void clear();
-    virtual void preRender();
-    virtual void postRender();
+    void clear();
+    void preRender();
+    void postRender();
+    void resolve(float blackoutFactor);
     
     std::vector<fragmentData> pixelData();
 protected:
-    virtual bool reinitializeInternal();
+    bool reinitializeInternal();
+
+    bool initializeABuffer();
+
     
 private:
     

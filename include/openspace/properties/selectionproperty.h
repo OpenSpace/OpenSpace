@@ -67,6 +67,14 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State*
 template <>
 int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
 
+template <>
+template <>
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(std::string value, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue);
+
 } // namespace properties
 } // namespace openspace
 

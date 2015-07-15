@@ -37,6 +37,7 @@ class SceneGraphNode;
 class SceneGraph {
 public:
     SceneGraph();
+    ~SceneGraph();
 
     void clear();
     bool loadFromFile(const std::string& sceneDescription);
@@ -52,7 +53,9 @@ public:
 
 private:
     struct SceneGraphNodeInternal {
-        SceneGraphNode* node;
+        ~SceneGraphNodeInternal();
+
+        SceneGraphNode* node = nullptr;
         // From nodes that are dependent on this one
         std::vector<SceneGraphNodeInternal*> incomingEdges;
         // To nodes that this node depends on
@@ -60,7 +63,7 @@ private:
     };
 
     bool nodeIsDependentOnRoot(SceneGraphNodeInternal* node);
-    bool sortTopologially();
+    bool sortTopologically();
 
     SceneGraphNodeInternal* nodeByName(const std::string& name);
 

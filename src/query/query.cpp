@@ -1,4 +1,4 @@
-/*****************************************************************************************
+ /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -36,13 +37,11 @@ namespace {
     const std::string _loggerCat = "Query";
 }
 
-Scene* sceneGraph()
-{
+Scene* sceneGraph() {
     return OsEng.renderEngine()->scene();
 }
 
-SceneGraphNode* sceneGraphNode(const std::string& name)
-{
+SceneGraphNode* sceneGraphNode(const std::string& name) {
     const Scene* graph = sceneGraph();
     return graph->sceneGraphNode(name);
 }
@@ -52,28 +51,33 @@ Renderable* renderable(const std::string& name) {
 	return node->renderable();
 }
 
-properties::Property* property(const std::string& uri)
-{
-    // The URI consists of the following form at this stage:
-    // <node name>.{<property owner>.}^(0..n)<property id>
-    
-    const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-    if (nodeNameSeparator == std::string::npos) {
-        LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
-               << "' separator must be present.");
-        return nullptr;
+properties::Property* property(const std::string& uri) {
+    properties::Property* globalProp = OsEng.globalPropertyOwner()->property(uri);
+    if (globalProp) {
+        return globalProp;
     }
-    const std::string nodeName = uri.substr(0, nodeNameSeparator);
-    const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
-    
-    SceneGraphNode* node = sceneGraphNode(nodeName);
-    if (!node) {
-        LERROR("Node '" << nodeName << "' did not exist");
-        return nullptr;
+    else {
+        // The URI consists of the following form at this stage:
+        // <node name>.{<property owner>.}^(0..n)<property id>
+        
+        const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
+        if (nodeNameSeparator == std::string::npos) {
+            LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
+                   << "' separator must be present.");
+            return nullptr;
+        }
+        const std::string nodeName = uri.substr(0, nodeNameSeparator);
+        const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
+
+        SceneGraphNode* node = sceneGraphNode(nodeName);
+        if (!node) {
+            LERROR("Node '" << nodeName << "' did not exist");
+            return nullptr;
+        }
+        
+        properties::Property* property = node->property(remainingUri);
+        return property;
     }
-    
-    properties::Property* property = node->property(remainingUri);
-    return property;
 }
 
 }  // namespace

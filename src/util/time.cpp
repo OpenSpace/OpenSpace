@@ -35,139 +35,13 @@
 #include <cassert>
 #include <string>
 
+#include "time_lua.inl"
+
 namespace {
 	const std::string _loggerCat = "Time";
 }
 
 namespace openspace {
-
-namespace luascriptfunctions {
-
-/**
- * \ingroup LuaScripts
- * setDeltaTime(number):
- * Sets the delta time by calling the Time::setDeltaTime method
- */
-int time_setDeltaTime(lua_State* L) {
-	const bool isFunction = (lua_isfunction(L, -1) != 0);
-	if (isFunction) {
-		// If the top of the stack is a function, it is ourself
-		const char* msg = lua_pushfstring(L, "method called without argument");
-		return luaL_error(L, "bad argument (%s)", msg);
-	}
-
-	const bool isNumber = (lua_isnumber(L, -1) != 0);
-	if (isNumber) {
-		double value = lua_tonumber(L, -1);
-		openspace::Time::ref().setDeltaTime(value);
-		return 0;
-	}
-	else {
-		const char* msg = lua_pushfstring(L, "%s expected, got %s",
-								lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
-		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
-	}
-
-}
-
-/**
- * \ingroup LuaScripts
- * deltaTime():
- * Returns the delta time by calling the Time::deltaTime method
- */
-int time_deltaTime(lua_State* L) {
-	lua_pushnumber(L, openspace::Time::ref().deltaTime());
-	return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * togglePause():
- * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
- */
-int time_togglePause(lua_State* L) {
-    openspace::Time::ref().togglePause();
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * togglePause():
- * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
- */
-int time_setPause(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    bool pause = lua_toboolean(L, -1) == 1;
-    openspace::Time::ref().setPause(pause);
-    return 0;
-}
-
-
-/**
- * \ingroup LuaScripts
- * setTime({number, string}):
- * Sets the simulation time to the passed value. If the parameter is a number, it is
- * interpreted as the number of seconds past the J2000 epoch and the
- * Time::setTime(double) method is called. If the parameter is a string, it is
- * interpreted as a structured date string and the Time::setTime(std::string) method
- * is called
- */
-int time_setTime(lua_State* L) {
-	const bool isFunction = (lua_isfunction(L, -1) != 0);
-	if (isFunction) {
-		// If the top of the stack is a function, it is ourself
-		const char* msg = lua_pushfstring(L, "method called without argument");
-		return luaL_error(L, "bad argument (%s)", 1, msg);
-	}
-
-	const bool isNumber = (lua_isnumber(L, -1) != 0);
-	const bool isString = (lua_isstring(L, -1) != 0);
-	if (!isNumber && !isString) {
-		const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
-								lua_typename(L, LUA_TNUMBER),
-								lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
-		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
-	}
-	if (isNumber) {
-		double value = lua_tonumber(L, -1);
-		openspace::Time::ref().setTime(value);
-		return 0;
-	}
-	if (isString) {
-		const char* time = lua_tostring(L, -1);
-		openspace::Time::ref().setTime(time);
-		return 0;
-	}
-	return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * currentTime():
- * Returns the current simulation time as the number of seconds past the J2000 epoch.
- * It is returned by calling the Time::currentTime method.
- */
-int time_currentTime(lua_State* L) {
-	lua_pushnumber(L, openspace::Time::ref().currentTime());
-	return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * currentTimeUTC():
- * Returns the current simulation time as a structured ISO 8601 string using the UTC
- * timezone by calling the Time::currentTimeUTC method
- */
-int time_currentTimeUTC(lua_State* L) {
-	lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
-	return 1;
-}
-
-} // namespace luascriptfunctions
-
 
 Time* Time::_instance = nullptr;
 
@@ -206,9 +80,9 @@ bool Time::isInitialized() {
 	return (_instance != nullptr);
 }
 
-void Time::setTime(double value) {
+void Time::setTime(double value, bool requireJump) {
 	_time = std::move(value);
-	_timeJumped = true;
+	_timeJumped = requireJump;
 }
 
 double Time::currentTime() const {
@@ -242,9 +116,9 @@ bool Time::togglePause() {
     return _timePaused;
 }
 
-void Time::setTime(std::string time) {
+void Time::setTime(std::string time, bool requireJump) {
 	SpiceManager::ref().getETfromDate(std::move(time), _time);
-	_timeJumped = true;
+	_timeJumped = requireJump;
 }
 
 std::string Time::currentTimeUTC() const {
@@ -311,6 +185,10 @@ bool Time::timeJumped() const {
 void Time::setTimeJumped(bool jumped){
 	_timeJumped = jumped;
 }
+    
+bool Time::paused() const{
+    return _timePaused;
+}
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 	scripting::ScriptEngine::LuaLibrary timeLibrary = {
@@ -321,7 +199,8 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 				&luascriptfunctions::time_setDeltaTime,
 				"number",
 				"Sets the amount of simulation time that happens "
-				"in one second of real time"
+				"in one second of real time",
+                true
 			},
 			{
 				"deltaTime",
@@ -334,14 +213,16 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
                 "setPause",
                 &luascriptfunctions::time_setPause,
                 "bool",
-                "Pauses the simulation time or restores the delta time"
+                "Pauses the simulation time or restores the delta time",
+                true
             },
             {
                 "togglePause",
                 &luascriptfunctions::time_togglePause,
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
+                " and restoring it afterwards",
+                true
             },
 			{
 				"setTime",
@@ -350,7 +231,8 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
 				"Sets the current simulation time to the "
 				"specified value. If the parameter is a number, the value is the number "
 				"of seconds past the J2000 epoch. If it is a string, it has to be a "
-				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
+				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)",
+                true
 			},
 			{
 				"currentTime",

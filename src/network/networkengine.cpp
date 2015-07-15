@@ -31,6 +31,8 @@
 #include <chrono>
 #include <thread>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #include "sgct.h"
 
 namespace {
@@ -38,6 +40,7 @@ namespace {
 
     const std::string StatusMessageIdentifierName = "StatusMessage";
     const std::string MappingIdentifierIdentifierName = "IdentifierMapping";
+    const std::string InitialMessageFinishedIdentifierName = "InitialMessageFinished";
 
     const char MessageTypeLuaScript = '0';
     const char MessageTypeExternalControlConnected = '1';
@@ -46,7 +49,7 @@ namespace {
 namespace openspace {
 
 NetworkEngine::NetworkEngine() 
-    : _lastAssignedIdentifier(-1) // -1 is okay as we assign one identifier in this ctor
+    : _lastAssignedIdentifier(MessageIdentifier(-1)) // -1 is okay as we assign one identifier in this ctor
     , _shouldPublishStatusMessage(true)
 {
     static_assert(
@@ -55,6 +58,7 @@ NetworkEngine::NetworkEngine()
     );
     _statusMessageIdentifier = identifier(StatusMessageIdentifierName);
     _identifierMappingIdentifier = identifier(MappingIdentifierIdentifierName);
+    _initialMessageFinishedIdentifier = identifier(InitialMessageFinishedIdentifierName);
 }
 
 bool NetworkEngine::handleMessage(const std::string& message) {
@@ -70,6 +74,8 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     }
     case MessageTypeExternalControlConnected:
     {
+        publishIdentifierMappingMessage();
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
         sendInitialInformation();
         return true;
     }
@@ -114,21 +120,25 @@ void NetworkEngine::publishStatusMessage() {
 }
 
 void NetworkEngine::publishIdentifierMappingMessage() {
-    size_t bufferSize = 0;
-    for (const std::pair<MessageIdentifier, std::string>& i : _identifiers) {
+    size_t bufferSize = sizeof(uint16_t);
+    for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
         bufferSize += sizeof(MessageIdentifier);
-        bufferSize += i.second.size() + 1; // +1 for \0 terminating character
+        bufferSize += i.first.size() + 1; // +1 for \0 terminating character
     }
 
     std::vector<char> buffer(bufferSize);
     size_t currentWritingPosition = 0;
-    for (const std::pair<MessageIdentifier, std::string>& i : _identifiers) {
-        std::memcpy(buffer.data() + currentWritingPosition, &(i.first), sizeof(MessageIdentifier));
+    uint16_t size = _identifiers.size();
+    std::memcpy(buffer.data(), &size, sizeof(uint16_t));
+    currentWritingPosition += sizeof(uint16_t);
+    for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
+        std::memcpy(buffer.data() + currentWritingPosition, &(i.second), sizeof(MessageIdentifier));
         currentWritingPosition += sizeof(MessageIdentifier);
-        std::memcpy(buffer.data() + currentWritingPosition, i.second.data(), i.second.size());
-        currentWritingPosition += i.second.size();
-        buffer[currentWritingPosition] = '\0';
-        currentWritingPosition += 1;
+        uint8_t stringSize = i.first.size();
+        std::memcpy(buffer.data() + currentWritingPosition, &stringSize, sizeof(uint8_t));
+        currentWritingPosition += sizeof(uint8_t);
+        std::memcpy(buffer.data() + currentWritingPosition, i.first.data(), stringSize);
+        currentWritingPosition += i.first.size();
     }
 
     publishMessage(_identifierMappingIdentifier, std::move(buffer));
@@ -136,21 +146,17 @@ void NetworkEngine::publishIdentifierMappingMessage() {
 
 
 NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
-#ifdef DEBUG
-    // Check if name has been assigned already
-    for (const std::pair<MessageIdentifier, std::string>& p : _identifiers) {
-        if (p.second == name) {
-            LERROR("Name '" << name << "' for identifier has been registered before");
-            return -1;
-        }
+    auto i = _identifiers.find(name);
+    if (i != _identifiers.end())
+        return i->second;
+    else {
+        _lastAssignedIdentifier++;
+
+        MessageIdentifier result = _lastAssignedIdentifier;
+
+        _identifiers[std::move(name)] = result;
+        return result;
     }
-#endif
-    _lastAssignedIdentifier++;
-
-    MessageIdentifier result = _lastAssignedIdentifier;
-
-    _identifiers[result] = std::move(name);
-    return result;
 }
 
 void NetworkEngine::publishMessage(MessageIdentifier identifier, std::vector<char> message) {
@@ -178,13 +184,14 @@ void NetworkEngine::sendMessages() {
             m.body.data(),
             static_cast<int>(m.body.size())
         );
+        //LINFO("Sent message: (s=" << m.body.size() << "): " << std::string(m.body.begin(), m.body.end()));
     }
 
     _messagesToSend.clear();
 }
 
 void NetworkEngine::sendInitialInformation() {
-    static const int SleepTime = 100;
+    static const int SleepTime = 250;
     _shouldPublishStatusMessage = false;
     for (const Message& m : _initialConnectionMessages) {
         union {
@@ -199,9 +206,24 @@ void NetworkEngine::sendInitialInformation() {
             payload.data(),
             static_cast<int>(payload.size())
         );
+        LINFO("Sent initial message: (s=" << m.body.size() << ") [i=" << identifier.value << "]");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(4 * SleepTime));
+
+    // Send finished message
+    union {
+        MessageIdentifier value;
+        std::array<char, 2> data;
+    } identifier;
+    identifier.value = _initialMessageFinishedIdentifier;
+
+    sgct::Engine::instance()->sendMessageToExternalControl(
+        identifier.data.data(),
+        2
+    );
 
     _shouldPublishStatusMessage = true;
 }

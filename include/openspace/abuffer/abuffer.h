@@ -45,7 +45,6 @@ namespace openspace {
 
 class ABuffer {
 public:
-
 	struct fragmentData {
 		GLfloat _position[3];
 		GLfloat _color[4];
@@ -56,7 +55,7 @@ public:
 
 	ABuffer();
 	virtual ~ABuffer();
-	virtual void resolve();
+	virtual void resolve(float blackoutFactor);
     virtual bool initialize() = 0;
 	virtual bool reinitialize();
 
@@ -75,7 +74,7 @@ public:
 protected:
 	virtual bool reinitializeInternal() = 0;
 
-	bool initializeABuffer();
+	virtual bool initializeABuffer();
 
 	void generateShaderSource();
 	bool updateShader();
@@ -86,8 +85,6 @@ protected:
 	void openspaceTransferFunction();
 
 	unsigned int _width, _height, _totalPixels;
-
-private:
 
 	void updateDimensions();
 

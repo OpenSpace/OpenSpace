@@ -40,9 +40,12 @@ public:
     NumericalProperty(std::string identifier, std::string guiName, T value,
         T minimumValue, T maximumValue, T steppingValue);
 
-	bool getLua(lua_State* state) const override;
-	bool setLua(lua_State* state) override;
+	bool getLuaValue(lua_State* state) const override;
+	bool setLuaValue(lua_State* state) override;
 	int typeLua() const override;
+
+    bool getStringValue(std::string& value) const override;
+    bool setStringValue(std::string value) override;
 
 	T minValue() const;
 	T maxValue() const;

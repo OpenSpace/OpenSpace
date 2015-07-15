@@ -24,18 +24,20 @@
 
 #include <openspace/engine/openspaceengine.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #define SGCT_WINDOWS_INCLUDE
 #include <sgct.h>
 #include <openspace/version.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
-#include <openspace/gui/gui.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
@@ -45,10 +47,10 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/util/imagesequencer2.h> // testing
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/downloadmanager.h>
 
-
-
+#include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -61,6 +63,16 @@
 // std
 #include <iostream>
 #include <fstream>
+
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+#include <modules/onscreengui/include/gui.h>
+#endif
+
+#ifdef _MSC_VER
+#ifdef OPENSPACE_ENABLE_VLD
+#include <vld.h>
+#endif
+#endif
 
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
@@ -75,15 +87,15 @@ namespace {
     
     const std::string _sgctConfigArgumentCommand = "-config";
 
-    const std::string DefaultOpenGlVersion = "4.3";
+    const int CacheVersion = 1;
+    const int DownloadVersion = 1;
     
     struct {
         std::string configurationName;
 		std::string sgctConfigurationName;
-        std::string openGlVersion;
+        std::string sceneName;
     } commandlineArgumentPlaceholders;
 }
-
 
 namespace openspace {
 
@@ -97,20 +109,26 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _networkEngine(new NetworkEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
     , _console(new LuaConsole)
+    , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
+    , _parallelConnection(new network::ParallelConnection)
+    , _globalPropertyNamespace(new properties::PropertyOwner)
 	, _isMaster(false)
+    , _runTime(0.0)
     , _syncBuffer(nullptr)
 {
-	SpiceManager::initialize();
-	Time::initialize();
-	ImageSequencer2::initialize();
-	FactoryManager::initialize();
-	ghoul::systemcapabilities::SystemCapabilities::initialize();
+    _interactionHandler->setPropertyOwner(_globalPropertyNamespace);
+    _globalPropertyNamespace->addPropertySubOwner(_interactionHandler);
+    FactoryManager::initialize();
+    SpiceManager::initialize();
+    Time::initialize();
+    ghoul::systemcapabilities::SystemCapabilities::initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
     _gui->deinitializeGL();
 
+	delete _parallelConnection;
     delete _configurationManager;
     delete _interactionHandler;
     delete _renderEngine;
@@ -118,7 +136,8 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _networkEngine;
     delete _commandlineParser;
     delete _console;
-    delete _gui;
+    delete _moduleEngine;
+    delete _gui;    
 
     if(_syncBuffer)
 		delete _syncBuffer;
@@ -132,9 +151,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 
 bool OpenSpaceEngine::create(
     int argc, char** argv,
-    std::vector<std::string>& sgctArguments,
-    std::string& openGlVersion)
+    std::vector<std::string>& sgctArguments)
 {
+    ghoul::initialize();
+
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
 
 	// Initialize the LogManager and add the console log as this will be used every time
@@ -146,7 +166,6 @@ bool OpenSpaceEngine::create(
 	LogMgr.addLog(new ConsoleLog);
 
 	LDEBUG("Initialize FileSystem");
-	ghoul::filesystem::FileSystem::initialize();
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -205,7 +224,7 @@ bool OpenSpaceEngine::create(
     LINFOC("OpenSpace Version", 
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_REVISION << " (" << OPENSPACE_VERSION_STRING << ")");
+        OPENSPACE_VERSION_PATCH << " (" << OPENSPACE_VERSION_STRING << ")");
 
 	// Create directories that doesn't exist
 	auto tokens = FileSys.tokens();
@@ -218,8 +237,11 @@ bool OpenSpaceEngine::create(
 		}
 	}
 
+    // Register modules
+    _engine->_moduleEngine->create();
+
 	// Create the cachemanager
-	FileSys.createCacheManager(absPath("${" + constants::configurationmanager::keyCache + "}"));
+	FileSys.createCacheManager(absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion);
 	_engine->_console->initialize();
 
 	// Register the provided shader directories
@@ -231,16 +253,13 @@ bool OpenSpaceEngine::create(
 	LDEBUG("Determining SGCT configuration file");
 	std::string sgctConfigurationPath = _sgctDefaultConfigFile;
 	_engine->configurationManager()->getValue(
-		constants::configurationmanager::keyConfigSgct, sgctConfigurationPath);
+		ConfigurationManager::KeyConfigSgct, sgctConfigurationPath);
 
 	if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
 		LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
 			commandlineArgumentPlaceholders.sgctConfigurationName);
 		sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
 	}
-
-    openGlVersion = commandlineArgumentPlaceholders.openGlVersion;
-    LINFO("Using OpenGL version " << openGlVersion);
 
 	// Prepend the outgoing sgctArguments with the program name
 	// as well as the configuration file that sgct is supposed to use
@@ -252,7 +271,11 @@ bool OpenSpaceEngine::create(
 }
 
 void OpenSpaceEngine::destroy() {
+    _engine->_moduleEngine->deinitialize();
+    _engine->_moduleEngine->destroy();
     _engine->_console->deinitialize();
+
+    _engine->_scriptEngine->deinitialize();
 	delete _engine;
 	ghoul::systemcapabilities::SystemCapabilities::deinitialize();
 	FactoryManager::deinitialize();
@@ -261,6 +284,8 @@ void OpenSpaceEngine::destroy() {
 
 	FileSystem::deinitialize();
 	LogManager::deinitialize();
+
+    ghoul::deinitialize();
 }
 
 bool OpenSpaceEngine::initialize() {
@@ -272,10 +297,29 @@ bool OpenSpaceEngine::initialize() {
 	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
 	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
 	SysCap.detectCapabilities();
-	SysCap.logCapabilities();
+
+    using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
+    Verbosity verbosity = Verbosity::Default;
+    if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity)) {
+        std::map<std::string, Verbosity> verbosityMap = {
+            { "Minimal", Verbosity::Minimal },
+            { "Default", Verbosity::Default },
+            { "Full", Verbosity::Full }
+        };
+
+        std::string v = configurationManager()->value<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity);
+        if (verbosityMap.find(v) != verbosityMap.end())
+            verbosity = verbosityMap[v];
+    }
+	SysCap.logCapabilities(verbosity);
+    
+    std::string requestURL = "";
+    bool success = configurationManager()->getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
+    if (success)
+        DownloadManager::initialize(requestURL, DownloadVersion);
 
 	// Load SPICE time kernel
-	bool success = loadSpiceKernels();
+	success = loadSpiceKernels();
 	if (!success)
 		return false;
 
@@ -287,20 +331,19 @@ bool OpenSpaceEngine::initialize() {
 	_scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
 	_scriptEngine->addLibrary(LuaConsole::luaLibrary());
 	_scriptEngine->addLibrary(gui::GUI::luaLibrary());
+    _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
 
 	// TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
 	scriptEngine()->initialize();
 
 	// If a LuaDocumentationFile was specified, generate it now
-	using constants::configurationmanager::keyLuaDocumentationType;
-	using constants::configurationmanager::keyLuaDocumentationFile;
-	const bool hasType = configurationManager()->hasKey(keyLuaDocumentationType);
-	const bool hasFile = configurationManager()->hasKey(keyLuaDocumentationFile);
+	const bool hasType = configurationManager()->hasKey(ConfigurationManager::KeyLuaDocumentationType);
+	const bool hasFile = configurationManager()->hasKey(ConfigurationManager::KeyLuaDocumentationFile);
 	if (hasType && hasFile) {
 		std::string luaDocumentationType;
-		configurationManager()->getValue(keyLuaDocumentationType, luaDocumentationType);
+		configurationManager()->getValue(ConfigurationManager::KeyLuaDocumentationType, luaDocumentationType);
 		std::string luaDocumentationFile;
-		configurationManager()->getValue(keyLuaDocumentationFile, luaDocumentationFile);
+		configurationManager()->getValue(ConfigurationManager::KeyLuaDocumentationFile, luaDocumentationFile);
 
 		luaDocumentationFile = absPath(luaDocumentationFile);
 		_scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
@@ -308,7 +351,7 @@ bool OpenSpaceEngine::initialize() {
 
     bool disableMasterRendering = false;
     configurationManager()->getValue(
-        constants::configurationmanager::keyDisableMasterRendering, disableMasterRendering);
+        ConfigurationManager::KeyDisableMasterRendering, disableMasterRendering);
     _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
 
 
@@ -317,18 +360,19 @@ bool OpenSpaceEngine::initialize() {
 	_renderEngine->setSceneGraph(sceneGraph);
 
 	// initialize the RenderEngine
-	_renderEngine->initialize();
+    _renderEngine->initialize();
 	sceneGraph->initialize();
 
-	std::string sceneDescriptionPath;
-	success = configurationManager()->getValue(
-		constants::configurationmanager::keyConfigScene, sceneDescriptionPath);
-	if (success)
-		sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
+    std::string sceneDescriptionPath = "";
+    if (commandlineArgumentPlaceholders.sceneName.empty()) {
+	    success = configurationManager()->getValue(
+		    ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
+    }
+    else
+        sceneDescriptionPath = commandlineArgumentPlaceholders.sceneName;
+	sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
 	_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
-	//_interactionHandler.setKeyboardController(new interaction::KeyboardControllerLua);
-	//_interactionHandler.setMouseController(new interaction::TrackballMouseController);
 	_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
 	// Run start up scripts
@@ -337,8 +381,13 @@ bool OpenSpaceEngine::initialize() {
 	// Load a light and a monospaced font
 	loadFonts();
 
+    LINFO("Initializing GUI");
 	_gui->initialize();
 
+    // Initialize modules
+    _moduleEngine->initialize();
+
+    LINFO("Finished initializing");
 	return true;
 }
 
@@ -372,12 +421,12 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
 		"the OpenSpace configuration file");
 	_commandlineParser->addCommand(sgctConfigFileCommand);
 
-    commandlineArgumentPlaceholders.openGlVersion = DefaultOpenGlVersion;
-    CommandlineCommand* openGlVersionCommand = new SingleCommand<std::string>(
-        &commandlineArgumentPlaceholders.openGlVersion,
-        "-ogl", "-o",
-        "Sets the OpenGL version that is to be used; valid values are '4.2' and '4.3'");
-    _commandlineParser->addCommand(openGlVersionCommand);
+    commandlineArgumentPlaceholders.sceneName = "";
+    CommandlineCommand* sceneFileCommand = new SingleCommand<std::string>(
+        &commandlineArgumentPlaceholders.sceneName, "-scene", "",
+        "Provides the path to the scene file, overriding the value set in the OpenSpace"
+        " configuration file");
+    _commandlineParser->addCommand(sceneFileCommand);
 
     return true;
 }
@@ -408,11 +457,11 @@ bool OpenSpaceEngine::findConfiguration(std::string& filename) {
 
 bool OpenSpaceEngine::loadSpiceKernels() {
 	// Load time kernel
-	using constants::configurationmanager::keySpiceTimeKernel;
 	std::string timeKernel;
-	bool success = configurationManager()->getValue(keySpiceTimeKernel, timeKernel);
+	bool success = configurationManager()->getValue(ConfigurationManager::KeySpiceTimeKernel, timeKernel);
+    // Move this to configurationmanager::completenesscheck ---abock
 	if (!success) {
-		LERROR("Configuration file does not contain a '" << keySpiceTimeKernel << "'");
+		LERROR("Configuration file does not contain a '" << ConfigurationManager::KeySpiceTimeKernel << "'");
 		return false;
 	}
 	SpiceManager::KernelIdentifier id =
@@ -423,11 +472,11 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 	}
 
 	// Load SPICE leap second kernel
-	using constants::configurationmanager::keySpiceLeapsecondKernel;
 	std::string leapSecondKernel;
-	success = configurationManager()->getValue(keySpiceLeapsecondKernel, leapSecondKernel);
+	success = configurationManager()->getValue(ConfigurationManager::KeySpiceLeapsecondKernel, leapSecondKernel);
 	if (!success) {
-		LERROR("Configuration file does not have a '" << keySpiceLeapsecondKernel << "'");
+        // Move this to configurationmanager::completenesscheck ---abock
+		LERROR("Configuration file does not have a '" << ConfigurationManager::KeySpiceLeapsecondKernel << "'");
 		return false;
 	}
 	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
@@ -454,6 +503,23 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         scripts.getValue(key, scriptPath);
         std::string&& absoluteScriptPath = absPath(scriptPath);
         _engine->scriptEngine()->runScriptFile(absoluteScriptPath);
+        
+        //@JK
+        //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
+        std::ifstream scriptFile;
+        scriptFile.open(absoluteScriptPath.c_str());
+        std::string line;
+       
+        while(getline(scriptFile,line)){
+            //valid line and not a comment
+            if(line.size() > 0 && line.at(0) != '-'){
+                std::string lib, func;
+                if(_engine->scriptEngine()->parseLibraryAndFunctionNames(lib, func, line) &&
+                   _engine->scriptEngine()->shouldScriptBeSent(lib, func)){
+                    _engine->scriptEngine()->cacheScript(lib, func, line);
+                }
+            }
+        }
     }
 }
 
@@ -461,23 +527,22 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
 void OpenSpaceEngine::runStartupScripts() {
 	ghoul::Dictionary scripts;
 	configurationManager()->getValue(
-		constants::configurationmanager::keyStartupScript, scripts);
+		ConfigurationManager::KeyStartupScript, scripts);
     runScripts(scripts);
 }
 
 void OpenSpaceEngine::runSettingsScripts() {
     ghoul::Dictionary scripts;
     configurationManager()->getValue(
-        constants::configurationmanager::keySettingsScript, scripts);
+        ConfigurationManager::KeySettingsScript, scripts);
     runScripts(scripts);
 }
-
 
 void OpenSpaceEngine::loadFonts() {
 	sgct_text::FontManager::FontPath local = sgct_text::FontManager::FontPath::FontPath_Local;
 
 	ghoul::Dictionary fonts;
-	configurationManager()->getValue(constants::configurationmanager::keyFonts, fonts);
+	configurationManager()->getValue(ConfigurationManager::KeyFonts, fonts);
 
 	for (const std::string& key : fonts.keys()) {
 		std::string font;
@@ -494,18 +559,12 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::configureLogging() {
-	using constants::configurationmanager::keyLogLevel;
-	using constants::configurationmanager::keyLogs;
-
-	if (configurationManager()->hasKeyAndValue<std::string>(keyLogLevel)) {
-		using constants::configurationmanager::keyLogLevel;
-		using constants::configurationmanager::keyLogImmediateFlush;
-
+	if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyLogLevel)) {
 		std::string logLevel;
-		configurationManager()->getValue(keyLogLevel, logLevel);
+		configurationManager()->getValue(ConfigurationManager::KeyLogLevel, logLevel);
 
 		bool immediateFlush = false;
-		configurationManager()->getValue(keyLogImmediateFlush, immediateFlush);
+		configurationManager()->getValue(ConfigurationManager::KeyLogImmediateFlush, immediateFlush);
 
 		LogManager::LogLevel level = LogManager::levelFromString(logLevel);
 		LogManager::deinitialize();
@@ -513,9 +572,9 @@ void OpenSpaceEngine::configureLogging() {
 		LogMgr.addLog(new ConsoleLog);
 	}
 
-	if (configurationManager()->hasKeyAndValue<ghoul::Dictionary>(keyLogs)) {
+	if (configurationManager()->hasKeyAndValue<ghoul::Dictionary>(ConfigurationManager::KeyLogs)) {
 		ghoul::Dictionary logs;
-		configurationManager()->getValue(keyLogs, logs);
+		configurationManager()->getValue(ConfigurationManager::KeyLogs, logs);
 
 		for (size_t i = 1; i <= logs.size(); ++i) {
 			ghoul::Dictionary logInfo;
@@ -560,8 +619,11 @@ gui::GUI* OpenSpaceEngine::gui() {
 }
 
 bool OpenSpaceEngine::initializeGL() {
+    LINFO("Initializing Rendering Engine");
     bool success = _renderEngine->initializeGL();
+    LINFO("Initializing OnScreen GUI GL");
 	_gui->initializeGL();
+    LINFO("Finished initializing OpenGL");
 	return success;
 }
 
@@ -572,7 +634,15 @@ bool OpenSpaceEngine::isMaster(){
 void OpenSpaceEngine::setMaster(bool master){
 	_isMaster = master;
 }
+    
+double OpenSpaceEngine::runTime(){
+    return _runTime;
+}
 
+void OpenSpaceEngine::setRunTime(double d){
+    _runTime = d;
+}
+    
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (_isMaster) {
@@ -583,10 +653,12 @@ void OpenSpaceEngine::preSynchronization() {
 		Time::ref().preSynchronization();
 		
         _interactionHandler->update(dt);
-        //_interactionHandler.lockControls();		
 
 		_scriptEngine->preSynchronization();			
-		_renderEngine->preSynchronization();
+		
+        _renderEngine->preSynchronization();
+        
+        _parallelConnection->preSynchronization();
     }
 }
 
@@ -629,7 +701,7 @@ void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 
 }
 
 void OpenSpaceEngine::postDraw() {
-	if (_isMaster)
+	//if (_isMaster)
         //_interactionHandler.unlockControls();
 
 	_renderEngine->postDraw();
@@ -643,7 +715,7 @@ void OpenSpaceEngine::keyboardCallback(int key, int action) {
 				return;
 		}
 
-		if (key == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
+		if (static_cast<unsigned int>(key) == _console->commandInputButton() && (action == SGCT_PRESS || action == SGCT_REPEAT))
 			_console->toggleVisibility();
 
 		if (!_console->isVisible()) {
@@ -681,13 +753,13 @@ void OpenSpaceEngine::mouseButtonCallback(int key, int action) {
 	}
 }
 
-void OpenSpaceEngine::mousePositionCallback(int x, int y) {
+void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 	if (_isMaster) {
 	    _interactionHandler->mousePositionCallback(x, y);
 	}
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(int pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 	if (_isMaster) {
 		if (_gui->isEnabled()) {
 			bool isConsumed = _gui->mouseWheelCallback(pos);
@@ -740,6 +812,20 @@ void OpenSpaceEngine::disableBarrier() {
 
 NetworkEngine* OpenSpaceEngine::networkEngine() {
     return _networkEngine;
+}
+
+ModuleEngine* OpenSpaceEngine::moduleEngine() {
+    return _moduleEngine;
+}
+    
+network::ParallelConnection* OpenSpaceEngine::parallelConnection() {
+    ghoul_assert(_parallelConnection != nullptr, "ParallelConnection is nullptr");
+    return _parallelConnection;
+}
+    
+properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
+    ghoul_assert(_globalPropertyNamespace, "Global Property Namespace");
+    return _globalPropertyNamespace;
 }
 
 }  // namespace openspace

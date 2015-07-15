@@ -159,9 +159,8 @@ private:
     
     glm::vec3 _lookUp;
 
-	//cluster variables
-	std::mutex _syncMutex;
-
+	std::mutex _mutex;
+	
 	//local variables
 	glm::mat4 _localViewRotationMatrix;
 	glm::vec2 _localScaling;

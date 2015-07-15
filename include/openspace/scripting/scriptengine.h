@@ -28,6 +28,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 #include <set>
+#include <map>
 
 /**
  * \defgroup LuaScripts Lua Scripts
@@ -46,6 +47,17 @@ public:
 			lua_CFunction function;
 			std::string argumentText;
 			std::string helpText;
+            bool parallelShared;
+            
+            Function(std::string n, lua_CFunction f, std::string a, std::string h , bool ps = false):
+            name(n),
+            function(f),
+            argumentText(a),
+            helpText(h),
+            parallelShared(ps)
+            {
+            
+            }
 		};
         std::string name;
 		std::vector<Function> functions;
@@ -78,8 +90,15 @@ public:
 	void preSynchronization();
 
 	void queueScript(const std::string &script);
+    
+    std::vector<std::string> cachedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
+    
+    //parallel functions
+    bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
+    bool shouldScriptBeSent(const std::string &library, const std::string &function);
+    void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
 private:
 	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
@@ -92,12 +111,17 @@ private:
     
     lua_State* _state;
     std::set<LuaLibrary> _registeredLibraries;
-
+    
 	//sync variables
 	std::mutex _mutex;
 	std::vector<std::string> _queuedScripts;
 	std::vector<std::string> _receivedScripts;
 	std::string _currentSyncedScript;
+    
+    //parallel variables
+    std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
+    std::mutex _cachedScriptsMutex;
+    
 };
 
 } // namespace scripting

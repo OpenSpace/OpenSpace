@@ -31,6 +31,28 @@ namespace openspace {
 
 class ConfigurationManager : public ghoul::Dictionary {
 public:
+    static const std::string KeyPaths;
+    static const std::string KeyCache;
+    static const std::string KeyCachePath;
+    static const std::string KeyFonts;
+    static const std::string KeyConfigSgct;
+    static const std::string KeyLuaDocumentationType;
+    static const std::string KeyLuaDocumentationFile;
+    static const std::string KeyPropertyDocumentationType;
+    static const std::string KeyPropertyDocumentationFile;
+    static const std::string KeyConfigScene;
+    static const std::string KeyEnableGui;
+    static const std::string KeyStartupScript;
+    static const std::string KeySettingsScript;
+    static const std::string KeySpiceTimeKernel;
+    static const std::string KeySpiceLeapsecondKernel;
+    static const std::string KeyLogLevel;
+    static const std::string KeyLogImmediateFlush;
+    static const std::string KeyLogs;
+    static const std::string KeyCapabilitiesVerbosity;
+    static const std::string KeyDisableMasterRendering;
+    static const std::string KeyDownloadRequestURL;
+
 	bool loadFromFile(const std::string& filename);
 
 private:

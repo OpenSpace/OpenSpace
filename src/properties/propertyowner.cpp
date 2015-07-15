@@ -50,19 +50,16 @@ PropertyOwner::PropertyOwner()
 {
 }
 
-PropertyOwner::~PropertyOwner()
-{
+PropertyOwner::~PropertyOwner() {
 	_properties.clear();
 	_subOwners.clear();
 }
 
-const std::vector<Property*>& PropertyOwner::properties() const
-{
+const std::vector<Property*>& PropertyOwner::properties() const {
     return _properties;
 }
 
-std::vector<Property*> PropertyOwner::propertiesRecursive() const
-{
+std::vector<Property*> PropertyOwner::propertiesRecursive() const {
 	std::vector<Property*> props = properties();
 
 	for (const PropertyOwner* owner : _subOwners) {
@@ -73,8 +70,7 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const
 	return std::move(props);
 }
 
-Property* PropertyOwner::property(const std::string& id) const
-{
+Property* PropertyOwner::property(const std::string& id) const {
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
 
 	// As the _properties list is sorted, just finding the lower bound is sufficient
@@ -138,13 +134,11 @@ bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
     return propertySubOwner(name) != nullptr;
 }
 
-void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name)
-{
+void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) {
     _groupNames[std::move(groupID)] = std::move(name);
 }
     
-const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const
-{
+const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const {
     auto it = _groupNames.find(groupID);
     if (it == _groupNames.end())
         return groupID;
@@ -193,8 +187,7 @@ void PropertyOwner::addProperty(Property* prop)
     }
 }
 
-void PropertyOwner::addProperty(Property& prop)
-{
+void PropertyOwner::addProperty(Property& prop) {
     addProperty(&prop);
 }
     
@@ -241,8 +234,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& ow
     addPropertySubOwner(&owner);
 }
 
-void PropertyOwner::removeProperty(Property* prop)
-{
+void PropertyOwner::removeProperty(Property* prop) {
     assert(prop != nullptr);
 
     // See if we can find the identifier of the property to add in the properties list
@@ -261,8 +253,7 @@ void PropertyOwner::removeProperty(Property* prop)
                                             << "' not found for removal.");
 }
 
-void PropertyOwner::removeProperty(Property& prop)
-{
+void PropertyOwner::removeProperty(Property& prop) {
     removeProperty(&prop);
 }
     
@@ -288,13 +279,11 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
     removePropertySubOwner(&owner);
 }
 
-void PropertyOwner::setName(std::string name)
-{
+void PropertyOwner::setName(std::string name) {
     _name = std::move(name);
 }
 
-const std::string& PropertyOwner::name() const
-{
+const std::string& PropertyOwner::name() const {
     return _name;
 }
 

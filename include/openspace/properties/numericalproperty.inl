@@ -29,22 +29,29 @@ namespace properties {
 
 #define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE)                              \
     typedef NumericalProperty<TYPE> CLASS_NAME;                                          \
+                                                                                         \
     template <>                                                                          \
     std::string PropertyDelegate<NumericalProperty<TYPE>>::className();                  \
+                                                                                         \
     template <>                                                                          \
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className();                   \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>();                \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>();         \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>();         \
+                                                                                         \
 	template <>																		     \
 	template <>																			 \
 	TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>();		 \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue(lua_State* state,        \
@@ -64,61 +71,92 @@ namespace properties {
     template <>                                                                          \
     int PropertyDelegate<TemplateProperty<TYPE>>::typeLua();                             \
     template <>                                                                          \
-    int PropertyDelegate<NumericalProperty<TYPE>>::typeLua();
+    int PropertyDelegate<NumericalProperty<TYPE>>::typeLua();                            \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
+                                                              bool& success);            \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string value,        \
+                                                              bool& success);            \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
+                                                            TYPE inValue);               \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& outValue,      \
+                                                            TYPE inValue);
+
 
 #define REGISTER_NUMERICALPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE,               \
                                           DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE,          \
                                           DEFAULT_STEPPING, FROM_LUA_LAMBDA_EXPRESSION,  \
-                                          TO_LUA_LAMBDA_EXPRESSION, LUA_TYPE)            \
+                                          TO_LUA_LAMBDA_EXPRESSION,                      \
+                                          FROM_STRING_LAMBDA_EXPRESSION,                 \
+                                          TO_STRING_LAMBDA_EXPRESSION, LUA_TYPE)         \
     template <>                                                                          \
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className()                    \
     {                                                                                    \
         return #CLASS_NAME;                                                              \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     std::string PropertyDelegate<NumericalProperty<TYPE>>::className()                   \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::className();                    \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultValue<TYPE>()                 \
     {                                                                                    \
         return DEFAULT_VALUE;                                                            \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMinimumValue<TYPE>()          \
     {                                                                                    \
         return DEFAULT_MIN_VALUE;                                                        \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>()          \
     {                                                                                    \
         return DEFAULT_MAX_VALUE;                                                        \
 	}                                                                                    \
+                                                                                         \
 	template <>																		     \
 	template <>																			 \
 	TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>()		 \
 	{ 																					 \
 		return DEFAULT_STEPPING;														 \
 	}																					 \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State * state, \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state,  \
                                                                       bool& success)     \
     {                                                                                    \
         return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(                  \
-          lua_State * state, bool& success)                                              \
+          lua_State* state, bool& success)                                               \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(state,       \
                                                                             success);    \
 	}                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,   \
@@ -126,6 +164,7 @@ namespace properties {
     {                                                                                    \
         return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
     }                                                                                    \
+                                                                                         \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<NumericalProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,  \
@@ -133,15 +172,50 @@ namespace properties {
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, value); \
     }                                                                                    \
+                                                                                         \
     template <>                                                                          \
     int PropertyDelegate<TemplateProperty<TYPE>>::typeLua()                              \
     {                                                                                    \
         return LUA_TYPE;                                                                 \
     }                                                                                    \
+                                                                                         \
     template <>                                                                          \
     int PropertyDelegate<NumericalProperty<TYPE>>::typeLua()                             \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::typeLua();                      \
+    }                                                                                    \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
+                                                              bool& success)             \
+    {                                                                                    \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
+    }                                                                                    \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string value,        \
+                                                              bool& success)             \
+    {                                                                                    \
+        return PropertyDelegate<TemplateProperty<TYPE>>::fromString<TYPE>(value,         \
+                                                                          success);      \
+    }                                                                                    \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
+                                                            TYPE inValue)                \
+    {                                                                                    \
+        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+    }                                                                                    \
+                                                                                         \
+    template <>                                                                          \
+    template <>                                                                          \
+    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& outValue,      \
+                                                             TYPE inValue)               \
+    {                                                                                    \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toString(outValue, inValue);    \
     }
 
 
@@ -206,7 +280,7 @@ std::string NumericalProperty<T>::className() const {
 }
 
 template <typename T>
-bool NumericalProperty<T>::setLua(lua_State* state)
+bool NumericalProperty<T>::setLuaValue(lua_State* state)
 {
 	bool success = false;
 	T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
@@ -216,7 +290,7 @@ bool NumericalProperty<T>::setLua(lua_State* state)
 }
 
 template <typename T>
-bool NumericalProperty<T>::getLua(lua_State* state) const
+bool NumericalProperty<T>::getLuaValue(lua_State* state) const
 {
 	bool success = PropertyDelegate<NumericalProperty<T>>::template toLuaValue<T>(state, TemplateProperty<T>::_value);
 	return success;
@@ -225,6 +299,21 @@ bool NumericalProperty<T>::getLua(lua_State* state) const
 template <typename T>
 int NumericalProperty<T>::typeLua() const {
 	return PropertyDelegate<NumericalProperty<T>>::typeLua();
+}
+
+template <typename T>
+bool NumericalProperty<T>::getStringValue(std::string& value) const {
+    bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(value, TemplateProperty<T>::_value);
+    return success;
+}
+
+template <typename T>
+bool NumericalProperty<T>::setStringValue(std::string value) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(value, success);
+    if (success)
+        TemplateProperty<T>::set(boost::any(thisValue));
+    return success;
 }
 
 template <typename T>

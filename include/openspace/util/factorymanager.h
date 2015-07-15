@@ -53,12 +53,12 @@ public:
     ghoul::TemplateFactory<T>* factory() const;
 
 private:
-    FactoryManager();
+    FactoryManager() = default;
     ~FactoryManager();
 
     FactoryManager(const FactoryManager& c) = delete;
 
-    static FactoryManager* _manager;  ///<Singleton member
+    static FactoryManager* _manager;  ///< Singleton member
 
     std::vector<ghoul::TemplateFactoryBase*> _factories;
 };

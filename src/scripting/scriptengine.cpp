@@ -27,138 +27,15 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/syncbuffer.h>
-
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/network/parallelconnection.h>
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
 #include <iomanip>
 
+#include "scriptengine_lua.inl"
+
 namespace openspace {
-
-namespace luascriptfunctions {
-
-	int printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
-		using ghoul::lua::luaTypeToString;
-		const std::string _loggerCat = "print";
-
-		int nArguments = lua_gettop(L);
-		if (nArguments != 1)
-			return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-		const int type = lua_type(L, -1);
-		switch (type) {
-			case LUA_TNONE:
-			case LUA_TLIGHTUSERDATA:
-			case LUA_TTABLE:
-			case LUA_TFUNCTION:
-			case LUA_TUSERDATA:
-			case LUA_TTHREAD:
-				LOG(level, "Function parameter was of type '" <<
-					 luaTypeToString(type) << "'");
-			case LUA_TNIL:
-				break;
-			case LUA_TBOOLEAN:
-				LOG(level, lua_toboolean(L, -1));
-				break;
-			case LUA_TNUMBER:
-				LOG(level, lua_tonumber(L, -1));
-				break;
-			case LUA_TSTRING:
-				LOG(level, lua_tostring(L, -1));
-				break;
-		}
-		return 0;
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * printDebug(*):
-	 * Logs the passed value to the installed LogManager with a LogLevel of 'Debug'.
-	 * For Boolean, numbers, and strings, the internal values are printed, for all other
-	 * types, the type is printed instead
-	 */
-	int printDebug(lua_State* L) {
-		return printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * printInfo(*):
-	 * Logs the passed value to the installed LogManager with a LogLevel of 'Info'.
-	 * For Boolean, numbers, and strings, the internal values are printed, for all other
-	 * types, the type is printed instead
-	 */
-	int printInfo(lua_State* L) {
-		return printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * printWarning(*):
-	 * Logs the passed value to the installed LogManager with a LogLevel of 'Warning'.
-	 * For Boolean, numbers, and strings, the internal values are printed, for all other
-	 * types, the type is printed instead
-	 */
-	int printWarning(lua_State* L) {
-		return printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * printError(*):
-	 * Logs the passed value to the installed LogManager with a LogLevel of 'Error'.
-	 * For Boolean, numbers, and strings, the internal values are printed, for all other
-	 * types, the type is printed instead
-	 */
-	int printError(lua_State* L) {
-		return printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * printFatal(*):
-	 * Logs the passed value to the installed LogManager with a LogLevel of 'Fatal'.
-	 * For Boolean, numbers, and strings, the internal values are printed, for all other
-	 * types, the type is printed instead
-	 */
-	int printFatal(lua_State* L) {
-		return printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * absPath(string):
-	 * Passes the argument to FileSystem::absolutePath, which resolves occuring path
-	 * tokens and returns the absolute path.
-	 */
-	int absolutePath(lua_State* L) {
-		int nArguments = lua_gettop(L);
-		if (nArguments != 1)
-			return luaL_error(L, "Expected %d arguments, got %d", 1, nArguments);
-
-		std::string path = luaL_checkstring(L, -1);
-		path = absPath(path);
-		lua_pushstring(L, path.c_str());
-		return 1;
-	}
-
-	/**
-	 * \ingroup LuaScripts
-	 * setPathToken(string, string):
-	 * Registers the path token provided by the first argument to the path in the second
-	 * argument. If the path token already exists, it will be silently overridden.
-	 */
-	int setPathToken(lua_State* L) {
-		int nArguments = lua_gettop(L);
-		if (nArguments != 2)
-			return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-
-		std::string pathToken = luaL_checkstring(L, -1);
-		std::string path = luaL_checkstring(L, -2);
-		FileSys.registerPathToken(pathToken, path, true);
-		return 0;
-	}
-
-} // namespace luascriptfunctions
 
 namespace scripting {
 
@@ -264,7 +141,7 @@ bool ScriptEngine::runScript(const std::string& script) {
 		LWARNING("Script was empty");
 		return false;
 	}
-        
+    
     int status = luaL_loadstring(_state, script.c_str());
     if (status != LUA_OK) {
         LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
@@ -278,9 +155,20 @@ bool ScriptEngine::runScript(const std::string& script) {
         return false;
     }
     
+    //if we're currently hosting the parallel session, find out if script should be synchronized.
+	if (OsEng.parallelConnection()->isHost()){
+
+		std::string lib, func;
+		if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
+//            OsEng.parallelConnection()->sendScript(script);
+//            cacheScript(lib, func, script);
+		}
+	}
+    
     return true;
 }
-
+    
+    
 bool ScriptEngine::runScriptFile(const std::string& filename) {
     if (filename.empty()) {
         LWARNING("Filename was empty");
@@ -290,20 +178,117 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LERROR("Script with name '" << filename << "' did not exist");
         return false;
     }
-
-	int status = luaL_loadfile(_state, filename.c_str());
-	if (status != LUA_OK) {
+    
+    int status = luaL_loadfile(_state, filename.c_str());
+    if (status != LUA_OK) {
         LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
         return false;
     }
-
-	LDEBUG("Executing script '" << filename << "'");
+    
+    LDEBUG("Executing script '" << filename << "'");
     if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
         LERROR("Error executing script: " << lua_tostring(_state, -1));
         return false;
     }
-    
+
     return true;
+}
+
+bool ScriptEngine::shouldScriptBeSent(const std::string &library, const std::string &function){
+
+    std::set<LuaLibrary>::const_iterator libit;
+    for (libit = _registeredLibraries.cbegin();
+         libit != _registeredLibraries.cend();
+         ++libit){
+        if (libit->name.compare(library) == 0){
+            break;
+        }
+    }
+    
+    std::vector<scripting::ScriptEngine::LuaLibrary::Function>::const_iterator funcit;
+    //library was found
+    if (libit != _registeredLibraries.cend()){
+        for (funcit = libit->functions.cbegin();
+             funcit != libit->functions.cend();
+             ++funcit){
+            //function was found!
+            if (funcit->name.compare(function) == 0){
+                //is the function of a type that should be shared via parallel connection?
+                return funcit->parallelShared;
+            }
+        }
+    }
+    
+    return false;
+}
+    
+void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
+    _cachedScriptsMutex.lock();
+    _cachedScripts[library][function] = script;
+    _cachedScriptsMutex.unlock();
+}
+    
+std::vector<std::string> ScriptEngine::cachedScripts(){
+    _cachedScriptsMutex.lock();
+    
+    std::vector<std::string> retVal;
+    std::map<std::string, std::map<std::string, std::string>>::const_iterator outerIt;
+    std::map<std::string, std::string>::const_iterator innerIt;
+    for(outerIt = _cachedScripts.cbegin();
+        outerIt != _cachedScripts.cend();
+        ++outerIt){
+        for(innerIt = outerIt->second.cbegin();
+            innerIt != outerIt->second.cend();
+            ++innerIt){
+			retVal.push_back(innerIt->second);
+        }
+    }
+    
+    _cachedScriptsMutex.unlock();
+
+	return retVal;
+}
+    
+bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
+	
+	//"deconstruct the script to find library and function name
+	//assuming a script looks like: "openspace.library.function()"
+	//or openspace.funcion()
+	std::string sub;
+	library.clear();
+	function.clear();
+	//find first "."
+	std::size_t pos = script.find(".");
+	
+	if (pos != std::string::npos){
+		//strip "openspace."
+		sub = script.substr(pos + 1, script.size());
+		pos = sub.find(".");
+		//one more "." was found, if the "." comes before first "(" we have a library name
+		if (pos != std::string::npos && pos < sub.find("(")){
+			//assing library name
+			library = sub.substr(0, pos);
+			//strip "library."
+			sub = sub.substr(pos + 1, sub.size());
+
+			pos = sub.find("(");
+			if (pos != std::string::npos && pos > 0){
+				//strip the () and we're left with function name
+				function = sub.substr(0, pos);
+			}
+		}
+		else{
+			//no more "." was found, we have the case of "openspace.funcion()"
+			pos = sub.find("(");
+			if (pos != std::string::npos && pos > 0){
+				//strip the () and we're left with function name
+				function = sub.substr(0, pos);
+			}
+		}
+	}
+
+	//if we found a function all is good
+	return !function.empty();
 }
 
 bool ScriptEngine::hasLibrary(const std::string& name)
@@ -625,12 +610,19 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
 }
 
 void ScriptEngine::postSynchronizationPreDraw(){
+	
+	std::vector<std::string> scripts;
+
 	_mutex.lock();
-	while(!_receivedScripts.empty()){
-		runScript(_receivedScripts.back());
-		_receivedScripts.pop_back();
-	}
+	scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
+	_receivedScripts.clear();
 	_mutex.unlock();
+	
+	while (!scripts.empty()){
+		runScript(scripts.back());
+		scripts.pop_back();
+	}
+	
 }
 
 void ScriptEngine::preSynchronization(){
@@ -651,14 +643,13 @@ void ScriptEngine::preSynchronization(){
 void ScriptEngine::queueScript(const std::string &script){
 	if (script.empty())
 		return;
-
+    
 	_mutex.lock();
 
 	_queuedScripts.insert(_queuedScripts.begin(), script);
 
 	_mutex.unlock();
 }
-
 
 } // namespace scripting
 } // namespace openspace

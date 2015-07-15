@@ -46,6 +46,14 @@ class ScreenLog;
 
 class RenderEngine {
 public:
+    enum class ABufferImplementation {
+        FrameBuffer = 0,
+        SingleLinked,
+        Fixed,
+        Dynamic,
+        Invalid
+    };
+
 	static const std::string PerformanceMeasurementSharedData;
 
 	RenderEngine();
@@ -57,7 +65,8 @@ public:
     Scene* scene();
 
     Camera* camera() const;
-    ABuffer* abuffer() const;
+    ABuffer* aBuffer() const;
+    ABufferImplementation aBufferImplementation() const;
 
 	// sgct wrapped functions
     bool initializeGL();
@@ -108,11 +117,14 @@ public:
     } _onScreenInformation;
 
 private:
+    ABufferImplementation aBufferFromString(const std::string& impl);
+
 	void storePerformanceMeasurements();
 
 	Camera* _mainCamera;
 	Scene* _sceneGraph;
 	ABuffer* _abuffer;
+    ABufferImplementation _abufferImplementation;
 	ScreenLog* _log;
 
 	bool _showInfo;

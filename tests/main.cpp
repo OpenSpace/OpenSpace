@@ -53,28 +53,8 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    std::string glVersion;
-    openspace::OpenSpaceEngine::create(argc, argv, args, glVersion);
+    openspace::OpenSpaceEngine::create(argc, argv, args);
 
-    
-    //LogManager::initialize(LogManager::LogLevel::Debug);
-    //LogMgr.addLog(new ConsoleLog);
-
-    //FileSystem::initialize();
-    //std::string configurationFilePath = "";
-    //LDEBUG("Finding configuration");
-    //if (!openspace::OpenSpaceEngine::findConfiguration(configurationFilePath)) {
-    //    LFATAL("Could not find OpenSpace configuration file!");
-    //    assert(false);
-    //}
-	////LINFO("Configuration file found: " << FileSys.absolutePath(configurationFilePath));
-
-	//openspace::ConfigurationManager manager;
-	//manager.loadFromFile(configurationFilePath);
-
-    
-    //openspace::FactoryManager::initialize();
-    
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

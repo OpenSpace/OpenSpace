@@ -27,7 +27,6 @@
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/gui/gui.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -53,104 +52,27 @@
 #include <string>
 #include <chrono>
 
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+#include <modules/onscreengui/include/gui.h>
+#endif
+
+#include "scene_lua.inl"
+
 namespace {
-    const std::string _loggerCat = "SceneGraph";
+    const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
 	const std::string _defaultCommonDirectory = "common";
 	const std::string _commonModuleToken = "${COMMON_MODULE}";
+
+    const std::string KeyCamera = "Camera";
+    const std::string KeyFocusObject = "Focus";
+    const std::string KeyPositionObject = "Position";
+    const std::string KeyViewOffset = "Offset";
 }
 
 namespace openspace {
 
-namespace luascriptfunctions {
-
-/**
- * \ingroup LuaScripts
- * setPropertyValue(string, *):
- * Sets the property identified by the URI in the first argument to the value passed to
- * the second argument. The type of the second argument is arbitrary, but it must agree
- * with the type the denoted Property expects
- */
-int property_setValue(lua_State* L) {
-    static const std::string _loggerCat = "property_setValue";
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
-
-	std::string uri = luaL_checkstring(L, -2);
-	const int type = lua_type(L, -1);
-
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-        LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
-        return 0;
-    }
-
-
-	if (type != prop->typeLua()) {
-        LERROR(errorLocation(L) << "Property '" << uri <<
-            "' does not accept input of type '" << luaTypeToString(type) <<
-            "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
-        return 0;
-    }
-	else
-		prop->setLua(L);
-
-	return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
-int property_getValue(lua_State* L) {
-    static const std::string _loggerCat = "property_getValue";
-    using ghoul::lua::errorLocation;
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
-
-	std::string uri = luaL_checkstring(L, -1);
-
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
-        LERROR(errorLocation(L) << "Property with URL '" << uri << "' was not found");
-        return 0;
-    }
-	else
-		prop->getLua(L);
-	return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
-int loadScene(lua_State* L) {
-    static const std::string _loggerCat = "loadScene";
-
-	int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
-
-	std::string sceneFile = luaL_checkstring(L, -1);
-
-	OsEng.renderEngine()->scene()->scheduleLoadSceneFile(sceneFile);
-
-	return 0;
-}
-
-} // namespace luascriptfunctions
-
-Scene::Scene()
-    : _focus(SceneGraphNode::RootNodeName)
-{
-}
+Scene::Scene() : _focus(SceneGraphNode::RootNodeName) {}
 
 Scene::~Scene() {
     deinitialize();
@@ -170,11 +92,6 @@ bool Scene::initialize() {
 		_programUpdateLock.unlock();
 	};
 
-	// Start Timing for building SceneGraph shaders
-	typedef std::chrono::high_resolution_clock clock_;
-	typedef std::chrono::duration<double, std::ratio<1> > second_;
-	std::chrono::time_point<clock_> beginning(clock_::now()); 
-
 	// fboPassthrough program
 	tmpProgram = ProgramObject::Build("fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
@@ -184,15 +101,6 @@ bool Scene::initialize() {
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
 
-	// projection program
-	tmpProgram = ProgramObject::Build("projectiveProgram", 
-		"${SHADERS}/projectiveTexture_vs.glsl",
-		"${SHADERS}/projectiveTexture_fs.glsl"); 
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("projectiveProgram", tmpProgram);
-	
 	// pscstandard
 	tmpProgram = ProgramObject::Build("pscstandard",
 		"${SHADERS}/pscstandard_vs.glsl",
@@ -201,16 +109,6 @@ bool Scene::initialize() {
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
-
-
-	// NH shader
-	tmpProgram = ProgramObject::Build("ModelProgram",
-		"${SHADERS}/model_vs.glsl",
-		"${SHADERS}/model_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("GenericModelShader", tmpProgram);
 
 	// Night texture program
 	tmpProgram = ProgramObject::Build("nightTextureProgram",
@@ -221,33 +119,6 @@ bool Scene::initialize() {
 	_programs.push_back(tmpProgram);
 	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
 
-	// Fov Program
-	tmpProgram = ProgramObject::Build("FovProgram",
-		"${SHADERS}/fov_vs.glsl",
-		"${SHADERS}/fov_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("FovProgram", tmpProgram);
-
-	// Plane Program
-	tmpProgram = ProgramObject::Build("planeProgram",
-		"${SHADERS}/modules/plane/plane_vs.glsl",
-		"${SHADERS}/modules/plane/plane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("planeProgram", tmpProgram);
-
-	// Image Plane Program
-	tmpProgram = ProgramObject::Build("imagePlaneProgram",
-		"${SHADERS}/modules/imageplane/imageplane_vs.glsl",
-		"${SHADERS}/modules/imageplane/imageplane_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("imagePlaneProgram", tmpProgram);
-
     // RaycastProgram
 	tmpProgram = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
@@ -256,20 +127,6 @@ bool Scene::initialize() {
 	tmpProgram->setProgramObjectCallback(cb);
 	_programs.push_back(tmpProgram);
     OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
-
-	// Grid program
-	tmpProgram = ProgramObject::Build("Grid",
-		"${SHADERS}/grid_vs.glsl",
-		"${SHADERS}/grid_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("GridProgram", tmpProgram);
-
-	// Done building shaders
-    double elapsed = std::chrono::duration_cast<second_>(clock_::now()-beginning).count();
-    LINFO("Time to load scene graph shaders: " << elapsed << " seconds");
-
 
     return true;
 }
@@ -292,9 +149,7 @@ void Scene::update(const UpdateData& data) {
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-#ifndef __APPLE__
-		OsEng.renderEngine()->abuffer()->invalidateABuffer();
-#endif
+		OsEng.renderEngine()->aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes())
         node->update(data);
@@ -350,70 +205,19 @@ void Scene::clearSceneGraph() {
 }
 
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
- //   using ghoul::Dictionary;
- //   using ghoul::lua::loadDictionaryFromFile;
-
-	//if (!FileSys.fileExists(sceneDescriptionFilePath)) {
-	//	LFATAL("Scene description file '" << sceneDescriptionFilePath << "' not found");
-	//	return false;
-	//}
-
- //   LDEBUG("Loading scenegraph nodes");
- //   if (_root != nullptr) {
- //       LFATAL("Scenegraph already loaded");
- //       return false;
- //   }
-
- //   OsEng.disableBarrier();
-
- //   _root = new SceneGraphNode();
- //   _root->setName(SceneGraphNode::RootNodeName);
- //   _nodes.push_back(_root);
- //   _allNodes.emplace(SceneGraphNode::RootNodeName, _root);
- //   _focus = SceneGraphNode::RootNodeName;
-
- //   bool success = SceneGraphLoader::load(sceneDescriptionFilePath, _nodes);
-
-
     ghoul::Dictionary dictionary;
-	////load default.scene 
     ghoul::lua::loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
-
-	//std::string&& sceneDescriptionDirectory =
-	//	ghoul::filesystem::File(sceneDescriptionFilePath).directoryName();
-	//std::string moduleDirectory(".");
-	//dictionary.getValue(constants::scenegraph::keyPathScene, moduleDirectory);
-
-	//// The scene path could either be an absolute or relative path to the description
-	//// paths directory
-	//std::string&& relativeCandidate = sceneDescriptionDirectory +
-	//	ghoul::filesystem::FileSystem::PathSeparator + moduleDirectory;
-	//std::string&& absoluteCandidate = absPath(moduleDirectory);
-
-	//if (FileSys.directoryExists(relativeCandidate))
-	//	moduleDirectory = relativeCandidate;
-	//else if (FileSys.directoryExists(absoluteCandidate))
-	//	moduleDirectory = absoluteCandidate;
-	//else {
-	//	LFATAL("The '" << constants::scenegraph::keyPathScene << "' pointed to a "
-	//		"path '" << moduleDirectory << "' that did not exist");
- //       OsEng.enableBarrier();
-	//	return false;
-	//}
-
-	//// Load the modules/scenegraph nodes
-	//loadModules(moduleDirectory, dictionary);
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     ghoul::Dictionary cameraDictionary;
-    if (dictionary.getValue(constants::scenegraph::keyCamera, cameraDictionary)) {
+    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
         LDEBUG("Camera dictionary found");
         std::string focus;
 
-        if (cameraDictionary.hasKey(constants::scenegraph::keyFocusObject)
-            && cameraDictionary.getValue(constants::scenegraph::keyFocusObject, focus))
+        if (cameraDictionary.hasKey(KeyFocusObject)
+            && cameraDictionary.getValue(KeyFocusObject, focus))
         {
             auto focusIterator = std::find_if(
                 _graph.nodes().begin(),
@@ -427,8 +231,10 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
                 _focus = focus;
                 LDEBUG("Setting camera focus to '" << _focus << "'");
             }
-            else
+            else {
                 LERROR("Could not find focus object '" << focus << "'");
+                _focus = "Root";
+            }
         }
     }
 
@@ -508,8 +314,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         OsEng.interactionHandler()->setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
-	if (cameraDictionary.hasKey(constants::scenegraph::keyPositionObject)
-		&& cameraDictionary.getValue(constants::scenegraph::keyPositionObject, position)) {
+	if (cameraDictionary.hasKey(KeyPositionObject)
+		&& cameraDictionary.getValue(KeyPositionObject, position)) {
 
 		LDEBUG("Camera position is (" 
 			<< position[0] << ", " 
@@ -523,7 +329,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
 	// the camera position
 	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
-	//psc relative = fn->worldPosition() - c->position();
+    // Check crash for when fn == nullptr
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
 
@@ -532,8 +338,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	c->setScaling(cameraScaling);
 
 	glm::vec3 viewOffset;
-	if (cameraDictionary.hasKey(constants::scenegraph::keyViewOffset)
-		&& cameraDictionary.getValue(constants::scenegraph::keyViewOffset, viewOffset)) {
+	if (cameraDictionary.hasKey(KeyViewOffset)
+		&& cameraDictionary.getValue(KeyViewOffset, viewOffset)) {
 	    glm::quat rot = glm::quat(viewOffset);
 	    c->rotate(rot);
 	}
@@ -547,15 +353,13 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	}
 
     // If a LuaDocumentationFile was specified, generate it now
-    using constants::configurationmanager::keyPropertyDocumentationType;
-    using constants::configurationmanager::keyPropertyDocumentationFile;
-    const bool hasType = OsEng.configurationManager()->hasKey(keyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager()->hasKey(keyPropertyDocumentationFile);
+    const bool hasType = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager()->getValue(keyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager()->getValue(keyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
@@ -765,7 +569,8 @@ scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
 				"string, *",
 				"Sets a property identified by the URI in "
 				"the first argument. The second argument can be any type, but it has to "
-				" agree with the type that the property expects"
+				" agree with the type that the property expects",
+                true
 			},
 			{
 				"getPropertyValue",

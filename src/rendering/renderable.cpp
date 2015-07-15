@@ -36,26 +36,25 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-const std::string _loggerCat = "Renderable";
-const std::string keyBody = "Body";
-const std::string keyStart = "StartTime";
-const std::string keyEnd = "EndTime";
+    const std::string _loggerCat = "Renderable";
+    const std::string keyBody = "Body";
+    const std::string keyStart = "StartTime";
+    const std::string keyEnd = "EndTime";
+    const std::string KeyType = "Type";
 }
 
 namespace openspace {
 
-Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
+Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
 	// The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
 	assert(success);
 
     std::string renderableType;
-    success = dictionary.getValue(constants::renderable::keyType, renderableType);
+    success = dictionary.getValue(KeyType, renderableType);
 	if (!success) {
-        LERROR("Renderable '" << name << "' did not have key '"
-                              << constants::renderable::keyType << "'");
+        LERROR("Renderable '" << name << "' did not have key '" << KeyType << "'");
         return nullptr;
 	}
 
@@ -85,15 +84,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 		"Scenegraphnode need to specify '" << constants::scenegraphnode::keyName 
 		<< "' because renderables is going to use this for debugging!");
 #endif
-    // get path if available
-	bool success = dictionary.getValue(constants::scenegraph::keyPathModule, _relativePath);
-#ifndef NDEBUG
-	ghoul_assert(success,
-		"Scenegraphnode need to specify '" << constants::scenegraph::keyPathModule
-		<< "' because renderables is going to use this for debugging!");
-#endif
-	if (success)
-		_relativePath += ghoul::filesystem::FileSystem::PathSeparator;
 
 	dictionary.getValue(keyStart, _startTime);
 	dictionary.getValue(keyEnd, _endTime);
@@ -119,20 +109,6 @@ const PowerScaledScalar& Renderable::getBoundingSphere()
 
 void Renderable::update(const UpdateData&)
 {
-}
-
-std::string Renderable::findPath(const std::string& path) {
-    std::string tmp = absPath(path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-
-    tmp = absPath(_relativePath + path);
-    if(FileSys.fileExists(tmp))
-        return tmp;
-
-    LERROR("Could not find file '" << path << "'");
-
-    return "";
 }
 
 void Renderable::setPscUniforms(

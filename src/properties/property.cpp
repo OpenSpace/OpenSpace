@@ -75,7 +75,8 @@ std::string Property::fullyQualifiedIdentifier() const {
 	PropertyOwner* currentOwner = owner();
 	while (currentOwner) {
 		std::string ownerId = currentOwner->name();
-		identifier = ownerId + "." + identifier;
+        if (!ownerId.empty())
+		    identifier = ownerId + "." + identifier;
 		currentOwner = currentOwner->owner();
 	}
 	return identifier;
@@ -85,14 +86,13 @@ boost::any Property::get() const {
     return boost::any();
 }
 
-bool Property::getLua(lua_State* state) const {
-	return true;
+bool Property::getLuaValue(lua_State* state) const {
+	return false;
 }
 
-void Property::set(boost::any value) {
-}
+void Property::set(boost::any value) {}
 
-bool Property::setLua(lua_State* state) {
+bool Property::setLuaValue(lua_State* state) {
 	return false;
 }
 
@@ -102,6 +102,14 @@ const std::type_info& Property::type() const {
 
 int Property::typeLua() const {
 	return LUA_TNIL;
+}
+
+bool Property::getStringValue(std::string& value) const {
+    return false;
+}
+
+bool Property::setStringValue(std::string value) {
+    return false;
 }
 
 std::string Property::guiName() const {

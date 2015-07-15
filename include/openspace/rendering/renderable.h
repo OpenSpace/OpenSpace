@@ -78,14 +78,12 @@ public:
 	void setBody(std::string& body);
 
 protected:
-    std::string findPath(const std::string& path);
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 
 private:
 	properties::BoolProperty _enabled;
 	
     PowerScaledScalar boundingSphere_;
-    std::string _relativePath;
 	std::string _startTime;
 	std::string _endTime;
 	std::string _targetBody;

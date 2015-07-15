@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014                                                                    #
+# Copyright (c) 2014-2015                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -22,169 +22,41 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
+cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 
-#########################################################################################
-# General Settings
-#########################################################################################
- 
-cmake_minimum_required (VERSION 2.8) 
 project (OpenSpace)
-
-if (WIN32)
-    SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib;LIBCMT.lib\")
-endif ()
+message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
+set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+set(OPENSPACE_MODULE_DIR "${OPENSPACE_BASE_DIR}/modules")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
-set(OPENSPACE_BINARY_DIR ${OPENSPACE_BASE_DIR}/bin/openspace)
-set(OPENSPACE_LIBRARY_DIR ${OPENSPACE_BASE_DIR}/bin/lib)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_LIBRARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BINARY_DIR})
+include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
+include(${OPENSPACE_EXT_DIR}/ghoul/ext/CopySharedLibraries.cmake) 
 
+test_compiler_compatibility()
+cleanup_project()
+set_build_output_directories()
+configure_openspace_version(0 2 0 "prerelease-6")
 
-#include(cotire)
+option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)
 
-# Make sure a build type is set. Default is Debug.
-if(NOT CMAKE_BUILD_TYPE)
-	set( CMAKE_BUILD_TYPE Debug CACHE STRING
-       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." 
-	   FORCE )
-endif(NOT CMAKE_BUILD_TYPE)
-
-if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
-endif ()
+include(src/CMakeLists.txt)
+create_openspace_target()
+add_external_dependencies()
+handle_applications()
 
 if (MSVC)
-    # Enable multicore compilation
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
+    handle_option_vld()
 endif ()
 
-#########################################################################################
-# External Third-party software
-#########################################################################################
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+handle_option_tests()
 
-# Ghoul
-set(GHOUL_ROOT_DIR "${OPENSPACE_EXT_DIR}/ghoul")
-include_directories("${GHOUL_ROOT_DIR}/include")
-include_directories("${GHOUL_ROOT_DIR}/ext/tinyobjloader")
-set(BOOST_ROOT "${GHOUL_ROOT_DIR}/ext/boost")
-add_subdirectory(${GHOUL_ROOT_DIR})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Ghoul)
-if (GHOUL_USE_FREEIMAGE)
-    add_definitions(-DGHOUL_USE_FREEIMAGE)
-endif ()
-if (GHOUL_USE_DEVIL)
-    add_definitions(-DGHOUL_USE_DEVIL)
-endif ()
-
-# Add ghoul ext
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${GHOUL_ROOT_DIR}/ext)
-
-# Boost
-include_directories(${GHOUL_ROOT_DIR}/ext/boost)
-
-# SGCT
-find_package(SGCT REQUIRED)
-include_directories(${SGCT_INCLUDE_DIRECTORIES})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SGCT_LIBRARIES})
-if (UNIX AND (NOT APPLE))
-    set(DEPENDENT_LIBS ${DEPENDENT_LIBS} Xcursor Xinerama)
-endif ()
-
-# GLM
-set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
-find_package(GLM REQUIRED)
-add_definitions(-DGLM_SWIZZLE)
-include_directories(${GLM_INCLUDE_DIRS})
-
-# GLEW
-find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIRECTORIES})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${GLEW_LIBRARIES})
-
-# Lua
-set(LUA_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/lua")
-include_directories("${LUA_ROOT_DIR}/include")
-
-# Spice
-set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")
-find_package(Spice REQUIRED)
-include_directories(${SPICE_INCLUDE_DIRS})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${SPICE_LIBRARIES})
-
-# Kameleon
-option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-if(WIN32)
-    option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
-else(WIN32)
-    option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-endif(WIN32)
-option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
-set(KAMELEON_ROOT_DIR ${OPENSPACE_EXT_DIR}/kameleon)
-set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-add_subdirectory(${KAMELEON_ROOT_DIR})
-include_directories(${KAMELEON_INCLUDES})
-set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ccmc)
-
-if (APPLE)
-    include_directories(/Developer/Headers/FlatCarbon)
-    find_library(CARBON_LIBRARY Carbon)
-    find_library(COCOA_LIBRARY Cocoa)
-    find_library(APP_SERVICES_LIBRARY ApplicationServices)
-    mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-    set(DEPENDENT_LIBS ${DEPENDENT_LIBS} ${CARBON_LIBRARY} ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
-endif ()
-
-#########################################################################################
-# Executable
-#########################################################################################
-
-add_subdirectory(src)
-
-option(BUILD_GUI_APPLICATIONS "Build GUI Applications" OFF)
-if (BUILD_GUI_APPLICATIONS)
-    add_subdirectory(gui)
-endif ()
-
-#########################################################################################
-# File Fetch
-#########################################################################################
-option(DOWNLOAD_FILES "Download large OpenSpace data on configure" OFF)
-if(DOWNLOAD_FILES)
-    function(DownloadFile FILE_PATH FILE_URL)
-        set(FILE_MD5 ${ARGV2})
-        if(NOT EXISTS "${FILE_PATH}")
-            file(DOWNLOAD ${FILE_URL} ${FILE_PATH} INACTIVITY_TIMEOUT 10 SHOW_PROGRESS)
-        endif()
-        file(MD5 ${FILE_PATH} MD5_RESULT)
-        if( NOT "${FILE_MD5}" STREQUAL "" )
-            string(COMPARE EQUAL ${MD5_RESULT} ${FILE_MD5} SUCCESS)
-            if(NOT ${SUCCESS})
-                message(WARNING "${FILE_PATH} not matching MD5")
-            endif()
-        endif()
-    endfunction(DownloadFile)
-
-    function(NewHorizonDownload FILE_PATH )
-        set(MD5 "${ARGV1}")
-        DownloadFile("${OPENSPACE_BASE_DIR}/openspace-data/spice/JupiterNhKernels/${FILE_PATH}"
-                     "http://naif.jpl.nasa.gov/pub/naif/pds/data/nh-j_p_ss-spice-6-v1.0/nhsp_1000/data/${FILE_PATH}" ${MD5})
-    endfunction(NewHorizonDownload)
-
-    NewHorizonDownload("ck/merged_nhpc_2006_v011.bc")
-    NewHorizonDownload("ck/merged_nhpc_2007_v006.bc")
-    NewHorizonDownload("fk/nh_v200.tf")
-    NewHorizonDownload("ik/nh_lorri_v100.ti")
-    NewHorizonDownload("sclk/new_horizons_413.tsc" "6f7a87c21cb3e37835261ed745f34d4a")
-    NewHorizonDownload("spk/de413.bsp")
-    NewHorizonDownload("spk/jup260.bsp")
-    NewHorizonDownload("spk/nh_nep_ura_000.bsp")
-    NewHorizonDownload("spk/nh_recon_e2j_v1.bsp")
-    NewHorizonDownload("spk/nh_recon_j2sep07_prelimv1.bsp")
-    NewHorizonDownload("spk/sb_2002jf56_2.bsp")
-endif(DOWNLOAD_FILES)
+handle_internal_modules()
+copy_dynamic_libraries()
