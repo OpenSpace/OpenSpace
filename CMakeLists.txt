@@ -40,7 +40,7 @@ include(${OPENSPACE_EXT_DIR}/ghoul/ext/CopySharedLibraries.cmake)
 test_compiler_compatibility()
 cleanup_project()
 set_build_output_directories()
-configure_openspace_version(0 2 0 "prerelease-6")
+configure_openspace_version(0 3 0 "prerelease-8")
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 option(OPENSPACE_DISABLE_EXTERNAL_WARNINGS "Disable warnings in external libraries" ON)

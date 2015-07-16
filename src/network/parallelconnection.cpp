@@ -55,7 +55,7 @@
 #endif
 
 //openspace includes
-#include <openspace/network/ParallelConnection.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/time.h>
