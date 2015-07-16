@@ -76,6 +76,9 @@ endmacro ()
 
 # Set the compiler settings that are common to all modules
 function (set_common_compile_settings target_name)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
+
     if (MSVC)
         target_compile_options(${library_name} PUBLIC
             "/MP"       # Enabling multi-threaded compilation
@@ -83,47 +86,22 @@ function (set_common_compile_settings target_name)
             "/wd4127"   # constant conditional expression [used for do/while semicolon swallowing]
             "/wd4201"   # nameless struct/union  [standard is ubiquitous]
             "/wd4505"   # Unreferenced function was removed
-            "/W4"
+            "/W4"       # Warning level
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "/Wx")
         endif ()
     elseif (APPLE)
         target_compile_definitions(${library_name} PUBLIC "__APPLE__")
-
-        include (CheckCXXCompilerFlag)
-        CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-        CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-        mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
-        if (COMPILER_SUPPORTS_CXX11)
-            target_compile_options(${library_name} PUBLIC "-std=c++11")
-        elseif (COMPILER_SUPPORTS_CXX0X)
-            target_compile_options(${library_name} PUBLIC "-std=c++0x")
-        else ()
-          message(FATAL_ERROR "Compiler does not have C++11 support")
-        endif ()
-
         target_compile_options(${library_name} PUBLIC "-stdlib=libc++")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "-Werror")
         endif ()
     elseif (UNIX)
-          include (CheckCXXCompilerFlag)
-          CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-          CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-          mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
-          if (COMPILER_SUPPORTS_CXX11)
-            target_compile_options(${library_name} PUBLIC "-std=c++11")
-          elseif (COMPILER_SUPPORTS_CXX0X)
-            target_compile_options(${library_name} PUBLIC "-std=c++0x")
-          else ()
-            message(FATAL_ERROR "Compiler does not have C++11 support")
-          endif ()
-
         target_compile_options(${library_name} PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "-Werror")
-        endif ()        
+        endif ()
     endif ()
 endfunction ()
 
@@ -131,6 +109,7 @@ endfunction ()
 
 # Propagate the include directives from the libOpenSpace target into this module
 function (set_openspace_settings target_name)
+    # Get the include directories from the OpenSpace library
     get_property(
         OPENSPACE_INCLUDE_DIR
         TARGET libOpenSpace
@@ -156,7 +135,7 @@ endfunction ()
 
 # Loads the dependencies from 'include.cmake' and deals with them
 function (handle_dependencies target_name module_name)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
         include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)
 
         # Handle OpenSpace dependencies
@@ -186,6 +165,7 @@ endfunction ()
 
 
 
+# Writes the modulename.cmake containing the MODULE_NAME and MODULE_PATH
 function (write_module_name module_name)
     string(TOLOWER ${module_name} module_name_lower)
 
