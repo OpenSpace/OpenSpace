@@ -25,7 +25,14 @@
 set(APPLICATION_NAME OpenSpace)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
-add_executable(${APPLICATION_NAME} ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp)
+if (WIN32)
+    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+endif ()
+
+add_executable(${APPLICATION_NAME}
+    ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
+    ${RESOURCE_FILE}
+)
 target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include)
 target_link_libraries(${APPLICATION_NAME} libOpenSpace)
 
