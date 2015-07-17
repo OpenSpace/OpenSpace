@@ -76,8 +76,8 @@ endmacro ()
 
 # Set the compiler settings that are common to all modules
 function (set_common_compile_settings target_name)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 11)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
+    set_property(TARGET ${library_name} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${library_name} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
         target_compile_options(${library_name} PUBLIC
