@@ -690,10 +690,12 @@ void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 
 
 	if (_isMaster) {
 		// If currently writing a command, render it to screen
-		sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-		if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
-			_console->render();
-		}
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+        // !w->isUsingFisheyeRendering() does not exist anymore ---abock
+        //        if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
+        if (_isMaster && _console->isVisible()) {
+        		_console->render();
+        }
 		
 		if (_gui->isEnabled())
 			_gui->endFrame();

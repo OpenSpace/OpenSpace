@@ -193,7 +193,7 @@ bool RenderEngine::initialize() {
 
 bool RenderEngine::initializeGL() {
 	// LDEBUG("RenderEngine::initializeGL()");
-	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
+	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getCurrentWindowPtr();
 
 	// TODO:    Fix the power scaled coordinates in such a way that these 
 	//			values can be set to more realistic values
@@ -205,7 +205,7 @@ bool RenderEngine::initializeGL() {
 
 	// calculating the maximum field of view for the camera, used to
 	// determine visibility of objects in the scene graph
-	if (wPtr->isUsingFisheyeRendering()) {
+/*    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer) {
 		// fisheye mode, looking upwards to the "dome"
 		glm::vec4 upDirection(0, 1, 0, 0);
 
@@ -220,19 +220,19 @@ bool RenderEngine::initializeGL() {
 		_mainCamera->setMaxFov(wPtr->getFisheyeFOV());
 		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
 	}
-	else {
+	else {*/
 		// get corner positions, calculating the forth to easily calculate center
 		glm::vec3 corners[4];
-		corners[0] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::LowerLeft);
+		/*corners[0] = wPtr->getCurrentViewport()->getViewPlaneCoords(
+			sgct_core::SGCTProjectionPlane::LowerLeft);
 		corners[1] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::UpperLeft);
+			sgct_core::SGCTProjectionPlane::UpperLeft);
 		corners[2] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::UpperRight);
+			sgct_core::SGCTProjectionPlane::UpperRight);
 		corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
+         */
 		const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
 			/ 4.0f;
-
 			
 //#if 0
 //			// @TODO Remove the ifdef when the next SGCT version is released that requests the
@@ -267,7 +267,7 @@ bool RenderEngine::initializeGL() {
 			}
 		}
 		_mainCamera->setMaxFov(maxFov);
-	}
+    //}
 
     LINFO("Initializing ABuffer");
 	_abuffer->initialize();
@@ -347,8 +347,9 @@ void RenderEngine::postSynchronizationPreDraw() {
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
 	// We need the window pointer
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-	if (w->isUsingFisheyeRendering())
+	sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+
+    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer)
 		_abuffer->clear();
 
 	// SGCT resets certain settings
@@ -399,8 +400,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 #if 1
 #define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
-#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
+#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
+#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__);
+    //#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
+    //#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
 
     if (_onScreenInformation._node != -1) {
         //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
@@ -415,7 +418,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
     }
 
 	// Print some useful information on the master viewport
-	if (OsEng.ref().isMaster() && !w->isUsingFisheyeRendering()) {
+
+	if (OsEng.ref().isMaster() && sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer) {
 
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono = 10;
@@ -429,7 +433,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		if (_showInfo) {
 			const sgct_text::Font* font = fontMono;
 			int x1, xSize, y1, ySize;
-			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+			sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
 			int startY = ySize - 2 * font_size_time;
 			//const glm::vec2& scaling = _mainCamera->scaling();
 			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
@@ -450,7 +454,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             if (timeString.size() > 11)
                 // This should never happen, but it's an emergency hack ---abock
                 timeString[11] = ' ';
-            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), glm::vec4(1), "Date: %s", timeString.c_str());
+//            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), glm::vec4(1), "Date: %s", timeString.c_str());
+            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), "Date: %s", timeString.c_str());
 			
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
@@ -609,7 +614,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 				const std::string& message = e->message.substr(0, msg_length);
 				nr += std::count(message.begin(), message.end(), '\n');
 
-				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
+//                Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
+				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2),
 					"%-14s %s%s",									// Format
 					e->timeString.c_str(),							// Time string
 					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
@@ -625,11 +631,16 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
 					color = blue;
 
-				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
+				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2),  "%s", lvl.c_str());
 
 
-				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
-				++nr;
+				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2),  "%s", message.c_str());
+
+//                Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
+                
+                
+//                Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
+                ++nr;
 			}
 		}
 	}
@@ -728,8 +739,8 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 void RenderEngine::generateGlslConfig() {
     ghoul_assert(_abuffer != nullptr, "ABuffer not initialized");
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
-	int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
-	int ySize = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();;
+	int xSize = sgct::Engine::instance()->getCurrentWindowPtr()->getXFramebufferResolution();;
+	int ySize = sgct::Engine::instance()->getCurrentWindowPtr()->getYFramebufferResolution();;
 
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to

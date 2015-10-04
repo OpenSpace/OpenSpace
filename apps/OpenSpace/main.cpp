@@ -128,7 +128,8 @@ int main(int argc, char** argv) {
     _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
     _sgctEngine->setCharCallbackFunction(mainCharCallback);
 
-    _sgctEngine->setFisheyeClearColor(0.f, 0.f, 0.f);
+
+    //    _sgctEngine->setFisheyeClearColor(0.f, 0.f, 0.f);
 
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions
@@ -214,13 +215,13 @@ void mainRenderFunc() {
     
     mat4 userMatrix = translate(mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
     mat4 sceneMatrix = _sgctEngine->getModelMatrix();
-    mat4 viewMatrix = _sgctEngine->getActiveViewMatrix() * userMatrix;
+    mat4 viewMatrix = _sgctEngine->getCurrentViewMatrix() * userMatrix;
     
     //dont shift nav-direction on master, makes it very tricky to navigate @JK
     if (!OsEng.ref().isMaster())
         viewMatrix = viewMatrix * sceneMatrix;
 
-    mat4 projectionMatrix = _sgctEngine->getActiveProjectionMatrix();
+    mat4 projectionMatrix = _sgctEngine->getCurrentProjectionMatrix();
     OsEng.render(projectionMatrix, viewMatrix);
 }
 

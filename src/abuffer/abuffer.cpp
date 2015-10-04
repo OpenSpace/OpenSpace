@@ -331,8 +331,9 @@ void ABuffer::invalidateABuffer() {
 }
 
 void ABuffer::updateDimensions() {
-	_width = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();
-	_height = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();
+    _width = sgct::Engine::instance()->getCurrentWindowPtr()->getXFramebufferResolution();
+    _height = sgct::Engine::instance()->getCurrentWindowPtr()->getYFramebufferResolution();
+    
 	_totalPixels = _width * _height;
 }
 
