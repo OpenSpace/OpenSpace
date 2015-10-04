@@ -128,9 +128,6 @@ int main(int argc, char** argv) {
     _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
     _sgctEngine->setCharCallbackFunction(mainCharCallback);
 
-
-    //    _sgctEngine->setFisheyeClearColor(0.f, 0.f, 0.f);
-
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
@@ -161,8 +158,6 @@ int main(int argc, char** argv) {
         openspace::OpenSpaceEngine::destroy();
         return EXIT_FAILURE;
     }
-
-   
 
     // Main loop
     LDEBUG("Starting rendering loop");
@@ -197,6 +192,21 @@ void mainInitFunc() {
         std::cin.ignore(100);
         exit(EXIT_FAILURE);
     }
+    
+    // Set the clear color for all non-linear projection viewports
+    size_t nWindows = _sgctEngine->getNumberOfWindows();
+    for (size_t i = 0; i < nWindows; ++i) {
+        sgct::SGCTWindow* w = _sgctEngine->getWindowPtr(i);
+        size_t nViewports = nViewports = w->getNumberOfViewports();
+        for (size_t j = 0; j < nViewports; ++j) {
+            sgct_core::Viewport* v = w->getViewport(j);
+            ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");
+            sgct_core::NonLinearProjection* p = v->getNonLinearProjectionPtr();
+            if (p)
+                p->setClearColor(0.f, 0.f, 0.f);
+        }
+    }
+
 }
 
 void mainPreSyncFunc() {
