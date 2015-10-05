@@ -147,7 +147,7 @@ void Camera::compileViewRotationMatrix()
     // the camera matrix needs to be rotated inverse to the world
    // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
 	//_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
-	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
+	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz();
     _viewDirection = glm::normalize(_viewDirection);
 }
 

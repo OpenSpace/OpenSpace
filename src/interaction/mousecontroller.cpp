@@ -76,7 +76,7 @@ void MouseController::trackballRotate(int x, int y) {
 	float height = static_cast<float>(sgct::Engine::instance()->getCurrentYResolution());
 	glm::vec2 mousePos = glm::vec2((float)x / width, (float)y / height);
 
-	mousePos = glm::clamp(mousePos, -0.5, 1.5); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
+	mousePos = glm::clamp(mousePos, -0.5f, 1.5f); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
 	//mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
 
 	glm::vec3 curTrackballPos = mapToTrackball(mousePos);

@@ -499,7 +499,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 
 	lockControls();
 	
-	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz;
+	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz();
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
 	glm::mat4 transform;
