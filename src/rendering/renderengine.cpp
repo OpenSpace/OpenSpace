@@ -400,10 +400,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 #if 1
 #define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__);
-    //#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
-    //#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
+    //#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
+    //#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__);
+    #define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
+    #define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
 
     if (_onScreenInformation._node != -1) {
         //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
@@ -614,8 +614,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 				const std::string& message = e->message.substr(0, msg_length);
 				nr += std::count(message.begin(), message.end(), '\n');
 
-//                Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
-				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2),
+                Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
 					"%-14s %s%s",									// Format
 					e->timeString.c_str(),							// Time string
 					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
@@ -631,15 +630,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
 					color = blue;
 
-				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2),  "%s", lvl.c_str());
-
-
-				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2),  "%s", message.c_str());
-
-//                Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
+                Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
                 
                 
-//                Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
+                Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
                 ++nr;
 			}
 		}

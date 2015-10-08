@@ -203,7 +203,7 @@ void mainInitFunc() {
             ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");
             sgct_core::NonLinearProjection* p = v->getNonLinearProjectionPtr();
             if (p)
-                p->setClearColor(0.f, 0.f, 0.f);
+                p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
         }
     }
 

@@ -294,10 +294,8 @@ void LuaConsole::render() {
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
 	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
-//    sgct_text::print(font, 15.0f, startY, red, "$");
-//    sgct_text::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
-    sgct_text::print(font, 15.0f, startY, "$");
-    sgct_text::print(font, 15.0f + font_size, startY, "%s", _commands.at(_activeCommand).c_str());
+    sgct_text::print(font, 15.0f, startY, red, "$");
+    sgct_text::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
 
 	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
 	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
@@ -320,8 +318,7 @@ void LuaConsole::render() {
 
 	std::stringstream ss;
 	ss << "%" << linepos + 1 << "s";
-//    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
-    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, ss.str().c_str(), "^");
+    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
 unsigned int LuaConsole::commandInputButton() {
