@@ -33,6 +33,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 
+#include <limits>
+#include <stdint.h>
+
 
 /* TODO for this class:
 *  In order to add geometry shader (for pretty-draw),
@@ -68,7 +71,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _vaoID(0)
     , _vBufferID(0)
     , _needsSweep(true)
-    , _oldTime(std::numeric_limits<float>::max())
+    , _oldTime(std::numeric_limits<double>::max())
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
@@ -76,7 +79,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     _successfullDictionaryFetch &= dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
     _successfullDictionaryFetch &= dictionary.getValue(keyEarthOrbitRatio, _ratio);
     _successfullDictionaryFetch &= dictionary.getValue(keyDayLength, _day);
-
     // values in modfiles set from here
     // http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
 

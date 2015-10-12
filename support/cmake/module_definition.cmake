@@ -88,6 +88,7 @@ function (set_common_compile_settings target_name)
             "/wd4505"   # Unreferenced function was removed
             "/W4"       # Warning level
         )
+        target_compile_definitions(${library_name} PUBLIC "NOMINMAX")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${library_name} PUBLIC "/Wx")
         endif ()
