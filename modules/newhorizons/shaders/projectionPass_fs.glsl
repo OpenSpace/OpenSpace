@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
+
 uniform sampler2D projectTexture;
 uniform sampler2D currentTexture;
 

@@ -46,6 +46,7 @@ class GUI;
 class RenderEngine;
 class SyncBuffer;
 class ModuleEngine;
+class Window;
 
 namespace interaction {
     class InteractionHandler;
@@ -67,7 +68,7 @@ namespace properties {
     
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv, Window* windowHandler, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -89,6 +90,7 @@ public:
     ModuleEngine* moduleEngine();
     network::ParallelConnection* parallelConnection();
     properties::PropertyOwner* globalPropertyOwner();
+    Window* windowWrapper();
 
 	gui::GUI* gui();
 
@@ -113,7 +115,7 @@ public:
     void runSettingsScripts();
 
 private:
-    OpenSpaceEngine(std::string programName);
+    OpenSpaceEngine(std::string programName, Window* windowHandler);
     ~OpenSpaceEngine();
     OpenSpaceEngine(const OpenSpaceEngine& rhs) = delete;
 
@@ -137,6 +139,7 @@ private:
     ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
     network::ParallelConnection* _parallelConnection;
+    Window* _windowWrapper;
     
     properties::PropertyOwner* _globalPropertyNamespace;
     

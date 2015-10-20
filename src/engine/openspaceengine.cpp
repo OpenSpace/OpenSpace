@@ -101,7 +101,7 @@ namespace openspace {
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine(std::string programName)
+OpenSpaceEngine::OpenSpaceEngine(std::string programName, Window* windowHandler)
     : _configurationManager(new ConfigurationManager)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
@@ -112,6 +112,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
     , _parallelConnection(new network::ParallelConnection)
+    , _windowWrapper(windowHandler)
     , _globalPropertyNamespace(new properties::PropertyOwner)
 	, _isMaster(false)
     , _runTime(0.0)
@@ -128,19 +129,43 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 OpenSpaceEngine::~OpenSpaceEngine() {
     _gui->deinitializeGL();
 
-	delete _parallelConnection;
-    delete _configurationManager;
-    delete _interactionHandler;
-    delete _renderEngine;
-    delete _scriptEngine;
-    delete _networkEngine;
-    delete _commandlineParser;
-    delete _console;
-    delete _moduleEngine;
-    delete _gui;    
+    delete _globalPropertyNamespace;
+    _globalPropertyNamespace = nullptr;
 
-    if(_syncBuffer)
-		delete _syncBuffer;
+    delete _windowWrapper;
+    _windowWrapper = nullptr;
+
+	delete _parallelConnection;
+    _parallelConnection = nullptr;
+
+    delete _configurationManager;
+    _configurationManager = nullptr;
+
+    delete _interactionHandler;
+    _interactionHandler = nullptr;
+
+    delete _renderEngine;
+    _renderEngine = nullptr;
+
+    delete _scriptEngine;
+    _scriptEngine = nullptr;
+
+    delete _networkEngine;
+    _networkEngine = nullptr;
+
+    delete _commandlineParser;
+    _commandlineParser = nullptr;
+
+    delete _console;
+    _console = nullptr;
+
+    delete _moduleEngine;
+    _moduleEngine = nullptr;
+
+    delete _gui;
+    _gui = nullptr;
+
+	delete _syncBuffer;
 	_syncBuffer = nullptr;
 }
 
@@ -151,6 +176,7 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 
 bool OpenSpaceEngine::create(
     int argc, char** argv,
+    Window* windowHandler,
     std::vector<std::string>& sgctArguments)
 {
     ghoul::initialize();
@@ -182,7 +208,7 @@ bool OpenSpaceEngine::create(
 
 	// Create other objects
 	LDEBUG("Creating OpenSpaceEngine");
-	_engine = new OpenSpaceEngine(std::string(argv[0]));
+	_engine = new OpenSpaceEngine(std::string(argv[0]), windowHandler);
 
 	// Query modules for commandline arguments
 	const bool gatherSuccess = _engine->gatherCommandlineArguments();
@@ -828,6 +854,11 @@ network::ParallelConnection* OpenSpaceEngine::parallelConnection() {
 properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
     ghoul_assert(_globalPropertyNamespace, "Global Property Namespace");
     return _globalPropertyNamespace;
+}
+
+Window* OpenSpaceEngine::windowWrapper() {
+    ghoul_assert(_windowWrapper, "Window Wrapper");
+    return _windowWrapper;
 }
 
 }  // namespace openspace

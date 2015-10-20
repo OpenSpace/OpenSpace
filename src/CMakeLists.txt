@@ -33,7 +33,9 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/sgctwindow.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/window.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/deviceidentifier.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
@@ -97,7 +99,9 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/sgctwindow.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/window.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/deviceidentifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h

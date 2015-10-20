@@ -485,7 +485,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 			if (openspace::ImageSequencer2::ref().isReady()) {
 				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
-				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+				float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
 				std::string progress = "|";
 				int g = static_cast<int>((t* 24) + 1);
 				g = std::max(g, 0);
@@ -1252,40 +1252,40 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	return;
 	//}
 
-	//if (origin == "67P") {
-	//	SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-	//	SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
-	//	//jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-	//	//plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-	//	solarSystemBarycenterNode->setParent(cgNode);
-	//	rosettaNode->setParent(cgNode);
-	//	
-	//	ghoul::Dictionary solarDictionary =
-	//		{
-	//		{ std::string("Type"), std::string("Spice") },
-	//			{ std::string("Body"), std::string("SUN") },
-	//			{ std::string("Reference"), std::string("GALACTIC") },
-	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-	//			{ std::string("Kernels"), ghoul::Dictionary() }
-	//		};
-	//	solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-	//	
-	//	ghoul::Dictionary rosettaDictionary =
-	//		{
-	//		{ std::string("Type"), std::string("Spice") },
-	//			{ std::string("Body"), std::string("ROSETTA") },
-	//			{ std::string("Reference"), std::string("GALACTIC") },
-	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-	//			{ std::string("Kernels"), ghoul::Dictionary() }
-	//		};
-	//	
-	//	cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-	//	rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
-	//	cgNode->setEphemeris(new StaticEphemeris);
-	//	
-	//	return;
-	//	
-	//}
+	if (origin == "67P") {
+		SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+		SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
+		//jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+		//plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+		solarSystemBarycenterNode->setParent(cgNode);
+		rosettaNode->setParent(cgNode);
+		
+		ghoul::Dictionary solarDictionary =
+			{
+			{ std::string("Type"), std::string("Spice") },
+				{ std::string("Body"), std::string("SUN") },
+				{ std::string("Reference"), std::string("GALACTIC") },
+				{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+				{ std::string("Kernels"), ghoul::Dictionary() }
+			};
+		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+		
+		ghoul::Dictionary rosettaDictionary =
+			{
+			{ std::string("Type"), std::string("Spice") },
+				{ std::string("Body"), std::string("ROSETTA") },
+				{ std::string("Reference"), std::string("GALACTIC") },
+				{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+				{ std::string("Kernels"), ghoul::Dictionary() }
+			};
+		
+		cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+		rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
+		cgNode->setEphemeris(new StaticEphemeris);
+		
+		return;
+		
+	}
 
     LFATAL("This function is being misused with an argument of '" << origin << "'");
 }
