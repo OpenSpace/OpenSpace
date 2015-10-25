@@ -29,6 +29,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/keys.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/highresclock.h>
@@ -37,149 +38,16 @@
 namespace {
 	const std::string _loggerCat = "InteractionHandler";
 
-	int stringToKey(std::string s) {
-
-		static std::map<std::string, int> m = {
-			{ "SPACE", SGCT_KEY_SPACE },
-			{ "APOSTROPHE", SGCT_KEY_APOSTROPHE },
-			{ "COMMA", SGCT_KEY_COMMA },
-			{ "MINUS", SGCT_KEY_MINUS },
-			{ "PERIOD", SGCT_KEY_PERIOD },
-			{ "APOSTROPHE", SGCT_KEY_SLASH },
-			{ "0", SGCT_KEY_0 },
-			{ "1", SGCT_KEY_1 },
-			{ "2", SGCT_KEY_2 },
-			{ "3", SGCT_KEY_3 },
-			{ "4", SGCT_KEY_4 },
-			{ "5", SGCT_KEY_5 },
-			{ "6", SGCT_KEY_6 },
-			{ "7", SGCT_KEY_7 },
-			{ "8", SGCT_KEY_8 },
-			{ "9", SGCT_KEY_9 },
-			{ "SEMICOLON", SGCT_KEY_SEMICOLON },
-			{ "EQUAL", SGCT_KEY_EQUAL },
-			{ "A", SGCT_KEY_A },
-			{ "B", SGCT_KEY_B },
-			{ "C", SGCT_KEY_C },
-			{ "D", SGCT_KEY_D },
-			{ "E", SGCT_KEY_E },
-			{ "F", SGCT_KEY_F },
-			{ "G", SGCT_KEY_G },
-			{ "H", SGCT_KEY_H },
-			{ "I", SGCT_KEY_I },
-			{ "J", SGCT_KEY_J },
-			{ "K", SGCT_KEY_K },
-			{ "L", SGCT_KEY_L },
-			{ "M", SGCT_KEY_M },
-			{ "N", SGCT_KEY_N },
-			{ "O", SGCT_KEY_O },
-			{ "P", SGCT_KEY_P },
-			{ "Q", SGCT_KEY_Q },
-			{ "R", SGCT_KEY_R },
-			{ "S", SGCT_KEY_S },
-			{ "T", SGCT_KEY_T },
-			{ "U", SGCT_KEY_U },
-			{ "V", SGCT_KEY_V },
-			{ "W", SGCT_KEY_W },
-			{ "X", SGCT_KEY_X },
-			{ "Y", SGCT_KEY_Y },
-			{ "Z", SGCT_KEY_Z },
-			{ "LEFT_BRACKET", SGCT_KEY_LEFT_BRACKET },
-			{ "BACKSLASH", SGCT_KEY_BACKSLASH },
-			{ "RIGHT_BRACKET", SGCT_KEY_RIGHT_BRACKET },
-			{ "GRAVE_ACCENT", SGCT_KEY_GRAVE_ACCENT },
-			{ "WORLD_1", SGCT_KEY_WORLD_1 },
-			{ "WORLD_2", SGCT_KEY_WORLD_2 },
-			{ "ESC", SGCT_KEY_ESC },
-			{ "ESCAPE", SGCT_KEY_ESCAPE },
-			{ "ENTER", SGCT_KEY_ENTER },
-			{ "TAB", SGCT_KEY_TAB },
-			{ "BACKSPACE", SGCT_KEY_BACKSPACE },
-			{ "INSERT", SGCT_KEY_INSERT },
-			{ "DEL", SGCT_KEY_DEL },
-			{ "DELETE", SGCT_KEY_DELETE },
-			{ "RIGHT", SGCT_KEY_RIGHT },
-			{ "LEFT", SGCT_KEY_LEFT },
-			{ "DOWN", SGCT_KEY_DOWN },
-			{ "UP", SGCT_KEY_UP },
-			{ "PAGEUP", SGCT_KEY_PAGEUP },
-			{ "PAGEDOWN", SGCT_KEY_PAGEDOWN },
-			{ "PAGE_UP", SGCT_KEY_PAGE_UP },
-			{ "PAGE_DOWN", SGCT_KEY_PAGE_DOWN },
-			{ "HOME", SGCT_KEY_HOME },
-			{ "END", SGCT_KEY_END },
-			{ "CAPS_LOCK", SGCT_KEY_CAPS_LOCK },
-			{ "SCROLL_LOCK", SGCT_KEY_SCROLL_LOCK },
-			{ "NUM_LOCK", SGCT_KEY_NUM_LOCK },
-			{ "PRINT_SCREEN", SGCT_KEY_PRINT_SCREEN },
-			{ "PAUSE", SGCT_KEY_PAUSE },
-			{ "F1", SGCT_KEY_F1 },
-			{ "F2", SGCT_KEY_F2 },
-			{ "F3", SGCT_KEY_F3 },
-			{ "F4", SGCT_KEY_F4 },
-			{ "F5", SGCT_KEY_F5 },
-			{ "F6", SGCT_KEY_F6 },
-			{ "F7", SGCT_KEY_F7 },
-			{ "F8", SGCT_KEY_F8 },
-			{ "F9", SGCT_KEY_F9 },
-			{ "F10", SGCT_KEY_F10 },
-			{ "F11", SGCT_KEY_F11 },
-			{ "F12", SGCT_KEY_F12 },
-			{ "F13", SGCT_KEY_F13 },
-			{ "F14", SGCT_KEY_F14 },
-			{ "F15", SGCT_KEY_F15 },
-			{ "F16", SGCT_KEY_F16 },
-			{ "F17", SGCT_KEY_F17 },
-			{ "F18", SGCT_KEY_F18 },
-			{ "F19", SGCT_KEY_F19 },
-			{ "F20", SGCT_KEY_F20 },
-			{ "F21", SGCT_KEY_F21 },
-			{ "F22", SGCT_KEY_F22 },
-			{ "F23", SGCT_KEY_F23 },
-			{ "F24", SGCT_KEY_F24 },
-			{ "F25", SGCT_KEY_F25 },
-			{ "KP_0", SGCT_KEY_KP_0 },
-			{ "KP_1", SGCT_KEY_KP_1 },
-			{ "KP_2", SGCT_KEY_KP_2 },
-			{ "KP_3", SGCT_KEY_KP_3 },
-			{ "KP_4", SGCT_KEY_KP_4 },
-			{ "KP_5", SGCT_KEY_KP_5 },
-			{ "KP_6", SGCT_KEY_KP_6 },
-			{ "KP_7", SGCT_KEY_KP_7 },
-			{ "KP_8", SGCT_KEY_KP_8 },
-			{ "KP_9", SGCT_KEY_KP_9 },
-			{ "KP_DECIMAL", SGCT_KEY_KP_DECIMAL },
-			{ "KP_DIVIDE", SGCT_KEY_KP_DIVIDE },
-			{ "KP_MULTIPLY", SGCT_KEY_KP_MULTIPLY },
-			{ "KP_SUBTRACT", SGCT_KEY_KP_SUBTRACT },
-			{ "KP_ADD", SGCT_KEY_KP_ADD },
-			{ "KP_ENTER", SGCT_KEY_KP_ENTER },
-			{ "KP_EQUAL", SGCT_KEY_KP_EQUAL },
-			{ "LSHIFT", SGCT_KEY_LSHIFT },
-			{ "LEFT_SHIFT", SGCT_KEY_LEFT_SHIFT },
-			{ "LCTRL", SGCT_KEY_LCTRL },
-			{ "LEFT_CONTROL", SGCT_KEY_LEFT_CONTROL },
-			{ "LALT", SGCT_KEY_LALT },
-			{ "LEFT_ALT", SGCT_KEY_LEFT_ALT },
-			{ "LEFT_SUPER", SGCT_KEY_LEFT_SUPER },
-			{ "RSHIFT", SGCT_KEY_RSHIFT },
-			{ "RIGHT_SHIFT", SGCT_KEY_RIGHT_SHIFT },
-			{ "RCTRL", SGCT_KEY_RCTRL },
-			{ "RIGHT_CONTROL", SGCT_KEY_RIGHT_CONTROL },
-			{ "RALT", SGCT_KEY_RALT },
-			{ "RIGHT_ALT", SGCT_KEY_RIGHT_ALT },
-			{ "RIGHT_SUPER", SGCT_KEY_RIGHT_SUPER },
-			{ "MENU", SGCT_KEY_MENU }
-		};
+    openspace::Key stringToKey(std::string s) {
 		// key only uppercase
 		std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 
 		// default is unknown
-		int key = SGCT_KEY_UNKNOWN;
-		auto it = m.find(s);
-		if (it != m.end())
-			key = m[s];
-		return key;
+        auto it = openspace::KeyMapping.find(s);
+        if (it != openspace::KeyMapping.end())
+            return it->second;
+        else
+            return openspace::Key::Unknown;
 	}
 }
 
@@ -479,9 +347,9 @@ const Camera* const InteractionHandler::camera() const {
 //	}
 //}
 
-void InteractionHandler::mouseButtonCallback(int button, int action) {
+void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
 	if (_mouseController)
-		_mouseController->button(MouseAction(action), MouseButton(button));
+		_mouseController->button(button, action);
 }
 
 void InteractionHandler::mousePositionCallback(double x, double y) {
@@ -768,11 +636,11 @@ void InteractionHandler::lookAt(const glm::quat& rotation)
 //	}
 //}
 //
-void InteractionHandler::keyboardCallback(int key, int action) {
+void InteractionHandler::keyboardCallback(Key key, KeyAction action) {
     // TODO package in script
     const float speed = _controllerSensitivity;
 	const float dt = static_cast<float>(_deltaTime);
-	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+    if (action == KeyAction::Press || action == KeyAction::Repeat) {
 		
 	    /*if (key == SGCT_KEY_S) {
 	        glm::vec3 euler(speed * dt, 0.0, 0.0);
@@ -800,32 +668,32 @@ void InteractionHandler::keyboardCallback(int key, int action) {
 		if (key == SGCT_KEY_X) {
 			Time::ref().advanceTime(-sgct::Engine::instance()->getDt());
 		}*/
-	    if (key == 262) {
+        if (key == Key::Right) {
 	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-	    if (key == 263) {
+        if (key == Key::Left) {
 			glm::vec3 euler(0.0, -speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-	    if (key == 264) {
+        if (key == Key::Down) {
 			glm::vec3 euler(speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-	    if (key == 265) {
+        if (key == Key::Up) {
 			glm::vec3 euler(-speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-		if (key == SGCT_KEY_KP_SUBTRACT) {
+        if (key == Key::KeypadSubtract) {
 			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] -= 0.5f;
 			OsEng.renderEngine()->camera()->setScaling(s);
 		}
-		if (key == SGCT_KEY_KP_ADD) {
+        if (key == Key::KeypadAdd) {
 			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] += 0.5f;
 			OsEng.renderEngine()->camera()->setScaling(s);
@@ -886,7 +754,7 @@ void InteractionHandler::resetKeyBindings() {
 	_validKeyLua = false;
 }
 
-void InteractionHandler::bindKey(int key, const std::string& lua) {
+void InteractionHandler::bindKey(Key key, std::string lua) {
 	_keyLua.insert(std::make_pair(key, lua));
 }
 

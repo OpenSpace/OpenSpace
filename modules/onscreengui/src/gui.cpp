@@ -257,7 +257,7 @@ void GUI::deinitializeGL() {
 void GUI::startFrame(float deltaTime,
 				const glm::vec2& windowSize,
 				 const glm::vec2& mousePos,
-				 bool mouseButtonsPressed[2])
+                uint32_t mouseButtonsPressed)
 {
     
 	ImGuiIO& io = ImGui::GetIO();
@@ -268,8 +268,8 @@ void GUI::startFrame(float deltaTime,
 #else
     io.MousePos = ImVec2(mousePos.x, mousePos.y);
 #endif
-	io.MouseDown[0] = mouseButtonsPressed[0];
-	io.MouseDown[1] = mouseButtonsPressed[1];
+    io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
+	io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 
 	ImGui::NewFrame();
 }
@@ -287,7 +287,8 @@ void GUI::endFrame() {
 	ImGui::Render();
 }
 
-bool GUI::mouseButtonCallback(int key, int action) {
+bool GUI::mouseButtonCallback(MouseButton button, MouseAction action) {
+//bool GUI::mouseButtonCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureMouse;
 	return consumeEvent;
@@ -302,14 +303,20 @@ bool GUI::mouseWheelCallback(double position) {
 	return consumeEvent;
 }
 
-bool GUI::keyCallback(int key, int action) {
+bool GUI::keyCallback(Key key, KeyAction action) {
+//bool GUI::keyCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
 	if (consumeEvent) {
-		if (action == SGCT_PRESS)
-			io.KeysDown[key] = true;
-		if (action == SGCT_RELEASE)
-			io.KeysDown[key] = false;
+        int keyIndex = static_cast<int>(key);
+        if (keyIndex < 0)
+            LERROR("Pressed key of index '" << keyIndex << "' was negative");
+        else {
+            if (action == KeyAction::Press)
+                io.KeysDown[keyIndex] = true;
+            if (action == KeyAction::Release)
+                io.KeysDown[keyIndex] = false;
+        }
 	}
 	return consumeEvent;
 }

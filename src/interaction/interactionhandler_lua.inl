@@ -76,9 +76,9 @@ int bindKey(lua_State* L) {
 	if (command.empty())
 		return luaL_error(L, "Command string is empty");
 
-	int iKey = stringToKey(key);
+    openspace::Key iKey = stringToKey(key);
 
-	if (iKey == SGCT_KEY_UNKNOWN) {
+    if (iKey == openspace::Key::Unknown) {
 		LERROR("Could not find key '"<< key <<"'");
 		return 0;
 	}

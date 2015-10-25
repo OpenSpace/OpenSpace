@@ -248,12 +248,15 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
 
 void mainKeyboardCallback(int key, int action) {
     if (OsEng.isMaster())
-        OsEng.keyboardCallback(key, action);
+        OsEng.keyboardCallback(openspace::Key(key),
+                               openspace::KeyModifier::NoModifier,  // TODO: fix ---abock
+                               openspace::KeyAction(action));
 }
 
 void mainMouseButtonCallback(int key, int action) {
     if (OsEng.isMaster())
-        OsEng.mouseButtonCallback(key, action);
+        OsEng.mouseButtonCallback(openspace::MouseButton(key),
+                                  openspace::MouseAction(action));
 }
 
 void mainMousePosCallback(double x, double y) {

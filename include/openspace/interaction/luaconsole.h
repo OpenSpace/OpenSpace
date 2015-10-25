@@ -27,6 +27,8 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/util/keys.h>
+
 #include <string>
 #include <vector>
 
@@ -40,12 +42,12 @@ public:
     void initialize();
     void deinitialize();
 
-	void keyboardCallback(int key, int action);
+	void keyboardCallback(Key key, KeyAction action);
 	void charCallback(unsigned int codepoint);
 
 	void render();
 
-    unsigned int commandInputButton();
+    Key commandInputButton();
 
 	bool isVisible() const;
 	void setVisible(bool visible);

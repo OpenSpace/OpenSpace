@@ -25,8 +25,12 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
+
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
+
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
 
 #include <string>
 #include <vector>
@@ -100,9 +104,10 @@ public:
     void postSynchronizationPreDraw();
 	void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
 	void postDraw();
-	void keyboardCallback(int key, int action);
+//	void keyboardCallback(int key, int action);
+    void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
 	void charCallback(unsigned int codepoint);
-    void mouseButtonCallback(int key, int action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 	void externalControlCallback(const char* receivedChars, int size, int clientId);

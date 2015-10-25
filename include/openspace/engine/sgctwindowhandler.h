@@ -36,8 +36,11 @@ public:
     
     double averageDeltaTime() override;
     glm::vec2 mousePosition() override;
+    uint32_t mouseButtons(int maxNumber) override;
     glm::ivec2 currentWindowSize() override;
     glm::ivec2 currentWindowResolution() override;
+    
+    bool isRegularRendering() override;
 
     
     //    void forEachWindow(std::function<void (void)> function) override;

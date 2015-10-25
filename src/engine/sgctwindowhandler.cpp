@@ -48,19 +48,43 @@ double SGCTWindowHandler::averageDeltaTime() {
 }
     
 glm::vec2 SGCTWindowHandler::mousePosition() {
+    int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     double posX, posY;
-    sgct::Engine::instance()->getMousePos(0, &posX, &posY);
+    sgct::Engine::instance()->getMousePos(id, &posX, &posY);
     return glm::vec2(posX, posY);
 }
     
+uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) {
+    int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+    uint32_t result = 0;
+    for (int i = 0; i < maxNumber; ++i) {
+        bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
+        if (button)
+            result |= (1 << i);
+        
+    }
+    return result;
+}
+    
 glm::ivec2 SGCTWindowHandler::currentWindowSize() {
-    return glm::ivec2(0);
+    return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
+                      sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
 }
     
 glm::ivec2 SGCTWindowHandler::currentWindowResolution() {
     int x,y;
-    sgct::Engine::instance()->getWindowPtr(0)->getFinalFBODimensions(x, y);
+    sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
+}
+    
+bool SGCTWindowHandler::isRegularRendering() {
+    // TODO: Needs to implement the nonlinear rendering check ---abock
+    
+    // sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+    // !w->isUsingFisheyeRendering() does not exist anymore ---abock
+    //        if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
+
+    return true;
 }
 
 //void forEachWindow(std::function<void (void)> function) {

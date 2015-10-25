@@ -79,6 +79,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/keys.h>
 
 #include <mutex>
 
@@ -109,8 +110,8 @@ public:
 	void setCamera(Camera* camera);
 	const Camera* const camera() const;
 
-    void keyboardCallback(int key, int action);
-	void mouseButtonCallback(int button, int action);
+    void keyboardCallback(Key key, KeyAction action);
+	void mouseButtonCallback(MouseButton button, MouseAction action);
 	void mousePositionCallback(double x, double y);
 	void mouseScrollWheelCallback(double pos);
 
@@ -131,7 +132,7 @@ public:
 	void setRotation(const glm::quat& rotation);
 
 	void resetKeyBindings();
-	void bindKey(int key, const std::string& lua);
+    void bindKey(Key key, std::string lua);
 
     void setInteractionSensitivity(float sensitivity);
     float interactionSensitivity() const;
@@ -170,7 +171,7 @@ private:
 	std::mutex _mutex;
 
 	bool _validKeyLua;
-	std::multimap<int, std::string > _keyLua;
+	std::multimap<Key, std::string > _keyLua;
 
     float _controllerSensitivity;
     bool _invertRoll;

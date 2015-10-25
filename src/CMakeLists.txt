@@ -107,7 +107,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardcontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalconnectioncontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalcontrol.h
@@ -148,6 +147,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledscalar.h

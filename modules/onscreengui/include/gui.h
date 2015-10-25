@@ -32,6 +32,9 @@
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+
 namespace openspace {
 namespace gui {
 
@@ -49,12 +52,14 @@ public:
 	void initializeGL();
 	void deinitializeGL();
 
-	bool mouseButtonCallback(int key, int action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action);
+//	bool mouseButtonCallback(int key, int action);
 	bool mouseWheelCallback(double position);
-	bool keyCallback(int key, int action);
+    bool keyCallback(Key key, KeyAction action);
+//	bool keyCallback(int key, int action);
 	bool charCallback(unsigned int character);
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
+	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
 	void endFrame();
 
 	void renderMainWindow();

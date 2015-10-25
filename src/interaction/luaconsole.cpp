@@ -103,8 +103,8 @@ void LuaConsole::deinitialize() {
     }
 }
 
-void LuaConsole::keyboardCallback(int key, int action) {
-	if (action == SGCT_PRESS || action == SGCT_REPEAT) {
+void LuaConsole::keyboardCallback(Key key, KeyAction action) {
+    if (action == KeyAction::Press || action == KeyAction::Release) {
 		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
 		const bool modifierControl = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
@@ -112,37 +112,37 @@ void LuaConsole::keyboardCallback(int key, int action) {
 			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
 
 		// Paste from clipboard
-		if (modifierControl && (key == SGCT_KEY_V))
+        if (modifierControl && (key == Key::V))
 			addToCommand(ghoul::clipboardText());
 
 		// Copy to clipboard
-		if (modifierControl && (key == SGCT_KEY_C))
+        if (modifierControl && (key == Key::C))
 			ghoul::setClipboardText(_commands.at(_activeCommand));
 
 		// Go to the previous character
-		if ((key == SGCT_KEY_LEFT) && (_inputPosition > 0))
+        if ((key == Key::Left) && (_inputPosition > 0))
 			--_inputPosition;
 
 		// Go to the next character
-		if ((key == SGCT_KEY_RIGHT) && _inputPosition < _commands.at(_activeCommand).length())
+        if ((key == Key::Right) && _inputPosition < _commands.at(_activeCommand).length())
 			++_inputPosition;
 
 		// Go to previous command
-		if (key == SGCT_KEY_UP) {
+        if (key == Key::Up) {
 			if (_activeCommand > 0)
 				--_activeCommand;
 			_inputPosition = _commands.at(_activeCommand).length();
 		}
 
 		// Go to next command (the last is empty)
-		if (key == SGCT_KEY_DOWN) {
+        if (key == Key::Down) {
 			if (_activeCommand < _commands.size() - 1)
 				++_activeCommand;
 			_inputPosition = _commands.at(_activeCommand).length();
 		}
 
 		// Remove character before _inputPosition
-		if (key == SGCT_KEY_BACKSPACE) {
+        if (key == Key::BackSpace) {
 			if (_inputPosition > 0) {
 				_commands.at(_activeCommand).erase(_inputPosition - 1, 1);
 				--_inputPosition;
@@ -150,18 +150,18 @@ void LuaConsole::keyboardCallback(int key, int action) {
 		}
 
 		// Remove character after _inputPosition
-		if ((key == SGCT_KEY_DELETE) && (_inputPosition <= _commands.at(_activeCommand).size()))
+        if ((key == Key::Delete) && (_inputPosition <= _commands.at(_activeCommand).size()))
 			_commands.at(_activeCommand).erase(_inputPosition, 1);
 
 		// Go to the beginning of command string
-		if (key == SGCT_KEY_HOME)
+        if (key == Key::Home)
 			_inputPosition = 0;
 
 		// Go to the end of command string
-		if (key == SGCT_KEY_END)
+        if (key == Key::End)
 			_inputPosition = _commands.at(_activeCommand).size();
 
-		if (key == SGCT_KEY_ENTER) {
+        if (key == Key::Enter) {
 			// SHIFT+ENTER == new line
 			if (modifierShift)
 				addToCommand("\n");
@@ -188,7 +188,7 @@ void LuaConsole::keyboardCallback(int key, int action) {
 			}
 		}
 
-        if (key == SGCT_KEY_TAB) {
+        if (key == Key::Tab) {
             // We get a list of all the available commands and initially find the first
             // command that starts with how much we typed sofar. We store the index so
             // that in subsequent "tab" presses, we will discard previous commands. This
@@ -265,7 +265,7 @@ void LuaConsole::keyboardCallback(int key, int action) {
 }
 
 void LuaConsole::charCallback(unsigned int codepoint) {
-	if (codepoint == commandInputButton())
+	if (codepoint == static_cast<unsigned int>(commandInputButton()))
 		return;
 
 #ifndef WIN32
@@ -321,10 +321,10 @@ void LuaConsole::render() {
     sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
-unsigned int LuaConsole::commandInputButton() {
+Key LuaConsole::commandInputButton() {
 	// Button left of 1 and above TAB
     // How to deal with different keyboard languages? ---abock
-	return SGCT_KEY_GRAVE_ACCENT;
+    return Key::GraveAccent;
 }
 
 void LuaConsole::addToCommand(std::string c) {
