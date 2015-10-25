@@ -22,18 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOW_H__
-#define __SGCTWINDOW_H__
+#ifndef __SGCTWINDOWHANDLER_H__
+#define __SGCTWINDOWHANDLER_H__
 
-#include <openspace/engine/window.h>
+#include <openspace/engine/windowhandler.h>
 
 namespace openspace {
 
-class SGCTWindow : public Window {
+class SGCTWindowHandler : public WindowHandler {
 public:
+    void setBarrier(bool enabled) override;
+    void clearAllWindows() override;
+    
+    double averageDeltaTime() override;
+    glm::vec2 mousePosition() override;
+    glm::ivec2 currentWindowSize() override;
+    glm::ivec2 currentWindowResolution() override;
+
+    
+    //    void forEachWindow(std::function<void (void)> function) override;
 
 };
 
 } // namespace openspace
 
-#endif // __SGCTWINDOW_H__
+#endif // __SGCTWINDOWHANDLER_H__

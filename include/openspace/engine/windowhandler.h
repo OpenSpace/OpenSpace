@@ -22,14 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WINDOW_H__
-#define __WINDOW_H__
+#ifndef __WINDOWHANDLER_H__
+#define __WINDOWHANDLER_H__
+
+#include <ghoul/glm.h>
+
+#include <functional>
 
 namespace openspace {
 
-class Window {
+class WindowHandler {
 public:
+    virtual void setBarrier(bool enabled) = 0;
+    virtual void clearAllWindows() = 0;
+    virtual double averageDeltaTime() = 0;
+    virtual glm::vec2 mousePosition() = 0;
+    virtual glm::ivec2 currentWindowSize() = 0;
+    virtual glm::ivec2 currentWindowResolution() = 0;
 
+    
+    
+    
+    //virtual void forEachWindow(std::function<void (void)> function) = 0;
+    
 };
 
 } // namespace openspace
