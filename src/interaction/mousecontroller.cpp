@@ -208,13 +208,13 @@ void OrbitalMouseController::move(float x, float y) {
 	sgct::Engine::instance()->getMousePos(winID, &mouseX, &mouseY);
 	_currentCursorPos = glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
-	if (_leftMouseButtonDown){		
+	if (_leftMouseButtonDown) {
 		_currentCursorDiff[MouseButtons::ButtonLeft] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonLeft]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
 	}
-	if (_rightMouseButtonDown){
+	if (_rightMouseButtonDown) {
 		_currentCursorDiff[MouseButtons::ButtonRight] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonRight]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
 	}
-	if (_middleMouseButtonDown){
+	if (_middleMouseButtonDown) {
 		_currentCursorDiff[MouseButtons::ButtonMiddle] = (_currentCursorPos - _previousCursorPos[MouseButtons::ButtonMiddle]) / glm::vec2(static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getXResolution()), static_cast<float>(sgct::Engine::instance()->getWindowPtr(winID)->getYResolution()));
 	}
 }

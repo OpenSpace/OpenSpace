@@ -442,7 +442,7 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 	_interceptTag[_bounds.size()] = _interceptTag[0];
 	fovSurfaceIntercept(_interceptTag, _bounds);
 
-	glm::vec3 aim = (_spacecraftRotation * glm::vec4(_boresight, 1)).xyz;
+	glm::vec3 aim = (_spacecraftRotation * glm::vec4(_boresight, 1)).xyz();
 	psc position;
 	SpiceManager::ref().getTargetPosition(_fovTarget,
 		    							  _spacecraft,
