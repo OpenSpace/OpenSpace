@@ -29,7 +29,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 
-#include <openspace/engine/windowhandler.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -72,7 +72,7 @@ namespace properties {
     
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, WindowHandler* windowHandler, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv, WindowWrapper* windowWrapper, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -94,7 +94,7 @@ public:
     ModuleEngine* moduleEngine();
     network::ParallelConnection* parallelConnection();
     properties::PropertyOwner* globalPropertyOwner();
-    WindowHandler* windowWrapper();
+    WindowWrapper* windowWrapper();
 
 	gui::GUI* gui();
 
@@ -120,7 +120,7 @@ public:
     void runSettingsScripts();
 
 private:
-    OpenSpaceEngine(std::string programName, WindowHandler* windowHandler);
+    OpenSpaceEngine(std::string programName, WindowWrapper* windowWrapper);
     ~OpenSpaceEngine();
     OpenSpaceEngine(const OpenSpaceEngine& rhs) = delete;
 
@@ -144,7 +144,7 @@ private:
     ModuleEngine* _moduleEngine;
     gui::GUI* _gui;
     network::ParallelConnection* _parallelConnection;
-    WindowHandler* _windowHandler;
+    WindowWrapper* _windowWrapper;
     
     properties::PropertyOwner* _globalPropertyNamespace;
     

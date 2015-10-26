@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WINDOWHANDLER_H__
-#define __WINDOWHANDLER_H__
+#ifndef __WINDOWWRAPPER_H__
+#define __WINDOWWRAPPER_H__
 
 #include <ghoul/glm.h>
 
@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-class WindowHandler {
+class WindowWrapper {
 public:
     virtual void setBarrier(bool enabled) = 0;
     virtual void clearAllWindows() = 0;

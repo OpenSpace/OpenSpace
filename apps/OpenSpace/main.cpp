@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/sgctwindowhandler.h>
+#include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logging>
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> sgctArguments;
     const bool success = openspace::OpenSpaceEngine::create(
         argc, argv,
-        new openspace::SGCTWindowHandler,
+        new openspace::SGCTWindowWrapper,
         sgctArguments
     );
     if (!success)

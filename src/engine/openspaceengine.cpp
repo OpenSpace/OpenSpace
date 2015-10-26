@@ -101,7 +101,7 @@ namespace openspace {
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine(std::string programName, WindowHandler* windowHandler)
+OpenSpaceEngine::OpenSpaceEngine(std::string programName, WindowWrapper* windowWrapper)
     : _configurationManager(new ConfigurationManager)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
@@ -112,7 +112,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName, WindowHandler* windowH
     , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
     , _parallelConnection(new network::ParallelConnection)
-    , _windowHandler(windowHandler)
+    , _windowWrapper(windowWrapper)
     , _globalPropertyNamespace(new properties::PropertyOwner)
 	, _isMaster(false)
     , _runTime(0.0)
@@ -132,8 +132,8 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     delete _globalPropertyNamespace;
     _globalPropertyNamespace = nullptr;
 
-    delete _windowHandler;
-    _windowHandler = nullptr;
+    delete _windowWrapper;
+    _windowWrapper = nullptr;
 
 	delete _parallelConnection;
     _parallelConnection = nullptr;
@@ -176,7 +176,7 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 
 bool OpenSpaceEngine::create(
     int argc, char** argv,
-    WindowHandler* windowHandler,
+    WindowWrapper* windowWrapper,
     std::vector<std::string>& sgctArguments)
 {
     ghoul::initialize();
@@ -208,7 +208,7 @@ bool OpenSpaceEngine::create(
 
 	// Create other objects
 	LDEBUG("Creating OpenSpaceEngine");
-	_engine = new OpenSpaceEngine(std::string(argv[0]), windowHandler);
+	_engine = new OpenSpaceEngine(std::string(argv[0]), windowWrapper);
 
 	// Query modules for commandline arguments
 	const bool gatherSuccess = _engine->gatherCommandlineArguments();
@@ -422,7 +422,7 @@ bool OpenSpaceEngine::isInitialized() {
 }
 
 void OpenSpaceEngine::clearAllWindows() {
-    _windowHandler->clearAllWindows();
+    _windowWrapper->clearAllWindows();
 }
 
 bool OpenSpaceEngine::gatherCommandlineArguments() {
@@ -666,7 +666,7 @@ void OpenSpaceEngine::setRunTime(double d){
 void OpenSpaceEngine::preSynchronization() {
 	FileSys.triggerFilesystemEvents();
     if (_isMaster) {
-        double dt = _windowHandler->averageDeltaTime();
+        double dt = _windowWrapper->averageDeltaTime();
 
 		Time::ref().advanceTime(dt);
 		Time::ref().preSynchronization();
@@ -687,12 +687,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();
     
-    if (_isMaster && _gui->isEnabled() && _windowHandler->isRegularRendering()) {
-        glm::vec2 mousePosition = _windowHandler->mousePosition();
-        glm::ivec2 windowResolution = _windowHandler->currentWindowResolution();
-        uint32_t mouseButtons = _windowHandler->mouseButtons(2);
+    if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
+        glm::vec2 mousePosition = _windowWrapper->mousePosition();
+        glm::ivec2 windowResolution = _windowWrapper->currentWindowResolution();
+        uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
         
-        double dt = _windowHandler->averageDeltaTime();
+        double dt = _windowWrapper->averageDeltaTime();
 
 		_gui->startFrame(static_cast<float>(dt), glm::vec2(windowResolution), mousePosition, mouseButtons);
 	}
@@ -701,7 +701,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
     _renderEngine->render(projectionMatrix, viewMatrix);
 
-	if (_isMaster && _windowHandler->isRegularRendering()) {
+	if (_isMaster && _windowWrapper->isRegularRendering()) {
         if (_console->isVisible())
         		_console->render();
 		if (_gui->isEnabled())
@@ -809,11 +809,11 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars,
 }
 
 void OpenSpaceEngine::enableBarrier() {
-    _windowHandler->setBarrier(true);
+    _windowWrapper->setBarrier(true);
 }
 
 void OpenSpaceEngine::disableBarrier() {
-    _windowHandler->setBarrier(false);
+    _windowWrapper->setBarrier(false);
 }
 
 NetworkEngine* OpenSpaceEngine::networkEngine() {
@@ -834,9 +834,9 @@ properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
     return _globalPropertyNamespace;
 }
 
-WindowHandler* OpenSpaceEngine::windowWrapper() {
-    ghoul_assert(_windowHandler, "Window Wrapper");
-    return _windowHandler;
+WindowWrapper* OpenSpaceEngine::windowWrapper() {
+    ghoul_assert(_windowWrapper, "Window Wrapper");
+    return _windowWrapper;
 }
 
 }  // namespace openspace

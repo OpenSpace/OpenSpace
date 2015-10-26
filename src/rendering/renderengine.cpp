@@ -192,9 +192,6 @@ bool RenderEngine::initialize() {
 }
 
 bool RenderEngine::initializeGL() {
-	// LDEBUG("RenderEngine::initializeGL()");
-//	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getCurrentWindowPtr();
-
 	// TODO:    Fix the power scaled coordinates in such a way that these 
 	//			values can be set to more realistic values
 

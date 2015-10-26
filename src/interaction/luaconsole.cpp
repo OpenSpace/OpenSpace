@@ -25,7 +25,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/util/constants.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowhandler.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>

@@ -26,7 +26,7 @@
 #include <openspace/util/constants.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowhandler.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>

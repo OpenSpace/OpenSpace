@@ -25,7 +25,6 @@
 #include <openspace/util/screenlog.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowhandler.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 

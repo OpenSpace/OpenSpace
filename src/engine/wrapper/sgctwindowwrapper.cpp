@@ -25,15 +25,15 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include "sgct.h"
 
-#include <openspace/engine/sgctwindowhandler.h>
+#include <openspace/engine/wrapper/sgctwindowwrapper.h>
 
 namespace openspace {
     
-void SGCTWindowHandler::setBarrier(bool enabled) {
+void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
     
-void SGCTWindowHandler::clearAllWindows() {
+void SGCTWindowWrapper::clearAllWindows() {
     size_t n = sgct::Engine::instance()->getNumberOfWindows();
     for (size_t i = 0; i < n; ++i) {
         glClearColor(0, 0, 0, 0);
@@ -43,26 +43,26 @@ void SGCTWindowHandler::clearAllWindows() {
     }
 }
 
-bool SGCTWindowHandler::windowHasResized() const {
+bool SGCTWindowWrapper::windowHasResized() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
 }
     
-double SGCTWindowHandler::time() const {
+double SGCTWindowWrapper::time() const {
     return sgct::Engine::instance()->getTime();
 }
     
-double SGCTWindowHandler::averageDeltaTime() const {
+double SGCTWindowWrapper::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
 }
     
-glm::vec2 SGCTWindowHandler::mousePosition() const {
+glm::vec2 SGCTWindowWrapper::mousePosition() const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     double posX, posY;
     sgct::Engine::instance()->getMousePos(id, &posX, &posY);
     return glm::vec2(posX, posY);
 }
     
-uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) const {
+uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     uint32_t result = 0;
     for (int i = 0; i < maxNumber; ++i) {
@@ -74,18 +74,18 @@ uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) const {
     return result;
 }
     
-glm::ivec2 SGCTWindowHandler::currentWindowSize() const {
+glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
                       sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
 }
     
-glm::ivec2 SGCTWindowHandler::currentWindowResolution() const {
+glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
     int x,y;
     sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
     
-bool SGCTWindowHandler::isRegularRendering() const {
+bool SGCTWindowWrapper::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock
     
     // sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
@@ -95,15 +95,15 @@ bool SGCTWindowHandler::isRegularRendering() const {
     return true;
 }
     
-glm::mat4 SGCTWindowHandler::viewProjectionMatrix() const {
+glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
     
-void SGCTWindowHandler::setNearFarClippingPlane(float near, float far) {
+void SGCTWindowWrapper::setNearFarClippingPlane(float near, float far) {
     sgct::Engine::instance()->setNearAndFarClippingPlanes(near, far);
 }
     
-glm::ivec4 SGCTWindowHandler::viewportPixelCoordinates() const {
+glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1,
                                                                                    y1,
@@ -112,22 +112,22 @@ glm::ivec4 SGCTWindowHandler::viewportPixelCoordinates() const {
     return glm::ivec4(x1, xSize, y1, ySize);
 }
     
-bool SGCTWindowHandler::isExternalControlConnected() const {
+bool SGCTWindowWrapper::isExternalControlConnected() const {
     return sgct::Engine::instance()->isExternalControlConnected();
 }
     
-void SGCTWindowHandler::sendMessageToExternalControl(const std::vector<char>& message) const {
+void SGCTWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
     sgct::Engine::instance()->sendMessageToExternalControl(
                                                            message.data(),
                                                            message.size());
 }
     
-bool SGCTWindowHandler::isSimpleRendering() const {
+bool SGCTWindowWrapper::isSimpleRendering() const {
     return (sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer);
 
 }
     
-void SGCTWindowHandler::takeScreenshot() const {
+void SGCTWindowWrapper::takeScreenshot() const {
     sgct::Engine::instance()->takeScreenshot();
 }
     

@@ -25,7 +25,6 @@
 #include <openspace/interaction/mousecontroller.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowhandler.h>
 
 #include <openspace/interaction/interactionhandler.h>
 
@@ -56,8 +55,6 @@ glm::vec3 MouseController::mapToTrackball(glm::vec2 mousePos) {
 }
 
 glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
-	//	return glm::vec3((sgct::Engine::instance()->getActiveViewMatrix() * glm::vec4(trackballPos,0)));
-
 	//Get x,y,z axis vectors of current camera view
 	glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
 	psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();

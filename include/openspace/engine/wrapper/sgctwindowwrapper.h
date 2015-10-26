@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWHANDLER_H__
-#define __SGCTWINDOWHANDLER_H__
+#ifndef __SGCTWINDOWWRAPPER_H__
+#define __SGCTWINDOWWRAPPER_H__
 
-#include <openspace/engine/windowhandler.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 namespace openspace {
 
-class SGCTWindowHandler : public WindowHandler {
+class SGCTWindowWrapper : public WindowWrapper {
 public:
     void setBarrier(bool enabled) override;
     void clearAllWindows() override;
@@ -62,4 +62,4 @@ public:
 
 } // namespace openspace
 
-#endif // __SGCTWINDOWHANDLER_H__
+#endif // __SGCTWINDOWWRAPPER_H__
