@@ -36,6 +36,8 @@ class WindowHandler {
 public:
     virtual void setBarrier(bool enabled) = 0;
     virtual void clearAllWindows() = 0;
+    virtual bool windowHasResized() const = 0;
+    virtual double time() const = 0;
     virtual double averageDeltaTime() const = 0;
     virtual uint32_t mouseButtons(int maxNumber = 8) const = 0;
     virtual glm::vec2 mousePosition() const = 0;
@@ -51,6 +53,10 @@ public:
     virtual bool isExternalControlConnected() const = 0;
     virtual void sendMessageToExternalControl(const std::vector<char>& message) const = 0;
     
+    // true for single viewport, single window; false otherwise
+    virtual bool isSimpleRendering() const = 0;
+    
+    virtual void takeScreenshot() const = 0;
     
     //virtual void forEachWindow(std::function<void (void)> function) = 0;
     

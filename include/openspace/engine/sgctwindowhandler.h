@@ -33,7 +33,9 @@ class SGCTWindowHandler : public WindowHandler {
 public:
     void setBarrier(bool enabled) override;
     void clearAllWindows() override;
-    
+    bool windowHasResized() const override;
+
+    double time() const override;
     double averageDeltaTime() const override;
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
@@ -50,6 +52,11 @@ public:
     bool isExternalControlConnected() const override;
     void sendMessageToExternalControl(const std::vector<char>& message) const override;
 
+    bool isSimpleRendering() const override;
+
+    void takeScreenshot() const override;
+    
+    
     //    void forEachWindow(std::function<void (void)> function) override;
 };
 

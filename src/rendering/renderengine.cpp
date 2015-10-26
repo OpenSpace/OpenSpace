@@ -306,22 +306,15 @@ void RenderEngine::postSynchronizationPreDraw() {
 				_globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
 			else
 				_globalBlackOutFactor = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
-			_currentFadeTime += static_cast<float>(sgct::Engine::instance()->getAvgDt());
+            _currentFadeTime += static_cast<float>(OsEng.windowWrapper()->averageDeltaTime());
 		}
 	}
 
 	if (_mainCamera)
 		_mainCamera->postSynchronizationPreDraw();
 
-	sgct_core::SGCTNode* thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
-	bool updateAbuffer = false;
-	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
-		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized()) {
-			updateAbuffer = true;
-			break;
-		}
-	}
-	if (updateAbuffer) {
+	bool windowResized = OsEng.windowWrapper()->windowHasResized();
+	if (windowResized) {
 		generateGlslConfig();
 		_abuffer->reinitialize();
 	}
@@ -352,9 +345,10 @@ void RenderEngine::postSynchronizationPreDraw() {
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
 	// We need the window pointer
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+//	sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
 
-    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer)
+    if (!OsEng.windowWrapper()->isSimpleRendering())
+//    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer)
 		_abuffer->clear();
 
 	// SGCT resets certain settings
@@ -424,8 +418,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 	// Print some useful information on the master viewport
 
-	if (OsEng.ref().isMaster() && sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer) {
-
+	if (OsEng.ref().isMaster() && OsEng.windowWrapper()->isSimpleRendering()) {
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono = 10;
         const int font_size_time = 15;
@@ -437,8 +430,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 		if (_showInfo) {
 			const sgct_text::Font* font = fontMono;
-			int x1, xSize, y1, ySize;
-			sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+            glm::ivec4 pixelCoords = OsEng.windowWrapper()->viewportPixelCoordinates();
+            int x1 = pixelCoords.x;
+            int xSize = pixelCoords.y;
+            int y1 = pixelCoords.z;
+            int ySize = pixelCoords.w;
 			int startY = ySize - 2 * font_size_time;
 			//const glm::vec2& scaling = _mainCamera->scaling();
 			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
@@ -477,7 +473,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			float distToSurf = glm::length(nhPos.vec3()) - radius;
 			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
 
-			PrintText(line++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
+            PrintText(line++, "Avg. Frametime: %.5f", OsEng.windowWrapper()->averageDeltaTime());
 		
 			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 			//PrintText(line++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
@@ -596,7 +592,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			for (auto& it = entries.first; it != entries.second; ++it) {
 				const ScreenLog::LogEntry* e = &(*it);
 
-				const double t = sgct::Engine::instance()->getTime();
+                const double t = OsEng.windowWrapper()->time();
 				float diff = static_cast<float>(t - e->timeStamp);
 
 				// Since all log entries are ordered, once one is exceeding TTL, all have
@@ -650,7 +646,7 @@ void RenderEngine::postDraw() {
     if (Time::ref().timeJumped())
         Time::ref().setTimeJumped(false);
 	if (_takeScreenshot) {
-		sgct::Engine::instance()->takeScreenshot();
+        OsEng.windowWrapper()->takeScreenshot();
 		_takeScreenshot = false;
 	}
 
@@ -738,8 +734,7 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 void RenderEngine::generateGlslConfig() {
     ghoul_assert(_abuffer != nullptr, "ABuffer not initialized");
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
-	int xSize = sgct::Engine::instance()->getCurrentWindowPtr()->getXFramebufferResolution();;
-	int ySize = sgct::Engine::instance()->getCurrentWindowPtr()->getYFramebufferResolution();;
+    glm::ivec2 size = OsEng.windowWrapper()->currentWindowResolution();
 
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to
@@ -747,8 +742,8 @@ void RenderEngine::generateGlslConfig() {
 	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
 	os << "#ifndef CONSTANTS_HGLSL\n"
 		<< "#define CONSTANTS_HGLSL\n"
-		<< "#define SCREEN_WIDTH  " << xSize << "\n"
-		<< "#define SCREEN_HEIGHT " << ySize << "\n"
+		<< "#define SCREEN_WIDTH  " << size.x << "\n"
+		<< "#define SCREEN_HEIGHT " << size.y << "\n"
 		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
 		<< "#define ABUFFER_FRAMEBUFFER       " << ABUFFER_FRAMEBUFFER << "\n"
 		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"

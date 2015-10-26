@@ -42,6 +42,14 @@ void SGCTWindowHandler::clearAllWindows() {
         glfwSwapBuffers(win);
     }
 }
+
+bool SGCTWindowHandler::windowHasResized() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
+}
+    
+double SGCTWindowHandler::time() const {
+    return sgct::Engine::instance()->getTime();
+}
     
 double SGCTWindowHandler::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
@@ -113,6 +121,16 @@ void SGCTWindowHandler::sendMessageToExternalControl(const std::vector<char>& me
                                                            message.data(),
                                                            message.size());
 }
+    
+bool SGCTWindowHandler::isSimpleRendering() const {
+    return (sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer);
+
+}
+    
+void SGCTWindowHandler::takeScreenshot() const {
+    sgct::Engine::instance()->takeScreenshot();
+}
+    
     
 //void forEachWindow(std::function<void (void)> function) {
 //    size_t n = sgct::Engine::instance()->getNumberOfWindows();
