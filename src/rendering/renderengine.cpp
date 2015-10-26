@@ -103,7 +103,7 @@ RenderEngine::RenderEngine()
 	, _fadeDuration(2.f)
 	, _currentFadeTime(0.f)
 	, _fadeDirection(0)
-    , _sgctRenderStatisticsVisible(false)
+    //    , _sgctRenderStatisticsVisible(false)
     , _visualizeABuffer(false)
     , _visualizer(nullptr)
 {
@@ -193,14 +193,20 @@ bool RenderEngine::initialize() {
 
 bool RenderEngine::initializeGL() {
 	// LDEBUG("RenderEngine::initializeGL()");
-	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getCurrentWindowPtr();
+//	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getCurrentWindowPtr();
 
 	// TODO:    Fix the power scaled coordinates in such a way that these 
 	//			values can be set to more realistic values
 
 	// set the close clip plane and the far clip plane to extreme values while in
 	// development
-	sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
+    OsEng.windowWrapper()->setNearFarClippingPlane(0.001f, 1000.f);
+    
+    // ALL OF THIS HAS TO BE CHECKED
+    // ---abock
+    
+    
+//	sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
 	// sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
 	// calculating the maximum field of view for the camera, used to
@@ -289,7 +295,6 @@ void RenderEngine::preSynchronization() {
 }
 
 void RenderEngine::postSynchronizationPreDraw() {
-    sgct::Engine::instance()->setStatsGraphVisibility(_sgctRenderStatisticsVisible);
 	//temporary fade funtionality
 	if (_fadeDirection != 0) {
 		if (_currentFadeTime > _fadeDuration){
@@ -788,12 +793,6 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"bool",
 				"Toggles the showing of render information on-screen text"
 			},
-            {
-                "showSGCTRenderStatistics",
-                &luascriptfunctions::showSGCTRenderStatistics,
-                "bool",
-                "Toggles the visibility of the SGCT rendering information"
-            },
 			{
 				"setPerformanceMeasurement",
 				&luascriptfunctions::setPerformanceMeasurement,
@@ -1288,10 +1287,6 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	}
 
     LFATAL("This function is being misused with an argument of '" << origin << "'");
-}
-
-void RenderEngine::setSGCTRenderStatistics(bool visible) {
-    _sgctRenderStatisticsVisible = visible;
 }
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {

@@ -43,10 +43,14 @@ public:
     bool isRegularRendering() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
-
+    void setNearFarClippingPlane(float near, float far) override;
     
-    //    void forEachWindow(std::function<void (void)> function) override;
+    glm::ivec4 viewportPixelCoordinates() const override;
+    
+    bool isExternalControlConnected() const override;
+    void sendMessageToExternalControl(const std::vector<char>& message) const override;
 
+    //    void forEachWindow(std::function<void (void)> function) override;
 };
 
 } // namespace openspace

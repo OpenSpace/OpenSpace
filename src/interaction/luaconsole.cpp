@@ -25,6 +25,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/util/constants.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowhandler.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -280,8 +281,13 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 
 void LuaConsole::render() {
 	const float font_size = 10.0f;
-	int x1, xSize, y1, ySize;
-	sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
+    
+    glm::ivec4 viewportPixelCoordinates = OsEng.windowWrapper()->viewportPixelCoordinates();
+    int x1 = viewportPixelCoordinates.x;
+    int xSize = viewportPixelCoordinates.y;
+    int y1 = viewportPixelCoordinates.z;
+    int ySize = viewportPixelCoordinates.w;
+
 	float startY = static_cast<float>(ySize) - 2.0f * font_size;
 	startY = startY - font_size * 15.0f * 2.0f;
 

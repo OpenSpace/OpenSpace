@@ -89,8 +89,6 @@ public:
 	float globalBlackOutFactor();
 	void setGlobalBlackOutFactor(float factor);
 
-    void setSGCTRenderStatistics(bool visible);
-
     void setDisableRenderingOnMaster(bool enabled);
 	
 	/**
@@ -140,7 +138,7 @@ private:
 	float _fadeDuration;
 	float _currentFadeTime;
 	int _fadeDirection;
-    bool _sgctRenderStatisticsVisible;
+//    bool _sgctRenderStatisticsVisible;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;

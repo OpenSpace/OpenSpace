@@ -686,8 +686,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
 	_scriptEngine->postSynchronizationPreDraw();	
     _renderEngine->postSynchronizationPreDraw();
-	
-
+    
     if (_isMaster && _gui->isEnabled() && _windowHandler->isRegularRendering()) {
         glm::vec2 mousePosition = _windowHandler->mousePosition();
         glm::ivec2 windowResolution = _windowHandler->currentWindowResolution();

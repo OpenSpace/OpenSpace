@@ -87,7 +87,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
 }
 
 void NetworkEngine::publishStatusMessage() {
-    if (!_shouldPublishStatusMessage || !sgct::Engine::instance()->isExternalControlConnected())
+    if (!_shouldPublishStatusMessage || !OsEng.windowWrapper()->isExternalControlConnected())
         return;
     // Protocol:
     // 8 bytes: time as a ET double
@@ -164,7 +164,7 @@ void NetworkEngine::publishMessage(MessageIdentifier identifier, std::vector<cha
 }
 
 void NetworkEngine::sendMessages() {
-    if (!sgct::Engine::instance()->isExternalControlConnected())
+    if (!OsEng.windowWrapper()->isExternalControlConnected())
         return;
 
     for (Message& m : _messagesToSend) {
@@ -180,10 +180,11 @@ void NetworkEngine::sendMessages() {
 
         // Prepending the message identifier to the front
         m.body.insert(m.body.begin(), identifier.data.begin(), identifier.data.end());
-        sgct::Engine::instance()->sendMessageToExternalControl(
-            m.body.data(),
-            static_cast<int>(m.body.size())
-        );
+        OsEng.windowWrapper()->sendMessageToExternalControl(m.body);
+//        sgct::Engine::instance()->sendMessageToExternalControl(
+//            m.body.data(),
+//            static_cast<int>(m.body.size())
+//        );
         //LINFO("Sent message: (s=" << m.body.size() << "): " << std::string(m.body.begin(), m.body.end()));
     }
 
@@ -202,10 +203,11 @@ void NetworkEngine::sendInitialInformation() {
 
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
-        sgct::Engine::instance()->sendMessageToExternalControl(
-            payload.data(),
-            static_cast<int>(payload.size())
-        );
+        OsEng.windowWrapper()->sendMessageToExternalControl(payload);
+//        sgct::Engine::instance()->sendMessageToExternalControl(
+//            payload.data(),
+//            static_cast<int>(payload.size())
+//        );
         LINFO("Sent initial message: (s=" << m.body.size() << ") [i=" << identifier.value << "]");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
@@ -220,10 +222,14 @@ void NetworkEngine::sendInitialInformation() {
     } identifier;
     identifier.value = _initialMessageFinishedIdentifier;
 
-    sgct::Engine::instance()->sendMessageToExternalControl(
-        identifier.data.data(),
-        2
-    );
+    std::vector<char> d;
+    d.insert(d.begin(), identifier.data.begin(), identifier.data.end());
+
+    OsEng.windowWrapper()->sendMessageToExternalControl(d);
+//    sgct::Engine::instance()->sendMessageToExternalControl(
+//        identifier.data.data(),
+//        2
+//    );
 
     _shouldPublishStatusMessage = true;
 }

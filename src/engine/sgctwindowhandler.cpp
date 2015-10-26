@@ -90,7 +90,30 @@ bool SGCTWindowHandler::isRegularRendering() const {
 glm::mat4 SGCTWindowHandler::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
-
+    
+void SGCTWindowHandler::setNearFarClippingPlane(float near, float far) {
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(near, far);
+}
+    
+glm::ivec4 SGCTWindowHandler::viewportPixelCoordinates() const {
+    int x1, xSize, y1, ySize;
+    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1,
+                                                                                   y1,
+                                                                                   xSize,
+                                                                                   ySize);
+    return glm::ivec4(x1, xSize, y1, ySize);
+}
+    
+bool SGCTWindowHandler::isExternalControlConnected() const {
+    return sgct::Engine::instance()->isExternalControlConnected();
+}
+    
+void SGCTWindowHandler::sendMessageToExternalControl(const std::vector<char>& message) const {
+    sgct::Engine::instance()->sendMessageToExternalControl(
+                                                           message.data(),
+                                                           message.size());
+}
+    
 //void forEachWindow(std::function<void (void)> function) {
 //    size_t n = sgct::Engine::instance()->getNumberOfWindows();
 //    for (size_t i = 0; i < n; ++i)

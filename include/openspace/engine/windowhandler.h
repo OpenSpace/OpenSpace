@@ -44,7 +44,12 @@ public:
     virtual bool isRegularRendering() const = 0;
 
     virtual glm::mat4 viewProjectionMatrix() const = 0;
+    virtual void setNearFarClippingPlane(float near, float far) = 0;
     
+    virtual glm::ivec4 viewportPixelCoordinates() const = 0;
+    
+    virtual bool isExternalControlConnected() const = 0;
+    virtual void sendMessageToExternalControl(const std::vector<char>& message) const = 0;
     
     
     //virtual void forEachWindow(std::function<void (void)> function) = 0;

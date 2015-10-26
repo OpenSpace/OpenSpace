@@ -88,24 +88,6 @@ int showRenderInformation(lua_State* L) {
 }
 
 /**
-    * \ingroup LuaScripts
-    * showSGCTRenderStatistics(bool):
-    * Set the rendering of the SGCTRenderStatistics
-    */
-int showSGCTRenderStatistics(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-    bool b = lua_toboolean(L, -1) != 0;
-    OsEng.renderEngine()->setSGCTRenderStatistics(b);
-    return 0;
-}
-
-/**
 * \ingroup LuaScripts
 * visualizeABuffer(bool):
 * Toggle the visualization of the ABuffer
