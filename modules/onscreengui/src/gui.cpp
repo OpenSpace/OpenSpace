@@ -26,9 +26,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-// This needs to be included first due to Windows.h / winsock2.h complications
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
+#include <openspace/util/keys.h>
 
 
 #include <openspace/engine/openspaceengine.h>
@@ -168,23 +166,23 @@ void GUI::initialize() {
 	//io.IniSavingRate = 5.f;
 	io.DeltaTime = 1.f / 60.f;
 	//io.PixelCenterOffset = 0.5f;
-	io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-	io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = SGCT_KEY_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = SGCT_KEY_DOWN;
-	io.KeyMap[ImGuiKey_Home] = SGCT_KEY_HOME;
-	io.KeyMap[ImGuiKey_End] = SGCT_KEY_END;
-	io.KeyMap[ImGuiKey_Delete] = SGCT_KEY_DELETE;
-	io.KeyMap[ImGuiKey_Backspace] = SGCT_KEY_BACKSPACE;
-	io.KeyMap[ImGuiKey_Enter] = SGCT_KEY_ENTER;
-	io.KeyMap[ImGuiKey_Escape] = SGCT_KEY_ESCAPE;
-	io.KeyMap[ImGuiKey_A] = SGCT_KEY_A;
-	io.KeyMap[ImGuiKey_C] = SGCT_KEY_C;
-	io.KeyMap[ImGuiKey_V] = SGCT_KEY_V;
-	io.KeyMap[ImGuiKey_X] = SGCT_KEY_X;
-	io.KeyMap[ImGuiKey_Y] = SGCT_KEY_Y;
-	io.KeyMap[ImGuiKey_Z] = SGCT_KEY_Z;
+    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
+    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
+	io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
+	io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
+	io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
+	io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
+	io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
+	io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
+	io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
+	io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
+	io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
+	io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
+	io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
+	io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
+	io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
+	io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
+	io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
 	io.RenderDrawListsFn = ImImpl_RenderDrawLists;
 	//io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock

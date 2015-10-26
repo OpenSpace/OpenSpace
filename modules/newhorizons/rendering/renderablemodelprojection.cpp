@@ -34,7 +34,6 @@
 #include <openspace/util/spicemanager.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <sgct.h>
 #include "imgui.h"
 
 #define _USE_MATH_DEFINES

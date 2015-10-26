@@ -26,15 +26,10 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/syncbuffer.h>
 
-// sgct includes
-#include "sgct.h"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-
 namespace openspace {
-
     
 Camera::Camera()
 	: _maxFov(0.f)

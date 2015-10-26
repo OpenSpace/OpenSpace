@@ -26,8 +26,6 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
 #include <openspace/version.h>
 
 #include <openspace/engine/configurationmanager.h>

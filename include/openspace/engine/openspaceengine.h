@@ -69,7 +69,7 @@ namespace network {
 namespace properties {
     class PropertyOwner;
 }
-    
+ 
 class OpenSpaceEngine {
 public:
     static bool create(int argc, char** argv, WindowWrapper* windowWrapper, std::vector<std::string>& sgctArguments);

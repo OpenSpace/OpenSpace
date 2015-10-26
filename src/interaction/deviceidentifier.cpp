@@ -2,9 +2,6 @@
 // open space includes
 #include <openspace/interaction/deviceidentifier.h>
 
-// sgct includes
-//#include "sgct.h"
-
 #include <assert.h>
 
 namespace openspace {

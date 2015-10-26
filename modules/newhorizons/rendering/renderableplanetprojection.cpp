@@ -40,7 +40,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
-#include <sgct.h>
 #include <iomanip> 
 #include <string>
 #include <thread>      

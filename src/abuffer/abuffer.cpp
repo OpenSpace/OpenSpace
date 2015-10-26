@@ -31,8 +31,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
-#include <sgct.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>

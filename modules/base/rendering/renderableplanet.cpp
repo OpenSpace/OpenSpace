@@ -39,8 +39,6 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <sgct.h>
-
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
 

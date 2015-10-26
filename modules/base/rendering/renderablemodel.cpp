@@ -39,7 +39,6 @@
 #include <openspace/util/spicemanager.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <sgct.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
