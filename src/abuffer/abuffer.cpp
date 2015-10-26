@@ -322,7 +322,7 @@ void ABuffer::invalidateABuffer() {
 }
 
 void ABuffer::updateDimensions() {
-    glm::ivec2 res = OsEng.windowWrapper()->currentWindowResolution();
+    glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     _width = res.x;
     _height = res.y;
     

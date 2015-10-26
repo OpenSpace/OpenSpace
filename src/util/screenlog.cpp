@@ -34,7 +34,7 @@ ScreenLog::ScreenLog() {}
 
 void ScreenLog::log(ghoul::logging::LogManager::LogLevel level, const std::string& category, const std::string& message) {
 	if (level >= ghoul::logging::LogManager::LogLevel::Info)
-		_entries.emplace_back(level, OsEng.windowWrapper()->time(), Log::getTimeString(), category, message);
+		_entries.emplace_back(level, OsEng.windowWrapper().time(), Log::getTimeString(), category, message);
 
 	// Once reaching maximum size, reduce to half
 	if (_entries.size() > MaximumSize) {

@@ -197,7 +197,7 @@ bool RenderEngine::initializeGL() {
 
 	// set the close clip plane and the far clip plane to extreme values while in
 	// development
-    OsEng.windowWrapper()->setNearFarClippingPlane(0.001f, 1000.f);
+    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
@@ -303,14 +303,14 @@ void RenderEngine::postSynchronizationPreDraw() {
 				_globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
 			else
 				_globalBlackOutFactor = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
-            _currentFadeTime += static_cast<float>(OsEng.windowWrapper()->averageDeltaTime());
+            _currentFadeTime += static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
 		}
 	}
 
 	if (_mainCamera)
 		_mainCamera->postSynchronizationPreDraw();
 
-	bool windowResized = OsEng.windowWrapper()->windowHasResized();
+	bool windowResized = OsEng.windowWrapper().windowHasResized();
 	if (windowResized) {
 		generateGlslConfig();
 		_abuffer->reinitialize();
@@ -344,7 +344,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 	// We need the window pointer
 //	sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
 
-    if (!OsEng.windowWrapper()->isSimpleRendering())
+    if (!OsEng.windowWrapper().isSimpleRendering())
 //    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer)
 		_abuffer->clear();
 
@@ -415,7 +415,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 	// Print some useful information on the master viewport
 
-	if (OsEng.ref().isMaster() && OsEng.windowWrapper()->isSimpleRendering()) {
+	if (OsEng.ref().isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
 		// TODO: Adjust font_size properly when using retina screen
 		const int font_size_mono = 10;
         const int font_size_time = 15;
@@ -427,7 +427,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 		if (_showInfo) {
 			const sgct_text::Font* font = fontMono;
-            glm::ivec4 pixelCoords = OsEng.windowWrapper()->viewportPixelCoordinates();
+            glm::ivec4 pixelCoords = OsEng.windowWrapper().viewportPixelCoordinates();
             int x1 = pixelCoords.x;
             int xSize = pixelCoords.y;
             int y1 = pixelCoords.z;
@@ -470,7 +470,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			float distToSurf = glm::length(nhPos.vec3()) - radius;
 			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
 
-            PrintText(line++, "Avg. Frametime: %.5f", OsEng.windowWrapper()->averageDeltaTime());
+            PrintText(line++, "Avg. Frametime: %.5f", OsEng.windowWrapper().averageDeltaTime());
 		
 			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
 			//PrintText(line++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
@@ -589,7 +589,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			for (auto& it = entries.first; it != entries.second; ++it) {
 				const ScreenLog::LogEntry* e = &(*it);
 
-                const double t = OsEng.windowWrapper()->time();
+                const double t = OsEng.windowWrapper().time();
 				float diff = static_cast<float>(t - e->timeStamp);
 
 				// Since all log entries are ordered, once one is exceeding TTL, all have
@@ -643,7 +643,7 @@ void RenderEngine::postDraw() {
     if (Time::ref().timeJumped())
         Time::ref().setTimeJumped(false);
 	if (_takeScreenshot) {
-        OsEng.windowWrapper()->takeScreenshot();
+        OsEng.windowWrapper().takeScreenshot();
 		_takeScreenshot = false;
 	}
 
@@ -731,7 +731,7 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 void RenderEngine::generateGlslConfig() {
     ghoul_assert(_abuffer != nullptr, "ABuffer not initialized");
 	LDEBUG("Generating GLSLS config, expect shader recompilation");
-    glm::ivec2 size = OsEng.windowWrapper()->currentWindowResolution();
+    glm::ivec2 size = OsEng.windowWrapper().currentWindowResolution();
 
 	// TODO: Make this file creation dynamic and better in every way
 	// TODO: If the screen size changes it is enough if this file is regenerated to

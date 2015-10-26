@@ -182,6 +182,7 @@ bool OpenSpaceEngine::create(
     ghoul::initialize();
 
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
+    ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
 
 	// Initialize the LogManager and add the console log as this will be used every time
 	// and we need a fall back if something goes wrong between here and when we add the
@@ -834,9 +835,9 @@ properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
     return _globalPropertyNamespace;
 }
 
-WindowWrapper* OpenSpaceEngine::windowWrapper() {
+WindowWrapper& OpenSpaceEngine::windowWrapper() {
     ghoul_assert(_windowWrapper, "Window Wrapper");
-    return _windowWrapper;
+    return *_windowWrapper;
 }
 
 }  // namespace openspace

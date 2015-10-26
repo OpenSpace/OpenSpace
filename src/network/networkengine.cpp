@@ -87,7 +87,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
 }
 
 void NetworkEngine::publishStatusMessage() {
-    if (!_shouldPublishStatusMessage || !OsEng.windowWrapper()->isExternalControlConnected())
+    if (!_shouldPublishStatusMessage || !OsEng.windowWrapper().isExternalControlConnected())
         return;
     // Protocol:
     // 8 bytes: time as a ET double
@@ -164,7 +164,7 @@ void NetworkEngine::publishMessage(MessageIdentifier identifier, std::vector<cha
 }
 
 void NetworkEngine::sendMessages() {
-    if (!OsEng.windowWrapper()->isExternalControlConnected())
+    if (!OsEng.windowWrapper().isExternalControlConnected())
         return;
 
     for (Message& m : _messagesToSend) {
@@ -180,7 +180,7 @@ void NetworkEngine::sendMessages() {
 
         // Prepending the message identifier to the front
         m.body.insert(m.body.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper()->sendMessageToExternalControl(m.body);
+        OsEng.windowWrapper().sendMessageToExternalControl(m.body);
     }
 
     _messagesToSend.clear();
@@ -198,7 +198,7 @@ void NetworkEngine::sendInitialInformation() {
 
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper()->sendMessageToExternalControl(payload);
+        OsEng.windowWrapper().sendMessageToExternalControl(payload);
         LINFO("Sent initial message: (s=" << m.body.size() << ") [i=" << identifier.value << "]");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
@@ -216,7 +216,7 @@ void NetworkEngine::sendInitialInformation() {
     std::vector<char> d;
     d.insert(d.begin(), identifier.data.begin(), identifier.data.end());
 
-    OsEng.windowWrapper()->sendMessageToExternalControl(d);
+    OsEng.windowWrapper().sendMessageToExternalControl(d);
     _shouldPublishStatusMessage = true;
 }
 

@@ -94,7 +94,7 @@ public:
     ModuleEngine* moduleEngine();
     network::ParallelConnection* parallelConnection();
     properties::PropertyOwner* globalPropertyOwner();
-    WindowWrapper* windowWrapper();
+    WindowWrapper& windowWrapper();
 
 	gui::GUI* gui();
 

@@ -70,7 +70,7 @@ glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
 
 void MouseController::trackballRotate(int x, int y) {
 	// Normalize mouse coordinates to [0,1]
-    glm::vec2 res = OsEng.windowWrapper()->currentWindowSize();
+    glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
 	glm::vec2 mousePos = glm::vec2((float)x / res.x, (float)y / res.y);
 
 	mousePos = glm::clamp(mousePos, -0.5f, 1.5f); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
@@ -163,7 +163,7 @@ void OrbitalMouseController::button(MouseButton button, MouseAction action) {
 	if (button == MouseButton::Left){
 		if (action == MouseAction::Press){
 			_leftMouseButtonDown = true;
-            _previousCursorPos[MouseButtons::ButtonLeft] = OsEng.windowWrapper()->mousePosition();
+            _previousCursorPos[MouseButtons::ButtonLeft] = OsEng.windowWrapper().mousePosition();
 		}
 		else if (action == MouseAction::Release) {
 			_leftMouseButtonDown = false;
@@ -173,7 +173,7 @@ void OrbitalMouseController::button(MouseButton button, MouseAction action) {
 	else if (button == MouseButton::Right){
 		if (action == MouseAction::Press){
 			_rightMouseButtonDown = true;
-            _previousCursorPos[MouseButtons::ButtonRight] = OsEng.windowWrapper()->mousePosition();
+            _previousCursorPos[MouseButtons::ButtonRight] = OsEng.windowWrapper().mousePosition();
 		}
 		else if (action == MouseAction::Release) {
 			_rightMouseButtonDown = false;
@@ -183,7 +183,7 @@ void OrbitalMouseController::button(MouseButton button, MouseAction action) {
 	else if (button == MouseButton::Middle){
 		if (action == MouseAction::Press){
 			_middleMouseButtonDown = true;
-            _previousCursorPos[MouseButtons::ButtonMiddle] = OsEng.windowWrapper()->mousePosition();
+            _previousCursorPos[MouseButtons::ButtonMiddle] = OsEng.windowWrapper().mousePosition();
 		}
 		else if (action == MouseAction::Release) {
 			_middleMouseButtonDown = false;
@@ -194,21 +194,21 @@ void OrbitalMouseController::button(MouseButton button, MouseAction action) {
 }
 
 void OrbitalMouseController::move(float x, float y) {
-    _currentCursorPos = OsEng.windowWrapper()->mousePosition();
+    _currentCursorPos = OsEng.windowWrapper().mousePosition();
 
 	if (_leftMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonLeft];
-        glm::vec2 res = OsEng.windowWrapper()->currentWindowSize();
+        glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonLeft] = diff / res;
 	}
 	if (_rightMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonRight];
-        glm::vec2 res = OsEng.windowWrapper()->currentWindowSize();
+        glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonRight] = diff / res;
 	}
 	if (_middleMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonMiddle];
-        glm::vec2 res = OsEng.windowWrapper()->currentWindowSize();
+        glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonMiddle] = diff / res;
 	}
 }
