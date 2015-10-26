@@ -34,13 +34,15 @@ public:
     void setBarrier(bool enabled) override;
     void clearAllWindows() override;
     
-    double averageDeltaTime() override;
-    glm::vec2 mousePosition() override;
-    uint32_t mouseButtons(int maxNumber) override;
-    glm::ivec2 currentWindowSize() override;
-    glm::ivec2 currentWindowResolution() override;
+    double averageDeltaTime() const override;
+    glm::vec2 mousePosition() const override;
+    uint32_t mouseButtons(int maxNumber) const override;
+    glm::ivec2 currentWindowSize() const override;
+    glm::ivec2 currentWindowResolution() const override;
     
-    bool isRegularRendering() override;
+    bool isRegularRendering() const override;
+    
+    glm::mat4 viewProjectionMatrix() const override;
 
     
     //    void forEachWindow(std::function<void (void)> function) override;

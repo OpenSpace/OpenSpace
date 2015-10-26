@@ -110,7 +110,7 @@ public:
 	void setCamera(Camera* camera);
 	const Camera* const camera() const;
 
-    void keyboardCallback(Key key, KeyAction action);
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 	void mouseButtonCallback(MouseButton button, MouseAction action);
 	void mousePositionCallback(double x, double y);
 	void mouseScrollWheelCallback(double pos);

@@ -55,9 +55,9 @@ public:
     bool mouseButtonCallback(MouseButton button, MouseAction action);
 //	bool mouseButtonCallback(int key, int action);
 	bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyAction action);
+    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
 //	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+	bool charCallback(unsigned int character, KeyModifier modifier);
 
 	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
 	void endFrame();

@@ -84,7 +84,9 @@ protected:
 	void openspaceSamplers();
 	void openspaceTransferFunction();
 
-	unsigned int _width, _height, _totalPixels;
+    int _width;
+    int _height;
+    int _totalPixels;
 
 	void updateDimensions();
 

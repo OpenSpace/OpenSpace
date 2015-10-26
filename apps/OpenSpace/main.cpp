@@ -24,6 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/sgctwindowhandler.h>
+#include <openspace/util/keys.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logging>
 #include <openspace/rendering/renderengine.h>
@@ -38,8 +39,8 @@ void mainPreSyncFunc();
 void mainPostSyncPreDrawFunc();
 void mainRenderFunc();
 void mainPostDrawFunc();
-void mainKeyboardCallback(int key, int action);
-void mainCharCallback(unsigned int codepoint);
+void mainKeyboardCallback(int key, int scancode, int action, int mods);
+void mainCharCallback(unsigned int codepoint, int mods);
 void mainMouseButtonCallback(int key, int action);
 void mainMousePosCallback(double x, double y);
 void mainMouseScrollCallback(double posX, double posY);
@@ -246,10 +247,10 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
         OsEng.externalControlCallback(receivedChars, size, 0);
 }
 
-void mainKeyboardCallback(int key, int action) {
+void mainKeyboardCallback(int key, int, int action, int mods) {
     if (OsEng.isMaster())
         OsEng.keyboardCallback(openspace::Key(key),
-                               openspace::KeyModifier::NoModifier,  // TODO: fix ---abock
+                               openspace::KeyModifier(mods),
                                openspace::KeyAction(action));
 }
 
@@ -269,9 +270,9 @@ void mainMouseScrollCallback(double posX, double posY) {
         OsEng.mouseScrollWheelCallback(posY);
 }
 
-void mainCharCallback(unsigned int codepoint) {
+void mainCharCallback(unsigned int codepoint, int mods) {
     if (OsEng.isMaster())
-        OsEng.charCallback(codepoint);
+        OsEng.charCallback(codepoint, openspace::KeyModifier(mods));
 }
 
 void mainEncodeFun() {

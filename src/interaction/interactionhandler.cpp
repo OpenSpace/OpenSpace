@@ -636,7 +636,7 @@ void InteractionHandler::lookAt(const glm::quat& rotation)
 //	}
 //}
 //
-void InteractionHandler::keyboardCallback(Key key, KeyAction action) {
+void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     // TODO package in script
     const float speed = _controllerSensitivity;
 	const float dt = static_cast<float>(_deltaTime);
@@ -668,32 +668,32 @@ void InteractionHandler::keyboardCallback(Key key, KeyAction action) {
 		if (key == SGCT_KEY_X) {
 			Time::ref().advanceTime(-sgct::Engine::instance()->getDt());
 		}*/
-        if (key == Key::Right) {
+        if ((key == Key::Right) && (modifier == KeyModifier::NoModifier)) {
 	        glm::vec3 euler(0.0, speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-        if (key == Key::Left) {
+        if ((key == Key::Left) && (modifier == KeyModifier::NoModifier)) {
 			glm::vec3 euler(0.0, -speed * dt*0.4, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-        if (key == Key::Down) {
+        if ((key == Key::Down) && (modifier == KeyModifier::NoModifier)) {
 			glm::vec3 euler(speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-        if (key == Key::Up) {
+        if ((key == Key::Up) && (modifier == KeyModifier::NoModifier)) {
 			glm::vec3 euler(-speed * dt*0.4, 0.0, 0.0);
 	        glm::quat rot = glm::quat(euler);
 	        rotateDelta(rot);
 	    }
-        if (key == Key::KeypadSubtract) {
+        if ((key == Key::KeypadSubtract) && (modifier == KeyModifier::NoModifier)) {
 			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] -= 0.5f;
 			OsEng.renderEngine()->camera()->setScaling(s);
 		}
-        if (key == Key::KeypadAdd) {
+        if ((key == Key::KeypadAdd) && (modifier == KeyModifier::NoModifier)) {
 			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
 			s[1] += 0.5f;
 			OsEng.renderEngine()->camera()->setScaling(s);

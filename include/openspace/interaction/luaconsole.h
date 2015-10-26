@@ -42,8 +42,8 @@ public:
     void initialize();
     void deinitialize();
 
-	void keyboardCallback(Key key, KeyAction action);
-	void charCallback(unsigned int codepoint);
+	void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void charCallback(unsigned int codepoint, KeyModifier modifier);
 
 	void render();
 

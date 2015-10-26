@@ -29,6 +29,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <openspace/engine/windowhandler.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -50,7 +51,6 @@ class GUI;
 class RenderEngine;
 class SyncBuffer;
 class ModuleEngine;
-class WindowHandler;
 
 namespace interaction {
     class InteractionHandler;
@@ -106,7 +106,7 @@ public:
 	void postDraw();
 //	void keyboardCallback(int key, int action);
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
-	void charCallback(unsigned int codepoint);
+	void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);

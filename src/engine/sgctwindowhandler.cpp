@@ -43,18 +43,18 @@ void SGCTWindowHandler::clearAllWindows() {
     }
 }
     
-double SGCTWindowHandler::averageDeltaTime() {
+double SGCTWindowHandler::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
 }
     
-glm::vec2 SGCTWindowHandler::mousePosition() {
+glm::vec2 SGCTWindowHandler::mousePosition() const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     double posX, posY;
     sgct::Engine::instance()->getMousePos(id, &posX, &posY);
     return glm::vec2(posX, posY);
 }
     
-uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) {
+uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     uint32_t result = 0;
     for (int i = 0; i < maxNumber; ++i) {
@@ -66,18 +66,18 @@ uint32_t SGCTWindowHandler::mouseButtons(int maxNumber) {
     return result;
 }
     
-glm::ivec2 SGCTWindowHandler::currentWindowSize() {
+glm::ivec2 SGCTWindowHandler::currentWindowSize() const {
     return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
                       sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
 }
     
-glm::ivec2 SGCTWindowHandler::currentWindowResolution() {
+glm::ivec2 SGCTWindowHandler::currentWindowResolution() const {
     int x,y;
     sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
     
-bool SGCTWindowHandler::isRegularRendering() {
+bool SGCTWindowHandler::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock
     
     // sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
@@ -85,6 +85,10 @@ bool SGCTWindowHandler::isRegularRendering() {
     //        if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
 
     return true;
+}
+    
+glm::mat4 SGCTWindowHandler::viewProjectionMatrix() const {
+    return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
 
 //void forEachWindow(std::function<void (void)> function) {

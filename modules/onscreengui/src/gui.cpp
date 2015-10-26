@@ -303,7 +303,7 @@ bool GUI::mouseWheelCallback(double position) {
 	return consumeEvent;
 }
 
-bool GUI::keyCallback(Key key, KeyAction action) {
+bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
 //bool GUI::keyCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
@@ -321,7 +321,7 @@ bool GUI::keyCallback(Key key, KeyAction action) {
 	return consumeEvent;
 }
 
-bool GUI::charCallback(unsigned int character) {
+bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
 

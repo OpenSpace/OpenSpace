@@ -32,7 +32,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
-#include <openspace/engine/windowhandler.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
@@ -718,33 +717,33 @@ void OpenSpaceEngine::postDraw() {
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
 	if (_isMaster) {
 		if (_gui->isEnabled()) {
-			bool isConsumed = _gui->keyCallback(key, action);
+			bool isConsumed = _gui->keyCallback(key, mod, action);
 			if (isConsumed)
 				return;
 		}
 
-        if (key == _console->commandInputButton() && (action == KeyAction::Press || action == KeyAction::Release))
+        if (key == _console->commandInputButton() && (action == KeyAction::Press || action == KeyAction::Repeat))
 			_console->toggleVisibility();
 
 		if (!_console->isVisible()) {
-			_interactionHandler->keyboardCallback(key, action);
+			_interactionHandler->keyboardCallback(key, mod, action);
 		}
 		else {
-			_console->keyboardCallback(key, action);
+			_console->keyboardCallback(key, mod, action);
 		}
 	}
 }
 
-void OpenSpaceEngine::charCallback(unsigned int codepoint) {
+void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
 	if (_isMaster) {
 		if (_gui->isEnabled()) {
-			bool isConsumed = _gui->charCallback(codepoint);
+			bool isConsumed = _gui->charCallback(codepoint, modifier);
 			if (isConsumed)
 				return;
 		}
 
 		if (_console->isVisible()) {
-			_console->charCallback(codepoint);
+			_console->charCallback(codepoint, modifier);
 		}
 	}
 }

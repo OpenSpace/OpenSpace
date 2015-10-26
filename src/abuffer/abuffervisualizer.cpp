@@ -25,6 +25,9 @@
 #include <openspace/abuffer/abuffervisualizer.h>
 #include <openspace/util/constants.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowhandler.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 
@@ -113,7 +116,7 @@ void ABufferVisualizer::render() {
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, -1));
 	modelMatrix = modelMatrix * rotation;
 
-    _pointcloudProgram->setUniform("ViewProjection", sgct::Engine::instance()->getCurrentModelViewProjectionMatrix());
+    _pointcloudProgram->setUniform("ViewProjection", OsEng.windowWrapper()->viewProjectionMatrix());
 	_pointcloudProgram->setUniform("ModelTransform", modelMatrix);
 
 #if defined(MARKER_POINTS)
@@ -145,29 +148,30 @@ void ABufferVisualizer::render() {
 	const glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(0.04, 0.04, 0.04));
 	glm::mat4 translate, mvp;
 
+    const glm::mat4 viewProjMatrix = OsEng.windowWrapper()->viewProjectionMatrix();
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 0));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(0,0,0)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 1));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(0,0,1)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 0));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(0,1,0)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 0));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(1,0,0)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 1));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(0,1,1)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 1));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(1,0,1)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 0));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(1,1,0)");
 	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 1));
-	mvp = sgct::Engine::instance()->getCurrentModelViewProjectionMatrix()*modelMatrix*translate*rotationText*scale;
+	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
 	Freetype::print3d(fontLight, mvp, "(1,1,1)");
 }
 

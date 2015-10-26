@@ -103,13 +103,10 @@ void LuaConsole::deinitialize() {
     }
 }
 
-void LuaConsole::keyboardCallback(Key key, KeyAction action) {
-    if (action == KeyAction::Press || action == KeyAction::Release) {
-		const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
-		const bool modifierControl = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
-			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
-		const bool modifierShift = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_SHIFT) ||
-			sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_SHIFT);
+void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+    if (action == KeyAction::Press || action == KeyAction::Repeat) {
+        const bool modifierControl = (modifier == KeyModifier::Control);
+        const bool modifierShift = (modifier == KeyModifier::Shift);
 
 		// Paste from clipboard
         if (modifierControl && (key == Key::V))
@@ -264,18 +261,16 @@ void LuaConsole::keyboardCallback(Key key, KeyAction action) {
 	}
 }
 
-void LuaConsole::charCallback(unsigned int codepoint) {
+void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 	if (codepoint == static_cast<unsigned int>(commandInputButton()))
 		return;
 
 #ifndef WIN32
-	const size_t windowIndex = sgct::Engine::instance()->getFocusedWindowIndex();
-	const bool mod_CONTROL = sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_LEFT_CONTROL) ||
-		sgct::Engine::instance()->getKey(windowIndex, SGCT_KEY_RIGHT_CONTROL);
+    const bool modifierControl = (modifier == KeyModifier::Control);
 
 	const int codepoint_C = 99;
 	const int codepoint_V = 118;
-	if (mod_CONTROL && (codepoint == codepoint_C || codepoint == codepoint_V)) {
+	if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
 		return;
 	}
 #endif

@@ -36,13 +36,14 @@ class WindowHandler {
 public:
     virtual void setBarrier(bool enabled) = 0;
     virtual void clearAllWindows() = 0;
-    virtual double averageDeltaTime() = 0;
-    virtual uint32_t mouseButtons(int maxNumber = 8) = 0;
-    virtual glm::vec2 mousePosition() = 0;
-    virtual glm::ivec2 currentWindowSize() = 0;
-    virtual glm::ivec2 currentWindowResolution() = 0;
-    virtual bool isRegularRendering() = 0;
+    virtual double averageDeltaTime() const = 0;
+    virtual uint32_t mouseButtons(int maxNumber = 8) const = 0;
+    virtual glm::vec2 mousePosition() const = 0;
+    virtual glm::ivec2 currentWindowSize() const = 0;
+    virtual glm::ivec2 currentWindowResolution() const = 0;
+    virtual bool isRegularRendering() const = 0;
 
+    virtual glm::mat4 viewProjectionMatrix() const = 0;
     
     
     
