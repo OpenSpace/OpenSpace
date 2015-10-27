@@ -65,6 +65,16 @@ enum class MouseAction {
 	Repeat = 2
 };
 
+// The X11 library header files define Button1-Button5 as defines, so they have to be
+// removed before we can use them as unqualified identifiers for the enum ---abock
+#ifdef unix
+#undef Button1
+#undef Button2
+#undef Button3
+#undef Button4
+#undef Button5
+#endif // unix
+    
 enum class MouseButton {
     Button1 = 0,
     Button2 = 1,
