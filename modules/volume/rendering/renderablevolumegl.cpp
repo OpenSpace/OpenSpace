@@ -112,7 +112,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 		glm::vec4 scalingVec4(_boxScaling, _w);
 		success = dictionary.getValue(KeyBoxScaling, scalingVec4);
 		if (success) {
-			_boxScaling = scalingVec4.xyz;
+			_boxScaling = scalingVec4.xyz();
 			_w = scalingVec4.w;
 		}
 		else {
