@@ -22,47 +22,68 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WINDOWWRAPPER_H__
-#define __WINDOWWRAPPER_H__
-
-#include <ghoul/glm.h>
-
-#include <cstdint>
-#include <functional>
-#include <vector>
+#include <openspace/engine/wrapper/dummywindowwrapper.h>
 
 namespace openspace {
+    
+void DummyWindowWrapper::setBarrier(bool enabled) {}
+    
+void DummyWindowWrapper::clearAllWindows() {}
 
-class WindowWrapper {
-public:
-    virtual void setBarrier(bool enabled) = 0;
-    virtual void clearAllWindows() = 0;
-    virtual bool windowHasResized() const = 0;
-    virtual double time() const = 0;
-    virtual double averageDeltaTime() const = 0;
-    virtual uint32_t mouseButtons(int maxNumber = 8) const = 0;
-    virtual glm::vec2 mousePosition() const = 0;
-    virtual glm::ivec2 currentWindowSize() const = 0;
-    virtual glm::ivec2 currentWindowResolution() const = 0;
-    virtual bool isRegularRendering() const = 0;
-
-    virtual glm::mat4 viewProjectionMatrix() const = 0;
-    virtual void setNearFarClippingPlane(float near, float far) = 0;
+bool DummyWindowWrapper::windowHasResized() const {
+    return false;
+}
     
-    virtual glm::ivec4 viewportPixelCoordinates() const = 0;
+double DummyWindowWrapper::time() const {
+    return 0.0;
+}
     
-    virtual bool isExternalControlConnected() const = 0;
-    virtual void sendMessageToExternalControl(const std::vector<char>& message) const = 0;
+double DummyWindowWrapper::averageDeltaTime() const {
+    return 0.0;
+}
     
-    // true for single viewport, single window; false otherwise
-    virtual bool isSimpleRendering() const = 0;
+glm::vec2 DummyWindowWrapper::mousePosition() const {
+    return glm::vec2(0.f);
+}
     
-    virtual void takeScreenshot() const = 0;
+uint32_t DummyWindowWrapper::mouseButtons(int maxNumber) const {
+    return 0;
+}
     
-    //virtual void forEachWindow(std::function<void (void)> function) = 0;
+glm::ivec2 DummyWindowWrapper::currentWindowSize() const {
+    return glm::ivec2(0);
+}
     
-};
-
+glm::ivec2 DummyWindowWrapper::currentWindowResolution() const {
+    return glm::ivec2(0);
+}
+    
+bool DummyWindowWrapper::isRegularRendering() const {
+    return true;
+}
+    
+glm::mat4 DummyWindowWrapper::viewProjectionMatrix() const {
+    return glm::mat4(1.f);
+}
+    
+void DummyWindowWrapper::setNearFarClippingPlane(float near, float far) {}
+    
+glm::ivec4 DummyWindowWrapper::viewportPixelCoordinates() const {
+    return glm::ivec4(0);
+}
+    
+bool DummyWindowWrapper::isExternalControlConnected() const {
+    return false;
+}
+    
+void DummyWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
+}
+    
+bool DummyWindowWrapper::isSimpleRendering() const {
+    return true;
+}
+    
+void DummyWindowWrapper::takeScreenshot() const {}
+    
 } // namespace openspace
 
-#endif // _WINDOW_H__

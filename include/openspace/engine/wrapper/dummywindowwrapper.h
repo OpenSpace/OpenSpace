@@ -22,42 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WINDOWWRAPPER_H__
-#define __WINDOWWRAPPER_H__
+#ifndef __DUMMYWINDOWWRAPPER_H__
+#define __DUMMYWINDOWWRAPPER_H__
 
-#include <ghoul/glm.h>
-
-#include <cstdint>
-#include <functional>
-#include <vector>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 namespace openspace {
 
-class WindowWrapper {
+class DummyWindowWrapper : public WindowWrapper {
 public:
-    virtual void setBarrier(bool enabled) = 0;
-    virtual void clearAllWindows() = 0;
-    virtual bool windowHasResized() const = 0;
-    virtual double time() const = 0;
-    virtual double averageDeltaTime() const = 0;
-    virtual uint32_t mouseButtons(int maxNumber = 8) const = 0;
-    virtual glm::vec2 mousePosition() const = 0;
-    virtual glm::ivec2 currentWindowSize() const = 0;
-    virtual glm::ivec2 currentWindowResolution() const = 0;
-    virtual bool isRegularRendering() const = 0;
+    void setBarrier(bool enabled) override;
+    void clearAllWindows() override;
+    bool windowHasResized() const override;
+    double time() const override;
+    double averageDeltaTime() const override;
+    uint32_t mouseButtons(int maxNumber = 8) const override;
+    glm::vec2 mousePosition() const override;
+    glm::ivec2 currentWindowSize() const override;
+    glm::ivec2 currentWindowResolution() const override;
+    bool isRegularRendering() const override;
 
-    virtual glm::mat4 viewProjectionMatrix() const = 0;
-    virtual void setNearFarClippingPlane(float near, float far) = 0;
+    glm::mat4 viewProjectionMatrix() const override;
+    void setNearFarClippingPlane(float near, float far) override;
     
-    virtual glm::ivec4 viewportPixelCoordinates() const = 0;
+    glm::ivec4 viewportPixelCoordinates() const override;
     
-    virtual bool isExternalControlConnected() const = 0;
-    virtual void sendMessageToExternalControl(const std::vector<char>& message) const = 0;
+    bool isExternalControlConnected() const override;
+    void sendMessageToExternalControl(const std::vector<char>& message) const override;
     
     // true for single viewport, single window; false otherwise
-    virtual bool isSimpleRendering() const = 0;
+    bool isSimpleRendering() const override;
     
-    virtual void takeScreenshot() const = 0;
+    void takeScreenshot() const override;
     
     //virtual void forEachWindow(std::function<void (void)> function) = 0;
     
@@ -65,4 +61,4 @@ public:
 
 } // namespace openspace
 
-#endif // _WINDOW_H__
+#endif // __DUMMYWINDOWWRAPPER_H__

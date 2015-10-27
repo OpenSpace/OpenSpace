@@ -36,7 +36,7 @@
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/window.h>
+#include <openspace/engine/wrapper/dummywindowwrapper.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
@@ -54,7 +54,7 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, new openspace::Window, args);
+    openspace::OpenSpaceEngine::create(argc, argv, new openspace::DummyWindowWrapper, args);
 
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
