@@ -27,11 +27,13 @@
 
 
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <string>
 #include <vector>
@@ -40,6 +42,10 @@ namespace ghoul {
 namespace cmdparser {
     class CommandlineParser;
 }
+namespace fontrendering {
+    class FontManager;
+}
+
 }
 
 namespace openspace {
@@ -95,6 +101,7 @@ public:
     network::ParallelConnection* parallelConnection();
     properties::PropertyOwner* globalPropertyOwner();
     WindowWrapper& windowWrapper();
+    ghoul::fontrendering::FontManager& fontManager();
 
 	gui::GUI* gui();
 
@@ -128,6 +135,7 @@ private:
 	bool gatherCommandlineArguments();
 	bool loadSpiceKernels();
 	void loadFonts();
+    void loadFonts2();
     void runScripts(const ghoul::Dictionary& scripts);
     void runStartupScripts();
 	void configureLogging();
@@ -145,6 +153,7 @@ private:
     gui::GUI* _gui;
     network::ParallelConnection* _parallelConnection;
     WindowWrapper* _windowWrapper;
+    ghoul::fontrendering::FontManager*_fontManager;
     
     properties::PropertyOwner* _globalPropertyNamespace;
     

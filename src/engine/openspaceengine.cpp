@@ -57,6 +57,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/font/fontrenderer.h>
 
 // std
 #include <iostream>
@@ -405,6 +406,7 @@ bool OpenSpaceEngine::initialize() {
 
 	// Load a light and a monospaced font
 	loadFonts();
+    loadFonts2();
 
     LINFO("Initializing GUI");
 	_gui->initialize();
@@ -577,6 +579,36 @@ void OpenSpaceEngine::loadFonts() {
 	}
 }
 
+void OpenSpaceEngine::loadFonts2() {
+    ghoul::Dictionary fonts;
+    configurationManager()->getValue(ConfigurationManager::KeyFonts, fonts);
+
+    _fontManager = new ghoul::fontrendering::FontManager;
+    for (const std::string& key : fonts.keys()) {
+        std::string font;
+        fonts.getValue(key, font);
+        font = absPath(font);
+        
+        if(!FileSys.fileExists(font)) {
+            LERROR("Could not find font '" << font << "'");
+            continue;
+        }
+
+        LINFO("Registering font '" << font << "' with key '" << key << "'");
+        bool success = _fontManager->registerFont(key, font);
+        
+        if (!success)
+            LERROR("Error registering font '" << font << "' with key '" << key << "'");
+    }
+    
+    bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
+    if (!initSuccess)
+        LERROR("Error initializing default font renderer");
+    
+    ghoul::fontrendering::FontRenderer::defaultRenderer()->setWindowSize(glm::vec2(_windowWrapper->currentWindowSize()));
+    
+}
+    
 void OpenSpaceEngine::configureLogging() {
 	if (configurationManager()->hasKeyAndValue<std::string>(ConfigurationManager::KeyLogLevel)) {
 		std::string logLevel;
@@ -836,6 +868,11 @@ properties::PropertyOwner* OpenSpaceEngine::globalPropertyOwner() {
 WindowWrapper& OpenSpaceEngine::windowWrapper() {
     ghoul_assert(_windowWrapper, "Window Wrapper");
     return *_windowWrapper;
+}
+    
+ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
+    ghoul_assert(_fontManager, "Font Manager");
+    return *_fontManager;
 }
 
 }  // namespace openspace

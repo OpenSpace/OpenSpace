@@ -50,6 +50,8 @@
 #include <openspace/engine/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/font/fontmanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -198,6 +200,8 @@ bool RenderEngine::initializeGL() {
 	// set the close clip plane and the far clip plane to extreme values while in
 	// development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    
+    _mainFont = OsEng.fontManager().font(constants::fonts::keyMono, 10);
     
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
@@ -457,7 +461,17 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
-			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
+            
+            using namespace ghoul::fontrendering;
+            FontRenderer::defaultRenderer()->render(
+                *_mainFont,
+                glm::vec2(10.f, static_cast<float>(startY / 2 - font_size_mono * line++ * 2)),
+                glm::vec4(1.f),
+                "Simulation increment (s): %.0f",
+                dt
+            );
+
+//			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
 
 			psc nhPos;
 			double lt;

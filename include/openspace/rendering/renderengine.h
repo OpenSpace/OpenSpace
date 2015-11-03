@@ -31,7 +31,11 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace ghoul {
-	class SharedMemory;
+namespace fontrendering {
+    class Font;
+}
+
+class SharedMemory;
 }
 
 namespace openspace {
@@ -131,6 +135,8 @@ private:
 
 	bool _doPerformanceMeasurements;
 	ghoul::SharedMemory* _performanceMemory;
+    
+    ghoul::fontrendering::Font* _mainFont;
 
 	void generateGlslConfig();
 

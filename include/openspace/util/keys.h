@@ -57,6 +57,9 @@
 // All values that are defined here are compatible with (and are based on) the
 // definitions GLFW v3.1
 
+#include <map>
+#include <string>
+
 namespace openspace {
 
 enum class KeyAction {
