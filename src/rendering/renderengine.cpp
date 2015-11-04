@@ -201,7 +201,7 @@ bool RenderEngine::initializeGL() {
 	// development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
-    _mainFont = OsEng.fontManager().font(constants::fonts::keyMono, 10);
+    _mainFont = OsEng.fontManager().font(constants::fonts::keyMono, 20);
     
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
@@ -465,7 +465,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             using namespace ghoul::fontrendering;
             FontRenderer::defaultRenderer()->render(
                 *_mainFont,
-                glm::vec2(10.f, static_cast<float>(startY / 2 - font_size_mono * line++ * 2)),
+                glm::vec2(10.f, static_cast<float>(startY  - font_size_mono * line++ * 2)),
                 glm::vec4(1.f),
                 "Simulation increment (s): %.0f",
                 dt

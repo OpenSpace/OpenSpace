@@ -605,7 +605,7 @@ void OpenSpaceEngine::loadFonts2() {
     if (!initSuccess)
         LERROR("Error initializing default font renderer");
     
-    ghoul::fontrendering::FontRenderer::defaultRenderer()->setWindowSize(glm::vec2(_windowWrapper->currentWindowSize()));
+    ghoul::fontrendering::FontRenderer::defaultRenderer()->setWindowSize(glm::vec2(_windowWrapper->currentWindowResolution()));
     
 }
     
