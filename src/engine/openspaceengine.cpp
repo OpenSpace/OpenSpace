@@ -595,7 +595,7 @@ void OpenSpaceEngine::loadFonts2() {
         }
 
         LINFO("Registering font '" << font << "' with key '" << key << "'");
-        bool success = _fontManager->registerFont(key, font);
+        bool success = _fontManager->registerFontPath(key, font);
         
         if (!success)
             LERROR("Error registering font '" << font << "' with key '" << key << "'");
@@ -605,7 +605,7 @@ void OpenSpaceEngine::loadFonts2() {
     if (!initSuccess)
         LERROR("Error initializing default font renderer");
     
-    ghoul::fontrendering::FontRenderer::defaultRenderer()->setWindowSize(glm::vec2(_windowWrapper->currentWindowResolution()));
+    ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(_windowWrapper->currentWindowResolution()));
     
 }
     

@@ -462,14 +462,17 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 			double dt = Time::ref().deltaTime();
             
+            if (_mainFont) {
             using namespace ghoul::fontrendering;
-            FontRenderer::defaultRenderer()->render(
+            FontRenderer::defaultRenderer().render(
                 *_mainFont,
                 glm::vec2(10.f, static_cast<float>(startY  - font_size_mono * line++ * 2)),
                 glm::vec4(1.f),
+                glm::vec4(0.f, 0.f, 0.f, 1.f),
                 "Simulation increment (s): %.0f",
                 dt
             );
+            }
 
 //			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
 
