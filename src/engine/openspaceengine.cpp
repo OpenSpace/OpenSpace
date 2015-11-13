@@ -584,6 +584,7 @@ void OpenSpaceEngine::loadFonts2() {
     configurationManager()->getValue(ConfigurationManager::KeyFonts, fonts);
 
     _fontManager = new ghoul::fontrendering::FontManager;
+    
     for (const std::string& key : fonts.keys()) {
         std::string font;
         fonts.getValue(key, font);
