@@ -143,6 +143,10 @@ private:
 	float _currentFadeTime;
 	int _fadeDirection;
 //    bool _sgctRenderStatisticsVisible;
+    
+    ghoul::fontrendering::Font* _fontInfo = nullptr;
+    ghoul::fontrendering::Font* _fontDate = nullptr;
+    ghoul::fontrendering::Font* _fontLog = nullptr;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;

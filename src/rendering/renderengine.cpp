@@ -52,6 +52,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/glm.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -200,6 +201,17 @@ bool RenderEngine::initializeGL() {
 	// set the close clip plane and the far clip plane to extreme values while in
 	// development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    
+    
+    const float fontSizeTime = 15.f;
+    _fontDate = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeTime);
+    const float fontSizeMono = 10.f;
+    _fontInfo = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeMono);
+    const float fontSizeLight = 8.f;
+    _fontLog = OsEng.fontManager().font(constants::fonts::keyLight, fontSizeLight);
+
+    
+    
     
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
@@ -396,27 +408,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         }
     }
 
-#if 1
-#define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-    //#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-    //#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__);
-    #define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
-    #define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
-
-    if (_onScreenInformation._node != -1) {
-        //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
-
-        //if (thisId == _onScreenInformation._node) {
-            //const unsigned int font_size_mono = _onScreenInformation._size;
-            //int x1, xSize, y1, ySize;
-            //const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-            //sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-            //int startY = ySize - 2 * font_size_mono;
-        //}
-    }
-
 	// Print some useful information on the master viewport
-
 	if (OsEng.ref().isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
         // TODO: Adjust font_size properly when using retina screen
         const float fontSizeMono = 10.f;
@@ -425,29 +417,37 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         using Font = ghoul::fontrendering::Font;
         using ghoul::fontrendering::RenderFont;
         
-        Font* fontMono = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeMono);
-        Font* fontTime = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeTime);
         
-        if (fontMono && fontTime) {
-            if (_showInfo) {
-                double currentTime = Time::ref().currentTime();
-                
-                glm::vec2 penPosition = glm::vec2(10.f, OsEng.windowWrapper().viewportPixelCoordinates().w);
+        if (_showInfo && _fontDate && _fontInfo) {
+            double currentTime = Time::ref().currentTime();
+            
+            glm::vec2 penPosition = glm::vec2(
+                10.f,
+                OsEng.windowWrapper().viewportPixelCoordinates().w
+            );
+            penPosition.y -= _fontDate->height();
 
-                penPosition.y -= fontTime->height();
-                RenderFont(fontTime,
-                           penPosition,
-                           "Date: %s",
-                           Time::ref().currentTimeUTC().c_str()
-                );
-                
-                penPosition.y -= fontMono->height();
-                RenderFont(fontMono,
-                           penPosition,
-                           "Simulation increment (s): %.0f",
-                           Time::ref().deltaTime()
-                           );
+            RenderFontCr(_fontDate,
+                penPosition,
+                "Date: %s",
+                Time::ref().currentTimeUTC().c_str()
+            );
+            
+            RenderFontCr(_fontInfo,
+                       penPosition,
+                       "Simulation increment (s): %.0f",
+                       Time::ref().deltaTime()
+                       );
 
+            RenderFontCr(_fontInfo,
+                       penPosition,
+                       "Avg. Frametime: %.5f",
+                       OsEng.windowWrapper().averageDeltaTime()
+            );
+
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+            if (openspace::ImageSequencer2::ref().isReady()) {
+                penPosition.y -= 25.f;
                 
                 glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
@@ -459,182 +459,163 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 float radius = (a + b) / 2.f;
                 float distToSurf = glm::length(nhPos.vec3()) - radius;
                 
-                penPosition.y -= fontMono->height();
-                RenderFont(fontMono,
+                RenderFont(_fontInfo,
                            penPosition,
                            "Distance to Pluto: % .1f (KM)",
                            distToSurf
                 );
+                penPosition.y -= _fontInfo->height();
+        
                 
-                penPosition.y -= fontMono->height();
-                RenderFont(fontMono,
-                           penPosition,
-                           "Avg. Frametime: %.5f",
-                           OsEng.windowWrapper().averageDeltaTime()
-                );
-                
-                
-    #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-                if (openspace::ImageSequencer2::ref().isReady()) {
-                    double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
-                    float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
-                    std::string progress = "|";
-                    int g = static_cast<int>((t* 24) + 1);
-                    g = std::max(g, 0);
-                    for (int i = 0; i < g; i++)
-                              progress.append("-");
-                          progress.append(">");
-                    for (int i = 0; i < 25 - g; i++)
-                              progress.append(" ");
+                double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
+                float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
+                std::string progress = "|";
+                int g = static_cast<int>((t* 24) + 1);
+                g = std::max(g, 0);
+                for (int i = 0; i < g; i++)
+                          progress.append("-");
+                      progress.append(">");
+                for (int i = 0; i < 25 - g; i++)
+                          progress.append(" ");
 
-                    std::string str = "";
-                    openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
+                std::string str = "";
+                openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
 
-                    glm::vec4 active(0.6, 1, 0.00, 1);
-                    glm::vec4 brigther_active(0.9, 1, 0.75, 1);
+                glm::vec4 active(0.6, 1, 0.00, 1);
+                glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
-                    progress.append("|");
-                    if (remaining > 0) {
-                        brigther_active *= (1 - t);
+                progress.append("|");
+                if (remaining > 0) {
+                    brigther_active *= (1 - t);
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active * t + brigther_active,
+                               "Next instrument activity:"
+                    );
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active * t + brigther_active,
+                               "%.0f s %s %.1f %%",
+                               remaining, progress.c_str(), t * 100
+                    );
+
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active,
+                               "Data acquisition time: %s",
+                               str.c_str()
+                    );
+                }
+                std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
+                std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+
+                if (currentTarget.first > 0.0) {
+                    int timeleft = static_cast<int>(nextTarget.first - currentTime);
+
+                    int hour   = timeleft / 3600;
+                    int second = timeleft % 3600;
+                    int minute = second / 60;
+                        second = second % 60;
+
+                    std::string hh, mm, ss, coundtown;
+
+                    if (hour   < 10) hh.append("0");
+                    if (minute < 10) mm.append("0");
+                    if (second < 10) ss.append("0");
+
+                    hh.append(std::to_string(hour));
+                    mm.append(std::to_string(minute));
+                    ss.append(std::to_string(second));
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               targetColor,
+                               "Data acquisition adjacency: [%s:%s:%s]",
+                               hh.c_str(), mm.c_str(), ss.c_str()
+                    );
+
+                    
+                    std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+                    std::string space;
+                    glm::vec4 color;
+                    size_t isize = incidentTargets.second.size(); 
+                    for (size_t p = 0; p < isize; p++){
+                        double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
+                        t = (p > isize / 2) ? 1 - t : t;
+                        t += 0.3;
+                        color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
                         
-                        penPosition.y -= fontMono->height();
-                        RenderFont(fontMono,
+                        RenderFont(_fontInfo,
                                    penPosition,
-                                   active * t + brigther_active,
-                                   "Next instrument activity:"
+                                   color,
+                                   "%s%s",
+                                   space.c_str(), incidentTargets.second[p].c_str()
                         );
                         
-                        penPosition.y -= fontMono->height();
-                        RenderFont(fontMono,
-                                   penPosition,
-                                   active * t + brigther_active,
-                                   "%.0f s %s %.1f %%",
-                                   remaining, progress.c_str(), t * 100
-                        );
-
-                        penPosition.y -= fontMono->height();
-                        RenderFont(fontMono,
-                                   penPosition,
-                                   active,
-                                   "Data acquisition time: %s",
-                                   str.c_str()
-                        );
+                        
+                        for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
+                            space += " ";
                     }
-                    std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
-                    std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+                    penPosition.y -= _fontInfo->height();
+                    
+                    std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
+                    glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
+                    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-                    if (currentTarget.first > 0.0) {
-                        int timeleft = static_cast<int>(nextTarget.first - currentTime);
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active,
+                               "Active Instruments:"
+                    );
 
-                        int hour   = timeleft / 3600;
-                        int second = timeleft % 3600;
-                        int minute = second / 60;
-                            second = second % 60;
-
-                        std::string hh, mm, ss, coundtown;
-
-                        if (hour   < 10) hh.append("0");
-                        if (minute < 10) mm.append("0");
-                        if (second < 10) ss.append("0");
-
-                        hh.append(std::to_string(hour));
-                        mm.append(std::to_string(minute));
-                        ss.append(std::to_string(second));
-                        
-                        penPosition.y -= fontMono->height();
-                        RenderFont(fontMono,
-                                   penPosition,
-                                   targetColor,
-                                   "Data acquisition adjacency: [%s:%s:%s]",
-                                   hh.c_str(), mm.c_str(), ss.c_str()
-                        );
-
-                        
-                        penPosition.y -= fontMono->height();
-                        std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
-                        std::string space;
-                        glm::vec4 color;
-                        size_t isize = incidentTargets.second.size(); 
-                        for (size_t p = 0; p < isize; p++){
-                            double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
-                            t = (p > isize / 2) ? 1 - t : t;
-                            t += 0.3;
-                            color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-                            
-                            RenderFont(fontMono,
+                    for (auto t : activeMap){
+                        if (t.second == false) {
+                            RenderFont(_fontInfo,
                                        penPosition,
-                                       color,
-                                       "%s%s",
-                                       space.c_str(), incidentTargets.second[p].c_str()
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "| |"
+                            );
+                            RenderFontCr(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "    %5s",
+                                       t.first.c_str()
                             );
                             
-                            
-                            for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
-                                space += " ";
                         }
-                        
-                        std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
-                        glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
-                        glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-
-                        penPosition.y -= fontMono->height();
-                        RenderFont(fontMono,
-                                   penPosition,
-                                   active,
-                                   "Active Instruments:"
-                        );
-
-                        for (auto t : activeMap){
-                            penPosition.y -= fontMono->height();
-                            if (t.second == false) {
-                                RenderFont(fontMono,
+                        else{
+                            RenderFont(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "|"
+                            );
+                            if (t.first == "NH_LORRI") {
+                                RenderFont(_fontInfo,
                                            penPosition,
-                                           glm::vec4(0.3, 0.3, 0.3, 1),
-                                           "| |"
-                                );
-                                RenderFont(fontMono,
-                                           penPosition,
-                                           glm::vec4(0.3, 0.3, 0.3, 1),
-                                           "    %5s",
-                                           t.first.c_str()
-                                );
-                                
-                            }
-                            else{
-                                RenderFont(fontMono,
-                                           penPosition,
-                                           glm::vec4(0.3, 0.3, 0.3, 1),
-                                           "|"
-                                );
-                                if (t.first == "NH_LORRI") {
-                                    RenderFont(fontMono,
-                                               penPosition,
-                                               firing,
-                                               " + "
-                                    );
-                                }
-                                RenderFont(fontMono,
-                                           penPosition,
-                                           glm::vec4(0.3, 0.3, 0.3, 1),
-                                           "  |"
-                                );
-                                RenderFont(fontMono,
-                                           penPosition,
-                                           active,
-                                           "    %5s",
-                                           t.first.c_str()
+                                           firing,
+                                           " + "
                                 );
                             }
+                            RenderFont(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "  |"
+                            );
+                            RenderFontCr(_fontInfo,
+                                       penPosition,
+                                       active,
+                                       "    %5s",
+                                       t.first.c_str()
+                            );
                         }
                     }
                 }
-    #endif
-
-    #undef PrintText
+            }
+#endif
             }
             if (_showScreenLog) {
-                const float fontSizeLight = 7.f;
-                Font* fontLight = OsEng.fontManager().font(constants::fonts::keyLight, 7.f);
                 const int max = 10;
                 const int category_length = 20;
                 const int msg_length = 140;
@@ -656,8 +637,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     float diff = static_cast<float>(t - e->timeStamp);
 
                     // Since all log entries are ordered, once one is exceeding TTL, all have
-                    if (diff > ttl)
-                        break;
+//                    if (diff > ttl)
+//                        break;
 
                     float alpha = 1;
                     float ttf = ttl - fade;
@@ -666,6 +647,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         float p = 0.8f - diff / fade;
                         alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
                     }
+                    
+                    alpha = 1.f;
 
                     // Since all log entries are ordered, once one exceeds alpha, all have
                     if (alpha <= 0.0)
@@ -675,8 +658,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     const std::string& message = e->message.substr(0, msg_length);
                     nr += std::count(message.begin(), message.end(), '\n');
 
-                    RenderFont(fontLight,
-                               glm::vec2(10.f, fontSizeLight * nr * 2),
+                    RenderFont(_fontLog,
+                               glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%-14s %s%s",									// Format
                                e->timeString.c_str(),							// Time string
@@ -693,24 +676,22 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
                         color = blue;
 
-                    const float font_with_light = 5;
-                    RenderFont(fontLight,
-                               glm::vec2(static_cast<float>(10 + 39 * font_with_light), fontSizeLight * nr * 2),
+//                    const float font_with_light = 5;
+                    RenderFont(_fontLog,
+                               glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                color * alpha,
                                "%s",									// Format
                                lvl.c_str());		// Pad category with "..." if exceeds category_length
 
-                    RenderFont(fontLight,
-                               glm::vec2(static_cast<float>(10 + 53 * font_with_light), fontSizeLight * nr * 2),
+                    RenderFont(_fontLog,
+                               glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%s",									// Format
                                message.c_str());		// Pad category with "..." if exceeds category_length
                     ++nr;
                 }
-            }
         }
 	}
-#endif
 }
 
 void RenderEngine::postDraw() {
