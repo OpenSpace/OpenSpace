@@ -136,8 +136,6 @@ private:
 	bool _doPerformanceMeasurements;
 	ghoul::SharedMemory* _performanceMemory;
     
-    ghoul::fontrendering::Font* _mainFont;
-
 	void generateGlslConfig();
 
 	float _globalBlackOutFactor;
