@@ -101,21 +101,24 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 void RenderableFov::allocateData() { 
 	std::string shape, instrument;
 	// fetch data for specific instrument (shape, boresight, bounds etc)
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, _boresight, _bounds);
-	if (!found) {
-		LERROR("Could not locate instrument");
-		return;
-	}
-	_stride = 8;
+    try {
+        SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, _boresight, _bounds);
 
-	_projectionBounds.resize(_bounds.size());
-	int initBoundPoints = 2 * (_bounds.size() + 1);
-	_fovBounds.resize(initBoundPoints*_stride);
-	_vBoundsSize = static_cast<unsigned int>(_fovBounds.size());
-	// allocate second vbo data 
-	_fovPlane.resize(40);
-	_vPlaneSize = 40;
-	_isteps = 10; // Interpolation steps per intersecting segment
+        _stride = 8;
+        
+        _projectionBounds.resize(_bounds.size());
+        int initBoundPoints = 2 * (_bounds.size() + 1);
+        _fovBounds.resize(initBoundPoints*_stride);
+        _vBoundsSize = static_cast<unsigned int>(_fovBounds.size());
+        // allocate second vbo data
+        _fovPlane.resize(40);
+        _vPlaneSize = 40;
+        _isteps = 10; // Interpolation steps per intersecting segment
+
+    }
+    catch (const SpiceManager::SpiceKernelException& e) {
+        LERROR(e.what());
+    }
 }
 
 RenderableFov::~RenderableFov() {

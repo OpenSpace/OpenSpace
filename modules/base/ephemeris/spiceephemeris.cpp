@@ -62,8 +62,14 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
 		if (!success)
 			LERROR("'" << KeyKernels << "' has to be an array-style table");
 
-		SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::InvalidKernel);
+        try {
+            SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
+            _kernelsLoadedSuccessfully = true;
+        }
+        catch (const SpiceManager::SpiceKernelException& e) {
+            LERROR("Could not load SPICE kernel: " << e.what());
+            _kernelsLoadedSuccessfully = false;
+        }
 	}
 }
     

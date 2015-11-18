@@ -118,7 +118,8 @@ void HongKangParser::writeUTCEventFile(const Image image){
 bool HongKangParser::create(){
 	//check input for errors. 
 	int tmp;
-	bool hasObserver = SpiceManager::ref().getNaifId(_spacecraft, tmp);
+    bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
+    tmp = SpiceManager::ref().naifId(_spacecraft);
 	if (!hasObserver){
 		LERROR("SPICE navigation system has no pooled observer: '" << _spacecraft << "' in kernel" <<
 			   "Please check that all necessary kernels are loaded"<<

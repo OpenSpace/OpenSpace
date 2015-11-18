@@ -29,10 +29,12 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/designpattern/singleton.h>
+#include <ghoul/misc/exception.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <array>
+#include <exception>
 #include <map>
 #include <string>
 #include <vector>
@@ -50,113 +52,149 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
     
-    static const KernelHandle InvalidKernel = KernelHandle(-1);
-
+    class SpiceKernelException : public ghoul::RuntimeError {
+    public:
+        explicit SpiceKernelException(const std::string& msg);
+    };
+    
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
      * loading is done by passing the \p filePath to the <code>furnsh_c</code>
-     * function. http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
-     * Kernels can safely be loaded multiple times and are reference counted
+     * function. Kernels can safely be loaded multiple times and are reference counted.
      * \param filePath The path to the kernel that should be loaded. This path will be
      * passed to <code>absPath</code> to convert a relative path to an absolute path
      * before usage
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
+     * \throws SpiceKernelException If the loading of the kernel \p filePath failed
      * \pre \p filePath is a non-empty absolute or relative path pointing to an
      * existing file that contains a SPICE kernel
      * \post The kernel is loaded or has its reference counter incremented and the handle
      * to the kernel is returned if the SPICE kernel is valid, or \a KernelInvalid if the
      * kernel is invalid
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
     KernelHandle loadKernel(std::string filePath);
 
     /**
-     * \return true if SPK kernels have been loaded to cover <code>target</code>
-     * for time <code>et</code>
-     * \param target, the body to be examined
-     * \param et, the time when body is possibly covered
-     */
-
-    bool hasSpkCoverage(std::string target, double& et) const;
-
-    /**
-     * \return true if CK kernels have been loaded to cover <code>frame</code>
-     * for time <code>et</code>
-     * \param frame, the frame to be examined
-     * \param et, the time when frame is possibly covered
-     */
-    bool hasCkCoverage(std::string frame, double& et) const;
-    
-    /**
-     * Unloads a SPICE kernel identified by the <code>kernelId</code> which was returned
-     * by the loading call to loadKernel. The unloading is done by calling the
+     * Unloads a SPICE kernel identified by the \p kernelId which was returned by the
+     * loading call to #loadKernel. The unloading is done by calling the
      * <code>unload_c</code> function.
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html.
      * \param kernelId The unique identifier that was returned from the call to
-     * loadKernel which loaded the kernel
+     * #loadKernel which loaded the kernel
+     * \pre \p kernelId must be a valid handle and cannot be equal to
+     * <code>KernelHandle(0)</code>
+     * \post The kernel identified by \p kernelId is unloaded
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(KernelHandle kernelId);
-
-    /**
-     * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
-     * the loading call to loadKernel. The unloading is done by calling the
-     * <code>unload_c</code> function.
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html.
-     * \param filePath The path of the kernel that should be unloaded, it has to refer to
-     * a file that was loaded in using the loadKernel method
-     */
-    void unloadKernel(const std::string& filePath);
     
     /**
-     * Determines whether values exist for some <code>item</code> for any body,
-     * identified by it's <code>naifId</code>, in the kernel pool by passing it to the
-     * <code>bodfnd_c</code> function. 
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     * For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+     * Unloads a SPICE kernel identified by the \p filePath which was used in the
+     * loading call to #loadKernel. The unloading is done by calling the
+     * <code>unload_c</code> function.
+     * \param filePath The path of the kernel that should be unloaded. The filePath must
+     * have been previously used to successfully load a kernel, or a SpiceKernelException
+     * is thrown
+     * \pre \p filePath cannot be empty
+     * \post The kernel identified by \p filePath is unloaded or nothing happens if
+     * \p filePath was not used to load a kernel
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
+     */
+    void unloadKernel(std::string filePath);
+    
+    /**
+     * Returns whether a given \p target has an Spk kernel covering it at the designated
+     * \p et ephemeris time.
+     * \param target The body to be examined. The target has to name a valid SPICE object
+     * with respect to the kernels that have been loaded
+     * \param et The time for which the coverage should be checked
+     * \return <code>true</code> if SPK kernels have been loaded to cover \p target at the
+     * time \p et, <code>false</code> otherwise.
+     * \pre \p target must be a non-empty string that names a valid SPICE object
+     * \throws SpiceKernelException If \p target is not a valid NAIF target
+     */
+    bool hasSpkCoverage(const std::string& target, double et) const;
+
+    /**
+     * Returns whether a given \p frame has a CK kernel covering it at the designated
+     * \p et ephemeris time.
+     * \param frame The frame to be examined. The \p frame has to name a valid frame with
+     * respect to the kernels that have been loaded
+     * \param et The time for which the coverage should be checked
+     * \return <code>true</code> if SPK kernels have been loaded to cover \p target at the
+     * time \p et , <code>false</code> otherwise.
+     * \pre \p target must be a non-empty string that names a valid SPICE object
+     * \throws SpiceKernelException If \p frame is not a valid frame
+     */
+    bool hasCkCoverage(const std::string& frame, double et) const;
+    
+    /**
+     * Determines whether values exist for some \p item for any body, identified by its
+     * \p naifId, in the kernel pool by passing it to the <code>bodfnd_c</code> function.
      * \param naifId NAIF ID code of body
      * \param item The item to find
      * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     bool hasValue(int naifId, const std::string& item) const;
 
     /**
-     * Determines whether values exist for some <code>item</code> for any
-     * <code>body</code> in the kernel pool by passing it to the <code>bodfnd_c</code>
-     * function. 
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+     * Determines whether values exist for some \p item for any \p body in the kernel pool
+     * by passing it to the <code>bodfnd_c</code> function.
      * \param body The name of the body that should be sampled
-     * \param item The item to find
+     * \param item The item to find in the \p body
      * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
+     * \throws SpiceKernelException If \p body is not a valid type
+     * \pre \p body and \item must be non-empty and \p body must name a valid Spice object
      */
     bool hasValue(const std::string& body, const std::string& item) const;
 
     /**
-     * Returns the NAIF ID for a specific body. For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html. The
-     * <code>id</code> will only be set if the retrieval was successful, otherwise it will
-     * remain unchanged.
+     * Returns the NAIF ID for a specific \p body using the <code>bods2c_c</code>
+     * function.
      * \param body The body name that should be retrieved
-     * \param id The ID of the <code>body</code> will be stored in this variable. The
+     * \return The ID of the <code>body</code> will be stored in this variable. The
      * value will only be changed if the retrieval was successful
-     * \return <code>true</code> if the <code>body</code> was found, <code>false</code>
-     * otherwise
+     * \throws SpiceKernelException If \p body is not a valid type
+     * \pre \p body must be not-empty
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bods2c_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
-    bool getNaifId(const std::string& body, int& id) const;
+    int naifId(const std::string& body) const;
 
     /**
-     * Returns the NAIF ID for a specific frame using namfrm_c(), see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html.
-     * The <code>id</code> will only be set if the retrieval was successful, 
-     * otherwise it will remain unchanged.
-     * \param frame The frame name that should be retrieved
-     * \param id The ID of the <code>frame</code> will be stored in this variable. The
-     * value will only be changed if the retrieval was successful
-     * \return <code>true</code> if the <code>frame</code> was found, <code>false</code>
+     * Checks whether the specified \p body has a valid NAIF ID using the currently loaded
+     * Spice kernels.
+     * \param body The body for which the presence of a valid ID should be checked
+     * \return <code>true</code> if the \p body has a NAIF ID, <code>false</code>
      * otherwise
+     * \pre \p body must be non-empty
      */
-    bool getFrameId(const std::string& frame, int& id) const;
+    bool hasNaifId(const std::string& body) const;
+    
+    /**
+     * Returns the NAIF ID for a specific frame using <code>namfrm_c</code>.
+     * \param frame The frame name that should be retrieved
+     * \return The NAIF ID of the \p frame
+     * \throws SpiceKernelException If \p frame is not a valid frame
+     * \pre \p frame must be not-empty
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html
+     */
+    int frameId(const std::string& frame) const;
 
+    /**
+     * Checks whether the specified \p frame has a valid NAIF ID using the currently
+     * loaded Spice kernels.
+     * \param frame The frame for which the presence of a valid ID should be checked
+     * \return <code>true</code> if the \p frame has a NAIF ID, <code>false</code>
+     * otherwise
+     * \pre \p frame must be non-empty
+     */
+    bool hasFrameId(const std::string& frame) const;
+    
     /**
      * Retrieves a single <code>value</code> for a certain <code>body</code>. This method
      * succeeds iff <code>body</code> is the name of a valid body, <code>value</code>
@@ -175,7 +213,7 @@ public:
      * <code>value</code> is a valid item for the <code>body</code> and the retrieved
      * value is only a single value. <code>false</code> otherwise
      */
-    bool getValue(const std::string& body, const std::string& value, double& v) const;
+    void getValue(const std::string& body, const std::string& value, double& v) const;
 
     /**
      * Retrieves a <code>value</code> with three components for a certain
@@ -195,7 +233,7 @@ public:
      * <code>value</code> is a valid item for the <code>body</code> and the retrieved
      * value is only a single value. <code>false</code> otherwise
      */
-    bool getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
+    void getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
 
     /**
      * Retrieves a <code>value</code> with four components for a certain
@@ -215,7 +253,7 @@ public:
      * <code>value</code> is a valid item for the <code>body</code> and the retrieved
      * value is only a single value. <code>false</code> otherwise
      */
-    bool getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
+    void getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
 
     /**
      * Retrieves a <code>value</code> with an arbitrary number of components for a certain
@@ -238,11 +276,23 @@ public:
      * <code>value</code> is a valid item for the <code>body</code> and the retrieved
      * value is only a single value. <code>false</code> otherwise
      */
-    bool getValue(const std::string& body, const std::string& value,
+    void getValue(const std::string& body, const std::string& value,
         std::vector<double>& v) const;
 
 
-    bool spacecraftClockToET(const std::string& craftIdCode, double& craftTicks, double& et);
+    /**
+     * Converts the value \p craftTicks of the internal clock for the spacecraft
+     * identified by \p craft into standard ephemeris time and returns the value.
+     * \param craft The NAIF ID of the craft for which the time should be converted
+     * \param craftTicks The internal clock ticks for the specified craft
+     * \return The converted ephemeris time
+     * \throws SpiceKernelException If the name \p craft is not a valid name
+     * available through all loaded kernels, if the craft is not supported by any of the
+     * loaded kernel, or if the provided \p craftTicks is not a valid tick time for the
+     * specific spacecraft
+     * \pre \craftIdCode may not be empty and need to name a valid craft
+     */
+    double spacecraftClockToET(const std::string& craft, double craftTicks);
 
     /**
      * Converts the <code>timeString</code> representing a date to a double precision
@@ -657,16 +707,6 @@ public:
     std::string frameFromBody(const std::string body) const;
     
     /**
-     * This method checks if one of the previous SPICE methods has failed. If it has, the
-     * <code>errorMessage</code> is used to log an error along with the original SPICE
-     * error message.
-     * \param errorMessage The error message that will be logged if the method fails. If
-     * the argument is empty, no error message will be logged
-     * \return <code>true</code> if an error occurred, <code>false</code> otherwise
-     */
-    static bool checkForError(std::string errorMessage);
-
-    /**
      * This method uses the SPICE kernels to get the radii of bodies defined as a
      * triaxial ellipsoid. The benefit of this is to be able to create more accurate
      * planet shapes, which is desirable when projecting images with SPICE intersection
@@ -699,8 +739,10 @@ protected:
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
      * \param filePath The path to the kernel that should be examined
      * \return true if the operation was successful
+     * \pre \p path must be nonempty and be an existing file
+     * \post Coverage times are stored only if loading was successful
      */
-    bool findCkCoverage(const std::string& path);
+    void findCkCoverage(const std::string& path);
     
     /**
      * Function to find and store the intervals covered by a spk file, this is done
@@ -709,10 +751,11 @@ protected:
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
      * \param filePath The path to the kernel that should be examined
      * \return true if the operation was successful
+     * \pre \p path must be nonempty and be an existing file
+     * \post Coverage times are stored only if loading was successful
      */
-    bool findSpkCoverage(const std::string& path);
+    void findSpkCoverage(const std::string& path);
     
-
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
     // Map: id, vector of pairs. Pair: Start time, end time;

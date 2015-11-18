@@ -88,7 +88,6 @@ bool RenderableShadowCylinder::isReady() const {
 bool RenderableShadowCylinder::initialize() {
 	glGenVertexArrays(1, &_vao); // generate array
 	glGenBuffers(1, &_vbo); // generate buffer
-	createCylinder();
 
 	bool completeSuccess = true;
 	_shader = ghoul::opengl::ProgramObject::Build("ShadowProgram",

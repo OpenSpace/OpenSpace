@@ -211,7 +211,14 @@ bool LabelParser::create() {
 							read = line.substr(0, line.find_first_of(" "));
 							if (read == "STOP_TIME"){
 								std::string stop = line.substr(line.find("=") + 2);
-								stop.erase(std::remove(stop.begin(), stop.end(), ' '), stop.end());
+                                stop.erase(
+                                    std::remove_if(
+                                        stop.begin(),
+                                        stop.end(),
+                                        [](char c) { return c == ' ' || c == '\r'; }
+                                    ),
+                                    stop.end()
+                                );
 								openspace::SpiceManager::ref().getETfromDate(stop, _stopTime);
 								count++;
 							}

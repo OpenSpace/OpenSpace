@@ -487,10 +487,6 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 	}
 	SpiceManager::KernelHandle id =
 		SpiceManager::ref().loadKernel(timeKernel);
-	if (id == SpiceManager::InvalidKernel) {
-		LERROR("Error loading time kernel '" << timeKernel << "'");
-		return false;
-	}
 
 	// Load SPICE leap second kernel
 	std::string leapSecondKernel;
@@ -501,10 +497,6 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 		return false;
 	}
 	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
-	if (id == SpiceManager::InvalidKernel) {
-		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
-		return false;
-	}
 	return true;
 }
 
