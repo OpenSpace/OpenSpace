@@ -39,13 +39,16 @@
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";
+    
+    // The value comes from
+    // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
+    // as the maximum message length
+    const unsigned SpiceErrorBufferSize = 1841;
 }
 
 namespace openspace {
 
-SpiceManager::SpiceManager() 
-    : _lastAssignedKernel(0)
-{
+SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
     erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
@@ -63,111 +66,116 @@ SpiceManager::~SpiceManager() {
 
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
+    // Preconditions:
+    // !filePath.empty()
+    // filePath exists
+    // Directory(filePath) exists
     ghoul_assert(!filePath.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(filePath),
-                 fmt::format("File '{}' does not exist", filePath)
+    ghoul_assert(
+        FileSys.fileExists(filePath),
+        fmt::format(
+            "File '{}' ('{}') does not exist",
+            filePath,
+            absPath(filePath)
+        )
+    );
+    ghoul_assert(
+        FileSys.directoryExists(ghoul::filesystem::File(filePath).directoryName()),
+        fmt::format(
+            "File '{}' exists, but directory '{}' doesn't",
+            absPath(filePath),
+            ghoul::filesystem::File(filePath).directoryName()
+        )
     );
     
 	std::string path = absPath(filePath);
-
-	if (!FileSys.fileExists(path)) {
-		LERROR("Kernel file '" << path << "' does not exist");
-		return InvalidKernel;
-	}
-
-	// We need to set the current directory as meta-kernels are usually defined relative
-	// to the directory they reside in. The directory change is not necessary for regular
-	// kernels
-
-	ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
-	std::string&& fileDirectory = ghoul::filesystem::File(path).directoryName();
-
-	if (!FileSys.directoryExists(fileDirectory)) {
-		LERROR("Could not find directory for kernel '" << path << "'");
-		return InvalidKernel;
-	}
-
     auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
         [path](const KernelInformation& info) { return info.path == path; });
 
-    if (it != _loadedKernels.end())
-    {
+    if (it != _loadedKernels.end()) {
         it->refCount++;
-        LDEBUG("Kernel '" << path << "' was already loaded. "
-            "New reference count: " << it->refCount);
+        LDEBUG(
+            fmt::format(
+                "Kernel '{}' was already loaded. New reference count: {}",
+                path,
+                it->refCount
+            )
+        );
         return it->id;
     }
 
-    KernelHandle kernelId = ++_lastAssignedKernel;
-
+    // We need to set the current directory as meta-kernels are usually defined relative
+    // to the directory they reside in. The directory change is not necessary for regular
+    // kernels
+    ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
+    std::string fileDirectory = ghoul::filesystem::File(path, true).directoryName();
 	FileSys.setCurrentDirectory(fileDirectory);
 
     LINFO("Loading SPICE kernel '" << path << "'");
-	// Load the kernel
+    // Load the kernel
 	furnsh_c(path.c_str());
 
-	std::string fileExtension = path.substr(path.size() - 3);
-	if (fileExtension == ".bc" || fileExtension == ".BC") { // binary ck kernel
-		findCkCoverage(path);
-	}
-	else if (fileExtension == "bsp" || fileExtension == "BSP") { // binary spk kernel
-		findSpkCoverage(path);
-	}
+    // Reset the current directory to the previous one
+    FileSys.setCurrentDirectory(currentDirectory);
 
-
-	// Reset the current directory to the previous one
-	FileSys.setCurrentDirectory(currentDirectory);
-	int failed = failed_c();
+    SpiceBoolean failed = failed_c();
     if (failed) {
-        char msg[1024];
-        getmsg_c ( "LONG", 1024, msg );
-        LERROR("Error loading kernel '" + path + "'");
-        LERROR("Spice reported: " + std::string(msg));
+        char* buffer = new char[SpiceErrorBufferSize];
+        getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+        LERROR(fmt::format("Error loading kernel '{}'", path));
+        LERROR(fmt::format("Spice reported: {}", buffer));
         reset_c();
+        delete[] buffer;
         return InvalidKernel;
     }
+    
+    std::string fileExtension = ghoul::filesystem::File(path, true).fileExtension();
+    bool success = true;
+    if (fileExtension == ".bc" || fileExtension == ".BC")
+		success = findCkCoverage(path); // binary ck kernel
+	else if (fileExtension == "bsp" || fileExtension == "BSP")
+		success = findSpkCoverage(path); // binary spk kernel
 
-	bool hasError = checkForError("Error loading kernel '" + path + "'");
-	if (hasError)
-		return InvalidKernel;
+    if (!success)
+        return InvalidKernel;
 	else {
-		KernelInformation&& info = { path, std::move(kernelId), 1 };
-		_loadedKernels.push_back(info);
+        KernelHandle kernelId = ++_lastAssignedKernel;
+        ghoul_assert(kernelId != 0, fmt::format("Kernel Handle wrapped around to 0"));
+        _loadedKernels.push_back({std::move(path), kernelId, 1});
 		return kernelId;
 	}
 }
 
 bool SpiceManager::findCkCoverage(const std::string& path) {
-	SpiceInt frame, numberOfIntervals;
-	SpiceDouble b, e;
-	std::pair <double, double> tempInterval;
 	SPICEINT_CELL(ids, MAXOBJ);
 	SPICEDOUBLE_CELL(cover, WINSIZ);
 	
 	ckobj_c(path.c_str(), &ids);
 
 	for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-		frame = SPICE_CELL_ELEM_I(&ids, i);
+		SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 		scard_c(0, &cover);
 		ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
 		
 		//Get the number of intervals in the coverage window.
-		numberOfIntervals = wncard_c(&cover);
+        SpiceInt numberOfIntervals = wncard_c(&cover);
 		
 		for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
 			//Get the endpoints of the jth interval.
+            SpiceDouble b, e;
 			wnfetd_c(&cover, j, &b, &e);
-			tempInterval = std::make_pair(b, e);
 
 			_ckCoverageTimes[frame].insert(e);
 			_ckCoverageTimes[frame].insert(b);
-			_ckIntervals[frame].push_back(tempInterval);
+			_ckIntervals[frame].emplace_back(b, e);
 		}
 	}
-	return true;
+    
+    bool success = checkForError("Error finding Ck Converage");
+	return success;
 }
 
 bool SpiceManager::findSpkCoverage(const std::string& path) {
@@ -196,11 +204,11 @@ bool SpiceManager::findSpkCoverage(const std::string& path) {
 			_spkIntervals[obj].push_back(tempInterval);
 		}		
 	}
-	return true;
+    bool success = checkForError("Error finding Spk Converage");
+    return success;
 }
 
-bool SpiceManager::hasSpkCoverage(std::string target, double& et) const
-{
+bool SpiceManager::hasSpkCoverage(std::string target, double& et) const {
 	int id;
 	bool idSuccess = getNaifId(target, id);
 	bool hasCoverage = false;
@@ -221,8 +229,7 @@ bool SpiceManager::hasSpkCoverage(std::string target, double& et) const
 	return idSuccess && hasCoverage;
 }
 
-bool SpiceManager::hasCkCoverage(std::string frame, double& et) const
-{
+bool SpiceManager::hasCkCoverage(std::string frame, double& et) const {
 	int id;
 	bool idSuccess = getFrameId(frame, id);
 	bool hasCoverage = false;

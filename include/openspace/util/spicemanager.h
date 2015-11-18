@@ -57,7 +57,10 @@ public:
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
      * loading is done by passing the \p filePath to the <code>furnsh_c</code>
      * function. http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
-     * \param filePath The path to the kernel that should be loaded
+     * Kernels can safely be loaded multiple times and are reference counted
+     * \param filePath The path to the kernel that should be loaded. This path will be
+     * passed to <code>absPath</code> to convert a relative path to an absolute path
+     * before usage
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
      * \pre \p filePath is a non-empty absolute or relative path pointing to an
      * existing file that contains a SPICE kernel
@@ -67,26 +70,6 @@ public:
      */
     KernelHandle loadKernel(std::string filePath);
 
-    /**
-     * Function to find and store the intervals covered by a ck file, this is done
-     * by using mainly the <code>ckcov_c</code> and <code>ckobj_c</code> functions. 
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html ,
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
-     * \param filePath The path to the kernel that should be examined
-     * \return true if the operation was successful
-     */
-    bool findCkCoverage(const std::string& path);
-
-    /**
-     * Function to find and store the intervals covered by a spk file, this is done
-     * by using mainly the <code>spkcov_c</code> and <code>spkobj_c</code> functions.
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html ,
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
-     * \param filePath The path to the kernel that should be examined
-     * \return true if the operation was successful
-     */
-    bool findSpkCoverage(const std::string& path);
-    
     /**
      * \return true if SPK kernels have been loaded to cover <code>target</code>
      * for time <code>et</code>
@@ -708,6 +691,27 @@ protected:
     SpiceManager& operator=(const SpiceManager& r) = delete;
     SpiceManager(SpiceManager&& r) = delete;
     ~SpiceManager();
+    
+    /**
+     * Function to find and store the intervals covered by a ck file, this is done
+     * by using mainly the <code>ckcov_c</code> and <code>ckobj_c</code> functions.
+     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html ,
+     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
+     * \param filePath The path to the kernel that should be examined
+     * \return true if the operation was successful
+     */
+    bool findCkCoverage(const std::string& path);
+    
+    /**
+     * Function to find and store the intervals covered by a spk file, this is done
+     * by using mainly the <code>spkcov_c</code> and <code>spkobj_c</code> functions.
+     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html ,
+     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
+     * \param filePath The path to the kernel that should be examined
+     * \return true if the operation was successful
+     */
+    bool findSpkCoverage(const std::string& path);
+    
 
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
@@ -722,7 +726,7 @@ protected:
     const static bool _showErrors = false;
 
     /// The last assigned kernel-id, used to determine the next free kernel id
-    KernelHandle _lastAssignedKernel;
+    KernelHandle _lastAssignedKernel = KernelHandle(0);
 };
 
 } // namespace openspace
