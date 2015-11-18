@@ -25,9 +25,6 @@
 #ifndef __SPICEMANAGER_H__
 #define __SPICEMANAGER_H__
 
-#include "SpiceUsr.h"
-#include "SpiceZpr.h"
-
 #include <openspace/util/powerscaledcoordinate.h>
 
 #include <ghoul/glm.h>
@@ -41,26 +38,34 @@
 #include <vector>
 #include <set>
 
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
+
 namespace openspace {
 
 class SpiceManager : public ghoul::Singleton<SpiceManager> {
     friend class ghoul::Singleton<SpiceManager>;
 
 public:
-    typedef std::array<double, 36> TransformMatrix;
-    typedef unsigned int KernelIdentifier;
+    using TransformMatrix = std::array<double, 36>;
+    using KernelHandle = unsigned int;
     
-    static const KernelIdentifier KernelFailed = KernelIdentifier(-1);
+    static const KernelHandle InvalidKernel = KernelHandle(-1);
 
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
-     * loading is done by passing the <code>filePath</code> to the <code>furnsh_c</code>
+     * loading is done by passing the \p filePath to the <code>furnsh_c</code>
      * function. http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      * \param filePath The path to the kernel that should be loaded
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
+     * \pre \p filePath is a non-empty absolute or relative path pointing to an
+     * existing file that contains a SPICE kernel
+     * \post The kernel is loaded or has its reference counter incremented and the handle
+     * to the kernel is returned if the SPICE kernel is valid, or \a KernelInvalid if the
+     * kernel is invalid
      */
-    KernelIdentifier loadKernel(const std::string& filePath);
+    KernelHandle loadKernel(std::string filePath);
 
     /**
      * Function to find and store the intervals covered by a ck file, this is done
@@ -107,7 +112,7 @@ public:
      * \param kernelId The unique identifier that was returned from the call to
      * loadKernel which loaded the kernel
      */
-    void unloadKernel(KernelIdentifier kernelId);
+    void unloadKernel(KernelHandle kernelId);
 
     /**
      * Unloads a SPICE kernel identified by the <code>filePath</code> which was used in
@@ -694,7 +699,7 @@ public:
 protected:
     struct KernelInformation {
         std::string path; /// The path from which the kernel was loaded
-        KernelIdentifier id; /// A unique identifier for each kernel
+        KernelHandle id; /// A unique identifier for each kernel
         int refCount; /// How many parts loaded this kernel and are interested in it
     };
 
@@ -717,7 +722,7 @@ protected:
     const static bool _showErrors = false;
 
     /// The last assigned kernel-id, used to determine the next free kernel id
-    KernelIdentifier _lastAssignedKernel;
+    KernelHandle _lastAssignedKernel;
 };
 
 } // namespace openspace

@@ -191,7 +191,6 @@ if (NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
 endif ()
 target_include_directories(libtorrent PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(libtorrent ${Boost_LIBRARIES})
-message(${Boost_LIBRARIES})
 
 if (WIN32)
     target_link_libraries(libtorrent wsock32 ws2_32 Iphlpapi.lib)

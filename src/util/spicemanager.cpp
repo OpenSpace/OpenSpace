@@ -26,10 +26,13 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
+
+#include <format.h>
 
 #define  MAXOBJ 64
 #define  WINSIZ 10000
@@ -59,17 +62,17 @@ SpiceManager::~SpiceManager() {
 }
 
 
-SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& filePath) {
-	if (filePath.empty()) {
-		LERROR("No filename provided");
-		return KernelFailed;
-	}
-
-	std::string&& path = absPath(filePath);
+SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
+    ghoul_assert(!filePath.empty(), "Empty file path");
+    ghoul_assert(FileSys.fileExists(filePath),
+                 fmt::format("File '{}' does not exist", filePath)
+    );
+    
+	std::string path = absPath(filePath);
 
 	if (!FileSys.fileExists(path)) {
 		LERROR("Kernel file '" << path << "' does not exist");
-		return KernelFailed;
+		return InvalidKernel;
 	}
 
 	// We need to set the current directory as meta-kernels are usually defined relative
@@ -81,7 +84,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
 
 	if (!FileSys.directoryExists(fileDirectory)) {
 		LERROR("Could not find directory for kernel '" << path << "'");
-		return KernelFailed;
+		return InvalidKernel;
 	}
 
     auto it = std::find_if(
@@ -97,7 +100,7 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
         return it->id;
     }
 
-    KernelIdentifier kernelId = ++_lastAssignedKernel;
+    KernelHandle kernelId = ++_lastAssignedKernel;
 
 	FileSys.setCurrentDirectory(fileDirectory);
 
@@ -123,12 +126,12 @@ SpiceManager::KernelIdentifier SpiceManager::loadKernel(const std::string& fileP
         LERROR("Error loading kernel '" + path + "'");
         LERROR("Spice reported: " + std::string(msg));
         reset_c();
-        return KernelFailed;
+        return InvalidKernel;
     }
 
 	bool hasError = checkForError("Error loading kernel '" + path + "'");
 	if (hasError)
-		return KernelFailed;
+		return InvalidKernel;
 	else {
 		KernelInformation&& info = { path, std::move(kernelId), 1 };
 		_loadedKernels.push_back(info);
@@ -240,7 +243,7 @@ bool SpiceManager::hasCkCoverage(std::string frame, double& et) const
 	return idSuccess && hasCoverage;
 }
 
-void SpiceManager::unloadKernel(KernelIdentifier kernelId) {
+void SpiceManager::unloadKernel(KernelHandle kernelId) {
 	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
 		[&kernelId](const KernelInformation& info) { return info.id == kernelId ; });
 

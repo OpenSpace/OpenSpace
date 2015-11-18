@@ -485,9 +485,9 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 		LERROR("Configuration file does not contain a '" << ConfigurationManager::KeySpiceTimeKernel << "'");
 		return false;
 	}
-	SpiceManager::KernelIdentifier id =
+	SpiceManager::KernelHandle id =
 		SpiceManager::ref().loadKernel(timeKernel);
-	if (id == SpiceManager::KernelFailed) {
+	if (id == SpiceManager::InvalidKernel) {
 		LERROR("Error loading time kernel '" << timeKernel << "'");
 		return false;
 	}
@@ -501,7 +501,7 @@ bool OpenSpaceEngine::loadSpiceKernels() {
 		return false;
 	}
 	id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
-	if (id == SpiceManager::KernelFailed) {
+	if (id == SpiceManager::InvalidKernel) {
 		LERROR("Error loading leap second kernel '" << leapSecondKernel << "'");
 		return false;
 	}
