@@ -204,7 +204,7 @@ bool LabelParser::create() {
 						if (read == "START_TIME"){
 							std::string start = line.substr(line.find("=") + 2);
 							start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
-							openspace::SpiceManager::ref().getETfromDate(start, _startTime);
+                            _startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
 							count++;
 
 							getline(file, line);
@@ -219,7 +219,7 @@ bool LabelParser::create() {
                                     ),
                                     stop.end()
                                 );
-								openspace::SpiceManager::ref().getETfromDate(stop, _stopTime);
+                                _stopTime = SpiceManager::ref().ephemerisTimeFromDate(stop);
 								count++;
 							}
 							else{

@@ -451,9 +451,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 
                 glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
-                psc nhPos;
                 double lt;
-                SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
+                glm::dvec3 p;
+                SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, p, lt);
+                psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
                 float a, b, c;
                 SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
                 float radius = (a + b) / 2.f;
@@ -478,8 +479,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 for (int i = 0; i < 25 - g; i++)
                           progress.append(" ");
 
-                std::string str = "";
-                openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
+                std::string str = SpiceManager::ref().dateFromEphemerisTime(
+                    ImageSequencer2::ref().getNextCaptureTime(),
+                    "YYYY MON DD HR:MN:SC"
+                );
 
                 glm::vec4 active(0.6, 1, 0.00, 1);
                 glm::vec4 brigther_active(0.9, 1, 0.75, 1);

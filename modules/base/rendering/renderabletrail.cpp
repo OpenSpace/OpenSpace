@@ -201,7 +201,6 @@ void RenderableTrail::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
     double lightTime = 0.0;
-    psc pscPos;
 
 	bool intervalSet = hasTimeInterval();
 	double start = DBL_MIN;
@@ -217,13 +216,17 @@ void RenderableTrail::update(const UpdateData& data) {
     double deltaTime = std::abs(data.time - _oldTime);
     int nValues = static_cast<int>(floor(deltaTime / _increment));
 
+    glm::dvec3 p;
     // Update the floating current time
 	if (start > data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, pscPos, lightTime);
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, p, lightTime);
 	else if (end < data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, pscPos, lightTime);
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, p, lightTime);
 	else
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, pscPos, lightTime);
+		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, p, lightTime);
+    
+    psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    
 
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
@@ -243,7 +246,9 @@ void RenderableTrail::update(const UpdateData& data) {
 				et = start;
 			else if (end < et)
 				et = end;
-			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, pscPos, lightTime);
+            glm::dvec3 p;
+			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, p, lightTime);
+            pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
@@ -283,7 +288,6 @@ void RenderableTrail::fullYearSweep(double time) {
     
     _oldTime = time;
 
-    psc pscPos;
     _vertexArray.resize(segments+2);
     for (int i = 0; i < segments+2; i++) {
 		if (start > time && intervalSet) {
@@ -293,7 +297,9 @@ void RenderableTrail::fullYearSweep(double time) {
 			time = end;
 		}
 
-        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, pscPos, lightTime);
+        glm::dvec3 p;
+        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, p, lightTime);
+        psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};

@@ -446,7 +446,7 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 	fovSurfaceIntercept(_interceptTag, _bounds);
 
 	glm::vec3 aim = (_spacecraftRotation * glm::vec4(_boresight, 1)).xyz();
-	psc position;
+    glm::dvec3 position;
 	SpiceManager::ref().getTargetPosition(_fovTarget,
 		    							  _spacecraft,
 		    							  _frame,
@@ -454,13 +454,14 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 		    							  _time,
 		    							  position,
 		    							  _lt);
-	pss length = position.length();
+    psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(position.x, position.y, position.z);
+	pss length = p.length();
 	if (length[0] < DBL_EPSILON) {
 		_drawFOV = false;
 		return;
 	}
 	//if aimed 80 deg away from target, dont draw white square
-	if (glm::dot(glm::normalize(aim), glm::normalize(position.vec3())) < 0.2){
+	if (glm::dot(glm::normalize(aim), glm::normalize(p.vec3())) < 0.2){
 		_drawFOV = false;
 	}
 }

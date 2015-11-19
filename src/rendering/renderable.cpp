@@ -136,9 +136,9 @@ bool Renderable::hasBody() {
 
 bool Renderable::getInterval(double& start, double& end) {
 	if (_startTime != "" && _endTime != "") {
-		bool successStart = openspace::SpiceManager::ref().getETfromDate(_startTime, start);
-		bool successEnd = openspace::SpiceManager::ref().getETfromDate(_endTime, end);
-		return successStart && successEnd;
+        start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
+        end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
+        return true;
 	}
 	else
 		return false;

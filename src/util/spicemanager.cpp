@@ -179,8 +179,11 @@ void SpiceManager::unloadKernel(string filePath) {
 	auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
 		[&path](const KernelInformation& info) { return info.path == path; });
     
-    if (it == _loadedKernels.end())
-        throw SpiceKernelException("Kernel unloading failed");
+    if (it == _loadedKernels.end()) {
+        throw SpiceKernelException(
+            format("'{}' did not correspond to a loaded kernel", path)
+        );
+    }
 	else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
@@ -256,6 +259,7 @@ bool SpiceManager::hasNaifId(const string& body) const {
     SpiceBoolean success;
     int id;
     bods2c_c(body.c_str(), &id, &success);
+    reset_c();
     return success;
 }
 
@@ -287,14 +291,24 @@ void getValueInternal(const string& body, const string& value, int size,
 	SpiceInt n;
 	bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
 
-    throwOnSpiceError("Error getting value '" + value +
-                                                "' for body '" + body + "'");
+    throwOnSpiceError(
+        format("Error getting value '{}' for body '{}'",
+               value,
+               body
+        )
+    );
 }
 
 void SpiceManager::getValue(const string& body, const string& value, double& v) const {
 	getValueInternal(body, value, 1, &v);
 }
 
+void SpiceManager::getValue(const string& body, const string& value,
+                            glm::dvec2& v) const
+{
+    getValueInternal(body, value, 2, glm::value_ptr(v));
+}
+    
 void SpiceManager::getValue(const string& body, const string& value,
                             glm::dvec3& v) const
 {
@@ -311,11 +325,13 @@ void SpiceManager::getValue(const string& body, const string& value,
 	std::vector<double>& v) const 
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
+
     getValueInternal(body, value, v.size(), v.data());
 }
 
 double SpiceManager::spacecraftClockToET(const string& craft, double craftTicks) {
     ghoul_assert(!craft.empty(), "Empty craft");
+
     int craftId = naifId(craft);
     double et;
 	sct2e_c(craftId, craftTicks, &et);
@@ -326,38 +342,32 @@ double SpiceManager::spacecraftClockToET(const string& craft, double craftTicks)
 	return et;
 }
 
-bool SpiceManager::getETfromDate(const std::string& timeString,
-                                 double& ephemerisTime) const
-{
-    if (timeString.empty()) {
-        LERROR("No time string was provided");
-        return false;
-    }
-    
-	str2et_c(timeString.c_str(), &ephemerisTime);
-    throwOnSpiceError("Error converting date '" + timeString + "'");
-    return true;
+double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const {
+    ghoul_assert(!timeString.empty(), "Empty timeString");
+
+    double et;
+	str2et_c(timeString.c_str(), &et);
+    throwOnSpiceError(format("Error converting date '{}'", timeString));
+    return et;
 }
 
-bool SpiceManager::getDateFromET(double ephemerisTime, std::string& date,
-	const std::string& format) const
+string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
+                                           const string& formatString) const
 {
-	static const int BufferSize = 256;
+    ghoul_assert(!formatString.empty(), "Format is empty");
     
-    if (format.empty()) {
-        LERROR("No format string was provided for the date conversion");
-        return false;
-    }
-	SpiceChar buffer[BufferSize];
-
-	timout_c(ephemerisTime, format.c_str(), BufferSize - 1, buffer);
-    throwOnSpiceError("Error converting ephemeris time '" +
-                      std::to_string(ephemerisTime) +
-                      "' to date with format '" + format + "'"
+    static const int BufferSize = 256;
+    SpiceChar buffer[BufferSize];
+    timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
+    throwOnSpiceError(
+        format("Error converting ephemeris time '{}' to date with format '{}'",
+               ephemerisTime,
+               formatString
+        )
     );
-
-    date = std::string(buffer);
-    return true;
+    
+    return std::string(buffer);
+    
 }
 
 bool SpiceManager::getTargetPosition(const std::string& target,
@@ -396,37 +406,37 @@ bool SpiceManager::getTargetPosition(const std::string& target,
 	return targetHasCoverage && observerHasCoverage;
 }
 
-bool SpiceManager::getTargetPosition(const std::string& target,
-						   const std::string& observer,
-		                   const std::string& referenceFrame, 
-						   const std::string& aberrationCorrection,
-		                   double ephemerisTime,
-						   psc& position, 
-						   double& lightTime) const
-{
-	double pos[3] = { 0.0, 0.0, 0.0};
-
-	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
-	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
-	if (!targetHasCoverage && !observerHasCoverage){
-		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-		return false;
-	}
-	else if (targetHasCoverage && observerHasCoverage){
-		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-			aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-	}
-	else if (targetHasCoverage) {// observer has no coverage
-		getEstimatedPosition(ephemerisTime, observer, target, position);
-		position = position*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
-	}
-	else {// target has no coverage
-		getEstimatedPosition(ephemerisTime, target, observer, position);
-	}
-
-	return targetHasCoverage && observerHasCoverage;
-}
+//bool SpiceManager::getTargetPosition(const std::string& target,
+//						   const std::string& observer,
+//		                   const std::string& referenceFrame, 
+//						   const std::string& aberrationCorrection,
+//		                   double ephemerisTime,
+//						   psc& position, 
+//						   double& lightTime) const
+//{
+//	double pos[3] = { 0.0, 0.0, 0.0};
+//
+//	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
+//	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
+//	if (!targetHasCoverage && !observerHasCoverage){
+//		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+//		return false;
+//	}
+//	else if (targetHasCoverage && observerHasCoverage){
+//		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
+//			aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
+//		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
+//	}
+//	else if (targetHasCoverage) {// observer has no coverage
+//		getEstimatedPosition(ephemerisTime, observer, target, position);
+//		position = position*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
+//	}
+//	else {// target has no coverage
+//		getEstimatedPosition(ephemerisTime, target, observer, position);
+//	}
+//
+//	return targetHasCoverage && observerHasCoverage;
+//}
 
 bool SpiceManager::getEstimatedPosition(const double time, const std::string target,
 										const std::string observer, psc& targetPosition) const 

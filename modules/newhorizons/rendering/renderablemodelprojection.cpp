@@ -354,7 +354,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
 		openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
 
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, _sunPosition, lt);
+    glm::dvec3 p;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, p, lt);
+    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
 void RenderableModelProjection::imageProjectGPU() {
@@ -427,8 +429,9 @@ void RenderableModelProjection::attitudeParameters(double time) {
 		return;
 
 	double lightTime;
-	psc position;                                //observer      target
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _destination, _aberration, time, position, lightTime);
+    glm::dvec3 p;
+	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _destination, _aberration, time, p, lightTime);
+    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
 	position[3] += (3 + _camScaling[1]);
 	glm::vec3 cpos = position.vec3();

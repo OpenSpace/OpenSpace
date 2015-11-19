@@ -66,12 +66,13 @@ public:
      * passed to <code>absPath</code> to convert a relative path to an absolute path
      * before usage
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
-     * \throws SpiceKernelException If the loading of the kernel \p filePath failed
-     * \pre \p filePath is a non-empty absolute or relative path pointing to an
-     * existing file that contains a SPICE kernel
+     * \throws SpiceKernelException If the loading of the kernel \p filePath failed if,
+     * for example, \p filePath is not a valid SPICE kernel
+     * \pre \p filePath must not be empty.
+     * \pre \p filePath must be an absolute or relative path pointing to an existing file.
      * \post The kernel is loaded or has its reference counter incremented and the handle
-     * to the kernel is returned if the SPICE kernel is valid, or \a KernelInvalid if the
-     * kernel is invalid
+     * to the kernel is returned. The returned value is never equal to
+     * <code>KernelHandle(0)</code>.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
     KernelHandle loadKernel(std::string filePath);
@@ -82,9 +83,9 @@ public:
      * <code>unload_c</code> function.
      * \param kernelId The unique identifier that was returned from the call to
      * #loadKernel which loaded the kernel
-     * \pre \p kernelId must be a valid handle and cannot be equal to
-     * <code>KernelHandle(0)</code>
-     * \post The kernel identified by \p kernelId is unloaded
+     * \pre \p kernelId must be a valid handle.
+     * \pre \p kernelId cannot be equal to <code>KernelHandle(0)</code>.
+     * \post The kernel identified by \p kernelId is unloaded.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(KernelHandle kernelId);
@@ -93,12 +94,11 @@ public:
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
      * loading call to #loadKernel. The unloading is done by calling the
      * <code>unload_c</code> function.
-     * \param filePath The path of the kernel that should be unloaded. The filePath must
-     * have been previously used to successfully load a kernel, or a SpiceKernelException
-     * is thrown
-     * \pre \p filePath cannot be empty
-     * \post The kernel identified by \p filePath is unloaded or nothing happens if
-     * \p filePath was not used to load a kernel
+     * \param filePath The path of the kernel that should be unloaded.
+     * \throws SpiceKernelException If the \p filePath has not been previously used to
+     * successfully load a kernel.
+     * \pre \p filePath must not be empty.
+     * \post The kernel identified by \p filePath is unloaded.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(std::string filePath);
@@ -111,8 +111,8 @@ public:
      * \param et The time for which the coverage should be checked
      * \return <code>true</code> if SPK kernels have been loaded to cover \p target at the
      * time \p et, <code>false</code> otherwise.
-     * \pre \p target must be a non-empty string that names a valid SPICE object
-     * \throws SpiceKernelException If \p target is not a valid NAIF target
+     * \throws SpiceKernelException If \p target does not name a valid SPICE object
+     * \pre \p target must not be empty.
      */
     bool hasSpkCoverage(const std::string& target, double et) const;
 
@@ -124,7 +124,8 @@ public:
      * \param et The time for which the coverage should be checked
      * \return <code>true</code> if SPK kernels have been loaded to cover \p target at the
      * time \p et , <code>false</code> otherwise.
-     * \pre \p target must be a non-empty string that names a valid SPICE object
+     * \throws SpiceKernelException If \p target does not name a valid SPICE object
+     * \pre \p target must not be empty.
      * \throws SpiceKernelException If \p frame is not a valid frame
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
@@ -146,9 +147,10 @@ public:
      * \param body The name of the body that should be sampled
      * \param item The item to find in the \p body
      * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
+     * \throws SpiceKernelException If \p body does not name a valid SPICE object.
+     * \pre \p body must not be empty.
+     * \pre \item must not be empty.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     * \throws SpiceKernelException If \p body is not a valid type
-     * \pre \p body and \item must be non-empty and \p body must name a valid Spice object
      */
     bool hasValue(const std::string& body, const std::string& item) const;
 
@@ -158,8 +160,8 @@ public:
      * \param body The body name that should be retrieved
      * \return The ID of the <code>body</code> will be stored in this variable. The
      * value will only be changed if the retrieval was successful
-     * \throws SpiceKernelException If \p body is not a valid type
-     * \pre \p body must be not-empty
+     * \throws SpiceKernelException If \p body does not name a valid SPICE object.
+     * \pre \p body must not be empty.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bods2c_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
@@ -171,7 +173,7 @@ public:
      * \param body The body for which the presence of a valid ID should be checked
      * \return <code>true</code> if the \p body has a NAIF ID, <code>false</code>
      * otherwise
-     * \pre \p body must be non-empty
+     * \pre \p body must not be empty.
      */
     bool hasNaifId(const std::string& body) const;
     
@@ -179,8 +181,8 @@ public:
      * Returns the NAIF ID for a specific frame using <code>namfrm_c</code>.
      * \param frame The frame name that should be retrieved
      * \return The NAIF ID of the \p frame
-     * \throws SpiceKernelException If \p frame is not a valid frame
-     * \pre \p frame must be not-empty
+     * \throws SpiceKernelException If \p frame is not a valid frame.
+     * \pre \p frame must not be empty.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/namfrm_c.html
      */
     int frameId(const std::string& frame) const;
@@ -191,90 +193,109 @@ public:
      * \param frame The frame for which the presence of a valid ID should be checked
      * \return <code>true</code> if the \p frame has a NAIF ID, <code>false</code>
      * otherwise
-     * \pre \p frame must be non-empty
+     * \pre \p frame must not be empty.
      */
     bool hasFrameId(const std::string& frame) const;
     
     /**
-     * Retrieves a single <code>value</code> for a certain <code>body</code>. This method
-     * succeeds iff <code>body</code> is the name of a valid body, <code>value</code>
-     * is a value associated with the body, and the value consists of only a single
-     * <code>double</code> value. If all conditions are true, the value is retrieved using
-     * the method <code>bodvrd_c</code> and stored in <code>v</code>
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
-     * the conditions is false an error is logged and the value <code>v</code> is
-     * unchanged.  For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+     * Retrieves a single \p value for a certain \p body. This method succeeds iff \p body
+     * is the name of a valid body, \p value is a value associated with the body, and the
+     * value consists of only a single <code>double</code> value. If all conditions are
+     * true, the value is retrieved using the method <code>bodvrd_c</code> and stored in
+     * \p v.
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      * this body
-     * \param value The value of that should be retrieved, this value is case-sensitive
+     * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
-     * \return <code>true</code> if the <code>body</code> named a valid body,
-     * <code>value</code> is a valid item for the <code>body</code> and the retrieved
-     * value is only a single value. <code>false</code> otherwise
+     * \throws SpiceKernelException If the \p body does not name a valid body, \t value
+     * is not a valid item for the \p body or the retrieved value is not a single value.
+     * \pre \p body must not be empty.
+     * \pre \p value must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, double& v) const;
 
     /**
-     * Retrieves a <code>value</code> with three components for a certain
-     * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
-     * valid body, <code>value</code> is a value associated with the body, and the value
-     * consists of three <code>double</code> values. If all conditions are true, the value
-     * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
-     * the conditions is false an error is logged and the value <code>v</code> is
-     * unchanged. For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+     * Retrieves a \p value with two components for a certain \p body. This method
+     * succeeds iff \p body is the name of a valid body, \p value is a value associated
+     * with the body, and the value consists of two <code>double</code> values.
+     * If all conditions are true, the value is retrieved using the method
+     * <code>bodvrd_c</code> and stored in \p v.
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     * the body
-     * \param value The value of that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved values
-     * \return <code>true</code> if the <code>body</code> named a valid body,
-     * <code>value</code> is a valid item for the <code>body</code> and the retrieved
-     * value is only a single value. <code>false</code> otherwise
+     * this body
+     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param v The destination for the retrieved value
+     * \throws SpiceKernelException If the \p body does not name a valid body, \t value
+     * is not a valid item for the \p body or the retrieved value is not a two-component
+     * value.
+     * \pre \p body must not be empty.
+     * \pre \p value must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     */
+    void getValue(const std::string& body, const std::string& value, glm::dvec2& v) const;
+
+    
+    /**
+     * Retrieves a \p value with three components for a certain \p body. This method
+     * succeeds iff \p body is the name of a valid body, \p value is a value associated
+     * with the body, and the value consists of three <code>double</code> values.
+     * If all conditions are true, the value is retrieved using the method
+     * <code>bodvrd_c</code> and stored in \p v.
+     * \param body The name of the body whose value should be retrieved or the NAIF ID of
+     * this body
+     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param v The destination for the retrieved value
+     * \throws SpiceKernelException If the \p body does not name a valid body, \t value
+     * is not a valid item for the \p body or the retrieved value is not a three-component
+     * value.
+     * \pre \p body must not be empty.
+     * \pre \p value must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
 
     /**
-     * Retrieves a <code>value</code> with four components for a certain
-     * <code>body</code>. This method succeeds iff <code>body</code> is the name of a
-     * valid body, <code>value</code> is a value associated with the body, and the value
-     * consists of four <code>double</code> values. If all conditions are true, the value
-     * is retrieved using the method <code>bodvrd_c</code> and stored in <code>v</code>
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
-     * the conditions is false an error is logged and the value <code>v</code> is
-     * unchanged. For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
+     * Retrieves a \p value with four components for a certain \p body. This method
+     * succeeds iff \p body is the name of a valid body, \p value is a value associated
+     * with the body, and the value consists of four <code>double</code> values.
+     * If all conditions are true, the value is retrieved using the method
+     * <code>bodvrd_c</code> and stored in \p v.
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     * the body
-     * \param value The value of that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved values
-     * \return <code>true</code> if the <code>body</code> named a valid body,
-     * <code>value</code> is a valid item for the <code>body</code> and the retrieved
-     * value is only a single value. <code>false</code> otherwise
+     * this body
+     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param v The destination for the retrieved value
+     * \throws SpiceKernelException If the \p body does not name a valid body, \t value
+     * is not a valid item for the \p body or the retrieved value is not a four-component
+     * value.
+     * \pre \p body must not be empty.
+     * \pre \p value must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
 
     /**
-     * Retrieves a <code>value</code> with an arbitrary number of components for a certain
-     * <code>body</code>. This method succeeds <code>body</code> is a valid body,
-     * <code>value</code> is a value associated with the body, and the value consists of a
-     * number of <code>double</code> values. The requested number is equal to the
-     * <code>size</code> of the passed vector <code>v</code> which means that this vector
-     * has to be preallocated. If all conditions are true, the value is retrieved using
-     * the method <code>bodvrd_c</code> and stored in <code>v</code>
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html. If one of
-     * the conditions is false an error is logged and the value <code>v</code> is
-     * unchanged. For a description on NAIF IDs, see
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html.
-     * \param body The body whose information should be retrieved or the NAIF ID of that
-     * body
-     * \param value The value of that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved values. The size of this vector
-     * determines how many values will be retrieved
-     * \return <code>true</code> if the <code>body</code> named a valid body,
-     * <code>value</code> is a valid item for the <code>body</code> and the retrieved
-     * value is only a single value. <code>false</code> otherwise
+     * Retrieves a \p value with an arbitrary number of components for a certain \p body.
+     * This method succeeds iff \p body is the name of a valid body, \p value is a value
+     * associated with the body, and the value consists of the correct number of
+     * <code>double</code> values. If all conditions are true, the value is retrieved
+     * using the method <code>bodvrd_c</code> and stored in \p v.
+     * \param body The name of the body whose value should be retrieved or the NAIF ID of
+     * this body
+     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param v The destination for the retrieved value. The <code>vector</code> must be
+     * preallocated to the correct size of components that should be retrieved
+     * \throws SpiceKernelException If the \p body does not name a valid body, \t value
+     * is not a valid item for the \p body or the retrieved value does not contain the
+     * correct number of components
+     * value.
+     * \pre \p body must not be empty.
+     * \pre \p value must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     void getValue(const std::string& body, const std::string& value,
         std::vector<double>& v) const;
@@ -290,52 +311,42 @@ public:
      * available through all loaded kernels, if the craft is not supported by any of the
      * loaded kernel, or if the provided \p craftTicks is not a valid tick time for the
      * specific spacecraft
-     * \pre \craftIdCode may not be empty and need to name a valid craft
+     * \pre \craftIdCode must not be empty
      */
     double spacecraftClockToET(const std::string& craft, double craftTicks);
 
     /**
-     * Converts the <code>timeString</code> representing a date to a double precision
-     * value representing the <code>ephemerisTime</code>; that is the number of TDB
-     * seconds past the J2000 epoch. For further details, please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html. If an error
-     * occurs, an error is logged, the method returns <code>false</code> and the
-     * <code>ephemerisTime</code> remains unchanged.
+     * Converts the \p timeString representing a date to a double precision
+     * value representing the ephemeris time; that is the number of TDB
+     * seconds past the J2000 epoch.
      * \param timeString A string representing the time to be converted
-     * \param ephemerisTime The destination for the converted time; the number of TDB
-     * seconds past the J2000 epoch, representing the passed <code>epochString</code>
-     * \return <code>true</code> if the <code>epochString</code> is a valid string and
-     * the conversion succeeded, <code>false</code> otherwise
+     * \return The converted time; the number of TDB seconds past the J2000 epoch,
+     * representing the passed \p timeString
+     * \throws SpiceKernelException If \p timeString is not a valid timestring according
+     * to the <code>str2et_c</code> function (see the Particulars section of the linked
+     * webpage).
+     * \pre \t timeString must not be empty
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
      */
-    bool getETfromDate(const std::string& timeString, double& ephemerisTime) const;
+    double ephemerisTimeFromDate(const std::string& timeString) const;
 
     /**
-     * Converts the passed <code>ephemerisTime</code> into a human-readable
-     * <code>date</code> string with a specific <code>format</code>. For details on the
-     * formatting, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html. In case of
-     * an error, <code>date</code> will not be modified, an error will be logged and the
-     * method returns <code>false</code>.
+     * Converts the passed \p ephemerisTime into a human-readable date string with a
+     * specific \t format.
      * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
      * J2000 epoch
-     * \param date The destination for the converted date. This will only be changed if 
-     * the conversion succeeded
-     * \param format The format string describing the output format for the
-     * <code>date</code>
-     * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
+     * \param format The format string describing the output format
+     * \return The destination for the converted date.
+     * \pre \t format must not be empty
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
      */
-    bool getDateFromET(double ephemerisTime, std::string& date,
-        const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
-
+    std::string dateFromEphemerisTime(double ephemerisTime,
+        const std::string& formatString = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
     /**
-     * Returns the <code>position</code> of a <code>target</code> body relative to an
-     * <code>observer</code> in a specific <code>referenceFrame</code>, optionally
-     * corrected for light time (planetary aberration) and stellar aberration
-     * (<code>aberrationCorrection</code>). For further details, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html. For more
-     * information on NAIF IDs, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * Returns the \t position of a \t target body relative to an \t observer in a
+     * specific \t referenceFrame, optionally corrected for \t lightTime (planetary
+     * aberration) and stellar aberration (\t aberrationCorrection).
      * \param target The target body name or the target body's NAIF ID
      * \param observer The observing body name or the observing body's NAIF ID
      * \param referenceFrame The reference frame of the output position vector
@@ -351,6 +362,8 @@ public:
      * observer and the target. If the method fails, the lightTime is unchanged
      * \return <code>true</code> if the function was successful, <code>false</code>
      * otherwise
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     bool getTargetPosition(const std::string& target, 
                            const std::string& observer,
@@ -359,15 +372,6 @@ public:
                            double ephemerisTime,
                            glm::dvec3& position, 
                            double& lightTime) const;
-
-    bool getTargetPosition(const std::string& target,
-                           const std::string& observer,
-                           const std::string& referenceFrame, 
-                           const std::string& aberrationCorrection,
-                           double ephemerisTime,
-                           psc& position, 
-                           double& lightTime) const;
-
     /**
      * If a position is requested for an uncovered time in the SPK kernels,
      * this function will insert a position in <code>modelPosition</code>.

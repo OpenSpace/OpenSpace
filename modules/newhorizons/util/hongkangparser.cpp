@@ -99,20 +99,18 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
 }
 
 void HongKangParser::writeUTCEventFile(const Image image){
-		std::string time_beg;
-		std::string time_end;
-		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-		SpiceManager::ref().getDateFromET(image.stopTime, time_end, "HR:MN:SC.### ::RND");
+    std::string time_beg = SpiceManager::ref().dateFromEphemerisTime(image.startTime);
+    std::string time_end = SpiceManager::ref().dateFromEphemerisTime(image.stopTime);
 
-		_eventsAsUTCFile << std::fixed
-			<< std::setw(10) << time_beg << "->"
-			<< std::setw(10) << time_end
-			<< std::setw(10) << (int)getMetFromET(image.startTime) << "->"
-			<< std::setw(10) << (int)getMetFromET(image.stopTime)
-			<< std::setw(10) << image.target << std::setw(10);
-		for (auto instrument : image.activeInstruments){
-			_eventsAsUTCFile << " " << instrument;
-		}
+    _eventsAsUTCFile << std::fixed
+        << std::setw(10) << time_beg << "->"
+        << std::setw(10) << time_end
+        << std::setw(10) << (int)getMetFromET(image.startTime) << "->"
+        << std::setw(10) << (int)getMetFromET(image.stopTime)
+        << std::setw(10) << image.target << std::setw(10);
+    for (auto instrument : image.activeInstruments){
+        _eventsAsUTCFile << " " << instrument;
+    }
 }
 
 bool HongKangParser::create(){
@@ -324,8 +322,8 @@ double HongKangParser::getETfromMet(std::string line){
 
 double HongKangParser::getETfromMet(double met){
 	double diff;
-	double referenceET;
-	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
+    double referenceET =
+        SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
     double et = referenceET;
 
 	//_metRef += 3; // MET reference time is off by 3 sec? 
@@ -342,8 +340,8 @@ double HongKangParser::getETfromMet(double met){
 
 double HongKangParser::getMetFromET(double et){
 	double met;
-	double referenceET;
-	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
+    double referenceET =
+        SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
 
 	if (et >= referenceET){
 		met = _metRef + (et - referenceET);

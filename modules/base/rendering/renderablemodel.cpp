@@ -183,8 +183,9 @@ void RenderableModel::render(const RenderData& data) {
 	else
 		_alpha = 1.0f;
 
-	psc tmppos;
-	SpiceManager::ref().getTargetPosition(_target, "SUN", "GALACTIC", "NONE", time, tmppos, lt);
+    glm::dvec3 p;
+	SpiceManager::ref().getTargetPosition(_target, "SUN", "GALACTIC", "NONE", time, p, lt);
+    psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
 	_programObject->setUniform("cam_dir", cam_dir);
 	_programObject->setUniform("transparency", _alpha);
@@ -245,7 +246,9 @@ void RenderableModel::update(const UpdateData& data) {
 	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
 
     double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, _sunPosition, lt);
+    glm::dvec3 p;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, p, lt);
+    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
 void RenderableModel::loadTexture() {

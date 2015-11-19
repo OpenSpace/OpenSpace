@@ -109,9 +109,8 @@ bool RenderablePath::initialize() {
 	bool intervalSet = hasTimeInterval();
 	if (intervalSet) {
 		getInterval(_start, _stop);
-		std::string stop, start;
-		SpiceManager::ref().getDateFromET(_start, start);
-		SpiceManager::ref().getDateFromET(_stop, stop);
+        std::string start = SpiceManager::ref().dateFromEphemerisTime(_start);
+        std::string stop = SpiceManager::ref().dateFromEphemerisTime(_stop);
 	}
 
 	return completeSuccess;
@@ -215,15 +214,17 @@ void RenderablePath::calculatePath(std::string observer) {
 	double lightTime;
 //	bool correctPosition = true;
 
-	psc pscPos;
 	double currentTime = _start;
 	_vertexArray.resize(segments);
 
+    psc pscPos;
 	//float r, g, b;
 	//float g = _lineColor[1];
 	//float b = _lineColor[2];
 	for (int i = 0; i < segments; i++) {
-		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
+        glm::dvec3 p;
+		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, p, lightTime);
+        pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 			
 		//if (!correctPosition) {

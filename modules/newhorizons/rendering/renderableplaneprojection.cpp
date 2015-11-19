@@ -321,9 +321,10 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	std::string closestTarget = "";
 
-	psc spacecraftPos;
+    glm::dvec3 p;
 	double lt;
-	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", GalacticFrame, "NONE", currentTime, spacecraftPos, lt);
+	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", GalacticFrame, "NONE", currentTime, p, lt);
+    psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 
 	for (auto node : nodes)

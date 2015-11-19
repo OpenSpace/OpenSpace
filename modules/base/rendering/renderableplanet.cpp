@@ -180,9 +180,11 @@ void RenderablePlanet::render(const RenderData& data)
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 
-	psc sun_pos;
+	
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, sun_pos, lt);
+    glm::dvec3 p;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, p, lt);
+    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);

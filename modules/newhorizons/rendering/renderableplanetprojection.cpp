@@ -430,8 +430,9 @@ void RenderablePlanetProjection::attitudeParameters(double time){
     if (!found)
         return ;
 
-	psc position;                                //observer      target
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
+    glm::dvec3 p;
+	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, p, lightTime);
+    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
 	//change to KM and add psc camera scaling. 
 	position[3] += (3 + _camScaling[1]);
@@ -508,9 +509,10 @@ void RenderablePlanetProjection::render(const RenderData& data){
     attitudeParameters(_time);
 	_imageTimes.clear();
 
-	psc sun_pos;
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, sun_pos, lt);
+    glm::dvec3 p;
+	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, p, lt);
+    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 	// Main renderpass
 	_programObject->activate();

@@ -117,14 +117,12 @@ bool Time::togglePause() {
 }
 
 void Time::setTime(std::string time, bool requireJump) {
-	SpiceManager::ref().getETfromDate(std::move(time), _time);
+    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
 	_timeJumped = requireJump;
 }
 
 std::string Time::currentTimeUTC() const {
-	std::string date;
-	SpiceManager::ref().getDateFromET(_syncedTime, date);
-	return date;
+    return SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
 }
 
 void Time::serialize(SyncBuffer* syncBuffer){
