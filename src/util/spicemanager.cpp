@@ -62,9 +62,52 @@ using std::string;
 
 namespace openspace {
     
+    
 SpiceManager::SpiceKernelException::SpiceKernelException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")
 {}
+    
+SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
+    : type(t)
+    , direction(d)
+{}
+    
+SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& identifier) {
+    static const std::map<std::string, std::pair<Type, Direction>> Mapping = {
+        { "NONE"  , { Type::None, Direction::Reception } },
+        { "LT"    , { Type::LightTime, Direction::Reception } },
+        { "LT+S"  , { Type::LightTimeStellar, Direction::Reception } },
+        { "CN"    , { Type::ConvergedNewtonian, Direction::Reception } },
+        { "CN+S"  , { Type::ConvergedNewtonianStellar, Direction::Reception } },
+        { "XLT"   , { Type::LightTime, Direction::Transmission } },
+        { "XLT+S" , { Type::LightTimeStellar, Direction::Transmission } },
+        { "XCN"   , { Type::ConvergedNewtonian, Direction::Transmission } },
+        { "XCN+S" , { Type::ConvergedNewtonianStellar, Direction::Transmission } }
+    };
+    
+    auto it = Mapping.find(identifier);
+    
+    ghoul_assert(!identifier.empty(), "Identifier may not be empty");
+    ghoul_assert(it != Mapping.end(), format("Invalid identifer '{}'", identifier));
+    
+    type = it->second.first;
+    direction = it->second.second;
+}
+    
+SpiceManager::AberrationCorrection::operator string() const {
+    switch (type) {
+        case Type::None:
+            return "NONE";
+        case Type::LightTime:
+            return (direction == Direction::Reception) ? "LT" : "XLT";
+        case Type::LightTimeStellar:
+            return (direction == Direction::Reception) ? "LT+S" : "XLT+S";
+        case Type::ConvergedNewtonian:
+            return (direction == Direction::Reception) ? "CN" : "XCN";
+        case Type::ConvergedNewtonianStellar:
+            return (direction == Direction::Reception) ? "CN+S" : "XCN+S";
+    }
+}
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
@@ -370,40 +413,48 @@ string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
     
 }
 
-bool SpiceManager::getTargetPosition(const std::string& target,
-	                                 const std::string& observer,
-	                                 const std::string& referenceFrame,
-	                                 const std::string& aberrationCorrection,
-	                                 double ephemerisTime,
-	                                 glm::dvec3& position,
-	                                 double& lightTime) const
+glm::dvec3 SpiceManager::targetPosition(const std::string& target,
+	                                    const std::string& observer,
+	                                    const std::string& referenceFrame,
+                                        AberrationCorrection abberationCorrection,
+	                                    double ephemerisTime,
+	                                    double& lightTime) const
 {
-	psc pscPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(position[0], position[1], position[2]);
+    ghoul_assert(!target.empty(), "Target is not empty");
+    ghoul_assert(!observer.empty(), "Observer is not empty");
+    ghoul_assert(!referenceFrame.empty(), "Reference frame is not empty");
 
 	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
 	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
 	if (!targetHasCoverage && !observerHasCoverage){
-		return false;
+        throw SpiceKernelException(
+            format("Neither the target '{}' nor observer '{}' has SPK coverage",
+                   target,
+                   observer
+            )
+        );
 	}
-	else if (targetHasCoverage && observerHasCoverage){
+	else if (targetHasCoverage && observerHasCoverage) {
+        std::string correction = abberationCorrection;
+        glm::dvec3 position;
 		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-			aberrationCorrection.c_str(), observer.c_str(), glm::value_ptr(position),
+			correction.c_str(), observer.c_str(), glm::value_ptr(position),
 			&lightTime);
+        throwOnSpiceError(format("Error getting target position from '{}' to '{}' in reference frame '{}", target, observer, referenceFrame));
+        return position;
 	}
 	else if (targetHasCoverage) {// observer has no coverage
+        psc pscPosition;
 		getEstimatedPosition(ephemerisTime, observer, target, pscPosition);
 		pscPosition = pscPosition*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
-		position = pscPosition.vec3();
+		return pscPosition.vec3();
 	}
 	else { // target has no coverage
+        psc pscPosition;
 		getEstimatedPosition(ephemerisTime, target, observer, pscPosition);
-		position = pscPosition.vec3();
+		return pscPosition.vec3();
+        
 	}
-	
-	if (position[0] == 0.0 || position[1] == 0.0 || position[2] == 0.0)
-		return false;
-
-	return targetHasCoverage && observerHasCoverage;
 }
 
 //bool SpiceManager::getTargetPosition(const std::string& target,

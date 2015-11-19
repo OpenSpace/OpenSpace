@@ -222,8 +222,8 @@ void RenderablePath::calculatePath(std::string observer) {
 	//float g = _lineColor[1];
 	//float b = _lineColor[2];
 	for (int i = 0; i < segments; i++) {
-        glm::dvec3 p;
-		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, p, lightTime);
+        glm::dvec3 p =
+            SpiceManager::ref().targetPosition(_target, observer, _frame, SpiceManager::AberrationCorrection(), currentTime, lightTime);
         pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 			

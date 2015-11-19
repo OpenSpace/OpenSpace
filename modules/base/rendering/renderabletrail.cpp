@@ -219,11 +219,11 @@ void RenderableTrail::update(const UpdateData& data) {
     glm::dvec3 p;
     // Update the floating current time
 	if (start > data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, p, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), start, lightTime);
 	else if (end < data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, p, lightTime);
+		p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), end, lightTime);
 	else
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, p, lightTime);
+		p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), data.time, lightTime);
     
     psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
     
@@ -246,8 +246,8 @@ void RenderableTrail::update(const UpdateData& data) {
 				et = start;
 			else if (end < et)
 				et = end;
-            glm::dvec3 p;
-			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, p, lightTime);
+            glm::dvec3 p =
+                SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), et, lightTime);
             pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
@@ -289,6 +289,7 @@ void RenderableTrail::fullYearSweep(double time) {
     _oldTime = time;
 
     _vertexArray.resize(segments+2);
+    glm::dvec3 p;
     for (int i = 0; i < segments+2; i++) {
 		if (start > time && intervalSet) {
 			time = start;
@@ -297,8 +298,16 @@ void RenderableTrail::fullYearSweep(double time) {
 			time = end;
 		}
 
-        glm::dvec3 p;
-        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, p, lightTime);
+        try {
+         p =
+            SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), time, lightTime);
+        }
+        catch (const SpiceManager::SpiceKernelException& e) {
+            // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
+            // ---abock
+//            LERROR(e.what());
+        }
+        
         psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 

@@ -30,6 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 namespace ghoul {
 	namespace filesystem {
@@ -87,7 +88,7 @@ namespace openspace {
 		std::string _body;
 		std::string _bodyFrame;
 		std::string _mainFrame;
-		std::string _aberration;
+        SpiceManager::AberrationCorrection _aberration;
 		
 		double _time;
 	};

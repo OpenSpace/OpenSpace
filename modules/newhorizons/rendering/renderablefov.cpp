@@ -80,7 +80,9 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     success = dictionary.getValue(keyInstrumentMethod, _method);
     ghoul_assert(success, "");
 
-    success = dictionary.getValue(keyInstrumentAberration, _aberrationCorrection);
+    std::string a = "NONE";
+    success = dictionary.getValue(keyInstrumentAberration, a);
+    a = SpiceManager::AberrationCorrection(a);
     ghoul_assert(success, "");
 
     ghoul::Dictionary potentialTargets;
@@ -241,8 +243,8 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
 }
 // Orthogonal projection next to planets surface
 psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
-	glm::dvec3 vecToTarget;
-	SpiceManager::ref().getTargetPosition(_fovTarget, _spacecraft, _frame, _aberrationCorrection, _time, vecToTarget, _lt);
+	glm::dvec3 vecToTarget =
+	SpiceManager::ref().targetPosition(_fovTarget, _spacecraft, _frame, _aberrationCorrection, _time, _lt);
 	openspace::SpiceManager::ref().frameConversion(vecFov, _instrumentID, _frame, _time);
 	glm::dvec3 p = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, vecFov);
 
@@ -446,13 +448,12 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 	fovSurfaceIntercept(_interceptTag, _bounds);
 
 	glm::vec3 aim = (_spacecraftRotation * glm::vec4(_boresight, 1)).xyz();
-    glm::dvec3 position;
-	SpiceManager::ref().getTargetPosition(_fovTarget,
+    glm::dvec3 position =
+	SpiceManager::ref().targetPosition(_fovTarget,
 		    							  _spacecraft,
 		    							  _frame,
 		    							  _aberrationCorrection,
 		    							  _time,
-		    							  position,
 		    							  _lt);
     psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(position.x, position.y, position.z);
 	pss length = p.length();

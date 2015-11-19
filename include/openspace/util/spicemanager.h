@@ -58,6 +58,64 @@ public:
     };
     
     /**
+     * Specifies the aberration correction method for the #targetPosition function.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     */
+    class AberrationCorrection {
+    public:
+        /// The type of the aberration correction
+        enum class Type {
+            None = 0, ///< No correction (<code>NONE</code>)
+            LightTime, ///< One-way light time (<code>LT</code>)
+            LightTimeStellar, ///< One-way light time and stellar (<code>LT+S</code>)
+            ConvergedNewtonian, ///< Converged newtonian light time (<code>CN</code>)
+            ConvergedNewtonianStellar ///< Converged newtonian + stellar (<code>CN+S</code>)
+        };
+        /// The direction of the aberration correct
+        enum class Direction {
+            Reception = 0,
+            Transmission
+        };
+
+        /**
+         * Default constructor initializing the AberrationCorrection to Type::None with a
+         * Drection::Reception
+         */
+        AberrationCorrection() = default;
+        
+        /**
+         * Constructor initializing the AberrationCorrection to the provided \p type and
+         * \p direction
+         * \param type The type of the aberration correction (AberrationCorrection::Type)
+         * \param direction The used direction (AberrationCorrection::Direction)
+         */
+        AberrationCorrection(Type type, Direction direction);
+        
+        /**
+         * Converts one of the valid aberration correction strings into its enumeration
+         * format. The valid strings are:
+         * <code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
+         * <code>CN+S</code>, <code>XLT</code>, <code>XLT+S</code>, <code>XCN</code>, and
+         * <code>XCN+S</code>.
+         * \param identifier The identifier that should be converted into the enumeration
+         * Type and Direction
+         * \pre The \p identifier must not be empty and be of one of the valid strings
+         */
+        explicit AberrationCorrection(const std::string& identifier);
+
+        /**
+         * Returns the string representation of this Aberration Correction
+         * \return The string representation of this Aberration correction
+         */
+        operator std::string() const;
+
+        /// The type of aberration correction
+        Type type = Type::None;
+        /// The direction of the aberration correction
+        Direction direction = Direction::Reception;
+    };
+    
+    /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
      * loading is done by passing the \p filePath to the <code>furnsh_c</code>
@@ -344,34 +402,37 @@ public:
         const std::string& formatString = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
     /**
-     * Returns the \t position of a \t target body relative to an \t observer in a
-     * specific \t referenceFrame, optionally corrected for \t lightTime (planetary
-     * aberration) and stellar aberration (\t aberrationCorrection).
+     * Returns the \p position of a \p target body relative to an \p observer in a
+     * specific \p referenceFrame, optionally corrected for \p lightTime (planetary
+     * aberration) and stellar aberration (\p aberrationCorrection).
      * \param target The target body name or the target body's NAIF ID
      * \param observer The observing body name or the observing body's NAIF ID
      * \param referenceFrame The reference frame of the output position vector
-     * \param aberrationCorrection The aberration correction flag out of the list of
-     * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
-     * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
-     * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
+     * \param aberrationCorrection The aberration correction used for the position
+     * calculation
      * \param ephemerisTime The time at which the position is to be queried
-     * \param position The output containing the position of the target; if the method
-     * fails, the target position is unchanged
-     * \param lightTime If the <code>aberrationCorrection</code> is different from
-     * <code>NONE</code>, this variable will contain the one-way light time between the
-     * observer and the target. If the method fails, the lightTime is unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * \param lightTime If the \p aberrationCorrection is different from
+     * AbberationCorrection::Type::None, this variable will contain the light time between
+     * the observer and the target.
+     * \return The position of the \p target relative to the \p observer in the specified
+     * \p referenceFrame
+     * \throws SpiceKernelException If the \p target or \p observer do not name a valid
+     * NAIF object, \p referenceFrame does not name a valid reference frame or if there is
+     * not sufficient data available to compute the position or neither the target nor the
+     * observer have coverage.
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p referenceFrame must not be empty
+     * \post If an exception is thrown, \p lightTime will not be modified
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
-    bool getTargetPosition(const std::string& target, 
-                           const std::string& observer,
-                           const std::string& referenceFrame, 
-                           const std::string& aberrationCorrection,
-                           double ephemerisTime,
-                           glm::dvec3& position, 
-                           double& lightTime) const;
+    glm::dvec3 targetPosition(const std::string& target,
+                              const std::string& observer,
+                              const std::string& referenceFrame,
+                              AberrationCorrection abberationCorrection,
+                              double ephemerisTime,
+                              double& lightTime) const;
     /**
      * If a position is requested for an uncovered time in the SPK kernels,
      * this function will insert a position in <code>modelPosition</code>.

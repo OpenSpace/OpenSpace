@@ -36,6 +36,7 @@
 #include <ghoul/opengl/texture.h>
 //#include <openspace/util/runtimedata.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/spicemanager.h>
 
 namespace openspace {
 class RenderableFov : public Renderable{
@@ -96,7 +97,7 @@ public:
 	std::string _frame;
 	std::string _instrumentID;
 	std::string _method;
-	std::string _aberrationCorrection;
+    SpiceManager::AberrationCorrection _aberrationCorrection;
 	std::string _fovTarget;
 	glm::dvec3 ipoint, ivec;
 	glm::dvec3 _previousHalf;

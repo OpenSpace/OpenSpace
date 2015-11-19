@@ -71,7 +71,9 @@ namespace openspace {
 	ghoul_assert(success, "");
 	success = dictionary.getValue(_keyMainFrame, _mainFrame);
 	ghoul_assert(success, "");
-	success = dictionary.getValue(_keyAberration, _aberration);
+    std::string a = "NONE";
+	success = dictionary.getValue(_keyAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
 	ghoul_assert(success, "");
 }
 
@@ -166,9 +168,9 @@ void RenderableShadowCylinder::createCylinder() {
 											 observerPosition,
 											 terminatorPoints);
 
-	glm::dvec3 vecLightSource;
 	double lt;
-	bool performs = SpiceManager::ref().getTargetPosition(_body, _lightSource, _mainFrame, _aberration, _time, vecLightSource, lt);
+    glm::dvec3 vecLightSource =
+        SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
 
 	glm::dmat3 _stateMatrix;
 	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time, _stateMatrix);

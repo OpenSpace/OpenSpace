@@ -228,12 +228,18 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 		return;
 	}
 
-	glm::dvec3 vecToTarget;
 	double lt;
 	psc projection[4];
 
-	SpiceManager::ref().getTargetPosition(_target.body, _spacecraft, GalacticFrame, "CN+S", currentTime, vecToTarget, lt);
-	// The apparent position, CN+S, makes image align best with target 
+    glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
+        _target.body,
+        _spacecraft,
+        GalacticFrame,
+        { SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar, SpiceManager::AberrationCorrection::Direction::Reception },
+        currentTime,
+        lt
+    );
+	// The apparent position, CN+S, makes image align best with target
 
 	for (int j = 0; j < bounds.size(); ++j) {
 		openspace::SpiceManager::ref().frameConversion(bounds[j], frame, GalacticFrame, currentTime);
@@ -321,9 +327,9 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	std::string closestTarget = "";
 
-    glm::dvec3 p;
 	double lt;
-	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", GalacticFrame, "NONE", currentTime, p, lt);
+    glm::dvec3 p =
+        SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, SpiceManager::AberrationCorrection(), currentTime, lt);
     psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 

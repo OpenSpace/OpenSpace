@@ -120,7 +120,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
     bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
     bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
-    bool b4 = dictionary.getValue(keyProjAberration, _aberration);
+    std::string a = "NONE";
+    bool b4 = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
     bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);        
     bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); 
     bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
@@ -430,8 +432,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
     if (!found)
         return ;
 
-    glm::dvec3 p;
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, p, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
 	//change to KM and add psc camera scaling. 
@@ -510,8 +511,8 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_imageTimes.clear();
 
 	double  lt;
-    glm::dvec3 p;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, p, lt);
+    glm::dvec3 p =
+    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 	// Main renderpass

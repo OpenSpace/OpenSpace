@@ -182,8 +182,8 @@ void RenderablePlanet::render(const RenderData& data)
 
 	
 	double  lt;
-    glm::dvec3 p;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, p, lt);
+    glm::dvec3 p =
+        SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader

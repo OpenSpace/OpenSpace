@@ -136,11 +136,12 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	completeSuccess &= dictionary.getValue(keyInstrumentNear, _nearPlane);
 	completeSuccess &= dictionary.getValue(keyInstrumentFar, _farPlane);
 	ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
-		
-	completeSuccess = dictionary.getValue(keyProjAberration, _aberration);
-	if (!completeSuccess)
-		_aberration = "NONE";
-
+    
+    std::string a = "NONE";
+	bool s = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
+    completeSuccess &= s;
+    
 	openspace::SpiceManager::ref().addFrame(_target, _source);
 	setBoundingSphere(pss(1.f, 9.f));
 
@@ -354,8 +355,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
 		openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
 
 	double  lt;
-    glm::dvec3 p;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, p, lt);
+    glm::dvec3 p =
+        openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
@@ -429,8 +430,8 @@ void RenderableModelProjection::attitudeParameters(double time) {
 		return;
 
 	double lightTime;
-    glm::dvec3 p;
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _destination, _aberration, time, p, lightTime);
+    glm::dvec3 p =
+        SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _destination, _aberration, time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
 	position[3] += (3 + _camScaling[1]);

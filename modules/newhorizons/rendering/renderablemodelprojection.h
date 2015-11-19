@@ -33,6 +33,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 #include <modules/base/rendering/modelgeometry.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -104,7 +105,7 @@ namespace openspace {
 		std::string _instrumentID;
 		std::string _projectorID;
 		std::string _projecteeID;
-		std::string _aberration;
+        SpiceManager::AberrationCorrection _aberration;
 		std::vector<std::string> _potentialTargets;
 		float _fovy;
 		float _aspectRatio;

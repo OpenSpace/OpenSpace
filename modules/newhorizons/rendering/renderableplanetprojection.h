@@ -40,6 +40,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/framebufferobject.h>
 
@@ -117,7 +118,7 @@ private:
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
-	std::string _aberration;
+    SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
 
 
