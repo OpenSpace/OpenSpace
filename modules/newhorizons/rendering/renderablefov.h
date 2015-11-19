@@ -107,7 +107,6 @@ public:
 	std::vector<glm::dvec3> _bounds;
 	std::vector<std::string> _potentialTargets;
 	bool _drawFOV;
-	double _targetEpoch;
 	double _lt;
 
 	// GPU 

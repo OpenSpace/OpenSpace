@@ -66,6 +66,8 @@ namespace openspace {
 SpiceManager::SpiceKernelException::SpiceKernelException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")
 {}
+
+    
     
 SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
     : type(t)
@@ -73,7 +75,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
 {}
     
 SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& identifier) {
-    static const std::map<std::string, std::pair<Type, Direction>> Mapping = {
+    const static std::map<std::string, std::pair<Type, Direction>> Mapping =  {
         { "NONE"  , { Type::None, Direction::Reception } },
         { "LT"    , { Type::LightTime, Direction::Reception } },
         { "LT+S"  , { Type::LightTimeStellar, Direction::Reception } },
@@ -84,7 +86,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
         { "XCN"   , { Type::ConvergedNewtonian, Direction::Transmission } },
         { "XCN+S" , { Type::ConvergedNewtonianStellar, Direction::Transmission } }
     };
-    
+
     auto it = Mapping.find(identifier);
     
     ghoul_assert(!identifier.empty(), "Identifier may not be empty");
@@ -94,7 +96,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
     direction = it->second.second;
 }
     
-SpiceManager::AberrationCorrection::operator string() const {
+SpiceManager::AberrationCorrection::operator const char*() const {
     switch (type) {
         case Type::None:
             return "NONE";
@@ -416,14 +418,14 @@ string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
 	                                    const std::string& observer,
 	                                    const std::string& referenceFrame,
-                                        AberrationCorrection abberationCorrection,
+                                        AberrationCorrection aberrationCorrection,
 	                                    double ephemerisTime,
 	                                    double& lightTime) const
 {
     ghoul_assert(!target.empty(), "Target is not empty");
     ghoul_assert(!observer.empty(), "Observer is not empty");
     ghoul_assert(!referenceFrame.empty(), "Reference frame is not empty");
-
+    
 	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
 	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
 	if (!targetHasCoverage && !observerHasCoverage){
@@ -435,149 +437,139 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         );
 	}
 	else if (targetHasCoverage && observerHasCoverage) {
-        std::string correction = abberationCorrection;
         glm::dvec3 position;
-		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-			correction.c_str(), observer.c_str(), glm::value_ptr(position),
-			&lightTime);
-        throwOnSpiceError(format("Error getting target position from '{}' to '{}' in reference frame '{}", target, observer, referenceFrame));
+		spkpos_c(
+            target.c_str(),
+            ephemerisTime,
+            referenceFrame.c_str(),
+            aberrationCorrection,
+            observer.c_str(),
+            glm::value_ptr(position),
+			&lightTime
+        );
+        throwOnSpiceError(format(
+            "Error getting target position from '{}' to '{}' in reference frame '{}",
+            target,
+            observer,
+            referenceFrame
+        ));
         return position;
 	}
-	else if (targetHasCoverage) {// observer has no coverage
-        psc pscPosition;
-		getEstimatedPosition(ephemerisTime, observer, target, pscPosition);
-		pscPosition = pscPosition*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
-		return pscPosition.vec3();
-	}
-	else { // target has no coverage
-        psc pscPosition;
-		getEstimatedPosition(ephemerisTime, target, observer, pscPosition);
-		return pscPosition.vec3();
-        
-	}
+        else if (targetHasCoverage) {
+            // observer has no coverage
+            return getEstimatedPosition(
+                observer,
+                target,
+                referenceFrame,
+                aberrationCorrection,
+                ephemerisTime,
+                lightTime
+            ) * -1.0;
+        }
+        else {
+            // target has no coverage
+            return getEstimatedPosition(
+                target,
+                observer,
+                referenceFrame,
+                aberrationCorrection,
+                ephemerisTime,
+                lightTime
+            );
+        }
 }
 
-//bool SpiceManager::getTargetPosition(const std::string& target,
-//						   const std::string& observer,
-//		                   const std::string& referenceFrame, 
-//						   const std::string& aberrationCorrection,
-//		                   double ephemerisTime,
-//						   psc& position, 
-//						   double& lightTime) const
-//{
-//	double pos[3] = { 0.0, 0.0, 0.0};
-//
-//	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
-//	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
-//	if (!targetHasCoverage && !observerHasCoverage){
-//		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-//		return false;
-//	}
-//	else if (targetHasCoverage && observerHasCoverage){
-//		spkpos_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-//			aberrationCorrection.c_str(), observer.c_str(), pos, &lightTime);
-//		position = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-//	}
-//	else if (targetHasCoverage) {// observer has no coverage
-//		getEstimatedPosition(ephemerisTime, observer, target, position);
-//		position = position*(-1.f); // inverse estimated position because the observer is "target" argument in funciton
-//	}
-//	else {// target has no coverage
-//		getEstimatedPosition(ephemerisTime, target, observer, position);
-//	}
-//
-//	return targetHasCoverage && observerHasCoverage;
-//}
-
-bool SpiceManager::getEstimatedPosition(const double time, const std::string target,
-										const std::string observer, psc& targetPosition) const 
+glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
+                                         const std::string& to,
+                                         double ephemerisTime) const
 {
+    ghoul_assert(!from.empty(), "From must not be empty");
+    ghoul_assert(!to.empty(), "To must not be empty");
+    
+    // get rotation matrix from frame A - frame B
+    glm::dmat3 transform;
+	pxform_c(
+        from.c_str(),
+        to.c_str(),
+        ephemerisTime,
+        reinterpret_cast<double(*)[3]>(glm::value_ptr(transform))
+    );
 	
-	int idTarget, idObserver;
-    bool targetFound = hasNaifId(target);
-    idTarget = naifId(target);
-	if (idTarget == 0) { //SOLAR SYSTEM BARYCENTER special case, no def. in kernels
-		targetPosition[0] = 0.f;
-		targetPosition[1] = 0.f;
-		targetPosition[2] = 0.f;
-		targetPosition[3] = 0.f;
-		return true;
-	}
-	
-	double pos[3] = { 0.0, 0.0, 0.0 };
+    throwOnSpiceError(
+        format("Error converting from frame '{}' to frame '{}' at time '{}'",
+               from, to, ephemerisTime
+        )
+    );
 
-    bool observerFound = hasNaifId(observer);
-    idObserver = naifId(observer);
-	if (!targetFound || !observerFound || (idTarget == idObserver)) {
-		return false;
-	}
-	double lt, earlier, later, difference, quote;
-	double pos_earlier[3] = { 0.0, 0.0, 0.0 };
-	double pos_later[3] = { 0.0, 0.0, 0.0 };
-	if (_spkCoverageTimes.find(idTarget) == _spkCoverageTimes.end()){ // no coverage
-		LWARNING("No position for " + target + " at any time, was the correct SPK Kernels loaded?");
-		targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-		return false;
-	}
-
-	std::set<double> coveredTimes = _spkCoverageTimes.find(idTarget)->second;
-	
-	std::set<double>::iterator first = coveredTimes.begin();
-	std::set<double>::iterator last = coveredTimes.end();
-	
-	if (coveredTimes.lower_bound(time) == first) { // coverage later, fetch first position
-		spkpos_c(target.c_str(), (*first), "GALACTIC",
-			"NONE", observer.c_str(), pos, &lt);
-	}
-	else if (coveredTimes.upper_bound(time) == last) { // coverage earlier, fetch last position
-		spkpos_c(target.c_str(), *(coveredTimes.rbegin()), "GALACTIC",
-			"NONE", observer.c_str(), pos, &lt);
-
-	}
-	else { // coverage both earlier and later, interpolate these positions
-		earlier = *std::prev((coveredTimes.lower_bound(time)));
-		later = *(coveredTimes.upper_bound(time));
-
-		spkpos_c(target.c_str(), earlier, "GALACTIC",
-			"NONE", observer.c_str(), pos_earlier, &lt);
-		spkpos_c(target.c_str(), later, "GALACTIC",
-			"NONE", observer.c_str(), pos_later, &lt);
-		
-		//linear interpolation
-		difference = later - earlier;
-		quote = (time - earlier) / difference;
-		pos[0] = (pos_earlier[0]*(1-quote) + pos_later[0]*quote);
-		pos[1] = (pos_earlier[1]*(1-quote) + pos_later[1]*quote);
-		pos[2] = (pos_earlier[2]*(1-quote) + pos_later[2]*quote);
-	}
-
-
-	targetPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(pos[0], pos[1], pos[2]);
-	throwOnSpiceError("Error estimating positin for target: " + target + ", or observer: " + observer);
-
-	return targetFound && observerFound;
+    // The rox-major, column-major order are switched in GLM and SPICE, so we have to
+    // transpose the matrix before we can return it
+    return glm::transpose(transform);
 }
 
-// do NOT remove this method. 
-bool SpiceManager::frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const{
-	glm::dmat3 transform;
-	if (from == to)
-		return true;
-	// get rotation matrix from frame A - frame B
-	pxform_c(from.c_str(), to.c_str(), ephemerisTime, (double(*)[3])glm::value_ptr(transform));
-	
-    throwOnSpiceError("Error converting from frame '" + from +
-        "' to frame '" + to + "' at time " + std::to_string(ephemerisTime));
-	// re-express vector in new frame
-	mxv_c((double(*)[3])glm::value_ptr(transform), glm::value_ptr(v), glm::value_ptr(v));
+bool SpiceManager::getSurfaceIntercept(const std::string& target,
+                                       const std::string& observer,
+                                       const std::string& fovFrame,
+                                       const std::string& referenceFrame,
+                                       AberrationCorrection aberrationCorrection,
+                                       double ephemerisTime,
+                                       glm::dvec3& directionVector,
+                                       glm::dvec3& surfaceIntercept,
+                                       glm::dvec3& surfaceVector,
+                                       bool& isVisible
+                                       ) const
+{
+    const std::string ComputationMethod = "ELLIPSOID";
+    
+    // make pretty latr
+    double dvec[3], spoint[3], et;
+    glm::dvec3 srfvec;
+    int found;
+    bool convert;
+    
+    dvec[0] = directionVector[0];
+    dvec[1] = directionVector[1];
+    dvec[2] = directionVector[2];
+    
+    // allow client specify non-inertial frame.
+    std::string bodyfixed = "IAU_";
+    convert = (referenceFrame.find(bodyfixed) == std::string::npos);
+    if (convert) {
+        bodyfixed = frameFromBody(target);
+    } else {
+        bodyfixed = referenceFrame;
+    }
+    
+    sincpt_c(ComputationMethod.c_str(),
+             target.c_str(),
+             ephemerisTime,
+             bodyfixed.c_str(),
+             aberrationCorrection,
+             observer.c_str(),
+             fovFrame.c_str(),
+             dvec,
+             spoint,
+             &et,
+             glm::value_ptr(srfvec),
+             &found);
+    
+    isVisible = (found == SPICETRUE);
+    
+    throwOnSpiceError("Error retrieving surface intercept on target '" + target + "'" +
+                      "viewed from observer '" + observer + "' in " +
+                      "reference frame '" + bodyfixed + "' at time '" +
+                      std::to_string(ephemerisTime) + "'");
+    
+    if (convert)
+        srfvec = SpiceManager::ref().frameTransformationMatrix(bodyfixed, referenceFrame, ephemerisTime) * srfvec;
+    
+    if (found){
+        memcpy(glm::value_ptr(directionVector), dvec, sizeof(dvec));
+        memcpy(glm::value_ptr(surfaceIntercept), spoint, sizeof(spoint));
+        surfaceVector = srfvec;
+    }
     return true;
 }
 
-glm::dvec3 SpiceManager::orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2){
-	glm::dvec3 projected;
-	vproj_c(glm::value_ptr(v1), glm::value_ptr(v2), glm::value_ptr(projected));
-	return projected;
-}
 
 bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 	const std::string& target,
@@ -635,70 +627,6 @@ bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
 	return true;
 }
 
-
-bool SpiceManager::getSurfaceIntercept(const std::string& target,
-									   const std::string& observer,
-									   const std::string& fovInstrument,
-									   const std::string& referenceFrame,
-									   const std::string& method,
-									   const std::string& aberrationCorrection,
-									   double ephemerisTime,
-									   double& targetEpoch,
-									   glm::dvec3& directionVector,
-									   glm::dvec3& surfaceIntercept,
-									   glm::dvec3& surfaceVector,
-                                       bool& isVisible
-                                       ) const
-{
-	// make pretty latr
-	double dvec[3], spoint[3], et;
-	glm::dvec3 srfvec;
-	int found;
-	bool convert;
-
-	dvec[0] = directionVector[0];
-	dvec[1] = directionVector[1];
-	dvec[2] = directionVector[2];
-
-	// allow client specify non-inertial frame. 
-	std::string bodyfixed = "IAU_";
-	convert = (referenceFrame.find(bodyfixed) == std::string::npos);
-	if (convert) {
-		bodyfixed = frameFromBody(target);
-	} else {
-		bodyfixed = referenceFrame;
-	}
-
-	sincpt_c(method.c_str(), 
-		     target.c_str(), 
-			 ephemerisTime, 
-			 bodyfixed.c_str(), 
-			 aberrationCorrection.c_str(), 
-			 observer.c_str(),
-		     fovInstrument.c_str(), 
-			 dvec, 
-			 spoint, 
-			 &et, 
-			 glm::value_ptr(srfvec), 
-			 &found);
-
-    isVisible = (found == SPICETRUE);
-
-	throwOnSpiceError("Error retrieving surface intercept on target '" + target + "'" +
-								  "viewed from observer '" + observer + "' in " +
-								  "reference frame '" + bodyfixed + "' at time '" +
-								  std::to_string(ephemerisTime) + "'");
-
-	if (convert)
-        frameConversion(srfvec, bodyfixed, referenceFrame, ephemerisTime);
-
-	if (found){
-		memcpy(glm::value_ptr(directionVector), dvec, sizeof(dvec));
-		memcpy(glm::value_ptr(surfaceIntercept), spoint, sizeof(spoint));
-		surfaceVector = srfvec;
-	}
-	return true;
-}
 
 // Not called at the moment @AA
 bool SpiceManager::getTargetState(const std::string& target,
@@ -1076,6 +1004,110 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         }		
     }
 }
+    
+glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
+                                              const std::string& observer,
+                                              const std::string& referenceFrame,
+                                              AberrationCorrection aberrationCorrection,
+                                              double ephemerisTime,
+                                              double& lightTime) const
+{
+    ghoul_assert(!target.empty(), "Target must not be empty");
+    ghoul_assert(!observer.empty(), "Observer must not be empty");
+    ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
+    ghoul_assert(target != observer, "Target and observer must be different");
+    
+    int targetId = naifId(target);
+    
+    if (targetId == 0) {
+        // SOLAR SYSTEM BARYCENTER special case, no definition in kernels
+        return glm::dvec3(0.0);
+    }
+    
+    if (_spkCoverageTimes.find(targetId) == _spkCoverageTimes.end()) {
+        // no coverage
+        throw SpiceKernelException(format("No position for '{}' at any time", target));
+    }
+    
+    
+    int observerId = naifId(observer);
 
+    std::set<double> coveredTimes = _spkCoverageTimes.find(targetId)->second;
+    
+    glm::dvec3 pos;
+    if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {
+        // coverage later, fetch first position
+        spkpos_c(
+            target.c_str(),
+            *(coveredTimes.begin()),
+            referenceFrame.c_str(),
+            aberrationCorrection,
+            observer.c_str(),
+            glm::value_ptr(pos),
+            &lightTime
+        );
+        throwOnSpiceError(format(
+            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
+            target, observer, referenceFrame
+        ));
+    }
+    else if (coveredTimes.upper_bound(ephemerisTime) == coveredTimes.end()) {
+        // coverage earlier, fetch last position
+        spkpos_c(
+            target.c_str(),
+            *(coveredTimes.rbegin()),
+            referenceFrame.c_str(),
+            aberrationCorrection,
+            observer.c_str(),
+            glm::value_ptr(pos),
+            &lightTime
+        );
+        throwOnSpiceError(format(
+            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
+            target, observer, referenceFrame
+        ));
+    }
+    else {
+        // coverage both earlier and later, interpolate these positions
+        glm::dvec3 posEarlier;
+        double ltEarlier;
+        double timeEarlier = *std::prev((coveredTimes.lower_bound(ephemerisTime)));
+        spkpos_c(
+            target.c_str(),
+            timeEarlier,
+            referenceFrame.c_str(),
+            aberrationCorrection,
+            observer.c_str(),
+            glm::value_ptr(posEarlier),
+            &ltEarlier
+        );
+        
+        glm::dvec3 posLater;
+        double ltLater;
+        double timeLater = *(coveredTimes.upper_bound(ephemerisTime));
+        spkpos_c(
+            target.c_str(),
+            timeLater,
+            referenceFrame.c_str(),
+            aberrationCorrection,
+            observer.c_str(),
+            glm::value_ptr(posLater),
+            &ltLater
+        );
 
+        throwOnSpiceError(format(
+            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
+            target, observer, referenceFrame
+        ));
+
+        // linear interpolation
+        double timeDifference = timeLater - timeEarlier;
+        double t = (ephemerisTime - timeEarlier) / timeDifference;
+        pos = posEarlier * (1.0 - t) + posLater * t;
+        lightTime = ltEarlier * (1.0 - t) + ltLater * t;
+    }
+
+    return pos;
 }
+
+} // namespace openspace

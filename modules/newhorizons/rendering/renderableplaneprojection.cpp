@@ -37,6 +37,8 @@
 #include <ghoul/opengl/textureunit.h>
 #include <openspace/util/time.h>
 
+#include <glm/gtx/projection.hpp>
+
 namespace {
 	const std::string _loggerCat = "RenderablePlaneProjection";
     const std::string KeySpacecraft = "Spacecraft";
@@ -242,13 +244,13 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 	// The apparent position, CN+S, makes image align best with target
 
 	for (int j = 0; j < bounds.size(); ++j) {
-		openspace::SpiceManager::ref().frameConversion(bounds[j], frame, GalacticFrame, currentTime);
-		glm::dvec3 cornerPosition = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, bounds[j]);
+        bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
+        glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 		
 		if (!_moving) {
 			cornerPosition -= vecToTarget;
 		}
-		openspace::SpiceManager::ref().frameConversion(cornerPosition, GalacticFrame, _target.frame, currentTime);
+        cornerPosition = SpiceManager::ref().frameTransformationMatrix(GalacticFrame, _target.frame, currentTime) * cornerPosition;
 				
 		projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(cornerPosition[0], cornerPosition[1], cornerPosition[2]);
 		projection[j][3] += 3;

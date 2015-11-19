@@ -107,14 +107,14 @@ public:
          * Returns the string representation of this Aberration Correction
          * \return The string representation of this Aberration correction
          */
-        operator std::string() const;
+        operator const char*() const;
 
         /// The type of aberration correction
         Type type = Type::None;
         /// The direction of the aberration correction
         Direction direction = Direction::Reception;
     };
-    
+
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
@@ -420,81 +420,59 @@ public:
      * NAIF object, \p referenceFrame does not name a valid reference frame or if there is
      * not sufficient data available to compute the position or neither the target nor the
      * observer have coverage.
-     * \pre \p target must not be empty
-     * \pre \p observer must not be empty
-     * \pre \p referenceFrame must not be empty
-     * \post If an exception is thrown, \p lightTime will not be modified
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p referenceFrame must not be empty.
+     * \post If an exception is thrown, \p lightTime will not be modified.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
     glm::dvec3 targetPosition(const std::string& target,
-                              const std::string& observer,
-                              const std::string& referenceFrame,
-                              AberrationCorrection abberationCorrection,
-                              double ephemerisTime,
-                              double& lightTime) const;
-    /**
-     * If a position is requested for an uncovered time in the SPK kernels,
-     * this function will insert a position in <code>modelPosition</code>.
-     * If the coverage has not yet started, the first position will be retrieved,
-     * If the coverage has ended, the last position will be retrieved
-     * If <code>time</code> is in a coverage gap, the position will be interpolated
-     * \param time, for which an estimated position is desirable
-     * \param target, the body which is missing SPK data for this time
-     * \param origin, the observer, the position will be retrieved in relation to this body
-     * \param modelPosition, the position of the body, passed by reference
-     * \return true if an estimated position is found
-     */
-    bool getEstimatedPosition(const double time, const std::string target, const std::string origin, psc& modelPosition) const;
+        const std::string& observer, const std::string& referenceFrame,
+        AberrationCorrection aberrationCorrection, double ephemerisTime,
+        double& lightTime) const;
 
     /**
-     * This helper method converts a 3 dimensional vector from one reference frame to another.
-     * \param v The vector to be converted
+     * This method returns the transformation matrix that defines the transformation from
+     * the reference frame \p from to the reference frame \p to. As both reference frames
+     * may be non-inertial, the \p ephemerisTime has to be specified.
      * \param from The frame to be converted from
      * \param to The frame to be converted to
-     * \param ephemerisTime Time at which to get rotational matrix that transforms vector
-     * \return <code>true</code> if the conversion succeeded, <code>false</code> otherwise
+     * \param ephemerisTime Time at which to get the transformation matrix
+     * \return The transformation matrix
+     * \throws SpiceKernelException If the transformation matrix between \p from and \p to
+     * cannot be determined.
+     * \pre \p from must not be empty.
+     * \pre \p to must not be empty.
      */
-    bool frameConversion(glm::dvec3& v, const std::string& from, const std::string& to, double ephemerisTime) const;
+    glm::dmat3 frameTransformationMatrix(const std::string& from,
+        const std::string& to, double ephemerisTime) const;
 
     /**
-     *  Finds the projection of one vector onto another vector.
-     *  All vectors are 3-dimensional.
-     *  \param v1 The vector to be projected.
-     *  \param v2 The vector onto which v1 is to be projected.
-     *  \return The projection of v1 onto v2.
-     */
-    glm::dvec3 orthogonalProjection(glm::dvec3& v1, glm::dvec3& v2);
-
-    /**
-     *   Given an observer and a direction vector defining a ray, compute 
-     *   the surface intercept of the ray on a target body at a specified 
-     *   epoch, optionally corrected for light time and stellar 
-     *   aberration. 
-     *   \param target Name of target body.
-     *   \param observer Name of observing body.
-     *   \param fovFrame Reference frame of ray's direction vector.
-     *   \param bodyFixedFrame Body-fixed, body-centered target body frame.
-     *   \param method Computation method. 
-     *   \param aberrationCorrection Aberration correction.
-     *   \param ephemerisTime Epoch in ephemeris seconds past J2000 TDB. 
-     *   \param targetEpoch Intercept epoch.
-     *   \param directionVector Ray's direction vector. 
-     *   \param surfaceIntercept Surface intercept point on the target body. 
-     *   \param surfaceVector Vector from observer to intercept point. 
-     *   \param isVisible Flag indicating whether intercept was found. 
-     *   \return <code>true</code> if not error occurred, <code>false</code> otherwise
-     *   For further details, refer to
-     *   http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
+     * Given an \p observer and a direction vector \p directionVector defining a ray,
+     * compute the surface intercept of the ray on a \p target body at a specified
+     * \p targetEpoch, optionally corrected for aberrations (\p aberrationCorrection).
+     * \param target Name of target body
+     * \param observer Name of observing body
+     * \param fovFrame Reference frame of the ray's direction vector
+     * \param bodyFixedFrame Body-fixed, body-centered target body frame
+     * \param method Computation method
+     * \param aberrationCorrection Aberration correction
+     * \param ephemerisTime Intercept time in ephemeris seconds past J2000 TDB
+     * \param directionVector Ray's direction vector
+     * \param surfaceIntercept Surface intercept point on the target body
+     * \param surfaceVector Vector from observer to intercept point
+     * \param isVisible Flag indicating whether intercept was found
+     * \return <code>true</code> if not error occurred, <code>false</code> otherwise
+     * For further details, refer to
+     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
      */
     bool getSurfaceIntercept(const std::string& target,
                              const std::string& observer,
                              const std::string& fovFrame,
                              const std::string& bodyFixedFrame,
-                             const std::string& method,
-                             const std::string& aberrationCorrection,
+                             AberrationCorrection aberrationCorrection,
                              double ephemerisTime,
-                             double& targetEpoch,
                              glm::dvec3& directionVector,
                              glm::dvec3& surfaceIntercept,
                              glm::dvec3& surfaceVector,
@@ -784,7 +762,7 @@ public:
      */
     bool getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c);
 
-protected:
+private:
     struct KernelInformation {
         std::string path; /// The path from which the kernel was loaded
         KernelHandle id; /// A unique identifier for each kernel
@@ -820,6 +798,34 @@ protected:
      * \post Coverage times are stored only if loading was successful
      */
     void findSpkCoverage(const std::string& path);
+    
+    /**
+     * If a position is requested for an uncovered time in the SPK kernels, this function
+     * will return an estimated position. If the coverage has not yet started, the first
+     * position will be retrieved. If the coverage has ended, the last position will be
+     * retrieved. If \p time is in a coverage gap, the position will be interpolated.
+     * \param target The body which is missing SPK data for this time
+     * \param observer The observer. The position will be retrieved in relation to this body
+     * \param referenceFrame The reference frame of the output position vector
+     * \param aberrationCorrection The aberration correction used for the position
+     * calculation
+     * \param ephemerisTime The time for which an estimated position is desirable
+     * \param lightTime If the \p aberrationCorrection is different from
+     * AbberationCorrection::Type::None, this variable will contain the light time between
+     * the observer and the target.
+     * \return The position of the \p target relative to the \p origin
+     * \throws SpiceKernelException If the \p target or \p origin are not valid NAIF
+     * objects or if there is no position for the \p target at any time
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p referenceFrame must not be empty
+     * \pre \p target and \p observer must be different
+     * \post If an exception is thrown, \p lightTime will not be modified
+     */
+    glm::dvec3 getEstimatedPosition(const std::string& target,
+                                    const std::string& observer, const std::string& referenceFrame,
+                                    AberrationCorrection aberrationCorrection, double ephemerisTime,
+                                    double& lightTime) const;
     
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;

@@ -38,6 +38,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/query/query.h>
+#include <glm/gtx/projection.hpp>
 
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
@@ -232,8 +233,8 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t) {
 psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
 	bool intercepted = false;
 	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-		_frame, _method, _aberrationCorrection,
-		_time, _targetEpoch, ray, ipoint, ivec, intercepted);
+		_frame, _aberrationCorrection,
+		_time, ray, ipoint, ivec, intercepted);
 	
 	ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
@@ -243,10 +244,10 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
 }
 // Orthogonal projection next to planets surface
 psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
-	glm::dvec3 vecToTarget =
-	SpiceManager::ref().targetPosition(_fovTarget, _spacecraft, _frame, _aberrationCorrection, _time, _lt);
-	openspace::SpiceManager::ref().frameConversion(vecFov, _instrumentID, _frame, _time);
-	glm::dvec3 p = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, vecFov);
+    glm::dvec3 vecToTarget =
+        SpiceManager::ref().targetPosition(_fovTarget, _spacecraft, _frame, _aberrationCorrection, _time, _lt);
+    vecFov = SpiceManager::ref().frameTransformationMatrix(_instrumentID, _frame, _time) * vecFov;
+    glm::dvec3 p = glm::proj(vecToTarget, vecFov);
 
 	psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
 	projection[3] += 3;
@@ -259,8 +260,8 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double toleran
 	glm::dvec3 half = interpolate(p1, p2, 0.5f);
 	bool intercepted = false;
 	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-		_frame, _method, _aberrationCorrection,
-		_time, _targetEpoch, half, ipoint, ivec, intercepted);
+		_frame, _aberrationCorrection,
+		_time, half, ipoint, ivec, intercepted);
 	if (glm::distance(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
 		return half;
@@ -302,8 +303,8 @@ void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds
 					glm::dvec3 half = interpolate(current, next, 0.5f);
 					bool intercepted;
 					openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-																	   _frame, _method, _aberrationCorrection,
-																	   _time, _targetEpoch, half, ipoint, ivec, intercepted);
+																	   _frame,  _aberrationCorrection,
+																	   _time, half, ipoint, ivec, intercepted);
 					if (intercepted){
 						// find the two outer most points of intersection 
 						glm::dvec3 root1 = bisection(half, current, tolerance);
@@ -400,7 +401,7 @@ void RenderableFov::determineTarget(){
 			_potentialTargets[i],
 			_spacecraft,
 			_method,
-			_aberrationCorrection,
+                                                                              std::string(_aberrationCorrection),
 			_time,
 			_withinFOV);
 		if (success && _withinFOV){
@@ -417,8 +418,8 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 		int r = (i == _bounds.size()) ? 0 : i;
 		// compute surface intercept
 		openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-			_frame, _method, _aberrationCorrection,
-			_time, _targetEpoch, _bounds[r], ipoint, ivec, _interceptTag[r]);
+			_frame, _aberrationCorrection,
+			_time, _bounds[r], ipoint, ivec, _interceptTag[r]);
 		// if not found, use the orthogonal projected point
 		if (!_interceptTag[r]) _projectionBounds[r] = orthogonalProjection(_bounds[r]);
 

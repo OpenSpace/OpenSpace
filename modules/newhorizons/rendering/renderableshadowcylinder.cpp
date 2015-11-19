@@ -162,7 +162,7 @@ void RenderableShadowCylinder::createCylinder() {
 											 _observer,
 											 _body,
 											 _bodyFrame,
-											 _aberration,
+                                             std::string(_aberration),
 											 _time,
 											 targetEpoch,
 											 observerPosition,
