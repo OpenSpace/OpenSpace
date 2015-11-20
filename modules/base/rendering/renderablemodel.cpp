@@ -243,7 +243,7 @@ void RenderableModel::update(const UpdateData& data) {
 
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time);
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
     }
 
     double  lt;

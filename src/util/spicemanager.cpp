@@ -406,7 +406,7 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 }
 
 string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-                                           const string& formatString) const
+    const string& formatString) const
 {
     ghoul_assert(!formatString.empty(), "Format is empty");
     
@@ -424,12 +424,9 @@ string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
     
 }
 
-glm::dvec3 SpiceManager::targetPosition(const std::string& target,
-	                                    const std::string& observer,
-	                                    const std::string& referenceFrame,
-                                        AberrationCorrection aberrationCorrection,
-	                                    double ephemerisTime,
-	                                    double& lightTime) const
+glm::dvec3 SpiceManager::targetPosition(const string& target, const string& observer,
+    const string& referenceFrame, AberrationCorrection aberrationCorrection,
+    double ephemerisTime, double& lightTime) const
 {
     ghoul_assert(!target.empty(), "Target is not empty");
     ghoul_assert(!observer.empty(), "Observer is not empty");
@@ -488,9 +485,8 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
 }
 
-glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
-                                         const std::string& to,
-                                         double ephemerisTime) const
+glm::dmat3 SpiceManager::frameTransformationMatrix(const string& from, const string& to,
+    double ephemerisTime) const
 {
     ghoul_assert(!from.empty(), "From must not be empty");
     ghoul_assert(!to.empty(), "To must not be empty");
@@ -515,9 +511,9 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     return glm::transpose(transform);
 }
 
-SpiceManager::SurfaceInterceptResult SpiceManager::getSurfaceIntercept(
-    const std::string& target, const std::string& observer, const std::string& fovFrame,
-    const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
+SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
+    const string& target, const string& observer, const string& fovFrame,
+    const string& referenceFrame, AberrationCorrection aberrationCorrection,
     double ephemerisTime, const glm::dvec3& directionVector) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
@@ -556,9 +552,8 @@ SpiceManager::SurfaceInterceptResult SpiceManager::getSurfaceIntercept(
     return result;
 }
 
-bool SpiceManager::isTargetInFieldOfView(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
-    const std::string& instrument, FieldOfViewMethod method,
+bool SpiceManager::isTargetInFieldOfView(const string& target, const string& observer,
+    const string& referenceFrame, const string& instrument, FieldOfViewMethod method,
     AberrationCorrection aberrationCorrection, double& ephemerisTime) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
@@ -586,10 +581,9 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
 	return visible == SPICETRUE;
 }
 
-bool SpiceManager::isTargetInFieldOfView(const std::string& target,
-    const std::string& observer, const std::string& instrument,
-    FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
-    double& ephemerisTime) const
+bool SpiceManager::isTargetInFieldOfView(const string& target, const string& observer,
+    const string& instrument, FieldOfViewMethod method,
+    AberrationCorrection aberrationCorrection, double& ephemerisTime) const
 {
     return isTargetInFieldOfView(
         target,
@@ -602,8 +596,8 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
     );
 }
 
-SpiceManager::TargetStateResult SpiceManager::getTargetState(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
+SpiceManager::TargetStateResult SpiceManager::targetState(const string& target,
+    const string& observer, const string& referenceFrame,
     AberrationCorrection aberrationCorrection, double ephemerisTime) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
@@ -636,8 +630,8 @@ SpiceManager::TargetStateResult SpiceManager::getTargetState(const std::string& 
     return result;
 }
 
-SpiceManager::TransformMatrix SpiceManager::getStateTransformMatrix(
-    const std::string& fromFrame, const std::string& toFrame, double ephemerisTime) const
+SpiceManager::TransformMatrix SpiceManager::stateTransformMatrix(const string& fromFrame,
+    const string& toFrame, double ephemerisTime) const
 {
     ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
     ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
@@ -657,8 +651,8 @@ SpiceManager::TransformMatrix SpiceManager::getStateTransformMatrix(
     return m;
 }
 
-glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-    const std::string& toFrame, double ephemerisTime) const
+glm::dmat3 SpiceManager::positionTransformMatrix(const string& fromFrame,
+    const string& toFrame, double ephemerisTime) const
 {
     ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
     ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
@@ -680,8 +674,8 @@ glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame
     return glm::transpose(result);
 }
 
-glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-    const std::string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
+glm::dmat3 SpiceManager::positionTransformMatrix(const string& fromFrame,
+    const string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
 {
     ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
     ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
@@ -703,96 +697,104 @@ glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame
     return glm::transpose(result);
 }
 
-bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fovShape,
-	std::string& frameName, glm::dvec3& boresightVector,
-	std::vector<glm::dvec3>& bounds) const
+SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(const string& instrument) const
 {
-	int id;
-    bool success = hasNaifId(instrument);
-	if (!success)
-		return false;
-	else
-        id = naifId(instrument);
-		return getFieldOfView(id, fovShape, frameName, boresightVector, bounds);
+    ghoul_assert(!instrument.empty(), "Instrument must not be empty");
+    return fieldOfView(naifId(instrument));
 }
 
+SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const {
+	static const int MaxBoundsSize = 20;
+	static const int BufferSize = 128;
 
-bool SpiceManager::getFieldOfView(int instrument,
-	                              std::string& fovShape,
-	                              std::string& frameName,
-	                              glm::dvec3& boresightVector,
-	                              std::vector<glm::dvec3>& bounds) const
-{
-	static const int maxBoundsSize = 20;
-	static const int bufferSize = 128;
-	static char fovShapeBuffer[bufferSize];
-	static char frameNameBuffer[bufferSize];
+    FieldOfViewResult res;
 
 	SpiceInt nrReturned;
-	double boundsArr[maxBoundsSize][3];
+	double boundsArr[MaxBoundsSize][3];
+    char fovShapeBuffer[BufferSize];
+    char frameNameBuffer[BufferSize];
+	getfov_c(instrument,                        // instrument id
+        MaxBoundsSize,                          // maximum size for the bounds vector
+        BufferSize,                             // maximum size for the fov shape buffer
+		BufferSize,                             // maximum size for the frame name buffer
+		fovShapeBuffer,                         // the fov shape buffer
+		frameNameBuffer,                        // the frame name buffer
+		glm::value_ptr(res.boresightVector),    // the boresight vector
+		&nrReturned,                            // the number of returned array values
+		boundsArr                               // the bounds
+    );
+    
+    throwOnSpiceError(format(
+        "Error getting field-of-view parameters for instrument '{}'", instrument
+    ));
 
-	getfov_c(instrument,  // instrument id
-		maxBoundsSize,    // maximum size for the bounds vector
-		bufferSize,       // maximum size for the fov shape buffer
-		bufferSize,       // maximum size for the frame name buffer
-		fovShapeBuffer,   // the fov shape buffer
-		frameNameBuffer,  // the frame name buffer
-		glm::value_ptr(boresightVector), // the boresight vector
-		&nrReturned,      // the number of array values returned for the bounds
-		(double(*)[3])boundsArr // the bounds
-		);
+    res.bounds.reserve(nrReturned);
+	for (int i = 0; i < nrReturned; ++i)
+        res.bounds.emplace_back(boundsArr[i][0], boundsArr[i][1], boundsArr[i][2]);
 
-	throwOnSpiceError("Error getting Field-of-View parameters for "
-		"instrument '" + std::to_string(instrument) + "'");
+    string shape = string(fovShapeBuffer);
+    static const std::map<string, FieldOfViewResult::Shape> Map = {
+        { "POLYGON", FieldOfViewResult::Shape::Polygon },
+        { "RECTANGLE" , FieldOfViewResult::Shape::Rectangle },
+        { "CIRCLE", FieldOfViewResult::Shape::Circle },
+        { "ELLIPSE", FieldOfViewResult::Shape::Ellipse }
+    };
+    res.shape = Map.at(shape);
+    res.frameName = string(frameNameBuffer);
 
-	bounds.resize(nrReturned);
-	for (int i = 0; i < nrReturned; ++i) {
-		bounds[i] = glm::dvec3(boundsArr[i][0],
-							   boundsArr[i][1],
-							   boundsArr[i][2]);
-	}
-
-	fovShape = std::string(fovShapeBuffer);
-	frameName = std::string(frameNameBuffer);
-
-	return true;
+	return res;
 }
-bool SpiceManager::getTerminatorEllipse(const int numberOfPoints,
-										const std::string terminatorType,
-										const std::string lightSource,
-										const std::string observer,
-										const std::string target,
-										const std::string frame,
-										const std::string aberrationCorrection,
-										double ephemerisTime,
-										double& targetEpoch,
-										glm::dvec3& observerPosition,
-										std::vector<psc>& terminatorPoints)
+    
+SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
+    const string& target, const string& observer, const string& frame,
+    const string& lightSource, TerminatorType terminatorType,
+    AberrationCorrection aberrationCorrection, double ephemerisTime,
+    int numberOfTerminatorPoints)
 {
-    std::vector<std::array<double, 3>> tpoints(numberOfPoints);
+    ghoul_assert(!target.empty(), "Target must not be empty");
+    ghoul_assert(!observer.empty(), "Observer must not be empty");
+    ghoul_assert(!frame.empty(), "Frame must not be empty");
+    ghoul_assert(!lightSource.empty(), "Light source must not be empty");
+    ghoul_assert(numberOfTerminatorPoints >= 1, "Terminator points must be >= 1");
+    
+    TerminatorEllipseResult res;
+    
+    // Warning: This assumes std::vector<glm::dvec3> to have all values memory contiguous
+    res.terminatorPoints.resize(numberOfTerminatorPoints);
 
-	edterm_c(terminatorType.c_str(), 
+    static const std::map<TerminatorType, string> Map = {
+        { TerminatorType::Umbral, "UMBRAL" },
+        { TerminatorType::Penumbral, "PENUMBRAL" }
+    };
+    string s = Map.at(terminatorType);
+    
+	edterm_c(s.c_str(),
 		     lightSource.c_str(), 
 			 target.c_str(), 
 			 ephemerisTime, 
 			 frame.c_str(), 
-			 aberrationCorrection.c_str(), 
+			 aberrationCorrection,
 			 observer.c_str(),
-		     numberOfPoints, 
-			 &targetEpoch, 
-			 glm::value_ptr(observerPosition), 
-			 (double(*)[3])tpoints.data() );
+		     numberOfTerminatorPoints,
+			 &res.targetEphemerisTime,
+			 glm::value_ptr(res.observerPosition),
+			 (double(*)[3])res.terminatorPoints.data()
+    );
+    throwOnSpiceError(format(
+        "Error getting terminator ellipse for target '{}' from observer '{}' in frame "
+        "'{}' with light source '{}' at time '{}'",
+        target, observer, frame, lightSource, ephemerisTime
+    ));
+	return res;
+}
 
-	throwOnSpiceError("Error getting " + terminatorType +
-		"terminator for'" + target + "'");
-
-	for (int i = 0; i < numberOfPoints; i++){
-		psc point = psc::CreatePowerScaledCoordinate(tpoints[i][0], tpoints[i][1], tpoints[i][2]);
-		point[3] += 3;
-		terminatorPoints.push_back(point);
-	}
-    
-	return true;
+bool SpiceManager::addFrame(std::string body, std::string frame) {
+    if (body == "" || frame == "")
+        return false;
+    else {
+        _frameByBody.push_back(std::make_pair(body, frame));
+        return true;
+    }
 }
 
 std::string SpiceManager::frameFromBody(const std::string body) const {
@@ -813,38 +815,6 @@ std::string SpiceManager::frameFromBody(const std::string body) const {
 	return frame;
 }
 
-bool SpiceManager::addFrame(const std::string body, const std::string frame) {
-	if (body == "" || frame == "")
-		return false;
-	else {
-		_frameByBody.push_back(std::make_pair(body, frame));
-		return true;
-	}
-}
-
-bool SpiceManager::getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c) {
-	SpiceDouble radii[3];
-	SpiceInt n = -1;
-	int id = -1;
-
-	id = naifId(planetName);
-	if (bodfnd_c(id, "RADII")) {
-		bodvrd_c(planetName.c_str(), "RADII", 3, &n, radii);
-		a = static_cast<float>(radii[0]);
-		b = static_cast<float>(radii[1]);
-		c = static_cast<float>(radii[2]);
-	}
-	else {
-		LWARNING("Could not find SPICE data for the shape of " + planetName + ", using modfile value");
-		a = 1.f;
-		b = 1.f;
-		c = 1.f;
-	}
-
-	throwOnSpiceError("Error retrieving planet radii of " + planetName);
-	return true;
-}
-    
 void SpiceManager::findCkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(FileSys.fileExists(path), format("File '{}' does not exist", path));

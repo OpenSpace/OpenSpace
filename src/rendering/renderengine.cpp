@@ -456,7 +456,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
                 psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
                 float a, b, c;
-                SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
+                glm::dvec3 radii;
+                SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                a = radii.x;
+                b = radii.y;
+                c = radii.z;
                 float radius = (a + b) / 2.f;
                 float distToSurf = glm::length(nhPos.vec3()) - radius;
                 

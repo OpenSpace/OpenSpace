@@ -352,7 +352,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 		
 	// set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time);
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
     }
 
 	double  lt;
@@ -407,8 +407,8 @@ void RenderableModelProjection::imageProjectGPU() {
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
-    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_source, _destination, time);
-    _instrumentMatrix = SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _destination, time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _destination, time);
 
 	_transform = glm::mat4(1);
 
@@ -423,12 +423,13 @@ void RenderableModelProjection::attitudeParameters(double time) {
 	}
 	_transform = _transform * rotPropX * rotPropY * rotPropZ;
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
-	if (!found)
-		return;
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        boresight = std::move(res.boresightVector);
+    } catch (const SpiceManager::SpiceKernelException& e) {
+        return;
+    }
 
 	double lightTime;
     glm::dvec3 p =

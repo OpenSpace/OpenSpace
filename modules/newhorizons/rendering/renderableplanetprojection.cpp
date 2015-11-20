@@ -408,8 +408,8 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time);
-    _instrumentMatrix = SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, _time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
 
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
@@ -424,13 +424,14 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	}
 	_transform = _transform * rot * roty * rotProp;
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, bs, bounds);
-	//if (!found) LERROR("Could not locate instrument");
-    if (!found)
-        return ;
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        bs = std::move(res.boresightVector);
+    }
+    catch (const SpiceManager::SpiceKernelException& e) {
+        return;
+    }
 
     glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);

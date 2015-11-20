@@ -120,6 +120,12 @@ public:
         Ellipsoid = 0,
         Point
     };
+    
+    
+    enum class TerminatorType {
+        Umbral = 0,
+        Penumbral
+    };
 
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
@@ -454,7 +460,7 @@ public:
     glm::dmat3 frameTransformationMatrix(const std::string& from,
         const std::string& to, double ephemerisTime) const;
 
-    /// Struct that is used as the return value from the #getSurfaceIntercept method
+    /// Struct that is used as the return value from the #surfaceIntercept method
     struct SurfaceInterceptResult {
         /**
          * The closest surface intercept point on the target body in Cartesian Coordinates
@@ -509,7 +515,7 @@ public:
      * \post The SurfaceInterceptResult does not contain any uninitialized values.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
      */
-    SurfaceInterceptResult getSurfaceIntercept(const std::string& target,
+    SurfaceInterceptResult surfaceIntercept(const std::string& target,
         const std::string& observer, const std::string& fovFrame,
         const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
         double ephemerisTime, const glm::dvec3& directionVector) const;
@@ -569,7 +575,7 @@ public:
         const std::string& instrument, FieldOfViewMethod method,
         AberrationCorrection aberrationCorrection, double& ephemerisTime) const;
     
-    /// Struct that is used as the return value from the #getTargetState method
+    /// Struct that is used as the return value from the #targetState method
     struct TargetStateResult {
         /// The target position
         glm::dvec3 position;
@@ -608,7 +614,7 @@ public:
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
-    TargetStateResult getTargetState(const std::string& target,
+    TargetStateResult targetState(const std::string& target,
         const std::string& observer, const std::string& referenceFrame,
         AberrationCorrection aberrationCorrection, double ephemerisTime) const;
 
@@ -627,7 +633,7 @@ public:
      * \pre \p destinatoinFrame must not be empty.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html
      */
-    TransformMatrix getStateTransformMatrix(const std::string& sourceFrame,
+    TransformMatrix stateTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTime) const;
 
     /**
@@ -645,7 +651,7 @@ public:
      * \pre \p destinationFrame must not be empty
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html
      */
-    glm::dmat3 getPositionTransformMatrix(const std::string& sourceFrame,
+    glm::dmat3 positionTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTime) const;
 
     /**
@@ -663,148 +669,140 @@ public:
      * \pre \p sourceFrame must not be empty.
      * \pre \p destinationFrame must not be empty.
      */
-    glm::dmat3 getPositionTransformMatrix(const std::string& sourceFrame,
+    glm::dmat3 positionTransformMatrix(const std::string& sourceFrame,
         const std::string& destinationFrame, double ephemerisTimeFrom,
         double ephemerisTimeTo) const;
 
+    /// The structure returned by the #fieldOfView methods
+    struct FieldOfViewResult {
+        /// The rough shape of the returned field of view
+        enum class Shape {
+            Polygon = 0, ///< The shape is a pyramedal polyhedron
+            Rectangle, ///< The shape is a rectangular pyramid
+            Circle, ///< The shape is circular
+            Ellipse ///< The shape is an ellipse
+        };
+        
+        /// The shape of the returned field of view
+        Shape shape;
+        
+        /// The name of the reference frame in which the \m bounds are defined
+        std::string frameName;
+        
+        /// The direction towards the center of the field of view
+        glm::dvec3 boresightVector;
+        
+        /// The corners of the field of view's bounding box, not necessarily unit vectors
+        std::vector<glm::dvec3> bounds;
+    };
     /**
-     * Applies the <code>transformationMatrix</code> retrieved from
-     * getStateTransformMatrix to the <code>position</code> and <code>velocity</code>. The
-     * <code>position</code> and <code>velocity</code> parameters are used as input and
-     * output.
-     * \param position The position that should be transformed. The transformed position
-     * will be stored back in this parameter
-     * \param velocity The velocity that should be transformed. The transformed velocity
-     * will be stored back in this parameter
-     * \param transformationMatrix The 6x6 transformation matrix retrieved from
-     * getStateTransformMatrix that is used to transform the <code>position</code> and
-     * <code>velocity</code> vectors
-     */
-    void applyTransformationMatrix(glm::dvec3& position,
-                                   glm::dvec3& velocity,
-                                   const TransformMatrix& transformationMatrix);
-    
-    /**
-     * This routine returns the field-of-view (FOV) parameters for a specified
-     * <code>instrument</code>. For further details, please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
+     * This method returns the field-of-view (FOV) parameters for a specified
+     * \p instrument.
      * \param instrument The name of the instrument for which the FOV is to be retrieved
-     * \param fovShape The output containing the rough shape of the returned FOV. If the
-     * method fails, this value remains unchanged
-     * \param frameName The output containing the name of the frame in which the FOV
-     * <code>bounds</code> are computed. If the method fails, this value remains unchanged
-     * \param boresightVector The output containing the boresight, that is the vector for
-     * the center direction of the FOV. If the method fails, this value remains unchanged
-     * \param bounds The output containing the values defining the bounds of the FOV as
-     * explained by http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
-     * If the method fails, this value remains unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * \return The FieldOfViewResult structure that contains information about the field
+     * of view.
+     * \throw SpiceKernelException If \p instrument does not name a valid NAIF object
+     * \pre \p instrument must not be empty
+     * \post The returned structure has all its values initialized
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
      */
-    bool getFieldOfView(const std::string& instrument, 
-                        std::string& fovShape,
-                        std::string& frameName,
-                        glm::dvec3& boresightVector, 
-                        std::vector<glm::dvec3>& bounds) const;
+    FieldOfViewResult fieldOfView(const std::string& instrument) const;
 
     /**
-     * This routine returns the field-of-view (FOV) parameters for a specified
-     * <code>instrument</code>. For further details, please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
-     * \param instrument The NAIF id of the instrument for which the FOV is to be
-     * retrieved. For more information on NAIF IDs, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     * \param fovShape The output containing the rough shape of the returned FOV. If the
-     * method fails, this value remains unchanged
-     * \param frameName The output containing the name of the frame in which the FOV
-     * <code>bounds</code> are computed. If the method fails, this value remains unchanged
-     * \param boresightVector The output containing the boresight, that is the vector for
-     * the center direction of the FOV. If the method fails, this value remains unchanged
-     * \param bounds The output containing the values defining the bounds of the FOV as
-     * explained by http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html.
-     * If the method fails, this value remains unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * This method returns the field-of-view (FOV) parameters for a specified
+     * \p instrument. The instrument must be a valid NAIF object index as returned by the
+     * #naifId method
+     * \param instrument The name of the instrument for which the FOV is to be retrieved
+     * \return The FieldOfViewResult structure that contains information about the field
+     * of view.
+     * \throw SpiceKernelException If \p instrument does not name a valid NAIF object
+     * \post The returned structure has all its values initialized
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
      */
-    bool getFieldOfView(int instrument, std::string& fovShape, std::string& frameName,
-        glm::dvec3& boresightVector, std::vector<glm::dvec3>& bounds) const;
+    FieldOfViewResult fieldOfView(int instrument) const;
+    
+    /// The structure retuned by the #terminatorEllipse method
+    struct TerminatorEllipseResult {
+        /// The vector from the target body at \m targetEphemerisTime to the observer at
+        /// the original time
+        glm::dvec3 observerPosition;
+        
+        /// The full list of terminator points specified in the original reference frame
+        std::vector<glm::dvec3> terminatorPoints;
+        
+        /// The local ephemeris time at the target, determined by the original
+        /// <code>aberrationCorrection</code> factor
+        double targetEphemerisTime;
+    };
     
     /**
-     * This routine computes a set of points on the umbral or penumbral terminator of
-     * a specified target body, where SPICE models the target shape as an ellipsoid.
-     * \param numberOfPoints - number of points along terminator returned by this method
-     * \param terminatorType - is a string indicating the type of terminator to compute: 
-     * umbral or penumbral. The umbral terminator is the boundary of the portion of the 
-     * ellipsoid surface in total shadow. The penumbral terminator is the boundary of 
-     * the portion of the surface that is completely illuminated. Note that in astronomy 
-     * references, the unqualified word "terminator" refers to the umbral terminator. 
-     * Here, the unqualified word refers to either type of terminator.
-     * \param lightSource - name of body acting as light source
-     * \param observer - name of bodserving body
-     * \param target - name of target body
-     * \param frame - name of the reference frame relative to which the output terminator 
-     * points are expressed.
-     * \param aberrationCorrection - correction for light time and/or stellar aberration 
-     * \param ephemerisTime - the epoch of participation of the observer
-     * \param targetEpoch -  is the "target epoch.", time it takes for 
-     * \param observerPosition - is the vector from the target body at targetEpoch
-     * \param terminatorPoints - an array of points on the umbral or penumbral terminator 
-     * of the ellipsoid, as specified by the input argument `numberOfPoints'
-     * For further, more specific details please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/edterm_c.html
+     * This method computes a set of points on the umbral or penumbral terminator of
+     * a specified \p target, where SPICE models the target shape as an ellipsoid.
+     * \param target The name of target body
+     * \param observer The name of the observing body
+     * \param frame The name of the reference frame relative to which the output
+     * terminator points are expressed
+     * \param lightSource The name of body acting as light source
+     * \param terminatorType Indicates the type of terminator to compute.
+     * TerminatorType::Umbral is the boundary of the portion of the ellipsoid surface in
+     * total shadow. TerminatorType::Penumbral is the boundary of the portion of the
+     * surface that is completely illuminated. Note that in astronomy references, the
+     * unqualified word "terminator" refers to the umbral terminator.
+     * \param aberrationCorrection The aberration correction method that is used
+     * \param numberOfPoints The number of points along terminator that should be computed
+     * by this method
+     * \return A TerminatorEllipseResult structure that contains all outputs of this
+     * function
+     * \throws SpiceKernelException If the \p target, \p observer, or \p lightSource are
+     * not valid NAIF names, the \p frame is not a valid NAIF frame or there is
+     * insufficient kernel data loaded
+     * \pre \p target must not be empty
+     * \pre \p observer must not be empty
+     * \pre \p frame must not be empty
+     * \pre \p lightSource must not be empty
+     * \pre \p numberOfTerminatorPoints must be bigger or equal to 1
+     * \post The returned structure has all its values initialized
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/edterm_c.html
      */
-    bool getTerminatorEllipse(const int numberOfPoints, 
-                              const std::string terminatorType,
-                              const std::string lightSource,
-                              const std::string observer,
-                              const std::string target,
-                              const std::string frame,
-                              const std::string aberrationCorrection,
-                              double ephemerisTime,
-                              double& targetEpoch,
-                              glm::dvec3& observerPosition,
-                              std::vector<psc>& terminatorPoints);
-
+    TerminatorEllipseResult terminatorEllipse(const std::string& target,
+        const std::string& observer, const std::string& frame,
+        const std::string& lightSource, TerminatorType terminatorType,
+        AberrationCorrection aberrationCorrection, double ephemerisTime,
+        int numberOfTerminatorPoints);
+    
     /**
-     * This function adds a frame to a body 
+     * This function adds a frame to a body
      * \param body - the name of the body
      * \param frame - the name of the frame
      * \return false if the arguments are empty
+     * \todo I think this function should die ---abock
      */
-    bool addFrame(const std::string body, const std::string frame);
+    bool addFrame(std::string body, std::string frame);
 
     /**
      * This function returns the frame of a body if defined, otherwise it returns 
      * IAU_ + body (most frames are known by the International Astronomical Union)
      * \param body - the name of the body
      * \return  the frame of the body
+     * \todo I think this function should die ---abock
      */
     std::string frameFromBody(const std::string body) const;
     
-    /**
-     * This method uses the SPICE kernels to get the radii of bodies defined as a
-     * triaxial ellipsoid. The benefit of this is to be able to create more accurate
-     * planet shapes, which is desirable when projecting images with SPICE intersection
-     * methods
-     * \param planetName - the name of the body, should be recognizable by SPICE
-     * \param a - equatorial radius 1
-     * \param b - equatorial radius 2 
-     * \param c - polar radius
-     * \return  <code>true</code> if SPICE reports no errors
-     */
-    bool getPlanetEllipsoid(std::string planetName, float &a, float &b, float &c);
-
 private:
+    /// Struct storing the information about all loaded kernels
     struct KernelInformation {
         std::string path; /// The path from which the kernel was loaded
         KernelHandle id; /// A unique identifier for each kernel
         int refCount; /// How many parts loaded this kernel and are interested in it
     };
 
+    /// Default constructor setting values for SPICE to not terminate on error
     SpiceManager();
     SpiceManager(const SpiceManager& c) = delete;
     SpiceManager& operator=(const SpiceManager& r) = delete;
     SpiceManager(SpiceManager&& r) = delete;
+    
+    /// Default destructor that resets the SPICE settings
     ~SpiceManager();
     
     /**
@@ -881,16 +879,15 @@ private:
     
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
-    // Map: id, vector of pairs. Pair: Start time, end time;
-    std::map<int, std::vector< std::pair<double, double> > > _ckIntervals;
-    std::map<int, std::vector< std::pair<double, double> > > _spkIntervals;
-    std::map<int, std::set<double> > _ckCoverageTimes;
-    std::map<int, std::set<double> > _spkCoverageTimes;
-    // Vector of pairs: Body, Frame
-    std::vector< std::pair<std::string, std::string> > _frameByBody;
     
-    const static bool _showErrors = false;
-
+    // Map: id, vector of pairs. Pair: Start time, end time;
+    std::map<int, std::vector< std::pair<double, double>>> _ckIntervals;
+    std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
+    std::map<int, std::set<double>> _ckCoverageTimes;
+    std::map<int, std::set<double>> _spkCoverageTimes;
+    // Vector of pairs: Body, Frame
+    std::vector<std::pair<std::string, std::string>> _frameByBody;
+    
     /// The last assigned kernel-id, used to determine the next free kernel id
     KernelHandle _lastAssignedKernel = KernelHandle(0);
 };

@@ -102,10 +102,12 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFov::allocateData() { 
-	std::string shape, instrument;
 	// fetch data for specific instrument (shape, boresight, bounds etc)
     try {
-        SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, _boresight, _bounds);
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        
+        _bounds = std::move(res.bounds);
+        _boresight = std::move(res.boresightVector);
 
         _stride = 8;
         
@@ -238,7 +240,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     else
         bodyfixed = _frame;
     
-    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().getSurfaceIntercept(
+    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().surfaceIntercept(
        _fovTarget, _spacecraft, _instrumentID, bodyfixed, _aberrationCorrection, _time, ray);
     
     if (convert) {
@@ -280,7 +282,7 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double toleran
         bodyfixed = _frame;
 
     
-    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().getSurfaceIntercept(
+    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().surfaceIntercept(
       _fovTarget, _spacecraft, _instrumentID, bodyfixed, _aberrationCorrection, _time, half);
     
     if (convert) {
@@ -340,7 +342,7 @@ void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds
                     
                     
                     SpiceManager::SurfaceInterceptResult res =
-                        SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft,
+                        SpiceManager::ref().surfaceIntercept(_fovTarget, _spacecraft,
                             _instrumentID, bodyfixed, _aberrationCorrection, _time, half);
                     
                     if (convert) {
@@ -472,7 +474,7 @@ void RenderableFov::computeIntercepts(const RenderData& data){
             bodyfixed = _frame;
         
         SpiceManager::SurfaceInterceptResult res =
-            SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft,
+            SpiceManager::ref().surfaceIntercept(_fovTarget, _spacecraft,
                 _instrumentID, bodyfixed, _aberrationCorrection, _time, _bounds[r]);
         
         if (convert) {
@@ -573,7 +575,7 @@ void RenderableFov::render(const RenderData& data) {
 
 void RenderableFov::update(const UpdateData& data) {
 	_time  = data.time;
-    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _frame, data.time);
 	_spacecraftRotation = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){

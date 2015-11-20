@@ -132,7 +132,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
-    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, data.time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
 	_time = data.time;
 	if (_shader->isDirty())
 		_shader->rebuildFromFile();
@@ -156,23 +156,30 @@ void RenderableShadowCylinder::createCylinder() {
 	double targetEpoch;
 	glm::dvec3 observerPosition;
 	std::vector<psc> terminatorPoints;
-	SpiceManager::ref().getTerminatorEllipse(_numberOfPoints,
-											 _terminatorType,
-											 _lightSource,
-											 _observer,
-											 _body,
-											 _bodyFrame,
-                                             std::string(_aberration),
-											 _time,
-											 targetEpoch,
-											 observerPosition,
-											 terminatorPoints);
-
+    SpiceManager::TerminatorType t;
+    if (_terminatorType == "UMBRAL")
+        t = SpiceManager::TerminatorType::Umbral;
+    else if (_terminatorType == "PENUMBRAL")
+        t = SpiceManager::TerminatorType::Penumbral;
+    
+    auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
+        _lightSource, t, _aberration, _time, _numberOfPoints);
+    
+    targetEpoch = res.targetEphemerisTime;
+    observerPosition = std::move(res.observerPosition);
+    
+    std::vector<glm::dvec3> ps = std::move(res.terminatorPoints);
+    for (auto&& p : ps) {
+        PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+        psc[3] += 3;
+        terminatorPoints.push_back(psc);
+    }
+    
 	double lt;
     glm::dvec3 vecLightSource =
         SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
 
-    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time));
+    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, _time));
 
 	vecLightSource = _stateMatrix * vecLightSource;
 

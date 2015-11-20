@@ -166,7 +166,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 	else
 		_hasImage = true;
 
-    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
 	
 	double timePast = abs(img.startTime - _previousTime);
 	
@@ -209,7 +209,7 @@ void RenderablePlaneProjection::loadTexture() {
 
 void RenderablePlaneProjection::updatePlane(const Image img, double currentTime) {
 	
-	std::string shape, frame;
+	std::string frame;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
 	
@@ -224,11 +224,15 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 
 	setTarget(target);
 
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrument, shape, frame, boresight, bounds);
-	if (!found) {
-		LERROR("Could not locate instrument");
-		return;
-	}
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrument);
+
+        frame = std::move(res.frameName);
+        bounds = std::move(res.bounds);
+        boresight = std::move(res.boresightVector);
+    } catch (const SpiceManager::SpiceKernelException& e) {
+        LERROR(e.what());
+    }
 
 	double lt;
 	psc projection[4];
