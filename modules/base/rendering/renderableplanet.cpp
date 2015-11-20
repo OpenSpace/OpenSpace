@@ -183,7 +183,7 @@ void RenderablePlanet::render(const RenderData& data)
 	
 	double  lt;
     glm::dvec3 p =
-        SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
+    SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader
@@ -217,7 +217,7 @@ void RenderablePlanet::render(const RenderData& data)
 
 void RenderablePlanet::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, "GALACTIC", data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_frame, "GALACTIC", data.time);
 	_time = data.time;
 }
 

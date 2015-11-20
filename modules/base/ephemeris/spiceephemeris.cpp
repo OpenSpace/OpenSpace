@@ -82,8 +82,7 @@ void SpiceEphemeris::update(const UpdateData& data) {
 		return;
 
 	double lightTime = 0.0;
-	glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName,
-        "GALACTIC", SpiceManager::AberrationCorrection(), data.time, lightTime);
+	glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
 	
 	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
 	//if (_ghosting == "TRUE" && interval > 60){

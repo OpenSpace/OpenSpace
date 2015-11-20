@@ -166,7 +166,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 	else
 		_hasImage = true;
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time);
 	
 	double timePast = abs(img.startTime - _previousTime);
 	
@@ -331,7 +331,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	double lt;
     glm::dvec3 p =
-        SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, SpiceManager::AberrationCorrection(), currentTime, lt);
+    SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, {}, currentTime, lt);
     psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 
@@ -341,7 +341,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 		if (possibleTarget != nullptr) {
 			hasBody = possibleTarget->hasBody();
 			if (hasBody && possibleTarget->getBody(targetBody)) {
-				openspace::SpiceManager::ref().targetWithinFieldOfView(_instrument, targetBody, _spacecraft, "ELLIPSOID", "NONE", currentTime, found);
+                found = SpiceManager::ref().isTargetInFieldOfView(targetBody, _spacecraft, _instrument, SpiceManager::FieldOfViewMethod::Ellipsoid, {}, currentTime);
 				if (found){
 					targets.push_back(node->name()); // get name from propertyOwner
 					distance = (node->worldPosition() - spacecraftPos).length();

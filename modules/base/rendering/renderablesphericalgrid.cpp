@@ -227,9 +227,8 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	_gridProgram->deactivate();
 }
 
-void RenderableSphericalGrid::update(const UpdateData& data){
-
-	openspace::SpiceManager::ref().getPositionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time, _parentMatrix);
+void RenderableSphericalGrid::update(const UpdateData& data) {
+    _parentMatrix = SpiceManager::ref().getPositionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time);
 
 }
 }

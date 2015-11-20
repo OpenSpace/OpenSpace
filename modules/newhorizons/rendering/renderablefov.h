@@ -96,7 +96,6 @@ public:
 	std::string _observer;
 	std::string _frame;
 	std::string _instrumentID;
-	std::string _method;
     SpiceManager::AberrationCorrection _aberrationCorrection;
 	std::string _fovTarget;
 	glm::dvec3 ipoint, ivec;

@@ -55,6 +55,15 @@ namespace {
             );
         }
     }
+    
+    const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
+        switch (m) {
+            case openspace::SpiceManager::FieldOfViewMethod::Ellipsoid:
+                return "ELLIPSOID";
+            case openspace::SpiceManager::FieldOfViewMethod::Point:
+                return "POINT";
+        }
+    }
 }
 
 using fmt::format;
@@ -506,289 +515,193 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     return glm::transpose(transform);
 }
 
-bool SpiceManager::getSurfaceIntercept(const std::string& target,
-                                       const std::string& observer,
-                                       const std::string& fovFrame,
-                                       const std::string& referenceFrame,
-                                       AberrationCorrection aberrationCorrection,
-                                       double ephemerisTime,
-                                       glm::dvec3& directionVector,
-                                       glm::dvec3& surfaceIntercept,
-                                       glm::dvec3& surfaceVector,
-                                       bool& isVisible
-                                       ) const
+SpiceManager::SurfaceInterceptResult SpiceManager::getSurfaceIntercept(
+    const std::string& target, const std::string& observer, const std::string& fovFrame,
+    const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
+    double ephemerisTime, const glm::dvec3& directionVector) const
 {
+    ghoul_assert(!target.empty(), "Target must not be empty");
+    ghoul_assert(!observer.empty(), "Observer must not be empty");
+    ghoul_assert(target != observer, "Target and observer must be different");
+    ghoul_assert(!fovFrame.empty(), "FOV frame must not be empty");
+    ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
+    ghoul_assert(directionVector != glm::dvec3(0.0), "Direction vector must not be zero");
+    
     const std::string ComputationMethod = "ELLIPSOID";
     
-    // make pretty latr
-    double dvec[3], spoint[3], et;
-    glm::dvec3 srfvec;
-    int found;
-    bool convert;
+    SurfaceInterceptResult result;
     
-    dvec[0] = directionVector[0];
-    dvec[1] = directionVector[1];
-    dvec[2] = directionVector[2];
-    
-    // allow client specify non-inertial frame.
-    std::string bodyfixed = "IAU_";
-    convert = (referenceFrame.find(bodyfixed) == std::string::npos);
-    if (convert) {
-        bodyfixed = frameFromBody(target);
-    } else {
-        bodyfixed = referenceFrame;
-    }
-    
+    SpiceBoolean found;
     sincpt_c(ComputationMethod.c_str(),
-             target.c_str(),
-             ephemerisTime,
-             bodyfixed.c_str(),
-             aberrationCorrection,
-             observer.c_str(),
-             fovFrame.c_str(),
-             dvec,
-             spoint,
-             &et,
-             glm::value_ptr(srfvec),
-             &found);
+        target.c_str(),
+        ephemerisTime,
+        referenceFrame.c_str(),
+        aberrationCorrection,
+        observer.c_str(),
+        fovFrame.c_str(),
+        glm::value_ptr(directionVector),
+        glm::value_ptr(result.surfaceIntercept),
+        &result.interceptEpoch,
+        glm::value_ptr(result.surfaceVector),
+        &found
+    );
+    result.interceptFound = (found == SPICETRUE);
     
-    isVisible = (found == SPICETRUE);
-    
-    throwOnSpiceError("Error retrieving surface intercept on target '" + target + "'" +
-                      "viewed from observer '" + observer + "' in " +
-                      "reference frame '" + bodyfixed + "' at time '" +
-                      std::to_string(ephemerisTime) + "'");
-    
-    if (convert)
-        srfvec = SpiceManager::ref().frameTransformationMatrix(bodyfixed, referenceFrame, ephemerisTime) * srfvec;
-    
-    if (found){
-        memcpy(glm::value_ptr(directionVector), dvec, sizeof(dvec));
-        memcpy(glm::value_ptr(surfaceIntercept), spoint, sizeof(spoint));
-        surfaceVector = srfvec;
-    }
-    return true;
+    throwOnSpiceError(format(
+        "Error retrieving surface intercept on target '{}' viewed from observer '{}' in "
+        "reference frame '{}' at time '{}'",
+        target, observer, referenceFrame, ephemerisTime
+    ));
+
+    return result;
 }
 
-
-bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
-	const std::string& target,
-	const std::string& observer,
-	const std::string& method,
-	const std::string& referenceFrame,
-	const std::string& aberrationCorrection,
-	double& targetEpoch,
-    bool& isVisible
-    ) const
+bool SpiceManager::isTargetInFieldOfView(const std::string& target,
+    const std::string& observer, const std::string& referenceFrame,
+    const std::string& instrument, FieldOfViewMethod method,
+    AberrationCorrection aberrationCorrection, double& ephemerisTime) const
 {
+    ghoul_assert(!target.empty(), "Target must not be empty");
+    ghoul_assert(!observer.empty(), "Observer must not be empty");
+    ghoul_assert(target != observer, "Target and observer must be different");
+    ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
+    ghoul_assert(!instrument.empty(), "Instrument must not be empty");
+    
 	int visible;
 	fovtrg_c(instrument.c_str(),
-		     target.c_str(),
-		     method.c_str(),
-		     referenceFrame.c_str(),
-		     aberrationCorrection.c_str(),
-		     observer.c_str(),
-		     &targetEpoch,
-		     &visible);
-    isVisible = (visible == SPICETRUE);
+        target.c_str(),
+        toString(method),
+        referenceFrame.c_str(),
+        aberrationCorrection,
+        observer.c_str(),
+        &ephemerisTime,
+        &visible
+    );
     
-    throwOnSpiceError("Checking if target '" + target +
-        "' is in view of instrument '" + instrument + "' failed");
+    throwOnSpiceError(format(
+        "Checking if target '{}' is in view of instrument '{}' failed",
+        target, instrument
+    ));
 
-	return true;
+	return visible == SPICETRUE;
 }
 
-bool SpiceManager::targetWithinFieldOfView(const std::string& instrument,
-	const std::string& target,
-	const std::string& observer,
-	const std::string& method,
-	const std::string& aberrationCorrection,
-	double& targetEpoch,
-    bool& isVisible
-    ) const{
-
-	int visible;
-
-	std::string frame = frameFromBody(target);
-
-	fovtrg_c(instrument.c_str(),
-		target.c_str(),
-		method.c_str(),
-		frame.c_str(),
-		aberrationCorrection.c_str(),
-		observer.c_str(),
-		&targetEpoch,
-		&visible);
-    isVisible = (visible == SPICETRUE);
-
-    throwOnSpiceError("Checking if target '" + target +
-                "' is in view of instrument '" + instrument + "' failed");
-
-	return true;
-}
-
-
-// Not called at the moment @AA
-bool SpiceManager::getTargetState(const std::string& target,
-	                              const std::string& observer,
-	                              const std::string& referenceFrame,
-	                              const std::string& aberrationCorrection,
-	                              double ephemerisTime,
-	                              glm::dvec3& targetPosition,
-	                              glm::dvec3& targetVelocity,
-	                              double& lightTime) const
+bool SpiceManager::isTargetInFieldOfView(const std::string& target,
+    const std::string& observer, const std::string& instrument,
+    FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
+    double& ephemerisTime) const
 {
+    return isTargetInFieldOfView(
+        target,
+        observer,
+        frameFromBody(target),
+        instrument,
+        method,
+        aberrationCorrection,
+        ephemerisTime
+    );
+}
+
+SpiceManager::TargetStateResult SpiceManager::getTargetState(const std::string& target,
+    const std::string& observer, const std::string& referenceFrame,
+    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+{
+    ghoul_assert(!target.empty(), "Target must not be empty");
+    ghoul_assert(!observer.empty(), "Observer must not be empty");
+    ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
+    
+    TargetStateResult result;
+    result.lightTime = 0.0;
+
     double buffer[6];
+
+	spkezr_c(
+        target.c_str(),
+        ephemerisTime,
+        referenceFrame.c_str(),
+        aberrationCorrection,
+        observer.c_str(),
+        buffer,
+        &result.lightTime
+    );
+
+    throwOnSpiceError(format(
+        "Error retrieving state of target '{}' viewed from observer '{}' in reference "
+        "frame '{}' at time '{}'",
+        target, observer, referenceFrame, ephemerisTime
+    ));
+
+    memmove(glm::value_ptr(result.position), buffer, sizeof(double) * 3);
+    memmove(glm::value_ptr(result.velocity), buffer + 3, sizeof(double) * 3);
+    return result;
+}
+
+SpiceManager::TransformMatrix SpiceManager::getStateTransformMatrix(
+    const std::string& fromFrame, const std::string& toFrame, double ephemerisTime) const
+{
+    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
+    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
     
-	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-	    	aberrationCorrection.c_str(), observer.c_str(), buffer, &lightTime);
-
-    throwOnSpiceError("Error retrieving state of target '" + target + "'" +
-                                  "viewed from observer '" + observer + "' in " +
-                                  "reference frame '" + referenceFrame + "' at time '" +
-                                  std::to_string(ephemerisTime) + "'");
-    memmove(glm::value_ptr(targetPosition), buffer, sizeof(double) * 3);
-    memmove(glm::value_ptr(targetVelocity), buffer + 3, sizeof(double) * 3);
-    return true;
+    TransformMatrix m;
+	sxform_c(
+        fromFrame.c_str(),
+        toFrame.c_str(),
+        ephemerisTime,
+        reinterpret_cast<double(*)[6]>(m.data())
+    );
+    throwOnSpiceError(format(
+        "Error retrieved state transform matrix from frame '{}' to frame '{}' at time "
+        "'{}'",
+        fromFrame, toFrame, ephemerisTime
+    ));
+    return m;
 }
 
-// Not called at the moment @AA
-bool SpiceManager::getTargetState(const std::string& target,
-									 const std::string& observer,
-									 const std::string& referenceFrame,
-									 const std::string& aberrationCorrection,
-									 double ephemerisTime,
-									 PowerScaledCoordinate& position,
-									 PowerScaledCoordinate& velocity,
-									 double& lightTime) const
+glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
+    const std::string& toFrame, double ephemerisTime) const
 {
-	double state[6];
-	std::fill_n(state, 6, NULL);
-
-	spkezr_c(target.c_str(), ephemerisTime, referenceFrame.c_str(),
-		aberrationCorrection.c_str(), observer.c_str(), state, &lightTime);
-
-	throwOnSpiceError("Error retrieving state of target '" + target + "'" +
-		"viewed from observer '" + observer + "' in " +
-		"reference frame '" + referenceFrame + "' at time '" +
-		std::to_string(ephemerisTime) + "'");
-
-    position = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[0], state[1], state[2]);
-    velocity = PowerScaledCoordinate::CreatePowerScaledCoordinate(state[3], state[4], state[5]);
-
-	return true;
-}
-
-// Not called at the moment @AA
-bool SpiceManager::getStateTransformMatrix(const std::string& fromFrame,
-							const std::string& toFrame,
-							double ephemerisTime,
-							TransformMatrix& stateMatrix) const
-{
-	sxform_c(fromFrame.c_str(), toFrame.c_str(), 
-		     ephemerisTime, (double(*)[6])stateMatrix.data());
+    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
+    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
     
-    throwOnSpiceError("Error retrieved state transform matrix from frame '" +
-                                  fromFrame + "' to frame '" + toFrame + "' at time '" +
-                                  std::to_string(ephemerisTime) + "'");
-	return true;
-}
-
-bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-												 const std::string& toFrame,
-												 double ephemerisTime,
-												 glm::dmat3& positionMatrix) const 
-{
-	bool estimated = false;
-	pxform_c(fromFrame.c_str(), toFrame.c_str(),
-			ephemerisTime, (double(*)[3])glm::value_ptr(positionMatrix));
+    glm::dmat3 result;
+	pxform_c(
+        fromFrame.c_str(),
+        toFrame.c_str(),
+        ephemerisTime,
+        reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
+    );
 
 	SpiceBoolean success = !(failed_c());
     reset_c();
-	if (!success) {
-		estimated = getEstimatedTransformMatrix(ephemerisTime, fromFrame, toFrame, positionMatrix);
-	}
+    bool estimated = false;
+	if (!success)
+		result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
-    positionMatrix = glm::transpose(positionMatrix);
-    
-	return estimated || success;
+    return glm::transpose(result);
 }
 
-// Not called at the moment @AA
-bool SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
-	const std::string& toFrame,
-	double ephemerisTimeFrom,
-	double ephemerisTimeTo,
-	glm::dmat3& positionMatrix) const{
-
-	pxfrm2_c(fromFrame.c_str(), toFrame.c_str(), ephemerisTimeFrom, ephemerisTimeTo, (double(*)[3])glm::value_ptr(positionMatrix));
-
-	throwOnSpiceError("Error retrieving position transform matrix from "
-		"frame '" + fromFrame + "' to frame '" + toFrame +
-		"' from time '" + std::to_string(ephemerisTimeFrom) + " to time '"
-		+ std::to_string(ephemerisTimeTo) + "'");
-	positionMatrix = glm::transpose(positionMatrix);
-
-	return true;
-}
-
-
-bool SpiceManager::getEstimatedTransformMatrix(const double time, const std::string fromFrame,
-	const std::string toFrame, glm::dmat3& positionMatrix) const
+glm::dmat3 SpiceManager::getPositionTransformMatrix(const std::string& fromFrame,
+    const std::string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
 {
-	int idFrame;
-
-    bool frameFound = hasFrameId(fromFrame);
-	if (!frameFound) {
-		return false;
-	}
-    idFrame = frameId(fromFrame);
+    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
+    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
     
-    if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()){ // no coverage
-		return false;
-	}
+    glm::dmat3 result;
 
-	double earlier, later, difference, quote;
-
-	std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
-
-	std::set<double>::iterator first = coveredTimes.begin();
-	std::set<double>::iterator last = coveredTimes.end();
-
-	if (coveredTimes.lower_bound(time) == first) { // coverage later, fetch first transform
-		pxform_c(fromFrame.c_str(), toFrame.c_str(),
-			*first, (double(*)[3])glm::value_ptr(positionMatrix));
-	}
-	else if (coveredTimes.upper_bound(time) == last) { // coverage earlier, fetch last transform
-		pxform_c(fromFrame.c_str(), toFrame.c_str(),
-			*(coveredTimes.rbegin()), (double(*)[3])glm::value_ptr(positionMatrix));
-	}
-	else { // coverage both earlier and later, interpolate these transformations
-		earlier = *std::prev((coveredTimes.lower_bound(time)));
-		later = *(coveredTimes.upper_bound(time));
-
-		glm::dmat3 earlierTransform, laterTransform;
-
-		pxform_c(fromFrame.c_str(), toFrame.c_str(),
-			earlier, (double(*)[3])glm::value_ptr(earlierTransform));
-		pxform_c(fromFrame.c_str(), toFrame.c_str(),
-			later, (double(*)[3])glm::value_ptr(laterTransform));
-
-		difference = later - earlier;
-		quote = (time - earlier) / difference;
-
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; ++j) {
-				positionMatrix[i][j] = (earlierTransform[i][j] * (1 - quote) + laterTransform[i][j] * quote);
-			}
-		}
-	}
-	throwOnSpiceError("Error estimating transform matrix from frame: "
-		+ fromFrame + ", to frame: " + toFrame);
-
-	return true;
+	pxfrm2_c(
+        fromFrame.c_str(),
+        toFrame.c_str(),
+        ephemerisTimeFrom,
+        ephemerisTimeTo,
+        reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
+    );
+    throwOnSpiceError(format(
+        "Error retrieving position transform matrix from '{}' at time '{}' to frame '{}' "
+        "at time '{}'",
+        fromFrame, ephemerisTimeFrom, toFrame, ephemerisTimeTo
+    ));
+    return glm::transpose(result);
 }
-
 
 bool SpiceManager::getFieldOfView(const std::string& instrument, std::string& fovShape,
 	std::string& frameName, glm::dvec3& boresightVector,
@@ -1101,13 +1014,94 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
         ));
 
         // linear interpolation
-        double timeDifference = timeLater - timeEarlier;
-        double t = (ephemerisTime - timeEarlier) / timeDifference;
+        double t = (ephemerisTime - timeEarlier) / (timeLater - timeEarlier);
         pos = posEarlier * (1.0 - t) + posLater * t;
         lightTime = ltEarlier * (1.0 - t) + ltLater * t;
     }
 
     return pos;
 }
+    
+glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFrame,
+                                                     const std::string& toFrame,
+                                                     double time) const
+{
+    glm::dmat3 result;
+    int idFrame = frameId(fromFrame);
+    
+    if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
+        // no coverage
+        throw SpiceKernelException(format(
+            "No data available for the transform matrix from '{}' to '{}' at any time",
+            fromFrame, toFrame
+        ));
+    }
+    
+    std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
+    
+    if (coveredTimes.lower_bound(time) == coveredTimes.begin()) {
+        // coverage later, fetch first transform
+        pxform_c(
+            fromFrame.c_str(),
+            toFrame.c_str(),
+            *(coveredTimes.begin()),
+            reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
+        );
+        throwOnSpiceError(format(
+            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
+            fromFrame, toFrame, time
+        ));
+        
+    }
+    else if (coveredTimes.upper_bound(time) == coveredTimes.end()) {
+        // coverage earlier, fetch last transform
+        pxform_c(
+            fromFrame.c_str(),
+            toFrame.c_str(),
+            *(coveredTimes.rbegin()),
+            reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
+        );
+        throwOnSpiceError(format(
+            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
+            fromFrame, toFrame, time
+        ));
+    }
+    else {
+        // coverage both earlier and later, interpolate these transformations
+        double earlier = *std::prev((coveredTimes.lower_bound(time)));
+        double later = *(coveredTimes.upper_bound(time));
+        
+        glm::dmat3 earlierTransform;
+        pxform_c(
+            fromFrame.c_str(),
+            toFrame.c_str(),
+            earlier,
+            reinterpret_cast<double(*)[3]>(glm::value_ptr(earlierTransform))
+        );
+        throwOnSpiceError(format(
+            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
+            fromFrame, toFrame, time
+        ));
+        
+        glm::dmat3 laterTransform;
+        pxform_c(
+            fromFrame.c_str(),
+            toFrame.c_str(),
+            later,
+            reinterpret_cast<double(*)[3]>(glm::value_ptr(laterTransform))
+        );
+        throwOnSpiceError(format(
+            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
+            fromFrame, toFrame, time
+        ));
+        
+        double t = (time - earlier) / (later - earlier);
+        result = earlierTransform * (1.0 - t) + laterTransform * t;
+    }
+    
+    return result;
+}
+
+
 
 } // namespace openspace

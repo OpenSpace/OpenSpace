@@ -179,11 +179,10 @@ void RenderableConstellationBounds::update(const UpdateData& data) {
 	if (_program->isDirty())
 		_program->rebuildFromFile();
 
-	SpiceManager::ref().getPositionTransformMatrix(
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(
 		_originReferenceFrame,
 		"GALACTIC",
-		data.time,
-		_stateMatrix
+		data.time
 	);
 }
 

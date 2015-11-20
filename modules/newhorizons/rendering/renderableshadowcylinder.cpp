@@ -132,7 +132,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, data.time);
 	_time = data.time;
 	if (_shader->isDirty())
 		_shader->rebuildFromFile();
@@ -172,10 +172,8 @@ void RenderableShadowCylinder::createCylinder() {
     glm::dvec3 vecLightSource =
         SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
 
-	glm::dmat3 _stateMatrix;
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time, _stateMatrix);
+    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time));
 
-	_stateMatrix = glm::inverse(_stateMatrix);
 	vecLightSource = _stateMatrix * vecLightSource;
 
 	vecLightSource *= _shadowLength;

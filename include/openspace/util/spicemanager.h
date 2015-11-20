@@ -115,6 +115,12 @@ public:
         Direction direction = Direction::Reception;
     };
 
+    /// The possible values for the method parameter of the targetInFieldOfView method
+    enum class FieldOfViewMethod {
+        Ellipsoid = 0,
+        Point
+    };
+
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
@@ -448,192 +454,218 @@ public:
     glm::dmat3 frameTransformationMatrix(const std::string& from,
         const std::string& to, double ephemerisTime) const;
 
+    /// Struct that is used as the return value from the #getSurfaceIntercept method
+    struct SurfaceInterceptResult {
+        /**
+         * The closest surface intercept point on the target body in Cartesian Coordinates
+         * relative to the reference frame.
+         */
+        glm::dvec3 surfaceIntercept;
+        
+        /**
+         * If the aberration correction is not AberrationCorrection::Type::None, this
+         * value contains the time for which the intercept was computed. Otherwise it is
+         * the same as the ephemerisTime.
+         */
+        double interceptEpoch;
+        
+        /**
+         * The vector from the observer's position to the \p surfaceIntercept position in
+         * the provided reference frame.
+         */
+        glm::dvec3 surfaceVector;
+        
+        /// <code>true</code> if the ray intersects the body, <code>false</code> otherwise
+        bool interceptFound;
+    };
+    
     /**
-     * Given an \p observer and a direction vector \p directionVector defining a ray,
-     * compute the surface intercept of the ray on a \p target body at a specified
+     * Given an \p observer and a probing direction vector \p directionVector defining a
+     * ray, compute the surface intercept of the ray on a \p target body at a specified
      * \p targetEpoch, optionally corrected for aberrations (\p aberrationCorrection).
-     * \param target Name of target body
-     * \param observer Name of observing body
+     * \param target The name of target body
+     * \param observer The name of the observer
      * \param fovFrame Reference frame of the ray's direction vector
-     * \param bodyFixedFrame Body-fixed, body-centered target body frame
-     * \param method Computation method
-     * \param aberrationCorrection Aberration correction
+     * \param referenceFrame The reference frame in which the surface intercept and the
+     * surface vector are expressed
+     * \param aberrationCorrection The aberration correction method that is applied to
+     * compute the intercept
      * \param ephemerisTime Intercept time in ephemeris seconds past J2000 TDB
-     * \param directionVector Ray's direction vector
+     * \param directionVector Probing ray's direction
      * \param surfaceIntercept Surface intercept point on the target body
      * \param surfaceVector Vector from observer to intercept point
      * \param isVisible Flag indicating whether intercept was found
      * \return <code>true</code> if not error occurred, <code>false</code> otherwise
-     * For further details, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
+     * \throws SpiceKernelException If the \p target or \p observer do not name the same
+     * NAIF object, the \p target or \p observer name the same NAIF object or are in the
+     * same location, the \p referenceFrame or \p fovFrame are not recognized,
+     * insufficient kernel information has been loaded.
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p The \p target and \p observer must be different strings
+     * \pre \p fovFrame must not be empty.
+     * \pre \p referenceFrame must not be empty.
+     * \pre \p directionVector must not be the null vector
+     * \post The SurfaceInterceptResult does not contain any uninitialized values.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sincpt_c.html
      */
-    bool getSurfaceIntercept(const std::string& target,
-                             const std::string& observer,
-                             const std::string& fovFrame,
-                             const std::string& bodyFixedFrame,
-                             AberrationCorrection aberrationCorrection,
-                             double ephemerisTime,
-                             glm::dvec3& directionVector,
-                             glm::dvec3& surfaceIntercept,
-                             glm::dvec3& surfaceVector,
-                             bool& isVisible
-                             ) const;
+    SurfaceInterceptResult getSurfaceIntercept(const std::string& target,
+        const std::string& observer, const std::string& fovFrame,
+        const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
+        double ephemerisTime, const glm::dvec3& directionVector) const;
 
     /**
-     *  Determine if a specified ephemeris object is within the
-     *  field-of-view (FOV) of a specified instrument at a given time.
-     *  \param instrument Name or ID code string of the instrument.
-     *  \param target Name or ID code string of the target.
-     *  \param observer Name or ID code string of the observer.
-     *  \param aberrationCorrection Aberration correction method.
-     *  \param method Type of shape model used for the target.
-     *  \param referenceFrame Body-fixed, body-centered frame for target body.
-     *  \param targetEpoch Time of the observation (seconds past J2000).
-     *  \param isVisible <code>true</code> if the target is visible
-     *  \return The success of the function
-     *  For further detail, refer to 
-     *  http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
+     * Determine whether a specific \p target is in the field-of-view of a specified
+     * \p instrument or an \p observer at a given time, using the reference frame
+     * \p referenceFrame.
+     * \param target The name or NAIF ID code string of the target
+     * \param observer The name or NAIF ID code string of the observer
+     * \param referenceFrame Body-fixed, body-centered frame for target body
+     * \param instrument The name or NAIF ID code string of the instrument
+     * \param method The type of shape model used for the target
+     * \param aberrationCorrection The aberration correction method
+     * \param ephemerisTime Time of the observation (seconds past J2000)
+     * \return <code>true</code> if the target is visible, <code>false</code> otherwise
+     * \throws SpiceKernelException If the \p target or \p observer do not name valid
+     * NAIF objects, the \p target or \p observer name the same NAIF object, the
+     * \p instrument does not name a valid NAIF object, or insufficient kernel information
+     * has been loaded.
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p target and \p observer must not be different strings
+     * \pre \p referenceFrame must not be empty.
+     * \pre \p instrument must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
      */
-    bool targetWithinFieldOfView(const std::string& instrument,
-                                 const std::string& target,
-                                 const std::string& observer,
-                                 const std::string& method,
-                                 const std::string& referenceFrame,
-                                 const std::string& aberrationCorrection,
-                                 double& targetEpoch,
-                                 bool& isVisible
-                                 ) const;
+    bool isTargetInFieldOfView(const std::string& target, const std::string& observer,
+        const std::string& referenceFrame, const std::string& instrument,
+        FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
+        double& ephemerisTime) const;
+    
     /**
-     * This method performs the same computation as the function its overloading 
-     * with the exception that in doing so it assumes the inertial bodyfixed frame 
-     * is that of 'IAU' type, allowing the client to omitt the 
-     * <code>referenceFrame</code> for planetary objects.   
+     * Determine whether a specific \p target is in the field-of-view of a specified
+     * \p instrument or an \p observer at a given time. The reference frame used is
+     * derived from the \p target by converting it into an <code>IAU</code> inertial
+     * reference frame.
+     * \param target The name or NAIF ID code string of the target
+     * \param observer The name or NAIF ID code string of the observer
+     * \param instrument The name or NAIF ID code string of the instrument
+     * \param method The type of shape model used for the target
+     * \param aberrationCorrection The aberration correction method
+     * \param ephemerisTime Time of the observation (seconds past J2000)
+     * \return <code>true</code> if the target is visible, <code>false</code> otherwise
+     * \throws SpiceKernelException If the \p target or \p observer do not name valid
+     * NAIF objects, the \p target or \p observer name the same NAIF object, the
+     * \p instrument does not name a valid NAIF object, or insufficient kernel information
+     * has been loaded.
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p target and \p observer must not be different strings
+     * \pre \p referenceFrame must not be empty.
+     * \pre \p instrument must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
      */
-    bool targetWithinFieldOfView(const std::string& instrument,
-                                 const std::string& target,
-                                 const std::string& observer,
-                                 const std::string& method,
-                                 const std::string& aberrationCorrection,
-                                 double& targetEpoch,
-                                 bool& isVisible
-                                 ) const;
-
+    bool isTargetInFieldOfView(const std::string& target, const std::string& observer,
+        const std::string& instrument, FieldOfViewMethod method,
+        AberrationCorrection aberrationCorrection, double& ephemerisTime) const;
+    
+    /// Struct that is used as the return value from the #getTargetState method
+    struct TargetStateResult {
+        /// The target position
+        glm::dvec3 position;
+        
+        /// The target velocity
+        glm::dvec3 velocity;
+        
+        /// One-way light time between <code>target</code> and <code>observer</code> if
+        /// the aberration correction is enabled
+        double lightTime;
+    };
+    
     /**
-     * Returns the state vector (<code>position</code> and <code>velocity</code>) of a
-     * <code>target</code> body relative to an <code>observer</code> in a specific
-     * <code>referenceFrame</code>, optionally corrected for light time (planetary
-     * aberration) and stellar aberration (<code>aberrationCorrection</code>). For further
-     * details, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html. For more
-     * information on NAIF IDs, refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     * Returns the state vector (position and velocity) of a \p target body relative to an 
+     * \p observer in a specific \p referenceFrame, optionally corrected for aberration
+     * (\p aberrationCorrection).
      * \param target The target body name or the target body's NAIF ID
      * \param observer The observing body name or the observing body's NAIF ID
      * \param referenceFrame The reference frame of the output position vector
-     * \param aberrationCorrection The aberration correction flag out of the list of
-     * values (<code>NONE</code>, <code>LT</code>, <code>LT+S</code>, <code>CN</code>,
-     * <code>CN+S</code> for the reception case or <code>XLT</code>, <code>XLT+S</code>,
-     * <code>XCN</code>, or <code>XCN+S</code> for the transmission case. 
+     * \param aberrationCorrection The aberration correction method
      * \param ephemerisTime The time at which the position is to be queried
-     * \param position The output containing the position of the target; if the method
-     * fails, the position is unchanged
-     * \param velocity The output containing the velocity of the target; if the method
-     * fails, the velocity is unchanged
-     * \param lightTime If the <code>aberrationCorrection</code> is different from
-     * <code>NONE</code>, this variable will contain the one-way light time between the
-     * observer and the target.If the method fails, the lightTime is unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * \return A TargetStateResult object that contains the <code>position>, containing
+     * the position of the target; the <code>velocity</code>, containing the velocity of
+     * the target; and the <code>lightTime</code>, containing the one-way light time
+     * between the \p target and the \p observer. This method is only set if the
+     * \p aberrationCorrection is set to a valid different from AberrationCorrection::None
+     * \throws SpiceKernelException If the \p target or \p observer do not name a valid
+     * NAIF object, the \p referenceFrame is not a valid frame, or if there is
+     * insufficient kernel information.
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p referenceFrame must not be empty.
+     * \post The resulting TargetStateResult is set to valid values; the
+     * <code>lightTime</code> is only set to a valid different from <code>0.0</code> if
+     * the \p aberrationCorrection is not AberrationCorrection::None.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
      */
-    bool getTargetState(const std::string& target, 
-                        const std::string& observer,
-                        const std::string& referenceFrame,
-                        const std::string& aberrationCorrection,
-                        double ephemerisTime, 
-                        glm::dvec3& position, 
-                        glm::dvec3& velocity,
-                        double& lightTime) const;
-
-    bool getTargetState(const std::string& target, 
-                        const std::string& observer,
-                        const std::string& referenceFrame,
-                        const std::string& aberrationCorrection,
-                        double ephemerisTime, 
-                        PowerScaledCoordinate& position, 
-                        PowerScaledCoordinate& velocity,
-                        double& lightTime) const;
+    TargetStateResult getTargetState(const std::string& target,
+        const std::string& observer, const std::string& referenceFrame,
+        AberrationCorrection aberrationCorrection, double ephemerisTime) const;
 
     /** 
-     * Returns the state transformation matrix used to convert from one frame to another
-     * at a specified <code>ephemerisTime</code>. For further details, please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html.
+     * Returns the state transformation matrix used to convert from the \p sourceFrame to
+     * the \p destinationFrame at a specific \p ephemerisTime.
+     * \param sourceFrame The name of the source reference frame
+     * \param destinationFrame The name of the destination reference frame
+     * \param ephemerisTime The time for which the transformation matrix should be
+     * returned
+     * \return The TransformMatrix containing the transformation matrix that defines the
+     * transformation from the \p sourceFrame to the \p destinationFrame
+     * \throws SpiceKernelException If the \p sourceFrame or the \p destinationFrame is
+     * not a valid frame
+     * \pre \p sourceFrame must not be empty.
+     * \pre \p destinatoinFrame must not be empty.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/sxform_c.html
+     */
+    TransformMatrix getStateTransformMatrix(const std::string& sourceFrame,
+        const std::string& destinationFrame, double ephemerisTime) const;
+
+    /**
+     * Returns the matrix that transforms position vectors from the source reference frame
+     * \p sourceFrame to the destination reference frame \p destinationFrame at the
+     * specific \p ephemerisTime.
      * \param sourceFrame The name of the source reference frame
      * \param destinationFrame The name of the destination reference frame
      * \param ephemerisTime The time at which the transformation matrix is to be queried
-     * \param transformationMatrix The output containing the TransformMatrix containing
-     * the transformation matrix that defines the transformation from the
-     * <code>sourceFrame</code> to the <code>destinationFrame</code>. If the method fails
-     * the <code>transformationMatrix</code> is unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * \return The transformation matrix that defines the transformation from the
+     * \p sourceFrame to the \p destinationFrame
+     * \throws SpiceKernelException If there is no coverage available for the specified
+     * \p sourceFrame, \p destinationFrame, \p ephemerisTime combination
+     * \pre \p sourceFrame must not be empty
+     * \pre \p destinationFrame must not be empty
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html
      */
-    bool getStateTransformMatrix(const std::string& sourceFrame,
-                                 const std::string& destinationFrame,
-                                 double ephemerisTime,
-                                 TransformMatrix& transformationMatrix) const;
+    glm::dmat3 getPositionTransformMatrix(const std::string& sourceFrame,
+        const std::string& destinationFrame, double ephemerisTime) const;
 
     /**
-     * Returns the matrix that transforms position vectors from one reference frame to
-     * another at a specified <code>ephemerisTime</code>. For further details, please refer to
-     * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html.
+     * Returns the transformation matrix that transforms position vectors from the
+     * \p sourceFrame at the time \p ephemerisTimeFrom to the \p destinationFrame at the
+     * time \p ephemerisTimeTo.
      * \param sourceFrame The name of the source reference frame
      * \param destinationFrame The name of the destination reference frame
-     * \param ephemerisTime The time at which the transformation matrix is to be queried
-     * \param transformationMatrix The output containing the transformation matrix that 
-     * defines the transformation from the <code>sourceFrame</code> to the
-     * <code>destinationFrame</code>. If the method fails the
-     * <code>transformationMatrix</code> is unchanged
-     * \return <code>true</code> if the function was successful, <code>false</code>
-     * otherwise
+     * \param ephemerisTimeFrom The time for the source reference frame
+     * \param ephemerisTimeTo The time for the destination reference frame
+     * \return Thetransformation matrix that maps between the \p sourceFrame at time
+     * \p ephemerisTimeFrom to the \p destinationFrame at the time \p ephemerisTimeTo.
+     * \throws SpiceKernelException If there is no coverage available for the specified
+     * \p sourceFrame and \p destinationFrame
+     * \pre \p sourceFrame must not be empty.
+     * \pre \p destinationFrame must not be empty.
      */
-    bool getPositionTransformMatrix(const std::string& sourceFrame,
-                                       const std::string& destinationFrame,
-                                       double ephemerisTime,
-                                       glm::dmat3& transformationMatrix) const;
-
-    /**
-     * The following overloaded function performs similar to its default - the exception being 
-     * that it computes <code>transformationMatrix</code> with respect to local time offset 
-     * between an observer and its target. This allows for the accountance of light travel of 
-     * photons, e.g to account for instrument pointing offsets due to said phenomenon. 
-     * \param sourceFrame The name of the source reference frame
-     * \param destinationFrame The name of the destination reference frame
-     * \param ephemerisTimeFrom Recorded/observed observation time
-     * \param ephemerisTimeTo   Emission local target-time
-     * \param transformationMatrix The output containing the transformation matrix that
-     */
-
-    bool getPositionTransformMatrix(const std::string& sourceFrame,
-                                    const std::string& destinationFrame,
-                                    double ephemerisTimeFrom,
-                                    double ephemerisTimeTo,
-                                    glm::dmat3& transformationMatrix) const;
-
-    /**
-     * If a transform matrix is requested for an uncovered time in the CK kernels,
-     * this function will insert a transform matrix in <code>positionMatrix</code>.
-     * If the coverage has not yet started, the first transform matrix will be retrieved,
-     * If the coverage has ended, the last transform matrix will be retrieved
-     * If <code>time</code> is in a coverage gap, the transform matrix will be interpolated
-     * \param time, for which an estimated transform matrix is desirable
-     * \param fromFrame, the transform matrix will be retrieved in relation to this frame
-     * \param toFrame, the frame missing CK data for this time
-     * \param positionMatrix, the estimated transform matrix of the frame, passed by reference
-     * \return true if an estimated transform matrix is found
-     */
-    bool getEstimatedTransformMatrix(const double time, const std::string fromFrame, const std::string toFrame, glm::dmat3& positionMatrix) const;
-
-
+    glm::dmat3 getPositionTransformMatrix(const std::string& sourceFrame,
+        const std::string& destinationFrame, double ephemerisTimeFrom,
+        double ephemerisTimeTo) const;
 
     /**
      * Applies the <code>transformationMatrix</code> retrieved from
@@ -823,9 +855,29 @@ private:
      * \post If an exception is thrown, \p lightTime will not be modified
      */
     glm::dvec3 getEstimatedPosition(const std::string& target,
-                                    const std::string& observer, const std::string& referenceFrame,
-                                    AberrationCorrection aberrationCorrection, double ephemerisTime,
-                                    double& lightTime) const;
+        const std::string& observer, const std::string& referenceFrame,
+        AberrationCorrection aberrationCorrection, double ephemerisTime,
+        double& lightTime) const;
+    
+    /**
+     * If a transform matrix is requested for an uncovered time in the CK kernels, this
+     * function will an estimated matrix. If the coverage has not yet started, the first
+     * transform matrix will be retrieved. If the coverage has ended, the last transform
+     * matrix will be retrieved. If <code>time</code> is in a coverage gap, the transform
+     * matrix will be interpolated.
+     * \param fromFrame The transform matrix will be retrieved in relation to this frame
+     * \param toFrame The reference frame into which the resulting matrix will transformed
+     * \param time The time for which an estimated transform matrix is requested
+     * \return The estimated transform matrix of the frame
+     * \throws SpiceKernelException If there is no coverage available for the specified
+     * \p sourceFrame and \p destinationFrame or the reference frames do not name a valid
+     * NAIF frame.
+     * \pre \p fromFrame must not be empty
+     * \pre \p toFrame must not be empty
+     */
+    glm::dmat3 getEstimatedTransformMatrix(const std::string& fromFrame,
+        const std::string& toFrame, double time) const;
+    
     
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;

@@ -408,8 +408,8 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time, _stateMatrix);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time);
+    _instrumentMatrix = SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time);
 
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
@@ -512,7 +512,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
 	double  lt;
     glm::dvec3 p =
-    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
+    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 	// Main renderpass

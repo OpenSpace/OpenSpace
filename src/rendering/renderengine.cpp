@@ -453,7 +453,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
                 double lt;
                 glm::dvec3 p =
-                SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", SpiceManager::AberrationCorrection(), currentTime, lt);
+                SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
                 psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
                 float a, b, c;
                 SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);

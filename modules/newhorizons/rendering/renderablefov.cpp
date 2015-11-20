@@ -78,8 +78,8 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     success = dictionary.getValue(keyInstrument, _instrumentID);
     ghoul_assert(success, "");
 
-    success = dictionary.getValue(keyInstrumentMethod, _method);
-    ghoul_assert(success, "");
+//    success = dictionary.getValue(keyInstrumentMethod, _method);
+//    ghoul_assert(success, "");
 
     std::string a = "NONE";
     success = dictionary.getValue(keyInstrumentAberration, a);
@@ -231,11 +231,24 @@ glm::dvec3 RenderableFov::interpolate(glm::dvec3 p0, glm::dvec3 p1, float t) {
 
 // This method is the current bottleneck.
 psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
-	bool intercepted = false;
-	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-		_frame, _aberrationCorrection,
-		_time, ray, ipoint, ivec, intercepted);
-	
+    std::string bodyfixed = "IAU_";
+    bool convert = (_frame.find(bodyfixed) == std::string::npos);
+    if (convert)
+        bodyfixed = SpiceManager::ref().frameFromBody(_fovTarget);
+    else
+        bodyfixed = _frame;
+    
+    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().getSurfaceIntercept(
+       _fovTarget, _spacecraft, _instrumentID, bodyfixed, _aberrationCorrection, _time, ray);
+    
+    if (convert) {
+        result.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _frame, _time) * result.surfaceVector;
+    }
+    
+    ipoint = result.surfaceIntercept;
+    ivec = result.surfaceVector;
+    bool intercepted = result.interceptFound;
+    
 	ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
 	_interceptVector[3] += 3;
@@ -258,10 +271,26 @@ psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
 glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance) {
 	//check if point is on surface
 	glm::dvec3 half = interpolate(p1, p2, 0.5f);
-	bool intercepted = false;
-	openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-		_frame, _aberrationCorrection,
-		_time, half, ipoint, ivec, intercepted);
+    
+    std::string bodyfixed = "IAU_";
+    bool convert = (_frame.find(bodyfixed) == std::string::npos);
+    if (convert)
+        bodyfixed = SpiceManager::ref().frameFromBody(_fovTarget);
+    else
+        bodyfixed = _frame;
+
+    
+    SpiceManager::SurfaceInterceptResult result = SpiceManager::ref().getSurfaceIntercept(
+      _fovTarget, _spacecraft, _instrumentID, bodyfixed, _aberrationCorrection, _time, half);
+    
+    if (convert) {
+        result.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _frame, _time) * result.surfaceVector;
+    }
+    
+    ipoint = result.surfaceIntercept;
+    ivec = result.surfaceVector;
+    bool intercepted = result.interceptFound;
+    
 	if (glm::distance(_previousHalf, half) < tolerance){
 		_previousHalf = glm::dvec3(0);
 		return half;
@@ -301,10 +330,28 @@ void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds
 					// IFF incident point is also non-interceptive BUT something is within FOV
 					// we need then to check if this segment makes contact with surface
 					glm::dvec3 half = interpolate(current, next, 0.5f);
-					bool intercepted;
-					openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-																	   _frame,  _aberrationCorrection,
-																	   _time, half, ipoint, ivec, intercepted);
+                    
+                    std::string bodyfixed = "IAU_";
+                    bool convert = (_frame.find(bodyfixed) == std::string::npos);
+                    if (convert)
+                        bodyfixed = SpiceManager::ref().frameFromBody(_fovTarget);
+                    else
+                        bodyfixed = _frame;
+                    
+                    
+                    SpiceManager::SurfaceInterceptResult res =
+                        SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft,
+                            _instrumentID, bodyfixed, _aberrationCorrection, _time, half);
+                    
+                    if (convert) {
+                        res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _frame, _time) * res.surfaceVector;
+                    }
+
+                    ipoint = res.surfaceIntercept;
+                    ivec = res.surfaceVector;
+                    bool intercepted = res.interceptFound;
+
+                    
 					if (intercepted){
 						// find the two outer most points of intersection 
 						glm::dvec3 root1 = bisection(half, current, tolerance);
@@ -396,15 +443,15 @@ void RenderableFov::computeColors() {
 void RenderableFov::determineTarget(){
 	_fovTarget = _potentialTargets[0]; //default;
 	for (int i = 0; i < _potentialTargets.size(); i++){
-		bool success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+		_withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
+                                                                            _potentialTargets[i],                                                                            _spacecraft,
+                                                                            
 			_instrumentID,
-			_potentialTargets[i],
-			_spacecraft,
-			_method,
-                                                                              std::string(_aberrationCorrection),
-			_time,
-			_withinFOV);
-		if (success && _withinFOV){
+                                                                          SpiceManager::FieldOfViewMethod::Ellipsoid,
+                                                                              _aberrationCorrection,
+			_time
+			);
+		if (_withinFOV){
 			_fovTarget = _potentialTargets[i];
 			break;
 		}
@@ -417,9 +464,25 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 	for (int i = 0; i <= _bounds.size(); i++){
 		int r = (i == _bounds.size()) ? 0 : i;
 		// compute surface intercept
-		openspace::SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft, _instrumentID,
-			_frame, _aberrationCorrection,
-			_time, _bounds[r], ipoint, ivec, _interceptTag[r]);
+        std::string bodyfixed = "IAU_";
+        bool convert = (_frame.find(bodyfixed) == std::string::npos);
+        if (convert)
+            bodyfixed = SpiceManager::ref().frameFromBody(_fovTarget);
+        else
+            bodyfixed = _frame;
+        
+        SpiceManager::SurfaceInterceptResult res =
+            SpiceManager::ref().getSurfaceIntercept(_fovTarget, _spacecraft,
+                _instrumentID, bodyfixed, _aberrationCorrection, _time, _bounds[r]);
+        
+        if (convert) {
+            res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _frame, _time) * res.surfaceVector;
+        }
+        
+        ipoint = res.surfaceIntercept;
+        ivec = res.surfaceVector;
+        _interceptTag[r] = res.interceptFound;
+        
 		// if not found, use the orthogonal projected point
 		if (!_interceptTag[r]) _projectionBounds[r] = orthogonalProjection(_bounds[r]);
 
@@ -510,7 +573,7 @@ void RenderableFov::render(const RenderData& data) {
 
 void RenderableFov::update(const UpdateData& data) {
 	_time  = data.time;
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _frame, data.time);
 	_spacecraftRotation = glm::mat4(1);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){

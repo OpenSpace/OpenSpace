@@ -148,8 +148,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 void RenderableCrawlingLine::update(const UpdateData& data) {
     if (_program->isDirty())
         _program->rebuildFromFile();
-    glm::dmat3 transformMatrix = glm::dmat3(1);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
+    glm::dmat3 transformMatrix = SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time);
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++) {

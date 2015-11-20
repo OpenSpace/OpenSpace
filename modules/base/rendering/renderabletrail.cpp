@@ -219,11 +219,11 @@ void RenderableTrail::update(const UpdateData& data) {
     glm::dvec3 p;
     // Update the floating current time
 	if (start > data.time)
-        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), start, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, start, lightTime);
 	else if (end < data.time)
-		p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), end, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, end, lightTime);
 	else
-		p = SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), data.time, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, data.time, lightTime);
     
     psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
     
@@ -247,7 +247,7 @@ void RenderableTrail::update(const UpdateData& data) {
 			else if (end < et)
 				et = end;
             glm::dvec3 p =
-                SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), et, lightTime);
+            SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, et, lightTime);
             pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
@@ -300,7 +300,7 @@ void RenderableTrail::fullYearSweep(double time) {
 
         try {
          p =
-            SpiceManager::ref().targetPosition(_target, _observer, _frame, SpiceManager::AberrationCorrection(), time, lightTime);
+            SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
         }
         catch (const SpiceManager::SpiceKernelException& e) {
             // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?

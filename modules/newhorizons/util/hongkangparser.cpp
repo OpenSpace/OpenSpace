@@ -286,14 +286,14 @@ bool HongKangParser::augmentWithSpice(Image& image,
 			double time = image.startTime;
 			for (int k = 0; k < exposureTime; k++){
 				time += k;
-				success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+				_withinFOV = SpiceManager::ref().isTargetInFieldOfView(
+                                                                       potentialTargets[i],
+                                                                       spacecraft,
 					image.activeInstruments[j],
-					potentialTargets[i],
-					spacecraft,
-					"ELLIPSOID",
-					"NONE",
-					time,
-					_withinFOV);
+                                                                       SpiceManager::FieldOfViewMethod::Ellipsoid,
+                                                                       {},
+					time
+					);
 				if (_withinFOV){
 					image.target = potentialTargets[i];
 					_withinFOV = false;

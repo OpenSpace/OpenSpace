@@ -184,7 +184,7 @@ void RenderableModel::render(const RenderData& data) {
 		_alpha = 1.0f;
 
     glm::dvec3 p =
-        SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", SpiceManager::AberrationCorrection(), time, lt);
+    SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, time, lt);
     psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
 	_programObject->setUniform("cam_dir", cam_dir);
@@ -242,12 +242,13 @@ void RenderableModel::update(const UpdateData& data) {
 	//}
 
 	// set spice-orientation in accordance to timestamp
-    if (!_source.empty())
-	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
+    if (!_source.empty()) {
+        _stateMatrix = SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time);
+    }
 
     double  lt;
     glm::dvec3 p =
-        openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", SpiceManager::AberrationCorrection(), _time, lt);
+    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
