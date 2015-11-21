@@ -64,6 +64,15 @@ namespace {
                 return "POINT";
         }
     }
+    
+    const char* toString(openspace::SpiceManager::TerminatorType t) {
+        switch (t) {
+            case openspace::SpiceManager::TerminatorType::Umbral:
+                return "UMBRAL";
+            case openspace::SpiceManager::TerminatorType::Penumbral:
+                return "PENUMBRAL";
+        }
+    }
 }
 
 using fmt::format;
@@ -118,6 +127,30 @@ SpiceManager::AberrationCorrection::operator const char*() const {
         case Type::ConvergedNewtonianStellar:
             return (direction == Direction::Reception) ? "CN+S" : "XCN+S";
     }
+}
+    
+SpiceManager::FieldOfViewMethod SpiceManager::fieldOfViewMethodFromString(
+    const string& method)
+{
+    const static std::map<string, FieldOfViewMethod> Mapping = {
+        { "ELLIPSOID", FieldOfViewMethod::Ellipsoid },
+        { "POINT", FieldOfViewMethod::Point }
+    };
+    
+    ghoul_assert(!method.empty(), "Method must not be empty");
+    
+    return Mapping.at(method);
+}
+    
+SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const string& type) {
+    const static std::map<string, TerminatorType> Mapping = {
+        { "UMBRAL", TerminatorType::Umbral },
+        { "PENUMBRAL", TerminatorType::Penumbral }
+    };
+    
+    ghoul_assert(!type.empty(), "Type must not be empty");
+    
+    return Mapping.at(type);
 }
 
 SpiceManager::SpiceManager() {
@@ -762,13 +795,7 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     // Warning: This assumes std::vector<glm::dvec3> to have all values memory contiguous
     res.terminatorPoints.resize(numberOfTerminatorPoints);
 
-    static const std::map<TerminatorType, string> Map = {
-        { TerminatorType::Umbral, "UMBRAL" },
-        { TerminatorType::Penumbral, "PENUMBRAL" }
-    };
-    string s = Map.at(terminatorType);
-    
-	edterm_c(s.c_str(),
+	edterm_c(toString(terminatorType),
 		     lightSource.c_str(), 
 			 target.c_str(), 
 			 ephemerisTime, 

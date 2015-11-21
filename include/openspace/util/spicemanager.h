@@ -114,18 +114,40 @@ public:
         /// The direction of the aberration correction
         Direction direction = Direction::Reception;
     };
-
+    
     /// The possible values for the method parameter of the targetInFieldOfView method
     enum class FieldOfViewMethod {
         Ellipsoid = 0,
         Point
     };
     
+    /**
+     * Returns the FieldOfViewMethod for the passed string. The allowed strings are
+     * <code>ELLIPSOID</code> and <code>POINT</code>. All other values will result in an
+     * exception.
+     * \param method The field of view method
+     * \throws std::out_of_range if \p method is not a valid string
+     * \pre \p method must not be empty
+     * \return The field of view method enum
+     */
+    static FieldOfViewMethod fieldOfViewMethodFromString(const std::string& method);
     
+    /// The possible values for terminator type method of the terminatorEllipse method
     enum class TerminatorType {
         Umbral = 0,
         Penumbral
     };
+    
+    /**
+     * Returns the TerminatorType for the passed string. The allowed strings are
+     * <code>UMBRAL</code> and <code>PENUMBRAL</code>. All other values will result in an
+     * exception.
+     * \param type The terminator type
+     * \param The terminator type enum
+     * \throws std::out_of_range if \p type is not a valid string
+     * \pre \p type must not be empty
+     */
+    static TerminatorType terminatorTypeFromString(const std::string& type);
 
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
