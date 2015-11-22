@@ -121,7 +121,7 @@ void RenderableFov::allocateData() {
         _isteps = 10; // Interpolation steps per intersecting segment
 
     }
-    catch (const SpiceManager::SpiceKernelException& e) {
+    catch (const SpiceManager::SpiceException& e) {
         LERROR(e.what());
     }
 }

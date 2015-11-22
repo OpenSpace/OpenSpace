@@ -429,7 +429,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
         bs = std::move(res.boresightVector);
     }
-    catch (const SpiceManager::SpiceKernelException& e) {
+    catch (const SpiceManager::SpiceException& e) {
         return;
     }
 

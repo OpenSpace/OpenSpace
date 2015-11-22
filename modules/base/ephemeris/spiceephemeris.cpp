@@ -66,7 +66,7 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
             SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
             _kernelsLoadedSuccessfully = true;
         }
-        catch (const SpiceManager::SpiceKernelException& e) {
+        catch (const SpiceManager::SpiceException& e) {
             LERROR("Could not load SPICE kernel: " << e.what());
             _kernelsLoadedSuccessfully = false;
         }

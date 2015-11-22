@@ -302,7 +302,7 @@ void RenderableTrail::fullYearSweep(double time) {
          p =
             SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
         }
-        catch (const SpiceManager::SpiceKernelException& e) {
+        catch (const SpiceManager::SpiceException& e) {
             // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
             // ---abock
 //            LERROR(e.what());

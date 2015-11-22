@@ -166,7 +166,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         boresight = res.boresightVector;
         
     }
-    catch (const SpiceManager::SpiceKernelException& e) {
+    catch (const SpiceManager::SpiceException& e) {
         LERROR(e.what());
     }
     

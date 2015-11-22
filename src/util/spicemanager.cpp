@@ -50,7 +50,7 @@ namespace {
             char buffer[SpiceErrorBufferSize];
             getmsg_c("LONG", SpiceErrorBufferSize, buffer);
             reset_c();
-            throw openspace::SpiceManager::SpiceKernelException(
+            throw openspace::SpiceManager::SpiceException(
                 errorMessage + ": " + buffer
             );
         }
@@ -81,7 +81,7 @@ using std::string;
 namespace openspace {
     
     
-SpiceManager::SpiceKernelException::SpiceKernelException(const string& msg)
+SpiceManager::SpiceException::SpiceException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")
 {}
 
@@ -267,7 +267,7 @@ void SpiceManager::unloadKernel(string filePath) {
 		[&path](const KernelInformation& info) { return info.path == path; });
     
     if (it == _loadedKernels.end()) {
-        throw SpiceKernelException(
+        throw SpiceException(
             format("'{}' did not correspond to a loaded kernel", path)
         );
     }
@@ -336,7 +336,7 @@ int SpiceManager::naifId(const string& body) const {
     int id;
     bods2c_c(body.c_str(), &id, &success);
     if (!success)
-        throw SpiceKernelException(format("Could not find NAIF ID of body '{}'", body));
+        throw SpiceException(format("Could not find NAIF ID of body '{}'", body));
     return id;
 }
     
@@ -356,7 +356,7 @@ int SpiceManager::frameId(const string& frame) const {
     int id;
     namfrm_c(frame.c_str(), &id);
     if (id == 0)
-        throw SpiceKernelException(format("Could not find NAIF ID of frame '{}'", frame));
+        throw SpiceException(format("Could not find NAIF ID of frame '{}'", frame));
     return id;
 }
 
@@ -468,7 +468,7 @@ glm::dvec3 SpiceManager::targetPosition(const string& target, const string& obse
 	bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
 	bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
 	if (!targetHasCoverage && !observerHasCoverage){
-        throw SpiceKernelException(
+        throw SpiceException(
             format("Neither the target '{}' nor observer '{}' has SPK coverage",
                    target,
                    observer
@@ -936,7 +936,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     
     if (_spkCoverageTimes.find(targetId) == _spkCoverageTimes.end()) {
         // no coverage
-        throw SpiceKernelException(format("No position for '{}' at any time", target));
+        throw SpiceException(format("No position for '{}' at any time", target));
     }
     
     
@@ -1028,7 +1028,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     
     if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
         // no coverage
-        throw SpiceKernelException(format(
+        throw SpiceException(format(
             "No data available for the transform matrix from '{}' to '{}' at any time",
             fromFrame, toFrame
         ));

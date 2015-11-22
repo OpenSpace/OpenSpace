@@ -148,7 +148,7 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
         c = radii.z;
         accutareRadius = true;
     }
-    catch (const SpiceManager::SpiceKernelException& e) {
+    catch (const SpiceManager::SpiceException& e) {
         LWARNING("Could not find radius for body " << planetName);
         accutareRadius = false;
     }

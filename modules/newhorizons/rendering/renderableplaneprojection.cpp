@@ -230,7 +230,7 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
         frame = std::move(res.frameName);
         bounds = std::move(res.bounds);
         boresight = std::move(res.boresightVector);
-    } catch (const SpiceManager::SpiceKernelException& e) {
+    } catch (const SpiceManager::SpiceException& e) {
         LERROR(e.what());
     }
 
