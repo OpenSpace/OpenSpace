@@ -76,7 +76,7 @@ endfunction ()
 
 
 function (set_compile_settings project)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD 14)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)

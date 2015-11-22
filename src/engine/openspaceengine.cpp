@@ -59,8 +59,8 @@
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/font/fontrenderer.h>
 
-// std
 #include <iostream>
+#include <memory>
 #include <fstream>
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
@@ -211,15 +211,17 @@ bool OpenSpaceEngine::create(
 	_engine = new OpenSpaceEngine(std::string(argv[0]), windowWrapper);
 
 	// Query modules for commandline arguments
-	const bool gatherSuccess = _engine->gatherCommandlineArguments();
+	bool gatherSuccess = _engine->gatherCommandlineArguments();
 	if (!gatherSuccess)
 		return false;
 
 	// Parse commandline arguments
-	_engine->_commandlineParser->setCommandLine(argc, argv, &sgctArguments);
-	const bool executeSuccess = _engine->_commandlineParser->execute();
-	if (!executeSuccess)
-		return false;
+    sgctArguments = *(_engine->_commandlineParser->setCommandLine(argc, argv));
+	bool showHelp = _engine->_commandlineParser->execute();
+    if (showHelp) {
+        _engine->_commandlineParser->displayHelp();
+        return false;
+    }
 
 	// Find configuration
 	std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
@@ -428,26 +430,25 @@ void OpenSpaceEngine::clearAllWindows() {
 
 bool OpenSpaceEngine::gatherCommandlineArguments() {
     // TODO: Get commandline arguments from all modules
-
+    
 	commandlineArgumentPlaceholders.configurationName = "";
-    CommandlineCommand* configurationFileCommand = new SingleCommand<std::string>(
-          &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
-          "Provides the path to the OpenSpace configuration file");
-    _commandlineParser->addCommand(configurationFileCommand);
+    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
+        &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+        "Provides the path to the OpenSpace configuration file"
+    ));
 
 	commandlineArgumentPlaceholders.sgctConfigurationName = "";
-	CommandlineCommand* sgctConfigFileCommand = new SingleCommand<std::string>(
-		&commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
-		"Provides the path to the SGCT configuration file, overriding the value set in"
-		"the OpenSpace configuration file");
-	_commandlineParser->addCommand(sgctConfigFileCommand);
+    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
+        &commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+        "Provides the path to the SGCT configuration file, overriding the value set in "
+        "the OpenSpace configuration file"
+    ));
 
     commandlineArgumentPlaceholders.sceneName = "";
-    CommandlineCommand* sceneFileCommand = new SingleCommand<std::string>(
-        &commandlineArgumentPlaceholders.sceneName, "-scene", "",
-        "Provides the path to the scene file, overriding the value set in the OpenSpace"
-        " configuration file");
-    _commandlineParser->addCommand(sceneFileCommand);
+    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
+        &commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
+        "the scene file, overriding the value set in the OpenSpace configuration file"
+    ));
 
     return true;
 }
