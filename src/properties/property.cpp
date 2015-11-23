@@ -115,7 +115,7 @@ bool Property::setStringValue(std::string value) {
 std::string Property::guiName() const {
 	std::string result;
 	_metaData.getValue(_metaDataKeyGuiName, result);
-    return std::move(result);
+    return result;
 }
 
 std::string Property::description() const {
@@ -129,7 +129,7 @@ void Property::setGroupIdentifier(std::string groupId) {
 std::string Property::groupIdentifier() const {
 	std::string result;
 	_metaData.getValue(_metaDataKeyGroup, result);
-    return std::move(result);
+    return result;
 }
 
 void Property::setVisible(bool state) {

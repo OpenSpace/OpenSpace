@@ -260,8 +260,7 @@ bool OpenSpaceEngine::create(
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
 			LDEBUG("Directory '" << p << "' does not exist, creating.");
-			if (!FileSys.createDirectory(p, true))
-				LERROR("Directory '" << p << "' could not be created");
+            FileSys.createDirectory(p, true);
 		}
 	}
 
