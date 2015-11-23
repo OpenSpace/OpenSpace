@@ -140,9 +140,10 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
         std::stringstream ss;
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << "." << variableCacheString << ".cache";
 
-		std::string cachepath; // = filepath + ss.str();
+		 // = filepath + ss.str();
         ghoul::filesystem::File ghlFile(filepath);
-		FileSys.cacheManager()->getCachedFile(ghlFile.baseName(), ss.str(), cachepath, true);
+        std::string cachepath = FileSys.cacheManager()->cachedFilename(ghlFile.baseName(),
+                                                                       ss.str(),  true);
 		if (cache && FileSys.fileExists(cachepath)) {
            
 #define VOLUME_LOAD_PROGRESSBAR

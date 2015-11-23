@@ -349,8 +349,7 @@ void RenderableStars::update(const UpdateData& data) {
 
 bool RenderableStars::loadData() {
 	std::string _file = _speckFile;
-	std::string cachedFile = "";
-	FileSys.cacheManager()->getCachedFile(_file, cachedFile, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file, true);
 
 	bool hasCachedFile = FileSys.fileExists(cachedFile);
 	if (hasCachedFile) {

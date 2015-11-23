@@ -52,8 +52,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
     
-    class SpiceException : public ghoul::RuntimeError {
-    public:
+    struct SpiceException : public ghoul::RuntimeError {
         explicit SpiceException(const std::string& msg);
     };
     

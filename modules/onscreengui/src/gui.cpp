@@ -150,8 +150,8 @@ void GUI::setEnabled(bool enabled) {
 }
 
 void GUI::initialize() {
-	std::string cachedFile;
-	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(configurationFile,
+                                                                    "", true);
 
 	char* buffer = new char[cachedFile.size() + 1];
 

@@ -67,7 +67,7 @@ LuaConsole::~LuaConsole() {
 
 
 void LuaConsole::initialize() {
-    FileSys.cacheManager()->getCachedFile(historyFile, "", _filename, true);
+    _filename = FileSys.cacheManager()->cachedFilename(historyFile, "", true);
 
     std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
     if (file.good()) {

@@ -146,8 +146,7 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-		std::string cachedFile = "";
-		FileSys.cacheManager()->getCachedFile(filename, cachedFile, true);
+		std::string cachedFile = FileSys.cacheManager()->cachedFilename(filename, true);
 
 		bool hasCachedFile = FileSys.fileExists(cachedFile);
 		if (hasCachedFile) {
