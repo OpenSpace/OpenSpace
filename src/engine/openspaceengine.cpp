@@ -583,7 +583,9 @@ void OpenSpaceEngine::loadFonts2() {
     ghoul::Dictionary fonts;
     configurationManager()->getValue(ConfigurationManager::KeyFonts, fonts);
 
-    _fontManager = new ghoul::fontrendering::FontManager;
+    const glm::ivec3 fontAtlasSize{1024, 1024, 1};
+    _fontManager = new ghoul::fontrendering::FontManager(fontAtlasSize);
+    
     for (const std::string& key : fonts.keys()) {
         std::string font;
         fonts.getValue(key, font);

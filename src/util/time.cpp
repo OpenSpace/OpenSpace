@@ -123,7 +123,6 @@ void Time::setTime(std::string time, bool requireJump) {
 
 std::string Time::currentTimeUTC() const {
 	std::string date;
-	//SpiceManager::ref().getDateFromET(_time, date);
 	SpiceManager::ref().getDateFromET(_syncedTime, date);
 	return date;
 }

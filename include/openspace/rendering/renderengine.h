@@ -136,8 +136,6 @@ private:
 	bool _doPerformanceMeasurements;
 	ghoul::SharedMemory* _performanceMemory;
     
-    ghoul::fontrendering::Font* _mainFont;
-
 	void generateGlslConfig();
 
 	float _globalBlackOutFactor;
@@ -145,6 +143,10 @@ private:
 	float _currentFadeTime;
 	int _fadeDirection;
 //    bool _sgctRenderStatisticsVisible;
+    
+    ghoul::fontrendering::Font* _fontInfo = nullptr;
+    ghoul::fontrendering::Font* _fontDate = nullptr;
+    ghoul::fontrendering::Font* _fontLog = nullptr;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;

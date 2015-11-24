@@ -52,6 +52,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/glm.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -201,7 +202,16 @@ bool RenderEngine::initializeGL() {
 	// development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
-    _mainFont = OsEng.fontManager().font(constants::fonts::keyMono, 20);
+    
+    const float fontSizeTime = 15.f;
+    _fontDate = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeTime);
+    const float fontSizeMono = 10.f;
+    _fontInfo = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeMono);
+    const float fontSizeLight = 8.f;
+    _fontLog = OsEng.fontManager().font(constants::fonts::keyLight, fontSizeLight);
+
+    
+    
     
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
@@ -398,262 +408,290 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         }
     }
 
-#if 1
-#define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-    //#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-    //#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__);
-    #define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
-    #define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
-
-    if (_onScreenInformation._node != -1) {
-        //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
-
-        //if (thisId == _onScreenInformation._node) {
-            //const unsigned int font_size_mono = _onScreenInformation._size;
-            //int x1, xSize, y1, ySize;
-            //const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-            //sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-            //int startY = ySize - 2 * font_size_mono;
-        //}
-    }
-
 	// Print some useful information on the master viewport
-
 	if (OsEng.ref().isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
-		// TODO: Adjust font_size properly when using retina screen
-		const int font_size_mono = 10;
-        const int font_size_time = 15;
-		const int font_size_light = 8;
-		const int font_with_light = static_cast<int>(font_size_light*0.7);
-		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
-		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-        const sgct_text::Font* fontTime = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_time);
+        // TODO: Adjust font_size properly when using retina screen
+        const float fontSizeMono = 10.f;
+        const float fontSizeTime = 15.f;
 
-		if (_showInfo) {
-			const sgct_text::Font* font = fontMono;
-            glm::ivec4 pixelCoords = OsEng.windowWrapper().viewportPixelCoordinates();
-            int x1 = pixelCoords.x;
-            int xSize = pixelCoords.y;
-            int y1 = pixelCoords.z;
-            int ySize = pixelCoords.w;
-			int startY = ySize - 2 * font_size_time;
-			//const glm::vec2& scaling = _mainCamera->scaling();
-			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
-			//const psc& position = _mainCamera->position();
-			//const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
-			//const PowerScaledScalar& pssl = (position - origin).length();
-					
-			// Next 2 lines neccesary for instrument switching to work. 
-			// GUI PRINT 
-			// Using a macro to shorten line length and increase readability
-
-            int line = 0;
-			
-			double currentTime = Time::ref().currentTime();
-
-			//PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
-            std::string timeString = Time::ref().currentTimeUTC();
-            if (timeString.size() > 11)
-                // This should never happen, but it's an emergency hack ---abock
-                timeString[11] = ' ';
-//            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), glm::vec4(1), "Date: %s", timeString.c_str());
-            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), "Date: %s", timeString.c_str());
-			
-            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
-			double dt = Time::ref().deltaTime();
+        using Font = ghoul::fontrendering::Font;
+        using ghoul::fontrendering::RenderFont;
+        
+        
+        if (_showInfo && _fontDate && _fontInfo) {
+            double currentTime = Time::ref().currentTime();
             
-            if (_mainFont) {
-            using namespace ghoul::fontrendering;
-            FontRenderer::defaultRenderer().render(
-                *_mainFont,
-                glm::vec2(10.f, static_cast<float>(startY  - font_size_mono * line++ * 2)),
-                glm::vec4(1.f),
-                glm::vec4(0.f, 0.f, 0.f, 1.f),
-                "Simulation increment (s): %.0f",
-                dt
+            glm::vec2 penPosition = glm::vec2(
+                10.f,
+                OsEng.windowWrapper().viewportPixelCoordinates().w
             );
-            }
+            penPosition.y -= _fontDate->height();
 
-//			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
+            RenderFontCr(_fontDate,
+                penPosition,
+                "Date: %s",
+                Time::ref().currentTimeUTC().c_str()
+            );
+            
+            RenderFontCr(_fontInfo,
+                       penPosition,
+                       "Simulation increment (s): %.0f",
+                       Time::ref().deltaTime()
+                       );
 
-			psc nhPos;
-			double lt;
-			SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
-			//nhPos[3] += 3;
-			float a, b, c;
-			SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
-			float radius = (a + b) / 2.f;
-
-			float distToSurf = glm::length(nhPos.vec3()) - radius;
-			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
-
-            PrintText(line++, "Avg. Frametime: %.5f", OsEng.windowWrapper().averageDeltaTime());
-		
-			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
-			//PrintText(line++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
-			//PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
-			//PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
-			//PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
-			//PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
-			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
+            RenderFontCr(_fontInfo,
+                       penPosition,
+                       "Avg. Frametime: %.5f",
+                       OsEng.windowWrapper().averageDeltaTime()
+            );
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-			if (openspace::ImageSequencer2::ref().isReady()) {
-				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
-				float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
-				std::string progress = "|";
-				int g = static_cast<int>((t* 24) + 1);
-				g = std::max(g, 0);
-				for (int i = 0; i < g; i++)
+            if (openspace::ImageSequencer2::ref().isReady()) {
+                penPosition.y -= 25.f;
+                
+                glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+
+                psc nhPos;
+                double lt;
+                SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
+                float a, b, c;
+                SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
+                float radius = (a + b) / 2.f;
+                float distToSurf = glm::length(nhPos.vec3()) - radius;
+                
+                RenderFont(_fontInfo,
+                           penPosition,
+                           "Distance to Pluto: % .1f (KM)",
+                           distToSurf
+                );
+                penPosition.y -= _fontInfo->height();
+        
+                
+                double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
+                float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
+                std::string progress = "|";
+                int g = static_cast<int>((t* 24) + 1);
+                g = std::max(g, 0);
+                for (int i = 0; i < g; i++)
                           progress.append("-");
                       progress.append(">");
-				for (int i = 0; i < 25 - g; i++)
+                for (int i = 0; i < 25 - g; i++)
                           progress.append(" ");
 
-				std::string str = "";
-				openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
+                std::string str = "";
+                openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
 
-				glm::vec4 active(0.6, 1, 0.00, 1);
-				glm::vec4 brigther_active(0.9, 1, 0.75, 1);
+                glm::vec4 active(0.6, 1, 0.00, 1);
+                glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
-				progress.append("|");
-				if (remaining > 0) {
-					brigther_active *= (1 - t);
-					PrintColorText(line++, "Next instrument activity:", 10, active*t + brigther_active);
-					PrintColorTextArg(line++, "%.0f s %s %.1f %%", 10, active*t + brigther_active, remaining, progress.c_str(), t * 100);
-					PrintColorTextArg(line++, "Data acquisition time: %s", 10, active, str.c_str());
-				}
-				std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
-   				std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+                progress.append("|");
+                if (remaining > 0) {
+                    brigther_active *= (1 - t);
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active * t + brigther_active,
+                               "Next instrument activity:"
+                    );
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active * t + brigther_active,
+                               "%.0f s %s %.1f %%",
+                               remaining, progress.c_str(), t * 100
+                    );
+
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active,
+                               "Data acquisition time: %s",
+                               str.c_str()
+                    );
+                }
+                std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
+                std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
 
                 if (currentTarget.first > 0.0) {
-					int timeleft = static_cast<int>(nextTarget.first - currentTime);
+                    int timeleft = static_cast<int>(nextTarget.first - currentTime);
 
-					int hour   = timeleft / 3600;
-					int second = timeleft % 3600;
-					int minute = second / 60;
-					    second = second % 60;
+                    int hour   = timeleft / 3600;
+                    int second = timeleft % 3600;
+                    int minute = second / 60;
+                        second = second % 60;
 
-					std::string hh, mm, ss, coundtown;
+                    std::string hh, mm, ss, coundtown;
 
-					if (hour   < 10) hh.append("0");
-					if (minute < 10) mm.append("0");
-					if (second < 10) ss.append("0");
+                    if (hour   < 10) hh.append("0");
+                    if (minute < 10) mm.append("0");
+                    if (second < 10) ss.append("0");
 
-					hh.append(std::to_string(hour));
-					mm.append(std::to_string(minute));
-					ss.append(std::to_string(second));
+                    hh.append(std::to_string(hour));
+                    mm.append(std::to_string(minute));
+                    ss.append(std::to_string(second));
+                    
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               targetColor,
+                               "Data acquisition adjacency: [%s:%s:%s]",
+                               hh.c_str(), mm.c_str(), ss.c_str()
+                    );
 
-					PrintColorTextArg(line++, "Data acquisition adjacency: [%s:%s:%s]", 10, targetColor, hh.c_str(), mm.c_str(), ss.c_str());
-						
-					std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
-					std::string space;
-					glm::vec4 color;
-					size_t isize = incidentTargets.second.size(); 
+                    
+                    std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+                    std::string space;
+                    glm::vec4 color;
+                    size_t isize = incidentTargets.second.size(); 
                     for (size_t p = 0; p < isize; p++){
                         double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
                         t = (p > isize / 2) ? 1 - t : t;
                         t += 0.3;
-						color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-                        PrintColorTextArg(line, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
-						for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
+                        color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
+                        
+                        RenderFont(_fontInfo,
+                                   penPosition,
+                                   color,
+                                   "%s%s",
+                                   space.c_str(), incidentTargets.second[p].c_str()
+                        );
+                        
+                        
+                        for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
                             space += " ";
-					}
-					line++;
-					
-					std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
-					glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
-					glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-					PrintColorText(line++, "Active Instruments: ", 10, active);
-					for (auto t : activeMap){
-						if (t.second == false){
-							PrintColorText(line, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							PrintColorTextArg(line++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
-						}
-						else{
-							PrintColorText(line, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							if (t.first == "NH_LORRI"){
-								PrintColorText(line, " + ", 10, firing);
-							}
-							PrintColorText(line, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							PrintColorTextArg(line++, "    %5s", 10, active, t.first.c_str());
-						}
-					}
+                    }
+                    penPosition.y -= _fontInfo->height();
+                    
+                    std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
+                    glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
+                    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+
+                    RenderFontCr(_fontInfo,
+                               penPosition,
+                               active,
+                               "Active Instruments:"
+                    );
+
+                    for (auto t : activeMap){
+                        if (t.second == false) {
+                            RenderFont(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "| |"
+                            );
+                            RenderFontCr(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "    %5s",
+                                       t.first.c_str()
+                            );
+                            
+                        }
+                        else{
+                            RenderFont(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "|"
+                            );
+                            if (t.first == "NH_LORRI") {
+                                RenderFont(_fontInfo,
+                                           penPosition,
+                                           firing,
+                                           " + "
+                                );
+                            }
+                            RenderFont(_fontInfo,
+                                       penPosition,
+                                       glm::vec4(0.3, 0.3, 0.3, 1),
+                                       "  |"
+                            );
+                            RenderFontCr(_fontInfo,
+                                       penPosition,
+                                       active,
+                                       "    %5s",
+                                       t.first.c_str()
+                            );
+                        }
+                    }
                 }
-			}
+            }
 #endif
+            }
+            if (_showScreenLog) {
+                const int max = 10;
+                const int category_length = 20;
+                const int msg_length = 140;
+                const float ttl = 15.f;
+                const float fade = 5.f;
+                auto entries = _log->last(max);
 
-#undef PrintText
-		}
+                const glm::vec4 white(0.9, 0.9, 0.9, 1);
+                const glm::vec4 red(1, 0, 0, 1);
+                const glm::vec4 yellow(1, 1, 0, 1);
+                const glm::vec4 green(0, 1, 0, 1);
+                const glm::vec4 blue(0, 0, 1, 1);
 
-		if (_showScreenLog)
-		{
-			const sgct_text::Font* font = fontLight;
-			const int max = 10;
-			const int category_length = 20;
-			const int msg_length = 140;
-			const float ttl = 15.f;
-			const float fade = 5.f;
-			auto entries = _log->last(max);
+                size_t nr = 1;
+                for (auto& it = entries.first; it != entries.second; ++it) {
+                    const ScreenLog::LogEntry* e = &(*it);
 
-			const glm::vec4 white(0.9, 0.9, 0.9, 1);
-			const glm::vec4 red(1, 0, 0, 1);
-			const glm::vec4 yellow(1, 1, 0, 1);
-			const glm::vec4 green(0, 1, 0, 1);
-			const glm::vec4 blue(0, 0, 1, 1);
+                    const double t = OsEng.windowWrapper().time();
+                    float diff = static_cast<float>(t - e->timeStamp);
 
-			size_t nr = 1;
-			for (auto& it = entries.first; it != entries.second; ++it) {
-				const ScreenLog::LogEntry* e = &(*it);
+                    // Since all log entries are ordered, once one is exceeding TTL, all have
+//                    if (diff > ttl)
+//                        break;
 
-                const double t = OsEng.windowWrapper().time();
-				float diff = static_cast<float>(t - e->timeStamp);
+                    float alpha = 1;
+                    float ttf = ttl - fade;
+                    if (diff > ttf) {
+                        diff = diff - ttf;
+                        float p = 0.8f - diff / fade;
+                        alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
+                    }
+                    
+                    alpha = 1.f;
 
-				// Since all log entries are ordered, once one is exceeding TTL, all have
-				if (diff > ttl)
-					break;
+                    // Since all log entries are ordered, once one exceeds alpha, all have
+                    if (alpha <= 0.0)
+                        break;
 
-				float alpha = 1;
-				float ttf = ttl - fade;
-				if (diff > ttf) {
-					diff = diff - ttf;
-					float p = 0.8f - diff / fade;
-					alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
-				}
+                    const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+                    const std::string& message = e->message.substr(0, msg_length);
+                    nr += std::count(message.begin(), message.end(), '\n');
 
-				// Since all log entries are ordered, once one exceeds alpha, all have
-				if (alpha <= 0.0)
-					break;
+                    RenderFont(_fontLog,
+                               glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
+                               white * alpha,
+                               "%-14s %s%s",									// Format
+                               e->timeString.c_str(),							// Time string
+                               e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
+                               e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
+                    
+                    glm::vec4 color = white;
+                    if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+                        color = green;
+                    if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+                        color = yellow;
+                    if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+                        color = red;
+                    if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+                        color = blue;
 
-				const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
-				const std::string& message = e->message.substr(0, msg_length);
-				nr += std::count(message.begin(), message.end(), '\n');
+//                    const float font_with_light = 5;
+                    RenderFont(_fontLog,
+                               glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+                               color * alpha,
+                               "%s",									// Format
+                               lvl.c_str());		// Pad category with "..." if exceeds category_length
 
-                Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
-					"%-14s %s%s",									// Format
-					e->timeString.c_str(),							// Time string
-					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
-					e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
-
-				glm::vec4 color = white;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
-					color = green;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
-					color = yellow;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Error)
-					color = red;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
-					color = blue;
-
-                Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
-                
-                
-                Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
-                ++nr;
-			}
-		}
+                    RenderFont(_fontLog,
+                               glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+                               white * alpha,
+                               "%s",									// Format
+                               message.c_str());		// Pad category with "..." if exceeds category_length
+                    ++nr;
+                }
+        }
 	}
-#endif
 }
 
 void RenderEngine::postDraw() {
