@@ -112,6 +112,9 @@ ParallelConnection::~ParallelConnection(){
 }
         
 void ParallelConnection::threadManagement(){
+    // The _disconnectCondition.wait(unqlock) stalls
+    // How about moving this out of the thread and into the destructor? ---abock
+    
     //while we're still running
     while(_isRunning.load()){
         {

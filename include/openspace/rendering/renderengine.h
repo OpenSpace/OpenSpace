@@ -144,9 +144,9 @@ private:
 	int _fadeDirection;
 //    bool _sgctRenderStatisticsVisible;
     
-    ghoul::fontrendering::Font* _fontInfo = nullptr;
-    ghoul::fontrendering::Font* _fontDate = nullptr;
-    ghoul::fontrendering::Font* _fontLog = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
 
 	bool _visualizeABuffer;
 	ABufferVisualizer* _visualizer;

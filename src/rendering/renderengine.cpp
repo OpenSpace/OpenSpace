@@ -427,19 +427,19 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             );
             penPosition.y -= _fontDate->height();
 
-            RenderFontCr(_fontDate,
+            RenderFontCr(*_fontDate,
                 penPosition,
                 "Date: %s",
                 Time::ref().currentTimeUTC().c_str()
             );
             
-            RenderFontCr(_fontInfo,
+            RenderFontCr(*_fontInfo,
                        penPosition,
                        "Simulation increment (s): %.0f",
                        Time::ref().deltaTime()
                        );
 
-            RenderFontCr(_fontInfo,
+            RenderFontCr(*_fontInfo,
                        penPosition,
                        "Avg. Frametime: %.5f",
                        OsEng.windowWrapper().averageDeltaTime()
@@ -464,7 +464,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 float radius = (a + b) / 2.f;
                 float distToSurf = glm::length(nhPos.vec3()) - radius;
                 
-                RenderFont(_fontInfo,
+                RenderFont(*_fontInfo,
                            penPosition,
                            "Distance to Pluto: % .1f (KM)",
                            distToSurf
@@ -495,20 +495,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 if (remaining > 0) {
                     brigther_active *= (1 - t);
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active * t + brigther_active,
                                "Next instrument activity:"
                     );
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active * t + brigther_active,
                                "%.0f s %s %.1f %%",
                                remaining, progress.c_str(), t * 100
                     );
 
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active,
                                "Data acquisition time: %s",
@@ -536,7 +536,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     mm.append(std::to_string(minute));
                     ss.append(std::to_string(second));
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                targetColor,
                                "Data acquisition adjacency: [%s:%s:%s]",
@@ -554,7 +554,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         t += 0.3;
                         color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
                         
-                        RenderFont(_fontInfo,
+                        RenderFont(*_fontInfo,
                                    penPosition,
                                    color,
                                    "%s%s",
@@ -571,7 +571,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
                     glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active,
                                "Active Instruments:"
@@ -579,12 +579,12 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
                     for (auto t : activeMap){
                         if (t.second == false) {
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "| |"
                             );
-                            RenderFontCr(_fontInfo,
+                            RenderFontCr(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "    %5s",
@@ -593,24 +593,24 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                             
                         }
                         else{
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "|"
                             );
                             if (t.first == "NH_LORRI") {
-                                RenderFont(_fontInfo,
+                                RenderFont(*_fontInfo,
                                            penPosition,
                                            firing,
                                            " + "
                                 );
                             }
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "  |"
                             );
-                            RenderFontCr(_fontInfo,
+                            RenderFontCr(*_fontInfo,
                                        penPosition,
                                        active,
                                        "    %5s",
@@ -665,7 +665,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     const std::string& message = e->message.substr(0, msg_length);
                     nr += std::count(message.begin(), message.end(), '\n');
 
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%-14s %s%s",									// Format
@@ -684,13 +684,13 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         color = blue;
 
 //                    const float font_with_light = 5;
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                color * alpha,
                                "%s",									// Format
                                lvl.c_str());		// Pad category with "..." if exceeds category_length
 
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%s",									// Format
