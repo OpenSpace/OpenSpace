@@ -140,7 +140,7 @@ function (add_external_dependencies)
     set_property(TARGET lz4 PROPERTY FOLDER "External")
     set_property(TARGET tinyobjloader PROPERTY FOLDER "External")
 
-    # # SGCT
+    # SGCT
     find_package(SGCT REQUIRED)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SGCT_INCLUDE_DIRECTORIES})
     target_link_libraries(libOpenSpace ${SGCT_LIBRARIES})

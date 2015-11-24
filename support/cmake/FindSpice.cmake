@@ -1,9 +1,12 @@
-
-
 set(SPICE_INCLUDE_DIR "${SPICE_ROOT_DIR}/include")
 
 if(WIN32)
-    set(SPICE_LIBRARY "${SPICE_ROOT_DIR}/lib/msvc12/cspice.lib")
+	if (${MSVC_VERSION} EQUAL 1800)
+	    set(SPICE_LIBRARY "${SPICE_ROOT_DIR}/lib/msvc12/cspice.lib")
+	endif ()
+	if (${MSVC_VERSION} EQUAL 1900)
+    	set(SPICE_LIBRARY "${SPICE_ROOT_DIR}/lib/msvc14/cspice.lib")
+    endif ()
 elseif(APPLE)
     set(SPICE_LIBRARY "${SPICE_ROOT_DIR}/lib/gcc_osx/cspice.a")
 else()

@@ -27,6 +27,9 @@
 
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 
+#undef near
+#undef far
+
 namespace openspace {
     
 void SGCTWindowWrapper::setBarrier(bool enabled) {
