@@ -46,6 +46,8 @@ if(WIN32)
         set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc11")
     elseif (MSVC12)
         set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc12")
+    elseif (MSVC14)
+        set(SGCT_LIBRARY_FOLDER "${SGCT_ROOT_DIR}/lib/msvc14")
     endif (MSVC10)
     
     if (CMAKE_CL_64)
