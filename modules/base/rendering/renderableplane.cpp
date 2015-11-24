@@ -166,7 +166,6 @@ bool RenderablePlane::deinitialize() {
 	if (!_projectionListener){
 		// its parents job to kill texture
 		// iff projectionlistener 
-		delete _texture;
 		_texture = nullptr;
 	}
 
@@ -190,8 +189,8 @@ void RenderablePlane::render(const RenderData& data) {
 		//get parent node-texture and set with correct dimensions  
 		SceneGraphNode* textureNode = OsEng.renderEngine()->scene()->sceneGraphNode(_nodeName)->parent();
 		if (textureNode != nullptr){
-			RenderablePlanetProjection *t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-			_texture = t->baseTexture();
+			RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+            _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());
 			float h = _texture->height();
 			float w = _texture->width();
 			float scale = h / w;
@@ -229,7 +228,7 @@ void RenderablePlane::update(const UpdateData& data) {
 
 void RenderablePlane::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
@@ -237,9 +236,7 @@ void RenderablePlane::loadTexture() {
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 
             delete _textureFile;
             _textureFile = new ghoul::filesystem::File(_texturePath);

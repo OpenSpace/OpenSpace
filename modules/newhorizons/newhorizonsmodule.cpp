@@ -44,7 +44,6 @@
 
 #include <modules/newhorizons/util/imagesequencer.h>
 
-
 namespace openspace {
 
 NewHorizonsModule::NewHorizonsModule()
@@ -57,7 +56,6 @@ bool NewHorizonsModule::create() {
         return false;
 
     ImageSequencer2::initialize();
-
 
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Decoder>);

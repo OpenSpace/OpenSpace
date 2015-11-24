@@ -80,10 +80,10 @@ namespace openspace {
 		ghoul::opengl::ProgramObject* _programObject;
 		ghoul::opengl::ProgramObject* _fboProgramObject;
 
-		ghoul::opengl::Texture* _texture;
-		ghoul::opengl::Texture* _textureOriginal;
-		ghoul::opengl::Texture* _textureProj;
-		ghoul::opengl::Texture* _textureWhiteSquare;
+        std::unique_ptr<ghoul::opengl::Texture> _texture;
+        std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+        std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+        std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 
 		modelgeometry::ModelGeometry* _geometry;
 

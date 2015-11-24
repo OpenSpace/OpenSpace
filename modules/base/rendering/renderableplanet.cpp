@@ -138,10 +138,6 @@ bool RenderablePlanet::deinitialize() {
         _geometry->deinitialize();
         delete _geometry;
     }
-    if (_texture)
-        delete _texture;
-	if (_nightTexture)
-		delete _nightTexture;
 
     _geometry = nullptr;
     _texture = nullptr;
@@ -222,10 +218,9 @@ void RenderablePlanet::update(const UpdateData& data){
 }
 
 void RenderablePlanet::loadTexture() {
-    delete _texture;
     _texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
 			_texture->uploadTexture();
@@ -237,10 +232,9 @@ void RenderablePlanet::loadTexture() {
         }
     }
 	if (_hasNightTexture) {
-		delete _nightTexture;
 		_nightTexture = nullptr;
 		if (_nightTexturePath != "") {
-			_nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
+            _nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
 			if (_nightTexture) {
 				LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
 				_nightTexture->uploadTexture();

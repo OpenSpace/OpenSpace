@@ -149,7 +149,6 @@ bool RenderableModel::deinitialize() {
 		delete _geometry;
         _geometry = nullptr;
 	}
-	delete _texture;
     _texture = nullptr;
 
     delete _programObject;
@@ -253,10 +252,9 @@ void RenderableModel::update(const UpdateData& data) {
 }
 
 void RenderableModel::loadTexture() {
-    delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();

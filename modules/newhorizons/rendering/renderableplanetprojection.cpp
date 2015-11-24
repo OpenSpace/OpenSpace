@@ -305,13 +305,9 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 }
 
 bool RenderablePlanetProjection::deinitialize(){
-    delete _texture; 
     _texture = nullptr;
-	delete _textureProj;
 	_textureProj = nullptr;
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	delete _geometry;
 	_geometry = nullptr;
@@ -561,10 +557,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 }
 
 void RenderablePlanetProjection::loadProjectionTexture() {
-	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
+        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
 		if (_textureProj) {
 			_textureProj->uploadTexture(); 
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
@@ -576,28 +571,25 @@ void RenderablePlanetProjection::loadProjectionTexture() {
 }
 
 void RenderablePlanetProjection::loadTexture() {
-    delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
         if (_texture) {
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
 		if (_textureOriginal) {
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage);
+        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage));
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

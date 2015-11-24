@@ -63,8 +63,8 @@ protected:
 private:
     properties::StringProperty _colorTexturePath;
     ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _nightTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
 	properties::IntProperty _rotation;

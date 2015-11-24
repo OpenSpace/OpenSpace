@@ -131,7 +131,6 @@ bool RenderableSphere::deinitialize() {
     delete _sphere;
     _sphere = nullptr;
 
-	delete _texture;
     _texture = nullptr;
 
     delete _shader;
@@ -182,7 +181,7 @@ void RenderableSphere::update(const UpdateData& data) {
 
 void RenderableSphere::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
@@ -192,9 +191,7 @@ void RenderableSphere::loadTexture() {
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 		}
 	}
 }

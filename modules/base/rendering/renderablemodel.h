@@ -60,7 +60,7 @@ private:
 	properties::BoolProperty _performFade;
 	properties::FloatProperty _fading;
     ghoul::opengl::ProgramObject* _programObject; 
-    ghoul::opengl::Texture* _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 	modelgeometry::ModelGeometry* _geometry;
 

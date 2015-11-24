@@ -274,15 +274,6 @@ bool RenderableModelProjection::deinitialize() {
 		delete _geometry;
 	}
 
-	if (_texture)
-		delete _texture;
-	if (_textureProj) 
-		delete _textureProj;
-	if (_textureOriginal)
-		delete _textureOriginal;
-	if (_textureWhiteSquare)
-		delete _textureWhiteSquare;
-
 	_geometry = nullptr;
 	_texture = nullptr;
 	_textureProj = nullptr;
@@ -488,30 +479,27 @@ void RenderableModelProjection::project() {
 }
 
 void RenderableModelProjection::loadTexture() {
-	delete _texture;
 	_texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 		if (_texture) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 		if (_textureOriginal) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_defaultProjImage != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage));
+        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage)));
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -520,10 +508,9 @@ void RenderableModelProjection::loadTexture() {
 }
 
 void RenderableModelProjection::loadProjectionTexture() {
-	delete _textureProj;
 	_textureProj = nullptr;
 	if (_projectionTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
+        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
 		if (_textureProj) {
 			_textureProj->uploadTexture();
 			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

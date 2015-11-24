@@ -70,7 +70,7 @@ public:
 
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-	ghoul::opengl::Texture* baseTexture() { return _texture; };
+	ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
 
 protected:
 
@@ -98,10 +98,10 @@ private:
     ghoul::opengl::ProgramObject* _programObject;
 	ghoul::opengl::ProgramObject* _fboProgramObject;
 
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _textureOriginal;
-	ghoul::opengl::Texture* _textureProj;
-	ghoul::opengl::Texture* _textureWhiteSquare;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+	std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+	std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+    std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
 	glm::vec2  _camScaling;

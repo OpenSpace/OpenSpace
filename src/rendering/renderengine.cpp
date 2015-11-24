@@ -182,13 +182,13 @@ bool RenderEngine::initialize() {
 	OsEng.interactionHandler()->setCamera(_mainCamera);
 
 #ifdef GHOUL_USE_DEVIL
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
 #endif // GHOUL_USE_FREEIMAGE
 
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
 
 	return true;

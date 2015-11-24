@@ -296,7 +296,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     // check if not a txt based texture
     if ( ! hasExtension(filepath, "txt")) {
-        ghoul::opengl::Texture* t = ghoul::io::TextureReader::ref().loadTexture(f);
+        ghoul::opengl::Texture* t = ghoul::io::TextureReader::ref().loadTexture(f).get();
         t->setWrapping(wrappingmode);
         return t;
     }

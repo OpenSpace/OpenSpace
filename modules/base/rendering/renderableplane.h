@@ -78,7 +78,7 @@ private:
 
 	ghoul::opengl::ProgramObject* _shader;
     bool _textureIsDirty;
-	ghoul::opengl::Texture* _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
     ghoul::filesystem::File* _textureFile;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

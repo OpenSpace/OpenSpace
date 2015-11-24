@@ -119,7 +119,7 @@ bool RenderablePlaneProjection::deinitialize() {
 	_quad = 0;
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
-	delete _texture;
+    _texture = nullptr;
 	return true;
 }
 
@@ -190,15 +190,13 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
 void RenderablePlaneProjection::loadTexture() {
 	if (_texturePath != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			texture->uploadTexture();
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 
 			delete _textureFile;
 			_textureFile = new ghoul::filesystem::File(_texturePath);
