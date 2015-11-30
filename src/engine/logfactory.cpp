@@ -45,7 +45,7 @@ namespace {
 
 namespace openspace {
 
-ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<ghoul::logging::Log> LogFactory::createLog(const ghoul::Dictionary& dictionary) {
 	std::string type;
 	bool typeSuccess = dictionary.getValue(keyType, type);
 	if (!typeSuccess) {
@@ -74,12 +74,14 @@ ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) 
 	dictionary.getValue(keyLogLevelStamping, logLevelStamp);
 
 	if (type == valueHtmlLog) {
-		return new ghoul::logging::HTMLLog(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+        return std::make_unique<ghoul::logging::HTMLLog>(
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+        );
 	}
 	else if (type == valueTextLog) {
-		return new ghoul::logging::TextLog(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+        return std::make_unique<ghoul::logging::TextLog>(
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+        );
 	}
 	else {
 		LERROR("Log with type '" << type << "' did not name a valid log");

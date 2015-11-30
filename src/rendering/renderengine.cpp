@@ -290,8 +290,9 @@ bool RenderEngine::initializeGL() {
 	_abuffer->initialize();
 
     LINFO("Initializing Log");
-	_log = new ScreenLog();
-	ghoul::logging::LogManager::ref().addLog(_log);
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>();
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Initializing Visualizer");
 	_visualizer = new ABufferVisualizer();

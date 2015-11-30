@@ -189,7 +189,7 @@ bool OpenSpaceEngine::create(
 	// configuration file, we will deinitialize this LogManager and reinitialize it later
 	// with the correct LogLevel
 	LogManager::initialize(LogManager::LogLevel::Debug, true);
-	LogMgr.addLog(new ConsoleLog);
+    LogMgr.addLog(std::make_unique<ConsoleLog>());
 
 	LDEBUG("Initialize FileSystem");
 
@@ -614,7 +614,7 @@ void OpenSpaceEngine::configureLogging() {
 		LogManager::LogLevel level = LogManager::levelFromString(logLevel);
 		LogManager::deinitialize();
 		LogManager::initialize(level, immediateFlush);
-		LogMgr.addLog(new ConsoleLog);
+		LogMgr.addLog(std::make_unique<ConsoleLog>());
 	}
 
 	if (configurationManager()->hasKeyAndValue<ghoul::Dictionary>(ConfigurationManager::KeyLogs)) {
@@ -625,10 +625,10 @@ void OpenSpaceEngine::configureLogging() {
 			ghoul::Dictionary logInfo;
 			logs.getValue(std::to_string(i), logInfo);
 
-			Log* log = LogFactory::createLog(logInfo);
+            std::unique_ptr<Log> log = LogFactory::createLog(logInfo);
 
 			if (log)
-				LogMgr.addLog(log);
+                LogMgr.addLog(std::move(log));
 		}
 	}
 }

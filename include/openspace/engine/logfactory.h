@@ -26,6 +26,7 @@
 #define __LOGFACTORY_H__
 
 #include <ghoul/misc/dictionary.h>
+#include <memory>
 
 namespace ghoul {
 namespace logging {
@@ -37,7 +38,7 @@ namespace openspace {
 
 class LogFactory {
 public:
-	static ghoul::logging::Log* createLog(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
 };
 
 } // namespace openspace
