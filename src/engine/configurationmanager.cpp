@@ -78,8 +78,10 @@ bool ConfigurationManager::loadFromFile(const std::string& filename) {
 	FileSys.registerPathToken(basePathToken, basePath);
 
 	// Loading the configuration file into ourselves
-	const bool loadingSuccess = ghoul::lua::loadDictionaryFromFile(filename, *this);
-	if (!loadingSuccess) {
+    try {
+        ghoul::lua::loadDictionaryFromFile(filename, *this);
+    }
+    catch (...) {
 		LERROR("Loading dictionary from file failed");
 		return false;
 	}
