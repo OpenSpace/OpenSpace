@@ -24,6 +24,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <algorithm>
 #include <assert.h>
 

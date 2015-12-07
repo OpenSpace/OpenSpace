@@ -28,6 +28,8 @@
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/decoder.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
 	const std::string _loggerCat = "SequenceParser";
 	const std::string keyTranslation = "DataInputTranslation";

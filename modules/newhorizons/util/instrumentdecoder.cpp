@@ -24,6 +24,9 @@
 
 #include <modules/newhorizons/util/instrumentdecoder.h>
 
+#include <ghoul/misc/assert.h>
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     const std::string _loggerCat  = "InstrumentDecoder";
 	const std::string keyDetector = "DetectorType";
