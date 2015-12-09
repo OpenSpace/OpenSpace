@@ -133,7 +133,6 @@ bool RenderableSphere::deinitialize() {
 
     _texture = nullptr;
 
-    delete _shader;
     _shader = nullptr;
 
 	return true;
@@ -152,7 +151,7 @@ void RenderableSphere::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 
     _shader->setUniform("alpha", _transparency);
 

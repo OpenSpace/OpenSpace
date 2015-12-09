@@ -77,8 +77,8 @@ namespace openspace {
 		properties::IntProperty _rotationY;
 		properties::IntProperty _rotationZ;
 
-		ghoul::opengl::ProgramObject* _programObject;
-		ghoul::opengl::ProgramObject* _fboProgramObject;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;

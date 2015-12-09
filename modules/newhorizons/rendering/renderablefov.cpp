@@ -541,7 +541,7 @@ void RenderableFov::render(const RenderData& data) {
 	// setup the data to the shader
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", glm::mat4(1));
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	if (openspace::ImageSequencer2::ref().isReady())
 		_drawFOV = ImageSequencer2::ref().instrumentActive(_instrumentID);

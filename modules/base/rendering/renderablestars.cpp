@@ -167,7 +167,6 @@ bool RenderableStars::deinitialize() {
 	_pointSpreadFunctionTexture = nullptr;
     _colorTexture = nullptr;
 
-    delete _program;
 	_program = nullptr;
 	return true;	
 }
@@ -198,7 +197,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
 	
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
 
 	ghoul::opengl::TextureUnit psfUnit;

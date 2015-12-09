@@ -125,7 +125,7 @@ private:
 
 	std::mutex _programUpdateLock;
 	std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
-	std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
     typedef std::map<std::string, ghoul::Dictionary> NodeMap;
     typedef std::multimap<std::string, std::string> DependencyMap;

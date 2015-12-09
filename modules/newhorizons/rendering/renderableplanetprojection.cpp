@@ -245,10 +245,10 @@ bool RenderablePlanetProjection::initialize() {
             return false;
     }
 
-	if (_fboProgramObject == nullptr)
-		completeSuccess
-		&= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
-
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
+                                      "${SHADERS}/fboPass_vs.glsl",
+                                      "${SHADERS}/fboPass_fs.glsl");
+    
     loadTexture();
 	loadProjectionTexture();
     completeSuccess &= (_texture != nullptr);
@@ -520,7 +520,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	textureBind();
 	

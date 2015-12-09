@@ -105,7 +105,6 @@ bool RenderableShadowCylinder::deinitialize() {
 	_vao = 0;
 	glDeleteBuffers(1, &_vbo);
 	_vbo = 0;
-	delete _shader;
 	_shader = nullptr;
 	return true;
 }
@@ -122,7 +121,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", _transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 	
 	glBindVertexArray(_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));

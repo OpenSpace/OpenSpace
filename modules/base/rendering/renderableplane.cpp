@@ -172,7 +172,6 @@ bool RenderablePlane::deinitialize() {
     delete _textureFile;
     _textureFile = nullptr;
 
-    delete _shader;
     _shader = nullptr;
 
 	return true;
@@ -200,7 +199,7 @@ void RenderablePlane::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();

@@ -29,7 +29,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <fstream>
@@ -123,7 +122,6 @@ bool RenderablePath::deinitialize() {
 	glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
 
-    delete _programObject;
     _programObject = nullptr;
 
 	return true;
@@ -158,7 +156,7 @@ void RenderablePath::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("color", _lineColor);
 	_programObject->setUniform("lastPosition", _lastPosition);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 
 	if (_drawLine) {
 		glLineWidth(_lineWidth);

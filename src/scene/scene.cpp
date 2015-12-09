@@ -84,8 +84,6 @@ bool Scene::initialize() {
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
-    ProgramObject* tmpProgram;
-
 	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
 		_programUpdateLock.lock();
 		_programsToUpdate.insert(program);
@@ -93,40 +91,40 @@ bool Scene::initialize() {
 	};
 
 	// fboPassthrough program
-	tmpProgram = ProgramObject::Build("fboPassProgram",
+	std::unique_ptr<ghoul::opengl::ProgramObject> prg = ProgramObject::Build("fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
 		"${SHADERS}/fboPass_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
+	if (!prg) return false;
+	prg->setProgramObjectCallback(cb);
+    OsEng.ref().configurationManager()->setValue("fboPassProgram", prg.get());
+    _programs.push_back(std::move(prg));
 
 	// pscstandard
-	tmpProgram = ProgramObject::Build("pscstandard",
+	prg = ProgramObject::Build("pscstandard",
 		"${SHADERS}/pscstandard_vs.glsl",
 		"${SHADERS}/pscstandard_fs.glsl");
-    if( ! tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
+    if (! prg) return false;
+	prg->setProgramObjectCallback(cb);
+    OsEng.ref().configurationManager()->setValue("pscShader", prg.get());
+    _programs.push_back(std::move(prg));
 
 	// Night texture program
-	tmpProgram = ProgramObject::Build("nightTextureProgram",
+	prg = ProgramObject::Build("nightTextureProgram",
 		"${SHADERS}/nighttexture_vs.glsl",
 		"${SHADERS}/nighttexture_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
+	if (!prg) return false;
+	prg->setProgramObjectCallback(cb);
+    OsEng.ref().configurationManager()->setValue("nightTextureProgram", prg.get());
+    _programs.push_back(std::move(prg));
 
     // RaycastProgram
-	tmpProgram = ProgramObject::Build("RaycastProgram",
+	prg = ProgramObject::Build("RaycastProgram",
 		"${SHADERS}/exitpoints.vert",
 		"${SHADERS}/exitpoints.frag");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
+	if (!prg) return false;
+	prg->setProgramObjectCallback(cb);
+    OsEng.ref().configurationManager()->setValue("RaycastProgram", prg.get());
+    _programs.push_back(std::move(prg));
 
     return true;
 }
@@ -136,8 +134,6 @@ bool Scene::deinitialize() {
 
 	// clean up all programs
 	_programsToUpdate.clear();
-	for (ghoul::opengl::ProgramObject* program : _programs)
-		delete program;
 	_programs.clear();
     return true;
 }
@@ -175,7 +171,7 @@ void Scene::render(const RenderData& data) {
 	if (!emptyProgramsToUpdate) {
 		LDEBUG("Setting uniforms");
 		// Ignore attribute locations
-		for (ghoul::opengl::ProgramObject* program : _programs)
+		for (const auto& program : _programs)
 			program->setIgnoreSubroutineUniformLocationError(true);
 	}
 

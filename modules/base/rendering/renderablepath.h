@@ -68,7 +68,7 @@ private:
 	properties::FloatProperty _lineWidth;
 	properties::BoolProperty _drawLine;
 
-	ghoul::opengl::ProgramObject* _programObject;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 	bool _successfullDictionaryFetch;
 

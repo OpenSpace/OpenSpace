@@ -87,7 +87,8 @@ void GuiPerformanceComponent::render() {
 			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
 
 
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+        void* ptr = _performanceMemory;
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 
 		for (int i = 0; i < layout->nEntries; ++i) {
 			const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];

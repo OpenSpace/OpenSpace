@@ -53,7 +53,7 @@ namespace {
 	size_t vboMaxSize = 20000;
 	GLuint vao = 0;
 	GLuint vbo = 0;
-	ghoul::opengl::ProgramObject* _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
 		if (nCommandLists == 0)
@@ -240,8 +240,6 @@ void GUI::initializeGL() {
 }
 
 void GUI::deinitializeGL() {
-	if (_program)
-		delete _program;
 	_program = nullptr;
 
 	if (vao) glDeleteVertexArrays(1, &vao);

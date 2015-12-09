@@ -79,7 +79,7 @@ private:
 	glm::dmat3 _stateMatrix;
 	std::string _frame;
 
-	ghoul::opengl::ProgramObject* _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	bool _textureIsDirty;
     std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
 //    ghoul::opengl::Texture* _texture;

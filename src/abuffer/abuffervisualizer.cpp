@@ -58,8 +58,6 @@ ABufferVisualizer::~ABufferVisualizer() {
 		glDeleteVertexArrays(1, &_pointcloud);
 	if (_markers)
 		glDeleteVertexArrays(1, &_markers);
-	if (_pointcloudProgram)
-		delete _pointcloudProgram;
 }
 
 void ABufferVisualizer::updateData(const std::vector<ABuffer::fragmentData>& data) {

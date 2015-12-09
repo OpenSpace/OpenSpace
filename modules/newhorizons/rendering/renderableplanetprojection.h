@@ -95,8 +95,8 @@ private:
 	properties::BoolProperty _performProjection;
 	properties::BoolProperty _clearAllProjections;
 
-    ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _fboProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 	std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;

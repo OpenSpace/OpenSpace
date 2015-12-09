@@ -73,7 +73,7 @@ namespace openspace {
 		properties::IntProperty _numberOfPoints;
 		properties::FloatProperty _shadowLength;
 
-		ghoul::opengl::ProgramObject* _shader;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 		
 		glm::dmat3 _stateMatrix;
 

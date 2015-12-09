@@ -60,9 +60,7 @@ ABuffer::ABuffer()
 }
 
 ABuffer::~ABuffer() {
-    delete _resolveShader;
-	
-	for (auto file: _samplerFiles)
+	for (auto file : _samplerFiles)
 		delete file;
 }
 
@@ -172,22 +170,17 @@ int ABuffer::addSamplerfile(const std::string& filename) {
 bool ABuffer::updateShader() {
     if (_resolveShader == nullptr)
         return false;
-	bool s = _resolveShader->rebuildFromFile();
-	if (s) {
-		int startAt = 0;
-		for (int i = 0; i < _volumes.size(); ++i) {
-			_resolveShader->setUniform(_volumes.at(i).first, i);
-			startAt = i + 1;
-		}
-		for (int i = 0; i < _transferFunctions.size(); ++i) {
-			_resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
-		}
-		LINFO("Successfully updated ABuffer resolve shader!");
-	}
-	else {
-		LWARNING("Couldn't update ABuffer resolve shader");
-	}
-	return s;
+	_resolveShader->rebuildFromFile();
+    int startAt = 0;
+    for (int i = 0; i < _volumes.size(); ++i) {
+        _resolveShader->setUniform(_volumes.at(i).first, i);
+        startAt = i + 1;
+    }
+    for (int i = 0; i < _transferFunctions.size(); ++i) {
+        _resolveShader->setUniform(_transferFunctions.at(i).first, startAt + i);
+    }
+    LINFO("Successfully updated ABuffer resolve shader!");
+	return true;
 }
 
 void ABuffer::generateShaderSource() {

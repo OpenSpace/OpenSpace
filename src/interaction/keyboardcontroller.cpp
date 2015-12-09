@@ -32,7 +32,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/highresclock.h>
+
+#include <chrono>
 
 namespace {
 	const std::string _loggerCat = "KeyboardController";
@@ -169,7 +170,7 @@ void KeyboardControllerLua::keyPressed(KeyAction action, Key key, KeyModifier mo
 		return;
 	}
 
-	auto start = ghoul::HighResClock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
 	lua_getfield(s, -1, keyToString(key, modifier).c_str());
 	if (!lua_isnil(s, -1))
@@ -177,7 +178,7 @@ void KeyboardControllerLua::keyPressed(KeyAction action, Key key, KeyModifier mo
 	else
 		LINFO("Key not found");
 
-	auto end = ghoul::HighResClock::now();
+    auto end = std::chrono::high_resolution_clock::now();
 	LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
 
 

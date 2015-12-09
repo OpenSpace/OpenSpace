@@ -76,7 +76,7 @@ private:
     properties::FloatProperty _scaleFactor;
     properties::FloatProperty _minBillboardSize;
 
-	ghoul::opengl::ProgramObject* _program;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	std::string _speckFile;
 

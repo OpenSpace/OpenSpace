@@ -919,7 +919,8 @@ void RenderEngine::storePerformanceMeasurements() {
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+        void* ptr = _performanceMemory;
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
 		layout->nEntries = nNodes;
@@ -944,7 +945,8 @@ void RenderEngine::storePerformanceMeasurements() {
 		}
 	}
 
-	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+    void* ptr = _performanceMemory;
+	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 	_performanceMemory->acquireLock();
 	for (int i = 0; i < nNodes; ++i) {
 		SceneGraphNode* node = scene()->allSceneGraphNodes()[i];

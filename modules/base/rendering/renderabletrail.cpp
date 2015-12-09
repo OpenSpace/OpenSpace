@@ -29,7 +29,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 
@@ -102,10 +101,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 	_distanceFade = 1.0;
 }
 
-RenderableTrail::~RenderableTrail() {
-    delete _programObject;
-}
-
 bool RenderableTrail::initialize() {
     if (!_successfullDictionaryFetch) {
         LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");
@@ -149,7 +144,7 @@ void RenderableTrail::render(const RenderData& data) {
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(_programObject, &data.camera, data.position);
+    setPscUniforms(_programObject.get(), &data.camera, data.position);
 
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
