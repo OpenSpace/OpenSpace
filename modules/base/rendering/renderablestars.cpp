@@ -150,6 +150,7 @@ bool RenderableStars::initialize() {
 		"${MODULE_BASE}/shaders/star_vs.glsl",
 		"${MODULE_BASE}/shaders/star_fs.glsl",
 		"${MODULE_BASE}/shaders/star_ge.glsl");
+    
 	if (!_program)
 		return false;
 	completeSuccess &= loadData();

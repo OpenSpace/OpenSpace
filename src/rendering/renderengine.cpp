@@ -656,8 +656,6 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
                     }
                     
-                    alpha = 1.f;
-
                     // Since all log entries are ordered, once one exceeds alpha, all have
                     if (alpha <= 0.0)
                         break;
