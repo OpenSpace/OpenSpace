@@ -56,7 +56,7 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/systemcapabilities>
 #include <ghoul/font/fontrenderer.h>
 
 #include <iostream>
@@ -321,8 +321,12 @@ bool OpenSpaceEngine::initialize() {
 	clearAllWindows();
 
 	// Detect and log OpenCL and OpenGL versions and available devices
-	SysCap.addComponent(new ghoul::systemcapabilities::GeneralCapabilitiesComponent);
-	SysCap.addComponent(new ghoul::systemcapabilities::OpenGLCapabilitiesComponent);
+    SysCap.addComponent(
+        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
+    );
+    SysCap.addComponent(
+        std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
+    );
 	SysCap.detectCapabilities();
 
     using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;

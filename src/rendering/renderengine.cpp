@@ -143,7 +143,7 @@ bool RenderEngine::initialize() {
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version(4,3)) {
+        if (OpenGLCap.openGLVersion() < Version{4,3}) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "ABufferFrameBuffer";
         }
