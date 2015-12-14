@@ -24,11 +24,12 @@
 
 #include <openspace/engine/moduleengine.h>
 
+#include <openspace/moduleregistration.h>
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/moduleregistration.h>
+#include <algorithm>
 
 namespace {
     const std::string _loggerCat = "ModuleEngine";
@@ -36,63 +37,40 @@ namespace {
 
 namespace openspace {
 
-void ModuleEngine::create() {
-    LDEBUG("Creating modules");
-
+void ModuleEngine::initialize() {
     for (OpenSpaceModule* m : AllModules)
         registerModule(std::unique_ptr<OpenSpaceModule>(m));
-
-    for (auto& m : _modules)
-        m->create();
-    LDEBUG("Finished creating modules");
     return true;
 }
 
-void ModuleEngine::destroy() {
-    LDEBUG("Destroying modules");
-    for (auto& m : _modules)
-        m->destroy();
+void ModuleEngine::deinitialize() {
+    LDEBUG("Deinitializing modules");
+    for (auto& m : _modules) {
+        LDEBUG("Deinitialieing module '" << m->name() << "'");
+        m->deinitialize();
+    }
     _modules.clear();
     LDEBUG("Finished destroying modules");
 }
 
-bool ModuleEngine::initialize() {
-    LDEBUG("Initializing modules");
-
-    for (auto& m : _modules) {
-        bool success = m->initialize();
-        if (!success) {
-            LERROR("Could not initialize module '" << m->name() << "'");
-            return false;
-        }
-    }
-    LDEBUG("Finished initializing modules");
-    return true;
-}
-
-bool ModuleEngine::deinitialize() {
-    LDEBUG("Deinitializing modules");
-
-    for (auto& m : _modules) {
-        bool success = m->deinitialize();
-        if (!success) {
-            LERROR("Could not deinitialize module '" << m->name() << "'");
-            return false;
-        }
-    }
-    LDEBUG("Finished Deinitializing modules");
-    return true;
-}
-
-void ModuleEngine::registerModules(std::vector<std::unique_ptr<OpenSpaceModule>> modules) {
-    _modules.insert(
-        _modules.end(),
-        std::make_move_iterator(modules.begin()),
-        std::make_move_iterator(modules.end())
-    );
-}
-
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
+    ghoul_assert(module, "Module must not be nullptr");
+    
+    auto it = std::find_if(
+        _modules.begin(),
+        _modules.end(),
+        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->name() == module->name();
+        }
+    );
+    if (it != _modules.end()) {
+        throw ghoul::RuntimeError(
+            "Module name '" + module->name() + "' was registered before", "ModuleEngine"
+        );
+    }
+    
+    LDEBUG("Registering module '" << module->name() << "'");
+    module->initialize();
     _modules.push_back(std::move(module));
 }
 

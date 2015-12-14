@@ -37,7 +37,7 @@ VolumeModule::VolumeModule()
     : OpenSpaceModule("Volume")
 {}
 
-void VolumeModule::internalCreate() {
+void VolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 

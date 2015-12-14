@@ -55,7 +55,7 @@ BaseModule::BaseModule()
     : OpenSpaceModule("Base")
 {}
 
-void BaseModule::internalCreate() {
+void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
 

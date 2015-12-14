@@ -37,7 +37,7 @@ FieldlinesModule::FieldlinesModule()
     : OpenSpaceModule("Fieldlines")
 {}
 
-void FieldlinesModule::internalCreate() {
+void FieldlinesModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 

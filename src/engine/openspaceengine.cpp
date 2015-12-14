@@ -239,7 +239,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	}
 
     // Register modules
-    _engine->_moduleEngine->create();
+    _engine->_moduleEngine->initialize();
 
 	// Create the cachemanager
 	FileSys.createCacheManager(
@@ -273,7 +273,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
 void OpenSpaceEngine::destroy() {
     _engine->_moduleEngine->deinitialize();
-    _engine->_moduleEngine->destroy();
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
@@ -388,9 +387,6 @@ bool OpenSpaceEngine::initialize() {
 
     LINFO("Initializing GUI");
 	_gui->initialize();
-
-    // Initialize modules
-    _moduleEngine->initialize();
 
     LINFO("Finished initializing");
 	return true;

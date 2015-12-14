@@ -34,7 +34,7 @@ public:
     VolumeModule();
     
 protected:
-    void internalCreate() override;
+    void internalInitialize() override;
 };
 
 } // namespace openspace

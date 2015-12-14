@@ -50,7 +50,7 @@ NewHorizonsModule::NewHorizonsModule()
     : OpenSpaceModule("NewHorizons")
 {}
 
-void NewHorizonsModule::internalCreate() {
+void NewHorizonsModule::internalInitialize() {
     ImageSequencer2::initialize();
 
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
