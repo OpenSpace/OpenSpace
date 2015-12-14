@@ -37,17 +37,11 @@ FieldlinesModule::FieldlinesModule()
     : OpenSpaceModule("Fieldlines")
 {}
 
-bool FieldlinesModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
+void FieldlinesModule::internalCreate() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableFieldlines>("RenderableFieldlines");
-
-    return true;
 }
 
 } // namespace openspace

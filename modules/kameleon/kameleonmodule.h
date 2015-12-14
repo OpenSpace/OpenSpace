@@ -32,7 +32,6 @@ namespace openspace {
 class KameleonModule : public OpenSpaceModule {
 public:
     KameleonModule();
-    bool create() override;
 };
 
 } // namespace openspace

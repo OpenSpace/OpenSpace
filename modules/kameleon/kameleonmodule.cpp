@@ -30,12 +30,4 @@ KameleonModule::KameleonModule()
     : OpenSpaceModule("Kameleon")
 {}
 
-bool KameleonModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
-    return true;
-}
-
 } // namespace openspace

@@ -28,10 +28,8 @@
 #include <memory>
 
 namespace ghoul {
-    class Dictionary;
-    namespace logging {
-        class Log;
-    }
+class Dictionary;
+namespace logging { class Log; }
 }
 
 namespace openspace {

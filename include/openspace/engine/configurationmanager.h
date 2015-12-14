@@ -29,11 +29,20 @@
 
 namespace openspace {
 
+/**
+ * The ConfigurationManager takes care of loading the major configuration file
+ * <code>openspace.cfg</code> and making it available to the rest of the application. The
+ * exposed keys in the ghoul::Dictionary are declared in this class as static constants.
+ * The findConfiguration method walks the filesystem from a provided starting point until
+ * it found the requested file or throws a ghoul::RuntimeError if it could not find the
+ * file. The loadFromFile method then loads the file into a ghoul::Dictionary format.
+ */
 class ConfigurationManager : public ghoul::Dictionary {
 public:
+    /// The key that stores the subdirectory containing all predefined path tokens
     static const std::string KeyPaths;
+    ///
     static const std::string KeyCache;
-    static const std::string KeyCachePath;
     static const std::string KeyFonts;
     static const std::string KeyConfigSgct;
     static const std::string KeyLuaDocumentationType;
@@ -53,7 +62,9 @@ public:
     static const std::string KeyDisableMasterRendering;
     static const std::string KeyDownloadRequestURL;
 
-	bool loadFromFile(const std::string& filename);
+    static std::string findConfiguration(const std::string& filename);
+    
+	void loadFromFile(const std::string& filename);
 
 private:
 	bool checkCompleteness() const;

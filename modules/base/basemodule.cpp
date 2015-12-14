@@ -55,11 +55,7 @@ BaseModule::BaseModule()
     : OpenSpaceModule("Base")
 {}
 
-bool BaseModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
+void BaseModule::internalCreate() {
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
 
@@ -89,8 +85,6 @@ bool BaseModule::create() {
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
     fModelGeometry->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
-
-    return true;
 }
 
 } // namespace openspace

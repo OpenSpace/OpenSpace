@@ -77,7 +77,6 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const std::string _loggerCat = "OpenSpaceEngine";
-    const std::string _configurationFile = "openspace.cfg";
     const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
 	const std::string _defaultCacheLocation = "${BASE_PATH}/cache";
     
@@ -199,24 +198,27 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
 	if (configurationFilePath.empty()) {
 		LDEBUG("Finding configuration");
-		const bool findConfigurationSuccess =
-			OpenSpaceEngine::findConfiguration(configurationFilePath);
-		if (!findConfigurationSuccess) {
-			LFATAL("Could not find OpenSpace configuration file!");
-			return false;
-		}
+        try {
+            configurationFilePath =
+                ConfigurationManager::findConfiguration(configurationFilePath);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LFATALC(e.component, e.message);
+        }
 	}
 	configurationFilePath = absPath(configurationFilePath);
 	LINFO("Configuration Path: '" << configurationFilePath << "'");
 
 	// Loading configuration from disk
 	LDEBUG("Loading configuration from disk");
-	const bool configLoadSuccess = _engine->configurationManager().loadFromFile(
-																configurationFilePath);
-	if (!configLoadSuccess) {
-		LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
-		return false;
-	}
+    try {
+        _engine->configurationManager().loadFromFile(configurationFilePath);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATALC(e.component, e.message);
+        return false;
+    }
 
 	// Initialize the requested logs from the configuration file
 	_engine->configureLogging();
@@ -425,30 +427,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
     ));
 
     return true;
-}
-
-bool OpenSpaceEngine::findConfiguration(std::string& filename) {
-	using ghoul::filesystem::Directory;
-
-	Directory directory = FileSys.currentDirectory();
-	std::string configurationName = _configurationFile;
-
-	while (true) {
-		std::string&& fullPath = FileSys.pathByAppendingComponent(directory,
-																  configurationName);
-		bool exists = FileSys.fileExists(fullPath);
-		if (exists) {
-			filename = fullPath;
-			return true;
-		}
-
-		Directory nextDirectory = directory.parentDirectory(true);
-
-		if (directory.path() == nextDirectory.path())
-			// We have reached the root of the file system and did not find the file
-			return false;
-		directory = nextDirectory;
-	}
 }
 
 bool OpenSpaceEngine::loadSpiceKernels() {

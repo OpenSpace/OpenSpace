@@ -59,17 +59,17 @@ namespace properties { class PropertyOwner; }
  
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, std::unique_ptr<WindowWrapper> windowWrapper, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv,
+        std::unique_ptr<WindowWrapper> windowWrapper,
+        std::vector<std::string>& sgctArguments);
     static void destroy();
+    static bool isInitialized();
     static OpenSpaceEngine& ref();
 
-    static bool isInitialized();
-    bool initialize();
 	bool isMaster();
 	void setMaster(bool master);
     double runTime();
     void setRunTime(double t);
-    static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
@@ -86,6 +86,7 @@ public:
 	gui::GUI& gui();
 
     // SGCT callbacks
+    bool initialize();
     bool initializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
@@ -116,8 +117,8 @@ private:
     void runScripts(const ghoul::Dictionary& scripts);
     void runStartupScripts();
 	void configureLogging();
-
-
+    
+    // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
@@ -131,12 +132,12 @@ private:
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     
+    // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+    std::unique_ptr<SyncBuffer> _syncBuffer;
     
 	bool _isMaster;
     double _runTime;
-
-	std::unique_ptr<SyncBuffer> _syncBuffer;
 
     static OpenSpaceEngine* _engine;
 };

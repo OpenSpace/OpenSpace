@@ -32,7 +32,6 @@ namespace openspace {
 class OnScreenGUIModule : public OpenSpaceModule {
 public:
     OnScreenGUIModule();
-    bool create() override;
 };
 
 } // namespace openspace

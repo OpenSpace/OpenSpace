@@ -34,15 +34,21 @@ public:
     OpenSpaceModule(std::string name);
     virtual ~OpenSpaceModule() = default;
 
-    virtual bool create();
-    virtual bool destroy();
+    void create();
+    void destroy();
 
-    virtual bool initialize();
-    virtual bool deinitialize();
+    bool initialize();
+    bool deinitialize();
 
     std::string name() const;
 
 protected:
+    virtual void internalCreate();
+    virtual void internalDestroy();
+    
+    virtual void internalInitialize();
+    virtual void internalDeinitialize();
+    
     std::string modulePath() const;
 
     const std::string _name;

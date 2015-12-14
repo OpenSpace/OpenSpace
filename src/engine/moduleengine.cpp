@@ -36,40 +36,30 @@ namespace {
 
 namespace openspace {
 
-bool ModuleEngine::create() {
+void ModuleEngine::create() {
     LDEBUG("Creating modules");
 
-    registerModules(AllModules);
+    for (OpenSpaceModule* m : AllModules)
+        registerModule(std::unique_ptr<OpenSpaceModule>(m));
 
-    for (OpenSpaceModule* m : _modules) {
-        bool success = m->create();
-        if (!success) {
-            LERROR("Could not initialize module '" << m->name() << "'");
-            return false;
-        }
-    }
+    for (auto& m : _modules)
+        m->create();
     LDEBUG("Finished creating modules");
     return true;
 }
 
-bool ModuleEngine::destroy() {
+void ModuleEngine::destroy() {
     LDEBUG("Destroying modules");
-    for (OpenSpaceModule* m : _modules) {
-        bool success = m->destroy();
-        if (!success) {
-            LERROR("Could not deinitialize module '" << m->name() << "'");
-            return false;
-        }
-        delete m;
-    }
+    for (auto& m : _modules)
+        m->destroy();
+    _modules.clear();
     LDEBUG("Finished destroying modules");
-    return true;
 }
 
 bool ModuleEngine::initialize() {
     LDEBUG("Initializing modules");
 
-    for (OpenSpaceModule* m : _modules) {
+    for (auto& m : _modules) {
         bool success = m->initialize();
         if (!success) {
             LERROR("Could not initialize module '" << m->name() << "'");
@@ -83,7 +73,7 @@ bool ModuleEngine::initialize() {
 bool ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
 
-    for (OpenSpaceModule* m : _modules) {
+    for (auto& m : _modules) {
         bool success = m->deinitialize();
         if (!success) {
             LERROR("Could not deinitialize module '" << m->name() << "'");
@@ -94,16 +84,23 @@ bool ModuleEngine::deinitialize() {
     return true;
 }
 
-void ModuleEngine::registerModules(std::vector<OpenSpaceModule*> modules) {
-    _modules.insert(_modules.end(), modules.begin(), modules.end());
+void ModuleEngine::registerModules(std::vector<std::unique_ptr<OpenSpaceModule>> modules) {
+    _modules.insert(
+        _modules.end(),
+        std::make_move_iterator(modules.begin()),
+        std::make_move_iterator(modules.end())
+    );
 }
 
-void ModuleEngine::registerModule(OpenSpaceModule* module) {
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     _modules.push_back(std::move(module));
 }
 
-const std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
-    return _modules;
+std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
+    std::vector<OpenSpaceModule*> result;
+    for (auto& m : _modules)
+        result.push_back(m.get());
+    return result;
 }
 
 } // namespace openspace

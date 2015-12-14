@@ -50,11 +50,7 @@ NewHorizonsModule::NewHorizonsModule()
     : OpenSpaceModule("NewHorizons")
 {}
 
-bool NewHorizonsModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
+void NewHorizonsModule::internalCreate() {
     ImageSequencer2::initialize();
 
     FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
@@ -76,8 +72,6 @@ bool NewHorizonsModule::create() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
-
-    return true;
 }
 
 } // namespace openspace

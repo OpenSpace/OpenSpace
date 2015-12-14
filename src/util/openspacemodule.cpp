@@ -43,7 +43,7 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     ghoul_assert(!_name.empty(), "Empty module name is not allowed");
 }
 
-bool OpenSpaceModule::create() {
+void OpenSpaceModule::create() {
     std::string moduleNameUpper = name();
     std::transform(moduleNameUpper.begin(), moduleNameUpper.end(), moduleNameUpper.begin(), toupper);
     std::string moduleToken = 
@@ -55,11 +55,12 @@ bool OpenSpaceModule::create() {
     std::string path = modulePath();
     LDEBUG("Registering module path: " << moduleToken << ": " << path);
     FileSys.registerPathToken(moduleToken, path);
-    return true;
+    
+    internalCreate();
 }
 
-bool OpenSpaceModule::destroy() {
-    return true;
+void OpenSpaceModule::destroy() {
+    internalDestroy();
 }
 
 std::string OpenSpaceModule::name() const {
@@ -81,12 +82,18 @@ std::string OpenSpaceModule::modulePath() const {
 }
 
 bool OpenSpaceModule::initialize() {
+    internalInitialize();
     return true;
 }
 
 bool OpenSpaceModule::deinitialize() {
+    internalDeinitialize();
     return true;
 }
-
+    
+void OpenSpaceModule::internalCreate() {}
+void OpenSpaceModule::internalDestroy() {}
+void OpenSpaceModule::internalInitialize() {}
+void OpenSpaceModule::internalDeinitialize() {}
 
 } // namespace openspace
