@@ -26,6 +26,7 @@
 #include <vector>
 #include <tuple>
 #include <utility> // pair
+#include <chrono>
 
 namespace openspace {
 
@@ -34,9 +35,9 @@ public:
 	//typedef std::tuple<ghoul::logging::LogManager::LogLevel, std::string, std::string> LogEntry;
 
 	struct LogEntry {
-		LogEntry(ghoul::logging::LogManager::LogLevel l, double t, std::string ts, std::string c, std::string m) : level(l), timeStamp(t), timeString(ts), category(c), message(m) {};
+		LogEntry(ghoul::logging::LogManager::LogLevel l, std::chrono::time_point<std::chrono::steady_clock> t, std::string ts, std::string c, std::string m) : level(l), timeStamp(t), timeString(ts), category(c), message(m) {};
 		ghoul::logging::LogManager::LogLevel level;
-		double timeStamp;
+        std::chrono::time_point<std::chrono::steady_clock> timeStamp;
 		std::string timeString;
 		std::string category;
 		std::string message;
@@ -52,16 +53,18 @@ public:
 
 	const size_t MaximumSize = 1000;
 
-	ScreenLog();
-
+    ScreenLog(std::chrono::seconds timeToLive);
+    
+    void removeExpiredEntries();
+    
 	virtual void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
 		const std::string& message);
 
 	const_range last(size_t n = 10);
 
 private:
-
 	std::vector<LogEntry> _entries;
 
+    std::chrono::seconds _timeToLive;
 };
 }

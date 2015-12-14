@@ -36,6 +36,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/dummywindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/deviceidentifier.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp

@@ -22,56 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/screenlog.h>
-
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-
 namespace openspace {
+    
+glm::ivec2 WindowWrapper::currentWindowResolution() const {
+    return currentWindowSize();
+}
+    
+bool WindowWrapper::isRegularRendering() const {
+    return true;
+}
 
-ScreenLog::ScreenLog(std::chrono::seconds timeToLive)
-    : _timeToLive(std::move(timeToLive))
-{}
-    
-void ScreenLog::removeExpiredEntries() {
-    auto t = std::chrono::steady_clock::now();
-    auto ttl = _timeToLive;
-    
-    _entries.erase(
-        std::remove_if(
-            _entries.begin(),
-            _entries.end(),
-            [t, ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
-        ),
-        _entries.end()
+glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
+    return glm::ivec4(
+        0,
+        currentWindowResolution().x,
+        0,
+        currentWindowResolution().y
     );
 }
-
-void ScreenLog::log(ghoul::logging::LogManager::LogLevel level, const std::string& category, const std::string& message) {
-    if (level >= ghoul::logging::LogManager::LogLevel::Info) {
-		_entries.emplace_back(
-            level,
-            std::chrono::steady_clock::now(),
-            Log::getTimeString(),
-            category,
-            message
-        );
-    }
-
-	// Once reaching maximum size, reduce to half
-	if (_entries.size() > MaximumSize) {
-		_entries.erase(_entries.begin(), _entries.begin() + MaximumSize / 2);
-	}
+    
+void WindowWrapper::setBarrier(bool) {}
+    
+bool WindowWrapper::isExternalControlConnected() const {
+    return false;
 }
-
-ScreenLog::const_range ScreenLog::last(size_t n) {
-	if (_entries.size() > n) {
-		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
-	} else {
-		return std::make_pair(_entries.rbegin(), _entries.rend());
-	}
+    
+void WindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
 }
-
+    
+bool WindowWrapper::isSimpleRendering() const {
+    return true;
 }
+    
+} // namespace openspace

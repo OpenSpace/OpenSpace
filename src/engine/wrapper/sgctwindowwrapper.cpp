@@ -36,10 +36,10 @@ void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
     
-void SGCTWindowWrapper::clearAllWindows() {
+void SGCTWindowWrapper::clearAllWindows(const glm::vec4& clearColor) {
     size_t n = sgct::Engine::instance()->getNumberOfWindows();
     for (size_t i = 0; i < n; ++i) {
-        glClearColor(0, 0, 0, 0);
+        glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLFWwindow* win = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
         glfwSwapBuffers(win);
@@ -48,10 +48,6 @@ void SGCTWindowWrapper::clearAllWindows() {
 
 bool SGCTWindowWrapper::windowHasResized() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
-}
-    
-double SGCTWindowWrapper::time() const {
-    return sgct::Engine::instance()->getTime();
 }
     
 double SGCTWindowWrapper::averageDeltaTime() const {

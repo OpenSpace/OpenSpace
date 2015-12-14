@@ -397,7 +397,7 @@ bool OpenSpaceEngine::isInitialized() {
 }
 
 void OpenSpaceEngine::clearAllWindows() {
-    _windowWrapper->clearAllWindows();
+    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 }
 
 bool OpenSpaceEngine::gatherCommandlineArguments() {

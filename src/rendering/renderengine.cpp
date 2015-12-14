@@ -85,6 +85,8 @@ namespace {
 
     const std::string KeyRenderingMethod = "RenderingMethod";
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
+    
+    std::chrono::seconds ScreenLogTimeToLive(15);
 }
 
 namespace openspace {
@@ -291,7 +293,7 @@ bool RenderEngine::initializeGL() {
 	_abuffer->initialize();
 
     LINFO("Initializing Log");
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>();
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
@@ -625,11 +627,12 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 #endif
             }
             if (_showScreenLog) {
+                _log->removeExpiredEntries();
+                
                 const int max = 10;
                 const int category_length = 20;
                 const int msg_length = 140;
-                const float ttl = 15.f;
-                const float fade = 5.f;
+                std::chrono::seconds fade(5);
                 auto entries = _log->last(max);
 
                 const glm::vec4 white(0.9, 0.9, 0.9, 1);
@@ -639,21 +642,18 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 const glm::vec4 blue(0, 0, 1, 1);
 
                 size_t nr = 1;
+                auto now = std::chrono::steady_clock::now();
                 for (auto& it = entries.first; it != entries.second; ++it) {
                     const ScreenLog::LogEntry* e = &(*it);
 
-                    const double t = OsEng.windowWrapper().time();
-                    float diff = static_cast<float>(t - e->timeStamp);
-
-                    // Since all log entries are ordered, once one is exceeding TTL, all have
-//                    if (diff > ttl)
-//                        break;
-
+                    std::chrono::duration<double> diff = now - e->timeStamp;
+                    
                     float alpha = 1;
-                    float ttf = ttl - fade;
+                    std::chrono::duration<double> ttf = ScreenLogTimeToLive - fade;
                     if (diff > ttf) {
-                        diff = diff - ttf;
-                        float p = 0.8f - diff / fade;
+                        auto d = (diff - ttf).count();
+                        auto t = static_cast<float>(d) / static_cast<float>(fade.count());
+                        float p = 0.8f - t;
                         alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
                     }
                     

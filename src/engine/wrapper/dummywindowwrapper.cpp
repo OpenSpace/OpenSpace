@@ -26,16 +26,10 @@
 
 namespace openspace {
     
-void DummyWindowWrapper::setBarrier(bool enabled) {}
-    
-void DummyWindowWrapper::clearAllWindows() {}
+void DummyWindowWrapper::clearAllWindows(const glm::vec4&) {}
 
 bool DummyWindowWrapper::windowHasResized() const {
     return false;
-}
-    
-double DummyWindowWrapper::time() const {
-    return 0.0;
 }
     
 double DummyWindowWrapper::averageDeltaTime() const {
@@ -54,36 +48,12 @@ glm::ivec2 DummyWindowWrapper::currentWindowSize() const {
     return glm::ivec2(0);
 }
     
-glm::ivec2 DummyWindowWrapper::currentWindowResolution() const {
-    return glm::ivec2(0);
-}
-    
-bool DummyWindowWrapper::isRegularRendering() const {
-    return true;
-}
-    
 glm::mat4 DummyWindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
 }
     
 void DummyWindowWrapper::setNearFarClippingPlane(float near, float far) {}
     
-glm::ivec4 DummyWindowWrapper::viewportPixelCoordinates() const {
-    return glm::ivec4(0);
-}
-    
-bool DummyWindowWrapper::isExternalControlConnected() const {
-    return false;
-}
-    
-void DummyWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
-}
-    
-bool DummyWindowWrapper::isSimpleRendering() const {
-    return true;
-}
-    
 void DummyWindowWrapper::takeScreenshot() const {}
     
 } // namespace openspace
-

@@ -29,13 +29,17 @@
 
 namespace openspace {
 
+/**
+ * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
+ * method calls to the specific functions in the Engine and SGCTWindow classes.
+ * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
+ */
 class SGCTWindowWrapper : public WindowWrapper {
 public:
     void setBarrier(bool enabled) override;
-    void clearAllWindows() override;
+    void clearAllWindows(const glm::vec4& clearColor) override;
     bool windowHasResized() const override;
 
-    double time() const override;
     double averageDeltaTime() const override;
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
@@ -55,9 +59,6 @@ public:
     bool isSimpleRendering() const override;
 
     void takeScreenshot() const override;
-    
-    
-    //    void forEachWindow(std::function<void (void)> function) override;
 };
 
 } // namespace openspace

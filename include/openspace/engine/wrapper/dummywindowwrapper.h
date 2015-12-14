@@ -29,34 +29,24 @@
 
 namespace openspace {
 
+/**
+ * DummyWindowWrapper that can be used if no actual rendering output is required, such as
+ * for console applications. The window sizes and resolutions will all be set to
+ * <code>0</code> and all graphics operations will be <code>no-op</code>s.
+ */
 class DummyWindowWrapper : public WindowWrapper {
 public:
-    void setBarrier(bool enabled) override;
-    void clearAllWindows() override;
+    void clearAllWindows(const glm::vec4& clearColor) override;
     bool windowHasResized() const override;
-    double time() const override;
     double averageDeltaTime() const override;
     uint32_t mouseButtons(int maxNumber = 8) const override;
     glm::vec2 mousePosition() const override;
     glm::ivec2 currentWindowSize() const override;
-    glm::ivec2 currentWindowResolution() const override;
-    bool isRegularRendering() const override;
 
     glm::mat4 viewProjectionMatrix() const override;
     void setNearFarClippingPlane(float near, float far) override;
     
-    glm::ivec4 viewportPixelCoordinates() const override;
-    
-    bool isExternalControlConnected() const override;
-    void sendMessageToExternalControl(const std::vector<char>& message) const override;
-    
-    // true for single viewport, single window; false otherwise
-    bool isSimpleRendering() const override;
-    
     void takeScreenshot() const override;
-    
-    //virtual void forEachWindow(std::function<void (void)> function) = 0;
-    
 };
 
 } // namespace openspace
