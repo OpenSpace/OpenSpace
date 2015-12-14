@@ -186,7 +186,7 @@ void RenderablePlane::render(const RenderData& data) {
 	_shader->activate();
 	if (_projectionListener){
 		//get parent node-texture and set with correct dimensions  
-		SceneGraphNode* textureNode = OsEng.renderEngine()->scene()->sceneGraphNode(_nodeName)->parent();
+		SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
 		if (textureNode != nullptr){
 			RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
             _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());

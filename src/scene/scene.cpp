@@ -96,7 +96,7 @@ bool Scene::initialize() {
 		"${SHADERS}/fboPass_fs.glsl");
 	if (!prg) return false;
 	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager()->setValue("fboPassProgram", prg.get());
+    OsEng.ref().configurationManager().setValue("fboPassProgram", prg.get());
     _programs.push_back(std::move(prg));
 
 	// pscstandard
@@ -105,7 +105,7 @@ bool Scene::initialize() {
 		"${SHADERS}/pscstandard_fs.glsl");
     if (! prg) return false;
 	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager()->setValue("pscShader", prg.get());
+    OsEng.ref().configurationManager().setValue("pscShader", prg.get());
     _programs.push_back(std::move(prg));
 
 	// Night texture program
@@ -114,7 +114,7 @@ bool Scene::initialize() {
 		"${SHADERS}/nighttexture_fs.glsl");
 	if (!prg) return false;
 	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager()->setValue("nightTextureProgram", prg.get());
+    OsEng.ref().configurationManager().setValue("nightTextureProgram", prg.get());
     _programs.push_back(std::move(prg));
 
     // RaycastProgram
@@ -123,7 +123,7 @@ bool Scene::initialize() {
 		"${SHADERS}/exitpoints.frag");
 	if (!prg) return false;
 	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager()->setValue("RaycastProgram", prg.get());
+    OsEng.ref().configurationManager().setValue("RaycastProgram", prg.get());
     _programs.push_back(std::move(prg));
 
     return true;
@@ -140,12 +140,12 @@ bool Scene::deinitialize() {
 
 void Scene::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
-		OsEng.renderEngine()->scene()->clearSceneGraph();
+		OsEng.renderEngine().scene()->clearSceneGraph();
 		bool success = loadSceneInternal(_sceneGraphToLoad);
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-		OsEng.renderEngine()->aBuffer()->invalidateABuffer();
+		OsEng.renderEngine().aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes())
         node->update(data);
@@ -257,7 +257,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     //_root->calculateBoundingSphere();
 
     // set the camera position
-	Camera* c = OsEng.ref().renderEngine()->camera();
+	Camera* c = OsEng.ref().renderEngine().camera();
     //auto focusIterator = _allNodes.find(_focus);
     auto focusIterator = std::find_if(
                 _graph.nodes().begin(),
@@ -304,10 +304,10 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
       //  c->setScaling(scaling);
 
         // Set the focus node for the interactionhandler
-        OsEng.interactionHandler()->setFocusNode(focusNode);
+        OsEng.interactionHandler().setFocusNode(focusNode);
     }
     else
-        OsEng.interactionHandler()->setFocusNode(_graph.rootNode());
+        OsEng.interactionHandler().setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
 	if (cameraDictionary.hasKey(KeyPositionObject)
@@ -324,7 +324,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	}
 
 	// the camera position
-	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
+	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
     // Check crash for when fn == nullptr
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
@@ -344,18 +344,18 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	for (SceneGraphNode* node : _graph.nodes()) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
-            OsEng.gui()->_property.registerProperty(p);
+            OsEng.gui()._property.registerProperty(p);
 		}
 	}
 
     // If a LuaDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);

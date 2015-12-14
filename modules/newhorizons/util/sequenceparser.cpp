@@ -77,7 +77,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
 
 void SequenceParser::sendPlaybookInformation(const std::string& name) {
     std::string fullName = PlaybookIdentifierName + "_" + name;
-    _messageIdentifier = OsEng.networkEngine()->identifier(fullName);
+    _messageIdentifier = OsEng.networkEngine().identifier(fullName);
 
     std::vector<char> buffer(1024);
     size_t currentWriteLocation = 0;
@@ -165,7 +165,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     buffer.resize(currentWriteLocation);
 
     //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine()->setInitialConnectionMessage(_messageIdentifier, buffer);
+    OsEng.networkEngine().setInitialConnectionMessage(_messageIdentifier, buffer);
 }
 
 }

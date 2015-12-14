@@ -25,27 +25,19 @@
 #ifndef __OPENSPACEENGINE_H__
 #define __OPENSPACEENGINE_H__
 
-
-#include <ghoul/glm.h>
-
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
-#include <ghoul/font/fontmanager.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace ghoul {
-namespace cmdparser {
-    class CommandlineParser;
-}
-namespace fontrendering {
-    class FontManager;
-}
-
+namespace cmdparser { class CommandlineParser; }
+namespace fontrendering { class FontManager; }
 }
 
 namespace openspace {
@@ -57,28 +49,17 @@ class GUI;
 class RenderEngine;
 class SyncBuffer;
 class ModuleEngine;
+class WindowWrapper;
 
-namespace interaction {
-    class InteractionHandler;
-}
-namespace gui {
-    class GUI;
-}
-namespace scripting {
-	class ScriptEngine;
-}
-    
-namespace network {
-    class ParallelConnection;
-}
-    
-namespace properties {
-    class PropertyOwner;
-}
+namespace interaction { class InteractionHandler; }
+namespace gui { class GUI; }
+namespace scripting { class ScriptEngine; }
+namespace network { class ParallelConnection; }
+namespace properties { class PropertyOwner; }
  
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv, WindowWrapper* windowWrapper, std::vector<std::string>& sgctArguments);
+    static bool create(int argc, char** argv, std::unique_ptr<WindowWrapper> windowWrapper, std::vector<std::string>& sgctArguments);
     static void destroy();
     static OpenSpaceEngine& ref();
 
@@ -91,27 +72,25 @@ public:
     static bool findConfiguration(std::string& filename);
 
     // Guaranteed to return a valid pointer
-    ConfigurationManager* configurationManager();
-    interaction::InteractionHandler* interactionHandler();
-    RenderEngine* renderEngine();
-	scripting::ScriptEngine* scriptEngine();
-    NetworkEngine* networkEngine();
-	LuaConsole* console();
-    ModuleEngine* moduleEngine();
-    network::ParallelConnection* parallelConnection();
-    properties::PropertyOwner* globalPropertyOwner();
+    ConfigurationManager& configurationManager();
+    interaction::InteractionHandler& interactionHandler();
+    RenderEngine& renderEngine();
+	scripting::ScriptEngine& scriptEngine();
+    NetworkEngine& networkEngine();
+	LuaConsole& console();
+    ModuleEngine& moduleEngine();
+    network::ParallelConnection& parallelConnection();
+    properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
-
-	gui::GUI* gui();
+	gui::GUI& gui();
 
     // SGCT callbacks
     bool initializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-	void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
+	void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
 	void postDraw();
-//	void keyboardCallback(int key, int action);
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
 	void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
@@ -127,40 +106,39 @@ public:
     void runSettingsScripts();
 
 private:
-    OpenSpaceEngine(std::string programName, WindowWrapper* windowWrapper);
+    OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
     ~OpenSpaceEngine();
-    OpenSpaceEngine(const OpenSpaceEngine& rhs) = delete;
 
 	void clearAllWindows();
 	bool gatherCommandlineArguments();
 	bool loadSpiceKernels();
-	void loadFonts();
-    void loadFonts2();
+    void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
     void runStartupScripts();
 	void configureLogging();
 
-    static OpenSpaceEngine* _engine;
 
-    ConfigurationManager* _configurationManager;
-    interaction::InteractionHandler* _interactionHandler;
-    RenderEngine* _renderEngine;
-	scripting::ScriptEngine* _scriptEngine;
-    NetworkEngine* _networkEngine;
-	ghoul::cmdparser::CommandlineParser* _commandlineParser;
-	LuaConsole* _console;
-    ModuleEngine* _moduleEngine;
-    gui::GUI* _gui;
-    network::ParallelConnection* _parallelConnection;
-    WindowWrapper* _windowWrapper;
-    ghoul::fontrendering::FontManager*_fontManager;
+    std::unique_ptr<ConfigurationManager> _configurationManager;
+    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
+    std::unique_ptr<RenderEngine> _renderEngine;
+	std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<NetworkEngine> _networkEngine;
+	std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
+	std::unique_ptr<LuaConsole> _console;
+    std::unique_ptr<ModuleEngine> _moduleEngine;
+    std::unique_ptr<gui::GUI> _gui;
+    std::unique_ptr<network::ParallelConnection> _parallelConnection;
+    std::unique_ptr<WindowWrapper> _windowWrapper;
+    std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     
-    properties::PropertyOwner* _globalPropertyNamespace;
+    std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     
 	bool _isMaster;
     double _runTime;
 
-	SyncBuffer* _syncBuffer;
+	std::unique_ptr<SyncBuffer> _syncBuffer;
+
+    static OpenSpaceEngine* _engine;
 };
 
 #define OsEng (openspace::OpenSpaceEngine::ref())

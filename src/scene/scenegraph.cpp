@@ -125,7 +125,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         return true;
 
     lua_State* state = ghoul::lua::createNewLuaState();
-    OsEng.scriptEngine()->initializeLuaState(state);
+    OsEng.scriptEngine().initializeLuaState(state);
 
     // Get the common directory
     bool commonFolderSpecified = sceneDictionary.hasKey(KeyCommonFolder);
@@ -343,7 +343,7 @@ bool SceneGraph::sortTopologically() {
 
     }
 
-    RenderEngine::ABufferImplementation i = OsEng.renderEngine()->aBufferImplementation();
+    RenderEngine::ABufferImplementation i = OsEng.renderEngine().aBufferImplementation();
     if (i == RenderEngine::ABufferImplementation::FrameBuffer) {
         auto it = std::find_if(
                                _topologicalSortedNodes.begin(),

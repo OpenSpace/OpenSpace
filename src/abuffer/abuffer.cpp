@@ -24,6 +24,7 @@
 
 #include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>

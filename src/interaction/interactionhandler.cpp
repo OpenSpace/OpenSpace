@@ -139,7 +139,7 @@ InteractionHandler::InteractionHandler()
     addProperty(_origin);
     
     _coordinateSystem.onChange([this](){
-        OsEng.renderEngine()->changeViewPoint(_coordinateSystem.value());
+        OsEng.renderEngine().changeViewPoint(_coordinateSystem.value());
     });
     addProperty(_coordinateSystem);
 }
@@ -552,14 +552,14 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 	        rotateDelta(rot);
 	    }
         if ((key == Key::KeypadSubtract) && (modifier == KeyModifier::NoModifier)) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] -= 0.5f;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
         if ((key == Key::KeypadAdd) && (modifier == KeyModifier::NoModifier)) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] += 0.5f;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
 
 		// iterate over key bindings
@@ -567,7 +567,7 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
 			//OsEng.scriptEngine()->runScript(it->second);
-			OsEng.scriptEngine()->queueScript(it->second);
+			OsEng.scriptEngine().queueScript(it->second);
 			if (!_validKeyLua) {
 				break;
 			}

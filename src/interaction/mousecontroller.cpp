@@ -25,6 +25,7 @@
 #include <openspace/interaction/mousecontroller.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <openspace/interaction/interactionhandler.h>
 
@@ -218,9 +219,9 @@ void OrbitalMouseController::scrollWheel(int pos) {
 }
 
 void OrbitalMouseController::update(const double& dt){
-    const float interactionSpeed = OsEng.interactionHandler()->interactionSensitivity();
-    const bool rotationInvert = OsEng.interactionHandler()->invertRotation();
-    const bool rollInvert = OsEng.interactionHandler()->invertRoll();
+    const float interactionSpeed = OsEng.interactionHandler().interactionSensitivity();
+    const bool rotationInvert = OsEng.interactionHandler().invertRotation();
+    const bool rollInvert = OsEng.interactionHandler().invertRoll();
 	
 	//if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
 		_handler->orbit(

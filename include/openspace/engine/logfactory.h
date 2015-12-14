@@ -25,21 +25,35 @@
 #ifndef __LOGFACTORY_H__
 #define __LOGFACTORY_H__
 
-#include <ghoul/misc/dictionary.h>
 #include <memory>
 
 namespace ghoul {
-namespace logging {
-	class Log;
-} // logging
-} // ghoul
+    class Dictionary;
+    namespace logging {
+        class Log;
+    }
+}
 
 namespace openspace {
 
-class LogFactory {
-public:
-    static std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
-};
+/**
+ * This function provides the capabilities to create a new ghoul::logging::Log from the
+ * provided ghoul::Dictionary%. The Dictionary must at least contain a <code>Type</code>
+ * value that determines the type of the created Log. Currently the types
+ * <code>HTML</code> and <code>Text</code> are supported which create a
+ * ghoul::logging::TextLog%, and ghoul::logging::HTMLLog respectively with both also
+ * require the <code>FileName</code> value for the location at which the logfile should be
+ * created . Both logs can be customized using the <code>Append</code>,
+ * <code>TimeStamping</code>, <code>DateStamping</code>, <code>CategoryStamping</code>,
+ * and <code>LogLevelStamping</code> values.
+ * \param dictionary The dictionary from which the ghoul::logging::Log should be created
+ * \return The created ghoul::logging::Log
+ * \post The return value will not be <code>nullptr</code>
+ * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ * \sa ghoul::logging::TextLeg
+ * \sa ghoul::logging::HTMLLog
+ */
+std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
 
 } // namespace openspace
 

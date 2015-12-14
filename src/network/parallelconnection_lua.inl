@@ -45,7 +45,7 @@ int setPort(lua_State* L) {
 		int value = lua_tonumber(L, -1);
 		std::string port = std::to_string(value);
         if(OsEng.isMaster()){
-            OsEng.parallelConnection()->setPort(port);
+            OsEng.parallelConnection().setPort(port);
         }
 		return 0;
 	}
@@ -71,7 +71,7 @@ int setAddress(lua_State* L) {
 	if (type == LUA_TSTRING) {
 		std::string address = luaL_checkstring(L, -1);
         if(OsEng.isMaster()){
-            OsEng.parallelConnection()->setAddress(address);
+            OsEng.parallelConnection().setAddress(address);
         }
 		return 0;
 	}
@@ -97,7 +97,7 @@ int setPassword(lua_State* L) {
 	if (type == LUA_TSTRING) {
 		std::string pwd = luaL_checkstring(L, -1);
         if(OsEng.isMaster()){
-            OsEng.parallelConnection()->setPassword(pwd);
+            OsEng.parallelConnection().setPassword(pwd);
         }
 		return 0;
 	}
@@ -123,7 +123,7 @@ int setDisplayName(lua_State* L) {
 	if (type == LUA_TSTRING) {
 		std::string name = luaL_checkstring(L, -1);
         if(OsEng.isMaster()){
-            OsEng.parallelConnection()->setName(name);
+            OsEng.parallelConnection().setName(name);
         }
 		return 0;
 	}
@@ -142,7 +142,7 @@ int connect(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     if(OsEng.isMaster()){
-        OsEng.parallelConnection()->clientConnect();
+        OsEng.parallelConnection().clientConnect();
     }
 	return 0;
 }
@@ -153,7 +153,7 @@ int disconnect(lua_State* L) {
     if (nArguments != 0)
     return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     if(OsEng.isMaster()){
-        OsEng.parallelConnection()->signalDisconnect();
+        OsEng.parallelConnection().signalDisconnect();
     }
     return 0;
 }
@@ -171,7 +171,7 @@ int requestHostship(lua_State* L) {
     if (type == LUA_TSTRING) {
         std::string pwd = luaL_checkstring(L, -1);
         if(OsEng.isMaster()){
-            OsEng.parallelConnection()->requestHostship(pwd);
+            OsEng.parallelConnection().requestHostship(pwd);
         }
         return 0;
     }

@@ -470,7 +470,7 @@ void ParallelConnection::initializationMessageReceived(){
         script.assign(buffer.begin(), buffer.end());
                 
         //queue received script
-        OsEng.scriptEngine()->queueScript(script);
+        OsEng.scriptEngine().queueScript(script);
     }
             
     //we've gone through all scripts, initialization is done
@@ -540,7 +540,7 @@ void ParallelConnection::dataMessageReceived(){
             kf.deserialize(buffer);
                     
             //add the keyframe to the interaction handler
-            OsEng.interactionHandler()->addKeyframe(kf);
+            OsEng.interactionHandler().addKeyframe(kf);
             break;
         }
         case network::datamessagestructures::TimeData:{
@@ -587,7 +587,7 @@ void ParallelConnection::dataMessageReceived(){
             sm.deserialize(buffer);
                     
             //Que script to be executed by script engine
-            OsEng.scriptEngine()->queueScript(sm._script);
+            OsEng.scriptEngine().queueScript(sm._script);
             break;
         }
         default:{
@@ -682,7 +682,7 @@ void ParallelConnection::hostInfoMessageReceived(){
 			}
                     
             //clear buffered any keyframes
-            OsEng.interactionHandler()->clearKeyframes();
+            OsEng.interactionHandler().clearKeyframes();
                     
             //request init package from the host
             int size = headerSize();
@@ -1037,8 +1037,8 @@ void ParallelConnection::broadcast(){
 
         //create a keyframe with current position and orientation of camera
         network::datamessagestructures::PositionKeyframe kf;
-		kf._position = OsEng.interactionHandler()->camera()->position();
-		kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler()->camera()->viewRotationMatrix());
+		kf._position = OsEng.interactionHandler().camera()->position();
+		kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler().camera()->viewRotationMatrix());
 				
         //timestamp as current runtime of OpenSpace instance
         kf._timeStamp = OsEng.runTime();

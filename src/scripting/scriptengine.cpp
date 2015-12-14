@@ -156,7 +156,7 @@ bool ScriptEngine::runScript(const std::string& script) {
     }
     
     //if we're currently hosting the parallel session, find out if script should be synchronized.
-	if (OsEng.parallelConnection()->isHost()){
+	if (OsEng.parallelConnection().isHost()){
 
 		std::string lib, func;
 		if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){

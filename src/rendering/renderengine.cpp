@@ -53,6 +53,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -136,8 +137,8 @@ bool RenderEngine::initialize() {
     std::string renderingMethod = DefaultRenderingMethod;
     
     // If the user specified a rendering method that he would like to use, use that
-    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
-        renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
+    if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyRenderingMethod))
+        renderingMethod = OsEng.configurationManager().value<std::string>(KeyRenderingMethod);
     else {
         using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
 
@@ -179,7 +180,7 @@ bool RenderEngine::initialize() {
 	_mainCamera = new Camera();
 	_mainCamera->setScaling(glm::vec2(1.0, -8.0));
 	_mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-	OsEng.interactionHandler()->setCamera(_mainCamera);
+	OsEng.interactionHandler().setCamera(_mainCamera);
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());

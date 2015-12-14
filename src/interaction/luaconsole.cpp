@@ -171,7 +171,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 			else {
 				if (_commands.at(_activeCommand) != "") {
 					//OsEng.scriptEngine()->runScript(_commands.at(_activeCommand));
-					OsEng.scriptEngine()->queueScript(_commands.at(_activeCommand));
+					OsEng.scriptEngine().queueScript(_commands.at(_activeCommand));
 					if (!_commandsHistory.empty() &&
 						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
@@ -197,7 +197,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             // find the value before the one that was previously found
             if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift)
                 _autoCompleteInfo.lastIndex -= 2;
-            std::vector<std::string> allCommands = OsEng.scriptEngine()->allLuaFunctions();
+            std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
             std::sort(allCommands.begin(), allCommands.end());
 
             std::string currentCommand = _commands.at(_activeCommand);

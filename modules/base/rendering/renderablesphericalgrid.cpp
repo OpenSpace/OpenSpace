@@ -166,7 +166,7 @@ bool RenderableSphericalGrid::deinitialize(){
 bool RenderableSphericalGrid::initialize(){
 	bool completeSuccess = true;
 	if (_gridProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager()->getValue("GridProgram", _gridProgram);
+		completeSuccess &= OsEng.ref().configurationManager().getValue("GridProgram", _gridProgram);
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);

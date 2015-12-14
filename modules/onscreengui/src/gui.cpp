@@ -384,11 +384,11 @@ void GUI::renderMainWindow() {
     bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
 
     if (toSun)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
     if (toPluto)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
     if (toJupiter)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
@@ -536,7 +536,7 @@ int show(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(true);
+	OsEng.gui().setEnabled(true);
 	return 0;
 }
 
@@ -550,7 +550,7 @@ int hide(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(false);
+	OsEng.gui().setEnabled(false);
 	return 0;
 }
 
@@ -564,7 +564,7 @@ int toggle(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(!OsEng.gui()->isEnabled());
+	OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
 	return 0;
 }
 

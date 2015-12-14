@@ -117,14 +117,14 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
 		}
 	
 		if (key == Key::KeypadSubtract) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] -= 0.5;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
 		if (key == Key::KeypadAdd) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] += 0.5;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
 	}
 	/*
