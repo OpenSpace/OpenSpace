@@ -34,6 +34,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -72,13 +73,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _frameCount(0)
 {
 	std::string name;
-    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModel");
 
 	ghoul::Dictionary geometryDictionary;
 	success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 	}
 

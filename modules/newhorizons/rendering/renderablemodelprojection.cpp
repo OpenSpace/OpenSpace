@@ -32,6 +32,7 @@
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include "imgui.h"
@@ -91,13 +92,13 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	, _programIsDirty(false)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
 	ghoul::Dictionary geometryDictionary;
 	success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 	}
 

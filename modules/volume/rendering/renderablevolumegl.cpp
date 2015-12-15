@@ -30,6 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/constants.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -68,7 +69,7 @@ RenderableVolumeGL::RenderableVolumeGL(const ghoul::Dictionary& dictionary)
 	, _id(-1)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	assert(success);
     
     _filename = "";

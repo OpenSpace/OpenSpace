@@ -94,6 +94,9 @@ namespace openspace {
 const std::string RenderEngine::PerformanceMeasurementSharedData =
 	"OpenSpacePerformanceMeasurementSharedData";
 
+const std::string RenderEngine::KeyFontMono = "Mono";
+const std::string RenderEngine::KeyFontLight = "Light";
+    
 RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
@@ -207,11 +210,11 @@ bool RenderEngine::initializeGL() {
     
     
     const float fontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeTime);
+    _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
     const float fontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeMono);
+    _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
     const float fontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(constants::fonts::keyLight, fontSizeLight);
+    _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
 
     
     

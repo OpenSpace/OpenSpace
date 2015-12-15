@@ -32,6 +32,7 @@
 #include <ghoul/io/texture/texturereader.h>
 //#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -99,7 +100,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "");
 
 	_defaultProjImage = absPath("textures/defaultProj.png");
@@ -108,7 +109,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     success = dictionary.getValue(
 		keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 

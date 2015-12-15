@@ -31,6 +31,7 @@
 #include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -65,9 +66,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _hasNightTexture(false)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success,
-            "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
+            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
 
     //std::string path;
     //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
@@ -77,7 +78,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         //geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}

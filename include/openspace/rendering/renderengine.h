@@ -59,6 +59,9 @@ public:
     };
 
 	static const std::string PerformanceMeasurementSharedData;
+    
+    static const std::string KeyFontMono;
+    static const std::string KeyFontLight;
 
 	RenderEngine();
 	~RenderEngine();

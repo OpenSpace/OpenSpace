@@ -65,8 +65,6 @@ const string ConfigurationManager::KeyDisableMasterRendering = "DisableRendering
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    
     using ghoul::filesystem::Directory;
     
     Directory directory = FileSys.currentDirectory();

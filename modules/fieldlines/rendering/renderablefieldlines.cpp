@@ -27,6 +27,7 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/constants.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -91,12 +92,12 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     , _vertexPositionBuffer(0)
 {
 	ghoul_assert(
-		dictionary.hasKeyAndValue<std::string>(constants::scenegraphnode::keyName),
+		dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
 		"Renderable does not have a name"
 	);
 
 	std::string name;
-	dictionary.getValue(constants::scenegraphnode::keyName, name);
+	dictionary.getValue(SceneGraphNode::KeyName, name);
 
 	_loggerCat = "RenderableFieldlines [" + name + "]";
 

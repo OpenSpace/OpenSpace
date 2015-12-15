@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 // ghoul
 #include <ghoul/misc/dictionary.h>
@@ -48,7 +49,7 @@ namespace openspace {
 Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
 	// The name is passed down from the SceneGraphNode
     std::string name;
-    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	assert(success);
 
     std::string renderableType;
@@ -80,8 +81,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     setName("renderable");
 #ifndef NDEBUG
 	std::string name;
-	ghoul_assert(dictionary.getValue(constants::scenegraphnode::keyName, name),
-		"Scenegraphnode need to specify '" << constants::scenegraphnode::keyName 
+	ghoul_assert(dictionary.getValue(SceneGraphNode::KeyName, name),
+                 "Scenegraphnode need to specify '" << SceneGraphNode::KeyName
 		<< "' because renderables is going to use this for debugging!");
 #endif
 

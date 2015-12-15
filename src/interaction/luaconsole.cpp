@@ -32,6 +32,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/font/font.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
 #include <string>
 #include <iostream>
@@ -294,9 +297,16 @@ void LuaConsole::render() {
 	const glm::vec4 red(1, 0, 0, 1);
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
-	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
-    sgct_text::print(font, 15.0f, startY, red, "$");
-    sgct_text::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
+    std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font("Mono", font_size);
+//	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
+
+    using ghoul::fontrendering::RenderFont;
+
+    RenderFont(*font, glm::vec2(15.f, startY), red, "$");
+    RenderFont(*font, glm::vec2(15.f + font_size, startY), white, "%s", _commands.at(_activeCommand).c_str());
+    
+//    sgct_text::print(font, 15.0f, startY, red, "$");
+//    sgct_text::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
 
 	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
 	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
@@ -319,7 +329,9 @@ void LuaConsole::render() {
 
 	std::stringstream ss;
 	ss << "%" << linepos + 1 << "s";
-    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
+    RenderFont(*font, glm::vec2(15.f + font_size * 0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f), green, ss.str().c_str(), "^");
+    
+//    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
 Key LuaConsole::commandInputButton() {

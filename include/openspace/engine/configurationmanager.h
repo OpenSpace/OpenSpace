@@ -100,7 +100,6 @@ public:
      * \return The path to the file that was found with the same base name as \p filename
      * but higher up in the file structure.
      * \throw ghoul::RuntimeError If the configuration could not be found
-     * \pre \p filename must not be empty
      */
     static std::string findConfiguration(const std::string& filename);
     
