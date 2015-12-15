@@ -52,7 +52,6 @@ const string ConfigurationManager::KeyPropertyDocumentationType =
 const string ConfigurationManager::KeyPropertyDocumentationFile =
     "PropertyDocumentationFile.File";
 const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeyEnableGui = "EnableGUI";
 const string ConfigurationManager::KeyStartupScript = "StartupScripts";
 const string ConfigurationManager::KeySettingsScript = "SettingsScripts";
 const string ConfigurationManager::KeySpiceTimeKernel = "SpiceKernel.Time";
@@ -66,6 +65,8 @@ const string ConfigurationManager::KeyDisableMasterRendering = "DisableRendering
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
+    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    
     using ghoul::filesystem::Directory;
     
     Directory directory = FileSys.currentDirectory();
@@ -110,13 +111,6 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     ghoul::lua::loadDictionaryFromFile(filename, *this);
 
 	// Register all the paths
-//    const bool hasPath =  hasKeyAndValue<std::string>(KeyPaths);
-//    if (!hasPath) {
-//        throw ghoul::RuntimeError(
-//            "Configuration does not contain the key '" + KeyPaths + "'",
-//            "ConfifgurationManager"
-//        );
-//    }
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);
 
     std::vector<std::string> pathKeys = dictionary.keys();
@@ -135,14 +129,16 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     }
 
 	bool complete = checkCompleteness();
-	if (!complete)
-		return false;
+    if (!complete) {
+        throw ghoul::RuntimeError(
+            "Configuration file '" + filename + "' was not complete",
+            "ConfigurationManager"
+        );
+    }
 
 	// Remove the Paths dictionary from the configuration manager as those paths might
 	// change later and we don't want to be forced to keep our local copy up to date
 	removeKey(KeyPaths);
-
-	return true;
 }
 
 bool ConfigurationManager::checkCompleteness() const {

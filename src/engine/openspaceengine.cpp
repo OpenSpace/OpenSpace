@@ -306,6 +306,7 @@ bool OpenSpaceEngine::initialize() {
     Verbosity verbosity = Verbosity::Default;
     if (configurationManager().hasKeyAndValue<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity)) {
         std::map<std::string, Verbosity> verbosityMap = {
+            { "None", Verbosity::None },
             { "Minimal", Verbosity::Minimal },
             { "Default", Verbosity::Default },
             { "Full", Verbosity::Full }
