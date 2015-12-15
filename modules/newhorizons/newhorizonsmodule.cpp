@@ -53,8 +53,8 @@ NewHorizonsModule::NewHorizonsModule()
 void NewHorizonsModule::internalInitialize() {
     ImageSequencer2::initialize();
 
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Decoder>);
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");

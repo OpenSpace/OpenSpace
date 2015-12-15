@@ -29,6 +29,13 @@
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
+    
+FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
+    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
+    , type(std::move(t))
+{
+    ghoul_assert(!type.empty(), "Type must not be empty");
+}
 
 void FactoryManager::initialize() {
     ghoul_assert(!_manager, "Factory Manager must not have been initialized");
@@ -50,15 +57,9 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-FactoryManager::~FactoryManager() {
-    for (ghoul::TemplateFactoryBase* factory : _factories)
-        delete factory;
-    _factories.clear();
-}
-
-void FactoryManager::addFactory(ghoul::TemplateFactoryBase* factory) {
-    _factories.push_back(factory);
-
+void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory) {
+    ghoul_assert(factory, "Factory must not be nullptr");
+    _factories.push_back(std::move(factory));
 }
 
 }  // namespace openspace

@@ -25,7 +25,10 @@
 #ifndef __FACTORYMANAGER_H__
 #define __FACTORYMANAGER_H__
 
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
+
+#include <memory>
 
 namespace openspace {
 
@@ -36,6 +39,23 @@ namespace openspace {
  */
 class FactoryManager {
 public:
+    /// This exception is thrown if the ghoul::TemplateFactory could not be found in the
+    /// #factory method
+    struct FactoryNotFoundError : public ghoul::RuntimeError {
+        /**
+         * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
+         * type descriptor for the type <code>T</code> for the TemplateFactory that could
+         * not be found.
+         * \param type The type <code>T</code> for the <code>TemplateFactory<T></code>
+         * that could not be found
+         * \pre \p type must not be empty
+         */
+        explicit FactoryNotFoundError(std::string type);
+        
+        /// The type describing the ghoul::TemplateFactory that could not be found
+        std::string type;
+    };
+    
     /**
      * Static initializer that initializes the static member. This needs to be done before
      * the FactoryManager can be used.
@@ -63,20 +83,30 @@ public:
      */
     static FactoryManager& ref();
 
-    void addFactory(ghoul::TemplateFactoryBase* factory);
+    /**
+     * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
+     * \param factory The ghoul::TemplateFactory to add to this FactoryManager
+     * \pre \p factory must not be nullptr
+     */
+    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory);
 
+    /**
+     * This method provides access to all registered ghoul::TemplateFactory%s through
+     * their type. The method will always return a proper ghoul::TemplateFactory or throw
+     * an error if the appropriate ghoul::TemplateFactory was not registered.
+     * \tparam T The type that the requested ghoul::TemplateFactory should create
+     * \return The ghoul::TemplateFactory that will create the pass type <code>T</code>
+     * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
+     * found
+     */
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
 private:
-    FactoryManager() = default;
-    ~FactoryManager();
+    /// Singleton member for the Factory Manager
+    static FactoryManager* _manager;
 
-    FactoryManager(const FactoryManager& c) = delete;
-
-    static FactoryManager* _manager;  ///< Singleton member
-
-    std::vector<ghoul::TemplateFactoryBase*> _factories;
+    std::vector<std::unique_ptr<ghoul::TemplateFactoryBase>> _factories;
 };
 
 } // namespace openspace

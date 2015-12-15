@@ -118,8 +118,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Renderable>);
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Ephemeris>);
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Renderable>>()
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Ephemeris>>()
+    );
     SpiceManager::initialize();
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();

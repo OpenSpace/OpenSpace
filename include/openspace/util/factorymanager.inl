@@ -22,20 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/logging/logmanager.h>
-
 namespace openspace {
 
 template <class T>
-ghoul::TemplateFactory<T>* FactoryManager::factory() const
-{
-    for (ghoul::TemplateFactoryBase* factory : _factories) {
+ghoul::TemplateFactory<T>* FactoryManager::factory() const {
+    for (auto& factory : _factories) {
         if (factory->baseClassType() == typeid(T))
-            return dynamic_cast<ghoul::TemplateFactory<T>*>(factory);
+            return dynamic_cast<ghoul::TemplateFactory<T>*>(factory.get());
     }
-    LERRORC("FactoryManager", "Could not find factory for type '" << typeid(T).name()
-                                                                 << "'");
-    return nullptr;
+    
+    throw FactoryNotFoundError(typeid(T).name());
 }
 
 }  // namespace openspace

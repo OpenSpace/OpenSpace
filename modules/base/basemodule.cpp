@@ -56,8 +56,8 @@ BaseModule::BaseModule()
 {}
 
 void BaseModule::internalInitialize() {
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

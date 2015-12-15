@@ -24,6 +24,7 @@
 
 #include <modules/newhorizons/util/decoder.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
 const std::string _loggerCat = "Decoder";
