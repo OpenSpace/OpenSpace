@@ -24,9 +24,6 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/scene/ephemeris.h>
-
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
@@ -34,23 +31,22 @@ namespace openspace {
 FactoryManager* FactoryManager::_manager = nullptr;
 
 void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager already initialized");
-    if (_manager == nullptr)
-        _manager = new FactoryManager;
-    ghoul_assert(_manager, "Factory Manager was not correctly initialized");
-
-    _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-    _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
+    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    _manager = new FactoryManager;
 }
 
 void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "No Factory Manager to deinitialize");
+    ghoul_assert(_manager, "Factory Manager must have been initialized");
     delete _manager;
     _manager = nullptr;
 }
+    
+bool FactoryManager::isInitialized() {
+    return _manager != nullptr;
+}
 
 FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "No Factory Manager to dereference");
+    ghoul_assert(_manager, "Factory Manager must have been initialized");
     return *_manager;
 }
 

@@ -26,7 +26,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #include <modules/newhorizons/util/imagesequencer.h>

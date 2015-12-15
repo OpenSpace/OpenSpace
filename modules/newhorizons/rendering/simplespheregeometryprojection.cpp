@@ -23,7 +23,6 @@
 ****************************************************************************************/
 
 #include <modules/newhorizons/rendering/simplespheregeometryprojection.h>
-#include <openspace/util/constants.h>
 #include <openspace/scene/scenegraphnode.h>
 
 namespace {

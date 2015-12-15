@@ -27,7 +27,6 @@
 
 // open space includes
 #include <modules/base/rendering/renderablemodel.h>
-#include <openspace/util/constants.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
 

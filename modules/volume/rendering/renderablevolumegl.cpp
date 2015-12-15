@@ -29,7 +29,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/util/constants.h>
 #include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>

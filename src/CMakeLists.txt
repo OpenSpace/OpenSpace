@@ -145,7 +145,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/constants.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h

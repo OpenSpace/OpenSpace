@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/simplespheregeometry.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/scene/scenegraphnode.h>
 

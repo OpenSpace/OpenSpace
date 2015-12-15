@@ -24,7 +24,6 @@
 
 #include <modules/base/rendering/wavefrontgeometry.h>
 
-#include <openspace/util/constants.h>
 #include "ghoul/logging/logmanager.h"
 #include <tiny_obj_loader.h>
 

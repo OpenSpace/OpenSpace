@@ -24,8 +24,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 
-#include <openspace/util/constants.h>
-
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>

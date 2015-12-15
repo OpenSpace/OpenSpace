@@ -25,7 +25,6 @@
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/constants.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>

@@ -24,8 +24,6 @@
 
 #include <modules/base/rendering/planetgeometry.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/constants.h>
-#include <openspace/util/factorymanager.h>
 
 namespace {
     const std::string _loggerCat = "PlanetGeometry";

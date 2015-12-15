@@ -37,10 +37,11 @@
 #include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/ephemeris.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -117,6 +118,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     FactoryManager::initialize();
+    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Renderable>);
+    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Ephemeris>);
     SpiceManager::initialize();
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();

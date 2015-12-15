@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/renderablesphere.h>
-#include <openspace/util/constants.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/io/texture/texturereader.h>

@@ -24,7 +24,6 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <openspace/util/constants.h>
 #include <modules/newhorizons/rendering/planetgeometryprojection.h>
 
 #include <openspace/engine/configurationmanager.h>

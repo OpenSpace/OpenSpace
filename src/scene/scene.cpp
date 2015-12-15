@@ -33,7 +33,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 
 #include <boost/algorithm/string.hpp>

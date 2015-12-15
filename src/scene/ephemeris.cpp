@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/scene/ephemeris.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 
 namespace {

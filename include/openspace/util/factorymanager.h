@@ -25,25 +25,41 @@
 #ifndef __FACTORYMANAGER_H__
 #define __FACTORYMANAGER_H__
 
-// ghoul includes
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
+/**
+ * Singleton factory class that handles a variety of ghoul::TemplateFactory%s and makes
+ * them available through the #addFactory and factory #methods. Each
+ * ghoul::TemplateFactory can only be added once and can be accessed by its type.
+ */
 class FactoryManager {
 public:
     /**
      * Static initializer that initializes the static member. This needs to be done before
-     * the FactoryManager can be used. If the manager has been already initialized, an
-     * assertion will be triggered.
+     * the FactoryManager can be used.
+     * \pre The FactoryManager must not have been initialized before
      */
     static void initialize();
+    
+    /**
+     * Deinitializes the static member and all the registered ghoul::TemplateFactory%s.
+     * \pre The FactoryManager must have been initialized before
+     */
     static void deinitialize();
 
     /**
-     * This method returns a reference to the initialized FactoryManager. If the manager
-     * has not been initialized, an assertion will be triggered.
+     * Returns <code>true</code> if the static FactoryManager has already been
+     * initiailzed, <code>false</code> otherwise.
+     * \return The initialization status of the static FactoryManager
+     */
+    static bool isInitialized();
+    
+    /**
+     * This method returns a reference to the initialized FactoryManager.
      * \return An initialized reference to the singleton manager
+     * \pre The FactoryManager must have been initialized before
      */
     static FactoryManager& ref();
 

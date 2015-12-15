@@ -26,7 +26,6 @@
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>

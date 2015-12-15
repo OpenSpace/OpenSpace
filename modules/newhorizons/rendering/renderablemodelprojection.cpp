@@ -24,7 +24,6 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
-#include <openspace/util/constants.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>

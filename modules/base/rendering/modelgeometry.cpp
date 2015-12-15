@@ -24,7 +24,6 @@
 
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/constants.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 

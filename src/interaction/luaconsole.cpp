@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/util/constants.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 

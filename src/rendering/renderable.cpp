@@ -24,7 +24,6 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
