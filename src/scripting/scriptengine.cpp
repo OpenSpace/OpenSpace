@@ -55,35 +55,15 @@ bool ScriptEngine::LuaLibrary::operator<(const LuaLibrary& rhs) const {
 	return name < rhs.name;
 }
 
-ScriptEngine::ScriptEngine()
-    : _state(nullptr)
-{
-}
-
-ScriptEngine::~ScriptEngine() {
-	//deinitialize();
-}
-
-bool ScriptEngine::initialize() {
-    LDEBUG("Adding base functions");
+void ScriptEngine::initialize() {
+    LDEBUG("Adding base library");
     addBaseLibrary();
-
-    _state = luaL_newstate();
-    LDEBUG("Creating Lua state");
-    if (_state == nullptr) {
-        LFATAL("Error creating new Lua state: Memory allocation error");
-        return false;
-    }
-
-    LDEBUG("Open Lua libraries");
-    luaL_openlibs(_state);
-
+    LDEBUG("Creating new Lua state");
+    _state = ghoul::lua::createNewLuaState();
+    LDEBUG("Initializing Lua state");
 	initializeLuaState(_state);
-    
-    LDEBUG("Remap print function");
+    LDEBUG("Remapping Print functions");
     remapPrintFunction();
-    
-    return true;
 }
 
 void ScriptEngine::deinitialize() {
@@ -91,6 +71,16 @@ void ScriptEngine::deinitialize() {
         lua_close(_state);
         _state = nullptr;
     }
+}
+
+void ScriptEngine::initializeLuaState(lua_State* state) {
+    LDEBUG("Create openspace base library");
+    lua_newtable(state);
+    lua_setglobal(state, _openspaceLibraryName.c_str());
+    
+    LDEBUG("Add OpenSpace modules");
+    for (const LuaLibrary& lib : _registeredLibraries)
+        registerLuaLibrary(state, lib);
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
@@ -136,6 +126,15 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
 	}
 }
 
+bool ScriptEngine::hasLibrary(const std::string& name) {
+    auto it = std::find_if(
+        _registeredLibraries.begin(),
+        _registeredLibraries.end(),
+        [name](const LuaLibrary& it) { return it.name == name; }
+    );
+    return (it != _registeredLibraries.end());
+}
+
 bool ScriptEngine::runScript(const std::string& script) {
 	if (script.empty()){
 		LWARNING("Script was empty");
@@ -168,7 +167,6 @@ bool ScriptEngine::runScript(const std::string& script) {
     return true;
 }
     
-    
 bool ScriptEngine::runScriptFile(const std::string& filename) {
     if (filename.empty()) {
         LWARNING("Filename was empty");
@@ -194,8 +192,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
     return true;
 }
 
-bool ScriptEngine::shouldScriptBeSent(const std::string &library, const std::string &function){
-
+bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
     std::set<LuaLibrary>::const_iterator libit;
     for (libit = _registeredLibraries.cbegin();
          libit != _registeredLibraries.cend();
@@ -289,24 +286,6 @@ bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::strin
 
 	//if we found a function all is good
 	return !function.empty();
-}
-
-bool ScriptEngine::hasLibrary(const std::string& name)
-{
-	auto it = std::find_if(
-		_registeredLibraries.begin(),
-		_registeredLibraries.end(),
-		[name](const LuaLibrary& it) { return it.name == name; }
-	);
-
-	return (it != _registeredLibraries.end());
-
-
-	//for (const LuaLibrary& it : _registeredLibraries) {
-	//	if (it.name == name)
-	//		return true;
-	//}
-	//return false;
 }
 
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
@@ -450,16 +429,6 @@ void ScriptEngine::remapPrintFunction() {
 	//ghoul::lua::logStack(_state);
  //   lua_settable(_state, _setTableOffset);
 	//ghoul::lua::logStack(_state);
-}
-
-void ScriptEngine::initializeLuaState(lua_State* state) {
-    LDEBUG("Create openspace base library");
-    lua_newtable(state);
-    lua_setglobal(state, _openspaceLibraryName.c_str());
-
-	LDEBUG("Add OpenSpace modules");
-	for (const LuaLibrary& lib : _registeredLibraries)
-		registerLuaLibrary(state, lib);
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& library) {

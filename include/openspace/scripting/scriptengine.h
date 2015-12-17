@@ -27,48 +27,69 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <set>
 #include <map>
-
-/**
- * \defgroup LuaScripts Lua Scripts
- */
+#include <memory>
+#include <set>
 
 namespace openspace {
-	class SyncBuffer;
+
+class SyncBuffer;
 
 namespace scripting {
 
+/**
+ * The ScriptEngine is responsible for handling the execution of custom Lua functions and
+ * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
+ * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
+ * ScriptEngine::Library::Function%s have to be added which can then be called using the
+ * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
+ * other Lua states by passing them to the #initializeLuaState method.
+ */
 class ScriptEngine {
 public:
+    /**
+     * This structure represents a Lua library, itself consisting of a unique \m name and
+     * an arbitrary number of \m functions
+     */
     struct LuaLibrary {
+        /**
+         * This structure represents a Lua function with its \m name, \m function pointer
+         * \m argumentText describing the arguments this function takes, the \m helpText
+         * descripbing the function, and whether it should be shared in a parallel
+         * connection (\m parallelShared)
+         */
 		struct Function {
+            /// The name of the function
 			std::string name;
+            /// The function pointer that is executed if the function is called
 			lua_CFunction function;
+            /// A text describing the arugments to this function
 			std::string argumentText;
+            /// A help text describing what the function does/
 			std::string helpText;
+            /// If <code>true</code>, this function will be shared with other parallel
+            /// connections
             bool parallelShared;
-            
-            Function(std::string n, lua_CFunction f, std::string a, std::string h , bool ps = false):
-            name(n),
-            function(f),
-            argumentText(a),
-            helpText(h),
-            parallelShared(ps)
-            {
-            
-            }
 		};
+        /// The name of the library
         std::string name;
+        /// The list of all functions for this library
 		std::vector<Function> functions;
 
+        /// Comparison function that compares two LuaLibrary%s name
 		bool operator<(const LuaLibrary& rhs) const;
     };
 
-    ScriptEngine();
-    ~ScriptEngine();
-
-    bool initialize();
+    /**
+     * Initializes the internal Lua state and registers a common set of library functions
+     * \throw LuaRuntimeException If the creation of the new Lua state fails
+     */
+    void initialize();
+    
+    /**
+     * Cleans the internal Lua state and leaves the ScriptEngine in a state to be newly
+     * initialize%d.
+     */
     void deinitialize();
     
 	void initializeLuaState(lua_State* state);
@@ -109,7 +130,7 @@ private:
     void addBaseLibrary();
     void remapPrintFunction();
     
-    lua_State* _state;
+    lua_State* _state = nullptr;
     std::set<LuaLibrary> _registeredLibraries;
     
 	//sync variables
@@ -121,7 +142,6 @@ private:
     //parallel variables
     std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
     std::mutex _cachedScriptsMutex;
-    
 };
 
 } // namespace scripting
