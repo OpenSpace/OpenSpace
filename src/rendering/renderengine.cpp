@@ -917,10 +917,17 @@ void RenderEngine::storePerformanceMeasurements() {
 			maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
 		LINFO("Create shared memory of " << totalSize << " bytes");
 
+        try {
+            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+        }
+        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
+            LINFOC(e.component, e.what());
+        }
+        
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
-        void* ptr = _performanceMemory;
+        void* ptr = _performanceMemory->memory();
 		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
@@ -946,7 +953,7 @@ void RenderEngine::storePerformanceMeasurements() {
 		}
 	}
 
-    void* ptr = _performanceMemory;
+    void* ptr = _performanceMemory->memory();
 	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 	_performanceMemory->acquireLock();
 	for (int i = 0; i < nNodes; ++i) {
