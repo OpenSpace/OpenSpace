@@ -40,7 +40,6 @@ namespace openspace {
 void ModuleEngine::initialize() {
     for (OpenSpaceModule* m : AllModules)
         registerModule(std::unique_ptr<OpenSpaceModule>(m));
-    return true;
 }
 
 void ModuleEngine::deinitialize() {

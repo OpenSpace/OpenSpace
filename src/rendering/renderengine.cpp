@@ -62,6 +62,7 @@
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/misc/exception.h>
 
 #include <array>
 #include <fstream>
@@ -148,7 +149,7 @@ bool RenderEngine::initialize() {
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version{4,3}) {
+        if (OpenGLCap.openGLVersion() < Version{4,3,0}) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "ABufferFrameBuffer";
         }
@@ -208,13 +209,18 @@ bool RenderEngine::initializeGL() {
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
     
-    const float fontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
-    const float fontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
-    const float fontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
-
+    try {
+        const float fontSizeTime = 15.f;
+        _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
+        const float fontSizeMono = 10.f;
+        _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
+        const float fontSizeLight = 8.f;
+        _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
+    }
+    catch (const ghoul::fontrendering::Font::FreeTypeException& e) {
+        LERROR(e.what());
+        throw;
+    }
     
     
     
@@ -292,7 +298,12 @@ bool RenderEngine::initializeGL() {
     //}
 
     LINFO("Initializing ABuffer");
-	_abuffer->initialize();
+    try {
+        _abuffer->initialize();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(e.what());
+    }
 
     LINFO("Initializing Log");
     std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
@@ -628,7 +639,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             }
 #endif
             }
-            if (_showScreenLog) {
+            if (_showScreenLog && _fontLog) {
                 _log->removeExpiredEntries();
                 
                 const int max = 10;

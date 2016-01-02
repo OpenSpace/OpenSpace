@@ -202,9 +202,9 @@ bool RenderableFieldlines::initialize() {
 
 	_program = ghoul::opengl::ProgramObject::Build(
 		"Fieldline",
-		"${SHADERS}/modules/fieldlines/fieldline_vs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_fs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_gs.glsl"
+        "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
+        "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
+        "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
 	);
 	if (!_program)
 		return false;

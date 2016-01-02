@@ -28,6 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 

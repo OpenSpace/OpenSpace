@@ -333,7 +333,7 @@ int SpiceManager::naifId(const string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
     
     SpiceBoolean success;
-    int id;
+    SpiceInt id;
     bods2c_c(body.c_str(), &id, &success);
     if (!success)
         throw SpiceException(format("Could not find NAIF ID of body '{}'", body));
@@ -344,7 +344,7 @@ bool SpiceManager::hasNaifId(const string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
     
     SpiceBoolean success;
-    int id;
+    SpiceInt id;
     bods2c_c(body.c_str(), &id, &success);
     reset_c();
     return success;
@@ -353,7 +353,7 @@ bool SpiceManager::hasNaifId(const string& body) const {
 int SpiceManager::frameId(const string& frame) const {
     ghoul_assert(!frame.empty(), "Empty frame");
     
-    int id;
+    SpiceInt id;
     namfrm_c(frame.c_str(), &id);
     if (id == 0)
         throw SpiceException(format("Could not find NAIF ID of frame '{}'", frame));
@@ -363,7 +363,7 @@ int SpiceManager::frameId(const string& frame) const {
 bool SpiceManager::hasFrameId(const string& frame) const {
     ghoul_assert(!frame.empty(), "Empty frame");
     
-    int id;
+    SpiceInt id;
     namfrm_c(frame.c_str(), &id);
     return id != 0;
 }

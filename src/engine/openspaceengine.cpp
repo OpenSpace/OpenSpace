@@ -576,7 +576,12 @@ bool OpenSpaceEngine::initializeGL() {
     LINFO("Initializing Rendering Engine");
     bool success = _renderEngine->initializeGL();
     LINFO("Initializing OnScreen GUI GL");
-	_gui->initializeGL();
+    try {
+        _gui->initializeGL();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(e.what());
+    }
     LINFO("Finished initializing OpenGL");
 	return success;
 }
