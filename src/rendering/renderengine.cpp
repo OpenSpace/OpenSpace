@@ -646,7 +646,21 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 const int category_length = 20;
                 const int msg_length = 140;
                 std::chrono::seconds fade(5);
-                auto entries = _log->last(max);
+                
+                auto entries = _log->entries();
+                auto lastEntries = entries.size() > max ? std::make_pair(entries.rbegin(), entries.rbegin() + max) : std::make_pair(entries.rbegin(), entries.rend());
+                
+//                if (entries.size() > max)
+                
+                //ScreenLog::const_range ScreenLog::last(size_t n) {
+                //	if (_entries.size() > n) {
+                //		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+                //	} else {
+                //		return std::make_pair(_entries.rbegin(), _entries.rend());
+                //	}
+                //}
+                
+//                auto entries = _log->last(max);
 
                 const glm::vec4 white(0.9, 0.9, 0.9, 1);
                 const glm::vec4 red(1, 0, 0, 1);
@@ -656,7 +670,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
                 size_t nr = 1;
                 auto now = std::chrono::steady_clock::now();
-                for (auto& it = entries.first; it != entries.second; ++it) {
+                for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
                     const ScreenLog::LogEntry* e = &(*it);
 
                     std::chrono::duration<double> diff = now - e->timeStamp;
@@ -928,10 +942,17 @@ void RenderEngine::storePerformanceMeasurements() {
 			maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
 		LINFO("Create shared memory of " << totalSize << " bytes");
 
+        try {
+            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+        }
+        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
+            LINFOC(e.component, e.what());
+        }
+        
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
-        void* ptr = _performanceMemory;
+        void* ptr = _performanceMemory->memory();
 		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
@@ -957,7 +978,7 @@ void RenderEngine::storePerformanceMeasurements() {
 		}
 	}
 
-    void* ptr = _performanceMemory;
+    void* ptr = _performanceMemory->memory();
 	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 	_performanceMemory->acquireLock();
 	for (int i = 0; i < nNodes; ++i) {

@@ -26,14 +26,44 @@
 
 namespace openspace {
     
+void WindowWrapper::setBarrier(bool) {}
+    
+void WindowWrapper::clearAllWindows(const glm::vec4& clearColor) {}
+
+bool WindowWrapper::windowHasResized() const {
+    return false;
+}
+    
+double WindowWrapper::averageDeltaTime() const {
+    return 0.0;
+}
+    
+glm::vec2 WindowWrapper::mousePosition() const {
+    return glm::vec2(0.f);
+}
+    
+uint32_t WindowWrapper::mouseButtons(int maxNumber) const {
+    return uint32_t(0);
+}
+    
+glm::ivec2 WindowWrapper::currentWindowSize() const {
+    return glm::ivec2(0);
+}
+    
 glm::ivec2 WindowWrapper::currentWindowResolution() const {
     return currentWindowSize();
 }
-    
+
 bool WindowWrapper::isRegularRendering() const {
     return true;
 }
 
+glm::mat4 WindowWrapper::viewProjectionMatrix() const {
+    return glm::mat4(1.f);
+}
+    
+void WindowWrapper::setNearFarClippingPlane(float near, float far) {}
+    
 glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     return glm::ivec4(
         0,
@@ -43,7 +73,6 @@ glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     );
 }
     
-void WindowWrapper::setBarrier(bool) {}
     
 bool WindowWrapper::isExternalControlConnected() const {
     return false;
@@ -55,5 +84,7 @@ void WindowWrapper::sendMessageToExternalControl(const std::vector<char>& messag
 bool WindowWrapper::isSimpleRendering() const {
     return true;
 }
+    
+void WindowWrapper::takeScreenshot() const {}
     
 } // namespace openspace
