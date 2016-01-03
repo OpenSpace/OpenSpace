@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/luaconsole.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -59,31 +60,26 @@ LuaConsole::LuaConsole()
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 	, _isVisible(false)
 {
-	_commands.push_back("");
-	_activeCommand = _commands.size() - 1;
+//	_commands.push_back("");
+//	_activeCommand = _commands.size() - 1;
 }
-
-LuaConsole::~LuaConsole() {
-
-}
-
 
 void LuaConsole::initialize() {
     _filename = FileSys.cacheManager()->cachedFilename(historyFile, "", true);
 
-    std::ifstream file(absPath(_filename), std::ios::binary | std::ios::in);
+    std::ifstream file(_filename, std::ios::binary | std::ios::in);
     if (file.good()) {
         int64_t nCommands;
         file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
+        std::vector<char> tmp;
         for (int64_t i = 0; i < nCommands; ++i) {
             int64_t length;
             file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
-            char* tmp = new char[length + 1];
-            file.read(tmp, sizeof(char)*length);
+            tmp.resize(length + 1);
+            file.read(tmp.data(), length);
             tmp[length] = '\0';
-            _commandsHistory.emplace_back(tmp);
-            delete[] tmp;
+            _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
         }
         file.close();
         _commands = _commandsHistory;
@@ -93,7 +89,7 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    std::ofstream file(absPath(_filename), std::ios::binary | std::ios::out);
+    std::ofstream file(_filename, std::ios::binary | std::ios::out);
     if (file.good()) {
         int64_t nCommands = _commandsHistory.size();
         file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
@@ -102,7 +98,6 @@ void LuaConsole::deinitialize() {
             file.write(reinterpret_cast<const char*>(&length), sizeof(int64_t));
             file.write(s.c_str(), length);
         }
-        file.close();
     }
 }
 
@@ -150,9 +145,11 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 		}
 
 		// Remove character after _inputPosition
-        if ((key == Key::Delete) && (_inputPosition <= _commands.at(_activeCommand).size()))
-			_commands.at(_activeCommand).erase(_inputPosition, 1);
-
+        if (key == Key::Delete) {
+            if (_inputPosition <= _commands.at(_activeCommand).size())
+                _commands.at(_activeCommand).erase(_inputPosition, 1);
+        }
+        
 		// Go to the beginning of command string
         if (key == Key::Home)
 			_inputPosition = 0;
@@ -165,21 +162,19 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 			// SHIFT+ENTER == new line
 			if (modifierShift)
 				addToCommand("\n");
-			// CTRL+ENTER == Debug print the command
-			else if (modifierControl) {
-				LDEBUG("Active command from next line:\n" << _commands.at(_activeCommand));
-			}
 			// ENTER == run lua script
 			else {
-				if (_commands.at(_activeCommand) != "") {
-					//OsEng.scriptEngine()->runScript(_commands.at(_activeCommand));
-					OsEng.scriptEngine().queueScript(_commands.at(_activeCommand));
-					if (!_commandsHistory.empty() &&
-						_commands.at(_activeCommand) != _commandsHistory.at(_commandsHistory.size() - 1))
-						_commandsHistory.push_back(_commands.at(_activeCommand));
-					else if (_commandsHistory.empty())
+                std::string cmd = _commands.at(_activeCommand);
+				if (cmd != "") {
+					OsEng.scriptEngine().queueScript(cmd);
+                    
+                    // Only add the current command to the history if it hasn't been
+                    // executed before. We don't want two of the same commands in a row
+                    if (_commandsHistory.empty() || (cmd != _commandsHistory.back()))
 						_commandsHistory.push_back(_commands.at(_activeCommand));
 				}
+                
+                // Some clean up after the execution of the command
                 _commands = _commandsHistory;
                 _commands.push_back("");
                 _activeCommand = _commands.size() - 1;
@@ -221,10 +216,27 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 // then check if we need to skip the first found values as the user has
                 // pressed TAB repeatedly
                 size_t fullLength = _autoCompleteInfo.initialValue.length();
-                if (command.length() >= fullLength &&
-                    (command.substr(0, fullLength) == _autoCompleteInfo.initialValue) &&
-                    (i > _autoCompleteInfo.lastIndex))
-                {
+                bool correctLength = command.length() >= fullLength;
+
+                std::string commandLowerCase;
+                std::transform(
+                    command.begin(), command.end(),
+                    commandLowerCase.begin(),
+                    ::tolower
+                );
+                
+                std::string initialValueLowerCase;
+                std::transform(
+                    _autoCompleteInfo.initialValue.begin(),
+                    _autoCompleteInfo.initialValue.end(),
+                    initialValueLowerCase.begin(),
+                    ::tolower
+                );
+    
+                bool correctCommand =
+                    commandLowerCase.substr(0, fullLength) == initialValueLowerCase;
+                
+                if (correctLength && correctCommand && (i > _autoCompleteInfo.lastIndex)){
                     // We found our index, so store it
                     _autoCompleteInfo.lastIndex = i;
 
@@ -297,16 +309,12 @@ void LuaConsole::render() {
 	const glm::vec4 green(0, 1, 0, 1);
 	const glm::vec4 white(1, 1, 1, 1);
     std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font("Mono", font_size);
-//	const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, static_cast<int>(font_size));
 
     using ghoul::fontrendering::RenderFont;
 
     RenderFont(*font, glm::vec2(15.f, startY), red, "$");
     RenderFont(*font, glm::vec2(15.f + font_size, startY), white, "%s", _commands.at(_activeCommand).c_str());
     
-//    sgct_text::print(font, 15.0f, startY, red, "$");
-//    sgct_text::print(font, 15.0f + font_size, startY, white, "%s", _commands.at(_activeCommand).c_str());
-
 	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
 	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
 	size_t linepos = _inputPosition;

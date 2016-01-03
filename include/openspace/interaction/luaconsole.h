@@ -37,7 +37,6 @@ namespace openspace {
 class LuaConsole {
 public:
 	LuaConsole();
-	~LuaConsole();
 
     void initialize();
     void deinitialize();
