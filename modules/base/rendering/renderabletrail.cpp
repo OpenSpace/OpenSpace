@@ -299,7 +299,7 @@ void RenderableTrail::fullYearSweep(double time) {
         catch (const SpiceManager::SpiceException& e) {
             // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
             // ---abock
-//            LERROR(e.what());
+            LERROR(e.what());
         }
         
         psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);

@@ -38,13 +38,14 @@
 #include <boost/algorithm/string.hpp>
 
 #include <ghoul/filesystem/filesystem.h>
-#include "ghoul/io/texture/texturereader.h"
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
-#include "ghoul/logging/logmanager.h"
+#include <ghoul/misc/exception.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include "ghoul/opengl/programobject.h"
-#include "ghoul/opengl/texture.h"
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 #include <iostream>
 #include <fstream>
@@ -140,10 +141,14 @@ bool Scene::deinitialize() {
 void Scene::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
 		OsEng.renderEngine().scene()->clearSceneGraph();
-		bool success = loadSceneInternal(_sceneGraphToLoad);
-		_sceneGraphToLoad = "";
-		if (!success)
-			return;
+        try {
+            bool success = loadSceneInternal(_sceneGraphToLoad);
+            _sceneGraphToLoad = "";
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(e.what());
+            return;
+        }
 		OsEng.renderEngine().aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes())
@@ -235,11 +240,16 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // Initialize all nodes
     for (SceneGraphNode* node : _graph.nodes()) {
-		bool success = node->initialize();
-        if (success)
-            LDEBUG(node->name() << " initialized successfully!");
-        else
-            LWARNING(node->name() << " not initialized.");
+        try {
+            bool success = node->initialize();
+            if (success)
+                LDEBUG(node->name() << " initialized successfully!");
+            else
+                LWARNING(node->name() << " not initialized.");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(_loggerCat + "(" + e.component + ")", e.what());
+        }
     }
 
     // update the position of all nodes
@@ -309,17 +319,21 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         OsEng.interactionHandler().setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
-	if (cameraDictionary.hasKey(KeyPositionObject)
-		&& cameraDictionary.getValue(KeyPositionObject, position)) {
+    if (cameraDictionary.hasKeyAndValue<glm::vec4>(KeyPositionObject)) {
+        try {
+            position = cameraDictionary.value<glm::vec4>(KeyPositionObject);
 
-		LDEBUG("Camera position is (" 
-			<< position[0] << ", " 
-			<< position[1] << ", " 
-			<< position[2] << ", " 
-			<< position[3] << ")");
+            LDEBUG("Camera position is ("
+                << position[0] << ", "
+                << position[1] << ", "
+                << position[2] << ", "
+                << position[3] << ")");
 
-		cameraPosition = psc(position);
-		//c->setPosition(position);
+            cameraPosition = psc(position);
+        }
+        catch (const ghoul::Dictionary::DictionaryError& e) {
+            LERROR("Error loading Camera location: " << e.what());
+        }
 	}
 
 	// the camera position
