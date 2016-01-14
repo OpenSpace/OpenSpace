@@ -284,6 +284,7 @@ void RenderableTrail::fullYearSweep(double time) {
 
     _vertexArray.resize(segments+2);
     glm::dvec3 p;
+    bool failed = false;
     for (int i = 0; i < segments+2; i++) {
 		if (start > time && intervalSet) {
 			time = start;
@@ -292,14 +293,17 @@ void RenderableTrail::fullYearSweep(double time) {
 			time = end;
 		}
 
-        try {
-         p =
-            SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
-        }
-        catch (const SpiceManager::SpiceException& e) {
-            // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
-            // ---abock
-            LERROR(e.what());
+        if (!failed || intervalSet) {
+            try {
+                p =
+                    SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
+            }
+            catch (const SpiceManager::SpiceException& e) {
+                // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
+                // ---abock
+                LERROR(e.what());
+                failed = true;
+            }
         }
         
         psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);

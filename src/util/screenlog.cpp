@@ -24,6 +24,8 @@
 
 #include <openspace/util/screenlog.h>
 
+#include <algorithm>
+
 using std::string;
 
 namespace openspace {
