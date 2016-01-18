@@ -37,4 +37,7 @@ if (OPENSPACE_HAVE_TESTS)
     add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES} ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
     target_link_libraries(OpenSpaceTest gtest ${DEPENDENT_LIBS})
 
+    set_property(TARGET OpenSpaceTest PROPERTY CXX_STANDARD 14)
+    set_property(TARGET OpenSpaceTest PROPERTY CXX_STANDARD_REQUIRED On)
+
 endif (OPENSPACE_HAVE_TESTS)
