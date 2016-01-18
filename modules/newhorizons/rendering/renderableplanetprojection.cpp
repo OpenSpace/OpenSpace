@@ -531,8 +531,9 @@ void RenderablePlanetProjection::render(const RenderData& data){
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
-	if (_time >= Time::ref().currentTime()){
-		imageQueue = {}; // if jump back in time -> empty queue.  
+	if (_time >= Time::ref().currentTime()) {
+        // if jump back in time -> empty queue.  
+        imageQueue = std::queue<Image>();
 	}
 
 	_time = Time::ref().currentTime();
