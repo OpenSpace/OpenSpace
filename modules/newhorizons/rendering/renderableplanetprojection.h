@@ -40,6 +40,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/framebufferobject.h>
 
@@ -69,7 +70,7 @@ public:
 
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-	ghoul::opengl::Texture* baseTexture() { return _texture; };
+	ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
 
 protected:
 
@@ -94,13 +95,13 @@ private:
 	properties::BoolProperty _performProjection;
 	properties::BoolProperty _clearAllProjections;
 
-    ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _fboProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _textureOriginal;
-	ghoul::opengl::Texture* _textureProj;
-	ghoul::opengl::Texture* _textureWhiteSquare;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+	std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+	std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+    std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
 	glm::vec2  _camScaling;
@@ -117,7 +118,7 @@ private:
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
-	std::string _aberration;
+    SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
 
 

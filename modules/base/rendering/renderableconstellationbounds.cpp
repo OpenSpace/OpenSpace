@@ -138,7 +138,6 @@ bool RenderableConstellationBounds::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _program;
 	_program = nullptr;
 	return true;
 }
@@ -154,7 +153,7 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 
 	_program->setUniform("exponent", _distance);
 	_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -179,11 +178,10 @@ void RenderableConstellationBounds::update(const UpdateData& data) {
 	if (_program->isDirty())
 		_program->rebuildFromFile();
 
-	SpiceManager::ref().getPositionTransformMatrix(
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(
 		_originReferenceFrame,
 		"GALACTIC",
-		data.time,
-		_stateMatrix
+		data.time
 	);
 }
 

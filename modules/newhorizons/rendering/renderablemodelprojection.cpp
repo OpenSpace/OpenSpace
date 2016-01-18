@@ -24,7 +24,6 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
-#include <openspace/util/constants.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
@@ -32,6 +31,7 @@
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include "imgui.h"
@@ -91,13 +91,13 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	, _programIsDirty(false)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
 	ghoul::Dictionary geometryDictionary;
 	success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 	}
 
@@ -136,11 +136,12 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	completeSuccess &= dictionary.getValue(keyInstrumentNear, _nearPlane);
 	completeSuccess &= dictionary.getValue(keyInstrumentFar, _farPlane);
 	ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
-		
-	completeSuccess = dictionary.getValue(keyProjAberration, _aberration);
-	if (!completeSuccess)
-		_aberration = "NONE";
-
+    
+    std::string a = "NONE";
+	bool s = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
+    completeSuccess &= s;
+    
 	openspace::SpiceManager::ref().addFrame(_target, _source);
 	setBoundingSphere(pss(1.f, 9.f));
 
@@ -273,15 +274,6 @@ bool RenderableModelProjection::deinitialize() {
 		delete _geometry;
 	}
 
-	if (_texture)
-		delete _texture;
-	if (_textureProj) 
-		delete _textureProj;
-	if (_textureOriginal)
-		delete _textureOriginal;
-	if (_textureWhiteSquare)
-		delete _textureWhiteSquare;
-
 	_geometry = nullptr;
 	_texture = nullptr;
 	_textureProj = nullptr;
@@ -326,7 +318,7 @@ void RenderableModelProjection::render(const RenderData& data) {
 	_viewProjection = data.camera.viewProjectionMatrix();
 	_programObject->setUniform("ViewProjection", _viewProjection);
 	_programObject->setUniform("ModelTransform", _transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	textureBind();
 	_geometry->render();
@@ -350,11 +342,14 @@ void RenderableModelProjection::update(const UpdateData& data) {
 	}
 		
 	// set spice-orientation in accordance to timestamp
-	if (!_source.empty())
-		openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
+    if (!_source.empty()) {
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
+    }
 
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, _sunPosition, lt);
+    glm::dvec3 p =
+    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
+    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
 void RenderableModelProjection::imageProjectGPU() {
@@ -403,8 +398,8 @@ void RenderableModelProjection::imageProjectGPU() {
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, time, _stateMatrix);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _destination, time, _instrumentMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _destination, time);
 
 	_transform = glm::mat4(1);
 
@@ -419,16 +414,18 @@ void RenderableModelProjection::attitudeParameters(double time) {
 	}
 	_transform = _transform * rotPropX * rotPropY * rotPropZ;
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, boresight, bounds);
-	if (!found)
-		return;
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        boresight = std::move(res.boresightVector);
+    } catch (const SpiceManager::SpiceException& e) {
+        return;
+    }
 
 	double lightTime;
-	psc position;                                //observer      target
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _destination, _aberration, time, position, lightTime);
+    glm::dvec3 p =
+        SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _destination, _aberration, time, lightTime);
+    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
 	position[3] += (3 + _camScaling[1]);
 	glm::vec3 cpos = position.vec3();
@@ -482,30 +479,27 @@ void RenderableModelProjection::project() {
 }
 
 void RenderableModelProjection::loadTexture() {
-	delete _texture;
 	_texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 		if (_texture) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 		if (_textureOriginal) {
 			LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_defaultProjImage != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage));
+        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage)));
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -514,10 +508,9 @@ void RenderableModelProjection::loadTexture() {
 }
 
 void RenderableModelProjection::loadProjectionTexture() {
-	delete _textureProj;
 	_textureProj = nullptr;
 	if (_projectionTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
+        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
 		if (_textureProj) {
 			_textureProj->uploadTexture();
 			_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

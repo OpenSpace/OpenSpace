@@ -76,7 +76,7 @@ endfunction ()
 
 
 function (set_compile_settings project)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD 14)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
@@ -140,7 +140,7 @@ function (add_external_dependencies)
     set_property(TARGET lz4 PROPERTY FOLDER "External")
     set_property(TARGET tinyobjloader PROPERTY FOLDER "External")
 
-    # # SGCT
+    # SGCT
     find_package(SGCT REQUIRED)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${SGCT_INCLUDE_DIRECTORIES})
     target_link_libraries(libOpenSpace ${SGCT_LIBRARIES})

@@ -32,7 +32,9 @@ namespace openspace {
 class NewHorizonsModule : public OpenSpaceModule {
 public:
     NewHorizonsModule();
-    bool create() override;
+    
+protected:
+    void internalInitialize() override;
 };
 
 } // namespace openspace

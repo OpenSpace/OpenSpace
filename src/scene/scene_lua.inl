@@ -62,7 +62,7 @@ int property_setValue(lua_State* L) {
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
-        OsEng.parallelConnection()->scriptMessage(prop->fullyQualifiedIdentifier(), value);
+        OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
 	return 0;
@@ -107,7 +107,7 @@ int loadScene(lua_State* L) {
 
 	std::string sceneFile = luaL_checkstring(L, -1);
 
-	OsEng.renderEngine()->scene()->scheduleLoadSceneFile(sceneFile);
+	OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
 
 	return 0;
 }

@@ -62,9 +62,8 @@ namespace {
     }
 
 
-    int xferinfo(void* p,
-                    curl_off_t dltotal, curl_off_t dlnow,
-                    curl_off_t ultotal, curl_off_t ulnow)
+    int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
+                 curl_off_t ulnow)
     {
         if (dltotal == 0)
             return 0;
@@ -121,43 +120,39 @@ DownloadManager::FileFuture::FileFuture(std::string file)
     , abortDownload(false)
 {}
 
-DownloadManager::DownloadManager(std::string requestURL, int applicationVersion)
-    : _requestURL(std::move(requestURL))
-    , _applicationVersion(std::move(applicationVersion))
+DownloadManager::DownloadManager(std::string requestURL, int applicationVersion,
+                                 bool useMultithreadedDownload)
+    : _applicationVersion(std::move(applicationVersion))
+    , _useMultithreadedDownload(useMultithreadedDownload)
 {
     curl_global_init(CURL_GLOBAL_ALL);
+    
+    _requestURL.push_back(std::move(requestURL));
+    
     // TODO: Check if URL is accessible ---abock
     // TODO: Allow for multiple requestURLs
 }
 
 DownloadManager::FileFuture* DownloadManager::downloadFile(
-    const std::string& url,
-    const ghoul::filesystem::File& file,
-    bool overrideFile,
-    DownloadFinishedCallback finishedCallback,
-    DownloadProgressCallback progressCallback)
+    const std::string& url, const ghoul::filesystem::File& file, bool overrideFile,
+    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
 {
     if (!overrideFile && FileSys.fileExists(file))
         return nullptr;
 
-    FileFuture* future = new FileFuture(
-        file.filename()
-    );
+    FileFuture* future = new FileFuture(file.filename());
     FILE* fp = fopen(file.path().c_str(), "wb");
 
-    LDEBUG("Starting download for file: '" << url <<
-    "' into file '" << file.path() << "'");
+    LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
-#ifdef USE_MULTITHREADED_DOWNLOAD
-    std::thread t = std::thread([url, finishedCallback, progressCallback, future, fp]() {
-#endif
+    auto downloadFunction = [url, finishedCallback, progressCallback, future, fp]() {
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
-
+            
             ProgressInformation p = {
                 future,
                 std::chrono::system_clock::now(),
@@ -166,49 +161,51 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-
+            
             CURLcode res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
             fclose(fp);
-
+            
             if (res == CURLE_OK)
                 future->isFinished = true;
             else
                 future->errorMessage = curl_easy_strerror(res);
-
+            
             if (finishedCallback)
                 finishedCallback(*future);
         }
-#ifdef USE_MULTITHREADED_DOWNLOAD
-    });
-
+    };
+    
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(downloadFunction);
+     
 #ifdef WIN32
-    std::thread::native_handle_type h = t.native_handle();
-    SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-    SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+        std::thread::native_handle_type h = t.native_handle();
+        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
 #else
-    // TODO: Implement thread priority ---abock
+        // TODO: Implement thread priority ---abock
 #endif
-
-    t.detach();
-#endif // USE_MULTITHREADED_DOWNLOAD
-
+        
+        t.detach();
+    }
+    else {
+        downloadFunction();
+    }
+    
     return future;
 }
 
 std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
-    const std::string& identifier,
-    const ghoul::filesystem::Directory& destination,
-    int version,
-    bool overrideFiles,
-    DownloadFinishedCallback finishedCallback,
+    const std::string& identifier, const ghoul::filesystem::Directory& destination,
+    int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,
     DownloadProgressCallback progressCallback)
 {
     std::vector<FileFuture*> futures;
-    bool s = FileSys.createDirectory(destination, true);
+    FileSys.createDirectory(destination, true);
     // TODO: Check s ---abock
     // TODO: Escaping is necessary ---abock
-    const std::string fullRequest =_requestURL + "?" +
+    const std::string fullRequest =_requestURL.back() + "?" +
         RequestIdentifier + "=" + identifier + "&" +
         RequestFileVersion + "=" + std::to_string(version) + "&" +
         RequestApplicationVersion + "=" + std::to_string(_applicationVersion);
@@ -259,37 +256,36 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     return futures;
 }
 
-void DownloadManager::downloadRequestFilesAsync(
-    const std::string& identifier,
-    const ghoul::filesystem::Directory& destination,
-    int version,
-    bool overrideFiles,
+void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
+    const ghoul::filesystem::Directory& destination, int version, bool overrideFiles,
     AsyncDownloadFinishedCallback callback)
 {
-#ifdef USE_MULTITHREADED_DOWNLOAD
-    std::thread t = std::thread([this, identifier, destination, version, overrideFiles, callback](){
-#endif
+    auto downloadFunction = [this, identifier, destination, version, overrideFiles, callback](){
         std::vector<FileFuture*> f = downloadRequestFiles(
             identifier,
             destination,
             version,
             overrideFiles
         );
-
+        
         callback(f);
-#ifdef USE_MULTITHREADED_DOWNLOAD
-    });
-
+    };
+    
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(downloadFunction);
+        
 #ifdef WIN32
-    std::thread::native_handle_type h = t.native_handle();
-    SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-    SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+        std::thread::native_handle_type h = t.native_handle();
+        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
 #else
-    // TODO: Implement thread priority ---abock
+        // TODO: Implement thread priority ---abock
 #endif
-
-    t.detach();
-#endif // USE_MULTITHREADED_DOWNLOAD
+        
+        t.detach();
+    }
+    else
+        downloadFunction();
 }
 
 } // namespace openspace

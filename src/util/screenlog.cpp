@@ -24,30 +24,45 @@
 
 #include <openspace/util/screenlog.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <algorithm>
 
-#include <ghoul/opengl/ghoul_gl.h>
+using std::string;
 
 namespace openspace {
-
-ScreenLog::ScreenLog() {}
-
-void ScreenLog::log(ghoul::logging::LogManager::LogLevel level, const std::string& category, const std::string& message) {
-	if (level >= ghoul::logging::LogManager::LogLevel::Info)
-		_entries.emplace_back(level, OsEng.windowWrapper().time(), Log::getTimeString(), category, message);
-
-	// Once reaching maximum size, reduce to half
-	if (_entries.size() > MaximumSize) {
-		_entries.erase(_entries.begin(), _entries.begin() + MaximumSize / 2);
-	}
+    
+ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
+    : _timeToLive(std::move(timeToLive))
+    , _logLevel(logLevel)
+{}
+    
+void ScreenLog::removeExpiredEntries() {
+    auto t = std::chrono::steady_clock::now();
+    auto ttl = _timeToLive;
+    
+    _entries.erase(
+        std::remove_if(
+            _entries.begin(),
+            _entries.end(),
+            [&t, &ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
+        ),
+        _entries.end()
+    );
 }
 
-ScreenLog::const_range ScreenLog::last(size_t n) {
-	if (_entries.size() > n) {
-		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
-	} else {
-		return std::make_pair(_entries.rbegin(), _entries.rend());
-	}
+void ScreenLog::log(LogLevel level, const string& category, const string& message) {
+    if (level >= _logLevel) {
+        _entries.push_back({
+            level,
+            std::chrono::steady_clock::now(),
+            Log::getTimeString(),
+            category,
+            message
+        });
+    }
+}
+    
+const std::vector<ScreenLog::LogEntry>& ScreenLog::entries() const {
+    return _entries;
 }
 
-}
+} // namespace openspace

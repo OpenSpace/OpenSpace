@@ -60,7 +60,7 @@ private:
 	GLsizei _markersSize;
 	GLuint _imarkers;
 	GLsizei _imarkersSize;
-	ghoul::opengl::ProgramObject* _pointcloudProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointcloudProgram;
 
 }; // ABufferVisualizer
 }  // namespace openspace

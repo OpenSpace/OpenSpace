@@ -29,7 +29,7 @@
 #include <openspace/rendering/renderable.h>
 
 // ghoul includes
-#include <ghoul/io/rawvolumereader.h>
+#include <ghoul/io/volume/rawvolumereader.h>
 
 // Forward declare to minimize dependencies
 namespace ghoul {

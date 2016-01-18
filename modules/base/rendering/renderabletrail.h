@@ -43,7 +43,6 @@ namespace openspace {
 class RenderableTrail : public Renderable {
 public:
     RenderableTrail(const ghoul::Dictionary& dictionary);
-    ~RenderableTrail();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -66,7 +65,7 @@ private:
     properties::FloatProperty _lineWidth;
 	properties::BoolProperty _showTimestamps;
 
-    ghoul::opengl::ProgramObject* _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     bool _successfullDictionaryFetch;
 

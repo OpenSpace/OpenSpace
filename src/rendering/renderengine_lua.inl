@@ -47,7 +47,7 @@ int takeScreenshot(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.renderEngine()->takeScreenshot();
+	OsEng.renderEngine().takeScreenshot();
 	return 0;
 }
 
@@ -65,7 +65,7 @@ int visualizeABuffer(lua_State* L) {
     if (type != LUA_TBOOLEAN)
         return luaL_error(L, "Expected argument of type 'bool'");
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleVisualizeABuffer(b);
+	OsEng.renderEngine().toggleVisualizeABuffer(b);
 	return 0;
 }
 
@@ -83,7 +83,7 @@ int showRenderInformation(lua_State* L) {
     if (type != LUA_TBOOLEAN)
         return luaL_error(L, "Expected argument of type 'bool'");
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleInfoText(b);
+	OsEng.renderEngine().toggleInfoText(b);
 	return 0;
 }
 
@@ -98,7 +98,7 @@ int setPerformanceMeasurement(lua_State* L) {
 		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->setPerformanceMeasurements(b);
+	OsEng.renderEngine().setPerformanceMeasurements(b);
 	return 0;
 }
 
@@ -114,7 +114,7 @@ int fadeIn(lua_State* L) {
 
 	double t = luaL_checknumber(L, -1);
 			
-	OsEng.renderEngine()->startFading(1, static_cast<float>(t));
+	OsEng.renderEngine().startFading(1, static_cast<float>(t));
 	return 0;
 }
 /**
@@ -129,7 +129,7 @@ int fadeOut(lua_State* L) {
 
 	double t = luaL_checknumber(L, -1);
 
-	OsEng.renderEngine()->startFading(-1, static_cast<float>(t));
+	OsEng.renderEngine().startFading(-1, static_cast<float>(t));
 	return 0;
 }
 

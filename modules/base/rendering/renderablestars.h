@@ -63,11 +63,11 @@ private:
 	bool saveCachedFile(const std::string& file) const;
 
 	properties::StringProperty _pointSpreadFunctionTexturePath;
-	ghoul::opengl::Texture* _pointSpreadFunctionTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
 	bool _pointSpreadFunctionTextureIsDirty;
 
 	properties::StringProperty _colorTexturePath;
-	ghoul::opengl::Texture* _colorTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
 	bool _colorTextureIsDirty;
 
 	properties::OptionProperty _colorOption;
@@ -76,7 +76,7 @@ private:
     properties::FloatProperty _scaleFactor;
     properties::FloatProperty _minBillboardSize;
 
-	ghoul::opengl::ProgramObject* _program;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	std::string _speckFile;
 

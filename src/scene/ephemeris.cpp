@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/scene/ephemeris.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     const std::string _loggerCat = "Ephemeris";

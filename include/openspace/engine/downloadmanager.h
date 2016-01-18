@@ -26,12 +26,14 @@
 #define __DOWNLOADMANAGER_H__
 
 #include <ghoul/designpattern/singleton.h>
+
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
 
-#include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace openspace {
 
@@ -58,42 +60,38 @@ public:
         bool abortDownload;
     };
 
-    typedef std::function<void(const FileFuture&)> DownloadProgressCallback;
-    typedef std::function<void(const FileFuture&)> DownloadFinishedCallback;
-    typedef std::function<void(const std::vector<FileFuture*>&)> AsyncDownloadFinishedCallback;
+    using DownloadProgressCallback = std::function<void(const FileFuture&)>;
+    using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
+    using AsyncDownloadFinishedCallback =
+        std::function<void(const std::vector<FileFuture*>&)>;
 
-    DownloadManager(std::string requestURL, int applicationVersion);
+    DownloadManager(std::string requestURL, int applicationVersion,
+        bool useMultithreadedDownload = true);
 
     // callers responsibility to delete
     // callbacks happen on a different thread
-    FileFuture* downloadFile(
-        const std::string& url,
-        const ghoul::filesystem::File& file,
+    FileFuture* downloadFile(const std::string& url, const ghoul::filesystem::File& file,
         bool overrideFile = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    std::vector<FileFuture*> downloadRequestFiles(
-        const std::string& identifier,
-        const ghoul::filesystem::Directory& destination,
-        int version,
+    std::vector<FileFuture*> downloadRequestFiles(const std::string& identifier,
+        const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    void downloadRequestFilesAsync(
-        const std::string& identifier,
-        const ghoul::filesystem::Directory& destination,
-        int version,
-        bool overrideFiles,
-        AsyncDownloadFinishedCallback callback
+    void downloadRequestFilesAsync(const std::string& identifier,
+        const ghoul::filesystem::Directory& destination, int version,
+        bool overrideFiles, AsyncDownloadFinishedCallback callback
     );
 
 private:
-    std::string _requestURL;
+    std::vector<std::string> _requestURL;
     int _applicationVersion;
+    bool _useMultithreadedDownload;
 };
 
 #define DlManager (openspace::DownloadManager::ref())

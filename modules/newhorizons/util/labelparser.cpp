@@ -204,15 +204,22 @@ bool LabelParser::create() {
 						if (read == "START_TIME"){
 							std::string start = line.substr(line.find("=") + 2);
 							start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
-							openspace::SpiceManager::ref().getETfromDate(start, _startTime);
+                            _startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
 							count++;
 
 							getline(file, line);
 							read = line.substr(0, line.find_first_of(" "));
 							if (read == "STOP_TIME"){
 								std::string stop = line.substr(line.find("=") + 2);
-								stop.erase(std::remove(stop.begin(), stop.end(), ' '), stop.end());
-								openspace::SpiceManager::ref().getETfromDate(stop, _stopTime);
+                                stop.erase(
+                                    std::remove_if(
+                                        stop.begin(),
+                                        stop.end(),
+                                        [](char c) { return c == ' ' || c == '\r'; }
+                                    ),
+                                    stop.end()
+                                );
+                                _stopTime = SpiceManager::ref().ephemerisTimeFromDate(stop);
 								count++;
 							}
 							else{

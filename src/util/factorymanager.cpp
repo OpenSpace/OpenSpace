@@ -24,45 +24,42 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/scene/ephemeris.h>
-
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
+    
+FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
+    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
+    , type(std::move(t))
+{
+    ghoul_assert(!type.empty(), "Type must not be empty");
+}
 
 void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager already initialized");
-    if (_manager == nullptr)
-        _manager = new FactoryManager;
-    ghoul_assert(_manager, "Factory Manager was not correctly initialized");
-
-    _manager->addFactory(new ghoul::TemplateFactory<Renderable>);
-    _manager->addFactory(new ghoul::TemplateFactory<Ephemeris>);
+    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    _manager = new FactoryManager;
 }
 
 void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "No Factory Manager to deinitialize");
+    ghoul_assert(_manager, "Factory Manager must have been initialized");
     delete _manager;
     _manager = nullptr;
 }
+    
+bool FactoryManager::isInitialized() {
+    return _manager != nullptr;
+}
 
 FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "No Factory Manager to dereference");
+    ghoul_assert(_manager, "Factory Manager must have been initialized");
     return *_manager;
 }
 
-FactoryManager::~FactoryManager() {
-    for (ghoul::TemplateFactoryBase* factory : _factories)
-        delete factory;
-    _factories.clear();
-}
-
-void FactoryManager::addFactory(ghoul::TemplateFactoryBase* factory) {
-    _factories.push_back(factory);
-
+void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory) {
+    ghoul_assert(factory, "Factory must not be nullptr");
+    _factories.push_back(std::move(factory));
 }
 
 }  // namespace openspace

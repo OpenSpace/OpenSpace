@@ -24,7 +24,6 @@
 
 #include <modules/base/rendering/wavefrontgeometry.h>
 
-#include <openspace/util/constants.h>
 #include "ghoul/logging/logmanager.h"
 #include <tiny_obj_loader.h>
 
@@ -53,9 +52,10 @@ void WavefrontGeometry::deinitialize() {
 bool WavefrontGeometry::loadModel(const std::string& filename) {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
-    std::string err = tinyobj::LoadObj(shapes, materials, filename.c_str(), filename.c_str());
+    std::string err;
+    bool success = tinyobj::LoadObj(shapes, materials, err, filename.c_str(), filename.c_str());
 
-    if (!err.empty()) {
+    if (!success) {
         LERROR(err);
         return false;
     }

@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/renderablesphere.h>
-#include <openspace/util/constants.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -131,10 +130,8 @@ bool RenderableSphere::deinitialize() {
     delete _sphere;
     _sphere = nullptr;
 
-	delete _texture;
     _texture = nullptr;
 
-    delete _shader;
     _shader = nullptr;
 
 	return true;
@@ -153,7 +150,7 @@ void RenderableSphere::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 
     _shader->setUniform("alpha", _transparency);
 
@@ -182,7 +179,7 @@ void RenderableSphere::update(const UpdateData& data) {
 
 void RenderableSphere::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
@@ -192,9 +189,7 @@ void RenderableSphere::loadTexture() {
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 		}
 	}
 }

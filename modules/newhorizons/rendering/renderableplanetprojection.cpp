@@ -24,7 +24,6 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <openspace/util/constants.h>
 #include <modules/newhorizons/rendering/planetgeometryprojection.h>
 
 #include <openspace/engine/configurationmanager.h>
@@ -32,6 +31,7 @@
 #include <ghoul/io/texture/texturereader.h>
 //#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -99,7 +99,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "");
 
 	_defaultProjImage = absPath("textures/defaultProj.png");
@@ -108,7 +108,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     success = dictionary.getValue(
 		keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
@@ -120,7 +120,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
     bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
     bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
-    bool b4 = dictionary.getValue(keyProjAberration, _aberration);
+    std::string a = "NONE";
+    bool b4 = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
     bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);        
     bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); 
     bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
@@ -243,10 +245,10 @@ bool RenderablePlanetProjection::initialize() {
             return false;
     }
 
-	if (_fboProgramObject == nullptr)
-		completeSuccess
-		&= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
-
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
+                                      "${SHADERS}/fboPass_vs.glsl",
+                                      "${SHADERS}/fboPass_fs.glsl");
+    
     loadTexture();
 	loadProjectionTexture();
     completeSuccess &= (_texture != nullptr);
@@ -303,13 +305,9 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 }
 
 bool RenderablePlanetProjection::deinitialize(){
-    delete _texture; 
     _texture = nullptr;
-	delete _textureProj;
 	_textureProj = nullptr;
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	delete _geometry;
 	_geometry = nullptr;
@@ -406,8 +404,8 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time, _stateMatrix);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, _time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
 
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
@@ -422,16 +420,17 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	}
 	_transform = _transform * rot * roty * rotProp;
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, bs, bounds);
-	//if (!found) LERROR("Could not locate instrument");
-    if (!found)
-        return ;
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        bs = std::move(res.boresightVector);
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        return;
+    }
 
-	psc position;                                //observer      target
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
+    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
 	//change to KM and add psc camera scaling. 
 	position[3] += (3 + _camScaling[1]);
@@ -508,9 +507,10 @@ void RenderablePlanetProjection::render(const RenderData& data){
     attitudeParameters(_time);
 	_imageTimes.clear();
 
-	psc sun_pos;
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, sun_pos, lt);
+    glm::dvec3 p =
+    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
+    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 	// Main renderpass
 	_programObject->activate();
@@ -520,7 +520,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	textureBind();
 	
@@ -557,10 +557,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 }
 
 void RenderablePlanetProjection::loadProjectionTexture() {
-	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
+        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
 		if (_textureProj) {
 			_textureProj->uploadTexture(); 
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
@@ -572,28 +571,25 @@ void RenderablePlanetProjection::loadProjectionTexture() {
 }
 
 void RenderablePlanetProjection::loadTexture() {
-    delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
         if (_texture) {
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
 		if (_textureOriginal) {
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage);
+        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage));
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

@@ -101,7 +101,7 @@ private:
 	std::string _vertexFilename; ///< The filename containing the constellation bounds
 	std::string _constellationFilename; ///< The file containing constellation names
 
-	ghoul::opengl::ProgramObject* _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	/// The list of all loaded constellation bounds
 	std::vector<ConstellationBound> _constellationBounds;

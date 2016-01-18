@@ -37,17 +37,11 @@ VolumeModule::VolumeModule()
     : OpenSpaceModule("Volume")
 {}
 
-bool VolumeModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
+void VolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableVolumeGL>("RenderableVolumeGL");
-
-    return true;
 }
 
 } // namespace openspace

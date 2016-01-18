@@ -33,6 +33,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 #include <modules/base/rendering/modelgeometry.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -76,13 +77,13 @@ namespace openspace {
 		properties::IntProperty _rotationY;
 		properties::IntProperty _rotationZ;
 
-		ghoul::opengl::ProgramObject* _programObject;
-		ghoul::opengl::ProgramObject* _fboProgramObject;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
-		ghoul::opengl::Texture* _texture;
-		ghoul::opengl::Texture* _textureOriginal;
-		ghoul::opengl::Texture* _textureProj;
-		ghoul::opengl::Texture* _textureWhiteSquare;
+        std::unique_ptr<ghoul::opengl::Texture> _texture;
+        std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+        std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+        std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 
 		modelgeometry::ModelGeometry* _geometry;
 
@@ -104,7 +105,7 @@ namespace openspace {
 		std::string _instrumentID;
 		std::string _projectorID;
 		std::string _projecteeID;
-		std::string _aberration;
+        SpiceManager::AberrationCorrection _aberration;
 		std::vector<std::string> _potentialTargets;
 		float _fovy;
 		float _aspectRatio;

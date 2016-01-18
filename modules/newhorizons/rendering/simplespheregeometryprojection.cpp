@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/newhorizons/rendering/simplespheregeometryprojection.h>
-#include <openspace/util/constants.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace {
     const std::string _loggerCat = "SimpleSphereGeometryProjection";
@@ -47,12 +47,11 @@ SimpleSphereGeometryProjection::SimpleSphereGeometryProjection(const ghoul::Dict
     , _segments("segments", "Segments", 20, 1, 1000)
     , _planet(nullptr)
 {
-	using constants::scenegraphnode::keyName;
 	using constants::simplespheregeometryprojection::keyRadius;
 	using constants::simplespheregeometryprojection::keySegments;
 
 	// The name is passed down from the SceneGraphNode
-	bool success = dictionary.getValue(keyName, _name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, _name);
 	assert(success);
 
 	// removing "Projection"-suffix from name for SPICE compability, TODO: better solution @AA

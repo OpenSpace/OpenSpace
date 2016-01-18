@@ -137,7 +137,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {
     delete _psfTextureFile;
     delete _colorTextureFile;
-    delete _colorTexture;
 }
 
 bool RenderableStars::isReady() const {
@@ -151,6 +150,7 @@ bool RenderableStars::initialize() {
 		"${MODULE_BASE}/shaders/star_vs.glsl",
 		"${MODULE_BASE}/shaders/star_fs.glsl",
 		"${MODULE_BASE}/shaders/star_ge.glsl");
+    
 	if (!_program)
 		return false;
 	completeSuccess &= loadData();
@@ -165,11 +165,9 @@ bool RenderableStars::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _pointSpreadFunctionTexture;
 	_pointSpreadFunctionTexture = nullptr;
+    _colorTexture = nullptr;
 
-	if(_program)
- 		delete _program;
 	_program = nullptr;
 	return true;	
 }
@@ -200,7 +198,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
 	
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
 
 	ghoul::opengl::TextureUnit psfUnit;
@@ -312,10 +310,9 @@ void RenderableStars::update(const UpdateData& data) {
 
 	if (_pointSpreadFunctionTextureIsDirty) {
 		LDEBUG("Reloading Point Spread Function texture");
-		delete _pointSpreadFunctionTexture;
 		_pointSpreadFunctionTexture = nullptr;
 		if (_pointSpreadFunctionTexturePath.value() != "") {
-			_pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath));
+            _pointSpreadFunctionTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath)));
 			if (_pointSpreadFunctionTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
 				_pointSpreadFunctionTexture->uploadTexture();
@@ -330,10 +327,9 @@ void RenderableStars::update(const UpdateData& data) {
 
 	if (_colorTextureIsDirty) {
 		LDEBUG("Reloading Color Texture");
-		delete _colorTexture;
 		_colorTexture = nullptr;
 		if (_colorTexturePath.value() != "") {
-			_colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+            _colorTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 			if (_colorTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 				_colorTexture->uploadTexture();
@@ -349,8 +345,7 @@ void RenderableStars::update(const UpdateData& data) {
 
 bool RenderableStars::loadData() {
 	std::string _file = _speckFile;
-	std::string cachedFile = "";
-	FileSys.cacheManager()->getCachedFile(_file, cachedFile, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file, true);
 
 	bool hasCachedFile = FileSys.fileExists(cachedFile);
 	if (hasCachedFile) {

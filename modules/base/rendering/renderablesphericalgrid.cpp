@@ -26,7 +26,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #define _USE_MATH_DEFINES
@@ -166,7 +165,7 @@ bool RenderableSphericalGrid::deinitialize(){
 bool RenderableSphericalGrid::initialize(){
 	bool completeSuccess = true;
 	if (_gridProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager()->getValue("GridProgram", _gridProgram);
+		completeSuccess &= OsEng.ref().configurationManager().getValue("GridProgram", _gridProgram);
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);
@@ -227,9 +226,8 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	_gridProgram->deactivate();
 }
 
-void RenderableSphericalGrid::update(const UpdateData& data){
-
-	openspace::SpiceManager::ref().getPositionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time, _parentMatrix);
+void RenderableSphericalGrid::update(const UpdateData& data) {
+    _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time);
 
 }
 }

@@ -38,7 +38,7 @@ namespace {
 }
 
 Scene* sceneGraph() {
-    return OsEng.renderEngine()->scene();
+    return OsEng.renderEngine().scene();
 }
 
 SceneGraphNode* sceneGraphNode(const std::string& name) {
@@ -52,7 +52,7 @@ Renderable* renderable(const std::string& name) {
 }
 
 properties::Property* property(const std::string& uri) {
-    properties::Property* globalProp = OsEng.globalPropertyOwner()->property(uri);
+    properties::Property* globalProp = OsEng.globalPropertyOwner().property(uri);
     if (globalProp) {
         return globalProp;
     }

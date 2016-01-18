@@ -25,11 +25,9 @@
 #include <modules/base/rendering/renderabletrail.h>
 #include <openspace/util/time.h>
 
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 
@@ -102,10 +100,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 	_distanceFade = 1.0;
 }
 
-RenderableTrail::~RenderableTrail() {
-    delete _programObject;
-}
-
 bool RenderableTrail::initialize() {
     if (!_successfullDictionaryFetch) {
         LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");
@@ -149,7 +143,7 @@ void RenderableTrail::render(const RenderData& data) {
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(_programObject, &data.camera, data.position);
+    setPscUniforms(_programObject.get(), &data.camera, data.position);
 
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
@@ -201,7 +195,6 @@ void RenderableTrail::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
     double lightTime = 0.0;
-    psc pscPos;
 
 	bool intervalSet = hasTimeInterval();
 	double start = DBL_MIN;
@@ -217,13 +210,17 @@ void RenderableTrail::update(const UpdateData& data) {
     double deltaTime = std::abs(data.time - _oldTime);
     int nValues = static_cast<int>(floor(deltaTime / _increment));
 
+    glm::dvec3 p;
     // Update the floating current time
 	if (start > data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", start, pscPos, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, start, lightTime);
 	else if (end < data.time)
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", end, pscPos, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, end, lightTime);
 	else
-		SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", data.time, pscPos, lightTime);
+        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, data.time, lightTime);
+    
+    psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    
 
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
@@ -243,7 +240,9 @@ void RenderableTrail::update(const UpdateData& data) {
 				et = start;
 			else if (end < et)
 				et = end;
-			SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", et, pscPos, lightTime);
+            glm::dvec3 p =
+            SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, et, lightTime);
+            pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 			pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
@@ -283,8 +282,9 @@ void RenderableTrail::fullYearSweep(double time) {
     
     _oldTime = time;
 
-    psc pscPos;
     _vertexArray.resize(segments+2);
+    glm::dvec3 p;
+    bool failed = false;
     for (int i = 0; i < segments+2; i++) {
 		if (start > time && intervalSet) {
 			time = start;
@@ -293,7 +293,20 @@ void RenderableTrail::fullYearSweep(double time) {
 			time = end;
 		}
 
-        SpiceManager::ref().getTargetPosition(_target, _observer, _frame, "NONE", time, pscPos, lightTime);
+        if (!failed || intervalSet) {
+            try {
+                p =
+                    SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
+            }
+            catch (const SpiceManager::SpiceException& e) {
+                // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
+                // ---abock
+                LERROR(e.what());
+                failed = true;
+            }
+        }
+        
+        psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};

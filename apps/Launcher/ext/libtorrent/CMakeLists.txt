@@ -187,11 +187,10 @@ endif ()
 # Boost
 set(Boost_USE_STATIC_LIBS ON)
 if (NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
-    find_package(Boost COMPONENTS system chrono REQUIRED)
+    find_package(Boost COMPONENTS REQUIRED system chrono date_time thread)
 endif ()
 target_include_directories(libtorrent PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(libtorrent ${Boost_LIBRARIES})
-message(${Boost_LIBRARIES})
 
 if (WIN32)
     target_link_libraries(libtorrent wsock32 ws2_32 Iphlpapi.lib)

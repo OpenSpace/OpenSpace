@@ -42,7 +42,7 @@ void GuiTimeComponent::render() {
     
     bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100.f, 100.f);
     if (changed)
-        OsEng.scriptEngine()->queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
+        OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")");
 
 
     //char dateBuffer[512] = {};

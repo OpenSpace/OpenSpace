@@ -61,8 +61,8 @@ private:
 
     properties::FloatProperty _transparency;
 
-	ghoul::opengl::ProgramObject* _shader;
-	ghoul::opengl::Texture* _texture;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     PowerScaledSphere* _sphere;
 

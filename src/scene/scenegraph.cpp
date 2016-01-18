@@ -90,9 +90,12 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
 
     // Load dictionary
     ghoul::Dictionary sceneDictionary;
-    bool success = ghoul::lua::loadDictionaryFromFile(absSceneFile, sceneDictionary);
-    if (!success)
+    try {
+        ghoul::lua::loadDictionaryFromFile(absSceneFile, sceneDictionary);
+    }
+    catch (...) {
         return false;
+    }
 
     std::string sceneDescriptionDirectory =
     ghoul::filesystem::File(absSceneFile, true).directoryName();
@@ -116,13 +119,13 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     }
 
     ghoul::Dictionary moduleDictionary;
-    success = sceneDictionary.getValue(KeyModules, moduleDictionary);
+    bool success = sceneDictionary.getValue(KeyModules, moduleDictionary);
     if (!success)
         // There are no modules that are loaded
         return true;
 
     lua_State* state = ghoul::lua::createNewLuaState();
-    OsEng.scriptEngine()->initializeLuaState(state);
+    OsEng.scriptEngine().initializeLuaState(state);
 
     // Get the common directory
     bool commonFolderSpecified = sceneDictionary.hasKey(KeyCommonFolder);
@@ -182,9 +185,12 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         }
 
         ghoul::Dictionary moduleDictionary;
-        bool s = ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
-        if (!s)
+        try {
+            ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+        }
+        catch (...) {
             continue;
+        }
 
         std::vector<std::string> keys = moduleDictionary.keys();
         for (const std::string& key : keys) {
@@ -337,7 +343,7 @@ bool SceneGraph::sortTopologically() {
 
     }
 
-    RenderEngine::ABufferImplementation i = OsEng.renderEngine()->aBufferImplementation();
+    RenderEngine::ABufferImplementation i = OsEng.renderEngine().aBufferImplementation();
     if (i == RenderEngine::ABufferImplementation::FrameBuffer) {
         auto it = std::find_if(
                                _topologicalSortedNodes.begin(),

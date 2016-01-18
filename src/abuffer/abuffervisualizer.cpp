@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/abuffer/abuffervisualizer.h>
-#include <openspace/util/constants.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -58,8 +57,6 @@ ABufferVisualizer::~ABufferVisualizer() {
 		glDeleteVertexArrays(1, &_pointcloud);
 	if (_markers)
 		glDeleteVertexArrays(1, &_markers);
-	if (_pointcloudProgram)
-		delete _pointcloudProgram;
 }
 
 void ABufferVisualizer::updateData(const std::vector<ABuffer::fragmentData>& data) {
@@ -142,37 +139,37 @@ void ABufferVisualizer::render() {
 
 	_pointcloudProgram->deactivate();
 
-	const int font_size_light = 8;
-	const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
-
-	const glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(0.04, 0.04, 0.04));
-	glm::mat4 translate, mvp;
-
-    const glm::mat4 viewProjMatrix = OsEng.windowWrapper().viewProjectionMatrix();
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 0));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(0,0,0)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 1));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(0,0,1)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 0));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(0,1,0)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 0));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(1,0,0)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 1));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(0,1,1)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 1));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(1,0,1)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 0));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(1,1,0)");
-	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 1));
-	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
-	Freetype::print3d(fontLight, mvp, "(1,1,1)");
+//	const int font_size_light = 8;
+//	const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
+//
+//	const glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(0.04, 0.04, 0.04));
+//	glm::mat4 translate, mvp;
+//
+//    const glm::mat4 viewProjMatrix = OsEng.windowWrapper().viewProjectionMatrix();
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 0));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(0,0,0)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, 1));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(0,0,1)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 0));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(0,1,0)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 0));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(1,0,0)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 1));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(0,1,1)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 0, 1));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(1,0,1)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 0));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(1,1,0)");
+//	translate = glm::translate(glm::mat4(1.0), glm::vec3(1, 1, 1));
+//	mvp = viewProjMatrix*modelMatrix*translate*rotationText*scale;
+//	Freetype::print3d(fontLight, mvp, "(1,1,1)");
 }
 
 void ABufferVisualizer::initializeMarkers() {

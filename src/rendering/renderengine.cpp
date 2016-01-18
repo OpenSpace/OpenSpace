@@ -38,7 +38,6 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
@@ -53,6 +52,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -62,6 +62,7 @@
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/misc/exception.h>
 
 #include <array>
 #include <fstream>
@@ -84,6 +85,8 @@ namespace {
 
     const std::string KeyRenderingMethod = "RenderingMethod";
     const std::string DefaultRenderingMethod = "ABufferSingleLinked";
+    
+    std::chrono::seconds ScreenLogTimeToLive(15);
 }
 
 namespace openspace {
@@ -91,6 +94,9 @@ namespace openspace {
 const std::string RenderEngine::PerformanceMeasurementSharedData =
 	"OpenSpacePerformanceMeasurementSharedData";
 
+const std::string RenderEngine::KeyFontMono = "Mono";
+const std::string RenderEngine::KeyFontLight = "Light";
+    
 RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
@@ -136,14 +142,14 @@ bool RenderEngine::initialize() {
     std::string renderingMethod = DefaultRenderingMethod;
     
     // If the user specified a rendering method that he would like to use, use that
-    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
-        renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
+    if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyRenderingMethod))
+        renderingMethod = OsEng.configurationManager().value<std::string>(KeyRenderingMethod);
     else {
         using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version(4,3)) {
+        if (OpenGLCap.openGLVersion() < Version{4,3,0}) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "ABufferFrameBuffer";
         }
@@ -179,16 +185,16 @@ bool RenderEngine::initialize() {
 	_mainCamera = new Camera();
 	_mainCamera->setScaling(glm::vec2(1.0, -8.0));
 	_mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-	OsEng.interactionHandler()->setCamera(_mainCamera);
+	OsEng.interactionHandler().setCamera(_mainCamera);
 
 #ifdef GHOUL_USE_DEVIL
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
 #endif // GHOUL_USE_FREEIMAGE
 
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
 
 	return true;
@@ -203,13 +209,18 @@ bool RenderEngine::initializeGL() {
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
     
-    const float fontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeTime);
-    const float fontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(constants::fonts::keyMono, fontSizeMono);
-    const float fontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(constants::fonts::keyLight, fontSizeLight);
-
+    try {
+        const float fontSizeTime = 15.f;
+        _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
+        const float fontSizeMono = 10.f;
+        _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
+        const float fontSizeLight = 8.f;
+        _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
+    }
+    catch (const ghoul::fontrendering::Font::FreeTypeException& e) {
+        LERROR(e.what());
+        throw;
+    }
     
     
     
@@ -287,11 +298,17 @@ bool RenderEngine::initializeGL() {
     //}
 
     LINFO("Initializing ABuffer");
-	_abuffer->initialize();
+    try {
+        _abuffer->initialize();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(e.what());
+    }
 
     LINFO("Initializing Log");
-	_log = new ScreenLog();
-	ghoul::logging::LogManager::ref().addLog(_log);
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Initializing Visualizer");
 	_visualizer = new ABufferVisualizer();
@@ -427,19 +444,19 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             );
             penPosition.y -= _fontDate->height();
 
-            RenderFontCr(_fontDate,
+            RenderFontCr(*_fontDate,
                 penPosition,
                 "Date: %s",
                 Time::ref().currentTimeUTC().c_str()
             );
             
-            RenderFontCr(_fontInfo,
+            RenderFontCr(*_fontInfo,
                        penPosition,
                        "Simulation increment (s): %.0f",
                        Time::ref().deltaTime()
                        );
 
-            RenderFontCr(_fontInfo,
+            RenderFontCr(*_fontInfo,
                        penPosition,
                        "Avg. Frametime: %.5f",
                        OsEng.windowWrapper().averageDeltaTime()
@@ -451,15 +468,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 
                 glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
-                psc nhPos;
                 double lt;
-                SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
+                glm::dvec3 p =
+                SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+                psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
                 float a, b, c;
-                SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
+                glm::dvec3 radii;
+                SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                a = radii.x;
+                b = radii.y;
+                c = radii.z;
                 float radius = (a + b) / 2.f;
                 float distToSurf = glm::length(nhPos.vec3()) - radius;
                 
-                RenderFont(_fontInfo,
+                RenderFont(*_fontInfo,
                            penPosition,
                            "Distance to Pluto: % .1f (KM)",
                            distToSurf
@@ -478,8 +500,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 for (int i = 0; i < 25 - g; i++)
                           progress.append(" ");
 
-                std::string str = "";
-                openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
+                std::string str = SpiceManager::ref().dateFromEphemerisTime(
+                    ImageSequencer2::ref().getNextCaptureTime(),
+                    "YYYY MON DD HR:MN:SC"
+                );
 
                 glm::vec4 active(0.6, 1, 0.00, 1);
                 glm::vec4 brigther_active(0.9, 1, 0.75, 1);
@@ -488,20 +512,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 if (remaining > 0) {
                     brigther_active *= (1 - t);
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active * t + brigther_active,
                                "Next instrument activity:"
                     );
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active * t + brigther_active,
                                "%.0f s %s %.1f %%",
                                remaining, progress.c_str(), t * 100
                     );
 
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active,
                                "Data acquisition time: %s",
@@ -529,7 +553,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     mm.append(std::to_string(minute));
                     ss.append(std::to_string(second));
                     
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                targetColor,
                                "Data acquisition adjacency: [%s:%s:%s]",
@@ -547,7 +571,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         t += 0.3;
                         color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
                         
-                        RenderFont(_fontInfo,
+                        RenderFont(*_fontInfo,
                                    penPosition,
                                    color,
                                    "%s%s",
@@ -564,7 +588,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
                     glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-                    RenderFontCr(_fontInfo,
+                    RenderFontCr(*_fontInfo,
                                penPosition,
                                active,
                                "Active Instruments:"
@@ -572,12 +596,12 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
                     for (auto t : activeMap){
                         if (t.second == false) {
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "| |"
                             );
-                            RenderFontCr(_fontInfo,
+                            RenderFontCr(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "    %5s",
@@ -586,24 +610,24 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                             
                         }
                         else{
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "|"
                             );
                             if (t.first == "NH_LORRI") {
-                                RenderFont(_fontInfo,
+                                RenderFont(*_fontInfo,
                                            penPosition,
                                            firing,
                                            " + "
                                 );
                             }
-                            RenderFont(_fontInfo,
+                            RenderFont(*_fontInfo,
                                        penPosition,
                                        glm::vec4(0.3, 0.3, 0.3, 1),
                                        "  |"
                             );
-                            RenderFontCr(_fontInfo,
+                            RenderFontCr(*_fontInfo,
                                        penPosition,
                                        active,
                                        "    %5s",
@@ -615,13 +639,28 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             }
 #endif
             }
-            if (_showScreenLog) {
+            if (_showScreenLog && _fontLog) {
+                _log->removeExpiredEntries();
+                
                 const int max = 10;
                 const int category_length = 20;
                 const int msg_length = 140;
-                const float ttl = 15.f;
-                const float fade = 5.f;
-                auto entries = _log->last(max);
+                std::chrono::seconds fade(5);
+                
+                auto entries = _log->entries();
+                auto lastEntries = entries.size() > max ? std::make_pair(entries.rbegin(), entries.rbegin() + max) : std::make_pair(entries.rbegin(), entries.rend());
+                
+//                if (entries.size() > max)
+                
+                //ScreenLog::const_range ScreenLog::last(size_t n) {
+                //	if (_entries.size() > n) {
+                //		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+                //	} else {
+                //		return std::make_pair(_entries.rbegin(), _entries.rend());
+                //	}
+                //}
+                
+//                auto entries = _log->last(max);
 
                 const glm::vec4 white(0.9, 0.9, 0.9, 1);
                 const glm::vec4 red(1, 0, 0, 1);
@@ -630,26 +669,21 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                 const glm::vec4 blue(0, 0, 1, 1);
 
                 size_t nr = 1;
-                for (auto& it = entries.first; it != entries.second; ++it) {
+                auto now = std::chrono::steady_clock::now();
+                for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
                     const ScreenLog::LogEntry* e = &(*it);
 
-                    const double t = OsEng.windowWrapper().time();
-                    float diff = static_cast<float>(t - e->timeStamp);
-
-                    // Since all log entries are ordered, once one is exceeding TTL, all have
-//                    if (diff > ttl)
-//                        break;
-
+                    std::chrono::duration<double> diff = now - e->timeStamp;
+                    
                     float alpha = 1;
-                    float ttf = ttl - fade;
+                    std::chrono::duration<double> ttf = ScreenLogTimeToLive - fade;
                     if (diff > ttf) {
-                        diff = diff - ttf;
-                        float p = 0.8f - diff / fade;
+                        auto d = (diff - ttf).count();
+                        auto t = static_cast<float>(d) / static_cast<float>(fade.count());
+                        float p = 0.8f - t;
                         alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
                     }
                     
-                    alpha = 1.f;
-
                     // Since all log entries are ordered, once one exceeds alpha, all have
                     if (alpha <= 0.0)
                         break;
@@ -658,7 +692,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                     const std::string& message = e->message.substr(0, msg_length);
                     nr += std::count(message.begin(), message.end(), '\n');
 
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%-14s %s%s",									// Format
@@ -677,13 +711,13 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
                         color = blue;
 
 //                    const float font_with_light = 5;
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                color * alpha,
                                "%s",									// Format
                                lvl.c_str());		// Pad category with "..." if exceeds category_length
 
-                    RenderFont(_fontLog,
+                    RenderFont(*_fontLog,
                                glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
                                white * alpha,
                                "%s",									// Format
@@ -908,10 +942,18 @@ void RenderEngine::storePerformanceMeasurements() {
 			maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
 		LINFO("Create shared memory of " << totalSize << " bytes");
 
+        try {
+            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+        }
+        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
+            LINFOC(e.component, e.what());
+        }
+        
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+        void* ptr = _performanceMemory->memory();
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
 		layout->nEntries = nNodes;
@@ -936,7 +978,8 @@ void RenderEngine::storePerformanceMeasurements() {
 		}
 	}
 
-	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+    void* ptr = _performanceMemory->memory();
+	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 	_performanceMemory->acquireLock();
 	for (int i = 0; i < nNodes; ++i) {
 		SceneGraphNode* node = scene()->allSceneGraphNodes()[i];

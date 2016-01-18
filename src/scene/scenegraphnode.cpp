@@ -25,7 +25,6 @@
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/constants.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
@@ -34,7 +33,6 @@
 #include <ghoul/opengl/shadermanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
-#include <ghoul/misc/highresclock.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
 #include <openspace/engine/openspaceengine.h>
@@ -43,6 +41,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <cctype>
+#include <chrono>
 
 namespace {
     const std::string _loggerCat = "SceneGraphNode";
@@ -177,12 +176,12 @@ void SceneGraphNode::update(const UpdateData& data) {
 	if (_ephemeris) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
-			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
+            auto start = std::chrono::high_resolution_clock::now();
 
 			_ephemeris->update(data);
 
 			glFinish();
-			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			auto end = std::chrono::high_resolution_clock::now();
 			_performanceRecord.updateTimeEphemeris = (end - start).count();
 		}
 		else
@@ -192,12 +191,12 @@ void SceneGraphNode::update(const UpdateData& data) {
 	if (_renderable && _renderable->isReady()) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
-			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
+			auto start = std::chrono::high_resolution_clock::now();
 
 			_renderable->update(data);
 
 			glFinish();
-			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			auto end = std::chrono::high_resolution_clock::now();
 			_performanceRecord.updateTimeRenderable = (end - start).count();
 		}
 		else
@@ -254,12 +253,12 @@ void SceneGraphNode::render(const RenderData& data) {
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
 		if (data.doPerformanceMeasurement) {
 			glFinish();
-			ghoul::HighResClock::time_point start = ghoul::HighResClock::now();
+			auto start = std::chrono::high_resolution_clock::now();
 
 			_renderable->render(newData);
 
 			glFinish();
-			ghoul::HighResClock::time_point end = ghoul::HighResClock::now();
+			auto end = std::chrono::high_resolution_clock::now();
 			_performanceRecord.renderTime = (end - start).count();
 		}
 		else

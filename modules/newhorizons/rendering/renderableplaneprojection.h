@@ -32,6 +32,8 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
 
+#include <memory>
+
 namespace ghoul {
 	namespace filesystem {
 		class File;
@@ -52,12 +54,10 @@ struct target {
 };
 
 class RenderablePlaneProjection : public Renderable {
-
-
 public:
 	RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
 	~RenderablePlaneProjection();
-
+    
 	bool initialize() override;
 	bool deinitialize() override;
 
@@ -79,9 +79,10 @@ private:
 	glm::dmat3 _stateMatrix;
 	std::string _frame;
 
-	ghoul::opengl::ProgramObject* _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	bool _textureIsDirty;
-	ghoul::opengl::Texture* _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+//    ghoul::opengl::Texture* _texture;
 	ghoul::filesystem::File* _textureFile;
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

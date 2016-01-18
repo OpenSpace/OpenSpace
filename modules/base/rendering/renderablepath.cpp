@@ -25,11 +25,9 @@
 #include <modules/base/rendering/renderablepath.h>
 #include <openspace/util/time.h>
 
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <fstream>
@@ -109,9 +107,8 @@ bool RenderablePath::initialize() {
 	bool intervalSet = hasTimeInterval();
 	if (intervalSet) {
 		getInterval(_start, _stop);
-		std::string stop, start;
-		SpiceManager::ref().getDateFromET(_start, start);
-		SpiceManager::ref().getDateFromET(_stop, stop);
+        std::string start = SpiceManager::ref().dateFromEphemerisTime(_start);
+        std::string stop = SpiceManager::ref().dateFromEphemerisTime(_stop);
 	}
 
 	return completeSuccess;
@@ -124,7 +121,6 @@ bool RenderablePath::deinitialize() {
 	glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
 
-    delete _programObject;
     _programObject = nullptr;
 
 	return true;
@@ -159,7 +155,7 @@ void RenderablePath::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("color", _lineColor);
 	_programObject->setUniform("lastPosition", _lastPosition);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 
 	if (_drawLine) {
 		glLineWidth(_lineWidth);
@@ -215,15 +211,17 @@ void RenderablePath::calculatePath(std::string observer) {
 	double lightTime;
 //	bool correctPosition = true;
 
-	psc pscPos;
 	double currentTime = _start;
 	_vertexArray.resize(segments);
 
+    psc pscPos;
 	//float r, g, b;
 	//float g = _lineColor[1];
 	//float b = _lineColor[2];
 	for (int i = 0; i < segments; i++) {
-		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
+        glm::dvec3 p =
+        SpiceManager::ref().targetPosition(_target, observer, _frame, {}, currentTime, lightTime);
+        pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 			
 		//if (!correctPosition) {

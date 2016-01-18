@@ -33,33 +33,34 @@ namespace {
     const std::string _loggerCat = "OpenSpaceModule";
     const std::string ModuleBaseToken = "MODULE_";
 }
-//ghoul::filesystem::FileSystem::TokenOpeningBraces
-//ghoul::filesystem::FileSystem::TokenClosingBraces
+
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name)
     : _name(std::move(name))
 {
-    ghoul_assert(!_name.empty(), "Empty module name is not allowed");
+    ghoul_assert(!_name.empty(), "Name must not be empty");
 }
 
-bool OpenSpaceModule::create() {
-    std::string moduleNameUpper = name();
-    std::transform(moduleNameUpper.begin(), moduleNameUpper.end(), moduleNameUpper.begin(), toupper);
-    std::string moduleToken = 
+void OpenSpaceModule::initialize() {
+    std::string upperName = name();
+    std::transform(upperName.begin(), upperName.end(), upperName.begin(), toupper);
+    
+    std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
         ModuleBaseToken +
-        moduleNameUpper +
+        upperName +
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 
     std::string path = modulePath();
     LDEBUG("Registering module path: " << moduleToken << ": " << path);
     FileSys.registerPathToken(moduleToken, path);
-    return true;
+    
+    internalInitialize();
 }
 
-bool OpenSpaceModule::destroy() {
-    return true;
+void OpenSpaceModule::deinitialize() {
+    internalDeinitialize();
 }
 
 std::string OpenSpaceModule::name() const {
@@ -76,17 +77,13 @@ std::string OpenSpaceModule::modulePath() const {
 #ifdef EXTERNAL_MODULES_PATHS
 
 #endif
-    LERROR("Could not resolve path for module '" << name() << "'");
-    return "";
+    throw ghoul::RuntimeError(
+        "Could not resolve path for module '" + name() + "'",
+        "OpenSpaceModule"
+    );
 }
 
-bool OpenSpaceModule::initialize() {
-    return true;
-}
-
-bool OpenSpaceModule::deinitialize() {
-    return true;
-}
-
+void OpenSpaceModule::internalInitialize() {}
+void OpenSpaceModule::internalDeinitialize() {}
 
 } // namespace openspace

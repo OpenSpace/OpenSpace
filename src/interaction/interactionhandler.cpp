@@ -32,7 +32,6 @@
 #include <openspace/util/keys.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/highresclock.h>
 #include <ghoul/misc/interpolator.h>
 
 namespace {
@@ -140,7 +139,7 @@ InteractionHandler::InteractionHandler()
     addProperty(_origin);
     
     _coordinateSystem.onChange([this](){
-        OsEng.renderEngine()->changeViewPoint(_coordinateSystem.value());
+        OsEng.renderEngine().changeViewPoint(_coordinateSystem.value());
     });
     addProperty(_coordinateSystem);
 }
@@ -245,9 +244,6 @@ void InteractionHandler::update(double deltaTime) {
 
 	if (_keyframes.size() > 4){	//wait until enough samples are buffered
         hasKeys = true;
-		ghoul::Interpolator<ghoul::Interpolators::CatmullRom> positionInterpCR;
-		ghoul::Interpolator<ghoul::Interpolators::Linear> positionInterpLin;
-		ghoul::Interpolator<ghoul::Interpolators::Linear> quatInterpLin;
         
         openspace::network::datamessagestructures::PositionKeyframe p0, p1, p2, p3;
         
@@ -268,10 +264,10 @@ void InteractionHandler::update(double deltaTime) {
         
         
 		//glm::dvec4 v = positionInterpCR.interpolate(fact, _keyframes[0]._position.dvec4(), _keyframes[1]._position.dvec4(), _keyframes[2]._position.dvec4(), _keyframes[3]._position.dvec4());
-		glm::dvec4 v = positionInterpLin.interpolate(fact, p1._position.dvec4(), p2._position.dvec4());
+        glm::dvec4 v = ghoul::interpolateLinear(fact, p1._position.dvec4(), p2._position.dvec4());
 		
         pos = psc(v.x, v.y, v.z, v.w);
-        q = quatInterpLin.interpolate(fact, p1._viewRotationQuat, p2._viewRotationQuat);
+        q = ghoul::interpolateLinear(fact, p1._viewRotationQuat, p2._viewRotationQuat);
         
         //we're done with this sample interval
         if (_currentKeyframeTime >= p2._timeStamp){
@@ -556,14 +552,14 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 	        rotateDelta(rot);
 	    }
         if ((key == Key::KeypadSubtract) && (modifier == KeyModifier::NoModifier)) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] -= 0.5f;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
         if ((key == Key::KeypadAdd) && (modifier == KeyModifier::NoModifier)) {
-			glm::vec2 s = OsEng.renderEngine()->camera()->scaling();
+			glm::vec2 s = OsEng.renderEngine().camera()->scaling();
 			s[1] += 0.5f;
-			OsEng.renderEngine()->camera()->setScaling(s);
+			OsEng.renderEngine().camera()->setScaling(s);
 		}
 
 		// iterate over key bindings
@@ -571,7 +567,7 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 		auto ret = _keyLua.equal_range(key);
 		for (auto it = ret.first; it != ret.second; ++it) {
 			//OsEng.scriptEngine()->runScript(it->second);
-			OsEng.scriptEngine()->queueScript(it->second);
+			OsEng.scriptEngine().queueScript(it->second);
 			if (!_validKeyLua) {
 				break;
 			}

@@ -42,7 +42,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    ghoul::opengl::ProgramObject* _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     std::string _instrumentName;
     std::string _source;

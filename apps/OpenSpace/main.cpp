@@ -26,14 +26,14 @@
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logging>
-#include <openspace/rendering/renderengine.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
+
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;
 
-// function pointer declarations
 void mainInitFunc();
 void mainPreSyncFunc();
 void mainPostSyncPreDrawFunc();
@@ -49,12 +49,13 @@ void mainDecodeFun();
 void mainExternalControlCallback(const char * receivedChars, int size);
 void mainLogCallback(const char* msg);
 
-std::pair<int, int> supportedOpenGLVersion () {
+std::pair<int, int> supportedOpenGLVersion() {
     glfwInit();
 
-    //On OS X we need to explicitly set the version and specify that we are using CORE profile
-    //to be able to use glGetIntegerv(GL_MAJOR_VERSION, &major) and glGetIntegerv(GL_MINOR_VERSION, &minor)
-    //explicitly setting to OGL 3.3 CORE works since all Mac's now support at least 3.3
+    // On OS X we need to explicitly set the version and specify that we are using CORE
+    // profile to be able to use glGetIntegerv(GL_MAJOR_VERSION, &major) and
+    // glGetIntegerv(GL_MINOR_VERSION, &minor) explicitly setting to OGL 3.3 CORE works
+    // since all Mac's now support at least 3.3
 #ifdef __APPLE__
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -75,8 +76,6 @@ std::pair<int, int> supportedOpenGLVersion () {
     return { major, minor };
 }
 
-#include <ghoul/lua/lua_helper.h>
-
 namespace {
     const std::string _loggerCat = "main";
 }
@@ -88,7 +87,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> sgctArguments;
     const bool success = openspace::OpenSpaceEngine::create(
         argc, argv,
-        new openspace::SGCTWindowWrapper,
+        std::make_unique<openspace::SGCTWindowWrapper>(),
         sgctArguments
     );
     if (!success)
@@ -147,10 +146,10 @@ int main(int argc, char** argv) {
         { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
         { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
     };
-    if (versionMapping.find(glVersion) == versionMapping.end()) {
-        LFATAL("Requested OpenGL version " << glVersion.first << "." << glVersion.second << " not supported");
-        return EXIT_FAILURE;
-    }
+    ghoul_assert(
+        versionMapping.find(glVersion) != versionMapping.end(),
+        "Unknown OpenGL version. Missing statement in version mapping map"
+    );
     sgct::Engine::RunMode rm = versionMapping[glVersion];
     const bool initSuccess = _sgctEngine->init(rm);
 
@@ -173,7 +172,7 @@ int main(int argc, char** argv) {
     LDEBUG("Destroying OpenSpaceEngine");
     openspace::OpenSpaceEngine::destroy();
 
-    // Clean up (de-allocate)
+    // Clean up (deallocate)
     LDEBUG("Destroying SGCT Engine");
     delete _sgctEngine;
 
@@ -191,8 +190,6 @@ void mainInitFunc() {
 
     if (!success) {
         LFATAL("Initializing OpenSpaceEngine failed");
-        std::cout << "Press any key to continue...";
-        std::cin.ignore(100);
         exit(EXIT_FAILURE);
     }
     
@@ -248,16 +245,22 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
 }
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
-    if (OsEng.isMaster())
-        OsEng.keyboardCallback(openspace::Key(key),
-                               openspace::KeyModifier(mods),
-                               openspace::KeyAction(action));
+    if (OsEng.isMaster()) {
+        OsEng.keyboardCallback(
+            openspace::Key(key),
+            openspace::KeyModifier(mods),
+            openspace::KeyAction(action)
+        );
+    }
 }
 
 void mainMouseButtonCallback(int key, int action) {
-    if (OsEng.isMaster())
-        OsEng.mouseButtonCallback(openspace::MouseButton(key),
-                                  openspace::MouseAction(action));
+    if (OsEng.isMaster()) {
+        OsEng.mouseButtonCallback(
+            openspace::MouseButton(key),
+            openspace::MouseAction(action)
+        );
+    }
 }
 
 void mainMousePosCallback(double x, double y) {
@@ -283,9 +286,9 @@ void mainDecodeFun() {
     OsEng.decode();
 }
 
-void mainLogCallback(const char* msg){
+void mainLogCallback(const char* msg) {
     std::string message = msg;
-    if (message == ".")
+    if (message.empty() || message == ".")
         // We don't want the empty '.' message that SGCT sends while it is waiting for
         // connections from other network nodes
         return;

@@ -44,23 +44,17 @@
 
 #include <modules/newhorizons/util/imagesequencer.h>
 
-
 namespace openspace {
 
 NewHorizonsModule::NewHorizonsModule()
     : OpenSpaceModule("NewHorizons")
 {}
 
-bool NewHorizonsModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
+void NewHorizonsModule::internalInitialize() {
     ImageSequencer2::initialize();
 
-
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>);
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<Decoder>);
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
@@ -78,8 +72,6 @@ bool NewHorizonsModule::create() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
-
-    return true;
 }
 
 } // namespace openspace

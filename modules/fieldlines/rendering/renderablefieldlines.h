@@ -75,7 +75,7 @@ private:
 	properties::OptionProperty _seedPointSource;
 	properties::StringProperty _seedPointSourceFile;
 
-	ghoul::opengl::ProgramObject* _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	ghoul::Dictionary _vectorFieldInfo;
 	ghoul::Dictionary _fieldlineInfo;

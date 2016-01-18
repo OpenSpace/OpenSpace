@@ -24,6 +24,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <algorithm>
 #include <assert.h>
 
@@ -67,7 +69,7 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const {
 		props.insert(props.end(), p.begin(), p.end());
 	}
 
-	return std::move(props);
+	return props;
 }
 
 Property* PropertyOwner::property(const std::string& id) const {

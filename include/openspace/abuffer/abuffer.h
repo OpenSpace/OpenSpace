@@ -28,6 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -93,7 +94,7 @@ protected:
 	GLuint _screenQuad;
 
 	bool _validShader;
-	ghoul::opengl::ProgramObject* _resolveShader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveShader;
 
 	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
 	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;

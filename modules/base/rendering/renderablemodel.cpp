@@ -27,13 +27,13 @@
 
 // open space includes
 #include <modules/base/rendering/renderablemodel.h>
-#include <openspace/util/constants.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -72,13 +72,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 	, _frameCount(0)
 {
 	std::string name;
-    bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModel");
 
 	ghoul::Dictionary geometryDictionary;
 	success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 	}
 
@@ -149,10 +149,8 @@ bool RenderableModel::deinitialize() {
 		delete _geometry;
         _geometry = nullptr;
 	}
-	delete _texture;
     _texture = nullptr;
 
-    delete _programObject;
     _programObject = nullptr;
 	return true;
 }
@@ -183,15 +181,16 @@ void RenderableModel::render(const RenderData& data) {
 	else
 		_alpha = 1.0f;
 
-	psc tmppos;
-	SpiceManager::ref().getTargetPosition(_target, "SUN", "GALACTIC", "NONE", time, tmppos, lt);
+    glm::dvec3 p =
+    SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, time, lt);
+    psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
 	_programObject->setUniform("cam_dir", cam_dir);
 	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	_programObject->setUniform("_performShading", _performShading);
 
@@ -241,18 +240,20 @@ void RenderableModel::update(const UpdateData& data) {
 	//}
 
 	// set spice-orientation in accordance to timestamp
-    if (!_source.empty())
-	    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _destination, _time, _stateMatrix);
+    if (!_source.empty()) {
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
+    }
 
     double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, _sunPosition, lt);
+    glm::dvec3 p =
+    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
+    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
 void RenderableModel::loadTexture() {
-    delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();

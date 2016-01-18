@@ -62,8 +62,14 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
 		if (!success)
 			LERROR("'" << KeyKernels << "' has to be an array-style table");
 
-		SpiceManager::KernelIdentifier id = SpiceManager::ref().loadKernel(kernel);
-		_kernelsLoadedSuccessfully &= (id != SpiceManager::KernelFailed);
+        try {
+            SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
+            _kernelsLoadedSuccessfully = true;
+        }
+        catch (const SpiceManager::SpiceException& e) {
+            LERROR("Could not load SPICE kernel: " << e.what());
+            _kernelsLoadedSuccessfully = false;
+        }
 	}
 }
     
@@ -75,10 +81,8 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	if (!_kernelsLoadedSuccessfully)
 		return;
 
-	glm::dvec3 position(0,0,0);
 	double lightTime = 0.0;
-	SpiceManager::ref().getTargetPosition(_targetName, _originName, 
-		"GALACTIC", "NONE", data.time, position, lightTime);
+	glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
 	
 	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
 	//if (_ghosting == "TRUE" && interval > 60){

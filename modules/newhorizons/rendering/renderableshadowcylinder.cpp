@@ -26,7 +26,6 @@
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -71,7 +70,9 @@ namespace openspace {
 	ghoul_assert(success, "");
 	success = dictionary.getValue(_keyMainFrame, _mainFrame);
 	ghoul_assert(success, "");
-	success = dictionary.getValue(_keyAberration, _aberration);
+    std::string a = "NONE";
+	success = dictionary.getValue(_keyAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
 	ghoul_assert(success, "");
 }
 
@@ -88,7 +89,6 @@ bool RenderableShadowCylinder::isReady() const {
 bool RenderableShadowCylinder::initialize() {
 	glGenVertexArrays(1, &_vao); // generate array
 	glGenBuffers(1, &_vbo); // generate buffer
-	createCylinder();
 
 	bool completeSuccess = true;
 	_shader = ghoul::opengl::ProgramObject::Build("ShadowProgram",
@@ -104,7 +104,6 @@ bool RenderableShadowCylinder::deinitialize() {
 	_vao = 0;
 	glDeleteBuffers(1, &_vbo);
 	_vbo = 0;
-	delete _shader;
 	_shader = nullptr;
 	return true;
 }
@@ -121,7 +120,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", _transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 	
 	glBindVertexArray(_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -131,7 +130,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
 	_time = data.time;
 	if (_shader->isDirty())
 		_shader->rebuildFromFile();
@@ -155,26 +154,31 @@ void RenderableShadowCylinder::createCylinder() {
 	double targetEpoch;
 	glm::dvec3 observerPosition;
 	std::vector<psc> terminatorPoints;
-	SpiceManager::ref().getTerminatorEllipse(_numberOfPoints,
-											 _terminatorType,
-											 _lightSource,
-											 _observer,
-											 _body,
-											 _bodyFrame,
-											 _aberration,
-											 _time,
-											 targetEpoch,
-											 observerPosition,
-											 terminatorPoints);
-
-	glm::dvec3 vecLightSource;
+    SpiceManager::TerminatorType t;
+    if (_terminatorType == "UMBRAL")
+        t = SpiceManager::TerminatorType::Umbral;
+    else if (_terminatorType == "PENUMBRAL")
+        t = SpiceManager::TerminatorType::Penumbral;
+    
+    auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
+        _lightSource, t, _aberration, _time, _numberOfPoints);
+    
+    targetEpoch = res.targetEphemerisTime;
+    observerPosition = std::move(res.observerPosition);
+    
+    std::vector<glm::dvec3> ps = std::move(res.terminatorPoints);
+    for (auto&& p : ps) {
+        PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+        psc[3] += 3;
+        terminatorPoints.push_back(psc);
+    }
+    
 	double lt;
-	bool performs = SpiceManager::ref().getTargetPosition(_body, _lightSource, _mainFrame, _aberration, _time, vecLightSource, lt);
+    glm::dvec3 vecLightSource =
+        SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
 
-	glm::dmat3 _stateMatrix;
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time, _stateMatrix);
+    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, _time));
 
-	_stateMatrix = glm::inverse(_stateMatrix);
 	vecLightSource = _stateMatrix * vecLightSource;
 
 	vecLightSource *= _shadowLength;

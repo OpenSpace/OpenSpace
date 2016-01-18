@@ -139,8 +139,20 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
 		"The size of the Vertex needs to be 64 for performance");
 
 	float a, b, c, powerscale;
-	bool accutareRadius = SpiceManager::ref().getPlanetEllipsoid(planetName, a, b, c);
-
+    bool accutareRadius;
+    try {
+        glm::dvec3 radii;
+        SpiceManager::ref().getValue(planetName, "RADII", radii);
+        a = radii.x;
+        b = radii.y;
+        c = radii.z;
+        accutareRadius = true;
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        LWARNING("Could not find radius for body " << planetName);
+        accutareRadius = false;
+    }
+    
 	if (accutareRadius) {
 		PowerScaledCoordinate powerScaledRadii = psc::CreatePowerScaledCoordinate(a, b, c);
 		powerScaledRadii[3] += 3; // SPICE returns radii in km
