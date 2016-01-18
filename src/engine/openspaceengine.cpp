@@ -45,6 +45,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/syncbuffer.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -69,12 +70,6 @@
 #include <vld.h>
 #endif
 #endif
-
-// The syncbuffer includes SGCT which (on Linux) includes Xlib. Xlib #defines 'None',
-// which confuses the systemcapabilities, so it has to be included last unfortunately
-// ---abock
-#include <openspace/util/syncbuffer.h>
-
 
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
