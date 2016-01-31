@@ -151,8 +151,14 @@ void Scene::update(const UpdateData& data) {
         }
 		OsEng.renderEngine().aBuffer()->invalidateABuffer();
 	}
-    for (SceneGraphNode* node : _graph.nodes())
-        node->update(data);
+    for (SceneGraphNode* node : _graph.nodes()) {
+        try {
+            node->update(data);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
 }
 
 void Scene::evaluate(Camera* camera) {

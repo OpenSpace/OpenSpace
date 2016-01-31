@@ -224,7 +224,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
     throwOnSpiceError("Kernel loading");
     
     string fileExtension = ghoul::filesystem::File(path, true).fileExtension();
-    if (fileExtension == ".bc" || fileExtension == ".BC")
+    if (fileExtension == "bc" || fileExtension == "BC")
 		findCkCoverage(path); // binary ck kernel
 	else if (fileExtension == "bsp" || fileExtension == "BSP")
 		findSpkCoverage(path); // binary spk kernel
@@ -698,6 +698,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const string& fromFrame,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
 
+    throwOnSpiceError("");
 	SpiceBoolean success = !(failed_c());
     reset_c();
     bool estimated = false;

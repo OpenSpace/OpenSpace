@@ -324,59 +324,60 @@ void RenderablePlanetProjection::imageProjectGPU(){
 
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
-		//counter = 0;
-		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-		// set blend eq
-		glEnable(GL_BLEND);
-		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
+	//counter = 0;
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+	// set blend eq
+	glEnable(GL_BLEND);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-		glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
-		_fboProgramObject->activate();
+	glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
+	_fboProgramObject->activate();
 
-		ghoul::opengl::TextureUnit unitFbo;
-		unitFbo.activate();
-		_textureProj->bind();
-		_fboProgramObject->setUniform("texture1"       , unitFbo);
+	ghoul::opengl::TextureUnit unitFbo;
+	unitFbo.activate();
+	_textureProj->bind();
+	_fboProgramObject->setUniform("texture1"       , unitFbo);
 		
-		ghoul::opengl::TextureUnit unitFbo2;
-		unitFbo2.activate();
-		_textureOriginal->bind();
-		_fboProgramObject->setUniform("texture2", unitFbo2);
-		_fboProgramObject->setUniform("projectionFading", _fadeProjection);
+	ghoul::opengl::TextureUnit unitFbo2;
+	unitFbo2.activate();
+	_textureOriginal->bind();
+	_fboProgramObject->setUniform("texture2", unitFbo2);
+	_fboProgramObject->setUniform("projectionFading", _fadeProjection);
 
-		_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
-		_fboProgramObject->setUniform("ModelTransform" , _transform);
-		_fboProgramObject->setUniform("_scaling"       , _camScaling);
-		_fboProgramObject->setUniform("boresight"      , _boresight);
+	_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
+	_fboProgramObject->setUniform("ModelTransform" , _transform);
+	_fboProgramObject->setUniform("_scaling"       , _camScaling);
+	_fboProgramObject->setUniform("boresight"      , _boresight);
 
-		if (_geometry->hasProperty("radius")){ 
-			boost::any r = _geometry->property("radius")->get();
-			if (glm::vec4* radius = boost::any_cast<glm::vec4>(&r)){
-				_fboProgramObject->setUniform("radius", radius);
-			}
-		}else{
-			LERROR("Geometry object needs to provide radius");
+	if (_geometry->hasProperty("radius")){ 
+		boost::any r = _geometry->property("radius")->get();
+		if (glm::vec4* radius = boost::any_cast<glm::vec4>(&r)){
+			_fboProgramObject->setUniform("radius", radius);
 		}
-		if (_geometry->hasProperty("segments")){
-			boost::any s = _geometry->property("segments")->get();
-			if (int* segments = boost::any_cast<int>(&s)){
-				_fboProgramObject->setAttribute("segments", segments[0]);
-			}
-		}else{
-			LERROR("Geometry object needs to provide segment count");
+	}else{
+		LERROR("Geometry object needs to provide radius");
+	}
+	if (_geometry->hasProperty("segments")){
+		boost::any s = _geometry->property("segments")->get();
+		if (int* segments = boost::any_cast<int>(&s)){
+			_fboProgramObject->setAttribute("segments", segments[0]);
 		}
+	}else{
+		LERROR("Geometry object needs to provide segment count");
+	}
 
-		glBindVertexArray(_quad);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		_fboProgramObject->deactivate();
-		glDisable(GL_BLEND);
+	glBindVertexArray(_quad);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	_fboProgramObject->deactivate();
+	glDisable(GL_BLEND);
 
-		//bind back to default
-		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-		glViewport(m_viewport[0], m_viewport[1],
-			       m_viewport[2], m_viewport[3]);
+	//bind back to default
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+	glViewport(m_viewport[0], m_viewport[1],
+			    m_viewport[2], m_viewport[3]);
 	
+    LINFO(GLuint(*_texture));
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
@@ -393,7 +394,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 										 e1.z, e2.z, e3.z, 0.f,
 										 -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
 	// create perspective projection matrix
-	glm::mat4 projProjectionMatrix = glm::perspective(_fovy, _aspectRatio, _nearPlane, _farPlane);
+	glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
 	// bias matrix
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
 		                                          0, 0.5f, 0, 0,
@@ -426,6 +427,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
         bs = std::move(res.boresightVector);
     }
     catch (const SpiceManager::SpiceException& e) {
+        LERRORC(e.component, e.what());
         return;
     }
 
@@ -434,6 +436,7 @@ void RenderablePlanetProjection::attitudeParameters(double time){
    
 	//change to KM and add psc camera scaling. 
 	position[3] += (3 + _camScaling[1]);
+    //position[3] += 3;
 	glm::vec3 cpos = position.vec3();
 
 	_projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
