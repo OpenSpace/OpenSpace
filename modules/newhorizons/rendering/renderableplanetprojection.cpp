@@ -376,8 +376,6 @@ void RenderablePlanetProjection::imageProjectGPU(){
 	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 	glViewport(m_viewport[0], m_viewport[1],
 			    m_viewport[2], m_viewport[3]);
-	
-    LINFO(GLuint(*_texture));
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
