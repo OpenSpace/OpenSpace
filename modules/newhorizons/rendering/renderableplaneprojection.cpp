@@ -101,7 +101,8 @@ bool RenderablePlaneProjection::initialize() {
 	// Plane program
 	if (_shader == nullptr) {
         // Image Plane Program
-        _shader = ghoul::opengl::ProgramObject::Build("ImagePlaneProgram",
+        RenderEngine* renderEngine = OsEng.renderEngine();
+        _shader = renderEngine->buildRenderProgram("Image Plane",
             "${MODULE_BASE}/shaders/imageplane_vs.glsl",
             "${MODULE_BASE}/shaders/imageplane_fs.glsl");
         if (!_shader) return false;
@@ -113,6 +114,12 @@ bool RenderablePlaneProjection::initialize() {
 }
 
 bool RenderablePlaneProjection::deinitialize() {
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine->removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 	glDeleteBuffers(1, &_vertexPositionBuffer);

@@ -99,8 +99,8 @@ glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
     
-void SGCTWindowWrapper::setNearFarClippingPlane(float near, float far) {
-    sgct::Engine::instance()->setNearAndFarClippingPlanes(near, far);
+void SGCTWindowWrapper::setNearFarClippingPlane(float nearPlane, float farPlane) {
+    sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
 }
     
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {

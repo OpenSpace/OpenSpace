@@ -40,6 +40,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/rendering/renderengine.h>
 #include <iomanip> 
 #include <string>
 #include <thread>      
@@ -236,9 +237,12 @@ bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr) {
         // projection program
-        _programObject = ghoul::opengl::ProgramObject::Build("projectiveProgram",
+
+        RenderEngine* renderEngine = OsEng.renderEngine();
+        _programObject = renderEngine->buildRenderProgram("projectiveProgram",
             "${MODULES}/newhorizons/shaders/projectiveTexture_vs.glsl",
             "${MODULES}/newhorizons/shaders/projectiveTexture_fs.glsl");
+
         if (!_programObject)
             return false;
     }
@@ -313,6 +317,13 @@ bool RenderablePlanetProjection::deinitialize(){
 	_textureWhiteSquare = nullptr;
 	delete _geometry;
 	_geometry = nullptr;
+
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine->removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
+
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
@@ -320,6 +331,9 @@ bool RenderablePlanetProjection::isReady() const {
 }
 
 void RenderablePlanetProjection::imageProjectGPU(){
+
+    glDisable(GL_DEPTH_TEST);
+
 	// keep handle to the current bound FBO
 	GLint defaultFBO;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -340,7 +354,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		unitFbo.activate();
 		_textureProj->bind();
 		_fboProgramObject->setUniform("texture1"       , unitFbo);
-		
+
 		ghoul::opengl::TextureUnit unitFbo2;
 		unitFbo2.activate();
 		_textureOriginal->bind();
@@ -372,13 +386,12 @@ void RenderablePlanetProjection::imageProjectGPU(){
 		glBindVertexArray(_quad);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		_fboProgramObject->deactivate();
-		glDisable(GL_BLEND);
 
 		//bind back to default
 		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 		glViewport(m_viewport[0], m_viewport[1],
 			       m_viewport[2], m_viewport[3]);
-	
+        glEnable(GL_DEPTH_TEST);
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
@@ -542,7 +555,11 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
     }
-	
+
+    if (_fboProgramObject && _fboProgramObject->isDirty()) {
+        _fboProgramObject->rebuildFromFile();
+    }
+
 	// remove these lines if not using queue ------------------------
 	// @mm
 	//_capture = true;

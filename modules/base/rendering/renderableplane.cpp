@@ -144,9 +144,12 @@ bool RenderablePlane::initialize() {
 
 	if (_shader == nullptr) {
         // Plane Program
-        _shader = ghoul::opengl::ProgramObject::Build("PlaneProgram",
+
+        RenderEngine* renderEngine = OsEng.renderEngine();
+        _shader = renderEngine->buildRenderProgram("PlaneProgram",
             "${MODULE_BASE}/shaders/plane_vs.glsl",
-            "${MODULE_BASE}/shaders/plane_fs.glsl");
+            "${MODULE_BASE}/shaders/plane_fs.glsl"
+            );
         if (!_shader)
             return false;
     }
@@ -173,8 +176,11 @@ bool RenderablePlane::deinitialize() {
     delete _textureFile;
     _textureFile = nullptr;
 
-    delete _shader;
-    _shader = nullptr;
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine->removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
 
 	return true;
 }

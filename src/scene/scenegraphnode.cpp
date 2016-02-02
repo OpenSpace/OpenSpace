@@ -272,6 +272,19 @@ void SceneGraphNode::render(const RenderData& data) {
     //    child->render(newData);
 }
 
+std::vector<std::pair<Volume*, RenderData>> SceneGraphNode::volumesToRender(const RenderData& data) const {
+   const psc thisPosition = worldPosition();
+   RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
+   std::vector<std::pair<Volume*, RenderData>> toRender;
+   if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
+       std::vector<Volume*> volumes = _renderable->volumesToRender(newData);
+       for (Volume* v : volumes) {
+           toRender.push_back(std::make_pair(v, newData));
+       }
+   }
+   return toRender;
+}
+
 // not used anymore @AA
 //void SceneGraphNode::addNode(SceneGraphNode* child)
 //{

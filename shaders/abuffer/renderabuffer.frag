@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
-
-in vec4 vs_position;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
+#include <#{fragmentPath}>
+#include "abufferfragment.glsl"
+#include "abufferresources.glsl"
 
-Fragment getFragment()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-    Fragment frag;
+out vec4 _out_color_;
 
-    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
-    frag.depth = depth;
+void main() {
+    Fragment frag = getFragment();
 
-    return frag;
+    int sampleMask = gl_SampleMaskIn[0];
+
+    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
+    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
+        
+    ABufferFragment aBufferFrag;
+    _color_(aBufferFrag, frag.color);
+    _depth_(aBufferFrag, frag.depth);
+    _type_(aBufferFrag, 0); // 0 = geometry type
+    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
+    _next_(aBufferFrag, prevHead);
+
+    storeFragment(newHead, aBufferFrag);
+    discard;
 }

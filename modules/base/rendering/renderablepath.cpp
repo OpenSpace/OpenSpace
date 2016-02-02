@@ -31,6 +31,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <fstream>
 
@@ -99,10 +100,12 @@ bool RenderablePath::initialize() {
 	}
 
 	bool completeSuccess = true;
-	_programObject = ghoul::opengl::ProgramObject::Build("PathProgram",
-		"${MODULE_BASE}/shaders/path_vs.glsl",
-		"${MODULE_BASE}/shaders/path_fs.glsl"
-		);
+
+
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    _programObject = renderEngine->buildRenderProgram("PathProgram",
+        "${MODULE_BASE}/shaders/path_vs.glsl",
+        "${MODULE_BASE}/shaders/path_fs.glsl");
 	if (!_programObject)
 		return false;
 
@@ -124,8 +127,11 @@ bool RenderablePath::deinitialize() {
 	glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
 
-    delete _programObject;
-    _programObject = nullptr;
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine->removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
 
 	return true;
 }

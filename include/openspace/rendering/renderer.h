@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+#ifndef __RENDERER_H__
+#define __RENDERER_H__
 
-in vec4 vs_position;
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#include <string>
+#include <vector>
+#include <map>
 
-Fragment getFragment()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-    Fragment frag;
-
-    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
-    frag.depth = depth;
-
-    return frag;
+namespace ghoul {
+	class Dictionary;
+	
+    namespace filesystem {
+        class File;
+    }
+	namespace opengl {
+        class ProgramObject;
+		class Texture;
+	}
 }
+
+namespace openspace {
+
+class RenderableVolume;
+class Camera;
+class Scene;
+	
+class Renderer {
+public:
+    virtual void initialize() = 0;
+    virtual void deinitialize() = 0;
+    
+    virtual void setCamera(Camera* camera) = 0;
+    virtual void setScene(Scene* scene) = 0;
+    virtual void setResolution(glm::ivec2 res) = 0;
+
+    virtual void update() = 0;
+	virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
+    /**
+     * Update render data
+     * Responsible for calling renderEngine::setRenderData
+     */
+    virtual void updateRendererData() = 0;
+    
+};		// Renderer
+}		// openspace
+
+#endif 	// __RENDERER_H__

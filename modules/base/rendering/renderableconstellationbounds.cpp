@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 // openspace
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/renderableconstellationbounds.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -90,9 +92,11 @@ RenderableConstellationBounds::~RenderableConstellationBounds() {
 }
 
 bool RenderableConstellationBounds::initialize() {
-	_program = ghoul::opengl::ProgramObject::Build("ConstellationBounds",
-		"${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
-		"${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    _program = renderEngine->buildRenderProgram("ConstellationBounds",
+        "${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
+        "${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
+
 	if (!_program)
 		return false;
 
@@ -138,8 +142,11 @@ bool RenderableConstellationBounds::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _program;
-	_program = nullptr;
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine->removeRenderProgram(_program);
+        _program = nullptr;
+    }
 	return true;
 }
 
@@ -176,9 +183,6 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 }
 
 void RenderableConstellationBounds::update(const UpdateData& data) {
-	if (_program->isDirty())
-		_program->rebuildFromFile();
-
 	SpiceManager::ref().getPositionTransformMatrix(
 		_originReferenceFrame,
 		"GALACTIC",

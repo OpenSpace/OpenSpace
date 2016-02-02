@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERDYNAMIC_H__
-#define __ABUFFERDYNAMIC_H__
+#ifndef _FRAGMENT_GLSL_
+#define _FRAGMENT_GLSL_
 
-#include <openspace/abuffer/abuffer.h>
+struct Fragment {
+    vec4 color;
+    float depth;
+    int blend;
+};
 
-namespace openspace {
-
-class ABufferDynamic: public ABuffer {
-public:
-
-	ABufferDynamic();
-	virtual ~ABufferDynamic();
-	virtual bool initialize();
-
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
-
-	std::vector<fragmentData> pixelData();
-
-protected:
-	virtual bool reinitializeInternal();
-
-private:
-
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
-
-}; 		// ABufferDynamic
-} 		// openspace
-
-#endif 	// __ABUFFERDYNAMIC_H__
+#endif    

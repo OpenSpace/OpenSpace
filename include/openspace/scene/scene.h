@@ -41,7 +41,7 @@
 
 namespace openspace {
 
-
+class Volume;
 class SceneGraphNode;
 
 // Notifications:
@@ -85,6 +85,10 @@ public:
      */
     void render(const RenderData& data);
 
+    /*
+     * Return a vector of volumes to render and their acciciated render data
+     */
+    std::vector<std::pair<Volume*, RenderData>> volumesToRender(const RenderData& data) const;
     /*
      * Returns the root SceneGraphNode
      */

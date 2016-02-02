@@ -336,7 +336,7 @@ bool SceneGraph::sortTopologically() {
         }
 
     }
-
+    /*
     RenderEngine::ABufferImplementation i = OsEng.renderEngine()->aBufferImplementation();
     if (i == RenderEngine::ABufferImplementation::FrameBuffer) {
         auto it = std::find_if(
@@ -361,7 +361,7 @@ bool SceneGraph::sortTopologically() {
         _topologicalSortedNodes.erase(it);
         _topologicalSortedNodes.insert(_topologicalSortedNodes.begin() + 2, n);
     }
-
+    */
     
     return true;
 }
@@ -390,7 +390,7 @@ SceneGraph::SceneGraphNodeInternal* SceneGraph::nodeByName(const std::string& na
         return *it;
 }
 
-const std::vector<SceneGraphNode*>& SceneGraph::nodes() {
+const std::vector<SceneGraphNode*>& SceneGraph::nodes() const {
     return _topologicalSortedNodes;
 }
 

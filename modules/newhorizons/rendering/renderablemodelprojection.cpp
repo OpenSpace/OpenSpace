@@ -34,6 +34,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include "imgui.h"
 
 #define _USE_MATH_DEFINES
@@ -186,9 +187,11 @@ bool RenderableModelProjection::initialize() {
 	bool completeSuccess = true;
 		
 	if (_programObject == nullptr) {
-		_programObject = ghoul::opengl::ProgramObject::Build("ModelShader",
-			"${MODULES}/newhorizons/shaders/modelShader_vs.glsl",
-			"${MODULES}/newhorizons/shaders/modelShader_fs.glsl");
+        RenderEngine* renderEngine = OsEng.renderEngine();
+        _programObject = renderEngine->buildRenderProgram("ModelShader",
+            "${MODULES}/newhorizons/shaders/modelShader_vs.glsl",
+            "${MODULES}/newhorizons/shaders/modelShader_fs.glsl");
+
 		if (!_programObject)
 			return false;
 	}
@@ -289,6 +292,12 @@ bool RenderableModelProjection::deinitialize() {
 	_textureWhiteSquare = nullptr;
 
 	glDeleteBuffers(1, &_vbo);
+
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine->removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
 
 	return true;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,87 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFER_H__
-#define __ABUFFER_H__
+#ifndef __BOXGEOMETRY_H__
+#define __BOXGEOMETRY_H__
 
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
-
-#include <string>
-#include <vector>
-
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-	namespace opengl {
-        class ProgramObject;
-		class Texture;
-	}
-}
+#include <glm/glm.hpp>
 
 namespace openspace {
 
-class ABuffer {
+class BoxGeometry {
 public:
-	struct fragmentData {
-		GLfloat _position[3];
-		GLfloat _color[4];
-		GLfloat _padding;
-	};
+    // initializers
+    BoxGeometry(glm::vec3 size);
+    ~BoxGeometry();
 
-	static const int MAX_LAYERS = 32;
+    bool initialize();
+    void render();
+ 
+	GLuint _vaoId;
+	GLuint _vBufferId;
+    glm::vec3 _size;
+};
 
-	ABuffer();
-	virtual ~ABuffer();
-	virtual void resolve(float blackoutFactor);
-    virtual bool initialize() = 0;
-	virtual bool reinitialize();
+} // namespace openspace
 
-	void addVolume(const std::string& tag,ghoul::opengl::Texture* volume);
-	void addTransferFunction(const std::string& tag,ghoul::opengl::Texture* transferFunction);
-	int addSamplerfile(const std::string& filename);
-
-	void invalidateABuffer();
-    
-    virtual void clear() = 0;
-    virtual void preRender() = 0;
-	virtual void postRender() = 0;
-
-	virtual std::vector<fragmentData> pixelData() = 0;
-
-protected:
-	virtual bool reinitializeInternal() = 0;
-
-	virtual bool initializeABuffer();
-
-	void generateShaderSource();
-	bool updateShader();
-
-	void openspaceHeaders();
-	void openspaceSamplerCalls();
-	void openspaceSamplers();
-	void openspaceTransferFunction();
-
-    int _width;
-    int _height;
-    int _totalPixels;
-
-	void updateDimensions();
-
-	GLuint _screenQuad;
-
-	bool _validShader;
-	ghoul::opengl::ProgramObject* _resolveShader;
-
-	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _volumes;
-	std::vector<std::pair<std::string,ghoul::opengl::Texture*> > _transferFunctions;
-	std::vector<ghoul::filesystem::File*> _samplerFiles;
-	std::vector<std::string> _samplers;
-
-	float _volumeStepFactor;
-
-};		// ABuffer
-}		// openspace
-
-#endif 	// __ABUFFER_H__
+#endif // __BOXGEOMETRY_H__

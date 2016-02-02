@@ -271,7 +271,7 @@ bool OpenSpaceEngine::create(
 	_engine->_console->initialize();
 
 	// Register the provided shader directories
-	ghoul::opengl::ShaderObject::addIncludePath("${SHADERS}");
+	ghoul::opengl::ShaderPreprocessor::addIncludePath("${SHADERS}");
 
 	_engine->_syncBuffer = new SyncBuffer(1024);
 

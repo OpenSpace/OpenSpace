@@ -23,12 +23,6 @@
 #########################################################################################
 
 set(OPENSPACE_SOURCE
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abuffer.cpp
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abufferdynamic.cpp
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abufferfixed.cpp
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abufferframebuffer.cpp
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abuffersinglelinked.cpp
-    ${OPENSPACE_BASE_DIR}/src/abuffer/abuffervisualizer.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
@@ -64,6 +58,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/vectorproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
@@ -74,6 +70,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
@@ -89,12 +87,6 @@ set(OPENSPACE_SOURCE
 )
 
 set(OPENSPACE_HEADER
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffer.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abufferdynamic.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abufferfixed.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abufferframebuffer.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffersinglelinked.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/abuffer/abuffervisualizer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
@@ -135,14 +127,20 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/vectorproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/ephemeris.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraph.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/constants.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h

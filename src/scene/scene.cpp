@@ -84,61 +84,24 @@ bool Scene::initialize() {
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
 
+    RenderEngine* renderEngine = OsEng.renderEngine();
+    
     ProgramObject* tmpProgram;
 
-	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
-		_programUpdateLock.lock();
-		_programsToUpdate.insert(program);
-		_programUpdateLock.unlock();
-	};
-
 	// fboPassthrough program
-	tmpProgram = ProgramObject::Build("fboPassProgram",
+    tmpProgram = ProgramObject::Build(
+        "fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
 		"${SHADERS}/fboPass_fs.glsl");
 	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
+    tmpProgram->setIgnoreSubroutineUniformLocationError(true);
 	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
-
-	// pscstandard
-	tmpProgram = ProgramObject::Build("pscstandard",
-		"${SHADERS}/pscstandard_vs.glsl",
-		"${SHADERS}/pscstandard_fs.glsl");
-    if( ! tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
-
-	// Night texture program
-	tmpProgram = ProgramObject::Build("nightTextureProgram",
-		"${SHADERS}/nighttexture_vs.glsl",
-		"${SHADERS}/nighttexture_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
-
-    // RaycastProgram
-	tmpProgram = ProgramObject::Build("RaycastProgram",
-		"${SHADERS}/exitpoints.vert",
-		"${SHADERS}/exitpoints.frag");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
 
     return true;
 }
 
 bool Scene::deinitialize() {
 	clearSceneGraph();
-
-	// clean up all programs
-	_programsToUpdate.clear();
-	for (ghoul::opengl::ProgramObject* program : _programs)
-		delete program;
-	_programs.clear();
     return true;
 }
 
@@ -149,7 +112,6 @@ void Scene::update(const UpdateData& data) {
 		_sceneGraphToLoad = "";
 		if (!success)
 			return;
-		OsEng.renderEngine()->aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes())
         node->update(data);
@@ -162,27 +124,18 @@ void Scene::evaluate(Camera* camera) {
 }
 
 void Scene::render(const RenderData& data) {
-	bool emptyProgramsToUpdate = _programsToUpdate.empty();
-		
-	_programUpdateLock.lock();
-	for (ghoul::opengl::ProgramObject* program : _programsToUpdate) {
-		LDEBUG("Attempting to recompile " << program->name());
-		program->rebuildFromFile();
-	}
-	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
-	_programUpdateLock.unlock();
-
-	if (!emptyProgramsToUpdate) {
-		LDEBUG("Setting uniforms");
-		// Ignore attribute locations
-		for (ghoul::opengl::ProgramObject* program : _programs)
-			program->setIgnoreSubroutineUniformLocationError(true);
-	}
-
     for (SceneGraphNode* node : _graph.nodes())
         node->render(data);
-	//if (_root)
-	//	_root->render(data);
+}
+
+std::vector<std::pair<Volume*, RenderData>> Scene::volumesToRender(const RenderData& data) const {
+    std::vector<std::pair<Volume*, RenderData>> volumes;
+
+    for (const SceneGraphNode* node : _graph.nodes()) {
+        std::vector<std::pair<Volume*, RenderData>> newVolumes = node->volumesToRender(data);
+        std::copy(newVolumes.begin(), newVolumes.end(), std::back_inserter(volumes));
+    }
+    return volumes;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
