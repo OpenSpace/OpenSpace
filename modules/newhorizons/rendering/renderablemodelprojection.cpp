@@ -403,9 +403,9 @@ void RenderableModelProjection::attitudeParameters(double time) {
 
 	_transform = glm::mat4(1);
 
-	glm::mat4 rotPropX = glm::rotate(_transform, static_cast<float>(_rotationX), glm::vec3(1, 0, 0));
-	glm::mat4 rotPropY = glm::rotate(_transform, static_cast<float>(_rotationY), glm::vec3(0, 1, 0));
-	glm::mat4 rotPropZ = glm::rotate(_transform, static_cast<float>(_rotationZ), glm::vec3(0, 0, 1));
+	glm::mat4 rotPropX = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationX)), glm::vec3(1, 0, 0));
+	glm::mat4 rotPropY = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationY)), glm::vec3(0, 1, 0));
+	glm::mat4 rotPropZ = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationZ)), glm::vec3(0, 0, 1));
 		
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {

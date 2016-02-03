@@ -39,6 +39,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
 
@@ -162,9 +165,9 @@ void RenderablePlanet::render(const RenderData& data)
     glm::mat4 transform = glm::mat4(1);
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, -1, 0));
-	glm::mat4 rotProp = glm::rotate(transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+	glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
