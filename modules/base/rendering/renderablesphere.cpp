@@ -33,6 +33,8 @@
 
 #include <openspace/util/powerscaledsphere.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableSphere";
@@ -149,7 +151,7 @@ void RenderableSphere::render(const RenderData& data) {
 
 	glm::mat4 transform = glm::mat4(1.0);
 
-    transform = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+    transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 
 
     // Activate shader

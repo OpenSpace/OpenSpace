@@ -110,7 +110,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 			_varray[nr].tex[1] = t2;
 
 			glm::vec4 tmp(x, y, z, 1);
-			glm::mat4 rot = glm::rotate(glm::mat4(1), 90.f, glm::vec3(1, 0, 0));
+			glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 			tmp = _gridMatrix*rot*tmp;
 			
 			for (int i = 0; i < 3; i++){

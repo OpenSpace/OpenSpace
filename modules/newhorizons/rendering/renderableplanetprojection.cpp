@@ -419,14 +419,14 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, _time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
 
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
-	glm::mat4 rot = glm::rotate(_transform, 90.f, glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(_transform, 90.f, glm::vec3(0, -1, 0));
-	glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+	glm::mat4 rot = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(glm::radians(static_cast<float>(_rotation))), glm::vec3(0, 1, 0));
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
