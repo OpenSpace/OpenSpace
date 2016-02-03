@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+#ifndef _ABUFFERRESOURCES_GLSL_
+#define _ABUFFERRESOURCES_GLSL_
 
-in vec4 vs_position;
+#define MAX_LAYERS #{rendererData.maxLayers}
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#include "abufferfragment.glsl"
 
-Fragment getFragment()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-    Fragment frag;
+layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
+layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
+layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
 
-    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
-    frag.depth = depth;
+ABufferFragment fragments[MAX_LAYERS];
+uint indices[MAX_LAYERS];
+const uint NULL_POINTER = 0;
 
-    return frag;
+void storeFragment(uint index, ABufferFragment aBufferFrag) {
+    imageStore(fragmentTexture, int(index), _raw_(aBufferFrag));                
 }
+
+ABufferFragment loadFragment(uint index) {
+    uvec4 raw = imageLoad(fragmentTexture, int(index));
+    ABufferFragment aBufferFragment;
+    _raw_(aBufferFragment, raw);
+    return aBufferFragment;
+}
+
+/**
+ * Load fragments into the #fragments array.
+ * Also set #indices to the used indices.
+ */ 
+uint loadFragments() {
+    uint currentIndex = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
+    int nFrags = 0;
+    while (currentIndex != NULL_POINTER && nFrags < MAX_LAYERS) { 
+        ABufferFragment frag = loadFragment(currentIndex);
+        indices[nFrags] = currentIndex;
+        fragments[nFrags] = frag;
+        nFrags++;
+        currentIndex = _next_(frag);
+    }
+    return nFrags;
+}
+
+#endif

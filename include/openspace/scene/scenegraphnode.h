@@ -90,6 +90,7 @@ public:
     void setRenderable(Renderable* renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
+    std::vector<std::pair<Volume*, RenderData>> volumesToRender(const RenderData& data) const;
 
     // @TODO Remove once the scalegraph is in effect ---abock
     void setEphemeris(Ephemeris* eph) {

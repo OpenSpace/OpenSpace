@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,35 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERFRAMEBUFFER_H__
-#define __ABUFFERFRAMEBUFFER_H__
+#ifndef __BOXGEOMETRY_H__
+#define __BOXGEOMETRY_H__
 
-#include <openspace/abuffer/abuffer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <glm/glm.hpp>
 
 namespace openspace {
-    
-class ABufferFramebuffer: public ABuffer {
+
+class BoxGeometry {
 public:
-    
-    ABufferFramebuffer();
-    virtual ~ABufferFramebuffer();
+    // initializers
+    BoxGeometry(glm::vec3 size);
+    ~BoxGeometry();
+
     bool initialize();
-    
-    void clear();
-    void preRender();
-    void postRender();
-    void resolve(float blackoutFactor);
-    
-    std::vector<fragmentData> pixelData();
-protected:
-    bool reinitializeInternal();
+    void render();
+ 
+	GLuint _vaoId;
+	GLuint _vBufferId;
+    glm::vec3 _size;
+};
 
-    bool initializeABuffer();
+} // namespace openspace
 
-    
-private:
-    
-}; 		// ABufferSingleLinked
-} 		// openspace
-
-#endif 	// __ABUFFERSINGLELINKED_H__
+#endif // __BOXGEOMETRY_H__

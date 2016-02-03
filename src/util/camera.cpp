@@ -38,6 +38,7 @@ Camera::Camera()
 	, _modelMatrix()
 	, _viewMatrix()
 	, _projectionMatrix()
+    , _dirtyViewProjectionMatrix(true)
 	, _viewDirection(0,0,-1)
     , _cameraDirection(0.f, 0.f, 0.f)
     , _focusPosition()
@@ -85,6 +86,7 @@ const glm::mat4& Camera::modelMatrix() const{
 void Camera::setViewMatrix(glm::mat4 viewMatrix){
     std::lock_guard<std::mutex> _lock(_mutex);
 	_viewMatrix = std::move(viewMatrix);
+    _dirtyViewProjectionMatrix = true;
 }
 
 const glm::mat4& Camera::viewMatrix() const{
@@ -94,20 +96,19 @@ const glm::mat4& Camera::viewMatrix() const{
 void Camera::setProjectionMatrix(glm::mat4 projectionMatrix){
     std::lock_guard<std::mutex> _lock(_mutex);
 	_projectionMatrix = std::move(projectionMatrix);
+    _dirtyViewProjectionMatrix = true;
 }
 
 const glm::mat4& Camera::projectionMatrix() const{
 	return _projectionMatrix;
 }
-
-void Camera::setViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
-{
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _viewProjectionMatrix = std::move(viewProjectionMatrix);
-}
-
-const glm::mat4& Camera::viewProjectionMatrix() const
-{
+    
+const glm::mat4& Camera::viewProjectionMatrix() const {
+    if (_dirtyViewProjectionMatrix) {
+        std::lock_guard<std::mutex> _lock(_mutex);
+        _viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+        _dirtyViewProjectionMatrix = false;
+    }
     return _viewProjectionMatrix;
 }
 

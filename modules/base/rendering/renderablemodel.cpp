@@ -26,6 +26,7 @@
 //                     ie after I see model on screen)
 
 // open space includes
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
@@ -126,9 +127,12 @@ bool RenderableModel::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr) {
         // NH shader
-        _programObject = ghoul::opengl::ProgramObject::Build("ModelProgram",
+
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _programObject = renderEngine.buildRenderProgram("ModelProgram",
             "${MODULE_BASE}/shaders/model_vs.glsl",
             "${MODULE_BASE}/shaders/model_fs.glsl");
+
         if (!_programObject)
             return false;
     }
@@ -151,7 +155,13 @@ bool RenderableModel::deinitialize() {
 	}
     _texture = nullptr;
 
-    _programObject = nullptr;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
+
 	return true;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERVISUALIZER_H__
-#define __ABUFFERVISUALIZER_H__
+#ifndef __FRAMEBUFFERRENDERER_H__
+#define __FRAMEBUFFERRENDERER_H__
 
-#include <openspace/abuffer/abuffer.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include <openspace/rendering/volume.h>
+#include <openspace/rendering/renderer.h>
 
 namespace ghoul {
+	class Dictionary;
+	
+    namespace filesystem {
+        class File;
+    }
 	namespace opengl {
         class ProgramObject;
+		class Texture;
 	}
 }
 
 namespace openspace {
 
-class ABufferVisualizer {
+class RenderableVolume;
+class Camera;
+class Scene;
+	
+class FramebufferRenderer : public Renderer {
 public:
+	FramebufferRenderer();
+	virtual ~FramebufferRenderer();
 
-	ABufferVisualizer();
-	~ABufferVisualizer();
+    void initialize() override;
+    void deinitialize() override;
+    
+    void setCamera(Camera* camera) override;
+    void setScene(Scene* scene) override;
+    void setResolution(glm::ivec2 res) override;
 
-	void updateData(const std::vector<ABuffer::fragmentData>& data);
-
-	void render();
-
+    void update() override;
+	void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    
+    /**
+     * Update render data
+     * Responsible for calling renderEngine::setRenderData
+     */
+    virtual void updateRendererData() override;
 private:
 
-	void initializeMarkers();
+    Camera* _camera;
+    Scene* _scene;
+    glm::vec2 _resolution;    
+};		// FramebufferRenderer
+}		// openspace
 
-	GLuint _pointcloud;
-	GLsizei _pointcloudSize;
-	GLuint _markers;
-	GLsizei _markersSize;
-	GLuint _imarkers;
-	GLsizei _imarkersSize;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointcloudProgram;
-
-}; // ABufferVisualizer
-}  // namespace openspace
-
-#endif // __ABUFFER_H__
+#endif 	// __FRAMEBUFFERRENDERER_H__

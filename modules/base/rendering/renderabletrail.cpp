@@ -29,6 +29,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/interactionhandler.h>
 
 #include <limits>
@@ -113,9 +114,13 @@ bool RenderableTrail::initialize() {
     }
 
     bool completeSuccess = true;
-    _programObject = ghoul::opengl::ProgramObject::Build("EphemerisProgram",
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _programObject = renderEngine.buildRenderProgram("EphemerisProgram",
         "${MODULE_BASE}/shaders/ephemeris_vs.glsl",
         "${MODULE_BASE}/shaders/ephemeris_fs.glsl");
+
+
     if (!_programObject)
         return false;
 
@@ -125,6 +130,13 @@ bool RenderableTrail::initialize() {
 bool RenderableTrail::deinitialize() {
     glDeleteVertexArrays(1, &_vaoID);
     glDeleteBuffers(1, &_vBufferID);
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
+    
     return true;
 }
 
@@ -192,8 +204,6 @@ void RenderableTrail::update(const UpdateData& data) {
         return;
     }
 
-    if (_programObject->isDirty())
-        _programObject->rebuildFromFile();
     double lightTime = 0.0;
 
 	bool intervalSet = hasTimeInterval();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERDYNAMIC_H__
-#define __ABUFFERDYNAMIC_H__
+#ifndef __BLOCKPLANEINTERSECTIONGEOMETRY_H__
+#define __BLOCKPLANEINTERSECTIONGEOMETRY_H__
 
-#include <openspace/abuffer/abuffer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <glm/glm.hpp>
+
+#include <vector>
 
 namespace openspace {
 
-class ABufferDynamic: public ABuffer {
+class BlockPlaneIntersectionGeometry {
 public:
+    // initializers
+    BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal, float planeDistance);
+    ~BlockPlaneIntersectionGeometry();
 
-	ABufferDynamic();
-	virtual ~ABufferDynamic();
-	virtual bool initialize();
+    bool initialize();
+    void render();
 
-	virtual void clear();
-	virtual void preRender();
-	virtual void postRender();
-
-	std::vector<fragmentData> pixelData();
-
-protected:
-	virtual bool reinitializeInternal();
+    void setBlockSize(glm::vec3 size);
+    void setPlane(glm::vec3 normal, float distance);
 
 private:
+    void updateVertices();
+    std::vector<float> _vertices;
+    bool _initialized;
+	GLuint _vaoId;
+	GLuint _vBufferId;
+    glm::vec3 _size;
+    glm::vec3 _normal;
+    float _planeDistance;
+};
 
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
+}
 
-}; 		// ABufferDynamic
-} 		// openspace
-
-#endif 	// __ABUFFERDYNAMIC_H__
+#endif // __BLOCKPLANEINTERSECTIONGEOMETRY_H__

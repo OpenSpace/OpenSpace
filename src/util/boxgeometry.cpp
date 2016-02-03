@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,69 +22,107 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/abuffer/abufferframebuffer.h>
-#include <openspace/engine/openspaceengine.h>
-
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/boxgeometry.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
-
-#include <iostream>
-#include <fstream>
 #include <string>
 
 namespace {
-	std::string _loggerCat = "ABufferFrameBuffer";
+const std::string _loggerCat = "BoxGeometry";
 }
 
 namespace openspace {
 
-ABufferFramebuffer::ABufferFramebuffer() {}
+BoxGeometry::BoxGeometry(glm::vec3 size)
+    : _vaoId(0)
+    , _vBufferId(0)
+    , _size(size)
+{}
 
-ABufferFramebuffer::~ABufferFramebuffer() {}
-
-bool ABufferFramebuffer::initialize() {
-	return initializeABuffer();
+BoxGeometry::~BoxGeometry() {
+    glDeleteBuffers(1, &_vBufferId);
+    glDeleteVertexArrays(1, &_vaoId);
 }
 
-bool ABufferFramebuffer::reinitializeInternal() {
-	return true;
-}
 
-void ABufferFramebuffer::clear() {
-}
+bool BoxGeometry::initialize() {
+    // Initialize and upload to graphics card
+    float x = _size.x * 0.5;
+    float y = _size.y * 0.5;
+    float z = _size.z * 0.5;
 
-void ABufferFramebuffer::preRender() {
-}
-
-void ABufferFramebuffer::postRender() {
-
-}
+    const GLfloat vertices[] = {
+        -x, y,  z,
+        x,  y,  z,
+        -x,  y,  z,
+        -x, -y,  z,
+        x, -y,  z,
+        x,  y,  z,
     
-void ABufferFramebuffer::resolve(float blackoutFactor) {
-}
-
-std::vector<ABuffer::fragmentData> ABufferFramebuffer::pixelData() {
-    return std::vector<ABuffer::fragmentData>();
-}
-
-bool ABufferFramebuffer::initializeABuffer() {
-    // ============================
-    // 			SHADERS
-    // ============================
-    auto shaderCallback = [this](ghoul::opengl::ProgramObject* program) {
-        // Error for visibility in log
-        _validShader = false;
+        -x, -y, -z,
+        x,  y, -z,
+        -x,  y, -z,
+        -x, -y, -z,
+        x, -y, -z,
+        x,  y, -z,
+    
+        x, -y, -z,
+        x,  y,  z,
+        x, -y,  z,
+        x, -y, -z,
+        x,  y, -z,
+        x,  y,  z,
+    
+        -x, -y, -z,
+        -x,  y,  z,
+        -x, -y,  z,
+        -x, -y, -z,
+        -x,  y, -z,
+        -x,  y,  z,
+    
+        -x,  y, -z,
+        x,  y,  z,
+        -x,  y,  z,
+        -x,  y, -z,
+        x,  y, -z,
+        x,  y,  z,
+    
+        -x, -y, -z,
+        x, -y,  z,
+        -x, -y,  z,
+        -x, -y, -z,
+        x, -y, -z,
+        x, -y,  z
     };
+    
+    if (_vaoId == 0)
+        glGenVertexArrays(1, &_vaoId);
 
-    generateShaderSource();
-    _resolveShader = ghoul::opengl::ProgramObject::Build(
-        "ABufferResolve",
-        "${SHADERS}/ABuffer/abufferResolveVertex.glsl",
-        "${SHADERS}/ABuffer/abufferResolveFragment.glsl");
-    if (!_resolveShader)
-        return false;
-    _resolveShader->setProgramObjectCallback(shaderCallback);
+    if (_vBufferId == 0) {
+        glGenBuffers(1, &_vBufferId);
+
+        if (_vBufferId == 0) {
+            LERROR("Could not create vertex buffer");
+            return false;
+        }
+    }
+
+    // First VAO setup
+    glBindVertexArray(_vaoId);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3, 0);
+
+    glBindVertexArray(0);
+    return true;
 }
 
-} // openspace
+void BoxGeometry::render() {
+    glBindVertexArray(_vaoId);  // select first VAO
+    glDrawArrays(GL_TRIANGLES, 0, 6*6);
+    glBindVertexArray(0);
+}
+
+}

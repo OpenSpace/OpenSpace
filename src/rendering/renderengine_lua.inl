@@ -53,19 +53,19 @@ int takeScreenshot(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
+* setRenderer(string):
+* Set renderer
 */
-int visualizeABuffer(lua_State* L) {
+int setRenderer(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 1)
 		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 	const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
+    if (type != LUA_TSTRING)
         return luaL_error(L, "Expected argument of type 'bool'");
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().toggleVisualizeABuffer(b);
+    std::string r = lua_tostring(L, -1);
+    OsEng.renderEngine().setRendererFromString(r);
 	return 0;
 }
 

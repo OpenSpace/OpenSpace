@@ -131,6 +131,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 
 OpenSpaceEngine::~OpenSpaceEngine() {
     _gui->deinitializeGL();
+    _renderEngine->deinitialize();
 
     _globalPropertyNamespace = nullptr;
     _windowWrapper = nullptr;

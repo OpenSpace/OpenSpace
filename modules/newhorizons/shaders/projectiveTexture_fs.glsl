@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
@@ -41,17 +39,14 @@ in vec4 ProjTexCoord;
 uniform vec3 boresight;
 uniform vec3 sun_pos;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
-void main()
-{
+Fragment getFragment() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
-	
+
 	// directional lighting
 	vec3 origin = vec3(0.0);
 	vec4 spec = vec4(0.0);
@@ -81,20 +76,21 @@ void main()
 	// PROJECTIVE TEXTURE
 	vec4 projTexColor = textureProj(texture2, ProjTexCoord);
 	vec4 shaded = max(intensity * diffuse, ambient);
-		if (ProjTexCoord[0] > 0.0 || 
-			ProjTexCoord[1] > 0.0 ||
-			ProjTexCoord[0] < ProjTexCoord[2] || 
-			ProjTexCoord[1] < ProjTexCoord[2]){
-			diffuse = shaded;
-		}else if(dot(n,boresight) < 0 &&
-		         (projTexColor.w != 0)){// frontfacing
-			diffuse = projTexColor;//*0.5f + 0.5f*shaded;
-		}else{
-			diffuse = shaded;
-		}
-	
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+    if (ProjTexCoord[0] > 0.0 ||
+        ProjTexCoord[1] > 0.0 ||
+        ProjTexCoord[0] < ProjTexCoord[2] ||
+        ProjTexCoord[1] < ProjTexCoord[2]){
+        diffuse = shaded;
+    } else if (dot(n,boresight) < 0 &&
+              (projTexColor.w != 0)) {// frontfacing
+        diffuse = projTexColor;//*0.5f + 0.5f*shaded;
+    } else {
+        diffuse = shaded;
+    }
 
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    //frag.color = vec4(vs_st, 0.0, 1.0);
+    return frag;
 }
-

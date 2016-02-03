@@ -100,3 +100,7 @@ openspace.bindKey("p", "local b = openspace.getPropertyValue('PlutoProjection.re
 openspace.bindKey("p", "local b = openspace.getPropertyValue('Charon.renderable.performProjection'); openspace.setPropertyValue('Charon.renderable.performProjection', not b)")
 
 openspace.bindKey("c", "openspace.parallel.setAddress('130.236.142.51');openspace.parallel.setPassword('newhorizons-20150714');openspace.parallel.connect();")
+
+
+openspace.bindKey("COMMA", "openspace.setRenderer('Framebuffer');")
+openspace.bindKey("PERIOD", "openspace.setRenderer('ABuffer');")

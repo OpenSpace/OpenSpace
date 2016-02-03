@@ -24,7 +24,6 @@
 
 #include <openspace/scene/scene.h>
 
-#include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -83,58 +82,23 @@ bool Scene::initialize() {
    
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-
-	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
-		_programUpdateLock.lock();
-		_programsToUpdate.insert(program);
-		_programUpdateLock.unlock();
-	};
+   
+    std::unique_ptr<ProgramObject> tmpProgram;
 
 	// fboPassthrough program
-	std::unique_ptr<ghoul::opengl::ProgramObject> prg = ProgramObject::Build("fboPassProgram",
+    tmpProgram = ProgramObject::Build(
+        "fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
 		"${SHADERS}/fboPass_fs.glsl");
-	if (!prg) return false;
-	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager().setValue("fboPassProgram", prg.get());
-    _programs.push_back(std::move(prg));
-
-	// pscstandard
-	prg = ProgramObject::Build("pscstandard",
-		"${SHADERS}/pscstandard_vs.glsl",
-		"${SHADERS}/pscstandard_fs.glsl");
-    if (! prg) return false;
-	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager().setValue("pscShader", prg.get());
-    _programs.push_back(std::move(prg));
-
-	// Night texture program
-	prg = ProgramObject::Build("nightTextureProgram",
-		"${SHADERS}/nighttexture_vs.glsl",
-		"${SHADERS}/nighttexture_fs.glsl");
-	if (!prg) return false;
-	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager().setValue("nightTextureProgram", prg.get());
-    _programs.push_back(std::move(prg));
-
-    // RaycastProgram
-	prg = ProgramObject::Build("RaycastProgram",
-		"${SHADERS}/exitpoints.vert",
-		"${SHADERS}/exitpoints.frag");
-	if (!prg) return false;
-	prg->setProgramObjectCallback(cb);
-    OsEng.ref().configurationManager().setValue("RaycastProgram", prg.get());
-    _programs.push_back(std::move(prg));
+	if (!tmpProgram) return false;
+    tmpProgram->setIgnoreSubroutineUniformLocationError(true);
+	OsEng.configurationManager().setValue("fboPassProgram", tmpProgram.get());
 
     return true;
 }
 
 bool Scene::deinitialize() {
 	clearSceneGraph();
-
-	// clean up all programs
-	_programsToUpdate.clear();
-	_programs.clear();
     return true;
 }
 
@@ -149,7 +113,6 @@ void Scene::update(const UpdateData& data) {
             LERROR(e.what());
             return;
         }
-		OsEng.renderEngine().aBuffer()->invalidateABuffer();
 	}
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
@@ -168,27 +131,18 @@ void Scene::evaluate(Camera* camera) {
 }
 
 void Scene::render(const RenderData& data) {
-	bool emptyProgramsToUpdate = _programsToUpdate.empty();
-		
-	_programUpdateLock.lock();
-	for (ghoul::opengl::ProgramObject* program : _programsToUpdate) {
-		LDEBUG("Attempting to recompile " << program->name());
-		program->rebuildFromFile();
-	}
-	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
-	_programUpdateLock.unlock();
-
-	if (!emptyProgramsToUpdate) {
-		LDEBUG("Setting uniforms");
-		// Ignore attribute locations
-		for (const auto& program : _programs)
-			program->setIgnoreSubroutineUniformLocationError(true);
-	}
-
     for (SceneGraphNode* node : _graph.nodes())
         node->render(data);
-	//if (_root)
-	//	_root->render(data);
+}
+
+std::vector<std::pair<Volume*, RenderData>> Scene::volumesToRender(const RenderData& data) const {
+    std::vector<std::pair<Volume*, RenderData>> volumes;
+
+    for (const SceneGraphNode* node : _graph.nodes()) {
+        std::vector<std::pair<Volume*, RenderData>> newVolumes = node->volumesToRender(data);
+        std::copy(newVolumes.begin(), newVolumes.end(), std::back_inserter(volumes));
+    }
+    return volumes;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {

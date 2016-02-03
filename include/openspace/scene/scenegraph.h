@@ -46,7 +46,7 @@ public:
     bool addSceneGraphNode(SceneGraphNode* node);
     bool removeSceneGraphNode(SceneGraphNode* node); 
 
-    const std::vector<SceneGraphNode*>& nodes();
+    const std::vector<SceneGraphNode*>& nodes() const;
 
     SceneGraphNode* rootNode() const;
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
