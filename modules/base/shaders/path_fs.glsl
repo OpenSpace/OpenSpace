@@ -22,24 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 in vec4 vs_point_position;
 flat in int isHour;
 in vec4 vs_point_color;
 
 uniform vec3 color;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-void main() {
+Fragment getFragment() {
     vec4 position = vs_point_position;
     float depth = pscDepth(position);
 	
 	vec4 diffuse = vs_point_color;
-    
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-    addToBuffer(frag);
+
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

@@ -22,19 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform float time;
 uniform sampler2D texture1;
 
 in vec2 vs_st;
 in vec4 vs_position;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-void main()
+Fragment getFragment()
 {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
@@ -44,7 +41,9 @@ void main()
 	else {
 		diffuse = vec4(0.8);
 	}
-	
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
+
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

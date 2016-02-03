@@ -53,6 +53,7 @@ out float billboardSize;
 uniform mat4 projection;
 
 uniform float scaleFactor;
+uniform float minBillboardSize;
 
 void main() {
     if ((psc_position[0].x == 0.0) && (psc_position[0].y == 0.0) && (psc_position[0].z == 0.0))
@@ -68,8 +69,8 @@ void main() {
 
     vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
-        vec4 p1     = gl_in[0].gl_Position;
-        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vec4 p1 = gl_in[0].gl_Position;
+        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
         projPos[i] = projection * p1;
     }
 
@@ -82,7 +83,7 @@ void main() {
     // The billboard is smaller than one pixel, we can discard it
     vec2 distance = abs(ll - ur);
     float sizeInPixels = length(distance);
-    if (sizeInPixels < 5)
+    if (sizeInPixels < minBillboardSize)
         return;
 
     for(int i = 0; i < 4; i++){

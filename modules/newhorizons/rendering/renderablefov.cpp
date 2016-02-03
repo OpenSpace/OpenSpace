@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 
 #include <modules/newhorizons/util/imagesequencer.h>
@@ -132,9 +133,12 @@ RenderableFov::~RenderableFov() {
 bool RenderableFov::initialize() {
 	bool completeSuccess = true;
     if (_programObject == nullptr) {
-        _programObject = ghoul::opengl::ProgramObject::Build("FovProgram",
+
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _programObject = renderEngine.buildRenderProgram("FovProgram",
             "${MODULE_NEWHORIZONS}/shaders/fov_vs.glsl",
             "${MODULE_NEWHORIZONS}/shaders/fov_fs.glsl");
+
         if (!_programObject)
             return false;
     }
@@ -144,6 +148,12 @@ bool RenderableFov::initialize() {
 }
 
 bool RenderableFov::deinitialize() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
+
 	return true;
 }
 
@@ -464,7 +474,6 @@ void RenderableFov::computeIntercepts(const RenderData& data){
 	_fovBounds.clear();
 	for (int i = 0; i <= _bounds.size(); i++){
 		int r = (i == _bounds.size()) ? 0 : i;
-		// compute surface intercept
         std::string bodyfixed = "IAU_";
         bool convert = (_frame.find(bodyfixed) == std::string::npos);
         if (convert)

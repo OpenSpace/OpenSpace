@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
+#version __CONTEXT__
 
-in vec4 vs_position;
+in vec4 position;
+out vec2 texCoord;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
-
-Fragment getFragment()
-{
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-    Fragment frag;
-
-    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
-    frag.depth = depth;
-
-    return frag;
+void main() {
+	gl_Position = position;
+	texCoord = 0.5 + position.xy / 2.0;
 }

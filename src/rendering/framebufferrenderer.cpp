@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,40 +21,77 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/framebufferrenderer.h>
+#include <string>
+#include <openspace/scene/scene.h>
+#include <openspace/util/camera.h>
 
-#ifndef __ABUFFERFIXED_H__
-#define __ABUFFERFIXED_H__
-
-#include <openspace/abuffer/abuffer.h>
+namespace {
+	const std::string _loggerCat = "FramebufferRenderer";
+    const std::string FragmentRendererPath = "${SHADERS}/renderframebuffer.frag";
+}
 
 namespace openspace {
 
-class ABufferFixed: public ABuffer {
-public:
 
-	ABufferFixed();
-	~ABufferFixed();
-	bool initialize() override;
+    FramebufferRenderer::FramebufferRenderer()
+        : _camera(nullptr)
+        , _scene(nullptr)
+        , _resolution(glm::vec2(0)) {
+    }
 
-	void clear() override;
-	void preRender() override;
-	void postRender() override;
 
-	std::vector<fragmentData> pixelData() override;
+    FramebufferRenderer::~FramebufferRenderer() {
+        
+    }
+    
 
-protected:
-	virtual bool reinitializeInternal() override;
+    void FramebufferRenderer::initialize() {
+        LINFO("Initializing FramebufferRenderer");
+        updateRendererData();
+    }
 
-private:
-	GLuint *_data;
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _atomicCounterTexture;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
-}; 		// ABufferFixed
+    void FramebufferRenderer::deinitialize() {
+        LINFO("Deinitializing FramebufferRenderer");
+    }
+    
 
-} 		// openspace
+    void FramebufferRenderer::update() {
+        // no need to update anything.
+    }
+    
+    void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
+        if (_scene == nullptr) return;
+        if (_camera == nullptr) return;
 
-#endif 	// __ABUFFERFIXED_H__
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+       _scene->render({ *_camera, psc(), doPerformanceMeasurements });;
+
+    }
+
+    void FramebufferRenderer::setScene(Scene* scene) {
+        _scene = scene;
+    }
+
+    void FramebufferRenderer::setCamera(Camera* camera) {
+        _camera = camera;
+    }
+
+    void FramebufferRenderer::setResolution(glm::ivec2 res) {
+        _resolution = res;
+    }
+
+    void FramebufferRenderer::updateRendererData() {
+        ghoul::Dictionary dict;
+        dict.setValue("fragmentRendererPath", FragmentRendererPath);
+        OsEng.renderEngine().setRendererData(dict);
+    }
+
+
+}
+

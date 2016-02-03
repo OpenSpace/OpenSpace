@@ -22,9 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -117,7 +119,8 @@ bool RenderableSphere::initialize() {
     _sphere->initialize();
 
     // pscstandard
-    _shader = ghoul::opengl::ProgramObject::Build("Sphere",
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("Sphere",
         "${MODULES}/base/shaders/sphere_vs.glsl",
         "${MODULES}/base/shaders/sphere_fs.glsl");
     if (!_shader)
@@ -134,7 +137,12 @@ bool RenderableSphere::deinitialize() {
 
     _texture = nullptr;
 
-    _shader = nullptr;
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 
 	return true;
 }
@@ -152,14 +160,17 @@ void RenderableSphere::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader.get(), &data.camera, data.position);
 
+	setPscUniforms(_shader.get(), &data.camera, data.position);
     _shader->setUniform("alpha", _transparency);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
 	_shader->setUniform("texture1", unit);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     _sphere->render();
 

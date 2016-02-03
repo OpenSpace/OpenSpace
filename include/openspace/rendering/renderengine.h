@@ -34,7 +34,10 @@ namespace ghoul {
 namespace fontrendering {
     class Font;
 }
-
+namespace opengl {
+    class ProgramObject;
+}
+class Dictionary;
 class SharedMemory;
 }
 
@@ -44,17 +47,14 @@ namespace openspace {
 class Camera;
 class SyncBuffer;
 class Scene;
-class ABuffer;
-class ABufferVisualizer;
+class Renderer;
 class ScreenLog;
 
 class RenderEngine {
 public:
-    enum class ABufferImplementation {
-        FrameBuffer = 0,
-        SingleLinked,
-        Fixed,
-        Dynamic,
+    enum class RendererImplementation {
+        Framebuffer = 0,
+        ABuffer,
         Invalid
     };
 
@@ -67,13 +67,14 @@ public:
 	~RenderEngine();
 	
 	bool initialize();
+	bool deinitialize();
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();
 
     Camera* camera() const;
-    ABuffer* aBuffer() const;
-    ABufferImplementation aBufferImplementation() const;
+    Renderer* renderer() const;
+    RendererImplementation rendererImplementation() const;
 
 	// sgct wrapped functions
     bool initializeGL();
@@ -83,8 +84,6 @@ public:
     void postDraw();
 
 	void takeScreenshot();
-	void toggleVisualizeABuffer(bool b);
-
 	void toggleInfoText(bool b);
 
 	void setPerformanceMeasurements(bool performanceMeasurements);
@@ -97,21 +96,40 @@ public:
 	void setGlobalBlackOutFactor(float factor);
 
     void setDisableRenderingOnMaster(bool enabled);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
+        std::string name,
+        std::string vsPath,
+        std::string fsPath,
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
+        std::string name,
+        std::string vsPath,
+        std::string fsPath,
+        std::string csPath,
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+
+    void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+
+    void setRendererFromString(const std::string& method);
+
+    /**
+     * Let's the renderer update the data to be brought into the rendererer programs
+     * as a 'rendererData' variable in the dictionary.
+     */
+    void setRendererData(const ghoul::Dictionary& renderer);
 	
 	/**
 	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering. The functions contained are
-	 * - openspace::luascriptfunctions::printImage
-	 * - openspace::luascriptfunctions::visualizeABuffer
-	 * \return The Lua library that contains all Lua functions available to affect the
-	 * rendering
+	 * rendering.
 	 */
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     // This is a temporary method to change the origin of the coordinate system ---abock
     void changeViewPoint(std::string origin);
 
-	//temporaray fade functionality
+	// Temporary fade functionality
 	void startFading(int direction, float fadeDuration);
 
     // This is temporary until a proper screenspace solution is found ---abock
@@ -122,37 +140,36 @@ public:
     } _onScreenInformation;
 
 private:
-    ABufferImplementation aBufferFromString(const std::string& impl);
-
+    void setRenderer(std::unique_ptr<Renderer> renderer);
+    RendererImplementation rendererFromString(const std::string& method);
 	void storePerformanceMeasurements();
+    void renderInformation();
+    void renderScreenLog();
 
 	Camera* _mainCamera;
 	Scene* _sceneGraph;
-	ABuffer* _abuffer;
-    ABufferImplementation _abufferImplementation;
+    std::unique_ptr<Renderer> _renderer;
+    RendererImplementation _rendererImplementation;
+    ghoul::Dictionary _rendererData;
 	ScreenLog* _log;
 
 	bool _showInfo;
-	bool _showScreenLog;
+	bool _showLog;
 	bool _takeScreenshot;
 
 	bool _doPerformanceMeasurements;
 	ghoul::SharedMemory* _performanceMemory;
     
-	void generateGlslConfig();
-
 	float _globalBlackOutFactor;
 	float _fadeDuration;
 	float _currentFadeTime;
 	int _fadeDirection;
-//    bool _sgctRenderStatisticsVisible;
+
+    std::vector<ghoul::opengl::ProgramObject*> _programs;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
-
-	bool _visualizeABuffer;
-	ABufferVisualizer* _visualizer;
 
     bool _disableMasterRendering = false;
 };

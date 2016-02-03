@@ -166,4 +166,8 @@ bool Renderable::isEnabled() const {
 	return _enabled;
 }
 
+std::vector<Volume*> Renderable::volumesToRender(const RenderData& data) const {
+    return std::vector<Volume*>();
+}
+
 }  // namespace openspace

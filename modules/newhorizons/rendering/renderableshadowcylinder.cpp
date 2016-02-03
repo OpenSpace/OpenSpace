@@ -25,6 +25,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 
@@ -91,20 +92,29 @@ bool RenderableShadowCylinder::initialize() {
 	glGenBuffers(1, &_vbo); // generate buffer
 
 	bool completeSuccess = true;
-	_shader = ghoul::opengl::ProgramObject::Build("ShadowProgram",
-		"${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
-		"${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl");
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("ShadowProgram",
+        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl");
+
 	if (!_shader)
 		return false;
 	return completeSuccess;
 }
 
 bool RenderableShadowCylinder::deinitialize() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 	glDeleteBuffers(1, &_vbo);
 	_vbo = 0;
-	_shader = nullptr;
+
 	return true;
 }
 
@@ -115,6 +125,8 @@ void RenderableShadowCylinder::render(const RenderData& data){
 			_transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
+
+    glDepthMask(false);
 	// Activate shader
 	_shader->activate();
 
@@ -127,6 +139,8 @@ void RenderableShadowCylinder::render(const RenderData& data){
 	glBindVertexArray(0);
 
 	_shader->deactivate();
+
+    glDepthMask(true);
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {

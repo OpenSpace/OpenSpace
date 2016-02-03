@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 //#include <imgui.h>
@@ -76,10 +77,13 @@ bool RenderableCrawlingLine::isReady() const {
 bool RenderableCrawlingLine::initialize() {
 	_frameCounter = 0;
     bool completeSuccess = true;
-    _program = ghoul::opengl::ProgramObject::Build("RenderableCrawlingLine",
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _program = renderEngine.buildRenderProgram("RenderableCrawlingLine",
         "${MODULE_NEWHORIZONS}/shaders/crawlingline_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl"
-    );
+        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl");
+
+
     if (!_program)
         return false;
 
@@ -103,6 +107,13 @@ bool RenderableCrawlingLine::deinitialize(){
     _vao = 0;
 	glDeleteBuffers(1, &_vbo);
     _vbo = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
 	return true;
 }
 

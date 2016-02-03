@@ -27,6 +27,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -125,10 +126,25 @@ RenderablePlanet::~RenderablePlanet() {
 }
 
 bool RenderablePlanet::initialize() {
-    if (_programObject == nullptr && _hasNightTexture)
-		OsEng.ref().configurationManager().getValue("nightTextureProgram", _programObject);
-	else if (_programObject == nullptr)
-		OsEng.ref().configurationManager().getValue("pscShader", _programObject);
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject == nullptr && _hasNightTexture) {
+        // Night texture program
+        _programObject = renderEngine.buildRenderProgram(
+            "nightTextureProgram",
+            "${SHADERS}/nighttexture_vs.glsl",
+            "${SHADERS}/nighttexture_fs.glsl");
+        if (!_programObject) return false;
+    }
+    else if (_programObject == nullptr) {
+        // pscstandard
+        _programObject = renderEngine.buildRenderProgram(
+            "pscstandard",
+            "${SHADERS}/pscstandard_vs.glsl",
+            "${SHADERS}/pscstandard_fs.glsl");
+        if (!_programObject) return false;
+
+    }
+    _programObject->setIgnoreSubroutineUniformLocationError(true);
 
     loadTexture();
     _geometry->initialize(this);
@@ -140,6 +156,12 @@ bool RenderablePlanet::deinitialize() {
     if(_geometry) {
         _geometry->deinitialize();
         delete _geometry;
+    }
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
     }
 
     _geometry = nullptr;
@@ -190,7 +212,7 @@ void RenderablePlanet::render(const RenderData& data)
 	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
     _programObject->setUniform("_performShading", _performShading);
 
@@ -207,6 +229,10 @@ void RenderablePlanet::render(const RenderData& data)
 		_nightTexture->bind();
 		_programObject->setUniform("nightTex", nightUnit);
 	}
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     // render
     _geometry->render();
 

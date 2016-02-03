@@ -25,6 +25,8 @@
 #include <modules/base/rendering/renderablestars.h>
 
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
@@ -90,8 +92,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-    , _scaleFactor("scaleFactor", "Scale Factor", 5.f, 0.f, 10.f)
-    , _minBillboardSize("minBillboardSize", "Min Billboard Size", 15.f, 1.f, 100.f)
+    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
+    , _minBillboardSize("minBillboardSize", "Min Billboard Size", 1.f, 1.f, 100.f)
 	, _program(nullptr)
 	, _speckFile("")
 	, _nValuesPerStar(0)
@@ -146,11 +148,12 @@ bool RenderableStars::isReady() const {
 bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
-	_program = ghoul::opengl::ProgramObject::Build("Star",
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _program = renderEngine.buildRenderProgram("Star",
 		"${MODULE_BASE}/shaders/star_vs.glsl",
 		"${MODULE_BASE}/shaders/star_fs.glsl",
 		"${MODULE_BASE}/shaders/star_ge.glsl");
-    
+
 	if (!_program)
 		return false;
 	completeSuccess &= loadData();
@@ -166,17 +169,18 @@ bool RenderableStars::deinitialize() {
 	_vao = 0;
 
 	_pointSpreadFunctionTexture = nullptr;
-    _colorTexture = nullptr;
+	_colorTexture = nullptr;
 
-	_program = nullptr;
-	return true;	
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+    return true;
 }
 
 void RenderableStars::render(const RenderData& data) {
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    
+    glDepthMask(false);
 	_program->activate();
 
 	// @Check overwriting the scaling from the camera; error as parsec->meter conversion
@@ -221,16 +225,10 @@ void RenderableStars::render(const RenderData& data) {
 	_program->setIgnoreUniformLocationError(false);
 	_program->deactivate();
     
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
+	glDepthMask(true);
 }
 
 void RenderableStars::update(const UpdateData& data) {
-	if (_program->isDirty()) {
-		_program->rebuildFromFile();
-		_dataIsDirty = true;
-	}
-	
 	if (_dataIsDirty) {
 		const int value = _colorOption;
 		LDEBUG("Regenerating data");
