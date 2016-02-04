@@ -41,7 +41,7 @@ void VolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableVolumeGL>("RenderableVolumeGL");
+    //fRenderable->registerClass<RenderableVolumeGL>("RenderableVolumeGL");
 }
 
 } // namespace openspace

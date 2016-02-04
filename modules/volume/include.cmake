@@ -1,3 +1,3 @@
 set (OPENSPACE_DEPENDENCIES
-    kameleon
+#    kameleon
 )

@@ -32,7 +32,6 @@ const vec2 corners[4] = vec2[4](
 );
 
 #include "PowerScaling/powerScalingMath.hglsl"
-#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
@@ -76,7 +75,7 @@ void main() {
 
     // Calculate the positions of the lower left and upper right corners of the
     // billboard in screen-space
-    const vec2 screenSize = vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    const vec2 screenSize = vec2(#{rendererData.windowWidth}, #{rendererData.windowHeight});
     vec2 ll = (((projPos[1].xy / projPos[1].w) + 1) / 2) * screenSize;
     vec2 ur = (((projPos[2].xy / projPos[2].w) + 1) / 2) * screenSize;
 
