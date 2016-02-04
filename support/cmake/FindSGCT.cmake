@@ -31,7 +31,7 @@ if(WIN32)
     
     # Check if found the SGCT root directory
     if(NOT SGCT_ROOT_DIR)
-        message(FATAL_ERROR "Could not locate SGCT in ${SGCT_PATH}!")
+        message("Could not locate SGCT in ${SGCT_PATH}!")
     endif(NOT SGCT_ROOT_DIR)
 
 
