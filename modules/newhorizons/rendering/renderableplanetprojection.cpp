@@ -384,7 +384,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
 	glBindVertexArray(_quad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	_fboProgramObject->deactivate();
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 
 	//bind back to default
 	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
