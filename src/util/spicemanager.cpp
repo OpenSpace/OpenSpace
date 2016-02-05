@@ -738,7 +738,7 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(const string& instrume
 }
 
 SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const {
-	static const int MaxBoundsSize = 20;
+	static const int MaxBoundsSize = 64;
 	static const int BufferSize = 128;
 
     FieldOfViewResult res;
@@ -854,14 +854,14 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     SPICEDOUBLE_CELL(cover, WinSiz);
     
     ckobj_c(path.c_str(), &ids);
-    throwOnSpiceError("Error finding Ck Converage");
+    throwOnSpiceError("Error finding Ck Coverage");
     
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
         
         scard_c(0, &cover);
         ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
-        throwOnSpiceError("Error finding Ck Converage");
+        throwOnSpiceError("Error finding Ck Coverage");
         
         //Get the number of intervals in the coverage window.
         SpiceInt numberOfIntervals = wncard_c(&cover);
@@ -870,7 +870,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
             //Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
-            throwOnSpiceError("Error finding Ck Converage");
+            throwOnSpiceError("Error finding Ck Coverage");
             
             _ckCoverageTimes[frame].insert(e);
             _ckCoverageTimes[frame].insert(b);

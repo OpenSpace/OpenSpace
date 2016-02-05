@@ -21,12 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <string>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
 	const std::string _loggerCat = "FramebufferRenderer";
@@ -89,6 +92,10 @@ namespace openspace {
     void FramebufferRenderer::updateRendererData() {
         ghoul::Dictionary dict;
         dict.setValue("fragmentRendererPath", FragmentRendererPath);
+        dict.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
+        dict.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
+
+
         OsEng.renderEngine().setRendererData(dict);
     }
 
