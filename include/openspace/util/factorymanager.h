@@ -34,7 +34,7 @@ namespace openspace {
 
 /**
  * Singleton factory class that handles a variety of ghoul::TemplateFactory%s and makes
- * them available through the #addFactory and factory #methods. Each
+ * them available through the #addFactory and #factory methods. Each
  * ghoul::TemplateFactory can only be added once and can be accessed by its type.
  */
 class FactoryManager {
