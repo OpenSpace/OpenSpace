@@ -261,6 +261,10 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                         else {
                             _commands.at(_activeCommand) = command.substr(0, pos + 1);
                             _inputPosition = _commands.at(_activeCommand).length();
+                            // We only want to remove the autocomplete info if we just
+                            // entered the 'default' openspace namespace
+                            if (command.substr(0, pos + 1) == "openspace.")
+                                _autoCompleteInfo = { NoAutoComplete, false, "" };
                         }
                     }
 
