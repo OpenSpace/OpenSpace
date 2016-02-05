@@ -38,6 +38,7 @@
 
 #include <string>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 
 #include <sgct.h>
@@ -221,7 +222,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 std::string commandLowerCase;
                 std::transform(
                     command.begin(), command.end(),
-                    commandLowerCase.begin(),
+                    std::back_inserter(commandLowerCase),
                     ::tolower
                 );
                 
@@ -229,7 +230,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 std::transform(
                     _autoCompleteInfo.initialValue.begin(),
                     _autoCompleteInfo.initialValue.end(),
-                    initialValueLowerCase.begin(),
+                    std::back_inserter(initialValueLowerCase),
                     ::tolower
                 );
     
