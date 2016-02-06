@@ -247,7 +247,7 @@ bool RenderEngine::initializeGL() {
 	}
 	else {*/
 		// get corner positions, calculating the forth to easily calculate center
-		glm::vec3 corners[4];
+		//glm::vec3 corners[4];
 		/*corners[0] = wPtr->getCurrentViewport()->getViewPlaneCoords(
 			sgct_core::SGCTProjectionPlane::LowerLeft);
 		corners[1] = wPtr->getCurrentViewport()->getViewPlaneCoords(
@@ -256,8 +256,8 @@ bool RenderEngine::initializeGL() {
 			sgct_core::SGCTProjectionPlane::UpperRight);
 		corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
          */
-		const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
-			/ 4.0f;
+		//const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
+			/// 4.0f;
 			
 //#if 0
 //			// @TODO Remove the ifdef when the next SGCT version is released that requests the
@@ -270,27 +270,28 @@ bool RenderEngine::initializeGL() {
 //			const glm::vec3 eyePosition
 //				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
 //#endif
-		const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
+		//const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
 		// get viewdirection, stores the direction in the camera, used for culling
-		const glm::vec3 viewdir = glm::normalize(eyePosition - center);
-		_mainCamera->setCameraDirection(-viewdir);
-		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
+		//const glm::vec3 viewdir = glm::normalize(eyePosition - center);
+		_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+		_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
 		// set the initial fov to be 0.0 which means everything will be culled
-		float maxFov = 0.0f;
+		//float maxFov = 0.0f;
+        float maxFov = std::numeric_limits<float>::max();
 
-		// for each corner
-		for (int i = 0; i < 4; ++i) {
-			// calculate radians to corner
-			glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
-			float radsbetween = acos(glm::dot(viewdir, dir))
-				/ (glm::length(viewdir) * glm::length(dir));
+		//// for each corner
+		//for (int i = 0; i < 4; ++i) {
+		//	// calculate radians to corner
+		//	glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
+		//	float radsbetween = acos(glm::dot(viewdir, dir))
+		//		/ (glm::length(viewdir) * glm::length(dir));
 
-			// the angle to a corner is larger than the current maxima
-			if (radsbetween > maxFov) {
-				maxFov = radsbetween;
-			}
-		}
+		//	// the angle to a corner is larger than the current maxima
+		//	if (radsbetween > maxFov) {
+		//		maxFov = radsbetween;
+		//	}
+		//}
 		_mainCamera->setMaxFov(maxFov);
     //}
 
