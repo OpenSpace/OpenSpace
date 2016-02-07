@@ -52,12 +52,15 @@ namespace openspace {
 	: Renderable(dictionary)
 	, _numberOfPoints("amountOfPoints", "Points", 190, 1, 300)
 	, _shadowLength("shadowLength", "Shadow Length", 0.1, 0.0, 0.5)
+    , _shadowColor("shadowColor", "Shadow Color",
+                   glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f))
 	, _shader(nullptr)
 	, _vao(0)
 	, _vbo(0)
 {
 	addProperty(_numberOfPoints);
 	addProperty(_shadowLength);
+    addProperty(_shadowColor);
 
 	bool success = dictionary.getValue(_keyType, _terminatorType);
 	ghoul_assert(success, "");
@@ -132,6 +135,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", _transform);
+    _shader->setUniform("shadowColor", _shadowColor);
 	setPscUniforms(_shader.get(), &data.camera, data.position);
 	
 	glBindVertexArray(_vao);
