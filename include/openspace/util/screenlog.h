@@ -42,9 +42,8 @@ public:
     using LogLevel = ghoul::logging::LogManager::LogLevel;
     
     /**
-     * This struct stores the incoming log entries with their \m level, \m timeString,
-     * \m category, \m message, and the generated \m timeStamp used for the expiry
-     * calculation.
+     * This struct stores the incoming log entries with their #level, #timeString,
+     * #category, #message, and the generated #timeStamp used for the expiry calculation.
      */
 	struct LogEntry {
         /// The ghoul::logging::LogManager::LogLevel of the log message
@@ -86,9 +85,9 @@ public:
     
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
-     * their <code>timeStamp</code> and the \m _timeToLive value.
+     * their <code>timeStamp</code> and the #_timeToLive value.
      * \post All entries retrieved by the #entries function have a <code>timeStamp</code>
-     * that is lower than the current time + \m _timeToLive. The current time used is the
+     * that is lower than the current time + #_timeToLive. The current time used is the
      * time when this method was last called
      */
     void removeExpiredEntries();

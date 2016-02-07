@@ -240,7 +240,7 @@ public:
      * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
      * \throws SpiceException If \p body does not name a valid SPICE object.
      * \pre \p body must not be empty.
-     * \pre \item must not be empty.
+     * \pre \p item must not be empty.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
      */
     bool hasValue(const std::string& body, const std::string& item) const;
@@ -298,7 +298,7 @@ public:
      * this body
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
-     * \throws SpiceException If the \p body does not name a valid body, \t value
+     * \throws SpiceException If the \p body does not name a valid body, \p value
      * is not a valid item for the \p body or the retrieved value is not a single value.
      * \pre \p body must not be empty.
      * \pre \p value must not be empty.
@@ -317,7 +317,7 @@ public:
      * this body
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
-     * \throws SpiceException If the \p body does not name a valid body, \t value
+     * \throws SpiceException If the \p body does not name a valid body, \p value
      * is not a valid item for the \p body or the retrieved value is not a two-component
      * value.
      * \pre \p body must not be empty.
@@ -338,7 +338,7 @@ public:
      * this body
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
-     * \throws SpiceException If the \p body does not name a valid body, \t value
+     * \throws SpiceException If the \p body does not name a valid body, \p value
      * is not a valid item for the \p body or the retrieved value is not a three-component
      * value.
      * \pre \p body must not be empty.
@@ -358,7 +358,7 @@ public:
      * this body
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
-     * \throws SpiceException If the \p body does not name a valid body, \t value
+     * \throws SpiceException If the \p body does not name a valid body, \p value
      * is not a valid item for the \p body or the retrieved value is not a four-component
      * value.
      * \pre \p body must not be empty.
@@ -379,7 +379,7 @@ public:
      * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value. The <code>vector</code> must be
      * preallocated to the correct size of components that should be retrieved
-     * \throws SpiceException If the \p body does not name a valid body, \t value
+     * \throws SpiceException If the \p body does not name a valid body, \p value
      * is not a valid item for the \p body or the retrieved value does not contain the
      * correct number of components
      * value.
@@ -402,7 +402,7 @@ public:
      * available through all loaded kernels, if the craft is not supported by any of the
      * loaded kernel, or if the provided \p craftTicks is not a valid tick time for the
      * specific spacecraft
-     * \pre \craftIdCode must not be empty
+     * \pre \p craft must not be empty
      */
     double spacecraftClockToET(const std::string& craft, double craftTicks);
 
@@ -416,19 +416,19 @@ public:
      * \throws SpiceException If \p timeString is not a valid timestring according
      * to the <code>str2et_c</code> function (see the Particulars section of the linked
      * webpage).
-     * \pre \t timeString must not be empty
+     * \pre \p timeString must not be empty
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
      */
     double ephemerisTimeFromDate(const std::string& timeString) const;
 
     /**
      * Converts the passed \p ephemerisTime into a human-readable date string with a
-     * specific \t format.
+     * specific \p formatString.
      * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
      * J2000 epoch
-     * \param format The format string describing the output format
+     * \param formatString The format string describing the output format
      * \return The destination for the converted date.
-     * \pre \t format must not be empty
+     * \pre \p formatString must not be empty
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
      */
     std::string dateFromEphemerisTime(double ephemerisTime,
@@ -707,7 +707,7 @@ public:
         /// The shape of the returned field of view
         Shape shape;
         
-        /// The name of the reference frame in which the \m bounds are defined
+        /// The name of the reference frame in which the #bounds are defined
         std::string frameName;
         
         /// The direction towards the center of the field of view
@@ -744,7 +744,7 @@ public:
     
     /// The structure retuned by the #terminatorEllipse method
     struct TerminatorEllipseResult {
-        /// The vector from the target body at \m targetEphemerisTime to the observer at
+        /// The vector from the target body at #targetEphemerisTime to the observer at
         /// the original time
         glm::dvec3 observerPosition;
         
@@ -831,7 +831,7 @@ private:
      * by using mainly the <code>ckcov_c</code> and <code>ckobj_c</code> functions.
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html ,
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
-     * \param filePath The path to the kernel that should be examined
+     * \param path The path to the kernel that should be examined
      * \return true if the operation was successful
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful
@@ -843,7 +843,7 @@ private:
      * by using mainly the <code>spkcov_c</code> and <code>spkobj_c</code> functions.
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html ,
      * http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
-     * \param filePath The path to the kernel that should be examined
+     * \param path The path to the kernel that should be examined
      * \return true if the operation was successful
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful

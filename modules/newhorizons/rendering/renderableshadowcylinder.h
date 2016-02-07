@@ -72,6 +72,7 @@ namespace openspace {
 		void createCylinder();
 		properties::IntProperty _numberOfPoints;
 		properties::FloatProperty _shadowLength;
+        properties::Vec4Property _shadowColor;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 		
