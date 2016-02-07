@@ -24,8 +24,8 @@
 
 function (test_compiler_compatibility)
     if (MSVC)
-        if (MSVC_VERSION LESS 1800)
-            message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2013")
+        if (MSVC_VERSION LESS 1900)
+            message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2015")
         endif ()
     endif ()
 endfunction ()
