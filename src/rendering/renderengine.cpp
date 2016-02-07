@@ -247,34 +247,30 @@ bool RenderEngine::initializeGL() {
 	}
 	else {*/
 		// get corner positions, calculating the forth to easily calculate center
-		//glm::vec3 corners[4];
-		/*corners[0] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::SGCTProjectionPlane::LowerLeft);
-		corners[1] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::SGCTProjectionPlane::UpperLeft);
-		corners[2] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::SGCTProjectionPlane::UpperRight);
-		corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
-         */
-		//const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
-			/// 4.0f;
-			
-//#if 0
-//			// @TODO Remove the ifdef when the next SGCT version is released that requests the
-//			// getUserPtr to get a name parameter ---abock
-//
-//			// set the eye position, useful during rendering
-//			const glm::vec3 eyePosition
-//				= sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
-//#else
-//			const glm::vec3 eyePosition
-//				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
-//#endif
+		
+  //      glm::vec3 corners[4];
+  //      sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getWindowPtr(0);
+  //      sgct_core::BaseViewport* vp = wPtr->getViewport(0);
+  //      sgct_core::SGCTProjectionPlane* projectionPlane = vp->getProjectionPlane();
+
+  //      corners[0] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::LowerLeft));
+  //      corners[1] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperLeft));
+  //      corners[2] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperRight));
+  //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
+  //       
+  //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
+		////	
 		//const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
-		// get viewdirection, stores the direction in the camera, used for culling
+		////// get viewdirection, stores the direction in the camera, used for culling
 		//const glm::vec3 viewdir = glm::normalize(eyePosition - center);
-		_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
-		_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
+
+        //const glm::vec3 upVector = corners[0] - corners[1];
+
+        
+		//_mainCamera->setCameraDirection(glm::normalize(-viewdir));
+     _mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+		//_mainCamera->setLookUpVector(glm::normalize(upVector));
+        _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
 		// set the initial fov to be 0.0 which means everything will be culled
 		//float maxFov = 0.0f;
