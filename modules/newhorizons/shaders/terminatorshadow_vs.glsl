@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@ out vec4 vs_color;
 //out float fade;
 
 uniform uint nVertices;
+uniform vec4 shadowColor;
 //uniform float lineFade;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -46,7 +47,7 @@ void main() {
 	//fade = 1.0 - id;
 
 	if(mod(gl_VertexID,2) == 0.f){
-		vs_color = vec4(1,1,1,0.5);
+		vs_color = shadowColor;
 	}else{
 		vs_color = vec4(0);
 	}

@@ -23,7 +23,7 @@
 #########################################################################################
 
 include (${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include (${OPENSPACE_CMAKE_EXT_DIR}/handle_external_library.cmake)
+include (${GHOUL_BASE_DIR}/ext/handle_external_library.cmake)
 
 # Creates a new project and a library for the module with name <module_name>. The name of
 # the library is returned in <output_library_name> for outside configuration

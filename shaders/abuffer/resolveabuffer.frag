@@ -86,8 +86,7 @@ void main() {
         
         for (uint j = i + 1;
              j < nFrags
-                 && ((newMask = _msaa_(fragments[j])) & accumulatedMask) == 0
-                 && ((_depth_(fragments[j]) - _depth_(fragments[j - 1]) < 0.00001));
+                 && ((newMask = _msaa_(fragments[j])) & accumulatedMask) == 0;
              j++) {
 
             accumulatedMask |= newMask;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,9 +49,9 @@ public:
 
     /**
      * Initialization method that will register a token of the form
-     * <code>${MODULE_<<NAME>>}</code> for a specific <code><<NAME>></code> that is set in
-     * the OpenSpaceModule constructor. This method will call the internalInitialize
-     * method for further customization for each subclass.
+     * <code>${MODULE_\<\<NAME\>\>}</code> for a specific <code>\<\<NAME\>\></code> that
+     * is set in the OpenSpaceModule constructor. This method will call the
+     * internalInitialize method for further customization for each subclass.
      */
     void initialize();
     

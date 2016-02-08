@@ -25,6 +25,7 @@
 #include <openspace/rendering/abufferrenderer.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
@@ -239,8 +240,8 @@ ghoul::Dictionary ABufferRenderer::createResolveDictionary() {
 
 void ABufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
-    //dict.setValue("windowWidth", _resolution.x);
-    //dict.setValue("windowHeight", _resolution.y);
+    dict.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
+    dict.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
     dict.setValue("maxLayers", MaxLayers);
     dict.setValue("fragmentRendererPath", std::string("${SHADERS}/abuffer/renderabuffer.frag"));
     _rendererData = dict;

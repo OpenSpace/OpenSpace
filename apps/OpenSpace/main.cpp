@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -129,6 +129,8 @@ int main(int argc, char** argv) {
     _sgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
     _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
     _sgctEngine->setCharCallbackFunction(mainCharCallback);
+
+    sgct::MessageHandler::instance()->setNotifyLevel(sgct::MessageHandler::NOTIFY_ALL);
 
     // set encode and decode functions
     // NOTE: starts synchronizing before init functions

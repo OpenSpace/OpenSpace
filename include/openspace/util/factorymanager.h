@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@ namespace openspace {
 
 /**
  * Singleton factory class that handles a variety of ghoul::TemplateFactory%s and makes
- * them available through the #addFactory and factory #methods. Each
+ * them available through the #addFactory and #factory methods. Each
  * ghoul::TemplateFactory can only be added once and can be accessed by its type.
  */
 class FactoryManager {

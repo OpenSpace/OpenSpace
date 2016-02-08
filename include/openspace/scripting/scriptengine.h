@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,15 +48,15 @@ namespace scripting {
 class ScriptEngine {
 public:
     /**
-     * This structure represents a Lua library, itself consisting of a unique \m name and
-     * an arbitrary number of \m functions
+     * This structure represents a Lua library, itself consisting of a unique #name and
+     * an arbitrary number of #functions
      */
     struct LuaLibrary {
         /**
-         * This structure represents a Lua function with its \m name, \m function pointer
-         * \m argumentText describing the arguments this function takes, the \m helpText
-         * descripbing the function, and whether it should be shared in a parallel
-         * connection (\m parallelShared)
+         * This structure represents a Lua function with its #name, #function pointer
+         * #argumentText describing the arguments this function takes, the #helpText
+         * describing the function, and whether it should be shared in a parallel
+         * connection (#parallelShared)
          */
 		struct Function {
             /// The name of the function

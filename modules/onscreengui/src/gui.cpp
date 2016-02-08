@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,7 @@ namespace {
 		// Setup orthographic projection matrix
 		const float width = ImGui::GetIO().DisplaySize.x;
 		const float height = ImGui::GetIO().DisplaySize.y;
-		static const glm::mat4 ortho(
+		const glm::mat4 ortho(
 			2.f / width, 0.0f, 0.0f, 0.0f,
 			0.0f, 2.0f / -height, 0.0f, 0.0f,
 			0.0f, 0.0f, -1.0f, 0.0f,
@@ -242,18 +242,17 @@ void GUI::initializeGL() {
 void GUI::deinitializeGL() {
 	_program = nullptr;
 
-	if (vao) glDeleteVertexArrays(1, &vao);
-	if (vbo) glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 
 	_property.deinitializeGL();
 	_performance.deinitializeGL();
 	_help.deinitializeGL();
 }
 
-void GUI::startFrame(float deltaTime,
-				const glm::vec2& windowSize,
-				 const glm::vec2& mousePos,
-                uint32_t mouseButtonsPressed)
+void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
+                     const glm::vec2& mousePos,
+                     uint32_t mouseButtonsPressed)
 {
     
 	ImGuiIO& io = ImGui::GetIO();

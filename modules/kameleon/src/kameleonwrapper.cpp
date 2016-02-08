@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/util/progressbar.h>
+//#include <openspace/util/progressbar.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -208,9 +208,9 @@ float* KameleonWrapper::getUniformSampledValues(
 		return glm::clamp(izerotoone, 0, bins-1);
     };
     
-	ProgressBar pb(static_cast<int>(outDimensions.x));
+	//ProgressBar pb(static_cast<int>(outDimensions.x));
     for (int x = 0; x < outDimensions.x; ++x) {
-		pb.print(x);
+		//pb.print(x);
         
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {
@@ -384,9 +384,9 @@ float* KameleonWrapper::getUniformSampledVectorValues(
 	//LDEBUG(zVar << "Min: " << varZMin);
 	//LDEBUG(zVar << "Max: " << varZMax);
 
-	ProgressBar pb(static_cast<int>(outDimensions.x));
+	//ProgressBar pb(static_cast<int>(outDimensions.x));
 	for (int x = 0; x < outDimensions.x; ++x) {
-		pb.print(x);
+		//pb.print(x);
 
 		for (int y = 0; y < outDimensions.y; ++y) {
 			for (int z = 0; z < outDimensions.z; ++z) {

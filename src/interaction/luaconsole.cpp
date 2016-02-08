@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@
 
 #include <string>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 
 #include <sgct.h>
@@ -221,7 +222,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 std::string commandLowerCase;
                 std::transform(
                     command.begin(), command.end(),
-                    commandLowerCase.begin(),
+                    std::back_inserter(commandLowerCase),
                     ::tolower
                 );
                 
@@ -229,7 +230,7 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 std::transform(
                     _autoCompleteInfo.initialValue.begin(),
                     _autoCompleteInfo.initialValue.end(),
-                    initialValueLowerCase.begin(),
+                    std::back_inserter(initialValueLowerCase),
                     ::tolower
                 );
     
@@ -260,6 +261,10 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                         else {
                             _commands.at(_activeCommand) = command.substr(0, pos + 1);
                             _inputPosition = _commands.at(_activeCommand).length();
+                            // We only want to remove the autocomplete info if we just
+                            // entered the 'default' openspace namespace
+                            if (command.substr(0, pos + 1) == "openspace.")
+                                _autoCompleteInfo = { NoAutoComplete, false, "" };
                         }
                     }
 

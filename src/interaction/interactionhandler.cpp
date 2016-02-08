@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -367,9 +367,9 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
 	glm::mat4 transform;
-	transform = glm::rotate(dx * 10.f, cameraUp) * transform;
-	transform = glm::rotate(dy * 10.f, cameraRight) * transform;
-	transform = glm::rotate(dz * 10.f, _camera->viewDirection()) * transform;
+	transform = glm::rotate(glm::radians(dx * 100.f), cameraUp) * transform;
+	transform = glm::rotate(glm::radians(dy * 100.f), cameraRight) * transform;
+	transform = glm::rotate(glm::radians(dz * 100.f), _camera->viewDirection()) * transform;
 
 	
 	//get "old" focus position 
