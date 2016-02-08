@@ -272,7 +272,14 @@ bool RenderEngine::initializeGL() {
 //#endif
 		const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
 		// get viewdirection, stores the direction in the camera, used for culling
-		const glm::vec3 viewdir = glm::normalize(eyePosition - center);
+		glm::vec3 viewdir = eyePosition - center;
+
+		if (viewdir == glm::vec3(0)) {
+			viewdir = glm::vec3(0, 0, 1);
+		} else {
+			viewdir = glm::normalize(viewdir);
+		}
+
 		_mainCamera->setCameraDirection(-viewdir);
 		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
 
