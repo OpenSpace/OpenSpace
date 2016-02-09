@@ -45,7 +45,9 @@ public:
     uint32_t mouseButtons(int maxNumber) const override;
     glm::ivec2 currentWindowSize() const override;
     glm::ivec2 currentWindowResolution() const override;
-    
+    glm::ivec2 currentDrawBufferResolution() const override;
+    int currentNumberOfAaSamples() const override;
+
     bool isRegularRendering() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
