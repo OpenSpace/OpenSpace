@@ -23,8 +23,14 @@
  ****************************************************************************************/
 
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/misc/exception.h>
+#include <string>
 
 namespace openspace {
+
+WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string& msg)
+    : ghoul::RuntimeError(msg, "WindowWrapper")
+{}
     
 void WindowWrapper::setBarrier(bool) {}
     
@@ -52,6 +58,14 @@ glm::ivec2 WindowWrapper::currentWindowSize() const {
     
 glm::ivec2 WindowWrapper::currentWindowResolution() const {
     return currentWindowSize();
+}
+
+glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
+	return currentWindowSize();
+}
+
+int WindowWrapper::currentNumberOfAaSamples() const {
+	return 1;
 }
 
 bool WindowWrapper::isRegularRendering() const {

@@ -83,6 +83,24 @@ glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
     sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
+
+glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
+    sgct_core::Viewport* viewport = sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+    if (viewport != nullptr){
+        if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
+            int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
+            return glm::ivec2(res, res);
+		} else {
+            return currentWindowResolution();
+        }
+    }
+    throw WindowWrapperException("No viewport available");
+}
+
+int SGCTWindowWrapper::currentNumberOfAaSamples() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
+}
+
     
 bool SGCTWindowWrapper::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock

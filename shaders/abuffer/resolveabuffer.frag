@@ -31,7 +31,7 @@
 layout (location = 0) out vec4 finalColor;
 
 uniform float blackoutFactor;
-
+uniform int nAaSamples;
 
 void sortFragments(uint nFrags) {
 	ABufferFragment tmp;
@@ -95,7 +95,7 @@ void main() {
 
         uint nSamples = countSamples(accumulatedMask);
         color = _color_(fragments[i]); // TODO: Possibly weigh all samples together?
-        color.a *= float(nSamples) * 0.125;
+        color.a *= float(nSamples) / float(nAaSamples);
 
         finalColor = blend(finalColor, color);
     }

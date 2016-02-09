@@ -271,6 +271,10 @@ bool RenderablePlanetProjection::initialize() {
 bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	bool completeSuccess = true;
 	if (!_texture) return false;
+
+	GLint defaultFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
 	// setup FBO
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
@@ -280,7 +284,7 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 		completeSuccess &= false;
 	// switch back to window-system-provided framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
 	// SCREEN-QUAD 
 	const GLfloat size = 1.0f;

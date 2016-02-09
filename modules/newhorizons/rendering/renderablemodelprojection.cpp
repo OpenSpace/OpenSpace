@@ -232,6 +232,10 @@ bool RenderableModelProjection::initialize() {
 bool RenderableModelProjection::auxiliaryRendertarget() {
 	bool completeSuccess = true;
 	// set FBO to texture to project to
+
+	GLint defaultFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
@@ -240,7 +244,7 @@ bool RenderableModelProjection::auxiliaryRendertarget() {
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 		completeSuccess &= false;
 	// switch back to window-system-provided framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
 	int vertexSize = sizeof(modelgeometry::ModelGeometry::Vertex);
 

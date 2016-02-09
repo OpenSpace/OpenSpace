@@ -104,6 +104,7 @@ private:
 	GLuint _fragmentBuffer;
 	GLuint _fragmentTexture;
 	GLuint _vertexPositionBuffer;
+	int _nAaSamples;
 
     ghoul::Dictionary _rendererData;
 };		// ABufferRenderer

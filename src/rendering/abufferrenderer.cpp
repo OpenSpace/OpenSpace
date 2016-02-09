@@ -96,6 +96,12 @@ void ABufferRenderer::initialize() {
 		"${SHADERS}/abuffer/resolveabuffer.frag",
 		dict);
 
+    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    if (_nAaSamples > 8) {
+        LERROR("ABuffer does not support more than 8 MSAA samples.");
+        _nAaSamples = 8;
+    }
+
 }
     
 void ABufferRenderer::deinitialize() {
@@ -163,6 +169,7 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     // Step 3: Resolve the buffer
     _resolveProgram->activate();
     _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
+    _resolveProgram->setUniform("nAaSamples", _nAaSamples);
     // todo: pre-ray-cast for each volume
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

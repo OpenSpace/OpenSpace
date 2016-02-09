@@ -327,7 +327,7 @@ void RenderEngine::postSynchronizationPreDraw() {
 	bool windowResized = OsEng.windowWrapper().windowHasResized();
 
 	if (windowResized) {
-		glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+		glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
 		_renderer->setResolution(res);
 		ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
 	}
@@ -552,7 +552,7 @@ void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
  * Set renderer
  */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
-	glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+	glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
 
 	if (_renderer) {
 		_renderer->deinitialize();

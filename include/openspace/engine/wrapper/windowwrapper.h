@@ -26,6 +26,7 @@
 #define __WINDOWWRAPPER_H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/exception.h>
 
 #include <cstdint>
 #include <functional>
@@ -104,6 +105,18 @@ public:
     virtual glm::ivec2 currentWindowResolution() const;
     
     /**
+     * Returns the resolution of the currently active framebuffer in pixel coordinates.
+     * On default, this method returns the same size as #currentWindowSize.
+     * \return The resolution of the currently active window in pixel coordinates
+     */
+    virtual glm::ivec2 currentDrawBufferResolution() const;
+
+    /**
+     * Returns the number of anti-aliasing samples used in the current window.
+     */
+    virtual int currentNumberOfAaSamples() const;
+
+	/**
      * Returns <code>true</code> if the current rendering method is regular, i.e., it is
      * a flat projection without non-linear distortions. Returns <code>false</code> in
      * other cases, for example fisheye projections. On default, this method will return
@@ -163,6 +176,10 @@ public:
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
     virtual void takeScreenshot() const;
+
+    struct WindowWrapperException : public ghoul::RuntimeError {
+        explicit WindowWrapperException(const std::string& msg);
+    };
 };
 
 } // namespace openspace

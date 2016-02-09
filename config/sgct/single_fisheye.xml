@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
 	<Node address="localhost" port="20401">
-		<Window fullScreen="false">
+		<Window fullScreen="false" numberOfSamples="8">
 			<Stereo type="none" />
 			<!-- 16:9 aspect ratio -->
-			<Size x="512" y="512" />
+			<Size x="1024" y="1024" />
 			<!-- Frame buffer resolution
 			<Res x="4096" y="4096" /> -->
 			<!--
@@ -20,7 +20,7 @@
 			<Viewport name="fisheye">
 				<Pos x="0.0" y="0.0" />
 				<Size x="1.0" y="1.0" />
-				<FisheyeProjection fov="180" quality="medium" tilt="27.0">
+				<FisheyeProjection fov="180" quality="1k" tilt="27.0">
 					<Background r="0.1" g="0.1" b="0.1" a="1.0" />
 				</FisheyeProjection>
 			</Viewport>
