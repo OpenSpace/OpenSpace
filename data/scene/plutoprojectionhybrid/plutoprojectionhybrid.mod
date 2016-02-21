@@ -150,8 +150,7 @@ return {
             Reference = "GALACTIC",
             Observer = "PLUTO BARYCENTER",
             Kernels = {
-                "${SPICE}/nh_kernels/spk/NavPE_de433_od122.bsp",
-                "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp",
+                "${SPICE}/NewHorizonsKernels/nh_plu017.bsp"
             }
         },
         Rotation = {

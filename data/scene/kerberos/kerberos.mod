@@ -28,7 +28,7 @@ return {
             Reference = "ECLIPJ2000",
             Observer = "PLUTO BARYCENTER",
             Kernels = {
-               "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+               "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
             }
         },
         Rotation = {
