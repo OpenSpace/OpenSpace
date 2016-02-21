@@ -1,30 +1,29 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <openspace/util/constants.h>
 #include <modules/newhorizons/rendering/planetgeometryprojection.h>
 
 #include <openspace/engine/configurationmanager.h>
@@ -32,6 +31,7 @@
 #include <ghoul/io/texture/texturereader.h>
 //#include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -40,7 +40,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
-#include <sgct.h>
+#include <openspace/rendering/renderengine.h>
 #include <iomanip> 
 #include <string>
 #include <thread>      
@@ -100,7 +100,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 	, _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "");
 
 	_defaultProjImage = absPath("textures/defaultProj.png");
@@ -109,7 +109,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     success = dictionary.getValue(
 		keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
 		_geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
 	}
 
@@ -121,7 +121,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
     bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
     bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
-    bool b4 = dictionary.getValue(keyProjAberration, _aberration);
+    std::string a = "NONE";
+    bool b4 = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
     bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);        
     bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); 
     bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
@@ -237,17 +239,20 @@ bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
     if (_programObject == nullptr) {
         // projection program
-        _programObject = ghoul::opengl::ProgramObject::Build("projectiveProgram",
+
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _programObject = renderEngine.buildRenderProgram("projectiveProgram",
             "${MODULES}/newhorizons/shaders/projectiveTexture_vs.glsl",
             "${MODULES}/newhorizons/shaders/projectiveTexture_fs.glsl");
+
         if (!_programObject)
             return false;
     }
 
-	if (_fboProgramObject == nullptr)
-		completeSuccess
-		&= OsEng.ref().configurationManager()->getValue("fboPassProgram", _fboProgramObject);
-
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
+                                      "${SHADERS}/fboPass_vs.glsl",
+                                      "${SHADERS}/fboPass_fs.glsl");
+    
     loadTexture();
 	loadProjectionTexture();
     completeSuccess &= (_texture != nullptr);
@@ -266,6 +271,10 @@ bool RenderablePlanetProjection::initialize() {
 bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	bool completeSuccess = true;
 	if (!_texture) return false;
+
+	GLint defaultFBO;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
 	// setup FBO
 	glGenFramebuffers(1, &_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
@@ -275,7 +284,7 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 		completeSuccess &= false;
 	// switch back to window-system-provided framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
 	// SCREEN-QUAD 
 	const GLfloat size = 1.0f;
@@ -304,16 +313,19 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
 }
 
 bool RenderablePlanetProjection::deinitialize(){
-    delete _texture; 
     _texture = nullptr;
-	delete _textureProj;
 	_textureProj = nullptr;
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	delete _geometry;
 	_geometry = nullptr;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
+
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
@@ -321,65 +333,69 @@ bool RenderablePlanetProjection::isReady() const {
 }
 
 void RenderablePlanetProjection::imageProjectGPU(){
+
+    glDisable(GL_DEPTH_TEST);
+
 	// keep handle to the current bound FBO
 	GLint defaultFBO;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
-		//counter = 0;
-		glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-		// set blend eq
-		glEnable(GL_BLEND);
-		glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
+	//counter = 0;
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+	// set blend eq
+	glEnable(GL_BLEND);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-		glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
-		_fboProgramObject->activate();
+	glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
+	_fboProgramObject->activate();
 
-		ghoul::opengl::TextureUnit unitFbo;
-		unitFbo.activate();
-		_textureProj->bind();
-		_fboProgramObject->setUniform("texture1"       , unitFbo);
+	ghoul::opengl::TextureUnit unitFbo;
+	unitFbo.activate();
+	_textureProj->bind();
+	_fboProgramObject->setUniform("texture1"       , unitFbo);
 		
-		ghoul::opengl::TextureUnit unitFbo2;
-		unitFbo2.activate();
-		_textureOriginal->bind();
-		_fboProgramObject->setUniform("texture2", unitFbo2);
-		_fboProgramObject->setUniform("projectionFading", _fadeProjection);
+	ghoul::opengl::TextureUnit unitFbo2;
+	unitFbo2.activate();
+	_textureOriginal->bind();
+	_fboProgramObject->setUniform("texture2", unitFbo2);
+	_fboProgramObject->setUniform("projectionFading", _fadeProjection);
 
-		_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
-		_fboProgramObject->setUniform("ModelTransform" , _transform);
-		_fboProgramObject->setUniform("_scaling"       , _camScaling);
-		_fboProgramObject->setUniform("boresight"      , _boresight);
+	_fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
+	_fboProgramObject->setUniform("ModelTransform" , _transform);
+	_fboProgramObject->setUniform("_scaling"       , _camScaling);
+	_fboProgramObject->setUniform("boresight"      , _boresight);
 
-		if (_geometry->hasProperty("radius")){ 
-			boost::any r = _geometry->property("radius")->get();
-			if (glm::vec4* radius = boost::any_cast<glm::vec4>(&r)){
-				_fboProgramObject->setUniform("radius", radius);
-			}
-		}else{
-			LERROR("Geometry object needs to provide radius");
+	if (_geometry->hasProperty("radius")){ 
+		boost::any r = _geometry->property("radius")->get();
+		if (glm::vec4* radius = boost::any_cast<glm::vec4>(&r)){
+			_fboProgramObject->setUniform("radius", radius);
 		}
-		if (_geometry->hasProperty("segments")){
-			boost::any s = _geometry->property("segments")->get();
-			if (int* segments = boost::any_cast<int>(&s)){
-				_fboProgramObject->setAttribute("segments", segments[0]);
-			}
-		}else{
-			LERROR("Geometry object needs to provide segment count");
+	}else{
+		LERROR("Geometry object needs to provide radius");
+	}
+	if (_geometry->hasProperty("segments")){
+		boost::any s = _geometry->property("segments")->get();
+		if (int* segments = boost::any_cast<int>(&s)){
+			_fboProgramObject->setAttribute("segments", segments[0]);
 		}
+	}else{
+		LERROR("Geometry object needs to provide segment count");
+	}
 
-		glBindVertexArray(_quad);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		_fboProgramObject->deactivate();
-		glDisable(GL_BLEND);
+	glBindVertexArray(_quad);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	_fboProgramObject->deactivate();
+	//glDisable(GL_BLEND);
 
-		//bind back to default
-		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-		glViewport(m_viewport[0], m_viewport[1],
-			       m_viewport[2], m_viewport[3]);
-	
+	//bind back to default
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+	glViewport(m_viewport[0], m_viewport[1],
+			    m_viewport[2], m_viewport[3]);
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
@@ -396,7 +412,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 										 e1.z, e2.z, e3.z, 0.f,
 										 -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
 	// create perspective projection matrix
-	glm::mat4 projProjectionMatrix = glm::perspective(_fovy, _aspectRatio, _nearPlane, _farPlane);
+	glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
 	// bias matrix
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
 		                                          0, 0.5f, 0, 0,
@@ -407,14 +423,14 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
 
 void RenderablePlanetProjection::attitudeParameters(double time){
 	// precomputations for shader
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, _mainFrame, _time, _stateMatrix);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_instrumentID, _mainFrame, time, _instrumentMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
 
 	_transform = glm::mat4(1);
 	//90 deg rotation w.r.t spice req. 
-	glm::mat4 rot = glm::rotate(_transform, 90.f, glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(_transform, 90.f, glm::vec3(0, -1, 0));
-	glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+	glm::mat4 rot = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(glm::radians(static_cast<float>(_rotation))), glm::vec3(0, 1, 0));
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
@@ -423,19 +439,22 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 	}
 	_transform = _transform * rot * roty * rotProp;
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 bs;
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrumentID, shape, instrument, bs, bounds);
-	//if (!found) LERROR("Could not locate instrument");
-    if (!found)
-        return ;
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        bs = std::move(res.boresightVector);
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        LERRORC(e.component, e.what());
+        return;
+    }
 
-	psc position;                                //observer      target
-	found = SpiceManager::ref().getTargetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, position, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
+    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
 	//change to KM and add psc camera scaling. 
 	position[3] += (3 + _camScaling[1]);
+    //position[3] += 3;
 	glm::vec3 cpos = position.vec3();
 
 	_projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
@@ -509,9 +528,10 @@ void RenderablePlanetProjection::render(const RenderData& data){
     attitudeParameters(_time);
 	_imageTimes.clear();
 
-	psc sun_pos;
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _projecteeID, "GALACTIC", "NONE", _time, sun_pos, lt);
+    glm::dvec3 p =
+    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
+    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 	// Main renderpass
 	_programObject->activate();
@@ -521,7 +541,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
 	textureBind();
 	
@@ -532,8 +552,9 @@ void RenderablePlanetProjection::render(const RenderData& data){
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data){
-	if (_time >= Time::ref().currentTime()){
-		imageQueue = {}; // if jump back in time -> empty queue.  
+	if (_time >= Time::ref().currentTime()) {
+        // if jump back in time -> empty queue.  
+        imageQueue = std::queue<Image>();
 	}
 
 	_time = Time::ref().currentTime();
@@ -543,7 +564,11 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 		openspace::ImageSequencer2::ref().updateSequencer(_time);
 		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
     }
-	
+
+    if (_fboProgramObject && _fboProgramObject->isDirty()) {
+        _fboProgramObject->rebuildFromFile();
+    }
+
 	// remove these lines if not using queue ------------------------
 	// @mm
 	//_capture = true;
@@ -558,10 +583,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
 }
 
 void RenderablePlanetProjection::loadProjectionTexture() {
-	delete _textureProj;
 	_textureProj = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
+        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
 		if (_textureProj) {
 			_textureProj->uploadTexture(); 
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
@@ -573,28 +597,25 @@ void RenderablePlanetProjection::loadProjectionTexture() {
 }
 
 void RenderablePlanetProjection::loadTexture() {
-    delete _texture;
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
         if (_texture) {
 			_texture->uploadTexture();
 			_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-	delete _textureOriginal;
 	_textureOriginal = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath));
 		if (_textureOriginal) {
 			_textureOriginal->uploadTexture();
 			_textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
 	}
-	delete _textureWhiteSquare;
 	_textureWhiteSquare = nullptr;
 	if (_colorTexturePath.value() != "") {
-		_textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage);
+        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage));
 		if (_textureWhiteSquare) {
 			_textureWhiteSquare->uploadTexture();
 			_textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

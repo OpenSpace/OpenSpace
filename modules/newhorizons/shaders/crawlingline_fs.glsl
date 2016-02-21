@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform vec4 campos;
 uniform vec4 objpos;
 uniform vec3 color;
@@ -32,16 +30,17 @@ uniform float _alpha;
 in vec4 vs_position;
 in vec4 vs_color;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-void main() {
+Fragment getFragment() {
 	vec4 position = vs_position;
 	vec4 diffuse = vs_color;
 	float depth = pscDepth(position);
 	diffuse.a = _alpha;
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
 
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

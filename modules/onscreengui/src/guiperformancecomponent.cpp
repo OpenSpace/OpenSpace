@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ void GuiPerformanceComponent::render() {
 	};
 
 	ImGui::Begin("Performance", &_isEnabled);
-	if (OsEng.renderEngine()->doesPerformanceMeasurements() &&
+	if (OsEng.renderEngine().doesPerformanceMeasurements() &&
 			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
 	{
 		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
@@ -87,7 +87,8 @@ void GuiPerformanceComponent::render() {
 			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
 
 
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+        void* ptr = _performanceMemory->memory();
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 
 		for (int i = 0; i < layout->nEntries; ++i) {
 			const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];

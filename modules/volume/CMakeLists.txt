@@ -25,14 +25,14 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.h
+#	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.h
+#	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.cpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolume.cpp
+#	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevolumegl.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

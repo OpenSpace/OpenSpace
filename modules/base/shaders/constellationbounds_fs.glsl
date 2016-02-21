@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
 
 in vec4 vs_position;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
-void main()
+Fragment getFragment()
 {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
+    Fragment frag;
 
-	ABufferStruct_t frag = createGeometryFragment(vec4(1.0, 0.0, 0.0, 1.0), position, depth);
-	addToBuffer(frag);
+    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
+    frag.depth = depth;
+
+    return frag;
 }

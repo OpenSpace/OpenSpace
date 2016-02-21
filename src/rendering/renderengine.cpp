@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,17 +28,14 @@
 #include <modules/newhorizons/util/imagesequencer.h>
 #endif
 
-#include <openspace/abuffer/abuffervisualizer.h>
-#include <openspace/abuffer/abuffer.h>
-#include <openspace/abuffer/abufferframebuffer.h>
-#include <openspace/abuffer/abuffersinglelinked.h>
-#include <openspace/abuffer/abufferfixed.h>
-#include <openspace/abuffer/abufferdynamic.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/rendering/abufferrenderer.h>
+#include <openspace/rendering/framebufferrenderer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
@@ -47,9 +44,14 @@
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/sharedmemory.h>
+#include <ghoul/opengl/programobject.h>
 #include <openspace/engine/configurationmanager.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/glm.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #ifdef GHOUL_USE_DEVIL
@@ -59,6 +61,7 @@
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/misc/exception.h>
 
 #include <array>
 #include <fstream>
@@ -69,18 +72,18 @@
 #include <modules/base/ephemeris/staticephemeris.h>
 
 // ABuffer defines
-#define ABUFFER_FRAMEBUFFER 0
-#define ABUFFER_SINGLE_LINKED 1
-#define ABUFFER_FIXED 2
-#define ABUFFER_DYNAMIC 3
+#define RENDERER_FRAMEBUFFER 0
+#define RENDERER_ABUFFER 1
 
 #include "renderengine_lua.inl"
 
 namespace {
 	const std::string _loggerCat = "RenderEngine";
 
-    const std::string KeyRenderingMethod = "RenderingMethod";
-    const std::string DefaultRenderingMethod = "ABufferSingleLinked";
+    const std::string KeyRenderingMethod = "RenderingMethod";   
+    std::chrono::seconds ScreenLogTimeToLive(15);
+    const std::string DefaultRenderingMethod = "ABuffer";
+    const std::string RenderFsPath = "${SHADERS}/render.frag";
 }
 
 namespace openspace {
@@ -88,14 +91,17 @@ namespace openspace {
 const std::string RenderEngine::PerformanceMeasurementSharedData =
 	"OpenSpacePerformanceMeasurementSharedData";
 
+const std::string RenderEngine::KeyFontMono = "Mono";
+const std::string RenderEngine::KeyFontLight = "Light";
+    
 RenderEngine::RenderEngine()
 	: _mainCamera(nullptr)
 	, _sceneGraph(nullptr)
-	, _abuffer(nullptr)
-    , _abufferImplementation(ABufferImplementation::Invalid)
+	, _renderer(nullptr)
+    , _rendererImplementation(RendererImplementation::Invalid)
 	, _log(nullptr)
 	, _showInfo(true)
-	, _showScreenLog(true)
+	, _showLog(true)
 	, _takeScreenshot(false)
 	, _doPerformanceMeasurements(false)
 	, _performanceMemory(nullptr)
@@ -103,9 +109,7 @@ RenderEngine::RenderEngine()
 	, _fadeDuration(2.f)
 	, _currentFadeTime(0.f)
 	, _fadeDirection(0)
-    , _sgctRenderStatisticsVisible(false)
-    , _visualizeABuffer(false)
-    , _visualizer(nullptr)
+    //    , _sgctRenderStatisticsVisible(false)
 {
     _onScreenInformation = {
         glm::vec2(0.f),
@@ -115,97 +119,118 @@ RenderEngine::RenderEngine()
 }
 
 RenderEngine::~RenderEngine() {
-	delete _abuffer;
-	_abuffer = nullptr;
-
 	delete _sceneGraph;
 	_sceneGraph = nullptr;
 
 	delete _mainCamera;
-	delete _visualizer;
-
 	delete _performanceMemory;
+
 	if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
 		ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+}
+
+bool RenderEngine::deinitialize() {
+	_sceneGraph->clearSceneGraph();
+	return true;
+}
+
+void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    _rendererImplementation = rendererFromString(renderingMethod);
+
+    std::unique_ptr<Renderer> newRenderer = nullptr;
+    switch (_rendererImplementation) {
+    case RendererImplementation::Framebuffer:
+		newRenderer = std::make_unique<FramebufferRenderer>();
+        break;
+    case RendererImplementation::ABuffer:
+        newRenderer = std::make_unique<ABufferRenderer>();
+        break;
+    case RendererImplementation::Invalid:
+        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
+               << "rendering methods");
+    }
+
+    setRenderer(std::move(newRenderer));
 }
 
 bool RenderEngine::initialize() {
     std::string renderingMethod = DefaultRenderingMethod;
     
     // If the user specified a rendering method that he would like to use, use that
-    if (OsEng.configurationManager()->hasKeyAndValue<std::string>(KeyRenderingMethod))
-        renderingMethod = OsEng.configurationManager()->value<std::string>(KeyRenderingMethod);
-    else {
+
+    if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyRenderingMethod)) {
+        renderingMethod = OsEng.configurationManager().value<std::string>(KeyRenderingMethod);
+	} else {
         using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version(4,3)) {
+        if (OpenGLCap.openGLVersion() < Version{4,3,0}) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
-            renderingMethod = "ABufferFrameBuffer";
+            renderingMethod = "Framebuffer";
         }
     }
 
-    _abufferImplementation = aBufferFromString(renderingMethod);
-    switch (_abufferImplementation) {
-    case ABufferImplementation::FrameBuffer:
-        LINFO("Creating ABufferFramebuffer implementation");
-        _abuffer = new ABufferFramebuffer;
-        break;
-    case ABufferImplementation::SingleLinked:
-        LINFO("Creating ABufferSingleLinked implementation");
-        _abuffer = new ABufferSingleLinked();
-        break;
-    case ABufferImplementation::Fixed:
-        LINFO("Creating ABufferFixed implementation");
-        _abuffer = new ABufferFixed();
-        break;
-    case ABufferImplementation::Dynamic:
-        LINFO("Creating ABufferDynamic implementation");
-        _abuffer = new ABufferDynamic();
-        break;
-    case ABufferImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-            << "rendering methods");
-        return false;
-    }
-
-	generateGlslConfig();
+	LINFO("Seting renderer from string: " << renderingMethod);
+	setRendererFromString(renderingMethod);
 
 	// init camera and set temporary position and scaling
 	_mainCamera = new Camera();
 	_mainCamera->setScaling(glm::vec2(1.0, -8.0));
 	_mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
-	OsEng.interactionHandler()->setCamera(_mainCamera);
+
+    OsEng.interactionHandler().setCamera(_mainCamera);
+    if (_renderer) {
+        _renderer->setCamera(_mainCamera);
+    }
 
 #ifdef GHOUL_USE_DEVIL
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderDevIL);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderFreeImage);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
 #endif // GHOUL_USE_FREEIMAGE
 
-	ghoul::io::TextureReader::ref().addReader(new ghoul::io::impl::TextureReaderCMAP);
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
 
 	return true;
 }
 
 bool RenderEngine::initializeGL() {
-	// LDEBUG("RenderEngine::initializeGL()");
-	sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getActiveWindowPtr();
-
 	// TODO:    Fix the power scaled coordinates in such a way that these 
 	//			values can be set to more realistic values
 
 	// set the close clip plane and the far clip plane to extreme values while in
 	// development
-	sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
+    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    
+    
+    try {
+        const float fontSizeTime = 15.f;
+        _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
+        const float fontSizeMono = 10.f;
+        _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
+        const float fontSizeLight = 8.f;
+        _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
+    }
+    catch (const ghoul::fontrendering::Font::FreeTypeException& e) {
+        LERROR(e.what());
+        throw;
+    }
+   
+    
+    
+    // ALL OF THIS HAS TO BE CHECKED
+    // ---abock
+    
+    
+//	sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
 	// sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
 	// calculating the maximum field of view for the camera, used to
 	// determine visibility of objects in the scene graph
-	if (wPtr->isUsingFisheyeRendering()) {
+/*    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer) {
 		// fisheye mode, looking upwards to the "dome"
 		glm::vec4 upDirection(0, 1, 0, 0);
 
@@ -220,64 +245,56 @@ bool RenderEngine::initializeGL() {
 		_mainCamera->setMaxFov(wPtr->getFisheyeFOV());
 		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
 	}
-	else {
+	else {*/
 		// get corner positions, calculating the forth to easily calculate center
-		glm::vec3 corners[4];
-		corners[0] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::LowerLeft);
-		corners[1] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::UpperLeft);
-		corners[2] = wPtr->getCurrentViewport()->getViewPlaneCoords(
-			sgct_core::Viewport::UpperRight);
-		corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
-		const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3])
-			/ 4.0f;
+		
+  //      glm::vec3 corners[4];
+  //      sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getWindowPtr(0);
+  //      sgct_core::BaseViewport* vp = wPtr->getViewport(0);
+  //      sgct_core::SGCTProjectionPlane* projectionPlane = vp->getProjectionPlane();
 
-			
-//#if 0
-//			// @TODO Remove the ifdef when the next SGCT version is released that requests the
-//			// getUserPtr to get a name parameter ---abock
-//
-//			// set the eye position, useful during rendering
-//			const glm::vec3 eyePosition
-//				= sgct_core::ClusterManager::instance()->getUserPtr("")->getPos();
-//#else
-//			const glm::vec3 eyePosition
-//				= sgct_core::ClusterManager::instance()->getUserPtr()->getPos();
-//#endif
-		const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
-		// get viewdirection, stores the direction in the camera, used for culling
-		const glm::vec3 viewdir = glm::normalize(eyePosition - center);
-		_mainCamera->setCameraDirection(-viewdir);
-		_mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
+  //      corners[0] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::LowerLeft));
+  //      corners[1] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperLeft));
+  //      corners[2] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperRight));
+  //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
+  //       
+  //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
+		////	
+		//const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
+		////// get viewdirection, stores the direction in the camera, used for culling
+		//const glm::vec3 viewdir = glm::normalize(eyePosition - center);
+
+        //const glm::vec3 upVector = corners[0] - corners[1];
+
+        
+		//_mainCamera->setCameraDirection(glm::normalize(-viewdir));
+     _mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+		//_mainCamera->setLookUpVector(glm::normalize(upVector));
+        _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
 		// set the initial fov to be 0.0 which means everything will be culled
-		float maxFov = 0.0f;
+		//float maxFov = 0.0f;
+        float maxFov = std::numeric_limits<float>::max();
 
-		// for each corner
-		for (int i = 0; i < 4; ++i) {
-			// calculate radians to corner
-			glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
-			float radsbetween = acos(glm::dot(viewdir, dir))
-				/ (glm::length(viewdir) * glm::length(dir));
+		//// for each corner
+		//for (int i = 0; i < 4; ++i) {
+		//	// calculate radians to corner
+		//	glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
+		//	float radsbetween = acos(glm::dot(viewdir, dir))
+		//		/ (glm::length(viewdir) * glm::length(dir));
 
-			// the angle to a corner is larger than the current maxima
-			if (radsbetween > maxFov) {
-				maxFov = radsbetween;
-			}
-		}
+		//	// the angle to a corner is larger than the current maxima
+		//	if (radsbetween > maxFov) {
+		//		maxFov = radsbetween;
+		//	}
+		//}
 		_mainCamera->setMaxFov(maxFov);
-	}
-
-    LINFO("Initializing ABuffer");
-	_abuffer->initialize();
+    //}
 
     LINFO("Initializing Log");
-	_log = new ScreenLog();
-	ghoul::logging::LogManager::ref().addLog(_log);
-
-    LINFO("Initializing Visualizer");
-	_visualizer = new ABufferVisualizer();
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Finished initializing GL");
 	return true;
@@ -289,7 +306,6 @@ void RenderEngine::preSynchronization() {
 }
 
 void RenderEngine::postSynchronizationPreDraw() {
-    sgct::Engine::instance()->setStatsGraphVisibility(_sgctRenderStatisticsVisible);
 	//temporary fade funtionality
 	if (_fadeDirection != 0) {
 		if (_currentFadeTime > _fadeDuration){
@@ -301,24 +317,19 @@ void RenderEngine::postSynchronizationPreDraw() {
 				_globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
 			else
 				_globalBlackOutFactor = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
-			_currentFadeTime += static_cast<float>(sgct::Engine::instance()->getAvgDt());
+            _currentFadeTime += static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
 		}
 	}
 
 	if (_mainCamera)
 		_mainCamera->postSynchronizationPreDraw();
 
-	sgct_core::SGCTNode* thisNode = sgct_core::ClusterManager::instance()->getThisNodePtr();
-	bool updateAbuffer = false;
-	for (unsigned int i = 0; i < thisNode->getNumberOfWindows(); i++) {
-		if (sgct::Engine::instance()->getWindowPtr(i)->isWindowResized()) {
-			updateAbuffer = true;
-			break;
-		}
-	}
-	if (updateAbuffer) {
-		generateGlslConfig();
-		_abuffer->reinitialize();
+	bool windowResized = OsEng.windowWrapper().windowHasResized();
+
+	if (windowResized) {
+		glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
+		_renderer->setResolution(res);
+		ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
 	}
 
 	// converts the quaternion used to rotation matrices
@@ -334,8 +345,13 @@ void RenderEngine::postSynchronizationPreDraw() {
 	});
 	_sceneGraph->evaluate(_mainCamera);
 
-	// clear the abuffer before rendering the scene
-	_abuffer->clear();
+	_renderer->update();
+
+	for (auto program : _programs) {
+		if (program->isDirty()) {
+			program->rebuildFromFile();
+		}
+	}
 
 	//Allow focus node to update camera (enables camera-following)
 	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
@@ -346,301 +362,30 @@ void RenderEngine::postSynchronizationPreDraw() {
 }
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-	// We need the window pointer
-	sgct::SGCTWindow* w = sgct::Engine::instance()->getActiveWindowPtr();
-	if (w->isUsingFisheyeRendering())
-		_abuffer->clear();
+	_mainCamera->setViewMatrix(viewMatrix);
+	_mainCamera->setProjectionMatrix(projectionMatrix);
 
-	// SGCT resets certain settings
-    
-    if (_abufferImplementation == ABufferImplementation::FrameBuffer) {
-        glEnable(GL_DEPTH_TEST);
-        //			glDisable(GL_CULL_FACE);
-        glEnable(GL_CULL_FACE);
-        //			glDisable(GL_BLEND);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-    else {
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
-    }
-	// setup the camera for the current frame
 
-	_mainCamera->setViewMatrix(
-		viewMatrix );
-	_mainCamera->setProjectionMatrix(
-		projectionMatrix);
-	//Is this really necessary to store? @JK
-	_mainCamera->setViewProjectionMatrix(projectionMatrix * viewMatrix);
-
-    // We only want to skip the rendering if we are the master and we want to
-    // disable the rendering for the master
-    if (!(OsEng.isMaster() && _disableMasterRendering)) {
-        if (!_visualizeABuffer) {
-            _abuffer->preRender();
-            _sceneGraph->render({
-                *_mainCamera,
-                psc(),
-                _doPerformanceMeasurements
-            });
-            _abuffer->postRender();
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            _abuffer->resolve(_globalBlackOutFactor);
-            glDisable(GL_BLEND);
-        }
-        else {
-            _visualizer->render();
-        }
-    }
-
-#if 1
-#define PrintText(__i__, __format__, ...) Freetype::print(font, 10.f, static_cast<float>(startY - font_size_mono * __i__ * 2), __format__, __VA_ARGS__);
-#define PrintColorTextArg(__i__, __format__, __size__, __color__, ...) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__, __VA_ARGS__);
-#define PrintColorText(__i__, __format__, __size__, __color__) Freetype::print(font, __size__, static_cast<float>(startY - font_size_mono * __i__ * 2), __color__, __format__);
-
-    if (_onScreenInformation._node != -1) {
-        //int thisId = sgct_core::ClusterManager::instance()->getThisNodeId();
-
-        //if (thisId == _onScreenInformation._node) {
-            //const unsigned int font_size_mono = _onScreenInformation._size;
-            //int x1, xSize, y1, ySize;
-            //const sgct_text::Font* font = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-            //sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-            //int startY = ySize - 2 * font_size_mono;
-        //}
-    }
+	if (!(OsEng.isMaster() && _disableMasterRendering)) {
+        _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
+	}
 
 	// Print some useful information on the master viewport
-	if (OsEng.ref().isMaster() && !w->isUsingFisheyeRendering()) {
-
-		// TODO: Adjust font_size properly when using retina screen
-		const int font_size_mono = 10;
-        const int font_size_time = 15;
-		const int font_size_light = 8;
-		const int font_with_light = static_cast<int>(font_size_light*0.7);
-		const sgct_text::Font* fontLight = sgct_text::FontManager::instance()->getFont(constants::fonts::keyLight, font_size_light);
-		const sgct_text::Font* fontMono = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_mono);
-        const sgct_text::Font* fontTime = sgct_text::FontManager::instance()->getFont(constants::fonts::keyMono, font_size_time);
-
+	if (OsEng.isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
 		if (_showInfo) {
-			const sgct_text::Font* font = fontMono;
-			int x1, xSize, y1, ySize;
-			sgct::Engine::instance()->getActiveWindowPtr()->getCurrentViewportPixelCoords(x1, y1, xSize, ySize);
-			int startY = ySize - 2 * font_size_time;
-			//const glm::vec2& scaling = _mainCamera->scaling();
-			//const glm::vec3& viewdirection = _mainCamera->viewDirection();
-			//const psc& position = _mainCamera->position();
-			//const psc& origin = OsEng.interactionHandler()->focusNode()->worldPosition();
-			//const PowerScaledScalar& pssl = (position - origin).length();
-					
-			// Next 2 lines neccesary for instrument switching to work. 
-			// GUI PRINT 
-			// Using a macro to shorten line length and increase readability
-
-            int line = 0;
-			
-			double currentTime = Time::ref().currentTime();
-
-			//PrintText(line++, "Date: %s", Time::ref().currentTimeUTC().c_str());
-            std::string timeString = Time::ref().currentTimeUTC();
-            if (timeString.size() > 11)
-                // This should never happen, but it's an emergency hack ---abock
-                timeString[11] = ' ';
-            Freetype::print(fontTime, 10, static_cast<float>(startY - font_size_mono * line++ * 2), glm::vec4(1), "Date: %s", timeString.c_str());
-			
-            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
-			double dt = Time::ref().deltaTime();
-			PrintColorTextArg(line++, "Simulation increment (s): %.0f", 10, glm::vec4(1), dt);
-
-			psc nhPos;
-			double lt;
-			SpiceManager::ref().getTargetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", "NONE", currentTime, nhPos, lt);
-			//nhPos[3] += 3;
-			float a, b, c;
-			SpiceManager::ref().getPlanetEllipsoid("PLUTO", a, b, c);
-			float radius = (a + b) / 2.f;
-
-			float distToSurf = glm::length(nhPos.vec3()) - radius;
-			PrintText(line++, "Distance to Pluto: % .1f (KM)", distToSurf);
-
-			PrintText(line++, "Avg. Frametime: %.5f", sgct::Engine::instance()->getAvgDt());
-		
-			//PrintText(line++, "Drawtime:       %.5f", sgct::Engine::instance()->getDrawTime());
-			//PrintText(line++, "Frametime:      %.5f", sgct::Engine::instance()->getDt());
-			//PrintText(i++, "Origin:         (% .5f, % .5f, % .5f, % .5f)", origin[0], origin[1], origin[2], origin[3]);
-			//PrintText(i++, "Cam pos:        (% .5f, % .5f, % .5f, % .5f)", position[0], position[1], position[2], position[3]);
-			//PrintText(i++, "View dir:       (% .5f, % .5f, % .5f)", viewdirection[0], viewdirection[1], viewdirection[2]);
-			//PrintText(i++, "Cam->origin:    (% .15f, % .4f)", pssl[0], pssl[1]);
-			//PrintText(i++, "Scaling:        (% .5f, % .5f)", scaling[0], scaling[1]);
-
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-			if (openspace::ImageSequencer2::ref().isReady()) {
-				double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
-				double t = 1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
-				std::string progress = "|";
-				int g = static_cast<int>((t* 24) + 1);
-				g = std::max(g, 0);
-				for (int i = 0; i < g; i++)
-                          progress.append("-");
-                      progress.append(">");
-				for (int i = 0; i < 25 - g; i++)
-                          progress.append(" ");
-
-				std::string str = "";
-				openspace::SpiceManager::ref().getDateFromET(openspace::ImageSequencer2::ref().getNextCaptureTime(), str, "YYYY MON DD HR:MN:SC");
-
-				glm::vec4 active(0.6, 1, 0.00, 1);
-				glm::vec4 brigther_active(0.9, 1, 0.75, 1);
-
-				progress.append("|");
-				if (remaining > 0) {
-					brigther_active *= (1 - t);
-					PrintColorText(line++, "Next instrument activity:", 10, active*t + brigther_active);
-					PrintColorTextArg(line++, "%.0f s %s %.1f %%", 10, active*t + brigther_active, remaining, progress.c_str(), t * 100);
-					PrintColorTextArg(line++, "Data acquisition time: %s", 10, active, str.c_str());
-				}
-				std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
-   				std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
-
-                if (currentTarget.first > 0.0) {
-					int timeleft = static_cast<int>(nextTarget.first - currentTime);
-
-					int hour   = timeleft / 3600;
-					int second = timeleft % 3600;
-					int minute = second / 60;
-					    second = second % 60;
-
-					std::string hh, mm, ss, coundtown;
-
-					if (hour   < 10) hh.append("0");
-					if (minute < 10) mm.append("0");
-					if (second < 10) ss.append("0");
-
-					hh.append(std::to_string(hour));
-					mm.append(std::to_string(minute));
-					ss.append(std::to_string(second));
-
-					PrintColorTextArg(line++, "Data acquisition adjacency: [%s:%s:%s]", 10, targetColor, hh.c_str(), mm.c_str(), ss.c_str());
-						
-					std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
-					std::string space;
-					glm::vec4 color;
-					size_t isize = incidentTargets.second.size(); 
-                    for (size_t p = 0; p < isize; p++){
-                        double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
-                        t = (p > isize / 2) ? 1 - t : t;
-                        t += 0.3;
-						color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-                        PrintColorTextArg(line, "%s%s", 10, color, space.c_str(), incidentTargets.second[p].c_str());
-						for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
-                            space += " ";
-					}
-					line++;
-					
-					std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
-					glm::vec4 firing(0.58-t, 1-t, 1-t, 1);
-					glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-					PrintColorText(line++, "Active Instruments: ", 10, active);
-					for (auto t : activeMap){
-						if (t.second == false){
-							PrintColorText(line, "| |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							PrintColorTextArg(line++, "    %5s", 10, glm::vec4(0.3, 0.3, 0.3, 1), t.first.c_str());
-						}
-						else{
-							PrintColorText(line, "|", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							if (t.first == "NH_LORRI"){
-								PrintColorText(line, " + ", 10, firing);
-							}
-							PrintColorText(line, "  |", 10, glm::vec4(0.3, 0.3, 0.3, 1));
-							PrintColorTextArg(line++, "    %5s", 10, active, t.first.c_str());
-						}
-					}
-                }
-			}
-#endif
-
-#undef PrintText
+			renderInformation();
 		}
-
-		if (_showScreenLog)
-		{
-			const sgct_text::Font* font = fontLight;
-			const int max = 10;
-			const int category_length = 20;
-			const int msg_length = 140;
-			const float ttl = 15.f;
-			const float fade = 5.f;
-			auto entries = _log->last(max);
-
-			const glm::vec4 white(0.9, 0.9, 0.9, 1);
-			const glm::vec4 red(1, 0, 0, 1);
-			const glm::vec4 yellow(1, 1, 0, 1);
-			const glm::vec4 green(0, 1, 0, 1);
-			const glm::vec4 blue(0, 0, 1, 1);
-
-			size_t nr = 1;
-			for (auto& it = entries.first; it != entries.second; ++it) {
-				const ScreenLog::LogEntry* e = &(*it);
-
-				const double t = sgct::Engine::instance()->getTime();
-				float diff = static_cast<float>(t - e->timeStamp);
-
-				// Since all log entries are ordered, once one is exceeding TTL, all have
-				if (diff > ttl)
-					break;
-
-				float alpha = 1;
-				float ttf = ttl - fade;
-				if (diff > ttf) {
-					diff = diff - ttf;
-					float p = 0.8f - diff / fade;
-					alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
-				}
-
-				// Since all log entries are ordered, once one exceeds alpha, all have
-				if (alpha <= 0.0)
-					break;
-
-				const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
-				const std::string& message = e->message.substr(0, msg_length);
-				nr += std::count(message.begin(), message.end(), '\n');
-
-				Freetype::print(font, 10.f, static_cast<float>(font_size_light * nr * 2), white*alpha,
-					"%-14s %s%s",									// Format
-					e->timeString.c_str(),							// Time string
-					e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
-					e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
-
-				glm::vec4 color = white;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
-					color = green;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
-					color = yellow;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Error)
-					color = red;
-				if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
-					color = blue;
-
-				Freetype::print(font, static_cast<float>(10 + 39 * font_with_light), static_cast<float>(font_size_light * nr * 2), color*alpha, "%s", lvl.c_str());
-
-
-				Freetype::print(font, static_cast<float>(10 + 53 * font_with_light), static_cast<float>(font_size_light * nr * 2), white*alpha, "%s", message.c_str());
-				++nr;
-			}
+		if (_showLog) {
+			renderScreenLog();
 		}
 	}
-#endif
 }
 
 void RenderEngine::postDraw() {
     if (Time::ref().timeJumped())
         Time::ref().setTimeJumped(false);
 	if (_takeScreenshot) {
-		sgct::Engine::instance()->takeScreenshot();
+        OsEng.windowWrapper().takeScreenshot();
 		_takeScreenshot = false;
 	}
 
@@ -651,16 +396,6 @@ void RenderEngine::postDraw() {
 void RenderEngine::takeScreenshot() {
 	_takeScreenshot = true;
 }
-
-void RenderEngine::toggleVisualizeABuffer(bool b) {
-	_visualizeABuffer = b;
-	if (!_visualizeABuffer)
-		return;
-
-	std::vector<ABuffer::fragmentData> _d = _abuffer->pixelData();
-	_visualizer->updateData(_d);
-}
-
 
 void RenderEngine::toggleInfoText(bool b) {
 	_showInfo = b;
@@ -703,12 +438,12 @@ Camera* RenderEngine::camera() const {
 	return _mainCamera;
 }
 
-ABuffer* RenderEngine::aBuffer() const {
-	return _abuffer;
+Renderer* RenderEngine::renderer() const {
+	return _renderer.get();
 }
 
-RenderEngine::ABufferImplementation RenderEngine::aBufferImplementation() const {
-    return _abufferImplementation;
+RenderEngine::RendererImplementation RenderEngine::rendererImplementation() const {
+    return _rendererImplementation;
 }
 
 float RenderEngine::globalBlackOutFactor() {
@@ -725,39 +460,109 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 	_currentFadeTime = 0.f;
 }
 
-void RenderEngine::generateGlslConfig() {
-    ghoul_assert(_abuffer != nullptr, "ABuffer not initialized");
-	LDEBUG("Generating GLSLS config, expect shader recompilation");
-	int xSize = sgct::Engine::instance()->getActiveWindowPtr()->getXFramebufferResolution();;
-	int ySize = sgct::Engine::instance()->getActiveWindowPtr()->getYFramebufferResolution();;
+/**
+ * Build a program object for rendering with the used renderer
+ */
+std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
+	std::string name,
+	std::string vsPath,
+	std::string fsPath,
+	const ghoul::Dictionary& data) {
 
-	// TODO: Make this file creation dynamic and better in every way
-	// TODO: If the screen size changes it is enough if this file is regenerated to
-	// recompile all necessary files
-	std::ofstream os(absPath("${SHADERS_GENERATED}/constants.hglsl"));
-	os << "#ifndef CONSTANTS_HGLSL\n"
-		<< "#define CONSTANTS_HGLSL\n"
-		<< "#define SCREEN_WIDTH  " << xSize << "\n"
-		<< "#define SCREEN_HEIGHT " << ySize << "\n"
-		<< "#define MAX_LAYERS " << ABuffer::MAX_LAYERS << "\n"
-		<< "#define ABUFFER_FRAMEBUFFER       " << ABUFFER_FRAMEBUFFER << "\n"
-		<< "#define ABUFFER_SINGLE_LINKED     " << ABUFFER_SINGLE_LINKED << "\n"
-		<< "#define ABUFFER_FIXED             " << ABUFFER_FIXED << "\n"
-		<< "#define ABUFFER_DYNAMIC           " << ABUFFER_DYNAMIC << "\n"
-		<< "#define ABUFFER_IMPLEMENTATION    " << int(_abufferImplementation) << "\n";
-	// System specific
-#ifdef WIN32
-	os << "#define WIN32\n";
-#endif
-#ifdef __APPLE__
-	os << "#define APPLE\n";
-#endif
-#ifdef __linux__
-	os << "#define linux\n";
-#endif
-	os << "#endif\n";
+	ghoul::Dictionary dict = data;
 
-	os.close();
+    // set path to the current renderer's main fragment shader
+	dict.setValue("rendererData", _rendererData);
+    // parameterize the main fragment shader program with specific contents.
+    // fsPath should point to a shader file defining a Fragment getFragment() function
+    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    dict.setValue("fragmentPath", fsPath);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
+		name,
+		vsPath,
+		RenderFsPath,
+		dict);
+
+    if (program) {
+        _programs.push_back(program.get());
+    }
+	return program;
+}
+
+/**
+ * Build a program object for rendering with the used renderer
+ */
+std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
+	std::string name,
+	std::string vsPath,
+	std::string fsPath,
+	std::string csPath,
+	const ghoul::Dictionary& data) {
+
+	ghoul::Dictionary dict = data;
+	dict.setValue("rendererData", _rendererData);
+
+    // parameterize the main fragment shader program with specific contents.
+    // fsPath should point to a shader file defining a Fragment getFragment() function
+    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    dict.setValue("fragmentPath", fsPath);
+
+	std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
+		name,
+		vsPath,
+		RenderFsPath,
+		csPath,
+		dict);
+
+    if (program) {
+        _programs.push_back(program.get());
+    }
+	return program;
+}
+
+void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program) {
+	ghoul::opengl::ProgramObject* ptr = program.get();
+    auto it = std::find(
+		_programs.begin(),
+		_programs.end(),
+		ptr
+		);
+
+	if (it != _programs.end()) {
+		_programs.erase(it);
+	}
+}
+
+/**
+ * Set renderer data
+ * Called from the renderer, whenever it needs to update
+ * the dictionary of all rendering programs.
+ */
+void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
+	_rendererData = data;
+	for (auto program : _programs) {
+		ghoul::Dictionary dict = program->dictionary();
+		dict.setValue("rendererData", _rendererData);
+		program->setDictionary(dict);
+	}
+}
+
+/**
+ * Set renderer
+ */
+void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
+	glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
+
+	if (_renderer) {
+		_renderer->deinitialize();
+	}
+
+	_renderer = std::move(renderer);
+    _renderer->setResolution(res);
+	_renderer->initialize();
+    _renderer->setCamera(_mainCamera);
+    _renderer->setScene(_sceneGraph);
 }
 
 scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
@@ -771,11 +576,10 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"Renders the current image to a file on disk"
 			},
 			{
-				"visualizeABuffer",
-				&luascriptfunctions::visualizeABuffer,
-				"bool",
-				"Toggles the visualization of the ABuffer",
-                true
+				"setRenderer",
+				&luascriptfunctions::setRenderer,
+				"string",
+				"Sets the renderer (ABuffer or FrameBuffer)"
 			},
 			{
 				"showRenderInformation",
@@ -783,12 +587,6 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 				"bool",
 				"Toggles the showing of render information on-screen text"
 			},
-            {
-                "showSGCTRenderStatistics",
-                &luascriptfunctions::showSGCTRenderStatistics,
-                "bool",
-                "Toggles the visibility of the SGCT rendering information"
-            },
 			{
 				"setPerformanceMeasurement",
 				&luascriptfunctions::setPerformanceMeasurement,
@@ -857,10 +655,18 @@ void RenderEngine::storePerformanceMeasurements() {
 			maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
 		LINFO("Create shared memory of " << totalSize << " bytes");
 
+        try {
+            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+        }
+        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
+            LINFOC(e.component, e.what());
+        }
+        
 		ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 		_performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
 
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+        void* ptr = _performanceMemory->memory();
+		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 		layout->version = Version;
 		layout->nValuesPerEntry = nValues;
 		layout->nEntries = nNodes;
@@ -885,7 +691,8 @@ void RenderEngine::storePerformanceMeasurements() {
 		}
 	}
 
-	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
+    void* ptr = _performanceMemory->memory();
+	PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 	_performanceMemory->acquireLock();
 	for (int i = 0; i < nNodes; ++i) {
 		SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
@@ -1247,64 +1054,360 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//	return;
 	//}
 
-	//if (origin == "67P") {
-	//	SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-	//	SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
-	//	//jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-	//	//plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-	//	solarSystemBarycenterNode->setParent(cgNode);
-	//	rosettaNode->setParent(cgNode);
-	//	
-	//	ghoul::Dictionary solarDictionary =
-	//		{
-	//		{ std::string("Type"), std::string("Spice") },
-	//			{ std::string("Body"), std::string("SUN") },
-	//			{ std::string("Reference"), std::string("GALACTIC") },
-	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-	//			{ std::string("Kernels"), ghoul::Dictionary() }
-	//		};
-	//	solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-	//	
-	//	ghoul::Dictionary rosettaDictionary =
-	//		{
-	//		{ std::string("Type"), std::string("Spice") },
-	//			{ std::string("Body"), std::string("ROSETTA") },
-	//			{ std::string("Reference"), std::string("GALACTIC") },
-	//			{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-	//			{ std::string("Kernels"), ghoul::Dictionary() }
-	//		};
-	//	
-	//	cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-	//	rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
-	//	cgNode->setEphemeris(new StaticEphemeris);
-	//	
-	//	return;
-	//	
-	//}
+	if (origin == "67P") {
+		SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+		SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
+		//jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+		//plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+		solarSystemBarycenterNode->setParent(cgNode);
+		rosettaNode->setParent(cgNode);
+		
+		ghoul::Dictionary solarDictionary =
+			{
+			{ std::string("Type"), std::string("Spice") },
+				{ std::string("Body"), std::string("SUN") },
+				{ std::string("Reference"), std::string("GALACTIC") },
+				{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+				{ std::string("Kernels"), ghoul::Dictionary() }
+			};
+		solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+		
+		ghoul::Dictionary rosettaDictionary =
+			{
+			{ std::string("Type"), std::string("Spice") },
+				{ std::string("Body"), std::string("ROSETTA") },
+				{ std::string("Reference"), std::string("GALACTIC") },
+				{ std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+				{ std::string("Kernels"), ghoul::Dictionary() }
+			};
+		
+		cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+		rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
+		cgNode->setEphemeris(new StaticEphemeris);
+		
+		return;
+		
+	}
 
     LFATAL("This function is being misused with an argument of '" << origin << "'");
-}
-
-void RenderEngine::setSGCTRenderStatistics(bool visible) {
-    _sgctRenderStatisticsVisible = visible;
 }
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
-RenderEngine::ABufferImplementation RenderEngine::aBufferFromString(const std::string& impl) {
-    const std::map<std::string, RenderEngine::ABufferImplementation> RenderingMethods = {
-        { "ABufferFrameBuffer", ABufferImplementation::FrameBuffer },
-        { "ABufferSingleLinked", ABufferImplementation::SingleLinked },
-        { "ABufferFixed", ABufferImplementation::Fixed },
-        { "ABufferDynamic", ABufferImplementation::Dynamic }
+RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
+    const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
+        { "ABuffer", RendererImplementation::ABuffer },
+        { "Framebuffer", RendererImplementation::Framebuffer }
     };
 
     if (RenderingMethods.find(impl) != RenderingMethods.end())
         return RenderingMethods.at(impl);
     else
-        return ABufferImplementation::Invalid;
+        return RendererImplementation::Invalid;
+}
+
+void RenderEngine::renderInformation() {
+	// TODO: Adjust font_size properly when using retina screen
+	const float fontSizeMono = 10.f;
+	const float fontSizeTime = 15.f;
+
+	using Font = ghoul::fontrendering::Font;
+	using ghoul::fontrendering::RenderFont;
+
+
+	if (_showInfo && _fontDate && _fontInfo) {
+		double currentTime = Time::ref().currentTime();
+
+		glm::vec2 penPosition = glm::vec2(
+			10.f,
+			OsEng.windowWrapper().viewportPixelCoordinates().w
+			);
+		penPosition.y -= _fontDate->height();
+
+		RenderFontCr(*_fontDate,
+			penPosition,
+			"Date: %s",
+			Time::ref().currentTimeUTC().c_str()
+			);
+
+		RenderFontCr(*_fontInfo,
+			penPosition,
+			"Simulation increment (s): %.0f",
+			Time::ref().deltaTime()
+			);
+
+		RenderFontCr(*_fontInfo,
+			penPosition,
+			"Avg. Frametime: %.5f",
+			OsEng.windowWrapper().averageDeltaTime()
+			);
+
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+		if (openspace::ImageSequencer2::ref().isReady()) {
+			penPosition.y -= 25.f;
+
+			glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+
+			double lt;
+			glm::dvec3 p =
+				SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+			psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+			float a, b, c;
+			glm::dvec3 radii;
+			SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+			a = radii.x;
+			b = radii.y;
+			c = radii.z;
+			float radius = (a + b) / 2.f;
+			float distToSurf = glm::length(nhPos.vec3()) - radius;
+
+			RenderFont(*_fontInfo,
+				penPosition,
+				"Distance to Pluto: % .1f (KM)",
+				distToSurf
+				);
+			penPosition.y -= _fontInfo->height();
+
+
+			double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
+			float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());
+			std::string progress = "|";
+			int g = static_cast<int>((t * 24) + 1);
+			g = std::max(g, 0);
+			for (int i = 0; i < g; i++)
+				progress.append("-");
+			progress.append(">");
+			for (int i = 0; i < 25 - g; i++)
+				progress.append(" ");
+
+			std::string str = SpiceManager::ref().dateFromEphemerisTime(
+				ImageSequencer2::ref().getNextCaptureTime(),
+				"YYYY MON DD HR:MN:SC"
+				);
+
+			glm::vec4 active(0.6, 1, 0.00, 1);
+			glm::vec4 brigther_active(0.9, 1, 0.75, 1);
+
+			progress.append("|");
+			if (remaining > 0) {
+				brigther_active *= (1 - t);
+
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					active * t + brigther_active,
+					"Next instrument activity:"
+					);
+
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					active * t + brigther_active,
+					"%.0f s %s %.1f %%",
+					remaining, progress.c_str(), t * 100
+					);
+
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					active,
+					"Data acquisition time: %s",
+					str.c_str()
+					);
+			}
+			std::pair<double, std::string> nextTarget = ImageSequencer2::ref().getNextTarget();
+			std::pair<double, std::string> currentTarget = ImageSequencer2::ref().getCurrentTarget();
+
+			if (currentTarget.first > 0.0) {
+				int timeleft = static_cast<int>(nextTarget.first - currentTime);
+
+				int hour = timeleft / 3600;
+				int second = timeleft % 3600;
+				int minute = second / 60;
+				second = second % 60;
+
+				std::string hh, mm, ss, coundtown;
+
+				if (hour   < 10) hh.append("0");
+				if (minute < 10) mm.append("0");
+				if (second < 10) ss.append("0");
+
+				hh.append(std::to_string(hour));
+				mm.append(std::to_string(minute));
+				ss.append(std::to_string(second));
+
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					targetColor,
+					"Data acquisition adjacency: [%s:%s:%s]",
+					hh.c_str(), mm.c_str(), ss.c_str()
+					);
+
+
+				std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer2::ref().getIncidentTargetList(2);
+				std::string space;
+				glm::vec4 color;
+				size_t isize = incidentTargets.second.size();
+				for (size_t p = 0; p < isize; p++) {
+					double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
+					t = (p > isize / 2) ? 1 - t : t;
+					t += 0.3;
+					color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
+
+					RenderFont(*_fontInfo,
+						penPosition,
+						color,
+						"%s%s",
+						space.c_str(), incidentTargets.second[p].c_str()
+						);
+
+
+					for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
+						space += " ";
+				}
+				penPosition.y -= _fontInfo->height();
+
+				std::map<std::string, bool> activeMap = ImageSequencer2::ref().getActiveInstruments();
+				glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
+				glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					active,
+					"Active Instruments:"
+					);
+
+				for (auto t : activeMap) {
+					if (t.second == false) {
+						RenderFont(*_fontInfo,
+							penPosition,
+							glm::vec4(0.3, 0.3, 0.3, 1),
+							"| |"
+							);
+						RenderFontCr(*_fontInfo,
+							penPosition,
+							glm::vec4(0.3, 0.3, 0.3, 1),
+							"    %5s",
+							t.first.c_str()
+							);
+
+					}
+					else {
+						RenderFont(*_fontInfo,
+							penPosition,
+							glm::vec4(0.3, 0.3, 0.3, 1),
+							"|"
+							);
+						if (t.first == "NH_LORRI") {
+							RenderFont(*_fontInfo,
+								penPosition,
+								firing,
+								" + "
+								);
+						}
+						RenderFont(*_fontInfo,
+							penPosition,
+							glm::vec4(0.3, 0.3, 0.3, 1),
+							"  |"
+							);
+						RenderFontCr(*_fontInfo,
+							penPosition,
+							active,
+							"    %5s",
+							t.first.c_str()
+							);
+					}
+				}
+			}
+		}
+#endif
+	}
+}
+
+void RenderEngine::renderScreenLog() {
+	_log->removeExpiredEntries();
+
+	const int max = 10;
+	const int category_length = 20;
+	const int msg_length = 140;
+	std::chrono::seconds fade(5);
+
+	auto entries = _log->entries();
+	auto lastEntries = entries.size() > max ? std::make_pair(entries.rbegin(), entries.rbegin() + max) : std::make_pair(entries.rbegin(), entries.rend());
+
+	//                if (entries.size() > max)
+
+	//ScreenLog::const_range ScreenLog::last(size_t n) {
+	//	if (_entries.size() > n) {
+	//		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+	//	} else {
+	//		return std::make_pair(_entries.rbegin(), _entries.rend());
+	//	}
+	//}
+
+	//                auto entries = _log->last(max);
+
+	const glm::vec4 white(0.9, 0.9, 0.9, 1);
+	const glm::vec4 red(1, 0, 0, 1);
+	const glm::vec4 yellow(1, 1, 0, 1);
+	const glm::vec4 green(0, 1, 0, 1);
+	const glm::vec4 blue(0, 0, 1, 1);
+
+	size_t nr = 1;
+	auto now = std::chrono::steady_clock::now();
+	for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
+		const ScreenLog::LogEntry* e = &(*it);
+
+		std::chrono::duration<double> diff = now - e->timeStamp;
+
+		float alpha = 1;
+		std::chrono::duration<double> ttf = ScreenLogTimeToLive - fade;
+		if (diff > ttf) {
+			auto d = (diff - ttf).count();
+			auto t = static_cast<float>(d) / static_cast<float>(fade.count());
+			float p = 0.8f - t;
+			alpha = (p <= 0.f) ? 0.f : pow(p, 0.3f);
+		}
+
+		// Since all log entries are ordered, once one exceeds alpha, all have
+		if (alpha <= 0.0)
+			break;
+
+		const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+		const std::string& message = e->message.substr(0, msg_length);
+		nr += std::count(message.begin(), message.end(), '\n');
+
+		RenderFont(*_fontLog,
+			glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
+			white * alpha,
+			"%-14s %s%s",									// Format
+			e->timeString.c_str(),							// Time string
+			e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
+			e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
+
+		glm::vec4 color = white;
+		if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+			color = green;
+		if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+			color = yellow;
+		if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+			color = red;
+		if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+			color = blue;
+
+		//                    const float font_with_light = 5;
+		RenderFont(*_fontLog,
+			glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+			color * alpha,
+			"%s",									// Format
+			lvl.c_str());		// Pad category with "..." if exceeds category_length
+
+		RenderFont(*_fontLog,
+			glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+			white * alpha,
+			"%s",									// Format
+			message.c_str());		// Pad category with "..." if exceeds category_length
+		++nr;
+	}
 }
 
 }// namespace openspace

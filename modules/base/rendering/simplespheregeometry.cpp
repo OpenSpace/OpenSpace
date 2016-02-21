@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/simplespheregeometry.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/powerscaledsphere.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace {
     const std::string _loggerCat = "SimpleSphereGeometry";
@@ -48,12 +48,11 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _segments("segments", "Segments", 20, 1, 50)
     , _sphere(nullptr)
 {
-	using constants::scenegraphnode::keyName;
 	using constants::simplespheregeometry::keyRadius;
 	using constants::simplespheregeometry::keySegments;
 
 	// The name is passed down from the SceneGraphNode
-    bool success = dictionary.getValue(keyName, _name);
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, _name);
 	assert(success);
 	
 	glm::vec4 radius;

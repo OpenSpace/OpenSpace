@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,13 @@
 
 #include <openspace/engine/logfactory.h>
 
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
-#include <ghoul/filesystem/filesystem.h>
 
 namespace {
-	const std::string _loggerCat = "LogFactory";
-
 	const std::string keyType = "Type";
 	const std::string keyFilename = "FileName";
 	const std::string keyAppend = "Append";
@@ -45,20 +45,21 @@ namespace {
 
 namespace openspace {
 
-ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
 	std::string type;
 	bool typeSuccess = dictionary.getValue(keyType, type);
 	if (!typeSuccess) {
-		LERROR("Requested log did not contain a key '" << keyType << "'");
-		return nullptr;
+        throw ghoul::RuntimeError(
+            "Requested log did not contain key '" + keyType + "'", "LogFactory"
+        );
 	}
 
 	std::string filename;
 	bool filenameSuccess = dictionary.getValue(keyFilename, filename);
 	if (!filenameSuccess) {
-		LERROR("Requested log of type '" << keyType << "' did not contain a key '"
-			<< keyFilename << "'");
-		return nullptr;
+        throw ghoul::RuntimeError(
+            "Requested log did not contain key '" + keyFilename + "'", "LogFactory"
+        );
 	}
 	filename = absPath(filename);
 
@@ -74,17 +75,20 @@ ghoul::logging::Log* LogFactory::createLog(const ghoul::Dictionary& dictionary) 
 	dictionary.getValue(keyLogLevelStamping, logLevelStamp);
 
 	if (type == valueHtmlLog) {
-		return new ghoul::logging::HTMLLog(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+        return std::make_unique<ghoul::logging::HTMLLog>(
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+        );
 	}
 	else if (type == valueTextLog) {
-		return new ghoul::logging::TextLog(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp);
+        return std::make_unique<ghoul::logging::TextLog>(
+			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+        );
 	}
 	else {
-		LERROR("Log with type '" << type << "' did not name a valid log");
-		return nullptr;
+        throw ghoul::RuntimeError(
+            "Log with type '" + type + "' did not name a valid log", "LogFactory"
+        );
 	}
 }
-
+    
 } // namespace openspace

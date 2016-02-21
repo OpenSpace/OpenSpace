@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
 #include <modules/base/rendering/renderablesphere.h>
-#include <openspace/util/constants.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/powerscaledsphere.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace {
 	const std::string _loggerCat = "RenderableSphere";
@@ -116,7 +119,8 @@ bool RenderableSphere::initialize() {
     _sphere->initialize();
 
     // pscstandard
-    _shader = ghoul::opengl::ProgramObject::Build("Sphere",
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("Sphere",
         "${MODULES}/base/shaders/sphere_vs.glsl",
         "${MODULES}/base/shaders/sphere_fs.glsl");
     if (!_shader)
@@ -131,11 +135,14 @@ bool RenderableSphere::deinitialize() {
     delete _sphere;
     _sphere = nullptr;
 
-	delete _texture;
     _texture = nullptr;
 
-    delete _shader;
-    _shader = nullptr;
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 
 	return true;
 }
@@ -144,7 +151,7 @@ void RenderableSphere::render(const RenderData& data) {
 
 	glm::mat4 transform = glm::mat4(1.0);
 
-    transform = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
+    transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 
 
     // Activate shader
@@ -153,14 +160,17 @@ void RenderableSphere::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
 
+	setPscUniforms(_shader.get(), &data.camera, data.position);
     _shader->setUniform("alpha", _transparency);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
 	_shader->setUniform("texture1", unit);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     _sphere->render();
 
@@ -182,7 +192,7 @@ void RenderableSphere::update(const UpdateData& data) {
 
 void RenderableSphere::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
@@ -192,9 +202,7 @@ void RenderableSphere::loadTexture() {
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 		}
 	}
 }

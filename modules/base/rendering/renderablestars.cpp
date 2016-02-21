@@ -1,30 +1,32 @@
 /*****************************************************************************************
-*                                                                                        *
-* OpenSpace                                                                              *
-*                                                                                        *
-* Copyright (c) 2014                                                                     *
-*                                                                                        *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this   *
-* software and associated documentation files (the "Software"), to deal in the Software  *
-* without restriction, including without limitation the rights to use, copy, modify,     *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     *
-* permit persons to whom the Software is furnished to do so, subject to the following    *
-* conditions:                                                                            *
-*                                                                                        *
-* The above copyright notice and this permission notice shall be included in all copies  *
-* or substantial portions of the Software.                                               *
-*                                                                                        *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          *
-*****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/base/rendering/renderablestars.h>
 
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
@@ -90,8 +92,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 	, _colorTextureIsDirty(true)
 	, _colorOption("colorOption", "Color Option")
 	, _dataIsDirty(true)
-    , _scaleFactor("scaleFactor", "Scale Factor", 5.f, 0.f, 10.f)
-    , _minBillboardSize("minBillboardSize", "Min Billboard Size", 15.f, 1.f, 100.f)
+    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
+    , _minBillboardSize("minBillboardSize", "Min Billboard Size", 1.f, 1.f, 100.f)
 	, _program(nullptr)
 	, _speckFile("")
 	, _nValuesPerStar(0)
@@ -137,7 +139,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {
     delete _psfTextureFile;
     delete _colorTextureFile;
-    delete _colorTexture;
 }
 
 bool RenderableStars::isReady() const {
@@ -147,10 +148,12 @@ bool RenderableStars::isReady() const {
 bool RenderableStars::initialize() {
 	bool completeSuccess = true;
 
-	_program = ghoul::opengl::ProgramObject::Build("Star",
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _program = renderEngine.buildRenderProgram("Star",
 		"${MODULE_BASE}/shaders/star_vs.glsl",
 		"${MODULE_BASE}/shaders/star_fs.glsl",
 		"${MODULE_BASE}/shaders/star_ge.glsl");
+
 	if (!_program)
 		return false;
 	completeSuccess &= loadData();
@@ -165,20 +168,19 @@ bool RenderableStars::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _pointSpreadFunctionTexture;
 	_pointSpreadFunctionTexture = nullptr;
+	_colorTexture = nullptr;
 
-	if(_program)
- 		delete _program;
-	_program = nullptr;
-	return true;	
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+    return true;
 }
 
 void RenderableStars::render(const RenderData& data) {
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    
+    glDepthMask(false);
 	_program->activate();
 
 	// @Check overwriting the scaling from the camera; error as parsec->meter conversion
@@ -200,7 +202,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
 	
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 	_program->setUniform("scaling", scaling);
 
 	ghoul::opengl::TextureUnit psfUnit;
@@ -223,16 +225,10 @@ void RenderableStars::render(const RenderData& data) {
 	_program->setIgnoreUniformLocationError(false);
 	_program->deactivate();
     
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
+	glDepthMask(true);
 }
 
 void RenderableStars::update(const UpdateData& data) {
-	if (_program->isDirty()) {
-		_program->rebuildFromFile();
-		_dataIsDirty = true;
-	}
-	
 	if (_dataIsDirty) {
 		const int value = _colorOption;
 		LDEBUG("Regenerating data");
@@ -312,10 +308,9 @@ void RenderableStars::update(const UpdateData& data) {
 
 	if (_pointSpreadFunctionTextureIsDirty) {
 		LDEBUG("Reloading Point Spread Function texture");
-		delete _pointSpreadFunctionTexture;
 		_pointSpreadFunctionTexture = nullptr;
 		if (_pointSpreadFunctionTexturePath.value() != "") {
-			_pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath));
+            _pointSpreadFunctionTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath)));
 			if (_pointSpreadFunctionTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
 				_pointSpreadFunctionTexture->uploadTexture();
@@ -330,10 +325,9 @@ void RenderableStars::update(const UpdateData& data) {
 
 	if (_colorTextureIsDirty) {
 		LDEBUG("Reloading Color Texture");
-		delete _colorTexture;
 		_colorTexture = nullptr;
 		if (_colorTexturePath.value() != "") {
-			_colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+            _colorTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
 			if (_colorTexture) {
 				LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
 				_colorTexture->uploadTexture();
@@ -349,8 +343,7 @@ void RenderableStars::update(const UpdateData& data) {
 
 bool RenderableStars::loadData() {
 	std::string _file = _speckFile;
-	std::string cachedFile = "";
-	FileSys.cacheManager()->getCachedFile(_file, cachedFile, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file, true);
 
 	bool hasCachedFile = FileSys.fileExists(cachedFile);
 	if (hasCachedFile) {

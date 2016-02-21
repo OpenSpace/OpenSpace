@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,10 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/syncbuffer.h>
 
-// sgct includes
-#include "sgct.h"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-
 namespace openspace {
-
     
 Camera::Camera()
 	: _maxFov(0.f)
@@ -43,6 +38,7 @@ Camera::Camera()
 	, _modelMatrix()
 	, _viewMatrix()
 	, _projectionMatrix()
+    , _dirtyViewProjectionMatrix(true)
 	, _viewDirection(0,0,-1)
     , _cameraDirection(0.f, 0.f, 0.f)
     , _focusPosition()
@@ -90,6 +86,7 @@ const glm::mat4& Camera::modelMatrix() const{
 void Camera::setViewMatrix(glm::mat4 viewMatrix){
     std::lock_guard<std::mutex> _lock(_mutex);
 	_viewMatrix = std::move(viewMatrix);
+    _dirtyViewProjectionMatrix = true;
 }
 
 const glm::mat4& Camera::viewMatrix() const{
@@ -99,20 +96,19 @@ const glm::mat4& Camera::viewMatrix() const{
 void Camera::setProjectionMatrix(glm::mat4 projectionMatrix){
     std::lock_guard<std::mutex> _lock(_mutex);
 	_projectionMatrix = std::move(projectionMatrix);
+    _dirtyViewProjectionMatrix = true;
 }
 
 const glm::mat4& Camera::projectionMatrix() const{
 	return _projectionMatrix;
 }
-
-void Camera::setViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
-{
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _viewProjectionMatrix = std::move(viewProjectionMatrix);
-}
-
-const glm::mat4& Camera::viewProjectionMatrix() const
-{
+    
+const glm::mat4& Camera::viewProjectionMatrix() const {
+    if (_dirtyViewProjectionMatrix) {
+        std::lock_guard<std::mutex> _lock(_mutex);
+        _viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+        _dirtyViewProjectionMatrix = false;
+    }
     return _viewProjectionMatrix;
 }
 
@@ -147,7 +143,7 @@ void Camera::compileViewRotationMatrix()
     // the camera matrix needs to be rotated inverse to the world
    // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
 	//_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
-	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
+	_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz();
     _viewDirection = glm::normalize(_viewDirection);
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,9 @@
 #define __TIME_H__
 
 #include <openspace/scripting/scriptengine.h>
-#include <string>
+
 #include <mutex>
+#include <string>
 
 namespace openspace {
 
@@ -49,6 +50,8 @@ namespace openspace {
  * time that has passed since the last call to the method. For example, if the
  * advanceTime(double) method is called each frame, the <code>tickTime</code> has to be
  * equal to the frame time.
+ *
+ * The synchronization of the simulation time requires 
  */
 
 class SyncBuffer;
@@ -59,18 +62,21 @@ public:
 	 * Initializes the Time singleton.
 	 * \return <code>true</code> if the initialization succeeded, <code>false</code>
 	 * otherwise
+     * \pre The Time singleton must not have been initialized
 	 */
-	static bool initialize();
+	static void initialize();
 
 	/**
 	 * Deinitializes the Time singleton. This method will not unload the kernel that was
 	 * possibly loaded during the initialize method.
+     * \pre The Time singleton must have been initialized
 	 */
 	static void deinitialize();
 
 	/**
 	 * Returns the reference to the Time singleton object.
 	 * \return The reference to the Time singleton object
+     * \pre The Time singleton must have been initialized
 	 */
     static Time& ref();
 
@@ -86,7 +92,9 @@ public:
 	 * Sets the current time to the specified value in seconds past the J2000 epoch. This
 	 * value can be negative to represent dates before the epoch.
 	 * \param value The number of seconds after the J2000 epoch
-     * \param requireJump Wether or not the time change is big enough to require a time-jump, defaults to true as most calls to set time will require recomputation of planetary paths etc.
+     * \param requireJump Whether or not the time change is big enough to require a
+     * time-jump; defaults to true as most calls to set time will require recomputation of
+     * planetary paths etc.
 	 */
 	void setTime(double value, bool requireJump = true);
 
@@ -95,7 +103,9 @@ public:
 	 * described in the Spice documentation
 	 * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
 	 * \param time The time to be set as a date string
-     * \param requireJump Wether or not the time change is big enough to require a time-jump, defaults to true as most calls to set time will require recomputation of planetary paths etc.
+     * \param requireJump Whether or not the time change is big enough to require a
+     * time-jump; defaults to true as most calls to set time will require recomputation of
+     * planetary paths etc.
 	 */
 	void setTime(std::string time, bool requireJump = true);
 
@@ -186,32 +196,25 @@ public:
 	static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
-	/// Creates the time object. Only used in the initialize() method
-	Time();
-	Time(const Time& src) = delete;
-    Time& operator=(const Time& rhs) = delete;
-
 	static Time* _instance; ///< The singleton instance
 		
-	//sync variables
-	
-	//local copies 
-	double _time; ///< The time stored as the number of seconds past the J2000 epoch
-	double _dt;
-	bool _timeJumped;
-    bool _timePaused;
+	//local copies
+    /// The time stored as the number of seconds past the J2000 epoch
+	double _time = -1.0;
+	double _dt = 1.0;
+	bool _timeJumped = false;
+    bool _timePaused = false;
     bool _jockeHasToFixThisLater;
 
 	//shared copies
-	double _sharedTime;
-	double _sharedDt;
-	bool _sharedTimeJumped;
+	double _sharedTime = -1.0;
+	double _sharedDt = 1.0;
+	bool _sharedTimeJumped = false;
 
 	//synced copies
-	double _syncedTime;
-	double _syncedDt;
-	bool _syncedTimeJumped;
-	
+	double _syncedTime = -1.0;
+	double _syncedDt = 1.0;
+	bool _syncedTimeJumped = false;
 	
 	std::mutex _syncMutex;
 };

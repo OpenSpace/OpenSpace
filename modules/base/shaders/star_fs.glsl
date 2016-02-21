@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
@@ -42,8 +41,7 @@ in float ge_speed;
 in vec2 texCoord;
 in float billboardSize;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 uniform vec2 magnitudeClamp;
@@ -56,7 +54,7 @@ vec4 bv2rgb(float bv) {
     return texture(colorTexture, t);
 }
 
-void main() {
+Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
 
@@ -77,21 +75,17 @@ void main() {
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
 
-    if (minBillboardSize != 1.0) {
-        float normSize = (billboardSize - 1.0) / (minBillboardSize - 1.0);
-        normSize = pow(normSize, 3);
-        fullColor *= clamp(normSize, 0.0, 1.0);
+    vec4 position = vs_position;
+    // This has to be fixed when the scale graph is in place ---emiax
+    position.w = 19;
+
+    Fragment frag;
+    frag.color = fullColor;
+    frag.depth = pscDepth(position);
+
+    if (fullColor.a == 0) {
+        discard;
     }
 
-    vec4 position = vs_position;
-    // This has to be fixed when the scale graph is in place ---abock
-    float depth = pscDepth(position) + 1;
-    // float depth = 10000.0;
-    // gl_FragDepth = depth;
-
-    ABufferStruct_t frag = createGeometryFragment(fullColor, position, depth);
-    addToBuffer(frag);
-
-    if (fullColor.a == 0)
-        discard;
+    return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,15 +42,6 @@ struct UpdateData {
 };
 
 struct RenderData {
-    RenderData(const Camera& cam, psc pos, bool performance)
-        : camera(cam)
-        , position(std::move(pos))
-        , doPerformanceMeasurement(std::move(performance))
-    {}
-
-    //RenderData() = default;
-    RenderData& operator=(const RenderData& rhs) = delete;
-
 	const Camera& camera;
 	psc position;
 	bool doPerformanceMeasurement;

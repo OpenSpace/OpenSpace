@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,8 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/planetgeometry.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/factorymanager.h>
 
 namespace {

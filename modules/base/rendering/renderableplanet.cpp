@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,11 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/planetgeometry.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -39,7 +40,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <sgct.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
@@ -67,9 +69,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _hasNightTexture(false)
 {
 	std::string name;
-	bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success,
-            "RenderablePlanet need the '" <<constants::scenegraphnode::keyName<<"' be specified");
+            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
 
     //std::string path;
     //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
@@ -79,7 +81,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
 	if (success) {
-		geometryDictionary.setValue(constants::scenegraphnode::keyName, name);
+		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         //geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 	}
@@ -124,10 +126,25 @@ RenderablePlanet::~RenderablePlanet() {
 }
 
 bool RenderablePlanet::initialize() {
-    if (_programObject == nullptr && _hasNightTexture)
-		OsEng.ref().configurationManager()->getValue("nightTextureProgram", _programObject);
-	else if (_programObject == nullptr)
-		OsEng.ref().configurationManager()->getValue("pscShader", _programObject);
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject == nullptr && _hasNightTexture) {
+        // Night texture program
+        _programObject = renderEngine.buildRenderProgram(
+            "nightTextureProgram",
+            "${SHADERS}/nighttexture_vs.glsl",
+            "${SHADERS}/nighttexture_fs.glsl");
+        if (!_programObject) return false;
+    }
+    else if (_programObject == nullptr) {
+        // pscstandard
+        _programObject = renderEngine.buildRenderProgram(
+            "pscstandard",
+            "${SHADERS}/pscstandard_vs.glsl",
+            "${SHADERS}/pscstandard_fs.glsl");
+        if (!_programObject) return false;
+
+    }
+    _programObject->setIgnoreSubroutineUniformLocationError(true);
 
     loadTexture();
     _geometry->initialize(this);
@@ -140,10 +157,12 @@ bool RenderablePlanet::deinitialize() {
         _geometry->deinitialize();
         delete _geometry;
     }
-    if (_texture)
-        delete _texture;
-	if (_nightTexture)
-		delete _nightTexture;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
 
     _geometry = nullptr;
     _texture = nullptr;
@@ -168,9 +187,9 @@ void RenderablePlanet::render(const RenderData& data)
     glm::mat4 transform = glm::mat4(1);
 	
 	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, 90.f, glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(transform, 90.f, glm::vec3(0, -1, 0));
-	glm::mat4 rotProp = glm::rotate(transform, static_cast<float>(_rotation), glm::vec3(0, 1, 0));
+	glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+	glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
 
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
@@ -182,16 +201,18 @@ void RenderablePlanet::render(const RenderData& data)
 	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
 	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 
-	psc sun_pos;
+	
 	double  lt;
-	openspace::SpiceManager::ref().getTargetPosition("SUN", _target, "GALACTIC", "NONE", _time, sun_pos, lt);
+    glm::dvec3 p =
+    SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
+    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
 	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 	
     _programObject->setUniform("_performShading", _performShading);
 
@@ -208,6 +229,10 @@ void RenderablePlanet::render(const RenderData& data)
 		_nightTexture->bind();
 		_programObject->setUniform("nightTex", nightUnit);
 	}
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     // render
     _geometry->render();
 
@@ -217,15 +242,14 @@ void RenderablePlanet::render(const RenderData& data)
 
 void RenderablePlanet::update(const UpdateData& data){
 	// set spice-orientation in accordance to timestamp
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_frame, "GALACTIC", data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 	_time = data.time;
 }
 
 void RenderablePlanet::loadTexture() {
-    delete _texture;
     _texture = nullptr;
 	if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
 			_texture->uploadTexture();
@@ -237,10 +261,9 @@ void RenderablePlanet::loadTexture() {
         }
     }
 	if (_hasNightTexture) {
-		delete _nightTexture;
 		_nightTexture = nullptr;
 		if (_nightTexturePath != "") {
-			_nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
+            _nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
 			if (_nightTexture) {
 				LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
 				_nightTexture->uploadTexture();

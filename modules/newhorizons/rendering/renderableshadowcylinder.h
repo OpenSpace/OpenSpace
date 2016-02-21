@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 namespace ghoul {
 	namespace filesystem {
@@ -71,8 +72,9 @@ namespace openspace {
 		void createCylinder();
 		properties::IntProperty _numberOfPoints;
 		properties::FloatProperty _shadowLength;
+        properties::Vec4Property _shadowColor;
 
-		ghoul::opengl::ProgramObject* _shader;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 		
 		glm::dmat3 _stateMatrix;
 
@@ -87,7 +89,7 @@ namespace openspace {
 		std::string _body;
 		std::string _bodyFrame;
 		std::string _mainFrame;
-		std::string _aberration;
+        SpiceManager::AberrationCorrection _aberration;
 		
 		double _time;
 	};

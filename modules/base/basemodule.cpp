@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,13 +55,9 @@ BaseModule::BaseModule()
     : OpenSpaceModule("Base")
 {}
 
-bool BaseModule::create() {
-    bool success = OpenSpaceModule::create();
-    if (!success)
-        return false;
-
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<planetgeometry::PlanetGeometry>);
-    FactoryManager::ref().addFactory(new ghoul::TemplateFactory<modelgeometry::ModelGeometry>);
+void BaseModule::internalInitialize() {
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -89,8 +85,6 @@ bool BaseModule::create() {
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
     fModelGeometry->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
-
-    return true;
 }
 
 } // namespace openspace

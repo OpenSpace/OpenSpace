@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,25 +47,25 @@ int takeScreenshot(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.renderEngine()->takeScreenshot();
+	OsEng.renderEngine().takeScreenshot();
 	return 0;
 }
 
 /**
 * \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
+* setRenderer(string):
+* Set renderer
 */
-int visualizeABuffer(lua_State* L) {
+int setRenderer(lua_State* L) {
 	int nArguments = lua_gettop(L);
 	if (nArguments != 1)
 		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 	const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
+    if (type != LUA_TSTRING)
         return luaL_error(L, "Expected argument of type 'bool'");
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleVisualizeABuffer(b);
+    std::string r = lua_tostring(L, -1);
+    OsEng.renderEngine().setRendererFromString(r);
 	return 0;
 }
 
@@ -83,26 +83,8 @@ int showRenderInformation(lua_State* L) {
     if (type != LUA_TBOOLEAN)
         return luaL_error(L, "Expected argument of type 'bool'");
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->toggleInfoText(b);
+	OsEng.renderEngine().toggleInfoText(b);
 	return 0;
-}
-
-/**
-    * \ingroup LuaScripts
-    * showSGCTRenderStatistics(bool):
-    * Set the rendering of the SGCTRenderStatistics
-    */
-int showSGCTRenderStatistics(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-    bool b = lua_toboolean(L, -1) != 0;
-    OsEng.renderEngine()->setSGCTRenderStatistics(b);
-    return 0;
 }
 
 /**
@@ -116,7 +98,7 @@ int setPerformanceMeasurement(lua_State* L) {
 		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine()->setPerformanceMeasurements(b);
+	OsEng.renderEngine().setPerformanceMeasurements(b);
 	return 0;
 }
 
@@ -132,7 +114,7 @@ int fadeIn(lua_State* L) {
 
 	double t = luaL_checknumber(L, -1);
 			
-	OsEng.renderEngine()->startFading(1, static_cast<float>(t));
+	OsEng.renderEngine().startFading(1, static_cast<float>(t));
 	return 0;
 }
 /**
@@ -147,7 +129,7 @@ int fadeOut(lua_State* L) {
 
 	double t = luaL_checknumber(L, -1);
 
-	OsEng.renderEngine()->startFading(-1, static_cast<float>(t));
+	OsEng.renderEngine().startFading(-1, static_cast<float>(t));
 	return 0;
 }
 

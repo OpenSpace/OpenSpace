@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform vec4 campos;
 uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
@@ -41,17 +39,16 @@ in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 //#include "PowerScaling/powerScaling_vs.hglsl"
-void main()
-{
+Fragment getFragment() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
 
+	Fragment frag;
 	if (_performShading) {
 		// directional lighting
 		vec3 origin = vec3(0.0);
@@ -77,14 +74,11 @@ void main()
 		}
 		*/
 		diffuse = max(intensity * diffuse, ambient);
-			
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);
 	}
-	else {
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);	
-	}
+
+	diffuse[3] = transparency;
+	frag.color = diffuse;
+	frag.depth = depth;
+
+	return frag;
 }

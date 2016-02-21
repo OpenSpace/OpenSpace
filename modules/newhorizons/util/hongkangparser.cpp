@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/newhorizons/util/imagesequencer.h>
 #include <ghoul/logging/logmanager.h>
@@ -99,26 +99,25 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
 }
 
 void HongKangParser::writeUTCEventFile(const Image image){
-		std::string time_beg;
-		std::string time_end;
-		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-		SpiceManager::ref().getDateFromET(image.stopTime, time_end, "HR:MN:SC.### ::RND");
+    std::string time_beg = SpiceManager::ref().dateFromEphemerisTime(image.startTime);
+    std::string time_end = SpiceManager::ref().dateFromEphemerisTime(image.stopTime);
 
-		_eventsAsUTCFile << std::fixed
-			<< std::setw(10) << time_beg << "->"
-			<< std::setw(10) << time_end
-			<< std::setw(10) << (int)getMetFromET(image.startTime) << "->"
-			<< std::setw(10) << (int)getMetFromET(image.stopTime)
-			<< std::setw(10) << image.target << std::setw(10);
-		for (auto instrument : image.activeInstruments){
-			_eventsAsUTCFile << " " << instrument;
-		}
+    _eventsAsUTCFile << std::fixed
+        << std::setw(10) << time_beg << "->"
+        << std::setw(10) << time_end
+        << std::setw(10) << (int)getMetFromET(image.startTime) << "->"
+        << std::setw(10) << (int)getMetFromET(image.stopTime)
+        << std::setw(10) << image.target << std::setw(10);
+    for (auto instrument : image.activeInstruments){
+        _eventsAsUTCFile << " " << instrument;
+    }
 }
 
 bool HongKangParser::create(){
 	//check input for errors. 
 	int tmp;
-	bool hasObserver = SpiceManager::ref().getNaifId(_spacecraft, tmp);
+    bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
+    tmp = SpiceManager::ref().naifId(_spacecraft);
 	if (!hasObserver){
 		LERROR("SPICE navigation system has no pooled observer: '" << _spacecraft << "' in kernel" <<
 			   "Please check that all necessary kernels are loaded"<<
@@ -287,14 +286,14 @@ bool HongKangParser::augmentWithSpice(Image& image,
 			double time = image.startTime;
 			for (int k = 0; k < exposureTime; k++){
 				time += k;
-				success = openspace::SpiceManager::ref().targetWithinFieldOfView(
+				_withinFOV = SpiceManager::ref().isTargetInFieldOfView(
+                                                                       potentialTargets[i],
+                                                                       spacecraft,
 					image.activeInstruments[j],
-					potentialTargets[i],
-					spacecraft,
-					"ELLIPSOID",
-					"NONE",
-					time,
-					_withinFOV);
+                                                                       SpiceManager::FieldOfViewMethod::Ellipsoid,
+                                                                       {},
+					time
+					);
 				if (_withinFOV){
 					image.target = potentialTargets[i];
 					_withinFOV = false;
@@ -323,8 +322,8 @@ double HongKangParser::getETfromMet(std::string line){
 
 double HongKangParser::getETfromMet(double met){
 	double diff;
-	double referenceET;
-	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
+    double referenceET =
+        SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
     double et = referenceET;
 
 	//_metRef += 3; // MET reference time is off by 3 sec? 
@@ -341,8 +340,8 @@ double HongKangParser::getETfromMet(double met){
 
 double HongKangParser::getMetFromET(double et){
 	double met;
-	double referenceET;
-	openspace::SpiceManager::ref().getETfromDate("2015-07-14T11:50:00.00", referenceET);
+    double referenceET =
+        SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
 
 	if (et >= referenceET){
 		met = _metRef + (et - referenceET);

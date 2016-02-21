@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,9 +39,9 @@ namespace openspace {
 namespace gui {
 
 void GuiOriginComponent::render() {
-    const SceneGraphNode* currentFocus = OsEng.interactionHandler()->focusNode();
+    const SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
 
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
     std::sort(nodes.begin(), nodes.end(), [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); });
     auto it = std::find(nodes.begin(), nodes.end(), currentFocus);
     ghoul_assert(it != nodes.end(), "Focus node not found");
@@ -57,7 +57,7 @@ void GuiOriginComponent::render() {
 
     if (result) {
         LINFO("openspace.setPropertyValue('Interaction.origin', '" + nodes[position]->name() + "');");
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.origin', '" + nodes[position]->name() + "');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.origin', '" + nodes[position]->name() + "');");
     }
 
 }

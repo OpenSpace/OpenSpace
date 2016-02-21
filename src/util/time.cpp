@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,55 +24,31 @@
 
 #include <openspace/util/time.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
-
-#include <cassert>
-#include <string>
+#include <ghoul/misc/assert.h>
 
 #include "time_lua.inl"
-
-namespace {
-	const std::string _loggerCat = "Time";
-}
 
 namespace openspace {
 
 Time* Time::_instance = nullptr;
 
-Time::Time()
-    : _time(-1.0)
-	, _dt(1.0)
-	, _timeJumped(false)
-    , _timePaused(false)
-    , _sharedTime(-1.0)
-    , _sharedDt(1.0)
-    , _sharedTimeJumped(false)
-	, _syncedTime(-1.0)
-	, _syncedDt(1.0)
-	, _syncedTimeJumped(false)
-{
-}
-
-bool Time::initialize() {
-	assert( _instance == nullptr);
-	 _instance = new Time();
-	 return true;
+void Time::initialize() {
+    ghoul_assert(_instance == nullptr, "Static time must not have been ininitialized");
+    _instance = new Time();
 }
 
 void Time::deinitialize() {
-	assert(_instance);
-	delete _instance;
-	_instance = nullptr;
+    ghoul_assert(_instance, "Static time must have been ininitialized");
+    delete _instance;
+    _instance = nullptr;
 }
 
 Time& Time::ref() {
-	assert(_instance);
+    ghoul_assert(_instance, "Static time must have been ininitialized");
     return *_instance;
 }
 
@@ -81,13 +57,11 @@ bool Time::isInitialized() {
 }
 
 void Time::setTime(double value, bool requireJump) {
-	_time = std::move(value);
+	_time = value;
 	_timeJumped = requireJump;
 }
 
 double Time::currentTime() const {
-	assert(_instance);
-	//return _time;
 	return _syncedTime;
 }
 
@@ -99,11 +73,10 @@ double Time::advanceTime(double tickTime) {
 }
 
 void Time::setDeltaTime(double deltaT) {
-	_dt = std::move(deltaT);
+	_dt = deltaT;
 }
 
 double Time::deltaTime() const {
-	//return _dt;
 	return _syncedDt;
 }
 
@@ -117,18 +90,15 @@ bool Time::togglePause() {
 }
 
 void Time::setTime(std::string time, bool requireJump) {
-	SpiceManager::ref().getETfromDate(std::move(time), _time);
+    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
 	_timeJumped = requireJump;
 }
 
 std::string Time::currentTimeUTC() const {
-	std::string date;
-	//SpiceManager::ref().getDateFromET(_time, date);
-	SpiceManager::ref().getDateFromET(_syncedTime, date);
-	return date;
+    return SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
 }
 
-void Time::serialize(SyncBuffer* syncBuffer){
+void Time::serialize(SyncBuffer* syncBuffer) {
 	_syncMutex.lock();
 
 	syncBuffer->encode(_sharedTime);
@@ -138,7 +108,7 @@ void Time::serialize(SyncBuffer* syncBuffer){
 	_syncMutex.unlock();
 }
 
-void Time::deserialize(SyncBuffer* syncBuffer){
+void Time::deserialize(SyncBuffer* syncBuffer) {
 	_syncMutex.lock();
 
 	syncBuffer->decode(_sharedTime);
@@ -151,13 +121,12 @@ void Time::deserialize(SyncBuffer* syncBuffer){
 	_syncMutex.unlock();
 }
 
-void Time::postSynchronizationPreDraw(){
+void Time::postSynchronizationPreDraw() {
 	_syncMutex.lock();
 
 	_syncedTime = _sharedTime;
 	_syncedDt = _sharedDt;
-    //if (_sharedTimeJumped)
-	    _syncedTimeJumped = _sharedTimeJumped;
+    _syncedTimeJumped = _sharedTimeJumped;
 
     if (_jockeHasToFixThisLater) {
         _syncedTimeJumped = true;
@@ -167,7 +136,7 @@ void Time::postSynchronizationPreDraw(){
 	_syncMutex.unlock();	
 }
 
-void Time::preSynchronization(){
+void Time::preSynchronization() {
 	_syncMutex.lock();
 
 	_sharedTime = _time;
@@ -178,15 +147,14 @@ void Time::preSynchronization(){
 }
 
 bool Time::timeJumped() const {
-	//return _timeJumped;
 	return _syncedTimeJumped;
 }
 
-void Time::setTimeJumped(bool jumped){
+void Time::setTimeJumped(bool jumped) {
 	_timeJumped = jumped;
 }
     
-bool Time::paused() const{
+bool Time::paused() const {
     return _timePaused;
 }
 

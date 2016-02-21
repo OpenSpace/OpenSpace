@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,8 @@
 #include <openspace/engine/configurationmanager.h>
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -52,12 +52,15 @@ namespace openspace {
 	: Renderable(dictionary)
 	, _numberOfPoints("amountOfPoints", "Points", 190, 1, 300)
 	, _shadowLength("shadowLength", "Shadow Length", 0.1, 0.0, 0.5)
+    , _shadowColor("shadowColor", "Shadow Color",
+                   glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f))
 	, _shader(nullptr)
 	, _vao(0)
 	, _vbo(0)
 {
 	addProperty(_numberOfPoints);
 	addProperty(_shadowLength);
+    addProperty(_shadowColor);
 
 	bool success = dictionary.getValue(_keyType, _terminatorType);
 	ghoul_assert(success, "");
@@ -71,7 +74,9 @@ namespace openspace {
 	ghoul_assert(success, "");
 	success = dictionary.getValue(_keyMainFrame, _mainFrame);
 	ghoul_assert(success, "");
-	success = dictionary.getValue(_keyAberration, _aberration);
+    std::string a = "NONE";
+	success = dictionary.getValue(_keyAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
 	ghoul_assert(success, "");
 }
 
@@ -88,24 +93,31 @@ bool RenderableShadowCylinder::isReady() const {
 bool RenderableShadowCylinder::initialize() {
 	glGenVertexArrays(1, &_vao); // generate array
 	glGenBuffers(1, &_vbo); // generate buffer
-	createCylinder();
 
 	bool completeSuccess = true;
-	_shader = ghoul::opengl::ProgramObject::Build("ShadowProgram",
-		"${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
-		"${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl");
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("ShadowProgram",
+        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl");
+
 	if (!_shader)
 		return false;
 	return completeSuccess;
 }
 
 bool RenderableShadowCylinder::deinitialize() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 	glDeleteBuffers(1, &_vbo);
 	_vbo = 0;
-	delete _shader;
-	_shader = nullptr;
+
 	return true;
 }
 
@@ -116,22 +128,27 @@ void RenderableShadowCylinder::render(const RenderData& data){
 			_transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
+
+    glDepthMask(false);
 	// Activate shader
 	_shader->activate();
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", _transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+    _shader->setUniform("shadowColor", _shadowColor);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 	
 	glBindVertexArray(_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
 	glBindVertexArray(0);
 
 	_shader->deactivate();
+
+    glDepthMask(true);
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, data.time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
 	_time = data.time;
 	if (_shader->isDirty())
 		_shader->rebuildFromFile();
@@ -155,26 +172,31 @@ void RenderableShadowCylinder::createCylinder() {
 	double targetEpoch;
 	glm::dvec3 observerPosition;
 	std::vector<psc> terminatorPoints;
-	SpiceManager::ref().getTerminatorEllipse(_numberOfPoints,
-											 _terminatorType,
-											 _lightSource,
-											 _observer,
-											 _body,
-											 _bodyFrame,
-											 _aberration,
-											 _time,
-											 targetEpoch,
-											 observerPosition,
-											 terminatorPoints);
-
-	glm::dvec3 vecLightSource;
+    SpiceManager::TerminatorType t;
+    if (_terminatorType == "UMBRAL")
+        t = SpiceManager::TerminatorType::Umbral;
+    else if (_terminatorType == "PENUMBRAL")
+        t = SpiceManager::TerminatorType::Penumbral;
+    
+    auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
+        _lightSource, t, _aberration, _time, _numberOfPoints);
+    
+    targetEpoch = res.targetEphemerisTime;
+    observerPosition = std::move(res.observerPosition);
+    
+    std::vector<glm::dvec3> ps = std::move(res.terminatorPoints);
+    for (auto&& p : ps) {
+        PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+        psc[3] += 3;
+        terminatorPoints.push_back(psc);
+    }
+    
 	double lt;
-	bool performs = SpiceManager::ref().getTargetPosition(_body, _lightSource, _mainFrame, _aberration, _time, vecLightSource, lt);
+    glm::dvec3 vecLightSource =
+        SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
 
-	glm::dmat3 _stateMatrix;
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_bodyFrame, _mainFrame, _time, _stateMatrix);
+    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, _time));
 
-	_stateMatrix = glm::inverse(_stateMatrix);
 	vecLightSource = _stateMatrix * vecLightSource;
 
 	vecLightSource *= _shadowLength;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 // openspace
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/renderableconstellationbounds.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -90,9 +92,11 @@ RenderableConstellationBounds::~RenderableConstellationBounds() {
 }
 
 bool RenderableConstellationBounds::initialize() {
-	_program = ghoul::opengl::ProgramObject::Build("ConstellationBounds",
-		"${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
-		"${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _program = renderEngine.buildRenderProgram("ConstellationBounds",
+        "${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
+        "${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
+
 	if (!_program)
 		return false;
 
@@ -138,8 +142,12 @@ bool RenderableConstellationBounds::deinitialize() {
 	glDeleteVertexArrays(1, &_vao);
 	_vao = 0;
 
-	delete _program;
-	_program = nullptr;
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
 	return true;
 }
 
@@ -154,7 +162,7 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 
 	_program->setUniform("exponent", _distance);
 	_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -176,14 +184,10 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 }
 
 void RenderableConstellationBounds::update(const UpdateData& data) {
-	if (_program->isDirty())
-		_program->rebuildFromFile();
-
-	SpiceManager::ref().getPositionTransformMatrix(
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(
 		_originReferenceFrame,
 		"GALACTIC",
-		data.time,
-		_stateMatrix
+		data.time
 	);
 }
 

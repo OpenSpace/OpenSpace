@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <openspace/scene/scene.h>
 
-#include <openspace/abuffer/abuffer.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -33,19 +32,19 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/time.h>
 
 #include <boost/algorithm/string.hpp>
 
 #include <ghoul/filesystem/filesystem.h>
-#include "ghoul/io/texture/texturereader.h"
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
-#include "ghoul/logging/logmanager.h"
+#include <ghoul/misc/exception.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include "ghoul/opengl/programobject.h"
-#include "ghoul/opengl/texture.h"
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 #include <iostream>
 #include <fstream>
@@ -83,76 +82,46 @@ bool Scene::initialize() {
    
     using ghoul::opengl::ShaderObject;
     using ghoul::opengl::ProgramObject;
-
-    ProgramObject* tmpProgram;
-
-	ghoul::opengl::ProgramObject::ProgramObjectCallback cb = [this](ghoul::opengl::ProgramObject* program) {
-		_programUpdateLock.lock();
-		_programsToUpdate.insert(program);
-		_programUpdateLock.unlock();
-	};
+   
+    std::unique_ptr<ProgramObject> tmpProgram;
 
 	// fboPassthrough program
-	tmpProgram = ProgramObject::Build("fboPassProgram",
+    tmpProgram = ProgramObject::Build(
+        "fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
 		"${SHADERS}/fboPass_fs.glsl");
 	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("fboPassProgram", tmpProgram);
-
-	// pscstandard
-	tmpProgram = ProgramObject::Build("pscstandard",
-		"${SHADERS}/pscstandard_vs.glsl",
-		"${SHADERS}/pscstandard_fs.glsl");
-    if( ! tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("pscShader", tmpProgram);
-
-	// Night texture program
-	tmpProgram = ProgramObject::Build("nightTextureProgram",
-		"${SHADERS}/nighttexture_vs.glsl",
-		"${SHADERS}/nighttexture_fs.glsl");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-	OsEng.ref().configurationManager()->setValue("nightTextureProgram", tmpProgram);
-
-    // RaycastProgram
-	tmpProgram = ProgramObject::Build("RaycastProgram",
-		"${SHADERS}/exitpoints.vert",
-		"${SHADERS}/exitpoints.frag");
-	if (!tmpProgram) return false;
-	tmpProgram->setProgramObjectCallback(cb);
-	_programs.push_back(tmpProgram);
-    OsEng.ref().configurationManager()->setValue("RaycastProgram", tmpProgram);
+    tmpProgram->setIgnoreSubroutineUniformLocationError(true);
+	OsEng.configurationManager().setValue("fboPassProgram", tmpProgram.get());
 
     return true;
 }
 
 bool Scene::deinitialize() {
 	clearSceneGraph();
-
-	// clean up all programs
-	_programsToUpdate.clear();
-	for (ghoul::opengl::ProgramObject* program : _programs)
-		delete program;
-	_programs.clear();
     return true;
 }
 
 void Scene::update(const UpdateData& data) {
 	if (!_sceneGraphToLoad.empty()) {
-		OsEng.renderEngine()->scene()->clearSceneGraph();
-		bool success = loadSceneInternal(_sceneGraphToLoad);
-		_sceneGraphToLoad = "";
-		if (!success)
-			return;
-		OsEng.renderEngine()->aBuffer()->invalidateABuffer();
+		OsEng.renderEngine().scene()->clearSceneGraph();
+        try {
+            bool success = loadSceneInternal(_sceneGraphToLoad);
+            _sceneGraphToLoad = "";
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(e.what());
+            return;
+        }
 	}
-    for (SceneGraphNode* node : _graph.nodes())
-        node->update(data);
+    for (SceneGraphNode* node : _graph.nodes()) {
+        try {
+            node->update(data);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
 }
 
 void Scene::evaluate(Camera* camera) {
@@ -162,27 +131,18 @@ void Scene::evaluate(Camera* camera) {
 }
 
 void Scene::render(const RenderData& data) {
-	bool emptyProgramsToUpdate = _programsToUpdate.empty();
-		
-	_programUpdateLock.lock();
-	for (ghoul::opengl::ProgramObject* program : _programsToUpdate) {
-		LDEBUG("Attempting to recompile " << program->name());
-		program->rebuildFromFile();
-	}
-	_programsToUpdate.erase(_programsToUpdate.begin(), _programsToUpdate.end());
-	_programUpdateLock.unlock();
-
-	if (!emptyProgramsToUpdate) {
-		LDEBUG("Setting uniforms");
-		// Ignore attribute locations
-		for (ghoul::opengl::ProgramObject* program : _programs)
-			program->setIgnoreSubroutineUniformLocationError(true);
-	}
-
     for (SceneGraphNode* node : _graph.nodes())
         node->render(data);
-	//if (_root)
-	//	_root->render(data);
+}
+
+std::vector<std::pair<Volume*, RenderData>> Scene::volumesToRender(const RenderData& data) const {
+    std::vector<std::pair<Volume*, RenderData>> volumes;
+
+    for (const SceneGraphNode* node : _graph.nodes()) {
+        std::vector<std::pair<Volume*, RenderData>> newVolumes = node->volumesToRender(data);
+        std::copy(newVolumes.begin(), newVolumes.end(), std::back_inserter(volumes));
+    }
+    return volumes;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
@@ -240,11 +200,16 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // Initialize all nodes
     for (SceneGraphNode* node : _graph.nodes()) {
-		bool success = node->initialize();
-        if (success)
-            LDEBUG(node->name() << " initialized successfully!");
-        else
-            LWARNING(node->name() << " not initialized.");
+        try {
+            bool success = node->initialize();
+            if (success)
+                LDEBUG(node->name() << " initialized successfully!");
+            else
+                LWARNING(node->name() << " not initialized.");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(_loggerCat + "(" + e.component + ")", e.what());
+        }
     }
 
     // update the position of all nodes
@@ -261,7 +226,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     //_root->calculateBoundingSphere();
 
     // set the camera position
-	Camera* c = OsEng.ref().renderEngine()->camera();
+	Camera* c = OsEng.ref().renderEngine().camera();
     //auto focusIterator = _allNodes.find(_focus);
     auto focusIterator = std::find_if(
                 _graph.nodes().begin(),
@@ -308,27 +273,31 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
       //  c->setScaling(scaling);
 
         // Set the focus node for the interactionhandler
-        OsEng.interactionHandler()->setFocusNode(focusNode);
+        OsEng.interactionHandler().setFocusNode(focusNode);
     }
     else
-        OsEng.interactionHandler()->setFocusNode(_graph.rootNode());
+        OsEng.interactionHandler().setFocusNode(_graph.rootNode());
 
 	glm::vec4 position;
-	if (cameraDictionary.hasKey(KeyPositionObject)
-		&& cameraDictionary.getValue(KeyPositionObject, position)) {
+    if (cameraDictionary.hasKeyAndValue<glm::vec4>(KeyPositionObject)) {
+        try {
+            position = cameraDictionary.value<glm::vec4>(KeyPositionObject);
 
-		LDEBUG("Camera position is (" 
-			<< position[0] << ", " 
-			<< position[1] << ", " 
-			<< position[2] << ", " 
-			<< position[3] << ")");
+            LDEBUG("Camera position is ("
+                << position[0] << ", "
+                << position[1] << ", "
+                << position[2] << ", "
+                << position[3] << ")");
 
-		cameraPosition = psc(position);
-		//c->setPosition(position);
+            cameraPosition = psc(position);
+        }
+        catch (const ghoul::Dictionary::DictionaryError& e) {
+            LERROR("Error loading Camera location: " << e.what());
+        }
 	}
 
 	// the camera position
-	const SceneGraphNode* fn = OsEng.interactionHandler()->focusNode();
+	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
     // Check crash for when fn == nullptr
 
 	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
@@ -348,18 +317,18 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	for (SceneGraphNode* node : _graph.nodes()) {
 		std::vector<properties::Property*> properties = node->propertiesRecursive();
 		for (properties::Property* p : properties) {
-            OsEng.gui()->_property.registerProperty(p);
+            OsEng.gui()._property.registerProperty(p);
 		}
 	}
 
     // If a LuaDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager()->hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager()->getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);

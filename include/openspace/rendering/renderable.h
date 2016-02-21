@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,10 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/rendering/volume.h>
 
 #include <ghoul/opengl/programobject.h>
+
 
 // Forward declare to minimize dependencies
 namespace ghoul {
@@ -67,6 +69,7 @@ public:
 
 	virtual void render(const RenderData& data) = 0;
     virtual void update(const UpdateData& data);
+    virtual std::vector<Volume*> volumesToRender(const RenderData& data) const;
 
 	bool isVisible() const;
 	

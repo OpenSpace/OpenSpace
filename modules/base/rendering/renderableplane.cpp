@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/constants.h>
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
@@ -144,9 +143,12 @@ bool RenderablePlane::initialize() {
 
 	if (_shader == nullptr) {
         // Plane Program
-        _shader = ghoul::opengl::ProgramObject::Build("PlaneProgram",
+
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram("PlaneProgram",
             "${MODULE_BASE}/shaders/plane_vs.glsl",
-            "${MODULE_BASE}/shaders/plane_fs.glsl");
+            "${MODULE_BASE}/shaders/plane_fs.glsl"
+            );
         if (!_shader)
             return false;
     }
@@ -166,15 +168,18 @@ bool RenderablePlane::deinitialize() {
 	if (!_projectionListener){
 		// its parents job to kill texture
 		// iff projectionlistener 
-		delete _texture;
 		_texture = nullptr;
 	}
 
     delete _textureFile;
     _textureFile = nullptr;
 
-    delete _shader;
-    _shader = nullptr;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
 
 	return true;
 }
@@ -188,10 +193,10 @@ void RenderablePlane::render(const RenderData& data) {
 	_shader->activate();
 	if (_projectionListener){
 		//get parent node-texture and set with correct dimensions  
-		SceneGraphNode* textureNode = OsEng.renderEngine()->scene()->sceneGraphNode(_nodeName)->parent();
+		SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
 		if (textureNode != nullptr){
-			RenderablePlanetProjection *t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-			_texture = t->baseTexture();
+			RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+            _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());
 			float h = _texture->height();
 			float w = _texture->width();
 			float scale = h / w;
@@ -201,7 +206,7 @@ void RenderablePlane::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -229,7 +234,7 @@ void RenderablePlane::update(const UpdateData& data) {
 
 void RenderablePlane::loadTexture() {
 	if (_texturePath.value() != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
@@ -237,9 +242,7 @@ void RenderablePlane::loadTexture() {
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 
             delete _textureFile;
             _textureFile = new ghoul::filesystem::File(_texturePath);

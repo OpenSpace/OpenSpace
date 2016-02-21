@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,7 +111,6 @@ public:
 	void setProjectionMatrix(glm::mat4 projectionMatrix);
 	const glm::mat4& projectionMatrix() const;
 
-    void setViewProjectionMatrix(glm::mat4 viewProjectionMatrix);
     const glm::mat4& viewProjectionMatrix() const;
 
     void setCameraDirection(glm::vec3 cameraDirection);
@@ -148,10 +147,11 @@ public:
 private:
     float _maxFov;
     float _sinMaxFov;
-    glm::mat4 _viewProjectionMatrix;
+    mutable glm::mat4 _viewProjectionMatrix;
 	glm::mat4 _modelMatrix;
 	glm::mat4 _viewMatrix;
 	glm::mat4 _projectionMatrix;
+    mutable bool _dirtyViewProjectionMatrix;
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
 	psc _focusPosition;
@@ -159,7 +159,7 @@ private:
     
     glm::vec3 _lookUp;
 
-	std::mutex _mutex;
+	mutable std::mutex _mutex;
 	
 	//local variables
 	glm::mat4 _localViewRotationMatrix;

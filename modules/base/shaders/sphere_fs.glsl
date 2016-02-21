@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform float time;
 uniform sampler2D texture1;
 uniform float alpha;
@@ -31,16 +29,14 @@ uniform float alpha;
 in vec2 vs_st;
 in vec4 vs_position;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
+#include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-void main()
+Fragment getFragment()
 {
     vec4 position = vs_position;
     // This has to be fixed with the ScaleGraph in place (precision deficiency in depth buffer) ---abock
-    // float depth = pscDepth(position);
-    float depth = 200;
+    float depth = pscDepth(position);
     vec4 diffuse;
 
     vec2 texCoord = vs_st;
@@ -75,7 +71,8 @@ void main()
 
     //diffuse = vec4(1.0, 0.0, 0.0, 1.0);
 
-    ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-    addToBuffer(frag);
-
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,8 @@ namespace properties {
     [](lua_State* state, bool& success) -> __TYPE__ {                                    \
         __TYPE__ result;                                                                 \
         int number = 1;                                                                  \
-        for (__TYPE__::size_type i = 0; i < __TYPE__::row_size(); ++i) {                 \
-            for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
+        for (glm::length_t i = 0; i < __TYPE__::rows; ++i) {                             \
+            for (glm::length_t j = 0; j < __TYPE__::cols; ++j) {                         \
                 lua_getfield(state, -1, std::to_string(number).c_str());                 \
                 if (lua_isnumber(state, -1) != 1) {                                      \
                     success = false;                                                     \
@@ -61,8 +61,8 @@ namespace properties {
     [](lua_State* state, __TYPE__ value) -> bool {                                       \
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
-        for (__TYPE__::size_type i = 0; i < __TYPE__::row_size(); ++i) {                 \
-            for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
+        for (glm::length_t i = 0; i < __TYPE__::rows; ++i) {                 \
+            for (glm::length_t j = 0; j < __TYPE__::cols; ++j) {             \
                 lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));             \
                 lua_setfield(state, -2, std::to_string(number).c_str());                 \
                 ++number;                                                                \
@@ -75,13 +75,13 @@ namespace properties {
     [](std::string value, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
-        if (tokens.size() != (__TYPE__::row_size() * __TYPE__::col_size())) {            \
+        if (tokens.size() != (__TYPE__::rows * __TYPE__::cols)) {                        \
             success = false;                                                             \
             return result;                                                               \
         }                                                                                \
         int number = 0;                                                                  \
-        for (__TYPE__::size_type i = 0; i < __TYPE__::row_size(); ++i) {                 \
-            for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
+        for (glm::length_t i = 0; i < __TYPE__::rows; ++i) {                             \
+            for (glm::length_t j = 0; j < __TYPE__::cols; ++j) {                         \
                 std::stringstream s(tokens[number]);                                     \
                 __TYPE__::value_type v;                                                  \
                 s >> v;                                                                  \
@@ -102,8 +102,8 @@ namespace properties {
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
         outValue = "";                                                                   \
-        for (__TYPE__::size_type i = 0; i < __TYPE__::row_size(); ++i) {                 \
-            for (__TYPE__::size_type j = 0; j < __TYPE__::col_size(); ++j) {             \
+        for (glm::length_t i = 0; i < __TYPE__::rows; ++i) {                             \
+            for (glm::length_t j = 0; j < __TYPE__::cols; ++j) {                         \
                 outValue += std::to_string(inValue[i][j]) + ",";                         \
             }                                                                            \
             outValue.pop_back();                                                         \

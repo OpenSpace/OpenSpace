@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/interaction/controller.h>
 
-#include <openspace/interaction/mouse.h>
+#include <openspace/util/mouse.h>
 
 #include <ghoul/glm.h>
 
@@ -39,7 +39,7 @@ public:
 	MouseController();
     virtual ~MouseController() {}
 
-	virtual void button(MouseAction action, MouseButton button) = 0;
+	virtual void button(MouseButton button, MouseAction action) = 0;
 	virtual void move(float x, float y) = 0;
 	virtual void scrollWheel(int pos) = 0;
 	virtual void update(const double& dt) = 0;
@@ -59,13 +59,13 @@ class TrackballMouseController : public MouseController {
 public:
 	TrackballMouseController();
 
-	void button(MouseAction action, MouseButton button);
+	void button(MouseButton button, MouseAction action) override;
 
-	void move(float x, float y);
+	void move(float x, float y) override;
 
-	void scrollWheel(int pos);
+	void scrollWheel(int pos) override;
 
-	void update(const double& dt);
+	void update(const double& dt) override;
 
 protected:
 	bool _leftMouseButtonDown;
@@ -76,13 +76,13 @@ class OrbitalMouseController : public MouseController {
 public:
 	OrbitalMouseController();
 
-	void button(MouseAction action, MouseButton button);
+	void button(MouseButton button, MouseAction action) override;
 
-	void move(float x, float y);
+	void move(float x, float y) override;
 
-	void scrollWheel(int pos);
+	void scrollWheel(int pos) override;
 
-	void update(const double& dt);
+	void update(const double& dt) override;
 
 protected:
 	bool _leftMouseButtonDown;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
@@ -33,12 +31,10 @@ in vec4 vs_point_velocity;
 
 //out vec4 diffuse;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-void main()
-{
+Fragment getFragment() {
 
 	vec4 position = vs_point_position;
 	float depth = pscDepth(position);
@@ -50,7 +46,8 @@ void main()
 	
 	vec4 diffuse = vs_point_velocity;
 
-	ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-	addToBuffer(frag);
-	
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

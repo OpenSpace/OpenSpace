@@ -69,7 +69,7 @@ namespace
 			ptr += (std::min)(salt.second, left);
 			left = canonical_length - (ptr - out);
 		}
-		ptr += snprintf(ptr, canonical_length - (ptr - out)
+		ptr += snprintf(ptr, int(canonical_length - (ptr - out))
 			, "3:seqi%" PRId64 "e1:v", seq);
 		left = canonical_length - (ptr - out);
 		memcpy(ptr, v.first, (std::min)(v.second, left));

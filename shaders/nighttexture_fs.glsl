@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
 uniform vec4 campos;
 uniform vec4 objpos;
 
@@ -42,17 +40,16 @@ in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
 
-#include "ABuffer/abufferStruct.hglsl"
-#include "ABuffer/abufferAddToBuffer.hglsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-void main()
-{
+Fragment getFragment() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	vec4 diffuse = texture(texture1, vs_st);
 	vec4 diffuse2 = texture(nightTex, vs_st);
 
+	Fragment frag;
 	if (_performShading) {
 		// directional lighting
 		vec3 origin = vec3(0.0);
@@ -74,14 +71,12 @@ void main()
 		vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);	
 		
 		diffuse = (daytex*2 + mixtex)/3;
-			
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);
 	}
-	else {
-		diffuse[3] = transparency;
-		ABufferStruct_t frag = createGeometryFragment(diffuse, position, depth);
-		addToBuffer(frag);	
-	}
+
+	diffuse[3] = transparency;
+	frag.color = diffuse;
+	frag.depth = depth;
+
+	return frag;
 }
+

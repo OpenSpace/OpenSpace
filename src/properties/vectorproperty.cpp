@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace properties {
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         lua_pushnil(state);                                                              \
-        for (__TYPE__::size_type i = 0; i < result.length(); ++i) {                      \
+        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
             int success = lua_next(state, -2);                                           \
             if (success != 1) {                                                          \
                 success = false;                                                         \
@@ -61,7 +61,7 @@ namespace properties {
     [](lua_State * state, __TYPE__ value) -> bool {                                      \
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
-        for (__TYPE__::size_type i = 0; i < value.length(); ++i) {                       \
+        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
             lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
             lua_setfield(state, -2, std::to_string(number).c_str());                     \
             ++number;                                                                    \
@@ -77,7 +77,7 @@ namespace properties {
             success = false;                                                             \
             return result;                                                               \
         }                                                                                \
-        for (__TYPE__::size_type i = 0; i < result.length(); ++i) {                      \
+        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
                 std::stringstream s(tokens[i]);                                          \
                 __TYPE__::value_type v;                                                  \
                 s >> v;                                                                  \
@@ -95,7 +95,7 @@ namespace properties {
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
         outValue = "{";                                                                  \
-        for (__TYPE__::size_type i = 0; i < inValue.length(); ++i)                       \
+        for (glm::length_t i = 0; i < __TYPE__::components; ++i)                         \
             outValue += std::to_string(inValue[i]) + ",";                                \
         outValue.pop_back();                                                             \
         outValue += "}";                                                                 \

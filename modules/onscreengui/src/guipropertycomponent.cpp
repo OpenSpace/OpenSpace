@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ namespace {
     void executeScript(const std::string& id, const std::string& value) {
         std::string script =
             "openspace.setPropertyValue('" + id + "', " + value + ");";
-        OsEng.scriptEngine()->queueScript(script);
+        OsEng.scriptEngine().queueScript(script);
     }
 
     void renderBoolProperty(Property* prop, const std::string& ownerName) {
@@ -432,17 +432,17 @@ void GuiPropertyComponent::render() {
 	ImGui::Begin("Properties", &_isEnabled, size, 0.5f);
 
     if (ImGui::CollapsingHeader("OnScreen GUI")) {
-        glm::vec2& pos = OsEng.renderEngine()->_onScreenInformation._position;
+        glm::vec2& pos = OsEng.renderEngine()._onScreenInformation._position;
         Vec2Property::ValueType value = pos;
         ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
         pos = value;
      
-        unsigned int& size = OsEng.renderEngine()->_onScreenInformation._size;
+        unsigned int& size = OsEng.renderEngine()._onScreenInformation._size;
         int sizeValue = static_cast<int>(size);
         ImGui::SliderInt("Size", &sizeValue, 0, 36);
         size = static_cast<unsigned int>(sizeValue);
 
-        int& node = OsEng.renderEngine()->_onScreenInformation._node;
+        int& node = OsEng.renderEngine()._onScreenInformation._node;
         int iValue = node;
         ImGui::SliderInt("Node#", &iValue, 0, 30);
         node = iValue;

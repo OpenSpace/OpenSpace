@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-// This needs to be included first due to Windows.h / winsock2.h complications
-#define SGCT_WINDOWS_INCLUDE
-#include <sgct.h>
+#include <openspace/util/keys.h>
 
 
 #include <openspace/engine/openspaceengine.h>
@@ -55,7 +53,7 @@ namespace {
 	size_t vboMaxSize = 20000;
 	GLuint vao = 0;
 	GLuint vbo = 0;
-	ghoul::opengl::ProgramObject* _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
 	static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
 		if (nCommandLists == 0)
@@ -76,7 +74,7 @@ namespace {
 		// Setup orthographic projection matrix
 		const float width = ImGui::GetIO().DisplaySize.x;
 		const float height = ImGui::GetIO().DisplaySize.y;
-		static const glm::mat4 ortho(
+		const glm::mat4 ortho(
 			2.f / width, 0.0f, 0.0f, 0.0f,
 			0.0f, 2.0f / -height, 0.0f, 0.0f,
 			0.0f, 0.0f, -1.0f, 0.0f,
@@ -152,8 +150,8 @@ void GUI::setEnabled(bool enabled) {
 }
 
 void GUI::initialize() {
-	std::string cachedFile;
-	FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(configurationFile,
+                                                                    "", true);
 
 	char* buffer = new char[cachedFile.size() + 1];
 
@@ -168,23 +166,23 @@ void GUI::initialize() {
 	//io.IniSavingRate = 5.f;
 	io.DeltaTime = 1.f / 60.f;
 	//io.PixelCenterOffset = 0.5f;
-	io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-	io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = SGCT_KEY_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = SGCT_KEY_DOWN;
-	io.KeyMap[ImGuiKey_Home] = SGCT_KEY_HOME;
-	io.KeyMap[ImGuiKey_End] = SGCT_KEY_END;
-	io.KeyMap[ImGuiKey_Delete] = SGCT_KEY_DELETE;
-	io.KeyMap[ImGuiKey_Backspace] = SGCT_KEY_BACKSPACE;
-	io.KeyMap[ImGuiKey_Enter] = SGCT_KEY_ENTER;
-	io.KeyMap[ImGuiKey_Escape] = SGCT_KEY_ESCAPE;
-	io.KeyMap[ImGuiKey_A] = SGCT_KEY_A;
-	io.KeyMap[ImGuiKey_C] = SGCT_KEY_C;
-	io.KeyMap[ImGuiKey_V] = SGCT_KEY_V;
-	io.KeyMap[ImGuiKey_X] = SGCT_KEY_X;
-	io.KeyMap[ImGuiKey_Y] = SGCT_KEY_Y;
-	io.KeyMap[ImGuiKey_Z] = SGCT_KEY_Z;
+    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
+    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
+	io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
+	io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
+	io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
+	io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
+	io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
+	io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
+	io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
+	io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
+	io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
+	io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
+	io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
+	io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
+	io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
+	io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
+	io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
 	io.RenderDrawListsFn = ImImpl_RenderDrawLists;
 	//io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock
@@ -242,22 +240,19 @@ void GUI::initializeGL() {
 }
 
 void GUI::deinitializeGL() {
-	if (_program)
-		delete _program;
 	_program = nullptr;
 
-	if (vao) glDeleteVertexArrays(1, &vao);
-	if (vbo) glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 
 	_property.deinitializeGL();
 	_performance.deinitializeGL();
 	_help.deinitializeGL();
 }
 
-void GUI::startFrame(float deltaTime,
-				const glm::vec2& windowSize,
-				 const glm::vec2& mousePos,
-				 bool mouseButtonsPressed[2])
+void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
+                     const glm::vec2& mousePos,
+                     uint32_t mouseButtonsPressed)
 {
     
 	ImGuiIO& io = ImGui::GetIO();
@@ -268,8 +263,8 @@ void GUI::startFrame(float deltaTime,
 #else
     io.MousePos = ImVec2(mousePos.x, mousePos.y);
 #endif
-	io.MouseDown[0] = mouseButtonsPressed[0];
-	io.MouseDown[1] = mouseButtonsPressed[1];
+    io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
+	io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 
 	ImGui::NewFrame();
 }
@@ -287,7 +282,8 @@ void GUI::endFrame() {
 	ImGui::Render();
 }
 
-bool GUI::mouseButtonCallback(int key, int action) {
+bool GUI::mouseButtonCallback(MouseButton button, MouseAction action) {
+//bool GUI::mouseButtonCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureMouse;
 	return consumeEvent;
@@ -302,19 +298,25 @@ bool GUI::mouseWheelCallback(double position) {
 	return consumeEvent;
 }
 
-bool GUI::keyCallback(int key, int action) {
+bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
+//bool GUI::keyCallback(int key, int action) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
 	if (consumeEvent) {
-		if (action == SGCT_PRESS)
-			io.KeysDown[key] = true;
-		if (action == SGCT_RELEASE)
-			io.KeysDown[key] = false;
+        int keyIndex = static_cast<int>(key);
+        if (keyIndex < 0)
+            LERROR("Pressed key of index '" << keyIndex << "' was negative");
+        else {
+            if (action == KeyAction::Press)
+                io.KeysDown[keyIndex] = true;
+            if (action == KeyAction::Release)
+                io.KeysDown[keyIndex] = false;
+        }
 	}
 	return consumeEvent;
 }
 
-bool GUI::charCallback(unsigned int character) {
+bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
 	ImGuiIO& io = ImGui::GetIO();
 	bool consumeEvent = io.WantCaptureKeyboard;
 
@@ -381,11 +383,11 @@ void GUI::renderMainWindow() {
     bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
 
     if (toSun)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
     if (toPluto)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
     if (toJupiter)
-        OsEng.scriptEngine()->queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
@@ -533,7 +535,7 @@ int show(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(true);
+	OsEng.gui().setEnabled(true);
 	return 0;
 }
 
@@ -547,7 +549,7 @@ int hide(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(false);
+	OsEng.gui().setEnabled(false);
 	return 0;
 }
 
@@ -561,7 +563,7 @@ int toggle(lua_State* L) {
 	if (nArguments != 0)
 		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.gui()->setEnabled(!OsEng.gui()->isEnabled());
+	OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
 	return 0;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/decoder.h>
+
+#include <ghoul/logging/logmanager.h>
 
 namespace {
 	const std::string _loggerCat = "SequenceParser";
@@ -75,7 +77,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
 
 void SequenceParser::sendPlaybookInformation(const std::string& name) {
     std::string fullName = PlaybookIdentifierName + "_" + name;
-    _messageIdentifier = OsEng.networkEngine()->identifier(fullName);
+    _messageIdentifier = OsEng.networkEngine().identifier(fullName);
 
     std::vector<char> buffer(1024);
     size_t currentWriteLocation = 0;
@@ -131,10 +133,8 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
             writeToBuffer(buffer, currentWriteLocation, image.startTime);
             writeToBuffer(buffer, currentWriteLocation, image.stopTime);
 
-            std::string timeBegin;
-            std::string timeEnd;
-            SpiceManager::ref().getDateFromET(image.startTime, timeBegin);
-            SpiceManager::ref().getDateFromET(image.stopTime, timeEnd);
+            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.startTime);
+            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.stopTime);
 
             writeToBuffer(buffer, currentWriteLocation, timeBegin);
             writeToBuffer(buffer, currentWriteLocation, timeEnd);
@@ -165,7 +165,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     buffer.resize(currentWriteLocation);
 
     //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine()->setInitialConnectionMessage(_messageIdentifier, buffer);
+    OsEng.networkEngine().setInitialConnectionMessage(_messageIdentifier, buffer);
 }
 
 }

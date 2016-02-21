@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
-#include <openspace/util/constants.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,6 +35,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <openspace/util/time.h>
+
+#include <glm/gtx/projection.hpp>
 
 namespace {
 	const std::string _loggerCat = "RenderablePlaneProjection";
@@ -101,7 +102,8 @@ bool RenderablePlaneProjection::initialize() {
 	// Plane program
 	if (_shader == nullptr) {
         // Image Plane Program
-        _shader = ghoul::opengl::ProgramObject::Build("ImagePlaneProgram",
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram("Image Plane",
             "${MODULE_BASE}/shaders/imageplane_vs.glsl",
             "${MODULE_BASE}/shaders/imageplane_fs.glsl");
         if (!_shader) return false;
@@ -113,11 +115,17 @@ bool RenderablePlaneProjection::initialize() {
 }
 
 bool RenderablePlaneProjection::deinitialize() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
-	delete _texture;
+    _texture = nullptr;
 	return true;
 }
 
@@ -139,7 +147,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader, &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, data.position);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -164,7 +172,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 	else
 		_hasImage = true;
 
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_target.frame, GalacticFrame, time, _stateMatrix);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
 	
 	double timePast = abs(img.startTime - _previousTime);
 	
@@ -188,15 +196,13 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
 void RenderablePlaneProjection::loadTexture() {
 	if (_texturePath != "") {
-		ghoul::opengl::Texture* texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			texture->uploadTexture();
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-			if (_texture)
-				delete _texture;
-			_texture = texture;
+            _texture = std::move(texture);
 
 			delete _textureFile;
 			_textureFile = new ghoul::filesystem::File(_texturePath);
@@ -207,7 +213,7 @@ void RenderablePlaneProjection::loadTexture() {
 
 void RenderablePlaneProjection::updatePlane(const Image img, double currentTime) {
 	
-	std::string shape, frame;
+	std::string frame;
 	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
 	
@@ -222,35 +228,45 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 
 	setTarget(target);
 
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_instrument, shape, frame, boresight, bounds);
-	if (!found) {
-		LERROR("Could not locate instrument");
-		return;
-	}
+    try {
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrument);
 
-	glm::dvec3 vecToTarget;
+        frame = std::move(res.frameName);
+        bounds = std::move(res.bounds);
+        boresight = std::move(res.boresightVector);
+    } catch (const SpiceManager::SpiceException& e) {
+        LERROR(e.what());
+    }
+
 	double lt;
 	psc projection[4];
 
-	SpiceManager::ref().getTargetPosition(_target.body, _spacecraft, GalacticFrame, "CN+S", currentTime, vecToTarget, lt);
-	// The apparent position, CN+S, makes image align best with target 
+    glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
+        _target.body,
+        _spacecraft,
+        GalacticFrame,
+        { SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar, SpiceManager::AberrationCorrection::Direction::Reception },
+        currentTime,
+        lt
+    );
+	// The apparent position, CN+S, makes image align best with target
 
 	for (int j = 0; j < bounds.size(); ++j) {
-		openspace::SpiceManager::ref().frameConversion(bounds[j], frame, GalacticFrame, currentTime);
-		glm::dvec3 cornerPosition = openspace::SpiceManager::ref().orthogonalProjection(vecToTarget, bounds[j]);
+        bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
+        glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 		
 		if (!_moving) {
 			cornerPosition -= vecToTarget;
 		}
-		openspace::SpiceManager::ref().frameConversion(cornerPosition, GalacticFrame, _target.frame, currentTime);
+        cornerPosition = SpiceManager::ref().frameTransformationMatrix(GalacticFrame, _target.frame, currentTime) * cornerPosition;
 				
 		projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(cornerPosition[0], cornerPosition[1], cornerPosition[2]);
 		projection[j][3] += 3;
 	}
 
 	if (!_moving) {
-		SceneGraphNode* thisNode = OsEng.renderEngine()->scene()->sceneGraphNode(_name);
-		SceneGraphNode* newParent = OsEng.renderEngine()->scene()->sceneGraphNode(_target.node);
+		SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
+		SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(_target.node);
 		if (thisNode != nullptr && newParent != nullptr)
 			thisNode->setParent(newParent);
 	}
@@ -284,7 +300,7 @@ void RenderablePlaneProjection::setTarget(std::string body) {
 	if (body == "")
 		return;
 
-	std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
+	std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
 	Renderable* possibleTarget;
 	bool hasBody, found = false;
 	std::string targetBody;
@@ -311,7 +327,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	std::vector<std::string> targets;
 
-	std::vector<SceneGraphNode*> nodes = OsEng.renderEngine()->scene()->allSceneGraphNodes();
+	std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
 	Renderable* possibleTarget;
 	std::string targetBody;
 	bool hasBody, found = false;
@@ -321,9 +337,10 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 
 	std::string closestTarget = "";
 
-	psc spacecraftPos;
 	double lt;
-	SpiceManager::ref().getTargetPosition(_spacecraft, "SSB", GalacticFrame, "NONE", currentTime, spacecraftPos, lt);
+    glm::dvec3 p =
+    SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, {}, currentTime, lt);
+    psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 
 	for (auto node : nodes)
@@ -332,7 +349,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
 		if (possibleTarget != nullptr) {
 			hasBody = possibleTarget->hasBody();
 			if (hasBody && possibleTarget->getBody(targetBody)) {
-				openspace::SpiceManager::ref().targetWithinFieldOfView(_instrument, targetBody, _spacecraft, "ELLIPSOID", "NONE", currentTime, found);
+                found = SpiceManager::ref().isTargetInFieldOfView(targetBody, _spacecraft, _instrument, SpiceManager::FieldOfViewMethod::Ellipsoid, {}, currentTime);
 				if (found){
 					targets.push_back(node->name()); // get name from propertyOwner
 					distance = (node->worldPosition() - spacecraftPos).length();

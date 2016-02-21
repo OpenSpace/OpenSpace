@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <ghoul/opengl/texture.h>
 //#include <openspace/util/runtimedata.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/spicemanager.h>
 
 namespace openspace {
 class RenderableFov : public Renderable{
@@ -55,7 +56,7 @@ public:
     // properties
     properties::FloatProperty _lineWidth;
 	properties::BoolProperty _drawSolid;
-	ghoul::opengl::ProgramObject* _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 	ghoul::opengl::Texture* _texture;
 	openspace::SceneGraphNode* _targetNode;
 
@@ -95,8 +96,7 @@ public:
 	std::string _observer;
 	std::string _frame;
 	std::string _instrumentID;
-	std::string _method;
-	std::string _aberrationCorrection;
+    SpiceManager::AberrationCorrection _aberrationCorrection;
 	std::string _fovTarget;
 	glm::dvec3 ipoint, ivec;
 	glm::dvec3 _previousHalf;
@@ -106,7 +106,6 @@ public:
 	std::vector<glm::dvec3> _bounds;
 	std::vector<std::string> _potentialTargets;
 	bool _drawFOV;
-	double _targetEpoch;
 	double _lt;
 
 	// GPU 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -190,17 +190,14 @@ void MainWindow::initialize() {
     _syncWidget->hide();
 
     ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
-    LogMgr.addLog(new ghoul::logging::ConsoleLog);
-    LogMgr.addLog(new ghoul::logging::HTMLLog("LauncherLog.html", false));
-    LogMgr.addLog(new QLog);
+    LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
+    LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", false) );
+    LogMgr.addLog( std::make_unique< QLog >() );
 
     std::string configurationFile = _configurationFile;
-    bool found = openspace::OpenSpaceEngine::findConfiguration(configurationFile);
-    if (!found) {
-        LERRORC("MainWindow", "Could not find configuration file");
-    }
-
+    
     _configuration = new openspace::ConfigurationManager;
+    configurationFile = _configuration->findConfiguration( configurationFile );
     _configuration->loadFromFile(configurationFile);
 
     // Load all available scenes

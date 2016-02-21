@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 
 #define _USE_MATH_DEFINES
@@ -111,7 +110,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 			_varray[nr].tex[1] = t2;
 
 			glm::vec4 tmp(x, y, z, 1);
-			glm::mat4 rot = glm::rotate(glm::mat4(1), 90.f, glm::vec3(1, 0, 0));
+			glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 			tmp = _gridMatrix*rot*tmp;
 			
 			for (int i = 0; i < 3; i++){
@@ -166,7 +165,7 @@ bool RenderableSphericalGrid::deinitialize(){
 bool RenderableSphericalGrid::initialize(){
 	bool completeSuccess = true;
 	if (_gridProgram == nullptr)
-		completeSuccess &= OsEng.ref().configurationManager()->getValue("GridProgram", _gridProgram);
+		completeSuccess &= OsEng.ref().configurationManager().getValue("GridProgram", _gridProgram);
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaoID);
@@ -227,9 +226,8 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	_gridProgram->deactivate();
 }
 
-void RenderableSphericalGrid::update(const UpdateData& data){
-
-	openspace::SpiceManager::ref().getPositionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time, _parentMatrix);
+void RenderableSphericalGrid::update(const UpdateData& data) {
+    _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time);
 
 }
 }

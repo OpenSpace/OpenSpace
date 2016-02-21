@@ -1,36 +1,35 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2015                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/base/rendering/renderablepath.h>
 #include <openspace/util/time.h>
 
-#include <openspace/util/constants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/highresclock.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <fstream>
 
@@ -99,19 +98,20 @@ bool RenderablePath::initialize() {
 	}
 
 	bool completeSuccess = true;
-	_programObject = ghoul::opengl::ProgramObject::Build("PathProgram",
-		"${MODULE_BASE}/shaders/path_vs.glsl",
-		"${MODULE_BASE}/shaders/path_fs.glsl"
-		);
+
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _programObject = renderEngine.buildRenderProgram("PathProgram",
+        "${MODULE_BASE}/shaders/path_vs.glsl",
+        "${MODULE_BASE}/shaders/path_fs.glsl");
 	if (!_programObject)
 		return false;
 
 	bool intervalSet = hasTimeInterval();
 	if (intervalSet) {
 		getInterval(_start, _stop);
-		std::string stop, start;
-		SpiceManager::ref().getDateFromET(_start, start);
-		SpiceManager::ref().getDateFromET(_stop, stop);
+        std::string start = SpiceManager::ref().dateFromEphemerisTime(_start);
+        std::string stop = SpiceManager::ref().dateFromEphemerisTime(_stop);
 	}
 
 	return completeSuccess;
@@ -124,8 +124,11 @@ bool RenderablePath::deinitialize() {
 	glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
 
-    delete _programObject;
-    _programObject = nullptr;
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_programObject) {
+        renderEngine.removeRenderProgram(_programObject);
+        _programObject = nullptr;
+    }
 
 	return true;
 }
@@ -159,7 +162,7 @@ void RenderablePath::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("color", _lineColor);
 	_programObject->setUniform("lastPosition", _lastPosition);
-	setPscUniforms(_programObject, &data.camera, data.position);
+	setPscUniforms(_programObject.get(), &data.camera, data.position);
 
 	if (_drawLine) {
 		glLineWidth(_lineWidth);
@@ -215,15 +218,17 @@ void RenderablePath::calculatePath(std::string observer) {
 	double lightTime;
 //	bool correctPosition = true;
 
-	psc pscPos;
 	double currentTime = _start;
 	_vertexArray.resize(segments);
 
+    psc pscPos;
 	//float r, g, b;
 	//float g = _lineColor[1];
 	//float b = _lineColor[2];
 	for (int i = 0; i < segments; i++) {
-		SpiceManager::ref().getTargetPosition(_target, observer, _frame, "NONE", currentTime, pscPos, lightTime);
+        glm::dvec3 p =
+        SpiceManager::ref().targetPosition(_target, observer, _frame, {}, currentTime, lightTime);
+        pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 		pscPos[3] += 3;
 			
 		//if (!correctPosition) {

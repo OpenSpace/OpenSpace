@@ -26,7 +26,6 @@
 #include <modules/volume/rendering/renderablevolume.h>
 #include <openspace/engine/openspaceengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/util/constants.h>
 #include <openspace/util/progressbar.h>
 
 // ghoul includes
@@ -140,9 +139,10 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
         std::stringstream ss;
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << "." << variableCacheString << ".cache";
 
-		std::string cachepath; // = filepath + ss.str();
+		 // = filepath + ss.str();
         ghoul::filesystem::File ghlFile(filepath);
-		FileSys.cacheManager()->getCachedFile(ghlFile.baseName(), ss.str(), cachepath, true);
+        std::string cachepath = FileSys.cacheManager()->cachedFilename(ghlFile.baseName(),
+                                                                       ss.str(),  true);
 		if (cache && FileSys.fileExists(cachepath)) {
            
 #define VOLUME_LOAD_PROGRESSBAR
@@ -295,7 +295,7 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     
     // check if not a txt based texture
     if ( ! hasExtension(filepath, "txt")) {
-        ghoul::opengl::Texture* t = ghoul::io::TextureReader::ref().loadTexture(f);
+        ghoul::opengl::Texture* t = ghoul::io::TextureReader::ref().loadTexture(f).get();
         t->setWrapping(wrappingmode);
         return t;
     }

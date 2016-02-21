@@ -26,7 +26,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/util/constants.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -91,12 +91,12 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     , _vertexPositionBuffer(0)
 {
 	ghoul_assert(
-		dictionary.hasKeyAndValue<std::string>(constants::scenegraphnode::keyName),
+		dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
 		"Renderable does not have a name"
 	);
 
 	std::string name;
-	dictionary.getValue(constants::scenegraphnode::keyName, name);
+	dictionary.getValue(SceneGraphNode::KeyName, name);
 
 	_loggerCat = "RenderableFieldlines [" + name + "]";
 
@@ -202,9 +202,9 @@ bool RenderableFieldlines::initialize() {
 
 	_program = ghoul::opengl::ProgramObject::Build(
 		"Fieldline",
-		"${SHADERS}/modules/fieldlines/fieldline_vs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_fs.glsl",
-		"${SHADERS}/modules/fieldlines/fieldline_gs.glsl"
+        "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
+        "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
+        "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
 	);
 	if (!_program)
 		return false;
@@ -225,7 +225,7 @@ void RenderableFieldlines::render(const RenderData& data) {
 	_program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_program->setUniform("modelTransform", glm::mat4(1.0));
 	_program->setUniform("cameraViewDir", data.camera.viewDirection());
-	setPscUniforms(_program, &data.camera, data.position);
+	setPscUniforms(_program.get(), &data.camera, data.position);
 
 	_program->setUniform("classification", _classification);
 	if (!_classification)

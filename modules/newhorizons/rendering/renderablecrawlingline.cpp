@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 //#include <imgui.h>
@@ -76,10 +77,13 @@ bool RenderableCrawlingLine::isReady() const {
 bool RenderableCrawlingLine::initialize() {
 	_frameCounter = 0;
     bool completeSuccess = true;
-    _program = ghoul::opengl::ProgramObject::Build("RenderableCrawlingLine",
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _program = renderEngine.buildRenderProgram("RenderableCrawlingLine",
         "${MODULE_NEWHORIZONS}/shaders/crawlingline_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl"
-    );
+        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl");
+
+
     if (!_program)
         return false;
 
@@ -103,6 +107,13 @@ bool RenderableCrawlingLine::deinitialize(){
     _vao = 0;
 	glDeleteBuffers(1, &_vbo);
     _vbo = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
 	return true;
 }
 
@@ -129,7 +140,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 
         _program->setUniform("_alpha", alpha);
 		_program->setUniform("color", _lineColor);
-	    setPscUniforms(_program, &data.camera, data.position);
+	    setPscUniforms(_program.get(), &data.camera, data.position);
 
 	    glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -148,8 +159,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 void RenderableCrawlingLine::update(const UpdateData& data) {
     if (_program->isDirty())
         _program->rebuildFromFile();
-    glm::dmat3 transformMatrix = glm::dmat3(1);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
+    glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(_source, _referenceFrame, data.time);
 
 	glm::mat4 tmp = glm::mat4(1);
 	for (int i = 0; i < 3; i++) {
@@ -160,13 +170,17 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
 	_positions[SourcePosition] = PowerScaledCoordinate::CreatePowerScaledCoordinate(0, 0, 0);
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
 	glm::dvec3 boresight;
-
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
-    if (!found)
-        LERROR("Could not find field of view for instrument");
+    try {
+        SpiceManager::FieldOfViewResult res =
+            SpiceManager::ref().fieldOfView(_source);
+        boresight = res.boresightVector;
+        
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        LERROR(e.what());
+    }
+    
 	glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
 	target = tmp * target;
 

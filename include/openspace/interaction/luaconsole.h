@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/util/keys.h>
+
 #include <string>
 #include <vector>
 
@@ -35,17 +37,16 @@ namespace openspace {
 class LuaConsole {
 public:
 	LuaConsole();
-	~LuaConsole();
 
     void initialize();
     void deinitialize();
 
-	void keyboardCallback(int key, int action);
-	void charCallback(unsigned int codepoint);
+	void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void charCallback(unsigned int codepoint, KeyModifier modifier);
 
 	void render();
 
-    unsigned int commandInputButton();
+    Key commandInputButton();
 
 	bool isVisible() const;
 	void setVisible(bool visible);

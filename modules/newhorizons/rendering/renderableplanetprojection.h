@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014                                                                    *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef __RENDERABLEPLANETPROJECTION_H__
 #define __RENDERABLEPLANETPROJECTION_H__
@@ -40,6 +40,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/framebufferobject.h>
 
@@ -69,7 +70,7 @@ public:
 
 	void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-	ghoul::opengl::Texture* baseTexture() { return _texture; };
+	ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
 
 protected:
 
@@ -94,13 +95,13 @@ private:
 	properties::BoolProperty _performProjection;
 	properties::BoolProperty _clearAllProjections;
 
-    ghoul::opengl::ProgramObject* _programObject;
-	ghoul::opengl::ProgramObject* _fboProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
-    ghoul::opengl::Texture* _texture;
-	ghoul::opengl::Texture* _textureOriginal;
-	ghoul::opengl::Texture* _textureProj;
-	ghoul::opengl::Texture* _textureWhiteSquare;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+	std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+	std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+    std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 	planetgeometryprojection::PlanetGeometryProjection* _geometry;
 	
 	glm::vec2  _camScaling;
@@ -117,7 +118,7 @@ private:
 	std::string _instrumentID;
 	std::string _projectorID;
 	std::string _projecteeID;
-	std::string _aberration;
+    SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
 
 

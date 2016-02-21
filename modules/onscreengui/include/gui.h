@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,9 @@
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+
 namespace openspace {
 namespace gui {
 
@@ -49,12 +52,14 @@ public:
 	void initializeGL();
 	void deinitializeGL();
 
-	bool mouseButtonCallback(int key, int action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action);
+//	bool mouseButtonCallback(int key, int action);
 	bool mouseWheelCallback(double position);
-	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character);
+    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
+//	bool keyCallback(int key, int action);
+	bool charCallback(unsigned int character, KeyModifier modifier);
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, bool mouseButtonsPressed[2]);
+	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
 	void endFrame();
 
 	void renderMainWindow();

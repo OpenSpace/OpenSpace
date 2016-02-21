@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ public:
     bool addSceneGraphNode(SceneGraphNode* node);
     bool removeSceneGraphNode(SceneGraphNode* node); 
 
-    const std::vector<SceneGraphNode*>& nodes();
+    const std::vector<SceneGraphNode*>& nodes() const;
 
     SceneGraphNode* rootNode() const;
     SceneGraphNode* sceneGraphNode(const std::string& name) const;

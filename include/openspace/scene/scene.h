@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@
 
 namespace openspace {
 
-
+class Volume;
 class SceneGraphNode;
 
 // Notifications:
@@ -86,6 +86,10 @@ public:
     void render(const RenderData& data);
 
     /*
+     * Return a vector of volumes to render and their acciciated render data
+     */
+    std::vector<std::pair<Volume*, RenderData>> volumesToRender(const RenderData& data) const;
+    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;
@@ -125,7 +129,7 @@ private:
 
 	std::mutex _programUpdateLock;
 	std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
-	std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
     typedef std::map<std::string, ghoul::Dictionary> NodeMap;
     typedef std::multimap<std::string, std::string> DependencyMap;

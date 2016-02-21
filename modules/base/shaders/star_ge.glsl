@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,6 @@ const vec2 corners[4] = vec2[4](
 );
 
 #include "PowerScaling/powerScalingMath.hglsl"
-#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
@@ -53,6 +52,7 @@ out float billboardSize;
 uniform mat4 projection;
 
 uniform float scaleFactor;
+uniform float minBillboardSize;
 
 void main() {
     if ((psc_position[0].x == 0.0) && (psc_position[0].y == 0.0) && (psc_position[0].z == 0.0))
@@ -68,21 +68,21 @@ void main() {
 
     vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
-        vec4 p1     = gl_in[0].gl_Position;
-        p1.xy      += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5))); 
+        vec4 p1 = gl_in[0].gl_Position;
+        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
         projPos[i] = projection * p1;
     }
 
     // Calculate the positions of the lower left and upper right corners of the
     // billboard in screen-space
-    const vec2 screenSize = vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    const vec2 screenSize = vec2(#{rendererData.windowWidth}, #{rendererData.windowHeight});
     vec2 ll = (((projPos[1].xy / projPos[1].w) + 1) / 2) * screenSize;
     vec2 ur = (((projPos[2].xy / projPos[2].w) + 1) / 2) * screenSize;
 
     // The billboard is smaller than one pixel, we can discard it
     vec2 distance = abs(ll - ur);
     float sizeInPixels = length(distance);
-    if (sizeInPixels < 5)
+    if (sizeInPixels < minBillboardSize)
         return;
 
     for(int i = 0; i < 4; i++){
