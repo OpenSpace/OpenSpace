@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "mercury_textures", Destination = "textures", Version = 1 }
+    },
+}

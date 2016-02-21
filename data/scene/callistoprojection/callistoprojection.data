@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "callisto_textures", Destination = "textures", Version = 1 }
+    },
+}

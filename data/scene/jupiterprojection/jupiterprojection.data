@@ -1,0 +1,5 @@
+return {
+    TorrentFiles = {
+        { File = "ProjectionsOfInterest.torrent", Destination = "." }
+    }
+}

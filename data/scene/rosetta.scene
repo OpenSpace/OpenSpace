@@ -1,0 +1,25 @@
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "67P",
+        Position = {1, 0, 0, 5},
+    },
+    Modules = {
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        -- "pluto",
+        "stars",
+        "milkyway",
+        "rosetta",
+        "67P",
+    }
+}
+
