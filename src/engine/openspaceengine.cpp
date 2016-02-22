@@ -290,7 +290,6 @@ void OpenSpaceEngine::destroy() {
 	Time::deinitialize();
 	SpiceManager::deinitialize();
 
-	FileSystem::deinitialize();
 	LogManager::deinitialize();
 
     ghoul::deinitialize();
