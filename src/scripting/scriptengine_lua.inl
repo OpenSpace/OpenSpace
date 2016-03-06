@@ -144,7 +144,11 @@ namespace luascriptfunctions {
 
 		std::string pathToken = luaL_checkstring(L, -1);
 		std::string path = luaL_checkstring(L, -2);
-		FileSys.registerPathToken(pathToken, path, true);
+		FileSys.registerPathToken(
+            pathToken,
+            path,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
 		return 0;
 	}
 

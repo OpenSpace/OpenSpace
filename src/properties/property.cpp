@@ -141,7 +141,11 @@ void Property::setReadOnly(bool state) {
 }
 
 void Property::setViewOption(std::string option, bool value) {
-    _metaData.setValue(_metaDataKeyViewPrefix + option, value, true);
+    _metaData.setValue(
+        _metaDataKeyViewPrefix + option,
+        value,
+        ghoul::Dictionary::CreateIntermediate::Yes
+    );
 }
 
 const ghoul::Dictionary& Property::metaData() const {

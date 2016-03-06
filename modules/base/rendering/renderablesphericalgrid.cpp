@@ -206,8 +206,10 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	}
 
 
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+
 	// setup the data to the shader
-	_gridProgram->setIgnoreUniformLocationError(true);
+	_gridProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 	_gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_gridProgram->setUniform("ModelTransform", transform);
 	setPscUniforms(_gridProgram, &data.camera, data.position);

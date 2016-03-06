@@ -191,7 +191,8 @@ void RenderableStars::render(const RenderData& data) {
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-	_program->setIgnoreUniformLocationError(true);
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 	//_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	//_program->setUniform("ModelTransform", glm::mat4(1.f));
 	_program->setUniform("model", modelMatrix);
@@ -222,7 +223,8 @@ void RenderableStars::render(const RenderData& data) {
 	glDrawArrays(GL_POINTS, 0, nStars);
 
 	glBindVertexArray(0);
-	_program->setIgnoreUniformLocationError(false);
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _program->setIgnoreUniformLocationError(IgnoreError::No);
 	_program->deactivate();
     
 	glDepthMask(true);
@@ -343,7 +345,10 @@ void RenderableStars::update(const UpdateData& data) {
 
 bool RenderableStars::loadData() {
 	std::string _file = _speckFile;
-	std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file, true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        _file,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
 
 	bool hasCachedFile = FileSys.fileExists(cachedFile);
 	if (hasCachedFile) {

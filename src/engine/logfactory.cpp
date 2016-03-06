@@ -74,14 +74,30 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
 	bool logLevelStamp = true;
 	dictionary.getValue(keyLogLevelStamping, logLevelStamp);
 
+    using Append = ghoul::logging::TextLog::Append;
+    using TimeStamping = ghoul::logging::Log::TimeStamping;
+    using DateStamping = ghoul::logging::Log::DateStamping;
+    using CategoryStamping = ghoul::logging::Log::CategoryStamping;
+    using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
+
 	if (type == valueHtmlLog) {
         return std::make_unique<ghoul::logging::HTMLLog>(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+			filename,
+            append ? Append::Yes : Append::No,
+            timeStamp ? TimeStamping::Yes : TimeStamping::No,
+            dateStamp ? DateStamping::Yes : DateStamping::No,
+            categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
         );
 	}
 	else if (type == valueTextLog) {
         return std::make_unique<ghoul::logging::TextLog>(
-			filename, append, timeStamp, dateStamp, categoryStamp, logLevelStamp
+			filename,
+            append ? Append::Yes : Append::No,
+            timeStamp ? TimeStamping::Yes : TimeStamping::No,
+            dateStamp ? DateStamping::Yes : DateStamping::No,
+            categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
         );
 	}
 	else {

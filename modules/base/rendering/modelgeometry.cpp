@@ -84,7 +84,7 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 	}
 	_file = FileSys.absolutePath(_file);
 
-	if (!FileSys.fileExists(_file, true))
+    if (!FileSys.fileExists(_file, ghoul::filesystem::FileSystem::RawPath::Yes))
 		LERROR("Could not load OBJ file '" << _file << "': File not found");
 	
 
@@ -145,7 +145,10 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-		std::string cachedFile = FileSys.cacheManager()->cachedFilename(filename, true);
+		std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            filename,
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
 
 		bool hasCachedFile = FileSys.fileExists(cachedFile);
 		if (hasCachedFile) {

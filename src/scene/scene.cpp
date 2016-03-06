@@ -90,8 +90,10 @@ bool Scene::initialize() {
         "fboPassProgram",
 		"${SHADERS}/fboPass_vs.glsl",
 		"${SHADERS}/fboPass_fs.glsl");
-	if (!tmpProgram) return false;
-    tmpProgram->setIgnoreSubroutineUniformLocationError(true);
+	if (!tmpProgram)
+        return false;
+
+    tmpProgram->setIgnoreSubroutineUniformLocationError(ProgramObject::IgnoreError::Yes);
 	OsEng.configurationManager().setValue("fboPassProgram", tmpProgram.get());
 
     return true;
