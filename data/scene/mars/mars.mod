@@ -37,7 +37,7 @@ return {
             Reference = "ECLIPJ2000",
             Observer = "SUN",
             Kernels = {
-                "${OPENSPACE_DATA}/spice/MAR063.bsp"
+                "${OPENSPACE_DATA}/spice/MAR063.BSP"
             }
         },
         Rotation = {
