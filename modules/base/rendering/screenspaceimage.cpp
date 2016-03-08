@@ -21,4 +21,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+ #include <modules/base/rendering/screenspaceimage.h>
+
+ namespace openspace {
+
+	void ScreenSpaceImage::render(){
+		return;
+	}
+	bool ScreenSpaceImage::initialize(){
+			
+	}
+	bool ScreenSpaceImage::deinitialize(){
+			
+	}
+	void ScreenSpaceImage::update(){
+			
+	}
+}

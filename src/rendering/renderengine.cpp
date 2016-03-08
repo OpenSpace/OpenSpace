@@ -52,6 +52,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
@@ -388,6 +389,10 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		if (_showLog) {
 			renderScreenLog();
 		}
+	}
+
+	for (auto s : _screenSpaceRenderables) {
+		s->render();
 	}
 }
 
@@ -1104,6 +1109,24 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
+}
+
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+	s->initialize();
+	_screenSpaceRenderables.push_back(s);
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+	auto it = std::find(
+		_screenSpaceRenderables.begin(),
+		_screenSpaceRenderables.end(),
+		s
+		);
+
+	if (it != _screenSpaceRenderables.end()) {
+		s->deinitialize();
+		_screenSpaceRenderables.erase(it);
+	}
 }
 
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {

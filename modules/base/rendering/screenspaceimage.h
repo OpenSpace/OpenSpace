@@ -23,8 +23,17 @@
  ****************************************************************************************/
  #include <openspace/rendering/screenspacerenderable.h>
  #include <ghoul/opengl/texture.h>
+namespace openspace {
 
 class ScreenSpaceImage : public ScreenSpaceRenderable {
+
+public:
+	void render() override;
+	bool initialize() override;
+	bool deinitialize() override;
+	void update() override;
 private:
 	std::unique_ptr<ghoul::opengl::Texture>  _imageHandle; // The image to render
 };
+
+}

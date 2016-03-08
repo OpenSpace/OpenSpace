@@ -29,7 +29,6 @@
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/rendering/screenspacerenderable.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -50,6 +49,7 @@ class SyncBuffer;
 class Scene;
 class Renderer;
 class ScreenLog;
+class ScreenSpaceRenderable;
 
 class RenderEngine {
 public:
@@ -97,6 +97,9 @@ public:
 	void setGlobalBlackOutFactor(float factor);
 
     void setDisableRenderingOnMaster(bool enabled);
+
+    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
