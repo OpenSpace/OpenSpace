@@ -25,12 +25,13 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledataplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledataplane.cpp
+	
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -40,7 +41,7 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Datasurface"
+    "DataSurface"
     datasurface_module
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
