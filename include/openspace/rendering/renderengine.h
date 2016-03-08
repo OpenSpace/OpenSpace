@@ -29,6 +29,7 @@
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -166,6 +167,7 @@ private:
 	int _fadeDirection;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
