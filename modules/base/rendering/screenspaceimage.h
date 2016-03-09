@@ -38,8 +38,13 @@ public:
 	bool initialize() override;
 	bool deinitialize() override;
 	void update() override;
+	bool isReady() const override;
 private:
-	std::unique_ptr<ghoul::opengl::Texture>  _imageHandle; // The image to render
+	void loadTexture();
+
+	std::string _texturePath;
+	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
+
 };
 } //namespace openspace
 #endif //__SCREENSPACEIMAGE_H__

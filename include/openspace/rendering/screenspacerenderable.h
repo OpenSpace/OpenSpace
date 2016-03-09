@@ -24,7 +24,7 @@
  
 #ifndef __SCREENSPACERENDERABLE_H__
 #define __SCREENSPACERENDERABLE_H__
-
+#include <ghoul/opengl/programobject.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
@@ -40,11 +40,18 @@ public:
 	virtual bool initialize() = 0;
 	virtual bool deinitialize() = 0;
 	virtual void update() = 0;
+	virtual bool isReady() const = 0;
 
 protected:
+	void createPlane();
+
 	properties::BoolProperty _enabled;
 	properties::Vec3Property _position;
 	properties::Vec2Property _size;
+
+	GLuint _quad;
+	GLuint _vertexPositionBuffer;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__

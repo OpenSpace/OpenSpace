@@ -24,15 +24,42 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 namespace openspace {
-		ScreenSpaceRenderable::ScreenSpaceRenderable()
-			: _enabled("enabled", "Is Enabled", true)
-			, _position("position", "Position", glm::vec3(0,0,0))
-			, _size("size", "Size" , glm::vec2(1,1))
-		{
-			addProperty(_enabled);
-			addProperty(_position);
-			addProperty(_size);
-		}
+	ScreenSpaceRenderable::ScreenSpaceRenderable()
+		: _enabled("enabled", "Is Enabled", true)
+		, _position("position", "Position", glm::vec3(0,0,0))
+		, _size("size", "Size" , glm::vec2(0.5,1.0))
+		, _quad(0)
+		, _vertexPositionBuffer(0)
+	{
+		addProperty(_enabled);
+		addProperty(_position);
+		addProperty(_size);
+	}
 
-		ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
+	ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
+
+	void ScreenSpaceRenderable::createPlane() {
+	    // ============================
+	    // 		GEOMETRY (quad)
+	    // ============================
+	    const GLfloat size = _size.value()[0];
+	    const GLfloat w = _size.value()[1];
+	    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+	        //	  x      y     z     w     s     t
+	        -size, -size, 0.0f, w, 0, 1,
+	        size, size, 0.0f, w, 1, 0,
+	        -size, size, 0.0f, w, 0, 0,
+	        -size, -size, 0.0f, w, 0, 1,
+	        size, -size, 0.0f, w, 1, 1,
+	        size, size, 0.0f, w, 1, 0,
+	    };
+
+	    glBindVertexArray(_quad); // bind array
+	    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+	    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+	    glEnableVertexAttribArray(0);
+	    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+	    glEnableVertexAttribArray(1);
+	    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+	}
 }
