@@ -33,6 +33,9 @@ namespace openspace {
 
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
+	ScreenSpaceRenderable();
+	~ScreenSpaceRenderable();
+
 	virtual void render() = 0;
 	virtual bool initialize() = 0;
 	virtual bool deinitialize() = 0;

@@ -24,9 +24,15 @@
  #include <modules/base/rendering/screenspaceimage.h>
 
  namespace openspace {
+ 	ScreenSpaceImage::ScreenSpaceImage()
+ 		:ScreenSpaceRenderable()
+ 	{}
+
+ 	ScreenSpaceImage::~ScreenSpaceImage(){}
+
 
 	void ScreenSpaceImage::render(){
-		return;
+		
 	}
 	bool ScreenSpaceImage::initialize(){
 			

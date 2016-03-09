@@ -21,6 +21,18 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+#include <openspace/rendering/screenspacerenderable.h>
+
 namespace openspace {
+		ScreenSpaceRenderable::ScreenSpaceRenderable()
+			: _enabled("enabled", "Is Enabled", true)
+			, _position("position", "Position", glm::vec3(0,0,0))
+			, _size("size", "Size" , glm::vec2(1,1))
+		{
+			addProperty(_enabled);
+			addProperty(_position);
+			addProperty(_size);
+		}
+
+		ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
 }
