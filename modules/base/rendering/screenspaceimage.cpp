@@ -67,7 +67,7 @@ bool ScreenSpaceImage::initialize(){
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	createPlane();
 
-	_texturePath = "/home/spiwell/OpenSpace-Development/data/test.png";
+	_texturePath = "../../data/test.png";
 
 	if(_shader == nullptr) {
     	RenderEngine& renderEngine = OsEng.renderEngine();
@@ -101,7 +101,7 @@ bool ScreenSpaceImage::isReady() const{
 
 void ScreenSpaceImage::loadTexture() {
 	if (_texturePath != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			// std::cout<< std::endl << std::endl << "Loaded texture from '" << absPath(_texturePath) << "'" <<std::endl << std::endl;
