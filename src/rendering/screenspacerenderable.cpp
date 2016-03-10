@@ -28,17 +28,17 @@ namespace openspace {
 	ScreenSpaceRenderable::ScreenSpaceRenderable()
 		: _enabled("enabled", "Is Enabled", true)
 		, _flatScreen("flatScreen", "Flat Screen", true)
-		, _position("position", "Position", glm::vec3(0,0,0))
-		, _size("size", "Size" , glm::vec2(1.0,1.0))
-		, _scale("scale", "Scale" , 0.5)
+		, _position("position", "Position", glm::vec3(0),glm::vec3(-2),glm::vec3(2))
+		, _scale("scale", "Scale" , 0.5, 0, 1)
+		, _texturePath("texturePath", "Texture path", "${OPENSPACE_DATA}/test2.jpg")
 		, _quad(0)
 		, _vertexPositionBuffer(0)
 	{
 		addProperty(_enabled);
 		addProperty(_flatScreen);
 		addProperty(_position);
-		addProperty(_size);
 		addProperty(_scale);
+		addProperty(_texturePath);
 	}
 
 	ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
@@ -51,16 +51,14 @@ namespace openspace {
 	    // ============================
 	    // 		GEOMETRY (quad)
 	    // ============================
-	    const GLfloat size = _size.value()[0];
-	    const GLfloat w = _size.value()[1];
 	    const GLfloat vertex_data[] = { // square of two triangles (sigh)
 	        //	  x      y     z     w     s     t
-	        -size, -size, 0.0f, w, 0, 1,
-	        size, size, 0.0f, w, 1, 0,
-	        -size, size, 0.0f, w, 0, 0,
-	        -size, -size, 0.0f, w, 0, 1,
-	        size, -size, 0.0f, w, 1, 1,
-	        size, size, 0.0f, w, 1, 0,
+	        -1, -1, 0.0f, 1, 0, 1,
+	         1,  1, 0.0f, 1, 1, 0,
+	        -1,  1, 0.0f, 1, 0, 0,
+	        -1, -1, 0.0f, 1, 0, 1,
+	         1, -1, 0.0f, 1, 1, 1,
+	         1,  1, 0.0f, 1, 1, 0,
 	    };
 
 	    glBindVertexArray(_quad); // bind array

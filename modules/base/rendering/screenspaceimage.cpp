@@ -34,16 +34,28 @@ namespace openspace {
 		:ScreenSpaceRenderable()
 	{
 		setName("ScreenSpaceImage");
+
+		OsEng.gui()._property.registerProperty(&_enabled);
+		OsEng.gui()._property.registerProperty(&_flatScreen);
+		OsEng.gui()._property.registerProperty(&_position);
+		OsEng.gui()._property.registerProperty(&_scale);
+		OsEng.gui()._property.registerProperty(&_texturePath);
+
+		_texturePath.onChange([this](){ loadTexture(); });
 	}
 
 	ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
 void ScreenSpaceImage::render(){
-	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
-	transform = glm::scale(transform, glm::vec3(_scale.value()));
+	GLint m_viewport[4];
+	glGetIntegerv(GL_VIEWPORT, m_viewport);
+	float height =  (float(m_viewport[2])/m_viewport[3])*
+					(float(_texture->height())/float(_texture->width()));
 
-    // transform.translate(position.value());
+	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
+	transform = glm::scale(transform, glm::vec3(_scale.value(),_scale.value()*height,1));
+
     _shader->activate();
 
     _shader->setUniform("ModelTransform",transform);
@@ -60,14 +72,9 @@ void ScreenSpaceImage::render(){
 }
 
 bool ScreenSpaceImage::initialize(){
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_flatScreen);
-
 	glGenVertexArrays(1, &_quad); // generate array
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	createPlane();
-
-	_texturePath = "${OPENSPACE_DATA}/test.png";
 
 	if(_shader == nullptr) {
     	RenderEngine& renderEngine = OsEng.renderEngine();
@@ -100,8 +107,8 @@ bool ScreenSpaceImage::isReady() const{
 }
 
 void ScreenSpaceImage::loadTexture() {
-	if (_texturePath != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+	if (_texturePath.value() != "") {
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value()));
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			// std::cout<< std::endl << std::endl << "Loaded texture from '" << absPath(_texturePath) << "'" <<std::endl << std::endl;
