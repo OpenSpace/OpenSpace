@@ -206,8 +206,6 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
-    std::shared_ptr<ScreenSpaceImage> s = std::make_shared<ScreenSpaceImage>();
-    registerScreenSpaceRenderable(s);
 	return true;
 }
 

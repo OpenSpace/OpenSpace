@@ -34,6 +34,9 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base/rendering/screenspaceimage.h>
+
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -129,6 +132,16 @@ namespace {
 }
 
 namespace openspace {
+	void addScreenSpaceRenderable(std::string texturePath){
+		std::string filepath ="${OPENSPACE_DATA}/"+texturePath;
+		if( ! FileSys.fileExists(filepath)) {
+			LWARNING("Could not find image '" << filepath << "'");
+			return;
+		}
+		OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));
+	}
+
+
 namespace gui {
 
 GUI::GUI() 
@@ -391,6 +404,14 @@ void GUI::renderMainWindow() {
         OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
+
+	static const int bufferSize = 256;
+    static char buffer[bufferSize];
+	ImGui::InputText("", buffer, bufferSize);
+
+	if(ImGui::SmallButton("Add Image")){
+		addScreenSpaceRenderable(std::string(buffer));
+	}
 
 	ImGui::End();
 }

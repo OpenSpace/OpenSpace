@@ -34,7 +34,7 @@ namespace openspace {
 
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
-	ScreenSpaceRenderable();
+	ScreenSpaceRenderable(std::string texturePath);
 	~ScreenSpaceRenderable();
 
 	virtual void render() = 0;

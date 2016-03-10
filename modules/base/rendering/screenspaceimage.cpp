@@ -30,11 +30,11 @@
 #include <modules/onscreengui/include/gui.h>
 
 namespace openspace {
-	ScreenSpaceImage::ScreenSpaceImage()
-		:ScreenSpaceRenderable()
+ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
+		:ScreenSpaceRenderable(texturePath)
 	{
-		setName("ScreenSpaceImage");
 
+		setName("ScreenSpaceImage" + std::to_string(id()));
 		OsEng.gui()._property.registerProperty(&_enabled);
 		OsEng.gui()._property.registerProperty(&_flatScreen);
 		OsEng.gui()._property.registerProperty(&_position);
@@ -44,13 +44,13 @@ namespace openspace {
 		_texturePath.onChange([this](){ loadTexture(); });
 	}
 
-	ScreenSpaceImage::~ScreenSpaceImage(){}
+ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
 void ScreenSpaceImage::render(){
-	GLint m_viewport[4];
-	glGetIntegerv(GL_VIEWPORT, m_viewport);
-	float height =  (float(m_viewport[2])/m_viewport[3])*
+	GLfloat m_viewport[4];
+	glGetFloatv(GL_VIEWPORT, m_viewport);
+	float height =  (m_viewport[2]/m_viewport[3])*
 					(float(_texture->height())/float(_texture->width()));
 
 	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
@@ -124,5 +124,10 @@ void ScreenSpaceImage::loadTexture() {
             // _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 		}
 	}
+}
+
+int ScreenSpaceImage::id(){
+		static int id = 0;
+		return id++;
 }
 }
