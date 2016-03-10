@@ -41,13 +41,16 @@ public:
 	virtual bool deinitialize() = 0;
 	virtual void update() = 0;
 	virtual bool isReady() const = 0;
+	bool isEnabled() const;
 
 protected:
 	void createPlane();
 
 	properties::BoolProperty _enabled;
+	properties::BoolProperty _flatScreen;
 	properties::Vec3Property _position;
 	properties::Vec2Property _size;
+	properties::FloatProperty _scale;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

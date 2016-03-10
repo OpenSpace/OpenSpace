@@ -21,22 +21,31 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
 namespace openspace {
 	ScreenSpaceRenderable::ScreenSpaceRenderable()
 		: _enabled("enabled", "Is Enabled", true)
-		, _position("position", "Position", glm::vec3(0,0,0))
-		, _size("size", "Size" , glm::vec2(0.5,1.0))
+		, _flatScreen("flatScreen", "Flat Screen", true)
+		, _position("position", "Position", glm::vec3(1,0,0))
+		, _size("size", "Size" , glm::vec2(1.0,1.0))
+		, _scale("scale", "Scale" , 0.5)
 		, _quad(0)
 		, _vertexPositionBuffer(0)
 	{
 		addProperty(_enabled);
+		addProperty(_flatScreen);
 		addProperty(_position);
 		addProperty(_size);
+		addProperty(_scale);
 	}
 
 	ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
+
+	bool ScreenSpaceRenderable::isEnabled() const {
+		return _enabled;
+	}
 
 	void ScreenSpaceRenderable::createPlane() {
 	    // ============================

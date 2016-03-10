@@ -38,5 +38,5 @@ void main(){
 	vs_st = in_st;
 	vs_position = in_position; 
 
-	gl_Position = vs_position;
+	gl_Position = ModelTransform*vs_position;
 }

@@ -395,7 +395,8 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 	}
 
 	for (auto s : _screenSpaceRenderables) {
-		s->render();
+		if(s->isEnabled())
+			s->render();
 	}
 }
 
@@ -1130,6 +1131,15 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 		s->deinitialize();
 		_screenSpaceRenderables.erase(it);
 	}
+}
+
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
+	for(auto s : _screenSpaceRenderables){
+		if(s->name() == name){
+			return s;
+		}
+	}
+	return nullptr;
 }
 
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {

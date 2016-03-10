@@ -27,21 +27,27 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/opengl/textureunit.h>
+#include <modules/onscreengui/include/gui.h>
 
 namespace openspace {
 	ScreenSpaceImage::ScreenSpaceImage()
 		:ScreenSpaceRenderable()
-	{}
+	{
+		setName("ScreenSpaceImage");
+		_enabled.onChange([this](){});
+	}
 
 	ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
 void ScreenSpaceImage::render(){
-	glm::mat4 transform = glm::mat4(1.0);
-	// using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _shader->activate();
-    // _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
+	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
+	transform = glm::scale(transform, glm::vec3(_scale.value()));
 
+    // transform.translate(position.value());
+    _shader->activate();
+
+    _shader->setUniform("ModelTransform",transform);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -55,6 +61,9 @@ void ScreenSpaceImage::render(){
 }
 
 bool ScreenSpaceImage::initialize(){
+	std::cout << "initializeing" << std::endl;
+	OsEng.gui()._property.registerProperty(&_enabled);
+
 	glGenVertexArrays(1, &_quad); // generate array
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	createPlane();
