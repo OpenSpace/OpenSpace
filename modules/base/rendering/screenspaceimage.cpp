@@ -107,8 +107,8 @@ bool ScreenSpaceImage::isReady() const{
 }
 
 void ScreenSpaceImage::loadTexture() {
-	if (_texturePath != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+	if (_texturePath.value() != "") {
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value()));
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			// std::cout<< std::endl << std::endl << "Loaded texture from '" << absPath(_texturePath) << "'" <<std::endl << std::endl;
