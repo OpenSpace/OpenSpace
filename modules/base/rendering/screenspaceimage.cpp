@@ -34,7 +34,6 @@ namespace openspace {
 		:ScreenSpaceRenderable()
 	{
 		setName("ScreenSpaceImage");
-		_enabled.onChange([this](){});
 	}
 
 	ScreenSpaceImage::~ScreenSpaceImage(){}
@@ -61,8 +60,8 @@ void ScreenSpaceImage::render(){
 }
 
 bool ScreenSpaceImage::initialize(){
-	std::cout << "initializeing" << std::endl;
 	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_flatScreen);
 
 	glGenVertexArrays(1, &_quad); // generate array
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer

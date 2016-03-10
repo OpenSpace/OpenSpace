@@ -28,7 +28,7 @@ namespace openspace {
 	ScreenSpaceRenderable::ScreenSpaceRenderable()
 		: _enabled("enabled", "Is Enabled", true)
 		, _flatScreen("flatScreen", "Flat Screen", true)
-		, _position("position", "Position", glm::vec3(1,0,0))
+		, _position("position", "Position", glm::vec3(0,0,0))
 		, _size("size", "Size" , glm::vec2(1.0,1.0))
 		, _scale("scale", "Scale" , 0.5)
 		, _quad(0)
