@@ -67,7 +67,7 @@ bool ScreenSpaceImage::initialize(){
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	createPlane();
 
-	_texturePath = "../../data/test.png";
+	_texturePath = "${OPENSPACE_DATA}/test.png";
 
 	if(_shader == nullptr) {
     	RenderEngine& renderEngine = OsEng.renderEngine();
@@ -84,7 +84,7 @@ bool ScreenSpaceImage::initialize(){
 	return isReady();
 }
 bool ScreenSpaceImage::deinitialize(){
-		
+	return true;
 }
 void ScreenSpaceImage::update(){
 		
