@@ -41,8 +41,6 @@ public:
 	bool isReady() const override;
 private:
 	void loadTexture();
-
-	std::string _texturePath;
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
 
 };

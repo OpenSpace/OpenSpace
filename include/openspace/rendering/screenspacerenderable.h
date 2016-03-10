@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -49,8 +50,8 @@ protected:
 	properties::BoolProperty _enabled;
 	properties::BoolProperty _flatScreen;
 	properties::Vec3Property _position;
-	properties::Vec2Property _size;
 	properties::FloatProperty _scale;
+	properties::StringProperty _texturePath;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
