@@ -1,0 +1,7 @@
+return {
+    FileRequest = {
+        { Identifier = "stars_textures", Destination = "textures", Version = 1 },
+        { Identifier = "stars_du", Destination = "speck", Version = 1 },
+        { Identifier = "stars_colormap", Destination = ".", Version = 1 },
+    },
+}

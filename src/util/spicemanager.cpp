@@ -211,7 +211,8 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
     // to the directory they reside in. The directory change is not necessary for regular
     // kernels
     ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
-    string fileDirectory = ghoul::filesystem::File(path, true).directoryName();
+    using RawPath = ghoul::filesystem::File::RawPath;
+    string fileDirectory = ghoul::filesystem::File(path, RawPath::Yes).directoryName();
 	FileSys.setCurrentDirectory(fileDirectory);
 
     LINFO("Loading SPICE kernel '" << path << "'");
@@ -223,7 +224,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
 
     throwOnSpiceError("Kernel loading");
     
-    string fileExtension = ghoul::filesystem::File(path, true).fileExtension();
+    string fileExtension = ghoul::filesystem::File(path, RawPath::Yes).fileExtension();
     if (fileExtension == "bc" || fileExtension == "BC")
 		findCkCoverage(path); // binary ck kernel
 	else if (fileExtension == "bsp" || fileExtension == "BSP")

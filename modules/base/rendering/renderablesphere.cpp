@@ -155,8 +155,9 @@ void RenderableSphere::render(const RenderData& data) {
 
 
     // Activate shader
-	_shader->activate();
-    _shader->setIgnoreUniformLocationError(true);
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _shader->activate();
+    _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
@@ -174,7 +175,7 @@ void RenderableSphere::render(const RenderData& data) {
 
     _sphere->render();
 
-    _shader->setIgnoreUniformLocationError(false);
+    _shader->setIgnoreUniformLocationError(IgnoreError::No);
 	_shader->deactivate();
 }
 

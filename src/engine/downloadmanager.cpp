@@ -202,7 +202,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     DownloadProgressCallback progressCallback)
 {
     std::vector<FileFuture*> futures;
-    FileSys.createDirectory(destination, true);
+    FileSys.createDirectory(destination, ghoul::filesystem::FileSystem::Recursive::Yes);
     // TODO: Check s ---abock
     // TODO: Escaping is necessary ---abock
     const std::string fullRequest =_requestURL.back() + "?" +

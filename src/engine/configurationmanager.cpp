@@ -75,7 +75,9 @@ string ConfigurationManager::findConfiguration(const string& filename) {
         if (exists)
             return fullPath;
         
-        Directory nextDirectory = directory.parentDirectory(true);
+        Directory nextDirectory = directory.parentDirectory(
+            ghoul::filesystem::Directory::AbsolutePath::Yes
+        );
         
         if (directory.path() == nextDirectory.path()) {
             // We have reached the root of the file system and did not find the file
@@ -120,7 +122,13 @@ void ConfigurationManager::loadFromFile(const string& filename) {
 			bool override = (basePathToken == fullKey);
             if (override)
                 LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
-            FileSys.registerPathToken(std::move(fullKey), std::move(p), override);
+
+            using Override = ghoul::filesystem::FileSystem::Override;
+            FileSys.registerPathToken(
+                std::move(fullKey),
+                std::move(p),
+                override ? Override::Yes : Override::No
+            );
         }
     }
 

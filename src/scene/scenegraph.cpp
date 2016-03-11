@@ -81,7 +81,8 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     std::string absSceneFile = absPath(sceneDescription);
 
     // See if scene file exists
-    if (!FileSys.fileExists(absSceneFile, true)) {
+    using RawPath = ghoul::filesystem::FileSystem::RawPath;
+    if (!FileSys.fileExists(absSceneFile, RawPath::Yes)) {
         LERROR("Could not load scene file '" << absSceneFile << "'. " <<
             "File not found");
         return false;
@@ -97,8 +98,10 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         return false;
     }
 
-    std::string sceneDescriptionDirectory =
-    ghoul::filesystem::File(absSceneFile, true).directoryName();
+    std::string sceneDescriptionDirectory = ghoul::filesystem::File(
+        absSceneFile,
+        ghoul::filesystem::File::RawPath::Yes
+    ).directoryName();
     std::string sceneDirectory(".");
     sceneDictionary.getValue(KeyPathScene, sceneDirectory);
 

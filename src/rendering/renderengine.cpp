@@ -54,6 +54,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturewriter.h>
 #ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
 #endif //GHOUL_USE_DEVIL
@@ -62,6 +63,11 @@
 #endif // GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/misc/exception.h>
+
+#ifdef GHOUL_USE_SOIL
+#include <ghoul/io/texture/texturereadersoil.h>
+#include <ghoul/io/texture/texturewritersoil.h>
+#endif //GHOUL_USE_SOIL
 
 #include <array>
 #include <fstream>
@@ -190,7 +196,11 @@ bool RenderEngine::initialize() {
 #ifdef GHOUL_USE_FREEIMAGE
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
 #endif // GHOUL_USE_FREEIMAGE
-
+#ifdef GHOUL_USE_SOIL
+    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderSOIL>());
+    ghoul::io::TextureWriter::ref().addWriter(std::make_shared<ghoul::io::TextureWriterSOIL>());
+#endif // GHOUL_USE_SOIL
+  
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
 

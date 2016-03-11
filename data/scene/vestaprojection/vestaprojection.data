@@ -1,0 +1,8 @@
+return {
+    FileRequest = {
+        { Identifier = "vesta_textures", Destination = "textures", Version = 1 }
+    },
+    TorrentFiles = {
+        { File = "VestaComet.torrent", Destination = "." }
+    }
+}

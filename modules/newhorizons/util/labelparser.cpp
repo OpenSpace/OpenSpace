@@ -141,12 +141,15 @@ bool LabelParser::create() {
 	std::string previousTarget;
 	std::string lblName = "";
 
-	ghoul::filesystem::Directory sequenceDir(_fileName, true);
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+	ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
         return false;
     }
-	std::vector<std::string> sequencePaths = sequenceDir.read(true, false); // check inputs 
+    using Recursive = ghoul::filesystem::Directory::Recursive;
+    using Sort = ghoul::filesystem::Directory::Sort;
+	std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
 	for (auto path : sequencePaths){
 		if (size_t position = path.find_last_of(".") + 1){
 			if (position != std::string::npos){

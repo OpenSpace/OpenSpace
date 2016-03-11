@@ -144,7 +144,8 @@ bool RenderablePlanet::initialize() {
         if (!_programObject) return false;
 
     }
-    _programObject->setIgnoreSubroutineUniformLocationError(true);
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
 
     loadTexture();
     _geometry->initialize(this);

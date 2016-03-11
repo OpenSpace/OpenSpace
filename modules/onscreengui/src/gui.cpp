@@ -150,8 +150,9 @@ void GUI::setEnabled(bool enabled) {
 }
 
 void GUI::initialize() {
-	std::string cachedFile = FileSys.cacheManager()->cachedFilename(configurationFile,
-                                                                    "", true);
+	std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        configurationFile, "", ghoul::filesystem::CacheManager::Persistent::Yes
+    );
 
 	char* buffer = new char[cachedFile.size() + 1];
 

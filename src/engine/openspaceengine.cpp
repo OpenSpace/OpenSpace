@@ -104,7 +104,9 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new scripting::ScriptEngine)
     , _networkEngine(new NetworkEngine)
-    , _commandlineParser(new ghoul::cmdparser::CommandlineParser(programName, true))
+    , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
+        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+      ))
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _gui(new gui::GUI)
@@ -167,7 +169,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 	// logs from the configuration file. If the user requested as specific loglevel in the
 	// configuration file, we will deinitialize this LogManager and reinitialize it later
 	// with the correct LogLevel
-	LogManager::initialize(LogManager::LogLevel::Debug, true);
+	LogManager::initialize(
+        LogManager::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
 
 	LDEBUG("Initialize FileSystem");
@@ -242,7 +247,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 		if (!FileSys.directoryExists(token)) {
 			std::string p = absPath(token);
 			LDEBUG("Directory '" << p << "' does not exist, creating.");
-            FileSys.createDirectory(p, true);
+            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
 		}
 	}
 
@@ -290,7 +295,6 @@ void OpenSpaceEngine::destroy() {
 	Time::deinitialize();
 	SpiceManager::deinitialize();
 
-	FileSystem::deinitialize();
 	LogManager::deinitialize();
 
     ghoul::deinitialize();
@@ -551,7 +555,11 @@ void OpenSpaceEngine::configureLogging() {
 
 		LogManager::LogLevel level = LogManager::levelFromString(logLevel);
 		LogManager::deinitialize();
-		LogManager::initialize(level, immediateFlush);
+        using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
+        LogManager::initialize(
+            level,
+            immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
+        );
 		LogMgr.addLog(std::make_unique<ConsoleLog>());
 	}
 

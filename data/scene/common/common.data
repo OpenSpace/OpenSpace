@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "general_spk", Destination = "${SPICE}", Version = 1 }
+    }
+}
