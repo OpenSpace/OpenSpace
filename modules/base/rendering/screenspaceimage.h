@@ -34,7 +34,7 @@ public:
 	ScreenSpaceImage();
 	~ScreenSpaceImage();
 
-	void render() override;
+	void render(Camera* camera) override;
 	bool initialize() override;
 	bool deinitialize() override;
 	void update() override;

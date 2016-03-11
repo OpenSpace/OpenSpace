@@ -396,7 +396,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 	for (auto s : _screenSpaceRenderables) {
 		if(s->isEnabled())
-			s->render();
+			s->render(_mainCamera);
 	}
 }
 

@@ -47,11 +47,10 @@ namespace openspace {
 	ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
-void ScreenSpaceImage::render(){
+void ScreenSpaceImage::render(Camera* camera){
 	GLint m_viewport[4];
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
-	float height =  (float(m_viewport[2])/m_viewport[3])*
-					(float(_texture->height())/float(_texture->width()));
+	float height =  (float(_texture->height())/float(_texture->width()));
 
 	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
 	transform = glm::scale(transform, glm::vec3(_scale.value(),_scale.value()*height,1));
@@ -59,6 +58,7 @@ void ScreenSpaceImage::render(){
     _shader->activate();
 
     _shader->setUniform("ModelTransform",transform);
+    _shader->setUniform("ViewProjectionMatrix", camera->viewProjectionMatrix());
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();

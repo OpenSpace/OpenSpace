@@ -29,15 +29,17 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/camera.h>
 
 namespace openspace {
 
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
+
 	ScreenSpaceRenderable();
 	~ScreenSpaceRenderable();
 
-	virtual void render() = 0;
+	virtual void render(Camera* camera) = 0;
 	virtual bool initialize() = 0;
 	virtual bool deinitialize() = 0;
 	virtual void update() = 0;

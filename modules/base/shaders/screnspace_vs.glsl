@@ -26,6 +26,7 @@
 #version __CONTEXT__
 
 uniform mat4 ModelTransform;
+uniform mat4 ViewProjectionMatrix;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -38,5 +39,5 @@ void main(){
 	vs_st = in_st;
 	vs_position = in_position; 
 
-	gl_Position = ModelTransform*vs_position;
+	gl_Position = ViewProjectionMatrix * ModelTransform * vs_position;
 }
