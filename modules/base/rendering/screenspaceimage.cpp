@@ -30,11 +30,11 @@
 #include <modules/onscreengui/include/gui.h>
 
 namespace openspace {
-	ScreenSpaceImage::ScreenSpaceImage()
-		:ScreenSpaceRenderable()
+ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
+		:ScreenSpaceRenderable(texturePath)
 	{
-		setName("ScreenSpaceImage");
 
+		setName("ScreenSpaceImage" + std::to_string(id()));
 		OsEng.gui()._property.registerProperty(&_enabled);
 		OsEng.gui()._property.registerProperty(&_flatScreen);
 		OsEng.gui()._property.registerProperty(&_position);
@@ -44,16 +44,20 @@ namespace openspace {
 		_texturePath.onChange([this](){ loadTexture(); });
 	}
 
-	ScreenSpaceImage::~ScreenSpaceImage(){}
+ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
 void ScreenSpaceImage::render(Camera* camera){
-	GLint m_viewport[4];
-	glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+	GLfloat m_viewport[4];
+	glGetFloatv(GL_VIEWPORT, m_viewport);
 	float height =  (float(_texture->height())/float(_texture->width()));
 
+	float scalingRatioX = m_viewport[2] / _originalViewportSize[0];
+	float scalingRatioY = m_viewport[3] / _originalViewportSize[1];
+
 	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
-	transform = glm::scale(transform, glm::vec3(_scale.value(),_scale.value()*height,1));
+	transform = glm::scale(transform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*height*scalingRatioX, 1));
 
     _shader->activate();
 
@@ -85,7 +89,9 @@ bool ScreenSpaceImage::initialize(){
         if (!_shader)
             return false;
 	}
-
+	GLfloat m_viewport[4];
+	glGetFloatv(GL_VIEWPORT, m_viewport);
+	_originalViewportSize = glm::vec2(m_viewport[2], m_viewport[3]);
 	loadTexture();
 
 	return isReady();
@@ -111,7 +117,6 @@ void ScreenSpaceImage::loadTexture() {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value()));
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-			// std::cout<< std::endl << std::endl << "Loaded texture from '" << absPath(_texturePath) << "'" <<std::endl << std::endl;
 			texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
@@ -124,5 +129,10 @@ void ScreenSpaceImage::loadTexture() {
             // _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 		}
 	}
+}
+
+int ScreenSpaceImage::id(){
+		static int id = 0;
+		return id++;
 }
 }

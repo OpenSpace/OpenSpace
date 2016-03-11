@@ -39,5 +39,5 @@ void main(){
 	vs_st = in_st;
 	vs_position = in_position; 
 
-	gl_Position = ViewProjectionMatrix * ModelTransform * vs_position;
+	gl_Position =  ViewProjectionMatrix * ModelTransform * vs_position;
 }

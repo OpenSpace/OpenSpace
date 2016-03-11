@@ -31,7 +31,7 @@ namespace openspace {
 class ScreenSpaceImage : public ScreenSpaceRenderable {
 
 public:
-	ScreenSpaceImage();
+	ScreenSpaceImage(std::string texturePath);
 	~ScreenSpaceImage();
 
 	void render(Camera* camera) override;
@@ -41,8 +41,11 @@ public:
 	bool isReady() const override;
 private:
 	void loadTexture();
+	static int id();
+	
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
-
+	glm::vec2 _originalViewportSize;
 };
+// int ScreenSpaceImage::id = 0;
 } //namespace openspace
 #endif //__SCREENSPACEIMAGE_H__

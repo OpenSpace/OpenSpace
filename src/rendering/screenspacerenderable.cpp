@@ -25,12 +25,12 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 namespace openspace {
-	ScreenSpaceRenderable::ScreenSpaceRenderable()
+	ScreenSpaceRenderable::ScreenSpaceRenderable(std::string texturePath)
 		: _enabled("enabled", "Is Enabled", true)
 		, _flatScreen("flatScreen", "Flat Screen", true)
 		, _position("position", "Position", glm::vec3(0,0,-2),glm::vec3(-2),glm::vec3(2))
 		, _scale("scale", "Scale" , 0.5, 0, 1)
-		, _texturePath("texturePath", "Texture path", "${OPENSPACE_DATA}/test2.jpg")
+		, _texturePath("texturePath", "Texture path", texturePath)
 		, _quad(0)
 		, _vertexPositionBuffer(0)
 	{

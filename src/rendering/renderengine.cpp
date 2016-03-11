@@ -206,8 +206,7 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
-    std::shared_ptr<ScreenSpaceImage> s = std::make_shared<ScreenSpaceImage>();
-    registerScreenSpaceRenderable(s);
+    registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg"));
 	return true;
 }
 
@@ -393,7 +392,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 			renderScreenLog();
 		}
 	}
-
+	
 	for (auto s : _screenSpaceRenderables) {
 		if(s->isEnabled())
 			s->render(_mainCamera);
