@@ -25,14 +25,16 @@
 uniform sampler2D texture1;
 
 in vec2 vs_st;
-in vec4 vs_postion;
+in vec4 vs_position;
 
 #include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 Fragment getFragment(){
 	Fragment frag;
+	float depth = pscDepth(vs_position);
 	frag.color = texture(texture1, vs_st);
-	frag.depth = 0;
+	frag.depth = depth;
 
 	return frag;
 }

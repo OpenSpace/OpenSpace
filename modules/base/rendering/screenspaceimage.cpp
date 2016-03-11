@@ -59,8 +59,8 @@ void ScreenSpaceImage::render(Camera* camera){
 	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
 	transform = glm::scale(transform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*height*scalingRatioX, 1));
 
+	glEnable(GL_DEPTH_TEST);
     _shader->activate();
-
     _shader->setUniform("ModelTransform",transform);
     _shader->setUniform("ViewProjectionMatrix", camera->viewProjectionMatrix());
 
