@@ -45,6 +45,7 @@ private:
 	
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
 	glm::vec2 _originalViewportSize;
+	const float _planeDepth = -2.0;
 };
 // int ScreenSpaceImage::id = 0;
 } //namespace openspace

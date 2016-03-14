@@ -51,19 +51,26 @@ void ScreenSpaceImage::render(Camera* camera){
 
 	GLfloat m_viewport[4];
 	glGetFloatv(GL_VIEWPORT, m_viewport);
-	float height =  (float(_texture->height())/float(_texture->width()));
 
+	//to scale the plane
+	float textureRatio =  (float(_texture->height())/float(_texture->width()));
+
+	//to keep the texture ratio after viewport is distorted.
 	float scalingRatioX = m_viewport[2] / _originalViewportSize[0];
 	float scalingRatioY = m_viewport[3] / _originalViewportSize[1];
 
-	glm::mat4 transform = glm::translate(glm::mat4(1.f), _position.value());
-	transform = glm::scale(transform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*height*scalingRatioX, 1));
+	glm::vec3 position = _position.value();
+	float occlusionDepth = position.z;
+	position.z = _planeDepth;
+
+	glm::mat4 modelTransform = glm::translate(glm::mat4(1.f), position);
+	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 
 	glEnable(GL_DEPTH_TEST);
     _shader->activate();
-    _shader->setUniform("ModelTransform",transform);
+    _shader->setUniform("OcclusionDepth", occlusionDepth);
+    _shader->setUniform("ModelTransform",modelTransform);
     _shader->setUniform("ViewProjectionMatrix", camera->viewProjectionMatrix());
-
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
