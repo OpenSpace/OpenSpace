@@ -28,13 +28,14 @@
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/onscreengui/include/gui.h>
+#include <glm/gtx/polar_coordinates.hpp>
 
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 		:ScreenSpaceRenderable(texturePath)
 	{
-
-		setName("ScreenSpaceImage" + std::to_string(id()));
+		_id = id();
+		setName("ScreenSpaceImage" + std::to_string(_id));
 		OsEng.gui()._property.registerProperty(&_enabled);
 		OsEng.gui()._property.registerProperty(&_flatScreen);
 		OsEng.gui()._property.registerProperty(&_position);
@@ -61,7 +62,13 @@ void ScreenSpaceImage::render(Camera* camera){
 
 	glm::vec3 position = _position.value();
 	float occlusionDepth = position.z;
-	position.z = _planeDepth;
+	if(!_isFlatScreen){
+		occlusionDepth = position.x;
+		position.x = _planeDepth;
+		position = toEuclidean(position);
+	} else {
+		position.z = _planeDepth;
+	}
 
 	glm::mat4 modelTransform = glm::translate(glm::mat4(1.f), position);
 	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
@@ -107,8 +114,34 @@ bool ScreenSpaceImage::deinitialize(){
 	return true;
 }
 void ScreenSpaceImage::update(){
-		
+
+	if(_flatScreen.value() != _isFlatScreen){
+		_isFlatScreen = _flatScreen.value();
+		glm::vec3 pos = _position.value();
+
+		if(!_isFlatScreen){
+			_position.set(toPolar(pos));
+		} else {
+			_position.set(toEuclidean(pos));
+		}
+
+	}
 }
+
+glm::vec3 ScreenSpaceImage::toEuclidean(glm::vec3 polar){
+	float x = polar[0]*cos(polar[1])*sin(polar[2]);
+	float y = polar[0]*sin(polar[1])*sin(polar[2]);
+	float z = polar[0]*cos(polar[2]);
+	return glm::vec3(x, y, z);
+}
+
+glm::vec3 ScreenSpaceImage::toPolar(glm::vec3 euclidean){
+	float r = sqrt(pow(euclidean[0], 2) + pow(euclidean[1], 2) + pow(euclidean[2], 2));
+	float theta= atan2(euclidean[1],euclidean[0]);
+	float phi = acos(euclidean[2]/r);
+	return glm::vec3(r, theta, phi);
+}
+
 
 bool ScreenSpaceImage::isReady() const{
 	bool ready = true;

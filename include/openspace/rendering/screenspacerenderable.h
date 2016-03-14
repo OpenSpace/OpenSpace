@@ -44,6 +44,17 @@ public:
 	virtual void update() = 0;
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
+	void x(float d){ 
+		glm::vec3 pos = _position.value();
+		pos.x += d;
+		_position.set(pos);
+
+	};
+	void y(float d){
+		glm::vec3 pos = _position.value();
+		pos.y += d;
+		_position.set(pos);
+	};
 
 protected:
 	void createPlane();

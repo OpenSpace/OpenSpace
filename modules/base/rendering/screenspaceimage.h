@@ -41,11 +41,15 @@ public:
 	bool isReady() const override;
 private:
 	void loadTexture();
+	glm::vec3 toEuclidean(glm::vec3 polar);
+	glm::vec3 toPolar(glm::vec3 euclidean);
 	static int id();
 	
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
 	glm::vec2 _originalViewportSize;
 	const float _planeDepth = -2.0;
+	bool _isFlatScreen = true;
+	int _id;
 };
 // int ScreenSpaceImage::id = 0;
 } //namespace openspace

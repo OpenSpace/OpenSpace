@@ -205,8 +205,8 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
-
-    registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg"));
+    ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
+    registerScreenSpaceRenderable(ssr);
     registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg"));
 	return true;
 }
@@ -367,6 +367,9 @@ void RenderEngine::postSynchronizationPreDraw() {
 		}
 	}
 
+	for (auto screenspacerenderable : _screenSpaceRenderables) {
+		screenspacerenderable->update();
+	}
 	//Allow focus node to update camera (enables camera-following)
 	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
 	//if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
