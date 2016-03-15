@@ -62,16 +62,24 @@ void ScreenSpaceImage::render(Camera* camera){
 
 	glm::vec3 position = _position.value();
 	float occlusionDepth = position.z;
+
+	glm::mat4 modelTransform;
+
 	if(!_isFlatScreen){
 		occlusionDepth = position.x;
 		position.x = _planeDepth;
-		position = toEuclidean(position);
+
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.z, glm::vec3(0.0f, 1.0f, 0.0f));
+		rotation = glm::rotate(rotation, position.y , glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, position.x));
+
+		modelTransform = rotation * translate;
 	} else {
 		position.z = _planeDepth;
+		modelTransform = glm::translate(glm::mat4(1.f), position);
+		modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 	}
 
-	glm::mat4 modelTransform = glm::translate(glm::mat4(1.f), position);
-	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 
 	glEnable(GL_DEPTH_TEST);
     _shader->activate();
