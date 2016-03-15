@@ -30,7 +30,6 @@
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <modules/newhorizons/util/decoder.h>
-#include <boost/algorithm/string.hpp>
 
 #include <openspace/util/spicemanager.h>
 #include <fstream>

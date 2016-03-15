@@ -34,8 +34,6 @@
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
@@ -47,6 +45,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <string>
 #include <chrono>
