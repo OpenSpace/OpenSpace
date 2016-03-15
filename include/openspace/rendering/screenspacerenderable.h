@@ -44,15 +44,9 @@ public:
 	virtual void update() = 0;
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
-	void x(float d){ 
+	void move(glm::vec3 v){ 
 		glm::vec3 pos = _position.value();
-		pos.x += d;
-		_position.set(pos);
-
-	};
-	void y(float d){
-		glm::vec3 pos = _position.value();
-		pos.y += d;
+		pos += v;
 		_position.set(pos);
 	};
 
