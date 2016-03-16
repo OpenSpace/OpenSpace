@@ -27,45 +27,35 @@
 namespace openspace {
 ScreenSpaceRenderable::ScreenSpaceRenderable()
 	: _enabled("enabled", "Is Enabled", true)
-	, _flatScreen("flatScreen", "Flat Screen", true)
+	, _useFlatScreen("flatScreen", "Flat Screen", true)
 	, _euclideanPosition("euclideanPosition", "Euclidean coordinates", glm::vec2(0),glm::vec2(-4),glm::vec2(4))
 	, _sphericalPosition("sphericalPosition", "Spherical coordinates", glm::vec2(0),glm::vec2(-M_PI),glm::vec2(M_PI))
 	, _depth("depth", "Depth", 0, 0, 1)
 	, _scale("scale", "Scale" , 0.5, 0, 1)
-	// , _texturePath("texturePath", "Texture path", texturePath)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	,_shader(nullptr)
 	,_radius(-.2f)
-	ScreenSpaceRenderable::ScreenSpaceRenderable(std::string texturePath)
-		: _enabled("enabled", "Is Enabled", true)
-		, _useFlatScreen("flatScreen", "Flat Screen", true)
-		, _shader(nullptr)
-		, _radius(-.2f)
-		, _rendererPath("${SHADERS}/renderframebuffer.frag")
-
-	{
-		addProperty(_enabled);
-		addProperty(_flatScreen);
+	, _rendererPath("${SHADERS}/renderframebuffer.frag")
 {
 	addProperty(_enabled);
-	addProperty(_flatScreen);
+	addProperty(_useFlatScreen);
 	addProperty(_euclideanPosition);
 	addProperty(_sphericalPosition);
 	addProperty(_depth);
 	addProperty(_scale);
 	// addProperty(_texturePath);
-	{
-		addProperty(_enabled);
-		addProperty(_useFlatScreen);
 
-		_rendererData = ghoul::Dictionary();
-        _rendererData.setValue("fragmentRendererPath", _rendererPath);
-        _rendererData.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
-        _rendererData.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
+	_rendererData = ghoul::Dictionary();
+    _rendererData.setValue("fragmentRendererPath", _rendererPath);
+    _rendererData.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
+    _rendererData.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
+
+    _useEuclideanCoordinates = _useFlatScreen.value();
+}
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
-		_useEuclideanCoordinates = _useFlatScreen.value();
+
 
 bool ScreenSpaceRenderable::isEnabled() const {
 	return _enabled;

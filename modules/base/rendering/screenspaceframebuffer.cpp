@@ -39,7 +39,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer()
 	_id = id();
 	setName("ScreenSpaceFramebuffer" + std::to_string(_id));
 	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_flatScreen);
+	OsEng.gui()._property.registerProperty(&_useFlatScreen);
 	OsEng.gui()._property.registerProperty(&_euclideanPosition);
 	OsEng.gui()._property.registerProperty(&_sphericalPosition);
 	OsEng.gui()._property.registerProperty(&_depth);

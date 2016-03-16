@@ -36,17 +36,15 @@ namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 		:ScreenSpaceRenderable()
 		,_texturePath("texturePath", "Texture path", texturePath)
-{
-	addProperty(_texturePath);
-		:ScreenSpaceRenderable(texturePath)
 		, _vertexPath("${MODULE_BASE}/shaders/screnspace_vs.glsl")
 		, _fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
-		OsEng.gui()._property.registerProperty(&_useFlatScreen);
+{
+	addProperty(_texturePath);
 
 	_id = id();
 	setName("ScreenSpaceImage" + std::to_string(_id));
 	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_flatScreen);
+	OsEng.gui()._property.registerProperty(&_useFlatScreen);
 	OsEng.gui()._property.registerProperty(&_euclideanPosition);
 	OsEng.gui()._property.registerProperty(&_sphericalPosition);
 	OsEng.gui()._property.registerProperty(&_depth);
