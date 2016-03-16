@@ -230,14 +230,14 @@ void OrbitalMouseController::update(const double& dt){
 			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
 			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
 	//}
-	glm::vec3 v(0.0);
+	glm::vec2 v(0.0);
 	if(!_middleMouseButtonDown ){
 		if(_leftMouseButtonDown && !_rightMouseButtonDown ){
 			v.x = static_cast<float>(dt);
 		} else if(!_leftMouseButtonDown && _rightMouseButtonDown ){
 			v.y = static_cast<float>(dt);
 		}else if(_leftMouseButtonDown && _rightMouseButtonDown ){
-			v.z = static_cast<float>(dt);
+			// v.z = static_cast<float>(dt);
 		}
 		OsEng.renderEngine().ssr->move(v);
 	} else {
@@ -246,7 +246,7 @@ void OrbitalMouseController::update(const double& dt){
 		} else if(!_leftMouseButtonDown && _rightMouseButtonDown ){
 			v.y = -static_cast<float>(dt);
 		}else if(_leftMouseButtonDown && _rightMouseButtonDown ){
-			v.z = -static_cast<float>(dt);
+			// v.z = -static_cast<float>(dt);
 		}
 		OsEng.renderEngine().ssr->move(v);
 	}

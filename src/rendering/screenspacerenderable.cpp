@@ -27,18 +27,27 @@
 namespace openspace {
 	ScreenSpaceRenderable::ScreenSpaceRenderable(std::string texturePath)
 		: _enabled("enabled", "Is Enabled", true)
-		, _flatScreen("flatScreen", "Flat Screen", false)
-		, _position("position", "Position", glm::vec3(0),glm::vec3(-4),glm::vec3(4))
+		, _flatScreen("flatScreen", "Flat Screen", true)
+		, _euclideanPosition("euclideanPosition", "Euclidean coordinates", glm::vec2(0),glm::vec2(-4),glm::vec2(4))
+		, _sphericalPosition("sphericalPosition", "Spherical coordinates", glm::vec2(0),glm::vec2(-M_PI),glm::vec2(M_PI))
+		, _depth("depth", "Depth", 0, 0, 1)
 		, _scale("scale", "Scale" , 0.5, 0, 1)
 		, _texturePath("texturePath", "Texture path", texturePath)
 		, _quad(0)
 		, _vertexPositionBuffer(0)
+		,_shader(nullptr)
+		,_radius(-.2f)
+
 	{
 		addProperty(_enabled);
 		addProperty(_flatScreen);
-		addProperty(_position);
+		addProperty(_euclideanPosition);
+		addProperty(_sphericalPosition);
+		addProperty(_depth);
 		addProperty(_scale);
 		addProperty(_texturePath);
+
+		_useEuclideanCoordinates = _flatScreen.value();
 	}
 
 	ScreenSpaceRenderable::~ScreenSpaceRenderable(){}

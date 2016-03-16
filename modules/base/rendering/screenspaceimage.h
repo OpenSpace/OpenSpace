@@ -41,8 +41,8 @@ public:
 	bool isReady() const override;
 private:
 	void loadTexture();
-	glm::vec3 toEuclidean(glm::vec3 polar);
-	glm::vec3 toPolar(glm::vec3 euclidean);
+	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
+	glm::vec2 toSpherical(glm::vec2 euclidean);
 	static int id();
 	
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render

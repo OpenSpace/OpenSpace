@@ -44,10 +44,22 @@ public:
 	virtual void update() = 0;
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
-	void move(glm::vec3 v){ 
-		glm::vec3 pos = _position.value();
-		pos += v;
-		_position.set(pos);
+	void move(glm::vec2 v){
+		if(_flatScreen.value()){
+			glm::vec2 pos = _euclideanPosition.value();
+			pos += v;
+			_euclideanPosition.set(pos);
+		}else{
+			glm::vec2 pos = _sphericalPosition.value();
+			pos += v;
+			_sphericalPosition.set(pos);
+		}
+		// glm::vec3 pos = _position.value();
+		// pos += v;
+		// _position.set(pos);
+	};
+	void toggleFlatScreen(){
+		_flatScreen.set(!_flatScreen.value());
 	};
 
 protected:
@@ -55,13 +67,17 @@ protected:
 
 	properties::BoolProperty _enabled;
 	properties::BoolProperty _flatScreen;
-	properties::Vec3Property _position;
+	properties::Vec2Property _euclideanPosition;
+	properties::Vec2Property _sphericalPosition;
+	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
 	properties::StringProperty _texturePath;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+	float _radius;
+	bool _useEuclideanCoordinates;
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__

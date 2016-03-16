@@ -38,11 +38,25 @@ ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 		setName("ScreenSpaceImage" + std::to_string(_id));
 		OsEng.gui()._property.registerProperty(&_enabled);
 		OsEng.gui()._property.registerProperty(&_flatScreen);
-		OsEng.gui()._property.registerProperty(&_position);
+		OsEng.gui()._property.registerProperty(&_euclideanPosition);
+		OsEng.gui()._property.registerProperty(&_sphericalPosition);
+		OsEng.gui()._property.registerProperty(&_depth);
 		OsEng.gui()._property.registerProperty(&_scale);
 		OsEng.gui()._property.registerProperty(&_texturePath);
 
 		_texturePath.onChange([this](){ loadTexture(); });
+
+		if(_useEuclideanCoordinates){
+			_euclideanPosition.onChange([this](){
+				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+			});
+			_sphericalPosition.onChange([this](){});
+		}else{
+			_euclideanPosition.onChange([this](){
+				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+			});
+		}
+		// _flatScreen.onChange([this](){ _useEuclideanCoordinates = _flatScreen.value(); });
 	}
 
 ScreenSpaceImage::~ScreenSpaceImage(){}
@@ -60,15 +74,11 @@ void ScreenSpaceImage::render(Camera* camera){
 	float scalingRatioX = m_viewport[2] / _originalViewportSize[0];
 	float scalingRatioY = m_viewport[3] / _originalViewportSize[1];
 
-	glm::vec3 position = _position.value();
-	float occlusionDepth = position.z;
+	float occlusionDepth = 1-_depth.value();
 
 	glm::mat4 modelTransform;
-	position.z = _planeDepth;
-
-	if(!_isFlatScreen){
-		occlusionDepth = position.x;
-		// position.x = _planeDepth;
+	if(!_useEuclideanCoordinates){
+		glm::vec2 position = _sphericalPosition.value();
 		float phi = position.y - M_PI/2.0;
 		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.x, glm::vec3(0.0f, 1.0f, 0.0f));
 		rotation = glm::rotate(rotation, phi , glm::vec3(1.0f, 0.0f, 0.0f));
@@ -76,7 +86,8 @@ void ScreenSpaceImage::render(Camera* camera){
 
 		modelTransform = rotation * translate;
 	} else {
-		modelTransform = glm::translate(glm::mat4(1.f), position);
+		glm::vec2 position = _euclideanPosition.value();
+		modelTransform = glm::translate(glm::mat4(1.f), glm::vec3(position, _planeDepth));
 	}
 
 	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
@@ -122,51 +133,56 @@ bool ScreenSpaceImage::deinitialize(){
 	return true;
 }
 void ScreenSpaceImage::update(){
+	if(_flatScreen.value() != _useEuclideanCoordinates){
+		_useEuclideanCoordinates = _flatScreen.value();
 
-	if(_flatScreen.value() != _isFlatScreen){
-		_isFlatScreen = _flatScreen.value();
-		glm::vec3 pos = _position.value();
-
-		if(!_isFlatScreen){
-			_position.set(toPolar(pos));
+		if(_useEuclideanCoordinates){
+			_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+			_euclideanPosition.onChange([this](){
+				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+			});
+			_sphericalPosition.onChange([this](){});
 		} else {
-			_position.set(toEuclidean(pos));
-			
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+			_sphericalPosition.onChange([this](){
+				_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+			});
+			_euclideanPosition.onChange([this](){});
 		}
 
 	}
 }
 
-glm::vec3 ScreenSpaceImage::toEuclidean(glm::vec3 polar){
-	float x = polar[2]*sin(polar[0])*sin(polar[1]);
-	float y = polar[2]*cos(polar[1]);
+glm::vec2 ScreenSpaceImage::toEuclidean(glm::vec2 polar, float r){
+	float x = r*sin(polar[0])*sin(polar[1]);
+	float y = r*cos(polar[1]);
 	float z = _planeDepth;
-	return glm::vec3(x, y, z);
+	return glm::vec2(x, y);
 }
 
-glm::vec3 ScreenSpaceImage::toPolar(glm::vec3 euclidean){	
-	float r = 		-sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(_planeDepth,2));
+glm::vec2 ScreenSpaceImage::toSpherical(glm::vec2 euclidean){	
+	_radius  = 		-sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(_planeDepth,2));
 	float theta	= 	atan2(-_planeDepth,euclidean[0])-M_PI/2.0;
-	float phi = 	acos(euclidean[1]/r);
+	float phi = 	acos(euclidean[1]/_radius);
 
 	while(phi>=M_PI){
 		phi -= M_PI;
 	}
 
-	if(!r){
+	if(!_radius){
 		phi = 0;
 	}
 
-	while(theta <= 0){
+	while(theta <= -M_PI){
 		theta += 2.0*M_PI;
 	}
 
-	while(theta >= 2.0*M_PI) {
+	while(theta >= M_PI) {
 		theta -= 2.0*M_PI;
 	}
 
 	// std::cout << euclidean[2] << " " << r 
-	return glm::vec3(theta, phi, r);
+	return glm::vec2(theta, phi);
 }
 
 
