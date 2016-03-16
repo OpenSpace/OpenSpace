@@ -29,6 +29,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <modules/onscreengui/include/gui.h>
 #include <glm/gtx/polar_coordinates.hpp>
+#include <openspace/util/camera.h>
 
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
@@ -62,7 +63,7 @@ ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
-void ScreenSpaceImage::render(Camera* camera){
+void ScreenSpaceImage::render(){
 
 	GLfloat m_viewport[4];
 	glGetFloatv(GL_VIEWPORT, m_viewport);
@@ -96,7 +97,7 @@ void ScreenSpaceImage::render(Camera* camera){
     _shader->activate();
     _shader->setUniform("OcclusionDepth", occlusionDepth);
     _shader->setUniform("ModelTransform",modelTransform);
-    _shader->setUniform("ViewProjectionMatrix", camera->viewProjectionMatrix());
+    _shader->setUniform("ViewProjectionMatrix", OsEng.renderEngine().camera()->viewProjectionMatrix());
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();

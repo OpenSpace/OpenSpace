@@ -34,7 +34,7 @@ public:
 	ScreenSpaceImage(std::string texturePath);
 	~ScreenSpaceImage();
 
-	void render(Camera* camera) override;
+	void render() override;
 	bool initialize() override;
 	bool deinitialize() override;
 	void update() override;
