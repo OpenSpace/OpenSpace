@@ -25,10 +25,16 @@
 #ifndef __SCREENSPACERENDERABLE_H__
 #define __SCREENSPACERENDERABLE_H__
 #include <ghoul/opengl/programobject.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
 
 namespace openspace {
 
@@ -44,7 +50,7 @@ public:
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
 	void move(glm::vec2 v){
-		if(_flatScreen.value()){
+		if(_useFlatScreen.value()){
 			glm::vec2 pos = _euclideanPosition.value();
 			pos += v;
 			_euclideanPosition.set(pos);
@@ -61,7 +67,7 @@ protected:
 	glm::vec2 toSpherical(glm::vec2 euclidean);
 
 	properties::BoolProperty _enabled;
-	properties::BoolProperty _flatScreen;
+	properties::BoolProperty _useFlatScreen;
 	properties::Vec2Property _euclideanPosition;
 	properties::Vec2Property _sphericalPosition;
 	properties::FloatProperty _depth;
@@ -69,7 +75,10 @@ protected:
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
+	const std::string _rendererPath;
+	ghoul::Dictionary _rendererData;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
 	float _radius;
 	bool _useEuclideanCoordinates;
 	const float _planeDepth = -2.0;

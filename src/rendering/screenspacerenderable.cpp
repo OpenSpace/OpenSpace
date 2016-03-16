@@ -37,7 +37,16 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	, _vertexPositionBuffer(0)
 	,_shader(nullptr)
 	,_radius(-.2f)
+	ScreenSpaceRenderable::ScreenSpaceRenderable(std::string texturePath)
+		: _enabled("enabled", "Is Enabled", true)
+		, _useFlatScreen("flatScreen", "Flat Screen", true)
+		, _shader(nullptr)
+		, _radius(-.2f)
+		, _rendererPath("${SHADERS}/renderframebuffer.frag")
 
+	{
+		addProperty(_enabled);
+		addProperty(_flatScreen);
 {
 	addProperty(_enabled);
 	addProperty(_flatScreen);
@@ -46,11 +55,17 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	addProperty(_depth);
 	addProperty(_scale);
 	// addProperty(_texturePath);
+	{
+		addProperty(_enabled);
+		addProperty(_useFlatScreen);
 
-	_useEuclideanCoordinates = _flatScreen.value();
-}
+		_rendererData = ghoul::Dictionary();
+        _rendererData.setValue("fragmentRendererPath", _rendererPath);
+        _rendererData.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
+        _rendererData.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
+		_useEuclideanCoordinates = _useFlatScreen.value();
 
 bool ScreenSpaceRenderable::isEnabled() const {
 	return _enabled;
