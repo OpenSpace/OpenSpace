@@ -40,7 +40,7 @@ bool TriggerProperty::setLuaValue(lua_State* state) {
 	return true;
 }
 
-void TriggerProperty::set(boost::any value) {
+void TriggerProperty::set(ghoul::any value) {
 	notifyListener();
 }
 

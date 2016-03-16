@@ -165,8 +165,8 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
 		powerscale = powerScaledRadii[3];
 	}
 	else {
-		boost::any r = radius.get();
-		glm::vec4 modRadius = boost::any_cast<glm::vec4>(r);
+        ghoul::any r = radius.get();
+		glm::vec4 modRadius = ghoul::any_cast<glm::vec4>(r);
 		a = modRadius[0];
 		b = modRadius[1];
 		c = modRadius[2];

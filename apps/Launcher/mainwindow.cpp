@@ -56,7 +56,7 @@ namespace {
 #ifdef WIN32
     const QString OpenSpaceExecutable = "OpenSpace.exe";
 #else
-    const QString OpenSpaceExecutable = "OpenSpace";
+    const QString OpenSpaceExecutable = "./OpenSpace";
 #endif
 
     class QLog : public ghoul::logging::Log {

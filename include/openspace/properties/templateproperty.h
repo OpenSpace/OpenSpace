@@ -83,22 +83,22 @@ public:
     virtual std::string className() const override;
 
 	/**
-	 * Returns the stored value packed into a <code>boost::any</code> object.
-	 * \return The stored value packed into a <code>boost::any</code> object
+	 * Returns the stored value packed into a ghoul::any object.
+	 * \return The stored value packed into a ghoul::any object
 	 */
-    virtual boost::any get() const override;
+    virtual ghoul::any get() const override;
 
 	/**
-	 * Sets the value fro the provided <code>boost::any</code> object. If the types
-	 * between <code>T</code> and <code>value</code> disagree, an error is logged and the
-	 * stored value remains unchanged.
+	 * Sets the value fro the provided ghoul::any object. If the types between
+     * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
+     * value remains unchanged.
 	 */
-    virtual void set(boost::any value) override;
+    virtual void set(ghoul::any value) override;
 
 	/**
 	 * Returns the <code>std::type_info</code> describing the template parameter
-	 * <code>T</code>. It can be used to test against a <code>boost::any</code> value
-	 * before trying to assign it.
+	 * <code>T</code>. It can be used to test against a ghoul::any value before trying to
+     * assign it.
 	 * \return The type info object describing the template parameter <code>T</code>
 	 */
     virtual const std::type_info& type() const override;
