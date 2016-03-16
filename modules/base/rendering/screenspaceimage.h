@@ -39,6 +39,7 @@ public:
 	bool deinitialize() override;
 	void update() override;
 	bool isReady() const override;
+	void useEuclideanCoordinates(bool b);
 private:
 	void loadTexture();
 	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
@@ -50,6 +51,8 @@ private:
 	const float _planeDepth = -2.0;
 	bool _isFlatScreen = true;
 	int _id;
+	const std::string _vertexPath;
+	const std::string _fragmentPath;
 };
 // int ScreenSpaceImage::id = 0;
 } //namespace openspace

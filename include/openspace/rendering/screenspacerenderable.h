@@ -25,6 +25,7 @@
 #ifndef __SCREENSPACERENDERABLE_H__
 #define __SCREENSPACERENDERABLE_H__
 #include <ghoul/opengl/programobject.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
@@ -44,7 +45,7 @@ public:
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
 	void move(glm::vec2 v){
-		if(_flatScreen.value()){
+		if(_useFlatScreen.value()){
 			glm::vec2 pos = _euclideanPosition.value();
 			pos += v;
 			_euclideanPosition.set(pos);
@@ -53,19 +54,16 @@ public:
 			pos += v;
 			_sphericalPosition.set(pos);
 		}
-		// glm::vec3 pos = _position.value();
-		// pos += v;
-		// _position.set(pos);
 	};
 	void toggleFlatScreen(){
-		_flatScreen.set(!_flatScreen.value());
+		_useFlatScreen.set(!_useFlatScreen.value());
 	};
 
 protected:
 	void createPlane();
 
 	properties::BoolProperty _enabled;
-	properties::BoolProperty _flatScreen;
+	properties::BoolProperty _useFlatScreen;
 	properties::Vec2Property _euclideanPosition;
 	properties::Vec2Property _sphericalPosition;
 	properties::FloatProperty _depth;
@@ -74,7 +72,10 @@ protected:
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
+	const std::string _rendererPath;
+	ghoul::Dictionary _rendererData;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
 	float _radius;
 	bool _useEuclideanCoordinates;
 };

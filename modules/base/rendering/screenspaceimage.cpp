@@ -34,11 +34,13 @@
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 		:ScreenSpaceRenderable(texturePath)
+		, _vertexPath("${MODULE_BASE}/shaders/screnspace_vs.glsl")
+		, _fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
 	{
 		_id = id();
 		setName("ScreenSpaceImage" + std::to_string(_id));
 		OsEng.gui()._property.registerProperty(&_enabled);
-		OsEng.gui()._property.registerProperty(&_flatScreen);
+		OsEng.gui()._property.registerProperty(&_useFlatScreen);
 		OsEng.gui()._property.registerProperty(&_euclideanPosition);
 		OsEng.gui()._property.registerProperty(&_sphericalPosition);
 		OsEng.gui()._property.registerProperty(&_depth);
@@ -57,7 +59,6 @@ ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
 			});
 		}
-		// _flatScreen.onChange([this](){ _useEuclideanCoordinates = _flatScreen.value(); });
 	}
 
 ScreenSpaceImage::~ScreenSpaceImage(){}
@@ -65,15 +66,13 @@ ScreenSpaceImage::~ScreenSpaceImage(){}
 
 void ScreenSpaceImage::render(){
 
-	GLfloat m_viewport[4];
-	glGetFloatv(GL_VIEWPORT, m_viewport);
-
+	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
 	//to scale the plane
 	float textureRatio =  (float(_texture->height())/float(_texture->width()));
 
 	//to keep the texture ratio after viewport is distorted.
-	float scalingRatioX = m_viewport[2] / _originalViewportSize[0];
-	float scalingRatioY = m_viewport[3] / _originalViewportSize[1];
+	float scalingRatioX = resolution[0] / _originalViewportSize[0];
+	float scalingRatioY = resolution[1] / _originalViewportSize[1];
 
 	float occlusionDepth = 1-_depth.value();
 
@@ -115,42 +114,53 @@ bool ScreenSpaceImage::initialize(){
 	createPlane();
 
 	if(_shader == nullptr) {
-    	RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("ScreenSpaceProgram",
-            "${MODULE_BASE}/shaders/screnspace_vs.glsl",
-            "${MODULE_BASE}/shaders/screnspace_fs.glsl"
-            );
+
+        ghoul::Dictionary dict = ghoul::Dictionary();
+
+        dict.setValue("rendererData", _rendererData);
+        dict.setValue("fragmentPath", _fragmentPath);
+		_shader = ghoul::opengl::ProgramObject::Build("ScreenSpaceProgram",
+			_vertexPath,
+			"${SHADERS}/render.frag",
+			dict
+			);
+
         if (!_shader)
             return false;
 	}
-	GLfloat m_viewport[4];
-	glGetFloatv(GL_VIEWPORT, m_viewport);
-	_originalViewportSize = glm::vec2(m_viewport[2], m_viewport[3]);
+
+	_originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+
 	loadTexture();
 
+	// Setting spherical/euclidean onchange handler
+	_useFlatScreen.onChange([this](){
+		useEuclideanCoordinates(_useFlatScreen.value());
+	});
 	return isReady();
 }
 bool ScreenSpaceImage::deinitialize(){
 	return true;
 }
+
 void ScreenSpaceImage::update(){
-	if(_flatScreen.value() != _useEuclideanCoordinates){
-		_useEuclideanCoordinates = _flatScreen.value();
+	
+}
 
-		if(_useEuclideanCoordinates){
-			_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
-			_euclideanPosition.onChange([this](){
-				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-			});
-			_sphericalPosition.onChange([this](){});
-		} else {
+void ScreenSpaceImage::useEuclideanCoordinates(bool b){
+	_useEuclideanCoordinates = b;
+	if(_useEuclideanCoordinates){
+		_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+		_euclideanPosition.onChange([this](){
 			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-			_sphericalPosition.onChange([this](){
-				_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
-			});
-			_euclideanPosition.onChange([this](){});
-		}
-
+		});
+		_sphericalPosition.onChange([this](){});
+	} else {
+		_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		_sphericalPosition.onChange([this](){
+			_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+		});
+		_euclideanPosition.onChange([this](){});
 	}
 }
 
@@ -182,7 +192,6 @@ glm::vec2 ScreenSpaceImage::toSpherical(glm::vec2 euclidean){
 		theta -= 2.0*M_PI;
 	}
 
-	// std::cout << euclidean[2] << " " << r 
 	return glm::vec2(theta, phi);
 }
 

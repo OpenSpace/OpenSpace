@@ -21,7 +21,7 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
+//#version __CONTEXT__
 uniform sampler2D texture1;
 uniform float OcclusionDepth;
 
@@ -41,3 +41,11 @@ Fragment getFragment(){
 
 	return frag;
 }
+
+/* out vec4 _out_color_;
+
+void main() {
+     Fragment f = getFragment();
+     _out_color_ = f.color;
+     gl_FragDepth = f.depth;
+} */
