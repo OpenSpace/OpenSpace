@@ -31,6 +31,11 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
 
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
+
 namespace openspace {
 
 class ScreenSpaceRenderable : public properties::PropertyOwner {
