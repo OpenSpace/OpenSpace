@@ -28,7 +28,7 @@ namespace openspace {
 	ScreenSpaceRenderable::ScreenSpaceRenderable(std::string texturePath)
 		: _enabled("enabled", "Is Enabled", true)
 		, _flatScreen("flatScreen", "Flat Screen", false)
-		, _position("position", "Position", glm::vec3(0,0,-2),glm::vec3(-2,-2, -1),glm::vec3(2, 2, 0))
+		, _position("position", "Position", glm::vec3(0),glm::vec3(-4),glm::vec3(4))
 		, _scale("scale", "Scale" , 0.5, 0, 1)
 		, _texturePath("texturePath", "Texture path", texturePath)
 		, _quad(0)
