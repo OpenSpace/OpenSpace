@@ -64,22 +64,22 @@ void ScreenSpaceImage::render(Camera* camera){
 	float occlusionDepth = position.z;
 
 	glm::mat4 modelTransform;
+	position.z = _planeDepth;
 
 	if(!_isFlatScreen){
 		occlusionDepth = position.x;
-		position.x = _planeDepth;
-
-		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.z, glm::vec3(0.0f, 1.0f, 0.0f));
-		rotation = glm::rotate(rotation, position.y , glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, position.x));
+		// position.x = _planeDepth;
+		float phi = position.y - M_PI/2.0;
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.x, glm::vec3(0.0f, 1.0f, 0.0f));
+		rotation = glm::rotate(rotation, phi , glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, _planeDepth));
 
 		modelTransform = rotation * translate;
 	} else {
-		position.z = _planeDepth;
 		modelTransform = glm::translate(glm::mat4(1.f), position);
-		modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 	}
 
+	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 
 	glEnable(GL_DEPTH_TEST);
     _shader->activate();
@@ -131,23 +131,42 @@ void ScreenSpaceImage::update(){
 			_position.set(toPolar(pos));
 		} else {
 			_position.set(toEuclidean(pos));
+			
 		}
 
 	}
 }
 
 glm::vec3 ScreenSpaceImage::toEuclidean(glm::vec3 polar){
-	float x = polar[0]*cos(polar[1])*sin(polar[2]);
-	float y = polar[0]*sin(polar[1])*sin(polar[2]);
-	float z = polar[0]*cos(polar[2]);
+	float x = polar[2]*sin(polar[0])*sin(polar[1]);
+	float y = polar[2]*cos(polar[1]);
+	float z = _planeDepth;
 	return glm::vec3(x, y, z);
 }
 
-glm::vec3 ScreenSpaceImage::toPolar(glm::vec3 euclidean){
-	float r = sqrt(pow(euclidean[0], 2) + pow(euclidean[1], 2) + pow(euclidean[2], 2));
-	float theta= atan2(euclidean[1],euclidean[0]);
-	float phi = acos(euclidean[2]/r);
-	return glm::vec3(r, theta, phi);
+glm::vec3 ScreenSpaceImage::toPolar(glm::vec3 euclidean){	
+	float r = 		-sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(_planeDepth,2));
+	float theta	= 	atan2(-_planeDepth,euclidean[0])-M_PI/2.0;
+	float phi = 	acos(euclidean[1]/r);
+
+	while(phi>=M_PI){
+		phi -= M_PI;
+	}
+
+	if(!r){
+		phi = 0;
+	}
+
+	while(theta <= 0){
+		theta += 2.0*M_PI;
+	}
+
+	while(theta >= 2.0*M_PI) {
+		theta -= 2.0*M_PI;
+	}
+
+	// std::cout << euclidean[2] << " " << r 
+	return glm::vec3(theta, phi, r);
 }
 
 
