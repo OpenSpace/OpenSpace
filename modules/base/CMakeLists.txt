@@ -38,6 +38,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
@@ -59,6 +60,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp

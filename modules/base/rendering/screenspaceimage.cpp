@@ -30,41 +30,43 @@
 #include <modules/onscreengui/include/gui.h>
 #include <glm/gtx/polar_coordinates.hpp>
 #include <openspace/util/camera.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
-		:ScreenSpaceRenderable(texturePath)
-	{
-		_id = id();
-		setName("ScreenSpaceImage" + std::to_string(_id));
-		OsEng.gui()._property.registerProperty(&_enabled);
-		OsEng.gui()._property.registerProperty(&_flatScreen);
-		OsEng.gui()._property.registerProperty(&_euclideanPosition);
-		OsEng.gui()._property.registerProperty(&_sphericalPosition);
-		OsEng.gui()._property.registerProperty(&_depth);
-		OsEng.gui()._property.registerProperty(&_scale);
-		OsEng.gui()._property.registerProperty(&_texturePath);
+		:ScreenSpaceRenderable()
+		,_texturePath("texturePath", "Texture path", texturePath)
+{
+	addProperty(_texturePath);
 
-		_texturePath.onChange([this](){ loadTexture(); });
+	_id = id();
+	setName("ScreenSpaceImage" + std::to_string(_id));
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_flatScreen);
+	OsEng.gui()._property.registerProperty(&_euclideanPosition);
+	OsEng.gui()._property.registerProperty(&_sphericalPosition);
+	OsEng.gui()._property.registerProperty(&_depth);
+	OsEng.gui()._property.registerProperty(&_scale);
+	OsEng.gui()._property.registerProperty(&_texturePath);
 
-		if(_useEuclideanCoordinates){
-			_euclideanPosition.onChange([this](){
-				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-			});
-			_sphericalPosition.onChange([this](){});
-		}else{
-			_euclideanPosition.onChange([this](){
-				_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-			});
-		}
-		// _flatScreen.onChange([this](){ _useEuclideanCoordinates = _flatScreen.value(); });
+	_texturePath.onChange([this](){ loadTexture(); });
+
+	if(_useEuclideanCoordinates){
+		_euclideanPosition.onChange([this](){
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		});
+		_sphericalPosition.onChange([this](){});
+	}else{
+		_euclideanPosition.onChange([this](){
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		});
 	}
+}
 
 ScreenSpaceImage::~ScreenSpaceImage(){}
 
 
 void ScreenSpaceImage::render(){
-
 	GLfloat m_viewport[4];
 	glGetFloatv(GL_VIEWPORT, m_viewport);
 
@@ -75,16 +77,14 @@ void ScreenSpaceImage::render(){
 	float scalingRatioX = m_viewport[2] / _originalViewportSize[0];
 	float scalingRatioY = m_viewport[3] / _originalViewportSize[1];
 
-	float occlusionDepth = 1-_depth.value();
-
 	glm::mat4 modelTransform;
 	if(!_useEuclideanCoordinates){
 		glm::vec2 position = _sphericalPosition.value();
 		float phi = position.y - M_PI/2.0;
+
 		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.x, glm::vec3(0.0f, 1.0f, 0.0f));
 		rotation = glm::rotate(rotation, phi , glm::vec3(1.0f, 0.0f, 0.0f));
 		glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, _planeDepth));
-
 		modelTransform = rotation * translate;
 	} else {
 		glm::vec2 position = _euclideanPosition.value();
@@ -92,6 +92,7 @@ void ScreenSpaceImage::render(){
 	}
 
 	modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
+	float occlusionDepth = 1-_depth.value();
 
 	glEnable(GL_DEPTH_TEST);
     _shader->activate();
@@ -130,9 +131,27 @@ bool ScreenSpaceImage::initialize(){
 
 	return isReady();
 }
+
 bool ScreenSpaceImage::deinitialize(){
+	glDeleteVertexArrays(1, &_quad);
+	_quad = 0;
+
+	glDeleteBuffers(1, &_vertexPositionBuffer);
+	_vertexPositionBuffer = 0;
+
+
+	_texturePath = "";
+	_texture = nullptr;
+
+	 RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
 	return true;
 }
+
 void ScreenSpaceImage::update(){
 	if(_flatScreen.value() != _useEuclideanCoordinates){
 		_useEuclideanCoordinates = _flatScreen.value();
@@ -154,39 +173,6 @@ void ScreenSpaceImage::update(){
 	}
 }
 
-glm::vec2 ScreenSpaceImage::toEuclidean(glm::vec2 polar, float r){
-	float x = r*sin(polar[0])*sin(polar[1]);
-	float y = r*cos(polar[1]);
-	float z = _planeDepth;
-	return glm::vec2(x, y);
-}
-
-glm::vec2 ScreenSpaceImage::toSpherical(glm::vec2 euclidean){	
-	_radius  = 		-sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(_planeDepth,2));
-	float theta	= 	atan2(-_planeDepth,euclidean[0])-M_PI/2.0;
-	float phi = 	acos(euclidean[1]/_radius);
-
-	while(phi>=M_PI){
-		phi -= M_PI;
-	}
-
-	if(!_radius){
-		phi = 0;
-	}
-
-	while(theta <= -M_PI){
-		theta += 2.0*M_PI;
-	}
-
-	while(theta >= M_PI) {
-		theta -= 2.0*M_PI;
-	}
-
-	// std::cout << euclidean[2] << " " << r 
-	return glm::vec2(theta, phi);
-}
-
-
 bool ScreenSpaceImage::isReady() const{
 	bool ready = true;
 	if (!_shader)
@@ -207,10 +193,6 @@ void ScreenSpaceImage::loadTexture() {
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
-
-            // delete _textureFile;
-            // _textureFile = new ghoul::filesystem::File(_texturePath);
-            // _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 		}
 	}
 }

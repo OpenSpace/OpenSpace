@@ -26,6 +26,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/opengl/texture.h>
+ 
 namespace openspace {
 
 class ScreenSpaceImage : public ScreenSpaceRenderable {
@@ -41,16 +42,12 @@ public:
 	bool isReady() const override;
 private:
 	void loadTexture();
-	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
-	glm::vec2 toSpherical(glm::vec2 euclidean);
 	static int id();
 	
+	properties::StringProperty _texturePath;
 	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
-	glm::vec2 _originalViewportSize;
-	const float _planeDepth = -2.0;
-	bool _isFlatScreen = true;
 	int _id;
 };
-// int ScreenSpaceImage::id = 0;
+
 } //namespace openspace
 #endif //__SCREENSPACEIMAGE_H__

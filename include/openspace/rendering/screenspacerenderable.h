@@ -34,7 +34,7 @@ namespace openspace {
 
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
-	ScreenSpaceRenderable(std::string texturePath);
+	ScreenSpaceRenderable();
 	~ScreenSpaceRenderable();
 
 	virtual void render() = 0;
@@ -53,16 +53,12 @@ public:
 			pos += v;
 			_sphericalPosition.set(pos);
 		}
-		// glm::vec3 pos = _position.value();
-		// pos += v;
-		// _position.set(pos);
-	};
-	void toggleFlatScreen(){
-		_flatScreen.set(!_flatScreen.value());
 	};
 
 protected:
 	void createPlane();
+	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
+	glm::vec2 toSpherical(glm::vec2 euclidean);
 
 	properties::BoolProperty _enabled;
 	properties::BoolProperty _flatScreen;
@@ -70,13 +66,15 @@ protected:
 	properties::Vec2Property _sphericalPosition;
 	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
-	properties::StringProperty _texturePath;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	float _radius;
 	bool _useEuclideanCoordinates;
+	const float _planeDepth = -2.0;
+	glm::vec2 _originalViewportSize;
+	
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__

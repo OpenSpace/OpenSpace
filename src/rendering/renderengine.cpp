@@ -33,6 +33,7 @@
 #include <openspace/rendering/framebufferrenderer.h>
 
 #include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -207,7 +208,9 @@ bool RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
     ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
     registerScreenSpaceRenderable(ssr);
-    registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg"));
+    // registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg"));
+    registerScreenSpaceRenderable(std::make_shared<ScreenSpaceFramebuffer>());
+
 	return true;
 }
 
@@ -397,9 +400,9 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		}
 	}
 	
-	for (auto s : _screenSpaceRenderables) {
-		if(s->isEnabled())
-			s->render();
+	for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+		if(screenSpaceRenderable->isEnabled())
+			screenSpaceRenderable->render();
 	}
 }
 
