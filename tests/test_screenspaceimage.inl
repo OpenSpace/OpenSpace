@@ -21,43 +21,40 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
 #include "gtest/gtest.h"
+#include <modules/base/rendering/screenspaceimage.h>
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+/*
+ * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
+ */
 
-// test files
-#include <test_common.inl>
-//#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <test_screenspaceimage.inl>
+namespace openspace {
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+class ScreenSpaceRenderableTest : public testing::Test{
+protected:
 
-#include <iostream>
+	ScreenSpaceRenderableTest() :
+		_ssr(texturePath) 
+	{
+		_sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+	}
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+	~ScreenSpaceRenderableTest(){}
 
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
+
+	void reset() {}
+
+	// These variables are shared by all tests
+	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
+	ScreenSpaceImage _ssr;
+	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
+};
+
+
+TEST_F(ScreenSpaceRenderableTest, initialize){
+
+	bool isReady = _ssr.isReady();
+	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
 }
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
-
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+}//namespace openspace
