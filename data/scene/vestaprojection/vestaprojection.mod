@@ -8,8 +8,8 @@ return {
             Frame = "IAU_VESTA",
             Body = "VESTA",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/vestaprojection_2/obj/VestaComet_5000.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/vestaprojection_2/obj/VestaComet_5000.obj",
             },
             Textures = {
                 Type = "simple",

@@ -41,7 +41,7 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/modelgeometry.h>
-#include <modules/base/rendering/wavefrontgeometry.h>
+#include <modules/base/rendering/multimodelgeometry.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
 #include <modules/base/ephemeris/dynamicephemeris.h>
@@ -84,7 +84,7 @@ void BaseModule::internalInitialize() {
 
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
-    fModelGeometry->registerClass<modelgeometry::WavefrontGeometry>("WavefrontGeometry");
+    fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 } // namespace openspace

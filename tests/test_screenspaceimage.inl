@@ -21,28 +21,40 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include "gtest/gtest.h"
+#include <modules/base/rendering/screenspaceimage.h>
 
-#include <openspace/properties/triggerproperty.h>
+/*
+ * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
+ */
 
 namespace openspace {
-namespace properties {
 
-TriggerProperty::TriggerProperty(std::string identifier, std::string guiName)
-	: Property(std::move(identifier), std::move(guiName))
-{}
+class ScreenSpaceRenderableTest : public testing::Test{
+protected:
 
-std::string TriggerProperty::className() const {
-	return "TriggerProperty";
+	ScreenSpaceRenderableTest() :
+		_ssr(texturePath) 
+	{
+		_sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+	}
+
+	~ScreenSpaceRenderableTest(){}
+
+
+	void reset() {}
+
+	// These variables are shared by all tests
+	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
+	ScreenSpaceImage _ssr;
+	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
+};
+
+
+TEST_F(ScreenSpaceRenderableTest, initialize){
+
+	bool isReady = _ssr.isReady();
+	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
 }
 
-bool TriggerProperty::setLuaValue(lua_State* state) {
-	notifyListener();
-	return true;
-}
-
-void TriggerProperty::set(ghoul::any value) {
-	notifyListener();
-}
-
-} // namespace properties
-} // namespace openspace
+}//namespace openspace

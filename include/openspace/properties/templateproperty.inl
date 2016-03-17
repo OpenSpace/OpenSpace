@@ -212,20 +212,20 @@ std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
 }
 
 template <typename T>
-boost::any TemplateProperty<T>::get() const {
-    return boost::any(_value);
+ghoul::any TemplateProperty<T>::get() const {
+    return ghoul::any(_value);
 }
 
 template <typename T>
-void TemplateProperty<T>::set(boost::any value) {
+void TemplateProperty<T>::set(ghoul::any value) {
     try {
-        T v = boost::any_cast<T>(std::move(value));
+        T v = ghoul::any_cast<T>(std::move(value));
 		if (v != _value) {
 			_value = std::move(v);
 			notifyListener();
 		}
     }
-    catch (boost::bad_any_cast&) {
+    catch (ghoul::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
 			<< "' to '" << typeid(T).name() << "'");
     }
@@ -247,7 +247,7 @@ bool TemplateProperty<T>::setLuaValue(lua_State* state) {
 	bool success = false;
 	T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
 	if (success)
-		set(boost::any(thisValue));
+		set(ghoul::any(thisValue));
 	return success;
 }
 
@@ -267,7 +267,7 @@ bool TemplateProperty<T>::setStringValue(std::string value) {
     bool success = false;
     T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(value, success);
     if (success)
-        set(boost::any(thisValue));
+        set(ghoul::any(thisValue));
     return success;
 }
 

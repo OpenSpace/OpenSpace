@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
@@ -37,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.h
@@ -48,6 +48,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
@@ -59,7 +60,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/wavefrontgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.cpp

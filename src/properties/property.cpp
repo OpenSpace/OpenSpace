@@ -82,15 +82,15 @@ std::string Property::fullyQualifiedIdentifier() const {
 	return identifier;
 }
 
-boost::any Property::get() const {
-    return boost::any();
+ghoul::any Property::get() const {
+    return ghoul::any();
 }
 
 bool Property::getLuaValue(lua_State* state) const {
 	return false;
 }
 
-void Property::set(boost::any value) {}
+void Property::set(ghoul::any value) {}
 
 bool Property::setLuaValue(lua_State* state) {
 	return false;

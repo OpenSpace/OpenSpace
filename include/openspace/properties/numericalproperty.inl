@@ -312,7 +312,7 @@ bool NumericalProperty<T>::setStringValue(std::string value) {
     bool success = false;
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(value, success);
     if (success)
-        TemplateProperty<T>::set(boost::any(thisValue));
+        TemplateProperty<T>::set(ghoul::any(thisValue));
     return success;
 }
 
