@@ -164,10 +164,10 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix(){
 
 	//to scale the plane
 	float textureRatio =  (float(_texture->height())/float(_texture->width()));
-	float scalingRatioX = resolution[0] / _originalViewportSize[0];
-	float scalingRatioY = resolution[1] / _originalViewportSize[1];
-	scale = glm::scale(scale, glm::vec3(_scale.value() * scalingRatioY,
-										_scale.value() *  scalingRatioX * textureRatio,
+	float scalingRatioX = _originalViewportSize[0]/ resolution[0];
+	float scalingRatioY = _originalViewportSize[1]/ resolution[1];
+	scale = glm::scale(scale, glm::vec3(_scale.value() * scalingRatioX,
+										_scale.value() * scalingRatioY * textureRatio,
 										1)); 
 	return scale;
 }

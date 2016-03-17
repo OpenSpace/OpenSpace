@@ -79,35 +79,11 @@ bool ScreenSpaceImage::deinitialize(){
 }
 
 void ScreenSpaceImage::render(){
-	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
-	//to scale the plane
-	float textureRatio =  (float(_texture->height())/float(_texture->width()));
-
-	//to keep the texture ratio after viewport is distorted.
-	float scalingRatioX = resolution[0] / _originalViewportSize[0];
-	float scalingRatioY = resolution[1] / _originalViewportSize[1];
-
-	glm::mat4 modelTransform = glm::mat4(1.0);
-	if(!_useEuclideanCoordinates){
-		glm::vec2 position = _sphericalPosition.value();
-		float phi = position.y - M_PI/2.0;
-
-		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f),  position.x, glm::vec3(0.0f, 1.0f, 0.0f));
-		rotation = glm::rotate(rotation, phi , glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, _planeDepth));
-		modelTransform = rotation * translate;
-	} else {
-		glm::vec2 position = _euclideanPosition.value();
-		modelTransform = glm::translate(glm::mat4(1.f), glm::vec3(position, _planeDepth));
-	}
-
-
-	// modelTransform = glm::scale(modelTransform, glm::vec3(_scale.value()*scalingRatioY, _scale.value()*textureRatio*scalingRatioX, 1));
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
 	glm::mat4 scale = scaleMatrix();
 	// scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
-	modelTransform = rotation*translation*scale;
+	glm::mat4 modelTransform = rotation*translation*scale;
 
 	draw(modelTransform);
 }
