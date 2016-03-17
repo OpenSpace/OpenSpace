@@ -38,54 +38,107 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer()
 {
 	_id = id();
 	setName("ScreenSpaceFramebuffer" + std::to_string(_id));
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_useFlatScreen);
-	OsEng.gui()._property.registerProperty(&_euclideanPosition);
-	OsEng.gui()._property.registerProperty(&_sphericalPosition);
-	OsEng.gui()._property.registerProperty(&_depth);
-	OsEng.gui()._property.registerProperty(&_scale);
-
-	if(_useEuclideanCoordinates){
-		_euclideanPosition.onChange([this](){
-			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		});
-		_sphericalPosition.onChange([this](){});
-	}else{
-		_euclideanPosition.onChange([this](){
-			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		});
-	}
+	registerProperties();
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer(){}
 
 bool ScreenSpaceFramebuffer::initialize(){
-	_framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
-	ghoul::opengl::Texture texture = ghoul::opengl::Texture(glm::uvec3(512, 512, 10));
-	_framebuffer->attachTexture(&texture, GL_COLOR_ATTACHMENT0);
-	return true;
+	_originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+
+	createPlane();
+	createShaders();
+
+	createFragmentbuffer();
+
+	// Setting spherical/euclidean onchange handler
+	_useFlatScreen.onChange([this](){
+		useEuclideanCoordinates(_useFlatScreen.value());
+	});
+
+	//for testing
+	_ssi = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+	OsEng.renderEngine().registerScreenSpaceRenderable(_ssi);
+	return isReady();
 }
 
 bool ScreenSpaceFramebuffer::deinitialize(){
+	glDeleteVertexArrays(1, &_quad);
+	_quad = 0;
+
+	glDeleteBuffers(1, &_vertexPositionBuffer);
+	_vertexPositionBuffer = 0;
+
+	_texture = nullptr;
+
+	 RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
+    _framebuffer->detachAll();
+
 	return true;
 }
 
 void ScreenSpaceFramebuffer::render(){
+	glViewport (0, 0, _originalViewportSize.x, _originalViewportSize.y);
 	GLint defaultFBO = _framebuffer->getActiveObject();
 	_framebuffer->activate();
-	// _shader->activate();
-
-
-	// _shader->deactivate();
+	glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// test functions -------------------------------
+	_ssi->render();
+	// OsEng.renderEngine().renderer()->render(1,false);
+	OsEng.renderEngine().renderInformation();
+	//-----------------------------------------------
 	_framebuffer->deactivate();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+	glViewport (0, 0, resolution.x, resolution.y);
+	
+	glm::mat4 rotation = rotationMatrix();
+	glm::mat4 translation = translationMatrix();
+	glm::mat4 scale = scaleMatrix();
+	scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
+	glm::mat4 modelTransform = rotation*translation*scale;
+	draw(modelTransform);
 }
 
 void ScreenSpaceFramebuffer::update(){}
-bool ScreenSpaceFramebuffer::isReady() const {}
+
+bool ScreenSpaceFramebuffer::isReady() const{
+	bool ready = true;
+	if (!_shader)
+		ready &= false;
+	if(!_texture)
+		ready &= false;
+	return ready;
+}
 
 int ScreenSpaceFramebuffer::id(){
 		static int id = 0;
 		return id++;
+}
+
+void ScreenSpaceFramebuffer::createFragmentbuffer(){
+	_framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
+	_framebuffer->activate();
+	_texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(_originalViewportSize.x, _originalViewportSize.y, 1));
+	_texture->uploadTexture();
+	_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+	_framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
+	_framebuffer->deactivate();
+
+	// GLuint depthrenderbuffer;
+	// glGenRenderbuffers(1, &depthrenderbuffer);
+	// glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+	// glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _originalViewportSize.x, _originalViewportSize.y);
+	// glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+
+	// GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+	// glDrawBuffers(1, DrawBuffers);
 }
 } //namespace openspace

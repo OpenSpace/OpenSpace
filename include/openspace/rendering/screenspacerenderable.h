@@ -30,6 +30,12 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <ghoul/opengl/texture.h>
+#include <modules/onscreengui/include/gui.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <ghoul/opengl/textureunit.h>
+ #include <openspace/util/camera.h>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -63,8 +69,15 @@ public:
 
 protected:
 	void createPlane();
+	void useEuclideanCoordinates(bool b);
 	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
 	glm::vec2 toSpherical(glm::vec2 euclidean);
+	void registerProperties();
+	void createShaders();
+	glm::mat4 scaleMatrix();
+	glm::mat4 rotationMatrix();
+	glm::mat4 translationMatrix();
+	void draw(glm::mat4 modelTransform);
 
 	properties::BoolProperty _enabled;
 	properties::BoolProperty _useFlatScreen;
@@ -73,17 +86,21 @@ protected:
 	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
 
+
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 	const std::string _rendererPath;
 	ghoul::Dictionary _rendererData;
+	const std::string _vertexPath;
+	const std::string _fragmentPath;
+	std::unique_ptr<ghoul::opengl::Texture>  _texture;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-	float _radius;
 	bool _useEuclideanCoordinates;
 	const float _planeDepth = -2.0;
 	glm::vec2 _originalViewportSize;
-	
+
+	float _radius;	
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__

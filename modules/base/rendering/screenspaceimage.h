@@ -40,16 +40,13 @@ public:
 	bool deinitialize() override;
 	void update() override;
 	bool isReady() const override;
-	void useEuclideanCoordinates(bool b);
+
 private:
 	void loadTexture();
 	static int id();
 	
 	properties::StringProperty _texturePath;
-	std::unique_ptr<ghoul::opengl::Texture>  _texture; // The image to render
 	int _id;
-	const std::string _vertexPath;
-	const std::string _fragmentPath;
 };
 
 } //namespace openspace

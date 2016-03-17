@@ -26,6 +26,9 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/textureunit.h>
+
+#include <modules/base/rendering/screenspaceimage.h>
 
 namespace openspace {
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
@@ -40,10 +43,13 @@ public:
 	bool isReady() const override;
 
 private:
+	void createFragmentbuffer();
 	static int id();
 
 	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
 	int _id;
+
+	std::shared_ptr<ScreenSpaceImage> _ssi; //for testing
 };
 
 } //namespace openspace

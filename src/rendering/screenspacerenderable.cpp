@@ -27,16 +27,18 @@
 namespace openspace {
 ScreenSpaceRenderable::ScreenSpaceRenderable()
 	: _enabled("enabled", "Is Enabled", true)
-	, _useFlatScreen("flatScreen", "Flat Screen", true)
+	, _useFlatScreen("flatScreen", "Flat Screen", false)
 	, _euclideanPosition("euclideanPosition", "Euclidean coordinates", glm::vec2(0),glm::vec2(-4),glm::vec2(4))
 	, _sphericalPosition("sphericalPosition", "Spherical coordinates", glm::vec2(0),glm::vec2(-M_PI),glm::vec2(M_PI))
 	, _depth("depth", "Depth", 0, 0, 1)
 	, _scale("scale", "Scale" , 0.5, 0, 1)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
+	,_rendererPath("${SHADERS}/renderframebuffer.frag")
+	,_vertexPath("${MODULE_BASE}/shaders/screnspace_vs.glsl")
+	,_fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
+	,_texture(nullptr)
 	,_shader(nullptr)
-	,_radius(-.2f)
-	, _rendererPath("${SHADERS}/renderframebuffer.frag")
 {
 	addProperty(_enabled);
 	addProperty(_useFlatScreen);
@@ -44,7 +46,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	addProperty(_sphericalPosition);
 	addProperty(_depth);
 	addProperty(_scale);
-	// addProperty(_texturePath);
 
 	_rendererData = ghoul::Dictionary();
     _rendererData.setValue("fragmentRendererPath", _rendererPath);
@@ -52,6 +53,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
     _rendererData.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
 
     _useEuclideanCoordinates = _useFlatScreen.value();
+    _radius = _planeDepth;
+
+    _sphericalPosition.set(toSpherical(_euclideanPosition.value()));
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
@@ -62,6 +66,8 @@ bool ScreenSpaceRenderable::isEnabled() const {
 }
 
 void ScreenSpaceRenderable::createPlane() {
+	glGenVertexArrays(1, &_quad); // generate array
+	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     // ============================
     // 		GEOMETRY (quad)
     // ============================
@@ -84,6 +90,23 @@ void ScreenSpaceRenderable::createPlane() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 }
 
+void ScreenSpaceRenderable::useEuclideanCoordinates(bool b){
+	_useEuclideanCoordinates = b;
+	if(_useEuclideanCoordinates){
+		_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+		_euclideanPosition.onChange([this](){
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		});
+		_sphericalPosition.onChange([this](){});
+	} else {
+		_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		_sphericalPosition.onChange([this](){
+			_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+		});
+		_euclideanPosition.onChange([this](){});
+	}
+}
+
 glm::vec2 ScreenSpaceRenderable::toEuclidean(glm::vec2 polar, float r){
 	float x = r*sin(polar[0])*sin(polar[1]);
 	float y = r*cos(polar[1]);
@@ -99,4 +122,103 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(glm::vec2 euclidean){
 	return glm::vec2(theta, phi);
 }
 
+void ScreenSpaceRenderable::registerProperties(){
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_useFlatScreen);
+	OsEng.gui()._property.registerProperty(&_euclideanPosition);
+	OsEng.gui()._property.registerProperty(&_sphericalPosition);
+	OsEng.gui()._property.registerProperty(&_depth);
+	OsEng.gui()._property.registerProperty(&_scale);
+
+	if(_useEuclideanCoordinates){
+		_euclideanPosition.onChange([this](){
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		});
+		_sphericalPosition.onChange([this](){});
+	}else{
+		_euclideanPosition.onChange([this](){
+			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+		});
+	}
+}
+
+void ScreenSpaceRenderable::createShaders(){
+	if(_shader == nullptr) {
+
+        ghoul::Dictionary dict = ghoul::Dictionary();
+
+        dict.setValue("rendererData", _rendererData);
+        dict.setValue("fragmentPath", _fragmentPath);
+		_shader = ghoul::opengl::ProgramObject::Build("ScreenSpaceProgram",
+			_vertexPath,
+			"${SHADERS}/render.frag",
+			dict
+			);
+	}
+}
+
+glm::mat4 ScreenSpaceRenderable::scaleMatrix(){
+	glm::mat4 scale(1.0);
+
+	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+
+	//to scale the plane
+	float textureRatio =  (float(_texture->height())/float(_texture->width()));
+	float scalingRatioX = resolution[0] / _originalViewportSize[0];
+	float scalingRatioY = resolution[1] / _originalViewportSize[1];
+	scale = glm::scale(scale, glm::vec3(_scale.value() * scalingRatioY,
+										_scale.value() *  scalingRatioX * textureRatio,
+										1)); 
+	return scale;
+}
+
+glm::mat4 ScreenSpaceRenderable::rotationMatrix(){
+	glm::mat4 rotation(1.0);
+	if(!_useEuclideanCoordinates){
+		glm::vec2 position = _sphericalPosition.value();
+
+		float theta = position.x;
+		float phi = position.y - M_PI/2.0;
+
+		rotation = glm::rotate(rotation, position.x, glm::vec3(0.0f, 1.0f, 0.0f));
+		rotation = glm::rotate(rotation, (float) (position.y - M_PI/2.0) , glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+
+	return rotation;
+}
+
+
+glm::mat4 ScreenSpaceRenderable::translationMatrix(){
+	glm::mat4 translation(1.0);
+	if(!_useEuclideanCoordinates){
+		translation = glm::translate(translation, glm::vec3(0.0f, 0.0f, _planeDepth));
+	}else{
+
+		translation = glm::translate(glm::mat4(1.f), glm::vec3(_euclideanPosition.value(), _planeDepth));
+	}
+
+	return translation;
+}
+
+
+void ScreenSpaceRenderable::draw(glm::mat4 modelTransform){
+	float occlusionDepth = 1-_depth.value();
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+    _shader->activate();
+    _shader->setUniform("OcclusionDepth", occlusionDepth);
+    _shader->setUniform("ModelTransform",modelTransform);
+    _shader->setUniform("ViewProjectionMatrix", OsEng.renderEngine().camera()->viewProjectionMatrix());
+	ghoul::opengl::TextureUnit unit;
+	unit.activate();
+	_texture->bind();
+	_shader->setUniform("texture1", unit);
+
+	glBindVertexArray(_quad);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glEnable(GL_CULL_FACE);
+
+	_shader->deactivate();
+}
 }// namespace openspace
