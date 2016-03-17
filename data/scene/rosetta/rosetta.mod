@@ -7,8 +7,8 @@ return {
             Type = "RenderableModel",
             Body = "ROSETTA", 
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/rosetta/obj/Rosettafromstl.obj",   
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/mainbodyros.obj",   
                 Magnification = 1,
             },
             Textures = {
@@ -114,9 +114,9 @@ return {
             Type = "RenderableModel",
             Body = "ROSETTA", 
             Geometry = {
-                Type = "WavefrontGeometry",
+                Type = "MultiModelGeometry",
                 Magnification = 1,    
-                ObjFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelleft.obj", 
+                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelleft.obj", 
             }, 
             Textures = {
                 Type = "simple",
@@ -138,8 +138,8 @@ return {
             Type = "RenderableModel",
             Body = "ROSETTA",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelright.obj", 
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelright.obj", 
                 Magnification = 1,
             },
             Textures = {

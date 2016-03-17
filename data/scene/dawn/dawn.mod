@@ -8,8 +8,8 @@ return {
             Type = "RenderableModel",
             Body = "DAWN",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/dawn/obj/mainbodydawn.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/mainbodydawn.obj",
             },
             Textures = {
                 Type = "simple",
@@ -633,8 +633,8 @@ return {
             Type = "RenderableModel",
             Body = "DAWN",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelleft.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelleft.obj",
             },
             Textures = {
                 Type = "simple",
@@ -656,8 +656,8 @@ return {
             Type = "RenderableModel",
             Body = "DAWN",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelright.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelright.obj",
             },
             Textures = {
                 Type = "simple",

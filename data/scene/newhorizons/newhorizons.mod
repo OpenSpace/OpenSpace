@@ -9,8 +9,8 @@ return {
             Type = "RenderableModel",
             Body = "NEW HORIZONS",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/newhorizons/models/NewHorizonsCleanModel.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/newhorizons/models/NewHorizonsCleanModel.obj",
                 Magnification = 4,
             }, 
             Textures = {
@@ -103,8 +103,8 @@ return {
             Type = "RenderableModel",
             Body = "NEW HORIZONS",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/newhorizons/models/Labels.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/newhorizons/models/Labels.obj",
                 Magnification = 4,
             }, 
             Textures = {

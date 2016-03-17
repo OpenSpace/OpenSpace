@@ -6,6 +6,12 @@ ext/SGCT
 .DS_Store
 *.swp
 
+# Windows system files:
+Thumbs.db
+
+# Emacs backup files:
+*~
+
 # generated glsl files
 *.gglsl
 *.GhoulGenerated.glsl

@@ -8,8 +8,8 @@ return {
             Type = "RenderableModelProjection",
             Body = "CHURYUMOV-GERASIMENKO",
             Geometry = {
-                Type = "WavefrontGeometry",
-                ObjFile = "${OPENSPACE_DATA}/scene/67P/obj/67P_rotated_5_130.obj",
+                Type = "MultiModelGeometry",
+                GeometryFile = "${OPENSPACE_DATA}/scene/67P/obj/67P_rotated_5_130.obj",
                 Magnification = 0,
             }, 
             Textures = {

@@ -38,8 +38,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <cctype>
 #include <chrono>
 
