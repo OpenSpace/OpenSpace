@@ -461,7 +461,7 @@ glm::mat4 RenderableModelProjection::computeProjectorMatrix(const glm::vec3 loc,
 											-glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
 		
 	// create perspective projection matrix
-	glm::mat4 projProjectionMatrix = glm::perspective(_fovy, _aspectRatio, _nearPlane, _farPlane);
+	glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
 	// bias matrix
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
 													0, 0.5f, 0, 0,

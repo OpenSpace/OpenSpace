@@ -382,6 +382,7 @@ void GUI::renderMainWindow() {
     bool toSun = ImGui::Button("Coordinate System to Sun");
     bool toPluto = ImGui::Button("Coordinate System to Pluto");
     bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
+    bool to67P = ImGui::Button("Coordinate System to 67P");
 
     if (toSun)
         OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
@@ -389,6 +390,8 @@ void GUI::renderMainWindow() {
         OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
     if (toJupiter)
         OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
+    if (to67P)
+        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', '67P');");
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
