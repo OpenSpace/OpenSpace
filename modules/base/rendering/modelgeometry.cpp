@@ -28,11 +28,10 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
-#include <modules/base/rendering/wavefrontgeometry.h>
 
 namespace {
     const std::string _loggerCat = "ModelGeometry";
-	const std::string keyObjFile = "ObjFile";
+	const std::string keyGeomModelFile = "GeometryFile";
 	const int8_t CurrentCacheVersion = 3;
     const std::string keyType = "Type";
 	const std::string keyName = "Name";
@@ -77,15 +76,15 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(keySize))
         _magnification = static_cast<float>(dictionary.value<double>(keySize));
 
-	success = dictionary.getValue(keyObjFile, _file);
+	success = dictionary.getValue(keyGeomModelFile, _file);
 	if (!success) {
-		LERROR("WaveFrontGeometry of '" << name << "' did not provide a key '"
-			<< keyObjFile << "'");
+		LERROR("Geometric Model file of '" << name << "' did not provide a key '"
+			<< keyGeomModelFile << "'");
 	}
 	_file = FileSys.absolutePath(_file);
 
     if (!FileSys.fileExists(_file, ghoul::filesystem::FileSystem::RawPath::Yes))
-		LERROR("Could not load OBJ file '" << _file << "': File not found");
+		LERROR("Could not load the geometric model file '" << _file << "': File not found");
 	
 
     addProperty(_magnification);
@@ -145,93 +144,95 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-		std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            filename,
-            ghoul::filesystem::CacheManager::Persistent::Yes
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        filename,
+        ghoul::filesystem::CacheManager::Persistent::Yes
         );
 
-		bool hasCachedFile = FileSys.fileExists(cachedFile);
-		if (hasCachedFile) {
-			LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
+    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    if (hasCachedFile) {
+        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
 
-			bool success = loadCachedFile(cachedFile);
-			if (success)
-				return true;
-			else
-				FileSys.cacheManager()->removeCacheFile(filename);
-			// Intentional fall-through to the 'else' computation to generate the cache
-			// file for the next run
-		}
-		else {
-			LINFO("Cache for Model '" << filename << "' not found");
-		}
-		LINFO("Loading Model file '" << filename << "'");
-		bool success = loadModel(filename);
-		if (!success)
-			//return false;
+        bool success = loadCachedFile(cachedFile);
+        if (success)
+            return true;
+        else
+            FileSys.cacheManager()->removeCacheFile(filename);
+        // Intentional fall-through to the 'else' computation to generate the cache
+        // file for the next run
+    }
+    else {
+        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "' not found");
+    }
 
-		LINFO("Saving cache");
-		success = saveCachedFile(cachedFile);
+    LINFO("Loading Model file '" << filename << "'");
+    bool success = loadModel(filename);
 
-		return success;
+    if (!success)
+        return false;
+
+    LINFO("Saving cache");
+    success = saveCachedFile(cachedFile);
+
+    return success;
 }
 
 bool ModelGeometry::saveCachedFile(const std::string& filename) {
-		std::ofstream fileStream(filename, std::ofstream::binary);
-		if (fileStream.good()) {
-			fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-				sizeof(int8_t));
+    std::ofstream fileStream(filename, std::ofstream::binary);
+    if (fileStream.good()) {
+        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t));
 
-			int64_t vSize = _vertices.size();
-			fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
-			int64_t iSize = _indices.size();
-			fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
+        int64_t vSize = _vertices.size();
+        fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
+        int64_t iSize = _indices.size();
+        fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
 
-			fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
-			fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
+        fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
 
-			return fileStream.good();
-		}
-		else {
-			LERROR("Error opening file '" << filename << "' for save cache file");
-			return false;
-		}
-	}
+        return fileStream.good();
+    }
+    else {
+        LERROR("Error opening file '" << filename << "' for save cache file");
+        return false;
+    }
+}
 
 bool ModelGeometry::loadCachedFile(const std::string& filename) {
-		std::ifstream fileStream(filename, std::ifstream::binary);
-		if (fileStream.good()) {
-			int8_t version = 0;
-			fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-			if (version != CurrentCacheVersion) {
-				LINFO("The format of the cached file has changed, deleting old cache");
-				fileStream.close();
-				FileSys.deleteFile(filename);
-				return false;
-			}
+    std::ifstream fileStream(filename, std::ifstream::binary);
+    if (fileStream.good()) {
+        int8_t version = 0;
+        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+        if (version != CurrentCacheVersion) {
+            LINFO("The format of the cached file has changed, deleting old cache");
+            fileStream.close();
+            FileSys.deleteFile(filename);
+            return false;
+        }
 
-			int64_t vSize, iSize;
-			fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
-			fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
+        int64_t vSize, iSize;
+        fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
+        fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
 
-            if (vSize == 0 || iSize == 0) {
-                LERROR("Error opening file '" << filename << "' for loading cache file");
-                return false;
-            }
+        if (vSize == 0 || iSize == 0) {
+            LERROR("Error opening file '" << filename << "' for loading cache file");
+            return false;
+        }
 
-			_vertices.resize(vSize);
-			_indices.resize(iSize);
+        _vertices.resize(vSize);
+        _indices.resize(iSize);
 
-			fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
-			fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
+        fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
 
-			return fileStream.good();
-		}
-		else {
-			LERROR("Error opening file '" << filename << "' for loading cache file");
-			return false;
-		}
-	}
+        return fileStream.good();
+    }
+    else {
+        LERROR("Error opening file '" << filename << "' for loading cache file");
+        return false;
+    }
+}
 
 bool ModelGeometry::getVertices(std::vector<Vertex>* vertexList) {
 	vertexList->clear();
