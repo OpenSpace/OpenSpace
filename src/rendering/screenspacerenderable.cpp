@@ -30,7 +30,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	, _useFlatScreen("flatScreen", "Flat Screen", false)
 	, _euclideanPosition("euclideanPosition", "Euclidean coordinates", glm::vec2(0),glm::vec2(-4),glm::vec2(4))
 	, _sphericalPosition("sphericalPosition", "Spherical coordinates", glm::vec2(0),glm::vec2(-M_PI),glm::vec2(M_PI))
-	, _depth("depth", "Depth", 0, 0, 1)
+	, _depth("depth", "Depth", 0, 0, 0)
 	, _scale("scale", "Scale" , 0.5, 0, 2)
 	, _alpha("alpha", "Alpha" , 1, 0, 1)
 	, _quad(0)
@@ -58,6 +58,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
     _radius = _planeDepth;
 
     _sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}

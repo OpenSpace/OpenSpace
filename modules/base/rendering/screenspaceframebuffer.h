@@ -41,15 +41,21 @@ public:
 	void render() override;
 	void update() override;
 	bool isReady() const override;
+
+	void setSize(glm::vec4);
 	void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
+	void removeAllRenderFunctions();
 private:
 	void createFragmentbuffer();
 	static int id();
 
 	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+
 	int _id;
 
 	std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
+	properties::Vec4Property _size;
+
 };
 
 } //namespace openspace

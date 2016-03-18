@@ -96,6 +96,7 @@ namespace {
     const std::string RenderFsPath = "${SHADERS}/render.frag";
 }
 
+
 namespace openspace {
 
 const std::string RenderEngine::PerformanceMeasurementSharedData =
@@ -207,14 +208,17 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
+    //For testing screenspacerenderables
+
+
     std::shared_ptr<ScreenSpaceFramebuffer> ssfb = std::make_shared<ScreenSpaceFramebuffer>();
     ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){renderInformation();}));
     ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){ssr->render();}));
     registerScreenSpaceRenderable(ssfb);
-    //For testing screenspacerenderables
+
+
     ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
     registerScreenSpaceRenderable(ssr);
-
 
 	return true;
 }
@@ -1465,6 +1469,13 @@ void RenderEngine::renderScreenLog() {
 			message.c_str());		// Pad category with "..." if exceeds category_length
 		++nr;
 	}
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+	std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+			  [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+			  	return i->depth() > j->depth();
+			  });
 }
 
 }// namespace openspace
