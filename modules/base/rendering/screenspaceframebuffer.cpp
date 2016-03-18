@@ -34,11 +34,17 @@
 namespace openspace {
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer() 
 	:ScreenSpaceRenderable()
+	,_size("size", "Size", glm::vec4(0, 0, 1020,720), glm::vec4(0), glm::vec4(2000))
 	,_framebuffer(nullptr)
 {
 	_id = id();
 	setName("ScreenSpaceFramebuffer" + std::to_string(_id));
 	registerProperties();
+	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+
+	addProperty(_size);
+	OsEng.gui()._property.registerProperty(&_size);
+	_size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer(){}
@@ -76,12 +82,20 @@ bool ScreenSpaceFramebuffer::deinitialize(){
 
     _framebuffer->detachAll();
 
+    removeAllRenderFunctions();
+
 	return true;
 }
 
 void ScreenSpaceFramebuffer::render(){
+	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+	glm::vec4 size = _size.value();
+
+	float xratio = _originalViewportSize.x / (size.z-size.x);
+	float yratio = _originalViewportSize.y / (size.w-size.y);;
+
 	if(!_renderFunctions.empty()){
-		glViewport (0, 0, _originalViewportSize.x, _originalViewportSize.y);
+		glViewport (-size.x*xratio, -size.y*yratio, _originalViewportSize.x*xratio, _originalViewportSize.y*yratio);
 		GLint defaultFBO = _framebuffer->getActiveObject();
 		_framebuffer->activate();
 		
@@ -96,13 +110,13 @@ void ScreenSpaceFramebuffer::render(){
 		_framebuffer->deactivate();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-		glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+		
 		glViewport (0, 0, resolution.x, resolution.y);
 		
 		glm::mat4 rotation = rotationMatrix();
 		glm::mat4 translation = translationMatrix();
 		glm::mat4 scale = scaleMatrix();
-		scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
+		scale = glm::scale(scale, glm::vec3((1.0/xratio), -(1.0/yratio), 1.0f));
 		glm::mat4 modelTransform = rotation*translation*scale;
 		draw(modelTransform);
 	}
@@ -143,7 +157,15 @@ void ScreenSpaceFramebuffer::createFragmentbuffer(){
 	// glDrawBuffers(1, DrawBuffers);
 }
 
+void ScreenSpaceFramebuffer::setSize(glm::vec4 size){
+	_size.set(size);
+}
+
 void ScreenSpaceFramebuffer::addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction){
 	_renderFunctions.push_back(renderFunction);
+}
+
+void ScreenSpaceFramebuffer::removeAllRenderFunctions(){
+	_renderFunctions.clear();
 }
 } //namespace openspace
