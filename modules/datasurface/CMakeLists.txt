@@ -36,8 +36,10 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-
+	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_fs.glsl
+	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_vs.glsl
 )
+
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
