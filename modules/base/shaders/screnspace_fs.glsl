@@ -39,6 +39,9 @@ Fragment getFragment(){
 	float depth = (1.0 + log(abs(OcclusionDepth) + 1/pow(k, 1.0))/log(k)) / 27.0;
 	frag.color = texture(texture1, vs_st);
 	frag.color.a = (frag.color.a != 0.0f) ? Alpha : frag.color.a;
+	if(frag.color.a == 0.0f){
+		discard;
+	}	
 	frag.depth = depth;
 
 	return frag;

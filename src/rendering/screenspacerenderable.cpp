@@ -209,11 +209,12 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform){
 
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-    _shader->activate();
-    _shader->setUniform("OcclusionDepth", occlusionDepth);
-    _shader->setUniform("Alpha", _alpha);
-    _shader->setUniform("ModelTransform",modelTransform);
-    _shader->setUniform("ViewProjectionMatrix", OsEng.renderEngine().camera()->viewProjectionMatrix());
+
+	_shader->activate();
+	_shader->setUniform("OcclusionDepth", occlusionDepth);
+	_shader->setUniform("Alpha", _alpha);
+	_shader->setUniform("ModelTransform",modelTransform);
+	_shader->setUniform("ViewProjectionMatrix", OsEng.renderEngine().camera()->viewProjectionMatrix());
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
