@@ -29,7 +29,7 @@
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
- #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -146,12 +146,11 @@ public:
     } _onScreenInformation;
 
     std::shared_ptr<ScreenSpaceRenderable> ssr;
-    void renderInformation(); //MOVE BACK TO PRIVATE
-
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
 	void storePerformanceMeasurements();
+    void renderInformation();
     void renderScreenLog();
 
 	Camera* _mainCamera;

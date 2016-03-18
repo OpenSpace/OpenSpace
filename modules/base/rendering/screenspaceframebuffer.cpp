@@ -56,9 +56,6 @@ bool ScreenSpaceFramebuffer::initialize(){
 		useEuclideanCoordinates(_useFlatScreen.value());
 	});
 
-	//for testing
-	_ssi = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
-	OsEng.renderEngine().registerScreenSpaceRenderable(_ssi);
 	return isReady();
 }
 
@@ -83,28 +80,32 @@ bool ScreenSpaceFramebuffer::deinitialize(){
 }
 
 void ScreenSpaceFramebuffer::render(){
-	glViewport (0, 0, _originalViewportSize.x, _originalViewportSize.y);
-	GLint defaultFBO = _framebuffer->getActiveObject();
-	_framebuffer->activate();
-	glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// test functions -------------------------------
-	_ssi->render();
-	// OsEng.renderEngine().renderer()->render(1,false);
-	OsEng.renderEngine().renderInformation();
-	//-----------------------------------------------
-	_framebuffer->deactivate();
+	if(!_renderFunctions.empty()){
+		glViewport (0, 0, _originalViewportSize.x, _originalViewportSize.y);
+		GLint defaultFBO = _framebuffer->getActiveObject();
+		_framebuffer->activate();
+		
+		glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
-	glViewport (0, 0, resolution.x, resolution.y);
-	
-	glm::mat4 rotation = rotationMatrix();
-	glm::mat4 translation = translationMatrix();
-	glm::mat4 scale = scaleMatrix();
-	scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
-	glm::mat4 modelTransform = rotation*translation*scale;
-	draw(modelTransform);
+		for(auto renderFunction : _renderFunctions){
+
+			(*renderFunction)();
+
+		}
+		_framebuffer->deactivate();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+		glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+		glViewport (0, 0, resolution.x, resolution.y);
+		
+		glm::mat4 rotation = rotationMatrix();
+		glm::mat4 translation = translationMatrix();
+		glm::mat4 scale = scaleMatrix();
+		scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
+		glm::mat4 modelTransform = rotation*translation*scale;
+		draw(modelTransform);
+	}
 }
 
 void ScreenSpaceFramebuffer::update(){}
@@ -140,5 +141,9 @@ void ScreenSpaceFramebuffer::createFragmentbuffer(){
 
 	// GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
 	// glDrawBuffers(1, DrawBuffers);
+}
+
+void ScreenSpaceFramebuffer::addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction){
+	_renderFunctions.push_back(renderFunction);
 }
 } //namespace openspace

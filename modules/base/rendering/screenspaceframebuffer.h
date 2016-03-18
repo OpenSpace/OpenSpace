@@ -41,7 +41,7 @@ public:
 	void render() override;
 	void update() override;
 	bool isReady() const override;
-
+	void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
 private:
 	void createFragmentbuffer();
 	static int id();
@@ -49,7 +49,7 @@ private:
 	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
 	int _id;
 
-	std::shared_ptr<ScreenSpaceImage> _ssi; //for testing
+	std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
 };
 
 } //namespace openspace
