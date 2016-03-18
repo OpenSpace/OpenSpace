@@ -32,6 +32,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	, _sphericalPosition("sphericalPosition", "Spherical coordinates", glm::vec2(0),glm::vec2(-M_PI),glm::vec2(M_PI))
 	, _depth("depth", "Depth", 0, 0, 1)
 	, _scale("scale", "Scale" , 0.5, 0, 2)
+	, _alpha("alpha", "Alpha" , 1, 0, 1)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	,_rendererPath("${SHADERS}/renderframebuffer.frag")
@@ -46,6 +47,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	addProperty(_sphericalPosition);
 	addProperty(_depth);
 	addProperty(_scale);
+	addProperty(_alpha);
 
 	_rendererData = ghoul::Dictionary();
     _rendererData.setValue("fragmentRendererPath", _rendererPath);
@@ -129,6 +131,7 @@ void ScreenSpaceRenderable::registerProperties(){
 	OsEng.gui()._property.registerProperty(&_sphericalPosition);
 	OsEng.gui()._property.registerProperty(&_depth);
 	OsEng.gui()._property.registerProperty(&_scale);
+	OsEng.gui()._property.registerProperty(&_alpha);
 
 	if(_useEuclideanCoordinates){
 		_euclideanPosition.onChange([this](){
@@ -208,6 +211,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform){
 	glDisable(GL_CULL_FACE);
     _shader->activate();
     _shader->setUniform("OcclusionDepth", occlusionDepth);
+    _shader->setUniform("Alpha", _alpha);
     _shader->setUniform("ModelTransform",modelTransform);
     _shader->setUniform("ViewProjectionMatrix", OsEng.renderEngine().camera()->viewProjectionMatrix());
 	ghoul::opengl::TextureUnit unit;

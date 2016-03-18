@@ -55,6 +55,8 @@ public:
 	virtual void update() = 0;
 	virtual bool isReady() const = 0;
 	bool isEnabled() const;
+	glm::vec2 euclideanPosition() const {return _euclideanPosition.value();};
+	glm::vec2 sphericalPosition() const {return _sphericalPosition.value();};
 	void move(glm::vec2 v){
 		if(_useFlatScreen.value()){
 			glm::vec2 pos = _euclideanPosition.value();
@@ -85,6 +87,7 @@ protected:
 	properties::Vec2Property _sphericalPosition;
 	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
+	properties::FloatProperty _alpha;
 
 
 	GLuint _quad;

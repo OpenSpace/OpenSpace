@@ -21,10 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#define private public
 #include "gtest/gtest.h"
+
+// make private variables public, only for testing!!
 #include <modules/base/rendering/screenspaceimage.h>
 
 /*
+ * For each test the following is run:
  * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
  */
 
@@ -52,9 +56,25 @@ protected:
 
 
 TEST_F(ScreenSpaceRenderableTest, initialize){
-
 	bool isReady = _ssr.isReady();
 	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
+
+	// cannot test initialize, crashes at createplane becasue of opengl functions. needs mocking
+	//_ssr.initialize();
+	//isReady = _ssr.isReady();
+	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is not ready after initialize";
+	//_ssr.deinitialize();
+	//isReady = _ssr.isReady();
+	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is still ready after deinitialize";
+}
+
+TEST_F(ScreenSpaceRenderableTest, move){
+
+	glm::vec2 v1 = _ssr.sphericalPosition();
+	glm::vec2 v2 = glm::vec2(2.0f, 5.0f);
+	_ssr.move(v2);
+
+	ASSERT_EQ(_ssr.sphericalPosition(), v1 + v2);
 }
 
 }//namespace openspace
