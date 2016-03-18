@@ -45,6 +45,8 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer()
 	addProperty(_size);
 	OsEng.gui()._property.registerProperty(&_size);
 	_size.set(glm::vec4(0, 0, resolution.x,resolution.y));
+
+	_depth.set(1.0f);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer(){}
@@ -101,7 +103,7 @@ void ScreenSpaceFramebuffer::render(){
 		
 		glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glEnable(GL_ALPHA_TEST);
 		for(auto renderFunction : _renderFunctions){
 
 			(*renderFunction)();

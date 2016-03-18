@@ -96,6 +96,7 @@ namespace {
     const std::string RenderFsPath = "${SHADERS}/render.frag";
 }
 
+
 namespace openspace {
 
 const std::string RenderEngine::PerformanceMeasurementSharedData =
@@ -1132,6 +1133,7 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
 void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
 	s->initialize();
 	_screenSpaceRenderables.push_back(s);
+	sortScreenspaceRenderables();
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
@@ -1468,6 +1470,13 @@ void RenderEngine::renderScreenLog() {
 			message.c_str());		// Pad category with "..." if exceeds category_length
 		++nr;
 	}
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+	std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+			  [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+			  	return i->depth() > j->depth();
+			  });
 }
 
 }// namespace openspace

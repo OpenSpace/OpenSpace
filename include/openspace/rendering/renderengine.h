@@ -138,6 +138,7 @@ public:
 	// Temporary fade functionality
 	void startFading(int direction, float fadeDuration);
 
+    void sortScreenspaceRenderables();
     // This is temporary until a proper screenspace solution is found ---abock
     struct {
         glm::vec2 _position;

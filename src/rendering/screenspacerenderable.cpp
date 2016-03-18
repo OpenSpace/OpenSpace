@@ -58,6 +58,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
     _radius = _planeDepth;
 
     _sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+
+    _depth.onChange([this](){ OsEng.renderEngine().sortScreenspaceRenderables(); });
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
