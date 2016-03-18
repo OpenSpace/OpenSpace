@@ -24,6 +24,7 @@
 //#version __CONTEXT__
 uniform sampler2D texture1;
 uniform float OcclusionDepth;
+uniform float Alpha;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -37,6 +38,7 @@ Fragment getFragment(){
 	// power scale coordinates for depth. w value is set to 1.0.
 	float depth = (1.0 + log(abs(OcclusionDepth) + 1/pow(k, 1.0))/log(k)) / 27.0;
 	frag.color = texture(texture1, vs_st);
+	frag.color.a = (frag.color.a != 0.0f) ? Alpha : frag.color.a;
 	frag.depth = depth;
 
 	return frag;

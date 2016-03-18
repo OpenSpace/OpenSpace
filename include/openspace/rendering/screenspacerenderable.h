@@ -87,6 +87,7 @@ protected:
 	properties::Vec2Property _sphericalPosition;
 	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
+	properties::FloatProperty _alpha;
 
 
 	GLuint _quad;
