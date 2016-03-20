@@ -36,7 +36,7 @@ set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${GHOUL_BASE_DIR}/ext/CopySharedLibraries.cmake) 
+include(${GHOUL_BASE_DIR}/support/cmake/CopySharedLibraries.cmake) 
 
 test_compiler_compatibility()
 cleanup_project()
