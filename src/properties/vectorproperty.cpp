@@ -39,7 +39,7 @@ namespace properties {
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         lua_pushnil(state);                                                              \
-        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
+        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
             int success = lua_next(state, -2);                                           \
             if (success != 1) {                                                          \
                 success = false;                                                         \
@@ -61,7 +61,7 @@ namespace properties {
     [](lua_State * state, __TYPE__ value) -> bool {                                      \
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
+        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
             lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
             lua_setfield(state, -2, std::to_string(number).c_str());                     \
             ++number;                                                                    \
@@ -77,7 +77,7 @@ namespace properties {
             success = false;                                                             \
             return result;                                                               \
         }                                                                                \
-        for (glm::length_t i = 0; i < __TYPE__::components; ++i) {                       \
+        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
                 std::stringstream s(tokens[i]);                                          \
                 __TYPE__::value_type v;                                                  \
                 s >> v;                                                                  \
@@ -95,7 +95,7 @@ namespace properties {
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
         outValue = "{";                                                                  \
-        for (glm::length_t i = 0; i < __TYPE__::components; ++i)                         \
+        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i)       \
             outValue += std::to_string(inValue[i]) + ",";                                \
         outValue.pop_back();                                                             \
         outValue += "}";                                                                 \
