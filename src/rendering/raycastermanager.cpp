@@ -22,48 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/raycasterlistener.h>
+#include <algorithm>
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+namespace {
+	const std::string _loggerCat = "RaycasterManager";
+}
 
 namespace openspace {
 
-class VolumeRaycaster;
+RaycasterManager::RaycasterManager() {}
 
-struct InitializeData {
+RaycasterManager::~RaycasterManager() {}
 
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+void RaycasterManager::attachRaycaster(VolumeRaycaster* raycaster) {
+    if (!isAttached(raycaster)) {
+        _raycasters.push_back(raycaster);
+    }
+    for (auto &listener : _listeners) {
+        listener->raycastersChanged(raycaster, true);
+    }
 }
 
-#endif // __UPDATESTRUCTURES_H__
+bool RaycasterManager::isAttached(VolumeRaycaster* raycaster) {
+    auto it = std::find(_raycasters.begin(), _raycasters.end(), raycaster);
+    return it != _raycasters.end();
+}
+
+
+void RaycasterManager::detachRaycaster(VolumeRaycaster* raycaster) {
+    auto it = std::find(_raycasters.begin(), _raycasters.end(), raycaster);
+    if (it != _raycasters.end()) {
+        _raycasters.erase(it);
+        for (auto &listener : _listeners) {
+            listener->raycastersChanged(raycaster, false);
+        }
+    }
+}
+
+
+void RaycasterManager::addListener(RaycasterListener* listener) {
+    auto it = std::find(_listeners.begin(), _listeners.end(), listener);
+    if (it == _listeners.end()) {
+        _listeners.push_back(listener);
+    }
+}
+
+void RaycasterManager::removeListener(RaycasterListener* listener) {
+    auto it = std::find(_listeners.begin(), _listeners.end(), listener);
+    if (it != _listeners.end()) {
+        _listeners.erase(it);
+    }
+}
+
+const std::vector<VolumeRaycaster*>& RaycasterManager::raycasters() {
+    return _raycasters;
+}
+
+}

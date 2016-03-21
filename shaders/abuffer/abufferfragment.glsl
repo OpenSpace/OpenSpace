@@ -41,7 +41,7 @@ struct ABufferFragment {
 // -------DEPTH-------
 // depth       32 bits 
 // -------DATA--------
-// type         8 bits 0: geometry, >0: volume, <0: reserved
+// type         8 bits (signed char) 0: geometry, >0: volume entry, <0: volume exit
 // msaa         8 bits 
 // reserved    16 bits
 // ----COMPOSITION----
@@ -104,13 +104,22 @@ float _depth_(ABufferFragment frag) {
  * Type
  */
 void _type_(inout ABufferFragment frag, int type) {
-    uint val = uint(type);
+    uint val;
+    if (type < 0) {
+        val = uint(-type) + 128;
+    } else {
+        val = type;
+    }
     bitinsert(frag.data, val, mask_type, shift_type);
 }
 
 int _type_(ABufferFragment frag) {
     uint val = bitextract(frag.data, mask_type, shift_type);
-    return int(val);
+    if (val > 127) {
+        return 128 - int(val);
+    } else {
+        return int(val);
+    }
 }
 
 /**

@@ -22,48 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
-
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-namespace openspace {
-
-class VolumeRaycaster;
-
-struct InitializeData {
-
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
+#version __CONTEXT__
 
 
+#include "PowerScaling/powerScalingMath.hglsl"
+#include <#{fragmentPath}>
+
+out vec4 _out_color_;
+
+void main() {
+     Fragment f = getFragment();
+     _out_color_ = f.color;
+     gl_FragDepth = normalizeFloat(f.depth);
 }
-
-#endif // __UPDATESTRUCTURES_H__

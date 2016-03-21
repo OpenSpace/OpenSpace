@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2016                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,49 +21,27 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+layout(location = 0) in vec4 vertPosition;
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
-namespace openspace {
+out vec3 vPosition;
+out vec4 worldPosition;
 
-class VolumeRaycaster;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-struct InitializeData {
+void main() {
+	vPosition = vertPosition.xyz;
+	worldPosition = modelTransform*vertPosition;
+	
+	vec4 position = pscTransform(worldPosition, mat4(1.0));
+    
+	// project the position to view space
+	gl_Position = viewProjection * position;
 
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+    gl_Position.z = 1.0;
 }
-
-#endif // __UPDATESTRUCTURES_H__

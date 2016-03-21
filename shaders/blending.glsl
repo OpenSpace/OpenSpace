@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2016                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef _BLENDING_GLSL_
+#define _BLENDING_GLSL_
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-namespace openspace {
-
-class VolumeRaycaster;
-
-struct InitializeData {
-
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+/**
+ * Blend in src behind dst
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ */
+void blend(inout vec4 dst, vec4 src) {
+    dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
+    dst.a = dst.a + (1.0 - dst.a) * src.a;
 }
 
-#endif // __UPDATESTRUCTURES_H__
+/**
+ * Blend in src behind dst
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ * stepSize = 0: alpha becomes 0
+ * stepSize = 1: alpha becomes src.a
+ */
+void blendStep(inout vec4 dst, vec4 src, float stepSize) {
+    src.a = 1.0 - pow(1.0 - src.a, stepSize);
+    blend(dst, src);
+}
+
+#endif

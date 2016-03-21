@@ -22,48 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __RAYCASTERMANAGER_H__
+#define __RAYCASTERMANAGER_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <vector>
 
 namespace openspace {
 
 class VolumeRaycaster;
+class RaycasterListener;
 
-struct InitializeData {
+class RaycasterManager {
+public:
+    RaycasterManager();
+    ~RaycasterManager();
+    void attachRaycaster(VolumeRaycaster* raycaster);
+    void detachRaycaster(VolumeRaycaster* raycaster);
+    bool isAttached(VolumeRaycaster* raycaster);
+    const std::vector<VolumeRaycaster*>& raycasters();
 
-};
+    void addListener(RaycasterListener* listener);
+    void removeListener(RaycasterListener* listener);
+private:
+    std::vector<VolumeRaycaster*> _raycasters;
+    std::vector<RaycasterListener*> _listeners;
+}; // Volume
 
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
+} // openspace
 
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
-}
-
-#endif // __UPDATESTRUCTURES_H__
+#endif  // __RAYCASTERMANAGER_H__
