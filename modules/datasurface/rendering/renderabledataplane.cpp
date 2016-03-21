@@ -31,6 +31,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+
 
 namespace openspace {
 
@@ -58,6 +60,22 @@ RenderableDataPlane::~RenderableDataPlane(){
 }
 
 bool RenderableDataPlane::initialize() {
+
+	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/Alexa_Halford_062105_2.3df.007200.cdf"));
+
+	_dimensions = glm::size3_t(10,10,1);
+	float zSlice = 0.5f;
+
+	float* _dataSlice = kw.getUniformSliceValues(std::string("p"), _dimensions, zSlice);
+
+	for (int i = 0; i < dimensions.x; ++i)
+	{
+		for (int k = 0; k < dimensions.x; ++k){
+			std::cout << _dataSlice[k] << "  ";
+		}
+		std::cout << std::endl;
+	}
+
 	glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -142,10 +160,15 @@ void RenderableDataPlane::update(const UpdateData& data){
 
 void RenderableDataPlane::loadTexture() {
 	if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+		std::unique_ptr<ghoul::opengl::Texture> texture = 
+			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		if (texture) {
 			std::cout << "texture path: " << absPath(_texturePath) << std::endl;
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+
 			texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear

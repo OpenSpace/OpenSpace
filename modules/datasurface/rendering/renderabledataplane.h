@@ -58,6 +58,9 @@
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
+	float* _dataSlice;
+	glm::size3_t _dimensions;
+
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 

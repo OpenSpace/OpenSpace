@@ -93,6 +93,11 @@ public:
 		const std::string& var, 
 		const glm::size3_t& outDimensions);
 
+	float* getUniformSliceValues(	
+	const std::string& var, 
+	const glm::size3_t& outDimensions,
+	const float& zSlice);
+
 	float* getUniformSampledVectorValues(
 		const std::string& xVar, 
 		const std::string& yVar,
