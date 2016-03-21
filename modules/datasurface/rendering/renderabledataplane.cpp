@@ -63,18 +63,18 @@ bool RenderableDataPlane::initialize() {
 
 	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/Alexa_Halford_062105_2.3df.007200.cdf"));
 
-	_dimensions = glm::size3_t(10,10,1);
+	_dimensions = glm::size3_t(1000,1000,1);
 	float zSlice = 0.5f;
 
 	float* _dataSlice = kw.getUniformSliceValues(std::string("p"), _dimensions, zSlice);
-
+/*
 	for (int i = 0; i < _dimensions.x; ++i)
 	{
 		for (int k = 0; k < _dimensions.y; ++k){
 			std::cout << _dataSlice[k] << "  ";
 		}
 		std::cout << std::endl;
-	}
+	}*/
 
 	glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer

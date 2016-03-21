@@ -403,8 +403,8 @@ float* KameleonWrapper::getUniformSliceValues(
 			if(value < minValue){
 				minValue = value;
 			}
-			
-			std::cout  << "x: " << xPos << " y: " << yPos << " z: " << zPos  << " val: " << value << std::endl;
+
+			//std::cout  << "x: " << xPos << " y: " << yPos << " z: " << zPos  << " val: " << value << std::endl;
 		}
 	}
 	for(size_t i = 0; i < size; ++i) {
