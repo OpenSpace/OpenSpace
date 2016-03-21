@@ -45,53 +45,53 @@ BoxGeometry::~BoxGeometry() {
 
 
 bool BoxGeometry::initialize() {
-    // Initialize and upload to graphics card
+    // Initialize and upload to GPU
     float x = _size.x * 0.5;
     float y = _size.y * 0.5;
     float z = _size.z * 0.5;
 
     const GLfloat vertices[] = {
-        -x, y,  z,
-        x,  y,  z,
-        -x,  y,  z,
-        -x, -y,  z,
-        x, -y,  z,
-        x,  y,  z,
+        -x, -y,  z, // blue corner
+        x,  y,  z,  // white corner
+        -x,  y,  z, // cyan corner
+        -x, -y,  z, // blue corner
+        x, -y,  z,  // magenta corner
+        x,  y,  z,  // white corner
     
-        -x, -y, -z,
-        x,  y, -z,
-        -x,  y, -z,
-        -x, -y, -z,
-        x, -y, -z,
-        x,  y, -z,
+        -x, -y, -z, // black corner
+        -x,  y, -z, // green
+        x,  y, -z,  // yellow corner
+        -x, -y, -z, // black
+        x,  y, -z, // yellow
+        x, -y, -z, // red
     
-        x, -y, -z,
-        x,  y,  z,
-        x, -y,  z,
-        x, -y, -z,
-        x,  y, -z,
-        x,  y,  z,
+        x, -y, -z, // red
+        x,  y,  z, // yellow
+        x, -y,  z, // magenta
+        x, -y, -z, // red
+        x,  y, -z, // yellow
+        x,  y,  z, // white
     
-        -x, -y, -z,
-        -x,  y,  z,
-        -x, -y,  z,
-        -x, -y, -z,
-        -x,  y, -z,
-        -x,  y,  z,
-    
-        -x,  y, -z,
-        x,  y,  z,
-        -x,  y,  z,
-        -x,  y, -z,
-        x,  y, -z,
-        x,  y,  z,
-    
-        -x, -y, -z,
-        x, -y,  z,
-        -x, -y,  z,
-        -x, -y, -z,
-        x, -y, -z,
-        x, -y,  z
+        -x, -y, -z, // black
+        -x, -y,  z, // blue
+        -x,  y,  z, // cyan
+        -x, -y, -z, // black
+        -x,  y,  z, // cyan
+        -x,  y, -z, // green
+
+        x,  y,  z, // white
+        -x,  y, -z, // green
+        -x,  y,  z, // cyan
+        -x,  y, -z, // green
+        x,  y,  z, // white
+        x,  y, -z, // yellow
+
+        -x, -y, -z, // black
+        x, -y,  z, // magenta
+        -x, -y,  z, // blue
+        -x, -y, -z, // black
+        x, -y, -z, // red
+        x, -y,  z // magenta
     };
     
     if (_vaoId == 0)
@@ -113,7 +113,7 @@ bool BoxGeometry::initialize() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, 0);
 
     glBindVertexArray(0);
     return true;

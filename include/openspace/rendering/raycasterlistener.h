@@ -22,48 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
-
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#ifndef __RAYCASTERLISTENER_H__
+#define __RAYCASTERLISTENER_H__
 
 namespace openspace {
 
 class VolumeRaycaster;
 
-struct InitializeData {
+class RaycasterListener {
+public:
+    virtual void raycastersChanged(VolumeRaycaster* raycaster, bool attached) = 0;
+}; // RaycasterListener
 
-};
+} // openspace
 
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
-}
-
-#endif // __UPDATESTRUCTURES_H__
+#endif  // __RAYCASTERLISTENER_H__

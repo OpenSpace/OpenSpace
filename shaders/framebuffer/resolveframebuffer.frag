@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#version __CONTEXT__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include "PowerScaling/powerScalingMath.hglsl"
 
-namespace openspace {
+layout (location = 0) out vec4 finalColor;
+uniform float blackoutFactor;
+uniform int nAaSamples;
 
-class VolumeRaycaster;
+uniform sampler2DMS mainColorTexture;
 
-struct InitializeData {
+void main() {
+     vec4 color = vec4(0.0);
+     for (int i = 0; i < nAaSamples; i++) {
+         color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+     }
 
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+     color /= nAaSamples;
+     color.rgb *= blackoutFactor;
+     
+     finalColor = vec4(color.rgb, 1.0);
 }
-
-#endif // __UPDATESTRUCTURES_H__

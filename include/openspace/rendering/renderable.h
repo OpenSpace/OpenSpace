@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -29,7 +30,6 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/rendering/volume.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -45,8 +45,7 @@ namespace ghoul {
 namespace openspace {
 
 // Forward declare to minimize dependencies
-struct RenderData;
-struct UpdateData;
+
 class Camera;
 class PowerScaledCoordinate;
 
@@ -67,9 +66,9 @@ public:
     void setBoundingSphere(const PowerScaledScalar& boundingSphere);
     const PowerScaledScalar& getBoundingSphere();
 
-	virtual void render(const RenderData& data) = 0;
+    virtual void render(const RenderData& data);
+    virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
-    virtual std::vector<Volume*> volumesToRender(const RenderData& data) const;
 
 	bool isVisible() const;
 	
@@ -80,12 +79,12 @@ public:
 	bool getBody(std::string& body);
 	void setBody(std::string& body);
 
-protected:
-	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
+    void onEnabledChange(std::function<void(bool)> callback);
+
+    static void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 
 private:
 	properties::BoolProperty _enabled;
-	
     PowerScaledScalar boundingSphere_;
 	std::string _startTime;
 	std::string _endTime;

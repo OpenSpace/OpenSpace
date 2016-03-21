@@ -123,7 +123,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     // Sort the vectors by angle in the plane
     std::sort(angles.begin(), angles.end(),
         [](const std::pair<int, float>& a, const std::pair<int, float>& b) -> bool {
-            return a.second > b.second;
+            return a.second < b.second;
         }
     );
 
@@ -138,6 +138,17 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         _vertices.push_back(intersections[j].z);
         //_vertices.push_back(_w);
     }
+
+    // First VAO setup
+    glBindVertexArray(_vaoId);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+
+    glBindVertexArray(0);
 }
     
 bool BlockPlaneIntersectionGeometry::initialize() {
@@ -154,23 +165,14 @@ bool BlockPlaneIntersectionGeometry::initialize() {
     }
 
     updateVertices();
-    // First VAO setup
-    glBindVertexArray(_vaoId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-
-    glBindVertexArray(0);
     return true;
 }
 
 void BlockPlaneIntersectionGeometry::render() {
-    glBindVertexArray(_vaoId);  // select first VAO
-    glDrawArrays(GL_TRIANGLES, 0, 6*6);
-    glBindVertexArray(0);
+    glBindVertexArray(_vaoId);
+    //glDisable(GL_CULL_FACE);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, _vertices.size() / 3);
+    //glEnable(GL_CULL_FACE);
 }
 
 }

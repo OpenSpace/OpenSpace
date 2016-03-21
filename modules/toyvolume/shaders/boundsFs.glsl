@@ -22,48 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+in vec3 vPosition;
+in vec4 worldPosition;
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-namespace openspace {
+Fragment getFragment() {
+	vec4 fragColor = vec4(vPosition+0.5, 1.0);
+	vec4 position = worldPosition;
+	float depth = pscDepth(position);
 
-class VolumeRaycaster;
-
-struct InitializeData {
-
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+    Fragment frag;
+    frag.color = fragColor;
+    frag.depth = depth;
+    return frag;
 }
-
-#endif // __UPDATESTRUCTURES_H__

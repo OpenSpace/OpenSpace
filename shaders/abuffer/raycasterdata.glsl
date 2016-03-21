@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef _RAYCASTERDATA_GLSL_
+#define _RAYCASTERDATA_GLSL_
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-namespace openspace {
-
-class VolumeRaycaster;
-
-struct InitializeData {
-
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+struct RaycasterData {
+    vec3 position;
+    vec3 direction;
+    float scale;
+    float previousJitterDistance;
 }
 
-#endif // __UPDATESTRUCTURES_H__
+#endif

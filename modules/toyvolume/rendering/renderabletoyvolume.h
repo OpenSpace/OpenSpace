@@ -22,48 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __RENDERABLETOYVOLUME_H__
+#define __RENDERABLETOYVOLUME_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/blockplaneintersectiongeometry.h>
+
+#include <openspace/rendering/renderable.h>
+#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
 namespace openspace {
 
-class VolumeRaycaster;
+struct RenderData;
+    
+class RenderableToyVolume : public Renderable {
+public:
+    RenderableToyVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableToyVolume();
+    
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
 
-struct InitializeData {
-
+private:
+    properties::Vec3Property _scaling;
+    properties::IntProperty _scalingExponent;
+    properties::FloatProperty _stepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+    properties::Vec4Property _color;
+    
+    std::unique_ptr<ToyVolumeRaycaster> _raycaster;
 };
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
 }
 
-#endif // __UPDATESTRUCTURES_H__
+#endif // __RENDERABLETOYVOLUME_H__

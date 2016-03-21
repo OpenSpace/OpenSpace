@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2016                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+uniform vec4 color#{id};
+uniform float time#{id};
+uniform float maxStepSize#{id} = 0.02;
 
-namespace openspace {
+vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
+    maxStepSize = maxStepSize#{id};
 
-class VolumeRaycaster;
+    // Generate an arbitrary procedural volume.
+    // In real situations, the sample function would sample a
+    // 3D texture to retrieve the color contribution of a given point.
+    
+    vec3 fromCenter = vec3(0.5, 0.5, 0.5) - samplePos;
+    
+    vec4 c = color#{id};
+    float r = length(fromCenter);
+    c.a *= (1.0 - smoothstep(0.4, 0.45, r));
+    c.a *= (1.0 - smoothstep(0.35, 0.3, r));
+    c.a *= (1.0 - smoothstep(0.1, 0.2, abs(fromCenter.y)));
 
-struct InitializeData {
+    float theta = atan(fromCenter.x, fromCenter.z);
+    float angularRatio = (theta + 3.1415) / 6.283;
 
-};
+    angularRatio = mod(angularRatio + time#{id}*0.01, 1.0);
+    
+    c.a *= smoothstep(0.0, 0.2, clamp(angularRatio, 0.0, 1.0));
+    c.a *= smoothstep(1.0, 0.8, clamp(angularRatio, 0.0, 1.0));
 
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+    return c;
 }
 
-#endif // __UPDATESTRUCTURES_H__
+float stepSize#{id}(vec3 samplePos, vec3 dir) {
+    return maxStepSize#{id};
+}

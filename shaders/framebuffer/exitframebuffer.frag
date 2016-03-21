@@ -1,3 +1,7 @@
+#version __CONTEXT__
+
+
+#include "PowerScaling/powerScalingMath.hglsl"
 #include <#{fragmentPath}>
 
 out vec4 _out_color_;
@@ -5,5 +9,5 @@ out vec4 _out_color_;
 void main() {
      Fragment f = getFragment();
      _out_color_ = f.color;
-     gl_FragDepth = f.depth;
+     gl_FragDepth = normalizeFloat(f.depth);
 }

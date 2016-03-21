@@ -32,8 +32,9 @@
 #include <vector>
 #include <map>
 
-#include <openspace/rendering/volume.h>
+#include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/renderer.h>
+#include <openspace/util/updatestructures.h>
 
 namespace ghoul {
 	class Dictionary;
@@ -53,13 +54,16 @@ class RenderableVolume;
 class Camera;
 class Scene;
 	
-class FramebufferRenderer : public Renderer {
+class FramebufferRenderer : public Renderer, public RaycasterListener {
 public:
 	FramebufferRenderer();
 	virtual ~FramebufferRenderer();
 
     void initialize() override;
     void deinitialize() override;
+
+    void updateResolution();
+    void updateRaycastData();
     
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
@@ -73,11 +77,34 @@ public:
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
+
+    virtual void raycastersChanged(VolumeRaycaster* entity, bool attached) override;
 private:
+
+    std::map<VolumeRaycaster*, RaycastData> _raycastData;
+    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
+    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
+
+    GLuint _screenQuad;
+    GLuint _vertexPositionBuffer;
+    GLuint _mainColorTexture;
+    GLuint _mainDepthTexture;
+    GLuint _exitColorTexture;
+    GLuint _mainFramebuffer;
+    GLuint _exitDepthTexture;
+    GLuint _exitFramebuffer;
+
+    bool _dirtyRaycastData;
+    bool _dirtyResolution;
 
     Camera* _camera;
     Scene* _scene;
-    glm::vec2 _resolution;    
+    glm::vec2 _resolution;
+    int _nAaSamples;
+
+    ghoul::Dictionary _rendererData;
 };		// FramebufferRenderer
 }		// openspace
 

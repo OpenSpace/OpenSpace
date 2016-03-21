@@ -22,48 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#include <modules/toyvolume/toyvolumemodule.h>
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+
+#include <ghoul/misc/assert.h>
+
+#include <modules/toyvolume/rendering/renderabletoyvolume.h>
 
 namespace openspace {
 
-class VolumeRaycaster;
+ToyVolumeModule::ToyVolumeModule() : OpenSpaceModule("ToyVolume") {}
 
-struct InitializeData {
-
-};
-
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
-
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+void ToyVolumeModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableToyVolume>("RenderableToyVolume");
 }
 
-#endif // __UPDATESTRUCTURES_H__
+} // namespace openspace

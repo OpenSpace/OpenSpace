@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#version __CONTEXT__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include "fragment.glsl"
+#include <#{fragmentPath}>
+#include "abufferfragment.glsl"
+#include "abufferresources.glsl"
 
-namespace openspace {
+uniform bool _exit_;
+out vec4 _out_color_;
 
-class VolumeRaycaster;
+void main() {
+    Fragment frag = getFragment();
 
-struct InitializeData {
+    int sampleMask = gl_SampleMaskIn[0];
 
-};
+    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
+    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
 
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
+    ABufferFragment aBufferFrag;
+    _color_(aBufferFrag, frag.color);
+    _depth_(aBufferFrag, frag.depth);
 
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
+    int fragmentType = #{fragmentType};
 
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
+    if (_exit_) {
+        fragmentType *= -1;
+    }
 
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
+    _type_(aBufferFrag, fragmentType);
+    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
+    
+    _next_(aBufferFrag, prevHead);
 
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-
+    storeFragment(newHead, aBufferFrag);
+    discard;
 }
-
-#endif // __UPDATESTRUCTURES_H__

@@ -111,6 +111,16 @@ void Renderable::update(const UpdateData&)
 {
 }
 
+void Renderable::render(const RenderData& data, RendererTasks& tasks)
+{
+    (void) tasks;
+    render(data);
+}
+
+void Renderable::render(const RenderData& data)
+{
+}
+
 void Renderable::setPscUniforms(
 	ghoul::opengl::ProgramObject* program, 
 	const Camera* camera,
@@ -166,8 +176,10 @@ bool Renderable::isEnabled() const {
 	return _enabled;
 }
 
-std::vector<Volume*> Renderable::volumesToRender(const RenderData& data) const {
-    return std::vector<Volume*>();
+void Renderable::onEnabledChange(std::function<void(bool)> callback) {
+    _enabled.onChange([=] () {
+            callback(isEnabled());
+    });
 }
 
 }  // namespace openspace

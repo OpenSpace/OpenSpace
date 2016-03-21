@@ -1,0 +1,116 @@
+#include <modules/toyvolume/rendering/renderabletoyvolume.h>
+#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
+
+#include <openspace/rendering/renderable.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <ghoul/opengl/ghoul_gl.h>
+
+
+namespace {
+    const std::string GlslRayCastPath = "${MODULES}/toyvolume/shaders/rayCast.glsl";
+    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
+    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+}
+
+namespace openspace {
+
+    RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary)
+    , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
+    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
+    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
+    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
+    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
+    , _color("color", "Color", glm::vec4(1.0, 0.0, 0.0, 0.1), glm::vec4(0.0), glm::vec4(1.0)) {
+
+    float scalingExponent, stepSize;
+    glm::vec3 scaling, translation, rotation;
+    glm::vec4 color;
+    if (dictionary.getValue("ScalingExponent", scalingExponent)) {
+        _scalingExponent = scalingExponent;
+    }
+    if (dictionary.getValue("Scaling", scaling)) {
+        _scaling = scaling;
+    }
+    if (dictionary.getValue("Translation", translation)) {
+        _translation = translation;
+    }
+    if (dictionary.getValue("Rotation", rotation)) {
+        _rotation = rotation;
+    }
+    if (dictionary.getValue("Color", color)) {
+        _color = color;
+    }
+    if (dictionary.getValue("StepSize", stepSize)) {
+        _stepSize = stepSize;
+    }
+}
+    
+RenderableToyVolume::~RenderableToyVolume() {}
+
+bool RenderableToyVolume::initialize() {
+    _raycaster = std::make_unique<ToyVolumeRaycaster>(ToyVolumeRaycaster(_color));
+    _raycaster->initialize();
+
+    OsEng.renderEngine().raycasterManager().attachRaycaster(_raycaster.get());
+
+    std::function<void(bool)> onChange = [&](bool enabled) {
+        if (enabled) {
+            OsEng.renderEngine().raycasterManager().attachRaycaster(_raycaster.get());
+        }
+        else {
+            OsEng.renderEngine().raycasterManager().detachRaycaster(_raycaster.get());
+        }
+    };
+
+    onEnabledChange(onChange);
+
+    addProperty(_scaling);
+    addProperty(_scalingExponent);
+    addProperty(_stepSize);
+    addProperty(_translation);
+    addProperty(_rotation);
+    addProperty(_color);
+    
+    return true;
+}
+    
+bool RenderableToyVolume::deinitialize() {
+    if (_raycaster) {
+        OsEng.renderEngine().raycasterManager().detachRaycaster(_raycaster.get());
+        _raycaster = nullptr;
+    }
+    return true;
+}
+    
+bool RenderableToyVolume::isReady() const {
+    return true;
+}
+    
+void RenderableToyVolume::update(const UpdateData& data) {
+    if (_raycaster) {
+
+        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::powf(10.0, static_cast<float>(_scalingExponent)));
+        glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
+        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
+        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
+        transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+        transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::powf(10.0, static_cast<float>(_scalingExponent)));
+        
+        _raycaster->setColor(_color);
+        _raycaster->setStepSize(_stepSize);
+        _raycaster->setModelTransform(transform);
+        _raycaster->setTime(data.time);
+    }
+}
+
+void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
+    RaycasterTask task{ _raycaster.get(), data };
+    tasks.raycasterTasks.push_back(task);
+}
+       
+}

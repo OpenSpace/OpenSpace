@@ -22,48 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __TOYVOLUMERAYCASTER_H__
+#define __TOYVOLUMERAYCASTER_H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <ghoul/glm.h>
+#include <string>
+#include <vector>
+#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/blockplaneintersectiongeometry.h>
+
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+        class ProgramObject;
+    }
+}
 
 namespace openspace {
 
-class VolumeRaycaster;
+class RenderData;
+class RaycastData;
 
-struct InitializeData {
+class ToyVolumeRaycaster : public VolumeRaycaster {
+public:
 
-};
+    ToyVolumeRaycaster(glm::vec4 color);
 
-struct UpdateData {
-	double time;
-    bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
-};
+    virtual ~ToyVolumeRaycaster();
+    void initialize();
+    void deinitialize();
+    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) override;
+    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) override;
+    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) override;
+    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) override;
 
-struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
-};
+    std::string getBoundsVsPath() const override;
+    std::string getBoundsFsPath() const override;
+    std::string getRaycastPath() const override;
+    std::string getHelperPath() const override;
 
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
+    void setColor(glm::vec4 color);
+    void setModelTransform(glm::mat4 transform);
+    void setTime(double time);
+    void setStepSize(float time);
+private:
+    BoxGeometry _boundingBox;
+    glm::vec4 _color;
+    glm::mat4 _modelTransform;
+    float _stepSize;
+    double _time;
 
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-};
+}; // ToyVolumeRaycaster
 
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
+} // openspace
 
-
-}
-
-#endif // __UPDATESTRUCTURES_H__
+#endif  // __TOYVOLUMERAYCASTER_H__ 
