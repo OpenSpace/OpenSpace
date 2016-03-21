@@ -60,18 +60,6 @@ public:
 	glm::vec2 sphericalPosition() const {return _sphericalPosition.value();};
 	float depth() const {return _depth.value();};
 	
-	void move(glm::vec2 v){
-		if(_useFlatScreen.value()){
-			glm::vec2 pos = _euclideanPosition.value();
-			pos += v;
-			_euclideanPosition.set(pos);
-		}else{
-			glm::vec2 pos = _sphericalPosition.value();
-			pos += v;
-			_sphericalPosition.set(pos);
-		}
-	};
-
 protected:
 	void createPlane();
 	void useEuclideanCoordinates(bool b);
