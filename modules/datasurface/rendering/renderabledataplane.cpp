@@ -68,9 +68,9 @@ bool RenderableDataPlane::initialize() {
 
 	float* _dataSlice = kw.getUniformSliceValues(std::string("p"), _dimensions, zSlice);
 
-	for (int i = 0; i < dimensions.x; ++i)
+	for (int i = 0; i < _dimensions.x; ++i)
 	{
-		for (int k = 0; k < dimensions.x; ++k){
+		for (int k = 0; k < _dimensions.y; ++k){
 			std::cout << _dataSlice[k] << "  ";
 		}
 		std::cout << std::endl;
