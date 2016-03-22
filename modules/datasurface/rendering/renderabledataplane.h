@@ -29,6 +29,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
  namespace openspace{
  
@@ -50,13 +51,14 @@
     void createPlane();
 
  	properties::StringProperty _texturePath;
- 	properties::Vec2Property _size;
  	properties::Vec3Property _roatation;
- 	properties::Vec2Property _origin;
- 	// Origin _origin;
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
+
+	glm::vec4 _pscOffset;
+	glm::vec4 _modelScale;
+	psc _parentPos; 
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

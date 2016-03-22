@@ -154,6 +154,15 @@ bool KameleonWrapper::open(const std::string& filename) {
 		LDEBUG("_yValidMax: " << _yValidMax);
 		LDEBUG("_zValidMin: " << _zValidMin);
 		LDEBUG("_zValidMax: " << _zValidMax);
+
+
+		std::vector<std::string> variables = _model->getLoadedVariables();
+
+		std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
+		std::cout << std::get<0>(gridUnits) << ", " << std::get<1>(gridUnits) << ", " << std::get<2>(gridUnits) << std::endl;
+		std::cout << std::endl;
+		// std::cout << "SIUnit: " << _model->getSIUnit(variables[0]) << std::endl;
+
 		return true;
 	}
 	return false;
@@ -542,6 +551,19 @@ glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
 	return offset;
 }
 
+glm::vec4 KameleonWrapper::getModelBarycenterOffsetScaled(){
+	std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
+	glm::vec4 offset = glm::vec4(getModelBarycenterOffset(), 1.0);
+	if(std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R"){
+		offset.x *= 6.371f;
+		offset.y *= 6.371f;
+		offset.z *= 6.371f;
+		offset.w = 6;
+	}
+	// else if(std::get<0>(t) == "m" && std::get<1>(t) == "radian" && std::get<2>(t) == "radian"){}
+	return offset;
+}
+
 glm::vec3 KameleonWrapper::getModelScale() {
 	if (_type == Model::ENLIL)
 		return glm::vec3(1.0f, 1.0f, 1.0f);
@@ -550,6 +572,24 @@ glm::vec3 KameleonWrapper::getModelScale() {
 	scale.x = _xMax - _xMin;
 	scale.y = _yMax - _yMin;
 	scale.z = _zMax - _zMin;
+	return scale;
+}
+
+glm::vec4 KameleonWrapper::getModelScaleScaled(){
+	std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
+	glm::vec4 scale = glm::vec4(getModelScale(), 1.0);
+	if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
+		// Earth radius
+		scale.x *= 6.371f;
+		scale.y *= 6.371f;
+		scale.z *= 6.371f;
+		scale.w = 6;
+	}
+	else if (std::get<0>(gridUnits) == "m" && std::get<1>(gridUnits) == "radian" && std::get<2>(gridUnits) == "radian") {
+		// For spherical coordinate systems the radius is in meter
+		scale.w = -log10(1.0f/getGridMax().x);
+	}
+
 	return scale;
 }
 

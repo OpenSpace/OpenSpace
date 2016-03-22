@@ -24,40 +24,50 @@
 
 #include <modules/datasurface/rendering/renderabledataplane.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+
 
 namespace openspace {
 
 RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
 	,_texturePath("texture", "Texture", "${OPENSPACE_DATA}/test.png")
-	,_size("size", "Size", glm::vec2(0.7,8), glm::vec2(0.f), glm::vec2(10.0f))
-	,_roatation("rotation", "Roatation", glm::vec3(0.3,0.4,0.0), glm::vec3(0), glm::vec3(2*M_PI))
-	,_origin("origin", "Origin", glm::vec2(0.05, 0.001), glm::vec2(-0.1), glm::vec2(0.1))
+	,_roatation("rotation", "Roatation", glm::vec3(0), glm::vec3(0), glm::vec3(2*M_PI))
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 {
-	addProperty(_size);
+
 	addProperty(_texturePath);
 	addProperty(_roatation);
-	addProperty(_origin);
+
 	_texturePath.onChange(std::bind(&RenderableDataPlane::loadTexture, this));
-    _size.onChange([this](){ _planeIsDirty = true; });
 
 }
+
 
 RenderableDataPlane::~RenderableDataPlane(){
 }
 
 bool RenderableDataPlane::initialize() {
+	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/OpenGGCM.cdf"));
+	_modelScale = kw.getModelScaleScaled();
+	_pscOffset  = kw.getModelBarycenterOffsetScaled();
+
+	std::cout << "Scale:  " << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
+	std::cout << "Offset: " << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
+
+
+
 	glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -105,13 +115,18 @@ bool RenderableDataPlane::isReady() const {
 
 void RenderableDataPlane::render(const RenderData& data)
 {
+
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
+	psc _parentPos = parent->worldPosition();
+	glm::dvec4 pos = _parentPos.dvec4();
+	// std::cout << pos.x << ", " <<   pos.y << ", " <<  pos.z << ", " <<   pos.w << std::endl;
+	// std::cout << parent->name() << std::endl;
+
 	float w = (float)_texture->width();
 	float h = (float)_texture->height();
 	float textureRatio = h/w;
 
 	glm::mat4 transform = glm::mat4(1.0);
-	transform = glm::scale(transform, glm::vec3(1.0, textureRatio, 1.0f));
-	glm::mat4 translate = glm::translate(glm::mat4(1.0), glm::vec3(_origin.value()[0], _origin.value()[1], 0.0f));
 	transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
 	transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
 	transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
@@ -119,10 +134,13 @@ void RenderableDataPlane::render(const RenderData& data)
 	// Activate shader
 	_shader->activate();
 
+	auto psc = _parentPos;
+	glm::dvec4 dpc = psc.dvec4();
+	psc += glm::vec4(_pscOffset); 
+
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	_shader->setUniform("Translate", translate);
-	setPscUniforms(_shader.get(), &data.camera, data.position);
+	setPscUniforms(_shader.get(), &data.camera, psc);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -160,16 +178,17 @@ void RenderableDataPlane::createPlane() {
     // ============================
     // 		GEOMETRY (quad)
     // ============================
-    const GLfloat size = _size.value()[0];
-    const GLfloat w = _size.value()[1];
+    const GLfloat x = _modelScale.x;
+    const GLfloat y = _modelScale.y;
+    const GLfloat w = _modelScale.w;
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
-        -size, -size, 0.0f, w, 0, 1,
-        size, size, 0.0f, w, 1, 0,
-        -size, size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-        size, -size, 0.0f, w, 1, 1,
-        size, size, 0.0f, w, 1, 0,
+        -x, -y, 0.0f, w, 0, 1,
+        x, y, 0.0f, w, 1, 0,
+        -x, y, 0.0f, w, 0, 0,
+        -x, -y, 0.0f, w, 0, 1,
+        x, -y, 0.0f, w, 1, 1,
+        x, y, 0.0f, w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array

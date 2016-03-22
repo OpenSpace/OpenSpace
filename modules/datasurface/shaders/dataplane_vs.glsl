@@ -39,7 +39,7 @@ out float s;
 
 void main()
 {
-	vec4 tmp = Translate*in_position;
+	vec4 tmp = in_position;
 
 	vec4 position = pscTransform(tmp, ModelTransform);
 
