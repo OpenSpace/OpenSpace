@@ -111,13 +111,13 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     std::vector< std::pair<int, float> > angles(nIntersections-1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
-    angles[0] = std::pair<int, float>(1, 0.0);
+    angles[0] = std::pair<int, float>(1, 0.0f);
 
     for (int i = 2; i < nIntersections; i++) {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i-1] = std::pair<int, float>(i, glm::sign(sinA) * (1.0 - cosA));
+        angles[i - 1] = std::pair<int, float>(i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)));
     }
 
     // Sort the vectors by angle in the plane
