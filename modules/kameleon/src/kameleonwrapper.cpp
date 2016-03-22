@@ -374,7 +374,7 @@ float* KameleonWrapper::getUniformSliceValues(
 	float* data = new float[size];
 	double* doubleData = new double[size];
 
-	//_model->loadVariable(var);
+	_model->loadVariable(var);
 
 	double varMin = _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
 	double varMax = _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
@@ -387,41 +387,52 @@ float* KameleonWrapper::getUniformSliceValues(
 
 	double maxValue=0.0;
 	double minValue=10000.0;
+	
+	float missingValue = _model->getMissingValue();
 
 	for (int x = 0; x < outDimensions.x; ++x) {
 		for (int y = 0; y < outDimensions.y; ++y) {
 
 			unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x);
 
-			double xPos = _xMin + stepX*x;
+			double xPos = _xMax - stepX*x;
 			double yPos = _yMin + stepY*y;
 			double zPos = (_zMin + (_zMax-_zMin)*zSlice);
 
 			// Should y and z be flipped?
 			double value = _interpolator->interpolate(
 				var,
-				static_cast<float>(-xPos),
+				static_cast<float>(xPos),
 				static_cast<float>(yPos),
 				static_cast<float>(zPos));
 
-			doubleData[index] = value;
-
-			if(value > maxValue){
-				maxValue = value;
+			if(value != missingValue){
+				doubleData[index] = value;
+				
+				if(value > maxValue){
+					maxValue = value;
+				}
+				if(value < minValue){
+					minValue = value;
+				}
+			}else{
+				std::cout << "value missing" << std::endl;
+				doubleData[index] = 0;
 			}
-			if(value < minValue){
-				minValue = value;
-			}
-
 			//std::cout  << "x: " << xPos << " y: " << yPos << " z: " << zPos  << " val: " << value << std::endl;
 		}
 	}
 	for(size_t i = 0; i < size; ++i) {
-		//double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
+		// std::cout << varMin << ", " << varMax << ", " << minValue << ", " <<  maxValue <<  ", " << doubleData[i] << ", ";
+		// double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
 		double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
+		// std::cout << normalizedVal << ", ";
 		data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
+		// std::cout << data[i] << " ";
 	}
-	delete[] doubleData;
+	std::cout << std::endl << std::endl;
+
+	// return doubleData;
 	return data;
 }
 
@@ -612,6 +623,10 @@ glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
 	offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
 	offset.y = _yMin+(std::abs(_yMin)+std::abs(_yMax))/2.0f;
 	offset.z = _zMin+(std::abs(_zMin)+std::abs(_zMax))/2.0f;
+	std::cout << "_x_Min: " << _xMin << ", _xMax:" << _xMax << std::endl;  
+	std::cout << "_y_Min: " << _yMin << ", _yMax:" << _yMax << std::endl;  
+	std::cout << "_z_Min: " << _zMin << ", _zMax:" << _zMax << std::endl;  
+	std::cout << "offset: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;  
 	return offset;
 }
 

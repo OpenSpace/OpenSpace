@@ -35,10 +35,7 @@ Fragment getFragment() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
 	vec4 diffuse;
-	if(gl_FrontFacing)
-		diffuse = texture(texture1, vs_st);
-	else
-		diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
+	diffuse = texture(texture1, vs_st);
 
 	//vec4 diffuse = vec4(1,vs_st,1);
 	//vec4 diffuse = vec4(1,0,0,1);
@@ -46,7 +43,7 @@ Fragment getFragment() {
 	// 	diffuse = vec4(1,0,0,1);
 	// }
 
-	if (diffuse.a == 0.0)
+	if (diffuse.r <= 0.1)
 		discard;
 
     Fragment frag;

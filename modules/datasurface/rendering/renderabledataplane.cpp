@@ -60,20 +60,13 @@ RenderableDataPlane::~RenderableDataPlane(){
 
 bool RenderableDataPlane::initialize() {
 
-	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/OpenGGCM.cdf"));
+	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/BATSRUS.cdf"));
 
 	_dimensions = glm::size3_t(1000,1000,1);
 	float zSlice = 0.5f;
 
-	float* _dataSlice = kw.getUniformSliceValues(std::string("p"), _dimensions, zSlice);
-/*
-	for (int i = 0; i < _dimensions.x; ++i)
-	{
-		for (int k = 0; k < _dimensions.y; ++k){
-			std::cout << _dataSlice[k] << "  ";
-		}
-		std::cout << std::endl;
-	}*/
+	_dataSlice = kw.getUniformSliceValues(std::string("p"), _dimensions, zSlice);
+	
 	_modelScale = kw.getModelScaleScaled();
 	_pscOffset  = kw.getModelBarycenterOffsetScaled();
 
@@ -147,10 +140,11 @@ void RenderableDataPlane::render(const RenderData& data)
 
 	// Activate shader
 	_shader->activate();
-
+	glEnable(GL_ALPHA_TEST);
+	glDisable(GL_CULL_FACE);
 	auto psc = _parentPos;
 	glm::dvec4 dpc = psc.dvec4();
-	psc += glm::vec4(_pscOffset); 
+	psc += glm::vec4(-_pscOffset.x, _pscOffset.y, _pscOffset.z, _pscOffset.w); 
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
@@ -163,7 +157,7 @@ void RenderableDataPlane::render(const RenderData& data)
 
 	glBindVertexArray(_quad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-
+	glEnable(GL_CULL_FACE);
 	_shader->deactivate();
 };
 void RenderableDataPlane::update(const UpdateData& data){
@@ -197,8 +191,8 @@ void RenderableDataPlane::createPlane() {
     // ============================
     // 		GEOMETRY (quad)
     // ============================
-    const GLfloat x = _modelScale.x;
-    const GLfloat y = _modelScale.y;
+    const GLfloat x = _modelScale.x/2.0;
+    const GLfloat y = _modelScale.y/2.0;
     const GLfloat w = _modelScale.w;
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
