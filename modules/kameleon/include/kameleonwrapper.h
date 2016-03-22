@@ -125,7 +125,9 @@ public:
 		float stepsize);
 
 	glm::vec3 getModelBarycenterOffset();
+	glm::vec4 getModelBarycenterOffsetScaled();
 	glm::vec3 getModelScale();
+	glm::vec4 getModelScaleScaled();
 	glm::vec3 getGridMax();
 	glm::vec3 getGridMin();
 	std::string getVariableUnit(const std::string& variable);
