@@ -30,6 +30,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <ghoul/opengl/texture.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/engine/downloadmanager.h>
 
  namespace openspace{
  
@@ -49,6 +50,7 @@
  private:
  	void loadTexture();
     void createPlane();
+    void updateTexture();
 
  	properties::StringProperty _texturePath;
  	properties::Vec3Property _roatation;
@@ -61,6 +63,7 @@
 	glm::vec4 _pscOffset;
 	glm::vec4 _modelScale;
 	psc _parentPos; 
+	DownloadManager::FileFuture* _futureTexture;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

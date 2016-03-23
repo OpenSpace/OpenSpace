@@ -51,14 +51,38 @@ RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
 	addProperty(_roatation);
 
 	_texturePath.onChange(std::bind(&RenderableDataPlane::loadTexture, this));
-
+	
 }
 
 
 RenderableDataPlane::~RenderableDataPlane(){
 }
 
+void RenderableDataPlane::updateTexture(){
+	int imageSize = 1024;
+	DownloadManager::FileFuture* future;
+	while(true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+		 future = DlManager.downloadFile(
+			std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
+			absPath("${OPENSPACE_DATA}/dataplane.png"),
+			true,
+			[](const DownloadManager::FileFuture& f){
+				std::cout<<" =====Download finished===== " << std::endl;
+			}
+		);
+
+		if(future){
+			_futureTexture = future;
+			imageSize-=1;
+		}
+	}	
+}
+
 bool RenderableDataPlane::initialize() {
+
+	std::thread t = std::thread(std::bind(&RenderableDataPlane::updateTexture, this));
+	t.detach();
 
 	KameleonWrapper kw(absPath("${OPENSPACE_DATA}/BATSRUS.cdf"));
 
@@ -93,6 +117,7 @@ bool RenderableDataPlane::initialize() {
 
 	return isReady();
 };
+
 bool RenderableDataPlane::deinitialize() {
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
@@ -161,16 +186,23 @@ void RenderableDataPlane::render(const RenderData& data)
 void RenderableDataPlane::update(const UpdateData& data){
 	if (_planeIsDirty)
        createPlane();
+
+   	if(_futureTexture && _futureTexture->isFinished){
+   		_texturePath.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
+   		loadTexture();
+   		delete _futureTexture; 
+   		_futureTexture = nullptr;
+   	}
 };
 
 
 void RenderableDataPlane::loadTexture() {
 	if (_texturePath.value() != "") {
-        //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+/*		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
 		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
-			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);*/
 		if (texture) {
 			std::cout << "texture path: " << absPath(_texturePath) << std::endl;
 			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
