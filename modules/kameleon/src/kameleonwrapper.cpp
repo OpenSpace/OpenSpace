@@ -155,14 +155,6 @@ bool KameleonWrapper::open(const std::string& filename) {
 		LDEBUG("_zValidMin: " << _zValidMin);
 		LDEBUG("_zValidMax: " << _zValidMax);
 
-
-		std::vector<std::string> variables = _model->getLoadedVariables();
-
-		std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
-		std::cout << std::get<0>(gridUnits) << ", " << std::get<1>(gridUnits) << ", " << std::get<2>(gridUnits) << std::endl;
-		std::cout << std::endl;
-		// std::cout << "SIUnit: " << _model->getSIUnit(variables[0]) << std::endl;
-
 		return true;
 	}
 	return false;
@@ -385,8 +377,8 @@ float* KameleonWrapper::getUniformSliceValues(
 	LDEBUG(var << "Min: " << varMin);
 	LDEBUG(var << "Max: " << varMax);
 
-	double maxValue=0.0;
-	double minValue=10000.0;
+	double maxValue = 0.0;
+	double minValue = std::numeric_limits<double>::max();
 	
 	float missingValue = _model->getMissingValue();
 
@@ -419,20 +411,14 @@ float* KameleonWrapper::getUniformSliceValues(
 				std::cout << "value missing" << std::endl;
 				doubleData[index] = 0;
 			}
-			//std::cout  << "x: " << xPos << " y: " << yPos << " z: " << zPos  << " val: " << value << std::endl;
 		}
 	}
 	for(size_t i = 0; i < size; ++i) {
-		// std::cout << varMin << ", " << varMax << ", " << minValue << ", " <<  maxValue <<  ", " << doubleData[i] << ", ";
-		// double normalizedVal = (doubleData[i]-varMin)/(varMax-varMin);
 		double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
-		// std::cout << normalizedVal << ", ";
 		data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
-		// std::cout << data[i] << " ";
 	}
 	std::cout << std::endl << std::endl;
 
-	// return doubleData;
 	return data;
 }
 

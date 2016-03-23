@@ -73,8 +73,6 @@ bool RenderableDataPlane::initialize() {
 	std::cout << "Scale:  " << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
 	std::cout << "Offset: " << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
 
-
-
 	glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
