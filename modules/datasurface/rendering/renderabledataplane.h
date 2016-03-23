@@ -30,6 +30,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <ghoul/opengl/texture.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 
  namespace openspace{
  
@@ -65,6 +66,7 @@
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
+	KameleonWrapper* _kw;
 	bool _planeIsDirty;
  };
  

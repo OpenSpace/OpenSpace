@@ -46,6 +46,7 @@ RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 {
+	std::cout << "Creating RenderableDataPlane" << std::endl;
 
 	addProperty(_texturePath);
 	addProperty(_roatation);
@@ -129,9 +130,9 @@ void RenderableDataPlane::render(const RenderData& data)
 	// std::cout << pos.x << ", " <<   pos.y << ", " <<  pos.z << ", " <<   pos.w << std::endl;
 	// std::cout << parent->name() << std::endl;
 
-	float w = (float)_texture->width();
-	float h = (float)_texture->height();
-	float textureRatio = h/w;
+	// float w = (float)_texture->width();
+	// float h = (float)_texture->height();
+	// float textureRatio = h/w;
 
 	glm::mat4 transform = glm::mat4(1.0);
 	transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
@@ -145,7 +146,7 @@ void RenderableDataPlane::render(const RenderData& data)
 	auto psc = _parentPos;
 	glm::dvec4 dpc = psc.dvec4();
 	psc += glm::vec4(-_pscOffset.x, _pscOffset.y, _pscOffset.z, _pscOffset.w); 
-
+	std::cout << dpc.x << ", " <<  dpc.y << ", " << dpc.z << ", " << dpc.w << std::endl;
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
 	setPscUniforms(_shader.get(), &data.camera, psc);
