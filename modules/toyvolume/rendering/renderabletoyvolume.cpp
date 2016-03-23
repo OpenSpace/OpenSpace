@@ -80,14 +80,14 @@ bool RenderableToyVolume::initialize() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(ToyVolumeRaycaster(_color));
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(_raycaster.get());
+    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
 
     std::function<void(bool)> onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(_raycaster.get());
+            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(_raycaster.get());
+            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -105,7 +105,7 @@ bool RenderableToyVolume::initialize() {
     
 bool RenderableToyVolume::deinitialize() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(_raycaster.get());
+        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
     return true;

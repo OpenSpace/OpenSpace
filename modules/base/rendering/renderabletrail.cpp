@@ -155,7 +155,7 @@ void RenderableTrail::render(const RenderData& data) {
     // setup the data to the shader
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(_programObject.get(), &data.camera, data.position);
+    setPscUniforms(*_programObject.get(), data.camera, data.position);
 
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));

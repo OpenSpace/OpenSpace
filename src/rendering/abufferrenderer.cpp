@@ -118,7 +118,7 @@ void ABufferRenderer::initialize() {
         LERROR(e.message);
     }
 
-    OsEng.renderEngine().raycasterManager().addListener(this);
+    OsEng.renderEngine().raycasterManager().addListener(*this);
 }
     
 void ABufferRenderer::deinitialize() {
@@ -133,10 +133,12 @@ void ABufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    OsEng.renderEngine().raycasterManager().removeListener(this);
+    OsEng.renderEngine().raycasterManager().removeListener(*this);
 }
 
-void ABufferRenderer::raycastersChanged(VolumeRaycaster* raycaster, bool attached) {
+void ABufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attached) {
+    (void) raycaster;
+    (void) attached;
     _dirtyRaycastData = true;
 }
     
@@ -221,9 +223,9 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         if (program) {
             program->activate();
             program->setUniform("_exit_", false);
-            raycaster->renderEntryPoints(raycasterTask.renderData, program);
+            raycaster->renderEntryPoints(raycasterTask.renderData, *program);
             program->setUniform("_exit_", true);
-            raycaster->renderExitPoints(raycasterTask.renderData, program);
+            raycaster->renderExitPoints(raycasterTask.renderData, *program);
             program->deactivate();
         }
         else {
@@ -239,7 +241,7 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
         auto raycastData = _raycastData.find(raycaster);
         if (raycastData != _raycastData.end()) {
-                raycaster->preRaycast(raycastData->second, _resolveProgram.get());
+                raycaster->preRaycast(raycastData->second, *_resolveProgram.get());
         }
     }
 
@@ -254,7 +256,7 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
         auto raycastData = _raycastData.find(raycaster);
         if (raycastData != _raycastData.end()) {
-            raycaster->postRaycast(raycastData->second, _resolveProgram.get());
+            raycaster->postRaycast(raycastData->second, *_resolveProgram.get());
         }
     }
 

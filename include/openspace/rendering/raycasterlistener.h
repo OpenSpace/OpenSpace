@@ -31,7 +31,7 @@ class VolumeRaycaster;
 
 class RaycasterListener {
 public:
-    virtual void raycastersChanged(VolumeRaycaster* raycaster, bool attached) = 0;
+    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) = 0;
 }; // RaycasterListener
 
 } // openspace

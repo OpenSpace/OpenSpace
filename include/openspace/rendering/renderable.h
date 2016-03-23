@@ -81,7 +81,7 @@ public:
 
     void onEnabledChange(std::function<void(bool)> callback);
 
-    static void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
+    static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
 private:
 	properties::BoolProperty _enabled;

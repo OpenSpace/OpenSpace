@@ -120,7 +120,7 @@ void FramebufferRenderer::initialize() {
         LERROR(e.message);
     }
 
-    OsEng.renderEngine().raycasterManager().addListener(this);
+    OsEng.renderEngine().raycasterManager().addListener(*this);
 
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     if (_nAaSamples > 8) {
@@ -143,10 +143,12 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    OsEng.renderEngine().raycasterManager().removeListener(this);
+    OsEng.renderEngine().raycasterManager().removeListener(*this);
 }
 
-void FramebufferRenderer::raycastersChanged(VolumeRaycaster* raycaster, bool attached) {
+void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attached) {
+    (void) raycaster;
+    (void) attached;
     _dirtyRaycastData = true;
 }
 
@@ -321,7 +323,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get(); 
         if (exitProgram) {
             exitProgram->activate();
-            raycaster->renderExitPoints(raycasterTask.renderData, exitProgram);
+            raycaster->renderExitPoints(raycasterTask.renderData, *exitProgram);
             exitProgram->deactivate();
         }
 
@@ -330,7 +332,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         ghoul::opengl::ProgramObject* raycastProgram = _raycastPrograms[raycaster].get();
         if (raycastProgram) {
             raycastProgram->activate();
-            raycaster->preRaycast(_raycastData[raycaster], raycastProgram);
+            raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
             exitColorTextureUnit.activate();
@@ -351,11 +353,11 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
-            raycaster->renderEntryPoints(raycasterTask.renderData, raycastProgram);
+            raycaster->renderEntryPoints(raycasterTask.renderData, *raycastProgram);
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
 
-            raycaster->postRaycast(_raycastData[raycaster], raycastProgram);
+            raycaster->postRaycast(_raycastData[raycaster], *raycastProgram);
             raycastProgram->deactivate();
         } else {
             LWARNING("Raycaster is not attached when trying to perform raycaster task");

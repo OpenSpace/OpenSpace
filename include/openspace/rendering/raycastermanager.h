@@ -36,13 +36,13 @@ class RaycasterManager {
 public:
     RaycasterManager();
     ~RaycasterManager();
-    void attachRaycaster(VolumeRaycaster* raycaster);
-    void detachRaycaster(VolumeRaycaster* raycaster);
-    bool isAttached(VolumeRaycaster* raycaster);
+    void attachRaycaster(VolumeRaycaster& raycaster);
+    void detachRaycaster(VolumeRaycaster& raycaster);
+    bool isAttached(VolumeRaycaster& raycaster);
     const std::vector<VolumeRaycaster*>& raycasters();
 
-    void addListener(RaycasterListener* listener);
-    void removeListener(RaycasterListener* listener);
+    void addListener(RaycasterListener& listener);
+    void removeListener(RaycasterListener& listener);
 private:
     std::vector<VolumeRaycaster*> _raycasters;
     std::vector<RaycasterListener*> _listeners;

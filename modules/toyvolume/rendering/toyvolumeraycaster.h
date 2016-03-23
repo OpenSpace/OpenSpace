@@ -52,10 +52,10 @@ public:
     virtual ~ToyVolumeRaycaster();
     void initialize();
     void deinitialize();
-    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) override;
-    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) override;
-    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) override;
-    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) override;
+    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
 
     std::string getBoundsVsPath() const override;
     std::string getBoundsFsPath() const override;

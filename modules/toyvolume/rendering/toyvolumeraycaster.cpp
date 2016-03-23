@@ -53,10 +53,10 @@ void ToyVolumeRaycaster::initialize() {
 void ToyVolumeRaycaster::deinitialize() {
 }
     
-void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) {
-    program->setUniform("modelTransform", _modelTransform);
-    program->setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, &data.camera, data.position);
+void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+    program.setUniform("modelTransform", _modelTransform);
+    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    Renderable::setPscUniforms(program, data.camera, data.position);
     
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -66,11 +66,11 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl
     _boundingBox.render();
 }
     
-void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) {   
+void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
     // Uniforms
-    program->setUniform("modelTransform", _modelTransform);
-    program->setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, &data.camera, data.position);
+    program.setUniform("modelTransform", _modelTransform);
+    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    Renderable::setPscUniforms(program, data.camera, data.position);
 
     // Cull front face
     glEnable(GL_CULL_FACE);
@@ -83,16 +83,16 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl:
     glCullFace(GL_BACK);
 }
     
-void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) {
+void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
     std::string colorUniformName = "color" + std::to_string(data.id);
     std::string timeUniformName = "time" + std::to_string(data.id);
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    program->setUniform(colorUniformName, _color);
-    program->setUniform(stepSizeUniformName, _stepSize);
-    program->setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
+    program.setUniform(colorUniformName, _color);
+    program.setUniform(stepSizeUniformName, _stepSize);
+    program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
 }
     
-void ToyVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject* program) {
+void ToyVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
     // For example: release texture units
 }
     

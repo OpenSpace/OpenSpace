@@ -122,14 +122,14 @@ void Renderable::render(const RenderData& data)
 }
 
 void Renderable::setPscUniforms(
-	ghoul::opengl::ProgramObject* program, 
-	const Camera* camera,
+	ghoul::opengl::ProgramObject& program, 
+	const Camera& camera,
 	const PowerScaledCoordinate& position) 
 {
-	program->setUniform("campos", camera->position().vec4());
-	program->setUniform("objpos", position.vec4());
-	program->setUniform("camrot", camera->viewRotationMatrix());
-	program->setUniform("scaling", camera->scaling());
+	program.setUniform("campos", camera.position().vec4());
+	program.setUniform("objpos", position.vec4());
+	program.setUniform("camrot", camera.viewRotationMatrix());
+	program.setUniform("scaling", camera.scaling());
 }
 
 bool Renderable::isVisible() const {
