@@ -29,7 +29,7 @@
 
  #include <ghoul/misc/assert.h>
 
- #include <modules/datasurface/rendering/renderabledataplane.h>
+ #include <modules/datasurface/rendering/datasurfacecontainer.h>
 
  namespace openspace {
 
@@ -41,6 +41,6 @@
  		auto fRenderable = FactoryManager::ref().factory<Renderable>();
  		ghoul_assert(fRenderable, "No renderable factory existed");
 
- 		fRenderable->registerClass<RenderableDataPlane>("RenderableDataPlane");
+ 		fRenderable->registerClass<DataSurfaceContainer>("DataSurfaceContainer");
  	}
  }

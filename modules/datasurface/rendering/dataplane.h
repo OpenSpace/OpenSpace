@@ -22,10 +22,11 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEDATAPLANE_H__
-#define __RENDERABLEDATAPLANE_H__
+#ifndef __DATAPLANE_H__
+#define __DATAPLANE_H__
 
-#include <openspace/rendering/renderable.h>
+// #include <openspace/rendering/renderable.h>
+#include <modules/datasurface/rendering/datasurface.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <ghoul/opengl/texture.h>
@@ -34,40 +35,37 @@
 
  namespace openspace{
  
- class RenderableDataPlane : public Renderable {
+ class DataPlane : public DataSurface {
  public:
- 	RenderableDataPlane(const ghoul::Dictionary& dictionary);
- 	~RenderableDataPlane();
+ 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
+ 	~DataPlane();
 
- 	bool initialize() override;
-    bool deinitialize() override;
+ 	virtual bool initialize();
+    virtual bool deinitialize();
 
-	bool isReady() const override;
+	bool isReady() const;
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
+	virtual void render();
+	// virtual void update();
  
  private:
+
  	void loadTexture();
     void createPlane();
 
- 	properties::StringProperty _texturePath;
- 	properties::Vec3Property _roatation;
+ // 	properties::StringProperty _texturePath;
+ // 	properties::Vec3Property _roatation;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+	// std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 	float* _dataSlice;
 	glm::size3_t _dimensions;
-	glm::vec4 _pscOffset;
-	glm::vec4 _modelScale;
-	psc _parentPos; 
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
-	KameleonWrapper* _kw;
-	bool _planeIsDirty;
+	// bool _planeIsDirty;
  };
  
  } // namespace openspace
