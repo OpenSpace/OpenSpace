@@ -53,6 +53,8 @@ void DataSurface::render(){
 
 }
 
+void DataSurface::update(){}
+
 void DataSurface::setPscUniforms(
 	ghoul::opengl::ProgramObject* program, 
 	const Camera* camera,

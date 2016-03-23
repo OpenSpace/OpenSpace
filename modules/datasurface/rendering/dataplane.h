@@ -46,7 +46,7 @@
 	bool isReady() const;
 
 	virtual void render();
-	// virtual void update();
+	virtual void update();
  
  private:
 
@@ -65,6 +65,7 @@
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
+	glm::dmat3 _stateMatrix;	
 	// bool _planeIsDirty;
  };
  

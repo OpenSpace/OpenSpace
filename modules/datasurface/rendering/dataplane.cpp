@@ -33,6 +33,9 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
+
 
 
 namespace openspace {
@@ -51,7 +54,7 @@ DataPlane::~DataPlane(){}
 bool DataPlane::initialize(){
 	DataSurface::initialize();
 
-	_dimensions = glm::size3_t(1000,1000,1);
+	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
 
 	_dataSlice = _kw->getUniformSliceValues(std::string("p"), _dimensions, zSlice);
@@ -109,9 +112,22 @@ bool DataPlane::isReady() const {
 
 void DataPlane::render(){
 	psc position = _parent->worldPosition();
-	position += glm::vec4(-_pscOffset.x, _pscOffset.y, _pscOffset.z, _pscOffset.w); 
 
 	glm::mat4 transform = glm::mat4(1.0);
+
+	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
+
+	// glm::mat4 rot = glm::mat4(1.0);
+	for (int i = 0; i < 3; i++){
+		for (int j = 0; j < 3; j++){
+			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+		}
+	}
+
+	transform = transform * roty * rotx;
+	position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+
 	// transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
 	// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
 	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
@@ -136,6 +152,10 @@ void DataPlane::render(){
 	_shader->deactivate();
 
 
+}
+
+void DataPlane::update(){
+	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", "GSM", Time::ref().currentTime());
 }
 
 

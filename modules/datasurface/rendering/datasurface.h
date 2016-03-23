@@ -40,7 +40,7 @@ public:
 	virtual bool deinitialize();
 
 	virtual void render();
-	// virtual void update();
+	virtual void update();
 
 protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);

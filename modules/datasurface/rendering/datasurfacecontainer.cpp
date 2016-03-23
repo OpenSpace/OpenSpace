@@ -50,7 +50,10 @@ namespace openspace{
 			dataSurface->render();
 	} 
 
-	void DataSurfaceContainer::update(const UpdateData& data){}
+	void DataSurfaceContainer::update(const UpdateData& data){
+		for(dataSurface : _dataSurfaces)
+			dataSurface->update();
+	}
 
 	void DataSurfaceContainer::addDataSurface(std::string path){
 		if(FileSys.fileExists(absPath(path))) {
