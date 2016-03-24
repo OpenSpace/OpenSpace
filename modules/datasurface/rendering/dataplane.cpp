@@ -141,11 +141,27 @@ void DataPlane::render(){
 
 	transform = transform * rotz * roty; //BATSRUS
 	// transform = transform * roty;
-	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
 
 	// transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
 	// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
 	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+
+	glm::vec4 vec(1,0,0,1);
+	vec = transform*vec;
+
+	double  lt;
+    glm::vec3 sun_vec =
+    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+    sun_vec = glm::normalize(sun_vec);
+    float angle = acos(glm::dot(sun_vec, glm::vec3(vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
+    glm::vec3 v = glm::cross(sun_vec, glm::vec3(vec));
+    transform = glm::rotate(transform, -angle, v);
+	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+
+    // std::cout << sun_vec.x << ", " << sun_vec.y << ", " << sun_vec.z << std::endl;
+    // std::cout << vec.x << ", " << vec.y << ", " << vec.z << std::endl;
+    // std::cout << angle << std::endl << std::endl;
+
 
 	// Activate shader
 	_shader->activate();
