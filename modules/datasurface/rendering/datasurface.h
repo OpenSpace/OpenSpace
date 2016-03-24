@@ -44,11 +44,13 @@ public:
 
 protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
+	virtual void setParent() = 0;
 
 	properties::StringProperty _path;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
 	SceneGraphNode* _parent;
+	double _time;
 };
 
 }//namespace openspace

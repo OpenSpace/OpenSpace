@@ -1,16 +1,18 @@
 return {
 	{
 		Name = "DataSurfaces",
-		Parent = "Root",
+		Parent = "SolarSystem",
 		Renderable = {
-			Type = "DataSurfaceContainer"
+			Type = "DataSurfaceContainer",
+			Frame = "GALACTIC"
 		},
 		Ephemeris = {
 			Type = "Spice",
-			Body = "Earth",
-			Observer = "Sun",
+			Body = "Sun",
+			Observer = "Earth",
 			Kernels = {
-			 	"${SPICE}/GSM.ti"
+			 	"${SPICE}/GSM.ti",
+			 	"${SPICE}/GSE.ti"
 			 }
 		}
 	}
