@@ -21,56 +21,69 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+#include <modules/datasurface/rendering/datasurfacecontainer.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <ghoul/filesystem/filesystem>
 
-#ifndef __RENDERABLEDATAPLANE_H__
-#define __RENDERABLEDATAPLANE_H__
+#include <modules/datasurface/rendering/datasurface.h>
+#include <modules/datasurface/rendering/dataplane.h>
+#include <modules/datasurface/rendering/textureplane.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/engine/downloadmanager.h>
+namespace openspace{
+	DataSurfaceContainer::DataSurfaceContainer(const ghoul::Dictionary& dictionary)
+		:Renderable(dictionary)
+	{
+		std::cout << "Created datasurface container" << std::endl;
+	}
 
- namespace openspace{
- 
- class RenderableDataPlane : public Renderable {
- public:
- 	RenderableDataPlane(const ghoul::Dictionary& dictionary);
- 	~RenderableDataPlane();
+	DataSurfaceContainer::~DataSurfaceContainer(){}
 
- 	bool initialize() override;
-    bool deinitialize() override;
+	bool DataSurfaceContainer::initialize(){
+		std::cout << "Initialized datasurface container" << std::endl;
 
-	bool isReady() const override;
+		addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
+		//addTextureSurface("${OPENSPACE_DATA}/test.png");
+	}
+	bool DataSurfaceContainer::deinitialize(){}
+	bool DataSurfaceContainer::isReady() const {}
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
- 
- private:
- 	void loadTexture();
-    void createPlane();
-    void updateTexture();
+	void DataSurfaceContainer::render(const RenderData& data){
+		for(dataSurface : _dataSurfaces)
+			dataSurface->render();
+	} 
 
- 	properties::StringProperty _texturePath;
- 	properties::Vec3Property _roatation;
+	void DataSurfaceContainer::update(const UpdateData& data){
+		for(dataSurface : _dataSurfaces)
+			dataSurface->update();
+	}
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	std::unique_ptr<ghoul::opengl::Texture> _texture;
+	void DataSurfaceContainer::addDataSurface(std::string path){
+		if(FileSys.fileExists(absPath(path))) {
+			std::shared_ptr<DataSurface> ds;
+			std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
 
-	float* _dataSlice;
-	glm::size3_t _dimensions;
-	glm::vec4 _pscOffset;
-	glm::vec4 _modelScale;
-	psc _parentPos; 
-	DownloadManager::FileFuture* _futureTexture;
+			//find out what class to create
+			ds = std::make_shared<DataPlane>(kw, path);
 
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
 
-	bool _planeIsDirty;
- };
- 
- } // namespace openspace
+			ds->initialize();
+			_dataSurfaces.push_back(ds);
+		}else{
+			std::cout << "file does not exist";
+		}
+	}
 
-#endif
+	void DataSurfaceContainer::addTextureSurface(std::string path){
+		if(FileSys.fileExists(absPath(path))) {
+			std::shared_ptr<DataSurface> ts;
+
+			//find out what class to create
+			ts = std::make_shared<TexturePlane>(path);
+			std::cout<<"before initialize"<<std::endl;
+			ts->initialize();
+			_dataSurfaces.push_back(ts);
+		}else{
+			std::cout << "file does not exist";
+		}
+	}
+}

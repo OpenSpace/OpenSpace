@@ -26,7 +26,6 @@
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-uniform mat4 Translate;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -40,7 +39,6 @@ out float s;
 void main()
 {
 	vec4 tmp = in_position;
-
 	vec4 position = pscTransform(tmp, ModelTransform);
 
 	vs_position = tmp;

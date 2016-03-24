@@ -25,12 +25,18 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledataplane.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasurfacecontainer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasurface.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledataplane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasurfacecontainer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasurface.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
 	
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

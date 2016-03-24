@@ -86,17 +86,6 @@ return {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }
-    },
-    {
-        Name = "EarthPlane",
-        Parent = "Earth",
-        Renderable = {
-            Type = "RenderableDataPlane"
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {10, 0, 0, 1}
-       }
     }
  -- Plane
     -- {   

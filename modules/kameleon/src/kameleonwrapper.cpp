@@ -419,6 +419,7 @@ float* KameleonWrapper::getUniformSliceValues(
 	}
 	std::cout << std::endl << std::endl;
 
+	delete[] doubleData;
 	return data;
 }
 
