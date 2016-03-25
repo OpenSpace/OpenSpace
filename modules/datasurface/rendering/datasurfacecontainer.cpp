@@ -43,7 +43,7 @@ namespace openspace{
 
 		addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
 		// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
-		//addTextureSurface("${OPENSPACE_DATA}/test.png");
+		addTextureSurface("${OPENSPACE_DATA}/test.png");
 	}
 	bool DataSurfaceContainer::deinitialize(){}
 	bool DataSurfaceContainer::isReady() const {}
