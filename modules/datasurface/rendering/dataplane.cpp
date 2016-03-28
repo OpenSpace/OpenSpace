@@ -124,6 +124,8 @@ bool DataPlane::isReady() const {
 };
 
 void DataPlane::render(){
+	// getiSWAurl(1);
+
 	psc position = _parent->worldPosition();
 
 	glm::mat4 transform = glm::mat4(1.0);

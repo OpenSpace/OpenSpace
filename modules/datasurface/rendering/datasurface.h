@@ -43,6 +43,8 @@ public:
 	virtual void update();
 
 protected:
+	std::string getiSWAurl(int id);
+
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	virtual void setParent() = 0;
 
@@ -51,6 +53,7 @@ protected:
 
 	SceneGraphNode* _parent;
 	double _time;
+	std::map<std::string, std::string> _month;
 };
 
 }//namespace openspace

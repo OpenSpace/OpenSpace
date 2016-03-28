@@ -166,8 +166,9 @@ void TexturePlane::updateTexture(){
 	while(true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(6000));
 		 future = DlManager.downloadFile(
-			std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
-			absPath("${OPENSPACE_DATA}/dataplane.png"),
+		 	getiSWAurl(5),
+			// std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
+			absPath("${OPENSPACE_DATA}/dataplane.jpg"),
 			true,
 			[](const DownloadManager::FileFuture& f){
 				std::cout<<"download finished"<<std::endl;

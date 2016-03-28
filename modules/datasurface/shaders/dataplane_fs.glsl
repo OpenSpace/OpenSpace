@@ -43,7 +43,7 @@ Fragment getFragment() {
 	// 	diffuse = vec4(1,0,0,1);
 	// }
 
-	if (diffuse.r <= 0.1)
+	if (diffuse.r <= 0.01)
 		discard;
 
     Fragment frag;
