@@ -118,12 +118,12 @@ bool RenderableToyVolume::isReady() const {
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
 
-        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::powf(10.0, static_cast<float>(_scalingExponent)));
+        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
-        transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::powf(10.0, static_cast<float>(_scalingExponent)));
+        transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
         
         _raycaster->setColor(_color);
         _raycaster->setStepSize(_stepSize);

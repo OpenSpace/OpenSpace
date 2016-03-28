@@ -27,9 +27,7 @@
 #define _ERRNO WSAGetLastError()
 #endif
 #else //Use BSD sockets
-#ifdef _XCODE
 #include <unistd.h>
-#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
