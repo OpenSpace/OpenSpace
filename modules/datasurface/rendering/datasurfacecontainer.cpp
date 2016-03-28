@@ -42,6 +42,7 @@ namespace openspace{
 		std::cout << "Initialized datasurface container" << std::endl;
 
 		addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
+		// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
 		//addTextureSurface("${OPENSPACE_DATA}/test.png");
 	}
 	bool DataSurfaceContainer::deinitialize(){}

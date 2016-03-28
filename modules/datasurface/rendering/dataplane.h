@@ -49,7 +49,7 @@
 	virtual void update();
  
  private:
-
+ 	virtual void setParent() override;
  	void loadTexture();
     void createPlane();
 
@@ -68,7 +68,9 @@
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
-	glm::dmat3 _stateMatrix;	
+	glm::dmat3 _stateMatrix;
+	std::string _frame; 
+	std::string _var;
 	// bool _planeIsDirty;
  };
  

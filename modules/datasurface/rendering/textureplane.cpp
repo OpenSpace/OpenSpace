@@ -161,6 +161,10 @@ void TexturePlane::update(){
 	}
 }
 
+void TexturePlane::setParent(){
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
+}
+
 void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;

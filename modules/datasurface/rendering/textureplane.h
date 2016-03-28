@@ -50,6 +50,7 @@
 	virtual void update();
  
  private:
+ 	virtual void setParent() override;
 
  	void loadTexture();
     void createPlane();

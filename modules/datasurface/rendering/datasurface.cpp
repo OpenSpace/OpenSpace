@@ -36,8 +36,7 @@ DataSurface::DataSurface(std::string path)
 DataSurface::~DataSurface(){}
 
 bool DataSurface::initialize(){
-	_parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
-
+	setParent();
 	return true;
 }
 

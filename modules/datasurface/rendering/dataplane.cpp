@@ -46,7 +46,15 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path)
 	, _texture(nullptr)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
-{}
+{
+	KameleonWrapper::Model model = _kw->model();
+	if(	model == KameleonWrapper::Model::BATSRUS){
+		_var = "p";
+	}else{
+		_var = "rho";
+	}
+
+}
 
 
 DataPlane::~DataPlane(){}
@@ -58,10 +66,13 @@ bool DataPlane::initialize(){
 	_modelScale = _kw->getModelScaleScaled();
 	_pscOffset  = _kw->getModelBarycenterOffsetScaled();
 
+	std::cout << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
+	std::cout << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
+
 	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
 
-	_dataSlice = _kw->getUniformSliceValues(std::string("p"), _dimensions, zSlice);
+	_dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
 
 	glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
@@ -118,21 +129,39 @@ void DataPlane::render(){
 	glm::mat4 transform = glm::mat4(1.0);
 
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
+	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+	glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
 
-	// glm::mat4 rot = glm::mat4(1.0);
+	glm::mat4 rot = glm::mat4(1.0);
 	for (int i = 0; i < 3; i++){
 		for (int j = 0; j < 3; j++){
 			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 		}
 	}
 
-	transform = transform * roty * rotx;
-	position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+	transform = transform * rotz * roty; //BATSRUS
+	// transform = transform * roty;
 
 	// transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
 	// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
 	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+
+	glm::vec4 vec(1,0,0,1);
+	vec = transform*vec;
+
+	double  lt;
+    glm::vec3 sun_vec =
+    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+    sun_vec = glm::normalize(sun_vec);
+    float angle = acos(glm::dot(sun_vec, glm::vec3(vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
+    glm::vec3 v = glm::cross(sun_vec, glm::vec3(vec));
+    transform = glm::rotate(transform, -angle, v);
+	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+
+    // std::cout << sun_vec.x << ", " << sun_vec.y << ", " << sun_vec.z << std::endl;
+    // std::cout << vec.x << ", " << vec.y << ", " << vec.z << std::endl;
+    // std::cout << angle << std::endl << std::endl;
+
 
 	// Activate shader
 	_shader->activate();
@@ -157,9 +186,33 @@ void DataPlane::render(){
 }
 
 void DataPlane::update(){
-	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", "GSM", Time::ref().currentTime());
+	_time = Time::ref().currentTime();
+	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
 
 }
+
+void DataPlane::setParent(){
+	KameleonWrapper::Model model = _kw->model();
+	if(	model == KameleonWrapper::Model::BATSRUS ||
+		model == KameleonWrapper::Model::OpenGGCM ||
+		model == KameleonWrapper::Model::LFM)
+	{
+		_parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
+		_frame = "GSM";
+	}else if(
+		model == KameleonWrapper::Model::ENLIL ||
+		model == KameleonWrapper::Model::MAS ||
+		model == KameleonWrapper::Model::Adapt3D ||
+		model == KameleonWrapper::Model::SWMF)
+	{
+		_parent = OsEng.renderEngine().scene()->sceneGraphNode("SolarSystem");
+		_frame = "GALACTIC";
+	}else{
+		//Warning!
+	}
+}
+
+
 
 void DataPlane::loadTexture() {
 
@@ -187,16 +240,16 @@ void DataPlane::createPlane() {
     // 		GEOMETRY (quad)
     // ============================
     const GLfloat x = _modelScale.x/2.0;
-    const GLfloat y = _modelScale.y/2.0;
+    const GLfloat y = _modelScale.z/2.0;
     const GLfloat w = _modelScale.w;
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
-        -x, -y, 0.0f, w, 0, 1,
-        x, y, 0.0f, w, 1, 0,
-        -x, y, 0.0f, w, 0, 0,
-        -x, -y, 0.0f, w, 0, 1,
-        x, -y, 0.0f, w, 1, 1,
-        x, y, 0.0f, w, 1, 0,
+        -x, -y, 0, w, 0, 1,
+         x,  y, 0, w, 1, 0,
+        -x,  y, 0, w, 0, 0,
+        -x, -y, 0, w, 0, 1,
+         x, -y, 0, w, 1, 1,
+         x,  y, 0, w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array
