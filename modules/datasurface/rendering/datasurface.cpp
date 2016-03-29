@@ -26,8 +26,11 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
+
 
 namespace openspace{
+
 DataSurface::DataSurface(std::string path)
 	:_path("path", "Path", path)
 	,_shader(nullptr)
@@ -37,6 +40,20 @@ DataSurface::~DataSurface(){}
 
 bool DataSurface::initialize(){
 	setParent();
+
+	_month["JAN"] = "01";
+   	_month["FEB"] = "02";
+   	_month["MAR"] = "03";
+   	_month["APR"] = "04";
+   	_month["MAY"] = "05";
+   	_month["JUN"] = "06";
+   	_month["JUL"] = "07";
+   	_month["AUG"] = "08";
+   	_month["SEP"] = "09";
+   	_month["OCT"] = "10";
+   	_month["NOV"] = "11";
+   	_month["DEC"] = "12";
+
 	return true;
 }
 
@@ -59,5 +76,30 @@ void DataSurface::setPscUniforms(
 	program->setUniform("objpos", position.vec4());
 	program->setUniform("camrot", camera->viewRotationMatrix());
 	program->setUniform("scaling", camera->scaling());
+}
+
+std::string DataSurface::getiSWAurl(int id){
+	std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
+	std::string t = Time::ref().currentTimeUTC(); 
+
+	std::stringstream ss(t);
+	std::string token;
+
+	std::getline(ss, token, ' ');
+	url += token + "-"; 
+	std::getline(ss, token, ' ');
+	url += _month[token] + "-";
+	std::getline(ss, token, 'T');
+	url += token + "%20";
+	std::getline(ss, token, '.');
+	url += token;
+
+	url += "&window=-1&cygnetId=";
+	url += std::to_string(id);
+
+	std::cout << url <<  std::endl;
+
+	// puts(buffer);
+	return url;
 }
 }//namespace openspac

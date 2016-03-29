@@ -124,6 +124,8 @@ bool DataPlane::isReady() const {
 };
 
 void DataPlane::render(){
+	// getiSWAurl(1);
+
 	psc position = _parent->worldPosition();
 
 	glm::mat4 transform = glm::mat4(1.0);
@@ -146,16 +148,22 @@ void DataPlane::render(){
 	// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
 	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
 
-	glm::vec4 vec(1,0,0,1);
-	vec = transform*vec;
+	glm::vec4 v(1,0,0,1);
+	glm::vec3 v1 = glm::vec3(transform*v);
+	v1 = glm::normalize(v1);
 
 	double  lt;
-    glm::vec3 sun_vec =
+    glm::vec3 v2 =
     SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-    sun_vec = glm::normalize(sun_vec);
-    float angle = acos(glm::dot(sun_vec, glm::vec3(vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
-    glm::vec3 v = glm::cross(sun_vec, glm::vec3(vec));
-    transform = glm::rotate(transform, -angle, v);
+    v2 = glm::normalize(v2);
+
+    float angle = acos(glm::dot(v1,v2));
+    glm::vec3 ref = glm::cross(v1, v2);
+
+    transform = glm::rotate(transform, angle, ref);
+
+
+    // float angle = acos(glm::dot(sun_vec, (vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
 	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
 
     // std::cout << sun_vec.x << ", " << sun_vec.y << ", " << sun_vec.z << std::endl;
