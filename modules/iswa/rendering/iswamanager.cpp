@@ -45,7 +45,7 @@ bool ISWAManager::initialize(){
 
 	addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
-	addTextureSurface("${OPENSPACE_DATA}/test.png");
+	addDataSurface("${OPENSPACE_DATA}/test.png");
 }
 bool ISWAManager::deinitialize(){
 	for(dataSurface : _dataSurfaces)
@@ -68,13 +68,16 @@ void ISWAManager::update(const UpdateData& data){
 
 void ISWAManager::addDataSurface(std::string path){
 	if(FileSys.fileExists(absPath(path))) {
+		const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
 		std::shared_ptr<ISWACygnet> ds;
-		std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
 
-		//find out what class to create
-		ds = std::make_shared<DataPlane>(kw, path);
-
-
+		if(extension == "cdf"){
+			std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
+			ds = std::make_shared<DataPlane>(kw, path);
+		} else {
+			ds = std::make_shared<TexturePlane>(path);
+		}
+		
 		ds->initialize();
 		_dataSurfaces.push_back(ds);
 	}else{
@@ -82,19 +85,6 @@ void ISWAManager::addDataSurface(std::string path){
 	}
 }
 
-void ISWAManager::addTextureSurface(std::string path){
-	if(FileSys.fileExists(absPath(path))) {
-		std::shared_ptr<ISWACygnet> ts;
-
-		//find out what class to create
-		ts = std::make_shared<TexturePlane>(path);
-		std::cout<<"before initialize"<<std::endl;
-		ts->initialize();
-		_dataSurfaces.push_back(ts);
-	}else{
-		std::cout << "file does not exist";
-	}
-}
 
 std::shared_ptr<ISWACygnet> ISWAManager::dataSurface(std::string name){
 	for(auto ds : _dataSurfaces){

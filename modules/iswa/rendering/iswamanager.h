@@ -43,7 +43,6 @@ public:
 	virtual void update(const UpdateData& data) override;
 
 	void addDataSurface(std::string path);
-	void addTextureSurface(std::string path);
 
 	std::shared_ptr<ISWACygnet> dataSurface(std::string name);
 
