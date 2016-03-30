@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
+
 #include <openspace/interaction/interactionhandler.h>
 
 namespace openspace {
@@ -230,26 +230,7 @@ void OrbitalMouseController::update(const double& dt){
 			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
 			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
 	//}
-	glm::vec2 v(0.0);
-	if(!_middleMouseButtonDown ){
-		if(_leftMouseButtonDown && !_rightMouseButtonDown ){
-			v.x = static_cast<float>(dt);
-		} else if(!_leftMouseButtonDown && _rightMouseButtonDown ){
-			v.y = static_cast<float>(dt);
-		}else if(_leftMouseButtonDown && _rightMouseButtonDown ){
-			// v.z = static_cast<float>(dt);
-		}
-		OsEng.renderEngine().ssr->move(v);
-	} else {
-		if(_leftMouseButtonDown && !_rightMouseButtonDown ){
-			v.x = -static_cast<float>(dt);
-		} else if(!_leftMouseButtonDown && _rightMouseButtonDown ){
-			v.y = -static_cast<float>(dt);
-		}else if(_leftMouseButtonDown && _rightMouseButtonDown ){
-			// v.z = -static_cast<float>(dt);
-		}
-		OsEng.renderEngine().ssr->move(v);
-	}
+	
 //	if (_leftMouseButtonDown){
 //		_handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);
 //	}	

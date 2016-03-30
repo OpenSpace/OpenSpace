@@ -67,14 +67,4 @@ TEST_F(ScreenSpaceRenderableTest, initialize){
 	//isReady = _ssr.isReady();
 	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is still ready after deinitialize";
 }
-
-TEST_F(ScreenSpaceRenderableTest, move){
-
-	glm::vec2 v1 = _ssr.sphericalPosition();
-	glm::vec2 v2 = glm::vec2(2.0f, 5.0f);
-	_ssr.move(v2);
-
-	ASSERT_EQ(_ssr.sphericalPosition(), v1 + v2);
-}
-
 }//namespace openspace
