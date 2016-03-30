@@ -75,7 +75,7 @@ properties::Property* property(const std::string& uri) {
 
         SceneGraphNode* node = sceneGraphNode("iSWA");
         if(node){
-            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAManager*>(node->renderable())->dataSurface(nodeName);
+            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAManager*>(node->renderable())->iSWACygnet(nodeName);
             if(cygnet){
                 return cygnet->property(remainingUri);
             }

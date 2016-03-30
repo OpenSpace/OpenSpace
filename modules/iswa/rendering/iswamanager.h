@@ -42,12 +42,12 @@ public:
 	virtual void render(const RenderData& data) override;
 	virtual void update(const UpdateData& data) override;
 
-	void addDataSurface(std::string path);
+	void addISWACygnet(std::string path);
 
-	std::shared_ptr<ISWACygnet> dataSurface(std::string name);
+	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 
 private:
-std::vector<std::shared_ptr<ISWACygnet>> _dataSurfaces;
+std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
 
 };	
 }//namespace openspace

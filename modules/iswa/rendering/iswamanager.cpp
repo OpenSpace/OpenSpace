@@ -33,7 +33,7 @@ namespace openspace{
 ISWAManager::ISWAManager(const ghoul::Dictionary& dictionary)
 	:Renderable(dictionary)
 {
-	std::cout << "Created datasurface container" << std::endl;
+	std::cout << "Created ISWAManager" << std::endl;
 }
 
 ISWAManager::~ISWAManager(){
@@ -41,55 +41,55 @@ ISWAManager::~ISWAManager(){
 }
 
 bool ISWAManager::initialize(){
-	std::cout << "Initialized datasurface container" << std::endl;
+	std::cout << "Initialized ISWAManager" << std::endl;
 
-	addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
-	// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
-	addDataSurface("${OPENSPACE_DATA}/test.png");
+	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
+	addISWACygnet("${OPENSPACE_DATA}/test.png");
 }
 bool ISWAManager::deinitialize(){
-	for(dataSurface : _dataSurfaces)
-		dataSurface->deinitialize();
+	for(iSWACygnet : _iSWACygnets)
+		iSWACygnet->deinitialize();
 }
 bool ISWAManager::isReady() const {}
 
 void ISWAManager::render(const RenderData& data){
-	for(dataSurface : _dataSurfaces){
-		if(dataSurface->enabled()){
-			dataSurface->render();
+	for(iSWACygnet : _iSWACygnets){
+		if(iSWACygnet->enabled()){
+			iSWACygnet->render();
 		}
 	}
 } 
 
 void ISWAManager::update(const UpdateData& data){
-	for(dataSurface : _dataSurfaces)
-		dataSurface->update();
+	for(iSWACygnet : _iSWACygnets)
+		iSWACygnet->update();
 }
 
-void ISWAManager::addDataSurface(std::string path){
+void ISWAManager::addISWACygnet(std::string path){
 	if(FileSys.fileExists(absPath(path))) {
 		const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
-		std::shared_ptr<ISWACygnet> ds;
+		std::shared_ptr<ISWACygnet> cygnet;
 
 		if(extension == "cdf"){
 			std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-			ds = std::make_shared<DataPlane>(kw, path);
+			cygnet = std::make_shared<DataPlane>(kw, path);
 		} else {
-			ds = std::make_shared<TexturePlane>(path);
+			cygnet = std::make_shared<TexturePlane>(path);
 		}
 		
-		ds->initialize();
-		_dataSurfaces.push_back(ds);
+		cygnet->initialize();
+		_iSWACygnets.push_back(cygnet);
 	}else{
 		std::cout << "file does not exist";
 	}
 }
 
 
-std::shared_ptr<ISWACygnet> ISWAManager::dataSurface(std::string name){
-	for(auto ds : _dataSurfaces){
-		if(ds->name() == name){
-			return ds;
+std::shared_ptr<ISWACygnet> ISWAManager::iSWACygnet(std::string name){
+	for(auto cygnet : _iSWACygnets){
+		if(cygnet->name() == name){
+			return cygnet;
 		}
 	}
 	return nullptr;
