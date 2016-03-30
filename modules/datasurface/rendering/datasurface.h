@@ -58,6 +58,13 @@ protected:
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
+	glm::vec4 _pscOffset;
+	glm::vec4 _modelScale;
+
+	glm::dmat3 _stateMatrix;
+	std::string _frame; 
+	std::string _var;
+
 	SceneGraphNode* _parent;
 	double _time;
 	double _lastUpdateTime = 0;

@@ -123,9 +123,10 @@ void TexturePlane::render(){
 	psc position = _parent->worldPosition();
 
 	glm::mat4 transform = glm::mat4(1.0);
+	transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
 
 	float textureRatio = (float (_texture->height()/float(_texture->width())));
-	transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
+	transform = glm::scale(transform, glm::vec3(1000, 1000*textureRatio, 1));
 
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
@@ -163,7 +164,7 @@ void TexturePlane::render(){
 
 void TexturePlane::update(){
 	_time = Time::ref().currentTime();
-	
+
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", "GSM", Time::ref().currentTime());
 	if(_futureTexture && _futureTexture->isFinished){
 		_path.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
@@ -179,7 +180,7 @@ void TexturePlane::update(){
 }
 
 void TexturePlane::setParent(){
-	_parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode("Sun");
 }
 
 void TexturePlane::updateTexture(){
@@ -232,11 +233,11 @@ void TexturePlane::createPlane() {
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
         -x, -y, 0.0f, w, 0, 1,
-        x, y, 0.0f, w, 1, 0,
-        -x, y, 0.0f, w, 0, 0,
+         x,  y, 0.0f, w, 1, 0,
+        -x,  y, 0.0f, w, 0, 0,
         -x, -y, 0.0f, w, 0, 1,
-        x, -y, 0.0f, w, 1, 1,
-        x, y, 0.0f, w, 1, 0,
+         x, -y, 0.0f, w, 1, 1,
+         x,  y, 0.0f, w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array

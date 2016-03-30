@@ -59,8 +59,6 @@
  // 	properties::Vec3Property _roatation;
 
 	// std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	glm::vec4 _pscOffset;
-	glm::vec4 _modelScale;
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
@@ -69,10 +67,6 @@
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
-
-	glm::dmat3 _stateMatrix;
-	std::string _frame; 
-	std::string _var;
 	// bool _planeIsDirty;
  };
  
