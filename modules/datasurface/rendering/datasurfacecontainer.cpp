@@ -36,7 +36,9 @@ DataSurfaceContainer::DataSurfaceContainer(const ghoul::Dictionary& dictionary)
 	std::cout << "Created datasurface container" << std::endl;
 }
 
-DataSurfaceContainer::~DataSurfaceContainer(){}
+DataSurfaceContainer::~DataSurfaceContainer(){
+	deinitialize();
+}
 
 bool DataSurfaceContainer::initialize(){
 	std::cout << "Initialized datasurface container" << std::endl;
@@ -45,7 +47,10 @@ bool DataSurfaceContainer::initialize(){
 	// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
 	addTextureSurface("${OPENSPACE_DATA}/test.png");
 }
-bool DataSurfaceContainer::deinitialize(){}
+bool DataSurfaceContainer::deinitialize(){
+	for(dataSurface : _dataSurfaces)
+		dataSurface->deinitialize();
+}
 bool DataSurfaceContainer::isReady() const {}
 
 void DataSurfaceContainer::render(const RenderData& data){

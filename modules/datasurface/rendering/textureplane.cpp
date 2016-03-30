@@ -61,7 +61,9 @@ TexturePlane::TexturePlane(std::string path)
 }
 
 
-TexturePlane::~TexturePlane(){}
+TexturePlane::~TexturePlane(){
+    
+}
 
 
 bool TexturePlane::initialize(){
@@ -104,6 +106,8 @@ bool TexturePlane::deinitialize(){
         _shader = nullptr;
     }
 
+    std::remove(absPath("${OPENSPACE_DATA}/dataplane.jpg").c_str());
+    
 	return true;
 }
 
