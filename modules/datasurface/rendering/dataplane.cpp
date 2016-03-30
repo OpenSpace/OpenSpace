@@ -46,16 +46,13 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path)
 	, _texture(nullptr)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
-{
-	addProperty(_enabled);
-	addProperty(_cygnetId);
-	addProperty(_path);
-	
+{	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
 	OsEng.gui()._property.registerProperty(&_enabled);
 	OsEng.gui()._property.registerProperty(&_cygnetId);
 	OsEng.gui()._property.registerProperty(&_path);
+	OsEng.gui()._property.registerProperty(&_updateInterval);
 
 	KameleonWrapper::Model model = _kw->model();
 	if(	model == KameleonWrapper::Model::BATSRUS){
