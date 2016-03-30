@@ -122,6 +122,9 @@ void TexturePlane::render(){
 
 	glm::mat4 transform = glm::mat4(1.0);
 
+	float textureRatio = (float (_texture->height()/float(_texture->width())));
+	transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
+
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
 	// glm::mat4 rot = glm::mat4(1.0);

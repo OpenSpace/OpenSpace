@@ -75,7 +75,6 @@ properties::Property* property(const std::string& uri) {
 
         SceneGraphNode* node = sceneGraphNode("DataSurfaces");
         if(node){
-            std::cout << "DataSurfaces node found!" << std::endl;
             std::shared_ptr<DataSurface> ds = static_cast <DataSurfaceContainer*>(node->renderable())->dataSurface(nodeName);
             if(ds){
                 return ds->property(remainingUri);
