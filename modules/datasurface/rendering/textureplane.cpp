@@ -36,7 +36,9 @@
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 
-
+namespace {
+	const std::string _loggerCat = "TexutePlane";
+}
 
 namespace openspace {
 
@@ -151,13 +153,16 @@ void TexturePlane::render(){
 	_shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
 	setPscUniforms(_shader.get(), OsEng.renderEngine().camera(), position);
+
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
 	_texture->bind();
 	_shader->setUniform("texture1", unit);
+
 	glBindVertexArray(_quad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glEnable(GL_CULL_FACE);
+	
 	_shader->deactivate();
 
 }
@@ -211,10 +216,9 @@ void TexturePlane::loadTexture() {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
 
 		if (texture) {
-			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+			LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
 			texture->uploadTexture();
-
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 

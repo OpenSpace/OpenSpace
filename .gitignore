@@ -38,6 +38,7 @@ include/openspace/version.h
 data/scene/67P/obj/67P_rotated_5_130.obj
 data/spice/NewHorizonsKernels/
 data/spice/RosettaKernels/
+data/scene/plutoprojectionhybrid/textures/
 data/scene/plutoprojectionhybrid/textures/Shenk_180.jpg
 data/scene/plutoprojectionhybrid/textures/barycenter.png
 data/scene/plutoprojectionhybrid/textures/defaultProj.png
@@ -99,6 +100,7 @@ data/scene/newhorizons/models/NewHorizonsCleanModel.obj
 data/scene/newhorizons/textures/NHTextureFlipCol.jpg
 data/scene/newhorizons/textures/goldfoilbump.tif
 data/scene/newhorizons/textures/labels.png
+data/scene/pluto/textures/
 data/scene/pluto/textures/Shenk_180.jpg
 data/scene/pluto/textures/pluto_highres_180.jpg
 data/scene/plutoprojectionhybrid/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt
