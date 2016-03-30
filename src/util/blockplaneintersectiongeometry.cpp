@@ -111,19 +111,19 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     std::vector< std::pair<int, float> > angles(nIntersections-1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
-    angles[0] = std::pair<int, float>(1, 0.0);
+    angles[0] = std::pair<int, float>(1, 0.0f);
 
     for (int i = 2; i < nIntersections; i++) {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i-1] = std::pair<int, float>(i, glm::sign(sinA) * (1.0 - cosA));
+        angles[i - 1] = std::pair<int, float>(i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)));
     }
 
     // Sort the vectors by angle in the plane
     std::sort(angles.begin(), angles.end(),
         [](const std::pair<int, float>& a, const std::pair<int, float>& b) -> bool {
-            return a.second > b.second;
+            return a.second < b.second;
         }
     );
 
@@ -138,6 +138,17 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         _vertices.push_back(intersections[j].z);
         //_vertices.push_back(_w);
     }
+
+    // First VAO setup
+    glBindVertexArray(_vaoId);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+
+    glBindVertexArray(0);
 }
     
 bool BlockPlaneIntersectionGeometry::initialize() {
@@ -154,23 +165,14 @@ bool BlockPlaneIntersectionGeometry::initialize() {
     }
 
     updateVertices();
-    // First VAO setup
-    glBindVertexArray(_vaoId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-
-    glBindVertexArray(0);
     return true;
 }
 
 void BlockPlaneIntersectionGeometry::render() {
-    glBindVertexArray(_vaoId);  // select first VAO
-    glDrawArrays(GL_TRIANGLES, 0, 6*6);
-    glBindVertexArray(0);
+    glBindVertexArray(_vaoId);
+    //glDisable(GL_CULL_FACE);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, _vertices.size() / 3);
+    //glEnable(GL_CULL_FACE);
 }
 
 }

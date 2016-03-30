@@ -147,7 +147,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader.get(), &data.camera, data.position);
+	setPscUniforms(*_shader.get(), data.camera, data.position);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();

@@ -72,5 +72,7 @@ create_new_module(
         endif ()
         set_property(TARGET cdf PROPERTY FOLDER "External")
     endif ()
-
+# Boost
+find_package(Boost REQUIRED)
+target_include_directories(openspace-module-kameleon SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 #include_external_library(${onscreengui_module} Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)

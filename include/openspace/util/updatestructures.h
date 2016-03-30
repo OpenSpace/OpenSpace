@@ -30,6 +30,8 @@
 
 namespace openspace {
 
+class VolumeRaycaster;
+
 struct InitializeData {
 
 };
@@ -46,6 +48,21 @@ struct RenderData {
 	psc position;
 	bool doPerformanceMeasurement;
 };
+
+struct RaycasterTask {
+    VolumeRaycaster* raycaster;
+    RenderData renderData;
+};
+
+struct RendererTasks {
+    std::vector<RaycasterTask> raycasterTasks;
+};
+
+struct RaycastData {
+    int id;
+    std::string namespaceName;
+};
+
 
 }
 

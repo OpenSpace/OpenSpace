@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/raycastermanager.h>
 
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
@@ -56,6 +57,7 @@
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
+
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
@@ -135,6 +137,7 @@ RenderEngine::~RenderEngine() {
 
 	delete _mainCamera;
 	delete _performanceMemory;
+	delete _raycasterManager;
 
 	if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
 		ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
@@ -181,6 +184,8 @@ bool RenderEngine::initialize() {
             renderingMethod = "Framebuffer";
         }
     }
+
+    _raycasterManager = new RaycasterManager();
 
 	LINFO("Seting renderer from string: " << renderingMethod);
 	setRendererFromString(renderingMethod);
@@ -439,6 +444,10 @@ Scene* RenderEngine::scene() {
 	// TODO custom assert (ticket #5)
 	assert(_sceneGraph);
 	return _sceneGraph;
+}
+
+RaycasterManager& RenderEngine::raycasterManager() {
+	return *_raycasterManager;
 }
 
 void RenderEngine::setSceneGraph(Scene* sceneGraph) {

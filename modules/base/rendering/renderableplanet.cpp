@@ -213,7 +213,7 @@ void RenderablePlanet::render(const RenderData& data)
 	_programObject->setUniform("transparency", _alpha);
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject.get(), &data.camera, data.position);
+	setPscUniforms(*_programObject.get(), data.camera, data.position);
 	
     _programObject->setUniform("_performShading", _performShading);
 
