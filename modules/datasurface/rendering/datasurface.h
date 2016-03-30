@@ -27,8 +27,10 @@
 #include <openspace/properties/propertyowner.h>
 #include <memory>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <modules/onscreengui/include/gui.h>
 
 namespace openspace{
 class DataSurface : public properties::PropertyOwner{
@@ -42,13 +44,17 @@ public:
 	virtual void render();
 	virtual void update();
 
+	bool enabled(){return _enabled.value();}
 protected:
 	std::string getiSWAurl(int id);
 
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	virtual void setParent() = 0;
 
+	properties::BoolProperty _enabled;
+	properties::IntProperty  _cygnetId;
 	properties::StringProperty _path;
+
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
 	SceneGraphNode* _parent;

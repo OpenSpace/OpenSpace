@@ -48,10 +48,25 @@ TexturePlane::TexturePlane(std::string path)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	, _futureTexture(nullptr)
-{}
+{
+	addProperty(_enabled);
+	addProperty(_cygnetId);
+	addProperty(_path);
+
+	_id = id();
+	setName("TexturePlane" + std::to_string(_id));
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_cygnetId);
+	OsEng.gui()._property.registerProperty(&_path);
+
+	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
+	_cygnetId.onChange([this](){ updateTexture(); });
+}
 
 
-TexturePlane::~TexturePlane(){}
+TexturePlane::~TexturePlane(){
+    
+}
 
 
 bool TexturePlane::initialize(){
@@ -94,6 +109,8 @@ bool TexturePlane::deinitialize(){
         _shader = nullptr;
     }
 
+    std::remove(absPath(_path.value()).c_str());
+
 	return true;
 }
 
@@ -111,6 +128,9 @@ void TexturePlane::render(){
 	psc position = _parent->worldPosition();
 
 	glm::mat4 transform = glm::mat4(1.0);
+
+	float textureRatio = (float (_texture->height()/float(_texture->width())));
+	transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
 
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
@@ -168,12 +188,12 @@ void TexturePlane::setParent(){
 void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;
-	while(true) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+	// while(true) {
+		// std::this_thread::sleep_for(std::chrono::milliseconds(6000));
 		 future = DlManager.downloadFile(
-		 	getiSWAurl(5),
+		 	getiSWAurl(_cygnetId.value()),
 			// std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
-			absPath("${OPENSPACE_DATA}/dataplane.jpg"),
+			absPath(_path.value()),
 			true,
 			[](const DownloadManager::FileFuture& f){
 				std::cout<<"download finished"<<std::endl;
@@ -184,7 +204,7 @@ void TexturePlane::updateTexture(){
 			_futureTexture = future;
 			imageSize-=1;
 		}
-	}	
+	// }	
 }
 
 void TexturePlane::loadTexture() {
@@ -227,6 +247,11 @@ void TexturePlane::createPlane() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+}
+
+int TexturePlane::id(){
+		static int id = 0;
+		return id++;
 }
 
 }// namespace openspace

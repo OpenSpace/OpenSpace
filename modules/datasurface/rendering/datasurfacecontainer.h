@@ -45,6 +45,8 @@ public:
 	void addDataSurface(std::string path);
 	void addTextureSurface(std::string path);
 
+	std::shared_ptr<DataSurface> dataSurface(std::string name);
+
 private:
 std::vector<std::shared_ptr<DataSurface>> _dataSurfaces;
 
