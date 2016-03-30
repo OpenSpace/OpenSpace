@@ -1,6 +1,6 @@
 return {
 	{
-		Name = "DataSurfaces",
+		Name = "iSWA",
 		Parent = "SolarSystem",
 		Renderable = {
 			Type = "ISWAManager",
