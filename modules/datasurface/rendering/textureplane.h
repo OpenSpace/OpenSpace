@@ -56,6 +56,8 @@
     void createPlane();
     void updateTexture();
 
+    static int id();
+    int _id;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 	glm::size3_t _dimensions;

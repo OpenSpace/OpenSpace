@@ -46,7 +46,19 @@ TexturePlane::TexturePlane(std::string path)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	, _futureTexture(nullptr)
-{}
+{
+	addProperty(_enabled);
+	addProperty(_cygnetId);
+	addProperty(_path);
+
+	_id = id();
+	setName("TexturePlane" + std::to_string(_id));
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_cygnetId);
+	OsEng.gui()._property.registerProperty(&_path);
+
+	_cygnetId.onChange([this](){ updateTexture(); });
+}
 
 
 TexturePlane::~TexturePlane(){}
@@ -163,10 +175,10 @@ void TexturePlane::setParent(){
 void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;
-	while(true) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+	// while(true) {
+		// std::this_thread::sleep_for(std::chrono::milliseconds(6000));
 		 future = DlManager.downloadFile(
-		 	getiSWAurl(5),
+		 	getiSWAurl(_cygnetId.value()),
 			// std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
 			absPath("${OPENSPACE_DATA}/dataplane.jpg"),
 			true,
@@ -179,7 +191,7 @@ void TexturePlane::updateTexture(){
 			_futureTexture = future;
 			imageSize-=1;
 		}
-	}	
+	// }	
 }
 
 void TexturePlane::loadTexture() {
@@ -223,6 +235,11 @@ void TexturePlane::createPlane() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+}
+
+int TexturePlane::id(){
+		static int id = 0;
+		return id++;
 }
 
 }// namespace openspace

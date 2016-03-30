@@ -30,6 +30,9 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <modules/datasurface/rendering/datasurface.h>
+#include <modules/datasurface/rendering/datasurfacecontainer.h>
+
 
 namespace openspace {
 
@@ -60,6 +63,7 @@ properties::Property* property(const std::string& uri) {
         // The URI consists of the following form at this stage:
         // <node name>.{<property owner>.}^(0..n)<property id>
         
+
         const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
         if (nodeNameSeparator == std::string::npos) {
             LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
@@ -69,7 +73,16 @@ properties::Property* property(const std::string& uri) {
         const std::string nodeName = uri.substr(0, nodeNameSeparator);
         const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
 
-        SceneGraphNode* node = sceneGraphNode(nodeName);
+        SceneGraphNode* node = sceneGraphNode("DataSurfaces");
+        if(node){
+            std::cout << "DataSurfaces node found!" << std::endl;
+            std::shared_ptr<DataSurface> ds = static_cast <DataSurfaceContainer*>(node->renderable())->dataSurface(nodeName);
+            if(ds){
+                return ds->property(remainingUri);
+            }
+        }
+
+        node = sceneGraphNode(nodeName);
         if (!node) {
             LERROR("Node '" << nodeName << "' did not exist");
             return nullptr;

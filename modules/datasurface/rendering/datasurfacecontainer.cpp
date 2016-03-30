@@ -25,66 +25,78 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <ghoul/filesystem/filesystem>
 
-#include <modules/datasurface/rendering/datasurface.h>
 #include <modules/datasurface/rendering/dataplane.h>
 #include <modules/datasurface/rendering/textureplane.h>
 
+
 namespace openspace{
-	DataSurfaceContainer::DataSurfaceContainer(const ghoul::Dictionary& dictionary)
-		:Renderable(dictionary)
-	{
-		std::cout << "Created datasurface container" << std::endl;
-	}
+DataSurfaceContainer::DataSurfaceContainer(const ghoul::Dictionary& dictionary)
+	:Renderable(dictionary)
+{
+	std::cout << "Created datasurface container" << std::endl;
+}
 
-	DataSurfaceContainer::~DataSurfaceContainer(){}
+DataSurfaceContainer::~DataSurfaceContainer(){}
 
-	bool DataSurfaceContainer::initialize(){
-		std::cout << "Initialized datasurface container" << std::endl;
+bool DataSurfaceContainer::initialize(){
+	std::cout << "Initialized datasurface container" << std::endl;
 
-		addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
-		// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
-		addTextureSurface("${OPENSPACE_DATA}/test.png");
-	}
-	bool DataSurfaceContainer::deinitialize(){}
-	bool DataSurfaceContainer::isReady() const {}
+	addDataSurface("${OPENSPACE_DATA}/BATSRUS.cdf");
+	// addDataSurface("${OPENSPACE_DATA}/ENLIL.cdf");
+	addTextureSurface("${OPENSPACE_DATA}/test.png");
+}
+bool DataSurfaceContainer::deinitialize(){}
+bool DataSurfaceContainer::isReady() const {}
 
-	void DataSurfaceContainer::render(const RenderData& data){
-		for(dataSurface : _dataSurfaces)
+void DataSurfaceContainer::render(const RenderData& data){
+	for(dataSurface : _dataSurfaces){
+		if(dataSurface->enabled()){
 			dataSurface->render();
-	} 
-
-	void DataSurfaceContainer::update(const UpdateData& data){
-		for(dataSurface : _dataSurfaces)
-			dataSurface->update();
-	}
-
-	void DataSurfaceContainer::addDataSurface(std::string path){
-		if(FileSys.fileExists(absPath(path))) {
-			std::shared_ptr<DataSurface> ds;
-			std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-
-			//find out what class to create
-			ds = std::make_shared<DataPlane>(kw, path);
-
-
-			ds->initialize();
-			_dataSurfaces.push_back(ds);
-		}else{
-			std::cout << "file does not exist";
 		}
 	}
+} 
 
-	void DataSurfaceContainer::addTextureSurface(std::string path){
-		if(FileSys.fileExists(absPath(path))) {
-			std::shared_ptr<DataSurface> ts;
+void DataSurfaceContainer::update(const UpdateData& data){
+	for(dataSurface : _dataSurfaces)
+		dataSurface->update();
+}
 
-			//find out what class to create
-			ts = std::make_shared<TexturePlane>(path);
-			std::cout<<"before initialize"<<std::endl;
-			ts->initialize();
-			_dataSurfaces.push_back(ts);
-		}else{
-			std::cout << "file does not exist";
+void DataSurfaceContainer::addDataSurface(std::string path){
+	if(FileSys.fileExists(absPath(path))) {
+		std::shared_ptr<DataSurface> ds;
+		std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
+
+		//find out what class to create
+		ds = std::make_shared<DataPlane>(kw, path);
+
+
+		ds->initialize();
+		_dataSurfaces.push_back(ds);
+	}else{
+		std::cout << "file does not exist";
+	}
+}
+
+void DataSurfaceContainer::addTextureSurface(std::string path){
+	if(FileSys.fileExists(absPath(path))) {
+		std::shared_ptr<DataSurface> ts;
+
+		//find out what class to create
+		ts = std::make_shared<TexturePlane>(path);
+		std::cout<<"before initialize"<<std::endl;
+		ts->initialize();
+		_dataSurfaces.push_back(ts);
+	}else{
+		std::cout << "file does not exist";
+	}
+}
+
+std::shared_ptr<DataSurface> DataSurfaceContainer::dataSurface(std::string name){
+	for(auto ds : _dataSurfaces){
+		if(ds->name() == name){
+			return ds;
 		}
 	}
+	return nullptr;
+}
 }

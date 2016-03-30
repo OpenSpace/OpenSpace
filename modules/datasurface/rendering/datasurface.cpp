@@ -32,9 +32,13 @@
 namespace openspace{
 
 DataSurface::DataSurface(std::string path)
-	:_path("path", "Path", path)
+	:_enabled("enabled", "Is Enabled", true)
+	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
+	,_path("path", "Path", path)
 	,_shader(nullptr)
-{}
+{
+	setName("DataSurface");
+}
 
 DataSurface::~DataSurface(){}
 

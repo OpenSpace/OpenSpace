@@ -52,7 +52,9 @@
  	virtual void setParent() override;
  	void loadTexture();
     void createPlane();
+	static int id();
 
+    int _id;
  // 	properties::StringProperty _texturePath;
  // 	properties::Vec3Property _roatation;
 

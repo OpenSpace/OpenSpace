@@ -47,13 +47,23 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path)
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 {
+	addProperty(_enabled);
+	addProperty(_cygnetId);
+	addProperty(_path);
+	
+	_id = id();
+	setName("DataPlane" + std::to_string(_id));
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_cygnetId);
+	OsEng.gui()._property.registerProperty(&_path);
+
 	KameleonWrapper::Model model = _kw->model();
 	if(	model == KameleonWrapper::Model::BATSRUS){
 		_var = "p";
 	}else{
 		_var = "rho";
 	}
-
+	std::cout << name() << std::endl;
 }
 
 
@@ -223,7 +233,6 @@ void DataPlane::setParent(){
 
 
 void DataPlane::loadTexture() {
-
         //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
 		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
@@ -269,4 +278,8 @@ void DataPlane::createPlane() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 }
 
+int DataPlane::id(){
+		static int id = 0;
+		return id++;
+}
 }// namespace openspace
