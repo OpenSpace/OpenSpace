@@ -28,12 +28,16 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 
+#include <modules/planetbrowsing/rendering/distanceswitch.h>
+#include <modules/base/rendering/renderableplanet.h>
+
+
 //#include <openspace/properties/stringproperty.h>
 //#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 
-class Planet : public Renderable {
+class Planet : public DistanceSwitch {
 public:
 	Planet(const ghoul::Dictionary& dictionary);
 	~Planet();
@@ -42,7 +46,6 @@ public:
 	bool deinitialize() override;
 	bool isReady() const override;
 
-	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
 private:

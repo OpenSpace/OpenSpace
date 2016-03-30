@@ -69,6 +69,17 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
     return result;
 }
 
+Renderable::Renderable()
+	: _enabled("enabled", "Is Enabled", true)
+	, _startTime("")
+	, _endTime("")
+	, _targetBody("")
+	, _hasBody(false)
+	, _hasTimeInterval(false)
+{
+
+}
+
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
 	: _enabled("enabled", "Is Enabled", true)
     , _startTime("")

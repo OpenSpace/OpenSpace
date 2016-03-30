@@ -23,45 +23,62 @@
 ****************************************************************************************/
 
 // open space includes
-#include <modules/planetbrowsing/rendering/Planet.h>
-
-#include <openspace/scene/scenegraphnode.h>
+#include <modules/planetbrowsing/rendering/distanceswitch.h>
 
 namespace {
-	const std::string _loggerCat = "Planet";
+	const std::string _loggerCat = "DistanceSwitch";
 }
 
 namespace openspace {
 
-Planet::Planet(const ghoul::Dictionary& dictionary){
-
-	std::string name;
-	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-	LDEBUG(name);
-
-	ghoul_assert(success,
-		"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
+DistanceSwitch::DistanceSwitch(){
 
 }
 
-Planet::~Planet() {
+DistanceSwitch::~DistanceSwitch() {
+
+}
+
+bool DistanceSwitch::initialize() {
+	return true;
+}
+
+bool DistanceSwitch::deinitialize() {
+	return true;
+}
+
+bool DistanceSwitch::isReady() const {
+	return true;
+}
+
+void DistanceSwitch::render(const RenderData& data) {
+	pss pssDistanceToCamera = (data.camera.position() - data.position).length();
+	double distanceToCamera = pssDistanceToCamera.lengthd();
+
+	if (distanceToCamera > _maxDistances.back()) {
+		return;
+	}
+
+	// linear search through nodes to find which Renderable to render
+	for (int i = 0; i < _renderables.size(); ++i) {
+		if (distanceToCamera < _maxDistances[i]) {
+			_renderables[i]->render(data);
+			return;
+		}
+	}
+}
+
+void DistanceSwitch::update(const UpdateData& data) {
 	
 }
+
+
+void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance) {
+	ghoul_assert(maxDistance > _maxDistances.back(), "Renderables must be inserted in ascending order wrt distance");
 	
-bool Planet::initialize() {
-	return true;
-}
-
-bool Planet::deinitialize() {
-	return true;
-}
-
-bool Planet::isReady() const {
-	return true;
-}
-
-void Planet::update(const UpdateData& data) {
-		
+	_renderables.push_back(renderable);
+	_maxDistances.push_back(maxDistance);
 }
 
 }  // namespace openspace
+

@@ -22,46 +22,54 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#ifndef __DDLODSWITCH_H__
+#define __DDLODSWITCH_H__
+
 // open space includes
-#include <modules/planetbrowsing/rendering/Planet.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
-#include <openspace/scene/scenegraphnode.h>
-
-namespace {
-	const std::string _loggerCat = "Planet";
-}
+#include <vector>
 
 namespace openspace {
 
-Planet::Planet(const ghoul::Dictionary& dictionary){
 
-	std::string name;
-	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-	LDEBUG(name);
+/**
+	Selects a specific Renderable to be used for rendering, based on distance to the 
+	camera
+*/
+class DistanceSwitch : public Renderable {
+public:
 
-	ghoul_assert(success,
-		"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
+	DistanceSwitch();
+	~DistanceSwitch();
 
-}
+	bool initialize() override;
+	bool deinitialize() override;
+	bool isReady() const override;
 
-Planet::~Planet() {
+	/**
+		Picks the first Renderable with the associated maxDistance greater than the 
+		current distance to the camera
+	*/
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+
+	/**
+		Adds a new renderable (first argument) which may be rendered only if the distance 
+		to the camera is less than maxDistance (second argument)
+	*/
+	void addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance);
+
+private:
 	
-}
-	
-bool Planet::initialize() {
-	return true;
-}
 
-bool Planet::deinitialize() {
-	return true;
-}
+	std::vector<std::shared_ptr<Renderable>> _renderables;
+	std::vector <double> _distanceThresholds;
 
-bool Planet::isReady() const {
-	return true;
-}
-
-void Planet::update(const UpdateData& data) {
-		
-}
-
-}  // namespace openspace
+};
+} // openspace
+#endif //__DDLODSWITCH_H__
