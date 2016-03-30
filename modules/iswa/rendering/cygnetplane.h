@@ -22,60 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __ISWACYGNET_H__
-#define __ISWACYGNET_H__
-#include <openspace/properties/propertyowner.h>
-#include <memory>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/onscreengui/include/gui.h>
+#ifndef __CYGNETPLANE_H__
+#define __CYGNETPLANE_H__
+
+#include <modules/iswa/rendering/iswacygnet.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace{
-class ISWACygnet : public properties::PropertyOwner{
+class CygnetPlane : public ISWACygnet {
 public:
-	ISWACygnet(std::string path);
-	~ISWACygnet();
+	CygnetPlane(std::string path);
+	~CygnetPlane();
 
 	virtual bool initialize();
 	virtual bool deinitialize();
 
+	bool isReady();
+
 	virtual void render();
 	virtual void update();
 
-	bool enabled(){return _enabled.value();}
-	
 protected:
-	std::string iSWAurl(int id);
-
-	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	virtual void setParent() = 0;
-	void registerProperties();
+	virtual void loadTexture() = 0;
+	virtual void updateTexture() = 0;
 
-	properties::BoolProperty _enabled;
-	properties::IntProperty  _cygnetId;
-	properties::StringProperty _path;
-	properties::FloatProperty _updateInterval;
+	void createPlane();
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-	SceneGraphNode* _parent;
-	glm::vec4 _pscOffset;
-	glm::vec4 _modelScale;
-
-	glm::dmat3 _stateMatrix;
-	std::string _frame; 
-	std::string _var;
-
-	double _time;
-	double _lastUpdateTime = 0;
-	std::map<std::string, std::string> _month;
-
-	int _id;
+	GLuint _quad;
+	GLuint _vertexPositionBuffer;
+	bool _planeIsDirty;
 };
+} //namespace openspace
 
-}//namespace openspace
-#endif
+#endif //__CYGNETPLANE_H__

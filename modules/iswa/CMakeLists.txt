@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswamanager.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
@@ -35,6 +36,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswamanager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
 	

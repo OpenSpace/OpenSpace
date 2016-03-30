@@ -25,17 +25,12 @@
 #ifndef __DATAPLANE_H__
 #define __DATAPLANE_H__
 
-// #include <openspace/rendering/renderable.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <modules/iswa/rendering/cygnetplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 
  namespace openspace{
  
- class DataPlane : public ISWACygnet {
+ class DataPlane : public CygnetPlane {
  public:
  	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
  	~DataPlane();
@@ -43,33 +38,21 @@
  	virtual bool initialize();
     virtual bool deinitialize();
 
-	bool isReady() const;
-
 	virtual void render();
 	virtual void update();
  
  private:
  	virtual void setParent() override;
- 	void loadTexture();
-    void createPlane();
+ 	virtual void loadTexture() override;
+ 	virtual void updateTexture() override;
+
 	static int id();
 
-    int _id;
- // 	properties::StringProperty _texturePath;
- // 	properties::Vec3Property _roatation;
-
-	// std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::shared_ptr<KameleonWrapper> _kw;
-	std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-	float* _dataSlice;
 	glm::size3_t _dimensions;
-
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
-	// bool _planeIsDirty;
+	float* _dataSlice;
  };
  
  } // namespace openspace
 
-#endif
+#endif //__DATAPLANE_H__

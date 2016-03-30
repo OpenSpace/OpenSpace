@@ -23,18 +23,17 @@
 //  ****************************************************************************************/
 
 #include <modules/iswa/rendering/dataplane.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
+
 
 namespace {
 	const std::string _loggerCat = "DataPlane";
@@ -43,18 +42,12 @@ namespace {
 namespace openspace {
 
 DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
-	:ISWACygnet(path)
+	:CygnetPlane(path)
 	, _kw(kw)
-	, _texture(nullptr)
-	, _quad(0)
-	, _vertexPositionBuffer(0)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_path);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
+	registerProperties();
 
 	KameleonWrapper::Model model = _kw->model();
 	if(	model == KameleonWrapper::Model::BATSRUS){
@@ -70,34 +63,16 @@ DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
-	ISWACygnet::initialize();
-
 	_modelScale = _kw->getModelScaleScaled();
 	_pscOffset  = _kw->getModelBarycenterOffsetScaled();
 
-	std::cout << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
-	std::cout << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
+	CygnetPlane::initialize();
+	// std::cout << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
+	// std::cout << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
 
 	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
-
 	_dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
-
-	glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    createPlane();
-
-    if (_shader == nullptr) {
-        // Plane Program
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
-            );
-        if (!_shader)
-            return false;
-    }
 
     loadTexture();
 
@@ -106,37 +81,13 @@ bool DataPlane::initialize(){
 
 bool DataPlane::deinitialize(){
 	ISWACygnet::deinitialize();
-
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
-
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
-
 	return true;
 }
 
 
-bool DataPlane::isReady() const {
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
-};
 
 void DataPlane::render(){
-	// getiSWAurl(1);
-
 	psc position = _parent->worldPosition();
-
 	glm::mat4 transform = glm::mat4(1.0);
 
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
@@ -203,9 +154,7 @@ void DataPlane::render(){
 }
 
 void DataPlane::update(){
-	_time = Time::ref().currentTime();
-	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
-
+	CygnetPlane::update();
 }
 
 void DataPlane::setParent(){
@@ -250,31 +199,33 @@ void DataPlane::loadTexture() {
 	
 }
 
-void DataPlane::createPlane() {
-    // ============================
-    // 		GEOMETRY (quad)
-    // ============================
-    const GLfloat x = _modelScale.x/2.0;
-    const GLfloat y = _modelScale.z/2.0;
-    const GLfloat w = _modelScale.w;
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
-        -x, -y, 0, w, 0, 1,
-         x,  y, 0, w, 1, 0,
-        -x,  y, 0, w, 0, 0,
-        -x, -y, 0, w, 0, 1,
-         x, -y, 0, w, 1, 1,
-         x,  y, 0, w, 1, 0,
-    };
+// void DataPlane::createPlane() {
+//     // ============================
+//     // 		GEOMETRY (quad)
+//     // ============================
+//     const GLfloat x = _modelScale.x/2.0;
+//     const GLfloat y = _modelScale.z/2.0;
+//     const GLfloat w = _modelScale.w;
+//     const GLfloat vertex_data[] = { // square of two triangles (sigh)
+//         //	  x      y     z     w     s     t
+//         -x, -y, 0, w, 0, 1,
+//          x,  y, 0, w, 1, 0,
+//         -x,  y, 0, w, 0, 0,
+//         -x, -y, 0, w, 0, 1,
+//          x, -y, 0, w, 1, 1,
+//          x,  y, 0, w, 1, 0,
+//     };
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-}
+//     glBindVertexArray(_quad); // bind array
+//     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+//     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+//     glEnableVertexAttribArray(0);
+//     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+//     glEnableVertexAttribArray(1);
+//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+// }
+
+void DataPlane::updateTexture(){}
 
 int DataPlane::id(){
 		static int id = 0;

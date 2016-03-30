@@ -43,18 +43,12 @@ namespace {
 namespace openspace {
 
 TexturePlane::TexturePlane(std::string path) 
-	:ISWACygnet(path)
-	,_texture(nullptr)
-	, _quad(0)
-	, _vertexPositionBuffer(0)
-	, _futureTexture(nullptr)
+	:CygnetPlane(path)
+	,_futureTexture(nullptr)
 {
 	_id = id();
 	setName("TexturePlane" + std::to_string(_id));
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_path);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
+	registerProperties();
 
 	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
 	_cygnetId.onChange([this](){ updateTexture(); });
@@ -67,24 +61,14 @@ TexturePlane::~TexturePlane(){
 
 
 bool TexturePlane::initialize(){
-	ISWACygnet::initialize();
+	_modelScale = glm::vec4(3, 3, 3, 10);
+	_pscOffset  = glm::vec4(0, 0, 0, 1);
+
+	CygnetPlane::initialize();
+
 	std::thread t = std::thread(std::bind(&TexturePlane::updateTexture, this));
 	t.detach();
-	glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    createPlane();
 
-    if (_shader == nullptr) {
-        // Plane Program
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
-            );
-        if (!_shader)
-            return false;
-    }
   
     loadTexture();
   
@@ -92,7 +76,7 @@ bool TexturePlane::initialize(){
 }
 
 bool TexturePlane::deinitialize(){
-	ISWACygnet::deinitialize();
+	CygnetPlane::deinitialize();
 
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
@@ -111,16 +95,6 @@ bool TexturePlane::deinitialize(){
 	return true;
 }
 
-
-bool TexturePlane::isReady() const {
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
-};
-
 void TexturePlane::render(){
 	psc position = _parent->worldPosition();
 
@@ -128,7 +102,7 @@ void TexturePlane::render(){
 	transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
 
 	float textureRatio = (float (_texture->height()/float(_texture->width())));
-	transform = glm::scale(transform, glm::vec3(1000, 1000*textureRatio, 1));
+	transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
 
 	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
@@ -168,19 +142,14 @@ void TexturePlane::render(){
 }
 
 void TexturePlane::update(){
-	_time = Time::ref().currentTime();
+	CygnetPlane::update();
 
-	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", "GSM", Time::ref().currentTime());
 	if(_futureTexture && _futureTexture->isFinished){
 		_path.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
 		loadTexture();
 
 		delete _futureTexture; 
 		_futureTexture = nullptr;
-	}
-
-	if((_time-_lastUpdateTime) >= _updateInterval){
-		updateTexture();
 	}
 }
 
@@ -192,7 +161,7 @@ void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;
 	future = DlManager.downloadFile(
-		getiSWAurl(_cygnetId.value()),
+		iSWAurl(_cygnetId.value()),
 		absPath(_path.value()),
 		true,
 		[](const DownloadManager::FileFuture& f){
@@ -204,7 +173,7 @@ void TexturePlane::updateTexture(){
 		_futureTexture = future;
 		imageSize-=1;
 	}
-	_lastUpdateTime = _time;
+
 }
 
 void TexturePlane::loadTexture() {
@@ -223,31 +192,31 @@ void TexturePlane::loadTexture() {
 	
 }
 
-void TexturePlane::createPlane() {
-    // ============================
-    // 		GEOMETRY (quad)
-    // ============================
-    const GLfloat x = 1.0;//_modelScale.x/2.0;
-    const GLfloat y = 1.0;//_modelScale.y/2.0;
-    const GLfloat w = 7.0;//_modelScale.w;
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
-        -x, -y, 0.0f, w, 0, 1,
-         x,  y, 0.0f, w, 1, 0,
-        -x,  y, 0.0f, w, 0, 0,
-        -x, -y, 0.0f, w, 0, 1,
-         x, -y, 0.0f, w, 1, 1,
-         x,  y, 0.0f, w, 1, 0,
-    };
+// void TexturePlane::createPlane() {
+//     // ============================
+//     // 		GEOMETRY (quad)
+//     // ============================
+//     const GLfloat x = 1.0;//_modelScale.x/2.0;
+//     const GLfloat y = 1.0;//_modelScale.y/2.0;
+//     const GLfloat w = 7.0;//_modelScale.w;
+//     const GLfloat vertex_data[] = { // square of two triangles (sigh)
+//         //	  x      y     z     w     s     t
+//         -x, -y, 0.0f, w, 0, 1,
+//          x,  y, 0.0f, w, 1, 0,
+//         -x,  y, 0.0f, w, 0, 0,
+//         -x, -y, 0.0f, w, 0, 1,
+//          x, -y, 0.0f, w, 1, 1,
+//          x,  y, 0.0f, w, 1, 0,
+//     };
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-}
+//     glBindVertexArray(_quad); // bind array
+//     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+//     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+//     glEnableVertexAttribArray(0);
+//     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+//     glEnableVertexAttribArray(1);
+//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+// }
 
 int TexturePlane::id(){
 		static int id = 0;
