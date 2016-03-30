@@ -24,6 +24,10 @@
 
 #ifndef __ISWACYGNET_H__
 #define __ISWACYGNET_H__
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <openspace/properties/propertyowner.h>
 #include <memory>
 #include <modules/kameleon/include/kameleonwrapper.h>

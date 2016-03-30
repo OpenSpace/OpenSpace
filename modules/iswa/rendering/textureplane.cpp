@@ -68,7 +68,6 @@ bool TexturePlane::initialize(){
 
 	std::thread t = std::thread(std::bind(&TexturePlane::updateTexture, this));
 	t.detach();
-
   
     loadTexture();
   
