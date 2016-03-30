@@ -31,6 +31,11 @@
 #include <modules/base/rendering/screenspaceimage.h>
 
 namespace openspace {
+/**
+ * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen space plane.
+ * @details This class lets you ass renderfunctions that should render to a framebuffer with an attached texture.
+ * The texture is then used on a screen space plane that works both in fisheye and flat screens.
+ */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
 	ScreenSpaceFramebuffer();

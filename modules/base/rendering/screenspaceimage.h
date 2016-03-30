@@ -28,7 +28,13 @@
 #include <ghoul/opengl/texture.h>
  
 namespace openspace {
-
+/**
+ * @brief Creates a textured plane rendered in screenspace
+ * @details The plane gets the same ratio as the texture. Implements
+ * the interface that ScreenSpaceImage speciefies.
+ * 
+ * @param texturePath Path to the image that should be used as texture
+ */
 class ScreenSpaceImage : public ScreenSpaceRenderable {
 
 public:

@@ -43,7 +43,13 @@
 #endif
 
 namespace openspace {
-
+/**
+ * @brief The base class for screen scape images and screen space framebuffers
+ * @details This base class handles general functionality specific to planes that
+ * are rendered infront of the camera. It implements protected methods and properties for converting
+ * the planes from spherical to euclidean coordinates and back. It also specifies the interface
+ * that it's children needs to implement.
+ */
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
 	ScreenSpaceRenderable();
@@ -75,7 +81,23 @@ public:
 protected:
 	void createPlane();
 	void useEuclideanCoordinates(bool b);
+
+	/**
+	 * @brief Converts vec2 polar coordinates to euclidean 
+	 * 
+	 * @param polar the coordinates theta and phi
+	 * @param radius the radius position value of the plane
+	 * 
+	 * @return glm::vec2 with the x and y position value of the plane 
+	 */
 	glm::vec2 toEuclidean(glm::vec2 polar, float radius);
+
+	/**
+	 * @brief Converts vec2 euclidean coordinates to sperical
+	 * 
+	 * @param euclidean the coordinates x and y
+	 * @return glm::vec2 with the spherical coordinates theta and phi.
+	 */
 	glm::vec2 toSpherical(glm::vec2 euclidean);
 	void registerProperties();
 	void createShaders();
