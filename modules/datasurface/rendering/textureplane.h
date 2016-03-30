@@ -66,7 +66,7 @@
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 
-	glm::dmat3 _stateMatrix;	
+	glm::dmat3 _stateMatrix;
 	// bool _planeIsDirty;
  };
  

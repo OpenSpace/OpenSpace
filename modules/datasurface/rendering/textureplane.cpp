@@ -47,15 +47,12 @@ TexturePlane::TexturePlane(std::string path)
 	, _vertexPositionBuffer(0)
 	, _futureTexture(nullptr)
 {
-	addProperty(_enabled);
-	addProperty(_cygnetId);
-	addProperty(_path);
-
 	_id = id();
 	setName("TexturePlane" + std::to_string(_id));
 	OsEng.gui()._property.registerProperty(&_enabled);
 	OsEng.gui()._property.registerProperty(&_cygnetId);
 	OsEng.gui()._property.registerProperty(&_path);
+	OsEng.gui()._property.registerProperty(&_updateInterval);
 
 	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
 	_cygnetId.onChange([this](){ updateTexture(); });
@@ -165,14 +162,19 @@ void TexturePlane::render(){
 }
 
 void TexturePlane::update(){
+	_time = Time::ref().currentTime();
+	
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", "GSM", Time::ref().currentTime());
 	if(_futureTexture && _futureTexture->isFinished){
-
 		_path.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
 		loadTexture();
 
 		delete _futureTexture; 
 		_futureTexture = nullptr;
+	}
+
+	if((_time-_lastUpdateTime) >= _updateInterval){
+		updateTexture();
 	}
 }
 
@@ -199,7 +201,8 @@ void TexturePlane::updateTexture(){
 			_futureTexture = future;
 			imageSize-=1;
 		}
-	// }	
+	// }
+	_lastUpdateTime = _time;
 }
 
 void TexturePlane::loadTexture() {

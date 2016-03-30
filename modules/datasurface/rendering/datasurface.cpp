@@ -35,9 +35,13 @@ DataSurface::DataSurface(std::string path)
 	:_enabled("enabled", "Is Enabled", true)
 	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
 	,_path("path", "Path", path)
+	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	,_shader(nullptr)
 {
-	setName("DataSurface");
+	addProperty(_enabled);
+	addProperty(_cygnetId);
+	addProperty(_path);
+	addProperty(_updateInterval);
 }
 
 DataSurface::~DataSurface(){}
