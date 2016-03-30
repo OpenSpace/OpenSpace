@@ -76,6 +76,12 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
+    FileFuture* getToMemory(
+        const std::string& url, std::string& memory,
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(), 
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()
+    );
+
     std::vector<FileFuture*> downloadRequestFiles(const std::string& identifier,
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles = true,

@@ -4,8 +4,8 @@
 
 openspace.printInfo("Setting default values")
 openspace.setPropertyValue("Sun.renderable.enabled", false)
-openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
 --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
 openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)

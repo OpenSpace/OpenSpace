@@ -62,6 +62,12 @@ namespace {
     }
 
 
+    size_t writeToMemory(void *contents, size_t size, size_t nmemb, void *userp)
+    {
+        ((std::string*)userp)->append((char*)contents, size * nmemb);
+        return size * nmemb;
+    }
+
     int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
                  curl_off_t ulnow)
     {
@@ -195,6 +201,65 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
     
     return future;
 }
+
+DownloadManager::FileFuture* DownloadManager::getToMemory(
+    const std::string& url, std::string& memoryBuffer,
+    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
+{
+    FileFuture* future = new FileFuture(std::string("memory"));
+
+    LDEBUG("Start downloading file: '" << url << "' into memory");
+    
+    auto downloadFunction = [url, finishedCallback, progressCallback, future, &memoryBuffer]() {
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &memoryBuffer);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
+            
+            ProgressInformation p = {
+                future,
+                std::chrono::system_clock::now(),
+                &progressCallback
+            };
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            
+            CURLcode res = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
+
+            if (res == CURLE_OK)
+                future->isFinished = true;
+            else
+                future->errorMessage = curl_easy_strerror(res);
+            
+            if (finishedCallback)
+                finishedCallback(*future);
+        }
+    };
+    
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(downloadFunction);
+     
+#ifdef WIN32
+        std::thread::native_handle_type h = t.native_handle();
+        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+#else
+        // TODO: Implement thread priority ---abock
+#endif
+        
+        t.detach();
+    }
+    else {
+        downloadFunction();
+    }
+
+    return future;
+}
+
 
 std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,

@@ -154,6 +154,7 @@ bool KameleonWrapper::open(const std::string& filename) {
 		LDEBUG("_yValidMax: " << _yValidMax);
 		LDEBUG("_zValidMin: " << _zValidMin);
 		LDEBUG("_zValidMax: " << _zValidMax);
+
 		return true;
 	}
 	return false;
@@ -352,6 +353,132 @@ float* KameleonWrapper::getUniformSampledValues(
 	return data;
 }
 
+float* KameleonWrapper::getUniformSliceValues(	
+	const std::string& var, 
+	const glm::size3_t& outDimensions,
+	const float& zSlice)
+{
+	assert(_model && _interpolator);
+	assert(outDimensions.x > 0 && outDimensions.y > 0);
+	LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
+
+	unsigned int size = static_cast<unsigned int>(outDimensions.x*outDimensions.y);
+	float* data = new float[size];
+	double* doubleData = new double[size];
+
+	_model->loadVariable(var);
+
+	auto vars = _model->getLoadedVariables();
+	for(v :vars){
+		std::cout << v << std::endl;
+	}
+
+	double varMin = _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
+	double varMax = _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
+	
+	double stepX = (_xMax-_xMin)/(static_cast<double>(outDimensions.x));
+	double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
+
+	LDEBUG(var << "Min: " << varMin);
+	LDEBUG(var << "Max: " << varMax);
+
+	double maxValue = 0.0;
+	double minValue = std::numeric_limits<double>::max();
+	
+	float missingValue = _model->getMissingValue();
+
+	for (int x = 0; x < outDimensions.x; ++x) {
+		for (int y = 0; y < outDimensions.y; ++y) {
+			
+			double value = 0;
+			unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x);
+			if(_gridType == GridType::Spherical) {
+					// int z = zSlice; 
+                    // Put r in the [0..sqrt(3)] range
+                    double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
+                    
+                    // Put theta in the [0..PI] range
+                    double thetaNorm = M_PI*(double)zSlice; ///(double)(outDimensions.y-1);
+                    
+                    // Put phi in the [0..2PI] range
+                    double phiNorm = 2.0*M_PI*(double)y/(double)(outDimensions.y-1);
+                    
+                    // Go to physical coordinates before sampling
+                    double rPh = _xMin + rNorm*(_xMax-_xMin);
+                    double thetaPh = thetaNorm;
+                    // phi range needs to be mapped to the slightly different model
+                    // range to avoid gaps in the data Subtract a small term to
+                    // avoid rounding errors when comparing to phiMax.
+                    double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
+                    
+                    // See if sample point is inside domain
+                    if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
+                        thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
+                        if (phiPh > _zMax) {
+                            std::cout << "Warning: There might be a gap in the data\n";
+                        }
+                        // Leave values at zero if outside domain
+                    } else { // if inside
+                        
+                        // ENLIL CDF specific hacks!
+                        // Convert from meters to AU for interpolator
+                        rPh /= ccmc::constants::AU_in_meters;
+                        // Convert from colatitude [0, pi] rad to latitude [-90, 90] degrees
+                        thetaPh = -thetaPh*180.f/M_PI+90.f;
+                        // Convert from [0, 2pi] rad to [0, 360] degrees
+                        phiPh = phiPh*180.f/M_PI;
+                        // Sample
+                        value = _interpolator->interpolate(
+							var, 
+							static_cast<float>(rPh), 
+							static_cast<float>(phiPh), 
+							static_cast<float>(thetaPh));
+                        // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
+                    }
+     
+            }else{
+				
+
+				double xPos = _xMin + stepX*x;
+				double yPos = _yMin + stepY*y;
+				double zPos = (_zMin + (_zMax-_zMin)*zSlice);
+
+				// Should y and z be flipped?
+				value = _interpolator->interpolate(
+					var,
+					static_cast<float>(xPos),
+					static_cast<float>(zPos),
+					static_cast<float>(yPos));
+
+			}
+
+			if(value != missingValue){
+                doubleData[index] = value;
+
+                if(value > maxValue){
+					maxValue = value;
+				}
+				if(value < minValue){
+					minValue = value;
+				}
+			}else{
+				// std::cout << "value missing" << std::endl;
+				doubleData[index] = 0;
+			}
+		}
+	}
+	for(size_t i = 0; i < size; ++i) {
+		double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
+		data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
+		// data[i] = 1;
+		// std::cout << minValue << ", " << maxValue << ", " << doubleData[i] << ", " << normalizedVal << ", " << data[i] << std::endl;
+	}
+	std::cout << std::endl << std::endl;
+
+	delete[] doubleData;
+	return data;
+}
+
 float* KameleonWrapper::getUniformSampledVectorValues(
 	const std::string& xVar,
 	const std::string& yVar, 
@@ -539,6 +666,23 @@ glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
 	offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
 	offset.y = _yMin+(std::abs(_yMin)+std::abs(_yMax))/2.0f;
 	offset.z = _zMin+(std::abs(_zMin)+std::abs(_zMax))/2.0f;
+	std::cout << "_x_Min: " << _xMin << ", _xMax:" << _xMax << std::endl;  
+	std::cout << "_y_Min: " << _yMin << ", _yMax:" << _yMax << std::endl;  
+	std::cout << "_z_Min: " << _zMin << ", _zMax:" << _zMax << std::endl;  
+	std::cout << "offset: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;  
+	return offset;
+}
+
+glm::vec4 KameleonWrapper::getModelBarycenterOffsetScaled(){
+	std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
+	glm::vec4 offset = glm::vec4(getModelBarycenterOffset(), 1.0);
+	if(std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R"){
+		offset.x *= 6.371f;
+		offset.y *= 6.371f;
+		offset.z *= 6.371f;
+		offset.w = 6;
+	}
+	// else if(std::get<0>(t) == "m" && std::get<1>(t) == "radian" && std::get<2>(t) == "radian"){}
 	return offset;
 }
 
@@ -550,6 +694,24 @@ glm::vec3 KameleonWrapper::getModelScale() {
 	scale.x = _xMax - _xMin;
 	scale.y = _yMax - _yMin;
 	scale.z = _zMax - _zMin;
+	return scale;
+}
+
+glm::vec4 KameleonWrapper::getModelScaleScaled(){
+	std::tuple < std::string, std::string, std::string > gridUnits = getGridUnits();
+	glm::vec4 scale = glm::vec4(getModelScale(), 1.0);
+	if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
+		// Earth radius
+		scale.x *= 6.371f;
+		scale.y *= 6.371f;
+		scale.z *= 6.371f;
+		scale.w = 6;
+	}
+	else if (std::get<0>(gridUnits) == "m" && std::get<1>(gridUnits) == "radian" && std::get<2>(gridUnits) == "radian") {
+		// For spherical coordinate systems the radius is in meter
+		scale.w = -log10(1.0f/_xMax);
+	}
+
 	return scale;
 }
 

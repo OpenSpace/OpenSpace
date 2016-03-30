@@ -207,9 +207,6 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
-
-
-	return true;
 }
 
 bool RenderEngine::initializeGL() {

@@ -28,6 +28,7 @@ return {
         --"gridGalactic",
         --"gridEcliptic",
         --"gridEquatorial",
+        "datasurface",
     }
 }
 

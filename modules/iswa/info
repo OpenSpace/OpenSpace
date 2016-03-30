@@ -1,0 +1,26 @@
+ScreenSpaceRenderable
+	-->ScreenSpaceCygnet
+
+ISWACygnet
+	-->CygnetPlane
+		-->dataPlane
+		-->texturePlane
+	-->CygnetSphere
+		-->dataSphere
+		-->textureSphere
+	-->CygnetCylinder
+		-->dataCylinder
+		-->textureCylinder
+
+
+Renderable
+	-->ISWAmanager:
+		create iSWA cygnets.
+		Reads the metadata from the cygnet and creates the appropriate class.
+		can be a  ISWACygnet or a ScreenSpaceCygnet
+		keeps a list of ISWACygnets to update and render.
+		registers the ScreenSpaceCygnets with the renderengine.
+
+change names in everyting in iswa folder and
+query.cpp
+datasurface.mod
