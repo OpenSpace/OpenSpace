@@ -36,7 +36,9 @@
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 
-
+namespace {
+	const std::string _loggerCat = "DataPlane";
+}
 
 namespace openspace {
 
@@ -236,8 +238,7 @@ void DataPlane::loadTexture() {
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
 			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		if (texture) {
-			// std::cout << "texture path: " << absPath(_texturePath) << std::endl;
-			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+			LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
 			texture->uploadTexture();
 

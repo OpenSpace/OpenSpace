@@ -191,23 +191,19 @@ void TexturePlane::setParent(){
 void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;
-	// while(true) {
-		// std::this_thread::sleep_for(std::chrono::milliseconds(6000));
-		 future = DlManager.downloadFile(
-		 	getiSWAurl(_cygnetId.value()),
-			// std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
-			absPath(_path.value()),
-			true,
-			[](const DownloadManager::FileFuture& f){
-				std::cout<<"download finished"<<std::endl;
-			}
-		);
-
-		if(future){
-			_futureTexture = future;
-			imageSize-=1;
+	future = DlManager.downloadFile(
+		getiSWAurl(_cygnetId.value()),
+		absPath(_path.value()),
+		true,
+		[](const DownloadManager::FileFuture& f){
+			std::cout<<"download finished"<<std::endl;
 		}
-	// }
+	);
+
+	if(future){
+		_futureTexture = future;
+		imageSize-=1;
+	}
 	_lastUpdateTime = _time;
 }
 
