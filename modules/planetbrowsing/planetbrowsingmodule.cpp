@@ -24,7 +24,7 @@
 
 #include <modules/planetbrowsing/planetbrowsingmodule.h>
 
-#include <modules/planetbrowsing/rendering/renderablecelestialbody.h>
+#include <modules/planetbrowsing/rendering/Planet.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -43,7 +43,7 @@ void PlanetBrowsingModule::internalInitialize() {
 	auto fRenderable = FactoryManager::ref().factory<Renderable>();
 	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableCelestialBody>("RenderableCelestialBody");
+	fRenderable->registerClass<Planet>("Planet");
 }
 
 } // namespace openspace

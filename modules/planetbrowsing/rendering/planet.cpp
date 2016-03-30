@@ -23,17 +23,17 @@
 ****************************************************************************************/
 
 // open space includes
-#include <modules/planetbrowsing/rendering/renderablecelestialbody.h>
+#include <modules/planetbrowsing/rendering/Planet.h>
 
 #include <openspace/scene/scenegraphnode.h>
 
 namespace {
-	const std::string _loggerCat = "RenderableCelestialBody";
+	const std::string _loggerCat = "Planet";
 }
 
 namespace openspace {
 
-RenderableCelestialBody::RenderableCelestialBody(const ghoul::Dictionary& dictionary)
+Planet::Planet(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary) {
 
 	std::string name;
@@ -41,31 +41,31 @@ RenderableCelestialBody::RenderableCelestialBody(const ghoul::Dictionary& dictio
 	LDEBUG(name);
 
 	ghoul_assert(success,
-		"RenderableCelestialBody need the '" << SceneGraphNode::KeyName << "' be specified");
+		"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
 
 }
 
-RenderableCelestialBody::~RenderableCelestialBody() {
+Planet::~Planet() {
 	
 }
 	
-bool RenderableCelestialBody::initialize() {
+bool Planet::initialize() {
 	return true;
 }
 
-bool RenderableCelestialBody::deinitialize() {
+bool Planet::deinitialize() {
 	return true;
 }
 
-bool RenderableCelestialBody::isReady() const {
+bool Planet::isReady() const {
 	return true;
 }
 
-void RenderableCelestialBody::render(const RenderData& data) {
+void Planet::render(const RenderData& data) {
 	
 }
 
-void RenderableCelestialBody::update(const UpdateData& data) {
+void Planet::update(const UpdateData& data) {
 		
 }
 

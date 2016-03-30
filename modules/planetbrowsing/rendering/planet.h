@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLECELESTIALBODY_H__
-#define __RENDERABLECELESTIALBODY_H__
+#ifndef __PLANET_H__
+#define __PLANET_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -33,10 +33,10 @@
 
 namespace openspace {
 
-class RenderableCelestialBody : public Renderable {
+class Planet : public Renderable {
 public:
-	RenderableCelestialBody(const ghoul::Dictionary& dictionary);
-	~RenderableCelestialBody();
+	Planet(const ghoul::Dictionary& dictionary);
+	~Planet();
 
 	bool initialize() override;
 	bool deinitialize() override;
@@ -50,4 +50,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __RENDERABLECELESTIALBODY_H__
+#endif  // __PLANET_H__
