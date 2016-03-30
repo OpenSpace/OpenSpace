@@ -25,6 +25,10 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem>
 
+namespace {
+	const std::string _loggerCat = "ScreenSpaceImage";
+}
+
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 		:ScreenSpaceRenderable()
@@ -82,7 +86,6 @@ void ScreenSpaceImage::render(){
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
 	glm::mat4 scale = scaleMatrix();
-	// scale = glm::scale(scale, glm::vec3(1.0f, -1.0f, 1.0f));
 	glm::mat4 modelTransform = rotation*translation*scale;
 
 	draw(modelTransform);
@@ -104,7 +107,7 @@ void ScreenSpaceImage::loadTexture() {
 	if (_texturePath.value() != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value()));
 		if (texture) {
-			// LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
 			texture->uploadTexture();
 
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
