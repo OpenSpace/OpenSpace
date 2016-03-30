@@ -57,6 +57,7 @@ TexturePlane::TexturePlane(std::string path)
 	OsEng.gui()._property.registerProperty(&_cygnetId);
 	OsEng.gui()._property.registerProperty(&_path);
 
+	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
 	_cygnetId.onChange([this](){ updateTexture(); });
 }
 
@@ -106,8 +107,8 @@ bool TexturePlane::deinitialize(){
         _shader = nullptr;
     }
 
-    std::remove(absPath("${OPENSPACE_DATA}/dataplane.jpg").c_str());
-    
+    std::remove(absPath(_path.value()).c_str());
+
 	return true;
 }
 
@@ -187,7 +188,7 @@ void TexturePlane::updateTexture(){
 		 future = DlManager.downloadFile(
 		 	getiSWAurl(_cygnetId.value()),
 			// std::string("http://placehold.it/" + std::to_string(imageSize) + "x" + std::to_string(imageSize)),
-			absPath("${OPENSPACE_DATA}/dataplane.jpg"),
+			absPath(_path.value()),
 			true,
 			[](const DownloadManager::FileFuture& f){
 				std::cout<<"download finished"<<std::endl;
