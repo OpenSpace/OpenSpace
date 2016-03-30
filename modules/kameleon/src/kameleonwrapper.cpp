@@ -368,11 +368,6 @@ float* KameleonWrapper::getUniformSliceValues(
 
 	_model->loadVariable(var);
 
-	auto vars = _model->getLoadedVariables();
-	for(v :vars){
-		std::cout << v << std::endl;
-	}
-
 	double varMin = _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
 	double varMax = _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
 	

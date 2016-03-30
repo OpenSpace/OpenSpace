@@ -67,6 +67,7 @@ bool ISWACygnet::initialize(){
 
 bool ISWACygnet::deinitialize(){
 	_parent = nullptr;
+	return true;
 }
 
 void ISWACygnet::render(){

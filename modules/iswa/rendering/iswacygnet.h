@@ -22,8 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DATASURFACE_H__
-#define __DATASURFACE_H__
+#ifndef __ISWACYGNET_H__
+#define __ISWACYGNET_H__
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <openspace/properties/propertyowner.h>
 #include <memory>
 #include <modules/kameleon/include/kameleonwrapper.h>

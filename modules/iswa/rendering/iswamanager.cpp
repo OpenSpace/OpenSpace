@@ -46,15 +46,21 @@ bool ISWAManager::initialize(){
 	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
 	addISWACygnet("${OPENSPACE_DATA}/test.png");
+
+	return true;
 }
+
 bool ISWAManager::deinitialize(){
-	for(iSWACygnet : _iSWACygnets)
+	for(auto iSWACygnet : _iSWACygnets)
 		iSWACygnet->deinitialize();
+
+	return true;
 }
-bool ISWAManager::isReady() const {}
+
+bool ISWAManager::isReady() const { return true; }
 
 void ISWAManager::render(const RenderData& data){
-	for(iSWACygnet : _iSWACygnets){
+	for(auto iSWACygnet : _iSWACygnets){
 		if(iSWACygnet->enabled()){
 			iSWACygnet->render();
 		}
@@ -62,7 +68,7 @@ void ISWAManager::render(const RenderData& data){
 } 
 
 void ISWAManager::update(const UpdateData& data){
-	for(iSWACygnet : _iSWACygnets)
+	for(auto iSWACygnet : _iSWACygnets)
 		iSWACygnet->update();
 }
 
