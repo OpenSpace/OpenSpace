@@ -68,6 +68,18 @@ namespace openspace{
 		return nullptr;
 	}
 
+	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
+		return 	DlManager.downloadFile(
+					iSWAurl(id),
+					path,
+					true,
+					[](const DownloadManager::FileFuture& f){
+						std::cout<<"download finished"<<std::endl;
+					}
+				);
+
+	}
+
 	std::string ISWAManager::iSWAurl(int id){
 		std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
 		std::string t = Time::ref().currentTimeUTC(); 

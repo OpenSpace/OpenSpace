@@ -21,7 +21,6 @@
 //  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 //  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 //  ****************************************************************************************/
-
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -157,20 +156,9 @@ void TexturePlane::setParent(){
 }
 
 void TexturePlane::updateTexture(){
-	int imageSize = 1024;
-	DownloadManager::FileFuture* future;
-	future = DlManager.downloadFile(
-		ISWAManager::ref().iSWAurl(_cygnetId.value()),
-		absPath(_path.value()),
-		true,
-		[](const DownloadManager::FileFuture& f){
-			std::cout<<"download finished"<<std::endl;
-		}
-	);
-
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path.value()));
 	if(future){
 		_futureTexture = future;
-		imageSize-=1;
 	}
 
 }
