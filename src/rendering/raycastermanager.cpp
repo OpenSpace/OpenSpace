@@ -25,6 +25,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <algorithm>
+#include <string>
 
 namespace {
 	const std::string _loggerCat = "RaycasterManager";
