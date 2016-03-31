@@ -33,6 +33,9 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -53,6 +56,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 
 #include <ghoul/io/texture/texturereader.h>
@@ -93,6 +97,7 @@ namespace {
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
 }
+
 
 namespace openspace {
 
@@ -207,6 +212,18 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+
+    //For testing screenspacerenderables
+
+
+    std::shared_ptr<ScreenSpaceFramebuffer> ssfb = std::make_shared<ScreenSpaceFramebuffer>();
+    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){renderInformation();}));
+    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){ssr->render();}));
+    registerScreenSpaceRenderable(ssfb);
+
+
+    ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
+    registerScreenSpaceRenderable(ssr);
 
 	return true;
 }
@@ -367,6 +384,9 @@ void RenderEngine::postSynchronizationPreDraw() {
 		}
 	}
 
+	for (auto screenspacerenderable : _screenSpaceRenderables) {
+		screenspacerenderable->update();
+	}
 	//Allow focus node to update camera (enables camera-following)
 	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
 	//if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
@@ -392,6 +412,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 		if (_showLog) {
 			renderScreenLog();
 		}
+	}
+	
+	for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+		if(screenSpaceRenderable->isEnabled())
+			screenSpaceRenderable->render();
 	}
 }
 
@@ -1114,6 +1139,33 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+	s->initialize();
+	_screenSpaceRenderables.push_back(s);
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+	auto it = std::find(
+		_screenSpaceRenderables.begin(),
+		_screenSpaceRenderables.end(),
+		s
+		);
+
+	if (it != _screenSpaceRenderables.end()) {
+		s->deinitialize();
+		_screenSpaceRenderables.erase(it);
+	}
+}
+
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
+	for(auto s : _screenSpaceRenderables){
+		if(s->name() == name){
+			return s;
+		}
+	}
+	return nullptr;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -1426,6 +1478,13 @@ void RenderEngine::renderScreenLog() {
 			message.c_str());		// Pad category with "..." if exceeds category_length
 		++nr;
 	}
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+	std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+			  [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+			  	return i->depth() > j->depth();
+			  });
 }
 
 }// namespace openspace

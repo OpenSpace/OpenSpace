@@ -32,6 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswamanager.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 
 namespace openspace {
@@ -62,33 +63,37 @@ properties::Property* property(const std::string& uri) {
     else {
         // The URI consists of the following form at this stage:
         // <node name>.{<property owner>.}^(0..n)<property id>
-        
-
-        const size_t nodeNameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-        if (nodeNameSeparator == std::string::npos) {
-            LERROR("Malformed URI '" << uri << "': At least one '" << nodeNameSeparator
+        const size_t nameSeparator = uri.find(properties::PropertyOwner::URISeparator);
+        if (nameSeparator == std::string::npos) {
+            LERROR("Malformed URI '" << uri << "': At least one '" << nameSeparator
                    << "' separator must be present.");
             return nullptr;
         }
-        const std::string nodeName = uri.substr(0, nodeNameSeparator);
-        const std::string remainingUri = uri.substr(nodeNameSeparator + 1);
+        const std::string nameUri = uri.substr(0, nameSeparator);
+        const std::string remainingUri = uri.substr(nameSeparator + 1);
 
         SceneGraphNode* node = sceneGraphNode("iSWA");
         if(node){
-            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAManager*>(node->renderable())->iSWACygnet(nodeName);
+            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAManager*>(node->renderable())->iSWACygnet(nameUri);
             if(cygnet){
                 return cygnet->property(remainingUri);
             }
         }
 
-        node = sceneGraphNode(nodeName);
-        if (!node) {
-            LERROR("Node '" << nodeName << "' did not exist");
-            return nullptr;
+        node = sceneGraphNode(nameUri);
+        if (node) {
+            properties::Property* property = node->property(remainingUri);
+            return property;
+        }
+
+        std::shared_ptr<ScreenSpaceRenderable> ssr = OsEng.renderEngine().screenSpaceRenderable(nameUri);
+        if(ssr){
+            properties::Property* property = ssr->property(remainingUri);
+            return property;
         }
         
-        properties::Property* property = node->property(remainingUri);
-        return property;
+        LERROR("Node, iSWACygnet or ScreenSpaceRenderable' " << nameUri << "' did not exist");
+        return nullptr;
     }
 }
 

@@ -64,6 +64,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/ephemeris.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
@@ -134,6 +135,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/ephemeris.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
