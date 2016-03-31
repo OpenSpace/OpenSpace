@@ -8,15 +8,15 @@ namespace openspace
 {
 
 Geometry::Geometry(std::vector<unsigned int> elements,
-	Positions usePositions, Textures useTextures, Normals useNormals)
+	Positions usePositions, TextureCoordinates useTextures, Normals useNormals)
 	: _vaoID(0)
 	,_vertexBufferID(0)
 	,_elementBufferID(0)
-	,_usePositions(usePositions == Positions::Yes)
-	,_useTextures(useTextures == Textures::Yes)
-	,_useNormals(useNormals == Normals::Yes)
+	,_useVertexPositions(usePositions == Positions::Yes)
+	,_useTextureCoordinates(useTextures == TextureCoordinates::Yes)
+	,_useVertexNormals(useNormals == Normals::Yes)
 {
-	setElementData(elements);
+	setElements(elements);
 }
 
 Geometry::~Geometry() {
@@ -25,7 +25,8 @@ Geometry::~Geometry() {
 	glDeleteVertexArrays(1, &_vaoID);
 }
 
-void Geometry::setPositionData(std::vector<glm::vec4> positions) {
+void Geometry::setVertexPositions(std::vector<glm::vec4> positions) {
+	_useVertexPositions = true;
 	_vertexData.resize(positions.size());
 	for (size_t i = 0; i < positions.size(); i++)
 	{
@@ -36,7 +37,8 @@ void Geometry::setPositionData(std::vector<glm::vec4> positions) {
 	}
 }
 
-void Geometry::setTextureData(std::vector<glm::vec2> textures) {
+void Geometry::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
+	_useTextureCoordinates = true;
 	_vertexData.resize(textures.size());
 	for (size_t i = 0; i < textures.size(); i++)
 	{
@@ -45,7 +47,8 @@ void Geometry::setTextureData(std::vector<glm::vec2> textures) {
 	}
 }
 
-void Geometry::setNormalData(std::vector<glm::vec3> normals) {
+void Geometry::setVertexNormals(std::vector<glm::vec3> normals) {
+	_useVertexNormals = true;
 	_vertexData.resize(normals.size());
 	for (size_t i = 0; i < normals.size(); i++)
 	{
@@ -55,7 +58,7 @@ void Geometry::setNormalData(std::vector<glm::vec3> normals) {
 	}
 }
 
-void Geometry::setElementData(std::vector<unsigned int> elements) {
+void Geometry::setElements(std::vector<unsigned int> elements) {
 	_elementData.resize(elements.size());
 	for (size_t i = 0; i < elements.size(); i++)
 	{
@@ -96,19 +99,19 @@ bool Geometry::initialize() {
 		GL_STATIC_DRAW);
 
 	// Positions at location 0
-	if (_usePositions) {
+	if (_useVertexPositions) {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
 	}
 	// Textures at location 1
-	if (_useTextures) {
+	if (_useTextureCoordinates) {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)));
 	}
 	// Normals at location 2
-	if (_useNormals) {
+	if (_useVertexNormals) {
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));

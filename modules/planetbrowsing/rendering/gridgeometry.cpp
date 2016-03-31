@@ -8,19 +8,19 @@ namespace {
 
 namespace openspace {
 
-GridGeometry::GridGeometry(unsigned int xRes, unsigned int yRes, Positions usePositions, Textures useTextures, Normals useNormals)
+GridGeometry::GridGeometry(unsigned int xRes, unsigned int yRes, Positions usePositions, TextureCoordinates useTextures, Normals useNormals)
 	: Geometry(CreateElements(xRes, yRes), usePositions, useTextures, useNormals)
 {
-	if(_usePositions){
-		setPositionData(CreatePositions(xRes, yRes));
+	if(_useVertexPositions){
+		setVertexPositions(CreatePositions(xRes, yRes));
 	}
 
-	if (_useTextures) {
-		setTextureData(CreateTextureCoordinates(xRes, yRes));
+	if (_useTextureCoordinates) {
+		setVertexTextureCoordinates(CreateTextureCoordinates(xRes, yRes));
 	}
 
-	if (_useNormals) {
-		setNormalData(CreateNormals(xRes, yRes));
+	if (_useVertexNormals) {
+		setVertexNormals(CreateNormals(xRes, yRes));
 	}
 		
 }

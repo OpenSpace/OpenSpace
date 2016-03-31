@@ -43,7 +43,7 @@ class GridGeometry : public Geometry
 public:
 	GridGeometry(unsigned int xRes, unsigned int yRes,
 		Positions usePositions = Positions::No, 
-		Textures useTextures = Textures::No, 
+		TextureCoordinates useTextures = TextureCoordinates::No, 
 		Normals useNormals = Normals::No
 	);
 

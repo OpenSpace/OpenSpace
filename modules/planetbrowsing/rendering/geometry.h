@@ -44,21 +44,21 @@ class Geometry
 {
 public:
 	enum class Positions { Yes, No };
-	enum class Textures { Yes, No };
+	enum class TextureCoordinates { Yes, No };
 	enum class Normals { Yes, No };
 
 	Geometry(
 		std::vector<unsigned int> elements, // At least elements are required
 		Positions usePositions = Positions::No,
-		Textures useTextures = Textures::No,
+		TextureCoordinates useTextures = TextureCoordinates::No,
 		Normals useNormals = Normals::No);
 	~Geometry();
 
 	// Setters
-	void setPositionData(std::vector<glm::vec4> positions);
-	void setTextureData(std::vector<glm::vec2> textures);
-	void setNormalData(std::vector<glm::vec3> normals);
-	void setElementData(std::vector<unsigned int> elements);
+	void setVertexPositions(std::vector<glm::vec4> positions);
+	void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
+	void setVertexNormals(std::vector<glm::vec3> normals);
+	void setElements(std::vector<unsigned int> elements);
 
 	/**
 		Initialize GPU handles. Before calling this function, the data must be set.
@@ -70,9 +70,9 @@ public:
 protected:
 
 	// Determines what attribute data is in use
-	bool _usePositions;
-	bool _useTextures;
-	bool _useNormals;
+	bool _useVertexPositions;
+	bool _useTextureCoordinates;
+	bool _useVertexNormals;
 
 private:
 	typedef struct {
