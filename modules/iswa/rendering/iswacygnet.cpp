@@ -31,10 +31,9 @@
 
 namespace openspace{
 
-ISWACygnet::ISWACygnet(std::string path)
+ISWACygnet::ISWACygnet()
 	:_enabled("enabled", "Is Enabled", true)
 	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
-	,_path("path", "Path", path)
 	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	,_shader(nullptr)
 	,_texture(nullptr)
@@ -42,7 +41,6 @@ ISWACygnet::ISWACygnet(std::string path)
 {
 	addProperty(_enabled);
 	addProperty(_cygnetId);
-	addProperty(_path);
 	addProperty(_updateInterval);
 }
 
@@ -78,7 +76,6 @@ void ISWACygnet::setPscUniforms(
 void ISWACygnet::registerProperties(){
 	OsEng.gui()._property.registerProperty(&_enabled);
 	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_path);
 	OsEng.gui()._property.registerProperty(&_updateInterval);
 }
 

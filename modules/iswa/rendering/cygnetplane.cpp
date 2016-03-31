@@ -24,8 +24,8 @@
 
 namespace openspace{
 
-CygnetPlane::CygnetPlane(std::string path)
-	:ISWACygnet(path)
+CygnetPlane::CygnetPlane()
+	:ISWACygnet()
 	,_quad(0)
 	,_vertexPositionBuffer(0)
 {}
@@ -89,10 +89,6 @@ void CygnetPlane::update(){
 	}
 }
 
-// void CygnetPlane::loadTexture(){
-
-// }
-
 void CygnetPlane::createPlane(){
 	// ============================
     // 		GEOMETRY (quad)
@@ -121,6 +117,3 @@ void CygnetPlane::createPlane(){
 }
 
 } //namespace openspace
-	// :ISWACygnet(path)
-	// , _quad(0)
-	// , _vertexPositionBuffer(0)

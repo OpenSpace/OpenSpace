@@ -54,9 +54,9 @@ namespace openspace{
 
 			if(extension == "cdf"){
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-				cygnet = std::make_shared<DataPlane>(kw, path);
+				cygnet = std::make_shared<DataPlane>(kw);
 			} else {
-				cygnet = std::make_shared<TexturePlane>(path);
+				cygnet = std::make_shared<TexturePlane>();
 			}
 			//if screenspacecygnet
 			//OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
@@ -67,6 +67,25 @@ namespace openspace{
 			std::cout << "file does not exist";
 		}
 		return nullptr;
+	}
+
+	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
+		// extension = "I have changed it"; 
+		return 	DlManager.downloadFile(
+					iSWAurl(id),
+					path,
+					true,
+					[](const DownloadManager::FileFuture& f){
+						std::cout<<"download finished"<<std::endl;
+					}
+				);
+
+	}
+
+	void ISWAManager::downloadData(){}
+
+	std::string ISWAManager::fileExtension(int id){
+		return ".jpg";
 	}
 
 	std::string ISWAManager::iSWAurl(int id){

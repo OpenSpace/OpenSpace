@@ -41,13 +41,22 @@ namespace {
 
 namespace openspace {
 
-DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
-	:CygnetPlane(path)
+DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw) 
+	:CygnetPlane()
 	, _kw(kw)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
 	registerProperties();
+
+	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+
+	_cygnetId.onChange([this](){ 
+		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+		updateTexture(); });
+
 
 	KameleonWrapper::Model model = _kw->model();
 	if(	model == KameleonWrapper::Model::BATSRUS){
@@ -55,7 +64,7 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path)
 	}else{
 		_var = "rho";
 	}
-	std::cout << name() << std::endl;
+
 }
 
 
@@ -187,7 +196,7 @@ void DataPlane::loadTexture() {
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
 			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
 			texture->uploadTexture();
 

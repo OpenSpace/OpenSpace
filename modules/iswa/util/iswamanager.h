@@ -27,6 +27,8 @@
 #include <ghoul/designpattern/singleton.h>
 #include <memory>
 #include <map>
+#include <openspace/engine/downloadmanager.h>
+
 namespace openspace {
 class ISWACygnet;
 
@@ -37,9 +39,11 @@ public:
 	ISWAManager();
 	~ISWAManager();
 	std::shared_ptr<ISWACygnet> createISWACygnet(std::string);
-	std::string iSWAurl(int);
-
+	DownloadManager::FileFuture* downloadImage(int, std::string);
+	void downloadData();
+	std::string fileExtension(int);
 private:
+	std::string iSWAurl(int);
 	std::map<std::string, std::string> _month;
 };
 

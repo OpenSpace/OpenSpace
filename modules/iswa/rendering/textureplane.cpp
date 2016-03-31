@@ -21,7 +21,6 @@
 //  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 //  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 //  ****************************************************************************************/
-
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -42,16 +41,21 @@ namespace {
 
 namespace openspace {
 
-TexturePlane::TexturePlane(std::string path) 
-	:CygnetPlane(path)
+TexturePlane::TexturePlane() 
+	:CygnetPlane()
 	,_futureTexture(nullptr)
 {
 	_id = id();
 	setName("TexturePlane" + std::to_string(_id));
 	registerProperties();
 
-	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
-	_cygnetId.onChange([this](){ updateTexture(); });
+	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+
+	_cygnetId.onChange([this](){ 
+		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+		updateTexture(); });
 }
 
 
@@ -89,7 +93,7 @@ bool TexturePlane::deinitialize(){
         _shader = nullptr;
     }
 
-    std::remove(absPath(_path.value()).c_str());
+    std::remove(absPath(_path).c_str());
 
 	return true;
 }
@@ -144,7 +148,7 @@ void TexturePlane::update(){
 	CygnetPlane::update();
 
 	if(_futureTexture && _futureTexture->isFinished){
-		_path.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
+		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
 		loadTexture();
 
 		delete _futureTexture; 
@@ -157,22 +161,10 @@ void TexturePlane::setParent(){
 }
 
 void TexturePlane::updateTexture(){
-	int imageSize = 1024;
-	DownloadManager::FileFuture* future;
-	future = DlManager.downloadFile(
-		ISWAManager::ref().iSWAurl(_cygnetId.value()),
-		absPath(_path.value()),
-		true,
-		[](const DownloadManager::FileFuture& f){
-			std::cout<<"download finished"<<std::endl;
-		}
-	);
-
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path));
 	if(future){
 		_futureTexture = future;
-		imageSize-=1;
 	}
-
 }
 
 void TexturePlane::loadTexture() {
