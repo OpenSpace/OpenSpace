@@ -115,16 +115,7 @@ void ScreenSpaceCygnet::update(){
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	DownloadManager::FileFuture* future;
-	future = DlManager.downloadFile(
-		ISWAManager::ref().iSWAurl(_cygnetId.value()),
-		absPath(_path),
-		true,
-		[](const DownloadManager::FileFuture& f){
-			std::cout<<"download finished"<<std::endl;
-		}
-	);
-
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}
