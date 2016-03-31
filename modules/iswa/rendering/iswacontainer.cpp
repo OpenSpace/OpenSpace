@@ -21,65 +21,88 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-
+#include <modules/iswa/rendering/iswacontainer.h>
+#include <ghoul/filesystem/filesystem>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/rendering/textureplane.h>
+#include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
-
-ISWACygnet::ISWACygnet(std::string path)
-	:_enabled("enabled", "Is Enabled", true)
-	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
-	,_path("path", "Path", path)
-	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	,_shader(nullptr)
-	,_texture(nullptr)
-	,_frame("GALACTIC")
+ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
+	:Renderable(dictionary)
 {
-	addProperty(_enabled);
-	addProperty(_cygnetId);
-	addProperty(_path);
-	addProperty(_updateInterval);
+	std::cout << "Created ISWAContainer" << std::endl;
 }
 
-ISWACygnet::~ISWACygnet(){}
+ISWAContainer::~ISWAContainer(){
+	deinitialize();
+}
 
-bool ISWACygnet::initialize(){
-	setParent();
+bool ISWAContainer::initialize(){
+	std::cout << "Initialized ISWAContainer" << std::endl;
+
+	ISWAManager::initialize();
+
+	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
+	addISWACygnet("${OPENSPACE_DATA}/test.png");
+
 	return true;
 }
 
-bool ISWACygnet::deinitialize(){
-	_parent = nullptr;
+bool ISWAContainer::deinitialize(){
+	for(auto iSWACygnet : _iSWACygnets)
+		iSWACygnet->deinitialize();
+
 	return true;
 }
 
-void ISWACygnet::render(){
+bool ISWAContainer::isReady() const { return true; }
 
+void ISWAContainer::render(const RenderData& data){
+	for(auto iSWACygnet : _iSWACygnets){
+		if(iSWACygnet->enabled()){
+			iSWACygnet->render();
+		}
+	}
+} 
+
+void ISWAContainer::update(const UpdateData& data){
+	for(auto iSWACygnet : _iSWACygnets)
+		iSWACygnet->update();
 }
 
-void ISWACygnet::update(){}
+void ISWAContainer::addISWACygnet(std::string path){
+	std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(path);
+	if(cygnet){
+		_iSWACygnets.push_back(cygnet);
+	}
+	// if(FileSys.fileExists(absPath(path))) {
+	// 	const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
+	// 	std::shared_ptr<ISWACygnet> cygnet;
 
-void ISWACygnet::setPscUniforms(
-	ghoul::opengl::ProgramObject* program, 
-	const Camera* camera,
-	const PowerScaledCoordinate& position) 
-{
-	program->setUniform("campos", camera->position().vec4());
-	program->setUniform("objpos", position.vec4());
-	program->setUniform("camrot", camera->viewRotationMatrix());
-	program->setUniform("scaling", camera->scaling());
+	// 	if(extension == "cdf"){
+	// 		std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
+	// 		cygnet = std::make_shared<DataPlane>(kw, path);
+	// 	} else {
+	// 		cygnet = std::make_shared<TexturePlane>(path);
+	// 	}
+		
+	// 	cygnet->initialize();
+	// 	_iSWACygnets.push_back(cygnet);
+	// }else{
+	// 	std::cout << "file does not exist";
+	// }
 }
 
-void ISWACygnet::registerProperties(){
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_path);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
-}
 
-}//namespace openspac
+std::shared_ptr<ISWACygnet> ISWAContainer::iSWACygnet(std::string name){
+	for(auto cygnet : _iSWACygnets){
+		if(cygnet->name() == name){
+			return cygnet;
+		}
+	}
+	return nullptr;
+}
+}

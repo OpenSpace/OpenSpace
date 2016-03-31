@@ -31,7 +31,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswamanager.h>
+#include <modules/iswa/rendering/iswacontainer.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
 
@@ -74,7 +74,7 @@ properties::Property* property(const std::string& uri) {
 
         SceneGraphNode* node = sceneGraphNode("iSWA");
         if(node){
-            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAManager*>(node->renderable())->iSWACygnet(nameUri);
+            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAContainer*>(node->renderable())->iSWACygnet(nameUri);
             if(cygnet){
                 return cygnet->property(remainingUri);
             }

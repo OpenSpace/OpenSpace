@@ -29,7 +29,7 @@
 
  #include <ghoul/misc/assert.h>
 
- #include <modules/iswa/rendering/iswamanager.h>
+ #include <modules/iswa/rendering/iswacontainer.h>
 
  namespace openspace {
 
@@ -41,6 +41,6 @@
  		auto fRenderable = FactoryManager::ref().factory<Renderable>();
  		ghoul_assert(fRenderable, "No renderable factory existed");
 
- 		fRenderable->registerClass<ISWAManager>("ISWAManager");
+ 		fRenderable->registerClass<ISWAContainer>("ISWAContainer");
  	}
  }

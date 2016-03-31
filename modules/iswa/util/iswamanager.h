@@ -21,35 +21,27 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
 #ifndef __ISWAMANAGER_H__
 #define __ISWAMANAGER_H__
-#include <openspace/rendering/renderable.h>
 
-namespace openspace{
+#include <ghoul/designpattern/singleton.h>
+#include <memory>
+#include <map>
+namespace openspace {
 class ISWACygnet;
 
-class ISWAManager : public Renderable {
+class ISWAManager : public ghoul::Singleton<ISWAManager> {
+	friend class ghoul::Singleton<ISWAManager>;
+
 public:
-	ISWAManager(const ghoul::Dictionary& dictionary);
+	ISWAManager();
 	~ISWAManager();
-
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
-
-	void addISWACygnet(std::string path);
-
-	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
+	std::shared_ptr<ISWACygnet> createISWACygnet(std::string);
+	std::string iSWAurl(int);
 
 private:
-std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
+	std::map<std::string, std::string> _month;
+};
 
-};	
-}//namespace openspace
-
-#endif
+} //namespace openspace
+#endif //__ISWAMANAGER_H__

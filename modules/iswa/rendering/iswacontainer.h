@@ -21,65 +21,35 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
 
+#ifndef __ISWACONTAINER_H__
+#define __ISWACONTAINER_H__
+#include <openspace/rendering/renderable.h>
 
 namespace openspace{
+class ISWACygnet;
 
-ISWACygnet::ISWACygnet(std::string path)
-	:_enabled("enabled", "Is Enabled", true)
-	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
-	,_path("path", "Path", path)
-	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	,_shader(nullptr)
-	,_texture(nullptr)
-	,_frame("GALACTIC")
-{
-	addProperty(_enabled);
-	addProperty(_cygnetId);
-	addProperty(_path);
-	addProperty(_updateInterval);
-}
+class ISWAContainer : public Renderable {
+public:
+	ISWAContainer(const ghoul::Dictionary& dictionary);
+	~ISWAContainer();
 
-ISWACygnet::~ISWACygnet(){}
+	bool initialize() override;
+	bool deinitialize() override;
 
-bool ISWACygnet::initialize(){
-	setParent();
-	return true;
-}
+	bool isReady() const override;
 
-bool ISWACygnet::deinitialize(){
-	_parent = nullptr;
-	return true;
-}
+	virtual void render(const RenderData& data) override;
+	virtual void update(const UpdateData& data) override;
 
-void ISWACygnet::render(){
+	void addISWACygnet(std::string path);
 
-}
+	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 
-void ISWACygnet::update(){}
+private:
+std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
 
-void ISWACygnet::setPscUniforms(
-	ghoul::opengl::ProgramObject* program, 
-	const Camera* camera,
-	const PowerScaledCoordinate& position) 
-{
-	program->setUniform("campos", camera->position().vec4());
-	program->setUniform("objpos", position.vec4());
-	program->setUniform("camrot", camera->viewRotationMatrix());
-	program->setUniform("scaling", camera->scaling());
-}
+};	
+}//namespace openspace
 
-void ISWACygnet::registerProperties(){
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_path);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
-}
-
-}//namespace openspac
+#endif

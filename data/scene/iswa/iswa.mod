@@ -3,7 +3,7 @@ return {
 		Name = "iSWA",
 		Parent = "SolarSystem",
 		Renderable = {
-			Type = "ISWAManager",
+			Type = "ISWAContainer",
 			Frame = "GALACTIC"
 		},
 		Ephemeris = {

@@ -36,6 +36,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/onscreengui/include/gui.h>
 #include <ghoul/opengl/texture.h>
+#include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
@@ -52,8 +53,6 @@ public:
 	bool enabled(){return _enabled.value();}
 	
 protected:
-	std::string iSWAurl(int id);
-
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	virtual void setParent() = 0;
 	void registerProperties();

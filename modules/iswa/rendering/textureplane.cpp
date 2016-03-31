@@ -160,7 +160,7 @@ void TexturePlane::updateTexture(){
 	int imageSize = 1024;
 	DownloadManager::FileFuture* future;
 	future = DlManager.downloadFile(
-		iSWAurl(_cygnetId.value()),
+		ISWAManager::ref().iSWAurl(_cygnetId.value()),
 		absPath(_path.value()),
 		true,
 		[](const DownloadManager::FileFuture& f){
