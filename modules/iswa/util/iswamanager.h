@@ -41,7 +41,7 @@ public:
 	std::shared_ptr<ISWACygnet> createISWACygnet(std::string);
 	DownloadManager::FileFuture* downloadImage(int, std::string);
 	void downloadData();
-
+	std::string fileExtension(int);
 private:
 	std::string iSWAurl(int);
 	std::map<std::string, std::string> _month;

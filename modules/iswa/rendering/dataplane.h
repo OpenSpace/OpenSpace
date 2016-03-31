@@ -32,7 +32,7 @@
  
  class DataPlane : public CygnetPlane {
  public:
- 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
+ 	DataPlane(std::shared_ptr<KameleonWrapper> kw);
  	~DataPlane();
 
  	virtual bool initialize();

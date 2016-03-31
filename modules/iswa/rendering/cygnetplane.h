@@ -32,7 +32,7 @@
 namespace openspace{
 class CygnetPlane : public ISWACygnet {
 public:
-	CygnetPlane(std::string path);
+	CygnetPlane();
 	~CygnetPlane();
 
 	virtual bool initialize();

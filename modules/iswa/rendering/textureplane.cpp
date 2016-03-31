@@ -41,16 +41,21 @@ namespace {
 
 namespace openspace {
 
-TexturePlane::TexturePlane(std::string path) 
-	:CygnetPlane(path)
+TexturePlane::TexturePlane() 
+	:CygnetPlane()
 	,_futureTexture(nullptr)
 {
 	_id = id();
 	setName("TexturePlane" + std::to_string(_id));
 	registerProperties();
 
-	_path.setValue("${OPENSPACE_DATA}/"+ name() + ".jpg");
-	_cygnetId.onChange([this](){ updateTexture(); });
+	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+
+	_cygnetId.onChange([this](){ 
+		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+		updateTexture(); });
 }
 
 
@@ -88,7 +93,7 @@ bool TexturePlane::deinitialize(){
         _shader = nullptr;
     }
 
-    std::remove(absPath(_path.value()).c_str());
+    std::remove(absPath(_path).c_str());
 
 	return true;
 }
@@ -143,7 +148,7 @@ void TexturePlane::update(){
 	CygnetPlane::update();
 
 	if(_futureTexture && _futureTexture->isFinished){
-		_path.set(absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath));
+		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
 		loadTexture();
 
 		delete _futureTexture; 
@@ -156,11 +161,10 @@ void TexturePlane::setParent(){
 }
 
 void TexturePlane::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path.value()));
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}
-
 }
 
 void TexturePlane::loadTexture() {
