@@ -144,6 +144,10 @@ RenderEngine::~RenderEngine() {
 }
 
 bool RenderEngine::deinitialize() {
+	for (auto screenspacerenderable : _screenSpaceRenderables) {
+		screenspacerenderable->deinitialize();
+	}
+
 	_sceneGraph->clearSceneGraph();
 	return true;
 }
@@ -212,18 +216,6 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
-
-    //For testing screenspacerenderables
-
-
-    std::shared_ptr<ScreenSpaceFramebuffer> ssfb = std::make_shared<ScreenSpaceFramebuffer>();
-    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){renderInformation();}));
-    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){ssr->render();}));
-    registerScreenSpaceRenderable(ssfb);
-
-
-    ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
-    registerScreenSpaceRenderable(ssr);
 
 	return true;
 }
@@ -600,6 +592,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 	if (_renderer) {
 		_renderer->deinitialize();
 	}
+
 
 	_renderer = std::move(renderer);
     _renderer->setResolution(res);
