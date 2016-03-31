@@ -24,8 +24,10 @@
 
 #ifndef __ISWACYGNET_H__
 #define __ISWACYGNET_H__
+
 #define _USE_MATH_DEFINES
 #include <math.h>
+
 #include <openspace/properties/propertyowner.h>
 #include <memory>
 #include <modules/kameleon/include/kameleonwrapper.h>
@@ -33,6 +35,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/onscreengui/include/gui.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
@@ -47,11 +50,13 @@ public:
 	virtual void update();
 
 	bool enabled(){return _enabled.value();}
+	
 protected:
-	std::string getiSWAurl(int id);
+	std::string iSWAurl(int id);
 
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	virtual void setParent() = 0;
+	void registerProperties();
 
 	properties::BoolProperty _enabled;
 	properties::IntProperty  _cygnetId;
@@ -59,7 +64,9 @@ protected:
 	properties::FloatProperty _updateInterval;
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
+	SceneGraphNode* _parent;
 	glm::vec4 _pscOffset;
 	glm::vec4 _modelScale;
 
@@ -67,10 +74,11 @@ protected:
 	std::string _frame; 
 	std::string _var;
 
-	SceneGraphNode* _parent;
 	double _time;
 	double _lastUpdateTime = 0;
 	std::map<std::string, std::string> _month;
+
+	int _id;
 };
 
 }//namespace openspace

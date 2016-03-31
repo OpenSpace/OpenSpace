@@ -21,6 +21,4 @@ Renderable
 		keeps a list of ISWACygnets to update and render.
 		registers the ScreenSpaceCygnets with the renderengine.
 
-change names in everyting in iswa folder and
-query.cpp
-datasurface.mod
+change names in everyting in iswa folder

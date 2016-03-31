@@ -37,6 +37,8 @@ ISWACygnet::ISWACygnet(std::string path)
 	,_path("path", "Path", path)
 	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	,_shader(nullptr)
+	,_texture(nullptr)
+	,_frame("GALACTIC")
 {
 	addProperty(_enabled);
 	addProperty(_cygnetId);
@@ -87,7 +89,14 @@ void ISWACygnet::setPscUniforms(
 	program->setUniform("scaling", camera->scaling());
 }
 
-std::string ISWACygnet::getiSWAurl(int id){
+void ISWACygnet::registerProperties(){
+	OsEng.gui()._property.registerProperty(&_enabled);
+	OsEng.gui()._property.registerProperty(&_cygnetId);
+	OsEng.gui()._property.registerProperty(&_path);
+	OsEng.gui()._property.registerProperty(&_updateInterval);
+}
+
+std::string ISWACygnet::iSWAurl(int id){
 	std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
 	std::string t = Time::ref().currentTimeUTC(); 
 

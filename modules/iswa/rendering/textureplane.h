@@ -26,17 +26,13 @@
 #define __TEXTUREPLANE_H__
 
 // #include <openspace/rendering/renderable.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <modules/iswa/rendering/cygnetplane.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/engine/downloadmanager.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 
  namespace openspace{
  
- class TexturePlane : public ISWACygnet {
+ class TexturePlane : public CygnetPlane{
  public:
  	TexturePlane(std::string path);
  	~TexturePlane();
@@ -44,29 +40,17 @@
  	virtual bool initialize();
     virtual bool deinitialize();
 
-	bool isReady() const;
-
 	virtual void render();
 	virtual void update();
  
  private:
  	virtual void setParent() override;
-
- 	void loadTexture();
-    void createPlane();
-    void updateTexture();
+ 	virtual void loadTexture() override;
+    virtual void updateTexture() override;
 
     static int id();
-    int _id;
-	std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-	glm::size3_t _dimensions;
+ 
 	DownloadManager::FileFuture* _futureTexture;
-
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
-
-	// bool _planeIsDirty;
  };
  
  } // namespace openspace

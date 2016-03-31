@@ -22,37 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DATAPLANE_H__
-#define __DATAPLANE_H__
+#ifndef __CYGNETPLANE_H__
+#define __CYGNETPLANE_H__
 
-#include <modules/iswa/rendering/cygnetplane.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/iswa/rendering/iswacygnet.h>
+#include <ghoul/opengl/texture.h>
+#include <openspace/util/powerscaledcoordinate.h>
 
- namespace openspace{
- 
- class DataPlane : public CygnetPlane {
- public:
- 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
- 	~DataPlane();
+namespace openspace{
+class CygnetPlane : public ISWACygnet {
+public:
+	CygnetPlane(std::string path);
+	~CygnetPlane();
 
- 	virtual bool initialize();
-    virtual bool deinitialize();
+	virtual bool initialize();
+	virtual bool deinitialize();
+
+	bool isReady();
 
 	virtual void render();
 	virtual void update();
- 
- private:
- 	virtual void setParent() override;
- 	virtual void loadTexture() override;
- 	virtual void updateTexture() override;
 
-	static int id();
+protected:
+	virtual void setParent() = 0;
+	virtual void loadTexture() = 0;
+	virtual void updateTexture() = 0;
 
-	std::shared_ptr<KameleonWrapper> _kw;
-	glm::size3_t _dimensions;
-	float* _dataSlice;
- };
- 
- } // namespace openspace
+	void createPlane();
 
-#endif //__DATAPLANE_H__
+	GLuint _quad;
+	GLuint _vertexPositionBuffer;
+	bool _planeIsDirty;
+};
+} //namespace openspace
+
+#endif //__CYGNETPLANE_H__
