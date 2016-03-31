@@ -218,11 +218,11 @@ bool RenderEngine::initialize() {
 
     std::shared_ptr<ScreenSpaceFramebuffer> ssfb = std::make_shared<ScreenSpaceFramebuffer>();
     ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){renderInformation();}));
-    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){ssr->render();}));
+    ssfb->setSize(glm::vec4(0,400,400,800));
     registerScreenSpaceRenderable(ssfb);
 
 
-    ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
+    std::shared_ptr<ScreenSpaceRenderable>ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
     registerScreenSpaceRenderable(ssr);
 
 	return true;

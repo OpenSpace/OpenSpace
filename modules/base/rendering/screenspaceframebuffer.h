@@ -50,6 +50,7 @@ public:
 	void setSize(glm::vec4);
 	void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
 	void removeAllRenderFunctions();
+	
 private:
 	void createFragmentbuffer();
 	static int id();

@@ -45,6 +45,8 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer()
 	addProperty(_size);
 	OsEng.gui()._property.registerProperty(&_size);
 	_size.set(glm::vec4(0, 0, resolution.x,resolution.y));
+
+	_scale.setValue(1.0f);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer(){}
