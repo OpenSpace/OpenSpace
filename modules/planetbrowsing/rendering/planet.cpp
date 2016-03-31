@@ -22,21 +22,23 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <modules/planetbrowsing/rendering/planet.h>
+
 // open space includes
-#include <openspace/engine/configurationmanager.h>
+//#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <openspace/util/time.h>
+//#include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
-#include <ghoul/filesystem/filesystem.h>
+// ghoul includes
+//#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+//#include <ghoul/io/texture/texturereader.h>
+//#include <ghoul/opengl/programobject.h>
+//#include <ghoul/opengl/texture.h>
+//#include <ghoul/opengl/textureunit.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -55,20 +57,14 @@ namespace openspace {
 
 	Planet::Planet(const ghoul::Dictionary& dictionary)
 		: Renderable(dictionary)
-		, _colorTexturePath("colorTexture", "Color Texture")
 		, _programObject(nullptr)
-		, _texture(nullptr)
-		, _nightTexture(nullptr)
-		, _performShading("performShading", "Perform Shading", true)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 		, _alpha(1.f)
-		, _nightTexturePath("")
-		, _hasNightTexture(false)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"RenderablePlanet need the '" << SceneGraphNode::KeyName << "' be specified");
+			"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
 
 		//std::string path;
 		//success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
@@ -80,31 +76,6 @@ namespace openspace {
 		if (_target != "")
 			setBody(_target);
 
-		// TODO: textures need to be replaced by a good system similar to the geometry as soon
-		// as the requirements are fixed (ab)
-		std::string texturePath = "";
-		success = dictionary.getValue("Textures.Color", texturePath);
-		if (success)
-			_colorTexturePath = absPath(texturePath);
-
-		std::string nightTexturePath = "";
-		dictionary.getValue("Textures.Night", nightTexturePath);
-
-		if (nightTexturePath != "") {
-			_hasNightTexture = true;
-			_nightTexturePath = absPath(nightTexturePath);
-		}
-
-		addProperty(_colorTexturePath);
-		_colorTexturePath.onChange(std::bind(&Planet::loadTexture, this));
-
-		if (dictionary.hasKeyAndValue<bool>(keyShading)) {
-			bool shading;
-			dictionary.getValue(keyShading, shading);
-			_performShading = shading;
-		}
-
-		addProperty(_performShading);
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
@@ -137,7 +108,7 @@ namespace openspace {
 
 	bool Planet::initialize() {
 		RenderEngine& renderEngine = OsEng.renderEngine();
-		if (_programObject == nullptr && _hasNightTexture) {
+		if (_programObject == nullptr) {
 			// Night texture program
 			_programObject = renderEngine.buildRenderProgram(
 				"simpleTextureProgram",
@@ -145,19 +116,9 @@ namespace openspace {
 				"${MODULE_PLANETBROWSING}/shaders/simple_fs.glsl");
 			if (!_programObject) return false;
 		}
-		else if (_programObject == nullptr) {
-			// pscstandard
-			_programObject = renderEngine.buildRenderProgram(
-				"pscstandard",
-				"${SHADERS}/pscstandard_vs.glsl",
-				"${SHADERS}/pscstandard_fs.glsl");
-			if (!_programObject) return false;
 
-		}
 		using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
 		_programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-
-		loadTexture();
 
 		return isReady();
 	}
@@ -169,15 +130,12 @@ namespace openspace {
 			_programObject = nullptr;
 		}
 
-		_texture = nullptr;
-		_nightTexture = nullptr;
 		return true;
 	}
 
 	bool Planet::isReady() const {
 		bool ready = true;
 		ready &= (_programObject != nullptr);
-		ready &= (_texture != nullptr);
 		return ready;
 	}
 
@@ -217,22 +175,6 @@ namespace openspace {
 		_programObject->setUniform("ModelTransform", transform);
 		setPscUniforms(_programObject.get(), &data.camera, data.position);
 
-		_programObject->setUniform("_performShading", _performShading);
-
-		// Bind texture
-		ghoul::opengl::TextureUnit dayUnit;
-		dayUnit.activate();
-		_texture->bind();
-		_programObject->setUniform("texture1", dayUnit);
-
-		// Bind possible night texture
-		if (_hasNightTexture) {
-			ghoul::opengl::TextureUnit nightUnit;
-			nightUnit.activate();
-			_nightTexture->bind();
-			_programObject->setUniform("nightTex", nightUnit);
-		}
-
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
@@ -247,34 +189,6 @@ namespace openspace {
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;
-	}
-
-	void Planet::loadTexture() {
-		_texture = nullptr;
-		if (_colorTexturePath.value() != "") {
-			_texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
-			if (_texture) {
-				LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
-				_texture->uploadTexture();
-
-				// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-				// TODO: AnisotropicMipMap crashes on ATI cards ---abock
-				//_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-				_texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-			}
-		}
-		if (_hasNightTexture) {
-			_nightTexture = nullptr;
-			if (_nightTexturePath != "") {
-				_nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
-				if (_nightTexture) {
-					LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
-					_nightTexture->uploadTexture();
-					_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-					//_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-				}
-			}
-		}
 	}
 
 }  // namespace openspace
