@@ -21,13 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-
 #include "gtest/gtest.h"
-//Make private variables public for testing
 #define private public
-#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/iswa/util/iswamanager.h>
 #define private private
+#include <openspace/util/time.h>
+
 /*
  * For each test the following is run:
  * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
@@ -35,38 +34,49 @@
 
 namespace openspace {
 
-class ScreenSpaceRenderableTest : public testing::Test{
+class ISWAManagerTest : public testing::Test{
 protected:
 
-	ScreenSpaceRenderableTest() :
-		_ssr(texturePath) 
+	ISWAManagerTest()
 	{
-		_sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+		ISWAManager::initialize();
 	}
 
-	~ScreenSpaceRenderableTest(){}
+	~ISWAManagerTest(){
+		ISWAManager::deinitialize();
+	}
 
 
 	void reset() {}
 
-	// These variables are shared by all tests
-	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
-	ScreenSpaceImage _ssr;
-	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
+	//std::shared_ptr<ISWAManager> iSWAManager;
 };
 
+TEST_F(ISWAManagerTest, initialize){
 
-TEST_F(ScreenSpaceRenderableTest, initialize){
-	bool isReady = _ssr.isReady();
-	_ssr._texturePath;
-	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
+	ISWAManager::deinitialize();
 
-	// cannot test initialize, crashes at createplane becasue of opengl functions. needs mocking
-	//_ssr.initialize();
-	//isReady = _ssr.isReady();
-	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is not ready after initialize";
-	//_ssr.deinitialize();
-	//isReady = _ssr.isReady();
-	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is still ready after deinitialize";
+	ASSERT_TRUE(!ISWAManager::isInitialized()) << "iSWAManager is initialized before initialize call";
+
+	ISWAManager::initialize();
+
+	ASSERT_TRUE(ISWAManager::isInitialized()) << "iSWAManager is not initialized after initialize call";
+
+	ASSERT_NE(&ISWAManager::ref(), nullptr) << "iSWAManager ref() is not a nullptr";
+
+	EXPECT_EQ(&ISWAManager::ref(), &ISWAManager::ref()) << "iSWAManager ref() returns the same object twice";
 }
+
+TEST_F(ISWAManagerTest, iSWAurl){
+
+	OsEng.loadSpiceKernels();
+	Time::ref().setTime(double(100000.0));
+	Time::ref().preSynchronization();
+	Time::ref().postSynchronizationPreDraw();
+	std::string url = ISWAManager::ref().iSWAurl(7);
+	std::string expectedUrl = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=2000-01-02%2015:45:35&window=-1&cygnetId=7";
+
+	EXPECT_EQ(expectedUrl, url);
+}
+
 }//namespace openspace

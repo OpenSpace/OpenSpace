@@ -37,6 +37,7 @@
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
 #include <test_screenspaceimage.inl>
+#include <test_iswamanager.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
