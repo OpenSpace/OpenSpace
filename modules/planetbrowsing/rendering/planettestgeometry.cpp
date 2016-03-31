@@ -22,41 +22,57 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#include <modules/planetbrowsing/rendering/planettestgeometry.h>
+#include <modules/planetbrowsing/rendering/renderabletestplanet.h>
+#include <openspace/util/factorymanager.h>
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/planetbrowsing/rendering/geometry.h>
-
-#include <memory>
-
-namespace openspace {
-
-namespace planetgeometry {
-	class PlanetGeometry;
+namespace {
+	const std::string _loggerCat = "PlanetTestGeometry";
+	const std::string KeyType = "Type";
 }
 
-class Planet : public Renderable {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+namespace openspace {
+	namespace planettestgeometry {
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+		PlanetTestGeometry* PlanetTestGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
+			std::string geometryType;
+			const bool success = dictionary.getValue(KeyType, geometryType);
+			if (!success) {
+				LERROR("PlanetTestGeometry did not contain a correct value of the key '"
+					<< KeyType << "'");
+				return nullptr;
+			}
+			ghoul::TemplateFactory<PlanetTestGeometry>* factory
+				= FactoryManager::ref().factory<PlanetTestGeometry>();
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+			PlanetTestGeometry* result = factory->create(geometryType, dictionary);
+			if (result == nullptr) {
+				LERROR("Failed to create a PlanetTestGeometry object of type '" << geometryType
+					<< "'");
+				return nullptr;
+			}
+			return result;
+		}
 
-private:
-//	std::unique_ptr<Geometry> _testGeometry;
-	planetgeometry::PlanetGeometry* _geometry;
+		PlanetTestGeometry::PlanetTestGeometry()
+			: _parent(nullptr)
+		{
+			setName("PlanetTestGeometry");
+		}
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _testProgramObject;
-};
+		PlanetTestGeometry::~PlanetTestGeometry()
+		{
+		}
 
+		bool PlanetTestGeometry::initialize(RenderableTestPlanet* parent)
+		{
+			_parent = parent;
+			return true;
+		}
+
+		void PlanetTestGeometry::deinitialize()
+		{
+		}
+
+	}  // namespace planettestgeometry
 }  // namespace openspace
-
-#endif  // __PLANET_H__

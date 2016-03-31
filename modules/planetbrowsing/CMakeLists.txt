@@ -27,12 +27,18 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planet.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletestplanet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planettestgeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheretestgeometry.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planet.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletestplanet.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planettestgeometry.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheretestgeometry.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

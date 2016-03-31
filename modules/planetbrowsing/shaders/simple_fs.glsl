@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,56 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/planetbrowsing/planetbrowsingmodule.h>
 
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/renderabletestplanet.h>
-#include <modules/planetbrowsing/rendering/planettestgeometry.h>
-#include <modules/planetbrowsing/rendering/simplespheretestgeometry.h>
+in vec4 vs_position;
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include <ghoul/misc/assert.h>
+Fragment getFragment() {
+	vec4 position = vs_position;
 
+	Fragment frag;
+	
+	frag.color = vec4(1,1,1,1);
+	frag.depth = 0;
 
-namespace openspace {
-
-PlanetBrowsingModule::PlanetBrowsingModule()
-    : OpenSpaceModule("PlanetBrowsing")
-{}
-
-void PlanetBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
-
-
-
-
-
-	FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planettestgeometry::PlanetTestGeometry>>());
-
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
+	return frag;
 }
 
-} // namespace openspace

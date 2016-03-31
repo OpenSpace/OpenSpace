@@ -22,41 +22,43 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#ifndef __SIMPLESPHERETESTGEOMETRY_H__
+#define __SIMPLESPHERETESTGEOMETRY_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/planetbrowsing/rendering/geometry.h>
-
-#include <memory>
+#include <modules/planetbrowsing/rendering/planettestgeometry.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
 
-namespace planetgeometry {
-	class PlanetGeometry;
-}
+	class RenderablePlanet;
+	class PowerScaledSphere;
 
-class Planet : public Renderable {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+	namespace planettestgeometry {
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+		class SimpleSphereTestGeometry : public PlanetTestGeometry {
+		public:
+			SimpleSphereTestGeometry(const ghoul::Dictionary& dictionary);
+			~SimpleSphereTestGeometry();
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
 
-private:
-//	std::unique_ptr<Geometry> _testGeometry;
-	planetgeometry::PlanetGeometry* _geometry;
+			bool initialize(RenderableTestPlanet* parent) override;
+			void deinitialize() override;
+			void render() override;
+			PowerScaledSphere* _planet;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _testProgramObject;
-};
+		private:
+			void createSphere();
 
+			glm::vec2 _modRadius;
+			properties::Vec4Property _realRadius;
+			properties::IntProperty _segments;
+			std::string _name;
+
+			PowerScaledSphere* _sphere;
+		};
+
+	}  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __PLANET_H__
+#endif // __SIMPLESPHERETESTGEOMETRY_H__

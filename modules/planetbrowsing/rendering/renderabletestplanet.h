@@ -22,56 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/planetbrowsing/planetbrowsingmodule.h>
+#ifndef __RENDERABLETESTPLANET_H__
+#define __RENDERABLETESTPLANET_H__
 
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/renderabletestplanet.h>
-#include <modules/planetbrowsing/rendering/planettestgeometry.h>
-#include <modules/planetbrowsing/rendering/simplespheretestgeometry.h>
-
+// open space includes
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
 
+// ghoul includes
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
 
-PlanetBrowsingModule::PlanetBrowsingModule()
-    : OpenSpaceModule("PlanetBrowsing")
-{}
-
-void PlanetBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
-
-
-
-
-
-	FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planettestgeometry::PlanetTestGeometry>>());
-
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
+namespace planettestgeometry {
+class PlanetTestGeometry;
 }
 
-} // namespace openspace
+class RenderableTestPlanet : public Renderable {
+public:
+	RenderableTestPlanet(const ghoul::Dictionary& dictionary);
+    ~RenderableTestPlanet();
+
+    bool initialize() override;
+    bool deinitialize() override;
+	bool isReady() const override;
+
+	void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
+
+protected:
+    void loadTexture();
+
+private:
+    properties::StringProperty _colorTexturePath;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
+	planettestgeometry::PlanetTestGeometry* _geometry;
+    properties::BoolProperty _performShading;
+	properties::IntProperty _rotation;
+	float _alpha;
+
+	glm::dmat3 _stateMatrix;
+	std::string _nightTexturePath;
+	std::string _frame;
+	std::string _target;
+	bool _hasNightTexture;
+	double _time;
+};
+
+}  // namespace openspace
+
+#endif  // __RENDERABLETESTPLANET_H__

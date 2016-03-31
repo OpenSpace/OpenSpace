@@ -22,41 +22,32 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#ifndef __PLANETTESTGEOMETRY_H__
+#define __PLANETTESTGEOMETRY_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/planetbrowsing/rendering/geometry.h>
-
-#include <memory>
+#include <openspace/properties/propertyowner.h>
+#include <modules/planetbrowsing/rendering/renderabletestplanet.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-namespace planetgeometry {
-	class PlanetGeometry;
-}
+	namespace planettestgeometry {
 
-class Planet : public Renderable {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+		class PlanetTestGeometry : public properties::PropertyOwner {
+		public:
+			static PlanetTestGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+			PlanetTestGeometry();
+			virtual ~PlanetTestGeometry();
+			virtual bool initialize(RenderableTestPlanet* parent);
+			virtual void deinitialize();
+			virtual void render() = 0;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+		protected:
+			RenderableTestPlanet* _parent;
+		};
 
-private:
-//	std::unique_ptr<Geometry> _testGeometry;
-	planetgeometry::PlanetGeometry* _geometry;
-
-	std::unique_ptr<ghoul::opengl::ProgramObject> _testProgramObject;
-};
-
+	}  // namespace planettestgeometry
 }  // namespace openspace
 
-#endif  // __PLANET_H__
+#endif  // __PLANETTESTGEOMETRY_H__
