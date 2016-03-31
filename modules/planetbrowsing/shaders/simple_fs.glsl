@@ -22,6 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+uniform vec4 campos;
+uniform vec4 objpos;
+
+uniform vec3 sun_pos;
+
+uniform bool _performShading = true;
+uniform float transparency;
+uniform int shadows;
+
+uniform float time;
+uniform sampler2D texture1;
+uniform sampler2D nightTex;
 
 in vec4 vs_position;
 
@@ -29,12 +41,10 @@ in vec4 vs_position;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-
 	Fragment frag;
-	
+
 	frag.color = vec4(1,1,1,1);
-	frag.depth = 0;
+	frag.depth =  pscDepth(vs_position);
 
 	return frag;
 }

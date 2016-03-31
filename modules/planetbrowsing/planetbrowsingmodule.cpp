@@ -25,9 +25,6 @@
 #include <modules/planetbrowsing/planetbrowsingmodule.h>
 
 #include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/renderabletestplanet.h>
-#include <modules/planetbrowsing/rendering/planettestgeometry.h>
-#include <modules/planetbrowsing/rendering/simplespheretestgeometry.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -60,17 +57,10 @@ void PlanetBrowsingModule::internalInitialize() {
 
 
 
-	FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planettestgeometry::PlanetTestGeometry>>());
-
 	auto fRenderable = FactoryManager::ref().factory<Renderable>();
 	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
+	fRenderable->registerClass<Planet>("Planet");
 
 }
 

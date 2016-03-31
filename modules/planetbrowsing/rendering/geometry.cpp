@@ -95,8 +95,8 @@ bool Geometry::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		_elementData.size() * sizeof(Vertex),
-		&_elementData[0],
+		_vertexData.size() * sizeof(Vertex),
+		&_vertexData[0],
 		GL_STATIC_DRAW);
 
 	// Positions at location 0

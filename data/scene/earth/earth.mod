@@ -25,14 +25,9 @@ return {
         Name = "Earth",
         Parent = "EarthBarycenter",
         Renderable = {
-            Type = "RenderableTestPlanet",
+            Type = "Planet",
             Frame = "IAU_EARTH",
 			Body = "EARTH",
-            Geometry = {
-                Type = "SimpleSphereTest",
-                Radius = { 6.371, 6 },
-                Segments = 100
-            },
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",

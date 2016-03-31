@@ -28,34 +28,55 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
 #include <modules/planetbrowsing/rendering/geometry.h>
 
-#include <memory>
+// ghoul includes
+namespace ghoul {
+	namespace opengl {
+		class ProgramObject;
+		class Texture;
+	}
+}
 
 namespace openspace {
 
-namespace planetgeometry {
-	class PlanetGeometry;
-}
+	class Planet : public Renderable {
+	public:
+		Planet(const ghoul::Dictionary& dictionary);
+		~Planet();
 
-class Planet : public Renderable {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+		bool initialize() override;
+		bool deinitialize() override;
+		bool isReady() const override;
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	protected:
+		void loadTexture();
 
-private:
-//	std::unique_ptr<Geometry> _testGeometry;
-	planetgeometry::PlanetGeometry* _geometry;
+	private:
+		properties::StringProperty _colorTexturePath;
+		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+		std::unique_ptr<ghoul::opengl::Texture> _texture;
+		std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _testProgramObject;
-};
+		std::unique_ptr<Geometry> _testGeometry;
+
+		properties::BoolProperty _performShading;
+		properties::IntProperty _rotation;
+		float _alpha;
+
+		glm::dmat3 _stateMatrix;
+		std::string _nightTexturePath;
+		std::string _frame;
+		std::string _target;
+		bool _hasNightTexture;
+		double _time;
+	};
 
 }  // namespace openspace
 

@@ -24,6 +24,9 @@
 
 #version __CONTEXT__
 
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
+
 layout(location = 0) in vec4 in_position;
 
 out vec4 vs_position;
@@ -34,6 +37,10 @@ void main()
 {
 	// set variables
 	vs_position = in_position;
+	vec4 tmp = in_position;
 
-	gl_Position = in_position;
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position = z_normalization(position);
 }
