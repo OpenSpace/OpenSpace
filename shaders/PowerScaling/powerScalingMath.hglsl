@@ -150,19 +150,19 @@ float pscToLinear(vec2 position) {
  * Note: This needs to be a monotonic function, so that the value can
  * still be used for depth comparison.
  */
-float normalizeFloat(float input) {
-    if (input > 1.0) {
-        return input / pow(10, 27);
+float normalizeFloat(float inpt) {
+    if (inpt > 1.0) {
+        return inpt / pow(10, 27);
     } else {
-        return input - 1.0;
+        return inpt - 1.0;
     }
 }
 
-float denormalizeFloat(float input) {
-    if (input < 0.0) {
-        return input + 1.0;
+float denormalizeFloat(float inpt) {
+    if (inpt < 0.0) {
+        return inpt + 1.0;
     } else {
-        return input * pow(10, 27);
+        return inpt * pow(10, 27);
     }
 }
 
