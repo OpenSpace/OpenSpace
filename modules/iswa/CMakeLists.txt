@@ -30,6 +30,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -40,6 +41,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

@@ -21,33 +21,39 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/base/rendering/screenspaceimage.h>
+
+#include <modules/iswa/rendering/screenspacecygnet.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem>
+#include <openspace/util/time.h>
+#include <modules/iswa/util/iswamanager.h>
 
 namespace {
-	const std::string _loggerCat = "ScreenSpaceImage";
+	const std::string _loggerCat = "ScreenSpaceCygnet";
 }
 
 namespace openspace {
-ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
-		:ScreenSpaceRenderable()
-		,_texturePath("texturePath", "Texture path", texturePath)
 
+ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
+: ScreenSpaceRenderable()
+, _cygnetId("cygnetId", "CygnetID",7, 0, 10)
+, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 {
 	_id = id();
-	setName("ScreenSpaceImage" + std::to_string(_id));
-	
-	addProperty(_texturePath);
+	setName("ScreenSpaceCygnet" + std::to_string(_id));
+	addProperty(_cygnetId);
+	addProperty(_updateInterval);
+
 	registerProperties();
-	OsEng.gui()._property.registerProperty(&_texturePath);
-	
-	_texturePath.onChange([this](){ loadTexture(); });
+	OsEng.gui()._property.registerProperty(&_cygnetId);
+	OsEng.gui()._property.registerProperty(&_updateInterval);
+
+	_path = "${OPENSPACE_DATA}/test.png";
 }
 
-ScreenSpaceImage::~ScreenSpaceImage(){}
+ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
-bool ScreenSpaceImage::initialize(){
+bool ScreenSpaceCygnet::initialize(){
 	_originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
 
 	createPlane();
@@ -62,7 +68,7 @@ bool ScreenSpaceImage::initialize(){
 	return isReady();
 }
 
-bool ScreenSpaceImage::deinitialize(){
+bool ScreenSpaceCygnet::deinitialize(){
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 
@@ -70,7 +76,7 @@ bool ScreenSpaceImage::deinitialize(){
 	_vertexPositionBuffer = 0;
 
 
-	_texturePath = "";
+	_path = "";
 	_texture = nullptr;
 
 	 RenderEngine& renderEngine = OsEng.renderEngine();
@@ -82,7 +88,7 @@ bool ScreenSpaceImage::deinitialize(){
 	return true;
 }
 
-void ScreenSpaceImage::render(){
+void ScreenSpaceCygnet::render(){
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
 	glm::mat4 scale = scaleMatrix();
@@ -91,35 +97,61 @@ void ScreenSpaceImage::render(){
 	draw(modelTransform);
 }
 
-void ScreenSpaceImage::update(){}
+void ScreenSpaceCygnet::update(){
+	_time = Time::ref().currentTime();
 
+	if((_time-_lastUpdateTime) >= _updateInterval){
+		updateTexture();
+		_lastUpdateTime = _time;
+	}
 
-bool ScreenSpaceImage::isReady() const{
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
-}
+	if(_futureTexture && _futureTexture->isFinished){
+		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
+		loadTexture();
 
-void ScreenSpaceImage::loadTexture() {
-	if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value()));
-		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-			texture->uploadTexture();
-
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-            _texture = std::move(texture);
-		}
+		delete _futureTexture; 
+		_futureTexture = nullptr;
 	}
 }
 
-int ScreenSpaceImage::id(){
-		static int id = 0;
-		return id++;
+void ScreenSpaceCygnet::updateTexture(){
+	DownloadManager::FileFuture* future;
+	future = DlManager.downloadFile(
+		ISWAManager::ref().iSWAurl(_cygnetId.value()),
+		absPath(_path),
+		true,
+		[](const DownloadManager::FileFuture& f){
+			std::cout<<"download finished"<<std::endl;
+		}
+	);
+
+	if(future){
+		_futureTexture = future;
+	}
 }
+
+bool ScreenSpaceCygnet::isReady() const{
+	return true;
+}
+
+void ScreenSpaceCygnet::loadTexture() {
+
+	std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+
+	if (texture) {
+		LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+
+		texture->uploadTexture();
+		// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+		texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+		_texture = std::move(texture);
+	}
+}
+
+int ScreenSpaceCygnet::id(){
+	static int id = 0;
+	return id++;
+}
+
 }

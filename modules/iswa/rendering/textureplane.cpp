@@ -177,7 +177,7 @@ void TexturePlane::updateTexture(){
 
 void TexturePlane::loadTexture() {
 
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
 
 		if (texture) {
 			LDEBUG("Loaded texture from '" << absPath(_path) << "'");

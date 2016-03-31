@@ -21,76 +21,41 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <ghoul/filesystem/filesystem>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/textureplane.h>
-#include <openspace/util/time.h>
+
+#ifndef __SCREENSPACECYGNET_H__
+#define __SCREENSPACECYGNET_H__
+
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/engine/downloadmanager.h>
 
 namespace openspace{
-	ISWAManager::ISWAManager(){
-		_month["JAN"] = "01";
-	   	_month["FEB"] = "02";
-	   	_month["MAR"] = "03";
-	   	_month["APR"] = "04";
-	   	_month["MAY"] = "05";
-	   	_month["JUN"] = "06";
-	   	_month["JUL"] = "07";
-	   	_month["AUG"] = "08";
-	   	_month["SEP"] = "09";
-	   	_month["OCT"] = "10";
-	   	_month["NOV"] = "11";
-	   	_month["DEC"] = "12";
-	}
 
-	ISWAManager::~ISWAManager(){}
+class ScreenSpaceCygnet : public ScreenSpaceRenderable {
+public:
+	ScreenSpaceCygnet(int cygnetId);
+	~ScreenSpaceCygnet();
 
-	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::string path){
-		if(FileSys.fileExists(absPath(path))) {
-			const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
-			std::shared_ptr<ISWACygnet> cygnet;
+	void render() override;
+	bool initialize() override;
+	bool deinitialize() override;
+	void update() override;
+	bool isReady() const override;
 
-			if(extension == "cdf"){
-				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-				cygnet = std::make_shared<DataPlane>(kw, path);
-			} else {
-				cygnet = std::make_shared<TexturePlane>(path);
-			}
-			//if screenspacecygnet
-			//OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
-			cygnet->initialize();
-			return cygnet;
-			// _iSWACygnets.push_back(cygnet);
-		}else{
-			std::cout << "file does not exist";
-		}
-		return nullptr;
-	}
+private:
+	static int id();
+	void updateTexture();
+	void loadTexture();
 
-	std::string ISWAManager::iSWAurl(int id){
-		std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
-		std::string t = Time::ref().currentTimeUTC(); 
+	properties::IntProperty  _cygnetId;
+	properties::FloatProperty _updateInterval;
 
-		std::stringstream ss(t);
-		std::string token;
+	std::string _path;
+	int _id;
+	float _time;
+	float _lastUpdateTime = 0.0f;
+	DownloadManager::FileFuture* _futureTexture;
+};
 
-		std::getline(ss, token, ' ');
-		url += token + "-"; 
-		std::getline(ss, token, ' ');
-		url += _month[token] + "-";
-		std::getline(ss, token, 'T');
-		url += token + "%20";
-		std::getline(ss, token, '.');
-		url += token;
+ } // namespace openspace
 
-		url += "&window=-1&cygnetId=";
-		url += std::to_string(id);
-
-		std::cout << url <<  std::endl;
-
-		return url;
-	}
-
-}// namsepace openspace
+#endif //__SCREENSPACECYGNET_H__

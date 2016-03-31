@@ -26,6 +26,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
+#include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
@@ -47,6 +48,8 @@ bool ISWAContainer::initialize(){
 	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
 	addISWACygnet("${OPENSPACE_DATA}/test.png");
+
+	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
 
 	return true;
 }

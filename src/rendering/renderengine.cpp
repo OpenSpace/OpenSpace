@@ -213,18 +213,6 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
-    //For testing screenspacerenderables
-
-
-    std::shared_ptr<ScreenSpaceFramebuffer> ssfb = std::make_shared<ScreenSpaceFramebuffer>();
-    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){renderInformation();}));
-    ssfb->addRenderFunction(std::make_shared<std::function<void()>>([this](){ssr->render();}));
-    registerScreenSpaceRenderable(ssfb);
-
-
-    ssr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test2.jpg");
-    registerScreenSpaceRenderable(ssr);
-
 	return true;
 }
 
