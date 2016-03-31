@@ -32,6 +32,8 @@ in vec4 vs_position;
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
+
+
 Fragment getFragment(){
 	Fragment frag;
 
@@ -42,7 +44,7 @@ Fragment getFragment(){
 	if(frag.color.a == 0.0f){
 		discard;
 	}	
-	frag.depth = depth;
+	frag.depth = denormalizeFloat(depth);
 
 	return frag;
 }
