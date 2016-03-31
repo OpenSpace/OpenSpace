@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DDLODSWITCH_H__
-#define __DDLODSWITCH_H__
+#ifndef __DISTANCESWITCH_H__
+#define __DISTANCESWITCH_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -68,8 +68,8 @@ private:
 	
 
 	std::vector<std::shared_ptr<Renderable>> _renderables;
-	std::vector <double> _distanceThresholds;
+	std::vector <double> _maxDistances;
 
 };
 } // openspace
-#endif //__DDLODSWITCH_H__
+#endif //__DISTANCESWITCH_H__

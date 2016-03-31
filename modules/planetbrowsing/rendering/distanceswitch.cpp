@@ -52,6 +52,10 @@ bool DistanceSwitch::isReady() const {
 }
 
 void DistanceSwitch::render(const RenderData& data) {
+	if (_maxDistances.size() == 0) {
+		return;
+	}
+
 	pss pssDistanceToCamera = (data.camera.position() - data.position).length();
 	double distanceToCamera = pssDistanceToCamera.lengthd();
 

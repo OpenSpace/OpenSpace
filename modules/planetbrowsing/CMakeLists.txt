@@ -26,7 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
