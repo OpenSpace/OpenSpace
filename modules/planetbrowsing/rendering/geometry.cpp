@@ -1,5 +1,4 @@
 #include <modules/planetbrowsing/rendering/geometry.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
 	const std::string _loggerCat = "Geometry";
@@ -8,17 +7,14 @@ namespace {
 namespace openspace
 {
 
-Geometry::Geometry(
-	std::vector<unsigned int> elements,
-	Positions usePositions,
-	Textures useTextures,
-	Normals useNormals) :
-	_vaoID(0),
-	_vertexBufferID(0),
-	_elementBufferID(0),
-	_usePositions(usePositions == Positions::Yes ? true : false),
-	_useTextures(useTextures == Textures::Yes ? true : false),
-	_useNormals(useNormals == Normals::Yes ? true : false)
+Geometry::Geometry(std::vector<unsigned int> elements,
+	Positions usePositions, Textures useTextures, Normals useNormals)
+	: _vaoID(0)
+	,_vertexBufferID(0)
+	,_elementBufferID(0)
+	,_usePositions(usePositions == Positions::Yes)
+	,_useTextures(useTextures == Textures::Yes)
+	,_useNormals(useNormals == Normals::Yes)
 {
 	setElementData(elements);
 }
@@ -30,6 +26,7 @@ Geometry::~Geometry() {
 }
 
 void Geometry::setPositionData(std::vector<glm::vec4> positions) {
+	_vertexData.resize(positions.size());
 	for (size_t i = 0; i < positions.size(); i++)
 	{
 		_vertexData[i].position[0] = static_cast<GLfloat>(positions[i].x);
@@ -40,6 +37,7 @@ void Geometry::setPositionData(std::vector<glm::vec4> positions) {
 }
 
 void Geometry::setTextureData(std::vector<glm::vec2> textures) {
+	_vertexData.resize(textures.size());
 	for (size_t i = 0; i < textures.size(); i++)
 	{
 		_vertexData[i].texture[0] = static_cast<GLfloat>(textures[i].s);
@@ -48,6 +46,7 @@ void Geometry::setTextureData(std::vector<glm::vec2> textures) {
 }
 
 void Geometry::setNormalData(std::vector<glm::vec3> normals) {
+	_vertexData.resize(normals.size());
 	for (size_t i = 0; i < normals.size(); i++)
 	{
 		_vertexData[i].normal[0] = static_cast<GLfloat>(normals[i].x);
@@ -57,6 +56,7 @@ void Geometry::setNormalData(std::vector<glm::vec3> normals) {
 }
 
 void Geometry::setElementData(std::vector<unsigned int> elements) {
+	_elementData.resize(elements.size());
 	for (size_t i = 0; i < elements.size(); i++)
 	{
 		_elementData[i] = static_cast<GLuint>(elements[i]);
