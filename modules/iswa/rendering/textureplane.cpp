@@ -183,32 +183,6 @@ void TexturePlane::loadTexture() {
 	
 }
 
-// void TexturePlane::createPlane() {
-//     // ============================
-//     // 		GEOMETRY (quad)
-//     // ============================
-//     const GLfloat x = 1.0;//_modelScale.x/2.0;
-//     const GLfloat y = 1.0;//_modelScale.y/2.0;
-//     const GLfloat w = 7.0;//_modelScale.w;
-//     const GLfloat vertex_data[] = { // square of two triangles (sigh)
-//         //	  x      y     z     w     s     t
-//         -x, -y, 0.0f, w, 0, 1,
-//          x,  y, 0.0f, w, 1, 0,
-//         -x,  y, 0.0f, w, 0, 0,
-//         -x, -y, 0.0f, w, 0, 1,
-//          x, -y, 0.0f, w, 1, 1,
-//          x,  y, 0.0f, w, 1, 0,
-//     };
-
-//     glBindVertexArray(_quad); // bind array
-//     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-//     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-//     glEnableVertexAttribArray(0);
-//     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-//     glEnableVertexAttribArray(1);
-//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-// }
-
 int TexturePlane::id(){
 		static int id = 0;
 		return id++;
