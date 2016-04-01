@@ -51,6 +51,7 @@ namespace openspace {
 	PlanetMesh::PlanetMesh(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
 		, _programObject(nullptr)
+		, _grid(10, 10, Geometry::Positions::Yes, Geometry::TextureCoordinates::No, Geometry::Normals::No)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
@@ -67,6 +68,9 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
+		_grid.initialize();
+
+		/*
 		// Create a simple triangle for testing the geometry
 		std::vector<unsigned int> triangleElements;
 		std::vector<glm::vec4> trianglePositions;
@@ -87,6 +91,7 @@ namespace openspace {
 
 		_testGeometry->setVertexPositions(trianglePositions);
 		_testGeometry->initialize();
+		*/
 	}
 
 	PlanetMesh::~PlanetMesh() {
@@ -157,7 +162,8 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_testGeometry->drawUsingActiveProgram();
+		// _testGeometry->drawUsingActiveProgram();
+		_grid.drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
