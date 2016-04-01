@@ -67,6 +67,8 @@ public:
 	void render() const;
 
 
+
+
 protected:
 
 	// Determines what attribute data is in use
@@ -74,16 +76,21 @@ protected:
 	bool _useTextureCoordinates;
 	bool _useVertexNormals;
 
-private:
 	typedef struct {
+	public:
 		GLfloat position[4];
 		GLfloat texture[2];
 		GLfloat normal[3];
+	private:
 		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
 	} Vertex;
+
 	// Vertex data
 	std::vector<Vertex> _vertexData;
 	std::vector<GLuint> _elementData;
+
+private:
+
 
 	// GL handles
 	GLuint _vaoID;

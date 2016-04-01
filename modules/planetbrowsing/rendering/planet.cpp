@@ -26,6 +26,7 @@
 #include <modules/planetbrowsing/rendering/Planet.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <modules/planetbrowsing/rendering/gridgeometry.h>
 
 namespace {
 	const std::string _loggerCat = "Planet";
@@ -41,6 +42,8 @@ Planet::Planet(const ghoul::Dictionary& dictionary){
 
 	ghoul_assert(success,
 		"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
+
+	new GridGeometry(4, 4, Geometry::Positions::Yes, Geometry::TextureCoordinates::Yes, Geometry::Normals::Yes);
 
 }
 

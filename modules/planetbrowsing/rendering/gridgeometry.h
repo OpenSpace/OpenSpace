@@ -49,6 +49,9 @@ public:
 
 	~GridGeometry();
 
+	inline const unsigned int xResolution() const;
+	inline const unsigned int yResolution() const;
+
 	inline static size_t numElements(unsigned int xRes, unsigned int yRes);
 	static size_t numVertices(unsigned int xRes, unsigned int yRes);
 
@@ -59,7 +62,11 @@ private:
 	static std::vector<glm::vec2> CreateTextureCoordinates(unsigned int xRes, unsigned int yRes);
 	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
 
-	static void validate(unsigned int xRes, unsigned int yRes);
+	inline static void validate(unsigned int xRes, unsigned int yRes);
+	inline void validateIndices(unsigned int x, unsigned int y);
+
+	unsigned int _xRes;
+	unsigned int _yRes;
 };
 } // namespace openspace
 #endif // __GRIDGEOMETRY_H__

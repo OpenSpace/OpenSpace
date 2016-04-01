@@ -11,6 +11,7 @@ namespace openspace {
 GridGeometry::GridGeometry(unsigned int xRes, unsigned int yRes, Positions usePositions, TextureCoordinates useTextures, Normals useNormals)
 	: Geometry(CreateElements(xRes, yRes), usePositions, useTextures, useNormals)
 {
+
 	if(_useVertexPositions){
 		setVertexPositions(CreatePositions(xRes, yRes));
 	}
@@ -22,6 +23,9 @@ GridGeometry::GridGeometry(unsigned int xRes, unsigned int yRes, Positions usePo
 	if (_useVertexNormals) {
 		setVertexNormals(CreateNormals(xRes, yRes));
 	}
+
+	_xRes = xRes;
+	_yRes = yRes;
 		
 }
 
@@ -31,9 +35,24 @@ GridGeometry::~GridGeometry()
 
 }
 
+const unsigned int GridGeometry::xResolution() const {
+	return _xRes;
+}
+
+const unsigned int GridGeometry::yResolution() const {
+	return _yRes;
+}
+
+
 void GridGeometry::validate(unsigned int xRes, unsigned int yRes) {
 	ghoul_assert(xRes > 0 && yRes > 0,
-		"Resolution must be larger than 1x1. (" << xRes << ", " << yRes << ")");
+		"Resolution must be at least 1x1. (" << xRes << ", " << yRes << ")");
+}
+
+void GridGeometry::validateIndices(unsigned int x, unsigned int y) {
+	validate(x, y);
+	ghoul_assert(x < _xRes, "x index is outside range: x = " << x << "  xRes = " << _xRes);
+	ghoul_assert(y < _yRes, "y index is outside range: y = " << y << "  yRes = " << _yRes);
 }
 
 inline size_t GridGeometry::numElements(unsigned int xRes, unsigned int yRes){
@@ -53,7 +72,7 @@ std::vector<GLuint> GridGeometry::CreateElements(unsigned int xRes, unsigned int
 	std::vector<GLuint> elements;
 	elements.reserve(numElements(xRes, yRes));
 	for (unsigned int y = 0; y < yRes-1; y++) {
-		for (unsigned int x = 0; x< xRes-1; x++) {
+		for (unsigned int x = 0; x < xRes-1; x++) {
 
 			// x    v00---v10   x ..
 			//       |  /  |

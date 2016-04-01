@@ -45,7 +45,7 @@ class DistanceSwitch : public Renderable {
 public:
 
 	DistanceSwitch();
-	~DistanceSwitch();
+	virtual ~DistanceSwitch();
 
 	bool initialize() override;
 	bool deinitialize() override;

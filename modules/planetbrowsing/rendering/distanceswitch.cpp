@@ -78,8 +78,12 @@ void DistanceSwitch::update(const UpdateData& data) {
 
 
 void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance) {
-	ghoul_assert(maxDistance > _maxDistances.back(), "Renderables must be inserted in ascending order wrt distance");
-	
+	ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
+	if (_maxDistances.size() > 0){
+		ghoul_assert(maxDistance > _maxDistances.back(),
+			"Renderables must be inserted in ascending order wrt distance");
+	}
+
 	_renderables.push_back(renderable);
 	_maxDistances.push_back(maxDistance);
 }
