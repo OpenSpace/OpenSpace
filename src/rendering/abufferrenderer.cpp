@@ -355,7 +355,7 @@ void ABufferRenderer::updateResolveDictionary() {
     dict.setValue("helperPaths", helperPathsDict);
     dict.setValue("rendererData", _rendererData);
     dict.setValue("raycastingEnabled", _raycastData.size() > 0);
-    dict.setValue("nRaycasters", _raycastData.size());
+    dict.setValue("nRaycasters", static_cast<unsigned long long>(_raycastData.size()));
 
     _resolveDictionary = dict;
     _dirtyResolveDictionary = false;
