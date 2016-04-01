@@ -32,6 +32,7 @@
 #include <openspace/util/updatestructures.h>
 
 #include <modules/planetbrowsing/rendering/geometry.h>
+#include <modules/planetbrowsing/rendering/gridgeometry.h>
 #include <modules/planetbrowsing/rendering/distanceswitch.h>
 #include <modules/planetbrowsing/rendering/planetmesh.h>
 
@@ -59,7 +60,9 @@ namespace openspace {
 	private:
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-		std::unique_ptr<Geometry> _testGeometry;
+		//std::unique_ptr<Geometry> _testGeometry;
+		GridGeometry _grid;
+		
 
 		properties::IntProperty _rotation;
 
