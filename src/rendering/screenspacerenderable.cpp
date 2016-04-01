@@ -54,11 +54,22 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
     _rendererData.setValue("windowWidth", OsEng.windowWrapper().currentWindowResolution().x);
     _rendererData.setValue("windowHeight", OsEng.windowWrapper().currentWindowResolution().y);
 
-    _useEuclideanCoordinates = _useFlatScreen.value();
     _radius = _planeDepth;
 
-    _sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+    useEuclideanCoordinates(_useFlatScreen.value());
 
+	_euclideanPosition.onChange([this](){
+		_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
+	});
+	
+	_sphericalPosition.onChange([this](){
+		_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
+	});
+
+	// Setting spherical/euclidean onchange handler
+	_useFlatScreen.onChange([this](){
+		useEuclideanCoordinates(_useFlatScreen.value());
+	});
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
@@ -97,16 +108,8 @@ void ScreenSpaceRenderable::useEuclideanCoordinates(bool b){
 	_useEuclideanCoordinates = b;
 	if(_useEuclideanCoordinates){
 		_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
-		_euclideanPosition.onChange([this](){
-			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		});
-		_sphericalPosition.onChange([this](){});
 	} else {
 		_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		_sphericalPosition.onChange([this](){
-			_euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
-		});
-		_euclideanPosition.onChange([this](){});
 	}
 }
 
@@ -133,21 +136,10 @@ void ScreenSpaceRenderable::registerProperties(){
 	OsEng.gui()._property.registerProperty(&_depth);
 	OsEng.gui()._property.registerProperty(&_scale);
 	OsEng.gui()._property.registerProperty(&_alpha);
-
-	if(_useEuclideanCoordinates){
-		_euclideanPosition.onChange([this](){
-			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		});
-		_sphericalPosition.onChange([this](){});
-	}else{
-		_euclideanPosition.onChange([this](){
-			_sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-		});
-	}
 }
 
 void ScreenSpaceRenderable::createShaders(){
-	if(_shader == nullptr) {
+	if(!_shader) {
 
         ghoul::Dictionary dict = ghoul::Dictionary();
 
@@ -197,7 +189,6 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix(){
 	if(!_useEuclideanCoordinates){
 		translation = glm::translate(translation, glm::vec3(0.0f, 0.0f, _planeDepth));
 	}else{
-
 		translation = glm::translate(glm::mat4(1.f), glm::vec3(_euclideanPosition.value(), _planeDepth));
 	}
 

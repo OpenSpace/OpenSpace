@@ -129,8 +129,7 @@ void DataPlane::render(){
     float angle = acos(glm::dot(v1,v2));
     glm::vec3 ref = glm::cross(v1, v2);
 
-    transform = glm::rotate(transform, angle, ref);
-
+    transform = glm::rotate(transform, angle/2.0f, ref);
 
     // float angle = acos(glm::dot(sun_vec, (vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
 	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 

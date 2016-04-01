@@ -148,8 +148,7 @@ public:
         unsigned int _size;
         int _node;
     } _onScreenInformation;
-
-    std::shared_ptr<ScreenSpaceRenderable> ssr;
+    
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);

@@ -50,17 +50,17 @@ public:
 	void setSize(glm::vec4);
 	void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
 	void removeAllRenderFunctions();
+	
 private:
 	void createFragmentbuffer();
 	static int id();
 
-	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-
-	int _id;
-
-	std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
 	properties::Vec4Property _size;
 
+	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+	std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
+
+	int _id;
 };
 
 } //namespace openspace

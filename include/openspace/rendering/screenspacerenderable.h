@@ -102,7 +102,6 @@ protected:
 	properties::FloatProperty _scale;
 	properties::FloatProperty _alpha;
 
-
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
 	const std::string _rendererPath;

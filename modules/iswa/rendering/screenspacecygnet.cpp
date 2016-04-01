@@ -48,7 +48,13 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	OsEng.gui()._property.registerProperty(&_cygnetId);
 	OsEng.gui()._property.registerProperty(&_updateInterval);
 
-	_path = "${OPENSPACE_DATA}/test.png";
+	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+
+	_cygnetId.onChange([this](){ 
+		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
+		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+		updateTexture(); });
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -75,8 +81,6 @@ bool ScreenSpaceCygnet::deinitialize(){
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
 
-
-	_path = "";
 	_texture = nullptr;
 
 	 RenderEngine& renderEngine = OsEng.renderEngine();
@@ -85,6 +89,9 @@ bool ScreenSpaceCygnet::deinitialize(){
 		_shader = nullptr;
 	}
 
+	std::remove(absPath(_path).c_str());
+	_path = "";
+	
 	return true;
 }
 

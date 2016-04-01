@@ -144,6 +144,10 @@ RenderEngine::~RenderEngine() {
 }
 
 bool RenderEngine::deinitialize() {
+	for (auto screenspacerenderable : _screenSpaceRenderables) {
+		screenspacerenderable->deinitialize();
+	}
+
 	_sceneGraph->clearSceneGraph();
 	return true;
 }
@@ -588,6 +592,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 	if (_renderer) {
 		_renderer->deinitialize();
 	}
+
 
 	_renderer = std::move(renderer);
     _renderer->setResolution(res);

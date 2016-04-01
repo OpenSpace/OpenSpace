@@ -31,17 +31,17 @@ namespace {
 
 namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
-		:ScreenSpaceRenderable()
-		,_texturePath("texturePath", "Texture path", texturePath)
+	:ScreenSpaceRenderable()
+	,_texturePath("texturePath", "Texture path", texturePath)
 
 {
 	_id = id();
 	setName("ScreenSpaceImage" + std::to_string(_id));
 	
-	addProperty(_texturePath);
 	registerProperties();
-	OsEng.gui()._property.registerProperty(&_texturePath);
-	
+
+	addProperty(_texturePath);
+	OsEng.gui()._property.registerProperty(&_texturePath);	
 	_texturePath.onChange([this](){ loadTexture(); });
 }
 
@@ -52,13 +52,8 @@ bool ScreenSpaceImage::initialize(){
 
 	createPlane();
 	createShaders();
-
 	loadTexture();
 
-	// Setting spherical/euclidean onchange handler
-	_useFlatScreen.onChange([this](){
-		useEuclideanCoordinates(_useFlatScreen.value());
-	});
 	return isReady();
 }
 
@@ -68,7 +63,6 @@ bool ScreenSpaceImage::deinitialize(){
 
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
-
 
 	_texturePath = "";
 	_texture = nullptr;
@@ -119,7 +113,7 @@ void ScreenSpaceImage::loadTexture() {
 }
 
 int ScreenSpaceImage::id(){
-		static int id = 0;
-		return id++;
+	static int id = 0;
+	return id++;
 }
 }
