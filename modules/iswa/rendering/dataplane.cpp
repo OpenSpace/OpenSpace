@@ -158,6 +158,8 @@ void DataPlane::render(){
 }
 
 void DataPlane::update(){
+	if(_planeIsDirty)
+		createPlane();
 
 	if(_path != ""){
 		CygnetPlane::update();

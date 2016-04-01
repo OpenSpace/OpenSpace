@@ -55,6 +55,8 @@ private:
 	float _lastUpdateTime = 0.0f;
 	DownloadManager::FileFuture* _futureTexture;
 	std::string _fileExtension;
+
+	float _openSpaceUpdateInterval;
 };
 
  } // namespace openspace
