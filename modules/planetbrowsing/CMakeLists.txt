@@ -29,6 +29,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetmesh.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,8 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetmesh.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

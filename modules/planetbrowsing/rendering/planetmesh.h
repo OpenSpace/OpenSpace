@@ -22,75 +22,53 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __GEOMETRY_H__
-#define __GEOMETRY_H__
+#ifndef __PLANETMESH_H__
+#define __PLANETMESH_H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/logging/logmanager.h>
+// open space includes
+#include <openspace/rendering/renderable.h>
 
-#include <glm/glm.hpp>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
 
-#include <vector>
+#include <modules/planetbrowsing/rendering/geometry.h>
+#include <modules/planetbrowsing/rendering/distanceswitch.h>
+#include <modules/planetbrowsing/rendering/planetmesh.h>
+
+
+namespace ghoul {
+	namespace opengl {
+		class ProgramObject;
+	}
+}
 
 namespace openspace {
 
-/**
-	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
-	has all data needed such as position buffer and normal buffer but all data is not
-	necessarily needed for all purpouses so the Geometry can disable use of normals for
-	example.
-*/
-class Geometry
-{
-public:
-	enum class Positions { Yes, No };
-	enum class TextureCoordinates { Yes, No };
-	enum class Normals { Yes, No };
-
-	Geometry(
-		std::vector<unsigned int> elements, // At least elements are required
-		Positions usePositions = Positions::No,
-		TextureCoordinates useTextures = TextureCoordinates::No,
-		Normals useNormals = Normals::No);
-	~Geometry();
-
-	// Setters
-	void setVertexPositions(std::vector<glm::vec4> positions);
-	void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
-	void setVertexNormals(std::vector<glm::vec3> normals);
-	void setElements(std::vector<unsigned int> elements);
-
-	/**
-		Initialize GPU handles. Before calling this function, the data must be set.
-	*/
-	bool initialize();
-	void drawUsingActiveProgram() const;
-protected:
-	// Determines what attribute data is in use
-	bool _useVertexPositions;
-	bool _useTextureCoordinates;
-	bool _useVertexNormals;
-
-	typedef struct {
+	class PlanetMesh : public DistanceSwitch {
 	public:
-		GLfloat position[4];
-		GLfloat texture[2];
-		GLfloat normal[3];
+		PlanetMesh(const ghoul::Dictionary& dictionary);
+		~PlanetMesh();
+
+		bool initialize() override;
+		bool deinitialize() override;
+		bool isReady() const override;
+
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
+
 	private:
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-	// Vertex data
-	std::vector<Vertex> _vertexData;
-	std::vector<GLuint> _elementData;
+		std::unique_ptr<Geometry> _testGeometry;
 
-private:
-	// GL handles
-	GLuint _vaoID;
-	GLuint _vertexBufferID;
-	GLuint _elementBufferID;
-};
+		properties::IntProperty _rotation;
 
-} // namespace openspace
+		glm::dmat3 _stateMatrix;
+		std::string _frame;
+		std::string _target;
+		double _time;
+	};
 
-#endif // __GEOMETRY_H__
+}  // namespace openspace
+
+#endif  // __PLANETMESH_H__

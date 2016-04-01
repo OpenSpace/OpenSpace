@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,49 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/planetbrowsing/planetbrowsingmodule.h>
+#version __CONTEXT__
 
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+layout(location = 0) in vec4 in_position;
 
-#include <ghoul/misc/assert.h>
+out vec4 vs_position;
 
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace {
+void main()
+{
+	// set variables
+	vs_position = in_position;
+	vec4 tmp = in_position;
 
-PlanetBrowsingModule::PlanetBrowsingModule()
-    : OpenSpaceModule("PlanetBrowsing")
-{}
-
-void PlanetBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
-
-
-
-
-
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<PlanetMesh>("PlanetMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
+	vec4 position = pscTransform(tmp, ModelTransform);
+	vs_position = tmp;
+	position = ViewProjection * position;
+	gl_Position = z_normalization(position);
 }
-
-} // namespace openspace

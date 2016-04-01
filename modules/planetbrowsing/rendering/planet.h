@@ -28,12 +28,20 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
+#include <modules/planetbrowsing/rendering/geometry.h>
 #include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/base/rendering/renderableplanet.h>
+#include <modules/planetbrowsing/rendering/planetmesh.h>
 
 
-//#include <openspace/properties/stringproperty.h>
-//#include <openspace/util/updatestructures.h>
+namespace ghoul {
+namespace opengl {
+	class ProgramObject;
+}
+}
+
 
 namespace openspace {
 
@@ -42,13 +50,16 @@ public:
 	Planet(const ghoul::Dictionary& dictionary);
 	~Planet();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
-
 	void update(const UpdateData& data) override;
 
 private:
+
+	properties::IntProperty _rotation;
+
+	glm::dmat3 _stateMatrix;
+	std::string _frame;
+	std::string _target;
+	double _time;
 };
 
 }  // namespace openspace

@@ -28,6 +28,17 @@ return {
             Type = "Planet",
             Frame = "IAU_EARTH",
 			Body = "EARTH",
+            Textures = {
+                Type = "simple",
+                Color = "textures/earth_bluemarble.jpg",
+				Night = "textures/earth_night.jpg",
+                -- Depth = "textures/earth_depth.png"
+            },
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
+            }
         },
         Ephemeris = {
             Type = "Spice",

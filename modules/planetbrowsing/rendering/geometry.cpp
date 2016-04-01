@@ -25,6 +25,7 @@ Geometry::~Geometry() {
 	glDeleteVertexArrays(1, &_vaoID);
 }
 
+
 void Geometry::setVertexPositions(std::vector<glm::vec4> positions) {
 	_useVertexPositions = true;
 	_vertexData.resize(positions.size());
@@ -37,6 +38,7 @@ void Geometry::setVertexPositions(std::vector<glm::vec4> positions) {
 	}
 }
 
+
 void Geometry::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
 	_useTextureCoordinates = true;
 	_vertexData.resize(textures.size());
@@ -46,6 +48,7 @@ void Geometry::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
 		_vertexData[i].texture[1] = static_cast<GLfloat>(textures[i].t);
 	}
 }
+
 
 void Geometry::setVertexNormals(std::vector<glm::vec3> normals) {
 	_useVertexNormals = true;
@@ -57,6 +60,7 @@ void Geometry::setVertexNormals(std::vector<glm::vec3> normals) {
 		_vertexData[i].normal[2] = static_cast<GLfloat>(normals[i].z);
 	}
 }
+
 
 void Geometry::setElements(std::vector<unsigned int> elements) {
 	_elementData.resize(elements.size());
@@ -94,8 +98,8 @@ bool Geometry::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		_elementData.size() * sizeof(Vertex),
-		&_elementData[0],
+		_vertexData.size() * sizeof(Vertex),
+		&_vertexData[0],
 		GL_STATIC_DRAW);
 
 	// Positions at location 0
@@ -128,7 +132,8 @@ bool Geometry::initialize() {
 	glBindVertexArray(0);
 	return true;
 }
-void Geometry::render() const {
+
+void Geometry::drawUsingActiveProgram() const {
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
 	glDrawElements(GL_TRIANGLES, _elementData.size(), GL_UNSIGNED_INT, 0);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,49 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/planetbrowsing/planetbrowsingmodule.h>
+uniform vec4 campos;
+uniform vec4 objpos;
 
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+uniform vec3 sun_pos;
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+uniform bool _performShading = true;
+uniform float transparency;
+uniform int shadows;
 
-#include <ghoul/misc/assert.h>
+uniform float time;
+uniform sampler2D texture1;
+uniform sampler2D nightTex;
 
+in vec4 vs_position;
 
-namespace openspace {
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-PlanetBrowsingModule::PlanetBrowsingModule()
-    : OpenSpaceModule("PlanetBrowsing")
-{}
+Fragment getFragment() {
+	Fragment frag;
 
-void PlanetBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+	frag.color = vec4(1,1,1,1);
+	frag.depth =  pscDepth(vs_position);
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
-
-
-
-
-
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<PlanetMesh>("PlanetMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
+	return frag;
 }
 
-} // namespace openspace

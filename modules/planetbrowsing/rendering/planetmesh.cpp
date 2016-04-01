@@ -22,8 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/planetbrowsing/rendering/planet.h>
-
 #include <modules/planetbrowsing/rendering/planetmesh.h>
 
 // open space includes
@@ -39,7 +37,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "Planet";
+	const std::string _loggerCat = "PlanetMesh";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -50,35 +48,125 @@ namespace {
 
 namespace openspace {
 
-	Planet::Planet(const ghoul::Dictionary& dictionary)
+	PlanetMesh::PlanetMesh(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
+		, _programObject(nullptr)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
+			"PlanetMesh need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
+
 		dictionary.getValue(keyFrame, _frame);
 		dictionary.getValue(keyBody, _target);
 		if (_target != "")
 			setBody(_target);
 
-
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
-		addSwitchValue(std::shared_ptr<PlanetMesh>(new PlanetMesh(dictionary)), 1000000000);
+		// Create a simple triangle for testing the geometry
+		std::vector<unsigned int> triangleElements;
+		std::vector<glm::vec4> trianglePositions;
+
+		trianglePositions.push_back(glm::vec4(0, 0, 0, 1));
+		trianglePositions.push_back(glm::vec4(10000000, 0, 0, 1));
+		trianglePositions.push_back(glm::vec4(10000000, 10000000, 0, 1));
+
+		triangleElements.push_back(0);
+		triangleElements.push_back(1);
+		triangleElements.push_back(2);
+
+		_testGeometry = std::unique_ptr<Geometry>(new Geometry(
+			triangleElements,
+			Geometry::Positions::Yes,
+			Geometry::TextureCoordinates::No,
+			Geometry::Normals::No));
+
+		_testGeometry->setVertexPositions(trianglePositions);
+		_testGeometry->initialize();
 	}
 
-	Planet::~Planet() {
+	PlanetMesh::~PlanetMesh() {
 	}
 
-	void Planet::update(const UpdateData& data) {
+	bool PlanetMesh::initialize() {
+
+		RenderEngine& renderEngine = OsEng.renderEngine();
+		if (_programObject == nullptr) {
+			// Night texture program
+			_programObject = renderEngine.buildRenderProgram(
+				"simpleTextureProgram",
+				"${MODULE_PLANETBROWSING}/shaders/simple_vs.glsl",
+				"${MODULE_PLANETBROWSING}/shaders/simple_fs.glsl");
+			if (!_programObject) return false;
+		}
+
+		using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+		_programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+
+		return isReady();
+	}
+
+	bool PlanetMesh::deinitialize() {
+
+		RenderEngine& renderEngine = OsEng.renderEngine();
+		if (_programObject) {
+			renderEngine.removeRenderProgram(_programObject);
+			_programObject = nullptr;
+		}
+
+		return true;
+	}
+
+	bool PlanetMesh::isReady() const {
+		bool ready = true;
+		ready &= (_programObject != nullptr);
+		return ready;
+	}
+
+	void PlanetMesh::render(const RenderData& data)
+	{
+		// activate shader
+		_programObject->activate();
+
+		// scale the planet to appropriate size since the planet is a unit sphere. Ehm no?
+		glm::mat4 transform = glm::mat4(1);
+
+		//earth needs to be rotated for that to work.
+		glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+		glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
+
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+			}
+		}
+		transform = transform * rot * roty * rotProp;
+
+		// setup the data to the shader
+		//	_programObject->setUniform("camdir", camSpaceEye);
+		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+		_programObject->setUniform("ModelTransform", transform);
+		setPscUniforms(_programObject.get(), &data.camera, data.position);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+		// render
+		_testGeometry->drawUsingActiveProgram();
+
+		// disable shader
+		_programObject->deactivate();
+	}
+
+	void PlanetMesh::update(const UpdateData& data) {
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;
-		DistanceSwitch::update(data);
 	}
 
 }  // namespace openspace

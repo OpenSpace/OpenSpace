@@ -40,10 +40,16 @@ DistanceSwitch::~DistanceSwitch() {
 }
 
 bool DistanceSwitch::initialize() {
+	for (int i = 0; i < _renderables.size(); ++i) {
+		_renderables[i]->initialize();
+	}
 	return true;
 }
 
 bool DistanceSwitch::deinitialize() {
+	for (int i = 0; i < _renderables.size(); ++i) {
+		_renderables[i]->deinitialize();
+	}
 	return true;
 }
 
@@ -73,7 +79,9 @@ void DistanceSwitch::render(const RenderData& data) {
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
-	
+	for (int i = 0; i < _renderables.size(); ++i) {
+		_renderables[i]->update(data);
+	}
 }
 
 
@@ -83,7 +91,6 @@ void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, doub
 		ghoul_assert(maxDistance > _maxDistances.back(),
 			"Renderables must be inserted in ascending order wrt distance");
 	}
-
 	_renderables.push_back(renderable);
 	_maxDistances.push_back(maxDistance);
 }
