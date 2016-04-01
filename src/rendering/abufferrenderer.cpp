@@ -99,6 +99,9 @@ void ABufferRenderer::initialize() {
     glGenTextures(1, &_fragmentTexture);
     
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    if (_nAaSamples == 0) {
+        _nAaSamples = 1;
+    }
     if (_nAaSamples > 8) {
         LERROR("ABuffer renderer does not support more than 8 MSAA samples.");
         _nAaSamples = 8;
