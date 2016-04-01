@@ -118,26 +118,20 @@ void DataPlane::render(){
 	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
 
 	glm::vec4 v(1,0,0,1);
-	glm::vec3 v1 = glm::vec3(transform*v);
-	v1 = glm::normalize(v1);
+	glm::vec3 xVec = glm::vec3(transform*v);
+	xVec = glm::normalize(xVec);
 
 	double  lt;
-    glm::vec3 v2 =
+    glm::vec3 sunVec =
     SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-    v2 = glm::normalize(v2);
+    sunVec = glm::normalize(sunVec);
 
-    float angle = acos(glm::dot(v1,v2));
-    glm::vec3 ref = glm::cross(v1, v2);
+    float angle = acos(glm::dot(xVec, sunVec));
+    glm::vec3 ref =  glm::cross(xVec, sunVec);
 
-    transform = glm::rotate(transform, angle/2.0f, ref);
-
-    // float angle = acos(glm::dot(sun_vec, (vec))/(glm::length(sun_vec)*glm::length(glm::vec3(vec))));
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+    transform = rotation * transform;
 	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
-
-    // std::cout << sun_vec.x << ", " << sun_vec.y << ", " << sun_vec.z << std::endl;
-    // std::cout << vec.x << ", " << vec.y << ", " << vec.z << std::endl;
-    // std::cout << angle << std::endl << std::endl;
-
 
 	// Activate shader
 	_shader->activate();
