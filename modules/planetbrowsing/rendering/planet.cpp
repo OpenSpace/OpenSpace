@@ -25,20 +25,13 @@
 #include <modules/planetbrowsing/rendering/planet.h>
 
 // open space includes
-//#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-//#include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
 // ghoul includes
-//#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-//#include <ghoul/io/texture/texturereader.h>
-//#include <ghoul/opengl/programobject.h>
-//#include <ghoul/opengl/texture.h>
-//#include <ghoul/opengl/textureunit.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -59,7 +52,6 @@ namespace openspace {
 		: Renderable(dictionary)
 		, _programObject(nullptr)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
-		, _alpha(1.f)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -144,7 +136,7 @@ namespace openspace {
 		// activate shader
 		_programObject->activate();
 
-		// scale the planet to appropriate size since the planet is a unit sphere
+		// scale the planet to appropriate size since the planet is a unit sphere. Ehm no?
 		glm::mat4 transform = glm::mat4(1);
 
 		//earth needs to be rotated for that to work.
@@ -170,7 +162,6 @@ namespace openspace {
 
 		// setup the data to the shader
 		//	_programObject->setUniform("camdir", camSpaceEye);
-		_programObject->setUniform("transparency", _alpha);
 		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 		_programObject->setUniform("ModelTransform", transform);
 		setPscUniforms(_programObject.get(), &data.camera, data.position);

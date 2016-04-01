@@ -60,7 +60,6 @@ private:
 	std::unique_ptr<Geometry> _testGeometry;
 
 	properties::IntProperty _rotation;
-	float _alpha;
 
 	glm::dmat3 _stateMatrix;
 	std::string _frame;
