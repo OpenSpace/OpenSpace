@@ -48,13 +48,15 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	OsEng.gui()._property.registerProperty(&_cygnetId);
 	OsEng.gui()._property.registerProperty(&_updateInterval);
 
-	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
-	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+	_fileExtension = "";
+	_path = "";
 
 	_cygnetId.onChange([this](){ 
-		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
-		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
-		updateTexture(); });
+		std::remove(absPath(_path).c_str());
+		_fileExtension = "";
+		_path = "";
+		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
+	});
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -64,9 +66,7 @@ bool ScreenSpaceCygnet::initialize(){
 
 	createPlane();
 	createShaders();
-
-	updateTexture();
-
+	ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
 	// Setting spherical/euclidean onchange handler
 	_useFlatScreen.onChange([this](){
 		useEuclideanCoordinates(_useFlatScreen.value());
@@ -109,19 +109,28 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
-	_time = Time::ref().currentTime();
 
-	if((_time-_lastUpdateTime) >= _updateInterval){
-		updateTexture();
-		_lastUpdateTime = _time;
-	}
 
-	if(_futureTexture && _futureTexture->isFinished){
-		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
-		loadTexture();
+	if(_path != ""){
+		_time = Time::ref().currentTime();
+		if((_time-_lastUpdateTime) >= _updateInterval){
+			updateTexture();
+			_lastUpdateTime = _time;
+		}
+		if(_futureTexture && _futureTexture->isFinished){
+			_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
+			loadTexture();
 
-		delete _futureTexture; 
-		_futureTexture = nullptr;
+			delete _futureTexture; 
+			_futureTexture = nullptr;
+		}
+	} else {
+		if(_fileExtension == ""){
+			//send new request
+		} else{
+			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+			updateTexture();
+		}
 	}
 }
 

@@ -84,8 +84,22 @@ namespace openspace{
 
 	void ISWAManager::downloadData(){}
 
-	std::string ISWAManager::fileExtension(int id){
-		return ".jpg";
+	void ISWAManager::fileExtension(int id, std::string* ext){
+		DlManager.getFileExtension(
+				iSWAurl(id),
+				[ext](std::string extension){
+					std::stringstream ss(extension);
+					std::string token;
+					std::getline(ss, token, '/');
+					std::getline(ss, token);
+
+					if(token == "jpeg"){
+						token = "jpg";
+					}
+
+					*ext = "."+token;
+				}
+			);
 	}
 
 	std::string ISWAManager::iSWAurl(int id){
@@ -107,7 +121,7 @@ namespace openspace{
 		url += "&window=-1&cygnetId=";
 		url += std::to_string(id);
 
-		std::cout << url <<  std::endl;
+		//std::cout << url <<  std::endl;
 
 		return url;
 	}

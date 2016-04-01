@@ -49,14 +49,15 @@ TexturePlane::TexturePlane()
 	setName("TexturePlane" + std::to_string(_id));
 	registerProperties();
 
-	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
-	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
-
+	_fileExtension = "";
+	_path = "";
 
 	_cygnetId.onChange([this](){ 
-		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
-		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
-		updateTexture(); });
+		std::remove(absPath(_path).c_str());
+		_fileExtension = "";
+		_path = "";
+		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
+	});
 }
 
 
@@ -71,7 +72,7 @@ bool TexturePlane::initialize(){
 
 	CygnetPlane::initialize();
 
-	updateTexture();
+	ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
 
     return isReady();
 }
@@ -143,14 +144,22 @@ void TexturePlane::render(){
 }
 
 void TexturePlane::update(){
-	CygnetPlane::update();
+	if(_path != ""){
+		CygnetPlane::update();
+		if(_futureTexture && _futureTexture->isFinished){
+			_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
+			loadTexture();
 
-	if(_futureTexture && _futureTexture->isFinished){
-		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
-		loadTexture();
-
-		delete _futureTexture; 
-		_futureTexture = nullptr;
+			delete _futureTexture; 
+			_futureTexture = nullptr;
+		}
+	} else {
+		if(_fileExtension == ""){
+			//send new request
+		} else{
+			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+			updateTexture();
+		}
 	}
 }
 

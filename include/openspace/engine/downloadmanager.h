@@ -62,6 +62,7 @@ public:
 
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
+    using RequestFinishedCallback = std::function<void(std::string)>;
     using AsyncDownloadFinishedCallback =
         std::function<void(const std::vector<FileFuture*>&)>;
 
@@ -76,12 +77,6 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    FileFuture* getToMemory(
-        const std::string& url, std::string& memory,
-        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(), 
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    );
-
     std::vector<FileFuture*> downloadRequestFiles(const std::string& identifier,
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles = true,
@@ -93,6 +88,9 @@ public:
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles, AsyncDownloadFinishedCallback callback
     );
+
+    void getFileExtension(const std::string& url,
+        RequestFinishedCallback finishedCallback = RequestFinishedCallback());
 
 private:
     std::vector<std::string> _requestURL;

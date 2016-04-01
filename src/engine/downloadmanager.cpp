@@ -27,7 +27,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-
+#include <stdio.h>
 #include <chrono>
 #include <fstream>
 #include <thread>
@@ -202,64 +202,6 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
     return future;
 }
 
-DownloadManager::FileFuture* DownloadManager::getToMemory(
-    const std::string& url, std::string& memoryBuffer,
-    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
-{
-    FileFuture* future = new FileFuture(std::string("memory"));
-
-    LDEBUG("Start downloading file: '" << url << "' into memory");
-    
-    auto downloadFunction = [url, finishedCallback, progressCallback, future, &memoryBuffer]() {
-        CURL* curl = curl_easy_init();
-        if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &memoryBuffer);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
-            
-            ProgressInformation p = {
-                future,
-                std::chrono::system_clock::now(),
-                &progressCallback
-            };
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-            
-            CURLcode res = curl_easy_perform(curl);
-            curl_easy_cleanup(curl);
-
-            if (res == CURLE_OK)
-                future->isFinished = true;
-            else
-                future->errorMessage = curl_easy_strerror(res);
-            
-            if (finishedCallback)
-                finishedCallback(*future);
-        }
-    };
-    
-    if (_useMultithreadedDownload) {
-        std::thread t = std::thread(downloadFunction);
-     
-#ifdef WIN32
-        std::thread::native_handle_type h = t.native_handle();
-        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
-#else
-        // TODO: Implement thread priority ---abock
-#endif
-        
-        t.detach();
-    }
-    else {
-        downloadFunction();
-    }
-
-    return future;
-}
-
 
 std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
@@ -351,6 +293,51 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     }
     else
         downloadFunction();
+}
+
+void DownloadManager::getFileExtension(const std::string& url,
+    RequestFinishedCallback finishedCallback){
+
+    auto requestFunction = [url, finishedCallback]() {
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            //USING CURLOPT NOBODY
+             curl_easy_setopt(curl, CURLOPT_NOBODY,1);
+            CURLcode res = curl_easy_perform(curl);
+            if(CURLE_OK == res) {
+                char *ct;
+                // ask for the content-type
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);    
+                if ((res == CURLE_OK) && ct){
+
+                    if (finishedCallback)
+                        finishedCallback(std::string(ct));
+                }
+            }
+            
+/*            else
+                future->errorMessage = curl_easy_strerror(res);*/
+            
+            curl_easy_cleanup(curl);
+        }
+    };
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(requestFunction);
+     
+#ifdef WIN32
+        std::thread::native_handle_type h = t.native_handle();
+        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+#else
+        // TODO: Implement thread priority ---abock
+#endif
+        
+        t.detach();
+    }
+    else {
+        requestFunction();
+    }
 }
 
 } // namespace openspace
