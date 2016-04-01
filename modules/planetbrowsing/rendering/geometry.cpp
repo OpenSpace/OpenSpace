@@ -129,8 +129,8 @@ bool Geometry::initialize() {
 	glBindVertexArray(0);
 	return true;
 }
-void Geometry::render() const {
 
+void Geometry::drawUsingActiveProgram() const {
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
 	glDrawElements(GL_TRIANGLES, _elementData.size(), GL_UNSIGNED_INT, 0);

@@ -56,12 +56,8 @@ namespace openspace {
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
-
-		//std::string path;
-		//success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-		//ghoul_assert(success,
-		//        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
+			"PlanetMesh need the '" << SceneGraphNode::KeyName << "' be specified");
+		setName(name);
 
 		dictionary.getValue(keyFrame, _frame);
 		dictionary.getValue(keyBody, _target);
@@ -70,10 +66,6 @@ namespace openspace {
 
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
-
-		//addSwitchValue(std::shared_ptr<PlanetMesh>(new PlanetMesh(dictionary)), 10000000);
-
-
 
 		// Create a simple triangle for testing the geometry
 		std::vector<unsigned int> triangleElements;
@@ -95,8 +87,6 @@ namespace openspace {
 
 		_testGeometry->setPositionData(trianglePositions);
 		_testGeometry->initialize();
-
-
 	}
 
 	PlanetMesh::~PlanetMesh() {
@@ -133,7 +123,7 @@ namespace openspace {
 
 	bool PlanetMesh::isReady() const {
 		bool ready = true;
-		//ready &= (_programObject != nullptr);
+		ready &= (_programObject != nullptr);
 		return ready;
 	}
 
@@ -156,15 +146,6 @@ namespace openspace {
 			}
 		}
 		transform = transform * rot * roty * rotProp;
-
-		//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
-		//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
-
-
-		double  lt;
-		glm::dvec3 p =
-			SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
-		psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 		// setup the data to the shader
 		//	_programObject->setUniform("camdir", camSpaceEye);

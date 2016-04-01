@@ -50,19 +50,9 @@ public:
 	Planet(const ghoul::Dictionary& dictionary);
 	~Planet();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
 private:
-	//std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-	//std::unique_ptr<Geometry> _testGeometry;
-
-	PlanetMesh _planetMesh;
 
 	properties::IntProperty _rotation;
 

@@ -62,7 +62,7 @@ public:
 		Initialize GPU handles. Before calling this function, the data must be set.
 	*/
 	bool initialize();
-	void render() const;
+	void drawUsingActiveProgram() const;
 
 private:
 	typedef struct {

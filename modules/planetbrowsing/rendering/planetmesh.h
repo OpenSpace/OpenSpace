@@ -42,7 +42,6 @@ namespace ghoul {
 	}
 }
 
-
 namespace openspace {
 
 	class PlanetMesh : public DistanceSwitch {
