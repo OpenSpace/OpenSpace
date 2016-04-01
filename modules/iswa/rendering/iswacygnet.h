@@ -79,6 +79,8 @@ protected:
 	std::string _fileExtension;
 	std::string _path;
 
+	float _openSpaceUpdateInterval;
+
 	int _id;
 };
 

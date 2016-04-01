@@ -107,10 +107,13 @@ void ScreenSpaceCygnet::render(){
 void ScreenSpaceCygnet::update(){
 	_time = Time::ref().currentTime();
 
-	if((_time-_lastUpdateTime) >= _updateInterval){
-		updateTexture();
-		_lastUpdateTime = _time;
-	}
+    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
+    if(_openSpaceUpdateInterval){
+    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
+    		updateTexture();
+    		_lastUpdateTime = _time;
+    	}
+    }
 
 	if(_futureTexture && _futureTexture->isFinished){
 		_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);

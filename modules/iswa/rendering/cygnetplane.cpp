@@ -28,6 +28,7 @@ CygnetPlane::CygnetPlane()
 	:ISWACygnet()
 	,_quad(0)
 	,_vertexPositionBuffer(0)
+    ,_planeIsDirty(true)
 {}
 
 CygnetPlane::~CygnetPlane(){}
@@ -83,10 +84,13 @@ void CygnetPlane::update(){
 	_time = Time::ref().currentTime();
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
 
-	if((_time-_lastUpdateTime) >= _updateInterval){
-		updateTexture();
-		_lastUpdateTime = _time;
-	}
+    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
+    if(_openSpaceUpdateInterval){
+    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
+    		updateTexture();
+    		_lastUpdateTime = _time;
+    	}
+    }
 }
 
 void CygnetPlane::createPlane(){
@@ -114,6 +118,7 @@ void CygnetPlane::createPlane(){
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
+    _planeIsDirty = false;
 }
 
 } //namespace openspace

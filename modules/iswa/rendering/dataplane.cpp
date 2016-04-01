@@ -156,6 +156,9 @@ void DataPlane::render(){
 }
 
 void DataPlane::update(){
+	if(_planeIsDirty)
+		createPlane();
+
 	CygnetPlane::update();
 }
 
