@@ -22,75 +22,51 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __GEOMETRY_H__
-#define __GEOMETRY_H__
+
+#ifndef __GRIDGEOMETRY_H__
+#define __GRIDGEOMETRY_H__
+
+
 
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/logging/logmanager.h>
-
 #include <glm/glm.hpp>
+
+#include <modules/planetbrowsing/rendering/geometry.h>
 
 #include <vector>
 
+
 namespace openspace {
 
-/**
-	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
-	has all data needed such as position buffer and normal buffer but all data is not
-	necessarily needed for all purpouses so the Geometry can disable use of normals for
-	example.
-*/
-class Geometry
+class GridGeometry : public Geometry
 {
 public:
-	enum class Positions { Yes, No };
-	enum class TextureCoordinates { Yes, No };
-	enum class Normals { Yes, No };
+	GridGeometry(unsigned int xRes, unsigned int yRes,
+		Positions usePositions = Positions::No, 
+		TextureCoordinates useTextures = TextureCoordinates::No, 
+		Normals useNormals = Normals::No
+	);
 
-	Geometry(
-		std::vector<unsigned int> elements, // At least elements are required
-		Positions usePositions = Positions::No,
-		TextureCoordinates useTextures = TextureCoordinates::No,
-		Normals useNormals = Normals::No);
-	~Geometry();
+	~GridGeometry();
 
-	// Setters
-	void setVertexPositions(std::vector<glm::vec4> positions);
-	void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
-	void setVertexNormals(std::vector<glm::vec3> normals);
-	void setElements(std::vector<unsigned int> elements);
+	inline const unsigned int xResolution() const;
+	inline const unsigned int yResolution() const;
 
-	/**
-		Initialize GPU handles. Before calling this function, the data must be set.
-	*/
-	bool initialize();
-	void drawUsingActiveProgram() const;
-protected:
-	// Determines what attribute data is in use
-	bool _useVertexPositions;
-	bool _useTextureCoordinates;
-	bool _useVertexNormals;
-
-	typedef struct {
-	public:
-		GLfloat position[4];
-		GLfloat texture[2];
-		GLfloat normal[3];
-	private:
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
-
-	// Vertex data
-	std::vector<Vertex> _vertexData;
-	std::vector<GLuint> _elementData;
+	inline static size_t numElements(unsigned int xRes, unsigned int yRes);
+	static size_t numVertices(unsigned int xRes, unsigned int yRes);
 
 private:
-	// GL handles
-	GLuint _vaoID;
-	GLuint _vertexBufferID;
-	GLuint _elementBufferID;
+	static std::vector<GLuint> CreateElements(unsigned int xRes, unsigned int yRes);
+	static std::vector<glm::vec4> CreatePositions(unsigned int xRes, unsigned int yRes,
+		float xSize = 1.0f, float ySize = 1.0f, float xOffset = 0.0f, float yOffset = 0.0f);
+	static std::vector<glm::vec2> CreateTextureCoordinates(unsigned int xRes, unsigned int yRes);
+	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
+
+	inline static void validate(unsigned int xRes, unsigned int yRes);
+	inline void validateIndices(unsigned int x, unsigned int y);
+
+	unsigned int _xRes;
+	unsigned int _yRes;
 };
-
 } // namespace openspace
-
-#endif // __GEOMETRY_H__
+#endif // __GRIDGEOMETRY_H__

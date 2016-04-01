@@ -64,6 +64,7 @@ namespace openspace {
 		if (_target != "")
 			setBody(_target);
 
+
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 

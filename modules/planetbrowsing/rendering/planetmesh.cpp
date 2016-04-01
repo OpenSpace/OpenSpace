@@ -82,10 +82,10 @@ namespace openspace {
 		_testGeometry = std::unique_ptr<Geometry>(new Geometry(
 			triangleElements,
 			Geometry::Positions::Yes,
-			Geometry::Textures::No,
+			Geometry::TextureCoordinates::No,
 			Geometry::Normals::No));
 
-		_testGeometry->setPositionData(trianglePositions);
+		_testGeometry->setVertexPositions(trianglePositions);
 		_testGeometry->initialize();
 	}
 
@@ -157,7 +157,7 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_testGeometry->render();
+		_testGeometry->drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
