@@ -52,6 +52,8 @@ TexturePlane::TexturePlane()
 	_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
 	_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
 
+	updateTexture();
+	
 	_cygnetId.onChange([this](){ 
 		_fileExtension = ISWAManager::ref().fileExtension(_cygnetId.value());
 		_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
@@ -69,9 +71,6 @@ bool TexturePlane::initialize(){
 	_pscOffset  = glm::vec4(0, 0, 0, 1);
 
 	CygnetPlane::initialize();
-
-	std::thread t = std::thread(std::bind(&TexturePlane::updateTexture, this));
-	t.detach();
   
     loadTexture();
   
