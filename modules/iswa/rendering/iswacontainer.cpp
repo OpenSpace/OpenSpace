@@ -65,7 +65,7 @@ bool ISWAContainer::isReady() const { return true; }
 
 void ISWAContainer::render(const RenderData& data){
 	for(auto iSWACygnet : _iSWACygnets){
-		if(iSWACygnet->enabled()){
+		if(iSWACygnet->enabled() && iSWACygnet->isReady()){
 			iSWACygnet->render();
 		}
 	}

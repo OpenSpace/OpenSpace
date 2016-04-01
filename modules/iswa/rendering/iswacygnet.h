@@ -51,6 +51,7 @@ public:
 	virtual void update();
 
 	bool enabled(){return _enabled.value();}
+	virtual bool isReady() = 0;
 	
 protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);

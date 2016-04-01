@@ -58,7 +58,6 @@ protected:
 
 TEST_F(ScreenSpaceRenderableTest, initialize){
 	bool isReady = _ssr.isReady();
-	_ssr._texturePath;
 	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
 
 	// cannot test initialize, crashes at createplane becasue of opengl functions. needs mocking
