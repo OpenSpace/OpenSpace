@@ -22,8 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/planetbrowsing/rendering/planet.h>
-
 #include <modules/planetbrowsing/rendering/planetmesh.h>
 
 // open space includes
@@ -39,7 +37,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "Planet";
+	const std::string _loggerCat = "PlanetMesh";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -50,10 +48,9 @@ namespace {
 
 namespace openspace {
 
-	Planet::Planet(const ghoul::Dictionary& dictionary)
+	PlanetMesh::PlanetMesh(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
-		//, _programObject(nullptr)
-		, _planetMesh(dictionary)
+		, _programObject(nullptr)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
@@ -77,7 +74,7 @@ namespace openspace {
 		//addSwitchValue(std::shared_ptr<PlanetMesh>(new PlanetMesh(dictionary)), 10000000);
 
 
-		/*
+
 		// Create a simple triangle for testing the geometry
 		std::vector<unsigned int> triangleElements;
 		std::vector<glm::vec4> trianglePositions;
@@ -98,15 +95,15 @@ namespace openspace {
 
 		_testGeometry->setPositionData(trianglePositions);
 		_testGeometry->initialize();
-		*/
+
 
 	}
 
-	Planet::~Planet() {
+	PlanetMesh::~PlanetMesh() {
 	}
 
-	bool Planet::initialize() {
-		/*
+	bool PlanetMesh::initialize() {
+
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject == nullptr) {
 			// Night texture program
@@ -119,32 +116,29 @@ namespace openspace {
 
 		using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
 		_programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-		*/
-		_planetMesh.initialize();
+
 		return isReady();
 	}
 
-	bool Planet::deinitialize() {
-		/*
+	bool PlanetMesh::deinitialize() {
+
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject) {
 			renderEngine.removeRenderProgram(_programObject);
 			_programObject = nullptr;
 		}
-		*/
-		_planetMesh.deinitialize();
+
 		return true;
 	}
 
-	bool Planet::isReady() const {
+	bool PlanetMesh::isReady() const {
 		bool ready = true;
 		//ready &= (_programObject != nullptr);
 		return ready;
 	}
-	
-	void Planet::render(const RenderData& data)
+
+	void PlanetMesh::render(const RenderData& data)
 	{
-		/*
 		// activate shader
 		_programObject->activate();
 
@@ -186,12 +180,9 @@ namespace openspace {
 
 		// disable shader
 		_programObject->deactivate();
-		*/
-		_planetMesh.render(data);
 	}
 
-	void Planet::update(const UpdateData& data) {
-		_planetMesh.update(data);
+	void PlanetMesh::update(const UpdateData& data) {
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

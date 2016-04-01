@@ -22,56 +22,54 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#ifndef __DISTANCESWITCH_H__
+#define __DISTANCESWITCH_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
-#include <modules/planetbrowsing/rendering/geometry.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
-
-
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
-}
-
+#include <vector>
 
 namespace openspace {
 
-class Planet : public DistanceSwitch {
+
+/**
+	Selects a specific Renderable to be used for rendering, based on distance to the 
+	camera
+*/
+class DistanceSwitch : public Renderable {
 public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+
+	DistanceSwitch();
+	~DistanceSwitch();
 
 	bool initialize() override;
 	bool deinitialize() override;
 	bool isReady() const override;
 
+	/**
+		Picks the first Renderable with the associated maxDistance greater than the 
+		current distance to the camera
+	*/
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
+	/**
+		Adds a new renderable (first argument) which may be rendered only if the distance 
+		to the camera is less than maxDistance (second argument)
+	*/
+	void addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance);
+
 private:
-	//std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+	
 
-	//std::unique_ptr<Geometry> _testGeometry;
+	std::vector<std::shared_ptr<Renderable>> _renderables;
+	std::vector <double> _maxDistances;
 
-	PlanetMesh _planetMesh;
-
-	properties::IntProperty _rotation;
-
-	glm::dmat3 _stateMatrix;
-	std::string _frame;
-	std::string _target;
-	double _time;
 };
-
-}  // namespace openspace
-
-#endif  // __PLANET_H__
+} // openspace
+#endif //__DISTANCESWITCH_H__

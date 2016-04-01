@@ -22,56 +22,70 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
-
 // open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/planetbrowsing/rendering/geometry.h>
 #include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
 
-
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
+namespace {
+	const std::string _loggerCat = "DistanceSwitch";
 }
-}
-
 
 namespace openspace {
 
-class Planet : public DistanceSwitch {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+DistanceSwitch::DistanceSwitch(){
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+}
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+DistanceSwitch::~DistanceSwitch() {
 
-private:
-	//std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+}
 
-	//std::unique_ptr<Geometry> _testGeometry;
+bool DistanceSwitch::initialize() {
+	return true;
+}
 
-	PlanetMesh _planetMesh;
+bool DistanceSwitch::deinitialize() {
+	return true;
+}
 
-	properties::IntProperty _rotation;
+bool DistanceSwitch::isReady() const {
+	return true;
+}
 
-	glm::dmat3 _stateMatrix;
-	std::string _frame;
-	std::string _target;
-	double _time;
-};
+void DistanceSwitch::render(const RenderData& data) {
+	if (_maxDistances.size() == 0) {
+		return;
+	}
+
+	pss pssDistanceToCamera = (data.camera.position() - data.position).length();
+	double distanceToCamera = pssDistanceToCamera.lengthd();
+
+	if (distanceToCamera > _maxDistances.back()) {
+		return;
+	}
+
+	// linear search through nodes to find which Renderable to render
+	for (int i = 0; i < _renderables.size(); ++i) {
+		if (distanceToCamera < _maxDistances[i]) {
+			_renderables[i]->render(data);
+			return;
+		}
+	}
+}
+
+void DistanceSwitch::update(const UpdateData& data) {
+	
+}
+
+
+void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance) {
+	if (_maxDistances.size() > 0) {
+		ghoul_assert(maxDistance > _maxDistances.back(), 
+			"Renderables must be inserted in ascending order wrt distance");
+	}
+	
+	_renderables.push_back(renderable);
+	_maxDistances.push_back(maxDistance);
+}
 
 }  // namespace openspace
 
-#endif  // __PLANET_H__

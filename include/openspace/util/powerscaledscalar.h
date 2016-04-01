@@ -44,6 +44,7 @@ public:
 
 	const glm::vec2& vec2() const;
 	float lengthf() const;
+	double lengthd() const;
 
 	// operator overloading
 	PowerScaledScalar& operator=(const PowerScaledScalar& rhs);

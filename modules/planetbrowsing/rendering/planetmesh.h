@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#ifndef __PLANETMESH_H__
+#define __PLANETMESH_H__
 
 // open space includes
 #include <openspace/rendering/renderable.h>
@@ -37,41 +37,39 @@
 
 
 namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
+	namespace opengl {
+		class ProgramObject;
+	}
 }
 
 
 namespace openspace {
 
-class Planet : public DistanceSwitch {
-public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+	class PlanetMesh : public DistanceSwitch {
+	public:
+		PlanetMesh(const ghoul::Dictionary& dictionary);
+		~PlanetMesh();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+		bool initialize() override;
+		bool deinitialize() override;
+		bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
 
-private:
-	//std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+	private:
+		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-	//std::unique_ptr<Geometry> _testGeometry;
+		std::unique_ptr<Geometry> _testGeometry;
 
-	PlanetMesh _planetMesh;
+		properties::IntProperty _rotation;
 
-	properties::IntProperty _rotation;
-
-	glm::dmat3 _stateMatrix;
-	std::string _frame;
-	std::string _target;
-	double _time;
-};
+		glm::dmat3 _stateMatrix;
+		std::string _frame;
+		std::string _target;
+		double _time;
+	};
 
 }  // namespace openspace
 
-#endif  // __PLANET_H__
+#endif  // __PLANETMESH_H__

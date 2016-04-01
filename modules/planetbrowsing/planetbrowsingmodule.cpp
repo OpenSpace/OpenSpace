@@ -25,6 +25,8 @@
 #include <modules/planetbrowsing/planetbrowsingmodule.h>
 
 #include <modules/planetbrowsing/rendering/planet.h>
+#include <modules/planetbrowsing/rendering/distanceswitch.h>
+#include <modules/planetbrowsing/rendering/planetmesh.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -61,7 +63,8 @@ void PlanetBrowsingModule::internalInitialize() {
 	ghoul_assert(fRenderable, "Renderable factory was not created");
 
 	fRenderable->registerClass<Planet>("Planet");
-
+	fRenderable->registerClass<PlanetMesh>("PlanetMesh");
+	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
 }
 
 } // namespace openspace
