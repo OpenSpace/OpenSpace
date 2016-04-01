@@ -86,7 +86,6 @@ namespace openspace {
 			Geometry::Normals::No));
 
 		_testGeometry->setVertexPositions(trianglePositions);
-		_testGeometry->initialize();
 	}
 
 	PlanetMesh::~PlanetMesh() {

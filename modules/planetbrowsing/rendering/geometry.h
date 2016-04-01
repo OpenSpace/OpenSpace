@@ -60,11 +60,10 @@ public:
 	void setVertexNormals(std::vector<glm::vec3> normals);
 	void setElements(std::vector<unsigned int> elements);
 
-	/**
-		Initialize GPU handles. Before calling this function, the data must be set.
-	*/
-	bool initialize();
-	void drawUsingActiveProgram() const;
+
+	
+	void drawUsingActiveProgram();
+
 protected:
 	// Determines what attribute data is in use
 	bool _useVertexPositions;
@@ -85,10 +84,15 @@ protected:
 	std::vector<GLuint> _elementData;
 
 private:
+
+	bool updateDataInGPU();
+
 	// GL handles
 	GLuint _vaoID;
 	GLuint _vertexBufferID;
 	GLuint _elementBufferID;
+
+	bool _gpuDataNeedUpdate;
 };
 
 } // namespace openspace
