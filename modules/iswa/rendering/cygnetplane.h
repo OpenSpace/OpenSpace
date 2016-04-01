@@ -38,7 +38,7 @@ public:
 	virtual bool initialize();
 	virtual bool deinitialize();
 
-	bool isReady();
+	bool isReady() override;
 
 	virtual void render();
 	virtual void update();

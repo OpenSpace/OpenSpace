@@ -65,12 +65,13 @@ bool ScreenSpaceCygnet::initialize(){
 	createPlane();
 	createShaders();
 
-	loadTexture();
+	updateTexture();
 
 	// Setting spherical/euclidean onchange handler
 	_useFlatScreen.onChange([this](){
 		useEuclideanCoordinates(_useFlatScreen.value());
 	});
+
 	return isReady();
 }
 
@@ -96,6 +97,9 @@ bool ScreenSpaceCygnet::deinitialize(){
 }
 
 void ScreenSpaceCygnet::render(){
+
+	if(!isReady()) return;
+
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
 	glm::mat4 scale = scaleMatrix();
@@ -132,7 +136,12 @@ void ScreenSpaceCygnet::updateTexture(){
 }
 
 bool ScreenSpaceCygnet::isReady() const{
-	return true;
+	bool ready = true;
+	if (!_shader)
+		ready &= false;
+	if(!_texture)
+		ready &= false;
+	return ready;
 }
 
 void ScreenSpaceCygnet::loadTexture() {
