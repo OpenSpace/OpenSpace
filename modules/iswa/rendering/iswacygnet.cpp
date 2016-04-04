@@ -39,6 +39,7 @@ ISWACygnet::ISWACygnet()
 	,_shader(nullptr)
 	,_texture(nullptr)
 	,_frame("GALACTIC")
+	,_toDelete(false)
 {
 	addProperty(_enabled);
 	addProperty(_cygnetId);

@@ -76,7 +76,6 @@ void ISWAContainer::update(const UpdateData& data){
 	if(!_deletedCygnets.empty())
 		_deletedCygnets.clear();
 	
-
 	for(auto iSWACygnet : _iSWACygnets)
 		iSWACygnet->update();
 }

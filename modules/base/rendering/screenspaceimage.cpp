@@ -41,7 +41,7 @@ ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
 	registerProperties();
 
 	addProperty(_texturePath);
-	OsEng.gui()._property.registerProperty(&_texturePath);	
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_texturePath);	
 	_texturePath.onChange([this](){ loadTexture(); });
 }
 
@@ -58,6 +58,8 @@ bool ScreenSpaceImage::initialize(){
 }
 
 bool ScreenSpaceImage::deinitialize(){
+	unregisterProperties();
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 
@@ -85,7 +87,10 @@ void ScreenSpaceImage::render(){
 	draw(modelTransform);
 }
 
-void ScreenSpaceImage::update(){}
+void ScreenSpaceImage::update(){
+	// if(_toDelete)
+	// 	OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
+}
 
 
 bool ScreenSpaceImage::isReady() const{

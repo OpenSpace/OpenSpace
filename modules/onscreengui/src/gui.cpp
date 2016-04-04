@@ -204,6 +204,7 @@ void GUI::initialize() {
 
 	_property.initialize();
 	_iSWAproperty.initialize();
+	_screenSpaceProperty.initialize();
 	_performance.initialize();
 	_help.initialize();
 }
@@ -251,6 +252,7 @@ void GUI::initializeGL() {
 
 	_property.initializeGL();
 	_iSWAproperty.initializeGL();
+	_screenSpaceProperty.initializeGL();
 	_performance.initializeGL();
 	_help.initializeGL();
 }
@@ -263,6 +265,7 @@ void GUI::deinitializeGL() {
 
 	_property.deinitializeGL();
 	_iSWAproperty.deinitializeGL();
+	_screenSpaceProperty.deinitializeGL();
 	_performance.deinitializeGL();
 	_help.deinitializeGL();
 }
@@ -293,6 +296,8 @@ void GUI::endFrame() {
 		_property.render();
 	if (_iSWAproperty.isEnabled())
 		_iSWAproperty.render();
+	if (_screenSpaceProperty.isEnabled())
+		_screenSpaceProperty.render();
 	if (_performance.isEnabled())
 		_performance.render();
 	if (_help.isEnabled())
@@ -391,7 +396,8 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
 void GUI::renderMainWindow() {
 	ImGui::Begin("OpenSpace GUI", nullptr);
 
-	ImGui::Checkbox("Properties", &_property._isEnabled);
+	ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
+	ImGui::Checkbox("ScreenSpace Properties", &_screenSpaceProperty._isEnabled);
 	ImGui::Checkbox("iSWA Properties", &_iSWAproperty._isEnabled);
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();

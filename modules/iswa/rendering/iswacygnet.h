@@ -84,6 +84,8 @@ protected:
 
 	float _openSpaceUpdateInterval;
 
+	bool _toDelete;
+	
 	int _id;
 };
 

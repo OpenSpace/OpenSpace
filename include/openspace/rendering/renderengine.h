@@ -104,6 +104,7 @@ public:
 
     void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::string name);
     std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
@@ -179,6 +180,7 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
+    std::vector<std::shared_ptr<ScreenSpaceRenderable>> _deletedScreenSpaceRenderables;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

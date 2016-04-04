@@ -54,6 +54,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
 	OsEng.gui()._iSWAproperty.registerProperty(&_cygnetId);
 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 
 	_fileExtension = "";
 	_path = "";
@@ -83,6 +84,8 @@ bool ScreenSpaceCygnet::initialize(){
 }
 
 bool ScreenSpaceCygnet::deinitialize(){
+	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 
@@ -106,6 +109,7 @@ bool ScreenSpaceCygnet::deinitialize(){
 void ScreenSpaceCygnet::render(){
 
 	if(!isReady()) return;
+	if(!_enabled) return;
 
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
@@ -116,6 +120,8 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
+	if(_toDelete)
+		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
 
 	if(_path != ""){
 		_time = Time::ref().currentTime();

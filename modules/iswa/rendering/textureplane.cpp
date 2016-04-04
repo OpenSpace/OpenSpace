@@ -144,8 +144,6 @@ void TexturePlane::render(){
 }
 
 void TexturePlane::update(){
-	//if(_planeIsDirty)
-	//	createPlane();
 	if(_path != ""){
 		CygnetPlane::update();
 		if(_futureTexture && _futureTexture->isFinished){
