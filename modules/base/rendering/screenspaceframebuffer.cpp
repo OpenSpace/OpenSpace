@@ -116,10 +116,7 @@ void ScreenSpaceFramebuffer::render(){
 	}
 }
 
-void ScreenSpaceFramebuffer::update(){
-	if(_toDelete)
-		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
-}
+void ScreenSpaceFramebuffer::update(){}
 
 bool ScreenSpaceFramebuffer::isReady() const{
 	bool ready = true;

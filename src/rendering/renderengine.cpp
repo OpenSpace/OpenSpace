@@ -384,6 +384,9 @@ void RenderEngine::postSynchronizationPreDraw() {
 		}
 	}
 
+	if(!_deletedScreenSpaceRenderables.empty())
+		_deletedScreenSpaceRenderables.clear();
+
 	for (auto screenspacerenderable : _screenSpaceRenderables) {
 		screenspacerenderable->update();
 	}
@@ -1153,6 +1156,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 
 	if (it != _screenSpaceRenderables.end()) {
 		s->deinitialize();
+		_deletedScreenSpaceRenderables.push_back(s);
 		_screenSpaceRenderables.erase(it);
 	}
 }

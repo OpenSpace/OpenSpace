@@ -41,7 +41,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	,_fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
 	,_texture(nullptr)
 	,_shader(nullptr)
-	,_toDelete(false)
 {
 	addProperty(_enabled);
 	addProperty(_useFlatScreen);
@@ -74,7 +73,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 		useEuclideanCoordinates(_useFlatScreen.value());
 	});
 
-	_delete.onChange([this](){_toDelete=true;});
+	_delete.onChange([this](){OsEng.renderEngine().unregisterScreenSpaceRenderable(name());});
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}

@@ -120,7 +120,6 @@ protected:
 	glm::vec2 _originalViewportSize;
 
 	float _radius;
-	bool _toDelete;
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__
