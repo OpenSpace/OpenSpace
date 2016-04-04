@@ -41,7 +41,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	,_fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
 	,_texture(nullptr)
 	,_shader(nullptr)
-	,_toDelete(false)
 {
 	addProperty(_enabled);
 	addProperty(_useFlatScreen);

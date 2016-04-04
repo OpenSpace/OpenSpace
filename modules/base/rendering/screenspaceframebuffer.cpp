@@ -116,10 +116,8 @@ void ScreenSpaceFramebuffer::render(){
 	}
 }
 
-void ScreenSpaceFramebuffer::update(){
-	// if(_toDelete)
-	// 	OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
-}
+
+void ScreenSpaceFramebuffer::update(){}
 
 bool ScreenSpaceFramebuffer::isReady() const{
 	bool ready = true;
@@ -154,7 +152,7 @@ void ScreenSpaceFramebuffer::createFragmentbuffer(){
 }
 
 int ScreenSpaceFramebuffer::id(){
-		static int id = 0;
-		return id++;
+	static int id = 0;
+	return id++;
 }
 } //namespace openspace
