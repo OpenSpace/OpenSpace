@@ -32,16 +32,25 @@
 namespace openspace {
 class ISWACygnet;
 
+struct ExtensionFuture {
+
+	std::string extension;
+	bool isFinished;
+	int id;
+};
+
+
 class ISWAManager : public ghoul::Singleton<ISWAManager> {
 	friend class ghoul::Singleton<ISWAManager>;
 
 public:
+
 	ISWAManager();
 	~ISWAManager();
-	std::shared_ptr<ISWACygnet> createISWACygnet(std::string);
+	std::shared_ptr<ISWACygnet> createISWACygnet(int, std::string);
 	DownloadManager::FileFuture* downloadImage(int, std::string);
 	void downloadData();
-	void fileExtension(int, std::string*);
+	std::shared_ptr<ExtensionFuture> fileExtension(int);
 private:
 	std::string iSWAurl(int);
 	std::map<std::string, std::string> _month;

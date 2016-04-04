@@ -24,8 +24,8 @@
 
 namespace openspace{
 
-CygnetPlane::CygnetPlane()
-	:ISWACygnet()
+CygnetPlane::CygnetPlane(int cygnetId, std::string path)
+	:ISWACygnet(cygnetId, path)
 	,_quad(0)
 	,_vertexPositionBuffer(0)
     ,_planeIsDirty(true)
@@ -83,8 +83,8 @@ void CygnetPlane::render(){}
 void CygnetPlane::update(){
 	_time = Time::ref().currentTime();
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
-
     _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
+
     if(_openSpaceUpdateInterval){
     	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
     		updateTexture();

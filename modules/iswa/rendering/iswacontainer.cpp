@@ -36,25 +36,25 @@ ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
 	std::cout << "Created ISWAContainer" << std::endl;
 }
 
-ISWAContainer::~ISWAContainer(){
-	deinitialize();
-}
+ISWAContainer::~ISWAContainer(){}
 
 bool ISWAContainer::initialize(){
 	std::cout << "Initialized ISWAContainer" << std::endl;
 
 	ISWAManager::initialize();
 
-	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	//addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
-	addISWACygnet("${OPENSPACE_DATA}/test.png");
+	//addISWACygnet("${OPENSPACE_DATA}/test.png");
+	addISWACygnet(7);
 
-	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
+	//OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
 
 	return true;
 }
 
 bool ISWAContainer::deinitialize(){
+
 	for(auto iSWACygnet : _iSWACygnets)
 		iSWACygnet->deinitialize();
 
@@ -72,31 +72,38 @@ void ISWAContainer::render(const RenderData& data){
 } 
 
 void ISWAContainer::update(const UpdateData& data){
-	for(auto iSWACygnet : _iSWACygnets)
+
+	int i = 0;
+	for(auto& extFuture : _extFutures){
+		if(extFuture->isFinished){
+			std::string path = "${OPENSPACE_DATA}/scene/iswa/" + std::to_string(extFuture->id) + extFuture->extension;
+			std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(extFuture->id, std::move(path));
+			if(cygnet){
+				_iSWACygnets.push_back(cygnet);
+				_extFutures.erase( _extFutures.begin() + i );
+			} else {
+				++i;
+			}
+		}
+	}
+
+
+	for(auto& iSWACygnet : _iSWACygnets)
 		iSWACygnet->update();
 }
 
 void ISWAContainer::addISWACygnet(std::string path){
-	std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(path);
+	std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(1, path);
 	if(cygnet){
 		_iSWACygnets.push_back(cygnet);
 	}
-	// if(FileSys.fileExists(absPath(path))) {
-	// 	const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
-	// 	std::shared_ptr<ISWACygnet> cygnet;
 
-	// 	if(extension == "cdf"){
-	// 		std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-	// 		cygnet = std::make_shared<DataPlane>(kw, path);
-	// 	} else {
-	// 		cygnet = std::make_shared<TexturePlane>(path);
-	// 	}
-		
-	// 	cygnet->initialize();
-	// 	_iSWACygnets.push_back(cygnet);
-	// }else{
-	// 	std::cout << "file does not exist";
-	// }
+}
+
+void ISWAContainer::addISWACygnet(int id){
+
+	std::shared_ptr<ExtensionFuture> extFuture = ISWAManager::ref().fileExtension(id);
+	_extFutures.push_back(extFuture);
 }
 
 

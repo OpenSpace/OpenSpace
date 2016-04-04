@@ -51,12 +51,12 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	_fileExtension = "";
 	_path = "";
 
-	_cygnetId.onChange([this](){ 
+/*	_cygnetId.onChange([this](){ 
 		std::remove(absPath(_path).c_str());
 		_fileExtension = "";
 		_path = "";
 		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
-	});
+	});*/
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -66,7 +66,7 @@ bool ScreenSpaceCygnet::initialize(){
 
 	createPlane();
 	createShaders();
-	ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
+	//ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
 	// Setting spherical/euclidean onchange handler
 	_useFlatScreen.onChange([this](){
 		useEuclideanCoordinates(_useFlatScreen.value());

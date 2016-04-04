@@ -41,7 +41,7 @@
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
 public:
-	ISWACygnet();
+	ISWACygnet(int cygnetId, std::string path);
 	~ISWACygnet();
 
 	virtual bool initialize();
@@ -59,7 +59,6 @@ protected:
 	void registerProperties();
 
 	properties::BoolProperty _enabled;
-	properties::IntProperty  _cygnetId;
 	properties::FloatProperty _updateInterval;
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
@@ -69,6 +68,7 @@ protected:
 	glm::vec4 _pscOffset;
 	glm::vec4 _modelScale;
 
+	const int _cygnetId;
 	glm::dmat3 _stateMatrix;
 	std::string _frame; 
 	std::string _var;

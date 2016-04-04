@@ -34,7 +34,7 @@
  
  class TexturePlane : public CygnetPlane{
  public:
- 	TexturePlane();
+ 	TexturePlane(int cygnetId, std::string path);
  	~TexturePlane();
 
  	virtual bool initialize();

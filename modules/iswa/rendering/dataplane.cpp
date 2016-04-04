@@ -41,22 +41,13 @@ namespace {
 
 namespace openspace {
 
-DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw) 
-	:CygnetPlane()
+DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
+	:CygnetPlane(1, path)
 	, _kw(kw)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
 	registerProperties();
-
-	_fileExtension = "";
-	_path = "";
-	_cygnetId.onChange([this](){ 
-		_fileExtension = "";
-		_path = "";
-		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
-	});
-
 
 	KameleonWrapper::Model model = _kw->model();
 	if(	model == KameleonWrapper::Model::BATSRUS){
@@ -78,8 +69,6 @@ bool DataPlane::initialize(){
 	CygnetPlane::initialize();
 	// std::cout << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
 	// std::cout << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
-
-	ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
 
 	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
@@ -161,16 +150,8 @@ void DataPlane::update(){
 	if(_planeIsDirty)
 		createPlane();
 
-	if(_path != ""){
-		CygnetPlane::update();
-	} else {
-		if(_fileExtension == ""){
-			//send new request
-		} else{
-			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
-			updateTexture();
-		}
-	}
+	CygnetPlane::update();
+
 }
 
 void DataPlane::setParent(){

@@ -26,8 +26,10 @@
 #define __ISWACONTAINER_H__
 #include <openspace/rendering/renderable.h>
 
+
 namespace openspace{
 class ISWACygnet;
+struct ExtensionFuture;
 
 class ISWAContainer : public Renderable {
 public:
@@ -43,11 +45,13 @@ public:
 	virtual void update(const UpdateData& data) override;
 
 	void addISWACygnet(std::string path);
+	void addISWACygnet(int id);
 
 	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 
 private:
 std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
+std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
 
 };	
 }//namespace openspace

@@ -47,30 +47,28 @@ namespace openspace{
 
 	ISWAManager::~ISWAManager(){}
 
-	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::string path){
-		if(FileSys.fileExists(absPath(path))) {
+	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(int id, std::string path){
+
+		if(path != ""){
 			const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
 
 			if(extension == "cdf"){
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-				cygnet = std::make_shared<DataPlane>(kw);
+				cygnet = std::make_shared<DataPlane>(kw, path);
 			} else {
-				cygnet = std::make_shared<TexturePlane>();
+				cygnet = std::make_shared<TexturePlane>(id, path);
 			}
-			//if screenspacecygnet
-			//OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
+
 			cygnet->initialize();
 			return cygnet;
-			// _iSWACygnets.push_back(cygnet);
-		}else{
-			std::cout << "file does not exist";
+		} else {
+			return nullptr;
 		}
-		return nullptr;
 	}
 
 	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
-		// extension = "I have changed it"; 
+
 		return 	DlManager.downloadFile(
 					iSWAurl(id),
 					path,
@@ -84,10 +82,15 @@ namespace openspace{
 
 	void ISWAManager::downloadData(){}
 
-	void ISWAManager::fileExtension(int id, std::string* ext){
+	std::shared_ptr<ExtensionFuture> ISWAManager::fileExtension(int id){
+
+		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
+		extFuture->isFinished = false;
+		extFuture->id = id;
+
 		DlManager.getFileExtension(
 				iSWAurl(id),
-				[ext](std::string extension){
+				[extFuture](std::string extension){
 					std::stringstream ss(extension);
 					std::string token;
 					std::getline(ss, token, '/');
@@ -97,9 +100,13 @@ namespace openspace{
 						token = "jpg";
 					}
 
-					*ext = "."+token;
+					std::string ext = "."+token;
+					extFuture->extension = ext;
+					extFuture->isFinished = true;
 				}
 			);
+
+		return extFuture;
 	}
 
 	std::string ISWAManager::iSWAurl(int id){

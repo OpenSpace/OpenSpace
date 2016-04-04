@@ -41,23 +41,13 @@ namespace {
 
 namespace openspace {
 
-TexturePlane::TexturePlane() 
-	:CygnetPlane()
+TexturePlane::TexturePlane(int cygnetId, std::string path) 
+	:CygnetPlane(cygnetId, path)
 	,_futureTexture(nullptr)
 {
 	_id = id();
 	setName("TexturePlane" + std::to_string(_id));
 	registerProperties();
-
-	_fileExtension = "";
-	_path = "";
-
-	_cygnetId.onChange([this](){ 
-		std::remove(absPath(_path).c_str());
-		_fileExtension = "";
-		_path = "";
-		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
-	});
 }
 
 
@@ -69,11 +59,8 @@ TexturePlane::~TexturePlane(){
 bool TexturePlane::initialize(){
 	_modelScale = glm::vec4(3, 3, 3, 10);
 	_pscOffset  = glm::vec4(0, 0, 0, 1);
-
 	CygnetPlane::initialize();
-
-	ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
-
+	updateTexture();
     return isReady();
 }
 
@@ -99,7 +86,6 @@ bool TexturePlane::deinitialize(){
 
 void TexturePlane::render(){
 	psc position = _parent->worldPosition();
-
 	glm::mat4 transform = glm::mat4(1.0);
 	transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
 
@@ -144,24 +130,15 @@ void TexturePlane::render(){
 }
 
 void TexturePlane::update(){
-	//if(_planeIsDirty)
-	//	createPlane();
-	if(_path != ""){
-		CygnetPlane::update();
-		if(_futureTexture && _futureTexture->isFinished){
-			_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
-			loadTexture();
+	if(_planeIsDirty)
+		createPlane();
 
-			delete _futureTexture; 
-			_futureTexture = nullptr;
-		}
-	} else {
-		if(_fileExtension == ""){
-			//send new request
-		} else{
-			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
-			updateTexture();
-		}
+	CygnetPlane::update();
+	if(_futureTexture && _futureTexture->isFinished){
+		loadTexture();
+
+		delete _futureTexture; 
+		_futureTexture = nullptr;
 	}
 }
 
@@ -170,7 +147,7 @@ void TexturePlane::setParent(){
 }
 
 void TexturePlane::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path));
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}
