@@ -36,6 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <modules/base/rendering/screenspaceimage.h>
+#include <modules/iswa/util/iswamanager.h>
 
 
 #include <ghoul/opengl/ghoul_gl.h>
@@ -140,7 +141,6 @@ namespace openspace {
 		}
 		OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));
 	}
-
 
 namespace gui {
 
@@ -417,12 +417,20 @@ void GUI::renderMainWindow() {
 
 	ImGui::Checkbox("Help", &_help._isEnabled);
 
-	static const int bufferSize = 256;
-    static char buffer[bufferSize];
-	ImGui::InputText("", buffer, bufferSize);
+	static const int addImageBufferSize = 256;
+    static char addImageBuffer[addImageBufferSize];
+	ImGui::InputText("addImage", addImageBuffer, addImageBufferSize);
 
 	if(ImGui::SmallButton("Add Image")){
-		addScreenSpaceRenderable(std::string(buffer));
+		addScreenSpaceRenderable(std::string(addImageBuffer));
+	}
+
+	static const int addCygnetBufferSize = 256;
+    static char addCygnetBuffer[addCygnetBufferSize];
+	ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+
+	if(ImGui::SmallButton("Add Cygnet")){
+		ISWAManager::ref().addCygnet(std::string(addCygnetBuffer));
 	}
 
 	ImGui::End();

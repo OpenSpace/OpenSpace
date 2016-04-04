@@ -46,9 +46,10 @@ public:
 
 	void addISWACygnet(std::string path);
 	void addISWACygnet(int id);
+	void addISWACygnet(std::shared_ptr<ISWACygnet> cygnet);
 
-	void deleteCygnet(ISWACygnet*);
-	void deleteCygnet(std::string);
+	void deleteCygnet(ISWACygnet* cygnet);
+	void deleteCygnet(std::string name);
 
 	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 

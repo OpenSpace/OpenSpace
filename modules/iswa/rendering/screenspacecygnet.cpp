@@ -40,6 +40,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
 , _cygnetId(cygnetId)
 , _path(path)
 {
+	std::cout << "screenspacecygnet constructor 1" << std::endl;
 	_id = id();
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
 	addProperty(_updateInterval);
@@ -55,14 +56,12 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 
-
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
 bool ScreenSpaceCygnet::initialize(){
 	_originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
-
 	createPlane();
 	createShaders();
 	updateTexture();
@@ -112,31 +111,24 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
-	//if(_path != ""){
-		_time = Time::ref().currentTime();
-		_openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
-    	if(_openSpaceUpdateInterval){
-			if(abs(_time-_lastUpdateTime) >= _updateInterval){
-				updateTexture();
-				_lastUpdateTime = _time;
-			}
-		}
 
-		if(_futureTexture && _futureTexture->isFinished){
-			//_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
-			loadTexture();
-
-			delete _futureTexture; 
-			_futureTexture = nullptr;
-		}
-/*	} else {
-		if(_fileExtension == ""){
-			//send new request
-		} else{
-			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
+	_time = Time::ref().currentTime();
+	_openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+	if(_openSpaceUpdateInterval){
+		if(abs(_time-_lastUpdateTime) >= _updateInterval){
 			updateTexture();
+			_lastUpdateTime = _time;
 		}
-	}*/
+	}
+
+	if(_futureTexture && _futureTexture->isFinished){
+
+		loadTexture();
+
+		delete _futureTexture; 
+		_futureTexture = nullptr;
+	}
+
 }
 
 void ScreenSpaceCygnet::updateTexture(){

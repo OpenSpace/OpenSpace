@@ -29,7 +29,7 @@
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/util/time.h>
 #include <modules/iswa/rendering/iswacontainer.h>
-
+#include <modules/iswa/rendering/screenspacecygnet.h>
 
 namespace openspace{
 	ISWAManager::ISWAManager()
@@ -51,8 +51,39 @@ namespace openspace{
 
 	ISWAManager::~ISWAManager(){}
 
-	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(int id, std::string path){
+	void ISWAManager::addCygnet(std::string info){
+		std::string token;
+		std::stringstream ss(info);
+		getline(ss,token,',');
+		int cygnetId = std::stoi(token);
+	/*	// std::cout << token << std::endl;
+		getline(ss,token,',');
+		std::string parent = token;*/
 
+		//if(parent == "Earth" || parent == "Sun"){
+			/*std::shared_ptr<TexturePlane> cygnet;
+			cygnet = std::make_shared<TexturePlane>();
+			cygnet->initialize();*/
+			// cygnet->cygnetId(cygnetId);
+			// cygnet->parent(parent);
+			//_container->addISWACygnet(cygnet);
+		_container->addISWACygnet(cygnetId);
+
+		//}else{
+		//	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(cygnetId));
+
+		//}
+		// std::cout << token << std::endl;
+		// if(token = ""){
+		// 	std::cout << "empty" << std::endl;
+		// }
+
+		// std::shared_ptr<ISWACygnet> cygnet;
+		// _container->addCygnet(cygnet);
+	}	
+
+	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(int id, std::string path){
+		std::cout << "createISWACygnet " << id << std::endl;
 		if(path != ""){
 			const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
@@ -63,6 +94,7 @@ namespace openspace{
 			} else if(id == 5) {
 				//check some other condition that id==5 (based on metadata maybe?)
 				OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id, path));
+				return nullptr;
 			} else {
 				cygnet = std::make_shared<TexturePlane>(id, path);
 			}
@@ -94,7 +126,7 @@ namespace openspace{
 		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
 		extFuture->isFinished = false;
 		extFuture->id = id;
-
+		std::cout << "extension id: "<< id << std::endl;
 		DlManager.getFileExtension(
 				iSWAurl(id),
 				[extFuture](std::string extension){

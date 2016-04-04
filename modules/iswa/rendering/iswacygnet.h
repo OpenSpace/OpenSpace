@@ -38,6 +38,8 @@
 #include <modules/onscreengui/include/gui.h>
 #include <ghoul/opengl/texture.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
