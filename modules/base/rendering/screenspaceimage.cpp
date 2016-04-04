@@ -87,10 +87,8 @@ void ScreenSpaceImage::render(){
 	draw(modelTransform);
 }
 
-void ScreenSpaceImage::update(){
-	// if(_toDelete)
-	// 	OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
-}
+
+void ScreenSpaceImage::update(){}
 
 
 bool ScreenSpaceImage::isReady() const{

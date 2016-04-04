@@ -120,9 +120,6 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
-	if(_toDelete)
-		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
-
 	if(_path != ""){
 		_time = Time::ref().currentTime();
 		_openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
