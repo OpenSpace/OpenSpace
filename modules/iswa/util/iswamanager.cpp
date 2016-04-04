@@ -29,7 +29,7 @@
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/util/time.h>
 #include <modules/iswa/rendering/iswacontainer.h>
-
+#include <modules/iswa/rendering/screenspacecygnet.h>
 
 namespace openspace{
 	ISWAManager::ISWAManager()
@@ -50,6 +50,35 @@ namespace openspace{
 	}
 
 	ISWAManager::~ISWAManager(){}
+
+	void ISWAManager::addCygnet(std::string info){
+		std::string token;
+		std::stringstream ss(info);
+		getline(ss,token,',');
+		int cygnetId = std::stoi(token);
+		// std::cout << token << std::endl;
+		getline(ss,token,',');
+		std::string parent = token;
+
+		if(parent == "Earth" || parent == "Sun"){
+			std::shared_ptr<TexturePlane> cygnet;
+			cygnet = std::make_shared<TexturePlane>();
+			cygnet->initialize();
+			// cygnet->cygnetId(cygnetId);
+			// cygnet->parent(parent);
+			_container->addISWACygnet(cygnet);
+
+		}else{
+			OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(cygnetId));
+		}
+		// std::cout << token << std::endl;
+		// if(token = ""){
+		// 	std::cout << "empty" << std::endl;
+		// }
+
+		// std::shared_ptr<ISWACygnet> cygnet;
+		// _container->addCygnet(cygnet);
+	}	
 
 	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::string path){
 		if(FileSys.fileExists(absPath(path))) {

@@ -43,9 +43,10 @@ public:
 	virtual void update(const UpdateData& data) override;
 
 	void addISWACygnet(std::string path);
+	void addISWACygnet(std::shared_ptr<ISWACygnet> cygnet);
 
-	void deleteCygnet(ISWACygnet*);
-	void deleteCygnet(std::string);
+	void deleteCygnet(ISWACygnet* cygnet);
+	void deleteCygnet(std::string name);
 
 	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 

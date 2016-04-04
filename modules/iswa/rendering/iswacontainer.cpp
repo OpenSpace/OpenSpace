@@ -103,6 +103,12 @@ void ISWAContainer::addISWACygnet(std::string path){
 	// }
 }
 
+void ISWAContainer::addISWACygnet(std::shared_ptr<ISWACygnet> cygnet){
+	if(cygnet){
+		_iSWACygnets.push_back(cygnet);
+	}
+}
+
 void ISWAContainer::deleteCygnet(std::string name){
 	std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
 

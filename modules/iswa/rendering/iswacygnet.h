@@ -38,6 +38,8 @@
 #include <modules/onscreengui/include/gui.h>
 #include <ghoul/opengl/texture.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
@@ -53,6 +55,9 @@ public:
 
 	bool enabled(){return _enabled.value();}
 	virtual bool isReady() = 0;
+
+	void cygnetId(int cygnetId){_cygnetId = cygnetId;}
+	void parent(std::string parent){_parent = OsEng.renderEngine().scene()->sceneGraphNode(parent);}
 	
 protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);

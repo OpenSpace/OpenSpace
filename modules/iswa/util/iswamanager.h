@@ -39,6 +39,7 @@ class ISWAManager : public ghoul::Singleton<ISWAManager> {
 public:
 	ISWAManager();
 	~ISWAManager();
+	void addCygnet(std::string info);
 	std::shared_ptr<ISWACygnet> createISWACygnet(std::string);
 	DownloadManager::FileFuture* downloadImage(int, std::string);
 	void downloadData();
