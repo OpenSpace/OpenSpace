@@ -22,9 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/planetbrowsing/rendering/planet.h>
+#include <modules/globebrowsing/rendering/renderableglobe.h>
 
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+#include <modules/globebrowsing/rendering/globemesh.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -39,7 +39,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "Planet";
+	const std::string _loggerCat = "RenderableGlobe";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -50,14 +50,14 @@ namespace {
 
 namespace openspace {
 
-	Planet::Planet(const ghoul::Dictionary& dictionary)
+	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"Planet need the '" << SceneGraphNode::KeyName << "' be specified");
+			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
 		dictionary.getValue(keyFrame, _frame);
 		dictionary.getValue(keyBody, _target);
@@ -68,13 +68,13 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
-		addSwitchValue(std::shared_ptr<PlanetMesh>(new PlanetMesh(dictionary)), 1000000000);
+		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1000000000);
 	}
 
-	Planet::~Planet() {
+	RenderableGlobe::~RenderableGlobe() {
 	}
 
-	void Planet::update(const UpdateData& data) {
+	void RenderableGlobe::update(const UpdateData& data) {
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

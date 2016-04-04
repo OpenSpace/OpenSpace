@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/planetbrowsing/planetbrowsingmodule.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
 
-#include <modules/planetbrowsing/rendering/planet.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+#include <modules/globebrowsing/rendering/renderableglobe.h>
+#include <modules/globebrowsing/rendering/distanceswitch.h>
+#include <modules/globebrowsing/rendering/globemesh.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -36,11 +36,11 @@
 
 namespace openspace {
 
-PlanetBrowsingModule::PlanetBrowsingModule()
-    : OpenSpaceModule("PlanetBrowsing")
+	GlobeBrowsingModule::GlobeBrowsingModule()
+    : OpenSpaceModule("GlobeBrowsing")
 {}
 
-void PlanetBrowsingModule::internalInitialize() {
+void GlobeBrowsingModule::internalInitialize() {
 	/*
 	auto fRenderable = FactoryManager::ref().factory<Renderable>();
 	ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -62,8 +62,8 @@ void PlanetBrowsingModule::internalInitialize() {
 	auto fRenderable = FactoryManager::ref().factory<Renderable>();
 	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<PlanetMesh>("PlanetMesh");
+	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
+	fRenderable->registerClass<GlobeMesh>("GlobeMesh");
 	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
 }
 

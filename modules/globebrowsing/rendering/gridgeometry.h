@@ -22,56 +22,51 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANETMESH_H__
-#define __PLANETMESH_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/planetbrowsing/rendering/geometry.h>
-#include <modules/planetbrowsing/rendering/gridgeometry.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+#ifndef __GRIDGEOMETRY_H__
+#define __GRIDGEOMETRY_H__
 
 
-namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
-}
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <glm/glm.hpp>
+
+#include <modules/globebrowsing/rendering/geometry.h>
+
+#include <vector>
+
 
 namespace openspace {
 
-	class PlanetMesh : public DistanceSwitch {
-	public:
-		PlanetMesh(const ghoul::Dictionary& dictionary);
-		~PlanetMesh();
+class GridGeometry : public Geometry
+{
+public:
+	GridGeometry(unsigned int xRes, unsigned int yRes,
+		Positions usePositions = Positions::No, 
+		TextureCoordinates useTextures = TextureCoordinates::No, 
+		Normals useNormals = Normals::No
+	);
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+	~GridGeometry();
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+	inline const unsigned int xResolution() const;
+	inline const unsigned int yResolution() const;
 
-	private:
-		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+	inline static size_t numElements(unsigned int xRes, unsigned int yRes);
+	static size_t numVertices(unsigned int xRes, unsigned int yRes);
 
-		//std::unique_ptr<Geometry> _testGeometry;
-		GridGeometry _grid;
-		
+private:
+	static std::vector<GLuint> CreateElements(unsigned int xRes, unsigned int yRes);
+	static std::vector<glm::vec4> CreatePositions(unsigned int xRes, unsigned int yRes,
+		float xSize = 1.0f, float ySize = 1.0f, float xOffset = 0.0f, float yOffset = 0.0f);
+	static std::vector<glm::vec2> CreateTextureCoordinates(unsigned int xRes, unsigned int yRes);
+	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
 
-		properties::IntProperty _rotation;
+	inline static void validate(unsigned int xRes, unsigned int yRes);
+	inline void validateIndices(unsigned int x, unsigned int y);
 
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
-	};
-
-}  // namespace openspace
-
-#endif  // __PLANETMESH_H__
+	unsigned int _xRes;
+	unsigned int _yRes;
+};
+} // namespace openspace
+#endif // __GRIDGEOMETRY_H__

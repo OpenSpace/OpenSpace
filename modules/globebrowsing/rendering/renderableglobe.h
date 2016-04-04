@@ -31,9 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-#include <modules/planetbrowsing/rendering/geometry.h>
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+#include <modules/globebrowsing/rendering/geometry.h>
+#include <modules/globebrowsing/rendering/distanceswitch.h>
+#include <modules/globebrowsing/rendering/globemesh.h>
 
 
 namespace ghoul {
@@ -45,10 +45,10 @@ namespace opengl {
 
 namespace openspace {
 
-class Planet : public DistanceSwitch {
+class RenderableGlobe : public DistanceSwitch {
 public:
-	Planet(const ghoul::Dictionary& dictionary);
-	~Planet();
+	RenderableGlobe(const ghoul::Dictionary& dictionary);
+	~RenderableGlobe();
 
 	void update(const UpdateData& data) override;
 

@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/planetbrowsing/rendering/planetmesh.h>
+#include <modules/globebrowsing/rendering/globemesh.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -37,7 +37,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "PlanetMesh";
+	const std::string _loggerCat = "GlobeMesh";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -47,8 +47,7 @@ namespace {
 }
 
 namespace openspace {
-
-	PlanetMesh::PlanetMesh(const ghoul::Dictionary& dictionary)
+	GlobeMesh::GlobeMesh(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
 		, _programObject(nullptr)
 		, _grid(10, 10, Geometry::Positions::Yes, Geometry::TextureCoordinates::No, Geometry::Normals::No)
@@ -57,7 +56,7 @@ namespace openspace {
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"PlanetMesh need the '" << SceneGraphNode::KeyName << "' be specified");
+			"GlobeMesh need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
 
 		dictionary.getValue(keyFrame, _frame);
@@ -69,43 +68,20 @@ namespace openspace {
 		addProperty(_rotation);
 
 		_grid.initialize();
-
-		/*
-		// Create a simple triangle for testing the geometry
-		std::vector<unsigned int> triangleElements;
-		std::vector<glm::vec4> trianglePositions;
-
-		trianglePositions.push_back(glm::vec4(0, 0, 0, 1));
-		trianglePositions.push_back(glm::vec4(10000000, 0, 0, 1));
-		trianglePositions.push_back(glm::vec4(10000000, 10000000, 0, 1));
-
-		triangleElements.push_back(0);
-		triangleElements.push_back(1);
-		triangleElements.push_back(2);
-
-		_testGeometry = std::unique_ptr<Geometry>(new Geometry(
-			triangleElements,
-			Geometry::Positions::Yes,
-			Geometry::TextureCoordinates::No,
-			Geometry::Normals::No));
-
-		_testGeometry->setVertexPositions(trianglePositions);
-		_testGeometry->initialize();
-		*/
 	}
 
-	PlanetMesh::~PlanetMesh() {
+	GlobeMesh::~GlobeMesh() {
 	}
 
-	bool PlanetMesh::initialize() {
+	bool GlobeMesh::initialize() {
 
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject == nullptr) {
 			// Night texture program
 			_programObject = renderEngine.buildRenderProgram(
 				"simpleTextureProgram",
-				"${MODULE_PLANETBROWSING}/shaders/simple_vs.glsl",
-				"${MODULE_PLANETBROWSING}/shaders/simple_fs.glsl");
+				"${MODULE_GLOBEBROWSING}/shaders/simple_vs.glsl",
+				"${MODULE_GLOBEBROWSING}/shaders/simple_fs.glsl");
 			if (!_programObject) return false;
 		}
 
@@ -115,7 +91,7 @@ namespace openspace {
 		return isReady();
 	}
 
-	bool PlanetMesh::deinitialize() {
+	bool GlobeMesh::deinitialize() {
 
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject) {
@@ -126,13 +102,13 @@ namespace openspace {
 		return true;
 	}
 
-	bool PlanetMesh::isReady() const {
+	bool GlobeMesh::isReady() const {
 		bool ready = true;
 		ready &= (_programObject != nullptr);
 		return ready;
 	}
 
-	void PlanetMesh::render(const RenderData& data)
+	void GlobeMesh::render(const RenderData& data)
 	{
 		// activate shader
 		_programObject->activate();
@@ -162,14 +138,13 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		// _testGeometry->drawUsingActiveProgram();
 		_grid.drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
 	}
 
-	void PlanetMesh::update(const UpdateData& data) {
+	void GlobeMesh::update(const UpdateData& data) {
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

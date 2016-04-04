@@ -22,54 +22,74 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DISTANCESWITCH_H__
-#define __DISTANCESWITCH_H__
+#ifndef __GEOMETRY_H__
+#define __GEOMETRY_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <glm/glm.hpp>
 
 #include <vector>
 
 namespace openspace {
 
-
 /**
-	Selects a specific Renderable to be used for rendering, based on distance to the 
-	camera
+	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
+	has all data needed such as position buffer and normal buffer but all data is not
+	necessarily needed for all purpouses so the Geometry can disable use of normals for
+	example.
 */
-class DistanceSwitch : public Renderable {
+class Geometry
+{
 public:
+	enum class Positions { Yes, No };
+	enum class TextureCoordinates { Yes, No };
+	enum class Normals { Yes, No };
 
-	DistanceSwitch();
-	virtual ~DistanceSwitch();
+	Geometry(
+		std::vector<unsigned int> elements, // At least elements are required
+		Positions usePositions = Positions::No,
+		TextureCoordinates useTextures = TextureCoordinates::No,
+		Normals useNormals = Normals::No);
+	~Geometry();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+	// Setters
+	void setVertexPositions(std::vector<glm::vec4> positions);
+	void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
+	void setVertexNormals(std::vector<glm::vec3> normals);
+	void setElements(std::vector<unsigned int> elements);
 
 	/**
-		Picks the first Renderable with the associated maxDistance greater than the 
-		current distance to the camera
+		Initialize GPU handles. Before calling this function, the data must be set.
 	*/
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	bool initialize();
+	void drawUsingActiveProgram() const;
+protected:
+	// Determines what attribute data is in use
+	bool _useVertexPositions;
+	bool _useTextureCoordinates;
+	bool _useVertexNormals;
 
-	/**
-		Adds a new renderable (first argument) which may be rendered only if the distance 
-		to the camera is less than maxDistance (second argument)
-	*/
-	void addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance);
+	typedef struct {
+	public:
+		GLfloat position[4];
+		GLfloat texture[2];
+		GLfloat normal[3];
+	private:
+		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
+	} Vertex;
 
+	// Vertex data
+	std::vector<Vertex> _vertexData;
+	std::vector<GLuint> _elementData;
 private:
-	
-
-	std::vector<std::shared_ptr<Renderable>> _renderables;
-	std::vector <double> _maxDistances;
-
+	// GL handles
+	GLuint _vaoID;
+	GLuint _vertexBufferID;
+	GLuint _elementBufferID;
 };
-} // openspace
-#endif //__DISTANCESWITCH_H__
+
+} // namespace openspace
+
+#endif // __GEOMETRY_H__

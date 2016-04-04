@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 // open space includes
-#include <modules/planetbrowsing/rendering/distanceswitch.h>
+#include <modules/globebrowsing/rendering/distanceswitch.h>
 
 namespace {
 	const std::string _loggerCat = "DistanceSwitch";

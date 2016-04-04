@@ -22,16 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PLANETBROWSING_H__
-#define __PLANETBROWSING_H__
+#ifndef __GLOBEBROWSING_H__
+#define __GLOBEBROWSING_H__
 
 #include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-class PlanetBrowsingModule : public OpenSpaceModule {
+class GlobeBrowsingModule : public OpenSpaceModule {
 public:
-	PlanetBrowsingModule();
+	GlobeBrowsingModule();
     
 protected:
     void internalInitialize() override;
@@ -39,4 +39,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __PLANETBROWSING_H__
+#endif // __GLOBEBROWSING_H__

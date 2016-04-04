@@ -1,4 +1,4 @@
-#include <modules/planetbrowsing/rendering/gridgeometry.h>
+#include <modules/globebrowsing/rendering/gridgeometry.h>
 
 
 

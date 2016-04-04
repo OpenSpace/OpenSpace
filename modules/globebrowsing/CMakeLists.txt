@@ -25,20 +25,20 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetmesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planet.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetmesh.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -49,7 +49,7 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "PlanetBrowsing"
-    planetbrowsing_module
+    "GlobeBrowsing"
+    globebrowsing_module
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
