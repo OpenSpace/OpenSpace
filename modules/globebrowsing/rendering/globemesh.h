@@ -43,7 +43,7 @@ namespace ghoul {
 
 namespace openspace {
 
-	class GlobeMesh : public DistanceSwitch {
+	class GlobeMesh : public Renderable {
 	public:
 		GlobeMesh(const ghoul::Dictionary& dictionary);
 		~GlobeMesh();

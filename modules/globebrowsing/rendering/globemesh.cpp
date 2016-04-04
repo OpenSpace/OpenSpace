@@ -48,8 +48,7 @@ namespace {
 
 namespace openspace {
 	GlobeMesh::GlobeMesh(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _programObject(nullptr)
+		: _programObject(nullptr)
 		, _grid(10, 10, Geometry::Positions::Yes, Geometry::TextureCoordinates::No, Geometry::Normals::No)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
