@@ -200,7 +200,7 @@ void RenderableModel::render(const RenderData& data) {
 	_programObject->setUniform("sun_pos", _sunPosition.vec3());
 	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(_programObject.get(), &data.camera, data.position);
+	setPscUniforms(*_programObject.get(), data.camera, data.position);
 	
 	_programObject->setUniform("_performShading", _performShading);
 

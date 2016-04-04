@@ -541,7 +541,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 	_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
 	_programObject->setUniform("ModelTransform" , _transform);
 	_programObject->setUniform("boresight"    , _boresight);
-	setPscUniforms(_programObject.get(), &data.camera, data.position);
+	setPscUniforms(*_programObject.get(), data.camera, data.position);
 	
 	textureBind();
 	

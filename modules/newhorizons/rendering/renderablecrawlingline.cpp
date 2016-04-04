@@ -140,7 +140,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
 
         _program->setUniform("_alpha", alpha);
 		_program->setUniform("color", _lineColor);
-	    setPscUniforms(_program.get(), &data.camera, data.position);
+	    setPscUniforms(*_program.get(), data.camera, data.position);
 
 	    glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);

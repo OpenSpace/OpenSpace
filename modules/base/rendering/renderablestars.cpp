@@ -203,7 +203,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
 	
-	setPscUniforms(_program.get(), &data.camera, data.position);
+	setPscUniforms(*_program.get(), data.camera, data.position);
 	_program->setUniform("scaling", scaling);
 
 	ghoul::opengl::TextureUnit psfUnit;

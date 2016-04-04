@@ -126,7 +126,6 @@ function (add_external_dependencies)
     target_compile_definitions(libOpenSpace PUBLIC ${GHOUL_DEFINITIONS})
     set_property(TARGET Lua PROPERTY FOLDER "External")
     set_property(TARGET lz4 PROPERTY FOLDER "External")
-    set_property(TARGET tinyobjloader PROPERTY FOLDER "External")
 
     # SGCT
     find_package(SGCT REQUIRED)

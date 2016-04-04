@@ -162,7 +162,7 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 	glm::mat4 viewMatrix       = data.camera.viewMatrix();
 	glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-	setPscUniforms(_program.get(), &data.camera, data.position);
+	setPscUniforms(*_program.get(), data.camera, data.position);
 
 	_program->setUniform("exponent", _distance);
 	_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
