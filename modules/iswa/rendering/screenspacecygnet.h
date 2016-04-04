@@ -32,7 +32,7 @@ namespace openspace{
 
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
-	ScreenSpaceCygnet(int cygnetId);
+	ScreenSpaceCygnet(int cygnetId, std::string path);
 	~ScreenSpaceCygnet();
 
 	void render() override;
@@ -46,10 +46,10 @@ private:
 	void updateTexture();
 	void loadTexture();
 
-	properties::IntProperty  _cygnetId;
 	properties::FloatProperty _updateInterval;
 
 	std::string _path;
+	const int _cygnetId;
 	int _id;
 	float _time;
 	float _lastUpdateTime = 0.0f;

@@ -44,12 +44,12 @@ bool ISWAContainer::initialize(){
 	ISWAManager::initialize();
 	ISWAManager::ref().setContainer(this);
 
-	//addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
 	//addISWACygnet("${OPENSPACE_DATA}/test.png");
 	addISWACygnet(7);
 
-	//OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(3));
+	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(6, "${OPENSPACE_DATA}/scene/iswa/6.jpg"));
 
 	return true;
 }

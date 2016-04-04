@@ -34,14 +34,14 @@ namespace {
 
 namespace openspace {
 
-ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
+ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
 : ScreenSpaceRenderable()
-, _cygnetId("cygnetId", "CygnetID",7, 0, 10)
 , _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+, _cygnetId(cygnetId)
+, _path(path)
 {
 	_id = id();
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
-	addProperty(_cygnetId);
 	addProperty(_updateInterval);
 
 	// registerProperties();
@@ -52,19 +52,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
 	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
 	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
-	OsEng.gui()._iSWAproperty.registerProperty(&_cygnetId);
 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 
-	_fileExtension = "";
-	_path = "";
 
-/*	_cygnetId.onChange([this](){ 
-		std::remove(absPath(_path).c_str());
-		_fileExtension = "";
-		_path = "";
-		ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
-	});*/
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -74,7 +65,8 @@ bool ScreenSpaceCygnet::initialize(){
 
 	createPlane();
 	createShaders();
-	//ISWAManager::ref().fileExtension(_cygnetId.value(), &_fileExtension);
+	updateTexture();
+
 	// Setting spherical/euclidean onchange handler
 	_useFlatScreen.onChange([this](){
 		useEuclideanCoordinates(_useFlatScreen.value());
@@ -123,7 +115,7 @@ void ScreenSpaceCygnet::update(){
 	if(_toDelete)
 		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
 
-	if(_path != ""){
+	//if(_path != ""){
 		_time = Time::ref().currentTime();
 		_openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
     	if(_openSpaceUpdateInterval){
@@ -134,24 +126,24 @@ void ScreenSpaceCygnet::update(){
 		}
 
 		if(_futureTexture && _futureTexture->isFinished){
-			_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
+			//_path = absPath("${OPENSPACE_DATA}/"+_futureTexture->filePath);
 			loadTexture();
 
 			delete _futureTexture; 
 			_futureTexture = nullptr;
 		}
-	} else {
+/*	} else {
 		if(_fileExtension == ""){
 			//send new request
 		} else{
 			_path = "${OPENSPACE_DATA}/"+ name()+_fileExtension;
 			updateTexture();
 		}
-	}
+	}*/
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId.value(), absPath(_path));
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}
