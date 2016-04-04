@@ -44,6 +44,7 @@ class GuiPropertyComponent : public GuiComponent {
 public:
 	//void registerProperty(const std::string& propertyDescription);
     void registerProperty(properties::Property* prop);
+    void unregisterProperties(std::string owner);
 	void render();
 
 protected:

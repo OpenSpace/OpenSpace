@@ -44,9 +44,17 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	addProperty(_cygnetId);
 	addProperty(_updateInterval);
 
-	registerProperties();
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
+	// registerProperties();
+	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
+	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
+	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
+	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
+	OsEng.gui()._iSWAproperty.registerProperty(&_cygnetId);
+	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 
 	_fileExtension = "";
 	_path = "";
@@ -76,6 +84,8 @@ bool ScreenSpaceCygnet::initialize(){
 }
 
 bool ScreenSpaceCygnet::deinitialize(){
+	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 
@@ -99,6 +109,7 @@ bool ScreenSpaceCygnet::deinitialize(){
 void ScreenSpaceCygnet::render(){
 
 	if(!isReady()) return;
+	if(!_enabled) return;
 
 	glm::mat4 rotation = rotationMatrix();
 	glm::mat4 translation = translationMatrix();
@@ -109,6 +120,8 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
+	if(_toDelete)
+		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
 
 	if(_path != ""){
 		_time = Time::ref().currentTime();

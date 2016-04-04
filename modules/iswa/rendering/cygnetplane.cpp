@@ -81,6 +81,8 @@ bool CygnetPlane::isReady(){
 void CygnetPlane::render(){}
 
 void CygnetPlane::update(){
+    ISWACygnet::update();
+    
 	_time = Time::ref().currentTime();
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
     _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;

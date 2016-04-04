@@ -72,15 +72,7 @@ properties::Property* property(const std::string& uri) {
         const std::string nameUri = uri.substr(0, nameSeparator);
         const std::string remainingUri = uri.substr(nameSeparator + 1);
 
-        SceneGraphNode* node = sceneGraphNode("iSWA");
-        if(node){
-            std::shared_ptr<ISWACygnet> cygnet = static_cast <ISWAContainer*>(node->renderable())->iSWACygnet(nameUri);
-            if(cygnet){
-                return cygnet->property(remainingUri);
-            }
-        }
-
-        node = sceneGraphNode(nameUri);
+        SceneGraphNode* node = sceneGraphNode(nameUri);
         if (node) {
             properties::Property* property = node->property(remainingUri);
             return property;
@@ -90,6 +82,11 @@ properties::Property* property(const std::string& uri) {
         if(ssr){
             properties::Property* property = ssr->property(remainingUri);
             return property;
+        }
+
+        std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().iSWACygnet(nameUri);
+        if(cygnet){
+            return cygnet->property(remainingUri);
         }
         
         LERROR("Node, iSWACygnet or ScreenSpaceRenderable' " << nameUri << "' did not exist");

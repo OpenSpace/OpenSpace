@@ -31,7 +31,7 @@ namespace openspace{
 class ISWACygnet;
 struct ExtensionFuture;
 
-class ISWAContainer : public Renderable {
+class ISWAContainer : public Renderable{
 public:
 	ISWAContainer(const ghoul::Dictionary& dictionary);
 	~ISWAContainer();
@@ -47,11 +47,15 @@ public:
 	void addISWACygnet(std::string path);
 	void addISWACygnet(int id);
 
+	void deleteCygnet(ISWACygnet*);
+	void deleteCygnet(std::string);
+
 	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 
 private:
 std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
 std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
+std::vector<std::shared_ptr<ISWACygnet>> _deletedCygnets;
 
 };	
 }//namespace openspace

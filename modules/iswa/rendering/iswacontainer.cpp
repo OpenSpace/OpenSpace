@@ -42,6 +42,7 @@ bool ISWAContainer::initialize(){
 	std::cout << "Initialized ISWAContainer" << std::endl;
 
 	ISWAManager::initialize();
+	ISWAManager::ref().setContainer(this);
 
 	//addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
@@ -87,6 +88,8 @@ void ISWAContainer::update(const UpdateData& data){
 		}
 	}
 
+	if(!_deletedCygnets.empty())
+		_deletedCygnets.clear();
 
 	for(auto& iSWACygnet : _iSWACygnets)
 		iSWACygnet->update();
@@ -104,6 +107,22 @@ void ISWAContainer::addISWACygnet(int id){
 
 	std::shared_ptr<ExtensionFuture> extFuture = ISWAManager::ref().fileExtension(id);
 	_extFutures.push_back(extFuture);
+}
+
+void ISWAContainer::deleteCygnet(std::string name){
+	std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
+
+	auto it = std::find(
+		_iSWACygnets.begin(),
+		_iSWACygnets.end(),
+		c
+	);
+
+	if (it != _iSWACygnets.end()) {
+		c->deinitialize();
+		_deletedCygnets.push_back(c);
+		_iSWACygnets.erase(it);
+	}
 }
 
 

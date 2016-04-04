@@ -80,7 +80,9 @@ bool DataPlane::initialize(){
 }
 
 bool DataPlane::deinitialize(){
-	ISWACygnet::deinitialize();
+	CygnetPlane::deinitialize();
+	_kw = nullptr;
+	
 	return true;
 }
 
@@ -195,32 +197,6 @@ void DataPlane::loadTexture() {
 		}
 	
 }
-
-// void DataPlane::createPlane() {
-//     // ============================
-//     // 		GEOMETRY (quad)
-//     // ============================
-//     const GLfloat x = _modelScale.x/2.0;
-//     const GLfloat y = _modelScale.z/2.0;
-//     const GLfloat w = _modelScale.w;
-//     const GLfloat vertex_data[] = { // square of two triangles (sigh)
-//         //	  x      y     z     w     s     t
-//         -x, -y, 0, w, 0, 1,
-//          x,  y, 0, w, 1, 0,
-//         -x,  y, 0, w, 0, 0,
-//         -x, -y, 0, w, 0, 1,
-//          x, -y, 0, w, 1, 1,
-//          x,  y, 0, w, 1, 0,
-//     };
-
-//     glBindVertexArray(_quad); // bind array
-//     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-//     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-//     glEnableVertexAttribArray(0);
-//     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-//     glEnableVertexAttribArray(1);
-//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-// }
 
 void DataPlane::updateTexture(){}
 

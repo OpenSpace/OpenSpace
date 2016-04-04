@@ -31,6 +31,7 @@
 
 namespace openspace {
 class ISWACygnet;
+class ISWAContainer;
 
 struct ExtensionFuture {
 
@@ -50,10 +51,19 @@ public:
 	std::shared_ptr<ISWACygnet> createISWACygnet(int, std::string);
 	DownloadManager::FileFuture* downloadImage(int, std::string);
 	void downloadData();
+
 	std::shared_ptr<ExtensionFuture> fileExtension(int);
+
+	void setContainer(ISWAContainer*);
+	std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
+	void deleteCygnet(ISWACygnet*);
+	void deleteCygnet(std::string);
+
 private:
 	std::string iSWAurl(int);
+
 	std::map<std::string, std::string> _month;
+	ISWAContainer* _container;
 };
 
 } //namespace openspace

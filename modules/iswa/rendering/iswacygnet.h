@@ -33,6 +33,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/onscreengui/include/gui.h>
 #include <ghoul/opengl/texture.h>
@@ -60,6 +61,7 @@ protected:
 
 	properties::BoolProperty _enabled;
 	properties::FloatProperty _updateInterval;
+	properties::TriggerProperty _delete;
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
@@ -82,6 +84,8 @@ protected:
 
 	float _openSpaceUpdateInterval;
 
+	bool _toDelete;
+	
 	int _id;
 };
 
