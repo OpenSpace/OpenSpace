@@ -30,6 +30,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/quadtree.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -40,6 +42,7 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
 
+   ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/quadtree.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
