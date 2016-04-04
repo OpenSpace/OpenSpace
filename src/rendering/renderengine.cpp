@@ -1157,6 +1157,12 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 	}
 }
 
+void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
+	auto s = screenSpaceRenderable(name);
+	if(s)
+		unregisterScreenSpaceRenderable(s);
+}
+
 std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
 	for(auto s : _screenSpaceRenderables){
 		if(s->name() == name){

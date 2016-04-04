@@ -30,6 +30,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <ghoul/opengl/texture.h>
 #include <modules/onscreengui/include/gui.h>
 #include <openspace/rendering/renderengine.h>
@@ -88,6 +89,8 @@ protected:
 	 */
 	glm::vec2 toSpherical(glm::vec2 euclidean);
 	void registerProperties();
+	void unregisterProperties();
+
 	void createShaders();
 	glm::mat4 scaleMatrix();
 	glm::mat4 rotationMatrix();
@@ -101,6 +104,7 @@ protected:
 	properties::FloatProperty _depth;
 	properties::FloatProperty _scale;
 	properties::FloatProperty _alpha;
+	properties::TriggerProperty _delete;
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;
@@ -115,7 +119,8 @@ protected:
 	const float _planeDepth = -2.0;
 	glm::vec2 _originalViewportSize;
 
-	float _radius;	
+	float _radius;
+	bool _toDelete;
 };
 }  // namespace openspace
 #endif  // __SCREENSPACERENDERABLE_H__

@@ -71,6 +71,7 @@ public:
     GuiOriginComponent _origin;
 	GuiPerformanceComponent _performance;
 	GuiPropertyComponent _property;
+	GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
 
 	bool _isEnabled;

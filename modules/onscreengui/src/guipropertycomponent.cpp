@@ -195,7 +195,7 @@ namespace {
         std::string name = prop->guiName();
         bool pressed = ImGui::Button((ownerName + "." + name).c_str());
         if (pressed)
-            executeScript(prop->fullyQualifiedIdentifier(), "0");
+            executeScript(prop->fullyQualifiedIdentifier(), "nil");
     }
 
 	//void renderBoolProperty(Property* prop, const std::string& ownerName) {
@@ -381,6 +381,37 @@ void GuiPropertyComponent::registerProperty(properties::Property* prop) {
 	//ghoul::lua::loadDictionaryFromString(propertyDescription, dictionary);
 
 	//handleProperty(dictionary);
+}
+
+void GuiPropertyComponent::unregisterProperties(std::string owner){
+    auto it = _propertiesByOwner.find(owner);
+    if(it != _propertiesByOwner.end()){
+        for(prop : it->second){
+            std::string className = prop->className();
+            if (className == "BoolProperty")
+                _boolProperties.insert(prop);
+            else if (className == "IntProperty")
+                _intProperties.insert(prop);
+            else if (className == "FloatProperty")
+                _floatProperties.insert(prop);
+            else if (className == "StringProperty")
+                _stringProperties.insert(prop);
+            else if (className == "Vec2Property")
+                _vec2Properties.insert(prop);
+            else if (className == "Vec3Property")
+                _vec3Properties.insert(prop);
+            else if (className == "Vec4Property")
+                _vec4Properties.insert(prop);
+            else if (className == "OptionProperty")
+                _optionProperties.insert(prop);
+            else if (className == "TriggerProperty")
+                _triggerProperties.insert(prop);
+            else if (className == "SelectionProperty")
+                _selectionProperties.insert(prop);
+        }
+        it->second.clear();
+        _propertiesByOwner.erase(it);
+    }
 }
 
 void GuiPropertyComponent::handleProperty(const ghoul::Dictionary& dictionary) {

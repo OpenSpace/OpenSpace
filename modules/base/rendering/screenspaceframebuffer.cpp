@@ -43,7 +43,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer()
 
 	glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
 	addProperty(_size);
-	OsEng.gui()._property.registerProperty(&_size);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_size);
 	_size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 
 	_scale.setValue(1.0f);
@@ -62,6 +62,8 @@ bool ScreenSpaceFramebuffer::initialize(){
 }
 
 bool ScreenSpaceFramebuffer::deinitialize(){
+	unregisterProperties();
+
 	glDeleteVertexArrays(1, &_quad);
 	_quad = 0;
 
@@ -114,7 +116,10 @@ void ScreenSpaceFramebuffer::render(){
 	}
 }
 
-void ScreenSpaceFramebuffer::update(){}
+void ScreenSpaceFramebuffer::update(){
+	if(_toDelete)
+		OsEng.renderEngine().unregisterScreenSpaceRenderable(name());
+}
 
 bool ScreenSpaceFramebuffer::isReady() const{
 	bool ready = true;

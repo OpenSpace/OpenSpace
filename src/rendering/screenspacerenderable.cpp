@@ -33,6 +33,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	, _depth("depth", "Depth", 0, 0, 1)
 	, _scale("scale", "Scale" , 0.5, 0, 2)
 	, _alpha("alpha", "Alpha" , 1, 0, 1)
+	,_delete("delete", "Delete")
 	, _quad(0)
 	, _vertexPositionBuffer(0)
 	,_rendererPath("${SHADERS}/framebuffer/renderframebuffer.frag")
@@ -40,6 +41,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	,_fragmentPath("${MODULE_BASE}/shaders/screnspace_fs.glsl")
 	,_texture(nullptr)
 	,_shader(nullptr)
+	,_toDelete(false)
 {
 	addProperty(_enabled);
 	addProperty(_useFlatScreen);
@@ -48,6 +50,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	addProperty(_depth);
 	addProperty(_scale);
 	addProperty(_alpha);
+	addProperty(_delete);
 
 	_rendererData = ghoul::Dictionary();
     _rendererData.setValue("fragmentRendererPath", _rendererPath);
@@ -70,9 +73,16 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 	_useFlatScreen.onChange([this](){
 		useEuclideanCoordinates(_useFlatScreen.value());
 	});
+
+	_delete.onChange([this](){_toDelete=true;});
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
+
+
+//deinitialzie(){
+	// unregisterProperies
+// }
 
 
 bool ScreenSpaceRenderable::isEnabled() const {
@@ -129,13 +139,18 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(glm::vec2 euclidean){
 }
 
 void ScreenSpaceRenderable::registerProperties(){
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_useFlatScreen);
-	OsEng.gui()._property.registerProperty(&_euclideanPosition);
-	OsEng.gui()._property.registerProperty(&_sphericalPosition);
-	OsEng.gui()._property.registerProperty(&_depth);
-	OsEng.gui()._property.registerProperty(&_scale);
-	OsEng.gui()._property.registerProperty(&_alpha);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_enabled);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_useFlatScreen);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_euclideanPosition);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_sphericalPosition);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_depth);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_scale);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_alpha);
+	OsEng.gui()._screenSpaceProperty.registerProperty(&_delete);
+}
+
+void ScreenSpaceRenderable::unregisterProperties(){
+	OsEng.gui()._screenSpaceProperty.unregisterProperties(name());
 }
 
 void ScreenSpaceRenderable::createShaders(){
