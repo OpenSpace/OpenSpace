@@ -155,10 +155,10 @@ bool SceneGraphNode::deinitialize() {
     delete _ephemeris;
     _ephemeris = nullptr;
 
-    for (SceneGraphNode* child : _children) {
-		child->deinitialize();
-		delete child;
-	}
+ //   for (SceneGraphNode* child : _children) {
+	//	child->deinitialize();
+	//	delete child;
+	//}
     _children.clear();
 
     // reset variables
@@ -282,6 +282,11 @@ void SceneGraphNode::setParent(SceneGraphNode* parent)
 {
     _parent = parent;
 }
+
+void SceneGraphNode::addChild(SceneGraphNode* child) {
+    _children.push_back(child);
+}
+
 
 //not used anymore @AA
 //bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
