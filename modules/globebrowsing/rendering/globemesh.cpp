@@ -130,7 +130,7 @@ namespace openspace {
 		//	_programObject->setUniform("camdir", camSpaceEye);
 		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 		_programObject->setUniform("ModelTransform", transform);
-		setPscUniforms(_programObject.get(), &data.camera, data.position);
+		setPscUniforms(*_programObject.get(), data.camera, data.position);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
