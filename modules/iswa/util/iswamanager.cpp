@@ -60,6 +60,9 @@ namespace openspace{
 			if(extension == "cdf"){
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
 				cygnet = std::make_shared<DataPlane>(kw, path);
+			} else if(id == 5) {
+				//check some other condition that id==5 (based on metadata maybe?)
+				OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id, path));
 			} else {
 				cygnet = std::make_shared<TexturePlane>(id, path);
 			}

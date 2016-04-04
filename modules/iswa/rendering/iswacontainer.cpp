@@ -49,8 +49,6 @@ bool ISWAContainer::initialize(){
 	//addISWACygnet("${OPENSPACE_DATA}/test.png");
 	addISWACygnet(7);
 
-	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(6, "${OPENSPACE_DATA}/scene/iswa/6.jpg"));
-
 	return true;
 }
 
