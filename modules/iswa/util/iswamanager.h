@@ -31,6 +31,7 @@
 
 namespace openspace {
 class ISWACygnet;
+class ISWAContainer;
 
 class ISWAManager : public ghoul::Singleton<ISWAManager> {
 	friend class ghoul::Singleton<ISWAManager>;
@@ -42,9 +43,16 @@ public:
 	DownloadManager::FileFuture* downloadImage(int, std::string);
 	void downloadData();
 	void fileExtension(int, std::string*);
+
+	void setContainer(ISWAContainer*);
+	std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
+	void deleteCygnet(ISWACygnet*);
+	void deleteCygnet(std::string);
 private:
 	std::string iSWAurl(int);
+
 	std::map<std::string, std::string> _month;
+	ISWAContainer* _container;
 };
 
 } //namespace openspace

@@ -35,6 +35,7 @@ ISWACygnet::ISWACygnet()
 	:_enabled("enabled", "Is Enabled", true)
 	,_cygnetId("cygnetId", "CygnetID",7, 0, 10)
 	,_updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	,_delete("delete", "Delete")
 	,_shader(nullptr)
 	,_texture(nullptr)
 	,_frame("GALACTIC")
@@ -42,6 +43,9 @@ ISWACygnet::ISWACygnet()
 	addProperty(_enabled);
 	addProperty(_cygnetId);
 	addProperty(_updateInterval);
+	addProperty(_delete);
+
+	_delete.onChange([this](){ISWAManager::ref().deleteCygnet(name());});
 }
 
 ISWACygnet::~ISWACygnet(){}
@@ -52,6 +56,7 @@ bool ISWACygnet::initialize(){
 }
 
 bool ISWACygnet::deinitialize(){
+	OsEng.gui()._iSWAproperty.unregisterProperties(name());
 	_parent = nullptr;
 	return true;
 }
@@ -74,9 +79,10 @@ void ISWACygnet::setPscUniforms(
 }
 
 void ISWACygnet::registerProperties(){
-	OsEng.gui()._property.registerProperty(&_enabled);
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
+	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+	OsEng.gui()._iSWAproperty.registerProperty(&_cygnetId);
+	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
 }//namespace openspac

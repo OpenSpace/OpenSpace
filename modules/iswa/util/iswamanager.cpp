@@ -28,9 +28,13 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/util/time.h>
+#include <modules/iswa/rendering/iswacontainer.h>
+
 
 namespace openspace{
-	ISWAManager::ISWAManager(){
+	ISWAManager::ISWAManager()
+		:_container(nullptr)
+	{
 		_month["JAN"] = "01";
 	   	_month["FEB"] = "02";
 	   	_month["MAR"] = "03";
@@ -100,6 +104,20 @@ namespace openspace{
 					*ext = "."+token;
 				}
 			);
+	}
+
+	void ISWAManager::setContainer(ISWAContainer* container){
+		_container = container;
+	}
+
+	std::shared_ptr<ISWACygnet> ISWAManager::iSWACygnet(std::string name){
+		if(_container)
+			return _container->iSWACygnet(name);
+		return nullptr;
+	}
+
+	void ISWAManager::deleteCygnet(std::string name){
+		_container->deleteCygnet(name);
 	}
 
 	std::string ISWAManager::iSWAurl(int id){

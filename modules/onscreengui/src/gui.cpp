@@ -203,6 +203,7 @@ void GUI::initialize() {
 	//io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
 
 	_property.initialize();
+	_iSWAproperty.initialize();
 	_performance.initialize();
 	_help.initialize();
 }
@@ -249,6 +250,7 @@ void GUI::initializeGL() {
     
 
 	_property.initializeGL();
+	_iSWAproperty.initializeGL();
 	_performance.initializeGL();
 	_help.initializeGL();
 }
@@ -260,6 +262,7 @@ void GUI::deinitializeGL() {
 	glDeleteBuffers(1, &vbo);
 
 	_property.deinitializeGL();
+	_iSWAproperty.deinitializeGL();
 	_performance.deinitializeGL();
 	_help.deinitializeGL();
 }
@@ -288,6 +291,8 @@ void GUI::endFrame() {
 
 	if (_property.isEnabled())
 		_property.render();
+	if (_iSWAproperty.isEnabled())
+		_iSWAproperty.render();
 	if (_performance.isEnabled())
 		_performance.render();
 	if (_help.isEnabled())
@@ -387,6 +392,7 @@ void GUI::renderMainWindow() {
 	ImGui::Begin("OpenSpace GUI", nullptr);
 
 	ImGui::Checkbox("Properties", &_property._isEnabled);
+	ImGui::Checkbox("iSWA Properties", &_iSWAproperty._isEnabled);
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
     _time.render();

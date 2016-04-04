@@ -44,9 +44,16 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	addProperty(_cygnetId);
 	addProperty(_updateInterval);
 
-	registerProperties();
-	OsEng.gui()._property.registerProperty(&_cygnetId);
-	OsEng.gui()._property.registerProperty(&_updateInterval);
+	// registerProperties();
+	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
+	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
+	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
+	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
+	OsEng.gui()._iSWAproperty.registerProperty(&_cygnetId);
+	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
 
 	_fileExtension = "";
 	_path = "";
