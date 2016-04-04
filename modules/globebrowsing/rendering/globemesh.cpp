@@ -66,8 +66,6 @@ namespace openspace {
 
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
-
-		_grid.initialize();
 	}
 
 	GlobeMesh::~GlobeMesh() {
