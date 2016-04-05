@@ -41,16 +41,6 @@ namespace {
 }
 
 namespace openspace {
-
-// TexturePlane::TexturePlane(int cygnetId, std::string path) 
-// 	:CygnetPlane(cygnetId, path)
-// 	,_futureTexture(nullptr)
-// {
-// 	_id = id();
-// 	setName("TexturePlane" + std::to_string(_id));
-// 	registerProperties();
-// }
-
 TexturePlane::TexturePlane(std::shared_ptr<Metadata> data) 
 	:CygnetPlane(data)
 	,_futureTexture(nullptr)
@@ -60,15 +50,12 @@ TexturePlane::TexturePlane(std::shared_ptr<Metadata> data)
 	registerProperties();
 }
 
-
 TexturePlane::~TexturePlane(){}
-
 
 bool TexturePlane::initialize(){
 	setParent();
     createPlane();
     createShader();
-
 	updateTexture();
     return isReady();
 }
@@ -153,14 +140,6 @@ void TexturePlane::update(){
 	}
 }
 
-
-void TexturePlane::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
-	if(future){
-		_futureTexture = future;
-	}
-}
-
 void TexturePlane::loadTexture() {
 
 		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
@@ -175,6 +154,13 @@ void TexturePlane::loadTexture() {
             _texture = std::move(texture);
 		}
 	
+}
+
+void TexturePlane::updateTexture(){
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
+	if(future){
+		_futureTexture = future;
+	}
 }
 
 int TexturePlane::id(){

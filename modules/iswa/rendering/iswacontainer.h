@@ -57,7 +57,6 @@ private:
 std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
 std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
 std::vector<std::shared_ptr<ISWACygnet>> _deletedCygnets;
-
 };	
 }//namespace openspace
 

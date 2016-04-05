@@ -32,7 +32,6 @@
  
  class DataPlane : public CygnetPlane {
  public:
- 	// DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
  	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data);
  	~DataPlane();
 

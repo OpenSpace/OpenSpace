@@ -45,7 +45,6 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
 	addProperty(_updateInterval);
 
-	// registerProperties();
 	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
 	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
 	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
@@ -68,7 +67,6 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
 	addProperty(_updateInterval);
 
-	// registerProperties();
 	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
 	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
 	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
@@ -154,13 +152,6 @@ void ScreenSpaceCygnet::update(){
 
 }
 
-void ScreenSpaceCygnet::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
-	if(future){
-		_futureTexture = future;
-	}
-}
-
 bool ScreenSpaceCygnet::isReady() const{
 	bool ready = true;
 	if (!_shader)
@@ -168,6 +159,13 @@ bool ScreenSpaceCygnet::isReady() const{
 	if(!_texture)
 		ready &= false;
 	return ready;
+}
+
+void ScreenSpaceCygnet::updateTexture(){
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	if(future){
+		_futureTexture = future;
+	}
 }
 
 void ScreenSpaceCygnet::loadTexture() {
