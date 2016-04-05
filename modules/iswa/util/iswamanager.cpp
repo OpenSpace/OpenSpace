@@ -83,7 +83,6 @@ namespace openspace{
 	}	
 
 	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(int id, std::string path){
-		std::cout << "createISWACygnet " << id << std::endl;
 		if(path != ""){
 			const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
@@ -106,7 +105,7 @@ namespace openspace{
 		}
 	}
 
-	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
 
 		return 	DlManager.downloadFile(
 					iSWAurl(id),
@@ -126,7 +125,6 @@ namespace openspace{
 		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
 		extFuture->isFinished = false;
 		extFuture->id = id;
-		std::cout << "extension id: "<< id << std::endl;
 		DlManager.getFileExtension(
 				iSWAurl(id),
 				[extFuture](std::string extension){

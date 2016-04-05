@@ -50,7 +50,7 @@
 
     static int id();
  
-	DownloadManager::FileFuture* _futureTexture;
+	std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
  };
  
  } // namespace openspace

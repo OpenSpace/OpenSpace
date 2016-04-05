@@ -40,7 +40,6 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
 , _cygnetId(cygnetId)
 , _path(path)
 {
-	std::cout << "screenspacecygnet constructor 1" << std::endl;
 	_id = id();
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
 	addProperty(_updateInterval);
@@ -125,14 +124,13 @@ void ScreenSpaceCygnet::update(){
 
 		loadTexture();
 
-		delete _futureTexture; 
 		_futureTexture = nullptr;
 	}
 
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}

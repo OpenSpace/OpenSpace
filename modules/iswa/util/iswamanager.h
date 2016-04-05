@@ -52,7 +52,7 @@ public:
 	std::shared_ptr<ISWACygnet> createISWACygnet(int, std::string);
 	void addCygnet(std::string info);
 
-	DownloadManager::FileFuture* downloadImage(int, std::string);
+	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
 	void downloadData();
 
 	std::shared_ptr<ExtensionFuture> fileExtension(int);
