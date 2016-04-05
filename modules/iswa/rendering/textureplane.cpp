@@ -154,7 +154,7 @@ void TexturePlane::update(){
 
 
 void TexturePlane::updateTexture(){
-	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
 	}
