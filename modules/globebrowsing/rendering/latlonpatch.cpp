@@ -56,7 +56,7 @@ namespace openspace {
 	: _grid(
 		xRes,
 		yRes,
-		Geometry::Positions::Yes,
+		Geometry::Positions::No,
 		Geometry::TextureCoordinates::Yes,
 		Geometry::Normals::No)
 	, _programObject(nullptr)
@@ -108,7 +108,7 @@ namespace openspace {
 		_programObject->activate();
 
 		// TODO : Not sure if double precision will be needed for all these calculations
-		// Using doubles in case.
+		// Using doubles in case but might slow things down.
 		// TODO : Need to get the radius of the globe
 		double r = 6e6;
 
@@ -149,7 +149,9 @@ namespace openspace {
 		glm::dvec3 camDir = glm::normalize(position - camPos);
 		glm::dvec3 camUp = glm::dvec3(0,1,0);// data.camera.lookUpVector();
 		// Get camera transform matrix (double precision)
-		glm::dmat4 viewTransform = glm::lookAt(camPos, camPos + camDir, camUp);
+		glm::dmat4 viewTransform = glm::inverse(glm::translate(glm::dmat4(1.0), camPos));
+		//glm::dmat4 viewTransform = glm::lookAt(camPos, camPos + camDir, camUp);
+		viewTransform = glm::dmat4( data.camera.viewRotationMatrix()) * viewTransform;
 		// Transform control points to camera space
 		p00 = glm::dvec3(viewTransform * glm::dvec4(p00, 1.0));
 		p10 = glm::dvec3(viewTransform * glm::dvec4(p10, 1.0));

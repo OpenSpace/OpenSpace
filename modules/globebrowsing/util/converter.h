@@ -48,6 +48,7 @@ namespace openspace {
 namespace converter {
 
 	glm::dvec3 latLonToCartesian(double latitude, double longitude, double radius);
+	glm::dvec2 cartesianToLatLon(glm::dvec3 position);
 
 }  // namespace converter
 }  // namespace openspace

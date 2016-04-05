@@ -41,5 +41,12 @@ namespace converter {
 			glm::sin(latitude));
 	}
 
+	glm::dvec2 cartesianToLatLon(glm::dvec3 position) {
+		double r = glm::length(position);
+		double lat = glm::asin(position.z / r);
+		double lon = atan2(position.y, position.x);
+		return glm::vec2(lat, lon);
+	}
+
 }  // namespace converter
 }  // namespace openspace
