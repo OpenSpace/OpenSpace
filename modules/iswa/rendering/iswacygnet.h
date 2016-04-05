@@ -78,7 +78,6 @@ protected:
 
 	double _time;
 	double _lastUpdateTime = 0;
-	float _openSpaceUpdateInterval;
 
 	int _id;
 };

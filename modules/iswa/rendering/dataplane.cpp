@@ -148,10 +148,10 @@ void DataPlane::update(){
 
 	_time = Time::ref().currentTime();
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
-    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
-
-    if(_openSpaceUpdateInterval){
-    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
+    
+    float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+    if(openSpaceUpdateInterval){
+    	if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
     		updateTexture();
     		_lastUpdateTime = _time;
     	}

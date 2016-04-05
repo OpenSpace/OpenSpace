@@ -56,7 +56,7 @@ namespace openspace{
 	ISWAManager::~ISWAManager(){}
 
 	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::shared_ptr<Metadata> metadata){
-		std::cout << "createISWACygnet " << metadata->id << std::endl;
+		LDEBUG("Creating ISWACygnet with id " << metadata->id);
 		if(metadata->path != ""){
 			const std::string& extension = ghoul::filesystem::File(absPath(metadata->path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
@@ -119,7 +119,7 @@ namespace openspace{
 					path,
 					true,
 					[path](const DownloadManager::FileFuture& f){
-						std::cout<<"download finished: " << path <<std::endl;
+						LDEBUG("Download finished: " << path);
 					}
 				);
 	}

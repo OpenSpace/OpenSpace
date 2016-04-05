@@ -133,9 +133,10 @@ void ScreenSpaceCygnet::render(){
 void ScreenSpaceCygnet::update(){
 
 	_time = Time::ref().currentTime();
-	_openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
-	if(_openSpaceUpdateInterval){
-		if(abs(_time-_lastUpdateTime) >= _updateInterval){
+	
+	float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+	if(openSpaceUpdateInterval){
+		if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
 			updateTexture();
 			_lastUpdateTime = _time;
 		}

@@ -241,7 +241,7 @@ float* KameleonWrapper::getUniformSampledValues(
                     if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
                         thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
                         if (phiPh > _zMax) {
-                            std::cout << "Warning: There might be a gap in the data\n";
+                            LWARNING("Warning: There might be a gap in the data");
                         }
                         // Leave values at zero if outside domain
                     } else { // if inside
@@ -410,7 +410,7 @@ float* KameleonWrapper::getUniformSliceValues(
                     if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
                         thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
                         if (phiPh > _zMax) {
-                            std::cout << "Warning: There might be a gap in the data\n";
+                            LWARNING("Warning: There might be a gap in the data");
                         }
                         // Leave values at zero if outside domain
                     } else { // if inside
@@ -468,7 +468,6 @@ float* KameleonWrapper::getUniformSliceValues(
 		// data[i] = 1;
 		// std::cout << minValue << ", " << maxValue << ", " << doubleData[i] << ", " << normalizedVal << ", " << data[i] << std::endl;
 	}
-	std::cout << std::endl << std::endl;
 
 	delete[] doubleData;
 	return data;
@@ -661,10 +660,6 @@ glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
 	offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
 	offset.y = _yMin+(std::abs(_yMin)+std::abs(_yMax))/2.0f;
 	offset.z = _zMin+(std::abs(_zMin)+std::abs(_zMax))/2.0f;
-	std::cout << "_x_Min: " << _xMin << ", _xMax:" << _xMax << std::endl;  
-	std::cout << "_y_Min: " << _yMin << ", _yMax:" << _yMax << std::endl;  
-	std::cout << "_z_Min: " << _zMin << ", _zMax:" << _zMax << std::endl;  
-	std::cout << "offset: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;  
 	return offset;
 }
 
