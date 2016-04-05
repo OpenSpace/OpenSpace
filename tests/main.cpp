@@ -33,7 +33,7 @@
 #include <test_common.inl>
 //#include <test_spicemanager.inl>
 //#include <test_scenegraphloader.inl>
-#include <test_quadtree.inl>
+#include <test_chunknode.inl>
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
 #include <openspace/engine/openspaceengine.h>

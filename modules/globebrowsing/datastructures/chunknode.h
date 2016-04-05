@@ -25,16 +25,67 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
+
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
 
 namespace openspace {
 
-class Quadtree {
-public:
-	Quadtree();
-	
-	
+enum Quad {
+	NORTH_WEST,
+	NORTH_EAST,
+	SOUTH_WEST,
+	SOUTH_EAST
 };
 
+
+
+struct BoundingRect {
+	BoundingRect(Scalar, Scalar, Scalar, Scalar);
+	BoundingRect(const Vec2& center, const Vec2& halfSize);
+	Vec2 center;
+	Vec2 halfSize;
+};
+
+
+
+
+
+class ChunkNode {
+public:
+	ChunkNode(const BoundingRect&, ChunkNode* parent = nullptr);
+	~ChunkNode();
+
+
+	void split();
+	void merge();
+	
+	bool isRoot() const;
+	bool isLeaf() const;
+	
+	
+	const ChunkNode& getChild(Quad quad) const;
+	const BoundingRect bounds;
+
+private:
+	
+
+	ChunkNode* _parent;
+	std::unique_ptr<ChunkNode> _children[4];
+
+};
+
+
+
 } // namespace openspace
+
+
+#include <modules/globebrowsing/datastructures/chunknode.inl>
+
 
 #endif // __QUADTREE_H__
