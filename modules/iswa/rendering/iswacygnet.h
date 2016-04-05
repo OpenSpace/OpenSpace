@@ -40,26 +40,31 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <modules/iswa/util/iswamanager.h>
+
 
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
 public:
-	ISWACygnet(int cygnetId, std::string path);
+	// ISWACygnet(int cygnetId, std::string path);
+	ISWACygnet(std::shared_ptr<Metadata> data);
 	~ISWACygnet();
 
-	virtual bool initialize();
-	virtual bool deinitialize();
+	virtual bool initialize() = 0;
+	virtual bool deinitialize() = 0;
 
-	virtual void render();
-	virtual void update();
+	virtual void render() = 0;
+	virtual void update() = 0;
+	virtual bool isReady() = 0;
 
 	bool enabled(){return _enabled.value();}
-	virtual bool isReady() = 0;
-	
+
 protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
-	virtual void setParent() = 0;
 	void registerProperties();
+	void unregisterProperties();
+
+	void setParent();
 
 	properties::BoolProperty _enabled;
 	properties::FloatProperty _updateInterval;
@@ -68,26 +73,15 @@ protected:
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-	SceneGraphNode* _parent;
-	glm::vec4 _pscOffset;
-	glm::vec4 _modelScale;
+	std::shared_ptr<Metadata> _data;
 
-	const int _cygnetId;
+	SceneGraphNode* _parent;
 	glm::dmat3 _stateMatrix;
-	std::string _frame; 
-	std::string _var;
 
 	double _time;
 	double _lastUpdateTime = 0;
-	std::map<std::string, std::string> _month;
-
-	std::string _fileExtension;
-	std::string _path;
-
 	float _openSpaceUpdateInterval;
 
-	bool _toDelete;
-	
 	int _id;
 };
 

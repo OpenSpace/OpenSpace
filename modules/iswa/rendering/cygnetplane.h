@@ -32,23 +32,24 @@
 namespace openspace{
 class CygnetPlane : public ISWACygnet {
 public:
-	CygnetPlane(int cygnetId, std::string path);
+	// CygnetPlane(int cygnetId, std::string path);
+	CygnetPlane(std::shared_ptr<Metadata> data);
 	~CygnetPlane();
 
-	virtual bool initialize();
-	virtual bool deinitialize();
-
-	bool isReady() override;
-
-	virtual void render();
-	virtual void update();
+	virtual bool initialize() = 0;
+	virtual bool deinitialize() = 0;
+	virtual bool isReady();
+	virtual void render() = 0;
+	virtual void update() = 0;
 
 protected:
-	virtual void setParent() = 0;
 	virtual void loadTexture() = 0;
 	virtual void updateTexture() = 0;
 
 	void createPlane();
+	void destroyPlane();
+	bool createShader();
+	void destroyShader();
 
 	GLuint _quad;
 	GLuint _vertexPositionBuffer;

@@ -28,19 +28,36 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 
-
 namespace openspace{
 
-ISWACygnet::ISWACygnet(int cygnetId, std::string path)
+// ISWACygnet::ISWACygnet(int cygnetId, std::string path)
+// 	: _enabled("enabled", "Is Enabled", true)
+// 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+// 	, _delete("delete", "Delete")
+// 	, _cygnetId(cygnetId)
+// 	, _shader(nullptr)
+// 	, _texture(nullptr)
+// 	, _frame("GALACTIC")
+// 	, _path(path)
+// 	, _data(nullptr)
+// {
+// 	addProperty(_enabled);
+// 	addProperty(_updateInterval);
+// 	addProperty(_delete);
+
+// 	_delete.onChange([this](){ISWAManager::ref().deleteCygnet(name());});
+// }
+
+ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	: _enabled("enabled", "Is Enabled", true)
 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	,_delete("delete", "Delete")
-	, _cygnetId(cygnetId)
+	, _delete("delete", "Delete")
+	// , _cygnetId(data->id)
 	, _shader(nullptr)
 	, _texture(nullptr)
-	, _frame("GALACTIC")
-	, _path(path)
-	,_toDelete(false)
+	// , _frame(data->frame)
+	// , _path(data->path)
+	, _data(data)
 {
 	addProperty(_enabled);
 	addProperty(_updateInterval);
@@ -51,23 +68,6 @@ ISWACygnet::ISWACygnet(int cygnetId, std::string path)
 
 ISWACygnet::~ISWACygnet(){}
 
-bool ISWACygnet::initialize(){
-
-	setParent();
-	return true;
-}
-
-bool ISWACygnet::deinitialize(){
-	OsEng.gui()._iSWAproperty.unregisterProperties(name());
-	_parent = nullptr;
-	return true;
-}
-
-void ISWACygnet::render(){
-
-}
-
-void ISWACygnet::update(){}
 
 void ISWACygnet::setPscUniforms(
 	ghoul::opengl::ProgramObject* program, 
@@ -81,11 +81,17 @@ void ISWACygnet::setPscUniforms(
 }
 
 void ISWACygnet::registerProperties(){
-
 	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+}
 
+void ISWACygnet::unregisterProperties(){
+	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+}
+
+void ISWACygnet::setParent(){
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode(_data->parent);
 }
 
 }//namespace openspac

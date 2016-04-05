@@ -34,7 +34,8 @@
  
  class TexturePlane : public CygnetPlane{
  public:
- 	TexturePlane(int cygnetId, std::string path);
+ 	// TexturePlane(int cygnetId, std::string path);
+ 	TexturePlane(std::shared_ptr<Metadata> data);
  	~TexturePlane();
 
  	virtual bool initialize();
@@ -44,7 +45,6 @@
 	virtual void update();
  
  private:
- 	virtual void setParent() override;
  	virtual void loadTexture() override;
     virtual void updateTexture() override;
 
