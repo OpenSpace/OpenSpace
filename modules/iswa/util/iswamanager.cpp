@@ -31,6 +31,10 @@
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
 
+namespace {
+	const std::string _loggerCat = "ISWAManager";
+}
+
 namespace openspace{
 	ISWAManager::ISWAManager()
 		:_container(nullptr)
@@ -51,21 +55,6 @@ namespace openspace{
 
 	ISWAManager::~ISWAManager(){}
 
-	void ISWAManager::addCygnet(std::string info){
-		std::string token;
-		std::stringstream ss(info);
-		getline(ss,token,',');
-		int cygnetId = std::stoi(token);
-
-		getline(ss,token,',');
-		std::string data = token;
-
-		if(cygnetId != 0)
-			_container->addISWACygnet(cygnetId, data);
-		else
-			_container->addISWACygnet("${OPENSPACE_DATA}/"+data);
-	}	
-
 	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::shared_ptr<Metadata> metadata){
 		std::cout << "createISWACygnet " << metadata->id << std::endl;
 		if(metadata->path != ""){
@@ -81,6 +70,9 @@ namespace openspace{
 				metadata->frame  = kw->getFrame();
 
 				cygnet = std::make_shared<DataPlane>(kw, metadata);
+			}else if(extension == "gif" || extension == "plain"){
+				LWARNING("This cygnet image is a GIF or does not exist");
+				return nullptr;
 			}else {
 				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
 				if(node){
@@ -102,8 +94,26 @@ namespace openspace{
 		}
 	}
 
-	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
+	void ISWAManager::addCygnet(std::string info){
+		std::string token;
+		std::stringstream ss(info);
+		getline(ss,token,',');
+		int cygnetId = std::stoi(token);
 
+		getline(ss,token,',');
+		std::string data = token;
+
+		if(cygnetId != 0)
+			_container->addISWACygnet(cygnetId, data);
+		else
+			_container->addISWACygnet("${OPENSPACE_DATA}/"+data);
+	}
+
+	void ISWAManager::deleteCygnet(std::string name){
+		_container->deleteCygnet(name);
+	}
+
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
 		return 	DlManager.downloadFile(
 					iSWAurl(id),
 					path,
@@ -112,13 +122,11 @@ namespace openspace{
 						std::cout<<"download finished: " << path <<std::endl;
 					}
 				);
-
 	}
 
 	void ISWAManager::downloadData(){}
 
 	std::shared_ptr<ExtensionFuture> ISWAManager::fileExtension(int id){
-
 		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
 		extFuture->isFinished = false;
 		extFuture->id = id;
@@ -151,10 +159,6 @@ namespace openspace{
 		if(_container)
 			return _container->iSWACygnet(name);
 		return nullptr;
-	}
-
-	void ISWAManager::deleteCygnet(std::string name){
-		_container->deleteCygnet(name);
 	}
 
 	std::string ISWAManager::iSWAurl(int id){

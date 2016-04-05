@@ -40,24 +40,6 @@ namespace {
 }
 
 namespace openspace {
-
-// DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
-// 	:CygnetPlane(1, path)
-// 	, _kw(kw)
-// {	
-// 	_id = id();
-// 	setName("DataPlane" + std::to_string(_id));
-// 	registerProperties();
-
-// 	KameleonWrapper::Model model = _kw->model();
-// 	if(	model == KameleonWrapper::Model::BATSRUS){
-// 		_var = "p";
-// 	}else{
-// 		_var = "rho";
-// 	}
-
-// }
-
 DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data)
 	:CygnetPlane(data)
 	, _kw(kw)
@@ -67,18 +49,10 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metada
 	registerProperties();
 
 	KameleonWrapper::Model model = _kw->model();
-	if(	model == KameleonWrapper::Model::BATSRUS){
+	if(	model == KameleonWrapper::Model::BATSRUS)
 		_var = "p";
-	}else{
+	else
 		_var = "rho";
-	}
-
-	if(!_data){
-		std::cout << "No data" << std::endl;
-	}else{
-		std::cout << _data->parent << std::endl;
-	}
-
 }
 DataPlane::~DataPlane(){}
 
@@ -98,12 +72,13 @@ bool DataPlane::initialize(){
 }
 
 bool DataPlane::deinitialize(){
-	_parent = nullptr;
     unregisterProperties();
     destroyPlane();
     destroyShader();
-	_kw = nullptr;
 	
+	_parent = nullptr;
+	_kw = nullptr;
+
 	return true;
 }
 
@@ -125,30 +100,24 @@ void DataPlane::render(){
 	}
 
 	transform = transform * rotz * roty; //BATSRUS
-	// transform = transform * roty;
 
-	// transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
-	// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
-	// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+	if(_data->frame == "GSM"){
+		glm::vec4 v(1,0,0,1);
+		glm::vec3 xVec = glm::vec3(transform*v);
+		xVec = glm::normalize(xVec);
 
-	glm::vec4 v(1,0,0,1);
-	glm::vec3 xVec = glm::vec3(transform*v);
-	xVec = glm::normalize(xVec);
+		double  lt;
+	    glm::vec3 sunVec =
+	    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+	    sunVec = glm::normalize(sunVec);
 
-	double  lt;
-    glm::vec3 sunVec =
-    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-    sunVec = glm::normalize(sunVec);
+	    float angle = acos(glm::dot(xVec, sunVec));
+	    glm::vec3 ref =  glm::cross(xVec, sunVec);
 
-    float angle = acos(glm::dot(xVec, sunVec));
-    glm::vec3 ref =  glm::cross(xVec, sunVec);
+	    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+	    transform = rotation * transform;
+	}
 
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-    transform = rotation * transform;
-
- //    if(!_data)
-	// 	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
-	// else
 	position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
 
 	// Activate shader
@@ -178,10 +147,6 @@ void DataPlane::update(){
 		createPlane();
 
 	_time = Time::ref().currentTime();
-
-	// if(!_data)
-	// 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
-	// else
 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
     _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
 
@@ -195,11 +160,11 @@ void DataPlane::update(){
 }
 
 void DataPlane::loadTexture() {
-        //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
 		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
 			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
@@ -216,7 +181,7 @@ void DataPlane::loadTexture() {
 void DataPlane::updateTexture(){}
 
 int DataPlane::id(){
-		static int id = 0;
-		return id++;
+	static int id = 0;
+	return id++;
 }
 }// namespace openspace

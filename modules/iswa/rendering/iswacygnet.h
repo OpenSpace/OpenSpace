@@ -46,7 +46,6 @@
 namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
 public:
-	// ISWACygnet(int cygnetId, std::string path);
 	ISWACygnet(std::shared_ptr<Metadata> data);
 	~ISWACygnet();
 
@@ -63,7 +62,6 @@ protected:
 	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	void registerProperties();
 	void unregisterProperties();
-
 	void setParent();
 
 	properties::BoolProperty _enabled;

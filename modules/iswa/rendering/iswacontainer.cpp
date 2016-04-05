@@ -30,31 +30,25 @@
 #include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
+
 ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
 	:Renderable(dictionary)
-{
-	std::cout << "Created ISWAContainer" << std::endl;
-}
+{}
 
 ISWAContainer::~ISWAContainer(){}
 
 bool ISWAContainer::initialize(){
-	std::cout << "Initialized ISWAContainer" << std::endl;
-
 	ISWAManager::initialize();
 	ISWAManager::ref().setContainer(this);
 
-	// addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
-	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
-	//addISWACygnet("${OPENSPACE_DATA}/test.png");
+	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	addISWACygnet(5, "Screen");
-	// addISWACygnet(7, "Sun");
+	addISWACygnet(7, "Sun");
 
 	return true;
 }
 
 bool ISWAContainer::deinitialize(){
-
 	for(auto iSWACygnet : _iSWACygnets)
 		iSWACygnet->deinitialize();
 
@@ -142,7 +136,6 @@ void ISWAContainer::deleteCygnet(std::string name){
 		_iSWACygnets.erase(it);
 	}
 }
-
 
 std::shared_ptr<ISWACygnet> ISWAContainer::iSWACygnet(std::string name){
 	for(auto cygnet : _iSWACygnets){

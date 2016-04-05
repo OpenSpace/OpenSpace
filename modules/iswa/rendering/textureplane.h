@@ -34,7 +34,6 @@
  
  class TexturePlane : public CygnetPlane{
  public:
- 	// TexturePlane(int cygnetId, std::string path);
  	TexturePlane(std::shared_ptr<Metadata> data);
  	~TexturePlane();
 

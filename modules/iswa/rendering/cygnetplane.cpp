@@ -51,19 +51,14 @@ bool CygnetPlane::isReady(){
 void CygnetPlane::createPlane(){
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    
 	// ============================
     // 		GEOMETRY (quad)
     // ============================
-    // GLfloat x, y, w;
-    // if(!_data){
-    //     x = _modelScale.x/2.0;
-    //     y = _modelScale.z/2.0;
-    //     w = _modelScale.w;
-    // }else{
     const GLfloat x = _data->scale.x/2.0;
     const GLfloat y = _data->scale.z/2.0;
     const GLfloat w = _data->scale.w;
-    // }
+
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
         -x, -y, 0, w, 0, 1,

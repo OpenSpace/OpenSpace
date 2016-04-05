@@ -30,33 +30,12 @@
 
 namespace openspace{
 
-// ISWACygnet::ISWACygnet(int cygnetId, std::string path)
-// 	: _enabled("enabled", "Is Enabled", true)
-// 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-// 	, _delete("delete", "Delete")
-// 	, _cygnetId(cygnetId)
-// 	, _shader(nullptr)
-// 	, _texture(nullptr)
-// 	, _frame("GALACTIC")
-// 	, _path(path)
-// 	, _data(nullptr)
-// {
-// 	addProperty(_enabled);
-// 	addProperty(_updateInterval);
-// 	addProperty(_delete);
-
-// 	_delete.onChange([this](){ISWAManager::ref().deleteCygnet(name());});
-// }
-
 ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	: _enabled("enabled", "Is Enabled", true)
 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	, _delete("delete", "Delete")
-	// , _cygnetId(data->id)
 	, _shader(nullptr)
 	, _texture(nullptr)
-	// , _frame(data->frame)
-	// , _path(data->path)
 	, _data(data)
 {
 	addProperty(_enabled);
