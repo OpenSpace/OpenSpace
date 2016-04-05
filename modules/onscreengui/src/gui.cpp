@@ -398,7 +398,9 @@ void GUI::renderMainWindow() {
 
 	ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
 	ImGui::Checkbox("ScreenSpace Properties", &_screenSpaceProperty._isEnabled);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
 	ImGui::Checkbox("iSWA Properties", &_iSWAproperty._isEnabled);
+#endif
 	ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
     _time.render();
@@ -425,6 +427,7 @@ void GUI::renderMainWindow() {
 		addScreenSpaceRenderable(std::string(addImageBuffer));
 	}
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
 	static const int addCygnetBufferSize = 256;
     static char addCygnetBuffer[addCygnetBufferSize];
 	ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
@@ -432,6 +435,7 @@ void GUI::renderMainWindow() {
 	if(ImGui::SmallButton("Add Cygnet")){
 		ISWAManager::ref().addCygnet(std::string(addCygnetBuffer));
 	}
+#endif
 
 	ImGui::End();
 }
