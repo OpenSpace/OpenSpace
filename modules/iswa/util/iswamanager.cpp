@@ -118,8 +118,8 @@ namespace openspace{
 					iSWAurl(id),
 					path,
 					true,
-					[](const DownloadManager::FileFuture& f){
-						std::cout<<"download finished"<<std::endl;
+					[path](const DownloadManager::FileFuture& f){
+						std::cout<<"download finished: " << path <<std::endl;
 					}
 				);
 	}

@@ -66,15 +66,18 @@ void ISWAContainer::render(const RenderData& data){
 } 
 
 void ISWAContainer::update(const UpdateData& data){
+
+	// Create iSWAcygnets if a ExtensionFuture in _extFutures is finished loading.
+	// Then remove it from the _extFutures vector.
 	for (auto it = _extFutures.begin(); it != _extFutures.end(); )
 	{
-	    if ((*it)->isFinished) {
-	    	std::string path = "${OPENSPACE_DATA}/scene/iswa/" + std::to_string((*it)->id) + (*it)->extension;
-	    	
-	    	std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
-	    	data->id = (*it)->id;
-	    	data->path = path;
-	    	data->parent = (*it)->parent;
+		if ((*it)->isFinished) {
+			std::string path = "${OPENSPACE_DATA}/scene/iswa/" + std::to_string((*it)->id) + (*it)->extension;
+			
+			std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
+			data->id = (*it)->id;
+			data->path = path;
+			data->parent = (*it)->parent;
 
 			std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(data);
 			if(cygnet){
