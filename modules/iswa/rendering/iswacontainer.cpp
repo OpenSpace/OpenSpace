@@ -81,7 +81,7 @@ void ISWAContainer::update(const UpdateData& data){
 			if(cygnet){
 				_iSWACygnets.push_back(cygnet);
 			}
-			_extFutures.erase( it );
+			it = _extFutures.erase( it );
 		}
 	    else {
 	    	++it;
