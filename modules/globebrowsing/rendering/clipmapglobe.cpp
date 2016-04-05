@@ -22,9 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
-
-#include <modules/globebrowsing/rendering/globemesh.h>
 #include <modules/globebrowsing/rendering/clipmapglobe.h>
 
 // open space includes
@@ -40,7 +37,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "RenderableGlobe";
+	const std::string _loggerCat = "ClipMapGlobe";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -50,37 +47,55 @@ namespace {
 }
 
 namespace openspace {
-
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
+	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
+		: _patch(10, 10, 0, 0, M_PI / 6, M_PI / 6)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
+			"ClipMapGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
+
 		dictionary.getValue(keyFrame, _frame);
 		dictionary.getValue(keyBody, _target);
 		if (_target != "")
 			setBody(_target);
 
-
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
-
-		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
 	}
 
-	RenderableGlobe::~RenderableGlobe() {
+	ClipMapGlobe::~ClipMapGlobe() {
 	}
 
-	void RenderableGlobe::update(const UpdateData& data) {
+	bool ClipMapGlobe::initialize() {
+		_patch.initialize();
+		return isReady();
+	}
+
+	bool ClipMapGlobe::deinitialize() {
+		_patch.deinitialize();
+		return true;
+	}
+
+	bool ClipMapGlobe::isReady() const {
+		bool ready = true;
+		ready &= _patch.isReady();
+		return ready;
+	}
+
+	void ClipMapGlobe::render(const RenderData& data)
+	{
+		// render
+		_patch.render(data);
+	}
+
+	void ClipMapGlobe::update(const UpdateData& data) {
+		_patch.update(data);
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;
-		DistanceSwitch::update(data);
 	}
 
 }  // namespace openspace

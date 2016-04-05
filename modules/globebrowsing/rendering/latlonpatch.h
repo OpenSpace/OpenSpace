@@ -22,65 +22,52 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
+#ifndef __LATLONPATCH_H__
+#define __LATLONPATCH_H__
 
-#include <modules/globebrowsing/rendering/globemesh.h>
-#include <modules/globebrowsing/rendering/clipmapglobe.h>
+#include <glm/glm.hpp>
 
 // open space includes
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderable.h>
 
-// ghoul includes
-#include <ghoul/misc/assert.h>
+#include <modules/globebrowsing/rendering/gridgeometry.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-namespace {
-	const std::string _loggerCat = "RenderableGlobe";
-
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
-
-	const std::string keyBody = "Body";
+namespace ghoul {
+namespace opengl {
+	class ProgramObject;
+}
 }
 
+
 namespace openspace {
-
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _rotation("rotation", "Rotation", 0, 0, 360)
+	class LatLonPatch : public Renderable
 	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
+	public:
+		LatLonPatch(
+			unsigned int xRes,
+			unsigned int yRes,
+			double posLat,
+			double posLon,
+			double sizeLat,
+			double sizeLon);
+		~LatLonPatch();
 
+		bool initialize() override;
+		bool deinitialize() override;
+		bool isReady() const override;
 
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
+		void render(const RenderData& data) override;
+		void update(const UpdateData& data) override;
 
-		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
-	}
+		void setPositionLatLon(glm::dvec2 posLatLon);
 
-	RenderableGlobe::~RenderableGlobe() {
-	}
+	private:
+		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-	void RenderableGlobe::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
-		DistanceSwitch::update(data);
-	}
-
+		glm::dvec2 _posLatLon;
+		glm::dvec2 _sizeLatLon;
+		GridGeometry _grid;
+	};
 }  // namespace openspace
+
+#endif  // __LATLONPATCH_H__

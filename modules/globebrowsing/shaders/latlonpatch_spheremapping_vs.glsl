@@ -24,10 +24,14 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 Projection;
 
-layout(location = 0) in vec4 in_position;
+uniform vec3 p00;
+uniform vec3 p10;
+uniform vec3 p01;
+uniform vec3 p11;
+
+layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
 
@@ -35,12 +39,11 @@ out vec4 vs_position;
 
 void main()
 {
-	// set variables
-	vs_position = vec4(in_position.xyz * 60000000.0f, 1);
-	vec4 tmp = vec4(in_position.xyz * 60000000.0f, 1);
+	// Bilinear interpolation
+	vec3 p0 = (1 - in_UV.x) * p00 + in_UV.x * p10;
+	vec3 p1 = (1 - in_UV.x) * p01 + in_UV.x * p11;
+	vec3 p = (1 - in_UV.y) * p0 + in_UV.y * p1;
 
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
-	position = ViewProjection * position;
+	vec4 position = Projection * vec4(p, 1);
 	gl_Position = z_normalization(position);
 }

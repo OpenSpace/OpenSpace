@@ -22,16 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
-
-#include <modules/globebrowsing/rendering/globemesh.h>
-#include <modules/globebrowsing/rendering/clipmapglobe.h>
-
-// open space includes
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <modules/globebrowsing/util/converter.h>
 
 // ghoul includes
 #include <ghoul/misc/assert.h>
@@ -39,48 +30,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace {
-	const std::string _loggerCat = "RenderableGlobe";
-
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
-
-	const std::string keyBody = "Body";
-}
-
 namespace openspace {
 
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _rotation("rotation", "Rotation", 0, 0, 360)
-	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
+namespace converter {
 
-
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
-
-		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
+	glm::dvec3 latLonToCartesian(double latitude, double longitude, double radius) {
+		return radius * glm::dvec3(
+			glm::cos(latitude) * glm::cos(longitude),
+			glm::cos(latitude) * glm::sin(longitude),
+			glm::sin(latitude));
 	}
 
-	RenderableGlobe::~RenderableGlobe() {
-	}
-
-	void RenderableGlobe::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
-		DistanceSwitch::update(data);
-	}
-
+}  // namespace converter
 }  // namespace openspace

@@ -74,7 +74,6 @@ namespace openspace {
 
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject == nullptr) {
-			// Night texture program
 			_programObject = renderEngine.buildRenderProgram(
 				"simpleTextureProgram",
 				"${MODULE_GLOBEBROWSING}/shaders/simple_vs.glsl",
@@ -131,8 +130,25 @@ namespace openspace {
 		_programObject->setUniform("ModelTransform", transform);
 		setPscUniforms(*_programObject.get(), data.camera, data.position);
 
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+		glm::dmat4 cameraTransform = data.camera.viewMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
+		glm::dmat4 cameraProjectionTransform = data.camera.viewProjectionMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
+
+		LDEBUG("cameraTransform = ( " << std::endl << cameraTransform[0][0] << " , " << cameraTransform[1][0] << " , " << cameraTransform[2][0] << std::endl <<
+			cameraTransform[0][1] << " , " << cameraTransform[1][1] << " , " << cameraTransform[2][1] << std::endl <<
+			cameraTransform[0][2] << " , " << cameraTransform[1][2] << " , " << cameraTransform[2][2] << std::endl << " ) ");
+
+		LDEBUG("transform = ( " << std::endl << transform[0][0] << " , " << transform[1][0] << " , " << transform[2][0] << std::endl <<
+			transform[0][1] << " , " << transform[1][1] << " , " << transform[2][1] << std::endl <<
+			transform[0][2] << " , " << transform[1][2] << " , " << transform[2][2] << std::endl << " ) ");
+
+		LDEBUG("cameraProjectionTransform = ( " << std::endl << cameraProjectionTransform[0][0] << " , " << cameraProjectionTransform[1][0] << " , " << cameraProjectionTransform[2][0] << std::endl <<
+			cameraProjectionTransform[0][1] << " , " << cameraProjectionTransform[1][1] << " , " << cameraProjectionTransform[2][1] << std::endl <<
+			cameraProjectionTransform[0][2] << " , " << cameraProjectionTransform[1][2] << " , " << cameraProjectionTransform[2][2] << std::endl << " ) ");
+
+
+
+		glDisable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
 
 		// render
 		_grid.drawUsingActiveProgram();
