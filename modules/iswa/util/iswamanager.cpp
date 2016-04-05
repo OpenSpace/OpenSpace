@@ -106,8 +106,7 @@ namespace openspace{
 		_container->deleteCygnet(name);
 	}
 
-	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
-
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
 		return 	DlManager.downloadFile(
 					iSWAurl(id),
 					path,
@@ -116,7 +115,6 @@ namespace openspace{
 						std::cout<<"download finished"<<std::endl;
 					}
 				);
-
 	}
 
 	void ISWAManager::downloadData(){}
@@ -125,7 +123,6 @@ namespace openspace{
 		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
 		extFuture->isFinished = false;
 		extFuture->id = id;
-		std::cout << "extension id: "<< id << std::endl;
 		DlManager.getFileExtension(
 				iSWAurl(id),
 				[extFuture](std::string extension){

@@ -386,7 +386,7 @@ void GuiPropertyComponent::registerProperty(properties::Property* prop) {
 void GuiPropertyComponent::unregisterProperties(std::string owner){
     auto it = _propertiesByOwner.find(owner);
     if(it != _propertiesByOwner.end()){
-        for(prop : it->second){
+        for(auto prop : it->second){
             std::string className = prop->className();
             if (className == "BoolProperty")
                 _boolProperties.insert(prop);

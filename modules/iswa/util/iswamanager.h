@@ -64,7 +64,7 @@ public:
 	void addCygnet(std::string info);
 	void deleteCygnet(std::string);
 
-	DownloadManager::FileFuture* downloadImage(int, std::string);
+	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
 	void downloadData();
 	std::shared_ptr<ExtensionFuture> fileExtension(int);
 

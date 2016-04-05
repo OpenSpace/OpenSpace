@@ -41,9 +41,9 @@ bool ISWAContainer::initialize(){
 	ISWAManager::initialize();
 	ISWAManager::ref().setContainer(this);
 
-	// addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
-	// addISWACygnet(5, "Screen");
-	// addISWACygnet(7, "Sun");
+	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	addISWACygnet(5, "Screen");
+	addISWACygnet(7, "Sun");
 
 	return true;
 }
@@ -80,7 +80,7 @@ void ISWAContainer::update(const UpdateData& data){
 			if(cygnet){
 				_iSWACygnets.push_back(cygnet);
 			}
-			_extFutures.erase( it );
+			it = _extFutures.erase( it );
 		}
 	    else {
 	    	++it;

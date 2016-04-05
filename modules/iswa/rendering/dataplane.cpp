@@ -101,7 +101,7 @@ void DataPlane::render(){
 
 	transform = transform * rotz * roty; //BATSRUS
 
-	if(_data->frame = "GSM"){
+	if(_data->frame == "GSM"){
 		glm::vec4 v(1,0,0,1);
 		glm::vec3 xVec = glm::vec3(transform*v);
 		xVec = glm::normalize(xVec);
@@ -164,7 +164,7 @@ void DataPlane::loadTexture() {
 		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
 			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
-			
+
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 

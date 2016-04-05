@@ -123,6 +123,9 @@ void FramebufferRenderer::initialize() {
     OsEng.renderEngine().raycasterManager().addListener(*this);
 
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    if (_nAaSamples == 0) {
+        _nAaSamples = 1;
+    }
     if (_nAaSamples > 8) {
         LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
         _nAaSamples = 8;

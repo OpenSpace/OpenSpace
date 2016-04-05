@@ -135,10 +135,11 @@ void TexturePlane::update(){
 	if(_futureTexture && _futureTexture->isFinished){
 		loadTexture();
 
-		delete _futureTexture; 
 		_futureTexture = nullptr;
 	}
 }
+
+
 
 void TexturePlane::loadTexture() {
 
@@ -157,7 +158,7 @@ void TexturePlane::loadTexture() {
 }
 
 void TexturePlane::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
 	}

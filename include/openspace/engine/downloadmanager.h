@@ -64,20 +64,20 @@ public:
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
     using RequestFinishedCallback = std::function<void(std::string)>;
     using AsyncDownloadFinishedCallback =
-        std::function<void(const std::vector<FileFuture*>&)>;
+        std::function<void(const std::vector<std::shared_ptr<FileFuture>>&)>;
 
     DownloadManager(std::string requestURL, int applicationVersion,
         bool useMultithreadedDownload = true);
 
     // callers responsibility to delete
     // callbacks happen on a different thread
-    FileFuture* downloadFile(const std::string& url, const ghoul::filesystem::File& file,
+    std::shared_ptr<FileFuture> downloadFile(const std::string& url, const ghoul::filesystem::File& file,
         bool overrideFile = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    std::vector<FileFuture*> downloadRequestFiles(const std::string& identifier,
+    std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),

@@ -71,6 +71,7 @@ public:
 
     //void addNode(SceneGraphNode* child);
 
+    void addChild(SceneGraphNode* child);
     void setParent(SceneGraphNode* parent);
 	//bool abandonChild(SceneGraphNode* child);
 
