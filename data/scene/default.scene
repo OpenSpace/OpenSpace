@@ -28,7 +28,7 @@ return {
         --"gridGalactic",
         --"gridEcliptic",
         --"gridEquatorial",
-        --"iswa",
+        "iswa",
     }
 }
 

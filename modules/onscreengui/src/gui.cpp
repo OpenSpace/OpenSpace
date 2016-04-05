@@ -428,12 +428,14 @@ void GUI::renderMainWindow() {
 	}
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-	static const int addCygnetBufferSize = 256;
-    static char addCygnetBuffer[addCygnetBufferSize];
-	ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+   	if(ISWAManager::isInitialized()){
+		static const int addCygnetBufferSize = 256;
+	    static char addCygnetBuffer[addCygnetBufferSize];
+		ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
-	if(ImGui::SmallButton("Add Cygnet")){
-		ISWAManager::ref().addCygnet(std::string(addCygnetBuffer));
+		if(ImGui::SmallButton("Add Cygnet")){
+			ISWAManager::ref().addCygnet(std::string(addCygnetBuffer));
+		}
 	}
 #endif
 

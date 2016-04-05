@@ -85,9 +85,11 @@ properties::Property* property(const std::string& uri) {
         }
         
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().iSWACygnet(nameUri);
-        if(cygnet){
-            return cygnet->property(remainingUri);
+        if(ISWAManager::isInitialized()){
+            std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().iSWACygnet(nameUri);
+            if(cygnet){
+                return cygnet->property(remainingUri);
+            }
         }
 #endif
         
