@@ -32,17 +32,16 @@
  
  class DataPlane : public CygnetPlane {
  public:
- 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
+ 	// DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path);
+ 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data);
  	~DataPlane();
 
- 	virtual bool initialize();
-    virtual bool deinitialize();
-
-	virtual void render();
-	virtual void update();
+ 	virtual bool initialize() override;
+    virtual bool deinitialize() override;
+	virtual void render() override;
+	virtual void update() override;
  
  private:
- 	virtual void setParent() override;
  	virtual void loadTexture() override;
  	virtual void updateTexture() override;
 
@@ -51,6 +50,7 @@
 	std::shared_ptr<KameleonWrapper> _kw;
 	glm::size3_t _dimensions;
 	float* _dataSlice;
+	std::string _var;
  };
  
  } // namespace openspace

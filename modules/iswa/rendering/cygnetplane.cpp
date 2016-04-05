@@ -19,89 +19,51 @@
 #include <modules/iswa/rendering/cygnetplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 
 namespace openspace{
 
-CygnetPlane::CygnetPlane(int cygnetId, std::string path)
-	:ISWACygnet(cygnetId, path)
-	,_quad(0)
-	,_vertexPositionBuffer(0)
+// CygnetPlane::CygnetPlane(int cygnetId, std::string path)
+// 	:ISWACygnet(cygnetId, path)
+// 	,_quad(0)
+// 	,_vertexPositionBuffer(0)
+//     ,_planeIsDirty(true)
+// {}
+
+CygnetPlane::CygnetPlane(std::shared_ptr<Metadata> data)
+    :ISWACygnet(data)
+    ,_quad(0)
+    ,_vertexPositionBuffer(0)
     ,_planeIsDirty(true)
 {}
 
 CygnetPlane::~CygnetPlane(){}
 
-bool CygnetPlane::initialize(){
-	ISWACygnet::initialize();
-
-	glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    createPlane();
-
-    if (_shader == nullptr) {
-        // Plane Program
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
-            );
-        if (!_shader)
-            return false;
-    }
-}
-
-bool CygnetPlane::deinitialize(){
-	ISWACygnet::deinitialize();
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
-
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
-
-  	return true;
-}
-
 bool CygnetPlane::isReady(){
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
-}
-
-void CygnetPlane::render(){}
-
-void CygnetPlane::update(){
-    ISWACygnet::update();
-    
-	_time = Time::ref().currentTime();
-	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
-    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
-
-    if(_openSpaceUpdateInterval){
-    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
-    		updateTexture();
-    		_lastUpdateTime = _time;
-    	}
-    }
+    bool ready = true;
+    if (!_shader)
+        ready &= false;
+    if(!_texture)
+        ready &= false;
+    return ready;
 }
 
 void CygnetPlane::createPlane(){
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 	// ============================
     // 		GEOMETRY (quad)
     // ============================
-    const GLfloat x = _modelScale.x/2.0;
-    const GLfloat y = _modelScale.z/2.0;
-    const GLfloat w = _modelScale.w;
+    // GLfloat x, y, w;
+    // if(!_data){
+    //     x = _modelScale.x/2.0;
+    //     y = _modelScale.z/2.0;
+    //     w = _modelScale.w;
+    // }else{
+    const GLfloat x = _data->scale.x/2.0;
+    const GLfloat y = _data->scale.z/2.0;
+    const GLfloat w = _data->scale.w;
+    // }
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
         -x, -y, 0, w, 0, 1,
@@ -121,6 +83,35 @@ void CygnetPlane::createPlane(){
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
     _planeIsDirty = false;
+}
+
+void CygnetPlane::destroyPlane(){
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+}
+
+bool CygnetPlane::createShader(){
+    if (_shader == nullptr) {
+    // Plane Program
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("PlaneProgram",
+        "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
+        "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
+        );
+    if (!_shader)
+        return false;
+    }
+}
+
+void CygnetPlane::destroyShader(){
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
 }
 
 } //namespace openspace

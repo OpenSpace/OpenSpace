@@ -44,11 +44,11 @@ bool ISWAContainer::initialize(){
 	ISWAManager::initialize();
 	ISWAManager::ref().setContainer(this);
 
-	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
+	// addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet("${OPENSPACE_DATA}/ENLIL.cdf");
 	//addISWACygnet("${OPENSPACE_DATA}/test.png");
-	addISWACygnet(5);
-	addISWACygnet(7);
+	addISWACygnet(5, "Screen");
+	// addISWACygnet(7, "Sun");
 
 	return true;
 }
@@ -72,12 +72,17 @@ void ISWAContainer::render(const RenderData& data){
 } 
 
 void ISWAContainer::update(const UpdateData& data){
-
 	for (auto it = _extFutures.begin(); it != _extFutures.end(); )
 	{
-	    if ((*it)->isFinished) { 			
+	    if ((*it)->isFinished) {
 	    	std::string path = "${OPENSPACE_DATA}/scene/iswa/" + std::to_string((*it)->id) + (*it)->extension;
-			std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet((*it)->id, std::move(path));
+	    	
+	    	std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
+	    	data->id = (*it)->id;
+	    	data->path = path;
+	    	data->parent = (*it)->parent;
+
+			std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(data);
 			if(cygnet){
 				_iSWACygnets.push_back(cygnet);
 			}
@@ -96,16 +101,20 @@ void ISWAContainer::update(const UpdateData& data){
 }
 
 void ISWAContainer::addISWACygnet(std::string path){
-	std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(1, path);
+	std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
+	data->id = 0;
+	data->path = path;
+
+	std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(data);
 	if(cygnet){
 		_iSWACygnets.push_back(cygnet);
 	}
 
 }
 
-void ISWAContainer::addISWACygnet(int id){
-
+void ISWAContainer::addISWACygnet(int id, std::string data){
 	std::shared_ptr<ExtensionFuture> extFuture = ISWAManager::ref().fileExtension(id);
+	extFuture->parent = data;
 	_extFutures.push_back(extFuture);
 }
 

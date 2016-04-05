@@ -56,47 +56,43 @@ namespace openspace{
 		std::stringstream ss(info);
 		getline(ss,token,',');
 		int cygnetId = std::stoi(token);
-	/*	// std::cout << token << std::endl;
+
 		getline(ss,token,',');
-		std::string parent = token;*/
+		std::string data = token;
 
-		//if(parent == "Earth" || parent == "Sun"){
-			/*std::shared_ptr<TexturePlane> cygnet;
-			cygnet = std::make_shared<TexturePlane>();
-			cygnet->initialize();*/
-			// cygnet->cygnetId(cygnetId);
-			// cygnet->parent(parent);
-			//_container->addISWACygnet(cygnet);
-		_container->addISWACygnet(cygnetId);
-
-		//}else{
-		//	OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(cygnetId));
-
-		//}
-		// std::cout << token << std::endl;
-		// if(token = ""){
-		// 	std::cout << "empty" << std::endl;
-		// }
-
-		// std::shared_ptr<ISWACygnet> cygnet;
-		// _container->addCygnet(cygnet);
+		if(cygnetId != 0)
+			_container->addISWACygnet(cygnetId, data);
+		else
+			_container->addISWACygnet("${OPENSPACE_DATA}/"+data);
 	}	
 
-	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(int id, std::string path){
-		std::cout << "createISWACygnet " << id << std::endl;
-		if(path != ""){
-			const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
+	std::shared_ptr<ISWACygnet> ISWAManager::createISWACygnet(std::shared_ptr<Metadata> metadata){
+		std::cout << "createISWACygnet " << metadata->id << std::endl;
+		if(metadata->path != ""){
+			const std::string& extension = ghoul::filesystem::File(absPath(metadata->path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
 
 			if(extension == "cdf"){
-				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(path));
-				cygnet = std::make_shared<DataPlane>(kw, path);
-			} else if(id == 5) {
-				//check some other condition that id==5 (based on metadata maybe?)
-				OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id, path));
-				return nullptr;
-			} else {
-				cygnet = std::make_shared<TexturePlane>(id, path);
+				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(metadata->path));
+
+				metadata->scale  = kw->getModelScaleScaled();
+				metadata->offset = kw->getModelBarycenterOffsetScaled();
+				metadata->parent = kw->getParent();
+				metadata->frame  = kw->getFrame();
+
+				cygnet = std::make_shared<DataPlane>(kw, metadata);
+			}else {
+				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
+				if(node){
+					metadata->scale = glm::vec4(3, 3, 3, 10);
+					metadata->offset = glm::vec4(0, 0, 0, 1);
+					metadata->frame  = "GALACTIC";
+
+					cygnet = std::make_shared<TexturePlane>(metadata);
+				}else{
+					OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(metadata));
+					return nullptr;
+				} 
 			}
 
 			cygnet->initialize();
@@ -106,7 +102,7 @@ namespace openspace{
 		}
 	}
 
-	DownloadManager::FileFuture* ISWAManager::downloadImage(int id, std::string path){
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
 
 		return 	DlManager.downloadFile(
 					iSWAurl(id),
@@ -126,7 +122,6 @@ namespace openspace{
 		std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
 		extFuture->isFinished = false;
 		extFuture->id = id;
-		std::cout << "extension id: "<< id << std::endl;
 		DlManager.getFileExtension(
 				iSWAurl(id),
 				[extFuture](std::string extension){

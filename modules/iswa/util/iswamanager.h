@@ -28,16 +28,27 @@
 #include <memory>
 #include <map>
 #include <openspace/engine/downloadmanager.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
 class ISWACygnet;
 class ISWAContainer;
 
 struct ExtensionFuture {
-
 	std::string extension;
 	bool isFinished;
 	int id;
+	std::string parent;
+};
+
+struct Metadata {
+	int id;
+	std::string path;
+	std::string parent;
+	std::string frame;
+	glm::vec4 offset;
+	glm::vec4 scale;
+	std::string scaleVariable;
 };
 
 
@@ -50,9 +61,10 @@ public:
 	~ISWAManager();
 
 	std::shared_ptr<ISWACygnet> createISWACygnet(int, std::string);
+	std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
 	void addCygnet(std::string info);
 
-	DownloadManager::FileFuture* downloadImage(int, std::string);
+	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
 	void downloadData();
 
 	std::shared_ptr<ExtensionFuture> fileExtension(int);

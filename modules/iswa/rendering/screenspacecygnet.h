@@ -27,12 +27,14 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/engine/downloadmanager.h>
+#include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
 
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
 	ScreenSpaceCygnet(int cygnetId, std::string path);
+	ScreenSpaceCygnet(std::shared_ptr<Metadata> data);
 	~ScreenSpaceCygnet();
 
 	void render() override;
@@ -50,13 +52,15 @@ private:
 
 	std::string _path;
 	const int _cygnetId;
-	int _id;
 	float _time;
 	float _lastUpdateTime = 0.0f;
-	DownloadManager::FileFuture* _futureTexture;
-	std::string _fileExtension;
 
+	std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
 	float _openSpaceUpdateInterval;
+	
+	std::string _fileExtension;
+	
+	int _id;	
 };
 
  } // namespace openspace

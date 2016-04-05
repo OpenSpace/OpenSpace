@@ -75,7 +75,7 @@ InfoWidget::InfoWidget(QString name, int totalBytes)
     setLayout(layout);
 }
 
-void InfoWidget::update(openspace::DownloadManager::FileFuture* f) {
+void InfoWidget::update(std::shared_ptr<openspace::DownloadManager::FileFuture> f) {
     _bytes->setText(
         QString("%1 / %2")
         .arg(f->currentSize)

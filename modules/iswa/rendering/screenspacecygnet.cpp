@@ -35,12 +35,34 @@ namespace {
 namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
-: ScreenSpaceRenderable()
-, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-, _cygnetId(cygnetId)
-, _path(path)
+	: ScreenSpaceRenderable()
+	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	, _cygnetId(cygnetId)
+	, _path(path)
 {
 	std::cout << "screenspacecygnet constructor 1" << std::endl;
+	_id = id();
+	setName("ScreenSpaceCygnet" + std::to_string(_id));
+	addProperty(_updateInterval);
+
+	// registerProperties();
+	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
+	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
+	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
+	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
+	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
+	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+}
+
+ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
+	: ScreenSpaceRenderable()
+	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	, _cygnetId(data->id)
+	, _path(data->path)
+{
 	_id = id();
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
 	addProperty(_updateInterval);
@@ -125,14 +147,13 @@ void ScreenSpaceCygnet::update(){
 
 		loadTexture();
 
-		delete _futureTexture; 
 		_futureTexture = nullptr;
 	}
 
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
 	if(future){
 		_futureTexture = future;
 	}
