@@ -31,6 +31,10 @@
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
 
+namespace {
+	const std::string _loggerCat = "ISWAManager";
+}
+
 namespace openspace{
 	ISWAManager::ISWAManager()
 		:_container(nullptr)
@@ -66,6 +70,9 @@ namespace openspace{
 				metadata->frame  = kw->getFrame();
 
 				cygnet = std::make_shared<DataPlane>(kw, metadata);
+			}else if(extension == "gif" || extension == "plain"){
+				LWARNING("This cygnet image is a GIF or does not exist");
+				return nullptr;
 			}else {
 				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
 				if(node){
