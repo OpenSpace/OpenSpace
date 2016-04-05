@@ -78,12 +78,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}
 
-
-//deinitialzie(){
-	// unregisterProperies
-// }
-
-
 bool ScreenSpaceRenderable::isEnabled() const {
 	return _enabled;
 }

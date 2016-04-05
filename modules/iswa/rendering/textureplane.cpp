@@ -34,6 +34,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 namespace {
 	const std::string _loggerCat = "TexutePlane";
@@ -41,8 +42,17 @@ namespace {
 
 namespace openspace {
 
-TexturePlane::TexturePlane(int cygnetId, std::string path) 
-	:CygnetPlane(cygnetId, path)
+// TexturePlane::TexturePlane(int cygnetId, std::string path) 
+// 	:CygnetPlane(cygnetId, path)
+// 	,_futureTexture(nullptr)
+// {
+// 	_id = id();
+// 	setName("TexturePlane" + std::to_string(_id));
+// 	registerProperties();
+// }
+
+TexturePlane::TexturePlane(std::shared_ptr<Metadata> data) 
+	:CygnetPlane(data)
 	,_futureTexture(nullptr)
 {
 	_id = id();
@@ -51,35 +61,25 @@ TexturePlane::TexturePlane(int cygnetId, std::string path)
 }
 
 
-TexturePlane::~TexturePlane(){
-    
-}
+TexturePlane::~TexturePlane(){}
 
 
 bool TexturePlane::initialize(){
-	_modelScale = glm::vec4(3, 3, 3, 10);
-	_pscOffset  = glm::vec4(0, 0, 0, 1);
-	CygnetPlane::initialize();
+	setParent();
+    createPlane();
+    createShader();
+
 	updateTexture();
     return isReady();
 }
 
 bool TexturePlane::deinitialize(){
-	CygnetPlane::deinitialize();
+	_parent = nullptr;
+    unregisterProperties();
+    destroyPlane();
+    destroyShader();
 
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
-
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
-
-    std::remove(absPath(_path).c_str());
+    std::remove(absPath(_data->path).c_str());
 
 	return true;
 }
@@ -133,7 +133,18 @@ void TexturePlane::update(){
 	if(_planeIsDirty)
 		createPlane();
 
-	CygnetPlane::update();
+	_time = Time::ref().currentTime();
+	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
+    
+    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
+
+    if(_openSpaceUpdateInterval){
+    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
+    		updateTexture();
+    		_lastUpdateTime = _time;
+    	}
+    }
+
 	if(_futureTexture && _futureTexture->isFinished){
 		loadTexture();
 
@@ -142,12 +153,9 @@ void TexturePlane::update(){
 	}
 }
 
-void TexturePlane::setParent(){
-	_parent = OsEng.renderEngine().scene()->sceneGraphNode("Sun");
-}
 
 void TexturePlane::updateTexture(){
-	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	DownloadManager::FileFuture* future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
 	}
@@ -155,10 +163,10 @@ void TexturePlane::updateTexture(){
 
 void TexturePlane::loadTexture() {
 
-		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
 
 		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+			LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
 
 			texture->uploadTexture();
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear

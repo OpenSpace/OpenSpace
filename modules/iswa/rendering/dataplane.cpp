@@ -33,7 +33,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
-
+#include <openspace/util/time.h>
 
 namespace {
 	const std::string _loggerCat = "DataPlane";
@@ -41,8 +41,25 @@ namespace {
 
 namespace openspace {
 
-DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
-	:CygnetPlane(1, path)
+// DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path) 
+// 	:CygnetPlane(1, path)
+// 	, _kw(kw)
+// {	
+// 	_id = id();
+// 	setName("DataPlane" + std::to_string(_id));
+// 	registerProperties();
+
+// 	KameleonWrapper::Model model = _kw->model();
+// 	if(	model == KameleonWrapper::Model::BATSRUS){
+// 		_var = "p";
+// 	}else{
+// 		_var = "rho";
+// 	}
+
+// }
+
+DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data)
+	:CygnetPlane(data)
 	, _kw(kw)
 {	
 	_id = id();
@@ -56,19 +73,20 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::string path)
 		_var = "rho";
 	}
 
+	if(!_data){
+		std::cout << "No data" << std::endl;
+	}else{
+		std::cout << _data->parent << std::endl;
+	}
+
 }
-
-
 DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
-	_modelScale = _kw->getModelScaleScaled();
-	_pscOffset  = _kw->getModelBarycenterOffsetScaled();
-
-	CygnetPlane::initialize();
-	// std::cout << _modelScale.x << ", " << _modelScale.y << ", " << _modelScale.z << ", " << _modelScale.w << std::endl;
-	// std::cout << _pscOffset.x << ", " << _pscOffset.y << ", " << _pscOffset.z << ", " << _pscOffset.w << std::endl;
+	setParent();
+    createPlane();
+    createShader();
 
 	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
@@ -80,7 +98,10 @@ bool DataPlane::initialize(){
 }
 
 bool DataPlane::deinitialize(){
-	CygnetPlane::deinitialize();
+	_parent = nullptr;
+    unregisterProperties();
+    destroyPlane();
+    destroyShader();
 	_kw = nullptr;
 	
 	return true;
@@ -124,7 +145,11 @@ void DataPlane::render(){
 
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
     transform = rotation * transform;
-	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+
+ //    if(!_data)
+	// 	position += transform*glm::vec4(_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+	// else
+	position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
 
 	// Activate shader
 	_shader->activate();
@@ -152,32 +177,22 @@ void DataPlane::update(){
 	if(_planeIsDirty)
 		createPlane();
 
-	CygnetPlane::update();
+	_time = Time::ref().currentTime();
+
+	// if(!_data)
+	// 	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _frame, _time);
+	// else
+	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
+    _openSpaceUpdateInterval = Time::ref().deltaTime()*_updateInterval;
+
+    if(_openSpaceUpdateInterval){
+    	if((_time-_lastUpdateTime) >= _openSpaceUpdateInterval){
+    		updateTexture();
+    		_lastUpdateTime = _time;
+    	}
+    }
 
 }
-
-void DataPlane::setParent(){
-	KameleonWrapper::Model model = _kw->model();
-	if(	model == KameleonWrapper::Model::BATSRUS ||
-		model == KameleonWrapper::Model::OpenGGCM ||
-		model == KameleonWrapper::Model::LFM)
-	{
-		_parent = OsEng.renderEngine().scene()->sceneGraphNode("Earth");
-		_frame = "GSM";
-	}else if(
-		model == KameleonWrapper::Model::ENLIL ||
-		model == KameleonWrapper::Model::MAS ||
-		model == KameleonWrapper::Model::Adapt3D ||
-		model == KameleonWrapper::Model::SWMF)
-	{
-		_parent = OsEng.renderEngine().scene()->sceneGraphNode("SolarSystem");
-		_frame = "GALACTIC";
-	}else{
-		//Warning!
-	}
-}
-
-
 
 void DataPlane::loadTexture() {
         //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
