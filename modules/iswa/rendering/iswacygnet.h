@@ -72,12 +72,14 @@ protected:
 	std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 	std::shared_ptr<Metadata> _data;
+	std::string _memorybuffer;
 
 	SceneGraphNode* _parent;
 	glm::dmat3 _stateMatrix;
 
 	double _time;
 	double _lastUpdateTime = 0;
+
 
 	int _id;
 };

@@ -78,7 +78,8 @@ bool DataPlane::deinitialize(){
 	
 	_parent = nullptr;
 	_kw = nullptr;
-
+	_memorybuffer = "";
+	
 	return true;
 }
 

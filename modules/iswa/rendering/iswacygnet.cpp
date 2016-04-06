@@ -37,6 +37,7 @@ ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _data(data)
+	, _memorybuffer("")
 {
 	addProperty(_enabled);
 	addProperty(_updateInterval);

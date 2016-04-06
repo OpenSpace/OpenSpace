@@ -65,6 +65,7 @@ public:
 	void deleteISWACygnet(std::string);
 
 	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
+	std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
 	void downloadData();
 	std::shared_ptr<ExtensionFuture> fileExtension(int);
 

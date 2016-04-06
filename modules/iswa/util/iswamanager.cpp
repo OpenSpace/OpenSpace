@@ -124,6 +124,16 @@ namespace openspace{
 				);
 	}
 
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
+		return 	DlManager.downloadToMemory(
+					iSWAurl(id),
+					buffer,
+					[](const DownloadManager::FileFuture& f){
+						LDEBUG("Download to memory finished");
+					}
+				);
+	}
+
 	void ISWAManager::downloadData(){}
 
 	std::shared_ptr<ExtensionFuture> ISWAManager::fileExtension(int id){

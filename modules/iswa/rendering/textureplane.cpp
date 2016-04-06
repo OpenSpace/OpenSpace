@@ -65,8 +65,8 @@ bool TexturePlane::deinitialize(){
     unregisterProperties();
     destroyPlane();
     destroyShader();
-
-    std::remove(absPath(_data->path).c_str());
+    _memorybuffer = "";
+    // std::remove(absPath(_data->path).c_str());
 
 	return true;
 }
@@ -140,23 +140,25 @@ void TexturePlane::update(){
 
 
 void TexturePlane::loadTexture() {
-
-		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
-
+	// std::cout << _data->path << std::endl;
+	// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
+	if(_memorybuffer != ""){
+		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
 		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
+			// LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
 
 			texture->uploadTexture();
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-            _texture = std::move(texture);
+	        _texture = std::move(texture);
 		}
-	
+	}	
 }
 
 void TexturePlane::updateTexture(){
-	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
+	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
 	}
