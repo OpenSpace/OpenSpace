@@ -61,8 +61,8 @@ public:
 	~ISWAManager();
 
 	std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
-	void addCygnet(std::string info);
-	void deleteCygnet(std::string);
+	void addISWACygnet(std::string info);
+	void deleteISWACygnet(std::string);
 
 	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
 	void downloadData();

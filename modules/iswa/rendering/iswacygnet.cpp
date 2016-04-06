@@ -42,7 +42,7 @@ ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	addProperty(_updateInterval);
 	addProperty(_delete);
 
-	_delete.onChange([this](){ISWAManager::ref().deleteCygnet(name());});
+	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
 
 ISWACygnet::~ISWACygnet(){}

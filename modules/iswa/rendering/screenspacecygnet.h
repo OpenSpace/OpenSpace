@@ -56,7 +56,6 @@ private:
 	float _lastUpdateTime = 0.0f;
 
 	std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-	std::string _fileExtension;
 	
 	int _id;	
 };
