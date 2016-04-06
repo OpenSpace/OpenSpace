@@ -62,6 +62,12 @@ namespace openspace{
 			std::shared_ptr<ISWACygnet> cygnet;
 
 			if(extension == "cdf"){
+
+				if(!FileSys.fileExists(absPath(metadata->path))) {
+					LERROR("Could not find cdf file:  " << absPath(metadata->path));
+					return nullptr;
+				}
+
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(metadata->path));
 
 				metadata->scale  = kw->getModelScaleScaled();
