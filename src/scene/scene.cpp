@@ -131,19 +131,10 @@ void Scene::evaluate(Camera* camera) {
 	//_root->evaluate(camera);
 }
 
-void Scene::render(const RenderData& data) {
-    for (SceneGraphNode* node : _graph.nodes())
-        node->render(data);
-}
-
-std::vector<std::pair<Volume*, RenderData>> Scene::volumesToRender(const RenderData& data) const {
-    std::vector<std::pair<Volume*, RenderData>> volumes;
-
-    for (const SceneGraphNode* node : _graph.nodes()) {
-        std::vector<std::pair<Volume*, RenderData>> newVolumes = node->volumesToRender(data);
-        std::copy(newVolumes.begin(), newVolumes.end(), std::back_inserter(volumes));
+void Scene::render(const RenderData& data, RendererTasks& tasks) {
+    for (SceneGraphNode* node : _graph.nodes()) {
+        node->render(data, tasks);
     }
-    return volumes;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {

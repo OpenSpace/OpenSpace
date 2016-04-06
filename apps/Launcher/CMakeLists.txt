@@ -25,7 +25,7 @@
 set(APPLICATION_NAME Launcher)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
-include (${GHOUL_BASE_DIR}/ext/handle_external_library.cmake)
+include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
 

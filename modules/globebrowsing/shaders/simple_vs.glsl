@@ -36,8 +36,8 @@ out vec4 vs_position;
 void main()
 {
 	// set variables
-	vs_position = in_position;
-	vec4 tmp = in_position;
+	vs_position = vec4(in_position.xyz * 60000000.0f, 1);
+	vec4 tmp = vec4(in_position.xyz * 60000000.0f, 1);
 
 	vec4 position = pscTransform(tmp, ModelTransform);
 	vs_position = tmp;

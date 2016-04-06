@@ -122,15 +122,25 @@ void Renderable::update(const UpdateData&)
 {
 }
 
+void Renderable::render(const RenderData& data, RendererTasks& tasks)
+{
+    (void) tasks;
+    render(data);
+}
+
+void Renderable::render(const RenderData& data)
+{
+}
+
 void Renderable::setPscUniforms(
-	ghoul::opengl::ProgramObject* program, 
-	const Camera* camera,
+	ghoul::opengl::ProgramObject& program, 
+	const Camera& camera,
 	const PowerScaledCoordinate& position) 
 {
-	program->setUniform("campos", camera->position().vec4());
-	program->setUniform("objpos", position.vec4());
-	program->setUniform("camrot", camera->viewRotationMatrix());
-	program->setUniform("scaling", camera->scaling());
+	program.setUniform("campos", camera.position().vec4());
+	program.setUniform("objpos", position.vec4());
+	program.setUniform("camrot", camera.viewRotationMatrix());
+	program.setUniform("scaling", camera.scaling());
 }
 
 bool Renderable::isVisible() const {
@@ -177,8 +187,10 @@ bool Renderable::isEnabled() const {
 	return _enabled;
 }
 
-std::vector<Volume*> Renderable::volumesToRender(const RenderData& data) const {
-    return std::vector<Volume*>();
+void Renderable::onEnabledChange(std::function<void(bool)> callback) {
+    _enabled.onChange([=] () {
+            callback(isEnabled());
+    });
 }
 
 }  // namespace openspace

@@ -136,7 +136,7 @@ void RenderableShadowCylinder::render(const RenderData& data){
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", _transform);
     _shader->setUniform("shadowColor", _shadowColor);
-	setPscUniforms(_shader.get(), &data.camera, data.position);
+	setPscUniforms(*_shader.get(), data.camera, data.position);
 	
 	glBindVertexArray(_vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));

@@ -2,12 +2,11 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
+        Focus = "DebugGlobe",
         Position = {1, 0, 0, 5},
     },
     Modules = {
-        "sun",
-        "earth",
+        "debugglobe",
         "stars",
         "milkyway",
     }

@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/rendering/renderableglobe.h>
 
 #include <modules/globebrowsing/rendering/globemesh.h>
+#include <modules/globebrowsing/rendering/clipmapglobe.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -68,7 +69,8 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1000000000);
+		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
+		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
 	}
 
 	RenderableGlobe::~RenderableGlobe() {

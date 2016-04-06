@@ -30,6 +30,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
 
+
 namespace ghoul {
 namespace fontrendering {
     class Font;
@@ -48,6 +49,7 @@ class Camera;
 class SyncBuffer;
 class Scene;
 class Renderer;
+class RaycasterManager;
 class ScreenLog;
 
 class RenderEngine {
@@ -75,6 +77,7 @@ public:
     Camera* camera() const;
     Renderer* renderer() const;
     RendererImplementation rendererImplementation() const;
+    RaycasterManager& raycasterManager();
 
 	// sgct wrapped functions
     bool initializeGL();
@@ -148,6 +151,8 @@ private:
 
 	Camera* _mainCamera;
 	Scene* _sceneGraph;
+    RaycasterManager* _raycasterManager;
+
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
     ghoul::Dictionary _rendererData;

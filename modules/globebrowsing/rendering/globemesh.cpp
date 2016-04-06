@@ -48,8 +48,7 @@ namespace {
 
 namespace openspace {
 	GlobeMesh::GlobeMesh(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _programObject(nullptr)
+		: _programObject(nullptr)
 		, _grid(10, 10, Geometry::Positions::Yes, Geometry::TextureCoordinates::No, Geometry::Normals::No)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
@@ -75,7 +74,6 @@ namespace openspace {
 
 		RenderEngine& renderEngine = OsEng.renderEngine();
 		if (_programObject == nullptr) {
-			// Night texture program
 			_programObject = renderEngine.buildRenderProgram(
 				"simpleTextureProgram",
 				"${MODULE_GLOBEBROWSING}/shaders/simple_vs.glsl",
@@ -130,10 +128,13 @@ namespace openspace {
 		//	_programObject->setUniform("camdir", camSpaceEye);
 		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 		_programObject->setUniform("ModelTransform", transform);
-		setPscUniforms(_programObject.get(), &data.camera, data.position);
+		setPscUniforms(*_programObject.get(), data.camera, data.position);
 
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+		glm::dmat4 cameraTransform = data.camera.viewMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
+		glm::dmat4 cameraProjectionTransform = data.camera.viewProjectionMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
+
+		glDisable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
 
 		// render
 		_grid.drawUsingActiveProgram();
