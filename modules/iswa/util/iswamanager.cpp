@@ -154,10 +154,6 @@ namespace openspace{
 					std::getline(ss, token, '/');
 					std::getline(ss, token);
 
-					if(token == "jpeg"){
-						token = "jpg";
-					}
-
 					std::string ext = "."+token;
 					extFuture->extension = ext;
 					extFuture->isFinished = true;
