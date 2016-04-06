@@ -434,7 +434,7 @@ void GUI::renderMainWindow() {
 		ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
 		if(ImGui::SmallButton("Add Cygnet")){
-			ISWAManager::ref().addCygnet(std::string(addCygnetBuffer));
+			ISWAManager::ref().addISWACygnet(std::string(addCygnetBuffer));
 		}
 	}
 #endif

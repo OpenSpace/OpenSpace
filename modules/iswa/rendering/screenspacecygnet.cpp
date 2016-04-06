@@ -113,7 +113,7 @@ bool ScreenSpaceCygnet::deinitialize(){
 
 	std::remove(absPath(_path).c_str());
 	_path = "";
-	
+	_memorybuffer = "";
 	return true;
 }
 
@@ -133,7 +133,7 @@ void ScreenSpaceCygnet::render(){
 void ScreenSpaceCygnet::update(){
 
 	_time = Time::ref().currentTime();
-	
+
 	float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
 	if(openSpaceUpdateInterval){
 		if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
@@ -143,9 +143,7 @@ void ScreenSpaceCygnet::update(){
 	}
 
 	if(_futureTexture && _futureTexture->isFinished){
-
 		loadTexture();
-
 		_futureTexture = nullptr;
 	}
 
@@ -161,7 +159,8 @@ bool ScreenSpaceCygnet::isReady() const{
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
 	if(future){
 		_futureTexture = future;
 	}
@@ -169,16 +168,20 @@ void ScreenSpaceCygnet::updateTexture(){
 
 void ScreenSpaceCygnet::loadTexture() {
 
-	std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+	if(_memorybuffer != ""){
 
-	if (texture) {
-		LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+		// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
 
-		texture->uploadTexture();
-		// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-		texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		if (texture) {
+			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
-		_texture = std::move(texture);
+			texture->uploadTexture();
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+			_texture = std::move(texture);
+		}
 	}
 }
 

@@ -121,7 +121,7 @@ void ISWAContainer::addISWACygnet(std::shared_ptr<ISWACygnet> cygnet){
 	}
 }
 
-void ISWAContainer::deleteCygnet(std::string name){
+void ISWAContainer::deleteISWACygnet(std::string name){
 	std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
 
 	auto it = std::find(

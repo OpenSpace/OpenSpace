@@ -202,6 +202,65 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     return future;
 }
 
+
+std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
+    const std::string& url, std::string& memoryBuffer,
+    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
+{
+
+    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(std::string("memory"));
+    LDEBUG("Start downloading file: '" << url << "' into memory");
+    
+    auto downloadFunction = [url, finishedCallback, progressCallback, future, &memoryBuffer]() {
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &memoryBuffer);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
+            
+            ProgressInformation p = {
+                future,
+                std::chrono::system_clock::now(),
+                &progressCallback
+            };
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            
+            CURLcode res = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
+
+            if (res == CURLE_OK)
+                future->isFinished = true;
+            else
+                future->errorMessage = curl_easy_strerror(res);
+            
+            if (finishedCallback)
+                finishedCallback(*future);
+        }
+    };
+    
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(downloadFunction);
+     
+#ifdef WIN32
+        std::thread::native_handle_type h = t.native_handle();
+        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+#else
+        // TODO: Implement thread priority ---abock
+#endif
+        
+        t.detach();
+    }
+    else {
+        downloadFunction();
+    }
+
+    return future;
+}
+
 std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
     int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,

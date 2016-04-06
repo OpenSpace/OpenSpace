@@ -100,7 +100,7 @@ namespace openspace{
 		}
 	}
 
-	void ISWAManager::addCygnet(std::string info){
+	void ISWAManager::addISWACygnet(std::string info){
 		std::string token;
 		std::stringstream ss(info);
 		getline(ss,token,',');
@@ -115,8 +115,8 @@ namespace openspace{
 			_container->addISWACygnet("${OPENSPACE_DATA}/"+data);
 	}
 
-	void ISWAManager::deleteCygnet(std::string name){
-		_container->deleteCygnet(name);
+	void ISWAManager::deleteISWACygnet(std::string name){
+		_container->deleteISWACygnet(name);
 	}
 
 	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
@@ -126,6 +126,16 @@ namespace openspace{
 					true,
 					[path](const DownloadManager::FileFuture& f){
 						LDEBUG("Download finished: " << path);
+					}
+				);
+	}
+
+	std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
+		return 	DlManager.downloadToMemory(
+					iSWAurl(id),
+					buffer,
+					[](const DownloadManager::FileFuture& f){
+						LDEBUG("Download to memory finished");
 					}
 				);
 	}

@@ -37,12 +37,13 @@ ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	, _shader(nullptr)
 	, _texture(nullptr)
 	, _data(data)
+	, _memorybuffer("")
 {
 	addProperty(_enabled);
 	addProperty(_updateInterval);
 	addProperty(_delete);
 
-	_delete.onChange([this](){ISWAManager::ref().deleteCygnet(name());});
+	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
 
 ISWACygnet::~ISWACygnet(){}
