@@ -76,8 +76,8 @@ namespace openspace{
 				metadata->frame  = kw->getFrame();
 
 				cygnet = std::make_shared<DataPlane>(kw, metadata);
-			}else if(extension == "gif" || extension == "plain"){
-				LWARNING("This cygnet image is a GIF or does not exist");
+			}else if(extension == "plain"){
+				LWARNING("This cygnet image does not exist");
 				return nullptr;
 			}else {
 				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
