@@ -37,7 +37,7 @@
 namespace openspace {
 
 	GlobeBrowsingModule::GlobeBrowsingModule()
-    : OpenSpaceModule("GlobeBrowsing")
+	: OpenSpaceModule("GlobeBrowsing")
 {}
 
 void GlobeBrowsingModule::internalInitialize() {

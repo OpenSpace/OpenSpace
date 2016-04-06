@@ -36,10 +36,11 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.inl
+
+	${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
+
 )
 
 set(SOURCE_FILES
@@ -51,6 +52,9 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
+
+   ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
+
    ${CMAKE_CURRENT_SOURCE_DIR}/util/converter.cpp
 
    

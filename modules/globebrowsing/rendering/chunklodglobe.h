@@ -22,35 +22,39 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
+#ifndef __CHUNK_LOD_GLOBE__
+#define __CHUNK_LOD_GLOBE__
 
-#include <glm/glm.hpp>
+#include <memory>
 
 // open space includes
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
+#include <modules/globebrowsing/datastructures/chunknode.h>
+
+#include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
+#include <modules/globebrowsing/rendering/distanceswitch.h>
+#include <modules/globebrowsing/rendering/latlonpatch.h>
 
 namespace ghoul {
-namespace opengl {
-	class ProgramObject;
+	namespace opengl {
+		class ProgramObject;
+	}
 }
-}
-
 
 namespace openspace {
-	class LatLonPatch : public Renderable
-	{
+
+	class ChunkLodGlobe : 
+		public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
 	public:
-		LatLonPatch(
-			unsigned int xRes,
-			unsigned int yRes,
-			double posLat,
-			double posLon,
-			double sizeLat,
-			double sizeLon);
-		~LatLonPatch();
+		ChunkLodGlobe(const ghoul::Dictionary& dictionary);
+		~ChunkLodGlobe();
+
+		LatLonPatch& getTemplatePatch();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -59,16 +63,30 @@ namespace openspace {
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 
-		void setPositionLatLon(glm::dvec2 posLatLon);
-		void setSizeLatLon(glm::dvec2 posLatLon);
 
-	private:
-		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-		glm::dvec2 _posLatLon;
-		glm::dvec2 _sizeLatLon;
-		GridGeometry _grid;
+	private:		
+
+		// Covers all negative longitudes
+		std::unique_ptr<ChunkNode> _leftRoot;
+
+		// Covers all positive longitudes
+		std::unique_ptr<ChunkNode> _rightRoot;
+
+		// the patch used for actual rendering
+		LatLonPatch _templatePatch;
+		
+		static const BoundingRect LEFT_HEMISPHERE;
+		static const BoundingRect RIGHT_HEMISPHERE;
+
+		properties::IntProperty _rotation;
+
+		glm::dmat3 _stateMatrix;
+		std::string _frame;
+		std::string _target;
+		double _time;
 	};
+
 }  // namespace openspace
 
-#endif  // __LATLONPATCH_H__
+#endif  // __CHUNK_LOD_GLOBE__

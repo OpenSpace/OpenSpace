@@ -110,7 +110,7 @@ namespace openspace {
 		// TODO : Not sure if double precision will be needed for all these calculations
 		// Using doubles in case but might slow things down.
 		// TODO : Need to get the radius of the globe
-		double r = 6e6;
+		double r = 6.3e6;
 
 		// Create control points (double)
 		glm::dvec3 p00, p01, p10, p11;
@@ -148,10 +148,13 @@ namespace openspace {
 		glm::dvec3 camPos = data.camera.position().dvec3();
 		glm::dvec3 camDir = glm::normalize(position - camPos);
 		glm::dvec3 camUp = glm::dvec3(0,1,0);// data.camera.lookUpVector();
+
 		// Get camera transform matrix (double precision)
 		glm::dmat4 viewTransform = glm::inverse(glm::translate(glm::dmat4(1.0), camPos));
+
 		//glm::dmat4 viewTransform = glm::lookAt(camPos, camPos + camDir, camUp);
-		viewTransform = glm::dmat4( data.camera.viewRotationMatrix()) * viewTransform;
+		viewTransform = glm::dmat4(data.camera.viewRotationMatrix())*viewTransform;
+
 		// Transform control points to camera space
 		p00 = glm::dvec3(viewTransform * glm::dvec4(p00, 1.0));
 		p10 = glm::dvec3(viewTransform * glm::dvec4(p10, 1.0));
@@ -169,8 +172,8 @@ namespace openspace {
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
 
 		// Render triangles (use texture coordinates to interpolate to new positions)
-		glDisable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
 		// render
 		_grid.drawUsingActiveProgram();
@@ -186,5 +189,10 @@ namespace openspace {
 	void LatLonPatch::setPositionLatLon(glm::dvec2 posLatLon) {
 		_posLatLon = posLatLon;
 	}
+
+	void LatLonPatch::setSizeLatLon(glm::dvec2 sizeLatLon) {
+		_sizeLatLon = sizeLatLon;
+	}
+
 
 }  // namespace openspace

@@ -36,6 +36,8 @@ uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
 in vec4 vs_position;
+in vec2 vs_uv;
+
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -43,7 +45,7 @@ in vec4 vs_position;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = vec4(1,1,1,1);
+	frag.color = vec4(vs_uv,1,1);
 	frag.depth =  pscDepth(vs_position);
 
 	return frag;

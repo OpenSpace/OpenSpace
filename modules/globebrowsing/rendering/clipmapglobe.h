@@ -31,10 +31,13 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
+
 #include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
 #include <modules/globebrowsing/rendering/latlonpatch.h>
+
+
 
 namespace ghoul {
 	namespace opengl {

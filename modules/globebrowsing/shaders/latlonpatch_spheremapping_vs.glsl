@@ -34,11 +34,14 @@ uniform vec3 p11;
 layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
+out vec2 vs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main()
 {
+	vs_uv = in_UV;
+
 	// Bilinear interpolation
 	vec3 p0 = (1 - in_UV.x) * p00 + in_UV.x * p10;
 	vec3 p1 = (1 - in_UV.x) * p01 + in_UV.x * p11;

@@ -30,6 +30,16 @@
 #include <memory>
 #include <ostream>
 
+#include <modules/globebrowsing/rendering/latlonpatch.h>
+
+
+// forward declaration
+namespace openspace {
+	class ChunkLodGlobe;
+}
+
+
+
 // Using double precision
 typedef double Scalar;
 typedef glm::dvec2 Vec2;
@@ -56,27 +66,40 @@ struct BoundingRect {
 
 
 
-class ChunkNode {
+class ChunkNode : public Renderable{
 public:
-	ChunkNode(const BoundingRect&, ChunkNode* parent = nullptr);
+	ChunkNode(ChunkLodGlobe&, const BoundingRect&, ChunkNode* parent = nullptr);
 	~ChunkNode();
 
 
-	void split();
+	void split(int depth = 1);
 	void merge();
-	
+
 	bool isRoot() const;
 	bool isLeaf() const;
-	
 	
 	const ChunkNode& getChild(Quad quad) const;
 	const BoundingRect bounds;
 
+
+
+	bool initialize() override;
+	bool deinitialize() override;
+	bool isReady() const override;
+
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+
+	void internalRender(const RenderData& data, int currLevel);
+	void internalUpdate(const UpdateData& data, int currLevel);
+
 private:
 	
-
+	
 	ChunkNode* _parent;
 	std::unique_ptr<ChunkNode> _children[4];
+
+	ChunkLodGlobe& _owner;
 
 };
 
@@ -84,8 +107,6 @@ private:
 
 } // namespace openspace
 
-
-#include <modules/globebrowsing/datastructures/chunknode.inl>
 
 
 #endif // __QUADTREE_H__

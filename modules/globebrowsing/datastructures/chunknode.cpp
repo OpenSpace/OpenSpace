@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/datastructures/chunknode.h>
-
+#include <modules/globebrowsing/rendering/chunklodglobe.h>
 
 namespace openspace {
 
@@ -36,8 +36,12 @@ BoundingRect::BoundingRect(const Vec2& center, const Vec2& halfSize)
 
 
 
-ChunkNode::ChunkNode(const BoundingRect& bounds, ChunkNode* parent)
-: bounds(bounds), _parent(parent)
+
+
+ChunkNode::ChunkNode(ChunkLodGlobe& owner, const BoundingRect& bounds, ChunkNode* parent)
+: _owner(owner)
+, bounds(bounds)
+, _parent(parent)
 {
 	_children[0] = nullptr;
 	_children[1] = nullptr;
@@ -58,23 +62,88 @@ bool ChunkNode::isLeaf() const {
 }
 
 
-void ChunkNode::split() {
-	// Defining short handles for center, halfSize and quarterSize
-	const Vec2& c = bounds.center;
-	const Vec2& hs =bounds.halfSize;
-	Vec2 qs = 0.5 * bounds.halfSize;
 
-	// Subdivide bounds
-	BoundingRect nwBounds = BoundingRect(c + Vec2(-qs.x, -qs.y), qs);
-	BoundingRect neBounds = BoundingRect(c + Vec2(+qs.x, -qs.y), qs);
-	BoundingRect swBounds = BoundingRect(c + Vec2(-qs.x, +qs.y), qs);
-	BoundingRect seBounds = BoundingRect(c + Vec2(+qs.x, +qs.y), qs);
+bool ChunkNode::initialize()  {
+	if (!isLeaf()) {
+		for (int i = 0; i < 4; ++i) {
+			_children[i]->initialize();
+		}
+	}
+	
+	return isReady();
+}
 
-	// Create new chunk nodes
-	_children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(nwBounds, this));
-	_children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(neBounds, this));
-	_children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(swBounds, this));
-	_children[Quad::SOUTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(seBounds, this));
+bool ChunkNode::deinitialize() {
+	if (!isLeaf()) {
+		for (int i = 0; i < 4; ++i) {
+			_children[i]->deinitialize();
+		}
+	}
+	return true;
+}
+
+bool ChunkNode::isReady() const{
+	bool ready = true;
+	return ready;
+}
+
+void ChunkNode::render(const RenderData& data) {
+	internalRender(data, 0);
+}
+
+void ChunkNode::internalRender(const RenderData& data, int currLevel) {
+	if (isLeaf()) {
+		LatLonPatch& templatePatch = _owner.getTemplatePatch();
+		templatePatch.setPositionLatLon(bounds.center);
+		templatePatch.setSizeLatLon(bounds.halfSize);
+		templatePatch.render(data);
+	}
+	else {
+		for (int i = 0; i < 4; ++i) {
+			_children[i]->internalRender(data, currLevel+1);
+		}
+	}
+}
+
+void ChunkNode::update(const UpdateData& data) {
+	internalUpdate(data, 0);
+}
+
+void ChunkNode::internalUpdate(const UpdateData& data, int currLevel) {
+	if (!isLeaf()) {
+		for (int i = 0; i < 4; ++i) {
+			_children[i]->internalUpdate(data, currLevel + 1);
+		}
+	}
+}
+
+
+void ChunkNode::split(int depth) {
+	if (depth > 0 && isLeaf()) {
+
+		// Defining short handles for center, halfSize and quarterSize
+		const Vec2& c = bounds.center;
+		const Vec2& hs = bounds.halfSize;
+		Vec2 qs = 0.5 * bounds.halfSize;
+
+		// Subdivide bounds
+		BoundingRect nwBounds = BoundingRect(c + Vec2(-qs.x, -qs.y), qs);
+		BoundingRect neBounds = BoundingRect(c + Vec2(+qs.x, -qs.y), qs);
+		BoundingRect swBounds = BoundingRect(c + Vec2(-qs.x, +qs.y), qs);
+		BoundingRect seBounds = BoundingRect(c + Vec2(+qs.x, +qs.y), qs);
+
+		// Create new chunk nodes
+		_children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));
+		_children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, neBounds, this));
+		_children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, swBounds, this));
+		_children[Quad::SOUTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, seBounds, this));
+	}
+
+	if (depth - 1 > 0) {
+		for (int i = 0; i < 4; ++i) {
+			_children[i]->split(depth - 1);
+		}
+	}
 }
 
 

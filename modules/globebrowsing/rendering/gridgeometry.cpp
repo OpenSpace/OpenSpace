@@ -86,13 +86,13 @@ std::vector<GLuint> GridGeometry::CreateElements(unsigned int xRes, unsigned int
 
 			// add upper triangle
 			elements.push_back(v00);
-			elements.push_back(v10);
 			elements.push_back(v01);
+			elements.push_back(v10);
 			
 			// add lower triangle
 			elements.push_back(v01);
-			elements.push_back(v10);
 			elements.push_back(v11);
+			elements.push_back(v10);
 
 			//LDEBUG(v00 << ", " << v10 << ", " << v01);
 			//LDEBUG(v01 << ", " << v10 << ", " << v11);
