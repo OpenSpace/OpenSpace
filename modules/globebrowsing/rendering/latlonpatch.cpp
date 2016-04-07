@@ -112,36 +112,48 @@ namespace openspace {
 		// TODO : Need to get the radius of the globe
 		double r = 6e6;
 
-		// Create control points (double)
-		glm::dvec3 p00, p01, p10, p11;
+		// Create control points and normals(double)
+		glm::dvec3 p00, p01, p02, p10, p11, p12, p20, p21, p22;
+		glm::dvec3 n00, n01, n02, n10, n11, n12, n20, n21, n22;
 
-		// Calculate global positions of control points
-		p00 = glm::dvec3(converter::latLonToCartesian(
-			_posLatLon.x - _sizeLatLon.x,
-			_posLatLon.y - _sizeLatLon.y,
-			r));
-		p10 = glm::dvec3(converter::latLonToCartesian(
-			_posLatLon.x + _sizeLatLon.x,
-			_posLatLon.y - _sizeLatLon.y,
-			r));
-		p01 = glm::dvec3(converter::latLonToCartesian(
-			_posLatLon.x - _sizeLatLon.x,
-			_posLatLon.y + _sizeLatLon.y,
-			r));
-		p11 = glm::dvec3(converter::latLonToCartesian(
-			_posLatLon.x + _sizeLatLon.x,
-			_posLatLon.y + _sizeLatLon.y,
-			r));
+		// Calculate positions of corner control points
+		p00 = calculateCornerPointLeftBottom();
+		p20 = calculateCornerPointRightBottom();
+		p02 = calculateCornerPointLeftTop();
+		p22 = calculateCornerPointRightTop();
+		// Get position of center control points
+		p01 = calculateCenterPoint(p00, p02);
+		p21 = calculateCenterPoint(p20, p22);
+		p10 = calculateCenterPoint(p00, p20);
+		p12 = calculateCenterPoint(p02, p22);
+		p11 = calculateCenterPoint(p01, p21);
+
+		// Calculate normals from control point positions
+		n00 = normalize(p00);
+		n01 = normalize(p01);
+		n02 = normalize(p02);
+		n10 = normalize(p10);
+		n11 = normalize(p11);
+		n12 = normalize(p12);
+		n20 = normalize(p20);
+		n21 = normalize(p21);
+		n22 = normalize(p22);
 
 		// TODO : Transformation to world space from model space should also consider
 		// rotations. Now it only uses translatation for simplicity. Should be done
 		// With a matrix transform
+		// TODO : Normals should also be transformed
 		glm::dvec3 position = data.position.dvec3();
 		p00 += position;
 		p10 += position;
+		p20 += position;
 		p01 += position;
 		p11 += position;
-		
+		p21 += position;
+		p02 += position;
+		p12 += position;
+		p22 += position;
+
 		// Calculate global position of camera
 		// TODO : Should only need to fetch the camera transform and use directly
 		// Now the viewTransform is wrong due to the constant lookUpVector
@@ -155,19 +167,48 @@ namespace openspace {
 		// Transform control points to camera space
 		p00 = glm::dvec3(viewTransform * glm::dvec4(p00, 1.0));
 		p10 = glm::dvec3(viewTransform * glm::dvec4(p10, 1.0));
+		p20 = glm::dvec3(viewTransform * glm::dvec4(p20, 1.0));
 		p01 = glm::dvec3(viewTransform * glm::dvec4(p01, 1.0));
 		p11 = glm::dvec3(viewTransform * glm::dvec4(p11, 1.0));
+		p21 = glm::dvec3(viewTransform * glm::dvec4(p21, 1.0));
+		p02 = glm::dvec3(viewTransform * glm::dvec4(p02, 1.0));
+		p12 = glm::dvec3(viewTransform * glm::dvec4(p12, 1.0));
+		p22 = glm::dvec3(viewTransform * glm::dvec4(p22, 1.0));
 
-		// Send control points to GPU to be used in shader
-		// TODO : Will need more control points or possibly normals to be able to
-		// do better than linear interpolation
+		// Transform normals to camera space
+		n00 = glm::dvec3(viewTransform * glm::dvec4(n00, 0.0));
+		n10 = glm::dvec3(viewTransform * glm::dvec4(n10, 0.0));
+		n20 = glm::dvec3(viewTransform * glm::dvec4(n20, 0.0));
+		n01 = glm::dvec3(viewTransform * glm::dvec4(n01, 0.0));
+		n11 = glm::dvec3(viewTransform * glm::dvec4(n11, 0.0));
+		n21 = glm::dvec3(viewTransform * glm::dvec4(n21, 0.0));
+		n02 = glm::dvec3(viewTransform * glm::dvec4(n02, 0.0));
+		n12 = glm::dvec3(viewTransform * glm::dvec4(n12, 0.0));
+		n22 = glm::dvec3(viewTransform * glm::dvec4(n22, 0.0));
+
+		// Send control points and normals to GPU to be used in shader
 		_programObject->setUniform("p00", glm::vec3(p00));
 		_programObject->setUniform("p10", glm::vec3(p10));
+		_programObject->setUniform("p20", glm::vec3(p20));
 		_programObject->setUniform("p01", glm::vec3(p01));
 		_programObject->setUniform("p11", glm::vec3(p11));
+		_programObject->setUniform("p21", glm::vec3(p21));
+		_programObject->setUniform("p02", glm::vec3(p02));
+		_programObject->setUniform("p12", glm::vec3(p12));
+		_programObject->setUniform("p22", glm::vec3(p22));
+
+		_programObject->setUniform("n00", glm::vec3(n00));
+		_programObject->setUniform("n10", glm::vec3(n10));
+		_programObject->setUniform("n20", glm::vec3(n20));
+		_programObject->setUniform("n01", glm::vec3(n01));
+		_programObject->setUniform("n11", glm::vec3(n11));
+		_programObject->setUniform("n21", glm::vec3(n21));
+		_programObject->setUniform("n02", glm::vec3(n02));
+		_programObject->setUniform("n12", glm::vec3(n12));
+		_programObject->setUniform("n22", glm::vec3(n22));
 
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
-
+		 
 		// Render triangles (use texture coordinates to interpolate to new positions)
 		glDisable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
@@ -185,6 +226,52 @@ namespace openspace {
 
 	void LatLonPatch::setPositionLatLon(glm::dvec2 posLatLon) {
 		_posLatLon = posLatLon;
+	}
+
+	glm::dvec3 LatLonPatch::calculateCornerPointLeftBottom() {
+		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+
+		return glm::dvec3(converter::latLonToCartesian(
+			_posLatLon.x - _sizeLatLon.x,
+			_posLatLon.y - _sizeLatLon.y,
+			r));
+	}
+	glm::dvec3 LatLonPatch::calculateCornerPointRightBottom() {
+		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+
+		return glm::dvec3(converter::latLonToCartesian(
+			_posLatLon.x + _sizeLatLon.x,
+			_posLatLon.y - _sizeLatLon.y,
+			r));
+	}
+	glm::dvec3 LatLonPatch::calculateCornerPointLeftTop() {
+		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+
+		return glm::dvec3(converter::latLonToCartesian(
+			_posLatLon.x - _sizeLatLon.x,
+			_posLatLon.y + _sizeLatLon.y,
+			r));
+	}
+	glm::dvec3 LatLonPatch::calculateCornerPointRightTop() {
+		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+
+		return glm::dvec3(converter::latLonToCartesian(
+			_posLatLon.x + _sizeLatLon.x,
+			_posLatLon.y + _sizeLatLon.y,
+			r));
+	}
+
+	glm::dvec3 LatLonPatch::calculateCenterPoint(glm::dvec3 p0, glm::dvec3 p2) {
+		glm::dvec3 n0 = glm::normalize(p0);
+		glm::dvec3 n2 = glm::normalize(p2);
+
+		// Solution derived
+		glm::dvec2 u = glm::dvec2(0, glm::dot(p2, n2) - glm::dot(p0, n2));
+		double cosNormalAngle = glm::dot(n0, n2);
+		glm::dmat2 A = glm::dmat2({ 1, cosNormalAngle, cosNormalAngle, 1 });
+		glm::dvec2 stParam = glm::inverse(A) * u;
+		glm::dvec3 p1 = p0 + stParam.s * n0 + stParam.t * n2;
+		return p1;
 	}
 
 }  // namespace openspace

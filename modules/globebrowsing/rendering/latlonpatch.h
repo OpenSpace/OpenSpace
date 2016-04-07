@@ -61,6 +61,17 @@ namespace openspace {
 
 		void setPositionLatLon(glm::dvec2 posLatLon);
 
+
+		glm::dvec3 calculateCornerPointLeftBottom();
+		glm::dvec3 calculateCornerPointRightBottom();
+		glm::dvec3 calculateCornerPointLeftTop();
+		glm::dvec3 calculateCornerPointRightTop();
+
+		/**
+		Finds a third control point between the two parameter points assuming
+		they both lie on a sphere with the origin in the center.
+		*/
+		glm::dvec3 calculateCenterPoint(glm::dvec3 p0, glm::dvec3 p2);
 	private:
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
