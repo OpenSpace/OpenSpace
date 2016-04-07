@@ -24,43 +24,25 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/rendering/latlonpatch.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+class LatLonPatchTest : public testing::Test {};
 
-#include <iostream>
+using namespace openspace;
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+TEST_F(LatLonPatchTest, findCenterControlPoint) {
+	LatLonPatch patch(10, 10, 0, 0, M_PI / 4, M_PI / 4);
 
-namespace {
-    std::string _loggerCat = "OpenSpaceTest";
-}
+	glm::dvec3 p0, p1First, p1Second, p2;
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+	p0 = patch.calculateCornerPointLeftBottom();
+	p2 = patch.calculateCornerPointRightBottom();
+	p1First = patch.calculateCenterPoint(p0, p2);
+	p1Second = patch.calculateCenterPoint(p2, p0);
 
-    testing::InitGoogleTest(&argc, argv);
-    int testResult = RUN_ALL_TESTS();
-	
-	int hej;
-	std::cin >> hej;
-	return testResult;
+	ASSERT_EQ(p1First, p1Second);
 }
