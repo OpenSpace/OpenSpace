@@ -395,7 +395,7 @@ bool RenderableStars::readSpeckFile() {
         std::ifstream::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#')
+        if (line[0] == '#' || line.empty())
             continue;
 
         if (line.substr(0, 7) != "datavar" &&
