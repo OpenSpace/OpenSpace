@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/rendering/renderable.h>
 
 namespace openspace{
 
@@ -59,8 +60,8 @@ bool ISWAContainer::isReady() const { return true; }
 
 void ISWAContainer::render(const RenderData& data){
 	for(auto iSWACygnet : _iSWACygnets){
-		if(iSWACygnet->enabled() && iSWACygnet->isReady()){
-			iSWACygnet->render();
+		if(iSWACygnet->isEnabled() && iSWACygnet->isReady()){
+			iSWACygnet->render(data);
 		}
 	}
 } 
@@ -94,7 +95,7 @@ void ISWAContainer::update(const UpdateData& data){
 		_deletedCygnets.clear();
 
 	for(auto& iSWACygnet : _iSWACygnets)
-		iSWACygnet->update();
+		iSWACygnet->update(data);
 }
 
 void ISWAContainer::addISWACygnet(std::string path){

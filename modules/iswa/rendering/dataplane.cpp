@@ -40,20 +40,6 @@ namespace {
 }
 
 namespace openspace {
-DataPlane::DataPlane(std::shared_ptr<Metadata> data)
-	:CygnetPlane(data)
-	, _kw(data->kw)
-{	
-	_id = id();
-	setName("DataPlane" + std::to_string(_id));
-	registerProperties();
-
-	KameleonWrapper::Model model = _kw->model();
-	if(	model == KameleonWrapper::Model::BATSRUS)
-		_var = "p";
-	else
-		_var = "rho";
-}
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 	:CygnetPlane(dictionary)
@@ -103,65 +89,65 @@ bool DataPlane::deinitialize(){
 
 
 
-void DataPlane::render(){
-	psc position = _parent->worldPosition();
-	glm::mat4 transform = glm::mat4(1.0);
+void DataPlane::render(const RenderData& data){
+	if(_texture){
+		psc position = _parent->worldPosition();
+		glm::mat4 transform = glm::mat4(1.0);
 
-	glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-	glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+		glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+		glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
 
-	glm::mat4 rot = glm::mat4(1.0);
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++){
-			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+		glm::mat4 rot = glm::mat4(1.0);
+		for (int i = 0; i < 3; i++){
+			for (int j = 0; j < 3; j++){
+				transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+			}
 		}
+
+		transform = transform * rotz * roty; //BATSRUS
+
+		if(_data->frame == "GSM"){
+			glm::vec4 v(1,0,0,1);
+			glm::vec3 xVec = glm::vec3(transform*v);
+			xVec = glm::normalize(xVec);
+
+			double  lt;
+		    glm::vec3 sunVec =
+		    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+		    sunVec = glm::normalize(sunVec);
+
+		    float angle = acos(glm::dot(xVec, sunVec));
+		    glm::vec3 ref =  glm::cross(xVec, sunVec);
+
+		    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+		    transform = rotation * transform;
+		}
+
+		position += transform*glm::vec4(_data->offset->x, _data->offset->z, _data->offset->y, _data->offset->w);
+
+		// Activate shader
+		_shader->activate();
+		glEnable(GL_ALPHA_TEST);
+		glDisable(GL_CULL_FACE);
+
+		_shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
+		_shader->setUniform("ModelTransform", transform);
+		setPscUniforms(*_shader.get(), *OsEng.renderEngine().camera(), position);
+
+		ghoul::opengl::TextureUnit unit;
+		unit.activate();
+		_texture->bind();
+		_shader->setUniform("texture1", unit);
+
+		glBindVertexArray(_quad);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glEnable(GL_CULL_FACE);
+		_shader->deactivate();
 	}
-
-	transform = transform * rotz * roty; //BATSRUS
-
-	if(_data->frame == "GSM"){
-		glm::vec4 v(1,0,0,1);
-		glm::vec3 xVec = glm::vec3(transform*v);
-		xVec = glm::normalize(xVec);
-
-		double  lt;
-	    glm::vec3 sunVec =
-	    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-	    sunVec = glm::normalize(sunVec);
-
-	    float angle = acos(glm::dot(xVec, sunVec));
-	    glm::vec3 ref =  glm::cross(xVec, sunVec);
-
-	    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-	    transform = rotation * transform;
-	}
-
-	position += transform*glm::vec4(_data->offset->x, _data->offset->z, _data->offset->y, _data->offset->w);
-
-	// Activate shader
-	_shader->activate();
-	glEnable(GL_ALPHA_TEST);
-	glDisable(GL_CULL_FACE);
-
-	_shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
-	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader.get(), OsEng.renderEngine().camera(), position);
-
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
-	_texture->bind();
-	_shader->setUniform("texture1", unit);
-
-	glBindVertexArray(_quad);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glEnable(GL_CULL_FACE);
-	_shader->deactivate();
-
-
 }
 
-void DataPlane::update(){
+void DataPlane::update(const UpdateData& data){
 	if(_planeIsDirty)
 		createPlane();
 

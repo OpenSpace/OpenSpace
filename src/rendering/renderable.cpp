@@ -84,7 +84,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
                  "Scenegraphnode need to specify '" << SceneGraphNode::KeyName
 		<< "' because renderables is going to use this for debugging!");
 #endif
-
 	dictionary.getValue(keyStart, _startTime);
 	dictionary.getValue(keyEnd, _endTime);
 

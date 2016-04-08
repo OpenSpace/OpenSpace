@@ -32,16 +32,10 @@
 namespace openspace{
 class CygnetPlane : public ISWACygnet {
 public:
-	// CygnetPlane(int cygnetId, std::string path);
-	CygnetPlane(std::shared_ptr<Metadata> data);
 	CygnetPlane(const ghoul::Dictionary& dictionary);
 	~CygnetPlane();
 
-	virtual bool initialize() = 0;
-	virtual bool deinitialize() = 0;
-	virtual bool isReady();
-	virtual void render() = 0;
-	virtual void update() = 0;
+	virtual bool isReady() const override;
 
 protected:
 	virtual void loadTexture() = 0;

@@ -23,20 +23,6 @@
 
 namespace openspace{
 
-// CygnetPlane::CygnetPlane(int cygnetId, std::string path)
-// 	:ISWACygnet(cygnetId, path)
-// 	,_quad(0)
-// 	,_vertexPositionBuffer(0)
-//     ,_planeIsDirty(true)
-// {}
-
-CygnetPlane::CygnetPlane(std::shared_ptr<Metadata> data)
-    :ISWACygnet(data)
-    ,_quad(0)
-    ,_vertexPositionBuffer(0)
-    ,_planeIsDirty(true)
-{}
-
 CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
     :ISWACygnet(dictionary)
     ,_quad(0)
@@ -46,12 +32,12 @@ CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
 
 CygnetPlane::~CygnetPlane(){}
 
-bool CygnetPlane::isReady(){
+bool CygnetPlane::isReady() const{
     bool ready = true;
     if (!_shader)
         ready &= false;
-    if(!_texture)
-        ready &= false;
+    // if(!_texture)
+    //     ready &= false;
     return ready;
 }
 

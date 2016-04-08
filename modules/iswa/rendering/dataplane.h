@@ -32,14 +32,13 @@
  
  class DataPlane : public CygnetPlane {
  public:
- 	DataPlane(std::shared_ptr<Metadata> data);
  	DataPlane(const ghoul::Dictionary& dictionary);
  	~DataPlane();
 
  	virtual bool initialize() override;
     virtual bool deinitialize() override;
-	virtual void render() override;
-	virtual void update() override;
+	virtual void render(const RenderData& data) override;
+	virtual void update(const UpdateData& data) override;
  
  private:
  	virtual void loadTexture() override;

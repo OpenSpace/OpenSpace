@@ -30,29 +30,12 @@
 
 namespace openspace{
 
-ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
-	: _enabled("enabled", "Is Enabled", true)
-	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	, _delete("delete", "Delete")
-	, _shader(nullptr)
-	, _texture(nullptr)
-	, _data(data)
-	, _memorybuffer("")
-{
-	addProperty(_enabled);
-	addProperty(_updateInterval);
-	addProperty(_delete);
-
-	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
-}
-
 ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
-	: _enabled("enabled", "Is Enabled", true)
+	: Renderable(dictionary)
 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	, _delete("delete", "Delete")
 	, _shader(nullptr)
 	, _texture(nullptr)
-	// , _data(data)
 	, _memorybuffer("")
 {
 	_data = std::make_shared<Metadata>();
@@ -64,7 +47,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	dictionary.getValue("Offset",_data->offset);
 	dictionary.getValue("Scale",_data->scale);
 
-	addProperty(_enabled);
+	// addProperty(_enabled);
 	addProperty(_updateInterval);
 	addProperty(_delete);
 
@@ -73,20 +56,8 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
 ISWACygnet::~ISWACygnet(){}
 
-
-void ISWACygnet::setPscUniforms(
-	ghoul::opengl::ProgramObject* program, 
-	const Camera* camera,
-	const PowerScaledCoordinate& position) 
-{
-	program->setUniform("campos", camera->position().vec4());
-	program->setUniform("objpos", position.vec4());
-	program->setUniform("camrot", camera->viewRotationMatrix());
-	program->setUniform("scaling", camera->scaling());
-}
-
 void ISWACygnet::registerProperties(){
-	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+	// OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }

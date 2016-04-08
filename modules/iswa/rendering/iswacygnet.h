@@ -42,31 +42,32 @@
 #include <openspace/rendering/renderengine.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <openspace/rendering/renderable.h>
 
 
 namespace openspace{
-class ISWACygnet : public properties::PropertyOwner{
+class ISWACygnet : public Renderable{
 public:
-	ISWACygnet(std::shared_ptr<Metadata> data);
+	// ISWACygnet(std::shared_ptr<Metadata> data);
 	ISWACygnet(const ghoul::Dictionary& dictionary);
 	~ISWACygnet();
 
-	virtual bool initialize() = 0;
-	virtual bool deinitialize() = 0;
+	// virtual bool initialize() = 0;
+	// virtual bool deinitialize() = 0;
 
-	virtual void render() = 0;
-	virtual void update() = 0;
-	virtual bool isReady() = 0;
+	// virtual void render(const RenderData& data) = 0;
+	// virtual void update(const UpdateData& data) = 0;
+	// virtual bool isReady() = 0;
 
-	bool enabled(){return _enabled.value();}
+	// bool enabled(){return _enabled.value();}
 
 protected:
-	void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
+	// void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	void registerProperties();
 	void unregisterProperties();
 	void setParent();
 
-	properties::BoolProperty _enabled;
+	// properties::BoolProperty _enabled;
 	properties::FloatProperty _updateInterval;
 	properties::TriggerProperty _delete;
 
@@ -81,7 +82,6 @@ protected:
 
 	double _time;
 	double _lastUpdateTime = 0;
-
 
 	int _id;
 };

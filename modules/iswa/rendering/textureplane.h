@@ -25,7 +25,6 @@
 #ifndef __TEXTUREPLANE_H__
 #define __TEXTUREPLANE_H__
 
-// #include <openspace/rendering/renderable.h>
 #include <modules/iswa/rendering/cygnetplane.h>
 #include <ghoul/opengl/texture.h>
 #include <openspace/engine/downloadmanager.h>
@@ -34,15 +33,14 @@
  
  class TexturePlane : public CygnetPlane{
  public:
- 	TexturePlane(std::shared_ptr<Metadata> data);
  	TexturePlane(const ghoul::Dictionary& dictionary);
  	~TexturePlane();
 
- 	virtual bool initialize();
-    virtual bool deinitialize();
+ 	virtual bool initialize() override;
+    virtual bool deinitialize() override;
 
-	virtual void render();
-	virtual void update();
+	virtual void render(const RenderData& data) override;
+	virtual void update(const UpdateData& data) override;
  
  private:
  	virtual void loadTexture() override;

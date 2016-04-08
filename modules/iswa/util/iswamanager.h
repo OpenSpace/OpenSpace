@@ -30,6 +30,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/glm.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/rendering/renderable.h>
 
 
 namespace openspace {

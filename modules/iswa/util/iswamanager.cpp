@@ -71,6 +71,9 @@ namespace openspace{
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(metadata->path));
 				ghoul::Dictionary metadataDic = 
 				{
+					{std::string("Name"), 	std::string("DataPlane")},
+					{std::string("StartTime"), 	std::string("")},
+					{std::string("EndTime"), 	std::string("")},
 					{std::string("Id"), 	metadata->id},
 					{std::string("Path"), 	metadata->path},
 					{std::string("Scale"),  std::make_shared<glm::vec4>(kw->getModelScaleScaled())},
@@ -89,6 +92,9 @@ namespace openspace{
 				if(node){
 					ghoul::Dictionary metadataDic = 
 					{
+						{std::string("Name"), 	std::string("TexturePlane")},
+						{std::string("StartTime"), 	std::string("")},
+						{std::string("EndTime"), 	std::string("")},
 						{std::string("Id"), 	metadata->id},
 						{std::string("Path"), 	metadata->path},
 						{std::string("Frame"),  std::string("GALACTIC")},
