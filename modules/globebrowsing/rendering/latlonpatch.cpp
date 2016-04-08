@@ -110,23 +110,40 @@ namespace openspace {
 		// TODO : Not sure if double precision will be needed for all these calculations
 		// Using doubles in case but might slow things down.
 		// TODO : Need to get the radius of the globe
-		double r = 6e6;
+		double r = 6.3e6;
 
 		// Create control points and normals(double)
 		glm::dvec3 p00, p01, p02, p10, p11, p12, p20, p21, p22;
 		glm::dvec3 n00, n01, n02, n10, n11, n12, n20, n21, n22;
+		glm::dvec3 nHorizontal0, nHorizontal1, nHorizontal2;
+		float w10, w11, w12;
 
 		// Calculate positions of corner control points
-		p00 = calculateCornerPointLeftBottom();
-		p20 = calculateCornerPointRightBottom();
-		p02 = calculateCornerPointLeftTop();
-		p22 = calculateCornerPointRightTop();
+		p00 = calculateCornerPointBottomLeft();
+		p20 = calculateCornerPointBottomRight();
+		p02 = calculateCornerPointTopLeft();
+		p22 = calculateCornerPointTopRight();
+
+		// Calculate the horizontal normals
+		nHorizontal0 = glm::normalize(converter::latLonToCartesian(
+			0,
+			_posLatLon.y - _sizeLatLon.y,
+			r));
+		nHorizontal1 = glm::normalize(converter::latLonToCartesian(
+			0,
+			_posLatLon.y,
+			r));
+		nHorizontal2 = glm::normalize(converter::latLonToCartesian(
+			0,
+			_posLatLon.y + _sizeLatLon.y,
+			r));
+
 		// Get position of center control points
-		p01 = calculateCenterPoint(p00, p02);
-		p21 = calculateCenterPoint(p20, p22);
-		p10 = calculateCenterPoint(p00, p20);
-		p12 = calculateCenterPoint(p02, p22);
-		p11 = calculateCenterPoint(p01, p21);
+		p01 = calculateCenterPoint(p00, glm::normalize(p00), p02, glm::normalize(p02));
+		p21 = calculateCenterPoint(p20, glm::normalize(p20), p22, glm::normalize(p22));
+		p10 = calculateCenterPoint(p00, nHorizontal0, p20, nHorizontal2);
+		p12 = calculateCenterPoint(p02, nHorizontal0, p22, nHorizontal2);
+		p11 = calculateCenterPoint(p01, nHorizontal0, p21, nHorizontal2);
 
 		// Calculate normals from control point positions
 		n00 = normalize(p00);
@@ -138,6 +155,11 @@ namespace openspace {
 		n20 = normalize(p20);
 		n21 = normalize(p21);
 		n22 = normalize(p22);
+
+		// Calculate three weights to send to GPU for interpolation
+		w10 = glm::dot(nHorizontal0, nHorizontal1);
+		w11 = w10;
+		w12 = w10;
 
 		// TODO : Transformation to world space from model space should also consider
 		// rotations. Now it only uses translatation for simplicity. Should be done
@@ -160,10 +182,13 @@ namespace openspace {
 		glm::dvec3 camPos = data.camera.position().dvec3();
 		glm::dvec3 camDir = glm::normalize(position - camPos);
 		glm::dvec3 camUp = glm::dvec3(0,1,0);// data.camera.lookUpVector();
+
 		// Get camera transform matrix (double precision)
 		glm::dmat4 viewTransform = glm::inverse(glm::translate(glm::dmat4(1.0), camPos));
+
 		//glm::dmat4 viewTransform = glm::lookAt(camPos, camPos + camDir, camUp);
-		viewTransform = glm::dmat4( data.camera.viewRotationMatrix()) * viewTransform;
+		viewTransform = glm::dmat4(data.camera.viewRotationMatrix())*viewTransform;
+
 		// Transform control points to camera space
 		p00 = glm::dvec3(viewTransform * glm::dvec4(p00, 1.0));
 		p10 = glm::dvec3(viewTransform * glm::dvec4(p10, 1.0));
@@ -197,6 +222,11 @@ namespace openspace {
 		_programObject->setUniform("p12", glm::vec3(p12));
 		_programObject->setUniform("p22", glm::vec3(p22));
 
+		_programObject->setUniform("w10", w10);
+		_programObject->setUniform("w11", w11);
+		_programObject->setUniform("w12", w12);
+
+		/*
 		_programObject->setUniform("n00", glm::vec3(n00));
 		_programObject->setUniform("n10", glm::vec3(n10));
 		_programObject->setUniform("n20", glm::vec3(n20));
@@ -206,12 +236,12 @@ namespace openspace {
 		_programObject->setUniform("n02", glm::vec3(n02));
 		_programObject->setUniform("n12", glm::vec3(n12));
 		_programObject->setUniform("n22", glm::vec3(n22));
-
+		*/
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
 		 
 		// Render triangles (use texture coordinates to interpolate to new positions)
-		glDisable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
 		// render
 		_grid.drawUsingActiveProgram();
@@ -228,43 +258,44 @@ namespace openspace {
 		_posLatLon = posLatLon;
 	}
 
-	glm::dvec3 LatLonPatch::calculateCornerPointLeftBottom() {
+	glm::dvec3 LatLonPatch::calculateCornerPointBottomLeft() {
 		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
 
-		return glm::dvec3(converter::latLonToCartesian(
+		return converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y - _sizeLatLon.y,
-			r));
+			r);
 	}
-	glm::dvec3 LatLonPatch::calculateCornerPointRightBottom() {
+	glm::dvec3 LatLonPatch::calculateCornerPointBottomRight() {
 		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
 
-		return glm::dvec3(converter::latLonToCartesian(
-			_posLatLon.x + _sizeLatLon.x,
-			_posLatLon.y - _sizeLatLon.y,
-			r));
-	}
-	glm::dvec3 LatLonPatch::calculateCornerPointLeftTop() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
-		return glm::dvec3(converter::latLonToCartesian(
+		return converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r));
+			r);
 	}
-	glm::dvec3 LatLonPatch::calculateCornerPointRightTop() {
+	glm::dvec3 LatLonPatch::calculateCornerPointTopLeft() {
 		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
 
-		return glm::dvec3(converter::latLonToCartesian(
+		return converter::latLonToCartesian(
+			_posLatLon.x + _sizeLatLon.x,
+			_posLatLon.y - _sizeLatLon.y,
+			r);
+	}
+	glm::dvec3 LatLonPatch::calculateCornerPointTopRight() {
+		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+
+		return converter::latLonToCartesian(
 			_posLatLon.x + _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r));
+			r);
 	}
 
-	glm::dvec3 LatLonPatch::calculateCenterPoint(glm::dvec3 p0, glm::dvec3 p2) {
-		glm::dvec3 n0 = glm::normalize(p0);
-		glm::dvec3 n2 = glm::normalize(p2);
-
+	glm::dvec3 LatLonPatch::calculateCenterPoint(
+		glm::dvec3 p0,
+		glm::dvec3 n0,
+		glm::dvec3 p2,
+		glm::dvec3 n2) {
 		// Solution derived
 		glm::dvec2 u = glm::dvec2(0, glm::dot(p2, n2) - glm::dot(p0, n2));
 		double cosNormalAngle = glm::dot(n0, n2);
@@ -272,6 +303,10 @@ namespace openspace {
 		glm::dvec2 stParam = glm::inverse(A) * u;
 		glm::dvec3 p1 = p0 + stParam.s * n0 + stParam.t * n2;
 		return p1;
+	}
+
+	void LatLonPatch::setSizeLatLon(glm::dvec2 sizeLatLon) {
+		_sizeLatLon = sizeLatLon;
 	}
 
 }  // namespace openspace

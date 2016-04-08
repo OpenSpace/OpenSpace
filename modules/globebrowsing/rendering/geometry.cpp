@@ -168,7 +168,7 @@ void Geometry::drawUsingActiveProgram() {
 
 	glBindVertexArray(_vaoID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
-	glDrawElements(GL_LINES, _elementData.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, _elementData.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

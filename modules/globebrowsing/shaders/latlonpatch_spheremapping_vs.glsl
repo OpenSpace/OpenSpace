@@ -36,6 +36,11 @@ uniform vec3 p02;
 uniform vec3 p12;
 uniform vec3 p22;
 
+uniform float w10;
+uniform float w11;
+uniform float w12;
+
+/*
 uniform vec3 n00;
 uniform vec3 n10;
 uniform vec3 n20;
@@ -45,10 +50,11 @@ uniform vec3 n21;
 uniform vec3 n02;
 uniform vec3 n12;
 uniform vec3 n22;
-
+*/
 layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
+out vec2 vs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -119,20 +125,21 @@ void getKnots(int n, int c, inout int x[7])
 
 void main()
 {
+	vs_uv = in_UV;
+
 	// Bilinear interpolation
+	
 	/*
 	vec3 p0 = (1 - in_UV.x) * p00 + in_UV.x * p20;
 	vec3 p2 = (1 - in_UV.x) * p02 + in_UV.x * p22;
 	vec3 p = (1 - in_UV.y) * p0 + in_UV.y * p2;
 	*/
-
 	// Calculate three weights
 	// These values of the weights will make the curves in to circle segments
 
-
-	float w10 = dot(n00, normalize(n00 + n20));
-	float w11 = dot(n01, normalize(n01 + n21));
-	float w12 = dot(n02, normalize(n02 + n22));
+	//float w10 = dot(n00, normalize(n00 + n20));
+	//float w11 = dot(n01, normalize(n01 + n21));
+	//float w12 = dot(n02, normalize(n02 + n22));
 
 	float basisFunctionValues[4];
 	int order = 3; // Order of the NURBS curve
@@ -141,45 +148,31 @@ void main()
 
 	// Interpolate in u direction
 	// getKnots(npts, order, knotVector);
-	nurbsBasis(order, in_UV.x, npts, knotVector, basisFunctionValues);	
+	nurbsBasis(order, in_UV.y, npts, knotVector, basisFunctionValues);	
 	vec3 p0 =
 		basisFunctionValues[1] * p00 +
-		basisFunctionValues[2] * p10 * w10 + 
+		basisFunctionValues[2] * p10 * w10+ 
 		basisFunctionValues[3] * p20;
 	vec3 p1 =
 		basisFunctionValues[1] * p01 +
-		basisFunctionValues[2] * p11 * w11 + 
+		basisFunctionValues[2] * p11 * w11+ 
 		basisFunctionValues[3] * p21;
 	vec3 p2 =
 		basisFunctionValues[1] * p02 +
-		basisFunctionValues[2] * p12 * w12 + 
+		basisFunctionValues[2] * p12 * w12+ 
 		basisFunctionValues[3] * p22;
 
-	// Interpolate normals
-	vec3 n0 =
-		basisFunctionValues[1] * n00 +
-		basisFunctionValues[2] * n10 * w10 + 
-		basisFunctionValues[3] * n20;
-	vec3 n1 =
-		basisFunctionValues[1] * n01 +
-		basisFunctionValues[2] * n11 * w11 + 
-		basisFunctionValues[3] * n21;
-	vec3 n2 =
-		basisFunctionValues[1] * n02 +
-		basisFunctionValues[2] * n12 * w12 + 
-		basisFunctionValues[3] * n22;
-
 	// Calculate the last weight
-	float w1 = dot(n0, n1);
+	float w1 = dot(normalize(p0), normalize(p1));
 
 	// Interpolate in v direction
-	nurbsBasis(order, in_UV.y, npts, knotVector, basisFunctionValues);	
+	nurbsBasis(order, in_UV.x, npts, knotVector, basisFunctionValues);	
 	vec3 p =
 		basisFunctionValues[1] * p0 +
-		basisFunctionValues[2] * p1 * w1 + 
+		basisFunctionValues[2] * p1 * w1 * w11+ 
 		basisFunctionValues[3] * p2;
 	
-	//p = (1 - in_UV.y) * p0 + in_UV.y * p2;
+	//p = (1 - in_UV.x) * p0 + in_UV.x * p2;
 
 
 	vec4 position = Projection * vec4(p, 1);

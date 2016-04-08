@@ -22,48 +22,91 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __QUADTREE_H__
+#define __QUADTREE_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-#include <test_chunknode.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+#include <modules/globebrowsing/rendering/latlonpatch.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
-
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
-
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+// forward declaration
+namespace openspace {
+	class ChunkLodGlobe;
 }
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
-	testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+namespace openspace {
 
-	return returnVal;
-}
+enum Quad {
+	NORTH_WEST,
+	NORTH_EAST,
+	SOUTH_WEST,
+	SOUTH_EAST
+};
+
+
+
+struct BoundingRect {
+	BoundingRect(Scalar, Scalar, Scalar, Scalar);
+	BoundingRect(const Vec2& center, const Vec2& halfSize);
+	Vec2 center;
+	Vec2 halfSize;
+};
+
+
+
+
+
+class ChunkNode : public Renderable{
+public:
+	ChunkNode(ChunkLodGlobe&, const BoundingRect&, ChunkNode* parent = nullptr);
+	~ChunkNode();
+
+
+	void split(int depth = 1);
+	void merge();
+
+	bool isRoot() const;
+	bool isLeaf() const;
+	
+	const ChunkNode& getChild(Quad quad) const;
+	const BoundingRect bounds;
+
+
+
+	bool initialize() override;
+	bool deinitialize() override;
+	bool isReady() const override;
+
+	void render(const RenderData& data) override;
+	void update(const UpdateData& data) override;
+
+	void internalRender(const RenderData& data, int currLevel);
+	void internalUpdate(const UpdateData& data, int currLevel);
+
+private:
+	
+	
+	ChunkNode* _parent;
+	std::unique_ptr<ChunkNode> _children[4];
+
+	ChunkLodGlobe& _owner;
+
+};
+
+
+
+} // namespace openspace
+
+
+
+#endif // __QUADTREE_H__

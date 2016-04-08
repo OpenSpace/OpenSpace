@@ -22,11 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
-
-#include <modules/globebrowsing/rendering/globemesh.h>
-#include <modules/globebrowsing/rendering/clipmapglobe.h>
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
+
+#include <modules/globebrowsing/util/converter.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -41,7 +39,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "RenderableGlobe";
+	const std::string _loggerCat = "ChunkLodGlobe";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -52,37 +50,82 @@ namespace {
 
 namespace openspace {
 
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
+	const BoundingRect ChunkLodGlobe::LEFT_HEMISPHERE = BoundingRect(0, -M_PI/2, M_PI/2, M_PI/2);
+	const BoundingRect ChunkLodGlobe::RIGHT_HEMISPHERE = BoundingRect(0, M_PI/2, M_PI/2, M_PI/2);
+
+
+	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
+		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
+		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
+		, _templatePatch(20,20, 0, 0, 0, 0)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
+			"ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
+
 		dictionary.getValue(keyFrame, _frame);
 		dictionary.getValue(keyBody, _target);
 		if (_target != "")
 			setBody(_target);
 
-
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
-		//addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
+		
+		// ----- specific for this class only ------ //
+		_leftRoot->split(1);
+		_rightRoot->split(1);
 	}
 
-	RenderableGlobe::~RenderableGlobe() {
+	ChunkLodGlobe::~ChunkLodGlobe() {
+
 	}
 
-	void RenderableGlobe::update(const UpdateData& data) {
+	LatLonPatch& ChunkLodGlobe::getTemplatePatch() {
+		return _templatePatch;
+	}
+
+	bool ChunkLodGlobe::initialize() {
+		_templatePatch.initialize();
+		_leftRoot->initialize();
+		_rightRoot->initialize();
+		return isReady();
+	}
+
+	bool ChunkLodGlobe::deinitialize() {
+		_templatePatch.deinitialize();
+		_leftRoot->deinitialize();
+		_rightRoot->deinitialize();
+		return true;
+	}
+
+	bool ChunkLodGlobe::isReady() const {
+		bool ready = true;
+		ready &= _templatePatch.isReady();
+		ready &= _leftRoot->isReady();
+		ready &= _rightRoot->isReady();
+		return ready;
+	}
+
+	void ChunkLodGlobe::render(const RenderData& data)
+	{
+		// Set patch to follow camera
+		//_patch.setPositionLatLon(converter::cartesianToLatLon(data.camera.position().dvec3()));
+		// render
+		_leftRoot->render(data);
+		_rightRoot->render(data);
+	}
+
+	void ChunkLodGlobe::update(const UpdateData& data) {
+		_templatePatch.update(data);
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;
-		DistanceSwitch::update(data);
 	}
+
+
 
 }  // namespace openspace

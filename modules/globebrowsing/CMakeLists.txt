@@ -25,16 +25,23 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
+
 )
-source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.cpp
@@ -44,8 +51,13 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
+
+   ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
+
    ${CMAKE_CURRENT_SOURCE_DIR}/util/converter.cpp
 
+   
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -54,7 +66,7 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "GlobeBrowsing"
-    globebrowsing_module
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+	"GlobeBrowsing"
+	globebrowsing_module
+	${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

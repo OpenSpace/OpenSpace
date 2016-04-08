@@ -3,7 +3,7 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "DebugGlobe",
-        Position = {1, 0, 0, 5},
+        Position = {1, 0, 0, 7},
     },
     Modules = {
         "debugglobe",
