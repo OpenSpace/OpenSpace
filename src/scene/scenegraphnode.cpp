@@ -71,7 +71,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-		renderableDictionary.setValue(KeyName, name);
+        renderableDictionary.setValue(KeyName, name);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
@@ -80,7 +80,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             delete result;
             return nullptr;
         }
-		result->addPropertySubOwner(result->_renderable);
+        result->addPropertySubOwner(result->_renderable);
         LDEBUG("Successfully create renderable for '" << result->name() << "'");
     }
 
@@ -95,7 +95,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             delete result;
             return nullptr;
         }
-		//result->addPropertySubOwner(result->_ephemeris);
+        //result->addPropertySubOwner(result->_ephemeris);
         LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
     }
 
@@ -147,18 +147,18 @@ bool SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {
-		_renderable->deinitialize();
+        _renderable->deinitialize();
         delete _renderable;
-		_renderable = nullptr;
-	}
+        _renderable = nullptr;
+    }
 
     delete _ephemeris;
     _ephemeris = nullptr;
 
  //   for (SceneGraphNode* child : _children) {
-	//	child->deinitialize();
-	//	delete child;
-	//}
+    //	child->deinitialize();
+    //	delete child;
+    //}
     _children.clear();
 
     // reset variables
@@ -171,35 +171,35 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-	if (_ephemeris) {
-		if (data.doPerformanceMeasurement) {
-			glFinish();
+    if (_ephemeris) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-			_ephemeris->update(data);
+            _ephemeris->update(data);
 
-			glFinish();
-			auto end = std::chrono::high_resolution_clock::now();
-			_performanceRecord.updateTimeEphemeris = (end - start).count();
-		}
-		else
-			_ephemeris->update(data);
-	}
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeEphemeris = (end - start).count();
+        }
+        else
+            _ephemeris->update(data);
+    }
 
-	if (_renderable && _renderable->isReady()) {
-		if (data.doPerformanceMeasurement) {
-			glFinish();
-			auto start = std::chrono::high_resolution_clock::now();
+    if (_renderable && _renderable->isReady()) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
 
-			_renderable->update(data);
+            _renderable->update(data);
 
-			glFinish();
-			auto end = std::chrono::high_resolution_clock::now();
-			_performanceRecord.updateTimeRenderable = (end - start).count();
-		}
-		else
-			_renderable->update(data);
-	}
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeRenderable = (end - start).count();
+        }
+        else
+            _renderable->update(data);
+    }
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
@@ -222,7 +222,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
             return;
         }
     }
-	*/
+    */
 #endif
 
     // inside boudningsphere or parts of the sphere is visible, individual
@@ -245,22 +245,22 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     const psc thisPosition = worldPosition();
 
-	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
+    RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-	_performanceRecord.renderTime = 0;
+    _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
-		if (data.doPerformanceMeasurement) {
-			glFinish();
-			auto start = std::chrono::high_resolution_clock::now();
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
 
-			_renderable->render(newData, tasks);
+            _renderable->render(newData, tasks);
 
-			glFinish();
-			auto end = std::chrono::high_resolution_clock::now();
-			_performanceRecord.renderTime = (end - start).count();
-		}
-		else
-			_renderable->render(newData, tasks);
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.renderTime = (end - start).count();
+        }
+        else
+            _renderable->render(newData, tasks);
     }
 
     // evaluate all the children, tail-recursive function(?)
@@ -278,8 +278,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 //    _children.push_back(child);
 //}
 
-void SceneGraphNode::setParent(SceneGraphNode* parent)
-{
+void SceneGraphNode::setParent(SceneGraphNode* parent) {
     _parent = parent;
 }
 
@@ -326,8 +325,8 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 // bounding sphere
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
-	_boundingSphere = 0.0;
-	
+    _boundingSphere = 0.0;
+    
     if (!_children.empty()) {  // node
         PowerScaledScalar maxChild;
 
@@ -338,7 +337,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
             // position
             //PowerScaledScalar child = _children.at(i)->position().length()
             //            + _children.at(i)->calculateBoundingSphere();
-			PowerScaledScalar child = _children.at(i)->calculateBoundingSphere();
+            PowerScaledScalar child = _children.at(i)->calculateBoundingSphere();
             if (child > maxChild) {
                 maxChild = child;
             }
@@ -352,8 +351,8 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         if(renderableBS > _boundingSphere)
             _boundingSphere = renderableBS;
     }
-	//LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
-	
+    //LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
+    
     return _boundingSphere;
 }
 
@@ -372,7 +371,7 @@ const Renderable* SceneGraphNode::renderable() const
 }
 
 Renderable* SceneGraphNode::renderable() {
-	return _renderable;
+    return _renderable;
 }
 
 // private helper methods
@@ -422,21 +421,21 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 
 void SceneGraphNode::updateCamera(Camera* camera) const{
 
-	psc origin = worldPosition();
-	//int i = 0;
-	// the camera position
-	
-	psc relative = camera->position();
-	psc focus = camera->focusPosition();
-	psc relative_focus = relative - focus;
+    psc origin = worldPosition();
+    //int i = 0;
+    // the camera position
+    
+    psc relative = camera->position();
+    psc focus = camera->focusPosition();
+    psc relative_focus = relative - focus;
 
-	psc target = origin + relative_focus;
-	
-	camera->setPosition(target);
-	camera->setFocusPosition(origin);
+    psc target = origin + relative_focus;
+    
+    camera->setPosition(target);
+    camera->setFocusPosition(origin);
 
-	//printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
-	
+    //printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
+    
 }
 
 }  // namespace openspace
