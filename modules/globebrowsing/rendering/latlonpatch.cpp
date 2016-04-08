@@ -104,6 +104,7 @@ namespace openspace {
 	}
 
 	void LatLonPatch::render(const RenderData& data) {
+
 		// activate shader
 		_programObject->activate();
 
@@ -116,22 +117,22 @@ namespace openspace {
 		glm::dvec3 p00, p01, p10, p11;
 
 		// Calculate global positions of control points
-		p00 = glm::dvec3(converter::latLonToCartesian(
+		p00 = converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y - _sizeLatLon.y,
-			r));
-		p10 = glm::dvec3(converter::latLonToCartesian(
+			r);
+		p10 = converter::latLonToCartesian(
 			_posLatLon.x + _sizeLatLon.x,
 			_posLatLon.y - _sizeLatLon.y,
-			r));
-		p01 = glm::dvec3(converter::latLonToCartesian(
+			r);
+		p01 = converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r));
-		p11 = glm::dvec3(converter::latLonToCartesian(
+			r);
+		p11 = converter::latLonToCartesian(
 			_posLatLon.x + _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r));
+			r);
 
 		// TODO : Transformation to world space from model space should also consider
 		// rotations. Now it only uses translatation for simplicity. Should be done
@@ -172,8 +173,11 @@ namespace openspace {
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
 
 		// Render triangles (use texture coordinates to interpolate to new positions)
+		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+
+
 
 		// render
 		_grid.drawUsingActiveProgram();

@@ -22,21 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/assert.h>
+
 #include <modules/globebrowsing/datastructures/chunknode.h>
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
+#include <modules/globebrowsing/util/converter.h>
+
+namespace {
+	const std::string _loggerCat = "ChunkNode";
+}
 
 namespace openspace {
 
 BoundingRect::BoundingRect(Scalar cx, Scalar cy, Scalar hsx, Scalar hsy)
-	: center(Vec2(cx, cy)), halfSize(Vec2(hsx, hsy)) { }
+	: center(Vec2(cx, cy))
+	, halfSize(Vec2(hsx, hsy)) 
+	, _hasCachedCartesianCenter(false)
+	, _hasCachedArea(false)
+{
+
+}
 
 BoundingRect::BoundingRect(const Vec2& center, const Vec2& halfSize)
-	:center(center), halfSize(halfSize) { }
+	:center(center)
+	, halfSize(halfSize)
+	, _hasCachedCartesianCenter(false)
+	, _hasCachedArea(false)
+{
+
+}
+
+
+Vec3 BoundingRect::centerAsCartesian(Scalar radius) {
+	if (!_hasCachedCartesianCenter) {
+		_cartesianCenter = converter::latLonToCartesian(center.x, center.y, 1);
+		_hasCachedCartesianCenter = true;
+	}
+	return radius * _cartesianCenter;
+}
+
+
+Scalar BoundingRect::area(Scalar radius) {
+	if (!_hasCachedArea) {
+		Scalar deltaTheta = 2 * halfSize.y; // longitude range
+		Scalar phiMin = center.x - halfSize.x;
+		Scalar phiMax = center.x + halfSize.x;
+		_area = deltaTheta * (sin(phiMax) - sin(phiMin));
+		_hasCachedArea = true;
+	}
+	return radius*radius*_area;
+}
 
 
 
 
 
+
+
+
+
+
+
+
+
+int ChunkNode::instanceCount = 0;
 
 ChunkNode::ChunkNode(ChunkLodGlobe& owner, const BoundingRect& bounds, ChunkNode* parent)
 : _owner(owner)
@@ -47,11 +96,14 @@ ChunkNode::ChunkNode(ChunkLodGlobe& owner, const BoundingRect& bounds, ChunkNode
 	_children[1] = nullptr;
 	_children[2] = nullptr;
 	_children[3] = nullptr;
+	instanceCount++;
 }
 
 ChunkNode::~ChunkNode() {
-	
+	instanceCount--;
 }
+
+
 
 bool ChunkNode::isRoot() const {
 	return _parent == nullptr;
@@ -88,7 +140,43 @@ bool ChunkNode::isReady() const{
 }
 
 void ChunkNode::render(const RenderData& data) {
+	ghoul_assert(isRoot(), "this method should only be invoked on root");
+	//LDEBUG("-------------");
+	internalUpdateChunkTree(data, 0);
 	internalRender(data, 0);
+}
+
+
+// Returns true or false wether this node can be merge or not
+bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
+	if (isLeaf()) {
+		int desiredDepth = desiredSplitDepth(data);
+		if (desiredDepth > depth) {
+			split();
+		}
+		else if(desiredDepth < depth){
+			return true; // request a merge from parent
+		}
+		return false;
+	}
+	else {
+		int requestedMergeMask = 0;
+		for (int i = 0; i < 4; ++i) {
+			if (_children[i]->internalUpdateChunkTree(data, depth + 1)) {
+				requestedMergeMask |= (1 << i);
+			}
+		}
+
+		// check if all children requested merge
+		if (requestedMergeMask == 0xf) {
+			merge();
+
+			// re-run this method on this, now that this is a leaf node
+			return internalUpdateChunkTree(data, depth);
+		}
+		return false;
+	}
+	
 }
 
 void ChunkNode::internalRender(const RenderData& data, int currLevel) {
@@ -105,8 +193,39 @@ void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 	}
 }
 
+int ChunkNode::desiredSplitDepth(const RenderData& data) {
+	Vec3 normal = bounds.centerAsCartesian(1.0);
+	Vec3 pos = data.position.dvec3() + _owner.globeRadius * normal;
+
+	// Temporay ugly fix for Camera::position() is broken.
+	Vec3 buggedCameraPos = data.camera.position().dvec3();
+	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
+	Vec3 cameraPos = buggedCameraPos - _owner.globeRadius * cameraDirection;
+	Vec3 cameraToChunk = pos - cameraPos;
+
+	// if camera points at same direction as latlon patch normal,
+	// we see the back side and dont have to split it
+	Scalar cosNormalCameraDirection = glm::dot(normal, cameraDirection);
+	if (cosNormalCameraDirection > 0.3) {
+		return _owner.minSplitDepth;
+	}
+
+
+	Scalar distance = glm::length(cameraToChunk) + _owner.globeRadius;
+	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
+
+	int depthRange = _owner.maxSplitDepth - _owner.minSplitDepth;
+
+	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*bounds.area(1);
+
+	int desiredDepth = _owner.minSplitDepth + floor(scaleFactor / distance);
+	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
+}
+
+
 void ChunkNode::update(const UpdateData& data) {
-	internalUpdate(data, 0);
+	ghoul_assert(isRoot(), "this method should only be invoked on root");
+	//internalUpdate(data, 0);
 }
 
 void ChunkNode::internalUpdate(const UpdateData& data, int currLevel) {

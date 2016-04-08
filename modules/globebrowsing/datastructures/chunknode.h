@@ -43,6 +43,7 @@ namespace openspace {
 // Using double precision
 typedef double Scalar;
 typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
@@ -58,8 +59,20 @@ enum Quad {
 struct BoundingRect {
 	BoundingRect(Scalar, Scalar, Scalar, Scalar);
 	BoundingRect(const Vec2& center, const Vec2& halfSize);
+
+	Vec3 centerAsCartesian(Scalar radius);
+	Scalar area(Scalar radius);
+
 	Vec2 center;
 	Vec2 halfSize;
+	
+
+private:
+	bool _hasCachedCartesianCenter;
+	Vec3 _cartesianCenter;
+
+	bool _hasCachedArea;
+	Scalar _area;
 };
 
 
@@ -79,8 +92,6 @@ public:
 	bool isLeaf() const;
 	
 	const ChunkNode& getChild(Quad quad) const;
-	const BoundingRect bounds;
-
 
 
 	bool initialize() override;
@@ -90,16 +101,24 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
-	void internalRender(const RenderData& data, int currLevel);
-	void internalUpdate(const UpdateData& data, int currLevel);
+	BoundingRect bounds;
+
+	static int instanceCount;
 
 private:
+
+	void internalRender(const RenderData& data, int currLevel);
+	void internalUpdate(const UpdateData& data, int currLevel);
+	bool internalUpdateChunkTree(const RenderData& data, int currLevel);
+	int desiredSplitDepth(const RenderData& data);
 	
 	
 	ChunkNode* _parent;
 	std::unique_ptr<ChunkNode> _children[4];
 
 	ChunkLodGlobe& _owner;
+
+
 
 };
 
