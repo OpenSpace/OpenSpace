@@ -104,6 +104,7 @@ namespace openspace {
 	}
 
 	void LatLonPatch::render(const RenderData& data) {
+
 		// activate shader
 		_programObject->activate();
 
@@ -240,8 +241,11 @@ namespace openspace {
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
 		 
 		// Render triangles (use texture coordinates to interpolate to new positions)
+		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+
+
 
 		// render
 		_grid.drawUsingActiveProgram();

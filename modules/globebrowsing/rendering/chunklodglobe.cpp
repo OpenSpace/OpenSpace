@@ -57,13 +57,15 @@ namespace openspace {
 	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
-		, _templatePatch(20,20, 0, 0, 0, 0)
+		, _templatePatch(10,10, 0, 0, 0, 0)
+		, globeRadius(6.3e6)
+		, minSplitDepth(1)
+		, maxSplitDepth(7)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
+		//ghoul_assert(success, "ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
 		setName(name);
 
 		dictionary.getValue(keyFrame, _frame);
@@ -73,11 +75,6 @@ namespace openspace {
 
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
-
-		
-		// ----- specific for this class only ------ //
-		_leftRoot->split(1);
-		_rightRoot->split(1);
 	}
 
 	ChunkLodGlobe::~ChunkLodGlobe() {
@@ -110,13 +107,17 @@ namespace openspace {
 		return ready;
 	}
 
-	void ChunkLodGlobe::render(const RenderData& data)
-	{
-		// Set patch to follow camera
-		//_patch.setPositionLatLon(converter::cartesianToLatLon(data.camera.position().dvec3()));
-		// render
+	void ChunkLodGlobe::render(const RenderData& data){
+		minDistToCamera = INFINITY;
 		_leftRoot->render(data);
 		_rightRoot->render(data);
+
+		//LDEBUG("min distnace to camera: " << minDistToCamera);
+
+		Vec3 cameraPos = data.camera.position().dvec3();
+		//LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+
+		//LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
 	}
 
 	void ChunkLodGlobe::update(const UpdateData& data) {

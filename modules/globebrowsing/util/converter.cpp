@@ -34,6 +34,7 @@ namespace openspace {
 
 namespace converter {
 
+
 	glm::dvec3 latLonToCartesian(double latitude, double longitude, double radius) {
 		return radius * glm::dvec3(
 			glm::cos(latitude) * glm::cos(longitude),

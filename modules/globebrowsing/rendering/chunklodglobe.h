@@ -27,14 +27,16 @@
 
 #include <memory>
 
+
+#include <ghoul/logging/logmanager.h>
+
+
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/datastructures/chunknode.h>
-
 #include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
@@ -63,6 +65,12 @@ namespace openspace {
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 
+		double minDistToCamera;
+
+		const Scalar globeRadius;
+
+		const int minSplitDepth;
+		const int maxSplitDepth;
 
 
 	private:		
@@ -75,6 +83,7 @@ namespace openspace {
 
 		// the patch used for actual rendering
 		LatLonPatch _templatePatch;
+
 		
 		static const BoundingRect LEFT_HEMISPHERE;
 		static const BoundingRect RIGHT_HEMISPHERE;
