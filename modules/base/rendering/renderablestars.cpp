@@ -92,6 +92,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _colorTextureIsDirty(true)
     , _colorOption("colorOption", "Color Option")
     , _dataIsDirty(true)
+    , _alphaValue("alphaValue", "Transparency", 1.f, 0.f, 1.f)
     , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
     , _minBillboardSize("minBillboardSize", "Min Billboard Size", 1.f, 1.f, 100.f)
     , _program(nullptr)
@@ -132,6 +133,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
     _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
 
+    addProperty(_alphaValue);
     addProperty(_scaleFactor);
     addProperty(_minBillboardSize);
 }
@@ -200,6 +202,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("projection", projectionMatrix);
 
     _program->setUniform("colorOption", _colorOption);
+    _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
     
