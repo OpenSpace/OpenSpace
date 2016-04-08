@@ -145,7 +145,7 @@ void Scene::update(const UpdateData& data) {
     //    _graph.addSceneGraphNode(node);
     //    ONCE = true;
     //}
-
+    // ISWAManagar::ref().update();
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
             node->update(data);
@@ -166,6 +166,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _graph.nodes()) {
         node->render(data, tasks);
     }
+    std::cout << std::endl;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {

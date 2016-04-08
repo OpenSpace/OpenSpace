@@ -61,7 +61,10 @@ namespace openspace{
 			const std::string& extension = ghoul::filesystem::File(absPath(metadata->path)).fileExtension();
 			std::shared_ptr<ISWACygnet> cygnet;
 
-			if(extension == "cdf"){
+			if(extension == "plain"){
+				LWARNING("This cygnet image does not exist");
+				return nullptr;
+			}else if(extension == "cdf"){
 
 				if(!FileSys.fileExists(absPath(metadata->path))) {
 					LERROR("Could not find cdf file:  " << absPath(metadata->path));
@@ -69,53 +72,80 @@ namespace openspace{
 				}
 
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(metadata->path));
-				ghoul::Dictionary metadataDic = 
-				{
-					{std::string("Name"), 	std::string("DataPlane")},
-					{std::string("StartTime"), 	std::string("")},
-					{std::string("EndTime"), 	std::string("")},
-					{std::string("Id"), 	metadata->id},
-					{std::string("Path"), 	metadata->path},
-					{std::string("Scale"),  std::make_shared<glm::vec4>(kw->getModelScaleScaled())},
-					{std::string("Offset"), std::make_shared<glm::vec4>(kw->getModelBarycenterOffsetScaled())},
-					{std::string("Parent"), kw->getParent()},
-					{std::string("Frame"),  kw->getFrame()},
-					{std::string("KW"),  	kw}
-				};
+				auto parentNode = OsEng.renderEngine().scene()->sceneGraphNode(kw->getParent());
 
-				cygnet = std::make_shared<DataPlane>(metadataDic);
-			}else if(extension == "plain"){
-				LWARNING("This cygnet image does not exist");
-				return nullptr;
-			}else {
-				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
-				if(node){
+				if(parentNode){
 					ghoul::Dictionary metadataDic = 
 					{
-						{std::string("Name"), 	std::string("TexturePlane")},
+						// {std::string("Name"), 		std::string("DataPlane")},
+						{std::string("Type"), 		std::string("DataPlane")},
 						{std::string("StartTime"), 	std::string("")},
 						{std::string("EndTime"), 	std::string("")},
-						{std::string("Id"), 	metadata->id},
-						{std::string("Path"), 	metadata->path},
-						{std::string("Frame"),  std::string("GALACTIC")},
-						{std::string("Parent"), metadata->parent},
-						{std::string("Scale"),  std::make_shared<glm::vec4>(3,3,3,10)},
-						{std::string("Offset"), std::make_shared<glm::vec4>(0,0,0,1)}
+						{std::string("Id"), 		metadata->id},
+						{std::string("Path"), 		metadata->path},
+						{std::string("Scale"),  	std::make_shared<glm::vec4>(kw->getModelScaleScaled())},
+						{std::string("Offset"), 	std::make_shared<glm::vec4>(kw->getModelBarycenterOffsetScaled())},
+						{std::string("Parent"), 	kw->getParent()},
+						{std::string("Frame"),  	kw->getFrame()},
+						{std::string("KW"),  		kw}
 					};
 
+					
+					ghoul::Dictionary nodeDic = 
+					{
+						{std::string("Name"), 		std::string("DataPlane")},
+						{std::string("Parent"), 	kw->getParent()},
+						{std::string("Renderable"),	metadataDic}
+					};
+					SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
+					cygnetNode->setParent(parentNode);
+					parentNode->addChild(cygnetNode);
+					OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);
+					cygnetNode->initialize();
 
-					cygnet = std::make_shared<TexturePlane>(metadataDic);
+				}
+				// cygnet = std::make_shared<DataPlane>(metadataDic);				
+			}else {
+				auto parentNode = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
+				if(parentNode){
+					ghoul::Dictionary metadataDic = 
+					{
+						// {std::string("Name"), 		std::string("TexturePlane")},
+						{std::string("Type"), 		std::string("TexturePlane")},	
+						{std::string("StartTime"), 	std::string("")},
+						{std::string("EndTime"), 	std::string("")},
+						{std::string("Id"), 		metadata->id},
+						{std::string("Path"), 		metadata->path},
+						{std::string("Frame"),  	std::string("GALACTIC")},
+						{std::string("Parent"), 	metadata->parent},
+						{std::string("Scale"),  	std::make_shared<glm::vec4>(3,3,3,10)},
+						{std::string("Offset"), 	std::make_shared<glm::vec4>(0,0,0,1)}
+					};
+
+					ghoul::Dictionary nodeDic = 
+					{
+						{std::string("Name"), 		std::string("TexturePlane")},
+						{std::string("Parent"), 	metadata->parent},
+						{std::string("Renderable"),	metadataDic}
+					};
+					// SceneGraphNode*
+
+					SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
+					cygnetNode->setParent(parentNode);
+					parentNode->addChild(cygnetNode);
+					OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);
+					cygnetNode->initialize();
+					
 				}else{
 					OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(metadata));
 					return nullptr;
 				} 
 			}
-
-			cygnet->initialize();
-			return cygnet;
-		} else {
-			return nullptr;
+			// cygnet->initialize();
+			// return cygnet;
 		}
+
+		return nullptr;
 	}
 
 	void ISWAManager::addISWACygnet(std::string info){
@@ -129,8 +159,12 @@ namespace openspace{
 
 		if(cygnetId != 0)
 			_container->addISWACygnet(cygnetId, data);
-		else
-			_container->addISWACygnet("${OPENSPACE_DATA}/"+data);
+		else{
+			std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
+			mdata->id = 0;
+			mdata->path = absPath("${OPENSPACE_DATA}/"+data);
+			createISWACygnet(mdata);
+		}
 	}
 
 	void ISWAManager::deleteISWACygnet(std::string name){

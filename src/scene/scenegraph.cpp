@@ -380,6 +380,7 @@ bool SceneGraph::addSceneGraphNode(SceneGraphNode* node) {
     _nodes.push_back(internalNode);
     sortTopologically();
 
+    std::cout << "Added the node" << std::endl;
     return true;
 }
 

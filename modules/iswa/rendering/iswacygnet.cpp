@@ -58,12 +58,12 @@ ISWACygnet::~ISWACygnet(){}
 
 void ISWACygnet::registerProperties(){
 	// OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+	// OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+	// OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
 void ISWACygnet::unregisterProperties(){
-	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+	// OsEng.gui()._iSWAproperty.unregisterProperties(name());
 }
 
 void ISWACygnet::setParent(){

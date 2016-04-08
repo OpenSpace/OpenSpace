@@ -44,7 +44,7 @@ bool ISWAContainer::initialize(){
 
 	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
 	// addISWACygnet(5, "Screen");
-	addISWACygnet(7, "Sun");
+	// addISWACygnet(7, "Sun");
 
 	return true;
 }

@@ -90,6 +90,7 @@ bool DataPlane::deinitialize(){
 
 
 void DataPlane::render(const RenderData& data){
+	std::cout << "rendering" << std::endl;
 	if(_texture){
 		psc position = _parent->worldPosition();
 		glm::mat4 transform = glm::mat4(1.0);

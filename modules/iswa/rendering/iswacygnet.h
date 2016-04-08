@@ -52,8 +52,8 @@ public:
 	ISWACygnet(const ghoul::Dictionary& dictionary);
 	~ISWACygnet();
 
-	// virtual bool initialize() = 0;
-	// virtual bool deinitialize() = 0;
+	virtual bool initialize() = 0;
+	virtual bool deinitialize() = 0;
 
 	// virtual void render(const RenderData& data) = 0;
 	// virtual void update(const UpdateData& data) = 0;
