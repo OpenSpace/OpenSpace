@@ -50,7 +50,8 @@ namespace {
 
 namespace openspace {
 	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
-		: _patch(20, 20, 0, 0, M_PI / 4, M_PI / 4, 6.3e6)
+		: _patch(40, 40, 0, 0, M_PI / 4, M_PI / 4, 6.3e6)
+		, _patch1(40, 40, 0, 0, M_PI / 8, M_PI / 8, 6.3e6)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
@@ -73,30 +74,42 @@ namespace openspace {
 
 	bool ClipMapGlobe::initialize() {
 		_patch.initialize();
+		_patch1.initialize();
 		return isReady();
 	}
 
 	bool ClipMapGlobe::deinitialize() {
 		_patch.deinitialize();
+		_patch1.deinitialize();
 		return true;
 	}
 
 	bool ClipMapGlobe::isReady() const {
 		bool ready = true;
 		ready &= _patch.isReady();
+		ready &= _patch1.isReady();
 		return ready;
 	}
 
 	void ClipMapGlobe::render(const RenderData& data)
 	{
 		// Set patch to follow camera
-		_patch.setPositionLatLon(converter::cartesianToLatLon(data.camera.position().dvec3()));
-		// render
+		int segmentsPerPatch = 10;
+		glm::vec2 cameraPositionLatLon =
+			converter::cartesianToLatLon(data.camera.position().dvec3());
+		_patch.setPositionLatLon(
+			glm::vec2((M_PI / 2.0 / segmentsPerPatch) * int(cameraPositionLatLon.x / (M_PI * 2) * segmentsPerPatch * 4),
+				(M_PI / 2.0 / segmentsPerPatch) * int(cameraPositionLatLon.y / (M_PI)* segmentsPerPatch * 2)));
+		_patch1.setPositionLatLon(
+			glm::vec2((M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.x / (M_PI * 2) * segmentsPerPatch * 8),
+				(M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.y / (M_PI)* segmentsPerPatch * 4)));		// render
 		_patch.render(data);
+		_patch1.render(data);
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {
 		_patch.update(data);
+		_patch1.update(data);
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

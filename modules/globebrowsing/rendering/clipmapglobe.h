@@ -61,6 +61,7 @@ namespace openspace {
 
 	private:		
 		LatLonPatch _patch;
+		LatLonPatch _patch1;
 
 		properties::IntProperty _rotation;
 
