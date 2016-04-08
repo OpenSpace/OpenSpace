@@ -162,7 +162,7 @@ void RenderableSphere::render(const RenderData& data) {
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
 
-	setPscUniforms(_shader.get(), &data.camera, data.position);
+	setPscUniforms(*_shader.get(), data.camera, data.position);
     _shader->setUniform("alpha", _transparency);
 
 	ghoul::opengl::TextureUnit unit;

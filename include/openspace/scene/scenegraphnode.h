@@ -66,11 +66,12 @@ public:
 
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
-    void render(const RenderData& data);
+    void render(const RenderData& data, RendererTasks& tasks);
 	void updateCamera(Camera* camera) const;
 
     //void addNode(SceneGraphNode* child);
 
+    void addChild(SceneGraphNode* child);
     void setParent(SceneGraphNode* parent);
 	//bool abandonChild(SceneGraphNode* child);
 
@@ -90,7 +91,6 @@ public:
     void setRenderable(Renderable* renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
-    std::vector<std::pair<Volume*, RenderData>> volumesToRender(const RenderData& data) const;
 
     // @TODO Remove once the scalegraph is in effect ---abock
     void setEphemeris(Ephemeris* eph) {

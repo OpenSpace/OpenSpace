@@ -155,10 +155,10 @@ bool SceneGraphNode::deinitialize() {
     delete _ephemeris;
     _ephemeris = nullptr;
 
-    for (SceneGraphNode* child : _children) {
-		child->deinitialize();
-		delete child;
-	}
+ //   for (SceneGraphNode* child : _children) {
+	//	child->deinitialize();
+	//	delete child;
+	//}
     _children.clear();
 
     // reset variables
@@ -242,7 +242,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
     //    child->evaluate(camera, psc());
 }
 
-void SceneGraphNode::render(const RenderData& data) {
+void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     const psc thisPosition = worldPosition();
 
 	RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
@@ -253,14 +253,14 @@ void SceneGraphNode::render(const RenderData& data) {
 			glFinish();
 			auto start = std::chrono::high_resolution_clock::now();
 
-			_renderable->render(newData);
+			_renderable->render(newData, tasks);
 
 			glFinish();
 			auto end = std::chrono::high_resolution_clock::now();
 			_performanceRecord.renderTime = (end - start).count();
 		}
 		else
-			_renderable->render(newData);
+			_renderable->render(newData, tasks);
     }
 
     // evaluate all the children, tail-recursive function(?)
@@ -269,18 +269,6 @@ void SceneGraphNode::render(const RenderData& data) {
     //    child->render(newData);
 }
 
-std::vector<std::pair<Volume*, RenderData>> SceneGraphNode::volumesToRender(const RenderData& data) const {
-   const psc thisPosition = worldPosition();
-   RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
-   std::vector<std::pair<Volume*, RenderData>> toRender;
-   if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
-       std::vector<Volume*> volumes = _renderable->volumesToRender(newData);
-       for (Volume* v : volumes) {
-           toRender.push_back(std::make_pair(v, newData));
-       }
-   }
-   return toRender;
-}
 
 // not used anymore @AA
 //void SceneGraphNode::addNode(SceneGraphNode* child)
@@ -294,6 +282,11 @@ void SceneGraphNode::setParent(SceneGraphNode* parent)
 {
     _parent = parent;
 }
+
+void SceneGraphNode::addChild(SceneGraphNode* child) {
+    _children.push_back(child);
+}
+
 
 //not used anymore @AA
 //bool SceneGraphNode::abandonChild(SceneGraphNode* child) {

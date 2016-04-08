@@ -34,8 +34,11 @@
 #include <vector>
 #include <map>
 
+
 #include <openspace/rendering/volume.h>
 #include <openspace/rendering/renderer.h>
+#include <openspace/rendering/raycasterlistener.h>
+#include <openspace/util/updatestructures.h>
 
 namespace ghoul {
 	
@@ -54,7 +57,7 @@ class RenderableVolume;
 class Camera;
 class Scene;
 	
-class ABufferRenderer : public Renderer {
+class ABufferRenderer : public Renderer, public RaycasterListener {
 public:
 	ABufferRenderer();
 	virtual ~ABufferRenderer();
@@ -69,42 +72,52 @@ public:
     void update();
 	void render(float blackoutFactor, bool doPerformanceMeasurements) override;
 
+
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
-
+    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
 private:
 
     void clear();
     void updateResolution();
-    ghoul::Dictionary createResolveDictionary();
-    std::unique_ptr<ghoul::opengl::ProgramObject> createResolveProgram(const ghoul::Dictionary& dict);
+    void updateRaycastData();
+    void updateResolveDictionary();
     
     Camera* _camera;
     Scene* _scene;
     glm::ivec2 _resolution;
+
     bool _dirtyResolution;
+    bool _dirtyRendererData;
+    bool _dirtyRaycastData;
+    bool _dirtyResolveDictionary;
     
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     
     /**
      * When a volume is attached or detached from the scene graph,
      * the resolve program needs to be recompiled.
-     * The #_volumes vector keeps track of which volumes that can
-     * be rendered using the current resolve program.
+     * The #_volumes map keeps track of which volumes that can
+     * be rendered using the current resolve program, along with their raycast data
+     * (id, namespace, etc)
      */ 
-    std::vector<Volume*> _volumes;
+    std::map<VolumeRaycaster*, RaycastData> _raycastData;
+    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _boundsPrograms;
+    std::vector<std::string> _helperPaths;
 
-	GLuint _screenQuad;    
-	GLuint _anchorPointerTexture;
-	GLuint _anchorPointerTextureInitializer;
-	GLuint _atomicCounterBuffer;
-	GLuint _fragmentBuffer;
-	GLuint _fragmentTexture;
-	GLuint _vertexPositionBuffer;
-	int _nAaSamples;
+    ghoul::Dictionary _resolveDictionary;
+
+    GLuint _screenQuad;
+    GLuint _anchorPointerTexture;
+    GLuint _anchorPointerTextureInitializer;
+    GLuint _atomicCounterBuffer;
+    GLuint _fragmentBuffer;
+    GLuint _fragmentTexture;
+    GLuint _vertexPositionBuffer;
+    int _nAaSamples;
 
     ghoul::Dictionary _rendererData;
 };		// ABufferRenderer

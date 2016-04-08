@@ -147,7 +147,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 
 	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(_shader.get(), &data.camera, data.position);
+	setPscUniforms(*_shader.get(), data.camera, data.position);
 
 	ghoul::opengl::TextureUnit unit;
 	unit.activate();
@@ -198,6 +198,8 @@ void RenderablePlaneProjection::loadTexture() {
 	if (_texturePath != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 		if (texture) {
+            if (texture->format() == ghoul::opengl::Texture::Format::Red)
+                texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
 			texture->uploadTexture();
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

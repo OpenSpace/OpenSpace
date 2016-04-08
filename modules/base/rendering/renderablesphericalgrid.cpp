@@ -212,7 +212,7 @@ void RenderableSphericalGrid::render(const RenderData& data){
 	_gridProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 	_gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 	_gridProgram->setUniform("ModelTransform", transform);
-	setPscUniforms(_gridProgram, &data.camera, data.position);
+	setPscUniforms(*_gridProgram, data.camera, data.position);
 	_gridProgram->setUniform("gridColor", _gridColor);
 
 	glLineWidth(0.5f);

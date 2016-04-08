@@ -25,16 +25,15 @@
 #ifndef _ABUFFERRESOURCES_GLSL_
 #define _ABUFFERRESOURCES_GLSL_
 
+#include "abufferfragment.glsl"
 #define MAX_LAYERS #{rendererData.maxLayers}
 
-#include "abufferfragment.glsl"
+ABufferFragment fragments[MAX_LAYERS];
 
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
 layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
 
-ABufferFragment fragments[MAX_LAYERS];
-uint indices[MAX_LAYERS];
 const uint NULL_POINTER = 0;
 
 void storeFragment(uint index, ABufferFragment aBufferFrag) {
@@ -50,17 +49,15 @@ ABufferFragment loadFragment(uint index) {
 
 /**
  * Load fragments into the #fragments array.
- * Also set #indices to the used indices.
  */ 
 uint loadFragments() {
     uint currentIndex = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
     int nFrags = 0;
     while (currentIndex != NULL_POINTER && nFrags < MAX_LAYERS) { 
         ABufferFragment frag = loadFragment(currentIndex);
-        indices[nFrags] = currentIndex;
         fragments[nFrags] = frag;
-        nFrags++;
         currentIndex = _next_(frag);
+        nFrags++;
     }
     return nFrags;
 }

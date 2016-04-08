@@ -32,7 +32,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
-#include <format.h>
+#include <cppformat/format.h>
 
 namespace {
 	const std::string _loggerCat = "SpiceManager";

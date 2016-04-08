@@ -162,7 +162,7 @@ void RenderablePath::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", transform);
 	_programObject->setUniform("color", _lineColor);
 	_programObject->setUniform("lastPosition", _lastPosition);
-	setPscUniforms(_programObject.get(), &data.camera, data.position);
+	setPscUniforms(*_programObject.get(), data.camera, data.position);
 
 	if (_drawLine) {
 		glLineWidth(_lineWidth);

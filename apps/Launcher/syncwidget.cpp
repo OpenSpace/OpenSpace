@@ -230,7 +230,7 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
 }
 
 void SyncWidget::clear() {
-    for (openspace::DownloadManager::FileFuture* f : _futures)
+    for (std::shared_ptr<openspace::DownloadManager::FileFuture> f : _futures)
         f->abortDownload = true;
 
     using libtorrent::torrent_handle;
@@ -254,7 +254,7 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         LDEBUG(f.url.toStdString() << " -> " << f.destination.toStdString());
 
-        openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future = DlManager.downloadFile(
             f.url.toStdString(),
             absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
@@ -571,8 +571,8 @@ void SyncWidget::handleTimer() {
     using namespace libtorrent;
     using FileFuture = openspace::DownloadManager::FileFuture;
 
-    std::vector<FileFuture*> toRemove;
-    for (FileFuture* f : _futures) {
+    std::vector<std::shared_ptr<FileFuture>> toRemove;
+    for (std::shared_ptr<FileFuture> f : _futures) {
         InfoWidget* w = _futureInfoWidgetMap[f];
 
         if (CleanInfoWidgets && (f->isFinished || f->isAborted)) {
@@ -585,13 +585,12 @@ void SyncWidget::handleTimer() {
             w->update(f);
     }
 
-    for (FileFuture* f : toRemove) {
+    for (std::shared_ptr<FileFuture> f : toRemove) {
         _futures.erase(std::remove(_futures.begin(), _futures.end(), f), _futures.end()); 
-        delete f;
     }
 
     while (_mutex.test_and_set()) {}
-    for (openspace::DownloadManager::FileFuture* f : _futuresToAdd) {
+    for (std::shared_ptr<FileFuture> f : _futuresToAdd) {
         InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
         _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
 
@@ -679,7 +678,7 @@ void SyncWidget::handleTimer() {
 }
 
 void SyncWidget::handleFileFutureAddition(
-    const std::vector<openspace::DownloadManager::FileFuture*>& futures)
+    const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>& futures)
 {
     while (_mutex.test_and_set()) {}
     _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());

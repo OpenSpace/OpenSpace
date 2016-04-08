@@ -35,6 +35,9 @@ void main() {
     int sampleMask = gl_SampleMaskIn[0];
 
     uint newHead = atomicCounterIncrement(atomicCounterBuffer);
+    if (newHead >= #{rendererData.maxTotalFragments}) {
+        discard; // ABuffer is full!
+    }
     uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
         
     ABufferFragment aBufferFrag;

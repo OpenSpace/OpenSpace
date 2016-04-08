@@ -331,7 +331,7 @@ void RenderableModelProjection::render(const RenderData& data) {
 	_viewProjection = data.camera.viewProjectionMatrix();
 	_programObject->setUniform("ViewProjection", _viewProjection);
 	_programObject->setUniform("ModelTransform", _transform);
-	setPscUniforms(_programObject.get(), &data.camera, data.position);
+	setPscUniforms(*_programObject.get(), data.camera, data.position);
 	
 	textureBind();
 	_geometry->render();

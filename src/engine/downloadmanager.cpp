@@ -50,7 +50,7 @@ namespace {
     const std::string RequestApplicationVersion = "application_version";
     
     struct ProgressInformation {
-        openspace::DownloadManager::FileFuture* future;
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future;
         std::chrono::system_clock::time_point startTime;
         const openspace::DownloadManager::DownloadProgressCallback* callback;
     };
@@ -133,14 +133,14 @@ DownloadManager::DownloadManager(std::string requestURL, int applicationVersion,
     // TODO: Allow for multiple requestURLs
 }
 
-DownloadManager::FileFuture* DownloadManager::downloadFile(
+std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     const std::string& url, const ghoul::filesystem::File& file, bool overrideFile,
     DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
 {
     if (!overrideFile && FileSys.fileExists(file))
         return nullptr;
 
-    FileFuture* future = new FileFuture(file.filename());
+    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
     FILE* fp = fopen(file.path().c_str(), "wb");
 
     LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
@@ -196,12 +196,12 @@ DownloadManager::FileFuture* DownloadManager::downloadFile(
     return future;
 }
 
-std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
+std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
     int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,
     DownloadProgressCallback progressCallback)
 {
-    std::vector<FileFuture*> futures;
+    std::vector<std::shared_ptr<FileFuture>> futures;
     FileSys.createDirectory(destination, ghoul::filesystem::FileSystem::Recursive::Yes);
     // TODO: Check s ---abock
     // TODO: Escaping is necessary ---abock
@@ -225,14 +225,14 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
             ++nFiles;
 #ifdef __APPLE__
             // @TODO: Fix this so that the ifdef is not necessary anymore ---abock
-            std::string file = ghoul::filesystem::File(line, true).filename();
+          std::string file = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
 #else
             std::string file = ghoul::filesystem::File(line).filename();
 #endif
 
             LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
 
-            FileFuture* future = DlManager.downloadFile(
+            std::shared_ptr<FileFuture> future = DlManager.downloadFile(
                 line,
                 destination.path() + "/" + file,
                 overrideFiles,
@@ -244,7 +244,7 @@ std::vector<DownloadManager::FileFuture*> DownloadManager::downloadRequestFiles(
         isFinished = true;
     };
     
-    FileFuture* f = downloadFile(
+    std::shared_ptr<FileFuture> f = downloadFile(
         fullRequest,
         requestFile,
         true,
@@ -261,7 +261,7 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     AsyncDownloadFinishedCallback callback)
 {
     auto downloadFunction = [this, identifier, destination, version, overrideFiles, callback](){
-        std::vector<FileFuture*> f = downloadRequestFiles(
+        std::vector<std::shared_ptr<FileFuture>> f = downloadRequestFiles(
             identifier,
             destination,
             version,
