@@ -1,6 +1,5 @@
 UseAccurateKernels = false
 
-NewHorizonsKernels = {}
 if UseAccurateKernels then
     NewHorizonsKernels = {
         -- SCLK

@@ -1,3 +1,15 @@
+UseAccurateKernels = false
+
+if UseAccurateKernels then
+    NewHorizonsKernels = {
+        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+    }
+else
+    NewHorizonsKernels = {
+        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
+    }
+end
+
 return {
     -- Styx module
     {   
@@ -27,9 +39,7 @@ return {
             Body = "KERBEROS",
             Reference = "ECLIPJ2000",
             Observer = "PLUTO BARYCENTER",
-            Kernels = {
-               "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-            }
+            Kernels = NewHorizonsKernels
         },
         Rotation = {
             Type = "Spice",
