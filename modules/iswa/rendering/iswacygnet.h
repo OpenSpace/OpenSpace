@@ -41,6 +41,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <ghoul/misc/dictionary.h>
 
 
 namespace openspace{
