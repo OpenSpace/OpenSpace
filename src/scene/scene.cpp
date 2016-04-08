@@ -524,6 +524,10 @@ std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() {
     return _graph.nodes();
 }
 
+SceneGraph& Scene::sceneGraph() {
+    return _graph;
+}
+
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
     if (type == "text") {
         LDEBUG("Writing documentation for properties");
@@ -577,6 +581,19 @@ scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
                 "string",
                 "Loads the scene found at the file passed as an "
                 "argument. If a scene is already loaded, it is unloaded first"
+            },
+            {
+                "addSceneGraphNode",
+                &luascriptfunctions::addSceneGraphNode,
+                "table",
+                "Loads the SceneGraphNode described in the table and adds it to the "
+                "SceneGraph"
+            },
+            {
+                "removeSceneGraphNode",
+                &luascriptfunctions::removeSceneGraphNode,
+                "string",
+                "Removes the SceneGraphNode identified by name"
             }
         }
     };
