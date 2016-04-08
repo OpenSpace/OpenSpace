@@ -50,6 +50,16 @@ TexturePlane::TexturePlane(std::shared_ptr<Metadata> data)
 	registerProperties();
 }
 
+TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
+	:CygnetPlane(dictionary)
+	,_futureTexture(nullptr)
+{
+	_id = id();
+	setName("TexturePlane" + std::to_string(_id));
+	registerProperties();
+}
+
+
 TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::initialize(){

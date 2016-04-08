@@ -40,9 +40,9 @@ namespace {
 }
 
 namespace openspace {
-DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data)
+DataPlane::DataPlane(std::shared_ptr<Metadata> data)
 	:CygnetPlane(data)
-	, _kw(kw)
+	, _kw(data->kw)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
@@ -54,6 +54,24 @@ DataPlane::DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metada
 	else
 		_var = "rho";
 }
+
+DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
+	:CygnetPlane(dictionary)
+{	
+	_id = id();
+	setName("DataPlane" + std::to_string(_id));
+	registerProperties();
+
+	dictionary.getValue("KW", _kw);
+
+
+	KameleonWrapper::Model model = _kw->model();
+	if(	model == KameleonWrapper::Model::BATSRUS)
+		_var = "p";
+	else
+		_var = "rho";
+}
+
 DataPlane::~DataPlane(){}
 
 
@@ -119,7 +137,7 @@ void DataPlane::render(){
 	    transform = rotation * transform;
 	}
 
-	position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
+	position += transform*glm::vec4(_data->offset->x, _data->offset->z, _data->offset->y, _data->offset->w);
 
 	// Activate shader
 	_shader->activate();

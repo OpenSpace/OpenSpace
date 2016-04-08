@@ -35,6 +35,7 @@
  class TexturePlane : public CygnetPlane{
  public:
  	TexturePlane(std::shared_ptr<Metadata> data);
+ 	TexturePlane(const ghoul::Dictionary& dictionary);
  	~TexturePlane();
 
  	virtual bool initialize();

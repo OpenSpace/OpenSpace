@@ -32,7 +32,8 @@
  
  class DataPlane : public CygnetPlane {
  public:
- 	DataPlane(std::shared_ptr<KameleonWrapper> kw, std::shared_ptr<Metadata> data);
+ 	DataPlane(std::shared_ptr<Metadata> data);
+ 	DataPlane(const ghoul::Dictionary& dictionary);
  	~DataPlane();
 
  	virtual bool initialize() override;

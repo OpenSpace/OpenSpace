@@ -46,6 +46,31 @@ ISWACygnet::ISWACygnet(std::shared_ptr<Metadata> data)
 	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
 
+ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
+	: _enabled("enabled", "Is Enabled", true)
+	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	, _delete("delete", "Delete")
+	, _shader(nullptr)
+	, _texture(nullptr)
+	// , _data(data)
+	, _memorybuffer("")
+{
+	_data = std::make_shared<Metadata>();
+
+	dictionary.getValue("Id",_data->id);
+	dictionary.getValue("Path",_data->path);
+	dictionary.getValue("Parent",_data->parent);
+	dictionary.getValue("Frame",_data->frame);
+	dictionary.getValue("Offset",_data->offset);
+	dictionary.getValue("Scale",_data->scale);
+
+	addProperty(_enabled);
+	addProperty(_updateInterval);
+	addProperty(_delete);
+
+	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
+}
+
 ISWACygnet::~ISWACygnet(){}
 
 

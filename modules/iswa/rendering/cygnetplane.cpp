@@ -37,6 +37,13 @@ CygnetPlane::CygnetPlane(std::shared_ptr<Metadata> data)
     ,_planeIsDirty(true)
 {}
 
+CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
+    :ISWACygnet(dictionary)
+    ,_quad(0)
+    ,_vertexPositionBuffer(0)
+    ,_planeIsDirty(true)
+{}
+
 CygnetPlane::~CygnetPlane(){}
 
 bool CygnetPlane::isReady(){
@@ -55,9 +62,9 @@ void CygnetPlane::createPlane(){
 	// ============================
     // 		GEOMETRY (quad)
     // ============================
-    const GLfloat x = _data->scale.x/2.0;
-    const GLfloat y = _data->scale.z/2.0;
-    const GLfloat w = _data->scale.w;
+    const GLfloat x = _data->scale->x/2.0;
+    const GLfloat y = _data->scale->z/2.0;
+    const GLfloat w = _data->scale->w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t

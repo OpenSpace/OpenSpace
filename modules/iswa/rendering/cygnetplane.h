@@ -34,6 +34,7 @@ class CygnetPlane : public ISWACygnet {
 public:
 	// CygnetPlane(int cygnetId, std::string path);
 	CygnetPlane(std::shared_ptr<Metadata> data);
+	CygnetPlane(const ghoul::Dictionary& dictionary);
 	~CygnetPlane();
 
 	virtual bool initialize() = 0;

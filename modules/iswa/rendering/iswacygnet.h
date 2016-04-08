@@ -48,6 +48,7 @@ namespace openspace{
 class ISWACygnet : public properties::PropertyOwner{
 public:
 	ISWACygnet(std::shared_ptr<Metadata> data);
+	ISWACygnet(const ghoul::Dictionary& dictionary);
 	~ISWACygnet();
 
 	virtual bool initialize() = 0;

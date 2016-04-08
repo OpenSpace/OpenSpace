@@ -69,24 +69,36 @@ namespace openspace{
 				}
 
 				std::shared_ptr<KameleonWrapper> kw = std::make_shared<KameleonWrapper>(absPath(metadata->path));
+				ghoul::Dictionary metadataDic = 
+				{
+					{std::string("Id"), 	metadata->id},
+					{std::string("Path"), 	metadata->path},
+					{std::string("Scale"),  std::make_shared<glm::vec4>(kw->getModelScaleScaled())},
+					{std::string("Offset"), std::make_shared<glm::vec4>(kw->getModelBarycenterOffsetScaled())},
+					{std::string("Parent"), kw->getParent()},
+					{std::string("Frame"),  kw->getFrame()},
+					{std::string("KW"),  	kw}
+				};
 
-				metadata->scale  = kw->getModelScaleScaled();
-				metadata->offset = kw->getModelBarycenterOffsetScaled();
-				metadata->parent = kw->getParent();
-				metadata->frame  = kw->getFrame();
-
-				cygnet = std::make_shared<DataPlane>(kw, metadata);
+				cygnet = std::make_shared<DataPlane>(metadataDic);
 			}else if(extension == "plain"){
 				LWARNING("This cygnet image does not exist");
 				return nullptr;
 			}else {
 				auto node = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
 				if(node){
-					metadata->scale = glm::vec4(3, 3, 3, 10);
-					metadata->offset = glm::vec4(0, 0, 0, 1);
-					metadata->frame  = "GALACTIC";
+					ghoul::Dictionary metadataDic = 
+					{
+						{std::string("Id"), 	metadata->id},
+						{std::string("Path"), 	metadata->path},
+						{std::string("Frame"),  std::string("GALACTIC")},
+						{std::string("Parent"), metadata->parent},
+						{std::string("Scale"),  std::make_shared<glm::vec4>(3,3,3,10)},
+						{std::string("Offset"), std::make_shared<glm::vec4>(0,0,0,1)}
+					};
 
-					cygnet = std::make_shared<TexturePlane>(metadata);
+
+					cygnet = std::make_shared<TexturePlane>(metadataDic);
 				}else{
 					OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(metadata));
 					return nullptr;

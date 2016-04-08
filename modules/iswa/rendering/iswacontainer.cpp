@@ -42,7 +42,7 @@ bool ISWAContainer::initialize(){
 	ISWAManager::ref().setContainer(this);
 
 	addISWACygnet("${OPENSPACE_DATA}/BATSRUS.cdf");
-	addISWACygnet(5, "Screen");
+	// addISWACygnet(5, "Screen");
 	addISWACygnet(7, "Sun");
 
 	return true;

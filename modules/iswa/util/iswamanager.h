@@ -29,6 +29,8 @@
 #include <map>
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/glm.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+
 
 namespace openspace {
 class ISWACygnet;
@@ -46,9 +48,10 @@ struct Metadata {
 	std::string path;
 	std::string parent;
 	std::string frame;
-	glm::vec4 offset;
-	glm::vec4 scale;
+	std::shared_ptr<glm::vec4> offset;
+	std::shared_ptr<glm::vec4> scale;
 	std::string scaleVariable;
+	std::shared_ptr<KameleonWrapper> kw;
 };
 
 
