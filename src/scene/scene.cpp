@@ -54,6 +54,10 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/iswa/util/iswamanager.h>
+#endif
+
 #include "scene_lua.inl"
 
 namespace {
@@ -145,7 +149,10 @@ void Scene::update(const UpdateData& data) {
     //    _graph.addSceneGraphNode(node);
     //    ONCE = true;
     //}
-    // ISWAManagar::ref().update();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    ISWAManager::ref().update();
+#endif
+    
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
             node->update(data);
@@ -166,7 +173,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _graph.nodes()) {
         node->render(data, tasks);
     }
-    std::cout << std::endl;
 }
 
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {

@@ -66,6 +66,7 @@ public:
 
 	std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
 	void addISWACygnet(std::string info);
+	void addISWACygnet(int id, std::string info);
 	void deleteISWACygnet(std::string);
 
 	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
@@ -76,11 +77,14 @@ public:
 	void setContainer(ISWAContainer*);
 	std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
 
+	void update();
+
 private:
 	std::string iSWAurl(int);
 
 	std::map<std::string, std::string> _month;
 	ISWAContainer* _container;
+	std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
 };
 
 } //namespace openspace

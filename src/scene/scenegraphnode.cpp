@@ -247,12 +247,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
     RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
-    std::cout << name() << " ";
-    if(_renderable){
-        std::cout << _renderableVisible << " " << _renderable->isVisible() << " " << _renderable->isReady() << " " << _renderable->isEnabled() << std::endl;
-    }else{
-        std::cout << "No Renderable" << std::endl;
-    }
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
         if (data.doPerformanceMeasurement) {
