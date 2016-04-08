@@ -57,17 +57,12 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 ISWACygnet::~ISWACygnet(){}
 
 void ISWACygnet::registerProperties(){
-	// OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	// OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	// OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+	OsEng.gui()._property.registerProperty(&_updateInterval);
+	OsEng.gui()._property.registerProperty(&_delete);
 }
 
 void ISWACygnet::unregisterProperties(){
-	// OsEng.gui()._iSWAproperty.unregisterProperties(name());
-}
-
-void ISWACygnet::setParent(){
-	_parent = OsEng.renderEngine().scene()->sceneGraphNode(_data->parent);
+	OsEng.gui()._property.unregisterProperties(name());
 }
 
 }//namespace openspac

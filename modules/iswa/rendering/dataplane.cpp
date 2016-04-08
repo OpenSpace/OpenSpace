@@ -62,7 +62,6 @@ DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
-	setParent();
     createPlane();
     createShader();
 
@@ -80,7 +79,6 @@ bool DataPlane::deinitialize(){
     destroyPlane();
     destroyShader();
 	
-	_parent = nullptr;
 	_kw = nullptr;
 	_memorybuffer = "";
 	
@@ -91,7 +89,7 @@ bool DataPlane::deinitialize(){
 
 void DataPlane::render(const RenderData& data){
 	if(_texture){
-		psc position = _parent->worldPosition();
+		psc position = data.position;
 		glm::mat4 transform = glm::mat4(1.0);
 
 		glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));

@@ -65,7 +65,7 @@ protected:
 	// void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
 	void registerProperties();
 	void unregisterProperties();
-	void setParent();
+	// void setParent();
 
 	// properties::BoolProperty _enabled;
 	properties::FloatProperty _updateInterval;
@@ -77,7 +77,6 @@ protected:
 	std::shared_ptr<Metadata> _data;
 	std::string _memorybuffer;
 
-	SceneGraphNode* _parent;
 	glm::dmat3 _stateMatrix;
 
 	double _time;

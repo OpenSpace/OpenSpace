@@ -123,19 +123,19 @@ void ISWAContainer::addISWACygnet(std::shared_ptr<ISWACygnet> cygnet){
 }
 
 void ISWAContainer::deleteISWACygnet(std::string name){
-	std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
+	// std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
 
-	auto it = std::find(
-		_iSWACygnets.begin(),
-		_iSWACygnets.end(),
-		c
-	);
+	// auto it = std::find(
+	// 	_iSWACygnets.begin(),
+	// 	_iSWACygnets.end(),
+	// 	c
+	// );
 
-	if (it != _iSWACygnets.end()) {
-		c->deinitialize();
-		_deletedCygnets.push_back(c);
-		_iSWACygnets.erase(it);
-	}
+	// if (it != _iSWACygnets.end()) {
+	// 	c->deinitialize();
+	// 	_deletedCygnets.push_back(c);
+	// 	_iSWACygnets.erase(it);
+	// }
 }
 
 std::shared_ptr<ISWACygnet> ISWAContainer::iSWACygnet(std::string name){

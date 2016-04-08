@@ -55,7 +55,6 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::initialize(){
-	setParent();
     createPlane();
     createShader();
 	updateTexture();
@@ -63,7 +62,6 @@ bool TexturePlane::initialize(){
 }
 
 bool TexturePlane::deinitialize(){
-	_parent = nullptr;
     unregisterProperties();
     destroyPlane();
     destroyShader();
@@ -75,7 +73,7 @@ bool TexturePlane::deinitialize(){
 
 void TexturePlane::render(const RenderData& data){
 	if(_texture){
-		psc position = _parent->worldPosition();
+		psc position = data.position;
 		glm::mat4 transform = glm::mat4(1.0);
 		transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
 
