@@ -49,7 +49,8 @@ namespace openspace {
 			double posLat,
 			double posLon,
 			double sizeLat,
-			double sizeLon);
+			double sizeLon,
+			double globeRadius);
 		~LatLonPatch();
 
 		bool initialize() override;
@@ -61,23 +62,33 @@ namespace openspace {
 
 		void setPositionLatLon(glm::dvec2 posLatLon);
 		void setSizeLatLon(glm::dvec2 posLatLon);
-
+		void setGlobeRadius(double globeRadius);
 
 		glm::dvec3 calculateCornerPointBottomLeft();
 		glm::dvec3 calculateCornerPointBottomRight();
 		glm::dvec3 calculateCornerPointTopLeft();
 		glm::dvec3 calculateCornerPointTopRight();
 
-		/**
-		Finds a third control point between the two parameter points assuming
-		they both lie on a sphere with the origin in the center.
-		*/
+		//!
+		//! Finds a third control point between the two parameter points assuming
+		//! they both lie on a sphere with the origin in the center.
+		//! The three control points will then be used to interpolate NURBS curves
+		//! that exactly describes circle segments.
+		//! \param p0 is the first control point
+		//! \param n0 is the normal corresponding to the first control point. The normal
+		//! should point out from the center of the circle and be normalized
+		//! \param p2 is the third control point
+		//! \param n2 is the normal corresponding to the third control point. The normal
+		//! should point out from the center of the circle and be normalized
+		//!	\returns the second control point to be used for circle segment interpolation.
+		//!
 		glm::dvec3 calculateCenterPoint(glm::dvec3 p0, glm::dvec3 n0, glm::dvec3 p2, glm::dvec3 n2);
 	private:
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 		glm::dvec2 _posLatLon;
 		glm::dvec2 _sizeLatLon;
+		double _globeRadius;
 		GridGeometry _grid;
 	};
 }  // namespace openspace

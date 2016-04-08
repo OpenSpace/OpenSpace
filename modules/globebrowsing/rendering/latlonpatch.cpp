@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/rendering/latlonpatch.h>
 
+// globe browsing includes
 #include <modules/globebrowsing/util/converter.h>
 
 // open space includes
@@ -52,16 +53,18 @@ namespace openspace {
 		double posLat,
 		double posLon,
 		double sizeLat,
-		double sizeLon)
+		double sizeLon,
+		double globeRadius)
 	: _grid(
 		xRes,
 		yRes,
 		Geometry::Positions::No,
-		Geometry::TextureCoordinates::Yes,
+		Geometry::TextureCoordinates::Yes, // Texture coords are used to derive postions
 		Geometry::Normals::No)
 	, _programObject(nullptr)
 	, _posLatLon(posLat, posLon)
 	, _sizeLatLon(sizeLat, sizeLon)
+	, _globeRadius(globeRadius)
 	{
 
 	}
@@ -69,7 +72,6 @@ namespace openspace {
 	LatLonPatch::~LatLonPatch() {
 
 	}
-
 
 	bool LatLonPatch::initialize() {
 		RenderEngine& renderEngine = OsEng.renderEngine();
@@ -104,148 +106,107 @@ namespace openspace {
 	}
 
 	void LatLonPatch::render(const RenderData& data) {
+		using namespace glm;
 
 		// activate shader
 		_programObject->activate();
 
 		// TODO : Not sure if double precision will be needed for all these calculations
-		// Using doubles in case but might slow things down.
-		// TODO : Need to get the radius of the globe
-		double r = 6.3e6;
+		// Using doubles in case for now.
 
-		// Create control points and normals(double)
-		glm::dvec3 p00, p01, p02, p10, p11, p12, p20, p21, p22;
-		glm::dvec3 n00, n01, n02, n10, n11, n12, n20, n21, n22;
-		glm::dvec3 nHorizontal0, nHorizontal1, nHorizontal2;
-		float w10, w11, w12;
+		// Create control points and normals
+		// 
+		// These are the physical positions of the control points for the patch:
+		//
+		// y  p[6] p[7] p[8]     p02 p12 p22
+		// ^  p[3] p[4] p[5] <=> p01 p11 p21
+		// |  p[0] p[1] p[2]     p00 p10 p20
+		// |
+		//  -----> x
+		dvec3 p[9];// p00, p01, p02, p10, p11, p12, p20, p21, p22;
+		dvec3 n00, n01, n02, n10, n11, n12, n20, n21, n22;
+		dvec3 nHorizontal0, nHorizontal1, nHorizontal2;
+		float interpolationWeight;
 
-		// Calculate positions of corner control points
-		p00 = calculateCornerPointBottomLeft();
-		p20 = calculateCornerPointBottomRight();
-		p02 = calculateCornerPointTopLeft();
-		p22 = calculateCornerPointTopRight();
+		// Calculate positions of corner control points 
+		p[0] = calculateCornerPointBottomLeft();	// p00
+		p[2] = calculateCornerPointBottomRight();	// p20
+		p[6] = calculateCornerPointTopLeft();		// p02
+		p[8] = calculateCornerPointTopRight();		// p22
 
 		// Calculate the horizontal normals
-		nHorizontal0 = glm::normalize(converter::latLonToCartesian(
+		// Horizontal normals are the same for constant latitude
+		nHorizontal0 = normalize(converter::latLonToCartesian(
 			0,
 			_posLatLon.y - _sizeLatLon.y,
-			r));
-		nHorizontal1 = glm::normalize(converter::latLonToCartesian(
+			_globeRadius));
+		nHorizontal1 = normalize(converter::latLonToCartesian(
 			0,
 			_posLatLon.y,
-			r));
-		nHorizontal2 = glm::normalize(converter::latLonToCartesian(
+			_globeRadius));
+		nHorizontal2 = normalize(converter::latLonToCartesian(
 			0,
 			_posLatLon.y + _sizeLatLon.y,
-			r));
+			_globeRadius));
 
 		// Get position of center control points
-		p01 = calculateCenterPoint(p00, glm::normalize(p00), p02, glm::normalize(p02));
-		p21 = calculateCenterPoint(p20, glm::normalize(p20), p22, glm::normalize(p22));
-		p10 = calculateCenterPoint(p00, nHorizontal0, p20, nHorizontal2);
-		p12 = calculateCenterPoint(p02, nHorizontal0, p22, nHorizontal2);
-		p11 = calculateCenterPoint(p01, nHorizontal0, p21, nHorizontal2);
+		p[3] = calculateCenterPoint(p[0], normalize(p[0]), p[6], normalize(p[6]));	// p01
+		p[5] = calculateCenterPoint(p[2], normalize(p[2]), p[8], normalize(p[8]));	// p21
+		p[1] = calculateCenterPoint(p[0], nHorizontal0, p[2], nHorizontal2);		// p10
+		p[7] = calculateCenterPoint(p[6], nHorizontal0, p[8], nHorizontal2);		// p12
+		p[4] = calculateCenterPoint(p[3], nHorizontal0, p[5], nHorizontal2);		// p11
 
-		// Calculate normals from control point positions
-		n00 = normalize(p00);
-		n01 = normalize(p01);
-		n02 = normalize(p02);
-		n10 = normalize(p10);
-		n11 = normalize(p11);
-		n12 = normalize(p12);
-		n20 = normalize(p20);
-		n21 = normalize(p21);
-		n22 = normalize(p22);
-
-		// Calculate three weights to send to GPU for interpolation
-		w10 = glm::dot(nHorizontal0, nHorizontal1);
-		w11 = w10;
-		w12 = w10;
+		// Calculate one weight to send to GPU for interpolation in longitude range.
+		// Actually there are three weights but they all have the same value.
+		// By weighting the center control point with this value, a circle segment is
+		// defined by the NURBS curve
+		interpolationWeight = dot(nHorizontal0, nHorizontal1);
 
 		// TODO : Transformation to world space from model space should also consider
 		// rotations. Now it only uses translatation for simplicity. Should be done
 		// With a matrix transform
-		// TODO : Normals should also be transformed
-		glm::dvec3 position = data.position.dvec3();
-		p00 += position;
-		p10 += position;
-		p20 += position;
-		p01 += position;
-		p11 += position;
-		p21 += position;
-		p02 += position;
-		p12 += position;
-		p22 += position;
+		dvec3 modelPosition = data.position.dvec3();
+		for (size_t i = 0; i < 9; i++) {
+			p[i] += modelPosition;
+		}
 
-		// Calculate global position of camera
+		// Get camera transform matrix
 		// TODO : Should only need to fetch the camera transform and use directly
-		// Now the viewTransform is wrong due to the constant lookUpVector
-		glm::dvec3 camPos = data.camera.position().dvec3();
-		glm::dvec3 camDir = glm::normalize(position - camPos);
-		glm::dvec3 camUp = glm::dvec3(0,1,0);// data.camera.lookUpVector();
-
-		// Get camera transform matrix (double precision)
-		glm::dmat4 viewTransform = glm::inverse(glm::translate(glm::dmat4(1.0), camPos));
-
-		//glm::dmat4 viewTransform = glm::lookAt(camPos, camPos + camDir, camUp);
-		viewTransform = glm::dmat4(data.camera.viewRotationMatrix())*viewTransform;
+		// but this is not currently possible in the camera class.
+		dvec3 cameraPosition = data.camera.position().dvec3();
+		dmat4 viewTransform = inverse(translate(dmat4(1.0), cameraPosition));
+		viewTransform = dmat4(data.camera.viewRotationMatrix()) * viewTransform;
 
 		// Transform control points to camera space
-		p00 = glm::dvec3(viewTransform * glm::dvec4(p00, 1.0));
-		p10 = glm::dvec3(viewTransform * glm::dvec4(p10, 1.0));
-		p20 = glm::dvec3(viewTransform * glm::dvec4(p20, 1.0));
-		p01 = glm::dvec3(viewTransform * glm::dvec4(p01, 1.0));
-		p11 = glm::dvec3(viewTransform * glm::dvec4(p11, 1.0));
-		p21 = glm::dvec3(viewTransform * glm::dvec4(p21, 1.0));
-		p02 = glm::dvec3(viewTransform * glm::dvec4(p02, 1.0));
-		p12 = glm::dvec3(viewTransform * glm::dvec4(p12, 1.0));
-		p22 = glm::dvec3(viewTransform * glm::dvec4(p22, 1.0));
+		for (size_t i = 0; i < 9; i++) {
+			p[i] = dvec3(viewTransform * dvec4(p[i], 1.0));
+		}
 
 		// Transform normals to camera space
-		n00 = glm::dvec3(viewTransform * glm::dvec4(n00, 0.0));
-		n10 = glm::dvec3(viewTransform * glm::dvec4(n10, 0.0));
-		n20 = glm::dvec3(viewTransform * glm::dvec4(n20, 0.0));
-		n01 = glm::dvec3(viewTransform * glm::dvec4(n01, 0.0));
-		n11 = glm::dvec3(viewTransform * glm::dvec4(n11, 0.0));
-		n21 = glm::dvec3(viewTransform * glm::dvec4(n21, 0.0));
-		n02 = glm::dvec3(viewTransform * glm::dvec4(n02, 0.0));
-		n12 = glm::dvec3(viewTransform * glm::dvec4(n12, 0.0));
-		n22 = glm::dvec3(viewTransform * glm::dvec4(n22, 0.0));
+		n00 = dvec3(viewTransform * dvec4(n00, 0.0));
+		n10 = dvec3(viewTransform * dvec4(n10, 0.0));
+		n20 = dvec3(viewTransform * dvec4(n20, 0.0));
+		n01 = dvec3(viewTransform * dvec4(n01, 0.0));
+		n11 = dvec3(viewTransform * dvec4(n11, 0.0));
+		n21 = dvec3(viewTransform * dvec4(n21, 0.0));
+		n02 = dvec3(viewTransform * dvec4(n02, 0.0));
+		n12 = dvec3(viewTransform * dvec4(n12, 0.0));
+		n22 = dvec3(viewTransform * dvec4(n22, 0.0));
 
-		// Send control points and normals to GPU to be used in shader
-		_programObject->setUniform("p00", glm::vec3(p00));
-		_programObject->setUniform("p10", glm::vec3(p10));
-		_programObject->setUniform("p20", glm::vec3(p20));
-		_programObject->setUniform("p01", glm::vec3(p01));
-		_programObject->setUniform("p11", glm::vec3(p11));
-		_programObject->setUniform("p21", glm::vec3(p21));
-		_programObject->setUniform("p02", glm::vec3(p02));
-		_programObject->setUniform("p12", glm::vec3(p12));
-		_programObject->setUniform("p22", glm::vec3(p22));
-
-		_programObject->setUniform("w10", w10);
-		_programObject->setUniform("w11", w11);
-		_programObject->setUniform("w12", w12);
-
-		/*
-		_programObject->setUniform("n00", glm::vec3(n00));
-		_programObject->setUniform("n10", glm::vec3(n10));
-		_programObject->setUniform("n20", glm::vec3(n20));
-		_programObject->setUniform("n01", glm::vec3(n01));
-		_programObject->setUniform("n11", glm::vec3(n11));
-		_programObject->setUniform("n21", glm::vec3(n21));
-		_programObject->setUniform("n02", glm::vec3(n02));
-		_programObject->setUniform("n12", glm::vec3(n12));
-		_programObject->setUniform("n22", glm::vec3(n22));
-		*/
+		// Send control points to GPU to be used in shader
+		// Transform to float values
+		vec3 pFloat[9];
+		for (size_t i = 0; i < 9; i++) {
+			pFloat[i] = vec3(p[i]);
+		}
+		_programObject->setUniform("p", &pFloat[0], 9);
+		_programObject->setUniform("interpolationWeight", interpolationWeight);
 		_programObject->setUniform("Projection", data.camera.projectionMatrix());
 		 
 		// Render triangles (use texture coordinates to interpolate to new positions)
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-
-
 
 		// render
 		_grid.drawUsingActiveProgram();
@@ -263,36 +224,28 @@ namespace openspace {
 	}
 
 	glm::dvec3 LatLonPatch::calculateCornerPointBottomLeft() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
 		return converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y - _sizeLatLon.y,
-			r);
+			_globeRadius);
 	}
 	glm::dvec3 LatLonPatch::calculateCornerPointBottomRight() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
 		return converter::latLonToCartesian(
 			_posLatLon.x - _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r);
+			_globeRadius);
 	}
 	glm::dvec3 LatLonPatch::calculateCornerPointTopLeft() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
 		return converter::latLonToCartesian(
 			_posLatLon.x + _sizeLatLon.x,
 			_posLatLon.y - _sizeLatLon.y,
-			r);
+			_globeRadius);
 	}
 	glm::dvec3 LatLonPatch::calculateCornerPointTopRight() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
 		return converter::latLonToCartesian(
 			_posLatLon.x + _sizeLatLon.x,
 			_posLatLon.y + _sizeLatLon.y,
-			r);
+			_globeRadius);
 	}
 
 	glm::dvec3 LatLonPatch::calculateCenterPoint(
@@ -300,7 +253,7 @@ namespace openspace {
 		glm::dvec3 n0,
 		glm::dvec3 p2,
 		glm::dvec3 n2) {
-		// Solution derived
+		// Solution derived from plane geometry
 		glm::dvec2 u = glm::dvec2(0, glm::dot(p2, n2) - glm::dot(p0, n2));
 		double cosNormalAngle = glm::dot(n0, n2);
 		glm::dmat2 A = glm::dmat2({ 1, cosNormalAngle, cosNormalAngle, 1 });
@@ -311,6 +264,10 @@ namespace openspace {
 
 	void LatLonPatch::setSizeLatLon(glm::dvec2 sizeLatLon) {
 		_sizeLatLon = sizeLatLon;
+	}
+
+	void LatLonPatch::setGlobeRadius(double globeRadius) {
+		_globeRadius = globeRadius;
 	}
 
 }  // namespace openspace

@@ -50,7 +50,7 @@ namespace {
 
 namespace openspace {
 	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
-		: _patch(20, 20, 0, 0, M_PI / 4, M_PI / 4)
+		: _patch(20, 20, 0, 0, M_PI / 4, M_PI / 4, 6.3e6)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
