@@ -36,79 +36,11 @@
 
 namespace {
     const std::string _loggerCat = "InteractionHandler";
-
-    openspace::Key stringToKey(std::string s) {
-        // key only uppercase
-        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-
-        // default is unknown
-        auto it = openspace::KeyMapping.find(s);
-        if (it != openspace::KeyMapping.end())
-            return it->second;
-        else
-            return openspace::Key::Unknown;
-    }
 }
 
 #include "interactionhandler_lua.inl"
 
 namespace openspace {
-
-//InteractionHandler::InteractionHandler() {
-//	// initiate pointers
-//	_camera = nullptr;
-//	_enabled = true;
-//	_node = nullptr;
-//	_dt = 0.0;
-//	_lastTrackballPos = glm::vec3(0.0, 0.0, 0.5);
-//	_leftMouseButtonDown = false;
-//	_isMouseBeingPressedAndHeld = false;
-//}
-//
-//InteractionHandler::~InteractionHandler() {
-//	for (size_t i = 0; i < _controllers.size(); ++i) {
-//		delete _controllers[i];
-//	}
-//}
-//
-////void InteractionHandler::init() {
-////	assert( ! this_);
-////	 this_ = new InteractionHandler();
-////}
-////
-////void InteractionHandler::deinit() {
-////	assert(this_);
-////	delete this_;
-////	this_ = nullptr;
-////}
-////
-////InteractionHandler& InteractionHandler::ref() {
-////	assert(this_);
-////    return *this_;
-////}
-//
-////bool InteractionHandler::isInitialized() {
-////	return this_ != nullptr;
-////}	
-//
-//void InteractionHandler::enable() {
-//	//assert(this_);
-//	_enabled = true;
-//}
-//
-//void InteractionHandler::disable() {
-//	//assert(this_);
-//	_enabled = false;
-//}
-//
-//const bool InteractionHandler::isEnabled() const {
-//	//assert(this_);
-//	if (_camera)
-//		return false;
-//	return _enabled;
-//=======
-
-//namespace openspace {
 namespace interaction {
 
 InteractionHandler::InteractionHandler()
@@ -179,59 +111,6 @@ void InteractionHandler::unlockControls() {
     _mutex.unlock();
 }
 
-//<<<<<<< HEAD
-//void InteractionHandler::addExternalControl(ExternalControl* controller) {
-//	//assert(this_);
-//	if (controller != nullptr) {
-//		_controllers.push_back(controller);
-//	}
-//}
-//
-//void InteractionHandler::setCamera(Camera *camera) {
-//	//assert(this_);
-//	_camera = camera;
-//}
-//
-//void InteractionHandler::setOrigin(SceneGraphNode* node) {
-//	if (node)
-//		_node = node;
-//}
-//
-//Camera * InteractionHandler::getCamera() const {
-//	//assert(this_);
-//	if (_enabled) {
-//		return _camera;
-//	}
-//	return nullptr;
-//}
-//
-//const psc InteractionHandler::getOrigin() const {
-//	if (_node)
-//		return _node->worldPosition();
-//	return psc();
-//}
-//
-//void InteractionHandler::lockControls() {
-//	//assert(this_);
-//	_cameraGuard.lock();
-//}
-//
-//void InteractionHandler::unlockControls() {
-//	//assert(this_);
-//	_cameraGuard.unlock();
-//}
-//
-//void InteractionHandler::setFocusNode(SceneGraphNode *node) {
-//	//assert(this_);
-//	_node = node;
-//}
-//
-//void InteractionHandler::rotate(const glm::quat &rotation) {
-//	//assert(this_);
-//	lockControls();
-//	_camera->rotate(rotation);
-//	unlockControls();
-//=======
 void InteractionHandler::update(double deltaTime) {
     _deltaTime = deltaTime;
     _mouseController->update(deltaTime);
@@ -564,7 +443,7 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 
         // iterate over key bindings
         _validKeyLua = true;
-        auto ret = _keyLua.equal_range(key);
+        auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
             //OsEng.scriptEngine()->runScript(it->second);
             OsEng.scriptEngine().queueScript(it->second);
@@ -574,51 +453,17 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
         }
     }
 }
-//
-//void InteractionHandler::mouseButtonCallback(int key, int action) {
-//    //if(mouseControl_ != nullptr) {
-//    //	mouseControl_->mouseButtonCallback(key,action);
-//    //}
-//	if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_PRESS)
-//		_leftMouseButtonDown = true;
-//	else if (key == SGCT_MOUSE_BUTTON_LEFT && action == SGCT_RELEASE) {
-//		_leftMouseButtonDown = false;
-//		_isMouseBeingPressedAndHeld = false;
-//	}
-//}
-//
-//void InteractionHandler::mousePositionCallback(int x, int y) {
-//	if (_leftMouseButtonDown)
-//		trackballRotate(x,y);
-//
-//    //if(mouseControl_ != nullptr) {
-//    //	mouseControl_->mousePosCallback(x,y);
-//    //}
-//}
-//
-//void InteractionHandler::mouseScrollWheelCallback(int pos) {
-//    //if(mouseControl_ != nullptr) {
-//    //	mouseControl_->mouseScrollCallback(pos);
-//    //}
-//    const float speed = 4.75f;
-//	const float dt = static_cast<float>(_dt);
-//    if(pos < 0) {
-//	    PowerScaledScalar dist(speed * dt, 0.0f);
-//	    distance(dist);
-//    } else if(pos > 0) {
-//	    PowerScaledScalar dist(-speed * dt, 0.0f);
-//	    distance(dist);
-//    }
-//}
-//
-//
+
 void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
     _validKeyLua = false;
 }
 
-void InteractionHandler::bindKey(Key key, std::string lua) {
-    _keyLua.insert(std::make_pair(key, lua));
+void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua) {
+    _keyLua.insert({
+        {key, modifier},
+        lua
+    });
 }
 
 scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
@@ -691,7 +536,6 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-//=======
 void InteractionHandler::setRotation(const glm::quat& rotation)
 {
     _camera->setRotation(rotation);

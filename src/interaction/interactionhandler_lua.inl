@@ -76,16 +76,20 @@ int bindKey(lua_State* L) {
     if (command.empty())
         return luaL_error(L, "Command string is empty");
 
-    openspace::Key iKey = stringToKey(key);
+    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
-    if (iKey == openspace::Key::Unknown) {
+    if (iKey.key == openspace::Key::Unknown) {
         LERROR("Could not find key '"<< key <<"'");
         return 0;
     }
 
 
-    OsEng.interactionHandler().bindKey(iKey, command);
-
+    OsEng.interactionHandler().bindKey(
+        iKey.key,
+        iKey.modifier,
+        command
+    );
+        
     return 0;
 }
 

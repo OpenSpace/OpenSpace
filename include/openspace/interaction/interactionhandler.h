@@ -22,55 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//<<<<<<< HEAD
-//#ifndef INTERACTIONHANDLER_H
-//#define INTERACTIONHANDLER_H
-//
-//#include <openspace/scripting/scriptengine.h>
-//#include <openspace/util/powerscaledcoordinate.h>
-//#include <openspace/util/powerscaledscalar.h>
-//
-//// std includes
-//#include <vector>
-//#include <mutex>
-//#include <map>
-//#include <functional>
-//
-//namespace openspace {
-//
-//// Forward declare to minimize dependencies
-//class Camera;
-//class SceneGraphNode;
-//class ExternalControl;
-//
-//class InteractionHandler {
-//public:
-//    InteractionHandler(void);
-//    InteractionHandler(const InteractionHandler& src);
-//    InteractionHandler& operator=(const InteractionHandler& rhs);
-//	virtual ~InteractionHandler();
-//
-//	void enable();
-//	void disable();
-//	const bool isEnabled() const;
-//
-//	void connectDevices();
-//	void addExternalControl(ExternalControl* controller);
-//
-//	void setCamera(Camera *camera = nullptr);
-//	void setOrigin(SceneGraphNode* node);
-//
-//	Camera* getCamera() const;
-//	const psc getOrigin() const;
-//	void lockControls();
-//	void unlockControls();
-//
-//	void setFocusNode(SceneGraphNode *node);
-//	
-//	void orbit(const glm::quat &rotation);
-//	void rotate(const glm::quat &rotation);
-//	void distance(const PowerScaledScalar &distance, size_t iterations = 0);
-//=======
 #ifndef __INTERACTIONHANDLER_H__
 #define __INTERACTIONHANDLER_H__
 
@@ -132,7 +83,7 @@ public:
     void setRotation(const glm::quat& rotation);
 
     void resetKeyBindings();
-    void bindKey(Key key, std::string lua);
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
 
     void setInteractionSensitivity(float sensitivity);
     float interactionSensitivity() const;
@@ -154,9 +105,8 @@ public:
     * interaction
     */
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
-    
-private:
 
+private:
     friend class Controller;
 
     InteractionHandler(const InteractionHandler&) = delete;
@@ -171,7 +121,8 @@ private:
     std::mutex _mutex;
 
     bool _validKeyLua;
-    std::multimap<Key, std::string > _keyLua;
+
+    std::multimap<KeyWithModifier, std::string > _keyLua;
 
     float _controllerSensitivity;
     bool _invertRoll;
