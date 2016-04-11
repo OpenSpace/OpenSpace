@@ -27,7 +27,6 @@
 #include <math.h>
 
 #include <modules/globebrowsing/rendering/clipmapglobe.h>
-#include <modules/globebrowsing/util/converter.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>

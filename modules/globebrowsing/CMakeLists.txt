@@ -40,8 +40,6 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
 
-	${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
-
 )
 
 set(SOURCE_FILES
@@ -56,9 +54,6 @@ set(SOURCE_FILES
 
    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/util/converter.cpp
-
    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

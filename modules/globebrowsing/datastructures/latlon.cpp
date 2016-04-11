@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/datastructures/latlon.h>
 
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
-#include <modules/globebrowsing/util/converter.h>
 
 namespace {
 	const std::string _loggerCat = "LatLon";

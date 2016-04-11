@@ -23,7 +23,6 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/util/converter.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -84,6 +83,8 @@ namespace openspace {
 		using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
 		_programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
 	}
+
+
 
 	void LatLonPatchRenderer::renderPatch(
 		const LatLonPatch& patch, const RenderData& data, double radius) 
