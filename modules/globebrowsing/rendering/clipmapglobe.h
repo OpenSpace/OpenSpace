@@ -27,15 +27,13 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
-
 
 #include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
 
@@ -60,8 +58,9 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		RenderableLatLonPatch _patch;
-		RenderableLatLonPatch _patch1;
+		std::unique_ptr<PatchRenderer> _patchRenderer;
+		LatLonPatch _patch;
+		
 
 		properties::IntProperty _rotation;
 

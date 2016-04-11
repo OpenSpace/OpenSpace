@@ -22,12 +22,14 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/clipmapglobe.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include <modules/globebrowsing/rendering/clipmapglobe.h>
 #include <modules/globebrowsing/util/converter.h>
 
 // open space includes
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
@@ -36,8 +38,6 @@
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace {
 	const std::string _loggerCat = "ClipMapGlobe";
@@ -51,8 +51,7 @@ namespace {
 
 namespace openspace {
 	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
-		: _patch(40, 40, 0, 0, M_PI / 4, M_PI / 4, 6.3e6)
-		, _patch1(40, 40, 0, 0, M_PI / 8, M_PI / 8, 6.3e6)
+		: _patch(0.0, 0.0, M_PI / 4, M_PI / 4)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
@@ -68,27 +67,31 @@ namespace openspace {
 
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
+
+		// ---------
+		// init Renderer
+		auto geometry = std::shared_ptr<Geometry>(new GridGeometry(10, 10,
+			Geometry::Positions::No,
+			Geometry::TextureCoordinates::Yes,
+			Geometry::Normals::No));
+
+		auto patchRenderer = new LatLonPatchRenderer(geometry);
+		_patchRenderer.reset(patchRenderer);
 	}
 
 	ClipMapGlobe::~ClipMapGlobe() {
 	}
 
 	bool ClipMapGlobe::initialize() {
-		_patch.initialize();
-		_patch1.initialize();
 		return isReady();
 	}
 
 	bool ClipMapGlobe::deinitialize() {
-		_patch.deinitialize();
-		_patch1.deinitialize();
 		return true;
 	}
 
 	bool ClipMapGlobe::isReady() const {
 		bool ready = true;
-		ready &= _patch.isReady();
-		ready &= _patch1.isReady();
 		return ready;
 	}
 
@@ -110,14 +113,12 @@ namespace openspace {
 		//_patch.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
 		//_patch1.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
 		// render
-
-		_patch.render(data);
-		_patch1.render(data);
+		Vec3 cameraPos = data.camera.position().dvec3();
+		_patch.center = LatLon::fromCartesian(cameraPos);
+		_patchRenderer->renderPatch(_patch, data, 6.3e6);
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {
-		_patch.update(data);
-		_patch1.update(data);
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

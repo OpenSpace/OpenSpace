@@ -36,9 +36,9 @@ namespace openspace {
 
 int ChunkNode::instanceCount = 0;
 
-ChunkNode::ChunkNode(ChunkLodGlobe& owner, const LatLonPatch& bounds, ChunkNode* parent)
+ChunkNode::ChunkNode(ChunkLodGlobe& owner, const LatLonPatch& patch, ChunkNode* parent)
 : _owner(owner)
-, bounds(bounds)
+, _patch(patch)
 , _parent(parent)
 {
 	_children[0] = nullptr;
@@ -126,9 +126,8 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
 
 void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 	if (isLeaf()) {
-		RenderableLatLonPatch& templatePatch = _owner.getTemplatePatch();
-		templatePatch.setPatch(bounds);
-		templatePatch.render(data);
+		PatchRenderer& patchRenderer = _owner.getPatchRenderer();
+		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
 	}
 	else {
 		for (int i = 0; i < 4; ++i) {
@@ -138,7 +137,7 @@ void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 }
 
 int ChunkNode::desiredSplitDepth(const RenderData& data) {
-	Vec3 normal = bounds.center.asUnitCartesian();
+	Vec3 normal = _patch.center.asUnitCartesian();
 	Vec3 pos = data.position.dvec3() + _owner.globeRadius * normal;
 
 	// Temporay ugly fix for Camera::position() is broken.
@@ -160,7 +159,7 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 
 	int depthRange = _owner.maxSplitDepth - _owner.minSplitDepth;
 
-	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*bounds.unitArea();
+	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*_patch.unitArea();
 
 	int desiredDepth = _owner.minSplitDepth + floor(scaleFactor / distance);
 	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
@@ -185,8 +184,8 @@ void ChunkNode::split(int depth) {
 	if (depth > 0 && isLeaf()) {
 
 		// Defining short handles for center, halfSize and quarterSize
-		const LatLon& c = bounds.center;
-		const LatLon& hs = bounds.halfSize;
+		const LatLon& c = _patch.center;
+		const LatLon& hs = _patch.halfSize;
 		LatLon qs = LatLon(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds

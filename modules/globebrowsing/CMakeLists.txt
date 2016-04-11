@@ -33,7 +33,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelatlonpatch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
 
@@ -50,7 +50,7 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelatlonpatch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
 

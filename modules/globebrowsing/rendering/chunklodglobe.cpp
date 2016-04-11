@@ -56,7 +56,6 @@ namespace openspace {
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
 		, globeRadius(6.3e6)
-		, _templatePatch(10,10, 0, 0, 0, 0, globeRadius)
 		, minSplitDepth(1)
 		, maxSplitDepth(7)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
@@ -73,25 +72,30 @@ namespace openspace {
 
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
+
+		// ---------
+		// init Renderer
+		auto geometry = std::shared_ptr<Geometry>(new GridGeometry(10, 10,
+			Geometry::Positions::No,
+			Geometry::TextureCoordinates::Yes,
+			Geometry::Normals::No));
+
+		auto patchRenderer = new LatLonPatchRenderer(geometry);
+		_patchRenderer.reset(patchRenderer);
+
 	}
 
 	ChunkLodGlobe::~ChunkLodGlobe() {
 
 	}
 
-	RenderableLatLonPatch& ChunkLodGlobe::getTemplatePatch() {
-		return _templatePatch;
-	}
-
 	bool ChunkLodGlobe::initialize() {
-		_templatePatch.initialize();
 		_leftRoot->initialize();
 		_rightRoot->initialize();
 		return isReady();
 	}
 
 	bool ChunkLodGlobe::deinitialize() {
-		_templatePatch.deinitialize();
 		_leftRoot->deinitialize();
 		_rightRoot->deinitialize();
 		return true;
@@ -99,10 +103,13 @@ namespace openspace {
 
 	bool ChunkLodGlobe::isReady() const {
 		bool ready = true;
-		ready &= _templatePatch.isReady();
 		ready &= _leftRoot->isReady();
 		ready &= _rightRoot->isReady();
 		return ready;
+	}
+
+	PatchRenderer& ChunkLodGlobe::getPatchRenderer() {
+		return *_patchRenderer;
 	}
 
 	void ChunkLodGlobe::render(const RenderData& data){
@@ -119,7 +126,6 @@ namespace openspace {
 	}
 
 	void ChunkLodGlobe::update(const UpdateData& data) {
-		_templatePatch.update(data);
 		// set spice-orientation in accordance to timestamp
 		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
 		_time = data.time;

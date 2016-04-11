@@ -31,7 +31,7 @@
 #include <ostream>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
 
@@ -75,8 +75,6 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
-	LatLonPatch bounds;
-
 	static int instanceCount;
 
 private:
@@ -92,11 +90,9 @@ private:
 
 	ChunkLodGlobe& _owner;
 
-
-
+	LatLonPatch _patch;
+	
 };
-
-
 
 } // namespace openspace
 
