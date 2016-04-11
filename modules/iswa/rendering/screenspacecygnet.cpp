@@ -34,11 +34,11 @@ namespace {
 
 namespace openspace {
 
-ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId, std::string path)
+ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	: ScreenSpaceRenderable()
 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	, _cygnetId(cygnetId)
-	, _path(path)
+	// , _path(path)
 {
 	std::cout << "screenspacecygnet constructor 1" << std::endl;
 	_id = id();
@@ -60,7 +60,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
 	: ScreenSpaceRenderable()
 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
 	, _cygnetId(data->id)
-	, _path(data->path)
+	// , _path(data->path)
 {
 	_id = id();
 	setName("ScreenSpaceCygnet" + std::to_string(_id));
@@ -111,8 +111,8 @@ bool ScreenSpaceCygnet::deinitialize(){
 		_shader = nullptr;
 	}
 
-	std::remove(absPath(_path).c_str());
-	_path = "";
+	// std::remove(absPath(_path).c_str());
+	// _path = "";
 	_memorybuffer = "";
 	return true;
 }

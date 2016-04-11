@@ -81,8 +81,14 @@ public:
 
 private:
 	std::string iSWAurl(int);
-	std::string getDictionaryTable(std::string path, int id);
-	std::string parseJSONToLuaTable(std::string json, int id);
+	std::string getDictionaryTable(int id, std::string path);
+	std::string parseJSONToLuaTable(int id, std::string json);
+	std::string parseKWToLuaTable(std::string kwPath);
+
+	void createDataPlane(std::string kwPath);
+	void createTexturePlane(int id, std::string json);
+	void createScreenSpace(int id);
+
 	std::map<std::string, std::string> _month;
 	ISWAContainer* _container;
 	std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;

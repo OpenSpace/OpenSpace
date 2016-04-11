@@ -111,32 +111,6 @@ namespace openspace{
             }else {
                 auto parentNode = OsEng.renderEngine().scene()->sceneGraphNode(metadata->parent);
                 if(parentNode){
-                    ghoul::Dictionary metadataDic = 
-                    {
-                        // {std::string("Name"),        std::string("TexturePlane")},
-                        {std::string("Type"),       std::string("TexturePlane")},   
-                        {std::string("StartTime"),  std::string("")},
-                        {std::string("EndTime"),    std::string("")},
-                        {std::string("Id"),         metadata->id},
-                        {std::string("Path"),       metadata->path},
-                        {std::string("Frame"),      std::string("GALACTIC")},
-                        {std::string("Parent"),     metadata->parent},
-                        {std::string("Scale"),      std::make_shared<glm::vec4>(3,3,3,10)},
-                        {std::string("Offset"),     std::make_shared<glm::vec4>(0,0,0,1)}
-                    };
-
-                    ghoul::Dictionary nodeDic = 
-                    {
-                        {std::string("Name"),       std::string("TexturePlane")},
-                        {std::string("Parent"),     metadata->parent},
-                        {std::string("Renderable"), metadataDic}
-                    };
-                    // SceneGraphNode*
-
-/*                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
-                    cygnetNode->setParent(parentNode);
-                    parentNode->addChild(cygnetNode);
-                    OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);*/
                     std::string script = "openspace.addSceneGraphNode({"
                         "Name = 'TexturePlane"+std::to_string(metadata->id)+"',"
                         "Parent = '" + metadata->parent + "',"
@@ -180,21 +154,21 @@ namespace openspace{
     }
 
     void ISWAManager::addISWACygnet(int id, std::string info){
-        getDictionaryTable(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"), id);
-
         if(id > 0){
             std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
             extFuture->parent = info;
             _extFutures.push_back(extFuture);
             // _container->addISWACygnet(cygnetId, data);
+            //createScreenSpace(id)
         }else if(id < 0){
-
+           //download metadata to texture plane
         }
         else {
             std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
             mdata->id = 0;
             mdata->path = absPath("${OPENSPACE_DATA}/"+info);
             createISWACygnet(mdata);
+            //createDataPlane(absPath("${OPENSPACE_DATA}/"+info);
         }
     }
 
@@ -302,7 +276,7 @@ namespace openspace{
         }
     }
 
-    std::string ISWAManager::getDictionaryTable(std::string path, int id){
+    std::string ISWAManager::getDictionaryTable(int id, std::string path){
         json j;
         std::ifstream file(path);
         if(file.is_open()){
@@ -359,7 +333,7 @@ namespace openspace{
         return table;
     }
 
-    std::string ISWAManager::parseJSONToLuaTable(std::string jsonString, int id){
+    std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString){
         if(jsonString != ""){
             json j = json::parse(jsonString);
 
@@ -380,49 +354,101 @@ namespace openspace{
                 scalew = 6;
             }
 
-            std::string scale = "{" 
-                                    + std::to_string(spatScale*(xmax-xmin)) + ","
-                                    + std::to_string(spatScale*(ymax-ymin)) + ","
-                                    + std::to_string(spatScale*(zmax-zmin)) + ","
-                                    + std::to_string(scalew) +
-                                "}";
+            glm::vec4 scale(
+                spatScale*(xmax-xmin),
+                spatScale*(ymax-ymin),
+                spatScale*(zmax-zmin),
+                scalew
+            );
+            glm::vec4 offset (
+                spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f),
+                spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f),
+                spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f),
+                scalew
+            );
+            // std::string scale = "{" 
+            //                         + std::to_string(spatScale*(xmax-xmin)) + ","
+            //                         + std::to_string(spatScale*(ymax-ymin)) + ","
+            //                         + std::to_string(spatScale*(zmax-zmin)) + ","
+            //                         + std::to_string(scalew) +
+            //                     "}";
 
-            std::string offset ="{"
-                                    + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
-                                    + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
-                                    + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
-                                    + std::to_string(scalew) +
-                                "}";
+            // std::string offset ="{"
+            //                         + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
+            //                         + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
+            //                         + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
+            //                         + std::to_string(scalew) +
+            //                     "}";
 
             std::string table = "{"
-            "Name : 'TexturePlane' , "
-            "Parent : '" + parent + "', "
+            "Name = 'TexturePlane "+ std::to_string(id) +"' , "
+            "Parent = '" + parent + "', "
             "Renderable = {"    
                 "Type = 'TexturePlane', "
                 "Id = " + std::to_string(id) + ", "
                 "Frame = '" + frame + "' , "
-                "Scale = " + scale + ", "
-                "Offset = " + offset + 
+                "Scale = " + std::to_string(scale) + ", "
+                "Offset = " + std::to_string(offset) + 
                 "}"
             "}"
             ;
 
-            std::cout << table << std::endl;
+            // std::cout << table << std::endl;
             // ghoul::Dictionary dic;
             return table;
         }
         return "";
     }
 
-    void createDataPlane(std::string path){
+    std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
 
+        if(kwPath != ""){
+            const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+            if(extension == "cdf"){
+                KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
+         
+                std::string parent  = kw.getParent();
+                std::string frame   = kw.getFrame();
+                glm::vec4 scale     = kw.getModelScaleScaled();
+                glm::vec4 offset    = kw.getModelBarycenterOffsetScaled();
+
+                std::string table = "{"
+                    "Name = 'DataPlane' , "
+                    "Parent = '" + parent + "', "
+                    "Renderable = {"    
+                        "Type = 'DataPlane', "
+                        "Id = 0 ,"
+                        "Frame = '" + frame + "' , "
+                        "Scale = " + std::to_string(scale) + ", "
+                        "Offset = " + std::to_string(offset) + ", "
+                        "kwPath = " + kwPath + 
+                        "}"
+                    "}"
+                    ;
+
+                return table;
+            }
+        }
+        return "";
     }
 
-    void createTexturePlane(std::string table){
+    void ISWAManager::createDataPlane(std::string kwPath){
+        std::string luaTable = parseKWToLuaTable(kwPath);
+        if(luaTable != ""){
+            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+            OsEng.scriptEngine().queueScript(script);
+        }
+    }
 
+    void ISWAManager::createTexturePlane(int id, std::string json){
+        std::string luaTable = parseJSONToLuaTable(id, json);
+        if(luaTable != ""){
+            std::string script = "openspace.addSceneGraphNode(" + parseJSONToLuaTable(id, json) + ");";
+            OsEng.scriptEngine().queueScript(script);
+        }
     }
 
     void createScreenSpace(int id){
-
+        OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id));
     }
 }// namsepace openspace

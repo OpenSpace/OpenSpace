@@ -33,7 +33,7 @@ namespace openspace{
 
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
-	ScreenSpaceCygnet(int cygnetId, std::string path);
+	ScreenSpaceCygnet(int cygnetId);
 	ScreenSpaceCygnet(std::shared_ptr<Metadata> data);
 	~ScreenSpaceCygnet();
 
