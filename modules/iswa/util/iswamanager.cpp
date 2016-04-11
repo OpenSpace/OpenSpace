@@ -30,8 +30,11 @@
 #include <openspace/util/time.h>
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
+#include <modules/iswa/ext/json/json.hpp>
+#include <fstream>
 
 namespace {
+    using json = nlohmann::json;
     const std::string _loggerCat = "ISWAManager";
 }
 
@@ -160,6 +163,8 @@ namespace openspace{
     }
 
     void ISWAManager::addISWACygnet(int id, std::string info){
+        getDictionaryTable(absPath("${OPENSPACE_DATA}/GM_openspace_X0_info.txt"), id);
+
         if(id != 0){
             std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
             extFuture->parent = info;
@@ -277,5 +282,58 @@ namespace openspace{
                 ++it;
             }
         }
+    }
+
+    std::string ISWAManager::getDictionaryTable(std::string path, int id){
+        json j;
+        std::ifstream file(path);
+        if(file.is_open()){
+            j = json::parse(file);
+        }
+
+        // std::cout << j << std::endl;
+
+        std::string parent = j["Central Body"];
+        int xmax = j["Plot XMAX"];
+        int ymax = j["Plot YMAX"];
+        int zmax = j["Plot ZMAX"];
+        int xmin = j["Plot XMIN"];
+        int ymin = j["Plot YMIN"];
+        int zmin = j["Plot ZMIN"];
+
+        //If Spatial scale is R_E
+        std::string scale = "{" 
+                                + std::to_string(6.371f*(xmax-xmin)) + ","
+                                + std::to_string(6.371f*(ymax-ymin)) + ","
+                                + std::to_string(6.371f*(ymax-ymin)) + ","
+                                + std::to_string(6) +
+                            "}";
+
+        std::string offset ="{"
+                                + std::to_string(6.371f*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
+                                + std::to_string(6.371f*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
+                                + std::to_string(6.371f*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
+                                + std::to_string(6) +
+                            "}";
+
+        // std::cout << scale << std::endl;
+        // std::cout << offset << std::endl;
+
+        std::string table = "{"
+        "Name : 'TexturePlane' , "
+        "Parent : '" + parent + "', "
+        "Renderable = {"
+            "Type = 'TexturePlane', "
+            "Id = " + std::to_string(id) + ", "
+            "Frame = 'GALACTIC' , "
+            "Scale = " + scale + ", "
+            "Offset = " + offset + 
+            "}"
+        "}"
+        ;
+
+        std::cout << table << std::endl;
+        // ghoul::Dictionary dic;
+        return table;
     }
 }// namsepace openspace

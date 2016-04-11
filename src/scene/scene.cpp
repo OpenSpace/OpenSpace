@@ -150,7 +150,8 @@ void Scene::update(const UpdateData& data) {
     //    ONCE = true;
     //}
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    ISWAManager::ref().update();
+    if(ISWAManager::isInitialized())
+        ISWAManager::ref().update();
 #endif
     
     for (SceneGraphNode* node : _graph.nodes()) {
