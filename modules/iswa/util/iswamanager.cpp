@@ -163,7 +163,7 @@ namespace openspace{
     }
 
     void ISWAManager::addISWACygnet(int id, std::string info){
-        getDictionaryTable(absPath("${OPENSPACE_DATA}/GM_openspace_X0_info.txt"), id);
+        getDictionaryTable(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"), id);
 
         if(id != 0){
             std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
@@ -309,7 +309,7 @@ namespace openspace{
         std::string scale = "{" 
                                 + std::to_string(spatScale*(xmax-xmin)) + ","
                                 + std::to_string(spatScale*(ymax-ymin)) + ","
-                                + std::to_string(spatScale*(ymax-ymin)) + ","
+                                + std::to_string(spatScale*(zmax-zmin)) + ","
                                 + std::to_string(scalew) +
                             "}";
 
