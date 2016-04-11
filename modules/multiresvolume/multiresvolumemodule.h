@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __MULTIRESVOLUMEMODULE_H__
+#define __MULTIRESVOLUMEMODULE_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <openspace/util/openspacemodule.h>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+namespace openspace {
+
+class MultiresVolumeModule : public OpenSpaceModule {
+public:
+    MultiresVolumeModule();
+    void internalInitialize() override;
 };
 
-#endif    
+} // namespace openspace
+
+#endif // __MULTIRESVOLUMEMODULE_H__

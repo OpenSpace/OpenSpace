@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2015                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __SHENBRICKSELECTOR_H__
+#define __SHENBRICKSELECTOR_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <vector>
+#include <modules/multiresvolume/rendering/brickselector.h>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/brickcover.h>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+namespace openspace {
+
+
+class ShenBrickSelector : public BrickSelector {
+public:
+    ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance);
+    ~ShenBrickSelector();
+    void setSpatialTolerance(float spatialTolerance);
+    void setTemporalTolerance(float temporalTolerance);
+    void selectBricks(int timestep,
+                      std::vector<int>& bricks);
+private:
+    TSP* _tsp;
+    float _spatialTolerance;
+    float _temporalTolerance;
+
+    void traverseOT(int timestep,
+                    unsigned int brickIndex,
+                    BrickCover coveredBricks,
+                    std::vector<int>& bricks);
+
+    void traverseBST(int timestep,
+                     unsigned int brickIndex,
+                     unsigned int bstRootBrickIndex,
+                     int timeSpanStart,
+                     int timeSpanEnd,
+                     BrickCover coveredBricks,
+                     std::vector<int>& bricks);
+
+    void selectBricks(int timestep,
+                      unsigned int brickIndex,
+                      unsigned int bstRootBrickIndex,
+                      int timeSpanStart,
+                      int timeSpanEnd,
+                      BrickCover coveredBricks,
+                      std::vector<int>& bricks);
+
+    int linearCoords(int x, int y, int z);
+
+    void selectCover(BrickCover coveredBricks, unsigned int brickIndex, std::vector<int>& bricks);
 };
 
-#endif    
+} // namespace openspace
+
+#endif // __SHENBRICKSELECTOR_H__

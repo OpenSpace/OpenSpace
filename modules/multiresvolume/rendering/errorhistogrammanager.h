@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2015                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __ERRORHISTOGRAMMANAGER_H__
+#define __ERRORHISTOGRAMMANAGER_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <fstream>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/histogram.h>
+#include <map>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+#include <ghoul/glm.h>
+
+namespace openspace {
+
+class ErrorHistogramManager {
+public:
+    ErrorHistogramManager(TSP* tsp);
+    ~ErrorHistogramManager();
+
+    bool buildHistograms(int numBins);
+    const Histogram* getHistogram(unsigned int brickIndex) const;
+
+    bool loadFromFile(const std::string& filename);
+    bool saveToFile(const std::string& filename);
+
+private:
+    TSP* _tsp;
+    std::ifstream* _file;
+
+    std::vector<Histogram> _histograms;
+    unsigned int _numInnerNodes;
+    float _minBin;
+    float _maxBin;
+    int _numBins;
+
+    std::map<unsigned int, std::vector<float>> _voxelCache;
+
+    bool buildFromLeaf(unsigned int bstOffset, unsigned int octreeOffset);
+    std::vector<float> readValues(unsigned int brickIndex) const;
+
+    int parentOffset(int offset, int base) const;
+
+    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
+    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
+    unsigned int linearCoords(glm::vec3 coords) const;
+    unsigned int linearCoords(int x, int y, int z) const;
+    unsigned int linearCoords(glm::ivec3 coords) const;
+
+    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
 };
 
-#endif    
+} // namespace openspace
+
+#endif // __ERRORHISTOGRAMMANAGER_H__

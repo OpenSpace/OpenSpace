@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#include <modules/multiresvolume/multiresvolumemodule.h>
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
-};
+#include <ghoul/misc/assert.h>
 
-#endif    
+#include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
+
+namespace openspace {
+
+MultiresVolumeModule::MultiresVolumeModule() : OpenSpaceModule("MultiresVolume") {}
+
+void MultiresVolumeModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+
+    fRenderable->registerClass<RenderableMultiresVolume>("RenderableMultiresVolume");
+}
+
+} // namespace openspace

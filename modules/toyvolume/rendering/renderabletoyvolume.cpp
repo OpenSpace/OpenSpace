@@ -77,7 +77,7 @@ namespace openspace {
 RenderableToyVolume::~RenderableToyVolume() {}
 
 bool RenderableToyVolume::initialize() {
-    _raycaster = std::make_unique<ToyVolumeRaycaster>(ToyVolumeRaycaster(_color));
+    _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());

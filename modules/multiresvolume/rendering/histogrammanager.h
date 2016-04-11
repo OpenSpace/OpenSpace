@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2015                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __HISTOGRAMMANAGER_H__
+#define __HISTOGRAMMANAGER_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <fstream>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/histogram.h>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+namespace openspace {
+
+class HistogramManager {
+public:
+    HistogramManager();
+    ~HistogramManager();
+    bool buildHistograms(TSP* tsp, int numBins);
+    Histogram* getHistogram(unsigned int brickIndex);
+    bool loadFromFile(const std::string& filename);
+    bool saveToFile(const std::string& filename);
+private:
+    std::vector<Histogram> _histograms;
+    float _minBin;
+    float _maxBin;
+    int _numBins;
+
+    bool buildHistogram(TSP* tsp, unsigned int brickIndex);
+    std::vector<float> readValues(TSP* tsp, unsigned int brickIndex);
 };
 
-#endif    
+} // namespace openspace
+
+#endif // __HISTOGRAMMANAGER_H__

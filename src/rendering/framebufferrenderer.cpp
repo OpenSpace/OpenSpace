@@ -220,12 +220,12 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA,
+        GL_RGBA16,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         0,
         GL_RGBA,
-        GL_BYTE,
+        GL_UNSIGNED_SHORT,
         nullptr);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+in vec3 vPosition;
+in vec4 worldPosition;
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
-};
+Fragment getFragment() {
+	vec4 fragColor = vec4(vPosition+0.5, 1.0);
+	vec4 position = worldPosition;
+	float depth = pscDepth(position);
 
-#endif    
+    Fragment frag;
+    frag.color = fragColor;
+    frag.depth = depth;
+    return frag;
+}

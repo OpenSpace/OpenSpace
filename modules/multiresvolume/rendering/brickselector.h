@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2015                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __BRICKSELECTOR_H__
+#define __BRICKSELECTOR_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#include <vector>
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+namespace openspace {
+
+class BrickSelector {
+public:
+    virtual ~BrickSelector() {};
+	virtual bool initialize() { return true; };
+    virtual void selectBricks(int timestep,
+                      std::vector<int>& bricks) = 0;
 };
 
-#endif    
+} // namespace openspace
+
+#endif // __BRICKSELECTOR_H__

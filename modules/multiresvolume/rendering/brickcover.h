@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2015                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,16 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef __BRICKCOVER_H__
+#define __BRICKCOVER_H__
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+namespace openspace {
 
-struct Fragment {
-    vec4 color;
-    float depth;
-    uint blend;
+struct BrickCover {
+    int lowX, highX, lowY, highY, lowZ, highZ;
+
+    BrickCover() {}
+
+    BrickCover(int numBricks) {
+        lowX = lowY = lowZ = 0;
+        highX = highY = highZ = numBricks;
+    }
+
+    BrickCover split(bool x, bool y, bool z) {
+        BrickCover child;
+        if (x) {
+            child.lowX = lowX + (highX - lowX) / 2;
+            child.highX = highX;
+        } else {
+            child.lowX = lowX;
+            child.highX = lowX + (highX - lowX) / 2;
+        }
+        if (y) {
+            child.lowY = lowY + (highY - lowY) / 2;
+            child.highY = highY;
+        } else {
+            child.lowY = lowY;
+            child.highY = lowY + (highY - lowY) / 2;
+        }
+        if (z) {
+            child.lowZ = lowZ + (highZ - lowZ) / 2;
+            child.highZ = highZ;
+        } else {
+            child.lowZ = lowZ;
+            child.highZ = lowZ + (highZ - lowZ) / 2;
+        }
+        return child;
+    }
 };
+}
 
-#endif    
+#endif // __BRICKCOVER_H__
