@@ -35,7 +35,7 @@
 #include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/latlonpatch.h>
+#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
 
 
 
@@ -60,8 +60,8 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		LatLonPatch _patch;
-		LatLonPatch _patch1;
+		RenderableLatLonPatch _patch;
+		RenderableLatLonPatch _patch1;
 
 		properties::IntProperty _rotation;
 

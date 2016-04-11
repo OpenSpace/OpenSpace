@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/util/converter.h>
 
 // open space includes
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
@@ -94,6 +95,8 @@ namespace openspace {
 	void ClipMapGlobe::render(const RenderData& data)
 	{
 		// Set patch to follow camera
+		/*
+		<<<<<<< HEAD
 		int segmentsPerPatch = 10;
 		glm::vec2 cameraPositionLatLon =
 			converter::cartesianToLatLon(data.camera.position().dvec3());
@@ -103,6 +106,11 @@ namespace openspace {
 		_patch1.setPositionLatLon(
 			glm::vec2((M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.x / (M_PI * 2) * segmentsPerPatch * 8),
 				(M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.y / (M_PI)* segmentsPerPatch * 4)));		// render
+		=======*/
+		//_patch.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
+		//_patch1.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
+		// render
+
 		_patch.render(data);
 		_patch1.render(data);
 	}

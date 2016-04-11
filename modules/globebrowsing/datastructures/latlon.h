@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
+#ifndef __LATLON_H__
+#define __LATLON_H__
 
-uniform vec3 sun_pos;
-
-uniform bool _performShading = true;
-uniform float transparency;
-uniform int shadows;
-
-uniform float time;
-uniform sampler2D texture1;
-uniform sampler2D nightTex;
-
-in vec4 vs_position;
-in vec2 vs_uv;
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
 
-Fragment getFragment() {
-	Fragment frag;
+namespace openspace {
 
-	frag.color = vec4(fract(vs_uv * 1), 0.4,1);
-	frag.depth =  pscDepth(vs_position);
+struct LatLon {
+	LatLon(Scalar latitude, Scalar longitude);
+	LatLon(const LatLon& src);
+	
+	static LatLon fromCartesian(const Vec3& v);
+	Vec3 asUnitCartesian();
 
-	return frag;
-}
+	inline bool operator==(const LatLon& other);
+	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }
 
+	Scalar lat;
+	Scalar lon;
+};
+
+struct LatLonPatch {
+
+	LatLonPatch(Scalar, Scalar, Scalar, Scalar);
+	LatLonPatch(const LatLon& center, const LatLon& halfSize);
+	LatLonPatch(const LatLonPatch& patch);
+
+	Scalar unitArea() const;
+
+	LatLon northWestCorner() const;
+	LatLon northEastCorner() const;
+	LatLon southWestCorner() const;
+	LatLon southEastCorner() const;
+
+	LatLon center;
+	LatLon halfSize;
+
+};
+
+} // namespace openspace
+
+#endif // __LATLON_H__

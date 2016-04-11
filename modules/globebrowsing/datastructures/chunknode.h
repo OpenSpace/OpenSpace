@@ -30,7 +30,9 @@
 #include <memory>
 #include <ostream>
 
-#include <modules/globebrowsing/rendering/latlonpatch.h>
+#include <modules/globebrowsing/datastructures/latlon.h>
+#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
+
 
 
 // forward declaration
@@ -38,12 +40,6 @@ namespace openspace {
 	class ChunkLodGlobe;
 }
 
-
-
-// Using double precision
-typedef double Scalar;
-typedef glm::dvec2 Vec2;
-typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
@@ -56,32 +52,10 @@ enum Quad {
 
 
 
-struct BoundingRect {
-	BoundingRect(Scalar, Scalar, Scalar, Scalar);
-	BoundingRect(const Vec2& center, const Vec2& halfSize);
-
-	Vec3 centerAsCartesian(Scalar radius);
-	Scalar area(Scalar radius);
-
-	Vec2 center;
-	Vec2 halfSize;
-	
-
-private:
-	bool _hasCachedCartesianCenter;
-	Vec3 _cartesianCenter;
-
-	bool _hasCachedArea;
-	Scalar _area;
-};
-
-
-
-
 
 class ChunkNode : public Renderable{
 public:
-	ChunkNode(ChunkLodGlobe&, const BoundingRect&, ChunkNode* parent = nullptr);
+	ChunkNode(ChunkLodGlobe&, const LatLonPatch&, ChunkNode* parent = nullptr);
 	~ChunkNode();
 
 
@@ -101,7 +75,7 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
-	BoundingRect bounds;
+	LatLonPatch bounds;
 
 	static int instanceCount;
 

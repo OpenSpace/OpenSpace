@@ -33,11 +33,12 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelatlonpatch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
+	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/util/converter.h
 
@@ -49,11 +50,12 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/latlonpatch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelatlonpatch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/util/converter.cpp
 

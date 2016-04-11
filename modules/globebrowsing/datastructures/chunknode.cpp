@@ -34,60 +34,9 @@ namespace {
 
 namespace openspace {
 
-BoundingRect::BoundingRect(Scalar cx, Scalar cy, Scalar hsx, Scalar hsy)
-	: center(Vec2(cx, cy))
-	, halfSize(Vec2(hsx, hsy)) 
-	, _hasCachedCartesianCenter(false)
-	, _hasCachedArea(false)
-{
-
-}
-
-BoundingRect::BoundingRect(const Vec2& center, const Vec2& halfSize)
-	:center(center)
-	, halfSize(halfSize)
-	, _hasCachedCartesianCenter(false)
-	, _hasCachedArea(false)
-{
-
-}
-
-
-Vec3 BoundingRect::centerAsCartesian(Scalar radius) {
-	if (!_hasCachedCartesianCenter) {
-		_cartesianCenter = converter::latLonToCartesian(center.x, center.y, 1);
-		_hasCachedCartesianCenter = true;
-	}
-	return radius * _cartesianCenter;
-}
-
-
-Scalar BoundingRect::area(Scalar radius) {
-	if (!_hasCachedArea) {
-		Scalar deltaTheta = 2 * halfSize.y; // longitude range
-		Scalar phiMin = center.x - halfSize.x;
-		Scalar phiMax = center.x + halfSize.x;
-		_area = deltaTheta * (sin(phiMax) - sin(phiMin));
-		_hasCachedArea = true;
-	}
-	return radius*radius*_area;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 int ChunkNode::instanceCount = 0;
 
-ChunkNode::ChunkNode(ChunkLodGlobe& owner, const BoundingRect& bounds, ChunkNode* parent)
+ChunkNode::ChunkNode(ChunkLodGlobe& owner, const LatLonPatch& bounds, ChunkNode* parent)
 : _owner(owner)
 , bounds(bounds)
 , _parent(parent)
@@ -103,8 +52,6 @@ ChunkNode::~ChunkNode() {
 	instanceCount--;
 }
 
-
-
 bool ChunkNode::isRoot() const {
 	return _parent == nullptr;
 }
@@ -112,8 +59,6 @@ bool ChunkNode::isRoot() const {
 bool ChunkNode::isLeaf() const {
 	return _children[0] == nullptr;
 }
-
-
 
 bool ChunkNode::initialize()  {
 	if (!isLeaf()) {
@@ -181,9 +126,8 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
 
 void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 	if (isLeaf()) {
-		LatLonPatch& templatePatch = _owner.getTemplatePatch();
-		templatePatch.setPositionLatLon(bounds.center);
-		templatePatch.setSizeLatLon(bounds.halfSize);
+		RenderableLatLonPatch& templatePatch = _owner.getTemplatePatch();
+		templatePatch.setPatch(bounds);
 		templatePatch.render(data);
 	}
 	else {
@@ -194,7 +138,7 @@ void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 }
 
 int ChunkNode::desiredSplitDepth(const RenderData& data) {
-	Vec3 normal = bounds.centerAsCartesian(1.0);
+	Vec3 normal = bounds.center.asUnitCartesian();
 	Vec3 pos = data.position.dvec3() + _owner.globeRadius * normal;
 
 	// Temporay ugly fix for Camera::position() is broken.
@@ -216,7 +160,7 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 
 	int depthRange = _owner.maxSplitDepth - _owner.minSplitDepth;
 
-	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*bounds.area(1);
+	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*bounds.unitArea();
 
 	int desiredDepth = _owner.minSplitDepth + floor(scaleFactor / distance);
 	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
@@ -241,15 +185,15 @@ void ChunkNode::split(int depth) {
 	if (depth > 0 && isLeaf()) {
 
 		// Defining short handles for center, halfSize and quarterSize
-		const Vec2& c = bounds.center;
-		const Vec2& hs = bounds.halfSize;
-		Vec2 qs = 0.5 * bounds.halfSize;
+		const LatLon& c = bounds.center;
+		const LatLon& hs = bounds.halfSize;
+		LatLon qs = LatLon(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds
-		BoundingRect nwBounds = BoundingRect(c + Vec2(-qs.x, -qs.y), qs);
-		BoundingRect neBounds = BoundingRect(c + Vec2(+qs.x, -qs.y), qs);
-		BoundingRect swBounds = BoundingRect(c + Vec2(-qs.x, +qs.y), qs);
-		BoundingRect seBounds = BoundingRect(c + Vec2(+qs.x, +qs.y), qs);
+		LatLonPatch nwBounds = LatLonPatch(LatLon(c.lat + qs.lat, c.lon - qs.lon), qs);
+		LatLonPatch neBounds = LatLonPatch(LatLon(c.lat - qs.lat, c.lon - qs.lon), qs);
+		LatLonPatch swBounds = LatLonPatch(LatLon(c.lat + qs.lat, c.lon + qs.lon), qs);
+		LatLonPatch seBounds = LatLonPatch(LatLon(c.lat - qs.lat, c.lon + qs.lon), qs);
 
 		// Create new chunk nodes
 		_children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));
@@ -265,7 +209,6 @@ void ChunkNode::split(int depth) {
 	}
 }
 
-
 void ChunkNode::merge() {
 	for (int i = 0; i < 4; ++i) {
 		if (_children[i] != nullptr) {
@@ -274,7 +217,6 @@ void ChunkNode::merge() {
 		_children[i] = nullptr;
 	}
 }
-
 
 const ChunkNode&  ChunkNode::getChild(Quad quad) const {
 	return *_children[quad];

@@ -28,8 +28,10 @@
 #include <glm/glm.hpp>
 
 // open space includes
+
 #include <openspace/rendering/renderable.h>
 
+#include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 
 namespace ghoul {
@@ -40,10 +42,14 @@ namespace opengl {
 
 
 namespace openspace {
-	class LatLonPatch : public Renderable
+
+	class LonLatPatch;
+	
+
+	class RenderableLatLonPatch : public Renderable
 	{
 	public:
-		LatLonPatch(
+		RenderableLatLonPatch(
 			unsigned int xRes,
 			unsigned int yRes,
 			double posLat,
@@ -51,7 +57,8 @@ namespace openspace {
 			double sizeLat,
 			double sizeLon,
 			double globeRadius);
-		~LatLonPatch();
+
+		~RenderableLatLonPatch();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -59,10 +66,14 @@ namespace openspace {
 
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
-
+		
 		void setPositionLatLon(glm::dvec2 posLatLon);
 		void setSizeLatLon(glm::dvec2 posLatLon);
 		void setGlobeRadius(double globeRadius);
+		
+		void setPatch(LatLonPatch patch);
+		LatLonPatch getPatch();
+
 
 		glm::dvec3 calculateCornerPointBottomLeft();
 		glm::dvec3 calculateCornerPointBottomRight();
@@ -83,12 +94,14 @@ namespace openspace {
 		//!	\returns the second control point to be used for circle segment interpolation.
 		//!
 		glm::dvec3 calculateCenterPoint(glm::dvec3 p0, glm::dvec3 n0, glm::dvec3 p2, glm::dvec3 n2);
+
+		
 	private:
+		LatLonPatch _patch;
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-		glm::dvec2 _posLatLon;
-		glm::dvec2 _sizeLatLon;
 		double _globeRadius;
+		
 		GridGeometry _grid;
 	};
 }  // namespace openspace
