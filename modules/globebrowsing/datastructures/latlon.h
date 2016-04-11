@@ -48,6 +48,8 @@ struct LatLon {
 	inline bool operator==(const LatLon& other);
 	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }
 
+
+
 	Scalar lat;
 	Scalar lon;
 };

@@ -32,12 +32,15 @@
 
 
 // open space includes
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
+
+
 #include <modules/globebrowsing/datastructures/chunknode.h>
-#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 namespace ghoul {
 	namespace opengl {
@@ -53,7 +56,7 @@ namespace openspace {
 		ChunkLodGlobe(const ghoul::Dictionary& dictionary);
 		~ChunkLodGlobe();
 
-		RenderableLatLonPatch& getTemplatePatch();
+		PatchRenderer& getPatchRenderer();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -79,7 +82,7 @@ namespace openspace {
 		std::unique_ptr<ChunkNode> _rightRoot;
 
 		// the patch used for actual rendering
-		RenderableLatLonPatch _templatePatch;
+		std::unique_ptr<PatchRenderer> _patchRenderer;
 
 		
 		static const LatLonPatch LEFT_HEMISPHERE;

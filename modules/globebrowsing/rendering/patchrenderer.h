@@ -25,6 +25,7 @@
 #ifndef __LATLONPATCH_H__
 #define __LATLONPATCH_H__
 
+#include <memory>
 #include <glm/glm.hpp>
 
 // open space includes
@@ -33,6 +34,8 @@
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
+
+
 
 namespace ghoul {
 namespace opengl {
@@ -44,66 +47,42 @@ namespace opengl {
 namespace openspace {
 
 	class LonLatPatch;
+	class Geometry;
 	
+	using std::shared_ptr;
+	using std::unique_ptr;
+	using ghoul::opengl::ProgramObject;
 
-	class RenderableLatLonPatch : public Renderable
-	{
+	class PatchRenderer {
 	public:
-		RenderableLatLonPatch(
-			unsigned int xRes,
-			unsigned int yRes,
-			double posLat,
-			double posLon,
-			double sizeLat,
-			double sizeLon,
-			double globeRadius);
-
-		~RenderableLatLonPatch();
-
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
-
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
 		
-		void setPositionLatLon(glm::dvec2 posLatLon);
-		void setSizeLatLon(glm::dvec2 posLatLon);
-		void setGlobeRadius(double globeRadius);
+		PatchRenderer(shared_ptr<Geometry>);
+		~PatchRenderer();
 		
-		void setPatch(LatLonPatch patch);
-		LatLonPatch getPatch();
-
-
-		glm::dvec3 calculateCornerPointBottomLeft();
-		glm::dvec3 calculateCornerPointBottomRight();
-		glm::dvec3 calculateCornerPointTopLeft();
-		glm::dvec3 calculateCornerPointTopRight();
-
-		//!
-		//! Finds a third control point between the two parameter points assuming
-		//! they both lie on a sphere with the origin in the center.
-		//! The three control points will then be used to interpolate NURBS curves
-		//! that exactly describes circle segments.
-		//! \param p0 is the first control point
-		//! \param n0 is the normal corresponding to the first control point. The normal
-		//! should point out from the center of the circle and be normalized
-		//! \param p2 is the third control point
-		//! \param n2 is the normal corresponding to the third control point. The normal
-		//! should point out from the center of the circle and be normalized
-		//!	\returns the second control point to be used for circle segment interpolation.
-		//!
-		glm::dvec3 calculateCenterPoint(glm::dvec3 p0, glm::dvec3 n0, glm::dvec3 p2, glm::dvec3 n2);
-
+		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius);
 		
-	private:
-		LatLonPatch _patch;
-		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+	protected:
 
-		double _globeRadius;
+		unique_ptr<ProgramObject> _programObject;
+		shared_ptr<Geometry> _geometry;
 		
-		GridGeometry _grid;
 	};
+
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	//							PATCH RENDERER SUBCLASSES								//
+	//////////////////////////////////////////////////////////////////////////////////////
+
+	class LatLonPatchRenderer : public PatchRenderer {
+	public:
+		LatLonPatchRenderer(shared_ptr<Geometry>);
+
+		virtual void renderPatch(
+			const LatLonPatch& patch, 
+			const RenderData& data, 
+			double radius) override;
+	};
+
 }  // namespace openspace
 
 #endif  // __LATLONPATCH_H__
