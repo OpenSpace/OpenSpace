@@ -130,9 +130,6 @@ namespace openspace {
 		_programObject->setUniform("ModelTransform", transform);
 		setPscUniforms(*_programObject.get(), data.camera, data.position);
 
-		glm::dmat4 cameraTransform = data.camera.viewMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
-		glm::dmat4 cameraProjectionTransform = data.camera.viewProjectionMatrix(); // TODO : NEEDS TO BE DOUBLE PRECISION
-
 		glDisable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 

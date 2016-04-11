@@ -35,6 +35,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace {
 	const std::string _loggerCat = "LatLonPatch";
@@ -106,104 +107,26 @@ namespace openspace {
 	}
 
 	void LatLonPatch::render(const RenderData& data) {
-		using namespace glm;
-
 		// activate shader
 		_programObject->activate();
+		using namespace glm;
 
-		// TODO : Not sure if double precision will be needed for all these calculations
-		// Using doubles in case for now.
-
-		// Create control points and normals
-		// 
-		// These are the physical positions of the control points for the patch:
-		//
-		// y  p[6] p[7] p[8]     p02 p12 p22
-		// ^  p[3] p[4] p[5] <=> p01 p11 p21
-		// |  p[0] p[1] p[2]     p00 p10 p20
-		// |
-		//  -----> x
-		dvec3 p[9];// p00, p01, p02, p10, p11, p12, p20, p21, p22;
-		dvec3 n00, n01, n02, n10, n11, n12, n20, n21, n22;
-		dvec3 nHorizontal0, nHorizontal1, nHorizontal2;
-		float interpolationWeight;
-
-		// Calculate positions of corner control points 
-		p[0] = calculateCornerPointBottomLeft();	// p00
-		p[2] = calculateCornerPointBottomRight();	// p20
-		p[6] = calculateCornerPointTopLeft();		// p02
-		p[8] = calculateCornerPointTopRight();		// p22
-
-		// Calculate the horizontal normals
-		// Horizontal normals are the same for constant latitude
-		nHorizontal0 = normalize(converter::latLonToCartesian(
-			0,
-			_posLatLon.y - _sizeLatLon.y,
-			_globeRadius));
-		nHorizontal1 = normalize(converter::latLonToCartesian(
-			0,
-			_posLatLon.y,
-			_globeRadius));
-		nHorizontal2 = normalize(converter::latLonToCartesian(
-			0,
-			_posLatLon.y + _sizeLatLon.y,
-			_globeRadius));
-
-		// Get position of center control points
-		p[3] = calculateCenterPoint(p[0], normalize(p[0]), p[6], normalize(p[6]));	// p01
-		p[5] = calculateCenterPoint(p[2], normalize(p[2]), p[8], normalize(p[8]));	// p21
-		p[1] = calculateCenterPoint(p[0], nHorizontal0, p[2], nHorizontal2);		// p10
-		p[7] = calculateCenterPoint(p[6], nHorizontal0, p[8], nHorizontal2);		// p12
-		p[4] = calculateCenterPoint(p[3], nHorizontal0, p[5], nHorizontal2);		// p11
-
-		// Calculate one weight to send to GPU for interpolation in longitude range.
-		// Actually there are three weights but they all have the same value.
-		// By weighting the center control point with this value, a circle segment is
-		// defined by the NURBS curve
-		interpolationWeight = dot(nHorizontal0, nHorizontal1);
-
-		// TODO : Transformation to world space from model space should also consider
-		// rotations. Now it only uses translatation for simplicity. Should be done
-		// With a matrix transform
-		dvec3 modelPosition = data.position.dvec3();
-		for (size_t i = 0; i < 9; i++) {
-			p[i] += modelPosition;
-		}
 
 		// Get camera transform matrix
 		// TODO : Should only need to fetch the camera transform and use directly
 		// but this is not currently possible in the camera class.
-		dvec3 cameraPosition = data.camera.position().dvec3();
-		dmat4 viewTransform = inverse(translate(dmat4(1.0), cameraPosition));
-		viewTransform = dmat4(data.camera.viewRotationMatrix()) * viewTransform;
+		vec3 cameraPosition = data.camera.position().vec3();
+		mat4 viewTransform = inverse(translate(mat4(1.0), cameraPosition));
+		viewTransform = mat4(data.camera.viewRotationMatrix()) * viewTransform;
 
-		// Transform control points to camera space
-		for (size_t i = 0; i < 9; i++) {
-			p[i] = dvec3(viewTransform * dvec4(p[i], 1.0));
-		}
+		// TODO : Model transform should be fetched as a matrix directly.
+		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
-		// Transform normals to camera space
-		n00 = dvec3(viewTransform * dvec4(n00, 0.0));
-		n10 = dvec3(viewTransform * dvec4(n10, 0.0));
-		n20 = dvec3(viewTransform * dvec4(n20, 0.0));
-		n01 = dvec3(viewTransform * dvec4(n01, 0.0));
-		n11 = dvec3(viewTransform * dvec4(n11, 0.0));
-		n21 = dvec3(viewTransform * dvec4(n21, 0.0));
-		n02 = dvec3(viewTransform * dvec4(n02, 0.0));
-		n12 = dvec3(viewTransform * dvec4(n12, 0.0));
-		n22 = dvec3(viewTransform * dvec4(n22, 0.0));
+		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);		
+		_programObject->setUniform("minLatLon", vec2(_posLatLon - _sizeLatLon));
+		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(_sizeLatLon));
+		_programObject->setUniform("globeRadius", float(_globeRadius));
 
-		// Send control points to GPU to be used in shader
-		// Transform to float values
-		vec3 pFloat[9];
-		for (size_t i = 0; i < 9; i++) {
-			pFloat[i] = vec3(p[i]);
-		}
-		_programObject->setUniform("p", &pFloat[0], 9);
-		_programObject->setUniform("interpolationWeight", interpolationWeight);
-		_programObject->setUniform("Projection", data.camera.projectionMatrix());
-		 
-		// Render triangles (use texture coordinates to interpolate to new positions)
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
