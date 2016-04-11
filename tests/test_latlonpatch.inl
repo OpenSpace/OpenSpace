@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/rendering/latlonpatch.h>
+#include <modules/globebrowsing/datastructures/latlon.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -35,14 +35,7 @@ class LatLonPatchTest : public testing::Test {};
 using namespace openspace;
 
 TEST_F(LatLonPatchTest, findCenterControlPoint) {
-	LatLonPatch patch(10, 10, 0, 0, M_PI / 4, M_PI / 4);
 
-	glm::dvec3 p0, p1First, p1Second, p2;
+	LatLonPatch patch(0, 0, M_PI / 4, M_PI / 4);
 
-	p0 = patch.calculateCornerPointLeftBottom();
-	p2 = patch.calculateCornerPointRightBottom();
-	p1First = patch.calculateCenterPoint(p0, p2);
-	p1Second = patch.calculateCenterPoint(p2, p0);
-
-	ASSERT_EQ(p1First, p1Second);
 }
