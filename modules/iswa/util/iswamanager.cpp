@@ -83,8 +83,8 @@ namespace openspace{
                         {std::string("EndTime"),    std::string("")},
                         {std::string("Id"),         metadata->id},
                         {std::string("Path"),       metadata->path},
-                        {std::string("Scale"),      std::make_shared<glm::vec4>(kw->getModelScaleScaled())},
-                        {std::string("Offset"),     std::make_shared<glm::vec4>(kw->getModelBarycenterOffsetScaled())},
+                        {std::string("Scale"),      glm::vec4(kw->getModelScaleScaled())},
+                        {std::string("Offset"),     glm::vec4(kw->getModelBarycenterOffsetScaled())},
                         {std::string("Parent"),     kw->getParent()},
                         {std::string("Frame"),      kw->getFrame()},
                         {std::string("KW"),         kw}
@@ -97,11 +97,11 @@ namespace openspace{
                         {std::string("Parent"),     kw->getParent()},
                         {std::string("Renderable"), metadataDic}
                     };
-                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
+/*                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
                     cygnetNode->setParent(parentNode);
                     parentNode->addChild(cygnetNode);
                     OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);
-                    cygnetNode->initialize();
+                    cygnetNode->initialize();*/
 
                 }
                 // cygnet = std::make_shared<DataPlane>(metadataDic);               
@@ -130,11 +130,28 @@ namespace openspace{
                     };
                     // SceneGraphNode*
 
-                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
+/*                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
                     cygnetNode->setParent(parentNode);
                     parentNode->addChild(cygnetNode);
-                    OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);
-                    cygnetNode->initialize();
+                    OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);*/
+                    std::string script = "openspace.addSceneGraphNode({"
+                        "Name = 'TexturePlane"+std::to_string(metadata->id)+"',"
+                        "Parent = '" + metadata->parent + "',"
+                        "Renderable = {"
+                            "Type = 'TexturePlane',"
+                            "Id = "+std::to_string(metadata->id)+","
+                            "Path = '" + metadata->path + "',"
+                            "StartTime = '',"
+                            "EndTime = '',"
+                            "Frame = 'GALACTIC',"
+                            "Parent = '" + metadata->parent + "',"
+                            "Scale = { 3, 3, 3, 10},"
+                            "Offset = {0, 0, 0, 1}"
+                        "}"
+                    "});";
+                    std::cout << script << std::endl;
+                    OsEng.scriptEngine().queueScript(script);
+                    //cygnetNode->initialize();
 
                 }else{
                     OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(metadata));
@@ -175,7 +192,9 @@ namespace openspace{
     }
 
     void ISWAManager::deleteISWACygnet(std::string name){
-        _container->deleteISWACygnet(name);
+        //_container->deleteISWACygnet(name);
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
+        
     }
 
     std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){

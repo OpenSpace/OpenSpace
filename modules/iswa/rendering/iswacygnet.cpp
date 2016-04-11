@@ -40,12 +40,20 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 {
 	_data = std::make_shared<Metadata>();
 
-	dictionary.getValue("Id",_data->id);
+	// dict.getValue can only set strings in _data directly
+	float renderableId;
+	glm::vec4 renderableScale;
+	glm::vec4 renderableOffset;
+	dictionary.getValue("Id", renderableId);
+	dictionary.getValue("Scale", renderableScale);
+	dictionary.getValue("Offset", renderableOffset);
+	_data->id = (int) renderableId;
+	_data->offset = renderableOffset;
+	_data->scale = renderableScale;
+
 	dictionary.getValue("Path",_data->path);
 	dictionary.getValue("Parent",_data->parent);
 	dictionary.getValue("Frame",_data->frame);
-	dictionary.getValue("Offset",_data->offset);
-	dictionary.getValue("Scale",_data->scale);
 
 	// addProperty(_enabled);
 	addProperty(_updateInterval);
