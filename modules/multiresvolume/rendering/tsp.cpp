@@ -22,16 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <sgct.h>
+//#include <sgct.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 
 // ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/glm.h>
 
 // std
 #include <algorithm>
+#include <math.h>
 #include <queue>
 
 namespace {

@@ -80,7 +80,7 @@ public:
     bool isReady() const override;
 
     virtual void update(const UpdateData& data) override;
-    virtual void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tasks);
+    virtual void render(const RenderData& data, RendererTasks& tasks);
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
     //virtual std::string getHeaderPath() override;
     //virtual std::string getHelperPath() override;
