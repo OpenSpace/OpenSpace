@@ -22,76 +22,112 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
+#ifndef __LATLON_H__
+#define __LATLON_H__
 
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
 #include <ostream>
 
-#include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/renderablelatlonpatch.h>
 
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
 
-
-// forward declaration
-namespace openspace {
-	class ChunkLodGlobe;
-}
 
 
 namespace openspace {
 
-enum Quad {
-	NORTH_WEST,
-	NORTH_EAST,
-	SOUTH_WEST,
-	SOUTH_EAST
+
+struct LatLon {
+	LatLon(Scalar latitude, Scalar longitude);
+	LatLon(const LatLon& src);
+	
+	static LatLon fromCartesian(const Vec3& v);
+	Vec3 asUnitCartesian();
+
+	inline bool operator==(const LatLon& other);
+	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }
+
+	Scalar lat;
+	Scalar lon;
 };
 
 
 
 
-class ChunkNode : public Renderable{
+
+struct LatLonPatch {
+
+	LatLonPatch(Scalar, Scalar, Scalar, Scalar);
+	LatLonPatch(const LatLon& center, const LatLon& halfSize);
+	LatLonPatch(const LatLonPatch& patch);
+
+	Scalar unitArea() const;
+
+	LatLon northWestCorner() const;
+	LatLon northEastCorner() const;
+	LatLon southWestCorner() const;
+	LatLon southEastCorner() const;
+
+	LatLon center;
+	LatLon halfSize;
+
+};
+
+
+
+class CachingLatLonPatch : private LatLonPatch {
+
 public:
-	ChunkNode(ChunkLodGlobe&, const LatLonPatch&, ChunkNode* parent = nullptr);
-	~ChunkNode();
+
+	CachingLatLonPatch(const LatLon& center, const LatLon& halfSize);
+	CachingLatLonPatch(const LatLonPatch& patch);
 
 
-	void split(int depth = 1);
-	void merge();
+	void setCenter(const LatLon&);
+	void setHalfSize(const LatLon&);
 
-	bool isRoot() const;
-	bool isLeaf() const;
+	const LatLon& getCenter() const;
+	const LatLon& getHalfSize() const;
+
+	Scalar unitArea();
+
+
+	const Vec3& cartesianUnitCenter();
+	const Vec3& cartesianUnitHalfSize();
+
+	LatLon northWestCorner() const;
+	LatLon northEastCorner() const;
+	LatLon southWestCorner() const;
+	LatLon southEastCorner() const;
+
+	const Vec3& CachingLatLonPatch::cartesianUnitNorthWestCorner();
+	const Vec3& CachingLatLonPatch::cartesianUnitNorthEastCorner();
+	const Vec3& CachingLatLonPatch::cartesianUnitSouthWestCorner();
+	const Vec3& CachingLatLonPatch::cartesianUnitSouthEastCorner();
+
 	
-	const ChunkNode& getChild(Quad quad) const;
-
-
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-	CachingLatLonPatch bounds;
-
-	static int instanceCount;
-
 private:
+	bool _hasCachedCartesianCenter;
+	bool _hasCachedCartesianHalfSize;
+	bool _hasCachedArea;
 
-	void internalRender(const RenderData& data, int currLevel);
-	void internalUpdate(const UpdateData& data, int currLevel);
-	bool internalUpdateChunkTree(const RenderData& data, int currLevel);
-	int desiredSplitDepth(const RenderData& data);
-	
-	
-	ChunkNode* _parent;
-	std::unique_ptr<ChunkNode> _children[4];
+	bool _hasCachedCartesianNorthWestCorner;
+	bool _hasCachedCartesianNorthEastCorner;
+	bool _hasCachedCartesianSouthWestCorner;
+	bool _hasCachedCartesianSouthEastCorner;
 
-	ChunkLodGlobe& _owner;
+	Vec3 _cachedCartesianCenter;
+	Vec3 _cachedCartesianHalfSize;
+	Scalar _cachedArea;
 
+	Vec3 _cachedCartesianNorthWestCorner;
+	Vec3 _cachedCartesianNorthEastCorner;
+	Vec3 _cachedCartesianSouthWestCorner;
+	Vec3 _cachedCartesianSouthEastCorner;
 
 
 };
@@ -102,4 +138,4 @@ private:
 
 
 
-#endif // __QUADTREE_H__
+#endif // __LATLON_H__

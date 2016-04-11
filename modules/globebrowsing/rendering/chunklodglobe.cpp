@@ -24,8 +24,6 @@
 
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
 
-#include <modules/globebrowsing/util/converter.h>
-
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -50,8 +48,8 @@ namespace {
 
 namespace openspace {
 
-	const BoundingRect ChunkLodGlobe::LEFT_HEMISPHERE = BoundingRect(0, -M_PI/2, M_PI/2, M_PI/2);
-	const BoundingRect ChunkLodGlobe::RIGHT_HEMISPHERE = BoundingRect(0, M_PI/2, M_PI/2, M_PI/2);
+	const LatLonPatch ChunkLodGlobe::LEFT_HEMISPHERE = LatLonPatch(0, -M_PI/2, M_PI/2, M_PI/2);
+	const LatLonPatch ChunkLodGlobe::RIGHT_HEMISPHERE = LatLonPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
 
 	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
@@ -81,7 +79,7 @@ namespace openspace {
 
 	}
 
-	LatLonPatch& ChunkLodGlobe::getTemplatePatch() {
+	RenderableLatLonPatch& ChunkLodGlobe::getTemplatePatch() {
 		return _templatePatch;
 	}
 

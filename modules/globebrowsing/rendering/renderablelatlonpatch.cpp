@@ -60,8 +60,7 @@ namespace openspace {
 		Geometry::TextureCoordinates::Yes,
 		Geometry::Normals::No)
 	, _programObject(nullptr)
-	, _posLatLon(posLat, posLon)
-	, _sizeLatLon(sizeLat, sizeLon)
+	, _patch(CachingLatLonPatch(LatLon(posLat, posLon), LatLon(sizeLat, sizeLon)))
 	{
 
 	}
@@ -128,15 +127,15 @@ namespace openspace {
 		// Calculate the horizontal normals
 		nHorizontal0 = glm::normalize(converter::latLonToCartesian(
 			0,
-			_posLatLon.y - _sizeLatLon.y,
+			_patch.getCenter().lon - _patch.getHalfSize().lon,
 			r));
 		nHorizontal1 = glm::normalize(converter::latLonToCartesian(
 			0,
-			_posLatLon.y,
+			_patch.getCenter().lon,
 			r));
 		nHorizontal2 = glm::normalize(converter::latLonToCartesian(
 			0,
-			_posLatLon.y + _sizeLatLon.y,
+			_patch.getCenter().lon + _patch.getHalfSize().lon,
 			r));
 
 		// Get position of center control points
@@ -258,41 +257,22 @@ namespace openspace {
 
 	}
 
-	void RenderableLatLonPatch::setPositionLatLon(glm::dvec2 posLatLon) {
-		_posLatLon = posLatLon;
-	}
 
 	glm::dvec3 RenderableLatLonPatch::calculateCornerPointBottomLeft() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
-		return converter::latLonToCartesian(
-			_posLatLon.x - _sizeLatLon.x,
-			_posLatLon.y - _sizeLatLon.y,
-			r);
+		double radius = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+		return radius * _patch.cartesianUnitSouthWestCorner();
 	}
 	glm::dvec3 RenderableLatLonPatch::calculateCornerPointBottomRight() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
-		return converter::latLonToCartesian(
-			_posLatLon.x - _sizeLatLon.x,
-			_posLatLon.y + _sizeLatLon.y,
-			r);
+		double radius = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+		return radius * _patch.cartesianUnitSouthEastCorner();
 	}
 	glm::dvec3 RenderableLatLonPatch::calculateCornerPointTopLeft() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
-		return converter::latLonToCartesian(
-			_posLatLon.x + _sizeLatLon.x,
-			_posLatLon.y - _sizeLatLon.y,
-			r);
+		double radius = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+		return radius * _patch.cartesianUnitNorthWestCorner();
 	}
 	glm::dvec3 RenderableLatLonPatch::calculateCornerPointTopRight() {
-		double r = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
-
-		return converter::latLonToCartesian(
-			_posLatLon.x + _sizeLatLon.x,
-			_posLatLon.y + _sizeLatLon.y,
-			r);
+		double radius = 6e6; // TODO : DEFINE r AS A MEMBER VARIABLE
+		return radius * _patch.cartesianUnitNorthEastCorner();
 	}
 
 	glm::dvec3 RenderableLatLonPatch::calculateCenterPoint(
@@ -309,8 +289,12 @@ namespace openspace {
 		return p1;
 	}
 
-	void RenderableLatLonPatch::setSizeLatLon(glm::dvec2 sizeLatLon) {
-		_sizeLatLon = sizeLatLon;
+	void RenderableLatLonPatch::setPatch(CachingLatLonPatch& patch) {
+		_patch = patch;
+	}
+
+	CachingLatLonPatch& RenderableLatLonPatch::getPatch() {
+		return _patch;
 	}
 
 }  // namespace openspace

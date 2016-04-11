@@ -28,8 +28,10 @@
 #include <glm/glm.hpp>
 
 // open space includes
+
 #include <openspace/rendering/renderable.h>
 
+#include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 
 namespace ghoul {
@@ -40,17 +42,21 @@ namespace opengl {
 
 
 namespace openspace {
-	class LatLonPatch : public Renderable
+
+	class CachingLonLatPatch;
+	
+
+	class RenderableLatLonPatch : public Renderable
 	{
 	public:
-		LatLonPatch(
+		RenderableLatLonPatch(
 			unsigned int xRes,
 			unsigned int yRes,
 			double posLat,
 			double posLon,
 			double sizeLat,
 			double sizeLon);
-		~LatLonPatch();
+		~RenderableLatLonPatch();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -59,8 +65,9 @@ namespace openspace {
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 
-		void setPositionLatLon(glm::dvec2 posLatLon);
-		void setSizeLatLon(glm::dvec2 posLatLon);
+		
+		void setPatch(CachingLatLonPatch& patch);
+		CachingLatLonPatch& getPatch();
 
 
 		glm::dvec3 calculateCornerPointBottomLeft();
@@ -73,11 +80,13 @@ namespace openspace {
 		they both lie on a sphere with the origin in the center.
 		*/
 		glm::dvec3 calculateCenterPoint(glm::dvec3 p0, glm::dvec3 n0, glm::dvec3 p2, glm::dvec3 n2);
+
+		
 	private:
+		CachingLatLonPatch& _patch;
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-		glm::dvec2 _posLatLon;
-		glm::dvec2 _sizeLatLon;
+		
 		GridGeometry _grid;
 	};
 }  // namespace openspace
