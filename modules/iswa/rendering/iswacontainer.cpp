@@ -43,7 +43,7 @@ bool ISWAContainer::initialize(){
 	ISWAManager::ref().setContainer(this);
 
 	// ISWAManager::ref().addISWACygnet(0, "BATSRUS.cdf");
-	ISWAManager::ref().addISWACygnet(5, "Screen");
+	// ISWAManager::ref().addISWACygnet(5, "Screen");
 	// ISWAManager::ref().addISWACygnet(7, "Sun");
 
 	return true;

@@ -55,6 +55,12 @@ struct Metadata {
 	std::shared_ptr<KameleonWrapper> kw;
 };
 
+struct MetadataFuture {
+	int id;
+	std::string json;
+	bool isFinished;
+};
+
 
 class ISWAManager : public ghoul::Singleton<ISWAManager> {
 	friend class ghoul::Singleton<ISWAManager>;
@@ -81,6 +87,7 @@ public:
 
 private:
 	std::string iSWAurl(int);
+	std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 	std::string getDictionaryTable(int id, std::string path);
 	std::string parseJSONToLuaTable(int id, std::string json);
 	std::string parseKWToLuaTable(std::string kwPath);
@@ -92,6 +99,7 @@ private:
 	std::map<std::string, std::string> _month;
 	ISWAContainer* _container;
 	std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
+	std::vector<std::shared_ptr<MetadataFuture>> _metaFutures;
 };
 
 } //namespace openspace

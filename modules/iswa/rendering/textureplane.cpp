@@ -76,28 +76,63 @@ bool TexturePlane::deinitialize(){
 
 void TexturePlane::render(const RenderData& data){
 	if(_texture){
+		// psc position = data.position;
+		// glm::mat4 transform = glm::mat4(1.0);
+		// // transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
+
+		// float textureRatio = (float (_texture->height()/float(_texture->width())));
+		// transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
+
+		// glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+		// glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
+		// // glm::mat4 rot = glm::mat4(1.0);
+		// /*	for (int i = 0; i < 3; i++){
+		// 	for (int j = 0; j < 3; j++){
+		// 		transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+		// 	}
+		// }*/
+
+		// //transform = transform * roty * rotx;
+		// position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+
+		// // transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
+		// // transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
+		// // transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+
 		psc position = data.position;
 		glm::mat4 transform = glm::mat4(1.0);
-		transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
-
-		float textureRatio = (float (_texture->height()/float(_texture->width())));
-		transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
 
 		glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
-		// glm::mat4 rot = glm::mat4(1.0);
-		/*	for (int i = 0; i < 3; i++){
+		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+		glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+
+		glm::mat4 rot = glm::mat4(1.0);
+		for (int i = 0; i < 3; i++){
 			for (int j = 0; j < 3; j++){
 				transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
 			}
-		}*/
+		}
 
-		//transform = transform * roty * rotx;
-		//position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+		transform = transform * rotz * roty; //BATSRUS
 
-		// transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
-		// transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
-		// transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+		if(_data->frame == "GSM"){
+			glm::vec4 v(1,0,0,1);
+			glm::vec3 xVec = glm::vec3(transform*v);
+			xVec = glm::normalize(xVec);
+
+			double  lt;
+		    glm::vec3 sunVec =
+		    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+		    sunVec = glm::normalize(sunVec);
+
+		    float angle = acos(glm::dot(xVec, sunVec));
+		    glm::vec3 ref =  glm::cross(xVec, sunVec);
+
+		    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+		    transform = rotation * transform;
+		}
+
+		position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
 
 		// Activate shader
 		_shader->activate();
@@ -146,8 +181,9 @@ void TexturePlane::update(const UpdateData& data){
 void TexturePlane::loadTexture() {
 	// std::cout << _data->path << std::endl;
 	// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
-	if(_memorybuffer != ""){
-		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+	std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath("${OPENSPACE_DATA}/GM_openspace_Z0_20150315_000000.png"));
+	// if(_memorybuffer != ""){
+		// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
 			texture->uploadTexture();
@@ -156,7 +192,7 @@ void TexturePlane::loadTexture() {
 
 	        _texture = std::move(texture);
 		}
-	}	
+	// }	
 }
 
 void TexturePlane::updateTexture(){

@@ -48,20 +48,24 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 	setName("DataPlane" + std::to_string(_id));
 	registerProperties();
 
-	dictionary.getValue("KW", _kw);
-
-
-	KameleonWrapper::Model model = _kw->model();
-	if(	model == KameleonWrapper::Model::BATSRUS)
-		_var = "p";
-	else
-		_var = "rho";
+	dictionary.getValue("kwPath", _kwPath);
 }
 
 DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
+	// std::string kwPath;
+	_kw = std::make_shared<KameleonWrapper>(_kwPath);
+	// dictionary.getValue("KW", _kw);
+
+	KameleonWrapper::Model model = _kw->model();
+	if(	model == KameleonWrapper::Model::BATSRUS)
+		_var = "p";
+	else
+		_var = "rho";
+
+
     createPlane();
     createShader();
 

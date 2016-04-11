@@ -46,7 +46,7 @@ Fragment getFragment() {
 	//diffuse.a = diffuse.r;
 	float tot = diffuse.r + diffuse.g + diffuse.b;
 	tot /= 3.0;
-	if (tot <= 0.05)
+	if (tot >= 0.5 || tot <= 0.05)
 		discard;
 
     Fragment frag;

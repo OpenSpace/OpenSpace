@@ -100,7 +100,7 @@ namespace openspace{
                         {std::string("Parent"),     kw->getParent()},
                         {std::string("Renderable"), metadataDic}
                     };
-/*                    SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
+/*                  SceneGraphNode* cygnetNode = SceneGraphNode::createFromDictionary(nodeDic);
                     cygnetNode->setParent(parentNode);
                     parentNode->addChild(cygnetNode);
                     OsEng.renderEngine().scene()->addSceneGraphNode(cygnetNode);
@@ -155,20 +155,25 @@ namespace openspace{
 
     void ISWAManager::addISWACygnet(int id, std::string info){
         if(id > 0){
-            std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
-            extFuture->parent = info;
-            _extFutures.push_back(extFuture);
+            // std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
+            // extFuture->parent = info;
+            // _extFutures.push_back(extFuture);
             // _container->addISWACygnet(cygnetId, data);
-            //createScreenSpace(id)
+            createScreenSpace(id);
         }else if(id < 0){
            //download metadata to texture plane
+             // std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
+            // extFuture->parent = info;
+            // _extFutures.push_back(extFuture);
+            // std::shared_ptr<ExtensionFuture> extFuture
+            _metaFutures.push_back(downloadMetadata(id));
         }
         else {
-            std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
-            mdata->id = 0;
-            mdata->path = absPath("${OPENSPACE_DATA}/"+info);
-            createISWACygnet(mdata);
-            //createDataPlane(absPath("${OPENSPACE_DATA}/"+info);
+            // std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
+            // mdata->id = 0;
+            // mdata->path = absPath("${OPENSPACE_DATA}/"+info);
+            // createISWACygnet(mdata);
+            createDataPlane(absPath("${OPENSPACE_DATA}/"+info));
         }
     }
 
@@ -201,6 +206,23 @@ namespace openspace{
 
     void ISWAManager::downloadData(){}
 
+    std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
+        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
+
+        metaFuture->id = id;
+
+        std::ifstream file(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"));
+        if(file.is_open()){
+            std::string json( (std::istreambuf_iterator<char>(file) ),
+                                (std::istreambuf_iterator<char>()));
+            std::cout << "This is in the file: " <<  json << std::endl;
+            metaFuture->isFinished = true;
+            metaFuture->json = json;
+        }
+
+        return metaFuture;
+    }
+
     std::shared_ptr<ExtensionFuture> ISWAManager::fileExtension(int id){
         std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
         extFuture->isFinished = false;
@@ -225,6 +247,7 @@ namespace openspace{
     void ISWAManager::setContainer(ISWAContainer* container){
         _container = container;
     }
+
 
     std::shared_ptr<ISWACygnet> ISWAManager::iSWACygnet(std::string name){
         if(_container)
@@ -267,6 +290,7 @@ namespace openspace{
                 data->path = path;
                 data->parent = (*it)->parent;
 
+                //createTexturePlane(id, json)
                 createISWACygnet(data);
                 it = _extFutures.erase( it );
             }
@@ -274,6 +298,15 @@ namespace openspace{
                 ++it;
             }
         }
+
+        for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
+            if((*it)->isFinished) {
+                createTexturePlane(7,(*it)->json);
+                it = _metaFutures.erase( it );
+            }else{
+                ++it;
+            }
+        }    
     }
 
     std::string ISWAManager::getDictionaryTable(int id, std::string path){
@@ -282,7 +315,6 @@ namespace openspace{
         if(file.is_open()){
             j = json::parse(file);
         }
-
 
         std::string parent = j["Central Body"];
         std::string frame = j["Coordinates"];
@@ -297,8 +329,8 @@ namespace openspace{
         float spatScale=1, scalew=10;
         std::string spatialScale = j["Spatial Scale (Custom)"];
         if(spatialScale == "R_E"){
-            spatScale = 6.371f;
-            scalew = 6;
+            // spatScale = 6.371f;
+            // scalew = 6;
         }
 
         std::string scale = "{" 
@@ -316,8 +348,8 @@ namespace openspace{
                             "}";
 
         std::string table = "{"
-        "Name : 'TexturePlane' , "
-        "Parent : '" + parent + "', "
+        "Name = 'TexturePlane' , "
+        "Parent = '" + parent + "', "
         "Renderable = {"    
             "Type = 'TexturePlane', "
             "Id = " + std::to_string(id) + ", "
@@ -413,7 +445,7 @@ namespace openspace{
                 glm::vec4 offset    = kw.getModelBarycenterOffsetScaled();
 
                 std::string table = "{"
-                    "Name = 'DataPlane' , "
+                    "Name = 'DataPlane',"
                     "Parent = '" + parent + "', "
                     "Renderable = {"    
                         "Type = 'DataPlane', "
@@ -421,11 +453,11 @@ namespace openspace{
                         "Frame = '" + frame + "' , "
                         "Scale = " + std::to_string(scale) + ", "
                         "Offset = " + std::to_string(offset) + ", "
-                        "kwPath = " + kwPath + 
+                        "kwPath = '" + kwPath + "'" 
                         "}"
                     "}"
                     ;
-
+                std::cout << table << std::endl;    
                 return table;
             }
         }
@@ -448,7 +480,7 @@ namespace openspace{
         }
     }
 
-    void createScreenSpace(int id){
+    void ISWAManager::createScreenSpace(int id){
         OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id));
     }
 }// namsepace openspace

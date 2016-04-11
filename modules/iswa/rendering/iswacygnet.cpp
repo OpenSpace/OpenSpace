@@ -51,13 +51,20 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	_data->offset = renderableOffset;
 	_data->scale = renderableScale;
 
-	dictionary.getValue("Path",_data->path);
-	dictionary.getValue("Parent",_data->parent);
+	// dictionary.getValue("Path",_data->path);
+	// dictionary.getValue("Parent",_data->parent);
 	dictionary.getValue("Frame",_data->frame);
 
 	// addProperty(_enabled);
 	addProperty(_updateInterval);
 	addProperty(_delete);
+
+	std::cout << _data->id << std::endl;
+	std::cout << std::to_string(_data->offset) << std::endl;
+	std::cout << std::to_string(_data->scale) << std::endl;
+	std::cout << _data->path << std::endl;
+	std::cout << _data->parent << std::endl;
+	std::cout << _data->frame << std::endl;
 
 	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
