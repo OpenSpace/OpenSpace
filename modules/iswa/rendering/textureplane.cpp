@@ -47,7 +47,10 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 	,_futureTexture(nullptr)
 {
 	_id = id();
-	setName("TexturePlane" + std::to_string(_id));
+	std::string name;
+	dictionary.getValue("Name", name);
+	setName(name);
+	//setName("TexturePlane" + std::to_string(_id));
 	registerProperties();
 }
 
@@ -132,7 +135,6 @@ void TexturePlane::update(const UpdateData& data){
     		_lastUpdateTime = _time;
     	}
     }
-
 	if(_futureTexture && _futureTexture->isFinished){
 		loadTexture();
 		_futureTexture = nullptr;
@@ -148,7 +150,6 @@ void TexturePlane::loadTexture() {
 		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
 		if (texture) {
 			// LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
-
 			texture->uploadTexture();
 			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
 			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -163,6 +164,7 @@ void TexturePlane::updateTexture(){
 	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
+
 	}
 }
 

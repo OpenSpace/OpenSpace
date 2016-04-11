@@ -122,7 +122,7 @@ void DataPlane::render(const RenderData& data){
 		    transform = rotation * transform;
 		}
 
-		position += transform*glm::vec4(_data->offset->x, _data->offset->z, _data->offset->y, _data->offset->w);
+		position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
 
 		// Activate shader
 		_shader->activate();

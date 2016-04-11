@@ -49,8 +49,8 @@ struct Metadata {
 	std::string path;
 	std::string parent;
 	std::string frame;
-	std::shared_ptr<glm::vec4> offset;
-	std::shared_ptr<glm::vec4> scale;
+	glm::vec4 offset;
+	glm::vec4 scale;
 	std::string scaleVariable;
 	std::shared_ptr<KameleonWrapper> kw;
 };
