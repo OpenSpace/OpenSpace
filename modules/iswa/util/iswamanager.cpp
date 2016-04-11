@@ -273,9 +273,6 @@ namespace openspace{
                 data->parent = (*it)->parent;
 
                 createISWACygnet(data);
-                // if(cygnet){
-                //     _iSWACygnets.push_back(cygnet);
-                // }
                 it = _extFutures.erase( it );
             }
             else {
@@ -291,9 +288,10 @@ namespace openspace{
             j = json::parse(file);
         }
 
-        // std::cout << j << std::endl;
 
         std::string parent = j["Central Body"];
+        std::string frame = j["Coordinates"];
+
         int xmax = j["Plot XMAX"];
         int ymax = j["Plot YMAX"];
         int zmax = j["Plot ZMAX"];
@@ -301,31 +299,34 @@ namespace openspace{
         int ymin = j["Plot YMIN"];
         int zmin = j["Plot ZMIN"];
 
-        //If Spatial scale is R_E
+        float spatScale=1, scalew=10;
+        std::string spatialScale = j["Spatial Scale (Custom)"];
+        if(spatialScale == "R_E"){
+            spatScale = 6.371f;
+            scalew = 6;
+        }
+
         std::string scale = "{" 
-                                + std::to_string(6.371f*(xmax-xmin)) + ","
-                                + std::to_string(6.371f*(ymax-ymin)) + ","
-                                + std::to_string(6.371f*(ymax-ymin)) + ","
-                                + std::to_string(6) +
+                                + std::to_string(spatScale*(xmax-xmin)) + ","
+                                + std::to_string(spatScale*(ymax-ymin)) + ","
+                                + std::to_string(spatScale*(ymax-ymin)) + ","
+                                + std::to_string(scalew) +
                             "}";
 
         std::string offset ="{"
-                                + std::to_string(6.371f*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
-                                + std::to_string(6.371f*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
-                                + std::to_string(6.371f*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
-                                + std::to_string(6) +
+                                + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
+                                + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
+                                + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
+                                + std::to_string(scalew) +
                             "}";
-
-        // std::cout << scale << std::endl;
-        // std::cout << offset << std::endl;
 
         std::string table = "{"
         "Name : 'TexturePlane' , "
         "Parent : '" + parent + "', "
-        "Renderable = {"
+        "Renderable = {"    
             "Type = 'TexturePlane', "
             "Id = " + std::to_string(id) + ", "
-            "Frame = 'GALACTIC' , "
+            "Frame = '" + frame + "' , "
             "Scale = " + scale + ", "
             "Offset = " + offset + 
             "}"
