@@ -30,8 +30,11 @@
 #include <openspace/util/time.h>
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
+#include <modules/iswa/ext/json/json.hpp>
+#include <fstream>
 
 namespace {
+    using json = nlohmann::json;
     const std::string _loggerCat = "ISWAManager";
 }
 
@@ -177,6 +180,8 @@ namespace openspace{
     }
 
     void ISWAManager::addISWACygnet(int id, std::string info){
+        getDictionaryTable(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"), id);
+
         if(id != 0){
             std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
             extFuture->parent = info;
@@ -287,14 +292,68 @@ namespace openspace{
                 data->parent = (*it)->parent;
 
                 createISWACygnet(data);
-                // if(cygnet){
-                //     _iSWACygnets.push_back(cygnet);
-                // }
                 it = _extFutures.erase( it );
             }
             else {
                 ++it;
             }
         }
+    }
+
+    std::string ISWAManager::getDictionaryTable(std::string path, int id){
+        json j;
+        std::ifstream file(path);
+        if(file.is_open()){
+            j = json::parse(file);
+        }
+
+
+        std::string parent = j["Central Body"];
+        std::string frame = j["Coordinates"];
+
+        int xmax = j["Plot XMAX"];
+        int ymax = j["Plot YMAX"];
+        int zmax = j["Plot ZMAX"];
+        int xmin = j["Plot XMIN"];
+        int ymin = j["Plot YMIN"];
+        int zmin = j["Plot ZMIN"];
+
+        float spatScale=1, scalew=10;
+        std::string spatialScale = j["Spatial Scale (Custom)"];
+        if(spatialScale == "R_E"){
+            spatScale = 6.371f;
+            scalew = 6;
+        }
+
+        std::string scale = "{" 
+                                + std::to_string(spatScale*(xmax-xmin)) + ","
+                                + std::to_string(spatScale*(ymax-ymin)) + ","
+                                + std::to_string(spatScale*(zmax-zmin)) + ","
+                                + std::to_string(scalew) +
+                            "}";
+
+        std::string offset ="{"
+                                + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
+                                + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
+                                + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
+                                + std::to_string(scalew) +
+                            "}";
+
+        std::string table = "{"
+        "Name : 'TexturePlane' , "
+        "Parent : '" + parent + "', "
+        "Renderable = {"    
+            "Type = 'TexturePlane', "
+            "Id = " + std::to_string(id) + ", "
+            "Frame = '" + frame + "' , "
+            "Scale = " + scale + ", "
+            "Offset = " + offset + 
+            "}"
+        "}"
+        ;
+
+        std::cout << table << std::endl;
+        // ghoul::Dictionary dic;
+        return table;
     }
 }// namsepace openspace
