@@ -82,6 +82,7 @@ public:
 private:
 	std::string iSWAurl(int);
 	std::string getDictionaryTable(std::string path, int id);
+	std::string parseJSONToLuaTable(std::string json, int id);
 	std::map<std::string, std::string> _month;
 	ISWAContainer* _container;
 	std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
