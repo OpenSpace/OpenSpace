@@ -736,6 +736,9 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
 	SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
 	SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
+    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
+    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+
 	RenderablePath* nhPath;
 
     SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
@@ -744,14 +747,11 @@ void RenderEngine::changeViewPoint(std::string origin) {
 	//SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
 	//SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
 
-    if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
-		newHorizonsNode == nullptr || jupiterBarycenterNode == nullptr 
-		//||	dawnNode == nullptr 
-		//||  vestaNode == nullptr
-		) {
-	    LERROR("Necessary nodes does not exist");
-		return;
-    }
+  //  if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
+		//jupiterBarycenterNode == nullptr) {
+	 //   LERROR("Necessary nodes does not exist");
+		//return;
+  //  }
 
     if (origin == "Pluto") {
 		if (newHorizonsPathNodeP) {
@@ -1169,26 +1169,28 @@ void RenderEngine::renderInformation() {
 
 			glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
-			double lt;
-			glm::dvec3 p =
-				SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
-			psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-			float a, b, c;
-			glm::dvec3 radii;
-			SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-			a = radii.x;
-			b = radii.y;
-			c = radii.z;
-			float radius = (a + b) / 2.f;
-			float distToSurf = glm::length(nhPos.vec3()) - radius;
+            try {
+                double lt;
+                glm::dvec3 p =
+                    SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+                psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+                float a, b, c;
+                glm::dvec3 radii;
+                SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                a = radii.x;
+                b = radii.y;
+                c = radii.z;
+                float radius = (a + b) / 2.f;
+                float distToSurf = glm::length(nhPos.vec3()) - radius;
 
-			RenderFont(*_fontInfo,
-				penPosition,
-				"Distance to Pluto: % .1f (KM)",
-				distToSurf
-				);
-			penPosition.y -= _fontInfo->height();
-
+                RenderFont(*_fontInfo,
+                    penPosition,
+                    "Distance to Pluto: % .1f (KM)",
+                    distToSurf
+                    );
+                penPosition.y -= _fontInfo->height();
+            }
+            catch (...) {}
 
 			double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - currentTime;
 			float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer2::ref().getIntervalLength());

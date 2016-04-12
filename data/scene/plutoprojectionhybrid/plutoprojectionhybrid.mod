@@ -1,3 +1,16 @@
+UseAccurateKernels = false
+
+if UseAccurateKernels then
+    NewHorizonsKernels = {
+        "${SPICE}/nh_kernels/spk/NavPE_de433_od122.bsp",
+        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+    }
+else
+    NewHorizonsKernels = {
+        "${SPICE}/NewHorizonsKernels/nh_plu017.bsp"
+    }
+end
+
 return {
     -- Pluto barycenter module
     {
@@ -8,9 +21,7 @@ return {
             Body = "PLUTO BARYCENTER",
             Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+            Kernels = NewHorizonsKernels
         },
     },
     -- PlutoProjection module
@@ -149,9 +160,7 @@ return {
             Body = "PLUTO",
             Reference = "GALACTIC",
             Observer = "PLUTO BARYCENTER",
-            Kernels = {
-                "${SPICE}/NewHorizonsKernels/nh_plu017.bsp"
-            }
+            Kernels = NewHorizonsKernels
         },
         Rotation = {
             Type = "Spice",

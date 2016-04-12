@@ -225,6 +225,7 @@ void RenderableFieldlines::render(const RenderData& data) {
 	_program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
 	_program->setUniform("modelTransform", glm::mat4(1.0));
 	_program->setUniform("cameraViewDir", data.camera.viewDirection());
+
 	setPscUniforms(*_program, data.camera, data.position);
 
 	_program->setUniform("classification", _classification);

@@ -83,7 +83,7 @@ private:
     void clear();
     QStringList selectedScenes() const;
 
-    void handleFileFutureAddition(const std::vector<openspace::DownloadManager::FileFuture*>& futures);
+    void handleFileFutureAddition(const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>& futures);
 
     void handleDirectFiles();
     void handleFileRequest();
@@ -101,10 +101,10 @@ private:
     QList<FileRequest> _fileRequests;
     QList<TorrentFile> _torrentFiles;
 
-    std::vector<openspace::DownloadManager::FileFuture*> _futures;
-    std::map<openspace::DownloadManager::FileFuture*, InfoWidget*> _futureInfoWidgetMap;
+    std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futures;
+    std::map<std::shared_ptr<openspace::DownloadManager::FileFuture>, InfoWidget*> _futureInfoWidgetMap;
 
-    std::vector<openspace::DownloadManager::FileFuture*> _futuresToAdd;
+    std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futuresToAdd;
     std::atomic_flag _mutex;
 };
 

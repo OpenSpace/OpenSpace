@@ -1,3 +1,16 @@
+UseAccurateKernels = false
+
+if UseAccurateKernels then
+    NewHorizonsKernels = {
+        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+    }
+else
+    NewHorizonsKernels = {
+        "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+    }
+end
+
+
 return {
     -- CharonProjection module
     {   
@@ -47,9 +60,7 @@ return {
             Body = "CHARON",
             Reference = "ECLIPJ2000",
             Observer = "PLUTO BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+            Kernels = NewHorizonsKernels
         },
         Rotation = {
             Type = "Spice",

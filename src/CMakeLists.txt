@@ -76,6 +76,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
