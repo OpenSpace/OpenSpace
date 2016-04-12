@@ -53,7 +53,7 @@ enum Quad {
 
 
 
-class ChunkNode : public Renderable{
+class ChunkNode {
 public:
 	ChunkNode(ChunkLodGlobe&, const LatLonPatch&, ChunkNode* parent = nullptr);
 	~ChunkNode();
@@ -67,20 +67,13 @@ public:
 	
 	const ChunkNode& getChild(Quad quad) const;
 
-
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	void render(const RenderData& data);
 
 	static int instanceCount;
 
 private:
 
 	void internalRender(const RenderData& data, int currLevel);
-	void internalUpdate(const UpdateData& data, int currLevel);
 	bool internalUpdateChunkTree(const RenderData& data, int currLevel);
 	int desiredSplitDepth(const RenderData& data);
 	

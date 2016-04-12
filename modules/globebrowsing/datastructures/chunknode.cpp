@@ -64,29 +64,6 @@ bool ChunkNode::isLeaf() const {
 	return _children[0] == nullptr;
 }
 
-bool ChunkNode::initialize()  {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->initialize();
-		}
-	}
-	
-	return isReady();
-}
-
-bool ChunkNode::deinitialize() {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->deinitialize();
-		}
-	}
-	return true;
-}
-
-bool ChunkNode::isReady() const{
-	bool ready = true;
-	return ready;
-}
 
 void ChunkNode::render(const RenderData& data) {
 	ghoul_assert(isRoot(), "this method should only be invoked on root");
@@ -98,6 +75,10 @@ void ChunkNode::render(const RenderData& data) {
 
 // Returns true or false wether this node can be merge or not
 bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
+	using namespace glm;
+	LatLon center = _patch.center;
+
+
 	if (isLeaf()) {
 		int desiredDepth = desiredSplitDepth(data);
 		if (desiredDepth > depth) {
@@ -124,9 +105,9 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
 			return internalUpdateChunkTree(data, depth);
 		}
 		return false;
-	}
-	
+	}	
 }
+
 
 void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 	if (isLeaf()) {
@@ -169,19 +150,6 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 }
 
 
-void ChunkNode::update(const UpdateData& data) {
-	ghoul_assert(isRoot(), "this method should only be invoked on root");
-	//internalUpdate(data, 0);
-}
-
-void ChunkNode::internalUpdate(const UpdateData& data, int currLevel) {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->internalUpdate(data, currLevel + 1);
-		}
-	}
-}
-
 
 void ChunkNode::split(int depth) {
 	if (depth > 0 && isLeaf()) {
@@ -223,8 +191,6 @@ void ChunkNode::merge() {
 const ChunkNode&  ChunkNode::getChild(Quad quad) const {
 	return *_children[quad];
 }
-
-
 
 
 
