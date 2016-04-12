@@ -24,8 +24,13 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/openspaceengine.h>
+
 #include <modules/globebrowsing/datastructures/chunknode.h>
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
+
+
 
 namespace {
 	const std::string _loggerCat = "ChunkNode";
@@ -145,6 +150,7 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 	Vec3 cameraPos = buggedCameraPos - _owner.globeRadius * cameraDirection;
 	Vec3 cameraToChunk = pos - cameraPos;
 
+
 	// if camera points at same direction as latlon patch normal,
 	// we see the back side and dont have to split it
 	Scalar cosNormalCameraDirection = glm::dot(normal, cameraDirection);
@@ -153,14 +159,12 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 	}
 
 
-	Scalar distance = glm::length(cameraToChunk) + _owner.globeRadius;
+	Scalar distance = glm::length(cameraToChunk);
 	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-	int depthRange = _owner.maxSplitDepth - _owner.minSplitDepth;
-
-	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*_patch.unitArea();
-
-	int desiredDepth = _owner.minSplitDepth + floor(scaleFactor / distance);
+	Scalar scaleFactor = 40 * _owner.globeRadius;// *150 * _patch.unitArea();
+	Scalar projectedScaleFactor = scaleFactor / distance;
+	int desiredDepth = floor( log2(projectedScaleFactor) );
 	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
 }
 

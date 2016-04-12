@@ -55,9 +55,9 @@ namespace openspace {
 	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
-		, globeRadius(6.3e6)
+		, globeRadius(1.6*6.3e6)
 		, minSplitDepth(1)
-		, maxSplitDepth(7)
+		, maxSplitDepth(15)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;

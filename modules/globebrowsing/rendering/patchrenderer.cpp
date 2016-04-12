@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 
 // open space includes
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
@@ -103,10 +104,12 @@ namespace openspace {
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
+		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+			* viewTransform * modelTransform;
 
 		LatLon swCorner = patch.southWestCorner();
 
-		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
+		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
 		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.lat, patch.halfSize.lon));
 		_programObject->setUniform("globeRadius", float(radius));
