@@ -32,17 +32,17 @@
 
 namespace openspace {
 
-class ClipmapGeometry : public Geometry
+class ClipMapGeometry : public Geometry
 {
 public:
-	ClipmapGeometry(
+	ClipMapGeometry(
 		unsigned int resolution,
 		Positions usePositions = Positions::No, 
 		TextureCoordinates useTextures = TextureCoordinates::No, 
 		Normals useNormals = Normals::No
 	);
 
-	~ClipmapGeometry();
+	~ClipMapGeometry();
 
 	const unsigned int resolution() const;
 

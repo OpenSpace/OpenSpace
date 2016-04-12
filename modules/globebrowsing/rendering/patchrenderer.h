@@ -29,13 +29,10 @@
 #include <glm/glm.hpp>
 
 // open space includes
-
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
-
-
 
 namespace ghoul {
 namespace opengl {
@@ -59,7 +56,7 @@ namespace openspace {
 		PatchRenderer(shared_ptr<Geometry>);
 		~PatchRenderer();
 		
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius);
+		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
 		
 	protected:
 
@@ -83,6 +80,15 @@ namespace openspace {
 			double radius) override;
 	};
 
+	class ClipMapPatchRenderer : public PatchRenderer {
+	public:
+		ClipMapPatchRenderer();
+
+		virtual void renderPatch(
+			const LatLonPatch& patch,
+			const RenderData& data,
+			double radius) override;
+	};
 }  // namespace openspace
 
 #endif  // __LATLONPATCH_H__
