@@ -46,13 +46,20 @@ public:
 
 	const unsigned int resolution() const;
 
+	static size_t numVerticesBottom(unsigned int resolution);
+	static size_t numVerticesLeft(unsigned int resolution);
+	static size_t numVerticesRight(unsigned int resolution);
+	static size_t numVerticesTop(unsigned int resolution);
+
 	static size_t numElements(unsigned int resolution);
 	static size_t numVertices(unsigned int resolution);
 private:
 	static std::vector<GLuint> CreateElements(unsigned int resoluion);
 	static std::vector<glm::vec4> CreatePositions(unsigned int resolution);
-	static std::vector<glm::vec2> CreateTextureCoordinates(unsigned int resolution);
+	static std::vector<glm::vec2> CreateTextureCoordinates(int resolution);
 	static std::vector<glm::vec3> CreateNormals(unsigned int resolution);
+
+
 
 	static void validate(unsigned int resolution);
 

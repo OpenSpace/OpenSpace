@@ -57,7 +57,7 @@ void main()
 {
 	vs_uv = in_uv;
 
-	vec2 scaledContraction = contraction / 8.0f;
+	vec2 scaledContraction = contraction / 32.0f;
 	vs_uv += scaledContraction;
 	vs_uv = clamp(vs_uv, 0, 1);
 	vs_uv -= scaledContraction;

@@ -59,8 +59,7 @@ namespace openspace {
 
 	private:		
 		std::unique_ptr<PatchRenderer> _patchRenderer;
-		LatLonPatch _patch;
-		
+		std::vector<LatLonPatch> _patches;
 
 		properties::IntProperty _rotation;
 

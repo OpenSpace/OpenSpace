@@ -62,16 +62,35 @@ const unsigned int ClipMapGeometry::resolution() const {
 
 size_t ClipMapGeometry::numElements(unsigned int resolution)
 {
-	return resolution * resolution / 2 * 9; 
+	return 6 * ((resolution + 1) * (resolution + 1) - (resolution / 4 * resolution / 4));
+}
+
+size_t ClipMapGeometry::numVerticesBottom(unsigned int resolution)
+{
+	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
+}
+
+size_t ClipMapGeometry::numVerticesLeft(unsigned int resolution)
+{
+	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
+}
+
+size_t ClipMapGeometry::numVerticesRight(unsigned int resolution)
+{
+	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
+}
+
+size_t ClipMapGeometry::numVerticesTop(unsigned int resolution)
+{
+	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
 }
 
 size_t ClipMapGeometry::numVertices(unsigned int resolution)
 {
-	return 
-		(resolution + 1)		* (resolution / 4 + 1) + // Bottom
-		(resolution / 4 + 1)	* (resolution / 2 + 1) + // Left
-		(resolution / 4 + 1)	* (resolution / 2 + 1) + // Right
-		(resolution + 1)		* (resolution / 4 + 1);  // Top
+	return	numVerticesBottom(resolution) +
+			numVerticesLeft(resolution) +
+			numVerticesRight(resolution) +
+			numVerticesTop(resolution);
 }
 
 void ClipMapGeometry::validate(unsigned int resolution) {
@@ -93,36 +112,19 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
 	// x	x     x     x ..
 	// :    :     :     :
 
-	unsigned int numVerticesBottom	= (resolution + 1)		* (resolution / 4 + 1);
-	unsigned int numVerticesLeft	= (resolution / 4 + 1)	* (resolution / 2 + 1);
-	unsigned int numVerticesRight	= (resolution / 4 + 1)	* (resolution / 2 + 1);
-	unsigned int numVerticesTop		= (resolution + 1)		* (resolution / 4 + 1);
+	unsigned int previousVerts[4];
+	previousVerts[0] = 0;
+	previousVerts[1] = previousVerts[0] + numVerticesBottom(resolution);
+	previousVerts[2] = previousVerts[1] + numVerticesLeft(resolution);
+	previousVerts[3] = previousVerts[2] + numVerticesRight(resolution);
 
 	// Build the bottom part of the clipmap geometry
-	for (unsigned int y = 0; y < resolution / 4; y++) {
-		for (unsigned int x = 0; x < resolution; x++) {
-			GLuint v00 = (y + 0) * (resolution + 1) + x + 0;
-			GLuint v10 = (y + 0) * (resolution + 1) + x + 1;
-			GLuint v01 = (y + 1) * (resolution + 1) + x + 0;
-			GLuint v11 = (y + 1) * (resolution + 1) + x + 1;
-
-			elements.push_back(v00);
-			elements.push_back(v10);
-			elements.push_back(v11);
-
-			elements.push_back(v00);
-			elements.push_back(v11);
-			elements.push_back(v01);
-		}
-	}
-	
-	// Build the left part of the clipmap geometry
-	for (unsigned int y = 0; y < resolution / 2; y++) {
-		for (unsigned int x = 0; x < resolution / 4; x++) {
-			GLuint v00 = numVerticesBottom + (y + 0) * (resolution / 4 + 1) + x + 0;
-			GLuint v10 = numVerticesBottom + (y + 0) * (resolution / 4 + 1) + x + 1;
-			GLuint v01 = numVerticesBottom + (y + 1) * (resolution / 4 + 1) + x + 0;
-			GLuint v11 = numVerticesBottom + (y + 1) * (resolution / 4 + 1) + x + 1;
+	for (unsigned int y = 0; y < resolution / 4 + 1; y++) {
+		for (unsigned int x = 0; x < resolution + 2; x++) {
+			GLuint v00 = previousVerts[0] + (y + 0) * (resolution + 3) + x + 0;
+			GLuint v10 = previousVerts[0] + (y + 0) * (resolution + 3) + x + 1;
+			GLuint v01 = previousVerts[0] + (y + 1) * (resolution + 3) + x + 0;
+			GLuint v11 = previousVerts[0] + (y + 1) * (resolution + 3) + x + 1;
 
 			elements.push_back(v00);
 			elements.push_back(v10);
@@ -136,11 +138,11 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
 
 	// Build the left part of the clipmap geometry
 	for (unsigned int y = 0; y < resolution / 2; y++) {
-		for (unsigned int x = 0; x < resolution / 4; x++) {
-			GLuint v00 = numVerticesBottom + numVerticesLeft + (y + 0) * (resolution / 4 + 1) + x + 0;
-			GLuint v10 = numVerticesBottom + numVerticesLeft + (y + 0) * (resolution / 4 + 1) + x + 1;
-			GLuint v01 = numVerticesBottom + numVerticesLeft + (y + 1) * (resolution / 4 + 1) + x + 0;
-			GLuint v11 = numVerticesBottom + numVerticesLeft + (y + 1) * (resolution / 4 + 1) + x + 1;
+		for (unsigned int x = 0; x < resolution / 4 + 1; x++) {
+			GLuint v00 = previousVerts[1] + (y + 0) * (resolution / 4 + 2) + x + 0;
+			GLuint v10 = previousVerts[1] + (y + 0) * (resolution / 4 + 2) + x + 1;
+			GLuint v01 = previousVerts[1] + (y + 1) * (resolution / 4 + 2) + x + 0;
+			GLuint v11 = previousVerts[1] + (y + 1) * (resolution / 4 + 2) + x + 1;
 
 			elements.push_back(v00);
 			elements.push_back(v10);
@@ -153,12 +155,30 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
 	}
 
 	// Build the left part of the clipmap geometry
-	for (unsigned int y = 0; y < resolution / 4; y++) {
-		for (unsigned int x = 0; x < resolution; x++) {
-			GLuint v00 = numVerticesBottom + numVerticesLeft + numVerticesRight + (y + 0) * (resolution + 1) + x + 0;
-			GLuint v10 = numVerticesBottom + numVerticesLeft + numVerticesRight + (y + 0) * (resolution + 1) + x + 1;
-			GLuint v01 = numVerticesBottom + numVerticesLeft + numVerticesRight + (y + 1) * (resolution + 1) + x + 0;
-			GLuint v11 = numVerticesBottom + numVerticesLeft + numVerticesRight + (y + 1) * (resolution + 1) + x + 1;
+	for (unsigned int y = 0; y < resolution / 2; y++) {
+		for (unsigned int x = 0; x < resolution / 4 + 1; x++) {
+			GLuint v00 = previousVerts[2] + (y + 0) * (resolution / 4 + 2) + x + 0;
+			GLuint v10 = previousVerts[2] + (y + 0) * (resolution / 4 + 2) + x + 1;
+			GLuint v01 = previousVerts[2] + (y + 1) * (resolution / 4 + 2) + x + 0;
+			GLuint v11 = previousVerts[2] + (y + 1) * (resolution / 4 + 2) + x + 1;
+
+			elements.push_back(v00);
+			elements.push_back(v10);
+			elements.push_back(v11);
+
+			elements.push_back(v00);
+			elements.push_back(v11);
+			elements.push_back(v01);
+		}
+	}
+
+	// Build the left part of the clipmap geometry
+	for (unsigned int y = 0; y < resolution / 4 + 1; y++) {
+		for (unsigned int x = 0; x < resolution + 2; x++) {
+			GLuint v00 = previousVerts[3] + (y + 0) * (resolution + 3) + x + 0;
+			GLuint v10 = previousVerts[3] + (y + 0) * (resolution + 3) + x + 1;
+			GLuint v01 = previousVerts[3] + (y + 1) * (resolution + 3) + x + 0;
+			GLuint v11 = previousVerts[3] + (y + 1) * (resolution + 3) + x + 1;
 
 			elements.push_back(v00);
 			elements.push_back(v10);
@@ -192,14 +212,14 @@ std::vector<glm::vec4> ClipMapGeometry::CreatePositions(unsigned int resolution)
 }
 
 
-std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int resolution){
+std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(int resolution){
 	validate(resolution);
 	std::vector<glm::vec2> textureCoordinates;
 	textureCoordinates.reserve(numVertices(resolution));
 
 	// Build the bottom part of the clipmap geometry
-	for (unsigned int y = 0; y < resolution / 4 + 1; y++) {
-		for (unsigned int x = 0; x < resolution + 1; x++) {
+	for (int y = -1; y < resolution / 4 + 1; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
 				static_cast<float>(x) / resolution,
 				static_cast<float>(y) / resolution));
@@ -207,17 +227,17 @@ std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int re
 	}
 	
 	// Build the left part of the clipmap geometry
-	for (unsigned int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
-		for (unsigned int x = 0; x < resolution / 4 + 1; x++) {
-			float u = static_cast<float>(x) / resolution;
-			float v = static_cast<float>(y) / resolution;
-			textureCoordinates.push_back(glm::vec2(u, v));
+	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
+		for (int x = -1; x < resolution / 4 + 1; x++) {
+			textureCoordinates.push_back(glm::vec2(
+				static_cast<float>(x) / resolution,
+				static_cast<float>(y) / resolution));
 		}
 	}
 	
 	// Build the right part of the clipmap geometry
-	for (unsigned int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
-		for (unsigned int x = 3 * resolution / 4; x < resolution + 1; x++) {
+	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
+		for (int x = 3 * resolution / 4; x < resolution + 2; x++) {
 			float u = static_cast<float>(x) / resolution;
 			float v = static_cast<float>(y) / resolution;
 			textureCoordinates.push_back(glm::vec2(u, v));
@@ -225,8 +245,8 @@ std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int re
 	}
 	
 	// Build the top part of the clipmap geometry
-	for (unsigned int y = 3 * resolution / 4; y < resolution + 1; y++) {
-		for (unsigned int x = 0; x < resolution + 1; x++) {
+	for (int y = 3 * resolution / 4; y < resolution + 2; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
 				static_cast<float>(x) / resolution,
 				static_cast<float>(y) / resolution));

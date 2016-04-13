@@ -122,7 +122,7 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	ClipMapPatchRenderer::ClipMapPatchRenderer()
 		: PatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(
-			8,
+			32,
 			Geometry::Positions::No,
 			Geometry::TextureCoordinates::Yes,
 			Geometry::Normals::No)))
@@ -157,16 +157,25 @@ namespace openspace {
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
 		// Snap patch position
-		int segmentsPerPatch = 8;
-		float stepSize = (M_PI / 2.0 / segmentsPerPatch);
+		int segmentsPerPatch = 32;
+		LatLon stepSize = LatLon(
+			patch.halfSize.lat * 2 / segmentsPerPatch,
+			patch.halfSize.lon * 2 / segmentsPerPatch);
+		ivec2 patchesToCoverGlobe = ivec2(
+			M_PI / (patch.halfSize.lat * 2) + 0.5,
+			M_PI * 2 / (patch.halfSize.lon * 2) + 0.5);
 		ivec2 intSnapCoord = ivec2(
-			patch.center.lat / (M_PI * 2) * segmentsPerPatch * 4,
-			patch.center.lon / (M_PI) * segmentsPerPatch * 2);
+			patch.center.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
+			patch.center.lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
 		LatLon swCorner = LatLon(
-			stepSize * intSnapCoord.x - patch.halfSize.lat,
-			stepSize * intSnapCoord.y - patch.halfSize.lon);
+			stepSize.lat * intSnapCoord.x - patch.halfSize.lat,
+			stepSize.lon * intSnapCoord.y - patch.halfSize.lon);
 
-		ivec2 contraction = ivec2(0, 0);// ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
+		ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
+
+		LDEBUG("patch.center = [ " << patch.center.lat << " , " << patch.center.lon << " ]");
+		LDEBUG("intSnapCoord = [ " << intSnapCoord.x << " , " << intSnapCoord.y << " ]");
+		//LDEBUG("contraction = [ " << contraction.x << " , " << contraction.y << " ]");
 
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
