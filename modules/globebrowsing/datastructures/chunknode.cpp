@@ -128,7 +128,8 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 	// Temporay ugly fix for Camera::position() is broken.
 	Vec3 buggedCameraPos = data.camera.position().dvec3();
 	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
-	Vec3 cameraPos = buggedCameraPos - _owner.globeRadius * cameraDirection;
+	Vec3 cameraPos = buggedCameraPos;// -_owner.globeRadius * cameraDirection;
+
 	Vec3 cameraToChunk = pos - cameraPos;
 
 

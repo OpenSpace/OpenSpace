@@ -55,9 +55,9 @@ namespace openspace {
 	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
-		, globeRadius(1.6*6.3e6)
+		, globeRadius(1e7)
 		, minSplitDepth(1)
-		, maxSplitDepth(15)
+		, maxSplitDepth(22)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
@@ -73,6 +73,8 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
+
+
 		// ---------
 		// init Renderer
 		auto geometry = std::shared_ptr<Geometry>(new GridGeometry(10, 10,
@@ -80,8 +82,11 @@ namespace openspace {
 			Geometry::TextureCoordinates::Yes,
 			Geometry::Normals::No));
 
-		auto patchRenderer = new LatLonPatchRenderer(geometry);
-		_patchRenderer.reset(patchRenderer);
+
+		_patchRenderer.reset(new LatLonPatchRenderer(geometry));
+
+		std::shared_ptr<FrustrumCuller> fc(new FrustrumCuller(1.3f));
+		_patchRenderer->setFrustrumCuller(fc);
 
 	}
 
@@ -90,21 +95,15 @@ namespace openspace {
 	}
 
 	bool ChunkLodGlobe::initialize() {
-		_leftRoot->initialize();
-		_rightRoot->initialize();
 		return isReady();
 	}
 
 	bool ChunkLodGlobe::deinitialize() {
-		_leftRoot->deinitialize();
-		_rightRoot->deinitialize();
 		return true;
 	}
 
 	bool ChunkLodGlobe::isReady() const {
 		bool ready = true;
-		ready &= _leftRoot->isReady();
-		ready &= _rightRoot->isReady();
 		return ready;
 	}
 
@@ -120,7 +119,7 @@ namespace openspace {
 		//LDEBUG("min distnace to camera: " << minDistToCamera);
 
 		Vec3 cameraPos = data.camera.position().dvec3();
-		//LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+		LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
 
 		//LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
 	}

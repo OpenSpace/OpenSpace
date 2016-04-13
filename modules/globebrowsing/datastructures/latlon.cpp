@@ -27,8 +27,6 @@
 #include <modules/globebrowsing/datastructures/chunknode.h>
 #include <modules/globebrowsing/datastructures/latlon.h>
 
-#include <modules/globebrowsing/rendering/chunklodglobe.h>
-
 namespace {
 	const std::string _loggerCat = "LatLon";
 }
@@ -62,6 +60,10 @@ namespace openspace {
 			glm::cos(lat) * glm::cos(lon),
 			glm::cos(lat) * glm::sin(lon),
 			glm::sin(lat));
+	}
+
+	Vec2 LatLon::asVec2() const {
+		return Vec2(lat, lon);
 	}
 
 	bool LatLon::operator==(const LatLon& other) {

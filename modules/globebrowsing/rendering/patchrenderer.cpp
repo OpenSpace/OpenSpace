@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
+
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
@@ -68,6 +69,10 @@ namespace openspace {
 		// nothing to do
 	}
 
+	void PatchRenderer::setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc) {
+		_frustrumCuller = fc;
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								LATLON PATCH RENDERER								//
@@ -98,7 +103,8 @@ namespace openspace {
 		// Get camera transform matrix
 		// TODO : Should only need to fetch the camera transform and use directly
 		// but this is not currently possible in the camera class.
-		vec3 cameraPosition = data.camera.position().vec3();
+		vec3 cameraPosition = data.camera.unsynchedPosition().vec3();
+		
 		mat4 viewTransform = inverse(translate(mat4(1.0), cameraPosition));
 		viewTransform = mat4(data.camera.viewRotationMatrix()) * viewTransform;
 
@@ -107,11 +113,24 @@ namespace openspace {
 		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
 			* viewTransform * modelTransform;
 
-		LatLon swCorner = patch.southWestCorner();
 
+		// View frustrum culling
+		if (_frustrumCuller != nullptr) {
+			//LatLon center = patch.center;
+			//vec3 centerPoint = radius * center.asUnitCartesian();
+			if (!_frustrumCuller->isVisible(patch, radius, modelViewProjectionTransform)) {
+				// dont render the patch
+				return;
+			}
+		}
+		
+
+
+
+		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
-		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.lat, patch.halfSize.lon));
+		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.asVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 
 		glEnable(GL_DEPTH_TEST);
