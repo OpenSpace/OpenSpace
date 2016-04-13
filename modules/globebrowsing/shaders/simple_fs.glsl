@@ -45,7 +45,7 @@ in vec2 vs_uv;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = vec4(fract(vs_uv * 32), 0.4,1);
+	frag.color = vec4(fract(vs_uv * 1), 0.4,1);
 	frag.depth =  pscDepth(vs_position);
 
 	return frag;

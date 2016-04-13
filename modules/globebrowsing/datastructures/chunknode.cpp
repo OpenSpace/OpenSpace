@@ -24,8 +24,13 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/openspaceengine.h>
+
 #include <modules/globebrowsing/datastructures/chunknode.h>
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
+
+
 
 namespace {
 	const std::string _loggerCat = "ChunkNode";
@@ -59,29 +64,6 @@ bool ChunkNode::isLeaf() const {
 	return _children[0] == nullptr;
 }
 
-bool ChunkNode::initialize()  {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->initialize();
-		}
-	}
-	
-	return isReady();
-}
-
-bool ChunkNode::deinitialize() {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->deinitialize();
-		}
-	}
-	return true;
-}
-
-bool ChunkNode::isReady() const{
-	bool ready = true;
-	return ready;
-}
 
 void ChunkNode::render(const RenderData& data) {
 	ghoul_assert(isRoot(), "this method should only be invoked on root");
@@ -93,6 +75,10 @@ void ChunkNode::render(const RenderData& data) {
 
 // Returns true or false wether this node can be merge or not
 bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
+	using namespace glm;
+	LatLon center = _patch.center;
+
+
 	if (isLeaf()) {
 		int desiredDepth = desiredSplitDepth(data);
 		if (desiredDepth > depth) {
@@ -119,9 +105,9 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
 			return internalUpdateChunkTree(data, depth);
 		}
 		return false;
-	}
-	
+	}	
 }
+
 
 void ChunkNode::internalRender(const RenderData& data, int currLevel) {
 	if (isLeaf()) {
@@ -142,8 +128,10 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 	// Temporay ugly fix for Camera::position() is broken.
 	Vec3 buggedCameraPos = data.camera.position().dvec3();
 	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
-	Vec3 cameraPos = buggedCameraPos - _owner.globeRadius * cameraDirection;
+	Vec3 cameraPos = buggedCameraPos;// -_owner.globeRadius * cameraDirection;
+
 	Vec3 cameraToChunk = pos - cameraPos;
+
 
 	// if camera points at same direction as latlon patch normal,
 	// we see the back side and dont have to split it
@@ -153,30 +141,15 @@ int ChunkNode::desiredSplitDepth(const RenderData& data) {
 	}
 
 
-	Scalar distance = glm::length(cameraToChunk) + _owner.globeRadius;
+	Scalar distance = glm::length(cameraToChunk);
 	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-	int depthRange = _owner.maxSplitDepth - _owner.minSplitDepth;
-
-	Scalar scaleFactor = depthRange * _owner.globeRadius * 25*_patch.unitArea();
-
-	int desiredDepth = _owner.minSplitDepth + floor(scaleFactor / distance);
+	Scalar scaleFactor = 40 * _owner.globeRadius;// *150 * _patch.unitArea();
+	Scalar projectedScaleFactor = scaleFactor / distance;
+	int desiredDepth = floor( log2(projectedScaleFactor) );
 	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
 }
 
-
-void ChunkNode::update(const UpdateData& data) {
-	ghoul_assert(isRoot(), "this method should only be invoked on root");
-	//internalUpdate(data, 0);
-}
-
-void ChunkNode::internalUpdate(const UpdateData& data, int currLevel) {
-	if (!isLeaf()) {
-		for (int i = 0; i < 4; ++i) {
-			_children[i]->internalUpdate(data, currLevel + 1);
-		}
-	}
-}
 
 
 void ChunkNode::split(int depth) {
@@ -219,8 +192,6 @@ void ChunkNode::merge() {
 const ChunkNode&  ChunkNode::getChild(Quad quad) const {
 	return *_children[quad];
 }
-
-
 
 
 

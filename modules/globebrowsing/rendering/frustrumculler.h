@@ -22,70 +22,41 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
+#ifndef __FRUSTRUMCULLER_H__
+#define __FRUSTRUMCULLER_H__
 
-#include <modules/globebrowsing/rendering/globemesh.h>
-#include <modules/globebrowsing/rendering/clipmapglobe.h>
-#include <modules/globebrowsing/rendering/chunklodglobe.h>
+#include <memory>
+#include <glm/glm.hpp>
 
 // open space includes
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
 
-// ghoul includes
-#include <ghoul/misc/assert.h>
+#include <openspace/rendering/renderable.h>
+
+#include <modules/globebrowsing/datastructures/latlon.h>
 
 
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-namespace {
-	const std::string _loggerCat = "RenderableGlobe";
-
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
-
-	const std::string keyBody = "Body";
-}
 
 namespace openspace {
 
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _rotation("rotation", "Rotation", 0, 0, 360)
-	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
+	class LonLatPatch;
+	using namespace glm;
+	
 
-
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
+	class FrustrumCuller {
+	public:
 		
+		FrustrumCuller(float tolerance = 1.0f);
+		~FrustrumCuller();
+		
+		bool isVisible(const vec3& point, const mat4x4& modelViewProjection);
+		bool isVisible(const LatLonPatch& patch, double radius, const mat4x4& modelViewProjection);
+		
+		
+	protected:
+		float _tolerance;
+	};
 
-		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		//addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
-	}
-
-	RenderableGlobe::~RenderableGlobe() {
-	}
-
-	void RenderableGlobe::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
-		DistanceSwitch::update(data);
-	}
 
 }  // namespace openspace
+
+#endif  // __FRUSTRUMCULLER_H__

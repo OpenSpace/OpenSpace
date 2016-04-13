@@ -25,6 +25,8 @@
 #ifndef __PLANET_H__
 #define __PLANET_H__
 
+#include <ghoul/logging/logmanager.h>
+
 // open space includes
 #include <openspace/rendering/renderable.h>
 

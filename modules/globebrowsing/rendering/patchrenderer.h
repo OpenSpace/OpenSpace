@@ -33,6 +33,7 @@
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/gridgeometry.h>
+#include <modules/globebrowsing/rendering/frustrumculler.h>
 
 namespace ghoul {
 namespace opengl {
@@ -57,11 +58,14 @@ namespace openspace {
 		~PatchRenderer();
 		
 		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
+
+		void setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc);
 		
 	protected:
 
 		unique_ptr<ProgramObject> _programObject;
 		shared_ptr<Geometry> _geometry;
+		shared_ptr<FrustrumCuller> _frustrumCuller;
 		
 	};
 
@@ -75,7 +79,7 @@ namespace openspace {
 		LatLonPatchRenderer(shared_ptr<Geometry>);
 
 		virtual void renderPatch(
-			const LatLonPatch& patch, 
+			const LatLonPatch& patch,
 			const RenderData& data, 
 			double radius) override;
 	};

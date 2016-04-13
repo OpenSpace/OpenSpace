@@ -37,6 +37,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
@@ -53,6 +54,7 @@ set(SOURCE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
