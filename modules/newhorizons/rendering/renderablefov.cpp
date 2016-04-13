@@ -258,7 +258,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     
     ipoint = result.surfaceIntercept;
     ivec = result.surfaceVector;
-    bool intercepted = result.interceptFound;
+//    bool intercepted = result.interceptFound;
     
 	ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
 	_interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);

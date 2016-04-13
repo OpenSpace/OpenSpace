@@ -736,8 +736,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
 	SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
 	SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
-    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
-    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+//    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
+//    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
 
 	RenderablePath* nhPath;
 

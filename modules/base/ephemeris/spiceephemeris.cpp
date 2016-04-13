@@ -63,7 +63,7 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
 			LERROR("'" << KeyKernels << "' has to be an array-style table");
 
         try {
-            SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
+            SpiceManager::ref().loadKernel(kernel);
             _kernelsLoadedSuccessfully = true;
         }
         catch (const SpiceManager::SpiceException& e) {

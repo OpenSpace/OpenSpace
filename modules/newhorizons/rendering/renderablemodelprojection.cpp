@@ -142,6 +142,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	bool s = dictionary.getValue(keyProjAberration, a);
     _aberration = SpiceManager::AberrationCorrection(a);
     completeSuccess &= s;
+    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
     
 	openspace::SpiceManager::ref().addFrame(_target, _source);
 	setBoundingSphere(pss(1.f, 9.f));
@@ -159,6 +160,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 		_sequenceSource = absPath(_sequenceSource);
 
 		foundSequence = dictionary.getValue(keySequenceType, _sequenceType);
+        ghoul_assert(foundSequence, "Did not find sequence");
 		//Important: client must define translation-list in mod file IFF playbook
 		if (dictionary.hasKey(keyTranslation)) {
 			ghoul::Dictionary translationDictionary;
