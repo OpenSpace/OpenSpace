@@ -62,7 +62,9 @@ const unsigned int ClipMapGeometry::resolution() const {
 
 size_t ClipMapGeometry::numElements(unsigned int resolution)
 {
-	return 6 * ((resolution + 1) * (resolution + 1) - (resolution / 4 * resolution / 4));
+	int numElementsInTotalSquare = 6 * (resolution + 1) * (resolution + 1);
+	int numElementsInHole = 6 * (resolution / 4 * resolution / 4);
+	return numElementsInTotalSquare - numElementsInHole;
 }
 
 size_t ClipMapGeometry::numVerticesBottom(unsigned int resolution)
@@ -105,6 +107,20 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
 	std::vector<GLuint> elements;
 	elements.reserve(numElements(resolution));
 	
+	// The clipmap geometry is built up by four parts as follows:
+	// 0 = Bottom part
+	// 1 = Left part
+	// 2 = Right part
+	// 3 = Top part
+	//
+	// 33333333
+	// 33333333
+	// 11    22
+	// 11    22
+	// 00000000
+	// 00000000
+
+
 	// x    v01---v11   x ..
 	//       |  /  |
 	// x    v00---v10   x ..
@@ -197,66 +213,67 @@ std::vector<glm::vec4> ClipMapGeometry::CreatePositions(unsigned int resolution)
 	validate(resolution);
 	std::vector<glm::vec4> positions;
 	positions.reserve(numVertices(resolution));
-	std::vector<glm::vec2> textureCoordinates = CreateTextureCoordinates(resolution);
+	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(resolution);
 
-	// Copy from texture coordinates
-	for (unsigned int i = 0; i < textureCoordinates.size(); i++) {
+	// Copy from 2d texture coordinates and use as template to create positions
+	for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
 		positions.push_back(
 			glm::vec4(
-				textureCoordinates[i].x,
-				textureCoordinates[i].y,
+				templateTextureCoords[i].x,
+				templateTextureCoords[i].y,
 				0,
 				1));
 	}
+
 	return positions;
 }
 
 
-std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(int resolution){
+std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int resolution){
 	validate(resolution);
 	std::vector<glm::vec2> textureCoordinates;
 	textureCoordinates.reserve(numVertices(resolution));
 
+	// Resolution needs to be an int to compare with negative numbers
+	int intResolution = resolution;
 	// Build the bottom part of the clipmap geometry
-	for (int y = -1; y < resolution / 4 + 1; y++) {
-		for (int x = -1; x < resolution + 2; x++) {
+	for (int y = -1; y < intResolution / 4 + 1; y++) {
+		for (int x = -1; x < intResolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / resolution,
-				static_cast<float>(y) / resolution));
+				static_cast<float>(x) / intResolution,
+				static_cast<float>(y) / intResolution));
 		}
 	}
 	
 	// Build the left part of the clipmap geometry
-	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
-		for (int x = -1; x < resolution / 4 + 1; x++) {
+	for (int y = intResolution / 4; y < 3 * intResolution / 4 + 1; y++) {
+		for (int x = -1; x < intResolution / 4 + 1; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / resolution,
-				static_cast<float>(y) / resolution));
+				static_cast<float>(x) / intResolution,
+				static_cast<float>(y) / intResolution));
 		}
 	}
 	
 	// Build the right part of the clipmap geometry
-	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
-		for (int x = 3 * resolution / 4; x < resolution + 2; x++) {
-			float u = static_cast<float>(x) / resolution;
-			float v = static_cast<float>(y) / resolution;
+	for (int y = intResolution / 4; y < 3 * intResolution / 4 + 1; y++) {
+		for (int x = 3 * intResolution / 4; x < intResolution + 2; x++) {
+			float u = static_cast<float>(x) / intResolution;
+			float v = static_cast<float>(y) / intResolution;
 			textureCoordinates.push_back(glm::vec2(u, v));
 		}
 	}
 	
 	// Build the top part of the clipmap geometry
-	for (int y = 3 * resolution / 4; y < resolution + 2; y++) {
-		for (int x = -1; x < resolution + 2; x++) {
+	for (int y = 3 * intResolution / 4; y < intResolution + 2; y++) {
+		for (int x = -1; x < intResolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / resolution,
-				static_cast<float>(y) / resolution));
+				static_cast<float>(x) / intResolution,
+				static_cast<float>(y) / intResolution));
 		}
 	}
 	
 	return textureCoordinates;
 }
-
-
 
 std::vector<glm::vec3> ClipMapGeometry::CreateNormals(unsigned int resolution) {
 	validate(resolution);

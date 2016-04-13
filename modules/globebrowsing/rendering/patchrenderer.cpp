@@ -143,11 +143,7 @@ namespace openspace {
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
 	ClipMapPatchRenderer::ClipMapPatchRenderer()
-		: PatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(
-			32,
-			Geometry::Positions::No,
-			Geometry::TextureCoordinates::Yes,
-			Geometry::Normals::No)))
+		: PatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)))
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",

@@ -38,7 +38,7 @@ public:
 	ClipMapGeometry(
 		unsigned int resolution,
 		Positions usePositions = Positions::No, 
-		TextureCoordinates useTextures = TextureCoordinates::No, 
+		TextureCoordinates useTextures = TextureCoordinates::Yes, 
 		Normals useNormals = Normals::No
 	);
 
@@ -54,15 +54,16 @@ public:
 	static size_t numElements(unsigned int resolution);
 	static size_t numVertices(unsigned int resolution);
 private:
-	static std::vector<GLuint> CreateElements(unsigned int resoluion);
-	static std::vector<glm::vec4> CreatePositions(unsigned int resolution);
-	static std::vector<glm::vec2> CreateTextureCoordinates(int resolution);
-	static std::vector<glm::vec3> CreateNormals(unsigned int resolution);
-
-
+	static std::vector<GLuint>		CreateElements(unsigned int resoluion);
+	static std::vector<glm::vec4>	CreatePositions(unsigned int resolution);
+	static std::vector<glm::vec2>	CreateTextureCoordinates(unsigned int resolution);
+	static std::vector<glm::vec3>	CreateNormals(unsigned int resolution);
 
 	static void validate(unsigned int resolution);
 
+	// _resolution defines how many grid squares the geometry has in one direction.
+	// In its uncontracted state, the clipmap geometry will have two extra grid squares
+	// in each direction.
 	unsigned int _resolution;
 };
 } // namespace openspace
