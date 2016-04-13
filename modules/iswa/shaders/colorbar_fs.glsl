@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -23,78 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLE_H__
-#define __RENDERABLE_H__
+uniform float time;
+uniform sampler2D texture1;
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/updatestructures.h>
+uniform vec4 top;
+uniform vec4 mid;
+uniform vec4 bot;
+uniform vec2 tfValues;
 
-#include <ghoul/opengl/programobject.h>
+in vec2 vs_st;
+in vec4 vs_position;
 
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-// Forward declare to minimize dependencies
-namespace ghoul {
-	namespace opengl {
-		class Texture;
+Fragment getFragment() {
+	vec4 position = vs_position;
+	float depth = pscDepth(position);
+	vec4 diffuse;
+	// diffuse = top;
+	// diffuse = texture(texture1, vs_st);
+	// float v = texture(texture1, vs_st).r;
+	float v = 1-vs_st.t;
+	float x = tfValues.x;
+	float y = tfValues.y;
+
+	// if(y == 0){
+		// v = v-x;
+		// diffuse = mix(bot, top, v);
+	// }else{
+	if(v > (x+y)){
+		v = v - (x+y);
+		v = v / (x-y);
+		diffuse = mix(mid, top, v);
+	}else if( v < (x-y)){
+		v = v / (x-y);
+		diffuse = mix(bot, mid, v);
+	}else{
+		diffuse = mid;
 	}
-	class Dictionary;
+	// }
+
+	// diffuse = vec4(vs_st.s, vs_st.t, 0, 1);
+	// vec4 diffuse = vec4(1,vs_st,1);
+	//vec4 diffuse = vec4(1,0,0,1);
+	// if(position.w > 9.0) {
+	// 	diffuse = vec4(1,0,0,1);
+	// }
+
+	//diffuse.a = diffuse.r;
+	// float tot = diffuse.r + diffuse.g + diffuse.b;
+	// tot /= 3.0;
+	// if (diffuse.a <= 0.05)
+		// discard;
+
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
+
 }
-
-namespace openspace {
-
-// Forward declare to minimize dependencies
-
-class Camera;
-class PowerScaledCoordinate;
-
-class Renderable : public properties::PropertyOwner {
-public:
-    static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
-
-    // constructors & destructor
-    Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable();
-
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
-
-	virtual bool isReady() const = 0;
-	bool isEnabled() const;
-
-    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
-    const PowerScaledScalar& getBoundingSphere();
-
-    virtual void render(const RenderData& data);
-    virtual void render(const RenderData& data, RendererTasks& rendererTask);
-    virtual void update(const UpdateData& data);
-
-	bool isVisible() const;
-	
-	bool hasTimeInterval();
-	bool getInterval(double& start, double& end);
-	
-	bool hasBody();
-	bool getBody(std::string& body);
-	void setBody(std::string& body);
-
-    void onEnabledChange(std::function<void(bool)> callback);
-
-    static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
-
-protected:
-	properties::BoolProperty _enabled;
-	
-private:
-    PowerScaledScalar boundingSphere_;
-	std::string _startTime;
-	std::string _endTime;
-	std::string _targetBody;
-	bool _hasBody;
-	bool _hasTimeInterval;
-};
-
-}  // namespace openspace
-
-#endif  // __RENDERABLE_H__

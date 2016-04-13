@@ -106,6 +106,7 @@ bool CygnetPlane::createShader(){
     if (!_shader)
         return false;
     }
+    return true;
 }
 
 void CygnetPlane::destroyShader(){

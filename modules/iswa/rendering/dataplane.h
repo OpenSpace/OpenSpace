@@ -27,10 +27,12 @@
 
 #include <modules/iswa/rendering/cygnetplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/properties/vectorproperty.h>
+#include <modules/iswa/rendering/colorbar.h>
 
- namespace openspace{
+namespace openspace{
  
- class DataPlane : public CygnetPlane {
+class DataPlane : public CygnetPlane {
  public:
  	DataPlane(const ghoul::Dictionary& dictionary);
  	~DataPlane();
@@ -46,11 +48,18 @@
 
 	static int id();
 
+	properties::Vec4Property _topColor;
+	properties::Vec4Property _midColor;
+	properties::Vec4Property _botColor;
+	properties::Vec2Property _tfValues;
+
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
 	glm::size3_t _dimensions;
 	float* _dataSlice;
 	std::string _var;
+
+	std::shared_ptr<ColorBar> _colorbar;
  };
  
  } // namespace openspace

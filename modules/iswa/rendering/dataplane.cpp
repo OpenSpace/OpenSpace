@@ -43,10 +43,25 @@ namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 	:CygnetPlane(dictionary)
+	,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
+	,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
+	,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
+	,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
+	,_colorbar(nullptr)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
+
+	addProperty(_topColor);
+	addProperty(_midColor);
+	addProperty(_botColor);
+	addProperty(_tfValues);
+
 	registerProperties();
+	OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
+	OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
+	OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
+	OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
 
 	dictionary.getValue("kwPath", _kwPath);
 }
@@ -67,13 +82,29 @@ bool DataPlane::initialize(){
 
 
     createPlane();
-    createShader();
+    
+    if (_shader == nullptr) {
+    // DatePlane Program
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("PlaneProgram",
+        "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
+        "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
+        );
+    if (!_shader)
+        return false;
+    }
 
 	_dimensions = glm::size3_t(500,500,1);
 	float zSlice = 0.5f;
 	_dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
 
     loadTexture();
+
+    std::cout << "Creating Colorbar" << std::endl;
+    _colorbar = std::make_shared<ColorBar>();
+    if(_colorbar){
+    	_colorbar->initialize(); 
+    }
 
     return isReady();
 }
@@ -86,6 +117,9 @@ bool DataPlane::deinitialize(){
 	_kw = nullptr;
 	_memorybuffer = "";
 	
+	_colorbar->deinitialize();
+	_colorbar = nullptr;
+
 	return true;
 }
 
@@ -133,9 +167,15 @@ void DataPlane::render(const RenderData& data){
 		glEnable(GL_ALPHA_TEST);
 		glDisable(GL_CULL_FACE);
 
-		_shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
+		_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
 		_shader->setUniform("ModelTransform", transform);
-		setPscUniforms(*_shader.get(), *OsEng.renderEngine().camera(), position);
+
+		_shader->setUniform("top", _topColor.value());
+		_shader->setUniform("mid", _midColor.value());
+		_shader->setUniform("bot", _botColor.value());
+		_shader->setUniform("tfValues", _tfValues.value());
+
+		setPscUniforms(*_shader.get(), data.camera, position);
 
 		ghoul::opengl::TextureUnit unit;
 		unit.activate();
@@ -146,6 +186,19 @@ void DataPlane::render(const RenderData& data){
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glEnable(GL_CULL_FACE);
 		_shader->deactivate();
+
+		position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
+    	// RenderData data = { *_camera, psc(), doPerformanceMeasurements };
+		ColorBarData cbdata = {	data.camera, 
+								position,
+								transform,
+								_topColor.value(),
+								_midColor.value(),
+								_botColor.value(),
+								_tfValues.value()
+								// transform
+							  };	
+		_colorbar->render(cbdata);
 	}
 }
 
@@ -182,7 +235,6 @@ void DataPlane::loadTexture() {
 
             _texture = std::move(texture);
 		}
-	
 }
 
 void DataPlane::updateTexture(){}
