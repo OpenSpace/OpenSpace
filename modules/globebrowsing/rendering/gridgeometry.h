@@ -26,8 +26,6 @@
 #ifndef __GRIDGEOMETRY_H__
 #define __GRIDGEOMETRY_H__
 
-
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <glm/glm.hpp>
 
@@ -35,13 +33,14 @@
 
 #include <vector>
 
-
 namespace openspace {
 
 class GridGeometry : public Geometry
 {
 public:
-	GridGeometry(unsigned int xRes, unsigned int yRes,
+	GridGeometry(
+		unsigned int xRes,
+		unsigned int yRes,
 		Positions usePositions = Positions::No, 
 		TextureCoordinates useTextures = TextureCoordinates::No, 
 		Normals useNormals = Normals::No
@@ -57,9 +56,16 @@ public:
 
 private:
 	static std::vector<GLuint> CreateElements(unsigned int xRes, unsigned int yRes);
-	static std::vector<glm::vec4> CreatePositions(unsigned int xRes, unsigned int yRes,
-		float xSize = 1.0f, float ySize = 1.0f, float xOffset = 0.0f, float yOffset = 0.0f);
-	static std::vector<glm::vec2> CreateTextureCoordinates(unsigned int xRes, unsigned int yRes);
+	static std::vector<glm::vec4> CreatePositions(
+		unsigned int xRes,
+		unsigned int yRes,
+		float xSize = 1.0f,
+		float ySize = 1.0f,
+		float xOffset = 0.0f,
+		float yOffset = 0.0f);
+	static std::vector<glm::vec2> CreateTextureCoordinates(
+		unsigned int xRes,
+		unsigned int yRes);
 	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
 
 	inline static void validate(unsigned int xRes, unsigned int yRes);

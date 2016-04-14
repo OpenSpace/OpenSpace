@@ -28,6 +28,8 @@
 
 #include <modules/globebrowsing/rendering/clipmapglobe.h>
 
+#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -50,8 +52,7 @@ namespace {
 
 namespace openspace {
 	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
-		: _patch(0.0, 0.0, M_PI / 4, M_PI / 4)
-		, _rotation("rotation", "Rotation", 0, 0, 360)
+		: _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -64,17 +65,21 @@ namespace openspace {
 		if (_target != "")
 			setBody(_target);
 
+		size_t numPatches = 5;
+		for (size_t i = 0; i < numPatches; i++)
+		{
+			_patches.push_back(LatLonPatch(
+				0.0,
+				0.0,
+				M_PI / (4 * pow(2, i)),
+				M_PI / (4 * pow(2, i))));
+		}
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
 		// ---------
 		// init Renderer
-		auto geometry = std::shared_ptr<Geometry>(new GridGeometry(10, 10,
-			Geometry::Positions::No,
-			Geometry::TextureCoordinates::Yes,
-			Geometry::Normals::No));
-
-		auto patchRenderer = new LatLonPatchRenderer(geometry);
+		auto patchRenderer = new ClipMapPatchRenderer();
 		_patchRenderer.reset(patchRenderer);
 	}
 
@@ -90,31 +95,22 @@ namespace openspace {
 	}
 
 	bool ClipMapGlobe::isReady() const {
-		bool ready = true;
+		bool ready = true; 
 		return ready;
 	}
 
 	void ClipMapGlobe::render(const RenderData& data)
 	{
-		// Set patch to follow camera
-		/*
-		<<<<<<< HEAD
-		int segmentsPerPatch = 10;
-		glm::vec2 cameraPositionLatLon =
-			converter::cartesianToLatLon(data.camera.position().dvec3());
-		_patch.setPositionLatLon(
-			glm::vec2((M_PI / 2.0 / segmentsPerPatch) * int(cameraPositionLatLon.x / (M_PI * 2) * segmentsPerPatch * 4),
-				(M_PI / 2.0 / segmentsPerPatch) * int(cameraPositionLatLon.y / (M_PI)* segmentsPerPatch * 2)));
-		_patch1.setPositionLatLon(
-			glm::vec2((M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.x / (M_PI * 2) * segmentsPerPatch * 8),
-				(M_PI / 4.0 / segmentsPerPatch) * int(cameraPositionLatLon.y / (M_PI)* segmentsPerPatch * 4)));		// render
-		=======*/
-		//_patch.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
-		//_patch1.getPatch().setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
-		// render
-		Vec3 cameraPos = data.camera.position().dvec3();
-		_patch.center = LatLon::fromCartesian(cameraPos);
-		_patchRenderer->renderPatch(_patch, data, 6.3e6);
+		// Set patches to follow camera
+		for (size_t i = 0; i < _patches.size(); i++)
+		{
+			_patches[i].center = LatLon::fromCartesian(data.camera.position().dvec3());
+		}
+		// render patches
+		for (size_t i = 0; i < _patches.size(); i++)
+		{
+			_patchRenderer->renderPatch(_patches[i], data, 6.3e6);
+		}
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {

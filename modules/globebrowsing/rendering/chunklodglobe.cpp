@@ -119,7 +119,7 @@ namespace openspace {
 		//LDEBUG("min distnace to camera: " << minDistToCamera);
 
 		Vec3 cameraPos = data.camera.position().dvec3();
-		LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+		//LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
 
 		//LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
 	}

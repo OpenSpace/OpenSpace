@@ -22,53 +22,49 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGLOBE_H__
-#define __CLIPMAPGLOBE_H__
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
+#ifndef __CLIPMAPGEOMETRY_H__
+#define __CLIPMAPGEOMETRY_H__
 
 #include <modules/globebrowsing/rendering/geometry.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
-#include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
 
-
-
-namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
-}
+#include <vector>
+#include <glm/glm.hpp>
 
 namespace openspace {
 
-	class ClipMapGlobe : public Renderable {
-	public:
-		ClipMapGlobe(const ghoul::Dictionary& dictionary);
-		~ClipMapGlobe();
+class ClipMapGeometry : public Geometry
+{
+public:
+	ClipMapGeometry(
+		unsigned int resolution,
+		Positions usePositions = Positions::No, 
+		TextureCoordinates useTextures = TextureCoordinates::Yes, 
+		Normals useNormals = Normals::No
+	);
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+	~ClipMapGeometry();
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+	const unsigned int resolution() const;
 
-	private:		
-		std::unique_ptr<PatchRenderer> _patchRenderer;
-		std::vector<LatLonPatch> _patches;
+	static size_t numVerticesBottom(unsigned int resolution);
+	static size_t numVerticesLeft(unsigned int resolution);
+	static size_t numVerticesRight(unsigned int resolution);
+	static size_t numVerticesTop(unsigned int resolution);
 
-		properties::IntProperty _rotation;
+	static size_t numElements(unsigned int resolution);
+	static size_t numVertices(unsigned int resolution);
+private:
+	static std::vector<GLuint>		CreateElements(unsigned int resoluion);
+	static std::vector<glm::vec4>	CreatePositions(unsigned int resolution);
+	static std::vector<glm::vec2>	CreateTextureCoordinates(unsigned int resolution);
+	static std::vector<glm::vec3>	CreateNormals(unsigned int resolution);
 
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
-	};
+	static void validate(unsigned int resolution);
 
-}  // namespace openspace
-
-#endif  // __CLIPMAPGLOBE_H__
+	// _resolution defines how many grid squares the geometry has in one direction.
+	// In its uncontracted state, the clipmap geometry will have two extra grid squares
+	// in each direction.
+	unsigned int _resolution;
+};
+} // namespace openspace
+#endif // __CLIPMAPGEOMETRY_H__

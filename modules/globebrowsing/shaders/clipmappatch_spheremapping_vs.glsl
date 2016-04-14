@@ -29,8 +29,9 @@ uniform float globeRadius;
 
 uniform vec2 minLatLon;
 uniform vec2 latLonScalingFactor;
+uniform ivec2 contraction; // [-1, 1]
 
-layout(location = 1) in vec2 in_UV;
+layout(location = 1) in vec2 in_uv;
 
 out vec4 vs_position;
 out vec2 vs_uv;
@@ -44,18 +45,24 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 		sin(latitude));
 }
 
-vec3 globalInterpolation() {
+vec3 globalInterpolation(vec2 uv) {
 	vec2 latLonInput;
-	latLonInput.x = minLatLon.x + latLonScalingFactor.x * in_UV.y; // Lat
-	latLonInput.y = minLatLon.y + latLonScalingFactor.y * in_UV.x; // Lon
+	latLonInput.x = minLatLon.x + latLonScalingFactor.x * uv.y; // Lat
+	latLonInput.y = minLatLon.y + latLonScalingFactor.y * uv.x; // Lon
 	vec3 positionModelSpace = latLonToCartesian(latLonInput.x, latLonInput.y, globeRadius);
 	return positionModelSpace;
 }
 
 void main()
 {
-	vs_uv = in_UV;
-	vec3 p = globalInterpolation();
+	vs_uv = in_uv;
+
+	vec2 scaledContraction = contraction / 32.0f;
+	vs_uv += scaledContraction;
+	vs_uv = clamp(vs_uv, 0, 1);
+	vs_uv -= scaledContraction;
+
+	vec3 p = globalInterpolation(vs_uv);
 
 	vec4 position = modelViewProjectionTransform * vec4(p, 1);
 	gl_Position = z_normalization(position);
