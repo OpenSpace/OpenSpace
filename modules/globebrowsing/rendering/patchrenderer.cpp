@@ -95,16 +95,11 @@ namespace openspace {
 		using namespace glm;
 
 
-		// Get camera transform matrix
-		// TODO : Should only need to fetch the camera transform and use directly
-		// but this is not currently possible in the camera class.
-		vec3 cameraPosition = data.camera.position().vec3();
 		
-		mat4 viewTransform = inverse(translate(mat4(1.0), cameraPosition));
-		viewTransform = mat4(data.camera.viewRotationMatrix()) * viewTransform;
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
+		mat4 viewTransform = data.camera.combinedViewMatrix();
 		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
 			* viewTransform * modelTransform;
 
@@ -162,14 +157,7 @@ namespace openspace {
 		_programObject->activate();
 		using namespace glm;
 
-		Vec3 cameraPos = data.camera.position().dvec3();
-
-		// Get camera transform matrix
-		// TODO : Should only need to fetch the camera transform and use directly
-		// but this is not currently possible in the camera class.
-		vec3 cameraPosition = data.camera.position().vec3();
-		mat4 viewTransform = inverse(translate(mat4(1.0), cameraPosition));
-		viewTransform = mat4(data.camera.viewRotationMatrix()) * viewTransform;
+		const mat4& viewTransform = data.camera.combinedViewMatrix();
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());

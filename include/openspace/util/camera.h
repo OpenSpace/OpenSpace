@@ -78,12 +78,12 @@ public:
 	float maxFov() const;
 	float sinMaxFov() const;
 	const glm::mat4& viewRotationMatrix() const;
-	//const glm::mat4& viewTranslationMatrix() const;
-	//const glm::mat4& viewScalingMatrix() const;
 
-	//@TODO this should simply be called viewMatrix. 
+
+	//@TODO this should simply be called viewMatrix!
 	//Rename after removing deprecated methods
-	//const glm::mat4& combinedViewMatrix() const;
+	const glm::mat4& combinedViewMatrix() const;
+	
 
 
 
@@ -112,7 +112,7 @@ public:
 
 
 
-	// Handles SGCT's internal matrices.
+	// Handles SGCT's internal matrices. Also caches a calculated viewProjection matrix.
 	class SgctInternal {
 		friend class Camera;
 
@@ -140,39 +140,40 @@ public:
 
 private:
 
+	// Defines what direction in local camera space the camera is looking in. 
+	const glm::vec3 _viewDirectionInCameraSpace;
+
+
 	psc _focusPosition;
 	glm::vec3 _viewDirection;
 	glm::vec3 _lookUp;
 	
 
+	// Class encapsulating the synced data. Are all three variables 
+	// (i.e. local, shared, synced) really neccessary? /EB
+	template <typename T>
+	struct SyncData {
+		void serialize(SyncBuffer* syncBuffer) { syncBuffer->encode(shared); }
+		void deserialize(SyncBuffer* syncBuffer) { syncBuffer->decode(shared); }
+		void postSynchronizationPreDraw() { synced = shared; }
+		void preSynchronization() { shared = local; }
+
+		T local;
+		T shared;
+		T synced;
+	};
 	
 
-
-	mutable std::mutex _mutex;
-
-
-	//local variables
-	glm::mat4 _localViewRotationMatrix;
-	glm::vec2 _localScaling;
-	psc _localPosition;
-
-	//shared copies of local variables
-	glm::vec2 _sharedScaling;
-	psc _sharedPosition;
-	glm::mat4 _sharedViewRotationMatrix;
-
-	//synced copies of local variables
-	glm::vec2 _syncedScaling;
-	psc _syncedPosition;
-	glm::mat4 _syncedViewRotationMatrix;
-
+	SyncData<glm::mat4> _viewRotationMatrix;
+	SyncData<glm::vec2> _scaling;
+	SyncData<psc> _position;
 
 
 	float _maxFov;
 	float _sinMaxFov;
+	
 
-	// Defines what direction in local camera space the camera is looking in. 
-	const glm::vec3 _viewDirectionInCameraSpace;
+	mutable std::mutex _mutex;
 	
 };
 
