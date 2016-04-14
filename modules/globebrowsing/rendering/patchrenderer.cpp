@@ -119,9 +119,13 @@ namespace openspace {
 			}
 		}
 		
+		// Get the textures that should be used for rendering
+	 	glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
+		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
+		TextureTile tile00 = tileSet.getTile(tileIndex);
 
-
-
+		// Upload the tile to the GPU (a lot of caching things should be done)
+		
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));

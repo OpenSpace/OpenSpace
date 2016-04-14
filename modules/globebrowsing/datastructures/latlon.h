@@ -39,6 +39,7 @@ typedef glm::dvec3 Vec3;
 namespace openspace {
 
 struct LatLon {
+	LatLon();
 	LatLon(Scalar latitude, Scalar longitude);
 	LatLon(const LatLon& src);
 	

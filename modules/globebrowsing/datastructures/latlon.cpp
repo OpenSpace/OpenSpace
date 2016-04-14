@@ -36,6 +36,11 @@ namespace openspace {
 	//								   LATITUDE LONGITUDE									//
 	//////////////////////////////////////////////////////////////////////////////////////////
 
+	LatLon::LatLon()
+		: lat(0)
+		, lon(0)
+	{}
+
 	LatLon::LatLon(Scalar latitude, Scalar longitude)
 		: lat(latitude)
 		, lon(longitude) 
