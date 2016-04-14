@@ -28,7 +28,7 @@ uniform sampler2D texture1;
 uniform vec4 top;
 uniform vec4 mid;
 uniform vec4 bot;
-uniform vec2 tfValues;
+uniform vec4 tfValues;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -39,33 +39,27 @@ in vec4 vs_position;
 Fragment getFragment() {
 	vec4 position = vs_position;
 	float depth = pscDepth(position);
-	vec4 diffuse;
-	// diffuse = top;
-	// diffuse = texture(texture1, vs_st);
+
+	// vec4 diffuse; 
 	float v = texture(texture1, vs_st).r;
 	float x = tfValues.x;
-	float y = tfValues.y;
+	float y = tfValues.y/2.0f;
+	float t = tfValues.z;
+	float b = tfValues.w;
 
-	if(v > (x+y)){
+	vec4 diffuse = vec4(0.f,0.f,0.f,0.f);
+	if(v > (x+y) && v < t){
 		v = v - (x+y);
-		v = v / (x-y);
+		v = v / (t-(x+y));
 		diffuse = mix(mid, top, v);
-	}else if( v < (x-y)){
-		v = v / (x-y);
+	}else if( v < (x-y) && v > b){
+		v = v- b;
+		v = v / (x-y-b);
 		diffuse = mix(bot, mid, v);
-	}else{
+	}else if(v < (x+y) && v > (x-y)){
 		diffuse = mid;
 	}
 
-	// vec4 diffuse = vec4(1,vs_st,1);
-	//vec4 diffuse = vec4(1,0,0,1);
-	// if(position.w > 9.0) {
-	// 	diffuse = vec4(1,0,0,1);
-	// }
-
-	//diffuse.a = diffuse.r;
-	// float tot = diffuse.r + diffuse.g + diffuse.b;
-	// tot /= 3.0;
 	if (diffuse.a <= 0.05)
 		discard;
 

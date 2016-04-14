@@ -46,7 +46,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 	,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
 	,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
 	,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
-	,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
+	,_tfValues("tfValues", "TF Values", glm::vec4(0.5,0.1, 0, 0), glm::vec4(0), glm::vec4(1))
 	,_colorbar(nullptr)
 {	
 	_id = id();

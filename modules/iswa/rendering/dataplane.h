@@ -51,7 +51,7 @@ class DataPlane : public CygnetPlane {
 	properties::Vec4Property _topColor;
 	properties::Vec4Property _midColor;
 	properties::Vec4Property _botColor;
-	properties::Vec2Property _tfValues;
+	properties::Vec4Property _tfValues;
 
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
