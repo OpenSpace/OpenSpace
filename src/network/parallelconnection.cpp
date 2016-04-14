@@ -57,7 +57,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/time.h>
-#include <openspace/version.h>
+#include <openspace/openspace.h>
 #include <ghoul/logging/logmanager.h>
 
 //lua functions

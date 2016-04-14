@@ -24,7 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-#include <openspace/version.h>
+#include <openspace/openspace.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>

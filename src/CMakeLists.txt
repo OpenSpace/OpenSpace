@@ -23,6 +23,7 @@
 #########################################################################################
 
 set(OPENSPACE_SOURCE
+    ${OPENSPACE_BASE_DIR}/src/openspace.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
@@ -90,6 +91,7 @@ set(OPENSPACE_SOURCE
 )
 
 set(OPENSPACE_HEADER
+    ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
