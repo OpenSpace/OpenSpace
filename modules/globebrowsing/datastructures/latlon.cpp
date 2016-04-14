@@ -68,7 +68,7 @@ namespace openspace {
 	}
 
 	Vec2 LatLon::asVec2() const {
-		return Vec2(lat, lon);
+		return Vec2(lon, lat);
 	}
 
 	bool LatLon::operator==(const LatLon& other) {

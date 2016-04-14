@@ -46,9 +46,9 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 
 vec3 globalInterpolation() {
 	vec2 latLonInput;
-	latLonInput.x = minLatLon.x + latLonScalingFactor.x * in_UV.x; // Lat
-	latLonInput.y = minLatLon.y + latLonScalingFactor.y * in_UV.y; // Lon
-	vec3 positionModelSpace = latLonToCartesian(latLonInput.x, latLonInput.y, globeRadius);
+	latLonInput.y = minLatLon.y + latLonScalingFactor.y * in_UV.y; // Lat
+	latLonInput.x = minLatLon.x + latLonScalingFactor.x * in_UV.x; // Lon
+	vec3 positionModelSpace = latLonToCartesian(latLonInput.y, latLonInput.x, globeRadius);
 	return positionModelSpace;
 }
 

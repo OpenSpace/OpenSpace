@@ -128,7 +128,7 @@ namespace openspace {
 		
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
+		_programObject->setUniform("minLatLon", vec2(swCorner.asVec2()));
 		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.asVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 
@@ -200,7 +200,7 @@ namespace openspace {
 		//LDEBUG("contraction = [ " << contraction.x << " , " << contraction.y << " ]");
 
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
-		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
+		_programObject->setUniform("minLatLon", vec2(swCorner.asVec2()));
 		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.lat, patch.halfSize.lon));
 		_programObject->setUniform("globeRadius", float(radius));
 		_programObject->setUniform("contraction", contraction);
