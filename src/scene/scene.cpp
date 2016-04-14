@@ -204,6 +204,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         }
     }
 
+
     // update the position of all nodes
 	// TODO need to check this; unnecessary? (ab)
 	for (SceneGraphNode* node : _graph.nodes()) {
@@ -247,7 +248,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 		glm::vec2 boundf = bound.vec2();
         //glm::vec2 scaling{1.0f, -boundf[1]};
 		cameraScaling = glm::vec2(1.f, -boundf[1]);
-        boundf[0] *= 5.0f;
+        //boundf[0] *= 5.0f;
         
 		//psc cameraPosition = focusNode->position();
         //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
@@ -255,7 +256,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
 		cameraPosition = focusNode->position();
-		cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
+		cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
 		
 		//why this line? (JK)
 		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
@@ -292,7 +293,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 	const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
     // Check crash for when fn == nullptr
 
-	glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+    
+	glm::mat4 la = glm::lookAt(glm::vec3(0,0,0), fn->worldPosition().vec3() - cameraPosition.vec3(), c->lookUpVector());
 
 	c->setRotation(la);
 	c->setPosition(cameraPosition);

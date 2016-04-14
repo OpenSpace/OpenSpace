@@ -103,7 +103,7 @@ namespace openspace {
 		// Get camera transform matrix
 		// TODO : Should only need to fetch the camera transform and use directly
 		// but this is not currently possible in the camera class.
-		vec3 cameraPosition = data.camera.unsynchedPosition().vec3();
+		vec3 cameraPosition = data.camera.position().vec3();
 		
 		mat4 viewTransform = inverse(translate(mat4(1.0), cameraPosition));
 		viewTransform = mat4(data.camera.viewRotationMatrix()) * viewTransform;

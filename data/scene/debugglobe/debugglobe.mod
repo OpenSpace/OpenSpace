@@ -7,6 +7,7 @@ return {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
 			Body = "EARTH",
+            Radius = 6.316e6,
         },
         Ephemeris = {
             Type = "Spice",
