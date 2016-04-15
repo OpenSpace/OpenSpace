@@ -45,6 +45,11 @@ namespace openspace {
 		return glm::ivec3(tileIndex, level);
 	}
 
+	TextureTile TextureTileSet::getTile(LatLonPatch patch)
+	{
+		return getTile(getTileIndex(patch));
+	}
+
 	TextureTile TextureTileSet::getTile(glm::ivec3 tileIndex)
 	{
 		return TextureTile();
@@ -52,7 +57,16 @@ namespace openspace {
 
 	LatLonPatch TextureTileSet::getTilePositionAndScale(glm::ivec3 tileIndex)
 	{
-		return LatLonPatch(LatLon(), LatLon());
+		LatLon tileSize = LatLon(
+			sizeLevel0.lat / pow(2, tileIndex.z),
+			sizeLevel0.lon / pow(2, tileIndex.z));
+		LatLon northWest = LatLon(
+			offsetLevel0.lat + tileIndex.y * tileSize.lat,
+			offsetLevel0.lon + tileIndex.x * tileSize.lon);
+		
+		return LatLonPatch(
+			LatLon(northWest.lat + tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
+			LatLon(tileSize.lat / 2, tileSize.lon / 2));
 	}
 
 }  // namespace openspace

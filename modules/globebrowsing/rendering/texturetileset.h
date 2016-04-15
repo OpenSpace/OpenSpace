@@ -43,6 +43,7 @@ namespace openspace {
 		/// Without the tile being smaller than the patch in lat-lon space.
 		/// The tile needs to be at least as big as the patch.
 		glm::ivec3 getTileIndex(LatLonPatch patch);
+		TextureTile getTile(LatLonPatch patch);
 		TextureTile getTile(glm::ivec3 tileIndex);
 		LatLonPatch getTilePositionAndScale(glm::ivec3 tileIndex);
 	private:

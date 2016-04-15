@@ -161,7 +161,7 @@ namespace openspace {
 		_programObject->activate();
 		using namespace glm;
 
-		const mat4& viewTransform = data.camera.combinedViewMatrix();
+		mat4 viewTransform = data.camera.combinedViewMatrix();
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
