@@ -44,7 +44,7 @@ struct LatLon {
 	LatLon(const LatLon& src);
 	
 	static LatLon fromCartesian(const Vec3& v);
-	Vec3 asUnitCartesian();
+	Vec3 asUnitCartesian() const;
 	Vec2 toLonLatVec2() const;
 
 	inline bool operator==(const LatLon& other);
@@ -54,21 +54,39 @@ struct LatLon {
 	Scalar lon;
 };
 
-struct LatLonPatch {
 
+
+
+class LatLonPatch {
+public:
 	LatLonPatch(Scalar, Scalar, Scalar, Scalar);
 	LatLonPatch(const LatLon& center, const LatLon& halfSize);
 	LatLonPatch(const LatLonPatch& patch);
 
+
+	void setCenter(const LatLon&);
+	void setHalfSize(const LatLon&);
+	
+
+	// Returns the minimal bounding radius that together with the LatLonPatch's
+	// center point represents a sphere in which the patch is completely contained
+	Scalar minimalBoundingRadius() const;
+
+	// Returns the area of the patch with unit radius
 	Scalar unitArea() const;
+
 
 	LatLon northWestCorner() const;
 	LatLon northEastCorner() const;
 	LatLon southWestCorner() const;
 	LatLon southEastCorner() const;
 
-	LatLon center;
-	LatLon halfSize;
+	const LatLon& center() const;
+	const LatLon& halfSize() const;
+
+private:
+	LatLon _center;
+	LatLon _halfSize;
 
 };
 

@@ -58,10 +58,11 @@ namespace openspace {
 	glm::ivec3 TextureTileSet::getTileIndex(LatLonPatch patch)
 	{
 		int level = log2(static_cast<int>(glm::max(
-			_sizeLevel0.lat / patch.halfSize.lat * 2,
-			_sizeLevel0.lon / patch.halfSize.lon * 2)));
+			_sizeLevel0.lat / patch.halfSize().lat * 2,
+			_sizeLevel0.lon / patch.halfSize().lon * 2)));
 		Vec2 TileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
 		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + _offsetLevel0.toLonLatVec2()) / TileSize;
+
 		return glm::ivec3(tileIndex, level);
 	}
 

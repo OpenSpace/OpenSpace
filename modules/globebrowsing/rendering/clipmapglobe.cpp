@@ -104,7 +104,7 @@ namespace openspace {
 		// Set patches to follow camera
 		for (size_t i = 0; i < _patches.size(); i++)
 		{
-			_patches[i].center = LatLon::fromCartesian(data.camera.position().dvec3());
+			_patches[i].setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
 		}
 		// render patches
 		for (size_t i = 0; i < _patches.size(); i++)

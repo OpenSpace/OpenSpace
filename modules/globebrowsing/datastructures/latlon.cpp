@@ -60,7 +60,7 @@ namespace openspace {
 	}
 
 
-	Vec3 LatLon::asUnitCartesian() {
+	Vec3 LatLon::asUnitCartesian() const{
 		return Vec3(
 			glm::cos(lat) * glm::cos(lon),
 			glm::cos(lat) * glm::sin(lon),
@@ -80,47 +80,70 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	LatLonPatch::LatLonPatch(Scalar centerLat, Scalar centerLon, Scalar halfSizeLat, Scalar halfSizeLon)
-		: center(LatLon(centerLat, centerLon))
-		, halfSize(LatLon(halfSizeLat, halfSizeLon)) 
+		: _center(LatLon(centerLat, centerLon))
+		, _halfSize(LatLon(halfSizeLat, halfSizeLon)) 
 	{
 	
 	}
 
 	LatLonPatch::LatLonPatch(const LatLon& center, const LatLon& halfSize)
-		: center(center)
-		, halfSize(halfSize) 
+		: _center(center)
+		, _halfSize(halfSize) 
 	{
 	
 	}
 
 	LatLonPatch::LatLonPatch(const LatLonPatch& patch)
-		: center(patch.center)
-		, halfSize(patch.halfSize) 
+		: _center(patch._center)
+		, _halfSize(patch._halfSize) 
 	{
 	
 	}
 
+
+	void LatLonPatch::setCenter(const LatLon& center) {
+		_center = center;
+	}
+
+	void LatLonPatch::setHalfSize(const LatLon& halfSize) {
+		_halfSize = halfSize;
+	}
+
+	Scalar LatLonPatch::minimalBoundingRadius() const {
+		const LatLon& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
+		return glm::length(_center.asUnitCartesian() - cornerNearEquator.asUnitCartesian());
+	}
+
 	Scalar LatLonPatch::unitArea() const {
-		Scalar deltaTheta = 2 * halfSize.lon;
-		Scalar phiMin = center.lat - halfSize.lat;
-		Scalar phiMax = center.lat + halfSize.lat;
+		Scalar deltaTheta = 2 * _halfSize.lon;
+		Scalar phiMin = _center.lat - _halfSize.lat;
+		Scalar phiMax = _center.lat + _halfSize.lat;
 		return deltaTheta * (sin(phiMax) - sin(phiMin));
 	}
 
+	const LatLon& LatLonPatch::center() const {
+		return _center;
+	}
+
+	const LatLon& LatLonPatch::halfSize() const {
+		return _halfSize;
+	}
+
+
 	LatLon LatLonPatch::northWestCorner() const{
-		return LatLon(center.lat + halfSize.lat, center.lon - halfSize.lon);
+		return LatLon(_center.lat + _halfSize.lat, _center.lon - _halfSize.lon);
 	}
 	
 	LatLon LatLonPatch::northEastCorner() const{
-		return LatLon(center.lat + halfSize.lat, center.lon + halfSize.lon);
+		return LatLon(_center.lat + _halfSize.lat, _center.lon + _halfSize.lon);
 	}
 	
 	LatLon LatLonPatch::southWestCorner() const{
-		return LatLon(center.lat - halfSize.lat, center.lon - halfSize.lon);
+		return LatLon(_center.lat - _halfSize.lat, _center.lon - _halfSize.lon);
 	}
 	
 	LatLon LatLonPatch::southEastCorner() const{
-		return LatLon(center.lat - halfSize.lat, center.lon + halfSize.lon);
+		return LatLon(_center.lat - _halfSize.lat, _center.lon + _halfSize.lon);
 	}
 
 } // namespace openspace

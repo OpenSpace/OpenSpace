@@ -56,7 +56,7 @@ namespace openspace {
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
 		, globeRadius(1e7)
-		, minSplitDepth(1)
+		, minSplitDepth(2)
 		, maxSplitDepth(22)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
@@ -73,6 +73,8 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
+		
+		globeRadius = dictionary.value<double>("Radius");
 
 
 		// ---------
@@ -85,8 +87,7 @@ namespace openspace {
 
 		_patchRenderer.reset(new LatLonPatchRenderer(geometry));
 
-		std::shared_ptr<FrustrumCuller> fc(new FrustrumCuller(1.3f));
-		_patchRenderer->setFrustrumCuller(fc);
+		_frustrumCuller = std::shared_ptr<FrustrumCuller>(new FrustrumCuller());
 
 	}
 
@@ -111,10 +112,19 @@ namespace openspace {
 		return *_patchRenderer;
 	}
 
+	FrustrumCuller& ChunkLodGlobe::getFrustrumCuller() {
+		return *_frustrumCuller;
+	}
+
+
+
 	void ChunkLodGlobe::render(const RenderData& data){
 		minDistToCamera = INFINITY;
-		_leftRoot->render(data);
-		_rightRoot->render(data);
+		ChunkIndex leftRootTileIndex = { 0, 0, 1 };
+		_leftRoot->render(data, leftRootTileIndex);
+
+		ChunkIndex rightRootTileIndex = { 1, 0, 1 };
+		_rightRoot->render(data, rightRootTileIndex);
 
 		//LDEBUG("min distnace to camera: " << minDistToCamera);
 

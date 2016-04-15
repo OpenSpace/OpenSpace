@@ -65,86 +65,100 @@ bool ChunkNode::isLeaf() const {
 }
 
 
-void ChunkNode::render(const RenderData& data) {
+void ChunkNode::render(const RenderData& data, ChunkIndex traverseData) {
 	ghoul_assert(isRoot(), "this method should only be invoked on root");
 	//LDEBUG("-------------");
-	internalUpdateChunkTree(data, 0);
-	internalRender(data, 0);
+	internalUpdateChunkTree(data, traverseData);
+	internalRender(data, traverseData);
 }
 
 
 // Returns true or false wether this node can be merge or not
-bool ChunkNode::internalUpdateChunkTree(const RenderData& data, int depth) {
+bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData) {
 	using namespace glm;
-	LatLon center = _patch.center;
+	LatLon center = _patch.center();
 
+
+	//LDEBUG("x: " << patch.x << " y: " << patch.y << " level: " << patch.level << "  lat: " << center.lat << " lon: " << center.lon);
 
 	if (isLeaf()) {
-		int desiredDepth = desiredSplitDepth(data);
-		if (desiredDepth > depth) {
+		int desiredLevel = calculateDesiredLevel(data, traverseData);
+		if (desiredLevel > traverseData.level) {
 			split();
 		}
-		else if(desiredDepth < depth){
+		else if(desiredLevel < traverseData.level){
 			return true; // request a merge from parent
 		}
 		return false;
 	}
 	else {
+		
 		int requestedMergeMask = 0;
+		std::vector<ChunkIndex> childIndices = traverseData.childIndices();
 		for (int i = 0; i < 4; ++i) {
-			if (_children[i]->internalUpdateChunkTree(data, depth + 1)) {
+			if (_children[i]->internalUpdateChunkTree(data, childIndices[i])) {
 				requestedMergeMask |= (1 << i);
 			}
 		}
+		
 
 		// check if all children requested merge
 		if (requestedMergeMask == 0xf) {
 			merge();
 
 			// re-run this method on this, now that this is a leaf node
-			return internalUpdateChunkTree(data, depth);
+			return internalUpdateChunkTree(data, traverseData);
 		}
 		return false;
 	}	
 }
 
 
-void ChunkNode::internalRender(const RenderData& data, int currLevel) {
+void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
 	if (isLeaf()) {
 		PatchRenderer& patchRenderer = _owner.getPatchRenderer();
+
 		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
 	}
 	else {
+		std::vector<ChunkIndex> childIndices = traverseData.childIndices();
 		for (int i = 0; i < 4; ++i) {
-			_children[i]->internalRender(data, currLevel+1);
+			_children[i]->internalRender(data, childIndices[i]);
 		}
 	}
 }
 
-int ChunkNode::desiredSplitDepth(const RenderData& data) {
-	Vec3 normal = _patch.center.asUnitCartesian();
-	Vec3 pos = data.position.dvec3() + _owner.globeRadius * normal;
+int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData) {
 
-	// Temporay ugly fix for Camera::position() is broken.
-	Vec3 buggedCameraPos = data.camera.position().dvec3();
+
+	Vec3 patchNormal = _patch.center().asUnitCartesian();
+	Vec3 patchPosition = data.position.dvec3() + _owner.globeRadius * patchNormal;
+
+	Vec3 cameraPosition = data.camera.position().dvec3();
 	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
-	Vec3 cameraPos = buggedCameraPos;// -_owner.globeRadius * cameraDirection;
-
-	Vec3 cameraToChunk = pos - cameraPos;
+	Vec3 cameraToChunk = patchPosition - cameraPosition;
 
 
 	// if camera points at same direction as latlon patch normal,
 	// we see the back side and dont have to split it
-	Scalar cosNormalCameraDirection = glm::dot(normal, cameraDirection);
+	Scalar cosNormalCameraDirection = glm::dot(patchNormal, cameraDirection);
 	if (cosNormalCameraDirection > 0.3) {
-		return _owner.minSplitDepth;
+		return traverseData.level - 1;
 	}
 
 
+	// Do frustrum culling
+	FrustrumCuller& culler = _owner.getFrustrumCuller();
+
+	if (!culler.isVisible(data, _patch, _owner.globeRadius)) {
+		return traverseData.level - 1;
+	}
+
+	// Calculate desired level based on distance
 	Scalar distance = glm::length(cameraToChunk);
 	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-	Scalar scaleFactor = 40 * _owner.globeRadius;// *150 * _patch.unitArea();
+	Scalar scaleFactor = 100 * _owner.globeRadius;
 	Scalar projectedScaleFactor = scaleFactor / distance;
 	int desiredDepth = floor( log2(projectedScaleFactor) );
 	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
@@ -156,8 +170,8 @@ void ChunkNode::split(int depth) {
 	if (depth > 0 && isLeaf()) {
 
 		// Defining short handles for center, halfSize and quarterSize
-		const LatLon& c = _patch.center;
-		const LatLon& hs = _patch.halfSize;
+		const LatLon& c = _patch.center();
+		const LatLon& hs = _patch.halfSize();
 		LatLon qs = LatLon(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds
@@ -189,7 +203,7 @@ void ChunkNode::merge() {
 	}
 }
 
-const ChunkNode&  ChunkNode::getChild(Quad quad) const {
+const ChunkNode& ChunkNode::getChild(Quad quad) const {
 	return *_children[quad];
 }
 
