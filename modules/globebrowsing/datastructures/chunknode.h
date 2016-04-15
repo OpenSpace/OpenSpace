@@ -51,6 +51,20 @@ enum Quad {
 };
 
 
+struct ChunkIndex {
+	int x, y, level;
+
+	std::vector<ChunkIndex> childIndices() const {
+		return {
+			{ 2 * x + 0, 2 * y + 0, level + 1 },
+			{ 2 * x + 1, 2 * y + 0, level + 1 },
+			{ 2 * x + 0, 2 * y + 1, level + 1 },
+			{ 2 * x + 1, 2 * y + 1, level + 1 },
+		};
+	}
+
+
+};
 
 
 class ChunkNode {
@@ -67,15 +81,15 @@ public:
 	
 	const ChunkNode& getChild(Quad quad) const;
 
-	void render(const RenderData& data);
+	void render(const RenderData& data, ChunkIndex);
 
 	static int instanceCount;
 
 private:
 
-	void internalRender(const RenderData& data, int currLevel);
-	bool internalUpdateChunkTree(const RenderData& data, int currLevel);
-	int desiredSplitDepth(const RenderData& data);
+	void internalRender(const RenderData& data, ChunkIndex&);
+	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex&);
+	int calculateDesiredLevel(const RenderData& data, const ChunkIndex&);
 	
 	
 	ChunkNode* _parent;

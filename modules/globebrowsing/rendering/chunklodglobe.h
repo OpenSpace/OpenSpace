@@ -67,7 +67,7 @@ namespace openspace {
 
 		double minDistToCamera;
 
-		const Scalar globeRadius;
+		Scalar globeRadius;
 
 		const int minSplitDepth;
 		const int maxSplitDepth;

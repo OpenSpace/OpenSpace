@@ -56,7 +56,7 @@ namespace openspace {
 		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
 		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
 		, globeRadius(1e7)
-		, minSplitDepth(1)
+		, minSplitDepth(2)
 		, maxSplitDepth(22)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
@@ -73,6 +73,8 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
+		
+		globeRadius = dictionary.value<double>("Radius");
 
 
 		// ---------
@@ -113,8 +115,11 @@ namespace openspace {
 
 	void ChunkLodGlobe::render(const RenderData& data){
 		minDistToCamera = INFINITY;
-		_leftRoot->render(data);
-		_rightRoot->render(data);
+		PatchIndex leftRootTileIndex = { 0, 0, 1 };
+		_leftRoot->render(data, leftRootTileIndex);
+
+		PatchIndex rightRootTileIndex = { 1, 0, 1 };
+		_rightRoot->render(data, rightRootTileIndex);
 
 		//LDEBUG("min distnace to camera: " << minDistToCamera);
 
