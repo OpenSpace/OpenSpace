@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PLANET_H__
-#define __PLANET_H__
+#ifndef __RENDERABLEGLOBE_H__
+#define __RENDERABLEGLOBE_H__
 
 #include <ghoul/logging/logmanager.h>
 
@@ -66,4 +66,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __PLANET_H__
+#endif  // __RENDERABLEGLOBE_H__

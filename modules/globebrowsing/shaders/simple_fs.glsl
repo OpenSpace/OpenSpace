@@ -35,6 +35,8 @@ uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
+uniform sampler2D textureSampler;
+
 in vec4 vs_position;
 in vec2 vs_uv;
 
@@ -45,7 +47,7 @@ in vec2 vs_uv;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = vec4(fract(vs_uv * 1), 0.4,1);
+	frag.color = texture2D(textureSampler, vs_uv);// vec4(fract(vs_uv * 1), 0.4,1);
 	frag.depth =  pscDepth(vs_position);
 
 	return frag;

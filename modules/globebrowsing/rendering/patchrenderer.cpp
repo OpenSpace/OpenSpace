@@ -31,9 +31,11 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
-
 // ghoul includes
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -113,13 +115,17 @@ namespace openspace {
 				return;
 			}
 		}
-		
+
 		// Get the textures that should be used for rendering
 	 	glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
 		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
-		TextureTile tile00 = tileSet.getTile(tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
 
-		// Upload the tile to the GPU (a lot of caching things should be done)
+		// Bind and use the texture
+		ghoul::opengl::TextureUnit texUnit;
+		texUnit.activate();
+		tile00->bind();
+		_programObject->setUniform("textureSampler", texUnit);
 		
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);

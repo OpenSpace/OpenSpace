@@ -26,8 +26,10 @@
 #define __TEXTURETILE_H__
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace openspace {
 
@@ -38,8 +40,6 @@ namespace openspace {
 		~TextureTile();
 
 	private:
-		glm::ivec2 positionIndex;
-		int level;
 	};
 }  // namespace openspace
 
