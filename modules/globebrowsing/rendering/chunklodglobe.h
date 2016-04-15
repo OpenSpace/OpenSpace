@@ -57,6 +57,7 @@ namespace openspace {
 		~ChunkLodGlobe();
 
 		PatchRenderer& getPatchRenderer();
+		FrustrumCuller& getFrustrumCuller();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -80,6 +81,9 @@ namespace openspace {
 
 		// Covers all positive longitudes
 		std::unique_ptr<ChunkNode> _rightRoot;
+
+		// Frustrum culler
+		std::shared_ptr<FrustrumCuller> _frustrumCuller;
 
 		// the patch used for actual rendering
 		std::unique_ptr<PatchRenderer> _patchRenderer;

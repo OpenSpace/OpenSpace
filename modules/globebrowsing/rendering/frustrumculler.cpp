@@ -1,4 +1,4 @@
-/*****************************************************************************************
+	/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -34,8 +34,7 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//							PATCH RENDERER											//
 	//////////////////////////////////////////////////////////////////////////////////////
-	FrustrumCuller::FrustrumCuller(float tolerance)
-		: _tolerance(tolerance)
+	FrustrumCuller::FrustrumCuller()
 	{
 
 	}
@@ -45,23 +44,66 @@ namespace openspace {
 	}
 
 
-	bool FrustrumCuller::isVisible(const vec3& point, const mat4x4& modelViewProjection) {
-		vec4 pointModelSpace(point, 1.0f);
-		vec4 pointProjectionSpace = modelViewProjection * pointModelSpace;
-		vec2 pointScreenSpace = (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy;
-		
+	bool FrustrumCuller::isVisible(const RenderData& data, const vec3& point, const glm::vec2& marginScreenSpace) {
 
-		// just for readability
+		mat4 modelTransform = translate(mat4(1), data.position.vec3());
+		mat4 viewTransform = data.camera.combinedViewMatrix();
+		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+			* viewTransform * modelTransform;
+
+		vec2 pointScreenSpace = transformToScreenSpace(point, modelViewProjectionTransform);
+		return testPoint(pointScreenSpace, marginScreenSpace);
+	}
+
+
+	bool FrustrumCuller::isVisible(const RenderData& data, const LatLonPatch& patch, double radius) {
+		// An axis aligned bounding box based on the patch's minimum boudning sphere is
+		// used for testnig
+	
+		// Calculate the MVP matrix
+		mat4 modelTransform = translate(mat4(1), data.position.vec3());
+		mat4 viewTransform = data.camera.combinedViewMatrix();
+		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+			* viewTransform * modelTransform;
+
+		// Calculate the patch's center point in screen space
+		vec4 patchCenterModelSpace = vec4(radius * patch.center().asUnitCartesian(), 1);
+		vec4 patchCenterProjectionSpace = modelViewProjectionTransform * patchCenterModelSpace;
+		vec2 pointScreenSpace = (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy;
+		
+		// Calculate the screen space margin that represents an axis aligned bounding 
+		// box based on the patch's minimum boudning sphere
+		double boundingRadius = radius * patch.minimalBoundingRadius();
+		vec4 marginProjectionSpace = vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
+		vec2 marginScreenSpace = (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy;
+
+		// Test the bounding box by testing the center point and the corresponding margin
+		return testPoint(pointScreenSpace, marginScreenSpace);
+	}
+
+
+
+
+
+	bool FrustrumCuller::testPoint(const glm::vec2& pointScreenSpace,
+		const glm::vec2& marginScreenSpace) const 
+	{
+		
 		const vec2& p = pointScreenSpace;
-		return ((-_tolerance < p.x && p.x < _tolerance) &
-				(-_tolerance < p.y && p.y < _tolerance));
-		
+
+		vec2 cullBounds = vec2(1) + marginScreenSpace;
+		return ((-cullBounds.x < p.x && p.x < cullBounds.x) &&
+				(-cullBounds.y < p.y && p.y < cullBounds.y));
 	}
 
-	bool FrustrumCuller::isVisible(const LatLonPatch& patch, double radius, const mat4x4& modelViewProjection) {
-		return isVisible(radius * patch.northWestCorner().asUnitCartesian(), modelViewProjection)
-			|| isVisible(radius * patch.northEastCorner().asUnitCartesian(), modelViewProjection)
-			|| isVisible(radius * patch.southWestCorner().asUnitCartesian(), modelViewProjection)
-			|| isVisible(radius * patch.southEastCorner().asUnitCartesian(), modelViewProjection);
+
+	glm::vec2 FrustrumCuller::transformToScreenSpace(const vec3& point, 
+		const mat4x4& modelViewProjection) const 
+	{
+		vec4 pointProjectionSpace = modelViewProjection * vec4(point, 1.0f);
+		vec2 pointScreenSpace = (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy;
+		return pointScreenSpace;
 	}
+
+
 }  // namespace openspace

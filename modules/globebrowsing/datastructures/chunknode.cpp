@@ -76,7 +76,7 @@ void ChunkNode::render(const RenderData& data, ChunkIndex traverseData) {
 // Returns true or false wether this node can be merge or not
 bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData) {
 	using namespace glm;
-	LatLon center = _patch.center;
+	LatLon center = _patch.center();
 
 
 	//LDEBUG("x: " << patch.x << " y: " << patch.y << " level: " << patch.level << "  lat: " << center.lat << " lon: " << center.lon);
@@ -117,6 +117,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
 	if (isLeaf()) {
 		PatchRenderer& patchRenderer = _owner.getPatchRenderer();
+
 		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
 	}
 	else {
@@ -130,7 +131,7 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData) {
 
 
-	Vec3 patchNormal = _patch.center.asUnitCartesian();
+	Vec3 patchNormal = _patch.center().asUnitCartesian();
 	Vec3 patchPosition = data.position.dvec3() + _owner.globeRadius * patchNormal;
 
 	Vec3 cameraPosition = data.camera.position().dvec3();
@@ -146,6 +147,14 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 	}
 
 
+	// Do frustrum culling
+	FrustrumCuller& culler = _owner.getFrustrumCuller();
+
+	if (!culler.isVisible(data, _patch, _owner.globeRadius)) {
+		return traverseData.level - 1;
+	}
+
+	// Calculate desired level based on distance
 	Scalar distance = glm::length(cameraToChunk);
 	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
@@ -161,8 +170,8 @@ void ChunkNode::split(int depth) {
 	if (depth > 0 && isLeaf()) {
 
 		// Defining short handles for center, halfSize and quarterSize
-		const LatLon& c = _patch.center;
-		const LatLon& hs = _patch.halfSize;
+		const LatLon& c = _patch.center();
+		const LatLon& hs = _patch.halfSize();
 		LatLon qs = LatLon(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds

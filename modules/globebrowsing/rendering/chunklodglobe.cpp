@@ -87,8 +87,7 @@ namespace openspace {
 
 		_patchRenderer.reset(new LatLonPatchRenderer(geometry));
 
-		std::shared_ptr<FrustrumCuller> fc(new FrustrumCuller(1.3f));
-		_patchRenderer->setFrustrumCuller(fc);
+		_frustrumCuller = std::shared_ptr<FrustrumCuller>(new FrustrumCuller());
 
 	}
 
@@ -113,12 +112,18 @@ namespace openspace {
 		return *_patchRenderer;
 	}
 
+	FrustrumCuller& ChunkLodGlobe::getFrustrumCuller() {
+		return *_frustrumCuller;
+	}
+
+
+
 	void ChunkLodGlobe::render(const RenderData& data){
 		minDistToCamera = INFINITY;
-		PatchIndex leftRootTileIndex = { 0, 0, 1 };
+		ChunkIndex leftRootTileIndex = { 0, 0, 1 };
 		_leftRoot->render(data, leftRootTileIndex);
 
-		PatchIndex rightRootTileIndex = { 1, 0, 1 };
+		ChunkIndex rightRootTileIndex = { 1, 0, 1 };
 		_rightRoot->render(data, rightRootTileIndex);
 
 		//LDEBUG("min distnace to camera: " << minDistToCamera);

@@ -65,7 +65,6 @@ namespace openspace {
 
 		unique_ptr<ProgramObject> _programObject;
 		shared_ptr<Geometry> _geometry;
-		shared_ptr<FrustrumCuller> _frustrumCuller;
 		
 	};
 

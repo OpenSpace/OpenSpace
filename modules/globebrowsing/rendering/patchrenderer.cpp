@@ -67,9 +67,7 @@ namespace openspace {
 		}
 	}
 
-	void PatchRenderer::setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc) {
-		_frustrumCuller = fc;
-	}
+
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								LATLON PATCH RENDERER								//
@@ -104,23 +102,10 @@ namespace openspace {
 			* viewTransform * modelTransform;
 
 
-		// View frustrum culling
-		if (_frustrumCuller != nullptr) {
-			//LatLon center = patch.center;
-			//vec3 centerPoint = radius * center.asUnitCartesian();
-			if (!_frustrumCuller->isVisible(patch, radius, modelViewProjectionTransform)) {
-				// dont render the patch
-				return;
-			}
-		}
-		
-
-
-
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
-		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.asVec2()));
+		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize().asVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 
 		glEnable(GL_DEPTH_TEST);
@@ -157,25 +142,26 @@ namespace openspace {
 		_programObject->activate();
 		using namespace glm;
 
-		const mat4& viewTransform = data.camera.combinedViewMatrix();
+		mat4 viewTransform = data.camera.combinedViewMatrix();
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
 		// Snap patch position
 		int segmentsPerPatch = 32;
+		LatLon halfSize = patch.halfSize();
 		LatLon stepSize = LatLon(
-			patch.halfSize.lat * 2 / segmentsPerPatch,
-			patch.halfSize.lon * 2 / segmentsPerPatch);
+			halfSize.lat * 2 / segmentsPerPatch,
+			halfSize.lon * 2 / segmentsPerPatch);
 		ivec2 patchesToCoverGlobe = ivec2(
-			M_PI / (patch.halfSize.lat * 2) + 0.5,
-			M_PI * 2 / (patch.halfSize.lon * 2) + 0.5);
+			M_PI / (halfSize.lat * 2) + 0.5,
+			M_PI * 2 / (halfSize.lon * 2) + 0.5);
 		ivec2 intSnapCoord = ivec2(
-			patch.center.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
-			patch.center.lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
+			patch.center().lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
+			patch.center().lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
 		LatLon swCorner = LatLon(
-			stepSize.lat * intSnapCoord.x - patch.halfSize.lat,
-			stepSize.lon * intSnapCoord.y - patch.halfSize.lon);
+			stepSize.lat * intSnapCoord.x - halfSize.lat,
+			stepSize.lon * intSnapCoord.y - halfSize.lon);
 
 		ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
@@ -185,7 +171,7 @@ namespace openspace {
 
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
-		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize.lat, patch.halfSize.lon));
+		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(halfSize.lat, halfSize.lon));
 		_programObject->setUniform("globeRadius", float(radius));
 		_programObject->setUniform("contraction", contraction);
 
