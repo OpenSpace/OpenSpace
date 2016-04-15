@@ -199,7 +199,7 @@ void mainInitFunc() {
     size_t nWindows = _sgctEngine->getNumberOfWindows();
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = _sgctEngine->getWindowPtr(i);
-        size_t nViewports = nViewports = w->getNumberOfViewports();
+        size_t nViewports = w->getNumberOfViewports();
         for (size_t j = 0; j < nViewports; ++j) {
             sgct_core::Viewport* v = w->getViewport(j);
             ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");

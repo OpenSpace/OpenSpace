@@ -138,7 +138,7 @@ void MainWindow::readTcpData() {
     static const uint16_t MessageTypePlayBookHongKang = 4;
 
     QByteArray data = continuousData.append(_socket->readAll());
-    int d = data.size();
+//    int d = data.size();
 
     if (QString(data) == "Connected to SGCT!\r\n") {
         continuousData.clear();
@@ -191,7 +191,7 @@ void MainWindow::readTcpData() {
     case MessageTypePlayBookHongKang:
     case MessageTypePlayBookLabel:
     {
-        const char* payloadDebug = data.mid(2).data();
+//        const char* payloadDebug = data.mid(2).data();
 
         size_t beginning = 0;
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);

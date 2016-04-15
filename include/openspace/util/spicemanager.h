@@ -807,7 +807,7 @@ public:
      * \return  the frame of the body
      * \todo I think this function should die ---abock
      */
-    std::string frameFromBody(const std::string body) const;
+    std::string frameFromBody(const std::string& body) const;
     
 private:
     /// Struct storing the information about all loaded kernels

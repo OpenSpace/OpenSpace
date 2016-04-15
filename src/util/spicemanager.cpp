@@ -832,7 +832,7 @@ bool SpiceManager::addFrame(std::string body, std::string frame) {
     }
 }
 
-std::string SpiceManager::frameFromBody(const std::string body) const {
+std::string SpiceManager::frameFromBody(const std::string& body) const {
 	for (auto pair : _frameByBody) {
 		if (pair.first == body) {
 			return pair.second;

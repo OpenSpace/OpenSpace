@@ -78,6 +78,7 @@ namespace {
 
 TimelineWidget::TimelineWidget(QWidget* parent)
     : QWidget(parent)
+    , _currentTime{"", 0.0}
 {
     setMinimumWidth(600);
     setMinimumHeight(600);
@@ -152,17 +153,14 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
 }
 
 void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
-    static const int HalfHeight = LegendHeight / 2;
     static const int Padding = 5;
     static const int BoxSize = 20;
 
-    // Draw Targets
     int currentHorizontalPosition = Padding;
-    int currentVerticalPosition = Padding;
+    int currentVerticalPosition = Padding + BoxSize + Padding;
 
+    // Draw Targets
     // Draw Instruments
-    currentHorizontalPosition = Padding;
-    currentVerticalPosition = Padding + BoxSize + Padding;
     for (int i = 0; i < _instruments.size(); ++i) {
         if (i == _instruments.size() / 3 || i == _instruments.size() * 2 / 3) {
             currentVerticalPosition += BoxSize + Padding;
@@ -179,7 +177,7 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         painter.setPen(QPen(QColor(200, 200, 200)));
         //painter.setPen(QPen(Qt::black));
         painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
-        int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
+//        int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
         //currentHorizontalPosition += std::max(textWidth, 25) + Padding;
         currentHorizontalPosition += 125;
     }
@@ -198,9 +196,6 @@ void TimelineWidget::drawImages(
     std::vector<Image*> images,
     double minimumTime, double maximumTime)
 {
-    int width = timelineRect.width();
-
-    int nInstruments = 0;
     std::set<std::string> instrumentSet;
     for (Image* i : images) {
         for (std::string instrument : i->instruments)
@@ -225,7 +220,7 @@ void TimelineWidget::drawImages(
 
         std::string target = i->target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
-        int iTarget = std::distance(_targets.begin(), it);
+//        int iTarget = std::distance(_targets.begin(), it);
 
         for (std::string instrument : i->instruments) {
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
