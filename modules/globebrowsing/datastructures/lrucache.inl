@@ -22,49 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#include <ghoul/misc/assert.h>
+//#include <modules/globebrowsing/datastructures/lrucache.h>
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-#include <test_lrucache.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+namespace openspace {
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+	
+	template<typename KeyType, typename ValueType>
+	LRUCache<KeyType, ValueType>::LRUCache(size_t size)
+		: _cacheSize(size) { }
 
-#include <iostream>
+	template<typename KeyType, typename ValueType>
+	LRUCache<KeyType, ValueType>::~LRUCache() {	}
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
+	//////////////////////////////
+	//		PUBLIC INTERFACE	//
+	//////////////////////////////
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+	template<typename KeyType, typename ValueType>
+	void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value)
+	{
+		auto it = _itemMap.find(key);
+		if (it != _itemMap.end()) {
+			_itemList.erase(it->second);
+			_itemMap.erase(it);
+		}
+		_itemList.push_front(std::make_pair(key, value));
+		_itemMap.insert(std::make_pair(key, _itemList.begin()));
+		clean();
+	}
 
-	testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
+	template<typename KeyType, typename ValueType>
+	bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const
+	{
+		return _itemMap.count(key) > 0;
+	}
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
 
-	return returnVal;
-}
+	template<typename KeyType, typename ValueType>
+	ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key)
+	{
+		ghoul_assert(exist(key), "Key " << key << " must exists");
+		auto it = _itemMap.find(key);
+		// Move list iterator pointing to value
+		_itemList.splice(_itemList.begin(), _itemList, it->second);
+		return it->second->second;
+	}
+
+
+
+	//////////////////////////////
+	//		PRIVATE HELPERS		//
+	//////////////////////////////
+	template<typename KeyType, typename ValueType>
+	void LRUCache<KeyType, ValueType>::clean()
+	{
+		while (_itemMap.size() > _cacheSize) {
+			auto last_it = _itemList.end(); last_it--;
+			_itemMap.erase(last_it->first);
+			_itemList.pop_back();
+		}
+	}
+
+
+} // namespace openspace

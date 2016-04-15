@@ -24,47 +24,29 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/datastructures/lrucache.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-#include <test_lrucache.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
+class LRUCacheTest : public testing::Test {};
 
-#include <iostream>
+using namespace openspace;
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
-
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+TEST_F(LRUCacheTest, Get) {
+	LRUCache<int, std::string> lru(4);
+	lru.put(1, "hej");
+	lru.put(12, "san");
+	ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
 }
-
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
-
-	testing::InitGoogleTest(&argc, argv);
-
-	int returnVal = RUN_ALL_TESTS();
-
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
-
-	return returnVal;
+TEST_F(LRUCacheTest, CleaningCache) {
+	LRUCache<int, double> lru(4);
+	lru.put(1, 1.2);
+	lru.put(12, 2.3);
+	lru.put(123, 33.4);
+	lru.put(1234, 4.5);
+	lru.put(12345, 6.7);
+	ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
+	ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
 }
