@@ -22,78 +22,51 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
-
-#include <memory>
-#include <glm/glm.hpp>
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
 #include <modules/globebrowsing/rendering/texturetileset.h>
 
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
-}
-
+#include <glm/glm.hpp>
 
 namespace openspace {
+	TextureTileSet::TextureTileSet()
+	{
+	}
 
-	class LonLatPatch;
-	class Geometry;
-	
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using ghoul::opengl::ProgramObject;
+	TextureTileSet::~TextureTileSet()
+	{
+	}
 
-	class PatchRenderer {
-	public:
+	glm::ivec3 TextureTileSet::getTileIndex(LatLonPatch patch)
+	{
+		int level = log2(static_cast<int>(glm::max(
+			sizeLevel0.lat / patch.halfSize().lat * 2,
+			sizeLevel0.lon / patch.halfSize().lon * 2)));
+		Vec2 TileSize = sizeLevel0.toLonLatVec2() / pow(2, level);
+		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + offsetLevel0.toLonLatVec2()) / TileSize;
+		return glm::ivec3(tileIndex, level);
+	}
+
+	TextureTile TextureTileSet::getTile(LatLonPatch patch)
+	{
+		return getTile(getTileIndex(patch));
+	}
+
+	TextureTile TextureTileSet::getTile(glm::ivec3 tileIndex)
+	{
+		return TextureTile();
+	}
+
+	LatLonPatch TextureTileSet::getTilePositionAndScale(glm::ivec3 tileIndex)
+	{
+		LatLon tileSize = LatLon(
+			sizeLevel0.lat / pow(2, tileIndex.z),
+			sizeLevel0.lon / pow(2, tileIndex.z));
+		LatLon northWest = LatLon(
+			offsetLevel0.lat + tileIndex.y * tileSize.lat,
+			offsetLevel0.lon + tileIndex.x * tileSize.lon);
 		
-		PatchRenderer(shared_ptr<Geometry>);
-		~PatchRenderer();
-		
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
+		return LatLonPatch(
+			LatLon(northWest.lat + tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
+			LatLon(tileSize.lat / 2, tileSize.lon / 2));
+	}
 
-		void setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc);
-		
-	protected:
-
-		unique_ptr<ProgramObject> _programObject;
-		shared_ptr<Geometry> _geometry;
-		
-		TextureTileSet tileSet;
-	};
-
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//							PATCH RENDERER SUBCLASSES								//
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	class LatLonPatchRenderer : public PatchRenderer {
-	public:
-		LatLonPatchRenderer(shared_ptr<Geometry>);
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data, 
-			double radius) override;
-	};
-
-	class ClipMapPatchRenderer : public PatchRenderer {
-	public:
-		ClipMapPatchRenderer();
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data,
-			double radius) override;
-	};
 }  // namespace openspace
-
-#endif  // __LATLONPATCH_H__

@@ -36,6 +36,11 @@ namespace openspace {
 	//								   LATITUDE LONGITUDE									//
 	//////////////////////////////////////////////////////////////////////////////////////////
 
+	LatLon::LatLon()
+		: lat(0)
+		, lon(0)
+	{}
+
 	LatLon::LatLon(Scalar latitude, Scalar longitude)
 		: lat(latitude)
 		, lon(longitude) 
@@ -62,8 +67,8 @@ namespace openspace {
 			glm::sin(lat));
 	}
 
-	Vec2 LatLon::asVec2() const {
-		return Vec2(lat, lon);
+	Vec2 LatLon::toLonLatVec2() const {
+		return Vec2(lon, lat);
 	}
 
 	bool LatLon::operator==(const LatLon& other) {

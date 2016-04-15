@@ -39,12 +39,13 @@ typedef glm::dvec3 Vec3;
 namespace openspace {
 
 struct LatLon {
+	LatLon();
 	LatLon(Scalar latitude, Scalar longitude);
 	LatLon(const LatLon& src);
 	
 	static LatLon fromCartesian(const Vec3& v);
 	Vec3 asUnitCartesian() const;
-	Vec2 asVec2() const;
+	Vec2 toLonLatVec2() const;
 
 	inline bool operator==(const LatLon& other);
 	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }

@@ -22,78 +22,35 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
+#ifndef __TEXTURETILESET_H__
+#define __TEXTURETILESET_H__
 
-#include <memory>
-#include <glm/glm.hpp>
-
-// open space includes
-#include <openspace/rendering/renderable.h>
+#include <ghoul/logging/logmanager.h>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
-#include <modules/globebrowsing/rendering/texturetileset.h>
-
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
-}
-
+#include <modules/globebrowsing/rendering/texturetile.h>
 
 namespace openspace {
 
-	class LonLatPatch;
-	class Geometry;
-	
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using ghoul::opengl::ProgramObject;
-
-	class PatchRenderer {
+	class TextureTileSet
+	{
 	public:
-		
-		PatchRenderer(shared_ptr<Geometry>);
-		~PatchRenderer();
-		
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
+		TextureTileSet();
+		~TextureTileSet();
 
-		void setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc);
-		
-	protected:
-
-		unique_ptr<ProgramObject> _programObject;
-		shared_ptr<Geometry> _geometry;
-		
-		TextureTileSet tileSet;
+		/// Returns the index of the tile at an appropriate level.
+		/// Appropriate meaning that the tile should be at as high level as possible
+		/// Without the tile being smaller than the patch in lat-lon space.
+		/// The tile needs to be at least as big as the patch.
+		glm::ivec3 getTileIndex(LatLonPatch patch);
+		TextureTile getTile(LatLonPatch patch);
+		TextureTile getTile(glm::ivec3 tileIndex);
+		LatLonPatch getTilePositionAndScale(glm::ivec3 tileIndex);
+	private:
+		LatLon sizeLevel0;
+		LatLon offsetLevel0;
 	};
 
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//							PATCH RENDERER SUBCLASSES								//
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	class LatLonPatchRenderer : public PatchRenderer {
-	public:
-		LatLonPatchRenderer(shared_ptr<Geometry>);
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data, 
-			double radius) override;
-	};
-
-	class ClipMapPatchRenderer : public PatchRenderer {
-	public:
-		ClipMapPatchRenderer();
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data,
-			double radius) override;
-	};
 }  // namespace openspace
 
-#endif  // __LATLONPATCH_H__
+#endif  // __TEXTURETILESET_H__

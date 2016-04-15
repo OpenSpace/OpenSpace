@@ -102,10 +102,17 @@ namespace openspace {
 			* viewTransform * modelTransform;
 
 
+		// Get the textures that should be used for rendering
+	 	glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
+		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
+		TextureTile tile00 = tileSet.getTile(tileIndex);
+
+		// Upload the tile to the GPU (a lot of caching things should be done)
+		
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
-		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(patch.halfSize().asVec2()));
+		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
+		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(patch.halfSize().toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 
 		glEnable(GL_DEPTH_TEST);
@@ -170,8 +177,8 @@ namespace openspace {
 		//LDEBUG("contraction = [ " << contraction.x << " , " << contraction.y << " ]");
 
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
-		_programObject->setUniform("minLatLon", vec2(swCorner.lat, swCorner.lon));
-		_programObject->setUniform("latLonScalingFactor", 2.0f * vec2(halfSize.lat, halfSize.lon));
+		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
+		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(halfSize.toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 		_programObject->setUniform("contraction", contraction);
 

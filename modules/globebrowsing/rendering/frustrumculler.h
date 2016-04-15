@@ -75,6 +75,7 @@ namespace openspace {
 			const glm::vec2& pointScreenSpace, 
 			const glm::vec2& marginScreenSpace) const;
 
+
 		glm::vec2 transformToScreenSpace(const vec3& point, const mat4x4& modelViewProjection) const;
 
 	};

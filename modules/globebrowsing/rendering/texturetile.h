@@ -22,78 +22,25 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
+#ifndef __TEXTURETILE_H__
+#define __TEXTURETILE_H__
 
-#include <memory>
+#include <ghoul/logging/logmanager.h>
+
 #include <glm/glm.hpp>
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
-#include <modules/globebrowsing/rendering/texturetileset.h>
-
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
-}
-
 
 namespace openspace {
 
-	class LonLatPatch;
-	class Geometry;
-	
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using ghoul::opengl::ProgramObject;
-
-	class PatchRenderer {
+	class TextureTile
+	{
 	public:
-		
-		PatchRenderer(shared_ptr<Geometry>);
-		~PatchRenderer();
-		
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
+		TextureTile();
+		~TextureTile();
 
-		void setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc);
-		
-	protected:
-
-		unique_ptr<ProgramObject> _programObject;
-		shared_ptr<Geometry> _geometry;
-		
-		TextureTileSet tileSet;
-	};
-
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//							PATCH RENDERER SUBCLASSES								//
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	class LatLonPatchRenderer : public PatchRenderer {
-	public:
-		LatLonPatchRenderer(shared_ptr<Geometry>);
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data, 
-			double radius) override;
-	};
-
-	class ClipMapPatchRenderer : public PatchRenderer {
-	public:
-		ClipMapPatchRenderer();
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data,
-			double radius) override;
+	private:
+		glm::ivec2 positionIndex;
+		int level;
 	};
 }  // namespace openspace
 
-#endif  // __LATLONPATCH_H__
+#endif  // __TEXTURETILE_H__
