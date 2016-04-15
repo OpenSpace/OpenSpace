@@ -43,12 +43,12 @@ gui/externaltimecontrol/mainwindow.h
 data/scene/67P/obj/67P_rotated_5_130.obj
 data/spice/NewHorizonsKernels/
 data/spice/RosettaKernels/
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/Shenk_180.jpg
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/barycenter.png
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/defaultProj.png
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/pluto_highres_180.jpg
-data/scene/newhorizons/pluto/plutoprojectionhybrid/utcEvents.txt
+data/scene/newhorizons/pluto/plutoprojection/textures/
+data/scene/newhorizons/pluto/plutoprojection/textures/Shenk_180.jpg
+data/scene/newhorizons/pluto/plutoprojection/textures/barycenter.png
+data/scene/newhorizons/pluto/plutoprojection/textures/defaultProj.png
+data/scene/newhorizons/pluto/plutoprojection/textures/pluto_highres_180.jpg
+data/scene/newhorizons/pluto/plutoprojection/utcEvents.txt
 data/scene/rosetta/obj/mainbodyros.obj
 data/scene/rosetta/obj/solarpanelleft.obj
 data/scene/rosetta/obj/solarpanelright.obj
@@ -108,9 +108,9 @@ data/scene/newhorizons/newhorizons/textures/labels.png
 data/scene/pluto/textures/
 data/scene/pluto/textures/Shenk_180.jpg
 data/scene/pluto/textures/pluto_highres_180.jpg
-data/scene/newhorizons/pluto/plutoprojectionhybrid/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/3.jpg
-data/scene/newhorizons/pluto/plutoprojectionhybrid/textures/Pluto-Text.png
+data/scene/newhorizons/pluto/plutoprojection/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt
+data/scene/newhorizons/pluto/plutoprojection/textures/3.jpg
+data/scene/newhorizons/pluto/plutoprojection/textures/Pluto-Text.png
 data/scene/vestaprojection/VestaComet/VestaComet.mtl
 data/scene/vestaprojection/textures/defaultProj_backup.png
 data/scene/vestaprojection/textures/dummy.jpg
@@ -119,4 +119,4 @@ data/scene/vestaprojection/textures/projectMe.png
 data/spice/MAR063.BSP
 data/spice/de430_1850-2150.bsp
 data/spice/jup260.bsp
-data/scene/newhorizons/pluto/plutoprojectionhybrid/images
+data/scene/newhorizons/pluto/plutoprojection/images
