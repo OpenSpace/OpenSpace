@@ -89,7 +89,7 @@ return {
             Body = "NEW HORIZONS",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "${OPENSPACE_DATA}/scene/newhorizons/models/NewHorizonsCleanModel.obj",
+                GeometryFile = "models/NewHorizonsCleanModel.obj",
                 Magnification = 4,
             }, 
             Textures = {
@@ -151,7 +151,7 @@ return {
             Body = "NEW HORIZONS",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "${OPENSPACE_DATA}/scene/newhorizons/models/Labels.obj",
+                GeometryFile = "models/Labels.obj",
                 Magnification = 4,
             }, 
             Textures = {
