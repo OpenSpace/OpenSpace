@@ -1,6 +1,4 @@
-UseAccurateKernels = false
-
-if UseAccurateKernels then
+if UseAccurateNewHorizonsKernels then
     NewHorizonsKernels = {
         "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
     }

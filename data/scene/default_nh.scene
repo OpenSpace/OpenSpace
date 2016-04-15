@@ -1,3 +1,5 @@
+UseAccurateNewHorizonsKernels = false
+
 return {
     ScenePath = ".",
     CommonFolder = "common",
@@ -14,7 +16,6 @@ return {
         "saturn",
         "uranus",
         "neptune",
-        --"PlutoProjection",
         "plutoprojectionhybrid",
         "charonprojection",
         "kerberos",
@@ -38,17 +39,6 @@ return {
         "callistoprojection",
         "newhorizons",
         "newhorizonsfov",
-        --"gridGalactic",
-        --"gridEcliptic",
-        --"gridEquatorial",
-        -- "ephemeris",
-
-    -- "newhorizonspath",
-    --   "newhorizonstrail",
-        -- "enlil",
-        -- "volumegl3",
-        -- "volumegl2",
-        -- "volumegl",
     }
 }
 

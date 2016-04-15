@@ -126,10 +126,16 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     if (!success)
         // There are no modules that are loaded
         return true;
-
+    
     lua_State* state = ghoul::lua::createNewLuaState();
     OsEng.scriptEngine().initializeLuaState(state);
 
+    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
+    // file again to load any variables defined inside into the state that is passed to
+    // the modules. This allows us to specify global variables that can then be used
+    // inside the modules to toggle settings
+    ghoul::lua::runScriptFile(state, absSceneFile);
+    
     // Get the common directory
     bool commonFolderSpecified = sceneDictionary.hasKey(KeyCommonFolder);
     bool commonFolderCorrectType = sceneDictionary.hasKeyAndValue<std::string>(KeyCommonFolder);

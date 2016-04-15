@@ -1,6 +1,4 @@
-UseAccurateKernels = false
-
-if UseAccurateKernels then
+if UseAccurateNewHorizonsKernels then
     NewHorizonsKernels = {
         -- SCLK
         "${SPICE}/nh_kernels/sclk/new-horizons_0976.tsc",
