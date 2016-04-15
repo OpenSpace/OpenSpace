@@ -193,6 +193,18 @@ namespace openspace {
 		//LDEBUG("intSnapCoord = [ " << intSnapCoord.x << " , " << intSnapCoord.y << " ]");
 		//LDEBUG("contraction = [ " << contraction.x << " , " << contraction.y << " ]");
 
+
+		// Get the textures that should be used for rendering
+		glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
+		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
+
+		// Bind and use the texture
+		ghoul::opengl::TextureUnit texUnit;
+		texUnit.activate();
+		tile00->bind();
+		_programObject->setUniform("textureSampler", texUnit);
+
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(patch.halfSize.toLonLatVec2()));
