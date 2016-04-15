@@ -37,6 +37,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -275,8 +276,8 @@ void SyncWidget::handleFileRequest() {
         LDEBUG(f.identifier.toStdString() << " (" << f.version << ") -> " << f.destination.toStdString()); 
 
         ghoul::filesystem::Directory d = FileSys.currentDirectory();
-        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
-        FileSys.setCurrentDirectory(thisDirectory);
+//        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(f.baseDir.toStdString());
 
 
         std::string identifier =  f.identifier.toStdString();
@@ -301,8 +302,9 @@ void SyncWidget::handleTorrentFiles() {
         LDEBUG(f.file.toStdString() << " -> " << f.destination.toStdString());
 
         ghoul::filesystem::Directory d = FileSys.currentDirectory();
-        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
-        FileSys.setCurrentDirectory(thisDirectory);
+//        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(f.baseDir.toStdString());
+//        FileSys.setCurrentDirectory(thisDirectory);
 
         QString file = QString::fromStdString(absPath(f.file.toStdString()));
 
@@ -367,18 +369,65 @@ void SyncWidget::syncButtonPressed() {
             LERROR("Could not find 'Modules'");
             return;
         }
-
-        QStringList modulesList;
-        for (int i = 1; i <= modules.size(); ++i) {
-            std::string module = modules.value<std::string>(std::to_string(i));
-            modulesList.append(QString::fromStdString(module));
-        }
-        modulesList.append("common");
-
+        
+        struct ModuleInformation {
+            QString moduleName;
+            QString moduleDatafile;
+            QString modulePath;
+        };
+        
         QDir sceneDir(scene);
         sceneDir.cdUp();
-        for (QString module : modulesList) {
-            QString dataFile = sceneDir.absoluteFilePath(module + "/" + module + ".data");
+        QList<ModuleInformation> modulesList;
+        for (int i = 1; i <= modules.size(); ++i) {
+            std::string module = modules.value<std::string>(std::to_string(i));
+            std::string shortModule = module;
+            
+            std::string::size_type pos = module.find_last_of(FileSys.PathSeparator);
+            if (pos != std::string::npos) {
+                shortModule = module.substr(pos+1);
+            }
+            
+            QString m = QString::fromStdString(module);
+            
+            QString dataFile = sceneDir.absoluteFilePath(
+                QString::fromStdString(module) + "/" + QString::fromStdString(shortModule) + ".data"
+            );
+            
+            if (QFileInfo(dataFile).exists()) {
+                modulesList.append({
+                    QString::fromStdString(module),
+                    dataFile,
+                    sceneDir.absolutePath() + "/" + QString::fromStdString(module)
+                });
+            }
+            else {
+                QDir metaModuleDir = sceneDir;
+                metaModuleDir.cd(QString::fromStdString(module));
+                
+                QDirIterator it(metaModuleDir.absolutePath(), QStringList() << "*.data", QDir::Files, QDirIterator::Subdirectories);
+                while (it.hasNext()) {
+                    QString v = it.next();
+                    QDir d(v);
+                    d.cdUp();
+                    
+                    modulesList.append({
+                        d.dirName(),
+                        v,
+                        d.absolutePath()
+                    });
+                }
+            }
+        }
+        modulesList.append({
+            "common",
+            sceneDir.absolutePath() + "/common/common.data",
+            sceneDir.absolutePath() + "/common"
+        });
+
+        for (const ModuleInformation& module : modulesList) {
+            QString dataFile = module.moduleDatafile;
+//            QString dataFile = sceneDir.absoluteFilePath(module + "/" + module + ".data");
 
             if (QFileInfo(dataFile).exists()) {
                 ghoul::Dictionary dataDictionary;
@@ -407,9 +456,10 @@ void SyncWidget::syncButtonPressed() {
                             dest = d.value<std::string>(DestinationKey);
 
                         _directFiles.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(url),
-                            QString::fromStdString(dest)
+                            QString::fromStdString(dest),
+                            module.modulePath
                         });
                     }
                 }
@@ -436,9 +486,10 @@ void SyncWidget::syncButtonPressed() {
                         int version = static_cast<int>(d.value<double>(VersionKey));
 
                         _fileRequests.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(url),
                             QString::fromStdString(dest),
+                            module.modulePath,
                             version
                         });
                     }
@@ -462,9 +513,10 @@ void SyncWidget::syncButtonPressed() {
                             dest = "";
 
                         _torrentFiles.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(file),
-                            QString::fromStdString(dest)
+                            QString::fromStdString(dest),
+                            module.modulePath
                         });
                     }
                 }
