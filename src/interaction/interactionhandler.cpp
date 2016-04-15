@@ -283,7 +283,7 @@ void InteractionHandler::update(double deltaTime) {
     
     if(hasKeys){
 		_camera->setPosition(pos);
-		_camera->setViewRotationMatrix(glm::mat4_cast(q));
+		_camera->setRotation(q);
     }
 
 		
@@ -395,7 +395,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	//new camera position
 	relative = origin + relative_focus_coordinate; 	
 
-	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f) / 10.f;
+	float bounds = _focusNode ? _focusNode->boundingSphere().lengthf() : 0.f;
 
 	psc target = relative + relative_focus_coordinate * dist;
 	//don't fly into objects
