@@ -26,7 +26,7 @@
 
 #include "infowidget.h"
 
-#include <openspace/version.h>
+#include <openspace/openspace.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -138,9 +138,9 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     libtorrent::session_settings settings = _session->settings();
     settings.user_agent =
         "OpenSpace/" +
-        std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-        std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-        std::to_string(OPENSPACE_VERSION_PATCH);
+        std::to_string(openspace::OPENSPACE_VERSION_MAJOR) + "." +
+        std::to_string(openspace::OPENSPACE_VERSION_MINOR) + "." +
+        std::to_string(openspace::OPENSPACE_VERSION_PATCH);
     settings.allow_multiple_connections_per_ip = true;
     settings.ignore_limits_on_local_network = true;
     settings.connection_speed = 20;
