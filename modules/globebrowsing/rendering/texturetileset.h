@@ -26,11 +26,14 @@
 #define __TEXTURETILESET_H__
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/texturetile.h>
 
 namespace openspace {
+
+	using namespace ghoul::opengl;
 
 	class TextureTileSet
 	{
@@ -41,14 +44,16 @@ namespace openspace {
 		/// Returns the index of the tile at an appropriate level.
 		/// Appropriate meaning that the tile should be at as high level as possible
 		/// Without the tile being smaller than the patch in lat-lon space.
-		/// The tile needs to be at least as big as the patch.
+		/// The tile is at least as big as the patch.
 		glm::ivec3 getTileIndex(LatLonPatch patch);
-		TextureTile getTile(LatLonPatch patch);
-		TextureTile getTile(glm::ivec3 tileIndex);
+		std::shared_ptr<Texture> getTile(LatLonPatch patch);
+		std::shared_ptr<Texture> getTile(glm::ivec3 tileIndex);
 		LatLonPatch getTilePositionAndScale(glm::ivec3 tileIndex);
 	private:
-		LatLon sizeLevel0;
-		LatLon offsetLevel0;
+		LatLon _sizeLevel0;
+		LatLon _offsetLevel0;
+
+		std::shared_ptr<Texture> _testTexture;
 	};
 
 }  // namespace openspace

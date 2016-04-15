@@ -23,12 +23,32 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/texturetileset.h>
+#include <ghoul/opengl/texturemanager.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <ghoul/logging/logmanager.h>
 
 #include <glm/glm.hpp>
 
+namespace {
+	const std::string _loggerCat = "TextureTileSet";
+}
+
 namespace openspace {
 	TextureTileSet::TextureTileSet()
-	{
+	{		
+		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath("textures/earth_bluemarble.jpg")));
+		if (_testTexture) {
+			LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
+			_testTexture->uploadTexture();
+
+			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+			// TODO: AnisotropicMipMap crashes on ATI cards ---abock
+			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		}
+		
 	}
 
 	TextureTileSet::~TextureTileSet()
@@ -38,31 +58,32 @@ namespace openspace {
 	glm::ivec3 TextureTileSet::getTileIndex(LatLonPatch patch)
 	{
 		int level = log2(static_cast<int>(glm::max(
-			sizeLevel0.lat / patch.halfSize().lat * 2,
-			sizeLevel0.lon / patch.halfSize().lon * 2)));
-		Vec2 TileSize = sizeLevel0.toLonLatVec2() / pow(2, level);
-		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + offsetLevel0.toLonLatVec2()) / TileSize;
+			_sizeLevel0.lat / patch.halfSize().lat * 2,
+			_sizeLevel0.lon / patch.halfSize().lon * 2)));
+		Vec2 TileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
+		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + _offsetLevel0.toLonLatVec2()) / TileSize;
+
 		return glm::ivec3(tileIndex, level);
 	}
 
-	TextureTile TextureTileSet::getTile(LatLonPatch patch)
+	std::shared_ptr<Texture> TextureTileSet::getTile(LatLonPatch patch)
 	{
 		return getTile(getTileIndex(patch));
 	}
 
-	TextureTile TextureTileSet::getTile(glm::ivec3 tileIndex)
+	std::shared_ptr<Texture> TextureTileSet::getTile(glm::ivec3 tileIndex)
 	{
-		return TextureTile();
+		return _testTexture;
 	}
 
 	LatLonPatch TextureTileSet::getTilePositionAndScale(glm::ivec3 tileIndex)
 	{
 		LatLon tileSize = LatLon(
-			sizeLevel0.lat / pow(2, tileIndex.z),
-			sizeLevel0.lon / pow(2, tileIndex.z));
+			_sizeLevel0.lat / pow(2, tileIndex.z),
+			_sizeLevel0.lon / pow(2, tileIndex.z));
 		LatLon northWest = LatLon(
-			offsetLevel0.lat + tileIndex.y * tileSize.lat,
-			offsetLevel0.lon + tileIndex.x * tileSize.lon);
+			_offsetLevel0.lat + tileIndex.y * tileSize.lat,
+			_offsetLevel0.lon + tileIndex.x * tileSize.lon);
 		
 		return LatLonPatch(
 			LatLon(northWest.lat + tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
