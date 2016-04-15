@@ -67,7 +67,7 @@ namespace openspace {
 			glm::sin(lat));
 	}
 
-	Vec2 LatLon::asVec2() const {
+	Vec2 LatLon::toLonLatVec2() const {
 		return Vec2(lon, lat);
 	}
 

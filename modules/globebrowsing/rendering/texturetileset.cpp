@@ -40,8 +40,8 @@ namespace openspace {
 		int level = log2(static_cast<int>(glm::max(
 			sizeLevel0.lat / patch.halfSize.lat * 2,
 			sizeLevel0.lon / patch.halfSize.lon * 2)));
-		Vec2 TileSize = sizeLevel0.asVec2() / pow(2, level);
-		glm::ivec2 tileIndex = -(patch.northWestCorner().asVec2() + offsetLevel0.asVec2()) / TileSize;
+		Vec2 TileSize = sizeLevel0.toLonLatVec2() / pow(2, level);
+		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + offsetLevel0.toLonLatVec2()) / TileSize;
 		return glm::ivec3(tileIndex, level);
 	}
 

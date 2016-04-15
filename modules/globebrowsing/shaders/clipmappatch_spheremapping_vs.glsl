@@ -28,7 +28,7 @@ uniform mat4 modelViewProjectionTransform;
 uniform float globeRadius;
 
 uniform vec2 minLatLon;
-uniform vec2 latLonScalingFactor;
+uniform vec2 lonLatScalingFactor;
 uniform ivec2 contraction; // [-1, 1]
 
 layout(location = 1) in vec2 in_uv;
@@ -46,10 +46,10 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 }
 
 vec3 globalInterpolation(vec2 uv) {
-	vec2 latLonInput;
-	latLonInput.y = minLatLon.y + latLonScalingFactor.y * uv.y; // Lat
-	latLonInput.x = minLatLon.x + latLonScalingFactor.x * uv.x; // Lon
-	vec3 positionModelSpace = latLonToCartesian(latLonInput.y, latLonInput.x, globeRadius);
+	vec2 lonLatInput;
+	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * uv.y; // Lat
+	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * uv.x; // Lon
+	vec3 positionModelSpace = latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
 	return positionModelSpace;
 }
 

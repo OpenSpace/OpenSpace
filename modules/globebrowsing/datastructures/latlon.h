@@ -45,7 +45,7 @@ struct LatLon {
 	
 	static LatLon fromCartesian(const Vec3& v);
 	Vec3 asUnitCartesian();
-	Vec2 asVec2() const;
+	Vec2 toLonLatVec2() const;
 
 	inline bool operator==(const LatLon& other);
 	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }
