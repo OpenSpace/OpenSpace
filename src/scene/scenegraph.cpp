@@ -193,62 +193,112 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             moduleName + _moduleExtension
         );
 
-        std::vector<ghoul::Dictionary> moduleDictionaries;
+        struct ModuleInformation {
+            ghoul::Dictionary dictionary;
+            std::string moduleFile;
+            std::string modulePath;
+            std::string moduleName;
+        };
+        std::vector<ModuleInformation> moduleDictionaries;
         if (FileSys.fileExists(moduleFile)) {
             // We have a module file, so it is a direct include
             try {
                 ghoul::Dictionary moduleDictionary;
                 ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
-                moduleDictionaries.push_back(std::move(moduleDictionary));
+                moduleDictionaries.push_back({
+                    moduleDictionary,
+                    moduleFile,
+                    modulePath,
+                    moduleName
+                });
             }
             catch (...) {
                 continue;
             }
         }
-//        else {
-//            // If we do not have a module file, we have to include all subdirectories
-//            ghoul::filesystem::
-//            ghoul::filesystem::Directory d = modulePath;
+        else {
+            // If we do not have a module file, we have to include all subdirectories
+            using ghoul::filesystem::Directory;
+            using std::string;
+            std::vector<string> directories = Directory(modulePath).readDirectories();
             
-//        }
-        
-        for (const ghoul::Dictionary& moduleDictionary : moduleDictionaries) {
+            for (const string& s : directories) {
+                std::string::size_type pos = s.find_last_of(FileSys.PathSeparator);
+                if (pos == std::string::npos) {
+                    LERROR("Error parsing subdirectory name '" << s << "'");
+                    continue;
+                }
+                string moduleName = s.substr(pos+1);
+                
+                string submodulePath = s;
+                string moduleFile = FileSys.pathByAppendingComponent(submodulePath, moduleName) + _moduleExtension;
+//                string moduleName = s;
+
+                if (!FileSys.fileExists(moduleFile)) {
+                    LERROR("Could not find module file '" << moduleFile << "'. "
+                           "Indirectly included through '" << modulePath << "'");
+                    continue;
+                }
+                
+                // We have a module file, so it is a direct include
+                try {
+                    ghoul::Dictionary moduleDictionary;
+                    ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+                    moduleDictionaries.push_back({
+                        moduleDictionary,
+                        moduleFile,
+                        submodulePath,
+                        moduleName
+                    });
+                }
+                catch (...) {
+                    continue;
+                }
+                
+            }
+            
+        }
+
+        auto addModule = [this, &dependencies, &parents](const ModuleInformation& moduleInformation) {
+            const ghoul::Dictionary& moduleDictionary = moduleInformation.dictionary;
+            const std::string& moduleFile = moduleInformation.moduleFile;
+            const std::string& modulePath = moduleInformation.modulePath;
+            const std::string& moduleName = moduleInformation.moduleName;
+            
             std::vector<std::string> keys = moduleDictionary.keys();
             for (const std::string& key : keys) {
                 if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
                     LERROR("SceneGraphNode '" << key << "' is not a table in module '"
-                                                 << moduleFile << "'");
+                           << moduleFile << "'");
                     continue;
                 }
-
+                
                 ghoul::Dictionary element;
                 std::string nodeName;
                 std::string parentName;
-
+                
                 moduleDictionary.getValue(key, element);
                 element.setValue(KeyPathModule, modulePath);
-
+                
                 element.getValue(SceneGraphNode::KeyName, nodeName);
                 element.getValue(SceneGraphNode::KeyParentName, parentName);
-
+                
                 FileSys.setCurrentDirectory(modulePath);
                 SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
                 if (node == nullptr) {
                     LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
                     continue;
-                    //clear();
-                    //return false;
                 }
-
+                
                 dependencies[nodeName].push_back(parentName);
                 parents[nodeName] = parentName;
                 // Also include loaded dependencies
-
+                
                 if (element.hasKey(SceneGraphNode::KeyDependencies)) {
                     if (element.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
                         ghoul::Dictionary nodeDependencies;
                         element.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
-
+                        
                         std::vector<std::string> keys = nodeDependencies.keys();
                         for (const std::string& key : keys) {
                             std::string value = nodeDependencies.value<std::string>(key);
@@ -259,12 +309,16 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                         LERROR("Dependencies did not have the corrent type");
                     }
                 }
-
-
+                
+                
                 SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
                 internalNode->node = node;
                 _nodes.push_back(internalNode);
             }
+        };
+
+        for (const ModuleInformation& i : moduleDictionaries) {
+            addModule(i);
         }
     }
     ghoul::lua::destroyLuaState(state);
