@@ -50,8 +50,8 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             },
 			Projection = {
-				Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojectionhybrid/images",
-				EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojectionhybrid/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+				Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojection/images",
+				EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojection/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
                 SequenceType   = "hybrid",
 				Observer       = "NEW HORIZONS",
 				Target         = "PLUTO",
