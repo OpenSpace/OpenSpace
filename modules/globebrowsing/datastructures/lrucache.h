@@ -22,50 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __LRU_CACHE_H__
+#define __LRU_CACHE_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <glm/glm.hpp>
+#include <memory>
+#include <ostream>
+#include <unordered_map>
+#include <list>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-#include <test_lrucache.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_texturetileset.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+namespace openspace {
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+	// Templated class implementing a Least-Recently-Used Cache
+	template<typename KeyType, typename ValueType>
+	class LRUCache {
+	public:
+		LRUCache(size_t size);
+		~LRUCache();
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+		void put(const KeyType& key, const ValueType& value);
+		bool exist(const KeyType& key) const;
+		ValueType get(const KeyType& key);
 
-	testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
+	private:
+		void clean();
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
 
-	return returnVal;
-}
+	// Member varialbes
+	private:
+		
+		std::list<std::pair<KeyType, ValueType>> _itemList;
+		std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
+		size_t _cacheSize;
+
+	};
+
+
+} // namespace openspace
+
+
+#include <modules/globebrowsing/datastructures/lrucache.inl>
+
+#endif // __LRU_CACHE_H__
