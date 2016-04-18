@@ -652,6 +652,22 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
         _gui->startFrame(static_cast<float>(dt), glm::vec2(drawBufferResolution), mousePosition, mouseButtons);
     }
+
+    // Testing this every frame has minimal impact on the performance --- abock
+    // Debug build: 1-2 us ; Release build: <= 1 us
+    using ghoul::logging::LogManager;
+    int warningCounter = LogMgr.messageCounter(LogManager::LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(LogManager::LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(LogManager::LogLevel::Fatal);
+
+    if (warningCounter > 0)
+        LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
+    if (errorCounter > 0)
+        LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
+    if (fatalCounter > 0)
+        LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+
+    LogMgr.resetMessageCounters();
 }
 
 void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
