@@ -186,8 +186,8 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
 	_positions[TargetPosition] = target;
 
-    if (ImageSequencer2::ref().isReady()) {
-        _imageSequenceTime = ImageSequencer2::ref().instrumentActiveTime(_instrumentName);
+    if (ImageSequencer::ref().isReady()) {
+        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(_instrumentName);
         _drawLine = _imageSequenceTime != -1.f;
     }
 }

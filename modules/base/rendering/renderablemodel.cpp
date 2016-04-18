@@ -234,10 +234,10 @@ void RenderableModel::update(const UpdateData& data) {
 	double _time = data.time;
 
 	//if (_isGhost){
-	//	futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
-	//	double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
-	//	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-	//	double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
+	//	futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();
+	//	double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - data.time;
+	//	double interval = openspace::ImageSequencer::ref().getIntervalLength();
+	//	double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
 	//	if (interval > 60) {
 	//		if (t < 0.8)
 	//			_fading = static_cast<float>(t);

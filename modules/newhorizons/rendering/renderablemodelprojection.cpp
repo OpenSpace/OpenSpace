@@ -168,7 +168,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 			dictionary.getValue(keyTranslation, translationDictionary);
 			if (_sequenceType == sequenceTypeImage) {
 				parser = new LabelParser(name, _sequenceSource, translationDictionary);
-				openspace::ImageSequencer2::ref().runSequenceParser(parser);
+				openspace::ImageSequencer::ref().runSequenceParser(parser);
 
 			}
 		}
@@ -351,9 +351,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
 		
 	_time = data.time;
 
-	if (openspace::ImageSequencer2::ref().isReady() && _performProjection) {
-		openspace::ImageSequencer2::ref().updateSequencer(_time);
-		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
+	if (openspace::ImageSequencer::ref().isReady() && _performProjection) {
+		openspace::ImageSequencer::ref().updateSequencer(_time);
+		_capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
 		
 	// set spice-orientation in accordance to timestamp

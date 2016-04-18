@@ -421,7 +421,7 @@ void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds
 // This method is purely cosmetics, can very well be removed 
 // but be sure to set colors somewhere. 
 void RenderableFov::computeColors() {
-	double t2 = (openspace::ImageSequencer2::ref().getNextCaptureTime());
+	double t2 = (openspace::ImageSequencer::ref().getNextCaptureTime());
 	double diff = (t2 - _time);
 	float t = 0.0;
 	float interpolationStart = 7.0; //seconds before
@@ -551,8 +551,8 @@ void RenderableFov::render(const RenderData& data) {
 	_programObject->setUniform("ModelTransform", glm::mat4(1));
 	setPscUniforms(*_programObject.get(), data.camera, data.position);
 	
-	if (openspace::ImageSequencer2::ref().isReady())
-		_drawFOV = ImageSequencer2::ref().instrumentActive(_instrumentID);
+	if (openspace::ImageSequencer::ref().isReady())
+		_drawFOV = ImageSequencer::ref().instrumentActive(_instrumentID);
 
 	if (_drawFOV){
 		// update only when time progresses.

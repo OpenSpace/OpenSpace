@@ -194,20 +194,20 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
                                             _projectorID,
                                             translationDictionary,
                                             _potentialTargets);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
             }
             else if (_sequenceType == sequenceTypeImage) {
                 parser = new LabelParser(name,
                                          _sequenceSource,
                                          translationDictionary);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
             }
             else if (_sequenceType == sequenceTypeHybrid) {
                 //first read labels
                 parser = new LabelParser(name,
                                          _sequenceSource,
                                          translationDictionary);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
 
                 std::string _eventFile;
                 bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
@@ -219,7 +219,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
                                                 _projectorID,
                                                 translationDictionary,
                                                 _potentialTargets);
-                    openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                    openspace::ImageSequencer::ref().runSequenceParser(parser);
                 }
                 else{
                     LWARNING("No eventfile has been provided, please check modfiles");
@@ -561,9 +561,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _capture = false;
 
-    if (openspace::ImageSequencer2::ref().isReady() && _performProjection){
-        openspace::ImageSequencer2::ref().updateSequencer(_time);
-        _capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
+    if (openspace::ImageSequencer::ref().isReady() && _performProjection){
+        openspace::ImageSequencer::ref().updateSequencer(_time);
+        _capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
     }
 
     if (_fboProgramObject && _fboProgramObject->isDirty()) {
