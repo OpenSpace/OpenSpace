@@ -22,51 +22,83 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEXTURETILESET_H__
-#define __TEXTURETILESET_H__
+#ifndef __TWMS_TILE_PROVIDER_H__
+#define __TWMS_TILE_PROVIDER_H__
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 
-#include <modules/globebrowsing/rendering/twmstileprovider.h>
 #include <modules/globebrowsing/rendering/texturetile.h>
 
 
 
+//////////////////////////////////////////////////////////////////////////////////////
+//									TILE INDEX										//
+//////////////////////////////////////////////////////////////////////////////////////
+
+namespace openspace {
+	using HashKey = unsigned long;
+
+	struct TileIndex {
+		int x, y, level;
+
+		HashKey hashKey() const {
+			return x ^ (y << 16) ^ (level << 21);
+		}
+	};
+
+	
+}
+
+/*
+bool operator==(const openspace::TileIndex& a, const openspace::TileIndex& b) {
+	return a.x == b.x && a.y == b.y && a.level == b.level;
+}
+
+std::ostream& operator<<(std::ostream& o, const openspace::TileIndex& key) {
+	return o << key.x << ", " << key.y << " at level " << key.level;
+}
+
+
+// custom specialization of std::hash can be injected in namespace std
+namespace std {
+	template<> struct hash<openspace::TileIndex> {
+		unsigned long  operator()(openspace::TileIndex const& ti) const {
+			return ti.x ^ (ti.y << 16) ^ (ti.level << 21);
+		}
+	};
+}
+*/
+
+#include <modules/globebrowsing/datastructures/lrucache.h>
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//									TEXTURE TILE SET									//
+//									TWMS TILE PROVIDER									//
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
 namespace openspace {
 	using namespace ghoul::opengl;
 
-	class TextureTileSet
+	class TwmsTileProvider
 	{
 	public:
-		TextureTileSet();
-		~TextureTileSet();
+		TwmsTileProvider();
+		~TwmsTileProvider();
 
-		/// Returns the index of the tile at an appropriate level.
-		/// Appropriate meaning that the tile should be at as high level as possible
-		/// Without the tile being smaller than the patch in lat-lon space.
-		/// The tile is at least as big as the patch.
-		TileIndex getTileIndex(LatLonPatch patch);
-		std::shared_ptr<Texture> getTile(LatLonPatch patch);
 		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
-		LatLonPatch getTilePositionAndScale(const TileIndex& tileIndex);
+
 
 	private:
-		LatLon _sizeLevel0;
-		LatLon _offsetLevel0;
+		void downloadTileAndPutInCache(const TileIndex&);
 
-		std::shared_ptr<Texture> _testTexture;
-
+		LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
 	};
 
 }  // namespace openspace
 
-#endif  // __TEXTURETILESET_H__
+#endif  // __TWMS_TILE_PROVIDER_H__

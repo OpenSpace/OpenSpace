@@ -41,60 +41,80 @@
 
 
 namespace {
-	const std::string _loggerCat = "TextureTileSet";
+	const std::string _loggerCat = "TwmsTileProvider";
 }
 
 namespace openspace {
 
-	TextureTileSet::TextureTileSet()
+	TwmsTileProvider::TwmsTileProvider()
+	: _tileCache(500) // setting cache size
 	{
-		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath("textures/earth_bluemarble.jpg")));
-		if (_testTexture) {
-			LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
-			_testTexture->uploadTexture();
+		int downloadApplicationVersion = 1;
+		DownloadManager::initialize("../tmp_openspace_downloads/", downloadApplicationVersion);
+	}
 
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			// TODO: AnisotropicMipMap crashes on ATI cards ---abock
-			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+	TwmsTileProvider::~TwmsTileProvider(){
+
+	}
+
+
+	std::shared_ptr<Texture> TwmsTileProvider::getTile(const TileIndex& tileIndex) {
+		HashKey hashkey = tileIndex.hashKey();
+		if (_tileCache.exist(hashkey)) {
+			return _tileCache.get(hashkey);
 		}
-		
+		else {
+			downloadTileAndPutInCache(tileIndex);
+		}
+		return nullptr;
 	}
 
-	TextureTileSet::~TextureTileSet(){
+
+
+	void TwmsTileProvider::downloadTileAndPutInCache(const TileIndex& tileIndex) {
+		// download tile
+		std::stringstream ss;
+		std::string baseUrl = "https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg";
+		ss << baseUrl;
+		ss << "&TileMatrix=" << tileIndex.level;
+		ss << "&TileCol=" << tileIndex.x;
+		ss << "&TileRow=" << tileIndex.y;
+		std::string twmsRequestUrl = ss.str();
+
+		using ghoul::filesystem::File;
+
+		std::string filename = "tiles/tile" + twmsRequestUrl.substr(baseUrl.length()) + ".jpg";
+		File localTileFile(filename);
+		bool overrideFile = true;
+
+
+
+		struct OnTileDownloaded {
+			HashKey key;
+			LRUCache<HashKey, std::shared_ptr<Texture>> * tileCache;
+
+			OnTileDownloaded(HashKey key, LRUCache<HashKey, std::shared_ptr<Texture>> * tileCache)
+				: key(key)
+				, tileCache(tileCache)
+			{
+			
+			}
+
+			void operator()(const DownloadManager::FileFuture& ff) const {
+				LDEBUG("Download of tile with hashkey " << key << " done!");
+				auto textureReader = ghoul::io::TextureReader::ref();
+				std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(ff.filePath)));
+				tileCache->put(key, texture);
+				LDEBUG("Cache updated");
+			}
+		};
+
+
+		OnTileDownloaded onTileDownloaded(tileIndex.hashKey(), &_tileCache);
+
+		DownloadManager::FileFuture* ff = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile, onTileDownloaded);
 
 	}
 
-	TileIndex TextureTileSet::getTileIndex(LatLonPatch patch) {
-		int level = log2(static_cast<int>(glm::max(
-			_sizeLevel0.lat / patch.size().lat,
-			_sizeLevel0.lon / patch.size().lon)));
-		Vec2 TileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
-		glm::ivec2 tileIndexXY = -(patch.northWestCorner().toLonLatVec2() + _offsetLevel0.toLonLatVec2()) / TileSize;
-
-		TileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
-		return tileIndex;
-	}
-
-	std::shared_ptr<Texture> TextureTileSet::getTile(LatLonPatch patch) {
-		return getTile(getTileIndex(patch));
-	}
-
-	std::shared_ptr<Texture> TextureTileSet::getTile(const TileIndex& tileIndex) {
-		return _testTexture;
-	}
-
-	LatLonPatch TextureTileSet::getTilePositionAndScale(const TileIndex& tileIndex) {
-		LatLon tileSize = LatLon(
-			_sizeLevel0.lat / pow(2, tileIndex.level),
-			_sizeLevel0.lon / pow(2, tileIndex.level));
-		LatLon northWest = LatLon(
-			_offsetLevel0.lat + tileIndex.y * tileSize.lat,
-			_offsetLevel0.lon + tileIndex.x * tileSize.lon);
-		
-		return LatLonPatch(
-			LatLon(northWest.lat + tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
-			LatLon(tileSize.lat / 2, tileSize.lon / 2));
-	}
 
 }  // namespace openspace

@@ -90,12 +90,21 @@ namespace openspace {
 	void LatLonPatchRenderer::renderPatch(
 		const LatLonPatch& patch, const RenderData& data, double radius) 
 	{
-		// activate shader
-		_programObject->activate();
+		
+		// Get the textures that should be used for rendering
+		TileIndex ti = tileSet.getTileIndex(patch);
+
+		renderPatch(patch, data, radius, ti);
+	}
+
+	void LatLonPatchRenderer::renderPatch(
+		const LatLonPatch& patch, const RenderData& data, double radius, const TileIndex& tileIndex)
+	{
+
 		using namespace glm;
 
-
-		
+		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
@@ -103,21 +112,20 @@ namespace openspace {
 		mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
 			* viewTransform * modelTransform;
 
-		// Get the textures that should be used for rendering
-	 	glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
-		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
-		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
+
+		// activate shader
+		_programObject->activate();
 
 		// Bind and use the texture
 		ghoul::opengl::TextureUnit texUnit;
 		texUnit.activate();
 		tile00->bind();
 		_programObject->setUniform("textureSampler", texUnit);
-		
+
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(patch.halfSize().toLonLatVec2()));
+		_programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 
 		glEnable(GL_DEPTH_TEST);
@@ -131,6 +139,8 @@ namespace openspace {
 		_programObject->deactivate();
 	}
 	
+
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +193,7 @@ namespace openspace {
 
 
 		// Get the textures that should be used for rendering
-		glm::ivec3 tileIndex = tileSet.getTileIndex(patch);
+		TileIndex tileIndex = tileSet.getTileIndex(patch);
 		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
 		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
 

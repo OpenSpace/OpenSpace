@@ -59,8 +59,7 @@ namespace openspace {
 		~PatchRenderer();
 		
 		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
-
-		void setFrustrumCuller(std::shared_ptr<FrustrumCuller> fc);
+		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius, const TileIndex& ti) = 0;
 		
 	protected:
 
@@ -83,7 +82,15 @@ namespace openspace {
 			const LatLonPatch& patch,
 			const RenderData& data, 
 			double radius) override;
+
+		virtual void renderPatch(
+			const LatLonPatch& patch, 
+			const RenderData& data, 
+			double radius, 
+			const TileIndex& ti) override;
 	};
+
+
 
 	class ClipMapPatchRenderer : public PatchRenderer {
 	public:
@@ -93,6 +100,13 @@ namespace openspace {
 			const LatLonPatch& patch,
 			const RenderData& data,
 			double radius) override;
+
+		virtual void renderPatch(
+			const LatLonPatch& patch,
+			const RenderData& data,
+			double radius,
+			const TileIndex& ti) { /* empty */};
+
 	};
 }  // namespace openspace
 

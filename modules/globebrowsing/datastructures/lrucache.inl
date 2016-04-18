@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __LRU_CACHE__
+#define __LRU_CACHE__
+
+
 #include <ghoul/misc/assert.h>
 //#include <modules/globebrowsing/datastructures/lrucache.h>
 
@@ -89,3 +93,5 @@ namespace openspace {
 
 
 } // namespace openspace
+
+#endif // !__LRU_CACHE__

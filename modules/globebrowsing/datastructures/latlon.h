@@ -83,6 +83,7 @@ public:
 
 	const LatLon& center() const;
 	const LatLon& halfSize() const;
+	LatLon size() const;
 
 private:
 	LatLon _center;
