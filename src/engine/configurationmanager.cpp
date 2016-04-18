@@ -34,7 +34,7 @@ using std::string;
 
 namespace {
     const string _configurationFile = "openspace.cfg";
-	const string _keyBasePath = "BASE_PATH";
+    const string _keyBasePath = "BASE_PATH";
 }
 
 namespace openspace {
@@ -91,24 +91,24 @@ string ConfigurationManager::findConfiguration(const string& filename) {
 }
     
 void ConfigurationManager::loadFromFile(const string& filename) {
-	using ghoul::filesystem::FileSystem;
+    using ghoul::filesystem::FileSystem;
     
     if (!FileSys.fileExists(filename))
         throw ghoul::FileNotFoundError(filename, "ConfigurationManager");
 
-	// ${BASE_PATH}
-	string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
+    // ${BASE_PATH}
+    string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
         + FileSystem::TokenClosingBraces;
 
-	// Retrieving the directory in which the configuration file lies
+    // Retrieving the directory in which the configuration file lies
     string absolutePath = FileSys.absolutePath(filename);
-	string basePath = ghoul::filesystem::File(absolutePath).directoryName();
-	FileSys.registerPathToken(basePathToken, basePath);
+    string basePath = ghoul::filesystem::File(absolutePath).directoryName();
+    FileSys.registerPathToken(basePathToken, basePath);
 
-	// Loading the configuration file into ourselves
+    // Loading the configuration file into ourselves
     ghoul::lua::loadDictionaryFromFile(filename, *this);
 
-	// Register all the paths
+    // Register all the paths
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);
 
     std::vector<std::string> pathKeys = dictionary.keys();
@@ -118,8 +118,8 @@ void ConfigurationManager::loadFromFile(const string& filename) {
             std::string fullKey =
                 FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
             LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
-			
-			bool override = (basePathToken == fullKey);
+            
+            bool override = (basePathToken == fullKey);
             if (override)
                 LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
 
@@ -132,7 +132,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         }
     }
 
-	bool complete = checkCompleteness();
+    bool complete = checkCompleteness();
     if (!complete) {
         throw ghoul::RuntimeError(
             "Configuration file '" + filename + "' was not complete",
@@ -140,34 +140,34 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         );
     }
 
-	// Remove the Paths dictionary from the configuration manager as those paths might
-	// change later and we don't want to be forced to keep our local copy up to date
-	removeKey(KeyPaths);
+    // Remove the Paths dictionary from the configuration manager as those paths might
+    // change later and we don't want to be forced to keep our local copy up to date
+    removeKey(KeyPaths);
 }
 
 bool ConfigurationManager::checkCompleteness() const {
-	std::vector<std::string> requiredTokens = {
-		KeyPaths,
-		KeyPaths + "." + KeyCache,
-		KeyFonts,
-		KeyConfigSgct
-	};
+    std::vector<std::string> requiredTokens = {
+        KeyPaths,
+        KeyPaths + "." + KeyCache,
+        KeyFonts,
+        KeyConfigSgct
+    };
 
-	bool totalSuccess = true;
-	for (const std::string& token : requiredTokens) {
-		bool success = hasKey(token);
+    bool totalSuccess = true;
+    for (const std::string& token : requiredTokens) {
+        bool success = hasKey(token);
 
         if (!success) {
-			LFATALC(
+            LFATALC(
                 "ConfigurationManager",
                 "Configuration file did not contain required key '" << token << "'"
             );
         }
 
-		totalSuccess &= success;
-	}
+        totalSuccess &= success;
+    }
 
-	return totalSuccess;
+    return totalSuccess;
 }
 
 }  // namespace openspace

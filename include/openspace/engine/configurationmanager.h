@@ -116,7 +116,7 @@ public:
      * configuration file
      * \pre \p filename must not be empty
      */
-	void loadFromFile(const std::string& filename);
+    void loadFromFile(const std::string& filename);
 
 private:
     /**
@@ -126,7 +126,7 @@ private:
      * \return <code>true</code> if the configuration file was complete;
      * <code>false</code> otherwise
      */
-	bool checkCompleteness() const;
+    bool checkCompleteness() const;
 };
 
 } // namespace openspace

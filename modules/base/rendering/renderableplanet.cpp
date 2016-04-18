@@ -57,20 +57,20 @@ namespace openspace {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-	, _colorTexturePath("colorTexture", "Color Texture")
+    , _colorTexturePath("colorTexture", "Color Texture")
     , _programObject(nullptr)
     , _texture(nullptr)
-	, _nightTexture(nullptr)
+    , _nightTexture(nullptr)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
-	, _rotation("rotation", "Rotation", 0, 0, 360)
-	, _alpha(1.f)
+    , _rotation("rotation", "Rotation", 0, 0, 360)
+    , _alpha(1.f)
     , _nightTexturePath("")
     , _hasNightTexture(false)
 {
-	std::string name;
-	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-	ghoul_assert(success,
+    std::string name;
+    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    ghoul_assert(success,
             "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
 
     //std::string path;
@@ -80,35 +80,35 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
-	if (success) {
-		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
+    if (success) {
+        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         //geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
         _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
-	}
+    }
 
-	dictionary.getValue(keyFrame, _frame);
-	dictionary.getValue(keyBody, _target);
-	if (_target != "")
-		setBody(_target);
+    dictionary.getValue(keyFrame, _frame);
+    dictionary.getValue(keyBody, _target);
+    if (_target != "")
+        setBody(_target);
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-	success = dictionary.getValue("Textures.Color", texturePath);
-	if (success)
+    success = dictionary.getValue("Textures.Color", texturePath);
+    if (success)
         _colorTexturePath = absPath(texturePath);
 
-	std::string nightTexturePath = "";
-	dictionary.getValue("Textures.Night", nightTexturePath);
-	
-	if (nightTexturePath != ""){
-		_hasNightTexture = true;
-		_nightTexturePath = absPath(nightTexturePath);
-	}
+    std::string nightTexturePath = "";
+    dictionary.getValue("Textures.Night", nightTexturePath);
+    
+    if (nightTexturePath != ""){
+        _hasNightTexture = true;
+        _nightTexturePath = absPath(nightTexturePath);
+    }
 
-	addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry);
 
-	addProperty(_colorTexturePath);
+    addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
 
     if (dictionary.hasKeyAndValue<bool>(keyShading)) {
@@ -118,8 +118,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_performShading);
-	// Mainly for debugging purposes @AA
-	addProperty(_rotation);
+    // Mainly for debugging purposes @AA
+    addProperty(_rotation);
 }
 
 RenderablePlanet::~RenderablePlanet() {
@@ -167,7 +167,7 @@ bool RenderablePlanet::deinitialize() {
 
     _geometry = nullptr;
     _texture = nullptr;
-	_nightTexture = nullptr;
+    _nightTexture = nullptr;
     return true;
 }
 
@@ -176,7 +176,7 @@ bool RenderablePlanet::isReady() const {
     ready &= (_programObject != nullptr);
     ready &= (_texture != nullptr);
     ready &= (_geometry != nullptr);
-	return ready;
+    return ready;
 }
 
 void RenderablePlanet::render(const RenderData& data)
@@ -186,50 +186,50 @@ void RenderablePlanet::render(const RenderData& data)
 
     // scale the planet to appropriate size since the planet is a unit sphere
     glm::mat4 transform = glm::mat4(1);
-	
-	//earth needs to be rotated for that to work.
-	glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-	glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-	glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
+    
+    //earth needs to be rotated for that to work.
+    glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+    glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
 
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++){
-			transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-		}
-	}
-	transform = transform * rot * roty * rotProp;
-	
-	//glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
-	//glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        }
+    }
+    transform = transform * rot * roty * rotProp;
+    
+    //glm::mat4 modelview = data.camera.viewMatrix()*data.camera.modelMatrix();
+    //glm::vec3 camSpaceEye = (-(modelview*data.position.vec4())).xyz;
 
-	
-	double  lt;
+    
+    double  lt;
     glm::dvec3 p =
     SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader
 //	_programObject->setUniform("camdir", camSpaceEye);
-	_programObject->setUniform("transparency", _alpha);
-	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(*_programObject.get(), data.camera, data.position);
-	
+    _programObject->setUniform("transparency", _alpha);
+    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _programObject->setUniform("ModelTransform", transform);
+    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    
     _programObject->setUniform("_performShading", _performShading);
 
     // Bind texture
-	ghoul::opengl::TextureUnit dayUnit;
-	dayUnit.activate();
+    ghoul::opengl::TextureUnit dayUnit;
+    dayUnit.activate();
     _texture->bind();
-	_programObject->setUniform("texture1", dayUnit);
+    _programObject->setUniform("texture1", dayUnit);
 
-	// Bind possible night texture
-	if (_hasNightTexture) {
-		ghoul::opengl::TextureUnit nightUnit;
-		nightUnit.activate();
-		_nightTexture->bind();
-		_programObject->setUniform("nightTex", nightUnit);
-	}
+    // Bind possible night texture
+    if (_hasNightTexture) {
+        ghoul::opengl::TextureUnit nightUnit;
+        nightUnit.activate();
+        _nightTexture->bind();
+        _programObject->setUniform("nightTex", nightUnit);
+    }
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -242,37 +242,37 @@ void RenderablePlanet::render(const RenderData& data)
 }
 
 void RenderablePlanet::update(const UpdateData& data){
-	// set spice-orientation in accordance to timestamp
+    // set spice-orientation in accordance to timestamp
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-	_time = data.time;
+    _time = data.time;
 }
 
 void RenderablePlanet::loadTexture() {
     _texture = nullptr;
-	if (_colorTexturePath.value() != "") {
+    if (_colorTexturePath.value() != "") {
         _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
-			_texture->uploadTexture();
+            _texture->uploadTexture();
 
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-	if (_hasNightTexture) {
-		_nightTexture = nullptr;
-		if (_nightTexturePath != "") {
+    if (_hasNightTexture) {
+        _nightTexture = nullptr;
+        if (_nightTexturePath != "") {
             _nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
-			if (_nightTexture) {
-				LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
-				_nightTexture->uploadTexture();
+            if (_nightTexture) {
+                LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
+                _nightTexture->uploadTexture();
                 _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-				//_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-			}
-		}
-	}
+                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            }
+        }
+    }
 }
 
 }  // namespace openspace
