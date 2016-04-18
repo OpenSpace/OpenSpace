@@ -161,19 +161,25 @@ namespace openspace{
             // _container->addISWACygnet(cygnetId, data);
             createScreenSpace(id);
         }else if(id < 0){
-           //download metadata to texture plane
-             // std::shared_ptr<ExtensionFuture> extFuture = fileExtension(id);
+            //download metadata to texture plane
+            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(id);
+            extFuture->type = "TEXTURE";
+            extFuture->id = -id;
             // extFuture->parent = info;
             // _extFutures.push_back(extFuture);
             // std::shared_ptr<ExtensionFuture> extFuture
-            _metaFutures.push_back(downloadMetadata(id));
+            _metaFutures.push_back(extFuture);
         }
         else {
+            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-2);
+            extFuture->type = "DATA";
+            extFuture->id = -2;
             // std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
             // mdata->id = 0;
             // mdata->path = absPath("${OPENSPACE_DATA}/"+info);
             // createISWACygnet(mdata);
-            createDataPlane(absPath("${OPENSPACE_DATA}/"+info));
+            _metaFutures.push_back(extFuture);
+            // createDataPlane(absPath("${OPENSPACE_DATA}/"+info));
         }
     }
 
@@ -223,7 +229,7 @@ namespace openspace{
         if(file.is_open()){
             std::string json( (std::istreambuf_iterator<char>(file) ),
                                 (std::istreambuf_iterator<char>()));
-            std::cout << "This is in the file: " <<  json << std::endl;
+            // std::cout << "This is in the file: " <<  json << std::endl;
             metaFuture->isFinished = true;
             metaFuture->json = json;
         }
@@ -320,7 +326,6 @@ namespace openspace{
                 data->path = path;
                 data->parent = (*it)->parent;
 
-                //createTexturePlane(id, json)
                 createISWACygnet(data);
                 it = _extFutures.erase( it );
             }
@@ -331,7 +336,12 @@ namespace openspace{
 
         for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
             if((*it)->isFinished) {
-                createTexturePlane(7,(*it)->json);
+                if((*it)->type == "TEXTURE"){
+                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
+                }else{
+                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
+
+                }
                 it = _metaFutures.erase( it );
             }else{
                 ++it;
@@ -395,7 +405,7 @@ namespace openspace{
         return table;
     }
 
-    std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString){
+    std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString, std::string type){
         if(jsonString != ""){
             json j = json::parse(jsonString);
 
@@ -442,11 +452,12 @@ namespace openspace{
             //                         + std::to_string(scalew) +
             //                     "}";
 
+
             std::string table = "{"
             "Name = 'TexturePlane "+ std::to_string(id) +"' , "
             "Parent = '" + parent + "', "
             "Renderable = {"    
-                "Type = 'TexturePlane', "
+                "Type = '" + type + "', "
                 "Id = " + std::to_string(id) + ", "
                 "Frame = '" + frame + "' , "
                 "Scale = " + std::to_string(scale) + ", "
@@ -455,7 +466,7 @@ namespace openspace{
             "}"
             ;
 
-            // std::cout << table << std::endl;
+            std::cout << table << std::endl;
             // ghoul::Dictionary dic;
             return table;
         }
@@ -494,18 +505,28 @@ namespace openspace{
         return "";
     }
 
-    void ISWAManager::createDataPlane(std::string kwPath){
-        std::string luaTable = parseKWToLuaTable(kwPath);
+    //Create KameleonPlane?
+    // void ISWAManager::createDataPlane(std::string kwPath){
+    //     std::string luaTable = parseKWToLuaTable(kwPath);
+    //     if(luaTable != ""){
+    //         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+    //         OsEng.scriptEngine().queueScript(script);
+    //     }
+    // }
+
+
+    // void ISWAManager::createTexturePlane(int id, std::string json){
+    //     std::string luaTable = parseJSONToLuaTable(id, json);
+    //     if(luaTable != ""){
+    //         std::string script = "openspace.addSceneGraphNode(" + parseJSONToLuaTable(id, json) + ");";
+    //         OsEng.scriptEngine().queueScript(script);
+    //     }
+    // }
+
+    void ISWAManager::createPlane(int id, std::string json, std::string type){
+        std::string luaTable = parseJSONToLuaTable(id, json, type);
         if(luaTable != ""){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
-        }
-    }
-
-    void ISWAManager::createTexturePlane(int id, std::string json){
-        std::string luaTable = parseJSONToLuaTable(id, json);
-        if(luaTable != ""){
-            std::string script = "openspace.addSceneGraphNode(" + parseJSONToLuaTable(id, json) + ");";
             OsEng.scriptEngine().queueScript(script);
         }
     }

@@ -45,12 +45,10 @@
  private:
  	virtual void loadTexture() override;
     virtual void updateTexture() override;
-
+    
     static int id();
  
 	std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-	std::shared_ptr<DownloadManager::FileFuture> _futureData;
-	std::string _databuffer;
  };
  
  } // namespace openspace

@@ -37,21 +37,21 @@
 #include <openspace/util/time.h>
 
 namespace {
-	const std::string _loggerCat = "TexutePlane";
+    const std::string _loggerCat = "TexutePlane";
 }
 
 namespace openspace {
 
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
-	:CygnetPlane(dictionary)
-	,_futureTexture(nullptr)
+    :CygnetPlane(dictionary)
+    ,_futureTexture(nullptr)
 {
-	_id = id();
-	std::string name;
-	dictionary.getValue("Name", name);
-	setName(name);
-	//setName("TexturePlane" + std::to_string(_id));
-	registerProperties();
+    _id = id();
+    std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
+    //setName("TexturePlane" + std::to_string(_id));
+    registerProperties();
 }
 
 
@@ -60,7 +60,7 @@ TexturePlane::~TexturePlane(){}
 bool TexturePlane::initialize(){
     createPlane();
     createShader();
-	updateTexture();
+    updateTexture();
     return isReady();
 }
 
@@ -71,153 +71,141 @@ bool TexturePlane::deinitialize(){
     _memorybuffer = "";
     // std::remove(absPath(_data->path).c_str());
 
-	return true;
+    return true;
 }
 
 void TexturePlane::render(const RenderData& data){
-	if(_texture){
-		// psc position = data.position;
-		// glm::mat4 transform = glm::mat4(1.0);
-		// // transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
+    if(_texture){
+        // psc position = data.position;
+        // glm::mat4 transform = glm::mat4(1.0);
+        // // transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
 
-		// float textureRatio = (float (_texture->height()/float(_texture->width())));
-		// transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
+        // float textureRatio = (float (_texture->height()/float(_texture->width())));
+        // transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
 
-		// glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-		// glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
-		// // glm::mat4 rot = glm::mat4(1.0);
-		// /*	for (int i = 0; i < 3; i++){
-		// 	for (int j = 0; j < 3; j++){
-		// 		transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-		// 	}
-		// }*/
+        // glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+        // glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
+        // // glm::mat4 rot = glm::mat4(1.0);
+        // /*   for (int i = 0; i < 3; i++){
+        //  for (int j = 0; j < 3; j++){
+        //      transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        //  }
+        // }*/
 
-		// //transform = transform * roty * rotx;
-		// position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
+        // //transform = transform * roty * rotx;
+        // position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
 
-		// // transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
-		// // transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
-		// // transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
+        // // transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
+        // // transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
+        // // transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
 
-		psc position = data.position;
-		glm::mat4 transform = glm::mat4(1.0);
+        psc position = data.position;
+        glm::mat4 transform = glm::mat4(1.0);
 
-		glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-		glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+        glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+        glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+        glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
 
-		glm::mat4 rot = glm::mat4(1.0);
-		for (int i = 0; i < 3; i++){
-			for (int j = 0; j < 3; j++){
-				transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-			}
-		}
+        glm::mat4 rot = glm::mat4(1.0);
+        for (int i = 0; i < 3; i++){
+            for (int j = 0; j < 3; j++){
+                transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+            }
+        }
 
-		transform = transform * rotz * roty; //BATSRUS
+        transform = transform * rotz * roty; //BATSRUS
 
-		if(_data->frame == "GSM"){
-			glm::vec4 v(1,0,0,1);
-			glm::vec3 xVec = glm::vec3(transform*v);
-			xVec = glm::normalize(xVec);
+        if(_data->frame == "GSM"){
+            glm::vec4 v(1,0,0,1);
+            glm::vec3 xVec = glm::vec3(transform*v);
+            xVec = glm::normalize(xVec);
 
-			double  lt;
-		    glm::vec3 sunVec =
-		    SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-		    sunVec = glm::normalize(sunVec);
+            double  lt;
+            glm::vec3 sunVec =
+            SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+            sunVec = glm::normalize(sunVec);
 
-		    float angle = acos(glm::dot(xVec, sunVec));
-		    glm::vec3 ref =  glm::cross(xVec, sunVec);
+            float angle = acos(glm::dot(xVec, sunVec));
+            glm::vec3 ref =  glm::cross(xVec, sunVec);
 
-		    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-		    transform = rotation * transform;
-		}
+            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+            transform = rotation * transform;
+        }
 
-		position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
+        position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
 
-		// Activate shader
-		_shader->activate();
-		glEnable(GL_ALPHA_TEST);
-		glDisable(GL_CULL_FACE);
-		_shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
-		_shader->setUniform("ModelTransform", transform);
-		setPscUniforms(*_shader.get(), *OsEng.renderEngine().camera(), position);
+        // Activate shader
+        _shader->activate();
+        glEnable(GL_ALPHA_TEST);
+        glDisable(GL_CULL_FACE);
+        _shader->setUniform("ViewProjection", OsEng.renderEngine().camera()->viewProjectionMatrix());
+        _shader->setUniform("ModelTransform", transform);
+        setPscUniforms(*_shader.get(), *OsEng.renderEngine().camera(), position);
 
-		ghoul::opengl::TextureUnit unit;
-		unit.activate();
-		_texture->bind();
-		_shader->setUniform("texture1", unit);
+        ghoul::opengl::TextureUnit unit;
+        unit.activate();
+        _texture->bind();
+        _shader->setUniform("texture1", unit);
 
-		glBindVertexArray(_quad);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glEnable(GL_CULL_FACE);
+        glBindVertexArray(_quad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
 
-		_shader->deactivate();
-	}
+        _shader->deactivate();
+    }
 
 }
 
 void TexturePlane::update(const UpdateData& data){
-	if(_planeIsDirty)
-		createPlane();
+    if(_planeIsDirty)
+        createPlane();
 
-	_time = Time::ref().currentTime();
-	_stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
+    _time = Time::ref().currentTime();
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
     
     float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
     if(openSpaceUpdateInterval){
-    	if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
-    		updateTexture();
-    		_lastUpdateTime = _time;
-    	}
+        if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+            updateTexture();
+            _lastUpdateTime = _time;
+        }
     }
 
-	if(_futureTexture && _futureTexture->isFinished){
-		loadTexture();
-		_futureTexture = nullptr;
-	}
-
-
-    if(_futureData && _futureData->isFinished){
-    	std::cout << _databuffer << std::endl;
-    	_futureData = nullptr;
+    if(_futureTexture && _futureTexture->isFinished){
+        loadTexture();
+        _futureTexture = nullptr;
     }
 }
 
-
-
 void TexturePlane::loadTexture() {
-	// std::cout << _data->path << std::endl;
-	// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
-	std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath("${OPENSPACE_DATA}/GM_openspace_Z0_20150315_000000.png"));
-	// if(_memorybuffer != ""){
-		// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
-		if (texture) {
-			// LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
-			texture->uploadTexture();
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    // std::cout << _data->path << std::endl;
+    // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
+    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath("${OPENSPACE_DATA}/GM_openspace_Z0_20150315_000000.png"));
+    // if(_memorybuffer != ""){
+        // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+        if (texture) {
+            // LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
+            texture->uploadTexture();
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-	        _texture = std::move(texture);
-		}
-	// }	
+            _texture = std::move(texture);
+        }
+    // }    
 }
 
 void TexturePlane::updateTexture(){
-	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
-	std::shared_ptr<DownloadManager::FileFuture> dataFuture = ISWAManager::ref().downloadDataToMemory(1, _databuffer);
+    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
 
-	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
-	if(future){
-		_futureTexture = future;
-	}
-
-	if(dataFuture)
-		_futureData = dataFuture;
+    // std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
+    if(future){
+        _futureTexture = future;
+    }
 }
 
 int TexturePlane::id(){
-		static int id = 0;
-		return id++;
+        static int id = 0;
+        return id++;
 }
 
 }// namespace openspace
