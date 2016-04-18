@@ -640,7 +640,7 @@ void OpenSpaceEngine::preSynchronization() {
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     Time::ref().postSynchronizationPreDraw();
 
-    _scriptEngine->postSynchronizationPreDraw();	
+    _scriptEngine->postSynchronizationPreDraw();    
     _renderEngine->postSynchronizationPreDraw();
     
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {

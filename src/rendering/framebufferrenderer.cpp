@@ -40,7 +40,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-	const std::string _loggerCat = "FramebufferRenderer";
+    const std::string _loggerCat = "FramebufferRenderer";
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
     const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
@@ -61,13 +61,13 @@ void FramebufferRenderer::initialize() {
 
     const GLfloat size = 1.0f;
     const GLfloat vertex_data[] = {
-        //	  x      y     s     t
+        //      x      y     s     t
         -size, -size, 0.0f, 1.0f,
-        size,	size, 0.0f, 1.0f,
+        size,    size, 0.0f, 1.0f,
         -size,  size, 0.0f, 1.0f,
         -size, -size, 0.0f, 1.0f,
         size, -size, 0.0f, 1.0f,
-        size,	size, 0.0f, 1.0f
+        size,    size, 0.0f, 1.0f
     };
     
     glGenVertexArrays(1, &_screenQuad);
@@ -80,13 +80,13 @@ void FramebufferRenderer::initialize() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
 
-	GLint defaultFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
     // Main framebuffer
     glGenTextures(1, &_mainColorTexture);
     glGenTextures(1, &_mainDepthTexture);
-	glGenFramebuffers(1, &_mainFramebuffer);
+    glGenFramebuffers(1, &_mainFramebuffer);
 
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);

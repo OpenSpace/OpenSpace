@@ -49,7 +49,7 @@ public:
     bool initialize() override;
     bool deinitialize() override;
 
-	void render(const RenderData& data) override;
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 protected:
@@ -61,9 +61,9 @@ private:
     ghoul::opengl::Texture* _texture;
     planetgeometry::PlanetGeometry* _geometry;
 
-	glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix;
 
-	std::string _target;
+    std::string _target;
 };
 
 }  // namespace openspace

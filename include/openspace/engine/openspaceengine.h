@@ -66,8 +66,8 @@ public:
     static bool isInitialized();
     static OpenSpaceEngine& ref();
 
-	bool isMaster();
-	void setMaster(bool master);
+    bool isMaster();
+    void setMaster(bool master);
     double runTime();
     void setRunTime(double t);
 
@@ -75,29 +75,29 @@ public:
     ConfigurationManager& configurationManager();
     interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
-	scripting::ScriptEngine& scriptEngine();
+    scripting::ScriptEngine& scriptEngine();
     NetworkEngine& networkEngine();
-	LuaConsole& console();
+    LuaConsole& console();
     ModuleEngine& moduleEngine();
     network::ParallelConnection& parallelConnection();
     properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
-	gui::GUI& gui();
+    gui::GUI& gui();
 
     // SGCT callbacks
     bool initialize();
     bool initializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-	void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
-	void postDraw();
+    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+    void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
-	void charCallback(unsigned int codepoint, KeyModifier mod);
+    void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
-	void externalControlCallback(const char* receivedChars, int size, int clientId);
+    void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
 
@@ -110,22 +110,22 @@ private:
     OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
     ~OpenSpaceEngine();
 
-	void clearAllWindows();
-	bool gatherCommandlineArguments();
-	bool loadSpiceKernels();
+    void clearAllWindows();
+    bool gatherCommandlineArguments();
+    bool loadSpiceKernels();
     void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
     void runStartupScripts();
-	void configureLogging();
+    void configureLogging();
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
-	std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
-	std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
-	std::unique_ptr<LuaConsole> _console;
+    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
+    std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<gui::GUI> _gui;
     std::unique_ptr<network::ParallelConnection> _parallelConnection;
@@ -136,7 +136,7 @@ private:
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     std::unique_ptr<SyncBuffer> _syncBuffer;
     
-	bool _isMaster;
+    bool _isMaster;
     double _runTime;
 
     static OpenSpaceEngine* _engine;

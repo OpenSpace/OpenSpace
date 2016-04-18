@@ -40,42 +40,42 @@ namespace gui {
 
 class GUI {
 public:
-	GUI();
+    GUI();
     ~GUI();
 
-	bool isEnabled() const;
-	void setEnabled(bool enabled);
+    bool isEnabled() const;
+    void setEnabled(bool enabled);
 
-	void initialize();
-	void deinitialize();
+    void initialize();
+    void deinitialize();
 
-	void initializeGL();
-	void deinitializeGL();
+    void initializeGL();
+    void deinitializeGL();
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
-//	bool mouseButtonCallback(int key, int action);
-	bool mouseWheelCallback(double position);
+//    bool mouseButtonCallback(int key, int action);
+    bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-//	bool keyCallback(int key, int action);
-	bool charCallback(unsigned int character, KeyModifier modifier);
+//    bool keyCallback(int key, int action);
+    bool charCallback(unsigned int character, KeyModifier modifier);
 
-	void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
-	void endFrame();
+    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void endFrame();
 
-	void renderMainWindow();
+    void renderMainWindow();
 
-	static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 //protected:
     GuiHelpComponent _help;
     GuiOriginComponent _origin;
-	GuiPerformanceComponent _performance;
-	GuiPropertyComponent _property;
+    GuiPerformanceComponent _performance;
+    GuiPropertyComponent _property;
     GuiTimeComponent _time;
 
-	bool _isEnabled;
+    bool _isEnabled;
 
-	bool _showHelp;
+    bool _showHelp;
 };
 
 } // namespace gui

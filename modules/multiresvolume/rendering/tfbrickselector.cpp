@@ -99,7 +99,7 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
             unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
-	    //	    assert(!pickRightTimeChild && "picked right child");
+        //        assert(!pickRightTimeChild && "picked right child");
 
             // On average on the whole time period, splitting this spatial brick in two time steps
             // would generate twice as much streaming. Current number of streams of this spatial brick
@@ -276,11 +276,11 @@ float TfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
 
     /*if (currentError + 0.001 < splitError) {
         std::cout << "Warning! (TEMPORAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
-	}*/
+    }*/
     float diff = currentError - splitError;
     if (diff < 0.0) {
-	//std::cout << "local temporal split minimum for brick " << brickIndex << std::endl;
-	diff = -diff;
+    //std::cout << "local temporal split minimum for brick " << brickIndex << std::endl;
+    diff = -diff;
     }
     return diff * 0.5;
 }
@@ -302,12 +302,12 @@ float TfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
 
     /*if (currentError + 0.001 < splitError) {
         std::cout << "Warning! (SPATIAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
-	}*/
+    }*/
 
     float diff = currentError - splitError;
     if (diff < 0.0) {
-	//std::cout << "local spatial split minimum for brick " << brickIndex << std::endl;
-	diff = -diff;
+    //std::cout << "local spatial split minimum for brick " << brickIndex << std::endl;
+    diff = -diff;
     }
 
     return diff * 0.125;

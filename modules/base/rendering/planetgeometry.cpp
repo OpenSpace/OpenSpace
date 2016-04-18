@@ -34,13 +34,13 @@ namespace openspace {
 namespace planetgeometry {
 
 PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
-	std::string geometryType;
-	const bool success = dictionary.getValue(KeyType, geometryType);
-	if (!success) {
+    std::string geometryType;
+    const bool success = dictionary.getValue(KeyType, geometryType);
+    if (!success) {
         LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< KeyType << "'");
+            << KeyType << "'");
         return nullptr;
-	}
+    }
     ghoul::TemplateFactory<PlanetGeometry>* factory
           = FactoryManager::ref().factory<PlanetGeometry>();
 
@@ -56,7 +56,7 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
 PlanetGeometry::PlanetGeometry()
     : _parent(nullptr)
 {
-	setName("PlanetGeometry");
+    setName("PlanetGeometry");
 }
 
 PlanetGeometry::~PlanetGeometry()

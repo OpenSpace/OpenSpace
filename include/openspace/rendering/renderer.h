@@ -33,15 +33,15 @@
 #include <map>
 
 namespace ghoul {
-	class Dictionary;
-	
+    class Dictionary;
+    
     namespace filesystem {
         class File;
     }
-	namespace opengl {
+    namespace opengl {
         class ProgramObject;
-		class Texture;
-	}
+        class Texture;
+    }
 }
 
 namespace openspace {
@@ -49,7 +49,7 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-	
+    
 class Renderer {
 public:
     virtual void initialize() = 0;
@@ -60,14 +60,14 @@ public:
     virtual void setResolution(glm::ivec2 res) = 0;
 
     virtual void update() = 0;
-	virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
+    virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() = 0;
     
-};		// Renderer
-}		// openspace
+};        // Renderer
+}        // openspace
 
-#endif 	// __RENDERER_H__
+#endif     // __RENDERER_H__

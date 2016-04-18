@@ -38,21 +38,21 @@ namespace planetgeometryprojection {
 
 class SimpleSphereGeometryProjection : public PlanetGeometryProjection {
 public:
-	SimpleSphereGeometryProjection(const ghoul::Dictionary& dictionary);
-	~SimpleSphereGeometryProjection();
+    SimpleSphereGeometryProjection(const ghoul::Dictionary& dictionary);
+    ~SimpleSphereGeometryProjection();
 
 
-	bool initialize(RenderablePlanetProjection* parent) override;
+    bool initialize(RenderablePlanetProjection* parent) override;
     void deinitialize() override;
     void render() override;
 
 private:
     void createSphere();
 
-	glm::vec2 _modRadius;
-	properties::Vec4Property _realRadius;
+    glm::vec2 _modRadius;
+    properties::Vec4Property _realRadius;
     properties::IntProperty _segments;
-	std::string _name;
+    std::string _name;
 
     PowerScaledSphere* _planet;
 };

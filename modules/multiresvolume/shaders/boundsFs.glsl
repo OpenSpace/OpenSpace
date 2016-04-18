@@ -29,9 +29,9 @@ in vec4 worldPosition;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 fragColor = vec4(vPosition+0.5, 1.0);
-	vec4 position = worldPosition;
-	float depth = pscDepth(position);
+    vec4 fragColor = vec4(vPosition+0.5, 1.0);
+    vec4 position = worldPosition;
+    float depth = pscDepth(position);
 
     Fragment frag;
     frag.color = fragColor;

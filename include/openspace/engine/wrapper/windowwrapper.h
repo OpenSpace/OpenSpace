@@ -116,7 +116,7 @@ public:
      */
     virtual int currentNumberOfAaSamples() const;
 
-	/**
+    /**
      * Returns <code>true</code> if the current rendering method is regular, i.e., it is
      * a flat projection without non-linear distortions. Returns <code>false</code> in
      * other cases, for example fisheye projections. On default, this method will return

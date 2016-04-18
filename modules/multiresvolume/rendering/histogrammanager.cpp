@@ -132,7 +132,7 @@ std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickInde
 bool HistogramManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-	return false;
+    return false;
     }
 
     int numHistograms;
@@ -148,10 +148,10 @@ bool HistogramManager::loadFromFile(const std::string& filename) {
     _histograms = std::vector<Histogram>(numHistograms);
 
     for (int i = 0; i < numHistograms; ++i) {
-	int offset = i*_numBins;
-	float* data = new float[_numBins];
-	memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
-	_histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
+    int offset = i*_numBins;
+    float* data = new float[_numBins];
+    memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
+    _histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
     }
 
     delete[] histogramData;
@@ -164,7 +164,7 @@ bool HistogramManager::loadFromFile(const std::string& filename) {
 bool HistogramManager::saveToFile(const std::string& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
-	return false;
+    return false;
     }
 
     int numHistograms = _histograms.size();
@@ -177,8 +177,8 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     float* histogramData = new float[nFloats];
 
     for (int i = 0; i < numHistograms; ++i) {
-	int offset = i*_numBins;
-	memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
+    int offset = i*_numBins;
+    memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
 
     file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);

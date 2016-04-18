@@ -29,22 +29,22 @@
 
 #include "powerScalingMath.hglsl"
 
-const float s_far			= 27.0f; //= gl_DepthRange.far;	// 40
-const float s_farcutoff		= 12.0f;
-const float s_nearcutoff	= 7.00f;
-const float s_near			= 1.00f;// gl_DepthRange.near;	// 0.1
+const float s_far            = 27.0f; //= gl_DepthRange.far;    // 40
+const float s_farcutoff        = 12.0f;
+const float s_nearcutoff    = 7.00f;
+const float s_near            = 1.00f;// gl_DepthRange.near;    // 0.1
 
 vec4 psc_normlization(vec4 invec) {
-	
-	float xymax = max(invec.x,invec.y);
+    
+    float xymax = max(invec.x,invec.y);
 
-	if(invec.z > 0.0f || invec.z < 0.0f) {
-		return invec / abs(invec.z);
-	} else if (xymax != 0.0f) {
-		return invec / xymax;
-	} else {
-		return invec / -.0;
-	}
+    if(invec.z > 0.0f || invec.z < 0.0f) {
+        return invec / abs(invec.z);
+    } else if (xymax != 0.0f) {
+        return invec / xymax;
+    } else {
+        return invec / -.0;
+    }
 }
 
 

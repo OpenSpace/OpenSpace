@@ -43,46 +43,46 @@ uniform vec3 sun_pos;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(currentTexture, vs_st);
-	
-	// directional lighting
-	vec3 origin = vec3(0.0);
-	vec4 spec = vec4(0.0);
-	
-	vec3 n = normalize(vs_normal.xyz);
-	vec3 e = normalize(camdir);
-	vec3 l_pos = sun_pos;
-	vec3 l_dir = normalize(l_pos-objpos.xyz);
-	float intensity = 1;
-	
-	if (_performShading) {
-		float terminatorBright = 0.4;
-		intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
-	}
-	
-	float shine = 0.0001;
-	vec4 specular = vec4(0.1);
-	vec4 ambient = vec4(0.f,0.f,0.f,1);
-	 //Specular
-	if (intensity > 0.f) {
-		vec3 h = normalize(l_dir + e);
-		float intSpec = max(dot(h,n),0.0);
-		spec = specular * pow(intSpec, shine);
-	}
-	
-	vec4 projTexColor = textureProj(projectedTexture, ProjTexCoord);
-	vec4 shaded = max(intensity * diffuse, ambient);
-	if (ProjTexCoord[0] > 0.0 || ProjTexCoord[1] > 0.0 ||
-		ProjTexCoord[0] < ProjTexCoord[2] || 
-		ProjTexCoord[1] < ProjTexCoord[2]) {
-		diffuse = shaded;
-	} else if (dot(n, boresight) < 0 && projTexColor.w != 0) {// frontfacing
-		diffuse = projTexColor;
-	} else {
-		diffuse = shaded;
-	}
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    vec4 diffuse = texture(currentTexture, vs_st);
+    
+    // directional lighting
+    vec3 origin = vec3(0.0);
+    vec4 spec = vec4(0.0);
+    
+    vec3 n = normalize(vs_normal.xyz);
+    vec3 e = normalize(camdir);
+    vec3 l_pos = sun_pos;
+    vec3 l_dir = normalize(l_pos-objpos.xyz);
+    float intensity = 1;
+    
+    if (_performShading) {
+        float terminatorBright = 0.4;
+        intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
+    }
+    
+    float shine = 0.0001;
+    vec4 specular = vec4(0.1);
+    vec4 ambient = vec4(0.f,0.f,0.f,1);
+     //Specular
+    if (intensity > 0.f) {
+        vec3 h = normalize(l_dir + e);
+        float intSpec = max(dot(h,n),0.0);
+        spec = specular * pow(intSpec, shine);
+    }
+    
+    vec4 projTexColor = textureProj(projectedTexture, ProjTexCoord);
+    vec4 shaded = max(intensity * diffuse, ambient);
+    if (ProjTexCoord[0] > 0.0 || ProjTexCoord[1] > 0.0 ||
+        ProjTexCoord[0] < ProjTexCoord[2] || 
+        ProjTexCoord[1] < ProjTexCoord[2]) {
+        diffuse = shaded;
+    } else if (dot(n, boresight) < 0 && projTexColor.w != 0) {// frontfacing
+        diffuse = projTexColor;
+    } else {
+        diffuse = shaded;
+    }
 
     Fragment frag;
     frag.color = diffuse;

@@ -209,7 +209,7 @@ void RenderablePlanet::render(const RenderData& data)
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // setup the data to the shader
-//	_programObject->setUniform("camdir", camSpaceEye);
+//    _programObject->setUniform("camdir", camSpaceEye);
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", transform);

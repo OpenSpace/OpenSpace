@@ -121,7 +121,7 @@ void InteractionHandler::update(double deltaTime) {
     
     _keyframeMutex.lock();
 
-    if (_keyframes.size() > 4){	//wait until enough samples are buffered
+    if (_keyframes.size() > 4){    //wait until enough samples are buffered
         hasKeys = true;
         
         openspace::network::datamessagestructures::PositionKeyframe p0, p1, p2, p3;
@@ -214,12 +214,12 @@ const Camera* const InteractionHandler::camera() const {
 }
 
 //void InteractionHandler::keyboardCallback(int key, int action) {
-//	if (_keyboardController) {
-//		auto start = ghoul::HighResClock::now();
-//		_keyboardController->keyPressed(KeyAction(action), Key(key), KeyModifier::None);
-//		auto end = ghoul::HighResClock::now();
-//		LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
-//	}
+//    if (_keyboardController) {
+//        auto start = ghoul::HighResClock::now();
+//        _keyboardController->keyPressed(KeyAction(action), Key(key), KeyModifier::None);
+//        auto end = ghoul::HighResClock::now();
+//        LINFO("Keyboard timing: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << "ns");
+//    }
 //}
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
@@ -272,7 +272,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
     }
 
     //new camera position
-    relative = origin + relative_focus_coordinate; 	
+    relative = origin + relative_focus_coordinate;     
 
     float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f) / 10.f;
 
@@ -292,22 +292,22 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 
 //void InteractionHandler::distance(const float &d){
 //
-//	lockControls();
+//    lockControls();
 //
-//	psc relative = _camera->position();
-//	const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
-//	psc relative_origin_coordinate = relative - origin;
-//	// addition 100% of bounds (fix later to something node specific?)
-//	float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
+//    psc relative = _camera->position();
+//    const psc origin = (_focusNode) ? _focusNode->worldPosition() : psc();
+//    psc relative_origin_coordinate = relative - origin;
+//    // addition 100% of bounds (fix later to something node specific?)
+//    float bounds = 2.f * (_focusNode ? _focusNode->boundingSphere().lengthf() : 0.f);
 //
-//	psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
-//	//don't fly into objects
-//	if ((target - origin).length() < bounds){
-//		target = relative;
-//	}
-//	_camera->setPosition(target);
-//	
-//	unlockControls();
+//    psc target = relative + relative_origin_coordinate * d;// *fmaxf(bounds, (1.f - d));
+//    //don't fly into objects
+//    if ((target - origin).length() < bounds){
+//        target = relative;
+//    }
+//    _camera->setPosition(target);
+//    
+//    unlockControls();
 //}
 
 void InteractionHandler::orbitDelta(const glm::quat& rotation)
@@ -345,17 +345,17 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
 
 //<<<<<<< HEAD
 //void InteractionHandler::distance(const PowerScaledScalar &dist, size_t iterations) {
-//	if (iterations > 5)
-//		return;
-//	//assert(this_);
-//	lockControls();
-//	
-//	psc relative = _camera->position();
-//	const psc origin = (_node) ? _node->worldPosition() : psc();
+//    if (iterations > 5)
+//        return;
+//    //assert(this_);
+//    lockControls();
+//    
+//    psc relative = _camera->position();
+//    const psc origin = (_node) ? _node->worldPosition() : psc();
 //
-//	psc relative_origin_coordinate = relative - origin;
-//	const glm::vec3 dir(relative_origin_coordinate.direction());
-//	glm::vec3 newdir = dir * dist[0];
+//    psc relative_origin_coordinate = relative - origin;
+//    const glm::vec3 dir(relative_origin_coordinate.direction());
+//    glm::vec3 newdir = dir * dist[0];
 //=======
 void InteractionHandler::rotateDelta(const glm::quat& rotation)
 {

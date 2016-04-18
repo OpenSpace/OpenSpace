@@ -44,39 +44,39 @@ in vec4 vs_position;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse = texture(texture1, vs_st);
-	vec4 diffuse2 = texture(nightTex, vs_st);
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    vec4 diffuse = texture(texture1, vs_st);
+    vec4 diffuse2 = texture(nightTex, vs_st);
 
-	Fragment frag;
-	if (_performShading) {
-		// directional lighting
-		vec3 origin = vec3(0.0);
-		vec4 spec = vec4(0.0);
-		
-		vec3 n = normalize(vs_normal.xyz);
-		//vec3 e = normalize(camdir);
-		vec3 l_pos = vec3(sun_pos); // sun.
-		vec3 l_dir = normalize(l_pos-objpos.xyz);
-		float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-		float darkSide  = min(max(5*dot(n,-l_dir), 0.0), 1);
-		
-		float shine = 0.0001;
+    Fragment frag;
+    if (_performShading) {
+        // directional lighting
+        vec3 origin = vec3(0.0);
+        vec4 spec = vec4(0.0);
+        
+        vec3 n = normalize(vs_normal.xyz);
+        //vec3 e = normalize(camdir);
+        vec3 l_pos = vec3(sun_pos); // sun.
+        vec3 l_dir = normalize(l_pos-objpos.xyz);
+        float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
+        float darkSide  = min(max(5*dot(n,-l_dir), 0.0), 1);
+        
+        float shine = 0.0001;
 
-		vec4 specular = vec4(0.5);
-		vec4 ambient = vec4(0.0,0.0,0.0,transparency);
-		
-		vec4 daytex = max(intensity * diffuse, ambient);
-		vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);	
-		
-		diffuse = (daytex*2 + mixtex)/3;
-	}
+        vec4 specular = vec4(0.5);
+        vec4 ambient = vec4(0.0,0.0,0.0,transparency);
+        
+        vec4 daytex = max(intensity * diffuse, ambient);
+        vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);    
+        
+        diffuse = (daytex*2 + mixtex)/3;
+    }
 
-	diffuse[3] = transparency;
-	frag.color = diffuse;
-	frag.depth = depth;
+    diffuse[3] = transparency;
+    frag.color = diffuse;
+    frag.depth = depth;
 
-	return frag;
+    return frag;
 }
 

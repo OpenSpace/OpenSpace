@@ -45,7 +45,7 @@
 namespace {
     const std::string _loggerCat = "RenderableTrail";
     //constants
-	const std::string keyName                    = "Name";
+    const std::string keyName                    = "Name";
         const std::string keyBody                = "Body";
         const std::string keyObserver            = "Observer";
         const std::string keyFrame               = "Frame";
@@ -54,7 +54,7 @@ namespace {
         const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
         const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
         const std::string keyDayLength           = "DayLength";
-		const std::string keyStamps				 = "TimeStamps";
+        const std::string keyStamps                 = "TimeStamps";
 }
 
 namespace openspace {
@@ -86,11 +86,11 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyColor, color);
     _lineColor = color;
 
-	bool timeStamps = false;
-	if (dictionary.hasKeyAndValue<bool>(keyStamps))
-		dictionary.getValue(keyStamps, timeStamps);
-	_showTimestamps = timeStamps;
-	addProperty(_showTimestamps);
+    bool timeStamps = false;
+    if (dictionary.hasKeyAndValue<bool>(keyStamps))
+        dictionary.getValue(keyStamps, timeStamps);
+    _showTimestamps = timeStamps;
+    addProperty(_showTimestamps);
 
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
@@ -98,7 +98,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_lineFade);
 
     addProperty(_lineWidth);
-	_distanceFade = 1.0;
+    _distanceFade = 1.0;
 }
 
 bool RenderableTrail::initialize() {
@@ -160,20 +160,20 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
     _programObject->setUniform("lineFade", _lineFade);
-	_programObject->setUniform("forceFade", _distanceFade);
+    _programObject->setUniform("forceFade", _distanceFade);
 
-	//const psc& position = data.camera.position();
-	//const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
-	//const PowerScaledScalar& pssl = (position - origin).length();
-	//
-	//if (pssl[0] < 0.000001){
-	//	if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
-	//	_programObject->setUniform("forceFade", _distanceFade);
-	//}
-	//else{
-	//	if (_distanceFade < 1.0f) _distanceFade += 0.05f;
-	//	_programObject->setUniform("forceFade", _distanceFade);
-	//}
+    //const psc& position = data.camera.position();
+    //const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
+    //const PowerScaledScalar& pssl = (position - origin).length();
+    //
+    //if (pssl[0] < 0.000001){
+    //    if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
+    //    _programObject->setUniform("forceFade", _distanceFade);
+    //}
+    //else{
+    //    if (_distanceFade < 1.0f) _distanceFade += 0.05f;
+    //    _programObject->setUniform("forceFade", _distanceFade);
+    //}
 
     glLineWidth(_lineWidth);
 
@@ -183,18 +183,18 @@ void RenderableTrail::render(const RenderData& data) {
 
     glLineWidth(1.f);
 
-	if (_showTimestamps){
-		glPointSize(5.f);
-		glBindVertexArray(_vaoID);
-		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
-		glBindVertexArray(0);
-	}
+    if (_showTimestamps){
+        glPointSize(5.f);
+        glBindVertexArray(_vaoID);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
+        glBindVertexArray(0);
+    }
 
     _programObject->deactivate();
 }
 
 void RenderableTrail::update(const UpdateData& data) {
-	if (data.isTimeJump)
+    if (data.isTimeJump)
         _needsSweep = true;
 
     if (_needsSweep) {
@@ -206,12 +206,12 @@ void RenderableTrail::update(const UpdateData& data) {
 
     double lightTime = 0.0;
 
-	bool intervalSet = hasTimeInterval();
-	double start = DBL_MIN;
-	double end = DBL_MAX;
-	if (intervalSet) {
-		getInterval(start, end);
-	}
+    bool intervalSet = hasTimeInterval();
+    double start = DBL_MIN;
+    double end = DBL_MAX;
+    if (intervalSet) {
+        getInterval(start, end);
+    }
 
     // Points in the vertex array should always have a fixed distance. For this reason we
     // keep the first entry in the array floating and always pointing to the current date
@@ -222,11 +222,11 @@ void RenderableTrail::update(const UpdateData& data) {
 
     glm::dvec3 p;
     // Update the floating current time
-	if (start > data.time)
+    if (start > data.time)
         p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, start, lightTime);
-	else if (end < data.time)
+    else if (end < data.time)
         p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, end, lightTime);
-	else
+    else
         p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, data.time, lightTime);
     
     psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
@@ -246,14 +246,14 @@ void RenderableTrail::update(const UpdateData& data) {
 
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
-			if (start > et)
-				et = start;
-			else if (end < et)
-				et = end;
+            if (start > et)
+                et = start;
+            else if (end < et)
+                et = end;
             glm::dvec3 p =
             SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, et, lightTime);
             pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-			pscPos[3] += 3;
+            pscPos[3] += 3;
             _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
 
@@ -281,12 +281,12 @@ void RenderableTrail::fullYearSweep(double time) {
     float planetYear = SecondsPerEarthYear * _ratio;
     int segments = static_cast<int>(_tropic);
 
-	bool intervalSet = hasTimeInterval();
-	double start = DBL_MIN;
-	double end = DBL_MAX;
-	if (intervalSet) {
-		intervalSet &= getInterval(start, end);
-	}
+    bool intervalSet = hasTimeInterval();
+    double start = DBL_MIN;
+    double end = DBL_MAX;
+    if (intervalSet) {
+        intervalSet &= getInterval(start, end);
+    }
 
     _increment = planetYear / _tropic;
     
@@ -296,12 +296,12 @@ void RenderableTrail::fullYearSweep(double time) {
     glm::dvec3 p;
     bool failed = false;
     for (int i = 0; i < segments+2; i++) {
-		if (start > time && intervalSet) {
-			time = start;
-		}
-		else if (end < time && intervalSet) {
-			time = end;
-		}
+        if (start > time && intervalSet) {
+            time = start;
+        }
+        else if (end < time && intervalSet) {
+            time = end;
+        }
 
         if (!failed || intervalSet) {
             try {
@@ -317,7 +317,7 @@ void RenderableTrail::fullYearSweep(double time) {
         }
         
         psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-		pscPos[3] += 3;
+        pscPos[3] += 3;
 
         _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};
         time -= _increment;

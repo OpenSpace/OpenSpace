@@ -32,7 +32,7 @@ namespace openspace {
 class BrickSelector {
 public:
     virtual ~BrickSelector() {};
-	virtual bool initialize() { return true; };
+    virtual bool initialize() { return true; };
     virtual void selectBricks(int timestep,
                       std::vector<int>& bricks) = 0;
 };

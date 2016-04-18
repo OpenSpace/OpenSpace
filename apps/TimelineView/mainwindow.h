@@ -38,8 +38,8 @@ class TimelineWidget;
 class MainWindow : public QWidget {
 Q_OBJECT
 public:
-	MainWindow();
-	~MainWindow();
+    MainWindow();
+    ~MainWindow();
 
     std::string nextTarget() const;
 
@@ -53,7 +53,7 @@ private slots:
     void onSocketConnected();
     void onSocketDisconnected();
 
-	void readTcpData();
+    void readTcpData();
     void handleStatusMessage(QByteArray data);
     QByteArray handlePlaybook(QByteArray data);
     void printMapping(QByteArray data);
@@ -66,7 +66,7 @@ private:
     InformationWidget* _informationWidget;
     TimelineWidget* _timelineWidget;
     
-	QTcpSocket* _socket;
+    QTcpSocket* _socket;
 
     bool _isConnected = false;
 };

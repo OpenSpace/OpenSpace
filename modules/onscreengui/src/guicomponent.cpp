@@ -28,11 +28,11 @@ namespace openspace {
 namespace gui {
 
 bool GuiComponent::isEnabled() const {
-	return _isEnabled;
+    return _isEnabled;
 }
 
 void GuiComponent::setEnabled(bool enabled) {
-	_isEnabled = enabled;
+    _isEnabled = enabled;
 }
 
 void GuiComponent::initialize() {}

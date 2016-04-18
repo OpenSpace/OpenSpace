@@ -58,26 +58,26 @@ public:
          * describing the function, and whether it should be shared in a parallel
          * connection (#parallelShared)
          */
-		struct Function {
+        struct Function {
             /// The name of the function
-			std::string name;
+            std::string name;
             /// The function pointer that is executed if the function is called
-			lua_CFunction function;
+            lua_CFunction function;
             /// A text describing the arugments to this function
-			std::string argumentText;
+            std::string argumentText;
             /// A help text describing what the function does/
-			std::string helpText;
+            std::string helpText;
             /// If <code>true</code>, this function will be shared with other parallel
             /// connections
             bool parallelShared;
-		};
+        };
         /// The name of the library
         std::string name;
         /// The list of all functions for this library
-		std::vector<Function> functions;
+        std::vector<Function> functions;
 
         /// Comparison function that compares two LuaLibrary%s name
-		bool operator<(const LuaLibrary& rhs) const;
+        bool operator<(const LuaLibrary& rhs) const;
     };
 
     /**
@@ -92,25 +92,25 @@ public:
      */
     void deinitialize();
     
-	void initializeLuaState(lua_State* state);
+    void initializeLuaState(lua_State* state);
 
-	void addLibrary(LuaLibrary library);
+    void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
     
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
 
-	bool writeDocumentation(const std::string& filename, const std::string& type) const;
+    bool writeDocumentation(const std::string& filename, const std::string& type) const;
 
-	void serialize(SyncBuffer* syncBuffer);
+    void serialize(SyncBuffer* syncBuffer);
 
-	void deserialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
-	void postSynchronizationPreDraw();
+    void postSynchronizationPreDraw();
 
-	void preSynchronization();
+    void preSynchronization();
 
-	void queueScript(const std::string &script);
+    void queueScript(const std::string &script);
     
     std::vector<std::string> cachedScripts();
 
@@ -122,7 +122,7 @@ public:
     void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
 private:
-	bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
+    bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
@@ -133,11 +133,11 @@ private:
     lua_State* _state = nullptr;
     std::set<LuaLibrary> _registeredLibraries;
     
-	//sync variables
-	std::mutex _mutex;
-	std::vector<std::string> _queuedScripts;
-	std::vector<std::string> _receivedScripts;
-	std::string _currentSyncedScript;
+    //sync variables
+    std::mutex _mutex;
+    std::vector<std::string> _queuedScripts;
+    std::vector<std::string> _receivedScripts;
+    std::string _currentSyncedScript;
     
     //parallel variables
     std::map<std::string, std::map<std::string, std::string>> _cachedScripts;

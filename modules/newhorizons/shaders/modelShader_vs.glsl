@@ -48,16 +48,16 @@ void main() {
     vec4 pos = in_position;
     pos.w += _magnification;
 
-	vs_st = in_st;
-	vs_position = pos;
-	vec4 tmp    = pos;
-	
-	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
+    vs_st = in_st;
+    vs_position = pos;
+    vec4 tmp    = pos;
+    
+    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
 
-	vec4 raw_pos = psc_to_meter(pos, scaling);
-	ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    vec4 raw_pos = psc_to_meter(pos, scaling);
+    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

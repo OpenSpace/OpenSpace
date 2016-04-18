@@ -59,8 +59,8 @@ LuaConsole::LuaConsole()
     , _autoCompleteInfo({NoAutoComplete, false, ""})
     , _isVisible(false)
 {
-//	_commands.push_back("");
-//	_activeCommand = _commands.size() - 1;
+//    _commands.push_back("");
+//    _activeCommand = _commands.size() - 1;
 }
 
 void LuaConsole::initialize() {

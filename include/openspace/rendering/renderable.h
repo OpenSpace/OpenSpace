@@ -36,10 +36,10 @@
 
 // Forward declare to minimize dependencies
 namespace ghoul {
-	namespace opengl {
-		class Texture;
-	}
-	class Dictionary;
+    namespace opengl {
+        class Texture;
+    }
+    class Dictionary;
 }
 
 namespace openspace {
@@ -60,8 +60,8 @@ public:
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
 
-	virtual bool isReady() const = 0;
-	bool isEnabled() const;
+    virtual bool isReady() const = 0;
+    bool isEnabled() const;
 
     void setBoundingSphere(const PowerScaledScalar& boundingSphere);
     const PowerScaledScalar& getBoundingSphere();
@@ -70,27 +70,27 @@ public:
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
 
-	bool isVisible() const;
-	
-	bool hasTimeInterval();
-	bool getInterval(double& start, double& end);
-	
-	bool hasBody();
-	bool getBody(std::string& body);
-	void setBody(std::string& body);
+    bool isVisible() const;
+    
+    bool hasTimeInterval();
+    bool getInterval(double& start, double& end);
+    
+    bool hasBody();
+    bool getBody(std::string& body);
+    void setBody(std::string& body);
 
     void onEnabledChange(std::function<void(bool)> callback);
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
 private:
-	properties::BoolProperty _enabled;
+    properties::BoolProperty _enabled;
     PowerScaledScalar boundingSphere_;
-	std::string _startTime;
-	std::string _endTime;
-	std::string _targetBody;
-	bool _hasBody;
-	bool _hasTimeInterval;
+    std::string _startTime;
+    std::string _endTime;
+    std::string _targetBody;
+    bool _hasBody;
+    bool _hasTimeInterval;
 };
 
 }  // namespace openspace

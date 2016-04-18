@@ -43,7 +43,7 @@ out vec4 color;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 bool inRange(float x, float a, float b) {
-	return (x >= a && x <= b);
+    return (x >= a && x <= b);
 } 
 
 void main() {
@@ -60,9 +60,9 @@ void main() {
   projected.y = 1 - projected.y; 
   
   if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-		color = texture(projectTexture, projected.xy);
+        color = texture(projectTexture, projected.xy);
   } else {
-		color = texture(currentTexture, uv);
+        color = texture(currentTexture, uv);
   }
 
 }

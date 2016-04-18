@@ -78,7 +78,7 @@ public:
     /**
      * Updates sequencer with current <code>time</code>. This is used internally for keeping
      * track of both current simulation time and the time of the previously rendered frame.  
-     */	
+     */    
     void updateSequencer(double time);
     /**
     * Runs parser and recieves the datastructures filled by it. 

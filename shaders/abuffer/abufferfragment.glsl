@@ -76,11 +76,11 @@ const uint mask_next   = mask_28;
 const uint shift_next  = 0;
 
 void bitinsert(inout uint pack, uint val, uint mask, uint shift) {
-	pack &= ~mask;
-	pack |= (val << shift) & mask;
+    pack &= ~mask;
+    pack |= (val << shift) & mask;
 }
 uint bitextract(in uint pack, uint mask, uint shift) {
-	return (pack >> shift) & (mask >> shift);
+    return (pack >> shift) & (mask >> shift);
 }
 
 /**

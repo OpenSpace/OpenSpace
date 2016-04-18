@@ -36,66 +36,66 @@ namespace interaction {
 
 class MouseController : public Controller {
 public:
-	MouseController();
+    MouseController();
     virtual ~MouseController() {}
 
-	virtual void button(MouseButton button, MouseAction action) = 0;
-	virtual void move(float x, float y) = 0;
-	virtual void scrollWheel(int pos) = 0;
-	virtual void update(const double& dt) = 0;
+    virtual void button(MouseButton button, MouseAction action) = 0;
+    virtual void move(float x, float y) = 0;
+    virtual void scrollWheel(int pos) = 0;
+    virtual void update(const double& dt) = 0;
 
 protected:
-	glm::vec3 _lastTrackballPos;
-	bool _isMouseBeingPressedAndHeld;
+    glm::vec3 _lastTrackballPos;
+    bool _isMouseBeingPressedAndHeld;
 
-	glm::vec3 mapToTrackball(glm::vec2 mousePos);
+    glm::vec3 mapToTrackball(glm::vec2 mousePos);
 
-	glm::vec3 mapToCamera(glm::vec3 trackballPos);
+    glm::vec3 mapToCamera(glm::vec3 trackballPos);
 
-	void trackballRotate(int x, int y);
+    void trackballRotate(int x, int y);
 };
 
 class TrackballMouseController : public MouseController {
 public:
-	TrackballMouseController();
+    TrackballMouseController();
 
-	void button(MouseButton button, MouseAction action) override;
+    void button(MouseButton button, MouseAction action) override;
 
-	void move(float x, float y) override;
+    void move(float x, float y) override;
 
-	void scrollWheel(int pos) override;
+    void scrollWheel(int pos) override;
 
-	void update(const double& dt) override;
+    void update(const double& dt) override;
 
 protected:
-	bool _leftMouseButtonDown;
-	glm::vec3 _previousTrackballPos;
+    bool _leftMouseButtonDown;
+    glm::vec3 _previousTrackballPos;
 };
 
 class OrbitalMouseController : public MouseController {
 public:
-	OrbitalMouseController();
+    OrbitalMouseController();
 
-	void button(MouseButton button, MouseAction action) override;
+    void button(MouseButton button, MouseAction action) override;
 
-	void move(float x, float y) override;
+    void move(float x, float y) override;
 
-	void scrollWheel(int pos) override;
+    void scrollWheel(int pos) override;
 
-	void update(const double& dt) override;
+    void update(const double& dt) override;
 
 protected:
-	bool _leftMouseButtonDown;
-	bool _rightMouseButtonDown;
-	bool _middleMouseButtonDown;
-	glm::vec2 _previousCursorPos[3];
-	glm::vec2 _currentCursorPos;
-	glm::vec2 _currentCursorDiff[3];
-	float _rotationSpeed;
-	float _navigationSpeed;
+    bool _leftMouseButtonDown;
+    bool _rightMouseButtonDown;
+    bool _middleMouseButtonDown;
+    glm::vec2 _previousCursorPos[3];
+    glm::vec2 _currentCursorPos;
+    glm::vec2 _currentCursorDiff[3];
+    float _rotationSpeed;
+    float _navigationSpeed;
 
 private:
-	enum MouseButtons{ ButtonLeft = 0, ButtonRight, ButtonMiddle };
+    enum MouseButtons{ ButtonLeft = 0, ButtonRight, ButtonMiddle };
 };
 
 } // namespace interaction

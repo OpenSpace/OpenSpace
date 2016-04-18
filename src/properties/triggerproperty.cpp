@@ -28,20 +28,20 @@ namespace openspace {
 namespace properties {
 
 TriggerProperty::TriggerProperty(std::string identifier, std::string guiName)
-	: Property(std::move(identifier), std::move(guiName))
+    : Property(std::move(identifier), std::move(guiName))
 {}
 
 std::string TriggerProperty::className() const {
-	return "TriggerProperty";
+    return "TriggerProperty";
 }
 
 bool TriggerProperty::setLuaValue(lua_State* state) {
-	notifyListener();
-	return true;
+    notifyListener();
+    return true;
 }
 
 void TriggerProperty::set(ghoul::any value) {
-	notifyListener();
+    notifyListener();
 }
 
 } // namespace properties

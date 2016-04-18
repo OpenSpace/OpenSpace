@@ -79,8 +79,8 @@ private:
 //class MainWindow : public QWidget {
 //Q_OBJECT
 //public:
-//	MainWindow();
-//	~MainWindow();
+//    MainWindow();
+//    ~MainWindow();
 //
 //    std::string nextTarget() const;
 //
@@ -94,7 +94,7 @@ private:
 //    void onSocketConnected();
 //    void onSocketDisconnected();
 //
-//	void readTcpData();
+//    void readTcpData();
 //    void handleStatusMessage(QByteArray data);
 //    void handlePlaybook(QByteArray data);
 //
@@ -106,7 +106,7 @@ private:
 //    InformationWidget* _informationWidget;
 //    TimelineWidget* _timelineWidget;
 //    
-//	QTcpSocket* _socket;
+//    QTcpSocket* _socket;
 //
 //    bool _hasHongKangTimeline = false;
 //    bool _hasLabelTimeline = false;
