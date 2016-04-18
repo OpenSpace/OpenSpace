@@ -43,8 +43,8 @@
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
-	const std::string _defaultCommonDirectory = "common";
-	const std::string _commonModuleToken = "${COMMON_MODULE}";
+    const std::string _defaultCommonDirectory = "common";
+    const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyPathScene = "ScenePath";
     const std::string KeyModules = "Modules";
@@ -176,6 +176,9 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
     for (const std::string& key : keys) {
         std::string fullModuleName = moduleDictionary.value<std::string>(key);
+
+        std::replace(fullModuleName.begin(), fullModuleName.end(), '/', FileSys.PathSeparator);
+
         std::string modulePath = FileSys.pathByAppendingComponent(sceneDirectory, fullModuleName);
         
         std::string moduleName = fullModuleName;
@@ -212,7 +215,8 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                     moduleName
                 });
             }
-            catch (...) {
+            catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERRORC(e.component, e.message);
                 continue;
             }
         }
@@ -235,8 +239,6 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
 //                string moduleName = s;
 
                 if (!FileSys.fileExists(moduleFile)) {
-                    LERROR("Could not find module file '" << moduleFile << "'. "
-                           "Indirectly included through '" << modulePath << "'");
                     continue;
                 }
                 
@@ -251,7 +253,8 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                         moduleName
                     });
                 }
-                catch (...) {
+                catch (const ghoul::lua::LuaRuntimeException& e) {
+                    LERRORC(e.component, e.message);
                     continue;
                 }
                 
@@ -331,6 +334,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         SceneGraphNode* parentNode = sceneGraphNode(parent);
         if (parentNode == nullptr) {
             LERROR("Could not find parent '" << parent << "' for '" << node->node->name() << "'");
+            continue;
         }
 
         node->node->setParent(parentNode);
