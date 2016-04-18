@@ -35,7 +35,7 @@ namespace openspace {
 class SyncBuffer {
 public:
 
-	SyncBuffer(size_t n);
+    SyncBuffer(size_t n);
 
     void encode(const std::string& s) {
         const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
@@ -48,14 +48,14 @@ public:
         _encodeOffset += length;
     }
 
-	template <typename T>
-	void encode(const T& v) {
-		const size_t size = sizeof(T);
-		assert(_encodeOffset + size < _n);
+    template <typename T>
+    void encode(const T& v) {
+        const size_t size = sizeof(T);
+        assert(_encodeOffset + size < _n);
 
-		memcpy(_dataStream.data() + _encodeOffset, &v, size);
-		_encodeOffset += size;
-	}
+        memcpy(_dataStream.data() + _encodeOffset, &v, size);
+        _encodeOffset += size;
+    }
 
     std::string decode() {
         int32_t length;
@@ -70,38 +70,38 @@ public:
         return ret;
     }
 
-	template <typename T>
-	T decode() {
-		const size_t size = sizeof(T);
-		assert(_decodeOffset + size < _n);
-		T value;
-		memcpy(&value, _dataStream.data() + _decodeOffset, size);
-		_decodeOffset += size;
-		return value;
-	}
+    template <typename T>
+    T decode() {
+        const size_t size = sizeof(T);
+        assert(_decodeOffset + size < _n);
+        T value;
+        memcpy(&value, _dataStream.data() + _decodeOffset, size);
+        _decodeOffset += size;
+        return value;
+    }
 
     void decode(std::string& s) {
         s = decode();
     }
 
-	template <typename T>
-	void decode(T& value) {
-		const size_t size = sizeof(T);
-		assert(_decodeOffset + size < _n);
-		memcpy(&value, _dataStream.data() + _decodeOffset, size);
-		_decodeOffset += size;
-	}
+    template <typename T>
+    void decode(T& value) {
+        const size_t size = sizeof(T);
+        assert(_decodeOffset + size < _n);
+        memcpy(&value, _dataStream.data() + _decodeOffset, size);
+        _decodeOffset += size;
+    }
 
     void write();
 
-	void read();
+    void read();
 
 private:
-	size_t _n;
-	size_t _encodeOffset;
-	size_t _decodeOffset;
-	std::vector<char> _dataStream;
-	sgct::SharedVector<char> _synchronizationBuffer;
+    size_t _n;
+    size_t _encodeOffset;
+    size_t _decodeOffset;
+    std::vector<char> _dataStream;
+    sgct::SharedVector<char> _synchronizationBuffer;
 };
 
 } // namespace openspace

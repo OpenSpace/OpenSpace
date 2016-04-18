@@ -41,11 +41,9 @@
 #include <iterator>
 #include <fstream>
 
-#include <sgct.h>
-
 namespace {
-	const std::string _loggerCat = "LuaConsole";
-	const std::string historyFile = "ConsoleHistory";
+    const std::string _loggerCat = "LuaConsole";
+    const std::string historyFile = "ConsoleHistory";
 
     const int NoAutoComplete = -1;
 }
@@ -55,11 +53,11 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole() 
-	: _inputPosition(0)
-	, _activeCommand(0)
-	, _filename("")
+    : _inputPosition(0)
+    , _activeCommand(0)
+    , _filename("")
     , _autoCompleteInfo({NoAutoComplete, false, ""})
-	, _isVisible(false)
+    , _isVisible(false)
 {
 //	_commands.push_back("");
 //	_activeCommand = _commands.size() - 1;
@@ -111,73 +109,73 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         const bool modifierControl = (modifier == KeyModifier::Control);
         const bool modifierShift = (modifier == KeyModifier::Shift);
 
-		// Paste from clipboard
+        // Paste from clipboard
         if (modifierControl && (key == Key::V))
-			addToCommand(ghoul::clipboardText());
+            addToCommand(ghoul::clipboardText());
 
-		// Copy to clipboard
+        // Copy to clipboard
         if (modifierControl && (key == Key::C))
-			ghoul::setClipboardText(_commands.at(_activeCommand));
+            ghoul::setClipboardText(_commands.at(_activeCommand));
 
-		// Go to the previous character
+        // Go to the previous character
         if ((key == Key::Left) && (_inputPosition > 0))
-			--_inputPosition;
+            --_inputPosition;
 
-		// Go to the next character
+        // Go to the next character
         if ((key == Key::Right) && _inputPosition < _commands.at(_activeCommand).length())
-			++_inputPosition;
+            ++_inputPosition;
 
-		// Go to previous command
+        // Go to previous command
         if (key == Key::Up) {
-			if (_activeCommand > 0)
-				--_activeCommand;
-			_inputPosition = _commands.at(_activeCommand).length();
-		}
+            if (_activeCommand > 0)
+                --_activeCommand;
+            _inputPosition = _commands.at(_activeCommand).length();
+        }
 
-		// Go to next command (the last is empty)
+        // Go to next command (the last is empty)
         if (key == Key::Down) {
-			if (_activeCommand < _commands.size() - 1)
-				++_activeCommand;
-			_inputPosition = _commands.at(_activeCommand).length();
-		}
+            if (_activeCommand < _commands.size() - 1)
+                ++_activeCommand;
+            _inputPosition = _commands.at(_activeCommand).length();
+        }
 
-		// Remove character before _inputPosition
+        // Remove character before _inputPosition
         if (key == Key::BackSpace) {
-			if (_inputPosition > 0) {
-				_commands.at(_activeCommand).erase(_inputPosition - 1, 1);
-				--_inputPosition;
-			}
-		}
+            if (_inputPosition > 0) {
+                _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
+                --_inputPosition;
+            }
+        }
 
-		// Remove character after _inputPosition
+        // Remove character after _inputPosition
         if (key == Key::Delete) {
             if (_inputPosition <= _commands.at(_activeCommand).size())
                 _commands.at(_activeCommand).erase(_inputPosition, 1);
         }
         
-		// Go to the beginning of command string
+        // Go to the beginning of command string
         if (key == Key::Home)
-			_inputPosition = 0;
+            _inputPosition = 0;
 
-		// Go to the end of command string
+        // Go to the end of command string
         if (key == Key::End)
-			_inputPosition = _commands.at(_activeCommand).size();
+            _inputPosition = _commands.at(_activeCommand).size();
 
         if (key == Key::Enter) {
-			// SHIFT+ENTER == new line
-			if (modifierShift)
-				addToCommand("\n");
-			// ENTER == run lua script
-			else {
+            // SHIFT+ENTER == new line
+            if (modifierShift)
+                addToCommand("\n");
+            // ENTER == run lua script
+            else {
                 std::string cmd = _commands.at(_activeCommand);
-				if (cmd != "") {
-					OsEng.scriptEngine().queueScript(cmd);
+                if (cmd != "") {
+                    OsEng.scriptEngine().queueScript(cmd);
                     
                     // Only add the current command to the history if it hasn't been
                     // executed before. We don't want two of the same commands in a row
                     if (_commandsHistory.empty() || (cmd != _commandsHistory.back()))
-						_commandsHistory.push_back(_commands.at(_activeCommand));
-				}
+                        _commandsHistory.push_back(_commands.at(_activeCommand));
+                }
                 
                 // Some clean up after the execution of the command
                 _commands = _commandsHistory;
@@ -185,8 +183,8 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 _activeCommand = _commands.size() - 1;
                 _inputPosition = 0;
                 setVisible(false);
-			}
-		}
+            }
+        }
 
         if (key == Key::Tab) {
             // We get a list of all the available commands and initially find the first
@@ -282,28 +280,28 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             if (!modifierShift)
                 _autoCompleteInfo = { NoAutoComplete, false, ""};
         }
-	}
+    }
 }
 
 void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
-	if (codepoint == static_cast<unsigned int>(commandInputButton()))
-		return;
+    if (codepoint == static_cast<unsigned int>(commandInputButton()))
+        return;
 
 #ifndef WIN32
     const bool modifierControl = (modifier == KeyModifier::Control);
 
-	const int codepoint_C = 99;
-	const int codepoint_V = 118;
-	if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
-		return;
-	}
+    const int codepoint_C = 99;
+    const int codepoint_V = 118;
+    if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
+        return;
+    }
 #endif
-	addToCommand(UnicodeToUTF8(codepoint));
+    addToCommand(UnicodeToUTF8(codepoint));
 
 }
 
 void LuaConsole::render() {
-	const float font_size = 10.0f;
+    const float font_size = 10.0f;
     
     glm::ivec4 viewportPixelCoordinates = OsEng.windowWrapper().viewportPixelCoordinates();
     int x1 = viewportPixelCoordinates.x;
@@ -311,12 +309,12 @@ void LuaConsole::render() {
     int y1 = viewportPixelCoordinates.z;
     int ySize = viewportPixelCoordinates.w;
 
-	float startY = static_cast<float>(ySize) - 2.0f * font_size;
-	startY = startY - font_size * 15.0f * 2.0f;
+    float startY = static_cast<float>(ySize) - 2.0f * font_size;
+    startY = startY - font_size * 15.0f * 2.0f;
 
-	const glm::vec4 red(1, 0, 0, 1);
-	const glm::vec4 green(0, 1, 0, 1);
-	const glm::vec4 white(1, 1, 1, 1);
+    const glm::vec4 red(1, 0, 0, 1);
+    const glm::vec4 green(0, 1, 0, 1);
+    const glm::vec4 white(1, 1, 1, 1);
     std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font("Mono", font_size);
 
     using ghoul::fontrendering::RenderFont;
@@ -324,106 +322,106 @@ void LuaConsole::render() {
     RenderFont(*font, glm::vec2(15.f, startY), red, "$");
     RenderFont(*font, glm::vec2(15.f + font_size, startY), white, "%s", _commands.at(_activeCommand).c_str());
     
-	size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
-	size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
-	size_t linepos = _inputPosition;
+    size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
+    size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
+    size_t linepos = _inputPosition;
 
-	if (n>0) {
-		if (p == _inputPosition) {
-			p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
-			if (p != std::string::npos) {
-				linepos -= p + 1;
-			}
-			else {
-				linepos = _inputPosition - 1;
-			}
-		}
-		else{
-			linepos -= p + 1;
-		}
-	}
+    if (n>0) {
+        if (p == _inputPosition) {
+            p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
+            if (p != std::string::npos) {
+                linepos -= p + 1;
+            }
+            else {
+                linepos = _inputPosition - 1;
+            }
+        }
+        else{
+            linepos -= p + 1;
+        }
+    }
 
-	std::stringstream ss;
-	ss << "%" << linepos + 1 << "s";
+    std::stringstream ss;
+    ss << "%" << linepos + 1 << "s";
     RenderFont(*font, glm::vec2(15.f + font_size * 0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f), green, ss.str().c_str(), "^");
     
 //    sgct_text::print(font, 15.0f + font_size*0.5f, startY - (font_size)*(n + 1)*3.0f / 2.0f, green, ss.str().c_str(), "^");
 }
 
 Key LuaConsole::commandInputButton() {
-	// Button left of 1 and above TAB
+    // Button left of 1 and above TAB
     // How to deal with different keyboard languages? ---abock
     return Key::GraveAccent;
 }
 
 void LuaConsole::addToCommand(std::string c) {
-	size_t length = c.length();
-	_commands.at(_activeCommand).insert(_inputPosition, c);
-	_inputPosition += length;
+    size_t length = c.length();
+    _commands.at(_activeCommand).insert(_inputPosition, c);
+    _inputPosition += length;
 }
 
 std::string LuaConsole::UnicodeToUTF8(unsigned int codepoint) {
-	std::string out;
+    std::string out;
 
-	if (codepoint <= 0x7f)
-		out.append(1, static_cast<char>(codepoint));
-	else if (codepoint <= 0x7ff)
-	{
-		out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
-		out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-	}
-	else if (codepoint <= 0xffff)
-	{
-		out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
-		out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
-		out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-	}
-	else
-	{
-		out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
-		out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
-		out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
-		out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-	}
-	return out;
+    if (codepoint <= 0x7f)
+        out.append(1, static_cast<char>(codepoint));
+    else if (codepoint <= 0x7ff)
+    {
+        out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
+        out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+    }
+    else if (codepoint <= 0xffff)
+    {
+        out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
+        out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+        out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+    }
+    else
+    {
+        out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
+        out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
+        out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+        out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+    }
+    return out;
 }
 
 bool LuaConsole::isVisible() const {
-	return _isVisible;
+    return _isVisible;
 }
 
 void LuaConsole::setVisible(bool visible) {
-	_isVisible = visible;
+    _isVisible = visible;
 }
 
 void LuaConsole::toggleVisibility() {
-	_isVisible = !_isVisible;
+    _isVisible = !_isVisible;
 }
 
 scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
-	return {
-		"console",
-		{
-			{
-				"show",
-				&luascriptfunctions::show,
-				"",
-				"Shows the console"
-			},
-			{
-				"hide",
-				&luascriptfunctions::hide,
-				"",
-				"Hides the console"
-			},
-			{
-				"toggle",
-				&luascriptfunctions::toggle,
-				"",
-				"Toggles the console"
-			}
-		}
-	};
+    return {
+        "console",
+        {
+            {
+                "show",
+                &luascriptfunctions::show,
+                "",
+                "Shows the console"
+            },
+            {
+                "hide",
+                &luascriptfunctions::hide,
+                "",
+                "Hides the console"
+            },
+            {
+                "toggle",
+                &luascriptfunctions::toggle,
+                "",
+                "Toggles the console"
+            }
+        }
+    };
 }
 
 
