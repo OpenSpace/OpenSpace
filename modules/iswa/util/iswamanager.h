@@ -77,7 +77,7 @@ public:
 
 	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
 	std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
-	void downloadData();
+	std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
 	std::shared_ptr<ExtensionFuture> fileExtension(int);
 
 	void setContainer(ISWAContainer*);
@@ -87,6 +87,7 @@ public:
 
 private:
 	std::string iSWAurl(int);
+	std::string iSWADataUrl(int);
 	std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 	std::string getDictionaryTable(int id, std::string path);
 	std::string parseJSONToLuaTable(int id, std::string json);

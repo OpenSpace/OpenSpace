@@ -48,6 +48,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 	,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
 	,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
 	,_colorbar(nullptr)
+	,_futureData(nullptr)
 {	
 	_id = id();
 	setName("DataPlane" + std::to_string(_id));
@@ -217,9 +218,13 @@ void DataPlane::update(const UpdateData& data){
     	}
     }
 
+    if(_futureData && _futureData->isFinished){
+    	std::cout << _memorybuffer << std::endl;
+    	_futureData = nullptr;
+    }
 }
 
-void DataPlane::loadTexture() {
+void DataPlane::loadTexture() {	
 		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
 		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 		std::unique_ptr<ghoul::opengl::Texture> texture = 
@@ -237,7 +242,12 @@ void DataPlane::loadTexture() {
 		}
 }
 
-void DataPlane::updateTexture(){}
+void DataPlane::updateTexture(){
+	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(-_data->id, _memorybuffer);
+	if(future){
+		_futureData = future;
+	}
+}
 
 int DataPlane::id(){
 	static int id = 0;

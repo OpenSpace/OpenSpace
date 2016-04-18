@@ -60,6 +60,7 @@ class DataPlane : public CygnetPlane {
 	std::string _var;
 
 	std::shared_ptr<ColorBar> _colorbar;
+	std::shared_ptr<DownloadManager::FileFuture> _futureData;
  };
  
  } // namespace openspace

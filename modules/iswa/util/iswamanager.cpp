@@ -204,7 +204,15 @@ namespace openspace{
                 );
     }
 
-    void ISWAManager::downloadData(){}
+    std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(int id, std::string& buffer){
+        return DlManager.downloadToMemory(
+                iSWADataUrl(id),
+                buffer,
+                [](const DownloadManager::FileFuture& f){
+                    LDEBUG("Download data finished");
+                }
+            );
+    }
 
     std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
@@ -257,8 +265,8 @@ namespace openspace{
 
     std::string ISWAManager::iSWAurl(int id){
         std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
+        
         std::string t = Time::ref().currentTimeUTC(); 
-
         std::stringstream ss(t);
         std::string token;
 
@@ -275,6 +283,28 @@ namespace openspace{
         url += std::to_string(id);
 
         //std::cout << url <<  std::endl;
+
+        return url;
+    }
+
+    std::string ISWAManager::iSWADataUrl(int id){
+        std::string url = "http://128.183.168.116:3000/data/" + std::to_string(id) + "/"; 
+        // /2996-01-23%2000:44:00
+        std::string t = Time::ref().currentTimeUTC(); 
+        std::stringstream ss(t);
+        std::string token;
+
+        http://localhost:3000/data/1/2029-07-14%2010:00:00
+        // http://128.183.168.116:3000/data/1/2996-01-23%2000:44:00
+
+        std::getline(ss, token, ' ');
+        url += token + "-"; 
+        std::getline(ss, token, ' ');
+        url += _month[token] + "-";
+        std::getline(ss, token, 'T');
+        url += token + "%20";
+        std::getline(ss, token, '.');
+        url += token;
 
         return url;
     }

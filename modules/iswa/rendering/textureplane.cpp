@@ -170,10 +170,17 @@ void TexturePlane::update(const UpdateData& data){
     		_lastUpdateTime = _time;
     	}
     }
+
 	if(_futureTexture && _futureTexture->isFinished){
 		loadTexture();
 		_futureTexture = nullptr;
 	}
+
+
+    if(_futureData && _futureData->isFinished){
+    	std::cout << _databuffer << std::endl;
+    	_futureData = nullptr;
+    }
 }
 
 
@@ -197,11 +204,15 @@ void TexturePlane::loadTexture() {
 
 void TexturePlane::updateTexture(){
 	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
+	std::shared_ptr<DownloadManager::FileFuture> dataFuture = ISWAManager::ref().downloadDataToMemory(1, _databuffer);
+
 	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
 	if(future){
 		_futureTexture = future;
-
 	}
+
+	if(dataFuture)
+		_futureData = dataFuture;
 }
 
 int TexturePlane::id(){
