@@ -67,7 +67,7 @@ namespace openspace {
 		unique_ptr<ProgramObject> _programObject;
 		shared_ptr<Geometry> _geometry;
 		
-		TextureTileSet tileSet;
+		TextureTileSet _tileSet;
 	};
 
 

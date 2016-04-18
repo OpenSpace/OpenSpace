@@ -36,8 +36,13 @@ namespace {
 }
 
 namespace openspace {
-	TextureTileSet::TextureTileSet()
-	{		
+	TextureTileSet::TextureTileSet(LatLon sizeLevel0, LatLon offsetLevel0, int depth)
+		: _sizeLevel0(sizeLevel0)
+		, _offsetLevel0(offsetLevel0)
+		, _depth(depth)
+	{
+		
+		// Set e texture to test
 		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath("textures/earth_bluemarble.jpg")));
 		if (_testTexture) {
 			LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
@@ -48,6 +53,16 @@ namespace openspace {
 			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
+		/*
+		int dataSize = _testTexture->width() * _testTexture->height() * _testTexture->bytesPerPixel();
+		GLubyte* data = new GLubyte[dataSize];
+		for (size_t i = 0; i < dataSize; i++)
+		{
+			data[i] = unsigned char(i / float(dataSize) * 255);
+		}
+		_testTexture->setPixelData(data);
+		_testTexture->uploadTexture();
+		*/
 		
 	}
 
@@ -58,10 +73,16 @@ namespace openspace {
 	glm::ivec3 TextureTileSet::getTileIndex(LatLonPatch patch)
 	{
 		int level = log2(static_cast<int>(glm::max(
-			_sizeLevel0.lat / patch.halfSize().lat * 2,
-			_sizeLevel0.lon / patch.halfSize().lon * 2)));
-		Vec2 TileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
-		glm::ivec2 tileIndex = -(patch.northWestCorner().toLonLatVec2() + _offsetLevel0.toLonLatVec2()) / TileSize;
+			_sizeLevel0.lat / (patch.halfSize().lat * 2),
+			_sizeLevel0.lon / (patch.halfSize().lon * 2))));
+		level = glm::min(level, _depth);
+		Vec2 tileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
+		Vec2 nw = patch.northWestCorner().toLonLatVec2();
+		Vec2 offset = _offsetLevel0.toLonLatVec2();
+		glm::ivec2 tileIndex = (nw - offset) / tileSize;
+
+		// Flip y since indices increase from top to bottom
+		tileIndex.y *= -1;
 
 		return glm::ivec3(tileIndex, level);
 	}
@@ -86,8 +107,35 @@ namespace openspace {
 			_offsetLevel0.lon + tileIndex.x * tileSize.lon);
 		
 		return LatLonPatch(
-			LatLon(northWest.lat + tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
+			LatLon(northWest.lat - tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
 			LatLon(tileSize.lat / 2, tileSize.lon / 2));
+	}
+
+	glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
+		LatLonPatch patch,
+		glm::ivec3 tileIndex)
+	{
+		LatLonPatch tile = getTilePositionAndScale(tileIndex);
+		Vec2 posDiff =
+			patch.southWestCorner().toLonLatVec2() - 
+			tile.southWestCorner().toLonLatVec2();
+		
+		glm::mat3 invTileScale = glm::mat3(
+			{1 / (tile.halfSize().lon * 2),	0,								0,
+			0,								1 / (tile.halfSize().lat * 2),	0,
+			0,								0,								1});
+
+		glm::mat3 globalTranslation = glm::mat3(
+		{	1,			0,			0,
+			0,			1,			0,
+			posDiff.x,	posDiff.y,	1 });
+		
+		glm::mat3 patchScale = glm::mat3(
+		{ (patch.halfSize().lon * 2),	0,								0,
+			0,							(patch.halfSize().lat * 2),		0,
+			0,							0,								1 });
+
+		return invTileScale * globalTranslation * patchScale;
 	}
 
 }  // namespace openspace
