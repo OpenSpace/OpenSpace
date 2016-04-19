@@ -86,7 +86,7 @@ namespace {
             std::vector<int> newSelectedIndices;
 
             std::vector<int> selectedIndices = p->value();
-
+            
             for (int i = 0; i < options.size(); ++i) {
                 std::string description = options[i].description;
                 bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();

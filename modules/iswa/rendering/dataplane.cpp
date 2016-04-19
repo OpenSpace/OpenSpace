@@ -43,6 +43,7 @@ namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
+    ,_dataOptions("dataOptions", "Data Options")
     ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
@@ -54,18 +55,22 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _id = id();
     setName("DataPlane" + std::to_string(_id));
 
+    addProperty(_dataOptions);
     // addProperty(_topColor);
     // addProperty(_midColor);
     // addProperty(_botColor);
     // addProperty(_tfValues);
 
     registerProperties();
+    OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
 
     // dictionary.getValue("kwPath", _kwPath);
+
+    _dataOptions.onChange([this](){loadTexture();});
 }
 
 DataPlane::~DataPlane(){}
@@ -223,69 +228,146 @@ void DataPlane::update(const UpdateData& data){
     }
 
     if(_futureData && _futureData->isFinished){
-        // std::cout << _memorybuffer << std::endl;
+        if(!_dataOptions.options().size()){
+            readHeader();
+        }
         loadTexture();
         _futureData = nullptr;
     }
 }
 
-void DataPlane::loadTexture() {
+void DataPlane::readHeader(){
+    // std::cout << "In the read header function" << std::endl;
     if(!_memorybuffer.empty()){
-        std::stringstream ss(_memorybuffer);
+        std::stringstream memorystream(_memorybuffer);
         std::string line;
 
-        // _dimensions = glm::size3_t(61, 61, 1);
-        float* values = new float[3721];
-        // for(int i=0; i<3721; i++){
-        //     values[i] = 0.0f;
-        // }
-        int i = 0;
-        ss >> std::ws;
-
-        float min = std::numeric_limits<float>::max();
-        float max = std::numeric_limits<float>::min();
-
-        while(getline(ss,line)){
+        int numOptions = 0;
+        while(getline(memorystream,line)){
             if(line.find("#") == 0){
-                // std::cout << line << std::endl;
+                // std::cout << "Comment line" << std::endl;
+                if(line.find("# Output data:") == 0){
+                    // std::cout << "the line with the good stuff" << std::endl;
+
+                    line = line.substr(26);
+                    std::stringstream ss(line);
+
+                    std::string token;
+                    getline(ss, token, 'x');
+                    int x = std::stoi(token);
+
+                    getline(ss, token, '=');
+                    int y = std::stoi(token);
+
+                    _dimensions = glm::size3_t(x, y, 1);
+
+                    getline(memorystream, line);
+                    line = line.substr(1);
+
+                    ss = std::stringstream(line);
+                    std::string option;
+                    while(ss >> option){
+                        // std::cout << option << std::endl;
+                        if(option != "x" && option != "y" && option != "z"){
+                            _dataOptions.addOption({numDataOptions, option});
+                            numDataOptions++;
+                        }
+                    }
+
+                    std::vector<int> v(1,0);
+                    _dataOptions.setValue(v);
+                }
+            }else{
+                break;
+            }
+        }
+    }else{
+        LERROR("Noting in memory buffer, are you connected to the information super highway?");
+    }
+}
+
+float* DataPlane::readData(){
+    if(!_memorybuffer.empty()){
+        std::stringstream memorystream(_memorybuffer);
+        std::string line;
+
+        std::vector<int> selectedOptions = _dataOptions.value();
+
+        std::vector<float> min; 
+        std::vector<float> max;
+        std::vector<std::vector<float>> optionValues;
+
+        for(int i=0; i < selectedOptions.size(); i++){
+            min.push_back(std::numeric_limits<float>::max());
+            max.push_back(std::numeric_limits<float>::min());
+
+            std::vector<float> v;
+            optionValues.push_back(v);
+        }
+
+        float* combinedValues = new float[_dimensions.x*_dimensions.y];
+
+        int numValues = 0;
+        while(getline(memorystream, line)){
+            if(line.find("#") == 0){
+                //part of the header
                 continue;
             }
 
-            float x, y, z, N, V, B;
-            std::stringstream sl(line);
-
-            sl >> std::ws >> x >> y >> z >> N >> V >> B;
-            values[i] = N;
-
-            // std::cout << N << ", "; 
-            min = std::min(min,values[i]);
-            max = std::max(max,values[i]);
-
-            i++;
-        }
-
-        // std::cout << min << ", " << max << std::endl;
-        for(int j=0; j<i; j++){
-            float normValue = (values[j]-min)/(max-min);
-            values[j] = glm::clamp(normValue, 0.0f, 1.0f);
-        }        
-
-        if (!_texture) {
-            ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-            ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-
-            std::unique_ptr<ghoul::opengl::Texture> texture = 
-            std::make_unique<ghoul::opengl::Texture>(values,glm::size3_t(61, 61, 1), ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
-
-            if(texture){
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                _texture = std::move(texture);
+            std::stringstream ss(line); 
+            std::vector<float> value;
+            float v;
+            while(ss >> v){
+                value.push_back(v);
             }
-        }else{
-            _texture->setPixelData(values);
-            _texture->uploadTexture();
+
+            if(value.size()){
+                for(int i=0; i<optionValues.size(); i++){
+                    optionValues[i].push_back(value[selectedOptions[i]+3]); //+3 because "options" x, y and z.
+
+                    min[i] = std::min(min[i], optionValues[i][numValues]);
+                    max[i] = std::max(max[i], optionValues[i][numValues]);
+                }
+                numValues++;
+            }
         }
+
+        if(numValues != _dimensions.x*_dimensions.y)
+            LERROR("Number of values read and expected are not the same");
+
+        for(int i=0; i< numValues; i++){
+            combinedValues[i] = 0;
+            for(int j=0; j<optionValues.size(); j++){
+                float normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
+                combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
+            }
+            combinedValues[i] /= selectedOptions.size();
+        }
+        return combinedValues;
+    
+    }else{
+        LERROR("Noting in memory buffer, are you connected to the information super highway?");
+    }
+} 
+
+void DataPlane::loadTexture() {
+    float* values = readData();
+
+    if (!_texture) {
+        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
+        std::unique_ptr<ghoul::opengl::Texture> texture = 
+        std::make_unique<ghoul::opengl::Texture>(values, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+
+        if(texture){
+            texture->uploadTexture();
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _texture = std::move(texture);
+        }
+    }else{
+        _texture->setPixelData(values);
+        _texture->uploadTexture();
     }
 }
 

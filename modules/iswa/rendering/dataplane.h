@@ -29,6 +29,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/vectorproperty.h>
 #include <modules/iswa/rendering/colorbar.h>
+#include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
  
@@ -45,21 +46,26 @@ class DataPlane : public CygnetPlane {
  private:
  	virtual void loadTexture() override;
  	virtual void updateTexture() override;
+ 	void readHeader();
+ 	float* readData();
 
 	static int id();
 
+	properties::SelectionProperty _dataOptions;
 	properties::Vec4Property _topColor;
 	properties::Vec4Property _midColor;
 	properties::Vec4Property _botColor;
 	properties::Vec2Property _tfValues;
 
-	std::shared_ptr<KameleonWrapper> _kw;
-	std::string _kwPath;
+	// std::shared_ptr<KameleonWrapper> _kw;
+	// std::string _kwPath;
+	
 	glm::size3_t _dimensions;
+	int numDataValues;
+	int numDataOptions = 0;
+
 	float* _dataSlice;
 	std::string _var;
-
-	std::shared_ptr<float> _values;
 
 	std::shared_ptr<ColorBar> _colorbar;
 	std::shared_ptr<DownloadManager::FileFuture> _futureData;
