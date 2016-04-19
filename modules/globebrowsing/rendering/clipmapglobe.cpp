@@ -53,6 +53,7 @@ namespace {
 namespace openspace {
 	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
 		: _rotation("rotation", "Rotation", 0, 0, 360)
+		, _clipMapPyramid(LatLon(M_PI / 2, M_PI / 2))
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -65,15 +66,6 @@ namespace openspace {
 		if (_target != "")
 			setBody(_target);
 
-		size_t numPatches = 10;
-		for (size_t i = 0; i < numPatches; i++)
-		{
-			_patches.push_back(LatLonPatch(
-				0.0,
-				0.0,
-				M_PI / (4 * pow(2, i)),
-				M_PI / (4 * pow(2, i))));
-		}
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 
@@ -109,18 +101,17 @@ namespace openspace {
 
 	void ClipMapGlobe::render(const RenderData& data)
 	{
-		// Set patches to follow camera
-		for (size_t i = 0; i < _patches.size(); i++)
-		{
-			_patches[i].setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
-		}
+		// TODO : Choose the max depth and the min depth depending on the camera
+		int maxDepth = 10;
+		int minDepth = 0;
 		// render patches
-		for (size_t i = 0; i < _patches.size() - 1; i++)
+		for (size_t i = minDepth; i < maxDepth; i++)
 		{
-			_patchRenderer->renderPatch(_patches[i], data, 6.3e6);
+			LatLon patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
+			_patchRenderer->renderPatch(patchSize, data, 6.3e6);
 		}
-		_smallestPatchRenderer->renderPatch(_patches[_patches.size() - 1], data, 6.3e6);
-
+		LatLon patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
+		_smallestPatchRenderer->renderPatch(patchSize, data, 6.3e6);
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {

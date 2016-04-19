@@ -22,82 +22,25 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
-
-#include <memory>
-#include <glm/glm.hpp>
+#ifndef __CLIPMAPPYRAMID_H__
+#define __CLIPMAPPYRAMID_H__
 
 // open space includes
-#include <openspace/rendering/renderable.h>
-
 #include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
-#include <modules/globebrowsing/rendering/texturetileset.h>
-
-namespace ghoul {
-namespace opengl {
-	class ProgramObject;
-}
-}
-
 
 namespace openspace {
 
-	class LonLatPatch;
-	class Geometry;
-	
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using ghoul::opengl::ProgramObject;
-
-	class PatchRenderer {
+	class ClipMapPyramid {
 	public:
-		
-		PatchRenderer(shared_ptr<Geometry>);
-		~PatchRenderer();
+		ClipMapPyramid(LatLon sizeLevel0);
+		~ClipMapPyramid();
 
-	protected:
+		LatLon getPatchSizeAtLevel(int level);
 
-		unique_ptr<ProgramObject> _programObject;
-		shared_ptr<Geometry> _geometry;
-		
-		TextureTileSet _tileSet;
+	private:
+		const LatLon _sizeLevel0;
 	};
 
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//							PATCH RENDERER SUBCLASSES								//
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	class LatLonPatchRenderer : public PatchRenderer {
-	public:
-		LatLonPatchRenderer(shared_ptr<Geometry>);
-
-		void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data, 
-			double radius);
-
-		void renderPatch(
-			const LatLonPatch& patch, 
-			const RenderData& data, 
-			double radius, 
-			const TileIndex& ti);
-	};
-
-
-
-	class ClipMapPatchRenderer : public PatchRenderer {
-	public:
-		ClipMapPatchRenderer(shared_ptr<Geometry> geometry);
-
-		void renderPatch(
-			const LatLon& patchSize,
-			const RenderData& data,
-			double radius);
-	};
 }  // namespace openspace
 
-#endif  // __LATLONPATCH_H__
+#endif  // __CLIPMAPPYRAMID_H__
