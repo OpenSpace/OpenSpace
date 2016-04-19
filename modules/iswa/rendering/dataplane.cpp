@@ -53,7 +53,10 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_dataSlice(nullptr)
 {   
     _id = id();
-    setName("DataPlane" + std::to_string(_id));
+    
+    std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
 
     addProperty(_dataOptions);
     // addProperty(_topColor);

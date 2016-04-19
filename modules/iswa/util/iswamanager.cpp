@@ -164,16 +164,16 @@ namespace openspace{
             //download metadata to texture plane
             std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(id);
             extFuture->type = "TEXTURE";
-            extFuture->id = -id;
+            extFuture->id = id;
             // extFuture->parent = info;
             // _extFutures.push_back(extFuture);
             // std::shared_ptr<ExtensionFuture> extFuture
             _metaFutures.push_back(extFuture);
         }
         else {
-            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-1);
+            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-2);
             extFuture->type = "DATA";
-            extFuture->id = -1;
+            extFuture->id = -2;
             // std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
             // mdata->id = 0;
             // mdata->path = absPath("${OPENSPACE_DATA}/"+info);
@@ -224,15 +224,15 @@ namespace openspace{
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
         metaFuture->id = id;
-
-        std::ifstream file(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"));
-        if(file.is_open()){
-            std::string json( (std::istreambuf_iterator<char>(file) ),
-                                (std::istreambuf_iterator<char>()));
-            metaFuture->isFinished = true;
-            metaFuture->json = json;
-        }
-
+        
+        DlManager.downloadToMemory(
+                    "http://128.183.168.116:3000/" + std::to_string(-id),
+                    metaFuture->json,
+                    [metaFuture](const DownloadManager::FileFuture& f){
+                        LDEBUG("Download to memory finished");
+                        metaFuture->isFinished = true;
+                    }
+                );
         return metaFuture;
     }
 
@@ -269,7 +269,13 @@ namespace openspace{
     }
 
     std::string ISWAManager::iSWAurl(int id){
-        std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
+        std::string url;
+        
+        if(id < 0){
+            url = "http://128.183.168.116:3000/image/" + std::to_string(-id) + "/";
+        } else {
+            url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
+        }
         
         std::string t = Time::ref().currentTimeUTC(); 
         std::stringstream ss(t);
@@ -283,9 +289,6 @@ namespace openspace{
         url += token + "%20";
         std::getline(ss, token, '.');
         url += token;
-
-        url += "&window=-1&cygnetId=";
-        url += std::to_string(id);
 
         //std::cout << url <<  std::endl;
 
@@ -345,61 +348,61 @@ namespace openspace{
         }    
     }
 
-    std::string ISWAManager::getDictionaryTable(int id, std::string path){
-        json j;
-        std::ifstream file(path);
-        if(file.is_open()){
-            j = json::parse(file);
-        }
+    // std::string ISWAManager::getDictionaryTable(int id, std::string path){
+    //     json j;
+    //     std::ifstream file(path);
+    //     if(file.is_open()){
+    //         j = json::parse(file);
+    //     }
 
-        std::string parent = j["Central Body"];
-        std::string frame = j["Coordinates"];
+    //     std::string parent = j["Central Body"];
+    //     std::string frame = j["Coordinates"];
 
-        int xmax = j["Plot XMAX"];
-        int ymax = j["Plot YMAX"];
-        int zmax = j["Plot ZMAX"];
-        int xmin = j["Plot XMIN"];
-        int ymin = j["Plot YMIN"];
-        int zmin = j["Plot ZMIN"];
+    //     int xmax = j["Plot XMAX"];
+    //     int ymax = j["Plot YMAX"];
+    //     int zmax = j["Plot ZMAX"];
+    //     int xmin = j["Plot XMIN"];
+    //     int ymin = j["Plot YMIN"];
+    //     int zmin = j["Plot ZMIN"];
 
-        float spatScale=1, scalew=10;
-        std::string spatialScale = j["Spatial Scale (Custom)"];
-        if(spatialScale == "R_E"){
-            // spatScale = 6.371f;
-            // scalew = 6;
-        }
+    //     float spatScale=1, scalew=10;
+    //     std::string spatialScale = j["Spatial Scale (Custom)"];
+    //     if(spatialScale == "R_E"){
+    //         // spatScale = 6.371f;
+    //         // scalew = 6;
+    //     }
 
-        std::string scale = "{" 
-                                + std::to_string(spatScale*(xmax-xmin)) + ","
-                                + std::to_string(spatScale*(ymax-ymin)) + ","
-                                + std::to_string(spatScale*(zmax-zmin)) + ","
-                                + std::to_string(scalew) +
-                            "}";
+    //     std::string scale = "{" 
+    //                             + std::to_string(spatScale*(xmax-xmin)) + ","
+    //                             + std::to_string(spatScale*(ymax-ymin)) + ","
+    //                             + std::to_string(spatScale*(zmax-zmin)) + ","
+    //                             + std::to_string(scalew) +
+    //                         "}";
 
-        std::string offset ="{"
-                                + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
-                                + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
-                                + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
-                                + std::to_string(scalew) +
-                            "}";
+    //     std::string offset ="{"
+    //                             + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
+    //                             + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
+    //                             + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
+    //                             + std::to_string(scalew) +
+    //                         "}";
 
-        std::string table = "{"
-        "Name = 'TexturePlane' , "
-        "Parent = '" + parent + "', "
-        "Renderable = {"    
-            "Type = 'TexturePlane', "
-            "Id = " + std::to_string(id) + ", "
-            "Frame = '" + frame + "' , "
-            "Scale = " + scale + ", "
-            "Offset = " + offset + 
-            "}"
-        "}"
-        ;
+    //     std::string table = "{"
+    //     "Name = 'TexturePlane' , "
+    //     "Parent = '" + parent + "', "
+    //     "Renderable = {"    
+    //         "Type = 'TexturePlane', "
+    //         "Id = " + std::to_string(id) + ", "
+    //         "Frame = '" + frame + "' , "
+    //         "Scale = " + scale + ", "
+    //         "Offset = " + offset + 
+    //         "}"
+    //     "}"
+    //     ;
 
-        std::cout << table << std::endl;
-        // ghoul::Dictionary dic;
-        return table;
-    }
+    //     // std::cout << table << std::endl;
+    //     // ghoul::Dictionary dic;
+    //     return table;
+    // }
 
     std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString, std::string type){
         if(jsonString != ""){
@@ -448,7 +451,7 @@ namespace openspace{
             "}"
             ;
 
-            std::cout << table << std::endl;
+            // std::cout << table << std::endl;
             // ghoul::Dictionary dic;
             return table;
         }
@@ -480,7 +483,7 @@ namespace openspace{
                         "}"
                     "}"
                     ;
-                std::cout << table << std::endl;    
+                // std::cout << table << std::endl;    
                 return table;
             }
         }

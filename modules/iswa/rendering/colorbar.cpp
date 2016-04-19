@@ -75,6 +75,7 @@ bool ColorBar::deinitialize(){
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
+    return true;
 }
 
 void ColorBar::render(){
