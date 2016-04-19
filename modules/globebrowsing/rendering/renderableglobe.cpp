@@ -37,11 +37,6 @@
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
-
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 namespace {
 	const std::string _loggerCat = "RenderableGlobe";
 
@@ -71,8 +66,8 @@ namespace openspace {
 		// Mainly for debugging purposes @AA
 		addProperty(_rotation);
 		
-		//addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
-		addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary)), 1e9);
+		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary)), 1e9);
+		//addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary)), 1e9);
 		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
 
 

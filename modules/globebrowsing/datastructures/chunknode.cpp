@@ -116,7 +116,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
 	if (isLeaf()) {
-		PatchRenderer& patchRenderer = _owner.getPatchRenderer();
+		LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
 		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
 	}

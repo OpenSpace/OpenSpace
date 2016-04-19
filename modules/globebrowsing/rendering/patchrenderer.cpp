@@ -99,7 +99,10 @@ namespace openspace {
 	}
 
 	void LatLonPatchRenderer::renderPatch(
-		const LatLonPatch& patch, const RenderData& data, double radius, const TileIndex& tileIndex)
+		const LatLonPatch& patch,
+		const RenderData& data,
+		double radius,
+		const TileIndex& tileIndex)
 	{
 
 		using namespace glm;
@@ -165,7 +168,9 @@ namespace openspace {
 	}
 
 	void ClipMapPatchRenderer::renderPatch(
-		const LatLonPatch& patch, const RenderData& data, double radius)
+		const LatLonPatch& patch,
+		const RenderData& data,
+		double radius)
 	{
 		// activate shader
 		_programObject->activate();

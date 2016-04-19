@@ -58,7 +58,7 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		std::unique_ptr<PatchRenderer> _patchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
 		std::vector<LatLonPatch> _patches;
 
 		properties::IntProperty _rotation;

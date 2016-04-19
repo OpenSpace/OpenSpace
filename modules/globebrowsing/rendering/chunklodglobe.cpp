@@ -108,7 +108,7 @@ namespace openspace {
 		return ready;
 	}
 
-	PatchRenderer& ChunkLodGlobe::getPatchRenderer() {
+	LatLonPatchRenderer& ChunkLodGlobe::getPatchRenderer() {
 		return *_patchRenderer;
 	}
 

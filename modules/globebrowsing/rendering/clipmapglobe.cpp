@@ -65,7 +65,7 @@ namespace openspace {
 		if (_target != "")
 			setBody(_target);
 
-		size_t numPatches = 5;
+		size_t numPatches = 10;
 		for (size_t i = 0; i < numPatches; i++)
 		{
 			_patches.push_back(LatLonPatch(

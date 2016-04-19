@@ -68,11 +68,11 @@ public:
 	void setHalfSize(const LatLon&);
 	
 
-	// Returns the minimal bounding radius that together with the LatLonPatch's
-	// center point represents a sphere in which the patch is completely contained
+	/// Returns the minimal bounding radius that together with the LatLonPatch's
+	/// center point represents a sphere in which the patch is completely contained
 	Scalar minimalBoundingRadius() const;
 
-	// Returns the area of the patch with unit radius
+	/// Returns the area of the patch with unit radius
 	Scalar unitArea() const;
 
 

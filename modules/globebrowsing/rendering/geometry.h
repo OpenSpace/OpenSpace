@@ -34,12 +34,14 @@
 
 namespace openspace {
 
-/**
-	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
-	has all data needed such as position buffer and normal buffer but all data is not
-	necessarily needed for all purpouses so the Geometry can disable use of normals for
-	example.
-*/
+///	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
+///	has all data needed such as position buffer and normal buffer but all data is not
+///	necessarily needed for all purpouses so the Geometry can disable use of normals for
+///	example.
+
+	// TODO : Possibly render triangle strips in this class instead of triangles since
+	// that is faster
+
 class Geometry
 {
 public:
