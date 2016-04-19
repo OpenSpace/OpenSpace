@@ -21,19 +21,15 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+/*
 
-#include <modules/globebrowsing/rendering/texturetileset.h>
+#include <modules/globebrowsing/rendering/twmstileprovider.h>
 
 #include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/opengl/texturemanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
-
 #include <ghoul/logging/logmanager.h>
-
-
-#include <glm/glm.hpp>
 
 #include <sstream>
 
@@ -118,3 +114,4 @@ namespace openspace {
 
 
 }  // namespace openspace
+*/

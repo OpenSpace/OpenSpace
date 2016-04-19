@@ -57,6 +57,7 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	PatchRenderer::PatchRenderer(shared_ptr<Geometry> geometry)
 		: _geometry(geometry)
+		, _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0)
 	{
 
 	}
@@ -92,7 +93,7 @@ namespace openspace {
 	{
 		
 		// Get the textures that should be used for rendering
-		TileIndex ti = tileSet.getTileIndex(patch);
+		TileIndex ti = _tileSet.getTileIndex(patch);
 
 		renderPatch(patch, data, radius, ti);
 	}
@@ -103,8 +104,7 @@ namespace openspace {
 
 		using namespace glm;
 
-		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
-		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
+
 
 		// TODO : Model transform should be fetched as a matrix directly.
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
@@ -116,11 +116,18 @@ namespace openspace {
 		// activate shader
 		_programObject->activate();
 
+		// Get the textures that should be used for rendering
+		LatLonPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
+		glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(patch, tileIndex);
+
 		// Bind and use the texture
 		ghoul::opengl::TextureUnit texUnit;
 		texUnit.activate();
 		tile00->bind();
 		_programObject->setUniform("textureSampler", texUnit);
+
+		_programObject->setUniform("uvTransformPatchToTile", uvTransform);
 
 		LatLon swCorner = patch.southWestCorner();
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
@@ -181,9 +188,10 @@ namespace openspace {
 		ivec2 intSnapCoord = ivec2(
 			patch.center().lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
 			patch.center().lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
-		LatLon swCorner = LatLon(
-			stepSize.lat * intSnapCoord.x - halfSize.lat,
-			stepSize.lon * intSnapCoord.y - halfSize.lon);
+		LatLon newPatchCenter = LatLon(
+			stepSize.lat * intSnapCoord.x,
+			stepSize.lon * intSnapCoord.y);
+		LatLonPatch newPatch(newPatchCenter, patch.halfSize());
 
 		ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
@@ -193,18 +201,20 @@ namespace openspace {
 
 
 		// Get the textures that should be used for rendering
-		TileIndex tileIndex = tileSet.getTileIndex(patch);
-		LatLonPatch tilePatch = tileSet.getTilePositionAndScale(tileIndex);
-		std::shared_ptr<ghoul::opengl::Texture> tile00 = tileSet.getTile(tileIndex);
+		TileIndex tileIndex = _tileSet.getTileIndex(patch);
+		LatLonPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
+		glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
 
 		// Bind and use the texture
 		ghoul::opengl::TextureUnit texUnit;
 		texUnit.activate();
 		tile00->bind();
 		_programObject->setUniform("textureSampler", texUnit);
+		_programObject->setUniform("uvTransformPatchToTile", mat3(uvTransform));
 
 		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
-		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
+		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(halfSize.toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 		_programObject->setUniform("contraction", contraction);

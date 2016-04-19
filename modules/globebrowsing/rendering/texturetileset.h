@@ -47,7 +47,7 @@ namespace openspace {
 	class TextureTileSet
 	{
 	public:
-		TextureTileSet();
+		TextureTileSet(LatLon sizeLevel0, LatLon offsetLevel0, int depth);
 		~TextureTileSet();
 
 		/// Returns the index of the tile at an appropriate level.
@@ -56,12 +56,14 @@ namespace openspace {
 		/// The tile is at least as big as the patch.
 		TileIndex getTileIndex(LatLonPatch patch);
 		std::shared_ptr<Texture> getTile(LatLonPatch patch);
+ 
 		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
 		LatLonPatch getTilePositionAndScale(const TileIndex& tileIndex);
-
+		glm::mat3 getUvTransformationPatchToTile(LatLonPatch patch, const TileIndex& tileIndex);
 	private:
 		LatLon _sizeLevel0;
 		LatLon _offsetLevel0;
+		int _depth;
 
 		std::shared_ptr<Texture> _testTexture;
 

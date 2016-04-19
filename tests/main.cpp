@@ -38,7 +38,8 @@
 #include <test_twmstileprovider.inl>
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+//#include <test_latlonpatch.inl>
+//#include <test_texturetileset.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
