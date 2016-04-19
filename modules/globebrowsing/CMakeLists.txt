@@ -75,7 +75,18 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-	"GlobeBrowsing"
-	globebrowsing_module
-	${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+    "GlobeBrowsing"
+    globebrowsing_module
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+
+target_include_directories(
+    openspace-module-globebrowsing
+    SYSTEM PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
+)
+
+target_link_libraries(
+    openspace-module-globebrowsing
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
 )
