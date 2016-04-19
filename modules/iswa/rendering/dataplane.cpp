@@ -49,6 +49,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
     ,_colorbar(nullptr)
     ,_futureData(nullptr)
+    ,_dataSlice(nullptr)
 {   
     _id = id();
     setName("DataPlane" + std::to_string(_id));
@@ -58,7 +59,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     // addProperty(_botColor);
     // addProperty(_tfValues);
 
-    // registerProperties();
+    registerProperties();
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
@@ -118,6 +119,7 @@ bool DataPlane::deinitialize(){
     destroyShader();
     
     // _kw = nullptr;
+    _texture = nullptr;
     _memorybuffer = "";
     
     // _colorbar->deinitialize();
@@ -227,63 +229,68 @@ void DataPlane::update(const UpdateData& data){
     }
 }
 
-void DataPlane::loadTexture() { 
-    std::stringstream ss(_memorybuffer);
-    std::string line;
+void DataPlane::loadTexture() {
+    if(!_memorybuffer.empty()){
+        std::stringstream ss(_memorybuffer);
+        std::string line;
 
-    _dimensions = glm::size3_t(61, 61, 1);
-    float* values = new float[3721];
-    int i = 0;
-    ss >> std::ws;
+        // _dimensions = glm::size3_t(61, 61, 1);
+        float* values = new float[3721];
+        // for(int i=0; i<3721; i++){
+        //     values[i] = 0.0f;
+        // }
+        int i = 0;
+        ss >> std::ws;
 
-    float min = std::numeric_limits<float>::max();
-    float max = std::numeric_limits<float>::min();
+        float min = std::numeric_limits<float>::max();
+        float max = std::numeric_limits<float>::min();
 
-    while(getline(ss,line)){
-        if(line.find("#") == 0){
-            // std::cout << line << std::endl;
-            continue;
+        while(getline(ss,line)){
+            if(line.find("#") == 0){
+                // std::cout << line << std::endl;
+                continue;
+            }
+
+            float x, y, z, N, V, B;
+            std::stringstream sl(line);
+
+            sl >> std::ws >> x >> y >> z >> N >> V >> B;
+            values[i] = N;
+
+            // std::cout << N << ", "; 
+            min = std::min(min,values[i]);
+            max = std::max(max,values[i]);
+
+            i++;
         }
 
-        float x, y, z, N, V, B;
-        std::stringstream sl(line);
+        // std::cout << min << ", " << max << std::endl;
+        for(int j=0; j<i; j++){
+            float normValue = (values[j]-min)/(max-min);
+            values[j] = glm::clamp(normValue, 0.0f, 1.0f);
+        }        
 
-        sl >> std::ws >> x >> y >> z >> N >> V >> B;
-        values[i] = N;
+        if (!_texture) {
+            ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+            ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
-        min = std::min(min,values[i]);
-        max = std::max(max,values[i]);
+            std::unique_ptr<ghoul::opengl::Texture> texture = 
+            std::make_unique<ghoul::opengl::Texture>(values,glm::size3_t(61, 61, 1), ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 
-        i++;
-    }
-
-    std::cout << min << ", " << max << std::endl;
-    for(int j=0; j<i; j++){
-        float normValue = (values[j]-min)/(max-min);
-        values[j] = glm::clamp(normValue, 0.0f, 1.0f);
-    }        
-
-    _dataSlice = values;
-
-
-    ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-    ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-    std::unique_ptr<ghoul::opengl::Texture> texture = 
-        std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
-
-    if (texture) {
-        // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
-
-        texture->uploadTexture();
-
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-        _texture = std::move(texture);
+            if(texture){
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                _texture = std::move(texture);
+            }
+        }else{
+            _texture->setPixelData(values);
+            _texture->uploadTexture();
+        }
     }
 }
 
 void DataPlane::updateTexture(){
+    _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(2, _memorybuffer);
 
     if(future){

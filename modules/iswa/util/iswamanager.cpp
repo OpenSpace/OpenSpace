@@ -171,9 +171,9 @@ namespace openspace{
             _metaFutures.push_back(extFuture);
         }
         else {
-            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-2);
+            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-1);
             extFuture->type = "DATA";
-            extFuture->id = -2;
+            extFuture->id = -1;
             // std::shared_ptr<Metadata> mdata = std::make_shared<Metadata>();
             // mdata->id = 0;
             // mdata->path = absPath("${OPENSPACE_DATA}/"+info);
@@ -229,7 +229,6 @@ namespace openspace{
         if(file.is_open()){
             std::string json( (std::istreambuf_iterator<char>(file) ),
                                 (std::istreambuf_iterator<char>()));
-            // std::cout << "This is in the file: " <<  json << std::endl;
             metaFuture->isFinished = true;
             metaFuture->json = json;
         }
@@ -299,9 +298,6 @@ namespace openspace{
         std::string t = Time::ref().currentTimeUTC(); 
         std::stringstream ss(t);
         std::string token;
-
-        http://localhost:3000/data/1/2029-07-14%2010:00:00
-        // http://128.183.168.116:3000/data/1/2996-01-23%2000:44:00
 
         std::getline(ss, token, ' ');
         url += token + "-"; 
@@ -438,20 +434,6 @@ namespace openspace{
                 spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f),
                 scalew
             );
-            // std::string scale = "{" 
-            //                         + std::to_string(spatScale*(xmax-xmin)) + ","
-            //                         + std::to_string(spatScale*(ymax-ymin)) + ","
-            //                         + std::to_string(spatScale*(zmax-zmin)) + ","
-            //                         + std::to_string(scalew) +
-            //                     "}";
-
-            // std::string offset ="{"
-            //                         + std::to_string(spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f)) + "," 
-            //                         + std::to_string(spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f)) + ","
-            //                         + std::to_string(spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)) + ","
-            //                         + std::to_string(scalew) +
-            //                     "}";
-
 
             std::string table = "{"
             "Name = 'TexturePlane "+ std::to_string(id) +"' , "

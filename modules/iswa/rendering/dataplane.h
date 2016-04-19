@@ -59,6 +59,8 @@ class DataPlane : public CygnetPlane {
 	float* _dataSlice;
 	std::string _var;
 
+	std::shared_ptr<float> _values;
+
 	std::shared_ptr<ColorBar> _colorbar;
 	std::shared_ptr<DownloadManager::FileFuture> _futureData;
  };

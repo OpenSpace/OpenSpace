@@ -32,7 +32,7 @@ namespace openspace{
 
 ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
-	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	, _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
 	, _delete("delete", "Delete")
 	, _shader(nullptr)
 	, _texture(nullptr)

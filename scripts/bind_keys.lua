@@ -58,7 +58,7 @@ openspace.bindKey("x", "openspace.setPropertyValue('Interaction.origin', 'Europa
 
 
 openspace.bindKey("g", "openspace.time.setTime('2007-02-28T11:40:00.00'); openspace.time.setDeltaTime(1);")
-
+openspace.bindKey("v", "openspace.time.setTime('2015-03-15T11:00:00.00'); openspace.time.setDeltaTime(0);")
 openspace.bindKey("h", "openspace.time.setTime('2015-07-14T10:00:00.00'); openspace.time.setDeltaTime(1); openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');openspace.setPropertyValue('Interaction.origin', 'PlutoProjection'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');")
 
 openspace.bindKey("i", "local b = openspace.getPropertyValue('PlutoTexture.renderable.enabled'); openspace.setPropertyValue('PlutoTexture.renderable.enabled', not b)")
