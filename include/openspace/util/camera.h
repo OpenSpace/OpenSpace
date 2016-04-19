@@ -58,7 +58,6 @@ public:
 
 
 
-
 	// RELATIVE MUTATORS
 
 	void rotate(const glm::quat& rotation);
@@ -104,10 +103,10 @@ public:
 
 	// SYNCHRONIZATION
 
-	void postSynchronizationPreDraw();
-	void preSynchronization();
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
+    void postSynchronizationPreDraw();
+    void preSynchronization();
+    void serialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
 
 
@@ -173,7 +172,7 @@ private:
 	
 
 	mutable std::mutex _mutex;
-	
+
 };
 
 } // namespace openspace

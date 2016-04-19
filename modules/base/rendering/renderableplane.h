@@ -42,46 +42,46 @@ namespace ghoul {
 }
 
 namespace openspace {
-	struct LinePoint;
+    struct LinePoint;
 
 class RenderablePlane : public Renderable {
 
-	enum class Origin {
-		LowerLeft, LowerRight, UpperLeft, UpperRight, Center
-	};
+    enum class Origin {
+        LowerLeft, LowerRight, UpperLeft, UpperRight, Center
+    };
 
 public:
-	RenderablePlane(const ghoul::Dictionary& dictionary);
+    RenderablePlane(const ghoul::Dictionary& dictionary);
     ~RenderablePlane();
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-	void loadTexture();
+    void loadTexture();
     void createPlane();
 
-	properties::StringProperty _texturePath;
-	properties::BoolProperty _billboard;
-	properties::BoolProperty _projectionListener;
+    properties::StringProperty _texturePath;
+    properties::BoolProperty _billboard;
+    properties::BoolProperty _projectionListener;
     properties::Vec2Property _size;
 
-	Origin _origin;
-	std::string _nodeName;
+    Origin _origin;
+    std::string _nodeName;
 
     bool _planeIsDirty;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     bool _textureIsDirty;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     ghoul::filesystem::File* _textureFile;
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
 };
 
 } // namespace openspace

@@ -32,22 +32,22 @@ in vec4 vs_position;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse;
-	if(gl_FrontFacing)
-		diffuse = texture(texture1, vs_st);
-	else
-		diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    vec4 diffuse;
+    if(gl_FrontFacing)
+        diffuse = texture(texture1, vs_st);
+    else
+        diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
 
-	//vec4 diffuse = vec4(1,vs_st,1);
-	//vec4 diffuse = vec4(1,0,0,1);
-	// if(position.w > 9.0) {
-	// 	diffuse = vec4(1,0,0,1);
-	// }
+    //vec4 diffuse = vec4(1,vs_st,1);
+    //vec4 diffuse = vec4(1,0,0,1);
+    // if(position.w > 9.0) {
+    //     diffuse = vec4(1,0,0,1);
+    // }
 
-	if (diffuse.a == 0.0)
-		discard;
+    if (diffuse.a == 0.0)
+        discard;
 
     Fragment frag;
     frag.color = diffuse;

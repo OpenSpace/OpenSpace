@@ -60,16 +60,16 @@ public:
         Invalid
     };
 
-	static const std::string PerformanceMeasurementSharedData;
+    static const std::string PerformanceMeasurementSharedData;
     
     static const std::string KeyFontMono;
     static const std::string KeyFontLight;
 
-	RenderEngine();
-	~RenderEngine();
-	
-	bool initialize();
-	bool deinitialize();
+    RenderEngine();
+    ~RenderEngine();
+    
+    bool initialize();
+    bool deinitialize();
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();
@@ -79,24 +79,24 @@ public:
     RendererImplementation rendererImplementation() const;
     RaycasterManager& raycasterManager();
 
-	// sgct wrapped functions
+    // sgct wrapped functions
     bool initializeGL();
     void postSynchronizationPreDraw();
-	void preSynchronization();
-	void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
+    void preSynchronization();
+    void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
     void postDraw();
 
-	void takeScreenshot();
-	void toggleInfoText(bool b);
+    void takeScreenshot();
+    void toggleInfoText(bool b);
 
-	void setPerformanceMeasurements(bool performanceMeasurements);
-	bool doesPerformanceMeasurements() const;
+    void setPerformanceMeasurements(bool performanceMeasurements);
+    bool doesPerformanceMeasurements() const;
 
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
+    void serialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
-	float globalBlackOutFactor();
-	void setGlobalBlackOutFactor(float factor);
+    float globalBlackOutFactor();
+    void setGlobalBlackOutFactor(float factor);
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -122,18 +122,18 @@ public:
      * as a 'rendererData' variable in the dictionary.
      */
     void setRendererData(const ghoul::Dictionary& renderer);
-	
-	/**
-	 * Returns the Lua library that contains all Lua functions available to affect the
-	 * rendering.
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    
+    /**
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * rendering.
+     */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     // This is a temporary method to change the origin of the coordinate system ---abock
     void changeViewPoint(std::string origin);
 
-	// Temporary fade functionality
-	void startFading(int direction, float fadeDuration);
+    // Temporary fade functionality
+    void startFading(int direction, float fadeDuration);
 
     // This is temporary until a proper screenspace solution is found ---abock
     struct {
@@ -145,30 +145,30 @@ public:
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
-	void storePerformanceMeasurements();
+    void storePerformanceMeasurements();
     void renderInformation();
     void renderScreenLog();
 
-	Camera* _mainCamera;
-	Scene* _sceneGraph;
+    Camera* _mainCamera;
+    Scene* _sceneGraph;
     RaycasterManager* _raycasterManager;
 
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
     ghoul::Dictionary _rendererData;
-	ScreenLog* _log;
+    ScreenLog* _log;
 
-	bool _showInfo;
-	bool _showLog;
-	bool _takeScreenshot;
+    bool _showInfo;
+    bool _showLog;
+    bool _takeScreenshot;
 
-	bool _doPerformanceMeasurements;
-	ghoul::SharedMemory* _performanceMemory;
+    bool _doPerformanceMeasurements;
+    ghoul::SharedMemory* _performanceMemory;
     
-	float _globalBlackOutFactor;
-	float _fadeDuration;
-	float _currentFadeTime;
-	int _fadeDirection;
+    float _globalBlackOutFactor;
+    float _fadeDuration;
+    float _currentFadeTime;
+    int _fadeDirection;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     

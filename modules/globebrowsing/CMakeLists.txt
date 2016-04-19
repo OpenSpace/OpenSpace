@@ -40,6 +40,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetile.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
@@ -60,6 +61,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetile.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.cpp
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp

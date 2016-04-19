@@ -34,23 +34,23 @@ namespace properties {
 
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
-	struct Option {
-		int value;
-		std::string description;
-	};
+    struct Option {
+        int value;
+        std::string description;
+    };
 
-	SelectionProperty(std::string identifier, std::string guiName);
-	
-	void addOption(Option option);
-	const std::vector<Option>& options() const;
+    SelectionProperty(std::string identifier, std::string guiName);
+    
+    void addOption(Option option);
+    const std::vector<Option>& options() const;
 
 private:
-	static const std::string OptionsKey;
-	std::string generateAdditionalDescription() const;
+    static const std::string OptionsKey;
+    std::string generateAdditionalDescription() const;
 
-	/// The list of options which have been registered with this OptionProperty
-	std::vector<Option> _options;
-	std::vector<int> _values;
+    /// The list of options which have been registered with this OptionProperty
+    std::vector<Option> _options;
+    std::vector<int> _values;
 };
 
 template <>

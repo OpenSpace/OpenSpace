@@ -45,15 +45,15 @@
 #include <math.h>
 
 namespace { 
-	const std::string _loggerCat     = "RenderableModel";
-	const std::string keySource      = "Rotation.Source";
-	const std::string keyDestination = "Rotation.Destination";
+    const std::string _loggerCat     = "RenderableModel";
+    const std::string keySource      = "Rotation.Source";
+    const std::string keyDestination = "Rotation.Destination";
     const std::string keyGeometry    = "Geometry";
-	const std::string keyBody        = "Body";
-	const std::string keyStart       = "StartTime";
-	const std::string keyEnd         = "EndTime";
-	const std::string keyFading      = "Shading.Fadeable";
-	//const std::string keyGhosting      = "Shading.Ghosting";
+    const std::string keyBody        = "Body";
+    const std::string keyStart       = "StartTime";
+    const std::string keyEnd         = "EndTime";
+    const std::string keyFading      = "Shading.Fadeable";
+    //const std::string keyGhosting      = "Shading.Ghosting";
 
 }
 
@@ -61,8 +61,8 @@ namespace openspace {
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-	, _colorTexturePath("colorTexture", "Color Texture")
-	, _performFade("performFading", "Perform Fading", false)
+    , _colorTexturePath("colorTexture", "Color Texture")
+    , _performFade("performFading", "Perform Fading", false)
     , _fading("fading", "Fade", 0)
     , _programObject(nullptr)
     , _texture(nullptr)
@@ -70,57 +70,57 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _alpha(1.f)
     //, _isGhost(false)
     , _performShading("performShading", "Perform Shading", true)
-	, _frameCount(0)
+    , _frameCount(0)
 {
-	std::string name;
+    std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModel");
 
-	ghoul::Dictionary geometryDictionary;
-	success = dictionary.getValue(keyGeometry, geometryDictionary);
-	if (success) {
-		geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-		_geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
-	}
+    ghoul::Dictionary geometryDictionary;
+    success = dictionary.getValue(keyGeometry, geometryDictionary);
+    if (success) {
+        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
+        _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
+    }
 
-	std::string texturePath = "";
-	success = dictionary.getValue("Textures.Color", texturePath);
-	if (success)
+    std::string texturePath = "";
+    success = dictionary.getValue("Textures.Color", texturePath);
+    if (success)
         _colorTexturePath = absPath(texturePath);
 
-	addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry);
 
-	addProperty(_colorTexturePath);
-	_colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
+    addProperty(_colorTexturePath);
+    _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
-	dictionary.getValue(keySource, _source);
-	dictionary.getValue(keyDestination, _destination);
-	dictionary.getValue(keyBody, _target);
+    dictionary.getValue(keySource, _source);
+    dictionary.getValue(keyDestination, _destination);
+    dictionary.getValue(keyBody, _target);
 
-	openspace::SpiceManager::ref().addFrame(_target, _source);
+    openspace::SpiceManager::ref().addFrame(_target, _source);
 
     setBoundingSphere(pss(1.f, 9.f));
-	addProperty(_performShading);
+    addProperty(_performShading);
 
-	if (dictionary.hasKeyAndValue<bool>(keyFading)) {
-		bool fading;
-		dictionary.getValue(keyFading, fading);
-		_performFade = fading;
-	}
-	addProperty(_performFade);
+    if (dictionary.hasKeyAndValue<bool>(keyFading)) {
+        bool fading;
+        dictionary.getValue(keyFading, fading);
+        _performFade = fading;
+    }
+    addProperty(_performFade);
 
-	//if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
-	//	bool ghosting;
-	//	dictionary.getValue(keyGhosting, ghosting);
-	//	_isGhost = ghosting;
-	//}
+    //if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
+    //    bool ghosting;
+    //    dictionary.getValue(keyGhosting, ghosting);
+    //    _isGhost = ghosting;
+    //}
 }
 
 bool RenderableModel::isReady() const {
-	bool ready = true;
-	ready &= (_programObject != nullptr);
-	ready &= (_texture != nullptr);
-	return ready;
+    bool ready = true;
+    ready &= (_programObject != nullptr);
+    ready &= (_texture != nullptr);
+    return ready;
 }
 
 bool RenderableModel::initialize() {
@@ -141,18 +141,18 @@ bool RenderableModel::initialize() {
 
     completeSuccess &= (_texture != nullptr);
     completeSuccess &= _geometry->initialize(this); 
-	completeSuccess &= !_source.empty();
-	completeSuccess &= !_destination.empty();
+    completeSuccess &= !_source.empty();
+    completeSuccess &= !_destination.empty();
 
     return completeSuccess;
 }
 
 bool RenderableModel::deinitialize() {
-	if (_geometry) {
-		_geometry->deinitialize();
-		delete _geometry;
+    if (_geometry) {
+        _geometry->deinitialize();
+        delete _geometry;
         _geometry = nullptr;
-	}
+    }
     _texture = nullptr;
 
 
@@ -162,59 +162,59 @@ bool RenderableModel::deinitialize() {
         _programObject = nullptr;
     }
 
-	return true;
+    return true;
 }
 
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
-	_frameCount++;
+    _frameCount++;
 
-	double lt;
+    double lt;
     glm::mat4 transform = glm::mat4(1);
 
-	glm::mat4 tmp = glm::mat4(1);
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++){
-			tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
-		}
-	}
-	transform *= tmp;
-	
-	double time = openspace::Time::ref().currentTime();
-	bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
-	if (!targetPositionCoverage){
-		int frame = _frameCount % 180;
+    glm::mat4 tmp = glm::mat4(1);
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        }
+    }
+    transform *= tmp;
+    
+    double time = openspace::Time::ref().currentTime();
+    bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
+    if (!targetPositionCoverage){
+        int frame = _frameCount % 180;
         
-		float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
-		_alpha = 0.5f + fadingFactor * 0.5f;
-	}
-	else
-		_alpha = 1.0f;
+        float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
+        _alpha = 0.5f + fadingFactor * 0.5f;
+    }
+    else
+        _alpha = 1.0f;
 
     glm::dvec3 p =
     SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, time, lt);
     psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-	glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
-	_programObject->setUniform("cam_dir", cam_dir);
-	_programObject->setUniform("transparency", _alpha);
-	_programObject->setUniform("sun_pos", _sunPosition.vec3());
-	_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_programObject->setUniform("ModelTransform", transform);
-	setPscUniforms(*_programObject.get(), data.camera, data.position);
-	
-	_programObject->setUniform("_performShading", _performShading);
+    glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
+    _programObject->setUniform("cam_dir", cam_dir);
+    _programObject->setUniform("transparency", _alpha);
+    _programObject->setUniform("sun_pos", _sunPosition.vec3());
+    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _programObject->setUniform("ModelTransform", transform);
+    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    
+    _programObject->setUniform("_performShading", _performShading);
 
     _geometry->setUniforms(*_programObject);
 
-	if (_performFade && _fading > 0.f){
-		_fading = _fading - 0.01f;
-	}
-	else if (!_performFade && _fading < 1.f){
-		_fading = _fading + 0.01f;
+    if (_performFade && _fading > 0.f){
+        _fading = _fading - 0.01f;
+    }
+    else if (!_performFade && _fading < 1.f){
+        _fading = _fading + 0.01f;
 
-	}
+    }
 
-	_programObject->setUniform("fading", _fading);
+    _programObject->setUniform("fading", _fading);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -222,7 +222,7 @@ void RenderableModel::render(const RenderData& data) {
     _texture->bind();
     _programObject->setUniform("texture1", unit);
 
-	_geometry->render();
+    _geometry->render();
 
     // disable shader
     _programObject->deactivate();
@@ -231,25 +231,25 @@ void RenderableModel::render(const RenderData& data) {
 void RenderableModel::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
-	double _time = data.time;
+    double _time = data.time;
 
-	//if (_isGhost){
-	//	futureTime = openspace::ImageSequencer2::ref().getNextCaptureTime();
-	//	double remaining = openspace::ImageSequencer2::ref().getNextCaptureTime() - data.time;
-	//	double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-	//	double t = 1.f - remaining / openspace::ImageSequencer2::ref().getIntervalLength();
-	//	if (interval > 60) {
-	//		if (t < 0.8)
-	//			_fading = static_cast<float>(t);
-	//		else if (t >= 0.95)
-	//			_fading = _fading - 0.5f;
-	//	}
-	//	else
-	//		_fading = 0.f;
-	//	_time = futureTime;
-	//}
+    //if (_isGhost){
+    //    futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();
+    //    double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - data.time;
+    //    double interval = openspace::ImageSequencer::ref().getIntervalLength();
+    //    double t = 1.f - remaining / openspace::ImageSequencer::ref().getIntervalLength();
+    //    if (interval > 60) {
+    //        if (t < 0.8)
+    //            _fading = static_cast<float>(t);
+    //        else if (t >= 0.95)
+    //            _fading = _fading - 0.5f;
+    //    }
+    //    else
+    //        _fading = 0.f;
+    //    _time = futureTime;
+    //}
 
-	// set spice-orientation in accordance to timestamp
+    // set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
         _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
     }

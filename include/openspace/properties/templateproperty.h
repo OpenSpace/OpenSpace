@@ -52,135 +52,135 @@ namespace properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
-	typedef T ValueType;
+    typedef T ValueType;
 
-	/**
-	 * The constructor initializing the TemplateProperty with the provided
-	 * <code>identifier</code> and human-readable <code>guiName</code>. The default value
-	 * for the stored type <code>T</code> is retrieved using the PropertyDelegate's
-	 * PropertyDelegate::defaultValue method, which must be specialized for new types or
-	 * a compile-error will occur.
-	 * \param identifier The identifier that is used for this TemplateProperty
-	 * \param guiName The human-readable GUI name for this TemplateProperty
-	 */
+    /**
+     * The constructor initializing the TemplateProperty with the provided
+     * <code>identifier</code> and human-readable <code>guiName</code>. The default value
+     * for the stored type <code>T</code> is retrieved using the PropertyDelegate's
+     * PropertyDelegate::defaultValue method, which must be specialized for new types or
+     * a compile-error will occur.
+     * \param identifier The identifier that is used for this TemplateProperty
+     * \param guiName The human-readable GUI name for this TemplateProperty
+     */
     TemplateProperty(std::string identifier, std::string guiName);
 
-	/**
-	 * The constructor initializing the TemplateProperty with the provided
-	 * <code>identifier</code>, human-readable <code>guiName</code> and provided
-	 * <code>value</code>.
-	 */
+    /**
+     * The constructor initializing the TemplateProperty with the provided
+     * <code>identifier</code>, human-readable <code>guiName</code> and provided
+     * <code>value</code>.
+     */
     TemplateProperty(std::string identifier, std::string guiName, T value);
 
-	/**
-	 * Returns the class name for this TemplateProperty. The default implementation makes
-	 * a call to the PropertyDelegate::className method with the template parameter
-	 * <code>T</code> as argument. For this to work, that method needs to be specialized
-	 * to return the correct class name for the new template parameter T, or a
-	 * compile-time error will occur.
-	 * \return The class name for the TemplateProperty
-	 */
+    /**
+     * Returns the class name for this TemplateProperty. The default implementation makes
+     * a call to the PropertyDelegate::className method with the template parameter
+     * <code>T</code> as argument. For this to work, that method needs to be specialized
+     * to return the correct class name for the new template parameter T, or a
+     * compile-time error will occur.
+     * \return The class name for the TemplateProperty
+     */
     virtual std::string className() const override;
 
-	/**
-	 * Returns the stored value packed into a ghoul::any object.
-	 * \return The stored value packed into a ghoul::any object
-	 */
+    /**
+     * Returns the stored value packed into a ghoul::any object.
+     * \return The stored value packed into a ghoul::any object
+     */
     virtual ghoul::any get() const override;
 
-	/**
-	 * Sets the value fro the provided ghoul::any object. If the types between
+    /**
+     * Sets the value fro the provided ghoul::any object. If the types between
      * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
      * value remains unchanged.
-	 */
+     */
     virtual void set(ghoul::any value) override;
 
-	/**
-	 * Returns the <code>std::type_info</code> describing the template parameter
-	 * <code>T</code>. It can be used to test against a ghoul::any value before trying to
+    /**
+     * Returns the <code>std::type_info</code> describing the template parameter
+     * <code>T</code>. It can be used to test against a ghoul::any value before trying to
      * assign it.
-	 * \return The type info object describing the template parameter <code>T</code>
-	 */
+     * \return The type info object describing the template parameter <code>T</code>
+     */
     virtual const std::type_info& type() const override;
 
-	/**
-	 * This method encodes the stored value into a Lua object and pushes that object onto
-	 * the stack. The encoding is performed by calling PropertyDelegate::toLuaValue with
-	 * the template parameter <code>T</code> as an argument. This method has to be
-	 * specialized for each new type, or a compile-time error will occur.
-	 * \param state The Lua state onto which the encoded object will be pushed
-	 * \return <code>true</code> if the encoding succeeded; <code>false</code> otherwise
-	 */
-	bool getLuaValue(lua_State* state) const override;
+    /**
+     * This method encodes the stored value into a Lua object and pushes that object onto
+     * the stack. The encoding is performed by calling PropertyDelegate::toLuaValue with
+     * the template parameter <code>T</code> as an argument. This method has to be
+     * specialized for each new type, or a compile-time error will occur.
+     * \param state The Lua state onto which the encoded object will be pushed
+     * \return <code>true</code> if the encoding succeeded; <code>false</code> otherwise
+     */
+    bool getLuaValue(lua_State* state) const override;
 
-	/**
-	 * Sets the value of this TemplateProprty by decoding the object at the top of the Lua
-	 * stack and, if successful, assigning it using the Property::set method. The decoding
-	 * is performed by calling the PropertyDelegate::fromLuaValue with the template
-	 * parameter <code>T</code> as argument. If the decoding is successful, the new value
-	 * is set, otherwise it remains unchanged.
-	 * \param state The Lua state from which the value will be decoded
-	 * \return <code>true</code> if the decoding succeeded; <code>false</code> otherwise
-	 */
-	bool setLuaValue(lua_State* state) override;
+    /**
+     * Sets the value of this TemplateProprty by decoding the object at the top of the Lua
+     * stack and, if successful, assigning it using the Property::set method. The decoding
+     * is performed by calling the PropertyDelegate::fromLuaValue with the template
+     * parameter <code>T</code> as argument. If the decoding is successful, the new value
+     * is set, otherwise it remains unchanged.
+     * \param state The Lua state from which the value will be decoded
+     * \return <code>true</code> if the decoding succeeded; <code>false</code> otherwise
+     */
+    bool setLuaValue(lua_State* state) override;
 
-	/// \see Property::typeLua
-	int typeLua() const override;
+    /// \see Property::typeLua
+    int typeLua() const override;
 
     bool getStringValue(std::string& value) const override;
 
     bool setStringValue(std::string value) override;
 
-	/**
-	 * Returns the description for this TemplateProperty as a Lua script that returns a
-	 * table on execution
-	 * \return The description for this TemplateProperty
-	 */
-	//virtual std::string description() override;
+    /**
+     * Returns the description for this TemplateProperty as a Lua script that returns a
+     * table on execution
+     * \return The description for this TemplateProperty
+     */
+    //virtual std::string description() override;
 
-	/**
-	 * This operator allows the TemplateProperty to be used almost transparently as if it
-	 * was of the type <code>T</code>. It makes assignments such as
-	 * <code>T v = property;</code> possible by allowing implicit casts (even though,
-	 * internally, not casts are performed. This method is next to zero overhead).
-	 * \return The internal representation of the Property
-	 */
+    /**
+     * This operator allows the TemplateProperty to be used almost transparently as if it
+     * was of the type <code>T</code>. It makes assignments such as
+     * <code>T v = property;</code> possible by allowing implicit casts (even though,
+     * internally, not casts are performed. This method is next to zero overhead).
+     * \return The internal representation of the Property
+     */
     operator T();
 
-	/**
-	 * This operator allows the TemplateProperty to be used almost transparently as if it
-	 * was of the type <code>T</code>. It makes assignments such as
-	 * <code>T v = property;</code> possible by allowing implicit casts (even though,
-	 * internally, not casts are performed. This method is next to zero overhead).
-	 * \return The internal representation of the Property
-	 */
-	operator T() const;
+    /**
+     * This operator allows the TemplateProperty to be used almost transparently as if it
+     * was of the type <code>T</code>. It makes assignments such as
+     * <code>T v = property;</code> possible by allowing implicit casts (even though,
+     * internally, not casts are performed. This method is next to zero overhead).
+     * \return The internal representation of the Property
+     */
+    operator T() const;
 
-	/**
-	 * The assignment operator allows the TemplateProperty's value to be set without using
-	 * the TemplateProperty::set method. It will be done internally by thos method and it
-	 * allows assignments such as <code>prop = T(1)</code>.
-	 * \param val The value that should be set.
-	 */
+    /**
+     * The assignment operator allows the TemplateProperty's value to be set without using
+     * the TemplateProperty::set method. It will be done internally by thos method and it
+     * allows assignments such as <code>prop = T(1)</code>.
+     * \param val The value that should be set.
+     */
     TemplateProperty<T>& operator=(T val);
 
-	/**
-	 * These method sets the stored value to the provided value <code>val</code>,
-	 * moving it into place. This move only happens if the provided value <code>val</code>
-	 * is different from the stored value, which needs an operator== to exist for the type
-	 * <code>T</code>. If the value are different, the listeners are notified.
-	 * \param val The new value for this TemplateProperty
-	 */
+    /**
+     * These method sets the stored value to the provided value <code>val</code>,
+     * moving it into place. This move only happens if the provided value <code>val</code>
+     * is different from the stored value, which needs an operator== to exist for the type
+     * <code>T</code>. If the value are different, the listeners are notified.
+     * \param val The new value for this TemplateProperty
+     */
     virtual void setValue(T val);
 
-	/**
-	 * Returns the currently stored value.
-	 * \return The currently stored value
-	 */
+    /**
+     * Returns the currently stored value.
+     * \return The currently stored value
+     */
     T value() const;
 
 protected:
-	/// The value that this TemplateProperty currently stores
+    /// The value that this TemplateProperty currently stores
     T _value;
 };
 

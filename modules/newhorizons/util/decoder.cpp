@@ -34,9 +34,9 @@ namespace openspace {
 
 Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
 {
-	ghoul::TemplateFactory<Decoder>* factory
-		= FactoryManager::ref().factory<Decoder>();
-	Decoder* result = factory->create(type, dictionary);
+    ghoul::TemplateFactory<Decoder>* factory
+        = FactoryManager::ref().factory<Decoder>();
+    Decoder* result = factory->create(type, dictionary);
 
     if (result == nullptr) {
         LERROR("Failed creating Payload object of type '" << type << "'");

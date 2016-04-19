@@ -26,7 +26,7 @@
 
 #include "infowidget.h"
 
-#include <openspace/version.h>
+#include <openspace/openspace.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -37,6 +37,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -138,9 +139,9 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     libtorrent::session_settings settings = _session->settings();
     settings.user_agent =
         "OpenSpace/" +
-        std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-        std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-        std::to_string(OPENSPACE_VERSION_PATCH);
+        std::to_string(openspace::OPENSPACE_VERSION_MAJOR) + "." +
+        std::to_string(openspace::OPENSPACE_VERSION_MINOR) + "." +
+        std::to_string(openspace::OPENSPACE_VERSION_PATCH);
     settings.allow_multiple_connections_per_ip = true;
     settings.ignore_limits_on_local_network = true;
     settings.connection_speed = 20;
@@ -230,7 +231,7 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
 }
 
 void SyncWidget::clear() {
-    for (openspace::DownloadManager::FileFuture* f : _futures)
+    for (std::shared_ptr<openspace::DownloadManager::FileFuture> f : _futures)
         f->abortDownload = true;
 
     using libtorrent::torrent_handle;
@@ -254,7 +255,7 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         LDEBUG(f.url.toStdString() << " -> " << f.destination.toStdString());
 
-        openspace::DownloadManager::FileFuture* future = DlManager.downloadFile(
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future = DlManager.downloadFile(
             f.url.toStdString(),
             absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
@@ -275,8 +276,8 @@ void SyncWidget::handleFileRequest() {
         LDEBUG(f.identifier.toStdString() << " (" << f.version << ") -> " << f.destination.toStdString()); 
 
         ghoul::filesystem::Directory d = FileSys.currentDirectory();
-        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
-        FileSys.setCurrentDirectory(thisDirectory);
+//        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(f.baseDir.toStdString());
 
 
         std::string identifier =  f.identifier.toStdString();
@@ -301,8 +302,9 @@ void SyncWidget::handleTorrentFiles() {
         LDEBUG(f.file.toStdString() << " -> " << f.destination.toStdString());
 
         ghoul::filesystem::Directory d = FileSys.currentDirectory();
-        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
-        FileSys.setCurrentDirectory(thisDirectory);
+//        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        FileSys.setCurrentDirectory(f.baseDir.toStdString());
+//        FileSys.setCurrentDirectory(thisDirectory);
 
         QString file = QString::fromStdString(absPath(f.file.toStdString()));
 
@@ -367,18 +369,65 @@ void SyncWidget::syncButtonPressed() {
             LERROR("Could not find 'Modules'");
             return;
         }
-
-        QStringList modulesList;
-        for (int i = 1; i <= modules.size(); ++i) {
-            std::string module = modules.value<std::string>(std::to_string(i));
-            modulesList.append(QString::fromStdString(module));
-        }
-        modulesList.append("common");
-
+        
+        struct ModuleInformation {
+            QString moduleName;
+            QString moduleDatafile;
+            QString modulePath;
+        };
+        
         QDir sceneDir(scene);
         sceneDir.cdUp();
-        for (QString module : modulesList) {
-            QString dataFile = sceneDir.absoluteFilePath(module + "/" + module + ".data");
+        QList<ModuleInformation> modulesList;
+        for (int i = 1; i <= modules.size(); ++i) {
+            std::string module = modules.value<std::string>(std::to_string(i));
+            std::string shortModule = module;
+            
+            std::string::size_type pos = module.find_last_of(FileSys.PathSeparator);
+            if (pos != std::string::npos) {
+                shortModule = module.substr(pos+1);
+            }
+            
+            QString m = QString::fromStdString(module);
+            
+            QString dataFile = sceneDir.absoluteFilePath(
+                QString::fromStdString(module) + "/" + QString::fromStdString(shortModule) + ".data"
+            );
+            
+            if (QFileInfo(dataFile).exists()) {
+                modulesList.append({
+                    QString::fromStdString(module),
+                    dataFile,
+                    sceneDir.absolutePath() + "/" + QString::fromStdString(module)
+                });
+            }
+            else {
+                QDir metaModuleDir = sceneDir;
+                metaModuleDir.cd(QString::fromStdString(module));
+                
+                QDirIterator it(metaModuleDir.absolutePath(), QStringList() << "*.data", QDir::Files, QDirIterator::Subdirectories);
+                while (it.hasNext()) {
+                    QString v = it.next();
+                    QDir d(v);
+                    d.cdUp();
+                    
+                    modulesList.append({
+                        d.dirName(),
+                        v,
+                        d.absolutePath()
+                    });
+                }
+            }
+        }
+        modulesList.append({
+            "common",
+            sceneDir.absolutePath() + "/common/common.data",
+            sceneDir.absolutePath() + "/common"
+        });
+
+        for (const ModuleInformation& module : modulesList) {
+            QString dataFile = module.moduleDatafile;
+//            QString dataFile = sceneDir.absoluteFilePath(module + "/" + module + ".data");
 
             if (QFileInfo(dataFile).exists()) {
                 ghoul::Dictionary dataDictionary;
@@ -407,9 +456,10 @@ void SyncWidget::syncButtonPressed() {
                             dest = d.value<std::string>(DestinationKey);
 
                         _directFiles.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(url),
-                            QString::fromStdString(dest)
+                            QString::fromStdString(dest),
+                            module.modulePath
                         });
                     }
                 }
@@ -436,9 +486,10 @@ void SyncWidget::syncButtonPressed() {
                         int version = static_cast<int>(d.value<double>(VersionKey));
 
                         _fileRequests.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(url),
                             QString::fromStdString(dest),
+                            module.modulePath,
                             version
                         });
                     }
@@ -462,9 +513,10 @@ void SyncWidget::syncButtonPressed() {
                             dest = "";
 
                         _torrentFiles.append({
-                            module,
+                            module.moduleName,
                             QString::fromStdString(file),
-                            QString::fromStdString(dest)
+                            QString::fromStdString(dest),
+                            module.modulePath
                         });
                     }
                 }
@@ -571,8 +623,8 @@ void SyncWidget::handleTimer() {
     using namespace libtorrent;
     using FileFuture = openspace::DownloadManager::FileFuture;
 
-    std::vector<FileFuture*> toRemove;
-    for (FileFuture* f : _futures) {
+    std::vector<std::shared_ptr<FileFuture>> toRemove;
+    for (std::shared_ptr<FileFuture> f : _futures) {
         InfoWidget* w = _futureInfoWidgetMap[f];
 
         if (CleanInfoWidgets && (f->isFinished || f->isAborted)) {
@@ -585,13 +637,12 @@ void SyncWidget::handleTimer() {
             w->update(f);
     }
 
-    for (FileFuture* f : toRemove) {
+    for (std::shared_ptr<FileFuture> f : toRemove) {
         _futures.erase(std::remove(_futures.begin(), _futures.end(), f), _futures.end()); 
-        delete f;
     }
 
     while (_mutex.test_and_set()) {}
-    for (openspace::DownloadManager::FileFuture* f : _futuresToAdd) {
+    for (std::shared_ptr<FileFuture> f : _futuresToAdd) {
         InfoWidget* w = new InfoWidget(QString::fromStdString(f->filePath), -1);
         _downloadLayout->insertWidget(_downloadLayout->count() - 1, w);
 
@@ -679,7 +730,7 @@ void SyncWidget::handleTimer() {
 }
 
 void SyncWidget::handleFileFutureAddition(
-    const std::vector<openspace::DownloadManager::FileFuture*>& futures)
+    const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>& futures)
 {
     while (_mutex.test_and_set()) {}
     _futuresToAdd.insert(_futuresToAdd.end(), futures.begin(), futures.end());

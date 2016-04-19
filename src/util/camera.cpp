@@ -90,6 +90,7 @@ void Camera::setMaxFov(float fov) {
 
 const psc& Camera::position() const {
 	return _position.synced;
+
 }
 
 const psc& Camera::unsynchedPosition() const {
@@ -153,7 +154,6 @@ const glm::mat4& Camera::viewProjectionMatrix() const {
 
 
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //								CAMERA RELATICVE MUTATORS								//
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -173,48 +173,47 @@ void Camera::rotate(const glm::quat& rotation) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void Camera::serialize(SyncBuffer* syncBuffer){
-	_mutex.lock();
+    _mutex.lock();
 
 	_viewRotationMatrix.serialize(syncBuffer);
 	_position.serialize(syncBuffer);
 	_scaling.serialize(syncBuffer);
 
-	_mutex.unlock();
+    _mutex.unlock();
 }
 
-void Camera::deserialize(SyncBuffer* syncBuffer){	
-	_mutex.lock();
+void Camera::deserialize(SyncBuffer* syncBuffer){    
+    _mutex.lock();
 
 	_viewRotationMatrix.deserialize(syncBuffer);
 	_position.deserialize(syncBuffer);
 	_scaling.deserialize(syncBuffer);
 
-	_mutex.unlock();
+    _mutex.unlock();
 }
 
 void Camera::postSynchronizationPreDraw(){
-	_mutex.lock();
+    _mutex.lock();
 
 	_viewRotationMatrix.postSynchronizationPreDraw();
 	_position.postSynchronizationPreDraw();
 	_scaling.postSynchronizationPreDraw();
 	
-	
 	glm::vec4 localViewDir = glm::vec4(_viewDirectionInCameraSpace, 0.f);
 	_viewDirection = (glm::inverse(_viewRotationMatrix.local) * localViewDir).xyz();
 	_viewDirection = glm::normalize(_viewDirection);
 
-	_mutex.unlock();
+    _mutex.unlock();
 }
 
 void Camera::preSynchronization(){
-	_mutex.lock();
+    _mutex.lock();
 
 	_viewRotationMatrix.preSynchronization();
 	_position.preSynchronization();
 	_scaling.preSynchronization();
 
-	_mutex.unlock();
+    _mutex.unlock();
 }
 
 

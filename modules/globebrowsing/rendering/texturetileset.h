@@ -29,31 +29,44 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/datastructures/latlon.h>
+
+#include <modules/globebrowsing/rendering/twmstileprovider.h>
 #include <modules/globebrowsing/rendering/texturetile.h>
 
-namespace openspace {
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									TEXTURE TILE SET									//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+namespace openspace {
 	using namespace ghoul::opengl;
 
 	class TextureTileSet
 	{
 	public:
-		TextureTileSet();
+		TextureTileSet(LatLon sizeLevel0, LatLon offsetLevel0, int depth);
 		~TextureTileSet();
 
 		/// Returns the index of the tile at an appropriate level.
 		/// Appropriate meaning that the tile should be at as high level as possible
 		/// Without the tile being smaller than the patch in lat-lon space.
 		/// The tile is at least as big as the patch.
-		glm::ivec3 getTileIndex(LatLonPatch patch);
+		TileIndex getTileIndex(LatLonPatch patch);
 		std::shared_ptr<Texture> getTile(LatLonPatch patch);
-		std::shared_ptr<Texture> getTile(glm::ivec3 tileIndex);
-		LatLonPatch getTilePositionAndScale(glm::ivec3 tileIndex);
+ 
+		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+		LatLonPatch getTilePositionAndScale(const TileIndex& tileIndex);
+		glm::mat3 getUvTransformationPatchToTile(LatLonPatch patch, const TileIndex& tileIndex);
 	private:
 		LatLon _sizeLevel0;
 		LatLon _offsetLevel0;
+		int _depth;
 
 		std::shared_ptr<Texture> _testTexture;
+
 	};
 
 }  // namespace openspace

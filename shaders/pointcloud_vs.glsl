@@ -34,8 +34,8 @@ out vec4 vs_color;
 
 void main()
 {
-	// set variables
-	vs_color = in_color;
+    // set variables
+    vs_color = in_color;
 
-	gl_Position =  ViewProjection*ModelTransform*vec4(in_position,1);
+    gl_Position =  ViewProjection*ModelTransform*vec4(in_position,1);
 }

@@ -129,6 +129,11 @@ namespace openspace {
 		return _halfSize;
 	}
 
+	LatLon LatLonPatch::size() const {
+		return LatLon(2 * _halfSize.lat, 2 * _halfSize.lon);
+	}
+
+
 
 	LatLon LatLonPatch::northWestCorner() const{
 		return LatLon(_center.lat + _halfSize.lat, _center.lon - _halfSize.lon);

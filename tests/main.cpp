@@ -34,10 +34,12 @@
 //#include <test_spicemanager.inl>
 //#include <test_scenegraphloader.inl>
 //#include <test_chunknode.inl>
-#include <test_lrucache.inl>
+//#include <test_lrucache.inl>
+#include <test_twmstileprovider.inl>
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
-#include <test_latlonpatch.inl>
+//#include <test_latlonpatch.inl>
+//#include <test_texturetileset.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>

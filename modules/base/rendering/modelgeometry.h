@@ -37,42 +37,42 @@ namespace modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
 public:
-	static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	struct Vertex {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-	};
+    struct Vertex {
+        GLfloat location[4];
+        GLfloat tex[2];
+        GLfloat normal[3];
+    };
 
-	ModelGeometry(const ghoul::Dictionary& dictionary);
-	virtual ~ModelGeometry();
-	virtual bool initialize(Renderable* parent);
-	virtual void deinitialize();
-	void render();
-	virtual bool loadModel(const std::string& filename) = 0;
-	void changeRenderMode(const GLenum mode);
-	bool getVertices(std::vector<Vertex>* vertexList);
-	bool getIndices(std::vector<int>* indexList);
+    ModelGeometry(const ghoul::Dictionary& dictionary);
+    virtual ~ModelGeometry();
+    virtual bool initialize(Renderable* parent);
+    virtual void deinitialize();
+    void render();
+    virtual bool loadModel(const std::string& filename) = 0;
+    void changeRenderMode(const GLenum mode);
+    bool getVertices(std::vector<Vertex>* vertexList);
+    bool getIndices(std::vector<int>* indexList);
 
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
 protected:
-	Renderable* _parent;
+    Renderable* _parent;
 
-	bool loadObj(const std::string& filename);
-	bool loadCachedFile(const std::string& filename);
-	bool saveCachedFile(const std::string& filename);
+    bool loadObj(const std::string& filename);
+    bool loadCachedFile(const std::string& filename);
+    bool saveCachedFile(const std::string& filename);
     properties::FloatProperty _magnification;
 
-	GLuint _vaoID;
-	GLuint _vbo;
-	GLuint _ibo;
-	GLenum _mode;
+    GLuint _vaoID;
+    GLuint _vbo;
+    GLuint _ibo;
+    GLenum _mode;
 
-	std::vector<Vertex> _vertices;
-	std::vector<int> _indices;
-	std::string _file;
+    std::vector<Vertex> _vertices;
+    std::vector<int> _indices;
+    std::string _file;
 };
 
 }  // namespace modelgeometry

@@ -38,7 +38,7 @@ class QPaintEvent;
 class TimelineWidget : public QWidget {
 Q_OBJECT
 public:
-	TimelineWidget(QWidget* parent);
+    TimelineWidget(QWidget* parent);
 
     void setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap);
     void setCurrentTime(std::string currentTime, double et);

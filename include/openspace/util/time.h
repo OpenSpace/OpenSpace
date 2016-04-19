@@ -58,92 +58,92 @@ class SyncBuffer;
 
 class Time {
 public:
-	/**
-	 * Initializes the Time singleton.
-	 * \return <code>true</code> if the initialization succeeded, <code>false</code>
-	 * otherwise
+    /**
+     * Initializes the Time singleton.
+     * \return <code>true</code> if the initialization succeeded, <code>false</code>
+     * otherwise
      * \pre The Time singleton must not have been initialized
-	 */
-	static void initialize();
+     */
+    static void initialize();
 
-	/**
-	 * Deinitializes the Time singleton. This method will not unload the kernel that was
-	 * possibly loaded during the initialize method.
+    /**
+     * Deinitializes the Time singleton. This method will not unload the kernel that was
+     * possibly loaded during the initialize method.
      * \pre The Time singleton must have been initialized
-	 */
-	static void deinitialize();
+     */
+    static void deinitialize();
 
-	/**
-	 * Returns the reference to the Time singleton object.
-	 * \return The reference to the Time singleton object
+    /**
+     * Returns the reference to the Time singleton object.
+     * \return The reference to the Time singleton object
      * \pre The Time singleton must have been initialized
-	 */
+     */
     static Time& ref();
 
-	/**
-	 * Returns <code>true</code> if the singleton has been successfully initialized,
-	 * <code>false</code> otherwise
-	 * \return <code>true</code> if the singleton has been successfully initialized,
-	 * <code>false</code> otherwise
-	 */
-	static bool isInitialized();
-	
-	/**
-	 * Sets the current time to the specified value in seconds past the J2000 epoch. This
-	 * value can be negative to represent dates before the epoch.
-	 * \param value The number of seconds after the J2000 epoch
+    /**
+     * Returns <code>true</code> if the singleton has been successfully initialized,
+     * <code>false</code> otherwise
+     * \return <code>true</code> if the singleton has been successfully initialized,
+     * <code>false</code> otherwise
+     */
+    static bool isInitialized();
+    
+    /**
+     * Sets the current time to the specified value in seconds past the J2000 epoch. This
+     * value can be negative to represent dates before the epoch.
+     * \param value The number of seconds after the J2000 epoch
      * \param requireJump Whether or not the time change is big enough to require a
      * time-jump; defaults to true as most calls to set time will require recomputation of
      * planetary paths etc.
-	 */
-	void setTime(double value, bool requireJump = true);
+     */
+    void setTime(double value, bool requireJump = true);
 
-	/**
-	 * Sets the current time to the specified value given as a Spice compliant string as
-	 * described in the Spice documentation
-	 * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
-	 * \param time The time to be set as a date string
+    /**
+     * Sets the current time to the specified value given as a Spice compliant string as
+     * described in the Spice documentation
+     * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
+     * \param time The time to be set as a date string
      * \param requireJump Whether or not the time change is big enough to require a
      * time-jump; defaults to true as most calls to set time will require recomputation of
      * planetary paths etc.
-	 */
-	void setTime(std::string time, bool requireJump = true);
+     */
+    void setTime(std::string time, bool requireJump = true);
 
-	/**
-	 * Returns the current time as the number of seconds past the J2000 epoch. If the
-	 * current time is a date before that epoch, the returned value will be negative.
-	 * \return The current time as the number of seconds past the J2000 epoch
-	 */
-	double currentTime() const;
+    /**
+     * Returns the current time as the number of seconds past the J2000 epoch. If the
+     * current time is a date before that epoch, the returned value will be negative.
+     * \return The current time as the number of seconds past the J2000 epoch
+     */
+    double currentTime() const;
 
-	/**
-	 * Returns the current time as a formatted date string compliant with ISO 8601 and
-	 * thus also compliant with the Spice library.
-	 * \return The current time as a formatted date string
-	 */
-	std::string currentTimeUTC() const;
+    /**
+     * Returns the current time as a formatted date string compliant with ISO 8601 and
+     * thus also compliant with the Spice library.
+     * \return The current time as a formatted date string
+     */
+    std::string currentTimeUTC() const;
 
-	/**
-	 * Sets the delta time value that is the number of seconds that should pass for each
-	 * real-time second. This value is used in the advanceTime(double) method to easily
-	 * advance the simulation time.
-	 * \param deltaT The number of seconds that should pass for each real-time second
-	 */
-	void setDeltaTime(double deltaT);
+    /**
+     * Sets the delta time value that is the number of seconds that should pass for each
+     * real-time second. This value is used in the advanceTime(double) method to easily
+     * advance the simulation time.
+     * \param deltaT The number of seconds that should pass for each real-time second
+     */
+    void setDeltaTime(double deltaT);
 
-	/**
-	 * Returns the delta time, that is the number of seconds that pass in the simulation
-	 * for each real-time second
-	 * \return The number of seconds that pass for each real-time second
-	 */
-	double deltaTime() const;
+    /**
+     * Returns the delta time, that is the number of seconds that pass in the simulation
+     * for each real-time second
+     * \return The number of seconds that pass for each real-time second
+     */
+    double deltaTime() const;
 
     /**
      * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> = 
      * <code>true</code>) and restoring it when the function is called with a parameter of
      * <code>false</code>.
-     * \param If <code>true</code>, the simulation time stops; if <code>false</code>, the
-     * simulation time continues at the previous rate
+     * \param pause If <code>true</code>, the simulation time stops;
+     * if <code>false</code>, the simulation time continues at the previous rate
      */
     void setPause(bool pause);
 
@@ -156,67 +156,67 @@ public:
      */
     bool togglePause();
 
-	/**
-	 * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.
-	 * The deltaTime() is the number of simulation seconds that pass for each real-time
-	 * second. <code>tickTime</code> is the number of real-time seconds that passed since
-	 * the last call to this method. If this method is called in the render loop, the
-	 * <code>tickTime</code> should be equivalent to the frame time.
-	 * \param tickTime The number of real-time seconds that passed since the last call
-	 * to this method
-	 * \return The new time value after advancing the time
-	 */
-	double advanceTime(double tickTime);
+    /**
+     * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.
+     * The deltaTime() is the number of simulation seconds that pass for each real-time
+     * second. <code>tickTime</code> is the number of real-time seconds that passed since
+     * the last call to this method. If this method is called in the render loop, the
+     * <code>tickTime</code> should be equivalent to the frame time.
+     * \param tickTime The number of real-time seconds that passed since the last call
+     * to this method
+     * \return The new time value after advancing the time
+     */
+    double advanceTime(double tickTime);
 
-	void serialize(SyncBuffer* syncBuffer);
+    void serialize(SyncBuffer* syncBuffer);
 
-	void deserialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
-	void postSynchronizationPreDraw();
+    void postSynchronizationPreDraw();
 
-	void preSynchronization();
+    void preSynchronization();
 
-	bool timeJumped() const;
+    bool timeJumped() const;
 
-	void setTimeJumped(bool jumped);
+    void setTimeJumped(bool jumped);
     
     bool paused() const;
 
-	/**
-	 * Returns the Lua library that contains all Lua functions available to change the
-	 * current time, retrieve the current time etc. The functions contained are
-	 * - openspace::luascriptfunctions::time_setDeltaTime
-	 * - openspace::luascriptfunctions::time_deltaTime
-	 * - openspace::luascriptfunctions::time_setTime
-	 * - openspace::luascriptfunctions::time_currentTime
-	 * - openspace::luascriptfunctions::time_currentTimeUTC
-	 * \return The Lua library that contains all Lua functions available to change the
-	 * Time singleton
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    /**
+     * Returns the Lua library that contains all Lua functions available to change the
+     * current time, retrieve the current time etc. The functions contained are
+     * - openspace::luascriptfunctions::time_setDeltaTime
+     * - openspace::luascriptfunctions::time_deltaTime
+     * - openspace::luascriptfunctions::time_setTime
+     * - openspace::luascriptfunctions::time_currentTime
+     * - openspace::luascriptfunctions::time_currentTimeUTC
+     * \return The Lua library that contains all Lua functions available to change the
+     * Time singleton
+     */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
-	static Time* _instance; ///< The singleton instance
-		
-	//local copies
+    static Time* _instance; ///< The singleton instance
+        
+    //local copies
     /// The time stored as the number of seconds past the J2000 epoch
-	double _time = -1.0;
-	double _dt = 1.0;
-	bool _timeJumped = false;
+    double _time = -1.0;
+    double _dt = 1.0;
+    bool _timeJumped = false;
     bool _timePaused = false;
     bool _jockeHasToFixThisLater;
 
-	//shared copies
-	double _sharedTime = -1.0;
-	double _sharedDt = 1.0;
-	bool _sharedTimeJumped = false;
+    //shared copies
+    double _sharedTime = -1.0;
+    double _sharedDt = 1.0;
+    bool _sharedTimeJumped = false;
 
-	//synced copies
-	double _syncedTime = -1.0;
-	double _syncedDt = 1.0;
-	bool _syncedTimeJumped = false;
-	
-	std::mutex _syncMutex;
+    //synced copies
+    double _syncedTime = -1.0;
+    double _syncedDt = 1.0;
+    bool _syncedTimeJumped = false;
+    
+    std::mutex _syncMutex;
 };
 
 } // namespace openspace

@@ -42,20 +42,20 @@ out float s;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vec4 pos = in_position;
-	pos.w += _magnification;
+    vec4 pos = in_position;
+    pos.w += _magnification;
 
-	// set variables
-	vs_st = in_st;
-	//vs_stp = in_position.xyz;
-	vs_position = pos;
-	vec4 tmp = pos;
+    // set variables
+    vs_st = in_st;
+    //vs_stp = in_position.xyz;
+    vs_position = pos;
+    vec4 tmp = pos;
 
-	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-	
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

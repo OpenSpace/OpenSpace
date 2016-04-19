@@ -32,6 +32,7 @@ uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float minBillboardSize;
 
+uniform float alphaValue;
 uniform int colorOption;
 
 in vec4 vs_position;
@@ -74,6 +75,7 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
+    fullColor.a *= alphaValue;
 
     vec4 position = vs_position;
     // This has to be fixed when the scale graph is in place ---emiax

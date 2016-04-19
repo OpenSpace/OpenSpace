@@ -65,7 +65,7 @@ public:
      * Load the scenegraph from the provided folder
      */
     void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
-	void clearSceneGraph();
+    void clearSceneGraph();
 
     void loadModule(const std::string& modulePath);
 
@@ -95,20 +95,20 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-	std::vector<SceneGraphNode*> allSceneGraphNodes();
+    std::vector<SceneGraphNode*> allSceneGraphNodes();
 
-	/**
-	 * Returns the Lua library that contains all Lua functions available to change the
-	 * scene graph. The functions contained are
-	 * - openspace::luascriptfunctions::property_setValue
-	 * - openspace::luascriptfunctions::property_getValue
-	 * \return The Lua library that contains all Lua functions available to change the
-	 * scene graph
-	 */
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    /**
+     * Returns the Lua library that contains all Lua functions available to change the
+     * scene graph. The functions contained are
+     * - openspace::luascriptfunctions::property_setValue
+     * - openspace::luascriptfunctions::property_getValue
+     * \return The Lua library that contains all Lua functions available to change the
+     * scene graph
+     */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
-	bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
+    bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
 
     void writePropertyDocumentation(const std::string& filename, const std::string& type);
 
@@ -120,10 +120,10 @@ private:
     //std::vector<SceneGraphNode*> _nodes;
     //std::map<std::string, SceneGraphNode*> _allNodes;
 
-	std::string _sceneGraphToLoad;
+    std::string _sceneGraphToLoad;
 
-	std::mutex _programUpdateLock;
-	std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
+    std::mutex _programUpdateLock;
+    std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
     typedef std::map<std::string, ghoul::Dictionary> NodeMap;

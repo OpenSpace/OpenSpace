@@ -53,31 +53,31 @@ Time& Time::ref() {
 }
 
 bool Time::isInitialized() {
-	return (_instance != nullptr);
+    return (_instance != nullptr);
 }
 
 void Time::setTime(double value, bool requireJump) {
-	_time = value;
-	_timeJumped = requireJump;
+    _time = value;
+    _timeJumped = requireJump;
 }
 
 double Time::currentTime() const {
-	return _syncedTime;
+    return _syncedTime;
 }
 
 double Time::advanceTime(double tickTime) {
     if (_timePaused)
         return _time;
     else
-	    return _time += _dt * tickTime;
+        return _time += _dt * tickTime;
 }
 
 void Time::setDeltaTime(double deltaT) {
-	_dt = deltaT;
+    _dt = deltaT;
 }
 
 double Time::deltaTime() const {
-	return _syncedDt;
+    return _syncedDt;
 }
 
 void Time::setPause(bool pause) {
@@ -91,7 +91,7 @@ bool Time::togglePause() {
 
 void Time::setTime(std::string time, bool requireJump) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
-	_timeJumped = requireJump;
+    _timeJumped = requireJump;
 }
 
 std::string Time::currentTimeUTC() const {
@@ -99,33 +99,33 @@ std::string Time::currentTimeUTC() const {
 }
 
 void Time::serialize(SyncBuffer* syncBuffer) {
-	_syncMutex.lock();
+    _syncMutex.lock();
 
-	syncBuffer->encode(_sharedTime);
-	syncBuffer->encode(_sharedDt);
-	syncBuffer->encode(_sharedTimeJumped);
+    syncBuffer->encode(_sharedTime);
+    syncBuffer->encode(_sharedDt);
+    syncBuffer->encode(_sharedTimeJumped);
 
-	_syncMutex.unlock();
+    _syncMutex.unlock();
 }
 
 void Time::deserialize(SyncBuffer* syncBuffer) {
-	_syncMutex.lock();
+    _syncMutex.lock();
 
-	syncBuffer->decode(_sharedTime);
-	syncBuffer->decode(_sharedDt);
-	syncBuffer->decode(_sharedTimeJumped);
+    syncBuffer->decode(_sharedTime);
+    syncBuffer->decode(_sharedDt);
+    syncBuffer->decode(_sharedTimeJumped);
 
     if (_sharedTimeJumped)
         _jockeHasToFixThisLater = true;
 
-	_syncMutex.unlock();
+    _syncMutex.unlock();
 }
 
 void Time::postSynchronizationPreDraw() {
-	_syncMutex.lock();
+    _syncMutex.lock();
 
-	_syncedTime = _sharedTime;
-	_syncedDt = _sharedDt;
+    _syncedTime = _sharedTime;
+    _syncedDt = _sharedDt;
     _syncedTimeJumped = _sharedTimeJumped;
 
     if (_jockeHasToFixThisLater) {
@@ -133,25 +133,25 @@ void Time::postSynchronizationPreDraw() {
         _jockeHasToFixThisLater = false;
     }
 
-	_syncMutex.unlock();	
+    _syncMutex.unlock();    
 }
 
 void Time::preSynchronization() {
-	_syncMutex.lock();
+    _syncMutex.lock();
 
-	_sharedTime = _time;
-	_sharedDt = _dt;
-	_sharedTimeJumped = _timeJumped;
+    _sharedTime = _time;
+    _sharedDt = _dt;
+    _sharedTimeJumped = _timeJumped;
 
-	_syncMutex.unlock();
+    _syncMutex.unlock();
 }
 
 bool Time::timeJumped() const {
-	return _syncedTimeJumped;
+    return _syncedTimeJumped;
 }
 
 void Time::setTimeJumped(bool jumped) {
-	_timeJumped = jumped;
+    _timeJumped = jumped;
 }
     
 bool Time::paused() const {
@@ -159,24 +159,24 @@ bool Time::paused() const {
 }
 
 scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
-	scripting::ScriptEngine::LuaLibrary timeLibrary = {
-		"time",
-		{
-			{
-				"setDeltaTime",
-				&luascriptfunctions::time_setDeltaTime,
-				"number",
-				"Sets the amount of simulation time that happens "
-				"in one second of real time",
+    scripting::ScriptEngine::LuaLibrary timeLibrary = {
+        "time",
+        {
+            {
+                "setDeltaTime",
+                &luascriptfunctions::time_setDeltaTime,
+                "number",
+                "Sets the amount of simulation time that happens "
+                "in one second of real time",
                 true
-			},
-			{
-				"deltaTime",
-				&luascriptfunctions::time_deltaTime,
-				"",
-				"Returns the amount of simulated time that passes in one "
-				"second of real time"
-			},
+            },
+            {
+                "deltaTime",
+                &luascriptfunctions::time_deltaTime,
+                "",
+                "Returns the amount of simulated time that passes in one "
+                "second of real time"
+            },
             {
                 "setPause",
                 &luascriptfunctions::time_setPause,
@@ -192,33 +192,33 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
                 " and restoring it afterwards",
                 true
             },
-			{
-				"setTime",
-				&luascriptfunctions::time_setTime,
-				"{number, string}",
-				"Sets the current simulation time to the "
-				"specified value. If the parameter is a number, the value is the number "
-				"of seconds past the J2000 epoch. If it is a string, it has to be a "
-				"valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)",
+            {
+                "setTime",
+                &luascriptfunctions::time_setTime,
+                "{number, string}",
+                "Sets the current simulation time to the "
+                "specified value. If the parameter is a number, the value is the number "
+                "of seconds past the J2000 epoch. If it is a string, it has to be a "
+                "valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)",
                 true
-			},
-			{
-				"currentTime",
-				&luascriptfunctions::time_currentTime,
-				"",
-				"Returns the current time as the number of seconds since "
-				"the J2000 epoch"
-			},
-			{
-				"currentTimeUTC",
-				&luascriptfunctions::time_currentTimeUTC,
-				"",
-				"Returns the current time as an ISO 8601 date string "
-				"(YYYY-MM-DDTHH:MN:SS)"
-			}
-		}
-	};
-	return timeLibrary;
+            },
+            {
+                "currentTime",
+                &luascriptfunctions::time_currentTime,
+                "",
+                "Returns the current time as the number of seconds since "
+                "the J2000 epoch"
+            },
+            {
+                "currentTimeUTC",
+                &luascriptfunctions::time_currentTimeUTC,
+                "",
+                "Returns the current time as an ISO 8601 date string "
+                "(YYYY-MM-DDTHH:MN:SS)"
+            }
+        }
+    };
+    return timeLibrary;
 }
 
 } // namespace openspace

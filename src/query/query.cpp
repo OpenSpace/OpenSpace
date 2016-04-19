@@ -47,8 +47,8 @@ SceneGraphNode* sceneGraphNode(const std::string& name) {
 }
 
 Renderable* renderable(const std::string& name) {
-	SceneGraphNode* node = sceneGraphNode(name);
-	return node->renderable();
+    SceneGraphNode* node = sceneGraphNode(name);
+    return node->renderable();
 }
 
 properties::Property* property(const std::string& uri) {

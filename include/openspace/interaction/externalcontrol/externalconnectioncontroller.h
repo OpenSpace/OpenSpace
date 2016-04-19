@@ -9,14 +9,14 @@ namespace openspace {
 class ExternalConnectionController: public ExternalControl {
 public:
 
-	// constructors & destructor
-	ExternalConnectionController();
-	~ExternalConnectionController();
-	
+    // constructors & destructor
+    ExternalConnectionController();
+    ~ExternalConnectionController();
+    
 private:
 
-	std::vector<ExternalControl*> controllers;
-	
+    std::vector<ExternalControl*> controllers;
+    
 };
 
 } // namespace openspace

@@ -37,15 +37,15 @@
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
-	class Dictionary;
-	
+    class Dictionary;
+    
     namespace filesystem {
         class File;
     }
-	namespace opengl {
+    namespace opengl {
         class ProgramObject;
-		class Texture;
-	}
+        class Texture;
+    }
 }
 
 namespace openspace {
@@ -53,11 +53,11 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-	
+    
 class FramebufferRenderer : public Renderer, public RaycasterListener {
 public:
-	FramebufferRenderer();
-	virtual ~FramebufferRenderer();
+    FramebufferRenderer();
+    virtual ~FramebufferRenderer();
 
     void initialize() override;
     void deinitialize() override;
@@ -70,7 +70,7 @@ public:
     void setResolution(glm::ivec2 res) override;
 
     void update() override;
-	void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void render(float blackoutFactor, bool doPerformanceMeasurements) override;
     
     /**
      * Update render data
@@ -105,7 +105,7 @@ private:
     int _nAaSamples;
 
     ghoul::Dictionary _rendererData;
-};		// FramebufferRenderer
-}		// openspace
+};        // FramebufferRenderer
+}        // openspace
 
-#endif 	// __FRAMEBUFFERRENDERER_H__
+#endif     // __FRAMEBUFFERRENDERER_H__

@@ -31,7 +31,7 @@ namespace interaction {
 
 void Controller::setHandler(InteractionHandler* handler)
 {
-	_handler = handler;
+    _handler = handler;
 }
 
 } // namespace interaction

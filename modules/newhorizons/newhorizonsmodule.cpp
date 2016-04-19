@@ -51,7 +51,7 @@ NewHorizonsModule::NewHorizonsModule()
 {}
 
 void NewHorizonsModule::internalInitialize() {
-    ImageSequencer2::initialize();
+    ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
@@ -59,12 +59,12 @@ void NewHorizonsModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-	fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
+    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-	fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
+    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
 
     auto fPlanetGeometryProjection = FactoryManager::ref().factory<planetgeometryprojection::PlanetGeometryProjection>();
     fPlanetGeometryProjection->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");

@@ -43,19 +43,19 @@ uniform vec4 shadowColor;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	//float id = float(gl_VertexID) / float(nVertices * lineFade);
-	//fade = 1.0 - id;
+    //float id = float(gl_VertexID) / float(nVertices * lineFade);
+    //fade = 1.0 - id;
 
-	if(mod(gl_VertexID,2) == 0.f){
-		vs_color = shadowColor;
-	}else{
-		vs_color = vec4(0);
-	}
-	
-	vec4 tmp = in_point_position;
-	//tmp = psc_to_meter(tmp, vec2(1,0.f));
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_point_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    if(mod(gl_VertexID,2) == 0.f){
+        vs_color = shadowColor;
+    }else{
+        vs_color = vec4(0);
+    }
+    
+    vec4 tmp = in_point_position;
+    //tmp = psc_to_meter(tmp, vec2(1,0.f));
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_point_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

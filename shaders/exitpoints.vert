@@ -37,21 +37,21 @@ out float s;
 
 void main() {
 
-	//vs_st = in_st;
-	//vs_stp = in_position.xyz;
+    //vs_st = in_st;
+    //vs_stp = in_position.xyz;
 
-	vPosition = vertPosition.xyz;
-	worldPosition = vertPosition;
+    vPosition = vertPosition.xyz;
+    worldPosition = vertPosition;
 
-	// this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-	//vs_normal = normalize(modelTransform * vec4(in_normal,0));
-	
-	vec4 position = pscTransform(worldPosition, modelTransform);
+    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+    //vs_normal = normalize(modelTransform * vec4(in_normal,0));
+    
+    vec4 position = pscTransform(worldPosition, modelTransform);
 
-	// project the position to view space
-	gl_Position =  z_normalization(modelViewProjection * position);
+    // project the position to view space
+    gl_Position =  z_normalization(modelViewProjection * position);
 
-	// vPosition = vertPosition.xyz;
-	// worldPosition = (modelTransform *vec4(vPosition, 1.0)).xyz;
-	// gl_Position = modelViewProjection  *vec4(worldPosition, 1.0);
+    // vPosition = vertPosition.xyz;
+    // worldPosition = (modelTransform *vec4(vPosition, 1.0)).xyz;
+    // gl_Position = modelViewProjection  *vec4(worldPosition, 1.0);
 }

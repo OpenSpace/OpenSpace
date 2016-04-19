@@ -37,7 +37,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "RenderableSphere";
+    const std::string _loggerCat = "RenderableSphere";
 
     const std::string keySize = "Size";
     const std::string keySegments = "Segments";
@@ -53,15 +53,15 @@ namespace {
 namespace openspace {
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary)
-	, _texturePath("texture", "Texture")
+    : Renderable(dictionary)
+    , _texturePath("texture", "Texture")
     , _orientation("orientation", "Orientation")
     , _size("size", "Size", glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _segments("segments", "Segments", 8, 4, 100)
     , _transparency("transparency", "Transparency", 1.f, 0.f, 1.f)
-	, _shader(nullptr)
-	, _texture(nullptr)
-	, _sphere(nullptr)
+    , _shader(nullptr)
+    , _texture(nullptr)
+    , _sphere(nullptr)
     , _sphereIsDirty(false)
 {
     if (dictionary.hasKeyAndValue<glm::vec2>(keySize)) {
@@ -105,8 +105,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     addProperty(_transparency);
 
-	addProperty(_texturePath);
-	_texturePath.onChange(std::bind(&RenderableSphere::loadTexture, this));
+    addProperty(_texturePath);
+    _texturePath.onChange(std::bind(&RenderableSphere::loadTexture, this));
 }
 
 bool RenderableSphere::isReady() const {
@@ -128,7 +128,7 @@ bool RenderableSphere::initialize() {
 
     loadTexture();
 
-	return isReady();
+    return isReady();
 }
 
 bool RenderableSphere::deinitialize() {
@@ -144,12 +144,12 @@ bool RenderableSphere::deinitialize() {
     }
 
 
-	return true;
+    return true;
 }
 
 void RenderableSphere::render(const RenderData& data) {
 
-	glm::mat4 transform = glm::mat4(1.0);
+    glm::mat4 transform = glm::mat4(1.0);
 
     transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
 
@@ -159,16 +159,16 @@ void RenderableSphere::render(const RenderData& data) {
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_shader->setUniform("ModelTransform", transform);
+    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("ModelTransform", transform);
 
-	setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader.get(), data.camera, data.position);
     _shader->setUniform("alpha", _transparency);
 
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
-	_texture->bind();
-	_shader->setUniform("texture1", unit);
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _texture->bind();
+    _shader->setUniform("texture1", unit);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -176,7 +176,7 @@ void RenderableSphere::render(const RenderData& data) {
     _sphere->render();
 
     _shader->setIgnoreUniformLocationError(IgnoreError::No);
-	_shader->deactivate();
+    _shader->deactivate();
 }
 
 void RenderableSphere::update(const UpdateData& data) {
@@ -192,20 +192,20 @@ void RenderableSphere::update(const UpdateData& data) {
 }
 
 void RenderableSphere::loadTexture() {
-	if (_texturePath.value() != "") {
+    if (_texturePath.value() != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
-		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-			texture->uploadTexture();
+        if (texture) {
+            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+            texture->uploadTexture();
 
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
-		}
-	}
+        }
+    }
 }
 
 } // namespace openspace

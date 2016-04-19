@@ -40,20 +40,20 @@ class PowerScaledSphere;
 
 class RenderableSphere : public Renderable {
 public:
-	RenderableSphere(const ghoul::Dictionary& dictionary);
+    RenderableSphere(const ghoul::Dictionary& dictionary);
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-	void loadTexture();
+    void loadTexture();
 
-	properties::StringProperty _texturePath;
+    properties::StringProperty _texturePath;
     properties::OptionProperty _orientation;
 
     properties::Vec2Property _size;

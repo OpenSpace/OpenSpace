@@ -34,8 +34,8 @@ uniform vec3 color;
 Fragment getFragment() {
     vec4 position = vs_point_position;
     float depth = pscDepth(position);
-	
-	vec4 diffuse = vs_point_color;
+    
+    vec4 diffuse = vs_point_color;
 
     Fragment frag;
     frag.color = diffuse;

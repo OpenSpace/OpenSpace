@@ -33,14 +33,14 @@ namespace openspace {
 class ScannerDecoder : public Decoder {
 public:
     ScannerDecoder(const ghoul::Dictionary& dictionary);
-	virtual std::string getDecoderType();
-	virtual std::vector<std::string> getSpiceIDs();
+    virtual std::string getDecoderType();
+    virtual std::vector<std::string> getSpiceIDs();
     std::string getStopCommand();
-	void setStopCommand(std::string stopCommand);
+    void setStopCommand(std::string stopCommand);
 private:
-	std::string _type;
-	std::string _abort;
-	std::vector<std::string> _spiceIDs;
+    std::string _type;
+    std::string _abort;
+    std::vector<std::string> _spiceIDs;
 };
     
 } // namespace openspace

@@ -37,44 +37,44 @@ namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
-	HongKangParser();
-	HongKangParser(std::string name, const std::string& fileName,
-			        std::string spacecraft,
-					ghoul::Dictionary dictionary,
-			        std::vector<std::string> potentialTargets);
+    HongKangParser();
+    HongKangParser(std::string name, const std::string& fileName,
+                    std::string spacecraft,
+                    ghoul::Dictionary dictionary,
+                    std::vector<std::string> potentialTargets);
 
-	bool create() override;
-	void findPlaybookSpecifiedTarget(std::string line, std::string& target);
-	virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+    bool create() override;
+    void findPlaybookSpecifiedTarget(std::string line, std::string& target);
+    virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
-	void writeUTCEventFile(const Image image);
+    void writeUTCEventFile(const Image image);
 
 private:
-	double getMetFromET(double et);
-	double getETfromMet(std::string timestr);
-	double getETfromMet(double met);
+    double getMetFromET(double et);
+    double getETfromMet(std::string timestr);
+    double getETfromMet(double met);
 
-	void createImage(Image& image,
-			            double startTime,
-			            double stopTime,
-			            std::vector<std::string> instr,
-			            std::string targ,
-			            std::string pot);
+    void createImage(Image& image,
+                        double startTime,
+                        double stopTime,
+                        std::vector<std::string> instr,
+                        std::string targ,
+                        std::string pot);
 
-	bool augmentWithSpice(Image& image, 
-			                std::string spacecraft, 
-							std::vector<std::string> payload, 
-							std::vector<std::string> potentialTargets);
+    bool augmentWithSpice(Image& image, 
+                            std::string spacecraft, 
+                            std::vector<std::string> payload, 
+                            std::vector<std::string> potentialTargets);
 
-	std::string _defaultCaptureImage;
-	double _metRef = 299180517;
+    std::string _defaultCaptureImage;
+    double _metRef = 299180517;
 
     std::string _name;
-	std::string _fileName;
-	std::string _spacecraft;
-	std::map<std::string, Decoder*> _fileTranslation;
-	std::vector<std::string> _potentialTargets;
-	std::ofstream _eventsAsUTCFile;
+    std::string _fileName;
+    std::string _spacecraft;
+    std::map<std::string, Decoder*> _fileTranslation;
+    std::vector<std::string> _potentialTargets;
+    std::ofstream _eventsAsUTCFile;
 };
 
 }

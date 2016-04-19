@@ -40,129 +40,129 @@ namespace ccmc {
 namespace openspace {
 
 struct LinePoint {
-	glm::vec3 position;
-	glm::vec4 color;
+    glm::vec3 position;
+    glm::vec4 color;
 
-	LinePoint(glm::vec3 pos, glm::vec4 col) {
-		position = pos;
-		color = col;
-	}
+    LinePoint(glm::vec3 pos, glm::vec4 col) {
+        position = pos;
+        color = col;
+    }
 };
 
 class KameleonWrapper {
 public:
 
-	enum class Model {
+    enum class Model {
         OpenGGCM,
-        BATSRUS,		// Magnetosphere
-        ENLIL,			// Heliosphere
+        BATSRUS,        // Magnetosphere
+        ENLIL,            // Heliosphere
         MAS,
         Adapt3D,
         SWMF,
         LFM,
         Unknown
-	};
+    };
 
-	enum class TraceDirection {
-		FORWARD = 1,
-		BACK 	= -1
-	};
+    enum class TraceDirection {
+        FORWARD = 1,
+        BACK     = -1
+    };
 
-	enum class FieldlineEnd {
-		NORTH,
-		SOUTH,
-		FAROUT
-	};
+    enum class FieldlineEnd {
+        NORTH,
+        SOUTH,
+        FAROUT
+    };
     
     enum class GridType {
         Cartesian,
         Spherical,
         Unknown
-	};
+    };
 
-	typedef std::vector<std::vector<LinePoint> > Fieldlines;
+    typedef std::vector<std::vector<LinePoint> > Fieldlines;
 
-	KameleonWrapper();
-	KameleonWrapper(const std::string& filename);
-	~KameleonWrapper();
+    KameleonWrapper();
+    KameleonWrapper(const std::string& filename);
+    ~KameleonWrapper();
 
-	bool open(const std::string& filename);
-	void close();
+    bool open(const std::string& filename);
+    void close();
 
-	float* getUniformSampledValues(
-		const std::string& var, 
-		const glm::size3_t& outDimensions);
+    float* getUniformSampledValues(
+        const std::string& var, 
+        const glm::size3_t& outDimensions);
 
-	float* getUniformSampledVectorValues(
-		const std::string& xVar, 
-		const std::string& yVar,
-		const std::string& zVar, 
-		const glm::size3_t& outDimensions);
+    float* getUniformSampledVectorValues(
+        const std::string& xVar, 
+        const std::string& yVar,
+        const std::string& zVar, 
+        const glm::size3_t& outDimensions);
 
-	Fieldlines getClassifiedFieldLines(
-		const std::string& xVar,
-		const std::string& yVar, 
-		const std::string& zVar,
-		const std::vector<glm::vec3>& seedPoints, 
-		float stepSize);
+    Fieldlines getClassifiedFieldLines(
+        const std::string& xVar,
+        const std::string& yVar, 
+        const std::string& zVar,
+        const std::vector<glm::vec3>& seedPoints, 
+        float stepSize);
 
-	Fieldlines getFieldLines(
-		const std::string& xVar,
-		const std::string& yVar, 
-		const std::string& zVar,
-		const std::vector<glm::vec3>& seedPoints, 
-		float stepSize, 
-		const glm::vec4& color);
+    Fieldlines getFieldLines(
+        const std::string& xVar,
+        const std::string& yVar, 
+        const std::string& zVar,
+        const std::vector<glm::vec3>& seedPoints, 
+        float stepSize, 
+        const glm::vec4& color);
 
-	Fieldlines getLorentzTrajectories(
-		const std::vector<glm::vec3>& seedPoints,
-		const glm::vec4& color, 
-		float stepsize);
+    Fieldlines getLorentzTrajectories(
+        const std::vector<glm::vec3>& seedPoints,
+        const glm::vec4& color, 
+        float stepsize);
 
-	glm::vec3 getModelBarycenterOffset();
-	glm::vec3 getModelScale();
-	glm::vec3 getGridMax();
-	glm::vec3 getGridMin();
-	std::string getVariableUnit(const std::string& variable);
+    glm::vec3 getModelBarycenterOffset();
+    glm::vec3 getModelScale();
+    glm::vec3 getGridMax();
+    glm::vec3 getGridMin();
+    std::string getVariableUnit(const std::string& variable);
 
-	std::tuple < std::string, std::string, std::string > getGridUnits();
+    std::tuple < std::string, std::string, std::string > getGridUnits();
 
-	Model model();
-	GridType gridType();
+    Model model();
+    GridType gridType();
 
 private:
-	typedef std::vector<glm::vec3> TraceLine;
-	TraceLine traceCartesianFieldline(
-		const std::string& xVar,
-		const std::string& yVar,
-		const std::string& zVar, 
-		const glm::vec3& seedPoint,
-		float stepSize, 
-		TraceDirection direction, 
-		FieldlineEnd& end);
+    typedef std::vector<glm::vec3> TraceLine;
+    TraceLine traceCartesianFieldline(
+        const std::string& xVar,
+        const std::string& yVar,
+        const std::string& zVar, 
+        const glm::vec3& seedPoint,
+        float stepSize, 
+        TraceDirection direction, 
+        FieldlineEnd& end);
 
-	TraceLine traceLorentzTrajectory(
-		const glm::vec3& seedPoint,
-		float stepsize, 
-		float eCharge);
+    TraceLine traceLorentzTrajectory(
+        const glm::vec3& seedPoint,
+        float stepsize, 
+        float eCharge);
     
     void getGridVariables(std::string& x, std::string& y, std::string& z);
     GridType getGridType(
-		const std::string& x, 
-		const std::string& y, 
-		const std::string& z);
+        const std::string& x, 
+        const std::string& y, 
+        const std::string& z);
     Model getModelType();
-	glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
+    glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
 
     ccmc::Kameleon* _kameleon;
-	ccmc::Model* _model;
+    ccmc::Model* _model;
     Model _type;
-	ccmc::Interpolator* _interpolator;
+    ccmc::Interpolator* _interpolator;
 
-	// Model parameters
-	float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
-	float _xValidMin, _xValidMax, _yValidMin, _yValidMax, _zValidMin, _zValidMax;
-	std::string _xCoordVar, _yCoordVar, _zCoordVar;
+    // Model parameters
+    float _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
+    float _xValidMin, _xValidMax, _yValidMin, _yValidMax, _zValidMin, _zValidMax;
+    std::string _xCoordVar, _yCoordVar, _zCoordVar;
     GridType _gridType;
 };
 
