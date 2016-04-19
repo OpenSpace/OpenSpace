@@ -71,7 +71,7 @@ public:
 	ISWAManager();
 	~ISWAManager();
 
-	std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
+	// std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
 	void addISWACygnet(std::string info);
 	void addISWACygnet(int id, std::string info);
 	void deleteISWACygnet(std::string);

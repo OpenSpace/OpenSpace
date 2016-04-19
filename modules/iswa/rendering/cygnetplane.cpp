@@ -48,32 +48,21 @@ void CygnetPlane::createPlane(){
 	// ============================
     // 		GEOMETRY (quad)
     // ============================
-    GLfloat x,y;
-    if(!_data->scale.x){
-        x = _data->scale.y/2.0;
-        y = _data->scale.z/2.0;
+    // GLfloat x,y, z;
 
-    }else if(!_data->scale.y){
-        x = _data->scale.x/2.0;
-        y = _data->scale.z/2.0;
-
-    }else{
-        x = _data->scale.x/2.0;
-        y = _data->scale.y/2.0;
-    }
-
-    // const GLfloat x = _data->scale.x/2.0;
-    // const GLfloat y = _data->scale.y/2.0;
+    const GLfloat x = _data->scale.x/2.0;
+    const GLfloat y = _data->scale.y/2.0;
+    const GLfloat z = _data->scale.z/2.0;
     const GLfloat w = _data->scale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t
-        -x, -y, 0, w, 0, 1,
-         x,  y, 0, w, 1, 0,
-        -x,  y, 0, w, 0, 0,
-        -x, -y, 0, w, 0, 1,
-         x, -y, 0, w, 1, 1,
-         x,  y, 0, w, 1, 0,
+        -x, -z,             -y,  w, 0, 1,
+         x,  z,              y,  w, 1, 0,
+        -x,  ((x>0)?z:-z),   y,  w, 0, 0,
+        -x, -z,             -y,  w, 0, 1,
+         x,  ((x>0)?-z:z),  -y,  w, 1, 1,
+         x,  z,              y,  w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array

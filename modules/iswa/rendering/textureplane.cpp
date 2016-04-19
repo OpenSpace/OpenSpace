@@ -50,7 +50,6 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     std::string name;
     dictionary.getValue("Name", name);
     setName(name);
-    //setName("TexturePlane" + std::to_string(_id));
     registerProperties();
 }
 
@@ -69,36 +68,12 @@ bool TexturePlane::deinitialize(){
     destroyPlane();
     destroyShader();
     _memorybuffer = "";
-    // std::remove(absPath(_data->path).c_str());
 
     return true;
 }
 
 void TexturePlane::render(const RenderData& data){
     if(_texture){
-        // psc position = data.position;
-        // glm::mat4 transform = glm::mat4(1.0);
-        // // transform = glm::inverse(OsEng.renderEngine().camera()->viewRotationMatrix());
-
-        // float textureRatio = (float (_texture->height()/float(_texture->width())));
-        // transform = glm::scale(transform, glm::vec3(1, textureRatio, 1));
-
-        // glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-        // glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 1, 0));
-        // // glm::mat4 rot = glm::mat4(1.0);
-        // /*   for (int i = 0; i < 3; i++){
-        //  for (int j = 0; j < 3; j++){
-        //      transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        //  }
-        // }*/
-
-        // //transform = transform * roty * rotx;
-        // position += transform*glm::vec4(-_pscOffset.x, _pscOffset.z, _pscOffset.y, _pscOffset.w); 
-
-        // // transform = glm::rotate(transform, _roatation.value()[0], glm::vec3(1,0,0));
-        // // transform = glm::rotate(transform, _roatation.value()[1], glm::vec3(0,1,0));
-        // // transform = glm::rotate(transform, _roatation.value()[2], glm::vec3(0,0,1));
-
         psc position = data.position;
         glm::mat4 transform = glm::mat4(1.0);
 

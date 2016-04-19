@@ -36,7 +36,7 @@ namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	: ScreenSpaceRenderable()
-	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+	, _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
 	, _cygnetId(cygnetId)
 	// , _path(path)
 {
@@ -159,6 +159,8 @@ bool ScreenSpaceCygnet::isReady() const{
 }
 
 void ScreenSpaceCygnet::updateTexture(){
+	_memorybuffer = "";
+
 	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
 	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
 	if(future){
