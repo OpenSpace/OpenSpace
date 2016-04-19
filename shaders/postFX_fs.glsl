@@ -32,5 +32,5 @@ uniform float Opacity;
 
 void main()
 {
-	Color = texture(Tex, UV) * Opacity;
+    Color = texture(Tex, UV) * Opacity;
 }

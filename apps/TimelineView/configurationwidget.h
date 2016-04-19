@@ -32,7 +32,7 @@
 class ConfigurationWidget : public QWidget {
 Q_OBJECT
 public:
-	ConfigurationWidget(QWidget* parent);
+    ConfigurationWidget(QWidget* parent);
 
     void socketConnected();
     void socketDisconnected();

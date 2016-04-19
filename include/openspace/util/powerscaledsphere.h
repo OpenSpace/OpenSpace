@@ -37,9 +37,9 @@ class PowerScaledSphere {
 public:
     // initializers
     PowerScaledSphere(const PowerScaledScalar& radius, 
-		int segments = 8);
-	PowerScaledSphere(properties::Vec4Property &radius,
-		int segments, std::string planetName);
+        int segments = 8);
+    PowerScaledSphere(properties::Vec4Property &radius,
+        int segments, std::string planetName);
 
     ~PowerScaledSphere();
     PowerScaledSphere(const PowerScaledSphere& cpy);
@@ -57,9 +57,9 @@ public:
         GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     } Vertex;
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-	GLuint _iBufferID;
+    GLuint _vaoID;
+    GLuint _vBufferID;
+    GLuint _iBufferID;
 
     unsigned int _isize;
     unsigned int _vsize;

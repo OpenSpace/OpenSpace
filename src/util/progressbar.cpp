@@ -29,30 +29,30 @@
 namespace openspace {
 
 ProgressBar::ProgressBar(int end, int width, std::ostream& stream)
-	: _width(width)
-	, _previous(-1)
-	, _end(end)
-	, _stream(stream) 
+    : _width(width)
+    , _previous(-1)
+    , _end(end)
+    , _stream(stream) 
 {
-	print(0);
+    print(0);
 }
 
 ProgressBar::~ProgressBar() {
-	_stream << "\n";
+    _stream << "\n";
 }
 
 void ProgressBar::print(int current) {
-	float progress = static_cast<float>(current) / static_cast<float>(_end - 1);
-	int iprogress = static_cast<int>(progress*100.0f);
-	if (iprogress != _previous) {
-		int pos = static_cast<int>(static_cast<float>(_width)* progress);
-		int eqWidth = pos + 1;
-		int spWidth = _width - pos + 2;
-		_stream << "[" << std::setfill('=') << std::setw(eqWidth)
-			<< ">" << std::setfill(' ') << std::setw(spWidth)
-			<< "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
-	}
-	_previous = iprogress;
+    float progress = static_cast<float>(current) / static_cast<float>(_end - 1);
+    int iprogress = static_cast<int>(progress*100.0f);
+    if (iprogress != _previous) {
+        int pos = static_cast<int>(static_cast<float>(_width)* progress);
+        int eqWidth = pos + 1;
+        int spWidth = _width - pos + 2;
+        _stream << "[" << std::setfill('=') << std::setw(eqWidth)
+            << ">" << std::setfill(' ') << std::setw(spWidth)
+            << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
+    }
+    _previous = iprogress;
 };
 
 } // namespace openspace

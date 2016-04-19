@@ -37,7 +37,7 @@ in vec4 vs_color;
 Fragment getFragment() {
     vec4 position = vs_point_position;
     float depth = pscDepth(position);
-	
+    
     Fragment frag;
     frag.color = vs_color;
     frag.depth = depth;

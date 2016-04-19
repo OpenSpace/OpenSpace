@@ -11,14 +11,14 @@ namespace openspace {
 class RandomExternalControl: public ExternalControl {
 public:
 
-	// constructors & destructor
-	RandomExternalControl();
-	~RandomExternalControl();
-	
+    // constructors & destructor
+    RandomExternalControl();
+    ~RandomExternalControl();
+    
 private:
-	std::mutex inputGuard;
-	bool *keepGoing_;
-    //	std::thread *backgroundThread;
+    std::mutex inputGuard;
+    bool *keepGoing_;
+    //    std::thread *backgroundThread;
 };
 
 } // namespace openspace

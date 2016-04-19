@@ -35,66 +35,66 @@
 #include <memory>
 
 namespace ghoul {
-	namespace filesystem {
-		class File;
-	}
-	namespace opengl {
-		class ProgramObject;
-		class Texture;
-	}
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
 }
 
 namespace openspace {
 struct LinePoint;
 
 struct target {
-	std::string body;
-	std::string frame;
-	std::string node;
+    std::string body;
+    std::string frame;
+    std::string node;
 };
 
 class RenderablePlaneProjection : public Renderable {
 public:
-	RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-	~RenderablePlaneProjection();
+    RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
+    ~RenderablePlaneProjection();
     
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-	void loadTexture();
-	void updatePlane(const Image img, double currentTime);
-	std::string findClosestTarget(double currentTime);
-	void setTarget(std::string body);
+    void loadTexture();
+    void updatePlane(const Image img, double currentTime);
+    std::string findClosestTarget(double currentTime);
+    void setTarget(std::string body);
 
-	std::string _texturePath;
-		
-	bool _planeIsDirty;
+    std::string _texturePath;
+        
+    bool _planeIsDirty;
 
-	glm::dmat3 _stateMatrix;
-	std::string _frame;
+    glm::dmat3 _stateMatrix;
+    std::string _frame;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	bool _textureIsDirty;
+    bool _textureIsDirty;
     std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
 //    ghoul::opengl::Texture* _texture;
-	ghoul::filesystem::File* _textureFile;
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
-	std::string _spacecraft;
-	std::string _instrument;
-	std::string _defaultTarget;
+    ghoul::filesystem::File* _textureFile;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+    std::string _spacecraft;
+    std::string _instrument;
+    std::string _defaultTarget;
 
-	double _previousTime;
-	target _target;
-	std::string _name;
-	bool _moving;
-	bool _hasImage;
+    double _previousTime;
+    target _target;
+    std::string _name;
+    bool _moving;
+    bool _hasImage;
 };
 
 } // namespace openspace

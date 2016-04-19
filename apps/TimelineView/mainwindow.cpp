@@ -67,9 +67,9 @@ MainWindow::MainWindow()
     , _timeControlWidget(nullptr)
     , _informationWidget(nullptr)
     , _timelineWidget(nullptr)
-	, _socket(nullptr)
+    , _socket(nullptr)
 {
-	setWindowTitle("OpenSpace Timeline");
+    setWindowTitle("OpenSpace Timeline");
 
     _configurationWidget = new ConfigurationWidget(this);
     _configurationWidget->setMinimumWidth(350);
@@ -79,7 +79,7 @@ MainWindow::MainWindow()
     _informationWidget->setMinimumWidth(350);
     _timelineWidget = new TimelineWidget(this);
 
-	QGridLayout* layout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout;
     layout->addWidget(_configurationWidget, 0, 0);
     layout->addWidget(_timeControlWidget, 1, 0);
     layout->addWidget(_informationWidget, 2, 0);
@@ -102,7 +102,7 @@ MainWindow::MainWindow()
         this, SLOT(sendScript(QString))
     );
 
-	setLayout(layout);
+    setLayout(layout);
 
     _configurationWidget->socketDisconnected();
     _timeControlWidget->socketDisconnected();
@@ -111,7 +111,7 @@ MainWindow::MainWindow()
 }
 
 MainWindow::~MainWindow() {
-	delete _socket;
+    delete _socket;
 }
 
 void MainWindow::onConnect(QString host, QString port) {
@@ -138,7 +138,7 @@ void MainWindow::readTcpData() {
     static const uint16_t MessageTypePlayBookHongKang = 4;
 
     QByteArray data = continuousData.append(_socket->readAll());
-    int d = data.size();
+//    int d = data.size();
 
     if (QString(data) == "Connected to SGCT!\r\n") {
         continuousData.clear();
@@ -191,7 +191,7 @@ void MainWindow::readTcpData() {
     case MessageTypePlayBookHongKang:
     case MessageTypePlayBookLabel:
     {
-        const char* payloadDebug = data.mid(2).data();
+//        const char* payloadDebug = data.mid(2).data();
 
         size_t beginning = 0;
         uint32_t size = readFromBuffer<uint32_t>(data.mid(2).data(), beginning);

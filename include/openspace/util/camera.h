@@ -41,6 +41,7 @@ namespace openspace {
 
 class SyncBuffer;
 
+
 class Camera {
 public:
 	Camera();
@@ -56,7 +57,6 @@ public:
 	void setLookUpVector(glm::vec3 lookUp);
 	void setScaling(glm::vec2 scaling);
 	void setMaxFov(float fov);
-
 
 
 
@@ -105,10 +105,10 @@ public:
 
 	// SYNCHRONIZATION
 
-	void postSynchronizationPreDraw();
-	void preSynchronization();
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
+    void postSynchronizationPreDraw();
+    void preSynchronization();
+    void serialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
 
 
@@ -174,7 +174,7 @@ private:
 	
 
 	mutable std::mutex _mutex;
-	
+
 };
 
 } // namespace openspace

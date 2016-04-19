@@ -37,14 +37,14 @@ class PlanetGeometryProjection : public properties::PropertyOwner {
 public:
     static PlanetGeometryProjection* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	PlanetGeometryProjection();
-	virtual ~PlanetGeometryProjection();
+    PlanetGeometryProjection();
+    virtual ~PlanetGeometryProjection();
     virtual bool initialize(RenderablePlanetProjection* parent);
     virtual void deinitialize();
     virtual void render() = 0;
 
 protected:
-	RenderablePlanetProjection* _parent;
+    RenderablePlanetProjection* _parent;
 };
 
 }  // namespace planetgeometry

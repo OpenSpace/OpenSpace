@@ -112,7 +112,7 @@ namespace openspace {
 
 		OnTileDownloaded onTileDownloaded(tileIndex.hashKey(), &_tileCache);
 
-		DownloadManager::FileFuture* ff = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile, onTileDownloaded);
+		std::shared_ptr<DownloadManager::FileFuture> ff = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile, onTileDownloaded);
 
 	}
 

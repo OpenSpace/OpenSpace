@@ -35,15 +35,15 @@ class SpiceEphemeris : public Ephemeris {
 public:
     SpiceEphemeris(const ghoul::Dictionary& dictionary);
     const psc& position() const;
-	void update(const UpdateData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
     std::string _targetName;
     std::string _originName;
     psc _position;
-	bool _kernelsLoadedSuccessfully;
-	//std::string _ghosting;
-	std::string _name;
+    bool _kernelsLoadedSuccessfully;
+    //std::string _ghosting;
+    std::string _name;
 };
     
 } // namespace openspace

@@ -36,35 +36,35 @@ namespace openspace {
 
 class LuaConsole {
 public:
-	LuaConsole();
+    LuaConsole();
 
     void initialize();
     void deinitialize();
 
-	void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
 
-	void render();
+    void render();
 
     Key commandInputButton();
 
-	bool isVisible() const;
-	void setVisible(bool visible);
-	void toggleVisibility();
-		
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    bool isVisible() const;
+    void setVisible(bool visible);
+    void toggleVisibility();
+        
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 
 private:
     void addToCommand(std::string c);
-	std::string UnicodeToUTF8(unsigned int codepoint);
+    std::string UnicodeToUTF8(unsigned int codepoint);
 
-	size_t _inputPosition;
-	std::vector<std::string> _commandsHistory;
-	size_t _activeCommand;
-	std::vector<std::string> _commands;
+    size_t _inputPosition;
+    std::vector<std::string> _commandsHistory;
+    size_t _activeCommand;
+    std::vector<std::string> _commands;
 
-	std::string _filename;
+    std::string _filename;
 
     struct {
         int lastIndex;
@@ -72,7 +72,7 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
-	bool _isVisible;
+    bool _isVisible;
 };
 
 } // namespace openspace

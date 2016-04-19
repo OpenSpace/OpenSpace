@@ -43,6 +43,8 @@ void main() {
     ABufferFragment aBufferFrag;
     _color_(aBufferFrag, frag.color);
     _depth_(aBufferFrag, frag.depth);
+    _blend_(aBufferFrag, frag.blend);
+
     _type_(aBufferFrag, 0); // 0 = geometry type
     _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
     _next_(aBufferFrag, prevHead);

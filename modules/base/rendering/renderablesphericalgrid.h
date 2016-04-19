@@ -38,46 +38,46 @@
 namespace openspace {
 class RenderableSphericalGrid : public Renderable{
 public:
-	RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-	~RenderableSphericalGrid();
+    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
+    ~RenderableSphericalGrid();
 
-	bool initialize()   override;
-	bool deinitialize() override;
+    bool initialize()   override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 private:
 protected:
-	typedef struct {
-		GLfloat location[4];
-		GLfloat tex[2];
-		GLfloat normal[3];
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+    typedef struct {
+        GLfloat location[4];
+        GLfloat tex[2];
+        GLfloat normal[3];
+        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
+    } Vertex;
 
 
-	ghoul::opengl::ProgramObject* _gridProgram;
-	std::string _gridType;
-	glm::vec4 _gridColor;
-	glm::mat4 _gridMatrix;
-	int _segments;
+    ghoul::opengl::ProgramObject* _gridProgram;
+    std::string _gridType;
+    glm::vec4 _gridColor;
+    glm::mat4 _gridMatrix;
+    int _segments;
 
-	bool staticGrid;
-	std::string _parentsRotation;
-	glm::dmat3 _parentMatrix;
-	PowerScaledScalar _radius;
+    bool staticGrid;
+    std::string _parentsRotation;
+    glm::dmat3 _parentMatrix;
+    PowerScaledScalar _radius;
 
-	GLuint _vaoID = 3;
-	GLuint _vBufferID = 4;
-	GLuint _iBufferID = 5;
+    GLuint _vaoID = 3;
+    GLuint _vBufferID = 4;
+    GLuint _iBufferID = 5;
 
-	GLenum _mode;
-	unsigned int _isize;
-	unsigned int _vsize;
-	Vertex* _varray;
-	int* _iarray;
+    GLenum _mode;
+    unsigned int _isize;
+    unsigned int _vsize;
+    Vertex* _varray;
+    int* _iarray;
 };
 }// namespace openspace
 #endif

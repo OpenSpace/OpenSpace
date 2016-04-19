@@ -4,7 +4,7 @@
 #include <cstdio>
 
 namespace openspace {
-	
+    
 ExternalControl::ExternalControl() {
 
 }
@@ -17,15 +17,15 @@ void ExternalControl::update() {
 }
 
 void ExternalControl::rotate(const glm::quat &rotation) {
-	//OsEng.interactionHandler().rotate(rotation);
+    //OsEng.interactionHandler().rotate(rotation);
 }
 
 void ExternalControl::orbit(const glm::quat &rotation) {
-	//OsEng.interactionHandler().orbit(rotation);
+    //OsEng.interactionHandler().orbit(rotation);
 }
 
 void ExternalControl::distance(const PowerScaledScalar &distance) {
-	//OsEng.interactionHandler().distance(distance);
+    //OsEng.interactionHandler().distance(distance);
 }
 
 

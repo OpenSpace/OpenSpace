@@ -39,8 +39,8 @@ public:
     bool initialize();
     void render();
  
-	GLuint _vaoId;
-	GLuint _vBufferId;
+    GLuint _vaoId;
+    GLuint _vBufferId;
     glm::vec3 _size;
 };
 

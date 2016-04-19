@@ -32,13 +32,13 @@ namespace openspace {
 namespace properties {
 
 namespace {
-	const std::string _loggerCat = "Property";
-	const std::string _metaDataKeyGuiName = "guiName";
+    const std::string _loggerCat = "Property";
+    const std::string _metaDataKeyGuiName = "guiName";
     const std::string _metaDataKeyGroup = "Group";
     const std::string _metaDataKeyVisible = "isVisible";
     const std::string _metaDataKeyReadOnly = "isReadOnly";
 
-	const std::string _metaDataKeyViewPrefix = "view.";
+    const std::string _metaDataKeyViewPrefix = "view.";
 }
 
 const std::string Property::ViewOptions::Color = "color";
@@ -52,16 +52,16 @@ const std::string Property::TypeKey = "Type";
 const std::string Property::MetaDataKey = "MetaData";
 
 Property::Property(std::string identifier, std::string guiName)
-	: _owner(nullptr)
+    : _owner(nullptr)
     , _identifier(std::move(identifier))
 {
-	if (_identifier.empty())
-		LWARNING("Property identifier is empty");
-	if (guiName.empty())
-		LWARNING("Property GUI name is empty");
+    if (_identifier.empty())
+        LWARNING("Property identifier is empty");
+    if (guiName.empty())
+        LWARNING("Property GUI name is empty");
 
     setVisible(true);
-	_metaData.setValue(_metaDataKeyGuiName, std::move(guiName));
+    _metaData.setValue(_metaDataKeyGuiName, std::move(guiName));
 }
 
 Property::~Property() {}
@@ -71,15 +71,15 @@ const std::string& Property::identifier() const {
 }
 
 std::string Property::fullyQualifiedIdentifier() const {
-	std::string identifier = _identifier;
-	PropertyOwner* currentOwner = owner();
-	while (currentOwner) {
-		std::string ownerId = currentOwner->name();
+    std::string identifier = _identifier;
+    PropertyOwner* currentOwner = owner();
+    while (currentOwner) {
+        std::string ownerId = currentOwner->name();
         if (!ownerId.empty())
-		    identifier = ownerId + "." + identifier;
-		currentOwner = currentOwner->owner();
-	}
-	return identifier;
+            identifier = ownerId + "." + identifier;
+        currentOwner = currentOwner->owner();
+    }
+    return identifier;
 }
 
 ghoul::any Property::get() const {
@@ -87,13 +87,13 @@ ghoul::any Property::get() const {
 }
 
 bool Property::getLuaValue(lua_State* state) const {
-	return false;
+    return false;
 }
 
 void Property::set(ghoul::any value) {}
 
 bool Property::setLuaValue(lua_State* state) {
-	return false;
+    return false;
 }
 
 const std::type_info& Property::type() const {
@@ -101,7 +101,7 @@ const std::type_info& Property::type() const {
 }
 
 int Property::typeLua() const {
-	return LUA_TNIL;
+    return LUA_TNIL;
 }
 
 bool Property::getStringValue(std::string& value) const {
@@ -113,13 +113,13 @@ bool Property::setStringValue(std::string value) {
 }
 
 std::string Property::guiName() const {
-	std::string result;
-	_metaData.getValue(_metaDataKeyGuiName, result);
+    std::string result;
+    _metaData.getValue(_metaDataKeyGuiName, result);
     return result;
 }
 
 std::string Property::description() const {
-	return "return {" + generateBaseDescription() + "}";
+    return "return {" + generateBaseDescription() + "}";
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
@@ -127,8 +127,8 @@ void Property::setGroupIdentifier(std::string groupId) {
 }
 
 std::string Property::groupIdentifier() const {
-	std::string result;
-	_metaData.getValue(_metaDataKeyGroup, result);
+    std::string result;
+    _metaData.getValue(_metaDataKeyGroup, result);
     return result;
 }
 
@@ -167,33 +167,33 @@ void Property::setPropertyOwner(PropertyOwner* owner)
 }
 
 void Property::notifyListener() {
-	if (_onChangeCallback)
-		_onChangeCallback();
+    if (_onChangeCallback)
+        _onChangeCallback();
 }
 
 std::string Property::generateBaseDescription() const {
-	return
-		TypeKey + " = \"" + className() + "\", " +
-		IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
-		NameKey + " = \"" + guiName() + "\", " +
-		generateMetaDataDescription() + ", " + 
-		generateAdditionalDescription();
+    return
+        TypeKey + " = \"" + className() + "\", " +
+        IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
+        NameKey + " = \"" + guiName() + "\", " +
+        generateMetaDataDescription() + ", " + 
+        generateAdditionalDescription();
 }
 
 std::string Property::generateMetaDataDescription() const {
-	bool isVisible, isReadOnly;
-	_metaData.getValue(_metaDataKeyVisible, isVisible);
-	_metaData.getValue(_metaDataKeyReadOnly, isReadOnly);
+    bool isVisible, isReadOnly;
+    _metaData.getValue(_metaDataKeyVisible, isVisible);
+    _metaData.getValue(_metaDataKeyReadOnly, isReadOnly);
 
-	return
-		MetaDataKey + " = {" +
-			_metaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
-			_metaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
-			_metaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+    return
+        MetaDataKey + " = {" +
+            _metaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
+            _metaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
+            _metaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
 }
 
 std::string Property::generateAdditionalDescription() const {
-	return "";
+    return "";
 }
 
 } // namespace properties

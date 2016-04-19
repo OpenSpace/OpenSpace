@@ -44,11 +44,11 @@ namespace openspace {
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
-	struct PerformanceRecord {
-		long long renderTime;  // time in ns
-		long long updateTimeRenderable;  // time in ns
-		long long updateTimeEphemeris;  // time in ns
-	};
+    struct PerformanceRecord {
+        long long renderTime;  // time in ns
+        long long updateTimeRenderable;  // time in ns
+        long long updateTimeEphemeris;  // time in ns
+    };
 
     static std::string RootNodeName;
 
@@ -61,18 +61,19 @@ public:
 
     static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-	bool initialize();
+    bool initialize();
     bool deinitialize();
 
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data, RendererTasks& tasks);
-	void updateCamera(Camera* camera) const;
+    void updateCamera(Camera* camera) const;
 
     //void addNode(SceneGraphNode* child);
 
+    void addChild(SceneGraphNode* child);
     void setParent(SceneGraphNode* parent);
-	//bool abandonChild(SceneGraphNode* child);
+    //bool abandonChild(SceneGraphNode* child);
 
     const psc& position() const;
     psc worldPosition() const;
@@ -85,7 +86,7 @@ public:
 
     SceneGraphNode* childNode(const std::string& name);
 
-	const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
+    const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
 
     void setRenderable(Renderable* renderable);
     const Renderable* renderable() const;
@@ -100,11 +101,11 @@ public:
 private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
-	std::vector<SceneGraphNode*> _children;
+    std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     Ephemeris* _ephemeris;
 
-	PerformanceRecord _performanceRecord;
+    PerformanceRecord _performanceRecord;
 
     Renderable* _renderable;
     bool _renderableVisible;

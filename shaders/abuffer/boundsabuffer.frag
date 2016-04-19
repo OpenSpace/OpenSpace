@@ -41,8 +41,9 @@ void main() {
     uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
 
     ABufferFragment aBufferFrag;
-    _color_(aBufferFrag, frag.color);
+    _position_(aBufferFrag, frag.color.rgb);
     _depth_(aBufferFrag, frag.depth);
+    _blend_(aBufferFrag, frag.blend);
 
     int fragmentType = #{fragmentType};
 

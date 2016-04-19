@@ -30,5 +30,5 @@ out vec4 diffuse;
 
 void main()
 {
-	diffuse = vs_color;
+    diffuse = vs_color;
 }

@@ -43,8 +43,8 @@
 namespace {
     const std::string _loggerCat = "SceneGraph";
     const std::string _moduleExtension = ".mod";
-	const std::string _defaultCommonDirectory = "common";
-	const std::string _commonModuleToken = "${COMMON_MODULE}";
+    const std::string _defaultCommonDirectory = "common";
+    const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyPathScene = "ScenePath";
     const std::string KeyModules = "Modules";
@@ -126,10 +126,16 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     if (!success)
         // There are no modules that are loaded
         return true;
-
+    
     lua_State* state = ghoul::lua::createNewLuaState();
     OsEng.scriptEngine().initializeLuaState(state);
 
+    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
+    // file again to load any variables defined inside into the state that is passed to
+    // the modules. This allows us to specify global variables that can then be used
+    // inside the modules to toggle settings
+    ghoul::lua::runScriptFile(state, absSceneFile);
+    
     // Get the common directory
     bool commonFolderSpecified = sceneDictionary.hasKey(KeyCommonFolder);
     bool commonFolderCorrectType = sceneDictionary.hasKeyAndValue<std::string>(KeyCommonFolder);
@@ -169,9 +175,17 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     std::sort(keys.begin(), keys.end());
     ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
     for (const std::string& key : keys) {
-        std::string moduleName = moduleDictionary.value<std::string>(key);
-        std::string modulePath = FileSys.pathByAppendingComponent(sceneDirectory, moduleName);
+        std::string fullModuleName = moduleDictionary.value<std::string>(key);
 
+        std::replace(fullModuleName.begin(), fullModuleName.end(), '/', FileSys.PathSeparator);
+
+        std::string modulePath = FileSys.pathByAppendingComponent(sceneDirectory, fullModuleName);
+        
+        std::string moduleName = fullModuleName;
+        std::string::size_type pos = fullModuleName.find_last_of(FileSys.PathSeparator);
+        if (pos != std::string::npos)
+            moduleName = fullModuleName.substr(pos + 1);
+        
         if (!FileSys.directoryExists(modulePath)) {
             LERROR("Could not load module '" << moduleName << "'. Directory did not exist");
             continue;
@@ -182,70 +196,132 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             moduleName + _moduleExtension
         );
 
-        if (!FileSys.fileExists(moduleFile)) {
-            LERROR("Could not load module file '" << moduleFile << "'. File did not exist");
-            continue;
-        }
-
-        ghoul::Dictionary moduleDictionary;
-        try {
-            ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
-        }
-        catch (...) {
-            continue;
-        }
-
-        std::vector<std::string> keys = moduleDictionary.keys();
-        for (const std::string& key : keys) {
-            if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
-                LERROR("SceneGraphNode '" << key << "' is not a table in module '"
-                                             << moduleFile << "'");
+        struct ModuleInformation {
+            ghoul::Dictionary dictionary;
+            std::string moduleFile;
+            std::string modulePath;
+            std::string moduleName;
+        };
+        std::vector<ModuleInformation> moduleDictionaries;
+        if (FileSys.fileExists(moduleFile)) {
+            // We have a module file, so it is a direct include
+            try {
+                ghoul::Dictionary moduleDictionary;
+                ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+                moduleDictionaries.push_back({
+                    moduleDictionary,
+                    moduleFile,
+                    modulePath,
+                    moduleName
+                });
+            }
+            catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERRORC(e.component, e.message);
                 continue;
             }
+        }
+        else {
+            // If we do not have a module file, we have to include all subdirectories
+            using ghoul::filesystem::Directory;
+            using std::string;
+            std::vector<string> directories = Directory(modulePath).readDirectories();
+            
+            for (const string& s : directories) {
+                std::string::size_type pos = s.find_last_of(FileSys.PathSeparator);
+                if (pos == std::string::npos) {
+                    LERROR("Error parsing subdirectory name '" << s << "'");
+                    continue;
+                }
+                string moduleName = s.substr(pos+1);
+                
+                string submodulePath = s;
+                string moduleFile = FileSys.pathByAppendingComponent(submodulePath, moduleName) + _moduleExtension;
+//                string moduleName = s;
 
-            ghoul::Dictionary element;
-            std::string nodeName;
-            std::string parentName;
-
-            moduleDictionary.getValue(key, element);
-            element.setValue(KeyPathModule, modulePath);
-
-            element.getValue(SceneGraphNode::KeyName, nodeName);
-            element.getValue(SceneGraphNode::KeyParentName, parentName);
-
-            FileSys.setCurrentDirectory(modulePath);
-            SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
-            if (node == nullptr) {
-                LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
-                continue;
-                //clear();
-                //return false;
+                if (!FileSys.fileExists(moduleFile)) {
+                    continue;
+                }
+                
+                // We have a module file, so it is a direct include
+                try {
+                    ghoul::Dictionary moduleDictionary;
+                    ghoul::lua::loadDictionaryFromFile(moduleFile, moduleDictionary, state);
+                    moduleDictionaries.push_back({
+                        moduleDictionary,
+                        moduleFile,
+                        submodulePath,
+                        moduleName
+                    });
+                }
+                catch (const ghoul::lua::LuaRuntimeException& e) {
+                    LERRORC(e.component, e.message);
+                    continue;
+                }
+                
             }
+            
+        }
 
-            dependencies[nodeName].push_back(parentName);
-            parents[nodeName] = parentName;
-            // Also include loaded dependencies
-
-            if (element.hasKey(SceneGraphNode::KeyDependencies)) {
-                if (element.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
-                    ghoul::Dictionary nodeDependencies;
-                    element.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
-
-                    std::vector<std::string> keys = nodeDependencies.keys();
-                    for (const std::string& key : keys) {
-                        std::string value = nodeDependencies.value<std::string>(key);
-                        dependencies[nodeName].push_back(value);
+        auto addModule = [this, &dependencies, &parents](const ModuleInformation& moduleInformation) {
+            const ghoul::Dictionary& moduleDictionary = moduleInformation.dictionary;
+            const std::string& moduleFile = moduleInformation.moduleFile;
+            const std::string& modulePath = moduleInformation.modulePath;
+            const std::string& moduleName = moduleInformation.moduleName;
+            
+            std::vector<std::string> keys = moduleDictionary.keys();
+            for (const std::string& key : keys) {
+                if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
+                    LERROR("SceneGraphNode '" << key << "' is not a table in module '"
+                           << moduleFile << "'");
+                    continue;
+                }
+                
+                ghoul::Dictionary element;
+                std::string nodeName;
+                std::string parentName;
+                
+                moduleDictionary.getValue(key, element);
+                element.setValue(KeyPathModule, modulePath);
+                
+                element.getValue(SceneGraphNode::KeyName, nodeName);
+                element.getValue(SceneGraphNode::KeyParentName, parentName);
+                
+                FileSys.setCurrentDirectory(modulePath);
+                SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
+                if (node == nullptr) {
+                    LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
+                    continue;
+                }
+                
+                dependencies[nodeName].push_back(parentName);
+                parents[nodeName] = parentName;
+                // Also include loaded dependencies
+                
+                if (element.hasKey(SceneGraphNode::KeyDependencies)) {
+                    if (element.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
+                        ghoul::Dictionary nodeDependencies;
+                        element.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+                        
+                        std::vector<std::string> keys = nodeDependencies.keys();
+                        for (const std::string& key : keys) {
+                            std::string value = nodeDependencies.value<std::string>(key);
+                            dependencies[nodeName].push_back(value);
+                        }
+                    }
+                    else {
+                        LERROR("Dependencies did not have the corrent type");
                     }
                 }
-                else {
-                    LERROR("Dependencies did not have the corrent type");
-                }
+                
+                
+                SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
+                internalNode->node = node;
+                _nodes.push_back(internalNode);
             }
+        };
 
-
-            SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
-            internalNode->node = node;
-            _nodes.push_back(internalNode);
+        for (const ModuleInformation& i : moduleDictionaries) {
+            addModule(i);
         }
     }
     ghoul::lua::destroyLuaState(state);
@@ -258,9 +334,12 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         SceneGraphNode* parentNode = sceneGraphNode(parent);
         if (parentNode == nullptr) {
             LERROR("Could not find parent '" << parent << "' for '" << node->node->name() << "'");
+            continue;
         }
 
         node->node->setParent(parentNode);
+        parentNode->addChild(node->node);
+        
     }
 
     // Setup dependencies

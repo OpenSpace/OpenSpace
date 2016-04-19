@@ -40,42 +40,42 @@
 
 namespace openspace {
 
-	namespace modelgeometry {
-		class ModelGeometry;
-	}
+    namespace modelgeometry {
+        class ModelGeometry;
+    }
 
-	class RenderableModelProjection : public Renderable {
-	public:
-		RenderableModelProjection(const ghoul::Dictionary& dictionary);
+    class RenderableModelProjection : public Renderable {
+    public:
+        RenderableModelProjection(const ghoul::Dictionary& dictionary);
 
-		bool initialize() override;
-		bool deinitialize() override;
+        bool initialize() override;
+        bool deinitialize() override;
 
-		bool isReady() const override;
+        bool isReady() const override;
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+        void render(const RenderData& data) override;
+        void update(const UpdateData& data) override;
 
 
-	protected:
-		void loadTexture();
-		void loadProjectionTexture();
+    protected:
+        void loadTexture();
+        void loadProjectionTexture();
 
-	private:
-		bool auxiliaryRendertarget();
-		glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
-		void attitudeParameters(double time);
-		void imageProjectGPU();
+    private:
+        bool auxiliaryRendertarget();
+        glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
+        void attitudeParameters(double time);
+        void imageProjectGPU();
 
-		void textureBind();
-		void project();
+        void textureBind();
+        void project();
 
-		properties::StringProperty _colorTexturePath;
-		properties::BoolProperty _performProjection;
+        properties::StringProperty _colorTexturePath;
+        properties::BoolProperty _performProjection;
 
-		properties::IntProperty _rotationX;
-		properties::IntProperty _rotationY;
-		properties::IntProperty _rotationZ;
+        properties::IntProperty _rotationX;
+        properties::IntProperty _rotationY;
+        properties::IntProperty _rotationZ;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
@@ -85,63 +85,63 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> _textureProj;
         std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
 
-		modelgeometry::ModelGeometry* _geometry;
+        modelgeometry::ModelGeometry* _geometry;
 
-		float _alpha;
-		glm::dmat3 _stateMatrix;
-		glm::dmat3 _instrumentMatrix;
+        float _alpha;
+        glm::dmat3 _stateMatrix;
+        glm::dmat3 _instrumentMatrix;
 
-		properties::StringProperty  _projectionTexturePath;
-		std::string _defaultProjImage;
-		std::string _source;
-		std::string _destination;
-		std::string _target;
+        properties::StringProperty  _projectionTexturePath;
+        std::string _defaultProjImage;
+        std::string _source;
+        std::string _destination;
+        std::string _target;
 
-		// sequence loading
-		std::string _sequenceSource;
-		std::string _sequenceType;
+        // sequence loading
+        std::string _sequenceSource;
+        std::string _sequenceType;
 
-		// projection mod info
-		std::string _instrumentID;
-		std::string _projectorID;
-		std::string _projecteeID;
+        // projection mod info
+        std::string _instrumentID;
+        std::string _projectorID;
+        std::string _projecteeID;
         SpiceManager::AberrationCorrection _aberration;
-		std::vector<std::string> _potentialTargets;
-		float _fovy;
-		float _aspectRatio;
-		float _nearPlane;
-		float _farPlane;
+        std::vector<std::string> _potentialTargets;
+        float _fovy;
+        float _aspectRatio;
+        float _nearPlane;
+        float _farPlane;
 
-		// uniforms
-		glm::vec2  _camScaling;
-		glm::vec3  _up;
-		glm::mat4  _transform;
-		glm::mat4  _viewProjection;
-		glm::mat4  _projectorMatrix;
-		glm::vec3  _boresight;
+        // uniforms
+        glm::vec2  _camScaling;
+        glm::vec3  _up;
+        glm::mat4  _transform;
+        glm::mat4  _viewProjection;
+        glm::mat4  _projectorMatrix;
+        glm::vec3  _boresight;
 
-		// FBO stuff
-		GLuint _fboID;
-		GLuint _quad;
-		GLuint _vertexPositionBuffer;
+        // FBO stuff
+        GLuint _fboID;
+        GLuint _quad;
+        GLuint _vertexPositionBuffer;
 
-		GLuint _vbo;
-		GLuint _ibo;
-		GLuint _vaoID;
-		std::vector<modelgeometry::ModelGeometry::Vertex> _geometryVertecies;
-		std::vector<int> _geometryIndeces;
+        GLuint _vbo;
+        GLuint _ibo;
+        GLuint _vaoID;
+        std::vector<modelgeometry::ModelGeometry::Vertex> _geometryVertecies;
+        std::vector<int> _geometryIndeces;
 
-		std::vector<Image> _imageTimes;
-		int _frameCount;
-		double _time;
+        std::vector<Image> _imageTimes;
+        int _frameCount;
+        double _time;
 
-		bool _capture;
+        bool _capture;
 
-		psc _sunPosition;
+        psc _sunPosition;
 
-		properties::BoolProperty _performShading;
-		bool _programIsDirty;
-	};
+        properties::BoolProperty _performShading;
+        bool _programIsDirty;
+    };
 
 }  // namespace openspace
 

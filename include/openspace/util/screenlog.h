@@ -45,22 +45,22 @@ public:
      * This struct stores the incoming log entries with their #level, #timeString,
      * #category, #message, and the generated #timeStamp used for the expiry calculation.
      */
-	struct LogEntry {
+    struct LogEntry {
         /// The ghoul::logging::LogManager::LogLevel of the log message
-		LogLevel level;
+        LogLevel level;
         
         /// The timepoint when the log message arrived at the ScreenLog
         std::chrono::time_point<std::chrono::steady_clock> timeStamp;
         
         /// The time string as retrieved from the log message
-		std::string timeString;
+        std::string timeString;
         
         /// The category as retrieved from the log message
-		std::string category;
+        std::string category;
         
         /// The actual message of the log entry
-		std::string message;
-	};
+        std::string message;
+    };
 
     /**
      * Constructor that creates a ScreenLog with the provided \p timeToLive, and the
@@ -80,8 +80,8 @@ public:
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-	void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
-		const std::string& message) override;
+    void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
+        const std::string& message) override;
     
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
@@ -100,7 +100,7 @@ public:
 
 private:
     /// The list of all LogEntry%s stored by this ScreenLog
-	std::vector<LogEntry> _entries;
+    std::vector<LogEntry> _entries;
 
     /// The time-to-live for the LogEntry%s in this ScreenLog. Is used by the
     /// #removeExpiredEntries method to remove expired entries.

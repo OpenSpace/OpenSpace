@@ -52,18 +52,6 @@ endmacro ()
 
 
 
-function (configure_openspace_version major_version minor_version patch_version string_version)
-    set(OPENSPACE_MAJOR_VERSION ${major_version})
-    set(OPENSPACE_MINOR_VERSION ${minor_version})
-    set(OPENSPACE_PATCH_VERSION ${patch_version})
-    set(OPENSPACE_VERSION_STRING ${string_version})
-    message(STATUS "Version: ${OPENSPACE_MAJOR_VERSION}.${OPENSPACE_MINOR_VERSION}.${OPENSPACE_PATCH_VERSION} (${OPENSPACE_VERSION_STRING})")
-    mark_as_advanced(OPENSPACE_MAJOR_VERSION, OPENSPACE_MINOR_VERSION, OPENSPACE_PATCH_VERSION, OPENSPACE_VERSION_STRING)
-    configure_file(${OPENSPACE_CMAKE_EXT_DIR}/version.template ${CMAKE_BINARY_DIR}/_generated/include/openspace/version.h)
-endfunction ()
-
-
-
 function (create_openspace_target)
     add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)

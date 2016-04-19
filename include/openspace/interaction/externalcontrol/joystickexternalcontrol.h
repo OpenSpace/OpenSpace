@@ -8,19 +8,19 @@
 //class JoystickExternalControl: public PythonExternalControl {
 //public:
 //
-//	// constructors & destructor
-//	JoystickExternalControl(const char *filename);
-//	~JoystickExternalControl();
-//	
-//	void setInputDevice(const int device);
-//	void update();
+//    // constructors & destructor
+//    JoystickExternalControl(const char *filename);
+//    ~JoystickExternalControl();
+//    
+//    void setInputDevice(const int device);
+//    void update();
 //
 //private:
 //
-//	// joystick
-//	int inputDevice_;
-//	int numberOfButtons_;
-//	int numberOfAxes_;
+//    // joystick
+//    int inputDevice_;
+//    int numberOfButtons_;
+//    int numberOfAxes_;
 //};
 //
 //} // namespace openspace

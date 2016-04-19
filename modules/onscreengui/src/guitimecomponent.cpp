@@ -31,7 +31,7 @@
 #include "imgui.h"
 
 namespace {
-	const std::string _loggerCat = "GuiTimeComponent";
+    const std::string _loggerCat = "GuiTimeComponent";
 }
 
 namespace openspace {

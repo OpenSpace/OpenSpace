@@ -35,40 +35,40 @@ class GUI;
  */
 class GuiComponent {
 public:
-	friend class GUI;
+    friend class GUI;
 
-	/**
-	 * Returns if this component is enabled, that is, if it is currently active and
-	 * visible on the screen.
-	 * \return <code>true</code> if this component is enabled, <code>false</code>
-	 * otherwise
-	 */
-	bool isEnabled() const;
+    /**
+     * Returns if this component is enabled, that is, if it is currently active and
+     * visible on the screen.
+     * \return <code>true</code> if this component is enabled, <code>false</code>
+     * otherwise
+     */
+    bool isEnabled() const;
 
-	/**
-	 * Sets if this component is enabled, that is, if it is currently active and visible
-	 * on the screen.
-	 * \param enabled The new enabled status of this component
-	 */
-	void setEnabled(bool enabled);
+    /**
+     * Sets if this component is enabled, that is, if it is currently active and visible
+     * on the screen.
+     * \param enabled The new enabled status of this component
+     */
+    void setEnabled(bool enabled);
 
-	/// Initializes the component with everything that does not require an OpenGL context
-	virtual void initialize();
-	/// Initializes the component with everything that requires an OpenGL context
-	virtual void initializeGL();
+    /// Initializes the component with everything that does not require an OpenGL context
+    virtual void initialize();
+    /// Initializes the component with everything that requires an OpenGL context
+    virtual void initializeGL();
 
-	/// Deinitializes the component with things that do not require an OpenGL context
-	virtual void deinitialize();
-	
-	/// Deinitializes the component with things that require an OpenGL context
-	virtual void deinitializeGL();
+    /// Deinitializes the component with things that do not require an OpenGL context
+    virtual void deinitialize();
+    
+    /// Deinitializes the component with things that require an OpenGL context
+    virtual void deinitializeGL();
 
-	/// Renders the individual subcomponents to the screen
-	virtual void render() = 0;
+    /// Renders the individual subcomponents to the screen
+    virtual void render() = 0;
 
 protected:
-	/// <code>true</code> if this component is enabled and visible on the screen
-	bool _isEnabled = false;
+    /// <code>true</code> if this component is enabled and visible on the screen
+    bool _isEnabled = false;
 };
 
 } // namespace gui

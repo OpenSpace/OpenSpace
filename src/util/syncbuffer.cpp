@@ -27,25 +27,25 @@
 namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
-	: _n(n)
-	, _encodeOffset(0)
-	, _decodeOffset(0)
+    : _n(n)
+    , _encodeOffset(0)
+    , _decodeOffset(0)
 {
-	_dataStream.resize(_n);
+    _dataStream.resize(_n);
 }
 
 void SyncBuffer::write() {
-	_synchronizationBuffer.setVal(_dataStream);
-	sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
-	_encodeOffset = 0;
-	_decodeOffset = 0;
+    _synchronizationBuffer.setVal(_dataStream);
+    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+    _encodeOffset = 0;
+    _decodeOffset = 0;
 }
 
 void SyncBuffer::read() {
-	sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-	_dataStream = std::move(_synchronizationBuffer.getVal());
-	_encodeOffset = 0;
-	_decodeOffset = 0;
+    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+    _dataStream = std::move(_synchronizationBuffer.getVal());
+    _encodeOffset = 0;
+    _decodeOffset = 0;
 }
 
 } // namespace openspace

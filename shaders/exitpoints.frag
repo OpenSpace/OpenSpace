@@ -35,16 +35,16 @@ in float s;
 #include "PowerScaling/powerScaling_fs.hglsl"
  
 void main() {
-	vec4 fragColor = vec4(vPosition+0.5, 1.0);
-	vec4 position = worldPosition;
-	float depth = pscDepth(position);
+    vec4 fragColor = vec4(vPosition+0.5, 1.0);
+    vec4 position = worldPosition;
+    float depth = pscDepth(position);
 
-	gl_FragDepth = depth;
+    gl_FragDepth = depth;
 
-	ABufferStruct_t frag;
-	_col_(frag, fragColor);
-	_z_(frag, depth);
-	_type_(frag, volumeType);
-	_pos_(frag, position);
-	addToBuffer(frag);
+    ABufferStruct_t frag;
+    _col_(frag, fragColor);
+    _z_(frag, depth);
+    _type_(frag, volumeType);
+    _pos_(frag, position);
+    addToBuffer(frag);
 }
