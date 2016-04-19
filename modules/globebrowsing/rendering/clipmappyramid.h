@@ -32,6 +32,11 @@ namespace openspace {
 
 	class ClipMapPyramid {
 	public:
+		/**
+			\Param sizeLevel0 is the size of the biggest patch in the pyramid.
+			The parameter needs to be M_PI / pow(2, i) where i is a positive or zero
+			valued integer.
+		*/
 		ClipMapPyramid(LatLon sizeLevel0);
 		~ClipMapPyramid();
 
