@@ -210,15 +210,15 @@ namespace openspace{
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
         metaFuture->id = id;
-
-        std::ifstream file(absPath("${OPENSPACE_DATA}/GM_openspace_Y0_info.txt"));
-        if(file.is_open()){
-            std::string json( (std::istreambuf_iterator<char>(file) ),
-                                (std::istreambuf_iterator<char>()));
-            std::cout << "This is in the file: " <<  json << std::endl;
-            metaFuture->isFinished = true;
-            metaFuture->json = json;
-        }
+        
+        DlManager.downloadToMemory(
+                    "http://128.183.168.116:3000/" + std::to_string(-id),
+                    metaFuture->json,
+                    [metaFuture](const DownloadManager::FileFuture& f){
+                        LDEBUG("Download to memory finished");
+                        metaFuture->isFinished = true;
+                    }
+                );
 
         return metaFuture;
     }
@@ -256,7 +256,14 @@ namespace openspace{
     }
 
     std::string ISWAManager::iSWAurl(int id){
-        std::string url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=";
+        std::string url;
+        
+        if(id < 0){
+            url = "http://128.183.168.116:3000/image/" + std::to_string(-id) + "/";
+        } else {
+            url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
+        }
+        
         std::string t = Time::ref().currentTimeUTC(); 
 
         std::stringstream ss(t);
@@ -270,9 +277,6 @@ namespace openspace{
         url += token + "%20";
         std::getline(ss, token, '.');
         url += token;
-
-        url += "&window=-1&cygnetId=";
-        url += std::to_string(id);
 
         //std::cout << url <<  std::endl;
 
@@ -301,7 +305,7 @@ namespace openspace{
 
         for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
             if((*it)->isFinished) {
-                createTexturePlane(7,(*it)->json);
+                createTexturePlane((*it)->id,(*it)->json);
                 it = _metaFutures.erase( it );
             }else{
                 ++it;

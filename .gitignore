@@ -5,6 +5,7 @@ tmp/
 ext/SGCT
 .DS_Store
 *.swp
+.vscode
 
 # Windows system files:
 Thumbs.db
