@@ -59,6 +59,7 @@ namespace openspace {
 
 	private:		
 		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
 		std::vector<LatLonPatch> _patches;
 
 		properties::IntProperty _rotation;

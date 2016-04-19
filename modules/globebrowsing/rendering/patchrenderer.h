@@ -91,7 +91,7 @@ namespace openspace {
 
 	class ClipMapPatchRenderer : public PatchRenderer {
 	public:
-		ClipMapPatchRenderer();
+		ClipMapPatchRenderer(shared_ptr<Geometry> geometry);
 
 		void renderPatch(
 			const LatLonPatch& patch,

@@ -69,7 +69,7 @@ namespace openspace {
 
 		/// A transformation (translation and scaling) from the texture space of a patch
 		/// to the texture space of a tile.
-		glm::mat3 getUvTransformationPatchToTile(
+		glm::mat3 getUvTransformationPatchToTile( 
 			LatLonPatch patch,
 			const TileIndex& tileIndex);
 

@@ -79,8 +79,16 @@ namespace openspace {
 
 		// ---------
 		// init Renderer
-		auto patchRenderer = new ClipMapPatchRenderer();
+		auto patchRenderer = new ClipMapPatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)));
 		_patchRenderer.reset(patchRenderer);
+		auto smallestPatchRenderer = new ClipMapPatchRenderer(shared_ptr<GridGeometry>(
+			new GridGeometry(
+				32,
+				32,
+				Geometry::Positions::No,
+				Geometry::TextureCoordinates::Yes,
+				Geometry::Normals::No)));
+		_smallestPatchRenderer.reset(smallestPatchRenderer);
 	}
 
 	ClipMapGlobe::~ClipMapGlobe() {
@@ -107,10 +115,12 @@ namespace openspace {
 			_patches[i].setCenter(LatLon::fromCartesian(data.camera.position().dvec3()));
 		}
 		// render patches
-		for (size_t i = 0; i < _patches.size(); i++)
+		for (size_t i = 0; i < _patches.size() - 1; i++)
 		{
 			_patchRenderer->renderPatch(_patches[i], data, 6.3e6);
 		}
+		_smallestPatchRenderer->renderPatch(_patches[_patches.size() - 1], data, 6.3e6);
+
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {
