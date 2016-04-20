@@ -24,7 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-#include <openspace/version.h>
+#include <openspace/openspace.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
@@ -55,6 +55,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
@@ -69,6 +70,10 @@
 #ifdef OPENSPACE_ENABLE_VLD
 #include <vld.h>
 #endif
+#endif
+
+#ifdef WIN32
+#include <WinBase.h>
 #endif
 
 using namespace openspace::scripting;
@@ -579,6 +584,12 @@ void OpenSpaceEngine::configureLogging() {
             }
         }
     }
+
+#ifdef WIN32
+    if (IsDebuggerPresent()) {
+        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
+    }
+#endif // WIN32
 }
 
 bool OpenSpaceEngine::initializeGL() {
@@ -641,6 +652,22 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
         _gui->startFrame(static_cast<float>(dt), glm::vec2(drawBufferResolution), mousePosition, mouseButtons);
     }
+
+    // Testing this every frame has minimal impact on the performance --- abock
+    // Debug build: 1-2 us ; Release build: <= 1 us
+    using ghoul::logging::LogManager;
+    int warningCounter = LogMgr.messageCounter(LogManager::LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(LogManager::LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(LogManager::LogLevel::Fatal);
+
+    if (warningCounter > 0)
+        LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
+    if (errorCounter > 0)
+        LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
+    if (fatalCounter > 0)
+        LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+
+    LogMgr.resetMessageCounters();
 }
 
 void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {

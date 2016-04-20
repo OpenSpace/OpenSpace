@@ -113,11 +113,12 @@ void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
         try {
-            bool success = loadSceneInternal(_sceneGraphToLoad);
+            loadSceneInternal(_sceneGraphToLoad);
             _sceneGraphToLoad = "";
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(e.what());
+            _sceneGraphToLoad = "";
             return;
         }
     }

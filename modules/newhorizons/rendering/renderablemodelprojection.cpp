@@ -142,6 +142,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 	bool s = dictionary.getValue(keyProjAberration, a);
     _aberration = SpiceManager::AberrationCorrection(a);
     completeSuccess &= s;
+    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
     
 	openspace::SpiceManager::ref().addFrame(_target, _source);
 	setBoundingSphere(pss(1.f, 9.f));
@@ -159,6 +160,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 		_sequenceSource = absPath(_sequenceSource);
 
 		foundSequence = dictionary.getValue(keySequenceType, _sequenceType);
+        ghoul_assert(foundSequence, "Did not find sequence");
 		//Important: client must define translation-list in mod file IFF playbook
 		if (dictionary.hasKey(keyTranslation)) {
 			ghoul::Dictionary translationDictionary;
@@ -166,7 +168,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 			dictionary.getValue(keyTranslation, translationDictionary);
 			if (_sequenceType == sequenceTypeImage) {
 				parser = new LabelParser(name, _sequenceSource, translationDictionary);
-				openspace::ImageSequencer2::ref().runSequenceParser(parser);
+				openspace::ImageSequencer::ref().runSequenceParser(parser);
 
 			}
 		}
@@ -349,9 +351,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
 		
 	_time = data.time;
 
-	if (openspace::ImageSequencer2::ref().isReady() && _performProjection) {
-		openspace::ImageSequencer2::ref().updateSequencer(_time);
-		_capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
+	if (openspace::ImageSequencer::ref().isReady() && _performProjection) {
+		openspace::ImageSequencer::ref().updateSequencer(_time);
+		_capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
 	}
 		
 	// set spice-orientation in accordance to timestamp
@@ -461,7 +463,7 @@ glm::mat4 RenderableModelProjection::computeProjectorMatrix(const glm::vec3 loc,
 											-glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
 		
 	// create perspective projection matrix
-	glm::mat4 projProjectionMatrix = glm::perspective(_fovy, _aspectRatio, _nearPlane, _farPlane);
+	glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
 	// bias matrix
 	glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
 													0, 0.5f, 0, 0,

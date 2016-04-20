@@ -172,11 +172,11 @@ void RenderableShadowCylinder::createCylinder() {
 	double targetEpoch;
 	glm::dvec3 observerPosition;
 	std::vector<psc> terminatorPoints;
-    SpiceManager::TerminatorType t;
-    if (_terminatorType == "UMBRAL")
-        t = SpiceManager::TerminatorType::Umbral;
-    else if (_terminatorType == "PENUMBRAL")
-        t = SpiceManager::TerminatorType::Penumbral;
+    SpiceManager::TerminatorType t = SpiceManager::terminatorTypeFromString(_terminatorType);
+//    if (_terminatorType == "UMBRAL")
+//        t = SpiceManager::TerminatorType::Umbral;
+//    else if (_terminatorType == "PENUMBRAL")
+//        t = SpiceManager::TerminatorType::Penumbral;
     
     auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
         _lightSource, t, _aberration, _time, _numberOfPoints);

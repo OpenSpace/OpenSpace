@@ -142,8 +142,8 @@ public:
      * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> = 
      * <code>true</code>) and restoring it when the function is called with a parameter of
      * <code>false</code>.
-     * \param If <code>true</code>, the simulation time stops; if <code>false</code>, the
-     * simulation time continues at the previous rate
+     * \param pause If <code>true</code>, the simulation time stops;
+     * if <code>false</code>, the simulation time continues at the previous rate
      */
     void setPause(bool pause);
 

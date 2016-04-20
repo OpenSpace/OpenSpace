@@ -65,12 +65,14 @@ private:
         QString module;
         QString url;
         QString destination;
+        QString baseDir;
     };
 
     struct FileRequest {
         QString module;
         QString identifier;
         QString destination;
+        QString baseDir;
         int version;
     };
 
@@ -78,6 +80,7 @@ private:
         QString module;
         QString file;
         QString destination;
+        QString baseDir;
     };
 
     void clear();

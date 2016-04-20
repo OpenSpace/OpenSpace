@@ -23,6 +23,7 @@
 #########################################################################################
 
 set(OPENSPACE_SOURCE
+    ${OPENSPACE_BASE_DIR}/src/openspace.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
@@ -65,6 +66,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/ephemeris.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
@@ -76,6 +78,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
@@ -89,6 +92,7 @@ set(OPENSPACE_SOURCE
 )
 
 set(OPENSPACE_HEADER
+    ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
@@ -138,6 +142,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/ephemeris.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraph.h

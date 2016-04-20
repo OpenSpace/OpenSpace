@@ -26,29 +26,31 @@
 #define _ABUFFERFRAGMENT_GLSL_
 
 struct ABufferFragment {
-    uint rgba;
-    uint depth;
-    uint data;
-    uint composition;
+    uint channel0;
+    uint channel1;
+    uint channel2;
+    uint channel3;
 };
 
+// An abuffer frame
 // Values stored in abuffer:
-// -------RGBA--------
-// r            8 bits
-// g            8 bits
-// b            8 bits
-// a            8 bits
-// -------DEPTH-------
-// depth       32 bits 
-// -------DATA--------
+//            -----CHANNEL 0-----
 // type         8 bits (signed char) 0: geometry, >0: volume entry, <0: volume exit
-// msaa         8 bits 
-// reserved    16 bits
-// ----COMPOSITION----
-// reserved     4 bits (may be suitable for blend modes)
-// next        28 bits
-// -------------------
-// in total: 16 + 4 = 20 reserved bits for future use.
+// msaa         8 bits
+// --- if geometry --- | ---- if volume ----
+// reserved    16 bits | x           16 bits
+//            -----CHANNEL 1-----
+// r            8 bits | y           16 bits
+// g            8 bits |
+// b            8 bits | z           16 bits
+// a            8 bits |
+//            -----CHANNEL 2-----
+//            depth       32 bits
+//            -----CHANNEL 3-----
+//            blend        4 bits (0 = normal, 1 = additive, 2-7 reserved)
+//            next        28 bits
+//            -------------------
+
 
 const uint mask_1 = uint(1);
 const uint mask_8 = uint(255);
@@ -58,14 +60,17 @@ const uint mask_28 = uint(268435455);
 const uint mask_31 = uint(2147483647);
 const uint mask_32 = uint(4294967295);
 
+const uint mask_red    = mask_16;
+const uint shift_red   = 0;
+
 const uint mask_type   = mask_32 - mask_24;
 const uint shift_type  = 24;
 
 const uint mask_msaa   = mask_24 - mask_16;
 const uint shift_msaa  = 16;
 
-const uint mask_blend  = mask_32 - mask_31;
-const uint shift_blend = 31;
+const uint mask_blend  = mask_32 - mask_28;
+const uint shift_blend = 28;
 
 const uint mask_next   = mask_28;
 const uint shift_next  = 0;
@@ -82,22 +87,37 @@ uint bitextract(in uint pack, uint mask, uint shift) {
  * Color
  */
 void _color_(inout ABufferFragment frag, vec4 color) {
-    frag.rgba = packUnorm4x8(color);
+    frag.channel1 = packUnorm4x8(color);
 }
 
 vec4 _color_(ABufferFragment frag) {
-    return unpackUnorm4x8(frag.rgba);
+    return unpackUnorm4x8(frag.channel1);
+}
+
+/**
+ * Position
+ */
+void _position_(inout ABufferFragment frag, vec3 pos) {
+    uint red = uint(round(clamp(pos.x, 0.0, 1.0) * 65535.0));
+    bitinsert(frag.channel0, red, mask_red, shift_red);
+    frag.channel1 = packUnorm2x16(pos.yz);
+}
+
+vec3 _position_(ABufferFragment frag) {
+    float x = float(bitextract(frag.channel0, mask_red, shift_red)) / 65535.0;
+    vec2 yz = unpackUnorm2x16(frag.channel1);
+    return vec3(x, yz);
 }
 
 /**
  * Depth
  */
 void _depth_(inout ABufferFragment frag, float depth) {
-    frag.depth = floatBitsToUint(depth);
+    frag.channel2 = floatBitsToUint(depth);
 }
 
 float _depth_(ABufferFragment frag) {
-    return uintBitsToFloat(frag.depth);
+    return uintBitsToFloat(frag.channel2);
 }
 
 /**
@@ -110,11 +130,11 @@ void _type_(inout ABufferFragment frag, int type) {
     } else {
         val = type;
     }
-    bitinsert(frag.data, val, mask_type, shift_type);
+    bitinsert(frag.channel0, val, mask_type, shift_type);
 }
 
 int _type_(ABufferFragment frag) {
-    uint val = bitextract(frag.data, mask_type, shift_type);
+    uint val = bitextract(frag.channel0, mask_type, shift_type);
     if (val > 127) {
         return 128 - int(val);
     } else {
@@ -127,11 +147,11 @@ int _type_(ABufferFragment frag) {
  */
 void _msaa_(inout ABufferFragment frag, int type) {
     uint val = uint(type);
-    bitinsert(frag.data, val, mask_msaa, shift_msaa);
+    bitinsert(frag.channel0, val, mask_msaa, shift_msaa);
 }
 
 int _msaa_(ABufferFragment frag) {
-    uint val = bitextract(frag.data, mask_msaa, shift_msaa);
+    uint val = bitextract(frag.channel0, mask_msaa, shift_msaa);
     return int(val);
 }
 
@@ -139,11 +159,23 @@ int _msaa_(ABufferFragment frag) {
  * Next
  */
 void _next_(inout ABufferFragment frag, uint val) {
-    bitinsert(frag.composition, val, mask_next, shift_next);
+    bitinsert(frag.channel3, val, mask_next, shift_next);
 }
 
 uint _next_(ABufferFragment frag) {
-    uint val = bitextract(frag.composition, mask_next, shift_next);
+    uint val = bitextract(frag.channel3, mask_next, shift_next);
+    return val;
+}
+
+/**
+ * Blend
+ */
+void _blend_(inout ABufferFragment frag, uint val) {
+    bitinsert(frag.channel3, val, mask_blend, shift_blend);
+}
+
+uint _blend_(ABufferFragment frag) {
+    uint val = bitextract(frag.channel3, mask_blend, shift_blend);
     return val;
 }
 
@@ -151,14 +183,14 @@ uint _next_(ABufferFragment frag) {
  * Raw data
  */
 void _raw_(inout ABufferFragment frag, uvec4 raw) {
-    frag.rgba = raw.x;
-    frag.depth = raw.y;
-    frag.data = raw.z;
-    frag.composition = raw.w;
+    frag.channel0 = raw.x;
+    frag.channel1 = raw.y;
+    frag.channel2 = raw.z;
+    frag.channel3 = raw.w;
 }
 
 uvec4 _raw_(inout ABufferFragment frag) {
-    return uvec4(frag.rgba, frag.depth, frag.data, frag.composition);
+    return uvec4(frag.channel0, frag.channel1, frag.channel2, frag.channel3);
 }
 
 #endif

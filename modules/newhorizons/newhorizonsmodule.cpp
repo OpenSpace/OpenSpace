@@ -51,7 +51,7 @@ NewHorizonsModule::NewHorizonsModule()
 {}
 
 void NewHorizonsModule::internalInitialize() {
-    ImageSequencer2::initialize();
+    ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());

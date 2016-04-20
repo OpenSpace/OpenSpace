@@ -63,7 +63,7 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
 			LERROR("'" << KeyKernels << "' has to be an array-style table");
 
         try {
-            SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
+            SpiceManager::ref().loadKernel(kernel);
             _kernelsLoadedSuccessfully = true;
         }
         catch (const SpiceManager::SpiceException& e) {
@@ -84,9 +84,9 @@ void SpiceEphemeris::update(const UpdateData& data) {
 	double lightTime = 0.0;
 	glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
 	
-	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
+	//double interval = openspace::ImageSequencer::ref().getIntervalLength();
 	//if (_ghosting == "TRUE" && interval > 60){
-	//	double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
+	//	double _time = openspace::ImageSequencer::ref().getNextCaptureTime();
 	//	SpiceManager::ref().getTargetPosition(_targetName, _originName,
 	//		"GALACTIC", "NONE", _time, position, lightTime);
 	//}

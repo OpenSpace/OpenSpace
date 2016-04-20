@@ -141,22 +141,20 @@ bool ScriptEngine::runScript(const std::string& script) {
 		return false;
 	}
     
-    int status = luaL_loadstring(_state, script.c_str());
-    if (status != LUA_OK) {
-        LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
+    try {
+        ghoul::lua::runScript(_state, script);
+    }
+    catch (const ghoul::lua::LuaLoadingException& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
+    catch (const ghoul::lua::LuaExecutionException& e) {
+        LERRORC(e.component, e.message);
         return false;
     }
     
-    //LDEBUG("Executing script");
-	//LINFO(script);
-    if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
-        LERROR("Error executing script: " << lua_tostring(_state, -1));
-        return false;
-    }
-    
-    //if we're currently hosting the parallel session, find out if script should be synchronized.
-	if (OsEng.parallelConnection().isHost()){
-
+    // if we're currently hosting the parallel session, find out if script should be synchronized.
+	if (OsEng.parallelConnection().isHost()) {
 		std::string lib, func;
 		if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
 //            OsEng.parallelConnection()->sendScript(script);
@@ -177,18 +175,18 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         return false;
     }
     
-    int status = luaL_loadfile(_state, filename.c_str());
-    if (status != LUA_OK) {
-        LERROR("Error loading script: '" << lua_tostring(_state, -1) << "'");
+    try {
+        ghoul::lua::runScriptFile(_state, filename);
+    }
+    catch (const ghoul::lua::LuaLoadingException& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
+    catch (const ghoul::lua::LuaExecutionException& e) {
+        LERRORC(e.component, e.message);
         return false;
     }
     
-    LDEBUG("Executing script '" << filename << "'");
-    if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
-        LERROR("Error executing script: " << lua_tostring(_state, -1));
-        return false;
-    }
-
     return true;
 }
 

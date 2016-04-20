@@ -167,9 +167,9 @@ int main(int argc, char** argv) {
     LDEBUG("Starting rendering loop");
     _sgctEngine->render();
 
-	//clear function bindings to avoid crash after destroying the OpenSpace Engine
-	sgct::MessageHandler::instance()->setLogToCallback(false);
-	sgct::MessageHandler::instance()->setLogCallback(nullptr);
+    //clear function bindings to avoid crash after destroying the OpenSpace Engine
+    sgct::MessageHandler::instance()->setLogToCallback(false);
+    sgct::MessageHandler::instance()->setLogCallback(nullptr);
 
     LDEBUG("Destroying OpenSpaceEngine");
     openspace::OpenSpaceEngine::destroy();
@@ -199,7 +199,7 @@ void mainInitFunc() {
     size_t nWindows = _sgctEngine->getNumberOfWindows();
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = _sgctEngine->getWindowPtr(i);
-        size_t nViewports = nViewports = w->getNumberOfViewports();
+        size_t nViewports = w->getNumberOfViewports();
         for (size_t j = 0; j < nViewports; ++j) {
             sgct_core::Viewport* v = w->getViewport(j);
             ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");

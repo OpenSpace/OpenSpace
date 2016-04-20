@@ -166,11 +166,11 @@ QScrollBar::add-page, QScrollBar::sub-page {
 )style";
 
 int main(int argc, char** argv) {
-	QApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setStyleSheet(style);
 
-	MainWindow window;
-	window.show();
+    MainWindow window;
+    window.show();
 
-	return app.exec();
+    return app.exec();
 }
