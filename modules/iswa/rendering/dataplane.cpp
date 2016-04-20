@@ -305,7 +305,6 @@ float* DataPlane::readData(){
         std::vector<float> max;
         std::vector<std::vector<float>> optionValues;
 
-
         for(int i=0; i < selectedOptions.size(); i++){
             min.push_back(std::numeric_limits<float>::max());
             max.push_back(std::numeric_limits<float>::min());
@@ -336,6 +335,8 @@ float* DataPlane::readData(){
 
                     min[i] = std::min(min[i], optionValues[i][numValues]);
                     max[i] = std::max(max[i], optionValues[i][numValues]);
+
+
                 }
                 numValues++;
             }

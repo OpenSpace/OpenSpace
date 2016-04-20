@@ -45,15 +45,17 @@ struct ExtensionFuture {
 };
 
 struct Metadata {
-    int id;
-    std::string path;
-    std::string parent;
-    std::string frame;
-    glm::vec3 offset;
-    glm::vec3 scale;
-    glm::vec2 spatialScale;
-    std::string scaleVariable;
-    std::shared_ptr<KameleonWrapper> kw;
+	int id;
+	std::string path;
+	std::string parent;
+	std::string frame;
+	glm::vec3 min;
+	glm::vec3 max;
+	glm::vec3 offset;
+	glm::vec3 scale;
+	glm::vec2 spatialScale;
+	std::string scaleVariable;
+	std::shared_ptr<KameleonWrapper> kw;
 };
 
 struct MetadataFuture {
@@ -93,7 +95,7 @@ private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string getDictionaryTable(int id, std::string path);
     std::string parseJSONToLuaTable(int id, std::string json, std::string type);
-    std::string parseKWToLuaTable(std::string kwPath);
+    // std::string parseKWToLuaTable(std::string kwPath);
 
     // void createDataPlane(std::string kwPath);
     // void createTexturePlane(int id, std::string json);
