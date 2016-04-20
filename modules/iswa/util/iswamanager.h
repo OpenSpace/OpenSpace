@@ -38,71 +38,71 @@ class ISWACygnet;
 class ISWAContainer;
 
 struct ExtensionFuture {
-	std::string extension;
-	bool isFinished;
-	int id;
-	std::string parent;
+    std::string extension;
+    bool isFinished;
+    int id;
+std::string parent;
 };
 
 struct Metadata {
-	int id;
-	std::string path;
-	std::string parent;
-	std::string frame;
-	glm::vec4 offset;
-	glm::vec4 scale;
-	std::string scaleVariable;
-	std::shared_ptr<KameleonWrapper> kw;
+    int id;
+    std::string path;
+    std::string parent;
+    std::string frame;
+    glm::vec4 offset;
+    glm::vec4 scale;
+    std::string scaleVariable;
+    std::shared_ptr<KameleonWrapper> kw;
 };
 
 struct MetadataFuture {
-	int id;
-	std::string type;
-	std::string json;
-	bool isFinished;
+    int id;
+    std::string type;
+    std::string json;
+    bool isFinished;
 };
 
 
 class ISWAManager : public ghoul::Singleton<ISWAManager> {
-	friend class ghoul::Singleton<ISWAManager>;
+    friend class ghoul::Singleton<ISWAManager>;
 
 public:
 
-	ISWAManager();
-	~ISWAManager();
+    ISWAManager();
+    ~ISWAManager();
 
-	// std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
-	void addISWACygnet(std::string info);
-	void addISWACygnet(int id, std::string info = "TEXTURE");
-	void deleteISWACygnet(std::string);
+    // std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
+    void addISWACygnet(std::string info);
+    void addISWACygnet(int id, std::string info = "TEXTURE");
+    void deleteISWACygnet(std::string);
 
-	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
-	std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
-	std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
-	std::shared_ptr<ExtensionFuture> fileExtension(int);
+    std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
+    std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
+    std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
+    std::shared_ptr<ExtensionFuture> fileExtension(int);
 
-	void setContainer(ISWAContainer*);
-	std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
+    void setContainer(ISWAContainer*);
+    std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
 
-	void update();
+    void update();
+
 
 private:
-	std::string iSWAurl(int id);
-	std::string iSWADataUrl(int id);
-	std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-	std::string getDictionaryTable(int id, std::string path);
-	std::string parseJSONToLuaTable(int id, std::string json, std::string type);
-	std::string parseKWToLuaTable(std::string kwPath);
+    std::string iSWAurl(int id, std::string type = "image");
+    std::shared_ptr<MetadataFuture> downloadMetadata(int id);
+    std::string getDictionaryTable(int id, std::string path);
+    std::string parseJSONToLuaTable(int id, std::string json, std::string type);
+    std::string parseKWToLuaTable(std::string kwPath);
 
-	// void createDataPlane(std::string kwPath);
-	// void createTexturePlane(int id, std::string json);
-	void createPlane(int id, std::string json, std::string type);
-	void createScreenSpace(int id);
+    // void createDataPlane(std::string kwPath);
+    // void createTexturePlane(int id, std::string json);
+    void createPlane(int id, std::string json, std::string type);
+    void createScreenSpace(int id);
 
-	std::map<std::string, std::string> _month;
-	ISWAContainer* _container;
-	std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
-	std::vector<std::shared_ptr<MetadataFuture>> _metaFutures;
+    std::map<std::string, std::string> _month;
+    ISWAContainer* _container;
+    std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
+    std::vector<std::shared_ptr<MetadataFuture>> _metaFutures;
 };
 
 } //namespace openspace
