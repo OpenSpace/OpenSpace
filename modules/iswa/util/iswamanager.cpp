@@ -63,10 +63,17 @@ namespace openspace{
         std::stringstream ss(info);
         getline(ss,token,',');
         int cygnetId = std::stoi(token);
-
-        getline(ss,token,',');
-        std::string data = token;
-        addISWACygnet(cygnetId, data);
+        
+        if(!ss.eof()){
+            getline(ss,token,',');
+            std::string data = token;
+            addISWACygnet(cygnetId, data);
+        } else{
+            addISWACygnet(cygnetId);
+        }
+        /*if(data == "")
+        else*/
+            
     }
 
     void ISWAManager::addISWACygnet(int id, std::string info){
@@ -79,12 +86,6 @@ namespace openspace{
             metaFuture->id = id;
             _metaFutures.push_back(metaFuture);
         }
-/*        else {
-            std::shared_ptr<MetadataFuture> metaFuture = downloadMetadata(-2);
-            metaFuture->type = "DATA";
-            metaFuture->id = -2;
-            _metaFutures.push_back(metaFuture);
-        }*/
     }
 
     void ISWAManager::deleteISWACygnet(std::string name){
@@ -104,17 +105,17 @@ namespace openspace{
 
     std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
         return  DlManager.downloadToMemory(
-                    iSWAurl(id),
-                    buffer,
-                    [](const DownloadManager::FileFuture& f){
-                        LDEBUG("Download to memory finished");
-                    }
-                );
+                iSWAurl(id, "image"),
+                buffer,
+                [](const DownloadManager::FileFuture& f){
+                    LDEBUG("Download to memory finished");
+                }
+            );
     }
 
     std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(int id, std::string& buffer){
         return DlManager.downloadToMemory(
-                iSWADataUrl(id),
+                iSWAurl(id, "data"),
                 buffer,
                 [](const DownloadManager::FileFuture& f){
                     LDEBUG("Download data finished");
@@ -149,6 +150,7 @@ namespace openspace{
                     std::string token;
                     std::getline(ss, token, '/');
                     std::getline(ss, token);
+                    
 
                     std::string ext = "."+token;
                     extFuture->extension = ext;
@@ -170,36 +172,14 @@ namespace openspace{
         return nullptr;
     }
 
-    std::string ISWAManager::iSWAurl(int id){
+    std::string ISWAManager::iSWAurl(int id, std::string type){
         std::string url;
-        
         if(id < 0){
-            url = "http://128.183.168.116:3000/image/" + std::to_string(-id) + "/";
-        } else {
+            url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
+        } else{
             url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
-        }
-        
-        std::string t = Time::ref().currentTimeUTC(); 
-        std::stringstream ss(t);
-        std::string token;
+        }        
 
-        std::getline(ss, token, ' ');
-        url += token + "-"; 
-        std::getline(ss, token, ' ');
-        url += _month[token] + "-";
-        std::getline(ss, token, 'T');
-        url += token + "%20";
-        std::getline(ss, token, '.');
-        url += token;
-
-        //std::cout << url <<  std::endl;
-
-        return url;
-    }
-
-    std::string ISWAManager::iSWADataUrl(int id){
-        std::string url = "http://128.183.168.116:3000/data/" + std::to_string(id) + "/"; 
-        // /2996-01-23%2000:44:00
         std::string t = Time::ref().currentTimeUTC(); 
         std::stringstream ss(t);
         std::string token;
@@ -219,11 +199,12 @@ namespace openspace{
     void ISWAManager::update(){
         for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
             if((*it)->isFinished) {
-                if((*it)->type == "DATA"){
-                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
-                }else{
+                if((*it)->type == "TEXTURE"){
                     createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
-
+                }else if ((*it)->type == "DATA"){
+                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
+                } else {
+                    LERROR("\""+ (*it)->type + "\" is not a valid type");
                 }
                 it = _metaFutures.erase( it );
             }else{
@@ -339,6 +320,14 @@ namespace openspace{
     // }
 
     void ISWAManager::createPlane(int id, std::string json, std::string type){
+
+        // check if this plane already exist
+        std::string name = type + std::to_string(id); 
+        if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
+            LERROR("A node with name \"" + name +"\" already exist");
+            return;
+        }
+
         std::string luaTable = parseJSONToLuaTable(id, json, type);
         if(luaTable != ""){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";

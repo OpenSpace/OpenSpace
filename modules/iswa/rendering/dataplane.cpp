@@ -23,7 +23,7 @@
 //  ****************************************************************************************/
 
 #include <modules/iswa/rendering/dataplane.h>
-#include <ghoul/filesystem/filesystem>
+//#include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -142,80 +142,82 @@ bool DataPlane::deinitialize(){
 
 
 void DataPlane::render(const RenderData& data){
-    if(_texture){
-        psc position = data.position;
-        glm::mat4 transform = glm::mat4(1.0);
+    
+    if(!_texture) return;
+    
+    psc position = data.position;
+    glm::mat4 transform = glm::mat4(1.0);
 
-        glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-        glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-        glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+    glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+    glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
 
-        glm::mat4 rot = glm::mat4(1.0);
-        for (int i = 0; i < 3; i++){
-            for (int j = 0; j < 3; j++){
-                transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-            }
+    glm::mat4 rot = glm::mat4(1.0);
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
-
-        transform = transform * rotz * roty; //BATSRUS
-
-        if(_data->frame == "GSM"){
-            glm::vec4 v(1,0,0,1);
-            glm::vec3 xVec = glm::vec3(transform*v);
-            xVec = glm::normalize(xVec);
-
-            double  lt;
-            glm::vec3 sunVec =
-            SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-            sunVec = glm::normalize(sunVec);
-
-            float angle = acos(glm::dot(xVec, sunVec));
-            glm::vec3 ref =  glm::cross(xVec, sunVec);
-
-            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-            transform = rotation * transform;
-        }
-
-        position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
-
-        // Activate shader
-        _shader->activate();
-        glEnable(GL_ALPHA_TEST);
-        glDisable(GL_CULL_FACE);
-
-        _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-        _shader->setUniform("ModelTransform", transform);
-
-        // _shader->setUniform("top", _topColor.value());
-        // _shader->setUniform("mid", _midColor.value());
-        // _shader->setUniform("bot", _botColor.value());
-        // _shader->setUniform("tfValues", _tfValues.value());
-
-        setPscUniforms(*_shader.get(), data.camera, position);
-
-        ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        _texture->bind();
-        _shader->setUniform("texture1", unit);
-
-        glBindVertexArray(_quad);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glEnable(GL_CULL_FACE);
-        _shader->deactivate();
-
-        // position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
-        // // RenderData data = { *_camera, psc(), doPerformanceMeasurements };
-        // ColorBarData cbdata = { data.camera, 
-        //                         position,
-        //                         transform,
-        //                         _topColor.value(),
-        //                         _midColor.value(),
-        //                         _botColor.value(),
-        //                         _tfValues.value()
-        //                         // transform
-        //                       };    
-        // _colorbar->render(cbdata);
     }
+
+    transform = transform * rotz * roty; //BATSRUS
+
+    if(_data->frame == "GSM"){
+        glm::vec4 v(1,0,0,1);
+        glm::vec3 xVec = glm::vec3(transform*v);
+        xVec = glm::normalize(xVec);
+
+        double  lt;
+        glm::vec3 sunVec =
+        SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
+        sunVec = glm::normalize(sunVec);
+
+        float angle = acos(glm::dot(xVec, sunVec));
+        glm::vec3 ref =  glm::cross(xVec, sunVec);
+
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+        transform = rotation * transform;
+    }
+
+    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
+    
+
+    // Activate shader
+    _shader->activate();
+    glEnable(GL_ALPHA_TEST);
+    glDisable(GL_CULL_FACE);
+
+    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("ModelTransform", transform);
+
+    // _shader->setUniform("top", _topColor.value());
+    // _shader->setUniform("mid", _midColor.value());
+    // _shader->setUniform("bot", _botColor.value());
+    // _shader->setUniform("tfValues", _tfValues.value());
+
+    setPscUniforms(*_shader.get(), data.camera, position);
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _texture->bind();
+    _shader->setUniform("texture1", unit);
+
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_CULL_FACE);
+    _shader->deactivate();
+
+    // position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
+    // // RenderData data = { *_camera, psc(), doPerformanceMeasurements };
+    // ColorBarData cbdata = { data.camera, 
+    //                         position,
+    //                         transform,
+    //                         _topColor.value(),
+    //                         _midColor.value(),
+    //                         _botColor.value(),
+    //                         _tfValues.value()
+    //                         // transform
+    //                       };    
+    // _colorbar->render(cbdata);
 }
 
 void DataPlane::update(const UpdateData& data){
@@ -413,7 +415,7 @@ bool DataPlane::loadTexture() {
 
 bool DataPlane::updateTexture(){
     _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(-_data->id, _memorybuffer);
+    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(_data->id, _memorybuffer);
 
     if(future){
         _futureData = future;
