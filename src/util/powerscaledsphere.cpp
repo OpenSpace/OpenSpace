@@ -71,8 +71,8 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             if (!(x == 0.f && y == 0.f && z == 0.f))
                 normal = glm::normalize(normal);
 
-            const float t1 = fj / fsegments;
-            const float t2 = fi / fsegments;
+            const float t1 = (fj / fsegments);
+            const float t2 = 1.f - (fi / fsegments);
 
             //double tp = 1.0 / pow(10, static_cast<GLfloat>(radius[1]));
 
@@ -204,7 +204,7 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
             _varray[nr].normal[2] = normal[2];
 
             const float t1 = fj / fsegments;
-            const float t2 = fi / fsegments;
+            const float t2 = 1.f - (fi / fsegments);
 
             _varray[nr].tex[0] = t1;
             _varray[nr].tex[1] = t2;

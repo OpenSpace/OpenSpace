@@ -8,7 +8,7 @@ return {
 			Frame = "IAU_EUROPA", 
 			Body = "EUROPA",
             Geometry = {
-                Type = "SimpleSphereProjection",
+                Type = "SimpleSphere",
                 Radius = { 1.8213, 6 },
                 Segments = 100
             },
