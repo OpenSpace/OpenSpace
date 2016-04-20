@@ -24,50 +24,53 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include "gdal.h"
+#include "gdal_priv.h"
+#include "cpl_conv.h"
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_twmstileprovider.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_texturetileset.inl>
-#include <test_gdalwms.inl>
+//#include "wms/wmsdriver.h"
+//#include "wms/wmsmetadataset.h"
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+class GdalWmsTest : public testing::Test {};
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+TEST_F(GdalWmsTest, Simple) {
+	//GDALRegister_WMS();
+	
+	const char* fileName = "C:/Users/kalbl_000/Documents/CPP/OpenSpace-Development/data/scene/debugglobe/textures/earth_bluemarble.jpg";
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
+	GDALDataset  *poDataset;
+	GDALAllRegister();
+	poDataset = (GDALDataset *)GDALOpen(fileName, GA_ReadOnly);
+	if (poDataset == NULL)
+	{
+		std::cout << "BAD GDAL OPEN" << std::endl;
+		return;
+	}
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+	double        adfGeoTransform[6];
+	printf("Driver: %s/%s\n",
+		poDataset->GetDriver()->GetDescription(),
+		poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
+	printf("Size is %dx%dx%d\n",
+		poDataset->GetRasterXSize(), poDataset->GetRasterYSize(),
+		poDataset->GetRasterCount());
+	if (poDataset->GetProjectionRef() != NULL)
+		printf("Projection is `%s'\n", poDataset->GetProjectionRef());
+	if (poDataset->GetGeoTransform(adfGeoTransform) == CE_None)
+	{
+		printf("Origin = (%.6f,%.6f)\n",
+			adfGeoTransform[0], adfGeoTransform[3]);
+		printf("Pixel Size = (%.6f,%.6f)\n",
+			adfGeoTransform[1], adfGeoTransform[5]);
+	}
 
-	testing::InitGoogleTest(&argc, argv);
-
-	int returnVal = RUN_ALL_TESTS();
-
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
-
-	return returnVal;
+	/*
+	GDALDataset  *poDataset;
+	GDALAllRegister();
+	poDataset = (GDALDataset *)GDALOpen("filename", GA_ReadOnly);
+	if (poDataset == NULL)
+	{
+		std::cout << "NULL" << std::endl;
+	}*/
 }
