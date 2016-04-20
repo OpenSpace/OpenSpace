@@ -619,7 +619,7 @@ void RenderablePlanetProjection::loadTexture() {
     if (_colorTexturePath.value() != "") {
         _textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
         if (_textureOriginal) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_texture);
+            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_textureOriginal);
 
             _textureOriginal->uploadTexture();
             _textureOriginal->setFilter(Texture::FilterMode::Linear);
