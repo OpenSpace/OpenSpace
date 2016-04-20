@@ -295,12 +295,12 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
     const GLfloat size = 1.0f;
     const GLfloat w = 1.0f;
     const GLfloat vertex_data[] = {
-        -size, -size, 0.0f, w, 0, 1,
-         size,  size, 0.0f, w, 1, 0,
-        -size,  size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-         size, -size, 0.0f, w, 1, 1,
-         size,  size, 0.0f, w, 1, 0,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
     glGenVertexArrays(1, &_quad);                         // generate array

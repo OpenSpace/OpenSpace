@@ -259,12 +259,12 @@ void RenderablePlane::createPlane() {
     const GLfloat w = _size.value()[1];
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //      x      y     z     w     s     t
-        -size, -size, 0.0f, w, 0, 1,
-        size, size, 0.0f, w, 1, 0,
-        -size, size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-        size, -size, 0.0f, w, 1, 1,
-        size, size, 0.0f, w, 1, 0,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array
