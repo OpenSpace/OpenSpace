@@ -8,7 +8,7 @@ return {
 			Frame = "IAU_IO", 
 			Body = "IO",
             Geometry = {
-                Type = "SimpleSphereProjection",
+                Type = "SimpleSphere",
                 Radius = { 1.8213, 6 },
                 Segments = 100
             },
