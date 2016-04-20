@@ -36,14 +36,14 @@ uniform vec4 fieldLineColor;
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 void main() {
-	float alpha = 1-length(gs_normal)*length(gs_normal);
-	vec4 fragColor;
-	if (classification)
-		fragColor = vec4(gs_color.rgb, alpha);
-	else
-		fragColor = vec4(fieldLineColor.rgb, fieldLineColor.a * alpha);
+    float alpha = 1-length(gs_normal)*length(gs_normal);
+    vec4 fragColor;
+    if (classification)
+        fragColor = vec4(gs_color.rgb, alpha);
+    else
+        fragColor = vec4(fieldLineColor.rgb, fieldLineColor.a * alpha);
 
-	float depth = pscDepth(gs_position);
-	ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
-	addToBuffer(frag);
+    float depth = pscDepth(gs_position);
+    ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
+    addToBuffer(frag);
 }

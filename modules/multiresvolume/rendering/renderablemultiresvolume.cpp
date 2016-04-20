@@ -154,7 +154,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     if (hasTimeData) {
         _loop = false;
     } else {
-	_loop = true;
+    _loop = true;
         LWARNING("Node " << name << " does not provide valid time information. Viewing one image per frame.");
     }
 

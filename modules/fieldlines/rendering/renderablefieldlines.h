@@ -37,60 +37,60 @@
 
 namespace ghoul {
 namespace opengl {
-	class ProgramObject;
+    class ProgramObject;
 }
 }
 
 namespace openspace {
-	struct LinePoint;
+    struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
-	RenderableFieldlines(const ghoul::Dictionary& dictionary);
+    RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-	typedef std::vector<LinePoint> Line;
+    typedef std::vector<LinePoint> Line;
 
-	void initializeDefaultPropertyValues();
-	//std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
-	std::vector<Line> getFieldlinesData();
-	void loadSeedPoints();
-	void loadSeedPointsFromFile();
-	void loadSeedPointsFromTable();
+    void initializeDefaultPropertyValues();
+    //std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
+    std::vector<Line> getFieldlinesData();
+    void loadSeedPoints();
+    void loadSeedPointsFromFile();
+    void loadSeedPointsFromTable();
 
-	std::vector<Line> generateFieldlines();
-	std::vector<Line> generateFieldlinesVolumeKameleon();
+    std::vector<Line> generateFieldlines();
+    std::vector<Line> generateFieldlinesVolumeKameleon();
 
-	properties::FloatProperty _stepSize;
-	properties::BoolProperty _classification;
-	properties::Vec4Property _fieldlineColor;
-	properties::OptionProperty _seedPointSource;
-	properties::StringProperty _seedPointSourceFile;
+    properties::FloatProperty _stepSize;
+    properties::BoolProperty _classification;
+    properties::Vec4Property _fieldlineColor;
+    properties::OptionProperty _seedPointSource;
+    properties::StringProperty _seedPointSourceFile;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
-	ghoul::Dictionary _vectorFieldInfo;
-	ghoul::Dictionary _fieldlineInfo;
-	ghoul::Dictionary _seedPointsInfo;
+    ghoul::Dictionary _vectorFieldInfo;
+    ghoul::Dictionary _fieldlineInfo;
+    ghoul::Dictionary _seedPointsInfo;
 
-	bool _seedPointsAreDirty;
-	bool _fieldLinesAreDirty;
+    bool _seedPointsAreDirty;
+    bool _fieldLinesAreDirty;
 
-	std::vector<glm::vec3> _seedPoints;
+    std::vector<glm::vec3> _seedPoints;
 
-	GLuint _fieldlineVAO;
-	GLuint _vertexPositionBuffer;
+    GLuint _fieldlineVAO;
+    GLuint _vertexPositionBuffer;
 
-	std::vector<GLint> _lineStart;
-	std::vector<GLsizei> _lineCount;
+    std::vector<GLint> _lineStart;
+    std::vector<GLsizei> _lineCount;
 };
 
 } // namespace openspace

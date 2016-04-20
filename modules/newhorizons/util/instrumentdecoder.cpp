@@ -29,49 +29,49 @@
 
 namespace {
     const std::string _loggerCat  = "InstrumentDecoder";
-	const std::string keyDetector = "DetectorType";
-	const std::string keySpice    = "Spice";
-	const std::string keyStopCommand = "StopCommand";
+    const std::string keyDetector = "DetectorType";
+    const std::string keySpice    = "Spice";
+    const std::string keyStopCommand = "StopCommand";
 }
 
 namespace openspace {
    
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
 {
-	bool success = dictionary.getValue(keyDetector, _type);
-	ghoul_assert(success, "Instrument has not provided detector type");
-	for_each(_type.begin(), _type.end(), [](char& in){ in = ::toupper(in); });
+    bool success = dictionary.getValue(keyDetector, _type);
+    ghoul_assert(success, "Instrument has not provided detector type");
+    for_each(_type.begin(), _type.end(), [](char& in){ in = ::toupper(in); });
 
-	if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
-		LWARNING("Scanner must provide stop command, please check mod file.");
-	}else{
-		dictionary.getValue(keyStopCommand, _stopCommand);
-	}
+    if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
+        LWARNING("Scanner must provide stop command, please check mod file.");
+    }else{
+        dictionary.getValue(keyStopCommand, _stopCommand);
+    }
 
-	std::vector<std::string> spice;
-	ghoul::Dictionary spiceDictionary;
-	success = dictionary.getValue(keySpice, spiceDictionary);
-	ghoul_assert(success, "Instrument did not provide spice ids");
+    std::vector<std::string> spice;
+    ghoul::Dictionary spiceDictionary;
+    success = dictionary.getValue(keySpice, spiceDictionary);
+    ghoul_assert(success, "Instrument did not provide spice ids");
 
 
-	_spiceIDs.resize(spiceDictionary.size());
-	for (int i = 0; i < _spiceIDs.size(); ++i) {
-		std::string id;
-		spiceDictionary.getValue(std::to_string(i + 1), id);
-		_spiceIDs[i] = id;
-	}
+    _spiceIDs.resize(spiceDictionary.size());
+    for (int i = 0; i < _spiceIDs.size(); ++i) {
+        std::string id;
+        spiceDictionary.getValue(std::to_string(i + 1), id);
+        _spiceIDs[i] = id;
+    }
 }
 
 std::string InstrumentDecoder::getStopCommand(){
-	return _stopCommand;
+    return _stopCommand;
 }
 
 std::string InstrumentDecoder::getDecoderType(){
-	return _type;
+    return _type;
 }
 
 std::vector<std::string> InstrumentDecoder::getTranslation(){
-	return _spiceIDs;
+    return _spiceIDs;
 }
 
 } // namespace openspace

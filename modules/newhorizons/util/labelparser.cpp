@@ -107,11 +107,11 @@ std::string LabelParser::decode(std::string line){
             std::string toTranslate = line.substr(value);
             
             //if (_fileTranslation.find(toTranslate) == _fileTranslation.end()) {
-            //	// not found
-            //	_badDecoding = true;
-            //	LERROR("Could not fins '" << toTranslate << "' in translation map." <<
-            //		   "\nPlease check label files");
-            //	return "";
+            //    // not found
+            //    _badDecoding = true;
+            //    LERROR("Could not fins '" << toTranslate << "' in translation map." <<
+            //           "\nPlease check label files");
+            //    return "";
             //}
             return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return
 
@@ -155,7 +155,7 @@ bool LabelParser::create() {
             if (position != std::string::npos){
                 ghoul::filesystem::File currentFile(path);
                 std::string extension = currentFile.fileExtension();
-                if (extension == "lbl" || extension == "LBL"){ // discovered header file 		
+                if (extension == "lbl" || extension == "LBL"){ // discovered header file         
                     std::ifstream file(currentFile.path());
 
                     if (!file.good()){
@@ -199,10 +199,10 @@ bool LabelParser::create() {
                             _detectorType = decode(line);
                             count++; 
                         }
-                    //	if (_badDecoding){
-                    //		LERROR("Please examine file: '" << currentFile.path() << "'");
-                    //		return false;
-                    //	}
+                    //    if (_badDecoding){
+                    //        LERROR("Please examine file: '" << currentFile.path() << "'");
+                    //        return false;
+                    //    }
 
                         if (read == "START_TIME"){
                             std::string start = line.substr(line.find("=") + 2);
@@ -280,27 +280,27 @@ bool LabelParser::create() {
     for (auto target : _subsetMap){
         _instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
 
-    //	std::string min, max;
-    //	SpiceManager::ref().getDateFromET(target.second._range._min, min);
-    //	SpiceManager::ref().getDateFromET(target.second._range._max, max);
+    //    std::string min, max;
+    //    SpiceManager::ref().getDateFromET(target.second._range._min, min);
+    //    SpiceManager::ref().getDateFromET(target.second._range._max, max);
 
-    //	myfile << std::endl;
-    //	for (auto image : target.second._subset){
-    //		std::string time_beg;
-    //		std::string time_end;
-    //		SpiceManager::ref().getDateFromET(image.startTime, time_beg);
-    //		SpiceManager::ref().getDateFromET(image.stopTime, time_end);
+    //    myfile << std::endl;
+    //    for (auto image : target.second._subset){
+    //        std::string time_beg;
+    //        std::string time_end;
+    //        SpiceManager::ref().getDateFromET(image.startTime, time_beg);
+    //        SpiceManager::ref().getDateFromET(image.stopTime, time_end);
 
-    //		myfile << std::fixed
-    //			<< " "   << time_beg
-    //			<< "-->" << time_end
-    //			<< " [ " << image.startTime
-    //			<< " ] "   << image.target << std::setw(10);
-    //		for (auto instrument : image.activeInstruments){
-    //			myfile << " " << instrument;
-    //		}
-    //		myfile << std::endl;
-    //	}
+    //        myfile << std::fixed
+    //            << " "   << time_beg
+    //            << "-->" << time_end
+    //            << " [ " << image.startTime
+    //            << " ] "   << image.target << std::setw(10);
+    //        for (auto instrument : image.activeInstruments){
+    //            myfile << " " << instrument;
+    //        }
+    //        myfile << std::endl;
+    //    }
     }
     sendPlaybookInformation(PlaybookIdentifierName);
     return true;

@@ -41,58 +41,58 @@ namespace properties {
  */
 class OptionProperty : public IntProperty {
 public:
-	/**
-	 * The struct storing a single option consisting of an integer <code>value</code> and
-	 * a <code>string</code> description.
-	 */
-	struct Option {
-		int value;
-		std::string description;
-	};
+    /**
+     * The struct storing a single option consisting of an integer <code>value</code> and
+     * a <code>string</code> description.
+     */
+    struct Option {
+        int value;
+        std::string description;
+    };
 
-	/**
-	 * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
-	 * to its super class.
-	 * \param identifier A unique identifier for this property
-	 * \param guiName The GUI name that should be used to represent this property
-	 */
-	OptionProperty(std::string identifier, std::string guiName);
+    /**
+     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
+     * to its super class.
+     * \param identifier A unique identifier for this property
+     * \param guiName The GUI name that should be used to represent this property
+     */
+    OptionProperty(std::string identifier, std::string guiName);
 
-	/**
-	 * Returns the name of the class for reflection purposes.
-	 * \return The name of this class for reflection purposes
-	 */
-	std::string className() const override;
-	using IntProperty::operator=;
+    /**
+     * Returns the name of the class for reflection purposes.
+     * \return The name of this class for reflection purposes
+     */
+    std::string className() const override;
+    using IntProperty::operator=;
 
-	/**
-	 * Adds the passed option to the list of available options. The <code>value</code> of
-	 * the <code>option</code> must not have been registered previously, or a warning will
-	 * be logged.
-	 * \param value The option that will be added to the list of available options
+    /**
+     * Adds the passed option to the list of available options. The <code>value</code> of
+     * the <code>option</code> must not have been registered previously, or a warning will
+     * be logged.
+     * \param value The option that will be added to the list of available options
      * \param desc The description of the value that will be added
-	 */
-	void addOption(int value, std::string desc);
+     */
+    void addOption(int value, std::string desc);
 
-	/**
-	 * Returns the list of available options.
-	 * /return The list of available options
-	 */
-	const std::vector<Option>& options() const;
+    /**
+     * Returns the list of available options.
+     * /return The list of available options
+     */
+    const std::vector<Option>& options() const;
 
-	/**
-	 * The overritten TemplateProperty::setValue method that checks if the provided value
-	 * represents a valid Option
-	 * \param value The value of the Option that should be set
-	 */
-	void setValue(int value) override;
+    /**
+     * The overritten TemplateProperty::setValue method that checks if the provided value
+     * represents a valid Option
+     * \param value The value of the Option that should be set
+     */
+    void setValue(int value) override;
 
 private:
-	static const std::string OptionsKey;
-	std::string generateAdditionalDescription() const;
+    static const std::string OptionsKey;
+    std::string generateAdditionalDescription() const;
 
-	/// The list of options which have been registered with this OptionProperty
-	std::vector<Option> _options;
+    /// The list of options which have been registered with this OptionProperty
+    std::vector<Option> _options;
 };
 
 } // namespace properties

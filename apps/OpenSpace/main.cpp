@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
 }
 
 void mainInitFunc() {
-    //is this node the master?	(must be set after call to _sgctEngine->init())
+    //is this node the master?    (must be set after call to _sgctEngine->init())
     OsEng.setMaster(_sgctEngine->isMaster());
     
     bool success = OsEng.initialize();

@@ -28,7 +28,7 @@
 #include <modules/onscreengui/include/guicomponent.h>
 
 namespace ghoul {
-	class SharedMemory;
+    class SharedMemory;
 }
 
 namespace openspace {
@@ -36,14 +36,14 @@ namespace gui {
 
 class GuiPerformanceComponent : public GuiComponent {
 public:
-	void initialize();
-	void deinitialize();
+    void initialize();
+    void deinitialize();
 
-	void render();
+    void render();
 
 protected:
-	ghoul::SharedMemory* _performanceMemory = nullptr;
-	float _minMaxValues[2];
+    ghoul::SharedMemory* _performanceMemory = nullptr;
+    float _minMaxValues[2];
 };
 
 } // namespace gui

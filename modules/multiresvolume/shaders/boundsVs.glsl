@@ -35,13 +35,13 @@ out vec4 worldPosition;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vPosition = vertPosition.xyz;
-	worldPosition = modelTransform*vertPosition;
-	
-	vec4 position = pscTransform(worldPosition, mat4(1.0));
+    vPosition = vertPosition.xyz;
+    worldPosition = modelTransform*vertPosition;
     
-	// project the position to view space
-	gl_Position = viewProjection * position;
+    vec4 position = pscTransform(worldPosition, mat4(1.0));
+    
+    // project the position to view space
+    gl_Position = viewProjection * position;
 
     gl_Position.z = 1.0;
 }

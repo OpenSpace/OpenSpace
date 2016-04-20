@@ -48,13 +48,13 @@ bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
 
 PropertyOwner::PropertyOwner()
     : _name("")
-	, _owner(nullptr)
+    , _owner(nullptr)
 {
 }
 
 PropertyOwner::~PropertyOwner() {
-	_properties.clear();
-	_subOwners.clear();
+    _properties.clear();
+    _subOwners.clear();
 }
 
 const std::vector<Property*>& PropertyOwner::properties() const {
@@ -62,20 +62,20 @@ const std::vector<Property*>& PropertyOwner::properties() const {
 }
 
 std::vector<Property*> PropertyOwner::propertiesRecursive() const {
-	std::vector<Property*> props = properties();
+    std::vector<Property*> props = properties();
 
-	for (const PropertyOwner* owner : _subOwners) {
-		std::vector<Property*> p = owner->propertiesRecursive();
-		props.insert(props.end(), p.begin(), p.end());
-	}
+    for (const PropertyOwner* owner : _subOwners) {
+        std::vector<Property*> p = owner->propertiesRecursive();
+        props.insert(props.end(), p.begin(), p.end());
+    }
 
-	return props;
+    return props;
 }
 
 Property* PropertyOwner::property(const std::string& id) const {
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
 
-	// As the _properties list is sorted, just finding the lower bound is sufficient
+    // As the _properties list is sorted, just finding the lower bound is sufficient
     std::vector<Property*>::const_iterator it
           = std::lower_bound(_properties.begin(), _properties.end(), id,
                              [](Property* prop, const std::string& str) {
@@ -119,7 +119,7 @@ const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
 PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
     assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
     
-	// As the _subOwners list is sorted, getting the lower bound is sufficient
+    // As the _subOwners list is sorted, getting the lower bound is sufficient
     std::vector<PropertyOwner*>::const_iterator it
     = std::lower_bound(_subOwners.begin(), _subOwners.end(), name,
                        [](PropertyOwner* owner, const std::string& str) {
@@ -152,7 +152,7 @@ void PropertyOwner::addProperty(Property* prop)
 {
     assert(prop != nullptr);
     assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
-	assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
+    assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -160,7 +160,7 @@ void PropertyOwner::addProperty(Property* prop)
     }
 
     // See if we can find the identifier of the property to add in the properties list
-	// The _properties list is sorted, so getting the lower bound is sufficient
+    // The _properties list is sorted, so getting the lower bound is sufficient
     std::vector<Property*>::iterator it
           = std::lower_bound(_properties.begin(), _properties.end(), prop->identifier(),
                              [](Property* prop, const std::string& str) {
@@ -175,17 +175,17 @@ void PropertyOwner::addProperty(Property* prop)
         return;
     } else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
-		const bool hasOwner = hasPropertySubOwner(prop->identifier());
-		if (hasOwner) {
-			LERROR("Property identifier '" << prop->identifier() << "' already names a"
-				<< "registed PropertyOwner");
-			return;
-		}					
-		else {
-			// now have found the correct position to add it in
-			_properties.insert(it, prop);
-			prop->setPropertyOwner(this);
-		}
+        const bool hasOwner = hasPropertySubOwner(prop->identifier());
+        if (hasOwner) {
+            LERROR("Property identifier '" << prop->identifier() << "' already names a"
+                << "registed PropertyOwner");
+            return;
+        }                    
+        else {
+            // now have found the correct position to add it in
+            _properties.insert(it, prop);
+            prop->setPropertyOwner(this);
+        }
     }
 }
 
@@ -195,7 +195,7 @@ void PropertyOwner::addProperty(Property& prop) {
     
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
     assert(owner != nullptr);
-	assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
+    assert(std::is_sorted(_properties.begin(), _properties.end(), propertyLess));
     assert(std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess));
     
     if (owner->name().empty()) {
@@ -216,18 +216,18 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
                << "' already present in PropertyOwner '" << name() << "'");
         return;
     } else {
-		// We still need to check if the PropertyOwners name is used in a Property
-		const bool hasProp = hasProperty(owner->name());
-		if (hasProp) {
-			LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
-				 << "Property");
-			return;
-		}
-		else {
-			// Otherwise we have found the correct position to add it in
-			_subOwners.insert(it, owner);
-			owner->setPropertyOwner(this);
-		}
+        // We still need to check if the PropertyOwners name is used in a Property
+        const bool hasProp = hasProperty(owner->name());
+        if (hasProp) {
+            LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
+                 << "Property");
+            return;
+        }
+        else {
+            // Otherwise we have found the correct position to add it in
+            _subOwners.insert(it, owner);
+            owner->setPropertyOwner(this);
+        }
     }
     
 }

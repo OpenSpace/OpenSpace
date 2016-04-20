@@ -63,7 +63,7 @@ private:
     properties::Vec3Property _lineColor;
     properties::FloatProperty _lineFade;
     properties::FloatProperty _lineWidth;
-	properties::BoolProperty _showTimestamps;
+    properties::BoolProperty _showTimestamps;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
@@ -86,7 +86,7 @@ private:
 
     float _increment;
     double _oldTime = 0.0;
-	float _distanceFade;
+    float _distanceFade;
 };
 
 } // namespace openspace

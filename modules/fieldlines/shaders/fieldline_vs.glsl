@@ -34,7 +34,7 @@ out vec4 vs_color;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() {		
-	vs_color = in_color;
-	gl_Position = vec4(in_position, 0);
+void main() {        
+    vs_color = in_color;
+    gl_Position = vec4(in_position, 0);
 }

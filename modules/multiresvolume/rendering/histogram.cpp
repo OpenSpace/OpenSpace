@@ -72,7 +72,7 @@ Histogram& Histogram::operator=(Histogram&& other) {
     _numBins = other._numBins;
     _data = other._data;
     other._data = nullptr;
-	return *this;
+    return *this;
 }
 
 

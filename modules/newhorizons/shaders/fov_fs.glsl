@@ -36,15 +36,15 @@ in vec4 vs_point_velocity;
 
 Fragment getFragment() {
 
-	vec4 position = vs_point_position;
-	float depth = pscDepth(position);
-	
-	// set the depth
-	//gl_FragDepth = depth;
+    vec4 position = vs_point_position;
+    float depth = pscDepth(position);
+    
+    // set the depth
+    //gl_FragDepth = depth;
 
-	//float l = length(vs_point_velocity);
-	
-	vec4 diffuse = vs_point_velocity;
+    //float l = length(vs_point_velocity);
+    
+    vec4 diffuse = vs_point_velocity;
 
     Fragment frag;
     frag.color = diffuse;

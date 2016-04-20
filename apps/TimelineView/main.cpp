@@ -28,15 +28,15 @@
 
 static const QString style = R"style(
 QWidget {
-	background-color: rgb(80, 80, 80);
-	font-family: Helvetica;
+    background-color: rgb(80, 80, 80);
+    font-family: Helvetica;
 }
 
 QGroupBox {
     background-color: qlineargradient(
-    	x1: 0, y1: 0, x2: 0, y2: 1,
-    	stop: 0 #858585,
-    	stop: 1 #959595);
+        x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #858585,
+        stop: 1 #959595);
     border: 2px solid gray;
     border-radius: 5px;
     margin-top: 4ex;
@@ -44,7 +44,7 @@ QGroupBox {
 }
 
 QGroupBox::title {
-	background-color: #E0E0E0;
+    background-color: #E0E0E0;
     border: 2px solid gray;
     border-radius: 5px;
     subcontrol-origin: margin;
@@ -60,10 +60,10 @@ QSlider::groove:horizontal {
     border: 1px solid #999999;
     height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
     background: qlineargradient(
-    	x1:0, y1:0, x2:1, y2:0,
-    	stop:0 #c4c4c4,
-    	stop:0.5 #555555,
-    	stop:1 #c4c4c4
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #c4c4c4,
+        stop:0.5 #555555,
+        stop:1 #c4c4c4
     );
     margin: 2px 0;
 }
@@ -77,7 +77,7 @@ QSlider::handle:horizontal {
 }
 
 QPushButton {
-	background-color: lightgray;
+    background-color: lightgray;
     border-style: outset;
     border-width: 0.5px;
     border-radius: 5px;
@@ -87,16 +87,16 @@ QPushButton {
 }
 
 QPushButton#connection {
-	background-color: lightgreen;
+    background-color: lightgreen;
 }
 
 QPushButton#connection:pressed {
-	background-color: green;
+    background-color: green;
 }
 
 
 QPushButton#pause, QPushButton#play {
-	padding: 5px;
+    padding: 5px;
 }
 
 QPushButton#pause:pressed, QPushButton#play:pressed, QPushButton:pressed {
@@ -112,7 +112,7 @@ QCombobox {
 }
 
 QComboBox:editable {
-    background: lightgrey;	
+    background: lightgrey;    
 }
 
 QComboBox QAbstractItemView {
@@ -123,34 +123,34 @@ QComboBox QAbstractItemView {
 }
 
 QLabel#label {
-	font-size: 13px;
-	background-color: transparent;
-	font-variant: small-caps;
+    font-size: 13px;
+    background-color: transparent;
+    font-variant: small-caps;
 }
 
 QLabel#value {
-	font-family: monospace;
-	font-weight: bold;
-	font-size: 14px;
-	background-color: transparent;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    background-color: transparent;
 }
 
 QWidget#background {
-	background-color: transparent;
+    background-color: transparent;
 }
 
 QTextEdit {
-	font-family: monospace;
+    font-family: monospace;
 }
 )style";
 
 int main(int argc, char** argv) {
-	QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     app.setStyleSheet(style);
 
-	MainWindow window;
-	window.show();
+    MainWindow window;
+    window.show();
 
-	return app.exec();
+    return app.exec();
 }

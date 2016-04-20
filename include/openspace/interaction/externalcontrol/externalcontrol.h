@@ -10,17 +10,17 @@ namespace openspace {
 class ExternalControl {
 public:
 
-	// constructors & destructor
-	ExternalControl();
-	virtual ~ExternalControl();
-	
-	virtual void update();
-	
-	void rotate(const glm::quat &rotation);
-	void orbit(const glm::quat &rotation);
-	void distance(const PowerScaledScalar &distance);
+    // constructors & destructor
+    ExternalControl();
+    virtual ~ExternalControl();
+    
+    virtual void update();
+    
+    void rotate(const glm::quat &rotation);
+    void orbit(const glm::quat &rotation);
+    void distance(const PowerScaledScalar &distance);
 
-	
+    
 protected:
 };
 

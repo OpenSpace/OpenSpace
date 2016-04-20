@@ -36,17 +36,17 @@ namespace planetgeometryprojection {
 
 PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
-	std::string geometryType;
-	const bool success = dictionary.getValue(KeyType, geometryType);
-	if (!success) {
+    std::string geometryType;
+    const bool success = dictionary.getValue(KeyType, geometryType);
+    if (!success) {
         LERROR("PlanetGeometry did not contain a correct value of the key '"
-			<< KeyType << "'");
+            << KeyType << "'");
         return nullptr;
-	}
-	ghoul::TemplateFactory<PlanetGeometryProjection>* factory
-		= FactoryManager::ref().factory<PlanetGeometryProjection>();
+    }
+    ghoul::TemplateFactory<PlanetGeometryProjection>* factory
+        = FactoryManager::ref().factory<PlanetGeometryProjection>();
 
-	PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
+    PlanetGeometryProjection* result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
                                                                     << "'");
@@ -58,7 +58,7 @@ PlanetGeometryProjection* PlanetGeometryProjection::createFromDictionary(const g
 PlanetGeometryProjection::PlanetGeometryProjection()
     : _parent(nullptr)
 {
-	setName("PlanetGeometryProjection");
+    setName("PlanetGeometryProjection");
 }
 
 PlanetGeometryProjection::~PlanetGeometryProjection()

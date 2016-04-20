@@ -31,58 +31,58 @@
 namespace openspace{
 
 ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary)
-	, _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
-	, _delete("delete", "Delete")
-	, _shader(nullptr)
-	, _texture(nullptr)
-	, _memorybuffer("")
+    : Renderable(dictionary)
+    , _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
+    , _delete("delete", "Delete")
+    , _shader(nullptr)
+    , _texture(nullptr)
+    , _memorybuffer("")
 {
-	_data = std::make_shared<Metadata>();
+    _data = std::make_shared<Metadata>();
 
-	// dict.getValue can only set strings in _data directly
-	float renderableId;
-	glm::vec3 renderableScale;
-	glm::vec3 renderableOffset;
-	glm::vec2 spatialScale;
+    // dict.getValue can only set strings in _data directly
+    float renderableId;
+    glm::vec3 renderableScale;
+    glm::vec3 renderableOffset;
+    glm::vec2 spatialScale;
 
-	dictionary.getValue("Id", renderableId);
-	dictionary.getValue("Scale", renderableScale);
-	dictionary.getValue("Offset", renderableOffset);
-	dictionary.getValue("SpatialScale", spatialScale);
-	_data->id = (int) renderableId;
-	_data->offset = renderableOffset;
-	_data->scale = renderableScale;
-	_data->spatialScale = spatialScale;
+    dictionary.getValue("Id", renderableId);
+    dictionary.getValue("Scale", renderableScale);
+    dictionary.getValue("Offset", renderableOffset);
+    dictionary.getValue("SpatialScale", spatialScale);
+    _data->id = (int) renderableId;
+    _data->offset = renderableOffset;
+    _data->scale = renderableScale;
+    _data->spatialScale = spatialScale;
 
-	// dictionary.getValue("Path",_data->path);
-	// dictionary.getValue("Parent",_data->parent);
-	dictionary.getValue("Frame",_data->frame);
+    // dictionary.getValue("Path",_data->path);
+    // dictionary.getValue("Parent",_data->parent);
+    dictionary.getValue("Frame",_data->frame);
 
-	// addProperty(_enabled);
-	addProperty(_updateInterval);
-	addProperty(_delete);
+    // addProperty(_enabled);
+    addProperty(_updateInterval);
+    addProperty(_delete);
 
-	// std::cout << _data->id << std::endl;
-	// std::cout << std::to_string(_data->offset) << std::endl;
-	// std::cout << std::to_string(_data->scale) << std::endl;
-	// std::cout << _data->path << std::endl;
-	// std::cout << _data->parent << std::endl;
-	// std::cout << _data->frame << std::endl;
+    // std::cout << _data->id << std::endl;
+    // std::cout << std::to_string(_data->offset) << std::endl;
+    // std::cout << std::to_string(_data->scale) << std::endl;
+    // std::cout << _data->path << std::endl;
+    // std::cout << _data->parent << std::endl;
+    // std::cout << _data->frame << std::endl;
 
-	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
+    _delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
 
 ISWACygnet::~ISWACygnet(){}
 
 void ISWACygnet::registerProperties(){
-	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+    OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
 void ISWACygnet::unregisterProperties(){
-	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._iSWAproperty.unregisterProperties(name());
 }
 
 }//namespace openspac

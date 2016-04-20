@@ -144,12 +144,12 @@ RenderEngine::~RenderEngine() {
 }
 
 bool RenderEngine::deinitialize() {
-	for (auto screenspacerenderable : _screenSpaceRenderables) {
-		screenspacerenderable->deinitialize();
-	}
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->deinitialize();
+    }
 
-	_sceneGraph->clearSceneGraph();
-	return true;
+    _sceneGraph->clearSceneGraph();
+    return true;
 }
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
@@ -222,7 +222,7 @@ bool RenderEngine::initialize() {
 
 bool RenderEngine::initializeGL() {
     // TODO:    Fix the power scaled coordinates in such a way that these 
-    //			values can be set to more realistic values
+    //            values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
@@ -248,7 +248,7 @@ bool RenderEngine::initializeGL() {
     // ---abock
     
     
-//	sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
+//    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
     // calculating the maximum field of view for the camera, used to
@@ -282,7 +282,7 @@ bool RenderEngine::initializeGL() {
   //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
   //       
   //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
-        ////	
+        ////    
         //const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
         ////// get viewdirection, stores the direction in the camera, used for culling
         //const glm::vec3 viewdir = glm::normalize(eyePosition - center);
@@ -301,15 +301,15 @@ bool RenderEngine::initializeGL() {
 
         //// for each corner
         //for (int i = 0; i < 4; ++i) {
-        //	// calculate radians to corner
-        //	glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
-        //	float radsbetween = acos(glm::dot(viewdir, dir))
-        //		/ (glm::length(viewdir) * glm::length(dir));
+        //    // calculate radians to corner
+        //    glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
+        //    float radsbetween = acos(glm::dot(viewdir, dir))
+        //        / (glm::length(viewdir) * glm::length(dir));
 
-        //	// the angle to a corner is larger than the current maxima
-        //	if (radsbetween > maxFov) {
-        //		maxFov = radsbetween;
-        //	}
+        //    // the angle to a corner is larger than the current maxima
+        //    if (radsbetween > maxFov) {
+        //        maxFov = radsbetween;
+        //    }
         //}
         _mainCamera->setMaxFov(maxFov);
     //}
@@ -376,17 +376,17 @@ void RenderEngine::postSynchronizationPreDraw() {
         }
     }
 
-	if(!_deletedScreenSpaceRenderables.empty())
-		_deletedScreenSpaceRenderables.clear(); 
-	
-	for (auto screenspacerenderable : _screenSpaceRenderables) {
-		screenspacerenderable->update();
-	}
-	//Allow focus node to update camera (enables camera-following)
-	//FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
-	//if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
-		//node->updateCamera(_mainCamera);
-	//}
+    if(!_deletedScreenSpaceRenderables.empty())
+        _deletedScreenSpaceRenderables.clear(); 
+    
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->update();
+    }
+    //Allow focus node to update camera (enables camera-following)
+    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
+    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
+        //node->updateCamera(_mainCamera);
+    //}
 
 }
 
@@ -399,20 +399,20 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
     }
 
-	// Print some useful information on the master viewport
-	if (OsEng.isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
-		if (_showInfo) {
-			renderInformation();
-		}
-		if (_showLog) {
-			renderScreenLog();
-		}
-	}
-	
-	for (auto screenSpaceRenderable : _screenSpaceRenderables) {
-		if(screenSpaceRenderable->isEnabled())
-			screenSpaceRenderable->render();
-	}
+    // Print some useful information on the master viewport
+    if (OsEng.isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
+        if (_showInfo) {
+            renderInformation();
+        }
+        if (_showLog) {
+            renderScreenLog();
+        }
+    }
+    
+    for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+        if(screenSpaceRenderable->isEnabled())
+            screenSpaceRenderable->render();
+    }
 }
 
 void RenderEngine::postDraw() {
@@ -836,23 +836,23 @@ void RenderEngine::changeViewPoint(std::string origin) {
         //
         //ghoul::Dictionary vestaDictionary =
         //{
-        //	  { std::string("Type"), std::string("Spice") },
-        //	  { std::string("Body"), std::string("VESTA") },
-        //	  { std::string("Reference"), std::string("GALACTIC") },
-        //	  { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-        //	  { std::string("Kernels"), ghoul::Dictionary() }
+        //      { std::string("Type"), std::string("Spice") },
+        //      { std::string("Body"), std::string("VESTA") },
+        //      { std::string("Reference"), std::string("GALACTIC") },
+        //      { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+        //      { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 
         
         //ghoul::Dictionary newHorizonsGhostDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("NEW HORIZONS") },
-        //	{ std::string("EphmerisGhosting"), std::string("TRUE") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("PLUTO BARYCENTER") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("NEW HORIZONS") },
+        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
         
@@ -905,33 +905,33 @@ void RenderEngine::changeViewPoint(std::string origin) {
         
         //ghoul::Dictionary dawnDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("DAWN") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("SUN") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("DAWN") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("SUN") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
         //
         //ghoul::Dictionary vestaDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("VESTA") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("SUN") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("VESTA") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("SUN") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
         
         
         //ghoul::Dictionary newHorizonsGhostDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("NEW HORIZONS") },
-        //	{ std::string("EphmerisGhosting"), std::string("TRUE") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("NEW HORIZONS") },
+        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
         
@@ -991,21 +991,21 @@ void RenderEngine::changeViewPoint(std::string origin) {
 
         //ghoul::Dictionary dawnDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("DAWN") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("DAWN") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
         //
         //ghoul::Dictionary vestaDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("VESTA") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("VESTA") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
 
@@ -1013,12 +1013,12 @@ void RenderEngine::changeViewPoint(std::string origin) {
         
         //ghoul::Dictionary newHorizonsGhostDictionary =
         //{
-        //	{ std::string("Type"), std::string("Spice") },
-        //	{ std::string("Body"), std::string("NEW HORIZONS") },
-        //	{ std::string("EphmerisGhosting"), std::string("TRUE") },
-        //	{ std::string("Reference"), std::string("GALACTIC") },
-        //	{ std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //	{ std::string("Kernels"), ghoul::Dictionary() }
+        //    { std::string("Type"), std::string("Spice") },
+        //    { std::string("Body"), std::string("NEW HORIZONS") },
+        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+        //    { std::string("Reference"), std::string("GALACTIC") },
+        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+        //    { std::string("Kernels"), ghoul::Dictionary() }
         //};
         //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
         //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
@@ -1027,69 +1027,69 @@ void RenderEngine::changeViewPoint(std::string origin) {
         return;
     }
     //if (origin == "Vesta") {
-    //	
-    //	vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-    //	vestaNode->setEphemeris(new StaticEphemeris);
+    //    
+    //    vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+    //    vestaNode->setEphemeris(new StaticEphemeris);
     //
-    //	solarSystemBarycenterNode->setParent(vestaNode);
-    //	newHorizonsNode->setParent(vestaNode);
+    //    solarSystemBarycenterNode->setParent(vestaNode);
+    //    newHorizonsNode->setParent(vestaNode);
     //
-    //	dawnNode->setParent(vestaNode);
-    //	plutoBarycenterNode->setParent(vestaNode);
+    //    dawnNode->setParent(vestaNode);
+    //    plutoBarycenterNode->setParent(vestaNode);
     //
     //
-    //	ghoul::Dictionary plutoDictionary =
-    //	{
-    //		{ std::string("Type"), std::string("Spice") },
-    //		{ std::string("Body"), std::string("PLUTO BARYCENTER") },
-    //		{ std::string("Reference"), std::string("GALACTIC") },
-    //		{ std::string("Observer"), std::string("VESTA") },
-    //		{ std::string("Kernels"), ghoul::Dictionary() }
-    //	};
-    //	ghoul::Dictionary solarDictionary =
-    //	{
-    //		{ std::string("Type"), std::string("Spice") },
-    //		{ std::string("Body"), std::string("SUN") },
-    //		{ std::string("Reference"), std::string("GALACTIC") },
-    //		{ std::string("Observer"), std::string("VESTA") },
-    //		{ std::string("Kernels"), ghoul::Dictionary() }
-    //	};
+    //    ghoul::Dictionary plutoDictionary =
+    //    {
+    //        { std::string("Type"), std::string("Spice") },
+    //        { std::string("Body"), std::string("PLUTO BARYCENTER") },
+    //        { std::string("Reference"), std::string("GALACTIC") },
+    //        { std::string("Observer"), std::string("VESTA") },
+    //        { std::string("Kernels"), ghoul::Dictionary() }
+    //    };
+    //    ghoul::Dictionary solarDictionary =
+    //    {
+    //        { std::string("Type"), std::string("Spice") },
+    //        { std::string("Body"), std::string("SUN") },
+    //        { std::string("Reference"), std::string("GALACTIC") },
+    //        { std::string("Observer"), std::string("VESTA") },
+    //        { std::string("Kernels"), ghoul::Dictionary() }
+    //    };
     //
-    //	ghoul::Dictionary jupiterDictionary =
-    //	{
-    //		{ std::string("Type"), std::string("Spice") },
-    //		{ std::string("Body"), std::string("JUPITER BARYCENTER") },
-    //		{ std::string("Reference"), std::string("GALACTIC") },
-    //		{ std::string("Observer"), std::string("VESTA") },
-    //		{ std::string("Kernels"), ghoul::Dictionary() }
-    //	};
+    //    ghoul::Dictionary jupiterDictionary =
+    //    {
+    //        { std::string("Type"), std::string("Spice") },
+    //        { std::string("Body"), std::string("JUPITER BARYCENTER") },
+    //        { std::string("Reference"), std::string("GALACTIC") },
+    //        { std::string("Observer"), std::string("VESTA") },
+    //        { std::string("Kernels"), ghoul::Dictionary() }
+    //    };
     //
-    //	solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-    //	plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-    //	jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
+    //    solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+    //    plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+    //    jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
     //
-    //	ghoul::Dictionary newHorizonsDictionary =
-    //	{
-    //		{ std::string("Type"), std::string("Spice") },
-    //		{ std::string("Body"), std::string("NEW HORIZONS") },
-    //		{ std::string("Reference"), std::string("GALACTIC") },
-    //		{ std::string("Observer"), std::string("VESTA") },
-    //		{ std::string("Kernels"), ghoul::Dictionary() }
-    //	};
-    //	newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+    //    ghoul::Dictionary newHorizonsDictionary =
+    //    {
+    //        { std::string("Type"), std::string("Spice") },
+    //        { std::string("Body"), std::string("NEW HORIZONS") },
+    //        { std::string("Reference"), std::string("GALACTIC") },
+    //        { std::string("Observer"), std::string("VESTA") },
+    //        { std::string("Kernels"), ghoul::Dictionary() }
+    //    };
+    //    newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
     //
-    //	ghoul::Dictionary dawnDictionary =
-    //	{
-    //		{ std::string("Type"), std::string("Spice") },
-    //		{ std::string("Body"), std::string("DAWN") },
-    //		{ std::string("Reference"), std::string("GALACTIC") },
-    //		{ std::string("Observer"), std::string("VESTA") },
-    //		{ std::string("Kernels"), ghoul::Dictionary() }
-    //	};
-    //	dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-    //	vestaNode->setEphemeris(new StaticEphemeris);
+    //    ghoul::Dictionary dawnDictionary =
+    //    {
+    //        { std::string("Type"), std::string("Spice") },
+    //        { std::string("Body"), std::string("DAWN") },
+    //        { std::string("Reference"), std::string("GALACTIC") },
+    //        { std::string("Observer"), std::string("VESTA") },
+    //        { std::string("Kernels"), ghoul::Dictionary() }
+    //    };
+    //    dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+    //    vestaNode->setEphemeris(new StaticEphemeris);
     //
-    //	return;
+    //    return;
     //}
 
     if (origin == "67P") {
@@ -1135,37 +1135,37 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
 }
 
 void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
-	s->initialize();
-	_screenSpaceRenderables.push_back(s);
+    s->initialize();
+    _screenSpaceRenderables.push_back(s);
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
-	auto it = std::find(
-		_screenSpaceRenderables.begin(),
-		_screenSpaceRenderables.end(),
-		s
-		);
+    auto it = std::find(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        s
+        );
 
-	if (it != _screenSpaceRenderables.end()) {
-		s->deinitialize();
-		_deletedScreenSpaceRenderables.push_back(s);
-		_screenSpaceRenderables.erase(it);
-	}
+    if (it != _screenSpaceRenderables.end()) {
+        s->deinitialize();
+        _deletedScreenSpaceRenderables.push_back(s);
+        _screenSpaceRenderables.erase(it);
+    }
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
-	auto s = screenSpaceRenderable(name);
-	if(s)
-		unregisterScreenSpaceRenderable(s);
+    auto s = screenSpaceRenderable(name);
+    if(s)
+        unregisterScreenSpaceRenderable(s);
 }
 
 std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
-	for(auto s : _screenSpaceRenderables){
-		if(s->name() == name){
-			return s;
-		}
-	}
-	return nullptr;
+    for(auto s : _screenSpaceRenderables){
+        if(s->name() == name){
+            return s;
+        }
+    }
+    return nullptr;
 }
 
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
@@ -1411,11 +1411,11 @@ void RenderEngine::renderScreenLog() {
     //                if (entries.size() > max)
 
     //ScreenLog::const_range ScreenLog::last(size_t n) {
-    //	if (_entries.size() > n) {
-    //		return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
-    //	} else {
-    //		return std::make_pair(_entries.rbegin(), _entries.rend());
-    //	}
+    //    if (_entries.size() > n) {
+    //        return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
+    //    } else {
+    //        return std::make_pair(_entries.rbegin(), _entries.rend());
+    //    }
     //}
 
     //                auto entries = _log->last(max);
@@ -1453,10 +1453,10 @@ void RenderEngine::renderScreenLog() {
         RenderFont(*_fontLog,
             glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
             white * alpha,
-            "%-14s %s%s",									// Format
-            e->timeString.c_str(),							// Time string
+            "%-14s %s%s",                                    // Format
+            e->timeString.c_str(),                            // Time string
             e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
-            e->category.length() > 20 ? "..." : "");		// Pad category with "..." if exceeds category_length
+            e->category.length() > 20 ? "..." : "");        // Pad category with "..." if exceeds category_length
 
         glm::vec4 color = white;
         if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
@@ -1472,23 +1472,23 @@ void RenderEngine::renderScreenLog() {
         RenderFont(*_fontLog,
             glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
             color * alpha,
-            "%s",									// Format
-            lvl.c_str());		// Pad category with "..." if exceeds category_length
+            "%s",                                    // Format
+            lvl.c_str());        // Pad category with "..." if exceeds category_length
 
         RenderFont(*_fontLog,
             glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
             white * alpha,
-            "%s",									// Format
-            message.c_str());		// Pad category with "..." if exceeds category_length
+            "%s",                                    // Format
+            message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
 }
 
 void RenderEngine::sortScreenspaceRenderables(){
-	std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
-			  [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
-			  	return i->depth() > j->depth();
-			  });
+    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+                  return i->depth() > j->depth();
+              });
 }
 
 }// namespace openspace

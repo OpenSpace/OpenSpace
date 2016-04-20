@@ -33,21 +33,21 @@
 
 // Forward declare to minimize dependencies
 namespace ghoul {
-	namespace filesystem {
-		class File;
-	}
-	namespace opengl {
-		class Texture;
-	}
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class Texture;
+    }
 }
 
 namespace openspace {
 
 class RenderableVolume: public Renderable {
 public:
-	// constructors & destructor
-	RenderableVolume(const ghoul::Dictionary& dictionary);
-	~RenderableVolume();
+    // constructors & destructor
+    RenderableVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableVolume();
     
 protected:
     ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);

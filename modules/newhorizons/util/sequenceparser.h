@@ -68,11 +68,11 @@ struct ImageSubset {
 class SequenceParser {
 public:
     virtual bool create() = 0;
-	virtual std::map<std::string, ImageSubset> getSubsetMap() final;
-	virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
-	virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
-	virtual std::map<std::string, Decoder*> getTranslation() = 0;
-	virtual std::vector<double> getCaptureProgression() final;
+    virtual std::map<std::string, ImageSubset> getSubsetMap() final;
+    virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
+    virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
+    virtual std::map<std::string, Decoder*> getTranslation() = 0;
+    virtual std::vector<double> getCaptureProgression() final;
 
 protected:
     void sendPlaybookInformation(const std::string& name);

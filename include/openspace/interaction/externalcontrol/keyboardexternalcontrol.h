@@ -8,15 +8,15 @@
 //class KeyboardExternalControl: public PythonExternalControl {
 //public:
 //
-//	// constructors & destructor
-//	KeyboardExternalControl(const char *filename);
-//	~KeyboardExternalControl();
+//    // constructors & destructor
+//    KeyboardExternalControl(const char *filename);
+//    ~KeyboardExternalControl();
 //
-//	void update();
-//	
-//	void keyboardCallback(int key, int action);
+//    void update();
+//    
+//    void keyboardCallback(int key, int action);
 //private:
-//	int *keys_;
+//    int *keys_;
 //
 //};
 //

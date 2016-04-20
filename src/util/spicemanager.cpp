@@ -919,7 +919,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
             _spkCoverageTimes[obj].insert(e);
             _spkCoverageTimes[obj].insert(b);
             _spkIntervals[obj].emplace_back(b, e);
-        }		
+        }        
     }
 }
     

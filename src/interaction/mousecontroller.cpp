@@ -33,112 +33,112 @@ namespace openspace {
 namespace interaction {
 
 MouseController::MouseController()
-	: _lastTrackballPos(0.f)
-	, _isMouseBeingPressedAndHeld(false)
+    : _lastTrackballPos(0.f)
+    , _isMouseBeingPressedAndHeld(false)
 {}
 
 glm::vec3 MouseController::mapToTrackball(glm::vec2 mousePos) {
-	const float RADIUS = 0.5; // Sphere radius
-	glm::vec3 out = glm::vec3(mousePos.x - 0.5, -1.0*(mousePos.y - 0.5), 0);
+    const float RADIUS = 0.5; // Sphere radius
+    glm::vec3 out = glm::vec3(mousePos.x - 0.5, -1.0*(mousePos.y - 0.5), 0);
 
-	// Mapping according to Holroyds trackball
-	// Piece-wise sphere + hyperbolic sheet
-	if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS / 2.0) {
-		//Spherical Region
-		out.z = RADIUS*RADIUS - (out.x*out.x + out.y*out.y);
-		out.z = out.z > 0.0f ? sqrtf(out.z) : 0.0f;
-	}
-	else { //Hyperbolic Region - for smooth z values
-		out.z = (RADIUS*RADIUS) / (2.0f*sqrt(out.x*out.x + out.y*out.y));
-	}
+    // Mapping according to Holroyds trackball
+    // Piece-wise sphere + hyperbolic sheet
+    if (out.x*out.x + out.y*out.y <= RADIUS*RADIUS / 2.0) {
+        //Spherical Region
+        out.z = RADIUS*RADIUS - (out.x*out.x + out.y*out.y);
+        out.z = out.z > 0.0f ? sqrtf(out.z) : 0.0f;
+    }
+    else { //Hyperbolic Region - for smooth z values
+        out.z = (RADIUS*RADIUS) / (2.0f*sqrt(out.x*out.x + out.y*out.y));
+    }
 
-	return glm::normalize(out);
+    return glm::normalize(out);
 }
 
 glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
-	//Get x,y,z axis vectors of current camera view
-	glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
-	psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();
-	glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
-	glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
+    //Get x,y,z axis vectors of current camera view
+    glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
+    psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();
+    glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
+    glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
 
-	//mapping to camera co-ordinate
-	currentViewXaxis *= trackballPos.x;
-	currentViewYaxis *= trackballPos.y;
-	currentViewZaxis *= trackballPos.z;
-	return (currentViewXaxis + currentViewYaxis + currentViewZaxis);
+    //mapping to camera co-ordinate
+    currentViewXaxis *= trackballPos.x;
+    currentViewYaxis *= trackballPos.y;
+    currentViewZaxis *= trackballPos.z;
+    return (currentViewXaxis + currentViewYaxis + currentViewZaxis);
 }
 
 void MouseController::trackballRotate(int x, int y) {
-	// Normalize mouse coordinates to [0,1]
+    // Normalize mouse coordinates to [0,1]
     glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
-	glm::vec2 mousePos = glm::vec2((float)x / res.x, (float)y / res.y);
+    glm::vec2 mousePos = glm::vec2((float)x / res.x, (float)y / res.y);
 
-	mousePos = glm::clamp(mousePos, -0.5f, 1.5f); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
-	//mousePos[1] = 0.5; 							// Ugly fix #2: Tempoarily only allow rotation around y
+    mousePos = glm::clamp(mousePos, -0.5f, 1.5f); // Ugly fix #1: Camera position becomes NaN on mouse values outside [-0.5, 1.5]
+    //mousePos[1] = 0.5;                             // Ugly fix #2: Tempoarily only allow rotation around y
 
-	glm::vec3 curTrackballPos = mapToTrackball(mousePos);
-	//	LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
+    glm::vec3 curTrackballPos = mapToTrackball(mousePos);
+    //    LDEBUG(mousePos.x << ", " << mousePos.y << " = " << curTrackballPos.x << ", " << curTrackballPos.y << ", " << curTrackballPos.z);
 
-	// Disable movement on the first click for extra smoothness
-	if (!_isMouseBeingPressedAndHeld) {
-		_lastTrackballPos = curTrackballPos;
-		_isMouseBeingPressedAndHeld = true;
-	}
+    // Disable movement on the first click for extra smoothness
+    if (!_isMouseBeingPressedAndHeld) {
+        _lastTrackballPos = curTrackballPos;
+        _isMouseBeingPressedAndHeld = true;
+    }
 
-	if (curTrackballPos != _lastTrackballPos) {
-		// calculate rotation angle (in radians)
-		float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-		rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
+    if (curTrackballPos != _lastTrackballPos) {
+        // calculate rotation angle (in radians)
+        float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
+        rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
 
-		// Map trackballpos to camera
-		//		glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
-		//		psc currentCamPos = camera_->getPosition();
-		//		glm::vec3 nextCamPos = currentCamPos.getVec3f() + trackballMappedToCamera;
-		//		glm::vec3 rotationAxis = glm::cross(currentCamPos.getVec3f(), nextCamPos);
+        // Map trackballpos to camera
+        //        glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
+        //        psc currentCamPos = camera_->getPosition();
+        //        glm::vec3 nextCamPos = currentCamPos.getVec3f() + trackballMappedToCamera;
+        //        glm::vec3 rotationAxis = glm::cross(currentCamPos.getVec3f(), nextCamPos);
 
-		glm::vec3 rotationAxis = glm::cross(_lastTrackballPos, curTrackballPos);
-		rotationAxis = glm::normalize(rotationAxis);
-		glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
+        glm::vec3 rotationAxis = glm::cross(_lastTrackballPos, curTrackballPos);
+        rotationAxis = glm::normalize(rotationAxis);
+        glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
 
-		// Apply quaternion to camera
-		_handler->orbitDelta(quaternion);
+        // Apply quaternion to camera
+        _handler->orbitDelta(quaternion);
 
-		_lastTrackballPos = curTrackballPos;
-	}
+        _lastTrackballPos = curTrackballPos;
+    }
 }
 
 
 TrackballMouseController::TrackballMouseController()
-	: MouseController()
-	, _leftMouseButtonDown(false)
+    : MouseController()
+    , _leftMouseButtonDown(false)
 {}
 
 void TrackballMouseController::button(MouseButton button, MouseAction action) {
-	if (button == MouseButton::Left && action == MouseAction::Press)
-			_leftMouseButtonDown = true;
-	else if (button == MouseButton::Left && action == MouseAction::Release) {
-		_leftMouseButtonDown = false;
-		_isMouseBeingPressedAndHeld = false;
-	}
+    if (button == MouseButton::Left && action == MouseAction::Press)
+            _leftMouseButtonDown = true;
+    else if (button == MouseButton::Left && action == MouseAction::Release) {
+        _leftMouseButtonDown = false;
+        _isMouseBeingPressedAndHeld = false;
+    }
 }
 
 void TrackballMouseController::move(float x, float y) {
-	if (_leftMouseButtonDown)
-		trackballRotate(static_cast<int>(x), static_cast<int>(y));
+    if (_leftMouseButtonDown)
+        trackballRotate(static_cast<int>(x), static_cast<int>(y));
 }
 
 void TrackballMouseController::scrollWheel(int pos) {
-	const float speed = 4.75f;
-	const float dt = static_cast<float>(_handler->deltaTime());
-	if (pos < 0) {
-		PowerScaledScalar dist(speed * dt, 0.0f);
-		_handler->distanceDelta(dist);
-	}
-	else if (pos > 0) {
-		PowerScaledScalar dist(-speed * dt, 0.0f);
-		_handler->distanceDelta(dist);
-	}
+    const float speed = 4.75f;
+    const float dt = static_cast<float>(_handler->deltaTime());
+    if (pos < 0) {
+        PowerScaledScalar dist(speed * dt, 0.0f);
+        _handler->distanceDelta(dist);
+    }
+    else if (pos > 0) {
+        PowerScaledScalar dist(-speed * dt, 0.0f);
+        _handler->distanceDelta(dist);
+    }
 }
 
 void TrackballMouseController::update(const double& dt){
@@ -155,63 +155,63 @@ OrbitalMouseController::OrbitalMouseController()
     , _rotationSpeed(10.f)
     , _navigationSpeed(3.f)
 {
-	for (int n = 0; n < 3; ++n){
-		_previousCursorPos[n] = glm::vec2(0);
-	}
+    for (int n = 0; n < 3; ++n){
+        _previousCursorPos[n] = glm::vec2(0);
+    }
 }
 
 void OrbitalMouseController::button(MouseButton button, MouseAction action) {
-	if (button == MouseButton::Left){
-		if (action == MouseAction::Press){
-			_leftMouseButtonDown = true;
+    if (button == MouseButton::Left){
+        if (action == MouseAction::Press){
+            _leftMouseButtonDown = true;
             _previousCursorPos[MouseButtons::ButtonLeft] = OsEng.windowWrapper().mousePosition();
-		}
-		else if (action == MouseAction::Release) {
-			_leftMouseButtonDown = false;
-			_currentCursorDiff[MouseButtons::ButtonLeft] = glm::vec2(0);
-		}
-	}
-	else if (button == MouseButton::Right){
-		if (action == MouseAction::Press){
-			_rightMouseButtonDown = true;
+        }
+        else if (action == MouseAction::Release) {
+            _leftMouseButtonDown = false;
+            _currentCursorDiff[MouseButtons::ButtonLeft] = glm::vec2(0);
+        }
+    }
+    else if (button == MouseButton::Right){
+        if (action == MouseAction::Press){
+            _rightMouseButtonDown = true;
             _previousCursorPos[MouseButtons::ButtonRight] = OsEng.windowWrapper().mousePosition();
-		}
-		else if (action == MouseAction::Release) {
-			_rightMouseButtonDown = false;
-			_currentCursorDiff[MouseButtons::ButtonRight] = glm::vec2(0);
-		}
-	}
-	else if (button == MouseButton::Middle){
-		if (action == MouseAction::Press){
-			_middleMouseButtonDown = true;
+        }
+        else if (action == MouseAction::Release) {
+            _rightMouseButtonDown = false;
+            _currentCursorDiff[MouseButtons::ButtonRight] = glm::vec2(0);
+        }
+    }
+    else if (button == MouseButton::Middle){
+        if (action == MouseAction::Press){
+            _middleMouseButtonDown = true;
             _previousCursorPos[MouseButtons::ButtonMiddle] = OsEng.windowWrapper().mousePosition();
-		}
-		else if (action == MouseAction::Release) {
-			_middleMouseButtonDown = false;
-			_currentCursorDiff[MouseButtons::ButtonMiddle] = glm::vec2(0);
-		}
-	}
+        }
+        else if (action == MouseAction::Release) {
+            _middleMouseButtonDown = false;
+            _currentCursorDiff[MouseButtons::ButtonMiddle] = glm::vec2(0);
+        }
+    }
 
 }
 
 void OrbitalMouseController::move(float x, float y) {
     _currentCursorPos = OsEng.windowWrapper().mousePosition();
 
-	if (_leftMouseButtonDown) {
+    if (_leftMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonLeft];
         glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonLeft] = diff / res;
-	}
-	if (_rightMouseButtonDown) {
+    }
+    if (_rightMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonRight];
         glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonRight] = diff / res;
-	}
-	if (_middleMouseButtonDown) {
+    }
+    if (_middleMouseButtonDown) {
         glm::vec2 diff = _currentCursorPos - _previousCursorPos[MouseButtons::ButtonMiddle];
         glm::vec2 res = OsEng.windowWrapper().currentWindowSize();
         _currentCursorDiff[MouseButtons::ButtonMiddle] = diff / res;
-	}
+    }
 }
 
 void OrbitalMouseController::scrollWheel(int pos) {
@@ -222,24 +222,24 @@ void OrbitalMouseController::update(const double& dt){
     const float interactionSpeed = OsEng.interactionHandler().interactionSensitivity();
     const bool rotationInvert = OsEng.interactionHandler().invertRotation();
     const bool rollInvert = OsEng.interactionHandler().invertRoll();
-	
-	//if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
-		_handler->orbit(
-			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * interactionSpeed * (rotationInvert ? -1.f : 1.f), 
-			static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * interactionSpeed * (rotationInvert ? -1.f : 1.f),
-			static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
-			static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
-	//}
-	
-//	if (_leftMouseButtonDown){
-//		_handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);
-//	}	
-//	if (_middleMouseButtonDown){
-//		_handler->orbit(0.f, 0.f, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed);
-//	}
-//	if (_rightMouseButtonDown){
-//		_handler->distance(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
-//	}
+    
+    //if (_leftMouseButtonDown || _rightMouseButtonDown || _middleMouseButtonDown){
+        _handler->orbit(
+            static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].x * interactionSpeed * (rotationInvert ? -1.f : 1.f), 
+            static_cast<float>(_leftMouseButtonDown) * static_cast<float>(dt)  *  _currentCursorDiff[MouseButtons::ButtonLeft].y * interactionSpeed * (rotationInvert ? -1.f : 1.f),
+            static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
+            static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
+    //}
+    
+//    if (_leftMouseButtonDown){
+//        _handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);
+//    }    
+//    if (_middleMouseButtonDown){
+//        _handler->orbit(0.f, 0.f, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonMiddle].x * _rotationSpeed);
+//    }
+//    if (_rightMouseButtonDown){
+//        _handler->distance(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
+//    }
 }
 
 } // namespace interaction

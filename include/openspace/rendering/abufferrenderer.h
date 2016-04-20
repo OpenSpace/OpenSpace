@@ -41,14 +41,14 @@
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
-	
+    
     namespace filesystem {
         class File;
     }
-	namespace opengl {
+    namespace opengl {
         class ProgramObject;
-		class Texture;
-	}
+        class Texture;
+    }
 }
 
 namespace openspace {
@@ -56,11 +56,11 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-	
+    
 class ABufferRenderer : public Renderer, public RaycasterListener {
 public:
-	ABufferRenderer();
-	virtual ~ABufferRenderer();
+    ABufferRenderer();
+    virtual ~ABufferRenderer();
 
     void initialize() override;
     void deinitialize() override;
@@ -70,7 +70,7 @@ public:
     void setResolution(glm::ivec2 res) override;
 
     void update();
-	void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void render(float blackoutFactor, bool doPerformanceMeasurements) override;
 
 
     /**
@@ -120,7 +120,7 @@ private:
     int _nAaSamples;
 
     ghoul::Dictionary _rendererData;
-};		// ABufferRenderer
-}		// openspace
+};        // ABufferRenderer
+}        // openspace
 
-#endif 	// __RENDERER_H__
+#endif     // __RENDERER_H__

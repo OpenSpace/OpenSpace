@@ -28,7 +28,7 @@
 #include <string>
 
 namespace {
-	const std::string _loggerCat = "RaycasterManager";
+    const std::string _loggerCat = "RaycasterManager";
 }
 
 namespace openspace {

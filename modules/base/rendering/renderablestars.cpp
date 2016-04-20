@@ -309,7 +309,7 @@ void RenderableStars::update(const UpdateData& data) {
         glBindVertexArray(0);
 
         _dataIsDirty = false;
-    }	
+    }    
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");

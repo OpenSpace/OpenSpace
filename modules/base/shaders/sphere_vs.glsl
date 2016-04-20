@@ -38,20 +38,20 @@ out float s;
 
 void main()
 {
-	vec4 tmp = in_position;
+    vec4 tmp = in_position;
 
-	mat4 mt = ModelTransform;
+    mat4 mt = ModelTransform;
 
-	mt = mat4(0, -1, 0, 0,
-			  1, 0, 0, 0,
-			  0, 0, -1, 0,
-			  0, 0, 0, 1) * mt;
+    mt = mat4(0, -1, 0, 0,
+              1, 0, 0, 0,
+              0, 0, -1, 0,
+              0, 0, 0, 1) * mt;
 
-	vec4 position = pscTransform(tmp, mt);
+    vec4 position = pscTransform(tmp, mt);
 
-	vs_position = in_position;
-	vs_st = in_st;
-	
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    vs_position = in_position;
+    vs_st = in_st;
+    
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

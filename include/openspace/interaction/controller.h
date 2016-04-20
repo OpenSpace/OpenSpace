@@ -37,14 +37,14 @@ class InteractionHandler;
 
 class Controller {
 public:
-	Controller() :
-		_handler(nullptr)
-	{}
+    Controller() :
+        _handler(nullptr)
+    {}
     
-	void setHandler(InteractionHandler* handler);
+    void setHandler(InteractionHandler* handler);
 
 protected:
-	InteractionHandler* _handler;
+    InteractionHandler* _handler;
 };
 
 } // namespace interaction

@@ -12,22 +12,22 @@
 //class PythonExternalControl: public ExternalControl {
 //public:
 //
-//	// constructors & destructor
-//	PythonExternalControl(const char *filename);
-//	~PythonExternalControl();
+//    // constructors & destructor
+//    PythonExternalControl(const char *filename);
+//    ~PythonExternalControl();
 //
-//	static PyMethodDef* getMethodDef();
-//	
-//	void message(const char *text);
-//	virtual void update();
-//	void clear();
+//    static PyMethodDef* getMethodDef();
+//    
+//    void message(const char *text);
+//    virtual void update();
+//    void clear();
 //private:
-//	PythonScript ps_;
+//    PythonScript ps_;
 //
 //protected:
-//	void run();
-//	int pyarrSize_;
-//	PyObject **pyarr_;
+//    void run();
+//    int pyarrSize_;
+//    PyObject **pyarr_;
 //};
 //
 //} // namespace openspace

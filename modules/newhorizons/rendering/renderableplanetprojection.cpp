@@ -481,15 +481,15 @@ void RenderablePlanetProjection::project(){
     // Comment out if not using queue and prefer old method -------------
     // + in update() function
     //if (!imageQueue.empty()){
-    //	Image& img = imageQueue.front();
-    //	RenderablePlanetProjection::attitudeParameters(img.startTime);
-    //	// if image has new path - ie actual image, NOT placeholder
-    //	if (_projectionTexturePath.value() != img.path){
-    //		// rebind and upload 
-    //		_projectionTexturePath = img.path; 
-    //	}
-    //	imageProjectGPU(); // fbopass
-    //	imageQueue.pop();
+    //    Image& img = imageQueue.front();
+    //    RenderablePlanetProjection::attitudeParameters(img.startTime);
+    //    // if image has new path - ie actual image, NOT placeholder
+    //    if (_projectionTexturePath.value() != img.path){
+    //        // rebind and upload 
+    //        _projectionTexturePath = img.path; 
+    //    }
+    //    imageProjectGPU(); // fbopass
+    //    imageQueue.pop();
     //}
     // ------------------------------------------------------------------
 
@@ -574,7 +574,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
     // @mm
     //_capture = true;
     //for (auto img : _imageTimes){
-    //	imageQueue.push(img);
+    //    imageQueue.push(img);
     //}
     //_imageTimes.clear();
     // --------------------------------------------------------------

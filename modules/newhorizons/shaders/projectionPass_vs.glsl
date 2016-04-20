@@ -42,20 +42,20 @@ out vec4 vs_normal;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vs_position  = in_position;
-	
-	vec4 tmp    = in_position;
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
+    vs_position  = in_position;
+    
+    vec4 tmp    = in_position;
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
 
-	vec4 raw_pos = psc_to_meter(in_position, _scaling);
-	ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
-	
-	vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-	
-	//match clipping plane
-	vec2 texco = (in_st * 2) - 1; 
-	vs_uv = texco;
-	gl_Position = vec4(texco, 0.0, 1.0);
+    vec4 raw_pos = psc_to_meter(in_position, _scaling);
+    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+    
+    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    
+    //match clipping plane
+    vec2 texco = (in_st * 2) - 1; 
+    vs_uv = texco;
+    gl_Position = vec4(texco, 0.0, 1.0);
 
 }

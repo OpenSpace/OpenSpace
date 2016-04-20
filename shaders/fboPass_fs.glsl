@@ -42,23 +42,23 @@ out vec4 color;
 #define M_PI 3.14159265358979323846
 
 vec4 uvToModel( float u, float v, vec4 radius, float segments){
-	float fj = u * segments;
-	float fi = v * segments;
+    float fj = u * segments;
+    float fi = v * segments;
 
-	float theta = fi * float(M_PI) / segments;  // 0 -> PI
-	float phi   = fj * float(M_PI) * 2.0f / segments;
+    float theta = fi * float(M_PI) / segments;  // 0 -> PI
+    float phi   = fj * float(M_PI) * 2.0f / segments;
 
-	float x = radius[0] * sin(phi) * sin(theta);  //
-	float y = radius[1] * cos(theta);             // up
-	float z = radius[2] * cos(phi) * sin(theta);  //
+    float x = radius[0] * sin(phi) * sin(theta);  //
+    float y = radius[1] * cos(theta);             // up
+    float z = radius[2] * cos(phi) * sin(theta);  //
 
-	return vec4(x, y, z, radius[3]);
+    return vec4(x, y, z, radius[3]);
 }
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 bool inRange(float x, float a, float b){
-	return (x >= a && x <= b);
+    return (x >= a && x <= b);
 } 
 
 void main() {
@@ -68,7 +68,7 @@ void main() {
   
   vec4 raw_pos   = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
-	
+    
   projected.x /= projected.w;
   projected.y /= projected.w;
   
@@ -78,11 +78,11 @@ void main() {
   
   if((inRange(projected.x, 0, 1) &&  
       inRange(projected.y, 0, 1)) &&
-	  dot(v_b, normal) < 0 ) {
-		color = texture(texture1, projected.xy);
+      dot(v_b, normal) < 0 ) {
+        color = texture(texture1, projected.xy);
   }else{
- 	 color = texture(texture2, uv);
-	 color.a = projectionFading;
+      color = texture(texture2, uv);
+     color.a = projectionFading;
   }
   
   // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending

@@ -38,21 +38,21 @@ namespace openspace {
 class ScreenSpaceImage : public ScreenSpaceRenderable {
 
 public:
-	ScreenSpaceImage(std::string texturePath);
-	~ScreenSpaceImage();
+    ScreenSpaceImage(std::string texturePath);
+    ~ScreenSpaceImage();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	void render() override;
-	void update() override;
-	bool isReady() const override;
+    bool initialize() override;
+    bool deinitialize() override;
+    void render() override;
+    void update() override;
+    bool isReady() const override;
 
 private:
-	void loadTexture();
-	static int id();
-	
-	properties::StringProperty _texturePath;
-	int _id;
+    void loadTexture();
+    static int id();
+    
+    properties::StringProperty _texturePath;
+    int _id;
 };
 
 } //namespace openspace

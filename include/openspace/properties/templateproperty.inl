@@ -29,7 +29,7 @@ namespace properties {
 
 // The following macros can be used to quickly generate the necessary PropertyDelegate
 // specializations required by the TemplateProperty class. Use the
-// REGISTER_TEMPLATEPROPERTY_HEADER	macro in the header file and the
+// REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
 // REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
 // a TemplateProperty
 
@@ -77,13 +77,13 @@ namespace properties {
 // DEFAULT_VALUE = The value (as type T) which should be used as a default value
 // FROM_LUA_LAMBDA_EXPRESSION = A lambda expression receiving a lua_State* as the first
 //                              parameter, a bool& as the second parameter and returning
-//								a value T. It is used by the fromLua method of
-//								TemplateProperty. The lambda expression must extract the
-//								stored value from the lua_State, return the value and
-//								report success in the second argument
+//                                a value T. It is used by the fromLua method of
+//                                TemplateProperty. The lambda expression must extract the
+//                                stored value from the lua_State, return the value and
+//                                report success in the second argument
 // TO_LUA_LAMBDA_EXPRESSION = A lambda expression receiving a lua_State*, a value T and
 //                            returning a bool. The lambda expression must encode the
-//							  value T onto the lua_State stack and return the success
+//                              value T onto the lua_State stack and return the success
 // LUA_TYPE                 = The Lua type that will be produced/consumed by the previous
 //                            Lambda expressions
 #define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE,                \
@@ -170,7 +170,7 @@ std::string TemplateProperty<T>::className() const {
 
 //template <typename T>
 //std::string TemplateProperty<T>::description() {
-//	return
+//    return
 //}
 
 template <typename T>
@@ -180,7 +180,7 @@ TemplateProperty<T>::operator T() {
 
 template <typename T>
 TemplateProperty<T>::operator T() const {
-	return _value;
+    return _value;
 }
 
 template <typename T>
@@ -198,11 +198,11 @@ T openspace::properties::TemplateProperty<T>::value() const
 template <typename T>
 void openspace::properties::TemplateProperty<T>::setValue(T val)
 {
-	const bool changed = (val != _value);
-	if (changed) {
-		_value = std::move(val);
-		notifyListener();
-	}
+    const bool changed = (val != _value);
+    if (changed) {
+        _value = std::move(val);
+        notifyListener();
+    }
 }
 
 template <typename T>
@@ -220,14 +220,14 @@ template <typename T>
 void TemplateProperty<T>::set(ghoul::any value) {
     try {
         T v = ghoul::any_cast<T>(std::move(value));
-		if (v != _value) {
-			_value = std::move(v);
-			notifyListener();
-		}
+        if (v != _value) {
+            _value = std::move(v);
+            notifyListener();
+        }
     }
     catch (ghoul::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
-			<< "' to '" << typeid(T).name() << "'");
+            << "' to '" << typeid(T).name() << "'");
     }
 }
 
@@ -244,16 +244,16 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 
 template <typename T>
 bool TemplateProperty<T>::setLuaValue(lua_State* state) {
-	bool success = false;
-	T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
-	if (success)
-		set(ghoul::any(thisValue));
-	return success;
+    bool success = false;
+    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
+    if (success)
+        set(ghoul::any(thisValue));
+    return success;
 }
 
 template <typename T>
 int TemplateProperty<T>::typeLua() const {
-	return PropertyDelegate<TemplateProperty<T>>::typeLua();
+    return PropertyDelegate<TemplateProperty<T>>::typeLua();
 }
 
 template <typename T>

@@ -64,7 +64,7 @@ PowerScaledCoordinate::PowerScaledCoordinate(float f1, float f2, float f3, float
 }
 
 PowerScaledCoordinate::PowerScaledCoordinate(const PowerScaledCoordinate& rhs) {
-	_vec = rhs._vec;
+    _vec = rhs._vec;
 
 }
 
@@ -89,15 +89,15 @@ PowerScaledCoordinate
 #endif
     size_t digits = strlen(buff);
 
-	//digits += 3;
+    //digits += 3;
 
     // rescale and return
     double tp = 1.0 / pow(k, digits);
     return PowerScaledCoordinate(
-		static_cast<float>(d1 * tp), 
-		static_cast<float>(d2 * tp), 
-		static_cast<float>(d3 * tp), 
-		static_cast<float>(digits));
+        static_cast<float>(d1 * tp), 
+        static_cast<float>(d2 * tp), 
+        static_cast<float>(d3 * tp), 
+        static_cast<float>(digits));
 }
 
 const glm::vec4& PowerScaledCoordinate::vec4() const
@@ -113,14 +113,14 @@ glm::vec3 PowerScaledCoordinate::vec3() const
 
 glm::dvec4 PowerScaledCoordinate::dvec4() const
 {
-	//return _vec;
-	return glm::dvec4(_vec);
+    //return _vec;
+    return glm::dvec4(_vec);
 }
 
 glm::dvec3 PowerScaledCoordinate::dvec3() const
 {
-	return glm::dvec3(_vec[0] * pow(k, _vec[3]), _vec[1] * pow(k, _vec[3]),
-		_vec[2] * pow(k, _vec[3]));
+    return glm::dvec3(_vec[0] * pow(k, _vec[3]), _vec[1] * pow(k, _vec[3]),
+        _vec[2] * pow(k, _vec[3]));
 }
 
 PowerScaledScalar PowerScaledCoordinate::length() const
@@ -176,14 +176,14 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator+=(const PowerScaledCoordi
     double ds = _vec[3] - rhs._vec[3];
     if (ds >= 0.0) {
         double p = pow(k, -ds);
-		*this = PowerScaledCoordinate(static_cast<float>(rhs._vec[0] * p + _vec[0]),
-									  static_cast<float>(rhs._vec[1] * p + _vec[1]),
-									  static_cast<float>(rhs._vec[2] * p + _vec[2]), _vec[3]);
+        *this = PowerScaledCoordinate(static_cast<float>(rhs._vec[0] * p + _vec[0]),
+                                      static_cast<float>(rhs._vec[1] * p + _vec[1]),
+                                      static_cast<float>(rhs._vec[2] * p + _vec[2]), _vec[3]);
     } else {
         double p = pow(k, ds);
-		*this = PowerScaledCoordinate(static_cast<float>(rhs._vec[0] + _vec[0] * p),
+        *this = PowerScaledCoordinate(static_cast<float>(rhs._vec[0] + _vec[0] * p),
                                       static_cast<float>(rhs._vec[1] + _vec[1] * p),
-									  static_cast<float>(rhs._vec[2] + _vec[2] * p), rhs._vec[3]);
+                                      static_cast<float>(rhs._vec[2] + _vec[2] * p), rhs._vec[3]);
     }
 
     return *this;
@@ -200,14 +200,14 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator-=(const PowerScaledCoordi
     double ds = this->_vec[3] - rhs._vec[3];
     if (ds >= 0.0) {
         double p = pow(k, -ds);
-		*this = PowerScaledCoordinate(static_cast<float>(-rhs._vec[0] * p + _vec[0]),
+        *this = PowerScaledCoordinate(static_cast<float>(-rhs._vec[0] * p + _vec[0]),
                                       static_cast<float>(-rhs._vec[1] * p + _vec[1]),
-									  static_cast<float>(-rhs._vec[2] * p + _vec[2]), _vec[3]);
+                                      static_cast<float>(-rhs._vec[2] * p + _vec[2]), _vec[3]);
     } else {
         double p = pow(k, ds);
-		*this = PowerScaledCoordinate(static_cast<float>(-rhs._vec[0] + _vec[0] * p),
+        *this = PowerScaledCoordinate(static_cast<float>(-rhs._vec[0] + _vec[0] * p),
                                       static_cast<float>(-rhs._vec[1] + _vec[1] * p),
-									  static_cast<float>(-rhs._vec[2] + _vec[2] * p), rhs._vec[3]);
+                                      static_cast<float>(-rhs._vec[2] + _vec[2] * p), rhs._vec[3]);
     }
 
     return *this;
@@ -215,9 +215,9 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator-=(const PowerScaledCoordi
 
 PowerScaledCoordinate PowerScaledCoordinate::operator*(const double& rhs) const
 {
-	return PowerScaledCoordinate(static_cast<float>(_vec[0] * rhs), 
-								 static_cast<float>(_vec[1] * rhs), 
-								 static_cast<float>(_vec[2] * rhs), _vec[3]);
+    return PowerScaledCoordinate(static_cast<float>(_vec[0] * rhs), 
+                                 static_cast<float>(_vec[1] * rhs), 
+                                 static_cast<float>(_vec[2] * rhs), _vec[3]);
 }
 
 PowerScaledCoordinate PowerScaledCoordinate::operator*(const float& rhs) const
@@ -231,15 +231,15 @@ PowerScaledCoordinate& PowerScaledCoordinate::operator*=(const PowerScaledScalar
     if (ds >= 0.0) {
         double p = pow(k, -ds);
         *this = PowerScaledCoordinate(
-			static_cast<float>(rhs._data[0] * p * _vec[0]), 
-			static_cast<float>(rhs._data[0] * p * _vec[1]),
-			static_cast<float>(rhs._data[0] * p * _vec[2]), this->_vec[3] + _vec[3]);
+            static_cast<float>(rhs._data[0] * p * _vec[0]), 
+            static_cast<float>(rhs._data[0] * p * _vec[1]),
+            static_cast<float>(rhs._data[0] * p * _vec[2]), this->_vec[3] + _vec[3]);
     } else {
         double p = pow(k, ds);
         *this = PowerScaledCoordinate(
-			static_cast<float>(rhs._data[0] * _vec[0] * p), 
-			static_cast<float>(rhs._data[0] * _vec[1] * p),
-			static_cast<float>(rhs._data[0] * _vec[2] * p), rhs._data[1] + rhs._data[1]);
+            static_cast<float>(rhs._data[0] * _vec[0] * p), 
+            static_cast<float>(rhs._data[0] * _vec[1] * p),
+            static_cast<float>(rhs._data[0] * _vec[2] * p), rhs._data[1] + rhs._data[1]);
     }
     return *this;
 }

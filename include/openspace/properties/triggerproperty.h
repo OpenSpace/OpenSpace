@@ -36,34 +36,34 @@ namespace properties {
  */
 class TriggerProperty : public Property {
 public:
-	/**
-	 * Initializes the TriggerProperty by delegating the <code>identifier</code> and
-	 * <code>guiName</code> to the Property constructor.
-	 * \param identifier The unique identifier used for this Property
-	 * \param guiName The human-readable name of this Property
-	 */
-	TriggerProperty(std::string identifier, std::string guiName);
+    /**
+     * Initializes the TriggerProperty by delegating the <code>identifier</code> and
+     * <code>guiName</code> to the Property constructor.
+     * \param identifier The unique identifier used for this Property
+     * \param guiName The human-readable name of this Property
+     */
+    TriggerProperty(std::string identifier, std::string guiName);
 
-	/**
-	 * Returns the class name <code>TriggerProperty</code>.
-	 * \return The class name <code>TriggerProperty</code>
-	 */
-	std::string className() const;
+    /**
+     * Returns the class name <code>TriggerProperty</code>.
+     * \return The class name <code>TriggerProperty</code>
+     */
+    std::string className() const;
 
-	/**
-	 * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
-	 * that the event has been triggered.
-	 * \param state The unused Lua state 
-	 * \return Returns always <code>true</code>
-	 */
-	bool setLuaValue(lua_State* state);
+    /**
+     * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
+     * that the event has been triggered.
+     * \param state The unused Lua state 
+     * \return Returns always <code>true</code>
+     */
+    bool setLuaValue(lua_State* state);
 
-	/**
-	 * Silently ignores any value that is passed into this function and will trigger the
-	 * listeners regardless of the value
-	 * \param value The ignored value
-	 */
-	void set(ghoul::any value);
+    /**
+     * Silently ignores any value that is passed into this function and will trigger the
+     * listeners regardless of the value
+     * \param value The ignored value
+     */
+    void set(ghoul::any value);
 };
 
 } // namespace properties

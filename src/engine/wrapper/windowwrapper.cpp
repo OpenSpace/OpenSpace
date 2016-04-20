@@ -61,11 +61,11 @@ glm::ivec2 WindowWrapper::currentWindowResolution() const {
 }
 
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
-	return currentWindowSize();
+    return currentWindowSize();
 }
 
 int WindowWrapper::currentNumberOfAaSamples() const {
-	return 1;
+    return 1;
 }
 
 bool WindowWrapper::isRegularRendering() const {

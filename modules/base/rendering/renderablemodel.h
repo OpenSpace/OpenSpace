@@ -41,14 +41,14 @@ class ModelGeometry;
 
 class RenderableModel : public Renderable {
 public:
-	RenderableModel(const ghoul::Dictionary& dictionary);
+    RenderableModel(const ghoul::Dictionary& dictionary);
 
     bool initialize() override;
     bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 
@@ -57,26 +57,26 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
-	properties::BoolProperty _performFade;
-	properties::FloatProperty _fading;
+    properties::BoolProperty _performFade;
+    properties::FloatProperty _fading;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-	modelgeometry::ModelGeometry* _geometry;
+    modelgeometry::ModelGeometry* _geometry;
 
-	float _alpha;
-	glm::dmat3 _stateMatrix; 
+    float _alpha;
+    glm::dmat3 _stateMatrix; 
 
-	std::string _source;
-	std::string _destination;
-	std::string _target;
+    std::string _source;
+    std::string _destination;
+    std::string _target;
 
-	//bool _isGhost;
-	int _frameCount;
+    //bool _isGhost;
+    int _frameCount;
 
     psc _sunPosition;
 
-	properties::BoolProperty _performShading;
+    properties::BoolProperty _performShading;
 };
 
 }  // namespace openspace

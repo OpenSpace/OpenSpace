@@ -242,7 +242,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
         auto compareTime = [](const Image &a,
                               const Image &b)->bool{
             return a.startTime < b.startTime;
-        };		
+        };        
         // for readability we store the iterators
         auto begin = _subsetMap[projectee]._subset.begin(); 
         auto end   = _subsetMap[projectee]._subset.end();
@@ -320,14 +320,14 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 std::vector<Image> &destination = _subsetMap[key]._subset; // imagery
 
                 // simple search function
-                double min = 10;				
+                double min = 10;                
                 auto findMin = [&](std::vector<Image> &vector)->double{
                     for (int i = 1; i < vector.size(); i++){
                         double e = abs(vector[i].startTime - vector[i - 1].startTime);
                         if (e < min){
                             min = e;
                         }
-                    }	
+                    }    
                     return min;
                 };
                 

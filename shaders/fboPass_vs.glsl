@@ -39,8 +39,8 @@ flat out uint vs_segments;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vs_position  = in_position;
-	vs_segments  = segments;
-	gl_Position  = vec4(in_position.xy, 0.0, 1.0);
+    vs_position  = in_position;
+    vs_segments  = segments;
+    gl_Position  = vec4(in_position.xy, 0.0, 1.0);
 
 }
