@@ -372,7 +372,7 @@ float* DataPlane::readData(){
                 normValue = (normValue+refProcent);
 
                 // normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
-                // combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
+                combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
             }
             combinedValues[i] /= selectedOptions.size();
             // std::cout << std::endl;
