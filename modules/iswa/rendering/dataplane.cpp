@@ -230,17 +230,17 @@ void DataPlane::update(const UpdateData& data){
         }
     }
 
-    if(_futureData && _futureData->isFinished){
+    if(_futureData && _futureData->isFinished && _memorybuffer != ""){
         if(!_dataOptions.options().size()){
             readHeader();
         }
-        loadTexture();
-        _futureData = nullptr;
+
+        if(loadTexture())
+            _futureData = nullptr;
     }
 }
 
 void DataPlane::readHeader(){
-    // std::cout << "In the read header function" << std::endl;
     if(!_memorybuffer.empty()){
         std::stringstream memorystream(_memorybuffer);
         std::string line;
@@ -248,9 +248,7 @@ void DataPlane::readHeader(){
         int numOptions = 0;
         while(getline(memorystream,line)){
             if(line.find("#") == 0){
-                // std::cout << "Comment line" << std::endl;
                 if(line.find("# Output data:") == 0){
-                    // std::cout << "the line with the good stuff" << std::endl;
 
                     line = line.substr(26);
                     std::stringstream ss(line);
@@ -270,7 +268,6 @@ void DataPlane::readHeader(){
                     ss = std::stringstream(line);
                     std::string option;
                     while(ss >> option){
-                        // std::cout << option << std::endl;
                         if(option != "x" && option != "y" && option != "z"){
                             _dataOptions.addOption({numDataOptions, option});
                             numDataOptions++;
@@ -285,7 +282,7 @@ void DataPlane::readHeader(){
             }
         }
     }else{
-        LERROR("Noting in memory buffer, are you connected to the information super highway?");
+        LWARNING("Noting in memory buffer, are you connected to the information super highway?");
     }
 }
 
@@ -335,8 +332,10 @@ float* DataPlane::readData(){
             }
         }
 
-        if(numValues != _dimensions.x*_dimensions.y)
-            LERROR("Number of values read and expected are not the same");
+        if(numValues != _dimensions.x*_dimensions.y){
+            LWARNING("Number of values read and expected are not the same");
+            return nullptr;
+        }
 
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
@@ -349,19 +348,26 @@ float* DataPlane::readData(){
         return combinedValues;
     
     }else{
-        LERROR("Noting in memory buffer, are you connected to the information super highway?");
+        LWARNING("Noting in memory buffer, are you connected to the information super highway?");
     }
 } 
 
-void DataPlane::loadTexture() {
+bool DataPlane::loadTexture() {
     float* values = readData();
+    if(!values){
+        return false;
+    }
 
     if (!_texture) {
-        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-
-        std::unique_ptr<ghoul::opengl::Texture> texture = 
-        std::make_unique<ghoul::opengl::Texture>(values, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                values, 
+                                                                _dimensions,
+                                                                ghoul::opengl::Texture::Format::Red,
+                                                                GL_RED, 
+                                                                GL_FLOAT,
+                                                                ghoul::opengl::Texture::FilterMode::Linear,
+                                                                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                            );
 
         if(texture){
             texture->uploadTexture();
@@ -372,15 +378,19 @@ void DataPlane::loadTexture() {
         _texture->setPixelData(values);
         _texture->uploadTexture();
     }
+    return true;
 }
 
-void DataPlane::updateTexture(){
+bool DataPlane::updateTexture(){
     _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(-_data->id, _memorybuffer);
 
     if(future){
         _futureData = future;
+        return (_memorybuffer != "");
     }
+
+    return false;
 }
 
 int DataPlane::id(){

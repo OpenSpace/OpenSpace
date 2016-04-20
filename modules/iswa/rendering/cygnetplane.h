@@ -38,8 +38,8 @@ public:
 	virtual bool isReady() const override;
 
 protected:
-	virtual void loadTexture() = 0;
-	virtual void updateTexture() = 0;
+	virtual bool loadTexture() = 0;
+	virtual bool updateTexture() = 0;
 
 	void createPlane();
 	void destroyPlane();
