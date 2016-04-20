@@ -41,7 +41,7 @@ Fragment getFragment() {
 	float depth = pscDepth(position);
 	vec4 diffuse;
 	// diffuse = top;
-	diffuse = texture(texture1, vs_st);
+	diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
 	//float v = texture(texture1, vs_st).r;
 	//float x = tfValues.x;
 	//float y = tfValues.y;

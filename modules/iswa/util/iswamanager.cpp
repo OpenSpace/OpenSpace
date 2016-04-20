@@ -219,10 +219,10 @@ namespace openspace{
     void ISWAManager::update(){
         for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
             if((*it)->isFinished) {
-                if((*it)->type == "TEXTURE"){
-                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
-                }else{
+                if((*it)->type == "DATA"){
                     createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
+                }else{
+                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
 
                 }
                 it = _metaFutures.erase( it );

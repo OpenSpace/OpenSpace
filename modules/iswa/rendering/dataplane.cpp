@@ -376,7 +376,7 @@ void DataPlane::loadTexture() {
 
 void DataPlane::updateTexture(){
     _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(2, _memorybuffer);
+    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(-_data->id, _memorybuffer);
 
     if(future){
         _futureData = future;
