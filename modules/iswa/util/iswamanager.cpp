@@ -318,6 +318,14 @@ namespace openspace{
     // }
 
     void ISWAManager::createPlane(int id, std::string json, std::string type){
+
+        // check if this plane already exist
+        std::string name = type + std::to_string(id); 
+        if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
+            LERROR("A node with name \"" + name +"\" already exist");
+            return;
+        }
+
         std::string luaTable = parseJSONToLuaTable(id, json, type);
         if(luaTable != ""){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
