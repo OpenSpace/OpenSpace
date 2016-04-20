@@ -91,7 +91,7 @@ SimpleSphereGeometry::~SimpleSphereGeometry()
 {
 }
 
-bool SimpleSphereGeometry::initialize(RenderablePlanet* parent)
+bool SimpleSphereGeometry::initialize(Renderable* parent)
 {
     bool success = PlanetGeometry::initialize(parent);
     createSphere();

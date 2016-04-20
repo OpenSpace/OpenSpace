@@ -53,8 +53,8 @@
 
 namespace openspace {
 
-namespace planetgeometryprojection {
-class PlanetGeometryProjection;
+namespace planetgeometry{
+class PlanetGeometry;
 }
 
 
@@ -102,7 +102,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
     std::unique_ptr<ghoul::opengl::Texture> _textureProj;
     std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
-    planetgeometryprojection::PlanetGeometryProjection* _geometry;
+    planetgeometry::PlanetGeometry* _geometry;
     
     glm::vec2  _camScaling;
     glm::vec3  _up;

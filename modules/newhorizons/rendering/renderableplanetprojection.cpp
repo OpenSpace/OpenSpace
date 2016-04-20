@@ -24,7 +24,11 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+//#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+
+#include <modules/base/rendering/planetgeometry.h>
+
+//#include <openspace/renderingo 
 
 #include <openspace/engine/configurationmanager.h>
 
@@ -111,7 +115,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         keyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
 
     dictionary.getValue(keyFrame, _frame);

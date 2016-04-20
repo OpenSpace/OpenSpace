@@ -25,13 +25,11 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
@@ -46,13 +44,11 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp

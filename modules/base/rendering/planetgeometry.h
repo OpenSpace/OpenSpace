@@ -39,12 +39,12 @@ public:
 
     PlanetGeometry();
     virtual ~PlanetGeometry();
-    virtual bool initialize(RenderablePlanet* parent);
+    virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     virtual void render() = 0;
 
 protected:
-    RenderablePlanet* _parent;
+    Renderable* _parent;
 };
 
 }  // namespace planetgeometry

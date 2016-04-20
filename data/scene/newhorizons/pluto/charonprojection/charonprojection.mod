@@ -19,7 +19,7 @@ return {
 			Frame = "IAU_CHARON", 
 			Body = "CHARON",
             Geometry = {
-                Type = "SimpleSphereProjection",
+                Type = "SimpleSphere",
                 Radius = { 6.035 , 5 },
                 Segments = 100
             },
