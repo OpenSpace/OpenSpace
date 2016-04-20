@@ -42,9 +42,9 @@ out vec4 color;
 
 #define M_PI 3.14159265358979323846
 
-vec4 uvToModel( float u, float v, vec4 radius, float segments){
-    float fj = u * segments;
-    float fi = (1.0 - v) * segments;
+vec4 uvToModel(vec2 uv, vec4 radius, float segments){
+    float fj = uv.x * segments;
+    float fi = (1.0 - uv.y) * segments;
 
     float theta = fi * float(M_PI) / segments;  // 0 -> PI
     float phi   = fj * float(M_PI) * 2.0f / segments;
@@ -65,9 +65,9 @@ bool inRange(float x, float a, float b){
 } 
 
 void main() {
-  vec2 uv = vec2(0.5,0.5)*vs_position.xy+vec2(0.5,0.5);
+  vec2 uv = (vs_position.xy + vec2(1.0)) / vec2(2.0);
   
-  vec4 vertex = uvToModel(uv.x, uv.y, _radius, _segments);
+  vec4 vertex = uvToModel(uv, _radius, _segments);
   
   vec4 raw_pos   = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
@@ -81,8 +81,11 @@ void main() {
   
   if((inRange(projected.x, 0, 1) &&  
       inRange(projected.y, 0, 1)) &&
-      dot(v_b, normal) < 0 ) {
-        color = texture(texture1, projected.xy);
+      dot(v_b, normal) < 0 )
+  {
+    // The 1-x is in this texture call because of flipped textures
+    // to be fixed soon ---abock
+        color = texture(texture1, vec2(projected.x, 1-projected.y));
   }else{
       color = texture(texture2, uv);
      color.a = projectionFading;

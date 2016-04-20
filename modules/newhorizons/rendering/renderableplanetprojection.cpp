@@ -292,8 +292,8 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     // SCREEN-QUAD 
-    const GLfloat size = 1.0f;
-    const GLfloat w = 1.0f;
+    const GLfloat size = 1.f;
+    const GLfloat w = 1.f;
     const GLfloat vertex_data[] = {
         -size, -size, 0.f, w, 0.f, 0.f,
         size, size, 0.f, w, 1.f, 1.f,
