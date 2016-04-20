@@ -303,16 +303,17 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
         size, size, 0.f, w, 1.f, 1.f,
     };
 
-    glGenVertexArrays(1, &_quad);                         // generate array
-    glBindVertexArray(_quad);                             // bind array
-    glGenBuffers(1, &_vertexPositionBuffer);              // generate buffer
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glGenVertexArrays(1, &_quad);
+    glBindVertexArray(_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    
+    glBindVertexArray(0);
 
     return completeSuccess;
 }
@@ -376,7 +377,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("radius")){ 
         ghoul::any r = _geometry->property("radius")->get();
         if (glm::vec4* radius = ghoul::any_cast<glm::vec4>(&r)){
-            _fboProgramObject->setUniform("radius", radius);
+            _fboProgramObject->setUniform("_radius", radius);
         }
     }else{
         LERROR("Geometry object needs to provide radius");
@@ -384,7 +385,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("segments")){
         ghoul::any s = _geometry->property("segments")->get();
         if (int* segments = ghoul::any_cast<int>(&s)){
-            _fboProgramObject->setAttribute("segments", segments[0]);
+            _fboProgramObject->setUniform("_segments", segments[0]);
         }
     }else{
         LERROR("Geometry object needs to provide segment count");

@@ -29,12 +29,13 @@ uniform sampler2D texture2;
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
-uniform vec4 radius;
-flat in uint vs_segments;
+uniform vec4 _radius;
+uniform int _segments;
 
 uniform float projectionFading;
 
 in vec4 vs_position;
+
 uniform vec3 boresight;
 
 out vec4 color;
@@ -43,16 +44,18 @@ out vec4 color;
 
 vec4 uvToModel( float u, float v, vec4 radius, float segments){
     float fj = u * segments;
-    float fi = v * segments;
+    float fi = (1.0 - v) * segments;
 
     float theta = fi * float(M_PI) / segments;  // 0 -> PI
     float phi   = fj * float(M_PI) * 2.0f / segments;
 
     float x = radius[0] * sin(phi) * sin(theta);  //
-    float y = radius[1] * cos(theta);             // up
+    float y = radius[1] * cos(theta);             // up 
     float z = radius[2] * cos(phi) * sin(theta);  //
 
     return vec4(x, y, z, radius[3]);
+
+    return vec4(0.0); 
 }
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -64,7 +67,7 @@ bool inRange(float x, float a, float b){
 void main() {
   vec2 uv = vec2(0.5,0.5)*vs_position.xy+vec2(0.5,0.5);
   
-  vec4 vertex = uvToModel(uv.x, uv.y, radius, vs_segments);
+  vec4 vertex = uvToModel(uv.x, uv.y, _radius, _segments);
   
   vec4 raw_pos   = psc_to_meter(vertex, _scaling);
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
