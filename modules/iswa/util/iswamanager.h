@@ -57,8 +57,8 @@ struct Metadata {
 
 struct MetadataFuture {
 	int id;
-	std::string json;
 	std::string type;
+	std::string json;
 	bool isFinished;
 };
 
@@ -73,7 +73,7 @@ public:
 
 	// std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
 	void addISWACygnet(std::string info);
-	void addISWACygnet(int id, std::string info);
+	void addISWACygnet(int id, std::string info = "TEXTURE");
 	void deleteISWACygnet(std::string);
 
 	std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);

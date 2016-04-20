@@ -361,7 +361,7 @@ void DownloadManager::getFileExtension(const std::string& url,
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             //USING CURLOPT NOBODY
-             curl_easy_setopt(curl, CURLOPT_NOBODY,1);
+            curl_easy_setopt(curl, CURLOPT_NOBODY,1);
             CURLcode res = curl_easy_perform(curl);
             if(CURLE_OK == res) {
                 char *ct;

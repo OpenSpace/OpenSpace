@@ -74,23 +74,21 @@ namespace openspace{
             createScreenSpace(id);
         }else if(id < 0){
             //download metadata to texture plane
-            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(id);
-            extFuture->type = "TEXTURE";
-            extFuture->id = id;
-            _metaFutures.push_back(extFuture);
+            std::shared_ptr<MetadataFuture> metaFuture = downloadMetadata(id);
+            metaFuture->type = info;
+            metaFuture->id = id;
+            _metaFutures.push_back(metaFuture);
         }
-        else {
-            std::shared_ptr<MetadataFuture> extFuture = downloadMetadata(-2);
-            extFuture->type = "DATA";
-            extFuture->id = -2;
-            _metaFutures.push_back(extFuture);
-        }
+/*        else {
+            std::shared_ptr<MetadataFuture> metaFuture = downloadMetadata(-2);
+            metaFuture->type = "DATA";
+            metaFuture->id = -2;
+            _metaFutures.push_back(metaFuture);
+        }*/
     }
 
     void ISWAManager::deleteISWACygnet(std::string name){
-        //_container->deleteISWACygnet(name);
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
-        
     }
 
     std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){

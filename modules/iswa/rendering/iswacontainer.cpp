@@ -29,18 +29,47 @@
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/rendering/renderable.h>
+#include <modules/iswa/ext/json/json.hpp>
+
+
+namespace {
+    using json = nlohmann::json;
+    const std::string _loggerCat = "ISWAContainer";
+}
 
 namespace openspace{
 
 ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
 	:Renderable(dictionary)
-{}
+{
+	ISWAManager::initialize();
+	ISWAManager::ref().setContainer(this);
+	std::string textureCygnets;
+	std::string dataCygnets;
+	dictionary.getValue("TextureCygnets", textureCygnets);
+	dictionary.getValue("DataCygnets", dataCygnets);
+	std::cout << textureCygnets << std::endl;
+	std::cout << dataCygnets << std::endl;
+	
+	if(textureCygnets != ""){
+		json j = json::parse(textureCygnets);
+		for (auto& id : j) {
+			ISWAManager::ref().addISWACygnet(id, "TEXTURE");
+		}
+	}
+	
+	if(dataCygnets != ""){
+		json j = json::parse(dataCygnets);
+		for (auto& id : j) {
+			ISWAManager::ref().addISWACygnet(id, "DATA");
+		}
+	}
+}
 
 ISWAContainer::~ISWAContainer(){}
 
 bool ISWAContainer::initialize(){
-	ISWAManager::initialize();
-	ISWAManager::ref().setContainer(this);
+	
 
 	// ISWAManager::ref().addISWACygnet(0, "BATSRUS.cdf");
 	// ISWAManager::ref().addISWACygnet(5, "Screen");
@@ -139,11 +168,11 @@ void ISWAContainer::deleteISWACygnet(std::string name){
 }
 
 std::shared_ptr<ISWACygnet> ISWAContainer::iSWACygnet(std::string name){
-	for(auto cygnet : _iSWACygnets){
+/*	for(auto cygnet : _iSWACygnets){
 		if(cygnet->name() == name){
 			return cygnet;
 		}
-	}
+	}*/
 	return nullptr;
 }
 }
