@@ -204,7 +204,7 @@ namespace openspace{
                 }else if ((*it)->type == "DATA"){
                     createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
                 } else {
-                    LDEBUG("\""+ (*it)->type + "\" is not a valid type");
+                    LERROR("\""+ (*it)->type + "\" is not a valid type");
                 }
                 it = _metaFutures.erase( it );
             }else{

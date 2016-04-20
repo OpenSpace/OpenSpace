@@ -154,7 +154,7 @@ void TexturePlane::update(const UpdateData& data){
     }
 }
 
-void TexturePlane::loadTexture() {
+bool TexturePlane::loadTexture() {
     // std::cout << _data->path << std::endl;
     // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
     //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath("${OPENSPACE_DATA}/GM_openspace_Z0_20150315_000000.png"));
@@ -168,18 +168,26 @@ void TexturePlane::loadTexture() {
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
+            
+            return true;
         }
     }   
+
+    return false;
 }
 
-void TexturePlane::updateTexture(){
+bool TexturePlane::updateTexture(){
     _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
 
     // std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
     if(future){
         _futureTexture = future;
+
+        return true;
     }
+
+    return false;
 }
 
 int TexturePlane::id(){
