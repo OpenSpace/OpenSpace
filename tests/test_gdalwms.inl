@@ -25,7 +25,12 @@
 #include "gtest/gtest.h"
 
 #include "gdal.h"
+
 #include "gdal_priv.h"
+
+#include <ogr_spatialref.h>
+
+
 #include "cpl_conv.h"
 
 //#include "wms/wmsdriver.h"
@@ -36,34 +41,15 @@ class GdalWmsTest : public testing::Test {};
 
 TEST_F(GdalWmsTest, Simple) {
 	//GDALRegister_WMS();
-	
-	const char* fileName = "C:/Users/kalbl_000/Documents/CPP/OpenSpace-Development/data/scene/debugglobe/textures/earth_bluemarble.jpg";
 
-	GDALDataset  *poDataset;
-	GDALAllRegister();
-	poDataset = (GDALDataset *)GDALOpen(fileName, GA_ReadOnly);
-	if (poDataset == NULL)
+
+
+	GDALWMSDataset* wms_dataset = GDALOpen("../test.xml", GA_ReadOnly);
+	if (wms_dataset)
 	{
-		std::cout << "BAD GDAL OPEN" << std::endl;
-		return;
+		;
 	}
 
-	double        adfGeoTransform[6];
-	printf("Driver: %s/%s\n",
-		poDataset->GetDriver()->GetDescription(),
-		poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
-	printf("Size is %dx%dx%d\n",
-		poDataset->GetRasterXSize(), poDataset->GetRasterYSize(),
-		poDataset->GetRasterCount());
-	if (poDataset->GetProjectionRef() != NULL)
-		printf("Projection is `%s'\n", poDataset->GetProjectionRef());
-	if (poDataset->GetGeoTransform(adfGeoTransform) == CE_None)
-	{
-		printf("Origin = (%.6f,%.6f)\n",
-			adfGeoTransform[0], adfGeoTransform[3]);
-		printf("Pixel Size = (%.6f,%.6f)\n",
-			adfGeoTransform[1], adfGeoTransform[5]);
-	}
 
 	/*
 	GDALDataset  *poDataset;
