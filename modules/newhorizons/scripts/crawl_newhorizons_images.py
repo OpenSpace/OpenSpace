@@ -19,9 +19,11 @@ def downloadPage(pageNumber):
     for p in imagePositions:
         try:
             beginOffset = len('"><A HREF="view_obs.php?image=029912/')
-            imageLength = len('lor_0299127173_0x630_sci_3.jpg')
+            imageLimiterEnd = '&utc_time='
+            imageEnd = source[p:].find(imageLimiterEnd)
+            # imageLength = len('lor_0299127173_0x630_sci_3.jpg')
             utcDateOffset = len('&utc_time=')
-            utcDateLength = len('2015-07-13');
+            utcDateLength = len('2015-07-13')
             utcTimeOffset = len('<br>')
             utcTimeLength = len('21:00:54')
             # targetOffset = len(' UTC&description=&')
@@ -31,7 +33,9 @@ def downloadPage(pageNumber):
             targetEnd = source[p:].find(targetLimiterEnd)
 
             pos = p+beginOffset
-            imageName = source[pos:pos+imageLength]
+            imageName = source[pos:p+imageEnd]
+            imageLength = len('imageName')
+            # imageName = source[pos:pos+imageLength]
             pos = pos + imageLength + utcDateOffset
 
             utcDate = source[pos:pos+utcDateLength]
@@ -49,7 +53,7 @@ def downloadPage(pageNumber):
             urlretrieve(imageURL, imageName)
 
             # Create Label file
-            with open(imageName[:-3] + '.lbl', 'w') as f:
+            with open(imageName[:-3] + 'lbl', 'w') as f:
                 f.write('MISSION_NAME = "NEW HORIZONS"\n')
                 f.write('SEQUENCE_ID = "UNUSED"\n')
                 f.write('TARGET_NAME = "' + target + '"\n')
