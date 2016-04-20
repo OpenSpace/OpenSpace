@@ -42,22 +42,36 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
 	// dict.getValue can only set strings in _data directly
 	float renderableId;
-	glm::vec3 renderableScale;
-	glm::vec3 renderableOffset;
+	glm::vec3 min, max;
 	glm::vec2 spatialScale;
 
 	dictionary.getValue("Id", renderableId);
-	dictionary.getValue("Scale", renderableScale);
-	dictionary.getValue("Offset", renderableOffset);
 	dictionary.getValue("SpatialScale", spatialScale);
+	dictionary.getValue("Min", min);
+	dictionary.getValue("Max", max);
+	dictionary.getValue("Frame",_data->frame);
+
+	
 	_data->id = (int) renderableId;
-	_data->offset = renderableOffset;
-	_data->scale = renderableScale;
 	_data->spatialScale = spatialScale;
+	_data->min = min;
+	_data->max = max;
+
+    _data->scale = glm::vec3(
+    		(max.x - min.x),
+    		(max.y - min.y),
+    		(max.z - min.z)
+    );
+
+	_data->offset = glm::vec3(
+			(min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
+        	(min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
+        	(min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
+	);
+
 
 	// dictionary.getValue("Path",_data->path);
 	// dictionary.getValue("Parent",_data->parent);
-	dictionary.getValue("Frame",_data->frame);
 
 	// addProperty(_enabled);
 	addProperty(_updateInterval);
@@ -66,6 +80,8 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	// std::cout << _data->id << std::endl;
 	// std::cout << std::to_string(_data->offset) << std::endl;
 	// std::cout << std::to_string(_data->scale) << std::endl;
+	// std::cout << std::to_string(_data->max) << std::endl;
+    // std::cout << std::to_string(_data->min) << std::endl;
 	// std::cout << _data->path << std::endl;
 	// std::cout << _data->parent << std::endl;
 	// std::cout << _data->frame << std::endl;

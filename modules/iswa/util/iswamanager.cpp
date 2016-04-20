@@ -220,33 +220,24 @@ namespace openspace{
             std::string parent = j["Central Body"];
             std::string frame = j["Coordinates"];
 
-            int xmax = j["Plot XMAX"];
-            int ymax = j["Plot YMAX"];
-            int zmax = j["Plot ZMAX"];
-            int xmin = j["Plot XMIN"];
-            int ymin = j["Plot YMIN"];
-            int zmin = j["Plot ZMIN"];
+            glm::vec3 max(
+                j["Plot XMAX"],
+                j["Plot YMAX"],
+                j["Plot ZMAX"]
+            );
+
+            glm::vec3 min(
+                j["Plot XMIN"],
+                j["Plot YMIN"],
+                j["Plot ZMIN"]
+            );
 
             glm::vec2 spatialScale(1, 10);
-
-            // float spatScale=1, scalew=10;
             std::string spatial = j["Spatial Scale (Custom)"];
             if(spatial == "R_E"){
                 spatialScale.x = 6.371f;
                 spatialScale.y = 6;
             }
-
-            glm::vec3 scale(
-                (xmax-xmin),
-                (ymax-ymin),
-                (zmax-zmin)
-            );
-
-            glm::vec3 offset (
-                (xmin + (std::abs(xmin)+std::abs(xmax))/2.0f),
-                (ymin + (std::abs(ymin)+std::abs(ymax))/2.0f),
-                (zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)
-            );
 
             std::string table = "{"
             "Name = '" + type + std::to_string(id) +"' , "
@@ -255,51 +246,50 @@ namespace openspace{
                 "Type = '" + type + "', "
                 "Id = " + std::to_string(id) + ", "
                 "Frame = '" + frame + "' , "
-                "Scale = " + std::to_string(scale) + ", "
+                "Min = " + std::to_string(min) + ", "
+                "Max = " + std::to_string(max) + ", "
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
-                "Offset = " + std::to_string(offset) + 
                 "}"
             "}"
             ;
 
             // std::cout << table << std::endl;
-            // ghoul::Dictionary dic;
             return table;
         }
         return "";
     }
 
-    std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
-
-        if(kwPath != ""){
-            const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
-            if(extension == "cdf"){
-                KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
+    // std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
+    //     //NEED TO REWRITE IF USED AGAIN
+    //     if(kwPath != ""){
+    //         const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+    //         if(extension == "cdf"){
+    //             KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
          
-                std::string parent  = kw.getParent();
-                std::string frame   = kw.getFrame();
-                glm::vec4 scale     = kw.getModelScaleScaled();
-                glm::vec4 offset    = kw.getModelBarycenterOffsetScaled();
+    //             std::string parent  = kw.getParent();
+    //             std::string frame   = kw.getFrame();
+    //             glm::vec4 scale     = kw.getModelScaleScaled();
+    //             glm::vec4 offset    = kw.getModelBarycenterOffsetScaled();
 
-                std::string table = "{"
-                    "Name = 'DataPlane',"
-                    "Parent = '" + parent + "', "
-                    "Renderable = {"    
-                        "Type = 'DataPlane', "
-                        "Id = 0 ,"
-                        "Frame = '" + frame + "' , "
-                        "Scale = " + std::to_string(scale) + ", "
-                        "Offset = " + std::to_string(offset) + ", "
-                        "kwPath = '" + kwPath + "'" 
-                        "}"
-                    "}"
-                    ;
-                // std::cout << table << std::endl;    
-                return table;
-            }
-        }
-        return "";
-    }
+    //             std::string table = "{"
+    //                 "Name = 'DataPlane',"
+    //                 "Parent = '" + parent + "', "
+    //                 "Renderable = {"    
+    //                     "Type = 'DataPlane', "
+    //                     "Id = 0 ,"
+    //                     "Frame = '" + frame + "' , "
+    //                     "Scale = " + std::to_string(scale) + ", "
+    //                     "Offset = " + std::to_string(offset) + ", "
+    //                     "kwPath = '" + kwPath + "'" 
+    //                     "}"
+    //                 "}"
+    //                 ;
+    //             // std::cout << table << std::endl;    
+    //             return table;
+    //         }
+    //     }
+    //     return "";
+    // }
 
     //Create KameleonPlane?
     // void ISWAManager::createDataPlane(std::string kwPath){
