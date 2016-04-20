@@ -49,11 +49,11 @@ void CygnetPlane::createPlane(){
     // 		GEOMETRY (quad)
     // ============================
     // GLfloat x,y, z;
-
-    const GLfloat x = _data->scale.x/2.0;
-    const GLfloat y = _data->scale.y/2.0;
-    const GLfloat z = _data->scale.z/2.0;
-    const GLfloat w = _data->scale.w;
+    float s = _data->spatialScale.x;
+    const GLfloat x = s*_data->scale.x/2.0;
+    const GLfloat y = s*_data->scale.y/2.0;
+    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat w = _data->spatialScale.y;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //	  x      y     z     w     s     t

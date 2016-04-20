@@ -107,7 +107,9 @@ void TexturePlane::render(const RenderData& data){
             transform = rotation * transform;
         }
 
-        position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
+        // position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
+        position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
+        
 
         // Activate shader
         _shader->activate();

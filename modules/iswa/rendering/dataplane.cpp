@@ -44,6 +44,7 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
+    ,_midLevel("midLevel","Middle level", 0.5, 0.0, 1.0)
     ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
@@ -59,6 +60,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_dataOptions);
+    addProperty(_midLevel);
     // addProperty(_topColor);
     // addProperty(_midColor);
     // addProperty(_botColor);
@@ -66,6 +68,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     registerProperties();
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
+    OsEng.gui()._iSWAproperty.registerProperty(&_midLevel);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
@@ -173,7 +176,7 @@ void DataPlane::render(const RenderData& data){
             transform = rotation * transform;
         }
 
-        position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
+        position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
 
         // Activate shader
         _shader->activate();
@@ -219,9 +222,11 @@ void DataPlane::update(const UpdateData& data){
     if(_planeIsDirty)
         createPlane();
 
+    // if(abs(Time::ref().currentTime - _time) > 2*Time::ref().deltaTime())
+
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
-    
+
     float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
     if(openSpaceUpdateInterval){
         if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
@@ -292,10 +297,12 @@ float* DataPlane::readData(){
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();
+        float refProcent = _midLevel.value();
 
         std::vector<float> min; 
         std::vector<float> max;
         std::vector<std::vector<float>> optionValues;
+
 
         for(int i=0; i < selectedOptions.size(); i++){
             min.push_back(std::numeric_limits<float>::max());
@@ -337,13 +344,36 @@ float* DataPlane::readData(){
             return nullptr;
         }
 
+        // std::vector<int> refValue;
+        // for(int i=0; j<optionValues.size(); i++){
+        //     refValue.push_back(optionValues[i][0]);
+        // }
+
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
             for(int j=0; j<optionValues.size(); j++){
-                float normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
-                combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
+                float refV = optionValues[j][_dimensions.x*_dimensions.y-1];
+                float v    = optionValues[j][i];
+
+                float normValue = 0;
+                if(v > refV){
+                    normValue = (1-refProcent)*(v-refV)/(max[j]-refV);
+                }else{
+                    normValue = -(refProcent)*((refV-v)/(refV-min[j]));
+
+                    // if(v < refV-1){
+                    //     std::cout << "refV: " << refV << ", v: " << v << ", min: " << min[j] << ", max: " << max[j] << ", "; 
+                    //     std::cout << "norm: " << normValue << ", norm+1/2: ";
+                    //     std::cout << (normValue+1.0)/2.0f << std::endl;
+                    // }
+                }
+                normValue = (normValue+refProcent);
+
+                // normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
+                // combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
             }
             combinedValues[i] /= selectedOptions.size();
+            // std::cout << std::endl;
         }
         return combinedValues;
     

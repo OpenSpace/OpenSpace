@@ -246,24 +246,25 @@ namespace openspace{
             int ymin = j["Plot YMIN"];
             int zmin = j["Plot ZMIN"];
 
-            float spatScale=1, scalew=10;
-            std::string spatialScale = j["Spatial Scale (Custom)"];
-            if(spatialScale == "R_E"){
-                spatScale = 6.371f;
-                scalew = 6;
+            glm::vec2 spatialScale(1, 10);
+
+            // float spatScale=1, scalew=10;
+            std::string spatial = j["Spatial Scale (Custom)"];
+            if(spatial == "R_E"){
+                spatialScale.x = 6.371f;
+                spatialScale.y = 6;
             }
 
-            glm::vec4 scale(
-                spatScale*(xmax-xmin),
-                spatScale*(ymax-ymin),
-                spatScale*(zmax-zmin),
-                scalew
+            glm::vec3 scale(
+                (xmax-xmin),
+                (ymax-ymin),
+                (zmax-zmin)
             );
-            glm::vec4 offset (
-                spatScale*(xmin + (std::abs(xmin)+std::abs(xmax))/2.0f),
-                spatScale*(ymin + (std::abs(ymin)+std::abs(ymax))/2.0f),
-                spatScale*(zmin + (std::abs(zmin)+std::abs(zmax))/2.0f),
-                scalew
+
+            glm::vec3 offset (
+                (xmin + (std::abs(xmin)+std::abs(xmax))/2.0f),
+                (ymin + (std::abs(ymin)+std::abs(ymax))/2.0f),
+                (zmin + (std::abs(zmin)+std::abs(zmax))/2.0f)
             );
 
             std::string table = "{"
@@ -274,6 +275,7 @@ namespace openspace{
                 "Id = " + std::to_string(id) + ", "
                 "Frame = '" + frame + "' , "
                 "Scale = " + std::to_string(scale) + ", "
+                "SpatialScale = " + std::to_string(spatialScale) + ", "
                 "Offset = " + std::to_string(offset) + 
                 "}"
             "}"

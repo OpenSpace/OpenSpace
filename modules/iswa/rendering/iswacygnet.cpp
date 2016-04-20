@@ -42,14 +42,18 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
 	// dict.getValue can only set strings in _data directly
 	float renderableId;
-	glm::vec4 renderableScale;
-	glm::vec4 renderableOffset;
+	glm::vec3 renderableScale;
+	glm::vec3 renderableOffset;
+	glm::vec2 spatialScale;
+
 	dictionary.getValue("Id", renderableId);
 	dictionary.getValue("Scale", renderableScale);
 	dictionary.getValue("Offset", renderableOffset);
+	dictionary.getValue("SpatialScale", spatialScale);
 	_data->id = (int) renderableId;
 	_data->offset = renderableOffset;
 	_data->scale = renderableScale;
+	_data->spatialScale = spatialScale;
 
 	// dictionary.getValue("Path",_data->path);
 	// dictionary.getValue("Parent",_data->parent);
