@@ -142,9 +142,9 @@ void TexturePlane::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
     
-    float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+    float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
     if(openSpaceUpdateInterval){
-        if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+        if(fabs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
             updateTexture();
             _lastUpdateTime = _time;
         }

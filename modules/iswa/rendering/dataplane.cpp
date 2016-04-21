@@ -44,7 +44,7 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_midLevel("midLevel","Middle level", 0.5, 0.0, 1.0)
+    ,_midLevel("midLevel","Middle level", glm::vec2(5), glm::vec2(0.0), glm::vec2(10.0))
     ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
@@ -59,16 +59,16 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setName(name);
 
-    addProperty(_dataOptions);
     addProperty(_midLevel);
+    addProperty(_dataOptions);
     // addProperty(_topColor);
     // addProperty(_midColor);
     // addProperty(_botColor);
     // addProperty(_tfValues);
 
     registerProperties();
-    OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     OsEng.gui()._iSWAproperty.registerProperty(&_midLevel);
+    OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
@@ -76,6 +76,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     // dictionary.getValue("kwPath", _kwPath);
 
+    _midLevel.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){loadTexture();});
 }
 
@@ -229,9 +230,9 @@ void DataPlane::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
 
-    float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+    float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
     if(openSpaceUpdateInterval){
-        if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+        if(fabs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
             updateTexture();
             _lastUpdateTime = _time;
         }
@@ -299,10 +300,11 @@ float* DataPlane::readData(){
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();
-        float refProcent = _midLevel.value();
 
         std::vector<float> min; 
         std::vector<float> max;
+
+        std::vector<int> logv;
         std::vector<std::vector<float>> optionValues;
 
         for(int i=0; i < selectedOptions.size(); i++){
@@ -311,11 +313,14 @@ float* DataPlane::readData(){
 
             std::vector<float> v;
             optionValues.push_back(v);
+
+            logv.push_back(0);
         }
 
         float* combinedValues = new float[_dimensions.x*_dimensions.y];
 
         int numValues = 0;
+        int numLogValues = 0;
         while(getline(memorystream, line)){
             if(line.find("#") == 0){
                 //part of the header
@@ -331,12 +336,13 @@ float* DataPlane::readData(){
 
             if(value.size()){
                 for(int i=0; i<optionValues.size(); i++){
-                    optionValues[i].push_back(value[selectedOptions[i]+3]); //+3 because "options" x, y and z.
+                    float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
+                    optionValues[i].push_back(v); 
 
-                    min[i] = std::min(min[i], optionValues[i][numValues]);
-                    max[i] = std::max(max[i], optionValues[i][numValues]);
+                    min[i] = std::min(min[i], v);
+                    max[i] = std::max(max[i], v);
 
-
+                    logv[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
                 }
                 numValues++;
             }
@@ -347,36 +353,21 @@ float* DataPlane::readData(){
             return nullptr;
         }
 
-        // std::vector<int> refValue;
-        // for(int i=0; j<optionValues.size(); i++){
-        //     refValue.push_back(optionValues[i][0]);
-        // }
+        for(int i=0; i<logv.size(); i++){
+            logv[i] /= numValues;
+        }
 
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
+
             for(int j=0; j<optionValues.size(); j++){
-                float refV = optionValues[j][_dimensions.x*_dimensions.y-1];
-                float v    = optionValues[j][i];
+                float v = optionValues[j][i];
 
-                float normValue = 0;
-                if(v > refV){
-                    normValue = (1-refProcent)*(v-refV)/(max[j]-refV);
-                }else{
-                    normValue = -(refProcent)*((refV-v)/(refV-min[j]));
-
-                    // if(v < refV-1){
-                    //     std::cout << "refV: " << refV << ", v: " << v << ", min: " << min[j] << ", max: " << max[j] << ", "; 
-                    //     std::cout << "norm: " << normValue << ", norm+1/2: ";
-                    //     std::cout << (normValue+1.0)/2.0f << std::endl;
-                    // }
-                }
-                normValue = (normValue+refProcent);
-
-                // normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
+                float logNormalized = v/pow(10, logv[j]);
+                float normValue = (logNormalized + _midLevel.value().x)/(_midLevel.value().x + _midLevel.value().y);
                 combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
             }
             combinedValues[i] /= selectedOptions.size();
-            // std::cout << std::endl;
         }
         return combinedValues;
     

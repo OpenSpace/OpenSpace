@@ -52,7 +52,7 @@ class DataPlane : public CygnetPlane {
 	static int id();
 
 	properties::SelectionProperty _dataOptions;
-	properties::FloatProperty _midLevel;
+	properties::Vec2Property _midLevel;
 
 	properties::Vec4Property _topColor;
 	properties::Vec4Property _midColor;
