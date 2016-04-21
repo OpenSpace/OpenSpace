@@ -41,6 +41,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gdaldataconverter.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
@@ -62,6 +63,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gdaldataconverter.cpp
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp

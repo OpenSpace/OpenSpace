@@ -24,12 +24,16 @@
 
 #include <modules/globebrowsing/rendering/texturetileset.h>
 
+#include <modules/globebrowsing/rendering/gdaldataconverter.h>
+
 #include <ghoul/opengl/texturemanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <ghoul/logging/logmanager.h>
 
+#include "gdal_priv.h"
+#include "cpl_conv.h" // for CPLMalloc()
 
 #include <glm/glm.hpp>
 
@@ -45,6 +49,23 @@ namespace openspace {
 		, _depth(depth)
 	{
 		
+
+		// Read using GDAL
+
+		/*
+		GDALDataset  *poDataset;
+		GDALAllRegister();
+		poDataset = (GDALDataset *)GDALOpen(absPath("textures/earth_bluemarble.jpg").c_str(), GA_ReadOnly);
+		assert(poDataset != NULL);
+		GdalDataConverter conv;
+
+		_testTexture = conv.convertToOpenGLTexture(poDataset);
+
+		_testTexture->uploadTexture();
+		_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		*/
+
+		
 		// Set e texture to test
 		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath("textures/earth_bluemarble.jpg")));
 		if (_testTexture) {
@@ -56,6 +77,7 @@ namespace openspace {
 			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
+		
 	}
 
 	TextureTileSet::~TextureTileSet(){
