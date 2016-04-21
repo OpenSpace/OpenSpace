@@ -221,8 +221,6 @@ namespace openspace{
             std::string frame = j["Coordinates"];
             int updateTime = j["ISWA_UPDATE_SECONDS"];
 
-            std::cout << updateTime << std::endl; 
-
             glm::vec3 max(
                 j["Plot XMAX"],
                 j["Plot YMAX"],

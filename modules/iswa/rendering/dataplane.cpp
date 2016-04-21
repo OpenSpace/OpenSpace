@@ -216,12 +216,10 @@ void DataPlane::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
 
-    float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
-    if(openSpaceUpdateInterval){
-        if(fabs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+    //add real world limit!!!
+    if(fabs(_time-_lastUpdateTime) >= _data->updateTime){
             updateTexture();
             _lastUpdateTime = _time;
-        }
     }
 
     if(_futureData && _futureData->isFinished && _memorybuffer != ""){
@@ -426,6 +424,9 @@ bool DataPlane::loadTexture() {
 }
 
 bool DataPlane::updateTexture(){
+    if(_futureData)
+        return false;
+
     _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(_data->id, _memorybuffer);
 

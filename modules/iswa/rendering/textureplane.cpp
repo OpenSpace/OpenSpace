@@ -111,7 +111,6 @@ void TexturePlane::render(const RenderData& data){
         transform = rotation * transform;
     }
 
-    // position += transform*glm::vec4(_data->offset.x, _data->offset.z, _data->offset.y, _data->offset.w);
     position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
         
 
@@ -142,13 +141,11 @@ void TexturePlane::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
     
-    // float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
-    // if(openSpaceUpdateInterval){
+    //add real world limit!!!
     if(fabs(_time-_lastUpdateTime) >= _data->updateTime){
             updateTexture();
             _lastUpdateTime = _time;
     }
-    // }
 
     if(_futureTexture && _futureTexture->isFinished){
         loadTexture();
@@ -157,14 +154,10 @@ void TexturePlane::update(const UpdateData& data){
 }
 
 bool TexturePlane::loadTexture() {
-    // std::cout << _data->path << std::endl;
-    // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_data->path));
-    //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath("${OPENSPACE_DATA}/GM_openspace_Z0_20150315_000000.png"));
     if(_memorybuffer != ""){
 
          std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
         if (texture) {
-            // LDEBUG("Loaded texture from '" << absPath(_data->path) << "'");
             texture->uploadTexture();
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -179,10 +172,12 @@ bool TexturePlane::loadTexture() {
 }
 
 bool TexturePlane::updateTexture(){
+    if(_futureTexture)
+        return false;
+
     _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
 
-    // std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_data->id, absPath(_data->path));
     if(future){
         _futureTexture = future;
 
