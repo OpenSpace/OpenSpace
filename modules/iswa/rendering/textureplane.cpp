@@ -142,13 +142,13 @@ void TexturePlane::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
     
-    float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
-    if(openSpaceUpdateInterval){
-        if(fabs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+    // float openSpaceUpdateInterval = fabs(Time::ref().deltaTime()*_updateInterval);
+    // if(openSpaceUpdateInterval){
+    if(fabs(_time-_lastUpdateTime) >= _data->updateTime){
             updateTexture();
             _lastUpdateTime = _time;
-        }
     }
+    // }
 
     if(_futureTexture && _futureTexture->isFinished){
         loadTexture();

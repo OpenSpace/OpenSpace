@@ -34,7 +34,7 @@ namespace openspace{
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
 	ScreenSpaceCygnet(int cygnetId);
-	ScreenSpaceCygnet(std::shared_ptr<Metadata> data);
+	// ScreenSpaceCygnet(std::shared_ptr<Metadata> data);
 	~ScreenSpaceCygnet();
 
 	void render() override;

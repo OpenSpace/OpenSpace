@@ -42,10 +42,12 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
 	// dict.getValue can only set strings in _data directly
 	float renderableId;
+	float updateTime;
 	glm::vec3 min, max;
 	glm::vec2 spatialScale;
 
 	dictionary.getValue("Id", renderableId);
+	dictionary.getValue("UpdateTime", updateTime);
 	dictionary.getValue("SpatialScale", spatialScale);
 	dictionary.getValue("Min", min);
 	dictionary.getValue("Max", max);
@@ -53,6 +55,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
 	
 	_data->id = (int) renderableId;
+	_data->updateTime = (int) updateTime;
 	_data->spatialScale = spatialScale;
 	_data->min = min;
 	_data->max = max;

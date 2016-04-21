@@ -219,6 +219,9 @@ namespace openspace{
 
             std::string parent = j["Central Body"];
             std::string frame = j["Coordinates"];
+            int updateTime = j["ISWA_UPDATE_SECONDS"];
+
+            std::cout << updateTime << std::endl; 
 
             glm::vec3 max(
                 j["Plot XMAX"],
@@ -249,6 +252,7 @@ namespace openspace{
                 "Min = " + std::to_string(min) + ", "
                 "Max = " + std::to_string(max) + ", "
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
+                "UpdateTime = " + std::to_string(updateTime) + ", "
                 "}"
             "}"
             ;

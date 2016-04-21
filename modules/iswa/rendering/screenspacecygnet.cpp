@@ -56,27 +56,27 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
-ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
-	: ScreenSpaceRenderable()
-	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	, _cygnetId(data->id)
-	// , _path(data->path)
-{
-	_id = id();
-	setName("ScreenSpaceCygnet" + std::to_string(_id));
-	addProperty(_updateInterval);
+// ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
+// 	: ScreenSpaceRenderable()
+// 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
+// 	, _cygnetId(data->id)
+// 	// , _path(data->path)
+// {
+// 	_id = id();
+// 	setName("ScreenSpaceCygnet" + std::to_string(_id));
+// 	addProperty(_updateInterval);
 
-	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
-	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
-	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
-	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
-	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
-	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
-	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+// 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 
-}
+// }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 

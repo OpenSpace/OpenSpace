@@ -22,7 +22,8 @@ openspace.bindKey("5", "openspace.time.setDeltaTime(40)")
 openspace.bindKey("6", "openspace.time.setDeltaTime(60)")
 openspace.bindKey("7", "openspace.time.setDeltaTime(120)")
 openspace.bindKey("8", "openspace.time.setDeltaTime(360)")
-openspace.bindKey("9", "openspace.time.setDeltaTime(540)") 
+openspace.bindKey("9", "openspace.time.setDeltaTime(540)")
+openspace.bindKey("0", "openspace.time.setDeltaTime(1200)")
 
 --[[openspace.bindKey("2", "openspace.time.setDeltaTime(30)")
 openspace.bindKey("3", "openspace.time.setDeltaTime(180)") -- 3m

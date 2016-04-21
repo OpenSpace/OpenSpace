@@ -44,20 +44,6 @@ struct ExtensionFuture {
 	std::string parent;
 };
 
-struct Metadata {
-	int id;
-	std::string path;
-	std::string parent;
-	std::string frame;
-	glm::vec3 min;
-	glm::vec3 max;
-	glm::vec3 offset;
-	glm::vec3 scale;
-	glm::vec2 spatialScale;
-	std::string scaleVariable;
-	std::shared_ptr<KameleonWrapper> kw;
-};
-
 struct MetadataFuture {
     int id;
     std::string type;
