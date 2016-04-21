@@ -22,7 +22,7 @@ return {
 			Frame = "IAU_JUPITER",
 			Body = "JUPITER",
             Geometry = {
-                Type = "SimpleSphereProjection",
+                Type = "SimpleSphere",
                 Radius = { 0.71492, 8 },
                 Segments = 200,
             },

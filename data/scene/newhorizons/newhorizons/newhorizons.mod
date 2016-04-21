@@ -94,7 +94,7 @@ return {
             }, 
             Textures = {
                 Type = "simple",
-                Color =  "textures/NHTextureFlipCol.jpg",
+                Color =  "textures/NHTexture.jpg",
             },
             Rotation = {
                 Source = "NH_SPACECRAFT",

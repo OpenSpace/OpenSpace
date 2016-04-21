@@ -31,7 +31,7 @@ return {
 			Frame = "IAU_PLUTO",
 			Body = "PLUTO",
             Geometry = {
-                Type = "SimpleSphereProjection",
+                Type = "SimpleSphere",
                 Radius = { 1.173 , 6 },
                 Segments = 100
             },

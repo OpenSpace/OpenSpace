@@ -24,7 +24,11 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+//#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+
+#include <modules/base/rendering/planetgeometry.h>
+
+//#include <openspace/renderingo 
 
 #include <openspace/engine/configurationmanager.h>
 
@@ -111,7 +115,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         keyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -288,27 +292,28 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     // SCREEN-QUAD 
-    const GLfloat size = 1.0f;
-    const GLfloat w = 1.0f;
+    const GLfloat size = 1.f;
+    const GLfloat w = 1.f;
     const GLfloat vertex_data[] = {
-        -size, -size, 0.0f, w, 0, 1,
-         size,  size, 0.0f, w, 1, 0,
-        -size,  size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-         size, -size, 0.0f, w, 1, 1,
-         size,  size, 0.0f, w, 1, 0,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
-    glGenVertexArrays(1, &_quad);                         // generate array
-    glBindVertexArray(_quad);                             // bind array
-    glGenBuffers(1, &_vertexPositionBuffer);              // generate buffer
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glGenVertexArrays(1, &_quad);
+    glBindVertexArray(_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    
+    glBindVertexArray(0);
 
     return completeSuccess;
 }
@@ -372,7 +377,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("radius")){ 
         ghoul::any r = _geometry->property("radius")->get();
         if (glm::vec4* radius = ghoul::any_cast<glm::vec4>(&r)){
-            _fboProgramObject->setUniform("radius", radius);
+            _fboProgramObject->setUniform("_radius", radius);
         }
     }else{
         LERROR("Geometry object needs to provide radius");
@@ -380,7 +385,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("segments")){
         ghoul::any s = _geometry->property("segments")->get();
         if (int* segments = ghoul::any_cast<int>(&s)){
-            _fboProgramObject->setAttribute("segments", segments[0]);
+            _fboProgramObject->setUniform("_segments", segments[0]);
         }
     }else{
         LERROR("Geometry object needs to provide segment count");
@@ -614,7 +619,7 @@ void RenderablePlanetProjection::loadTexture() {
     if (_colorTexturePath.value() != "") {
         _textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
         if (_textureOriginal) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_texture);
+            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_textureOriginal);
 
             _textureOriginal->uploadTexture();
             _textureOriginal->setFilter(Texture::FilterMode::Linear);
