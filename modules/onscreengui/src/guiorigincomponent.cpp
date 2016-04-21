@@ -32,7 +32,7 @@
 #include "imgui.h"
 
 namespace {
-	const std::string _loggerCat = "GuiOriginComponent";
+    const std::string _loggerCat = "GuiOriginComponent";
 }
 
 namespace openspace {
@@ -128,55 +128,55 @@ void GuiOriginComponent::render() {
  //       }
  //   }
 
-	//ImGui::End();
+    //ImGui::End();
 //}
 //
 //GuiPropertyComponent::PropertyType GuiPropertyComponent::toPropertyType(
-//	const std::string& name) const
+//    const std::string& name) const
 //{
-//	if (name == "BoolProperty")
-//		return PropertyType::BoolProperty;
-//	if (name == "IntProperty")
-//		return PropertyType::IntProperty;
-//	if (name == "FloatProperty")
-//		return PropertyType::FloatProperty;
-//	if (name == "Vec2Property")
-//		return PropertyType::Vec2Property;
-//	if (name == "Vec3Property")
-//		return PropertyType::Vec3Property;
-//	if (name == "StringProperty")
-//		return PropertyType::StringProperty;
-//	if (name == "OptionProperty")
-//		return PropertyType::OptionProperty;
-//	if (name == "SelectionProperty")
-//		return PropertyType::SelectionProperty;
-//	if (name == "TriggerProperty")
-//		return PropertyType::TriggerProperty;
+//    if (name == "BoolProperty")
+//        return PropertyType::BoolProperty;
+//    if (name == "IntProperty")
+//        return PropertyType::IntProperty;
+//    if (name == "FloatProperty")
+//        return PropertyType::FloatProperty;
+//    if (name == "Vec2Property")
+//        return PropertyType::Vec2Property;
+//    if (name == "Vec3Property")
+//        return PropertyType::Vec3Property;
+//    if (name == "StringProperty")
+//        return PropertyType::StringProperty;
+//    if (name == "OptionProperty")
+//        return PropertyType::OptionProperty;
+//    if (name == "SelectionProperty")
+//        return PropertyType::SelectionProperty;
+//    if (name == "TriggerProperty")
+//        return PropertyType::TriggerProperty;
 //
-//	LWARNING("Unsupported property type '" << name << "'");
-//	return PropertyType::InvalidPropertyType;
+//    LWARNING("Unsupported property type '" << name << "'");
+//    return PropertyType::InvalidPropertyType;
 //}
 //
 //void GuiPropertyComponent::renderProperty(const PropertyInfo& info) const {
-//	switch (info.type) {
-//		case PropertyType::BoolProperty:
-//		{
-//			//	BoolProperty* p = static_cast<BoolProperty*>(prop);
-//			//	std::string name = p->guiName();
+//    switch (info.type) {
+//        case PropertyType::BoolProperty:
+//        {
+//            //    BoolProperty* p = static_cast<BoolProperty*>(prop);
+//            //    std::string name = p->guiName();
 //
-//			//	BoolProperty::ValueType value = *p;
-//			//	ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
-//			//	p->set(value);
+//            //    BoolProperty::ValueType value = *p;
+//            //    ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+//            //    p->set(value);
 //
 //
-//			
+//            
 //
-//			break;
-//		}
-//		default:
+//            break;
+//        }
+//        default:
 //            LERROR("Missing case statement: {" << int(info.type) << "," << info.identifier << "}");
-//			//ghoul_assert(false, "Missing case statement");
-//		}
+//            //ghoul_assert(false, "Missing case statement");
+//        }
 //
 //}
 

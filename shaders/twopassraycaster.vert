@@ -34,6 +34,6 @@ out vec2 texCoords;
 const vec2 screenScale = vec2(0.5, 0.5);
 
 void main() {
-	texCoords = vertPosition.xy*screenScale+screenScale; // scale vertex attribute to [0-1] range
-	gl_Position = vec4(vertPosition.xy, 0.0, 1.0);
+    texCoords = vertPosition.xy*screenScale+screenScale; // scale vertex attribute to [0-1] range
+    gl_Position = vec4(vertPosition.xy, 0.0, 1.0);
 }

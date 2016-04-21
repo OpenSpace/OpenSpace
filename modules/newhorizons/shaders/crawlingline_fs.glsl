@@ -34,10 +34,10 @@ in vec4 vs_color;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	vec4 diffuse = vs_color;
-	float depth = pscDepth(position);
-	diffuse.a = _alpha;
+    vec4 position = vs_position;
+    vec4 diffuse = vs_color;
+    float depth = pscDepth(position);
+    diffuse.a = _alpha;
 
     Fragment frag;
     frag.color = diffuse;

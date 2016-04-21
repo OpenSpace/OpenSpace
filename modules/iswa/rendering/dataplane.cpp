@@ -44,14 +44,14 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_midLevel("midLevel","Middle level", glm::vec2(5), glm::vec2(0.0), glm::vec2(10.0))
-    ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
-    ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
-    ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
-    ,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
-    ,_colorbar(nullptr)
     ,_futureData(nullptr)
-    ,_dataSlice(nullptr)
+    ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
+    ,_useLog("useLog","Use Logarithm Norm", false)
+    // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
+    // ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
+    // ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
+    // ,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
+    // ,_colorbar(nullptr)
 {   
     _id = id();
     
@@ -59,42 +59,36 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setName(name);
 
-    addProperty(_midLevel);
+    addProperty(_useLog);
+    addProperty(_normValues);
     addProperty(_dataOptions);
+    //addProperty(_midLevel);
     // addProperty(_topColor);
     // addProperty(_midColor);
     // addProperty(_botColor);
-    // addProperty(_tfValues);
+    //addProperty(_tfValues);
 
     registerProperties();
-    OsEng.gui()._iSWAproperty.registerProperty(&_midLevel);
+
+    OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
+    OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
+    
 
-    // dictionary.getValue("kwPath", _kwPath);
 
-    _midLevel.onChange([this](){loadTexture();});
+    _normValues.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){loadTexture();});
+    _useLog.onChange([this](){loadTexture();});
 }
 
 DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
-    // std::string kwPath;
-    // _kw = std::make_shared<KameleonWrapper>(_kwPath);
-    // dictionary.getValue("KW", _kw);
-
-    // KameleonWrapper::Model model = _kw->model();
-    // if( model == KameleonWrapper::Model::BATSRUS)
-    //     _var = "p";
-    // else
-    //     _var = "rho";
-
-
     createPlane();
     
     if (_shader == nullptr) {
@@ -108,11 +102,6 @@ bool DataPlane::initialize(){
         return false;
     }
 
-    // _dimensions = glm::size3_t(500,500,1);
-    // float zSlice = 0.5f;
-    // _dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
-
-    // loadTexture();
     updateTexture();
 
 
@@ -129,8 +118,7 @@ bool DataPlane::deinitialize(){
     unregisterProperties();
     destroyPlane();
     destroyShader();
-    
-    // _kw = nullptr;
+
     _texture = nullptr;
     _memorybuffer = "";
     
@@ -225,8 +213,6 @@ void DataPlane::update(const UpdateData& data){
     if(_planeIsDirty)
         createPlane();
 
-    // if(abs(Time::ref().currentTime - _time) > 2*Time::ref().deltaTime())
-
     _time = Time::ref().currentTime();
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
 
@@ -304,26 +290,30 @@ float* DataPlane::readData(){
         std::vector<float> min; 
         std::vector<float> max;
 
-        std::vector<int> logv;
+        std::vector<int> logmean;
+
+        std::vector<float> sum;
+        std::vector<float> mean;
+        std::vector<float> standardDeviation;
+
         std::vector<std::vector<float>> optionValues;
 
         for(int i=0; i < selectedOptions.size(); i++){
             min.push_back(std::numeric_limits<float>::max());
             max.push_back(std::numeric_limits<float>::min());
 
+            sum.push_back(0);
+            logmean.push_back(0);
+
             std::vector<float> v;
             optionValues.push_back(v);
-
-            logv.push_back(0);
         }
 
         float* combinedValues = new float[_dimensions.x*_dimensions.y];
 
         int numValues = 0;
-        int numLogValues = 0;
         while(getline(memorystream, line)){
-            if(line.find("#") == 0){
-                //part of the header
+            if(line.find("#") == 0){ //part of the header
                 continue;
             }
 
@@ -336,13 +326,15 @@ float* DataPlane::readData(){
 
             if(value.size()){
                 for(int i=0; i<optionValues.size(); i++){
+
                     float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
                     optionValues[i].push_back(v); 
 
                     min[i] = std::min(min[i], v);
                     max[i] = std::max(max[i], v);
 
-                    logv[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
+                    sum[i] += v;
+                    logmean[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
                 }
                 numValues++;
             }
@@ -352,29 +344,57 @@ float* DataPlane::readData(){
             LWARNING("Number of values read and expected are not the same");
             return nullptr;
         }
+    
+        for(int i=0; i<optionValues.size(); i++){    
+            //Calculate the mean
+            mean.push_back((1.0 / numValues) * sum[i]);
+            //Calculate the Standard Deviation
+            standardDeviation.push_back(sqrt (((pow(sum[i], 2.0)) - ((1.0/numValues) * (pow(sum[i],2.0)))) / (numValues - 1.0)));
 
-        for(int i=0; i<logv.size(); i++){
-            logv[i] /= numValues;
+            //calulate log mean
+            logmean[i] /= numValues;        
         }
-
+        
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
 
             for(int j=0; j<optionValues.size(); j++){
                 float v = optionValues[j][i];
 
-                float logNormalized = v/pow(10, logv[j]);
-                float normValue = (logNormalized + _midLevel.value().x)/(_midLevel.value().x + _midLevel.value().y);
-                combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
+                if(_useLog.value()){
+                    combinedValues[i] += normalizeWithLogarithm(v, logmean[j]);
+                }else{
+                    combinedValues[i] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
+                }
             }
+
             combinedValues[i] /= selectedOptions.size();
         }
         return combinedValues;
     
-    }else{
+    } else {
         LWARNING("Noting in memory buffer, are you connected to the information super highway?");
     }
 } 
+
+float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){
+    
+    float zScoreMin = _normValues.value().x;
+    float zScoreMax = _normValues.value().y;
+    float standardScore = ( value - mean ) / sd;
+    // Clamp intresting values
+    standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
+    //return and normalize
+    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+}
+
+float DataPlane::normalizeWithLogarithm(float value, int logMean){
+    float logMin = 10*_normValues.value().x;
+    float logMax = 10*_normValues.value().y;
+
+    float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
+    return glm::clamp(logNormalized,0.0f, 1.0f);
+}
 
 bool DataPlane::loadTexture() {
     float* values = readData();

@@ -48,7 +48,7 @@ const psc& DynamicEphemeris::position() const {
 }
 
 void DynamicEphemeris::setPosition(psc pos) {
-	_position = pos;
+    _position = pos;
 }
 
 void DynamicEphemeris::update(const UpdateData&) {}

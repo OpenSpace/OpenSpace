@@ -30,6 +30,7 @@ struct RaycasterData {
     vec3 direction;
     float scale;
     float previousJitterDistance;
+    uint blend;
 }
 
 #endif

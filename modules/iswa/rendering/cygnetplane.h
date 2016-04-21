@@ -32,23 +32,23 @@
 namespace openspace{
 class CygnetPlane : public ISWACygnet {
 public:
-	CygnetPlane(const ghoul::Dictionary& dictionary);
-	~CygnetPlane();
+    CygnetPlane(const ghoul::Dictionary& dictionary);
+    ~CygnetPlane();
 
-	virtual bool isReady() const override;
+    virtual bool isReady() const override;
 
 protected:
-	virtual bool loadTexture() = 0;
-	virtual bool updateTexture() = 0;
+    virtual bool loadTexture() = 0;
+    virtual bool updateTexture() = 0;
 
-	void createPlane();
-	void destroyPlane();
-	bool createShader();
-	void destroyShader();
+    void createPlane();
+    void destroyPlane();
+    bool createShader();
+    void destroyShader();
 
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
-	bool _planeIsDirty;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+    bool _planeIsDirty;
 };
 } //namespace openspace
 

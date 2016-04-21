@@ -43,18 +43,18 @@ out vec4 cam_position;
 
 void main() { 
     vec4 p = in_position;
-	psc_position  = p;
-	vs_brightness = in_brightness;
-	vs_velocity = in_velocity;
-	vs_speed = in_speed;
-	cam_position  = campos;
+    psc_position  = p;
+    vs_brightness = in_brightness;
+    vs_velocity = in_velocity;
+    vs_speed = in_speed;
+    cam_position  = campos;
 
-	vec4 tmp = p;
-	vec4 position = pscTransform(tmp, mat4(1.0));
-	// vec4 position = pscTransform(tmp, model);
-	// psc_position = tmp;
-	position = view * position;
-	// position = ViewProjection * ModelTransform * position;
-	// gl_Position =  z_normalization(position);
-	gl_Position = position;
+    vec4 tmp = p;
+    vec4 position = pscTransform(tmp, mat4(1.0));
+    // vec4 position = pscTransform(tmp, model);
+    // psc_position = tmp;
+    position = view * position;
+    // position = ViewProjection * ModelTransform * position;
+    // gl_Position =  z_normalization(position);
+    gl_Position = position;
 }

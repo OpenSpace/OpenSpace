@@ -40,12 +40,12 @@ uniform float lineFade;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	float id = float(gl_VertexID) / float(nVertices * lineFade);
-	fade = 1.0 - id;
+    float id = float(gl_VertexID) / float(nVertices * lineFade);
+    fade = 1.0 - id;
 
-	vec4 tmp = in_point_position;
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_point_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    vec4 tmp = in_point_position;
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_point_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

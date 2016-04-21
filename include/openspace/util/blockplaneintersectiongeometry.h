@@ -48,8 +48,8 @@ private:
     void updateVertices();
     std::vector<float> _vertices;
     bool _initialized;
-	GLuint _vaoId;
-	GLuint _vBufferId;
+    GLuint _vaoId;
+    GLuint _vBufferId;
     glm::vec3 _size;
     glm::vec3 _normal;
     float _planeDistance;

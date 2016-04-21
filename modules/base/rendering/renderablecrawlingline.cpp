@@ -31,13 +31,13 @@
 //#include <imgui.h>
 
 namespace {
-	const std::string _loggerCat = "RenderableCrawlingLine";
+    const std::string _loggerCat = "RenderableCrawlingLine";
 
     const std::string KeySource = "Source";
     const std::string KeyTarget = "Target";
     const std::string KeyInstrument = "Instrument";
     const std::string KeyReferenceFrame = "Frame";
-	const std::string keyColor = "RGB";
+    const std::string keyColor = "RGB";
 
     static const int SourcePosition = 0;
     static const int TargetPosition = 1;
@@ -58,23 +58,23 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyReferenceFrame, _referenceFrame);
 
 
-	if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
-		dictionary.getValue(keyColor, _lineColor);
-	else
-		_lineColor = glm::vec3(1);
+    if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
+        dictionary.getValue(keyColor, _lineColor);
+    else
+        _lineColor = glm::vec3(1);
 }
 
 bool RenderableCrawlingLine::isReady() const {
-	bool ready = true;
+    bool ready = true;
     ready &= !_source.empty();
     ready &= !_target.empty();
     ready &= !_instrumentName.empty();
-	ready &= (_program != nullptr);
-	return ready;
+    ready &= (_program != nullptr);
+    return ready;
 }
 
 bool RenderableCrawlingLine::initialize() {
-	_frameCounter = 0;
+    _frameCounter = 0;
     bool completeSuccess = true;
     _program = ghoul::opengl::ProgramObject::Build("RenderableCrawlingLine",
         "${SHADERS}/modules/crawlingline/crawlingline_vs.glsl",
@@ -83,65 +83,65 @@ bool RenderableCrawlingLine::initialize() {
     if (!_program)
         return false;
 
-	glGenVertexArrays(1, &_vao);
-	glGenBuffers(1, &_vbo);
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(psc), NULL, GL_DYNAMIC_DRAW);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	glBindVertexArray(0);
+    glBindVertexArray(0);
 
-	return completeSuccess;
+    return completeSuccess;
 }
 
 bool RenderableCrawlingLine::deinitialize(){
-	glDeleteVertexArrays(1, &_vao);
+    glDeleteVertexArrays(1, &_vao);
     _vao = 0;
-	glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_vbo);
     _vbo = 0;
-	return true;
+    return true;
 }
 
 void RenderableCrawlingLine::render(const RenderData& data) {
-	if (_drawLine) {
-	    _program->activate();
-		_frameCounter++;
-	    // fetch data
-	    psc currentPosition = data.position;
-	    psc campos = data.camera.position();
-	    glm::mat4 camrot = data.camera.viewRotationMatrix();
+    if (_drawLine) {
+        _program->activate();
+        _frameCounter++;
+        // fetch data
+        psc currentPosition = data.position;
+        psc campos = data.camera.position();
+        glm::mat4 camrot = data.camera.viewRotationMatrix();
 
-	    glm::mat4 transform = glm::mat4(1);
+        glm::mat4 transform = glm::mat4(1);
 
-	    // setup the data to the shader
-	    _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	    _program->setUniform("ModelTransform", transform);
+        // setup the data to the shader
+        _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+        _program->setUniform("ModelTransform", transform);
 
-		int frame = _frameCounter % 60;
-		float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 60));
-		float alpha = 0.6f + fadingFactor*0.4f;
+        int frame = _frameCounter % 60;
+        float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 60));
+        float alpha = 0.6f + fadingFactor*0.4f;
 
-		glLineWidth(2.f);
+        glLineWidth(2.f);
 
         _program->setUniform("_alpha", alpha);
-		_program->setUniform("color", _lineColor);
-	    setPscUniforms(_program, &data.camera, data.position);
+        _program->setUniform("color", _lineColor);
+        setPscUniforms(_program, &data.camera, data.position);
 
-	    glBindVertexArray(_vao);
+        glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(psc) * 2, _positions);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	    glDrawArrays(GL_LINES, 0, 2);
-	    glBindVertexArray(0);
-	
-	    _program->deactivate();
+        glDrawArrays(GL_LINES, 0, 2);
+        glBindVertexArray(0);
+    
+        _program->deactivate();
     }
 }
 
@@ -149,28 +149,28 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     if (_program->isDirty())
         _program->rebuildFromFile();
     glm::dmat3 transformMatrix = glm::dmat3(1);
-	openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
+    openspace::SpiceManager::ref().getPositionTransformMatrix(_source, _referenceFrame, data.time, transformMatrix);
 
-	glm::mat4 tmp = glm::mat4(1);
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++){
-			tmp[i][j] = static_cast<float>(transformMatrix[i][j]);
-		}
-	}
+    glm::mat4 tmp = glm::mat4(1);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++){
+            tmp[i][j] = static_cast<float>(transformMatrix[i][j]);
+        }
+    }
 
-	_positions[SourcePosition] = PowerScaledCoordinate::CreatePowerScaledCoordinate(0, 0, 0);
+    _positions[SourcePosition] = PowerScaledCoordinate::CreatePowerScaledCoordinate(0, 0, 0);
 
-	std::string shape, instrument;
-	std::vector<glm::dvec3> bounds;
-	glm::dvec3 boresight;
+    std::string shape, instrument;
+    std::vector<glm::dvec3> bounds;
+    glm::dvec3 boresight;
 
-	bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
+    bool found = openspace::SpiceManager::ref().getFieldOfView(_source, shape, instrument, boresight, bounds);
     if (!found)
         LERROR("Could not find field of view for instrument");
-	glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
-	target = tmp * target;
+    glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
+    target = tmp * target;
 
-	_positions[TargetPosition] = target;
+    _positions[TargetPosition] = target;
 
     if (ImageSequencer2::ref().isReady()) {
         _imageSequenceTime = ImageSequencer2::ref().instrumentActiveTime(_instrumentName);

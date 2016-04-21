@@ -52,9 +52,9 @@ public:
 
     bool initialize() override;
     bool deinitialize() override;
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 protected:
@@ -67,15 +67,15 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
-	properties::IntProperty _rotation;
-	float _alpha;
+    properties::IntProperty _rotation;
+    float _alpha;
 
-	glm::dmat3 _stateMatrix;
-	std::string _nightTexturePath;
-	std::string _frame;
-	std::string _target;
-	bool _hasNightTexture;
-	double _time;
+    glm::dmat3 _stateMatrix;
+    std::string _nightTexturePath;
+    std::string _frame;
+    std::string _target;
+    bool _hasNightTexture;
+    double _time;
 };
 
 }  // namespace openspace

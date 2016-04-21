@@ -29,167 +29,145 @@
 #include <modules/iswa/util/iswamanager.h>
 
 namespace {
-	const std::string _loggerCat = "ScreenSpaceCygnet";
+    const std::string _loggerCat = "ScreenSpaceCygnet";
 }
 
 namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
-	: ScreenSpaceRenderable()
-	, _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
-	, _cygnetId(cygnetId)
-	// , _path(path)
+    : ScreenSpaceRenderable()
+    , _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
+    , _cygnetId(cygnetId)
+    // , _path(path)
 {
-	std::cout << "screenspacecygnet constructor 1" << std::endl;
-	_id = id();
-	setName("ScreenSpaceCygnet" + std::to_string(_id));
-	addProperty(_updateInterval);
+    std::cout << "screenspacecygnet constructor 1" << std::endl;
+    _id = id();
+    setName("ScreenSpaceCygnet" + std::to_string(_id));
+    addProperty(_updateInterval);
 
-	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
-	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
-	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
-	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
-	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
-	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
-	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
+    OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
+    OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
+    OsEng.gui()._iSWAproperty.registerProperty(&_depth);
+    OsEng.gui()._iSWAproperty.registerProperty(&_scale);
+    OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
+    OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
-
-// ScreenSpaceCygnet::ScreenSpaceCygnet(std::shared_ptr<Metadata> data)
-// 	: ScreenSpaceRenderable()
-// 	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-// 	, _cygnetId(data->id)
-// 	// , _path(data->path)
-// {
-// 	_id = id();
-// 	setName("ScreenSpaceCygnet" + std::to_string(_id));
-// 	addProperty(_updateInterval);
-
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_depth);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_scale);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-// 	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
-
-// }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
 bool ScreenSpaceCygnet::initialize(){
-	_originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
-	createPlane();
-	createShaders();
-	updateTexture();
+    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+    createPlane();
+    createShaders();
+    updateTexture();
 
-	// Setting spherical/euclidean onchange handler
-	_useFlatScreen.onChange([this](){
-		useEuclideanCoordinates(_useFlatScreen.value());
-	});
+    // Setting spherical/euclidean onchange handler
+    _useFlatScreen.onChange([this](){
+        useEuclideanCoordinates(_useFlatScreen.value());
+    });
 
-	return isReady();
+    return isReady();
 }
 
 bool ScreenSpaceCygnet::deinitialize(){
-	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._iSWAproperty.unregisterProperties(name());
 
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
 
-	_texture = nullptr;
+    _texture = nullptr;
 
-	 RenderEngine& renderEngine = OsEng.renderEngine();
-	if (_shader) {
-		renderEngine.removeRenderProgram(_shader);
-		_shader = nullptr;
-	}
+     RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
 
-	// std::remove(absPath(_path).c_str());
-	// _path = "";
-	_memorybuffer = "";
-	return true;
+    // std::remove(absPath(_path).c_str());
+    // _path = "";
+    _memorybuffer = "";
+    return true;
 }
 
 void ScreenSpaceCygnet::render(){
 
-	if(!isReady()) return;
-	if(!_enabled) return;
+    if(!isReady()) return;
+    if(!_enabled) return;
 
-	glm::mat4 rotation = rotationMatrix();
-	glm::mat4 translation = translationMatrix();
-	glm::mat4 scale = scaleMatrix();
-	glm::mat4 modelTransform = rotation*translation*scale;
+    glm::mat4 rotation = rotationMatrix();
+    glm::mat4 translation = translationMatrix();
+    glm::mat4 scale = scaleMatrix();
+    glm::mat4 modelTransform = rotation*translation*scale;
 
-	draw(modelTransform);
+    draw(modelTransform);
 }
 
 void ScreenSpaceCygnet::update(){
 
-	_time = Time::ref().currentTime();
+    _time = Time::ref().currentTime();
 
-	float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
-	if(openSpaceUpdateInterval){
-		if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
-			updateTexture();
-			_lastUpdateTime = _time;
-		}
-	}
+    float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
+    if(openSpaceUpdateInterval){
+        if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
+            updateTexture();
+            _lastUpdateTime = _time;
+        }
+    }
 
-	if(_futureTexture && _futureTexture->isFinished){
-		loadTexture();
-		_futureTexture = nullptr;
-	}
+    if(_futureTexture && _futureTexture->isFinished){
+        loadTexture();
+        _futureTexture = nullptr;
+    }
 
 }
 
 bool ScreenSpaceCygnet::isReady() const{
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
+    bool ready = true;
+    if (!_shader)
+        ready &= false;
+    if(!_texture)
+        ready &= false;
+    return ready;
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-	_memorybuffer = "";
+    _memorybuffer = "";
 
-	// std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
-	std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
-	if(future){
-		_futureTexture = future;
-	}
+    // std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
+    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
+    if(future){
+        _futureTexture = future;
+    }
 }
 
 void ScreenSpaceCygnet::loadTexture() {
 
-	if(_memorybuffer != ""){
+    if(_memorybuffer != ""){
 
-		std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
-		// std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+        // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
 
-		if (texture) {
-			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+        if (texture) {
+            // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
-			texture->uploadTexture();
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            texture->uploadTexture();
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-			_texture = std::move(texture);
-		}
-	}
+            _texture = std::move(texture);
+        }
+    }
 }
 
 int ScreenSpaceCygnet::id(){
-	static int id = 0;
-	return id++;
+    static int id = 0;
+    return id++;
 }
 
 }

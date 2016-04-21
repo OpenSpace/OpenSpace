@@ -35,19 +35,19 @@ namespace openspace {
 namespace properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
-	[](lua_State* state, bool& success) -> TYPE {                                        \
-		success = (lua_isnumber(state, -1) == 1);                                        \
-		if (success)                                                                     \
-			return static_cast<TYPE>(lua_tonumber(state, -1));                           \
-		else                                                                             \
-			return DEFAULT_VALUE;                                                        \
-	}
+    [](lua_State* state, bool& success) -> TYPE {                                        \
+        success = (lua_isnumber(state, -1) == 1);                                        \
+        if (success)                                                                     \
+            return static_cast<TYPE>(lua_tonumber(state, -1));                           \
+        else                                                                             \
+            return DEFAULT_VALUE;                                                        \
+    }
 
 #define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
-	[](lua_State* state, TYPE value) -> bool {                                           \
-		lua_pushnumber(state, static_cast<lua_Number>(value));                           \
-		return true;                                                                     \
-	}
+    [](lua_State* state, TYPE value) -> bool {                                           \
+        lua_pushnumber(state, static_cast<lua_Number>(value));                           \
+        return true;                                                                     \
+    }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
     [](std::string value, bool& success) -> TYPE {                                       \
@@ -69,24 +69,24 @@ namespace properties {
 // be equal to unsigned short and unsigned int which causes a compile error
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false, 
-	[](lua_State* state, bool& success) -> bool {
-		success = (lua_isboolean(state, -1) == 1);
-		if (success)
-			return lua_toboolean(state, -1) == 1;
-		else
-			return false;
-	},
-	[](lua_State* state, bool value) -> bool {
-		lua_pushboolean(state, value);
-		return true;
-	},
+    [](lua_State* state, bool& success) -> bool {
+        success = (lua_isboolean(state, -1) == 1);
+        if (success)
+            return lua_toboolean(state, -1) == 1;
+        else
+            return false;
+    },
+    [](lua_State* state, bool value) -> bool {
+        lua_pushboolean(state, value);
+        return true;
+    },
     DEFAULT_FROM_STRING_LAMBDA(bool, false),
                                  [](std::string& outValue, bool inValue) -> bool {
                                      outValue = inValue ? "true" : "false";
                                      return true;
                                  },
-	LUA_TBOOLEAN
-	);
+    LUA_TBOOLEAN
+    );
 
 REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
                                   numeric_limits<char>::lowest(),

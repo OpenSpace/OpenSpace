@@ -1,7 +1,7 @@
 #include <openspace/interaction/externalcontrol/externalconnectioncontroller.h>
 
 namespace openspace {
-	
+    
 ExternalConnectionController::ExternalConnectionController() {
 }
 

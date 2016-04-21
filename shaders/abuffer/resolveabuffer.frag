@@ -39,7 +39,7 @@ uniform int nAaSamples;
 #define RAYCASTING_ENABLED #{raycastingEnabled}
 #define N_RAYCASTERS #{nRaycasters}
 #define ALPHA_LIMIT 0.99
-#define RAYCAST_MAX_STEPS 1000
+#define RAYCAST_MAX_STEPS 10000
 #define INT_MAX 2147483647
 
 /////////////////////////
@@ -132,19 +132,21 @@ void retrieveRaycasterData(uint nFrags) {
     }
     for (int i = 0; i < nFrags; i++) {
         int type = _type_(fragments[i]); // - 1;
-        vec4 color = _color_(fragments[i]);
+        vec3 position = _position_(fragments[i]);
         float depth = _depth_(fragments[i]);
+        uint blend = _blend_(fragments[i]);
         if (type > 0) { // enter raycaster
             int raycasterId = type - 1;
             if (entryDepths[raycasterId] < 0) { // first entry
-                raycasterData[raycasterId].position = color.rgb;
+                raycasterData[raycasterId].position = position;
                 raycasterData[raycasterId].previousJitterDistance = 0;
+                raycasterData[raycasterId].blend = blend;
                 entryDepths[raycasterId] = depth;
                 raycasterData[raycasterId].scale = -1;
             }
         } else if (type < 0) { // exit raycaster
             int raycasterId = -type - 1;
-            vec3 localDirection = color.xyz - raycasterData[raycasterId].position;
+            vec3 localDirection = position - raycasterData[raycasterId].position;
             raycasterData[raycasterId].direction = safeNormalize(localDirection);
             raycasterData[raycasterId].scale = safeLength(localDirection) / (depth - entryDepths[raycasterId]);
         }
@@ -183,6 +185,7 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
         nextStepSize = raycastDepth - currentDepth;
 
 #for index, raycaster in raycasters
+
         if ((raycasterMask & #{raycaster.bitmask}) != 0) {
             RaycasterData data = raycasterData[#{raycaster.id}];
             float stepSizeLocal = currentStepSize * data.scale;
@@ -195,8 +198,13 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
 
             vec4 raycasterContribution = sample#{raycaster.id}(jitteredPosition, data.direction, finalColor, maxStepSizeLocal);
             float sampleDistance = jitteredStepSizeLocal + data.previousJitterDistance;
+            uint blend = raycasterData[#{raycaster.id}].blend;
 
-            blendStep(finalColor, raycasterContribution, sampleDistance);
+            if (blend == BLEND_MODE_NORMAL) {
+                normalBlendStep(finalColor, raycasterContribution, sampleDistance);
+            } else if (blend == BLEND_MODE_ADDITIVE) {
+                additiveBlendStep(finalColor, raycasterContribution, sampleDistance);
+            }
 
             raycasterData[#{raycaster.id}].previousJitterDistance = stepSizeLocal - jitteredStepSizeLocal;
             float maxStepSize = maxStepSizeLocal/data.scale;
@@ -224,10 +232,15 @@ void main() {
         ABufferFragment frag = fragments[i];
 
         int type = _type_(frag);
+        uint blend = _blend_(frag);
 
         if (type == 0) { // geometry fragment
             vec4 color = _color_(frag);
-            blend(finalColor, color);
+            if (blend == BLEND_MODE_NORMAL) {
+                normalBlend(finalColor, color);
+            } else if (blend == BLEND_MODE_ADDITIVE) {
+                additiveBlend(finalColor, color);
+            }
         }
 #if RAYCASTING_ENABLED
         else if (type > 0) { // enter volume

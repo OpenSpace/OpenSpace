@@ -45,12 +45,12 @@ namespace properties {
                 success = false;                                                         \
                 return __TYPE__(0);                                                      \
             }                                                                            \
-			if (__TESTFUNC__(state, -1) != 1) {                                          \
+            if (__TESTFUNC__(state, -1) != 1) {                                          \
                 success = false;                                                         \
                 return __TYPE__(0);                                                      \
             } else {                                                                     \
-				result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
-				lua_pop(state, 1);                                                       \
+                result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
+                lua_pop(state, 1);                                                       \
             }                                                                            \
         }                                                                                \
         success = true;                                                                  \
@@ -110,8 +110,8 @@ namespace properties {
 
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
-								 DEFAULT_FROM_LUA_LAMBDA(glm::bvec2, lua_toboolean,
-														 lua_isboolean),
+                                 DEFAULT_FROM_LUA_LAMBDA(glm::bvec2, lua_toboolean,
+                                                         lua_isboolean),
                                  DEFAULT_TO_LUA_LAMBDA(glm::bvec2),
                                  DEFAULT_FROM_STRING_LAMBDA(glm::bvec2),
                                  DEFAULT_TO_STRING_LAMBDA(glm::bvec2),

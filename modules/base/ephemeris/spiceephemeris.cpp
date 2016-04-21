@@ -29,7 +29,7 @@
 
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
-	//const std::string keyGhosting = "EphmerisGhosting";
+    //const std::string keyGhosting = "EphmerisGhosting";
 
     const std::string KeyBody = "Body";
     const std::string KeyOrigin = "Observer";
@@ -42,7 +42,7 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     : _targetName("")
     , _originName("")
     , _position()
-	, _kernelsLoadedSuccessfully(true)
+    , _kernelsLoadedSuccessfully(true)
 {
     const bool hasBody = dictionary.getValue(KeyBody, _targetName);
     if (!hasBody)
@@ -52,25 +52,25 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     if (!hasObserver)
         LERROR("SpiceEphemeris does not contain the key '" << KeyOrigin << "'");
 
-	//dictionary.getValue(keyGhosting, _ghosting);
+    //dictionary.getValue(keyGhosting, _ghosting);
 
-	ghoul::Dictionary kernels;
-	dictionary.getValue(KeyKernels, kernels);
-	for (size_t i = 1; i <= kernels.size(); ++i) {
-		std::string kernel;
-		bool success = kernels.getValue(std::to_string(i), kernel);
-		if (!success)
-			LERROR("'" << KeyKernels << "' has to be an array-style table");
+    ghoul::Dictionary kernels;
+    dictionary.getValue(KeyKernels, kernels);
+    for (size_t i = 1; i <= kernels.size(); ++i) {
+        std::string kernel;
+        bool success = kernels.getValue(std::to_string(i), kernel);
+        if (!success)
+            LERROR("'" << KeyKernels << "' has to be an array-style table");
 
         try {
-            SpiceManager::KernelHandle id = SpiceManager::ref().loadKernel(kernel);
+            SpiceManager::ref().loadKernel(kernel);
             _kernelsLoadedSuccessfully = true;
         }
         catch (const SpiceManager::SpiceException& e) {
             LERROR("Could not load SPICE kernel: " << e.what());
             _kernelsLoadedSuccessfully = false;
         }
-	}
+    }
 }
     
 const psc& SpiceEphemeris::position() const {
@@ -78,21 +78,21 @@ const psc& SpiceEphemeris::position() const {
 }
 
 void SpiceEphemeris::update(const UpdateData& data) {
-	if (!_kernelsLoadedSuccessfully)
-		return;
+    if (!_kernelsLoadedSuccessfully)
+        return;
 
-	double lightTime = 0.0;
-	glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
-	
-	//double interval = openspace::ImageSequencer2::ref().getIntervalLength();
-	//if (_ghosting == "TRUE" && interval > 60){
-	//	double _time = openspace::ImageSequencer2::ref().getNextCaptureTime();
-	//	SpiceManager::ref().getTargetPosition(_targetName, _originName,
-	//		"GALACTIC", "NONE", _time, position, lightTime);
-	//}
-	//
-	_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-	_position[3] += 3;
+    double lightTime = 0.0;
+    glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
+    
+    //double interval = openspace::ImageSequencer::ref().getIntervalLength();
+    //if (_ghosting == "TRUE" && interval > 60){
+    //    double _time = openspace::ImageSequencer::ref().getNextCaptureTime();
+    //    SpiceManager::ref().getTargetPosition(_targetName, _originName,
+    //        "GALACTIC", "NONE", _time, position, lightTime);
+    //}
+    //
+    _position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
+    _position[3] += 3;
 }
 
 } // namespace openspace

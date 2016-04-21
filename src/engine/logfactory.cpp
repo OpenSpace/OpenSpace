@@ -31,48 +31,48 @@
 #include <ghoul/logging/textlog.h>
 
 namespace {
-	const std::string keyType = "Type";
-	const std::string keyFilename = "FileName";
-	const std::string keyAppend = "Append";
-	const std::string keyTimeStamping = "TimeStamping";
-	const std::string keyDateStamping = "DateStamping";
-	const std::string keyCategoryStamping = "CategoryStamping";
-	const std::string keyLogLevelStamping = "LogLevelStamping";
+    const std::string keyType = "Type";
+    const std::string keyFilename = "FileName";
+    const std::string keyAppend = "Append";
+    const std::string keyTimeStamping = "TimeStamping";
+    const std::string keyDateStamping = "DateStamping";
+    const std::string keyCategoryStamping = "CategoryStamping";
+    const std::string keyLogLevelStamping = "LogLevelStamping";
 
-	const std::string valueHtmlLog = "HTML";
-	const std::string valueTextLog = "Text";
+    const std::string valueHtmlLog = "HTML";
+    const std::string valueTextLog = "Text";
 }
 
 namespace openspace {
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
-	std::string type;
-	bool typeSuccess = dictionary.getValue(keyType, type);
-	if (!typeSuccess) {
+    std::string type;
+    bool typeSuccess = dictionary.getValue(keyType, type);
+    if (!typeSuccess) {
         throw ghoul::RuntimeError(
             "Requested log did not contain key '" + keyType + "'", "LogFactory"
         );
-	}
+    }
 
-	std::string filename;
-	bool filenameSuccess = dictionary.getValue(keyFilename, filename);
-	if (!filenameSuccess) {
+    std::string filename;
+    bool filenameSuccess = dictionary.getValue(keyFilename, filename);
+    if (!filenameSuccess) {
         throw ghoul::RuntimeError(
             "Requested log did not contain key '" + keyFilename + "'", "LogFactory"
         );
-	}
-	filename = absPath(filename);
+    }
+    filename = absPath(filename);
 
-	bool append = true;
-	dictionary.getValue(keyAppend, append);
-	bool timeStamp = true;
-	dictionary.getValue(keyTimeStamping, timeStamp);
-	bool dateStamp = true;
-	dictionary.getValue(keyDateStamping, dateStamp);
-	bool categoryStamp = true;
-	dictionary.getValue(keyCategoryStamping, categoryStamp);
-	bool logLevelStamp = true;
-	dictionary.getValue(keyLogLevelStamping, logLevelStamp);
+    bool append = true;
+    dictionary.getValue(keyAppend, append);
+    bool timeStamp = true;
+    dictionary.getValue(keyTimeStamping, timeStamp);
+    bool dateStamp = true;
+    dictionary.getValue(keyDateStamping, dateStamp);
+    bool categoryStamp = true;
+    dictionary.getValue(keyCategoryStamping, categoryStamp);
+    bool logLevelStamp = true;
+    dictionary.getValue(keyLogLevelStamping, logLevelStamp);
 
     using Append = ghoul::logging::TextLog::Append;
     using TimeStamping = ghoul::logging::Log::TimeStamping;
@@ -80,31 +80,31 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     using CategoryStamping = ghoul::logging::Log::CategoryStamping;
     using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
 
-	if (type == valueHtmlLog) {
+    if (type == valueHtmlLog) {
         return std::make_unique<ghoul::logging::HTMLLog>(
-			filename,
+            filename,
             append ? Append::Yes : Append::No,
             timeStamp ? TimeStamping::Yes : TimeStamping::No,
             dateStamp ? DateStamping::Yes : DateStamping::No,
             categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
             logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
         );
-	}
-	else if (type == valueTextLog) {
+    }
+    else if (type == valueTextLog) {
         return std::make_unique<ghoul::logging::TextLog>(
-			filename,
+            filename,
             append ? Append::Yes : Append::No,
             timeStamp ? TimeStamping::Yes : TimeStamping::No,
             dateStamp ? DateStamping::Yes : DateStamping::No,
             categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
             logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
         );
-	}
-	else {
+    }
+    else {
         throw ghoul::RuntimeError(
             "Log with type '" + type + "' did not name a valid log", "LogFactory"
         );
-	}
+    }
 }
     
 } // namespace openspace

@@ -37,55 +37,56 @@ namespace openspace {
 
 class RenderableStars : public Renderable {
 public:
-	RenderableStars(const ghoul::Dictionary& dictionary);
-	~RenderableStars();
+    RenderableStars(const ghoul::Dictionary& dictionary);
+    ~RenderableStars();
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-	enum ColorOption {
-		Color = 0,
-		Velocity = 1,
-		Speed = 2
-	};
+    enum ColorOption {
+        Color = 0,
+        Velocity = 1,
+        Speed = 2
+    };
 
-	void createDataSlice(ColorOption option);
+    void createDataSlice(ColorOption option);
 
-	bool loadData();
-	bool readSpeckFile();
-	bool loadCachedFile(const std::string& file);
-	bool saveCachedFile(const std::string& file) const;
+    bool loadData();
+    bool readSpeckFile();
+    bool loadCachedFile(const std::string& file);
+    bool saveCachedFile(const std::string& file) const;
 
-	properties::StringProperty _pointSpreadFunctionTexturePath;
+    properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-	bool _pointSpreadFunctionTextureIsDirty;
+    bool _pointSpreadFunctionTextureIsDirty;
 
-	properties::StringProperty _colorTexturePath;
+    properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
-	bool _colorTextureIsDirty;
+    bool _colorTextureIsDirty;
 
-	properties::OptionProperty _colorOption;
-	bool _dataIsDirty;
+    properties::OptionProperty _colorOption;
+    bool _dataIsDirty;
 
+    properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::FloatProperty _minBillboardSize;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
-	std::string _speckFile;
+    std::string _speckFile;
 
-	std::vector<float> _slicedData;
-	std::vector<float> _fullData;
-	int _nValuesPerStar;
+    std::vector<float> _slicedData;
+    std::vector<float> _fullData;
+    int _nValuesPerStar;
 
-	GLuint _vao;
-	GLuint _vbo;
+    GLuint _vao;
+    GLuint _vbo;
 };
 
 } // namespace openspace

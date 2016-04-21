@@ -37,16 +37,16 @@ struct InitializeData {
 };
 
 struct UpdateData {
-	double time;
+    double time;
     bool isTimeJump;
-	double delta;
-	bool doPerformanceMeasurement;
+    double delta;
+    bool doPerformanceMeasurement;
 };
 
 struct RenderData {
-	const Camera& camera;
-	psc position;
-	bool doPerformanceMeasurement;
+    const Camera& camera;
+    psc position;
+    bool doPerformanceMeasurement;
 };
 
 struct RaycasterTask {

@@ -35,7 +35,7 @@ out vec2 vs_st;
 out vec4 vs_position;
 
 void main(){
-	vs_st = in_st;
-	vs_position =  ViewProjectionMatrix*ModelTransform*in_position; 
-	gl_Position =  vec4(vs_position);
+    vs_st = in_st;
+    vs_position =  ViewProjectionMatrix*ModelTransform*in_position; 
+    gl_Position =  vec4(vs_position);
 }

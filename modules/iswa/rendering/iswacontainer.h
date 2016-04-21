@@ -33,30 +33,30 @@ struct ExtensionFuture;
 
 class ISWAContainer : public Renderable{
 public:
-	ISWAContainer(const ghoul::Dictionary& dictionary);
-	~ISWAContainer();
+    ISWAContainer(const ghoul::Dictionary& dictionary);
+    ~ISWAContainer();
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
+    virtual void render(const RenderData& data) override;
+    virtual void update(const UpdateData& data) override;
 
-	void addISWACygnet(std::string path);
-	void addISWACygnet(int id, std::string data);
-	void addISWACygnet(std::shared_ptr<ISWACygnet> cygnet);
+    void addISWACygnet(std::string path);
+    void addISWACygnet(int id, std::string data);
+    void addISWACygnet(std::shared_ptr<ISWACygnet> cygnet);
 
-	void deleteISWACygnet(std::string name);
+    void deleteISWACygnet(std::string name);
 
-	std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
+    std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
 
 private:
 std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
 std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
 std::vector<std::shared_ptr<ISWACygnet>> _deletedCygnets;
-};	
+};    
 
 }//namespace openspace
 #endif

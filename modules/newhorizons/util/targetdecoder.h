@@ -33,12 +33,12 @@ namespace openspace {
     
 class TargetDecoder : public Decoder {
 public:
-	TargetDecoder(const ghoul::Dictionary& dictionary);
-	virtual std::string getDecoderType();
-	virtual std::vector<std::string> getTranslation();
+    TargetDecoder(const ghoul::Dictionary& dictionary);
+    virtual std::string getDecoderType();
+    virtual std::vector<std::string> getTranslation();
 private:
-	std::string _type;
-	std::vector<std::string> _names;
+    std::string _type;
+    std::vector<std::string> _names;
 };
     
 } // namespace openspace

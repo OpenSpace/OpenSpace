@@ -25,10 +25,13 @@
 #ifndef _FRAGMENT_GLSL_
 #define _FRAGMENT_GLSL_
 
+#define BLEND_MODE_NORMAL 0
+#define BLEND_MODE_ADDITIVE 1
+
 struct Fragment {
     vec4 color;
     float depth;
-    int blend;
+    uint blend;
 };
 
 #endif    

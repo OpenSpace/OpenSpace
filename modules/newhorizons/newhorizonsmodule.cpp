@@ -29,13 +29,11 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/newhorizons/rendering/planetgeometryprojection.h>
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <modules/newhorizons/rendering/renderablefov.h>
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <modules/newhorizons/rendering/simplespheregeometryprojection.h>
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
 #include <modules/newhorizons/util/decoder.h>
@@ -51,23 +49,19 @@ NewHorizonsModule::NewHorizonsModule()
 {}
 
 void NewHorizonsModule::internalInitialize() {
-    ImageSequencer2::initialize();
+    ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometryprojection::PlanetGeometryProjection>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-	fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
+    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-	fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
-
-    auto fPlanetGeometryProjection = FactoryManager::ref().factory<planetgeometryprojection::PlanetGeometryProjection>();
-    fPlanetGeometryProjection->registerClass<planetgeometryprojection::SimpleSphereGeometryProjection>("SimpleSphereProjection");
+    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
 
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");

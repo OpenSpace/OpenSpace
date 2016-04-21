@@ -38,29 +38,29 @@ namespace openspace {
  */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
-	ScreenSpaceFramebuffer();
-	~ScreenSpaceFramebuffer();
+    ScreenSpaceFramebuffer();
+    ~ScreenSpaceFramebuffer();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	void render() override;
-	void update() override;
-	bool isReady() const override;
+    bool initialize() override;
+    bool deinitialize() override;
+    void render() override;
+    void update() override;
+    bool isReady() const override;
 
-	void setSize(glm::vec4);
-	void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
-	void removeAllRenderFunctions();
-	
+    void setSize(glm::vec4);
+    void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
+    void removeAllRenderFunctions();
+    
 private:
-	void createFragmentbuffer();
-	static int id();
+    void createFragmentbuffer();
+    static int id();
 
-	properties::Vec4Property _size;
+    properties::Vec4Property _size;
 
-	std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-	std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
+    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
 
-	int _id;
+    int _id;
 };
 
 } //namespace openspace

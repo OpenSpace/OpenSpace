@@ -35,7 +35,7 @@ class QSlider;
 class ControlWidget : public QWidget {
 Q_OBJECT
 public:
-	ControlWidget(QWidget* parent);
+    ControlWidget(QWidget* parent);
 
     void update(QString currentTime, QString currentDelta);
 

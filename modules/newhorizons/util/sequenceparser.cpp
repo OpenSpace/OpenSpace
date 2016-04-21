@@ -31,8 +31,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-	const std::string _loggerCat = "SequenceParser";
-	const std::string keyTranslation = "DataInputTranslation";
+    const std::string _loggerCat = "SequenceParser";
+    const std::string keyTranslation = "DataInputTranslation";
 
     const std::string PlaybookIdentifierName = "Playbook";
 }

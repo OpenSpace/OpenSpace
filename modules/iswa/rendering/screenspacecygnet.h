@@ -33,32 +33,31 @@ namespace openspace{
 
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
-	ScreenSpaceCygnet(int cygnetId);
-	// ScreenSpaceCygnet(std::shared_ptr<Metadata> data);
-	~ScreenSpaceCygnet();
+    ScreenSpaceCygnet(int cygnetId);
+    ~ScreenSpaceCygnet();
 
-	void render() override;
-	bool initialize() override;
-	bool deinitialize() override;
-	void update() override;
-	bool isReady() const override;
+    void render() override;
+    bool initialize() override;
+    bool deinitialize() override;
+    void update() override;
+    bool isReady() const override;
 
 private:
-	static int id();
-	void updateTexture();
-	void loadTexture();
+    static int id();
+    void updateTexture();
+    void loadTexture();
 
-	properties::FloatProperty _updateInterval;
+    properties::FloatProperty _updateInterval;
 
-	std::string _path;
-	const int _cygnetId;
-	float _time;
-	float _lastUpdateTime = 0.0f;
+    std::string _path;
+    const int _cygnetId;
+    float _time;
+    float _lastUpdateTime = 0.0f;
 
-	std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-	std::string _memorybuffer;
-	
-	int _id;	
+    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
+    std::string _memorybuffer;
+    
+    int _id;    
 };
 
  } // namespace openspace

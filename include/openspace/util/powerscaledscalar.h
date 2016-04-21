@@ -36,52 +36,52 @@ namespace openspace {
 
 class PowerScaledScalar {
 public:
-	// constructors
-	PowerScaledScalar();
-	PowerScaledScalar(const glm::vec2 &v);
-	PowerScaledScalar(float f1, float f2);
-	static PowerScaledScalar CreatePSS(double d1);
+    // constructors
+    PowerScaledScalar();
+    PowerScaledScalar(const glm::vec2 &v);
+    PowerScaledScalar(float f1, float f2);
+    static PowerScaledScalar CreatePSS(double d1);
 
-	const glm::vec2& vec2() const;
-	float lengthf() const;
+    const glm::vec2& vec2() const;
+    float lengthf() const;
 
-	// operator overloading
-	PowerScaledScalar& operator=(const PowerScaledScalar& rhs);
-	PowerScaledScalar& operator+=(const PowerScaledScalar& rhs);
-	const PowerScaledScalar operator+(const PowerScaledScalar& rhs) const;
-	PowerScaledScalar& operator-=(const PowerScaledScalar& rhs);
-	const PowerScaledScalar operator-(const PowerScaledScalar& rhs) const;
-	PowerScaledScalar& operator*=(const PowerScaledScalar& rhs);
-	const PowerScaledScalar operator*(const PowerScaledScalar& rhs) const;
-	PowerScaledScalar& operator*=(const float& rhs);
-	const PowerScaledScalar operator*(const float& rhs) const;
-	float& operator[](unsigned int idx);
-	float operator[](unsigned int idx) const;
+    // operator overloading
+    PowerScaledScalar& operator=(const PowerScaledScalar& rhs);
+    PowerScaledScalar& operator+=(const PowerScaledScalar& rhs);
+    const PowerScaledScalar operator+(const PowerScaledScalar& rhs) const;
+    PowerScaledScalar& operator-=(const PowerScaledScalar& rhs);
+    const PowerScaledScalar operator-(const PowerScaledScalar& rhs) const;
+    PowerScaledScalar& operator*=(const PowerScaledScalar& rhs);
+    const PowerScaledScalar operator*(const PowerScaledScalar& rhs) const;
+    PowerScaledScalar& operator*=(const float& rhs);
+    const PowerScaledScalar operator*(const float& rhs) const;
+    float& operator[](unsigned int idx);
+    float operator[](unsigned int idx) const;
 
-	// comparison
-	bool operator==(const PowerScaledScalar& other) const;
-	bool operator<(const PowerScaledScalar& other) const;
-	bool operator>(const PowerScaledScalar& other) const;
-	bool operator<=(const PowerScaledScalar& other) const;
-	bool operator>=(const PowerScaledScalar& other) const;
-	
-	bool operator==(double other) const;
-	bool operator<(double other) const;
-	bool operator>(double other) const;
-	bool operator<=(double other) const;
-	bool operator>=(double other) const;
+    // comparison
+    bool operator==(const PowerScaledScalar& other) const;
+    bool operator<(const PowerScaledScalar& other) const;
+    bool operator>(const PowerScaledScalar& other) const;
+    bool operator<=(const PowerScaledScalar& other) const;
+    bool operator>=(const PowerScaledScalar& other) const;
+    
+    bool operator==(double other) const;
+    bool operator<(double other) const;
+    bool operator>(double other) const;
+    bool operator<=(double other) const;
+    bool operator>=(double other) const;
 
-	// glm integration
-	PowerScaledScalar& operator=(const glm::vec2& rhs);
-	PowerScaledScalar& operator=(float rhs);
+    // glm integration
+    PowerScaledScalar& operator=(const glm::vec2& rhs);
+    PowerScaledScalar& operator=(float rhs);
     
     friend std::ostream& operator<<(std::ostream& os, const PowerScaledScalar& rhs);
-	
-	// allow the power scaled coordinates to access private members
-	friend class PowerScaledCoordinate;
+    
+    // allow the power scaled coordinates to access private members
+    friend class PowerScaledCoordinate;
 private:
-	// float vector used when returning float values
-	glm::vec2 _data;
+    // float vector used when returning float values
+    glm::vec2 _data;
 
 };
 
