@@ -38,9 +38,9 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetile.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
@@ -60,9 +60,9 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetile.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.cpp
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
@@ -77,7 +77,18 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-	"GlobeBrowsing"
-	globebrowsing_module
-	${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+    "GlobeBrowsing"
+    globebrowsing_module
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+
+target_include_directories(
+    openspace-module-globebrowsing
+    SYSTEM PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
+)
+
+target_link_libraries(
+    openspace-module-globebrowsing
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
 )

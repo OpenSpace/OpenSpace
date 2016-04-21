@@ -22,25 +22,30 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEXTURETILE_H__
-#define __TEXTURETILE_H__
+#ifndef __CLIPMAPPYRAMID_H__
+#define __CLIPMAPPYRAMID_H__
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-#include <glm/glm.hpp>
-#include <memory>
+// open space includes
+#include <modules/globebrowsing/datastructures/latlon.h>
 
 namespace openspace {
 
-	class TextureTile
-	{
+	class ClipMapPyramid {
 	public:
-		TextureTile();
-		~TextureTile();
+		/**
+			\Param sizeLevel0 is the size of the biggest patch in the pyramid.
+			The parameter needs to be M_PI / pow(2, i) where i is a positive or zero
+			valued integer.
+		*/
+		ClipMapPyramid(LatLon sizeLevel0);
+		~ClipMapPyramid();
+
+		LatLon getPatchSizeAtLevel(int level);
 
 	private:
+		const LatLon _sizeLevel0;
 	};
+
 }  // namespace openspace
 
-#endif  // __TEXTURETILE_H__
+#endif  // __CLIPMAPPYRAMID_H__

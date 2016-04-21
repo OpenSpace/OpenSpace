@@ -22,15 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/texturetile.h>
+
+
+#include <modules/globebrowsing/rendering/clipmappyramid.h>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+// ghoul includes
+#include <ghoul/misc/assert.h>
+
+namespace {
+	const std::string _loggerCat = "ClipMapPyramid";
+}
 
 namespace openspace {
-	TextureTile::TextureTile()
+	ClipMapPyramid::ClipMapPyramid(LatLon sizeLevel0)
+		: _sizeLevel0(sizeLevel0)
 	{
+
 	}
 
-	TextureTile::~TextureTile()
+	ClipMapPyramid::~ClipMapPyramid()
+	{}
+
+	LatLon ClipMapPyramid::getPatchSizeAtLevel(int level)
 	{
+		return LatLon(_sizeLevel0.lat / pow(2, level), _sizeLevel0.lon / pow(2, level));
 	}
+
 
 }  // namespace openspace

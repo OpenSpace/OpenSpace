@@ -33,10 +33,6 @@
 
 #include <glm/glm.hpp>
 
-
-
-
-
 namespace {
 	const std::string _loggerCat = "TextureTileSet";
 }
@@ -60,17 +56,6 @@ namespace openspace {
 			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
-		/*
-		int dataSize = _testTexture->width() * _testTexture->height() * _testTexture->bytesPerPixel();
-		GLubyte* data = new GLubyte[dataSize];
-		for (size_t i = 0; i < dataSize; i++)
-		{
-			data[i] = unsigned char(i / float(dataSize) * 255);
-		}
-		_testTexture->setPixelData(data);
-		_testTexture->uploadTexture();
-		*/
-		
 	}
 
 	TextureTileSet::~TextureTileSet(){
@@ -78,10 +63,17 @@ namespace openspace {
 	}
 
 	TileIndex TextureTileSet::getTileIndex(LatLonPatch patch) {
+		// Calculate the level of the index depanding on the size of the incoming patch.
+		// The level is as big as possible (as far down as possible) but it can't be
+		// too big since at maximum four tiles should be used to cover a patch
 		int level = log2(static_cast<int>(glm::max(
 			_sizeLevel0.lat / (patch.size().lat),
 			_sizeLevel0.lon / (patch.size().lon))));
+		
+		// If the depth is not big enough, the level must be clamped.
 		level = glm::min(level, _depth);
+		
+		// Calculate the index in x y where the tile should be positioned
 		Vec2 tileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
 		Vec2 nw = patch.northWestCorner().toLonLatVec2();
 		Vec2 offset = _offsetLevel0.toLonLatVec2();
@@ -90,6 +82,7 @@ namespace openspace {
 		// Flip y since indices increase from top to bottom
 		tileIndexXY.y *= -1;
 
+		// Create the tileindex
 		TileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
 		return tileIndex;
 	}
@@ -120,22 +113,29 @@ namespace openspace {
 		const TileIndex& tileIndex)
 	{
 		LatLonPatch tile = getTilePositionAndScale(tileIndex);
+		return getUvTransformationPatchToTile(patch, tile);
+	}
+
+	glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
+		LatLonPatch patch,
+		LatLonPatch tile)
+	{
 		Vec2 posDiff =
-			patch.southWestCorner().toLonLatVec2() - 
+			patch.southWestCorner().toLonLatVec2() -
 			tile.southWestCorner().toLonLatVec2();
-		
+
 		glm::mat3 invTileScale = glm::mat3(
-			{1 / (tile.halfSize().lon * 2),	0,								0,
+		{	1 / (tile.halfSize().lon * 2),	0,								0,
 			0,								1 / (tile.halfSize().lat * 2),	0,
-			0,								0,								1});
+			0,								0,								1 });
 
 		glm::mat3 globalTranslation = glm::mat3(
 		{	1,			0,			0,
 			0,			1,			0,
 			posDiff.x,	posDiff.y,	1 });
-		
+
 		glm::mat3 patchScale = glm::mat3(
-		{ (patch.halfSize().lon * 2),	0,								0,
+		{	(patch.halfSize().lon * 2),	0,								0,
 			0,							(patch.halfSize().lat * 2),		0,
 			0,							0,								1 });
 

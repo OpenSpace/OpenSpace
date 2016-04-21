@@ -57,10 +57,7 @@ namespace openspace {
 		
 		PatchRenderer(shared_ptr<Geometry>);
 		~PatchRenderer();
-		
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius) = 0;
-		virtual void renderPatch(const LatLonPatch& patch, const RenderData& data, double radius, const TileIndex& ti) = 0;
-		
+
 	protected:
 
 		unique_ptr<ProgramObject> _programObject;
@@ -78,35 +75,28 @@ namespace openspace {
 	public:
 		LatLonPatchRenderer(shared_ptr<Geometry>);
 
-		virtual void renderPatch(
+		void renderPatch(
 			const LatLonPatch& patch,
 			const RenderData& data, 
-			double radius) override;
+			double radius);
 
-		virtual void renderPatch(
+		void renderPatch(
 			const LatLonPatch& patch, 
 			const RenderData& data, 
 			double radius, 
-			const TileIndex& ti) override;
+			const TileIndex& ti);
 	};
 
 
 
 	class ClipMapPatchRenderer : public PatchRenderer {
 	public:
-		ClipMapPatchRenderer();
+		ClipMapPatchRenderer(shared_ptr<Geometry> geometry);
 
-		virtual void renderPatch(
-			const LatLonPatch& patch,
+		void renderPatch(
+			const LatLon& patchSize,
 			const RenderData& data,
-			double radius) override;
-
-		virtual void renderPatch(
-			const LatLonPatch& patch,
-			const RenderData& data,
-			double radius,
-			const TileIndex& ti) { /* empty */};
-
+			double radius);
 	};
 }  // namespace openspace
 

@@ -34,8 +34,7 @@
 #include <modules/globebrowsing/rendering/gridgeometry.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
-
-
+#include <modules/globebrowsing/rendering/clipmappyramid.h>
 
 namespace ghoul {
 	namespace opengl {
@@ -58,8 +57,10 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		std::unique_ptr<PatchRenderer> _patchRenderer;
-		std::vector<LatLonPatch> _patches;
+		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
+		
+		ClipMapPyramid _clipMapPyramid;
 
 		properties::IntProperty _rotation;
 

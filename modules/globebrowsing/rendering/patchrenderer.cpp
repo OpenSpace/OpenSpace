@@ -99,7 +99,10 @@ namespace openspace {
 	}
 
 	void LatLonPatchRenderer::renderPatch(
-		const LatLonPatch& patch, const RenderData& data, double radius, const TileIndex& tileIndex)
+		const LatLonPatch& patch,
+		const RenderData& data,
+		double radius,
+		const TileIndex& tileIndex)
 	{
 
 		using namespace glm;
@@ -151,8 +154,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	ClipMapPatchRenderer::ClipMapPatchRenderer()
-		: PatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)))
+	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<Geometry> geometry)
+		: PatchRenderer(geometry)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -165,7 +168,9 @@ namespace openspace {
 	}
 
 	void ClipMapPatchRenderer::renderPatch(
-		const LatLonPatch& patch, const RenderData& data, double radius)
+		const LatLon& patchSize,
+		const RenderData& data,
+		double radius)
 	{
 		// activate shader
 		_programObject->activate();
@@ -178,20 +183,22 @@ namespace openspace {
 
 		// Snap patch position
 		int segmentsPerPatch = 32;
-		LatLon halfSize = patch.halfSize();
 		LatLon stepSize = LatLon(
-			halfSize.lat * 2 / segmentsPerPatch,
-			halfSize.lon * 2 / segmentsPerPatch);
+			patchSize.lat / segmentsPerPatch,
+			patchSize.lon / segmentsPerPatch);
 		ivec2 patchesToCoverGlobe = ivec2(
-			M_PI / (halfSize.lat * 2) + 0.5,
-			M_PI * 2 / (halfSize.lon * 2) + 0.5);
+			M_PI / patchSize.lat + 0.5,
+			M_PI * 2 / patchSize.lon + 0.5);
+		LatLon cameraPosLatLon = LatLon::fromCartesian(data.camera.position().dvec3());
 		ivec2 intSnapCoord = ivec2(
-			patch.center().lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
-			patch.center().lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
+			cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
+			cameraPosLatLon.lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
 		LatLon newPatchCenter = LatLon(
 			stepSize.lat * intSnapCoord.x,
 			stepSize.lon * intSnapCoord.y);
-		LatLonPatch newPatch(newPatchCenter, patch.halfSize());
+		LatLonPatch newPatch(
+			newPatchCenter,
+			LatLon(patchSize.lat / 2, patchSize.lon / 2));
 
 		ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
@@ -201,7 +208,7 @@ namespace openspace {
 
 
 		// Get the textures that should be used for rendering
-		TileIndex tileIndex = _tileSet.getTileIndex(patch);
+		TileIndex tileIndex = _tileSet.getTileIndex(newPatch);
 		LatLonPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
 		std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
 		glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
@@ -213,9 +220,11 @@ namespace openspace {
 		_programObject->setUniform("textureSampler", texUnit);
 		_programObject->setUniform("uvTransformPatchToTile", mat3(uvTransform));
 
-		_programObject->setUniform("modelViewProjectionTransform", data.camera.projectionMatrix() * viewTransform *  modelTransform);
+		_programObject->setUniform(
+			"modelViewProjectionTransform",
+			data.camera.projectionMatrix() * viewTransform *  modelTransform);
 		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
-		_programObject->setUniform("lonLatScalingFactor", 2.0f * vec2(halfSize.toLonLatVec2()));
+		_programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
 		_programObject->setUniform("contraction", contraction);
 

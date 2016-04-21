@@ -69,13 +69,13 @@ namespace openspace {
 		// Calculate the patch's center point in screen space
 		vec4 patchCenterModelSpace = vec4(radius * patch.center().asUnitCartesian(), 1);
 		vec4 patchCenterProjectionSpace = modelViewProjectionTransform * patchCenterModelSpace;
-		vec2 pointScreenSpace = (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy;
+		vec2 pointScreenSpace = (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy();
 		
 		// Calculate the screen space margin that represents an axis aligned bounding 
 		// box based on the patch's minimum boudning sphere
 		double boundingRadius = radius * patch.minimalBoundingRadius();
 		vec4 marginProjectionSpace = vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
-		vec2 marginScreenSpace = (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy;
+		vec2 marginScreenSpace = (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy();
 
 		// Test the bounding box by testing the center point and the corresponding margin
 		return testPoint(pointScreenSpace, marginScreenSpace);
@@ -101,7 +101,7 @@ namespace openspace {
 		const mat4x4& modelViewProjection) const 
 	{
 		vec4 pointProjectionSpace = modelViewProjection * vec4(point, 1.0f);
-		vec2 pointScreenSpace = (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy;
+		vec2 pointScreenSpace = (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy();
 		return pointScreenSpace;
 	}
 

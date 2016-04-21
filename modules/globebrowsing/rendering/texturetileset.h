@@ -31,7 +31,6 @@
 #include <modules/globebrowsing/datastructures/latlon.h>
 
 #include <modules/globebrowsing/rendering/twmstileprovider.h>
-#include <modules/globebrowsing/rendering/texturetile.h>
 
 
 
@@ -40,8 +39,8 @@
 //									TEXTURE TILE SET									//
 //////////////////////////////////////////////////////////////////////////////////////////
 
-
 namespace openspace {
+	
 	using namespace ghoul::opengl;
 
 	class TextureTileSet
@@ -50,16 +49,47 @@ namespace openspace {
 		TextureTileSet(LatLon sizeLevel0, LatLon offsetLevel0, int depth);
 		~TextureTileSet();
 
-		/// Returns the index of the tile at an appropriate level.
-		/// Appropriate meaning that the tile should be at as high level as possible
-		/// Without the tile being smaller than the patch in lat-lon space.
-		/// The tile is at least as big as the patch.
+		/**
+			Returns the index of the tile at an appropriate level.
+			Appropriate meaning that the tile should be at as high level as possible
+			Without the tile being smaller than the patch in lat-lon space.
+			The tile is at least as big as the patch.
+		*/
 		TileIndex getTileIndex(LatLonPatch patch);
+
+		/**
+			Returns a texture that can be used for the specified patch
+		*/
 		std::shared_ptr<Texture> getTile(LatLonPatch patch);
- 
+
+		/**
+			Returns the texture for the given tile index. The indices reaches from left
+			to right and top to bottom while the texture coordinates and the latlon
+			coordinates reaches from left to right and bottom to top.
+		*/
 		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+
+		/**
+			A tile can be defined with a tile index or a LatLonPatch which defines
+			the position and the size of the tile.
+		*/
 		LatLonPatch getTilePositionAndScale(const TileIndex& tileIndex);
-		glm::mat3 getUvTransformationPatchToTile(LatLonPatch patch, const TileIndex& tileIndex);
+
+		/**
+			A transformation (translation and scaling) from the texture space of a patch
+			to the texture space of a tile.
+		*/
+		glm::mat3 getUvTransformationPatchToTile( 
+			LatLonPatch patch,
+			const TileIndex& tileIndex);
+
+		/**
+			Overloaded function
+		*/
+		glm::mat3 getUvTransformationPatchToTile(
+			LatLonPatch patch,
+			LatLonPatch tile);
+
 	private:
 		LatLon _sizeLevel0;
 		LatLon _offsetLevel0;

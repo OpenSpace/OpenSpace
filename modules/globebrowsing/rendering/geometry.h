@@ -40,6 +40,10 @@ namespace openspace {
 	necessarily needed for all purpouses so the Geometry can disable use of normals for
 	example.
 */
+
+	// TODO : Possibly render triangle strips in this class instead of triangles since
+	// that is faster
+
 class Geometry
 {
 public:

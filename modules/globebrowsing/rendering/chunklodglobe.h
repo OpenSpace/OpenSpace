@@ -56,7 +56,7 @@ namespace openspace {
 		ChunkLodGlobe(const ghoul::Dictionary& dictionary);
 		~ChunkLodGlobe();
 
-		PatchRenderer& getPatchRenderer();
+		LatLonPatchRenderer& getPatchRenderer();
 		FrustrumCuller& getFrustrumCuller();
 
 		bool initialize() override;
@@ -86,7 +86,7 @@ namespace openspace {
 		std::shared_ptr<FrustrumCuller> _frustrumCuller;
 
 		// the patch used for actual rendering
-		std::unique_ptr<PatchRenderer> _patchRenderer;
+		std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
 
 		
 		static const LatLonPatch LEFT_HEMISPHERE;
