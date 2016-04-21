@@ -44,6 +44,7 @@ set(HEADER_FILES
 
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
+	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/angle.h
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/lrucache.h
 
 )
@@ -65,6 +66,7 @@ set(SOURCE_FILES
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/angle.inl
 	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/lrucache.inl
    
 )

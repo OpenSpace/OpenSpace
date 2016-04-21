@@ -58,5 +58,6 @@ void main()
 	vec3 p = globalInterpolation();
 
 	vec4 position = modelViewProjectionTransform * vec4(p, 1);
+	vs_position = vec4(p, 1);
 	gl_Position = z_normalization(position);
 }

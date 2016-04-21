@@ -49,7 +49,9 @@ Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = texture2D(textureSampler, vec2(uvTransformPatchToTile * vec3(vs_uv.s, vs_uv.t, 1)));
-	frag.color = frag.color * 1.0  + vec4(fract(vs_uv * 1), 0.4,1) * 0.2;
+	frag.color = frag.color * 0.5  + vec4(fract(vs_uv * 1), 0.4,1) * 0.5;
+	frag.color = 0.5*frag.color + 0.5 * vec4(1)* (abs(vs_position.y) < 10000 ? 1 : 0) ;
+	frag.color.a = 1;
 	frag.depth =  pscDepth(vs_position);
 
 	return frag;

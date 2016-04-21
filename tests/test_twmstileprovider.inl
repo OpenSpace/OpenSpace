@@ -37,6 +37,7 @@ using namespace openspace;
 
 TEST_F(TWMSTileProviderTest, Simple) {
 
+	/*
 	TwmsTileProvider tileProvider;
 
 	TileIndex tileIndex = { 0, 0, 0 };
@@ -46,5 +47,5 @@ TEST_F(TWMSTileProviderTest, Simple) {
 	std::this_thread::sleep_for(2s);
 
 	std::cout << "exiting" << std::endl;
-	
+	*/
 }

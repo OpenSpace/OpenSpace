@@ -38,6 +38,10 @@ typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
+
+
+
+
 struct LatLon {
 	LatLon();
 	LatLon(Scalar latitude, Scalar longitude);
@@ -47,8 +51,13 @@ struct LatLon {
 	Vec3 asUnitCartesian() const;
 	Vec2 toLonLatVec2() const;
 
-	inline bool operator==(const LatLon& other);
-	inline bool operator!=(const LatLon& other) { return !(*this == (other)); }
+	inline bool operator==(const LatLon& other) const;
+	inline bool operator!=(const LatLon& other) const { return !(*this == (other)); }
+
+	inline LatLon operator+(const LatLon& other) const;
+	inline LatLon operator-(const LatLon& other) const;
+	inline LatLon operator*(Scalar scalar) const;
+	inline LatLon operator/(Scalar scalar) const;
 
 	Scalar lat;
 	Scalar lon;
@@ -80,6 +89,23 @@ public:
 	LatLon northEastCorner() const;
 	LatLon southWestCorner() const;
 	LatLon southEastCorner() const;
+
+	/**
+	 * Clamps a point to the patch region
+	 */
+	LatLon clamp(const LatLon& p) const;
+
+	/**
+	 * Returns the corner of the patch that is closest to the given point p
+	 */
+	LatLon closestCorner(const LatLon& p) const;
+
+	/**
+	* Returns a point on the patch that minimizes the great-circle distance to
+	* the given point p.
+	*/
+	LatLon closestPoint(const LatLon& p) const;
+	
 
 	const LatLon& center() const;
 	const LatLon& halfSize() const;

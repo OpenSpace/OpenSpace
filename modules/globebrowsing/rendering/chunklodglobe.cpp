@@ -120,6 +120,8 @@ namespace openspace {
 
 	void ChunkLodGlobe::render(const RenderData& data){
 		minDistToCamera = INFINITY;
+		ChunkNode::renderedPatches = 0;
+
 		ChunkIndex leftRootTileIndex = { 0, 0, 1 };
 		_leftRoot->render(data, leftRootTileIndex);
 
@@ -129,9 +131,10 @@ namespace openspace {
 		//LDEBUG("min distnace to camera: " << minDistToCamera);
 
 		Vec3 cameraPos = data.camera.position().dvec3();
-		LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+		//LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
 
 		//LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
+		//LDEBUG("RenderedPatches count: " << ChunkNode::renderedPatches);
 	}
 
 	void ChunkLodGlobe::update(const UpdateData& data) {
