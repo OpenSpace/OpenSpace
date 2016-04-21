@@ -4,8 +4,8 @@ return {
 		Parent = "SolarSystem",
 		Renderable = {
 			Type = "ISWAContainer",
-			TextureCygnets = "[-1, -3, -2]",
-			DataCygnets = "[]",
+			TextureCygnets = "[]",
+			DataCygnets = "[-2]",
 			Frame = "GALACTIC"
 		},
 		Ephemeris = {

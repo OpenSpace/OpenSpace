@@ -49,6 +49,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
     ,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
+    ,_normValues("zScoreValues", "Z Score Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
     ,_colorbar(nullptr)
     ,_futureData(nullptr)
     ,_dataSlice(nullptr)
@@ -60,22 +61,26 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_dataOptions);
-    addProperty(_midLevel);
+    //addProperty(_midLevel);
     // addProperty(_topColor);
     // addProperty(_midColor);
     // addProperty(_botColor);
-    // addProperty(_tfValues);
+    //addProperty(_tfValues);
+    addProperty(_normValues);
 
     registerProperties();
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
-    OsEng.gui()._iSWAproperty.registerProperty(&_midLevel);
+    //OsEng.gui()._iSWAproperty.registerProperty(&_midLevel);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
     // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
+   // OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
+    OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
+    
 
     // dictionary.getValue("kwPath", _kwPath);
-
+    _normValues.onChange([this](){loadTexture();});
+   // _midLevel.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){loadTexture();});
 }
 
@@ -303,12 +308,15 @@ float* DataPlane::readData(){
 
         std::vector<float> min; 
         std::vector<float> max;
+        std::vector<float> sum;
+        std::vector<float> mean;
+        std::vector<float> standardDeviation;
         std::vector<std::vector<float>> optionValues;
 
         for(int i=0; i < selectedOptions.size(); i++){
             min.push_back(std::numeric_limits<float>::max());
             max.push_back(std::numeric_limits<float>::min());
-
+            sum.push_back(0);
             std::vector<float> v;
             optionValues.push_back(v);
         }
@@ -335,7 +343,7 @@ float* DataPlane::readData(){
 
                     min[i] = std::min(min[i], optionValues[i][numValues]);
                     max[i] = std::max(max[i], optionValues[i][numValues]);
-
+                    sum[i] += optionValues[i][numValues];
 
                 }
                 numValues++;
@@ -351,39 +359,41 @@ float* DataPlane::readData(){
         // for(int i=0; j<optionValues.size(); i++){
         //     refValue.push_back(optionValues[i][0]);
         // }
-
+    
+        for(int i=0; i<optionValues.size(); i++){    
+                
+            //Calculate the mean
+            mean.push_back((1.0 / numValues) * sum[i]);
+            //Calculate the Standard Deviation
+            standardDeviation.push_back(sqrt (((pow(sum[i], 2.0)) - ((1.0/numValues) * (pow(sum[i],2.0)))) / (numValues - 1.0)));           
+        }
+        
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
             for(int j=0; j<optionValues.size(); j++){
-                float refV = optionValues[j][_dimensions.x*_dimensions.y-1];
-                float v    = optionValues[j][i];
+                float v = optionValues[j][i];
 
-                float normValue = 0;
-                if(v > refV){
-                    normValue = (1-refProcent)*(v-refV)/(max[j]-refV);
-                }else{
-                    normValue = -(refProcent)*((refV-v)/(refV-min[j]));
-
-                    // if(v < refV-1){
-                    //     std::cout << "refV: " << refV << ", v: " << v << ", min: " << min[j] << ", max: " << max[j] << ", "; 
-                    //     std::cout << "norm: " << normValue << ", norm+1/2: ";
-                    //     std::cout << (normValue+1.0)/2.0f << std::endl;
-                    // }
-                }
-                normValue = (normValue+refProcent);
-
-                // normValue = (optionValues[j][i]-min[j])/(max[j]-min[j]);
-                combinedValues[i] += glm::clamp(normValue, 0.0f, 1.0f);
+                combinedValues[i] = normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
             }
             combinedValues[i] /= selectedOptions.size();
-            // std::cout << std::endl;
         }
         return combinedValues;
     
-    }else{
+    } else {
         LWARNING("Noting in memory buffer, are you connected to the information super highway?");
     }
 } 
+
+float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){
+    
+    float zScoreMin = _normValues.value().x;
+    float zScoreMax = _normValues.value().y;
+    float standardScore = ( value - mean ) / sd;
+    // Clamp intresting values
+    standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
+    //return and normalize
+    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+}
 
 bool DataPlane::loadTexture() {
     float* values = readData();

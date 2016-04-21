@@ -38,17 +38,18 @@ class DataPlane : public CygnetPlane {
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
 
-     virtual bool initialize() override;
+    virtual bool initialize() override;
     virtual bool deinitialize() override;
     virtual void render(const RenderData& data) override;
     virtual void update(const UpdateData& data) override;
  
  private:
-     virtual bool loadTexture() override;
-     virtual bool updateTexture() override;
-     void readHeader();
-     float* readData();
-
+    virtual bool loadTexture() override;
+    virtual bool updateTexture() override;
+    void readHeader();
+    float* readData();
+    float normalizeWithStandardScore(float value, float mean, float sd);
+     
     static int id();
 
     properties::SelectionProperty _dataOptions;
@@ -58,6 +59,7 @@ class DataPlane : public CygnetPlane {
     properties::Vec4Property _midColor;
     properties::Vec4Property _botColor;
     properties::Vec2Property _tfValues;
+    properties::Vec2Property _normValues;
 
     // std::shared_ptr<KameleonWrapper> _kw;
     // std::string _kwPath;
