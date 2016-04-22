@@ -45,8 +45,9 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
     ,_futureData(nullptr)
-    ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
+    ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(5.0))
     ,_useLog("useLog","Use Logarithm Norm", false)
+    ,_useHistogram("useHistogram","Use Histogram Equalization", true)
     // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     // ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     // ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
@@ -60,6 +61,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_useLog);
+    addProperty(_useHistogram);
     addProperty(_normValues);
     addProperty(_dataOptions);
     //addProperty(_midLevel);
@@ -71,6 +73,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
@@ -83,6 +86,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _normValues.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
+    _useHistogram.onChange([this](){loadTexture();});
 }
 
 DataPlane::~DataPlane(){}
@@ -295,6 +299,22 @@ float* DataPlane::readData(){
         std::vector<float> standardDeviation;
 
         std::vector<std::vector<float>> optionValues;
+        
+        // HISTOGRAM
+        // number of levels/bins/values
+        const int levels = 512;    
+        // Normal Histogram where "levels" is the number of steps/bins
+        std::vector<std::vector<int>> histogram;
+        // Maps the old levels to new ones. 
+        std::vector<std::vector<float>> newLevels;
+
+        // maps the data values to the histogram bin/index/level
+        auto mapToHistogram = [levels](float val, float varMin, float varMax) {
+            float probability = (val-varMin)/(varMax-varMin);
+            float mappedValue = probability * levels;
+            return glm::clamp(mappedValue, 0.0f, static_cast<float>(levels - 1));
+        };
+        
 
         for(int i=0; i < selectedOptions.size(); i++){
             min.push_back(std::numeric_limits<float>::max());
@@ -305,6 +325,11 @@ float* DataPlane::readData(){
 
             std::vector<float> v;
             optionValues.push_back(v);
+            
+            //initialize histogram for chosen values
+            histogram.push_back( std::vector<int>(levels, 0) );
+            //initialize the newLevels for chosen values
+            newLevels.push_back( std::vector<float>(levels, 0.0f) );
         }
 
         float* combinedValues = new float[_dimensions.x*_dimensions.y];
@@ -348,10 +373,46 @@ float* DataPlane::readData(){
             mean.push_back((1.0 / numValues) * sum[i]);
             //Calculate the Standard Deviation
             standardDeviation.push_back(sqrt (((pow(sum[i], 2.0)) - ((1.0/numValues) * (pow(sum[i],2.0)))) / (numValues - 1.0)));
-
             //calulate log mean
-            logmean[i] /= numValues;        
+            logmean[i] /= numValues;   
+                
         }
+        
+        //HISTOGRAM FUNCTIONALITY
+        //======================
+        if(_useHistogram.value()){
+            for(int j=0; j<optionValues.size(); j++){ 
+                for(int i = 0; i < numValues; i++){
+                    
+                    float v = optionValues[j][i];
+                    float pixelVal = mapToHistogram(v, min[j], max[j]);       
+                    histogram[j][(int)pixelVal]++;
+                    optionValues[j][i] = pixelVal;
+                }
+                
+                // Map mean and standard deviation to histogram levels (Not sure about this)
+                mean[j] = mapToHistogram(mean[j] , min[j], max[j]);
+                logmean[j] = mapToHistogram(logmean[j] , min[j], max[j]);
+                standardDeviation[j] = mapToHistogram(standardDeviation[j], min[j], max[j]);
+                min[j] = 0.0f;
+                max[j] = levels - 1.0f;
+            }
+        
+        
+            //Calculate the cumulative distributtion function (CDF)
+            for(int j=0; j<optionValues.size(); j++){ 
+                float previousCdf = 0.0f;
+                for(int i = 0; i < levels; i++){
+                    
+                    float probability = histogram[j][i] / (float)numValues; 
+                    float cdf  = previousCdf + probability;
+                    cdf = glm::clamp(cdf, 0.0f, 1.0f); //just in case
+                    newLevels[j][i] = cdf * (levels-1);
+                    previousCdf = cdf;
+                }
+            }
+        }
+        //======================
         
         for(int i=0; i< numValues; i++){
             combinedValues[i] = 0;
@@ -359,11 +420,24 @@ float* DataPlane::readData(){
             for(int j=0; j<optionValues.size(); j++){
                 float v = optionValues[j][i];
 
+                // if use histogram get the equalized values
+                if(_useHistogram.value()){
+                    v = newLevels[j][(int)v];
+                    
+                    // Map mean and standard deviation to new histogram levels (Not sure about this)
+                    mean[j] =  newLevels[j][(int) mean[j]];
+                    logmean[j] =  newLevels[j][(int) logmean[j]];
+                    standardDeviation[j] = newLevels[j][(int) standardDeviation[j]];
+                }
+                
                 if(_useLog.value()){
                     combinedValues[i] += normalizeWithLogarithm(v, logmean[j]);
                 }else{
                     combinedValues[i] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
                 }
+                
+                // standard normalization when using histogram
+                //combinedValues[i] += v / (levels-1);
             }
 
             combinedValues[i] /= selectedOptions.size();
