@@ -132,9 +132,8 @@ bool DataPlane::deinitialize(){
 
 bool DataPlane::loadTexture() {
     float* values = readData();
-    if(!values){
+    if(!values)
         return false;
-    }
 
     if (!_texture) {
         std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
@@ -221,10 +220,10 @@ void DataPlane::readHeader(){
 }
 
 float* DataPlane::readData(){
-    if(!_dataOptions.options().size()) // load options for value selection
+    if(!_memorybuffer.empty()){
+        if(!_dataOptions.options().size()) // load options for value selection
             readHeader();
 
-    if(!_memorybuffer.empty()){
         std::stringstream memorystream(_memorybuffer);
         std::string line;
 
@@ -317,6 +316,7 @@ float* DataPlane::readData(){
     
     } else {
         LWARNING("Noting in memory buffer, are you connected to the information super highway?");
+        return nullptr;
     }
 } 
 
