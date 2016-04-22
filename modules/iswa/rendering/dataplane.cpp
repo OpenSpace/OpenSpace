@@ -45,6 +45,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_dataOptions("dataOptions", "Data Options")
     ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
     ,_useLog("useLog","Use Logarithm Norm", false)
+    ,_useRGB("useRGB","Use RGB Channels", false)
     // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     // ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
     // ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
@@ -58,6 +59,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_useLog);
+    addProperty(_useRGB);
     addProperty(_normValues);
     addProperty(_dataOptions);
     //addProperty(_midLevel);
@@ -69,6 +71,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
@@ -79,8 +82,20 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
 
     _normValues.onChange([this](){loadTexture();});
-    _dataOptions.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
+    _dataOptions.onChange([this](){
+        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
+            LWARNING("More than 3 values, using only the red channel.");
+        }
+        loadTexture();
+    });
+
+    _useRGB.onChange([this](){
+        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
+            LWARNING("More than 3 values, using only the red channel.");
+        }
+            loadTexture();
+    });
 }
 
 DataPlane::~DataPlane(){}
@@ -139,8 +154,8 @@ bool DataPlane::loadTexture() {
         std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                 values, 
                                                                 _dimensions,
-                                                                ghoul::opengl::Texture::Format::Red,
-                                                                GL_RED, 
+                                                                ghoul::opengl::Texture::Format::RGB,
+                                                                GL_RGB, 
                                                                 GL_FLOAT,
                                                                 ghoul::opengl::Texture::FilterMode::Linear,
                                                                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
@@ -202,7 +217,7 @@ void DataPlane::readHeader(){
                     std::string option;
                     while(ss >> option){
                         if(option != "x" && option != "y" && option != "z"){
-                            _dataOptions.addOption({numDataOptions, option});
+                            _dataOptions.addOption({numDataOptions, name()+"_"+option});
                             numDataOptions++;
                         }
                     }
@@ -251,7 +266,7 @@ float* DataPlane::readData(){
             optionValues.push_back(v);
         }
 
-        float* combinedValues = new float[_dimensions.x*_dimensions.y];
+        float* combinedValues = new float[3*_dimensions.x*_dimensions.y];
 
         int numValues = 0;
         while(getline(memorystream, line)){
@@ -298,19 +313,38 @@ float* DataPlane::readData(){
         }
         
         for(int i=0; i< numValues; i++){
-            combinedValues[i] = 0;
+            if(_useRGB.value() && (optionValues.size() <= 3)){
+            combinedValues[3*i+0] = 0;
+            combinedValues[3*i+1] = 0;
+            combinedValues[3*i+2] = 0;
 
-            for(int j=0; j<optionValues.size(); j++){
-                float v = optionValues[j][i];
+                for(int j=0; j<optionValues.size(); j++){
 
-                if(_useLog.value()){
-                    combinedValues[i] += normalizeWithLogarithm(v, logmean[j]);
-                }else{
-                    combinedValues[i] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
+                    float v = optionValues[j][i];
+
+                    if(_useLog.value()){
+                        combinedValues[3*i+j] += normalizeWithLogarithm(v, logmean[j]);
+                    }else{
+                        combinedValues[3*i+j] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
+                    }
                 }
-            }
+            }else{
+                combinedValues[3*i+0] = 0;
+                combinedValues[3*i+1] = 0;
+                combinedValues[3*i+2] = 0;
 
-            combinedValues[i] /= selectedOptions.size();
+                for(int j=0; j<optionValues.size(); j++){
+
+                    float v = optionValues[j][i];
+
+                    if(_useLog.value()){
+                        combinedValues[3*i+0] += normalizeWithLogarithm(v, logmean[j]);
+                    }else{
+                        combinedValues[3*i+0] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
+                    }
+                }
+                combinedValues[3*i+0] /= selectedOptions.size();
+            }
         }
         return combinedValues;
     
