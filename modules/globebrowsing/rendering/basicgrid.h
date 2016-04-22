@@ -22,49 +22,42 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGEOMETRY_H__
-#define __CLIPMAPGEOMETRY_H__
 
-#include <modules/globebrowsing/rendering/geometry.h>
+#ifndef __BASICGRIDGEOMETRY_H__
+#define __BASICGRIDGEOMETRY_H__
+
+#include <glm/glm.hpp>
+
+#include <modules/globebrowsing/rendering/grid.h>
 
 #include <vector>
-#include <glm/glm.hpp>
 
 namespace openspace {
 
-class ClipMapGeometry : public Geometry
+class BasicGrid : public Grid
 {
 public:
-	ClipMapGeometry(
-		unsigned int resolution,
-		Positions usePositions = Positions::No, 
-		TextureCoordinates useTextures = TextureCoordinates::Yes, 
-		Normals useNormals = Normals::No
-	);
+	BasicGrid(
+		unsigned int xRes,
+		unsigned int yRes,
+		Geometry::Positions usePositions,
+		Geometry::TextureCoordinates useTextureCoordinates,
+		Geometry::Normals useNormals);
+	~BasicGrid();
 
-	~ClipMapGeometry();
+	virtual int xResolution() const;
+	virtual int yResolution() const;
 
-	const unsigned int resolution() const;
+protected:
+	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
+	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes);
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);
+	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes);
 
-	static size_t numVerticesBottom(unsigned int resolution);
-	static size_t numVerticesLeft(unsigned int resolution);
-	static size_t numVerticesRight(unsigned int resolution);
-	static size_t numVerticesTop(unsigned int resolution);
+	void validate(int xRes, int yRes);
 
-	static size_t numElements(unsigned int resolution);
-	static size_t numVertices(unsigned int resolution);
-private:
-	static std::vector<GLuint>		CreateElements(unsigned int resoluion);
-	static std::vector<glm::vec4>	CreatePositions(unsigned int resolution);
-	static std::vector<glm::vec2>	CreateTextureCoordinates(unsigned int resolution);
-	static std::vector<glm::vec3>	CreateNormals(unsigned int resolution);
-
-	static void validate(unsigned int resolution);
-
-	// _resolution defines how many grid squares the geometry has in one direction.
-	// In its uncontracted state, the clipmap geometry will have two extra grid squares
-	// in each direction.
-	unsigned int _resolution;
+	inline size_t numElements(int xRes, int yRes);
+	inline size_t numVertices(int xRes, int yRes);
 };
 } // namespace openspace
-#endif // __CLIPMAPGEOMETRY_H__
+#endif // __BASICGRIDGEOMETRY_H__

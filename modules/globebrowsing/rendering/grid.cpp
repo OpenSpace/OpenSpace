@@ -22,54 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGLOBE_H__
-#define __CLIPMAPGLOBE_H__
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/grid.h>
-#include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/rendering/clipmappyramid.h>
 
-namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
+namespace {
+	const std::string _loggerCat = "Grid";
 }
 
 namespace openspace {
 
-	class ClipMapGlobe : public Renderable {
-	public:
-		ClipMapGlobe(const ghoul::Dictionary& dictionary);
-		~ClipMapGlobe();
+	Grid::Grid(
+		int xRes,
+		int yRes,
+		Geometry::Positions usePositions,
+		Geometry::TextureCoordinates useTextures,
+		Geometry::Normals useNormals)
+	: _xRes(xRes)
+	, _yRes(yRes)
+{
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+}
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+Grid::~Grid()
+{
 
-	private:		
-		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
-		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
-		
-		ClipMapPyramid _clipMapPyramid;
+}
 
-		properties::IntProperty _rotation;
+Geometry& Grid::geometry()
+{
+	return *_geometry;
+}
 
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
-	};
-
-}  // namespace openspace
-
-#endif  // __CLIPMAPGLOBE_H__
+}// namespace openspace

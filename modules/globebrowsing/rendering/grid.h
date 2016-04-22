@@ -22,7 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #ifndef __GRIDGEOMETRY_H__
 #define __GRIDGEOMETRY_H__
 
@@ -35,44 +34,32 @@
 
 namespace openspace {
 
-class GridGeometry : public Geometry
+class Grid
 {
 public:
-	GridGeometry(
-		unsigned int xRes,
-		unsigned int yRes,
-		Positions usePositions = Positions::No, 
-		TextureCoordinates useTextures = TextureCoordinates::No, 
-		Normals useNormals = Normals::No
-	);
+	Grid(
+		int xRes,
+		int yRes,
+		Geometry::Positions usePositions = Geometry::Positions::No,
+		Geometry::TextureCoordinates useTextures = Geometry::TextureCoordinates::No,
+		Geometry::Normals useNormals = Geometry::Normals::No);
+	~Grid();
 
-	~GridGeometry();
+	Geometry& geometry();
 
-	inline const unsigned int xResolution() const;
-	inline const unsigned int yResolution() const;
+	virtual int xResolution() const = 0;
+	virtual int yResolution() const = 0;
 
-	inline static size_t numElements(unsigned int xRes, unsigned int yRes);
-	static size_t numVertices(unsigned int xRes, unsigned int yRes);
+protected:
+	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes) = 0;
+	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes) = 0;
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes) = 0;
+	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes) = 0;
 
-private:
-	static std::vector<GLuint> CreateElements(unsigned int xRes, unsigned int yRes);
-	static std::vector<glm::vec4> CreatePositions(
-		unsigned int xRes,
-		unsigned int yRes,
-		float xSize = 1.0f,
-		float ySize = 1.0f,
-		float xOffset = 0.0f,
-		float yOffset = 0.0f);
-	static std::vector<glm::vec2> CreateTextureCoordinates(
-		unsigned int xRes,
-		unsigned int yRes);
-	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
+	std::unique_ptr<Geometry> _geometry;
 
-	inline static void validate(unsigned int xRes, unsigned int yRes);
-	inline void validateIndices(unsigned int x, unsigned int y);
-
-	unsigned int _xRes;
-	unsigned int _yRes;
+	const int _xRes;
+	const int _yRes;
 };
 } // namespace openspace
 #endif // __GRIDGEOMETRY_H__

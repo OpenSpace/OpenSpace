@@ -32,7 +32,7 @@
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/rendering/geometry.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
+#include <modules/globebrowsing/rendering/basicgrid.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
 
 namespace ghoul {
@@ -59,7 +59,7 @@ namespace openspace {
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 		//std::unique_ptr<Geometry> _testGeometry;
-		GridGeometry _grid;
+		BasicGrid _grid;
 		
 
 		properties::IntProperty _rotation;

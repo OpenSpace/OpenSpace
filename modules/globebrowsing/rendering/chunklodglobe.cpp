@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/rendering/chunklodglobe.h>
 
+#include <modules/globebrowsing/rendering/basicgrid.h>
+
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -79,7 +81,9 @@ namespace openspace {
 
 		// ---------
 		// init Renderer
-		auto geometry = std::shared_ptr<Geometry>(new GridGeometry(10, 10,
+		auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
+			10,
+			10,
 			Geometry::Positions::No,
 			Geometry::TextureCoordinates::Yes,
 			Geometry::Normals::No));

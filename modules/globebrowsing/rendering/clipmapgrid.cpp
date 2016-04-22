@@ -22,33 +22,26 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
-	const std::string _loggerCat = "ClipMapGeometry";
+	const std::string _loggerCat = "ClipMapGrid";
 }
 
 namespace openspace {
 
-ClipMapGeometry::ClipMapGeometry(
-	unsigned int resolution,
-	Positions usePositions, 
-	TextureCoordinates useTextures, 
-	Normals useNormals)
-	: Geometry(CreateElements(resolution), usePositions, useTextures, useNormals)
-	, _resolution(resolution)
+ClipMapGeometry::ClipMapGeometry(unsigned int resolution)
+	: Grid(resolution, resolution, Geometry::Positions::No, Geometry::TextureCoordinates::Yes, Geometry::Normals::No)
 {
-	if(_useVertexPositions){
-		setVertexPositions(CreatePositions(_resolution));
-	}
-	if (_useTextureCoordinates) {
-		setVertexTextureCoordinates(CreateTextureCoordinates(_resolution));
-	}
-	if (_useVertexNormals) {
-		setVertexNormals(CreateNormals(_resolution));
-	}
+	_geometry = std::unique_ptr<Geometry>(new Geometry(
+		CreateElements(resolution, resolution),
+		Geometry::Positions::No,
+		Geometry::TextureCoordinates::Yes,
+		Geometry::Normals::No));
+
+	_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(resolution, resolution));
 }
 
 ClipMapGeometry::~ClipMapGeometry()
@@ -56,38 +49,46 @@ ClipMapGeometry::~ClipMapGeometry()
 
 }
 
-const unsigned int ClipMapGeometry::resolution() const {
-	return _resolution;
+int ClipMapGeometry::xResolution() const {
+	return resolution();
 }
 
-size_t ClipMapGeometry::numElements(unsigned int resolution)
+int ClipMapGeometry::yResolution() const {
+	return resolution();
+}
+
+int ClipMapGeometry::resolution() const {
+	return _xRes;
+}
+
+size_t ClipMapGeometry::numElements(int resolution)
 {
 	int numElementsInTotalSquare = 6 * (resolution + 1) * (resolution + 1);
 	int numElementsInHole = 6 * (resolution / 4 * resolution / 4);
 	return numElementsInTotalSquare - numElementsInHole;
 }
 
-size_t ClipMapGeometry::numVerticesBottom(unsigned int resolution)
+size_t ClipMapGeometry::numVerticesBottom(int resolution)
 {
 	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesLeft(unsigned int resolution)
+size_t ClipMapGeometry::numVerticesLeft(int resolution)
 {
 	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesRight(unsigned int resolution)
+size_t ClipMapGeometry::numVerticesRight(int resolution)
 {
 	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesTop(unsigned int resolution)
+size_t ClipMapGeometry::numVerticesTop(int resolution)
 {
 	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
 }
 
-size_t ClipMapGeometry::numVertices(unsigned int resolution)
+size_t ClipMapGeometry::numVertices(int resolution)
 {
 	return	numVerticesBottom(resolution) +
 			numVerticesLeft(resolution) +
@@ -95,15 +96,21 @@ size_t ClipMapGeometry::numVertices(unsigned int resolution)
 			numVerticesTop(resolution);
 }
 
-void ClipMapGeometry::validate(unsigned int resolution) {
+void ClipMapGeometry::validate(int xRes, int yRes) {
+	
+	ghoul_assert(xRes == yRes,
+		"Resolution must be equal in x and in y. ");
+	int resolution = xRes;
 	ghoul_assert(resolution >= 8,
 		"Resolution must be at least 8. (" << resolution << ")");
 	ghoul_assert(resolution == pow(2, int(log2(resolution))),
 		"Resolution must be a power of 2. (" << resolution << ")");
 }
 
-std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
-	validate(resolution);
+std::vector<GLuint> ClipMapGeometry::CreateElements(int xRes, int yRes) {
+	int hej = 0;
+	validate(xRes, yRes);
+	int resolution = xRes;
 	std::vector<GLuint> elements;
 	elements.reserve(numElements(resolution));
 	
@@ -208,12 +215,13 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(unsigned int resolution) {
 	return elements;
 }
 
-std::vector<glm::vec4> ClipMapGeometry::CreatePositions(unsigned int resolution)
+std::vector<glm::vec4> ClipMapGeometry::CreatePositions(int xRes, int yRes)
 {
-	validate(resolution);
+	validate(xRes, yRes);
+	int resolution = xRes;
 	std::vector<glm::vec4> positions;
 	positions.reserve(numVertices(resolution));
-	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(resolution);
+	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(xRes, yRes);
 
 	// Copy from 2d texture coordinates and use as template to create positions
 	for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
@@ -229,8 +237,9 @@ std::vector<glm::vec4> ClipMapGeometry::CreatePositions(unsigned int resolution)
 }
 
 
-std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int resolution){
-	validate(resolution);
+std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(int xRes, int yRes){
+	validate(xRes, yRes);
+	int resolution = xRes;
 	std::vector<glm::vec2> textureCoordinates;
 	textureCoordinates.reserve(numVertices(resolution));
 
@@ -275,8 +284,9 @@ std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(unsigned int re
 	return textureCoordinates;
 }
 
-std::vector<glm::vec3> ClipMapGeometry::CreateNormals(unsigned int resolution) {
-	validate(resolution);
+std::vector<glm::vec3> ClipMapGeometry::CreateNormals(int xRes, int yRes) {
+	validate(xRes, yRes);
+	int resolution = xRes;
 	std::vector<glm::vec3> normals;
 	normals.reserve(numVertices(resolution));
 

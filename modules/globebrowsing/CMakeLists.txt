@@ -31,8 +31,9 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgeometry.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
@@ -53,8 +54,9 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gridgeometry.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgeometry.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp

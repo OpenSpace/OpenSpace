@@ -28,7 +28,7 @@
 
 #include <modules/globebrowsing/rendering/clipmapglobe.h>
 
-#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -73,13 +73,7 @@ namespace openspace {
 		// init Renderer
 		auto patchRenderer = new ClipMapPatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)));
 		_patchRenderer.reset(patchRenderer);
-		auto smallestPatchRenderer = new ClipMapPatchRenderer(shared_ptr<GridGeometry>(
-			new GridGeometry(
-				32,
-				32,
-				Geometry::Positions::No,
-				Geometry::TextureCoordinates::Yes,
-				Geometry::Normals::No)));
+		auto smallestPatchRenderer = new ClipMapPatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)));
 		_smallestPatchRenderer.reset(smallestPatchRenderer);
 	}
 

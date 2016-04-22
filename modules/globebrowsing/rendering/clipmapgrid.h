@@ -22,54 +22,43 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGLOBE_H__
-#define __CLIPMAPGLOBE_H__
+#ifndef __CLIPMAPGEOMETRY_H__
+#define __CLIPMAPGEOMETRY_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/globebrowsing/rendering/geometry.h>
 #include <modules/globebrowsing/rendering/grid.h>
-#include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/rendering/clipmappyramid.h>
 
-namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
-}
+#include <vector>
+#include <glm/glm.hpp>
 
 namespace openspace {
 
-	class ClipMapGlobe : public Renderable {
-	public:
-		ClipMapGlobe(const ghoul::Dictionary& dictionary);
-		~ClipMapGlobe();
+class ClipMapGeometry : public Grid
+{
+public:
+	ClipMapGeometry(unsigned int resolution);
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+	~ClipMapGeometry();
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+	virtual int xResolution() const;
+	virtual int yResolution() const;
+	int resolution() const;
 
-	private:		
-		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
-		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
-		
-		ClipMapPyramid _clipMapPyramid;
+protected:
+	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
+	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes);
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);
+	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes);
 
-		properties::IntProperty _rotation;
+private:
+	void validate(int xRes, int yRes);
 
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
-	};
+	static size_t numVerticesBottom(int resolution);
+	static size_t numVerticesLeft(int resolution);
+	static size_t numVerticesRight(int resolution);
+	static size_t numVerticesTop(int resolution);
 
-}  // namespace openspace
-
-#endif  // __CLIPMAPGLOBE_H__
+	static size_t numElements(int resolution);
+	static size_t numVertices(int resolution);
+};
+} // namespace openspace
+#endif // __CLIPMAPGEOMETRY_H__

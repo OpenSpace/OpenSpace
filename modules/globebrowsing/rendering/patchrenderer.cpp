@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 
-#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -41,7 +41,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "LatLonPatch";
+	const std::string _loggerCat = "PatchRenderer";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -55,8 +55,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//							PATCH RENDERER											//
 	//////////////////////////////////////////////////////////////////////////////////////
-	PatchRenderer::PatchRenderer(shared_ptr<Geometry> geometry)
-		: _geometry(geometry)
+	PatchRenderer::PatchRenderer(shared_ptr<Grid> geometry)
+		: _grid(geometry)
 		, _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0)
 	{
 
@@ -75,8 +75,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								LATLON PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Geometry> geometry) 
-		: PatchRenderer(geometry)
+	LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
+		: PatchRenderer(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -143,7 +143,7 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_geometry->drawUsingActiveProgram();
+		_grid->geometry().drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
@@ -154,8 +154,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<Geometry> geometry)
-		: PatchRenderer(geometry)
+	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<Grid> grid)
+		: PatchRenderer(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -233,7 +233,7 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_geometry->drawUsingActiveProgram();
+		_grid->geometry().drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
