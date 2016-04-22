@@ -217,8 +217,8 @@ void DataPlane::readHeader(){
                     std::string option;
                     while(ss >> option){
                         if(option != "x" && option != "y" && option != "z"){
-                            _dataOptions.addOption({numDataOptions, name()+"_"+option});
-                            numDataOptions++;
+                            _dataOptions.addOption({numOptions, name()+"_"+option});
+                            numOptions++;
                         }
                     }
 
@@ -314,10 +314,6 @@ float* DataPlane::readData(){
         
         for(int i=0; i< numValues; i++){
             if(_useRGB.value() && (optionValues.size() <= 3)){
-            combinedValues[3*i+0] = 0;
-            combinedValues[3*i+1] = 0;
-            combinedValues[3*i+2] = 0;
-
                 for(int j=0; j<optionValues.size(); j++){
 
                     float v = optionValues[j][i];

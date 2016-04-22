@@ -64,9 +64,6 @@ class DataPlane : public CygnetPlane {
     // properties::Vec2Property _tfValues;
     
     glm::size3_t _dimensions;
-    int numDataValues;
-    int numDataOptions = 0;
-
     // std::shared_ptr<ColorBar> _colorbar;
  };
  
