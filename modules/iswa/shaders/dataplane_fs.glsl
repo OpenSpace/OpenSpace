@@ -42,22 +42,33 @@ Fragment getFragment() {
 
 	// vec4 diffuse; 
 	float v = texture(texture1, vs_st).r;
-	float x = tfValues.x;
-	float y = tfValues.y/2.0f;
-	float t = tfValues.z;
+	float t = tfValues.x;
+	float x = tfValues.y;
+	float y = tfValues.z;
 	float b = tfValues.w;
 
+	if(x>t)
+		x=t;
+	if(y>x)
+		y=x;
+	if(b>y)
+		b=y;
+
 	vec4 diffuse = vec4(0.f,0.f,0.f,0.f);
-	if(v > (x+y) && v < t){
-		v = v - (x+y);
-		v = v / (t-(x+y));
-		diffuse = mix(mid, top, v);
-	}else if( v < (x-y) && v > b){
-		v = v- b;
-		v = v / (x-y-b);
-		diffuse = mix(bot, mid, v);
-	}else if(v < (x+y) && v > (x-y)){
-		diffuse = mid;
+	if(y == x){
+		diffuse = mix(bot, top, v);
+	}else{
+		if(v > x && v <= t){
+			v = v - x;
+			v = v / (t-x);
+			diffuse = mix(mid, top, v);
+		}else if( v < y && v > b){
+			v = v - b;
+			v = v / (y-b);
+			diffuse = mix(bot, mid, v);
+		}else if(v < x && v > y){
+			diffuse = mid;
+		}
 	}
 
 	if (diffuse.a <= 0.05)

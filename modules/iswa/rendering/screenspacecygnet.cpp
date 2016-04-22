@@ -143,6 +143,7 @@ void ScreenSpaceCygnet::update(){
 	}
 
 	if(_futureTexture && _futureTexture->isFinished){
+		std::cout << _futureTexture->extension << std::endl;
 		loadTexture();
 		_futureTexture = nullptr;
 	}
